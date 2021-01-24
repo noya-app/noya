@@ -1,28 +1,43 @@
-import * as React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
+import {
+  CanvasKit,
+  load,
+  makeCanvasSurface,
+  drawRectangle,
+} from 'sketch-canvas';
+import rectangleExample from './rectangleExample';
 
-import 'skanvas';
+export default function App() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [CanvasKit, setCanvasKit] = useState<CanvasKit | null>(null);
 
-function App(): JSX.Element {
+  useEffect(() => {
+    load().then(setCanvasKit);
+  }, []);
+
+  useEffect(() => {
+    const canvasElement = canvasRef.current;
+
+    if (!canvasElement || !CanvasKit) return;
+
+    const surfaceContext = makeCanvasSurface(CanvasKit, canvasElement.id);
+
+    if (!surfaceContext) return;
+
+    const { canvas, surface } = surfaceContext;
+
+    drawRectangle(surfaceContext, rectangleExample);
+
+    (surface as any).flush();
+  }, [CanvasKit]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <canvas
+      width={window.innerWidth}
+      height={window.innerHeight}
+      id="main"
+      ref={canvasRef}
+    />
   );
 }
-
-export default App;

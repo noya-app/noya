@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`converts color 1`] = `
+Float32Array [
+  0.5,
+  0.5,
+  0.5,
+  0.5,
+]
+`;
+
+exports[`converts fill 1`] = `
+Float32Array [
+  0.28056401014328003,
+  0.6895309686660767,
+  1,
+  1,
+]
+`;
+
+exports[`converts rect 1`] = `
+Float32Array [
+  10,
+  20,
+  40,
+  60,
+]
+`;
