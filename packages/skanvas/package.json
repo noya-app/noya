@@ -1,0 +1,10 @@
+{
+  "name": "skanvas",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@sketch-hq/sketch-file-format-ts": "^5.2.2",
+    "canvaskit-wasm": "^0.22.0"
+  }
+}

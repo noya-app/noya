@@ -1,9 +1,0 @@
-{
-  "name": "canvas",
-  "version": "1.0.0",
-  "main": "src/index.tsx",
-  "license": "UNLICENSED",
-  "modular": {
-    "type": "view"
-  }
-}

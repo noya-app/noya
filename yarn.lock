@@ -1519,6 +1519,11 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@sketch-hq/sketch-file-format-ts@^5.2.2":
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/@sketch-hq/sketch-file-format-ts/-/sketch-file-format-ts-5.2.2.tgz#a4ac5c2240aa6cfe742fe6330ff0e77c7cf3ccbb"
+  integrity sha512-DWadC1LtBo7gvFNwO62DSjEP0pIgzYOl3V2ZPUHcg0vbxgZ2zIl3F14US2F2ya8r6CfIYtjOwjDTxsLmebz7GQ==
+
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/@surma/rollup-plugin-off-main-thread/-/rollup-plugin-off-main-thread-1.4.2.tgz#e6786b6af5799f82f7ab3a82e53f6182d2b91a58"
@@ -3282,6 +3287,11 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, can
   version "1.0.30001179"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001179.tgz#b0803883b4471a6c62066fb1752756f8afc699c8"
   integrity sha512-blMmO0QQujuUWZKyVrD1msR4WNDAqb/UPO1Sw2WWsQ7deoM5bJiicKnWJ1Y0NS/aGINSnKPIWBMw5luX+NDUCA==
+
+canvaskit-wasm@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.22.0.tgz#b0a3259d42470b221646197c8b9d9a95452cf52b"
+  integrity sha512-cG7idicPkKfmSMc9LUh3ZGoz1ox99qREKk7Oa3HOXHGiAm6czNKl324J5CXtDn8VceIh31WoQ3jjfqkeQrHT9A==
 
 capital-case@^1.0.4:
   version "1.0.4"
