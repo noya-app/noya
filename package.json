@@ -1,0 +1,45 @@
+{
+  "name": "ayano",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Devin Abbott <devinabbott@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "modular": {
+    "type": "root"
+  },
+  "scripts": {
+    "start": "modular start app",
+    "build": "modular build app",
+    "test": "modular test",
+    "lint": "eslint . --ext .js,.ts,.tsx",
+    "prettier": "prettier --write ."
+  },
+  "eslintConfig": {
+    "extends": "modular-app"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 80,
+    "proseWrap": "always"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.3",
+    "@testing-library/user-event": "^12.6.2",
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.14.22",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "eslint-config-modular-app": "^0.3.1",
+    "modular-scripts": "^0.9.0",
+    "prettier": "^2.2.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "typescript": "^4.1.2"
+  }
+}
