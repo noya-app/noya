@@ -2,9 +2,14 @@ import * as React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+const Canvas = React.lazy(() => import('canvas'));
+
 function App(): JSX.Element {
   return (
     <div className="App">
+      <React.Suspense fallback="Loading">
+        <Canvas />
+      </React.Suspense>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
