@@ -22,9 +22,9 @@ export function fill(CanvasKit: CanvasKit, fill: Sketch.Fill): Paint {
   paint.setStyle(CanvasKit.PaintStyle.Fill);
   paint.setAntiAlias(true);
 
-  paint.setMaskFilter(
-    CanvasKit.MaskFilter.MakeBlur(CanvasKit.BlurStyle.Normal, 5, true),
-  );
+  // paint.setMaskFilter(
+  //   CanvasKit.MaskFilter.MakeBlur(CanvasKit.BlurStyle.Normal, 5, true),
+  // );
 
   return paint;
 }

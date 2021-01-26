@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import {
   CanvasKit,
@@ -7,8 +7,25 @@ import {
   drawRectangle,
 } from 'sketch-canvas';
 import rectangleExample from './rectangleExample';
+import { useResource } from './hooks/useResource';
+import { parse, SketchFile } from 'sketch-zip';
 
 export default function App() {
+  const sketchFile = useResource<ArrayBuffer>(
+    '/Rectangle.sketch',
+    'arrayBuffer',
+  );
+
+  const parsedSketchFile = useRef<SketchFile | undefined>();
+
+  useEffect(() => {
+    parse(sketchFile).then((parsed) => {
+      parsedSketchFile.current = parsed;
+    });
+  }, [sketchFile]);
+
+  console.log('parsed', parsedSketchFile);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [CanvasKit, setCanvasKit] = useState<CanvasKit | null>(null);
 
