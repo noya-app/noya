@@ -2,8 +2,6 @@ import type { CanvasKit, CanvasKitInit, Canvas } from 'canvaskit-wasm';
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as Primitives from './primitives';
 
-export type { CanvasKit };
-
 export interface Context {
   CanvasKit: CanvasKit;
   canvas: Canvas;
@@ -31,22 +29,23 @@ export function load() {
   });
 }
 
-export function makeCanvasSurface(CanvasKit: CanvasKit, canvasId: string) {
-  const surface = CanvasKit.MakeCanvasSurface(canvasId);
-  if (!surface) {
-    console.log('Could not make surface');
-    return;
-  }
-  const context = CanvasKit.currentContext();
-  const canvas = surface.getCanvas();
+// export function makeCanvasSurface(CanvasKit: CanvasKit, canvasId: string): Context {
+//   const surface = CanvasKit.MakeCanvasSurface(canvasId);
 
-  return {
-    CanvasKit,
-    surface,
-    context,
-    canvas,
-  };
-}
+//   if (!surface) {
+//     throw new Error('Could not make surface')
+//   }
+
+//   const context = CanvasKit.currentContext();
+//   const canvas = surface.getCanvas();
+
+//   return {
+//     CanvasKit,
+//     surface,
+//     context,
+//     canvas,
+//   };
+// }
 
 // init({
 // locateFile: (file: string) =>
