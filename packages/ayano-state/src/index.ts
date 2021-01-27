@@ -4,7 +4,22 @@ import produce from 'immer';
 
 export type UUID = string;
 
+export type Point = { x: number; y: number };
+
+export type Rect = { x: number; y: number; width: number; height: number };
+
+export type InteractionState =
+  | {
+      type: 'ready';
+    }
+  | {
+      type: 'drawing';
+      origin: Point;
+      value: PageLayer;
+    };
+
 export type ApplicationState = {
+  interactionState: InteractionState;
   selectedPage: string;
   selectedObjects: string[];
   sketch: SketchFile;
@@ -12,7 +27,9 @@ export type ApplicationState = {
 
 export type PageLayer = Sketch.Page['layers'][0];
 
-export type Action = { type: 'addLayer'; layer: PageLayer };
+export type Action =
+  | { type: 'addLayer'; layer: PageLayer }
+  | { type: 'interaction'; state: InteractionState };
 
 export const addLayerToPage = produce(
   (state: ApplicationState, pageIndex: number, layer: PageLayer) => {
@@ -33,6 +50,10 @@ export function reducer(
       if (currentPageIndex === -1) throw new Error('No selected page');
 
       return addLayerToPage(state, currentPageIndex, action.layer);
+    case 'interaction':
+      return produce(state, (state) => {
+        state.interactionState = action.state;
+      });
   }
 }
 
@@ -42,6 +63,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
+    interactionState: { type: 'ready' },
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     sketch,

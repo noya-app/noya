@@ -1,7 +1,8 @@
-import { Action, ApplicationState } from 'ayano-state';
+import { Action, ApplicationState, PageLayer, Point, Rect } from 'ayano-state';
 import type { CanvasKit, Surface } from 'canvaskit-wasm';
 import { useEffect, useRef, useState } from 'react';
 import { drawRectangle, load } from 'sketch-canvas';
+import produce from 'immer';
 import './App.css';
 import rectangleExample from './rectangleExample';
 
@@ -14,6 +15,19 @@ declare module 'canvaskit-wasm' {
 interface Props {
   state: ApplicationState;
   dispatch: (action: Action) => void;
+}
+
+function getPoint(event: MouseEvent): Point {
+  return { x: event.offsetX, y: event.offsetY };
+}
+
+function createRect(initialPoint: Point, finalPoint: Point): Rect {
+  return {
+    width: Math.abs(finalPoint.x - initialPoint.x),
+    height: Math.abs(finalPoint.y - initialPoint.y),
+    x: Math.min(finalPoint.x, initialPoint.x),
+    y: Math.min(finalPoint.y, initialPoint.y),
+  };
 }
 
 export default function Canvas({ state, dispatch }: Props) {
@@ -45,10 +59,8 @@ export default function Canvas({ state, dispatch }: Props) {
   useEffect(() => {
     if (!surface || !CanvasKit) return;
 
-    const { sketch, selectedPage } = state;
+    const { sketch, selectedPage, interactionState } = state;
     const context = { CanvasKit, canvas: surface.getCanvas() };
-
-    console.log(context);
 
     const page = sketch.pages.find((page) => page.do_objectID === selectedPage);
 
@@ -60,25 +72,81 @@ export default function Canvas({ state, dispatch }: Props) {
       }
     });
 
+    if (interactionState.type === 'drawing') {
+      drawRectangle(context, interactionState.value as any);
+    }
+
     surface.flush();
   }, [CanvasKit, surface, state]);
 
   return (
     <canvas
-      onClick={(event) => {
+      onMouseDown={(event) => {
+        const point = getPoint(event.nativeEvent);
+        const rect = createRect(point, point);
+
+        const layer: PageLayer = {
+          ...rectangleExample,
+          frame: {
+            _class: 'rect',
+            constrainProportions: false,
+            ...rect,
+          },
+        };
+
+        dispatch({
+          type: 'interaction',
+          state: {
+            type: 'drawing',
+            value: layer,
+            origin: point,
+          },
+        });
+      }}
+      onMouseMove={(event) => {
+        if (state.interactionState.type !== 'drawing') return;
+
+        const point = getPoint(event.nativeEvent);
+        const rect = createRect(state.interactionState.origin, point);
+
+        const layer = produce(state.interactionState.value, (layer) => {
+          layer.frame = {
+            ...layer.frame,
+            ...rect,
+          };
+        });
+
+        dispatch({
+          type: 'interaction',
+          state: {
+            type: 'drawing',
+            value: layer,
+            origin: state.interactionState.origin,
+          },
+        });
+      }}
+      onMouseUp={(event) => {
+        if (state.interactionState.type !== 'drawing') return;
+
+        const point = getPoint(event.nativeEvent);
+        const rect = createRect(state.interactionState.origin, point);
+
+        const layer = produce(state.interactionState.value, (layer) => {
+          layer.frame = {
+            ...layer.frame,
+            ...rect,
+          };
+        });
+
+        dispatch({
+          type: 'interaction',
+          state: {
+            type: 'ready',
+          },
+        });
         dispatch({
           type: 'addLayer',
-          layer: {
-            ...rectangleExample,
-            frame: {
-              _class: 'rect',
-              constrainProportions: false,
-              x: event.clientX,
-              y: event.clientY,
-              width: 100,
-              height: 100,
-            },
-          },
+          layer,
         });
       }}
       width={window.innerWidth}
