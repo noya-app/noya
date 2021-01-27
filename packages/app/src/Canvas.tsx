@@ -94,14 +94,14 @@ export default function Canvas({ state, dispatch }: Props) {
           },
         };
 
-        dispatch({
-          type: 'interaction',
-          state: {
+        dispatch([
+          'interaction',
+          {
             type: 'drawing',
             value: layer,
             origin: point,
           },
-        });
+        ]);
       }}
       onMouseMove={(event) => {
         if (state.interactionState.type !== 'drawing') return;
@@ -116,14 +116,14 @@ export default function Canvas({ state, dispatch }: Props) {
           };
         });
 
-        dispatch({
-          type: 'interaction',
-          state: {
+        dispatch([
+          'interaction',
+          {
             type: 'drawing',
             value: layer,
             origin: state.interactionState.origin,
           },
-        });
+        ]);
       }}
       onMouseUp={(event) => {
         if (state.interactionState.type !== 'drawing') return;
@@ -138,16 +138,8 @@ export default function Canvas({ state, dispatch }: Props) {
           };
         });
 
-        dispatch({
-          type: 'interaction',
-          state: {
-            type: 'ready',
-          },
-        });
-        dispatch({
-          type: 'addLayer',
-          layer,
-        });
+        dispatch(['interaction', { type: 'ready' }]);
+        dispatch(['addLayer', layer]);
       }}
       width={window.innerWidth}
       height={window.innerHeight}

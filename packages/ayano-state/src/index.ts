@@ -28,8 +28,8 @@ export type ApplicationState = {
 export type PageLayer = Sketch.Page['layers'][0];
 
 export type Action =
-  | { type: 'addLayer'; layer: PageLayer }
-  | { type: 'interaction'; state: InteractionState };
+  | [type: 'addLayer', layer: PageLayer]
+  | [type: 'interaction', state: InteractionState];
 
 export const addLayerToPage = produce(
   (state: ApplicationState, pageIndex: number, layer: PageLayer) => {
@@ -41,7 +41,7 @@ export function reducer(
   state: ApplicationState,
   action: Action,
 ): ApplicationState {
-  switch (action.type) {
+  switch (action[0]) {
     case 'addLayer':
       const currentPageIndex = state.sketch.pages.findIndex(
         (page) => page.do_objectID === state.selectedPage,
@@ -49,10 +49,10 @@ export function reducer(
 
       if (currentPageIndex === -1) throw new Error('No selected page');
 
-      return addLayerToPage(state, currentPageIndex, action.layer);
+      return addLayerToPage(state, currentPageIndex, action[1]);
     case 'interaction':
       return produce(state, (state) => {
-        state.interactionState = action.state;
+        state.interactionState = action[1];
       });
   }
 }

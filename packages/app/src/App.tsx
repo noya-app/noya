@@ -4,7 +4,7 @@ import {
   createInitialState,
   reducer,
 } from 'ayano-state';
-import { useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { parse, SketchFile } from 'sketch-zip';
 import './App.css';
 import Canvas from './Canvas';
@@ -20,23 +20,26 @@ export default function App() {
   const [state, dispatch] = useReducer(
     (
       state: PromiseState<ApplicationState>,
-      action: { type: 'set'; value: SketchFile } | Action,
+      action:
+        | { type: 'set'; value: SketchFile }
+        | { type: 'update'; value: Action },
     ): PromiseState<ApplicationState> => {
-      if (action.type === 'set') {
-        return {
-          type: 'success',
-          value: createInitialState(action.value),
-        };
+      switch (action.type) {
+        case 'set':
+          return {
+            type: 'success',
+            value: createInitialState(action.value),
+          };
+        case 'update':
+          if (state.type === 'success') {
+            return {
+              type: 'success',
+              value: reducer(state.value, action.value),
+            };
+          } else {
+            return state;
+          }
       }
-
-      if (state.type === 'success') {
-        return {
-          type: 'success',
-          value: reducer(state.value, action),
-        };
-      }
-
-      return state;
     },
     { type: 'pending' },
   );
@@ -47,14 +50,11 @@ export default function App() {
     });
   }, [sketchFile]);
 
+  const handleDispatch = useCallback((action: Action) => {
+    dispatch({ type: 'update', value: action });
+  }, []);
+
   if (state.type !== 'success') return null;
 
-  return (
-    <Canvas
-      state={state.value}
-      dispatch={(action) => {
-        dispatch(action);
-      }}
-    />
-  );
+  return <Canvas state={state.value} dispatch={handleDispatch} />;
 }
