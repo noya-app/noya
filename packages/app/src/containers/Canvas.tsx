@@ -1,10 +1,10 @@
 import { Action, ApplicationState, PageLayer, Point, Rect } from 'ayano-state';
-import type { CanvasKit, Surface } from 'canvaskit-wasm';
-import { useEffect, useRef, useState } from 'react';
-import { drawRectangle, load } from 'sketch-canvas';
+import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
-import './App.css';
-import rectangleExample from './rectangleExample';
+import { useEffect, useRef, useState } from 'react';
+import { drawRectangle } from 'sketch-canvas';
+import useCanvasKit from '../hooks/useCanvasKit';
+import rectangleExample from '../rectangleExample';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -32,17 +32,13 @@ function createRect(initialPoint: Point, finalPoint: Point): Rect {
 
 export default function Canvas({ state, dispatch }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [CanvasKit, setCanvasKit] = useState<CanvasKit | null>(null);
+  const CanvasKit = useCanvasKit();
   const [surface, setSurface] = useState<Surface | null>(null);
-
-  useEffect(() => {
-    load().then(setCanvasKit);
-  }, []);
 
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
-    if (!canvasElement || !CanvasKit) return;
+    if (!canvasElement) return;
 
     const surface = CanvasKit.MakeCanvasSurface(canvasElement.id);
 
@@ -57,7 +53,7 @@ export default function Canvas({ state, dispatch }: Props) {
   }, [CanvasKit]);
 
   useEffect(() => {
-    if (!surface || !CanvasKit) return;
+    if (!surface) return;
 
     const { sketch, selectedPage, interactionState } = state;
     const context = { CanvasKit, canvas: surface.getCanvas() };
@@ -65,6 +61,8 @@ export default function Canvas({ state, dispatch }: Props) {
     const page = sketch.pages.find((page) => page.do_objectID === selectedPage);
 
     if (!page) return;
+
+    context.canvas.clear(CanvasKit.WHITE);
 
     page.layers.forEach((layer) => {
       if (layer._class === 'rectangle') {

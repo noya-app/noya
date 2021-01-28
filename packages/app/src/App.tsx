@@ -6,16 +6,12 @@ import {
 } from 'ayano-state';
 import { useCallback, useEffect, useReducer } from 'react';
 import { parse, SketchFile } from 'sketch-zip';
-import './App.css';
-import Canvas from './Canvas';
+import Workspace from './containers/Workspace';
 import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
 
 export default function App() {
-  const sketchFile = useResource<ArrayBuffer>(
-    '/Rectangle.sketch',
-    'arrayBuffer',
-  );
+  const sketchFile = useResource<ArrayBuffer>('/Pages.sketch', 'arrayBuffer');
 
   const [state, dispatch] = useReducer(
     (
@@ -56,5 +52,5 @@ export default function App() {
 
   if (state.type !== 'success') return null;
 
-  return <Canvas state={state.value} dispatch={handleDispatch} />;
+  return <Workspace state={state.value} dispatch={handleDispatch} />;
 }

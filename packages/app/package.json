@@ -2,7 +2,9 @@
   "name": "app",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "styled-components": "^5.2.1"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -17,5 +19,8 @@
   },
   "modular": {
     "type": "app"
+  },
+  "devDependencies": {
+    "@types/styled-components": "^5.1.7"
   }
 }
