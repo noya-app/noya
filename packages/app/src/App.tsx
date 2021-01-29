@@ -11,7 +11,7 @@ import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
 
 export default function App() {
-  const sketchFile = useResource<ArrayBuffer>('/Pages.sketch', 'arrayBuffer');
+  const sketchFile = useResource<ArrayBuffer>('/Oval.sketch', 'arrayBuffer');
 
   const [state, dispatch] = useReducer(
     (

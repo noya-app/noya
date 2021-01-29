@@ -16,8 +16,9 @@ export default function Workspace({ state, dispatch }: Props) {
     return withSeparatorElements(
       state.sketch.pages.map((page) => (
         <ListView.Row
+          key={page.do_objectID}
+          selected={state.selectedPage === page.do_objectID}
           onClick={() => {
-            console.log(page, page.do_objectID);
             dispatch(['selectPage', page.do_objectID]);
           }}
         >

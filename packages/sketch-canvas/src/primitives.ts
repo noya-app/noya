@@ -28,3 +28,12 @@ export function fill(CanvasKit: CanvasKit, fill: Sketch.Fill): Paint {
 
   return paint;
 }
+
+export function parsePoint(pointString: string): { x: number; y: number } {
+  const [x, y] = pointString.slice(1, -1).split(',');
+
+  return {
+    x: parseFloat(x),
+    y: parseFloat(y),
+  };
+}

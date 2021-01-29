@@ -2,7 +2,7 @@ import { Action, ApplicationState, PageLayer, Point, Rect } from 'ayano-state';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
 import { useEffect, useRef, useState } from 'react';
-import { drawRectangle } from 'sketch-canvas';
+import { drawLayer } from 'sketch-canvas';
 import useCanvasKit from '../hooks/useCanvasKit';
 import rectangleExample from '../rectangleExample';
 
@@ -65,13 +65,11 @@ export default function Canvas({ state, dispatch }: Props) {
     context.canvas.clear(CanvasKit.WHITE);
 
     page.layers.forEach((layer) => {
-      if (layer._class === 'rectangle') {
-        drawRectangle(context, layer);
-      }
+      drawLayer(context, layer);
     });
 
     if (interactionState.type === 'drawing') {
-      drawRectangle(context, interactionState.value as any);
+      drawLayer(context, interactionState.value as any);
     }
 
     surface.flush();
