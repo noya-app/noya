@@ -1,47 +1,29 @@
-import { Action, ApplicationState } from 'ayano-state';
-import { useMemo } from 'react';
-import { ThemeProvider } from 'styled-components';
-import * as ListView from '../components/ListView';
+import styled, { ThemeProvider } from 'styled-components';
+import Divider from '../components/Divider';
 import { defaultTheme } from '../theme';
-import withSeparatorElements from '../utils/withSeparatorElements';
 import Canvas from './Canvas';
+import LayerList from './LayerList';
+import PageList from './PageList';
 
-interface Props {
-  state: ApplicationState;
-  dispatch: (action: Action) => void;
-}
+const LeftSidebar = styled.div(({ theme }) => ({
+  flex: '0 0 260px',
+  borderRight: `1px solid ${theme.colors.divider}`,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+}));
 
-export default function Workspace({ state, dispatch }: Props) {
-  const pageElements = useMemo(() => {
-    return withSeparatorElements(
-      state.sketch.pages.map((page) => (
-        <ListView.Row
-          key={page.do_objectID}
-          selected={state.selectedPage === page.do_objectID}
-          onClick={() => {
-            dispatch(['selectPage', page.do_objectID]);
-          }}
-        >
-          {page.name}
-        </ListView.Row>
-      )),
-      <ListView.Spacer />,
-    );
-  }, [state, dispatch]);
+interface Props {}
 
+export default function Workspace(props: Props) {
   return (
-    <div
-      style={{ display: 'flex', flexDirection: 'row', alignItems: 'stretch' }}
-    >
-      <ThemeProvider theme={defaultTheme}>
-        <ListView.Root>
-          <ListView.SectionHeader>
-            <strong>Pages</strong>
-          </ListView.SectionHeader>
-          {pageElements}
-        </ListView.Root>
-      </ThemeProvider>
-      <Canvas state={state} dispatch={dispatch} />
-    </div>
+    <ThemeProvider theme={defaultTheme}>
+      <LeftSidebar>
+        <PageList />
+        <Divider />
+        <LayerList />
+      </LeftSidebar>
+      <Canvas />
+    </ThemeProvider>
   );
 }

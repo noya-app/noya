@@ -112,8 +112,6 @@ const RootContainer = styled.div(({ theme }) => ({
   flexDirection: 'column',
   flexWrap: 'nowrap',
   backgroundColor: 'white',
-  flex: '0 0 260px',
-  borderRight: `1px solid ${theme.colors.divider}`,
 }));
 
 interface ListViewRootProps {

@@ -29,6 +29,7 @@ export type PageLayer = Sketch.Page['layers'][0];
 
 export type Action =
   | [type: 'addLayer', layer: PageLayer]
+  | [type: 'selectLayer', layerId: string]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'interaction', state: InteractionState];
 
@@ -51,6 +52,10 @@ export function reducer(
       if (currentPageIndex === -1) throw new Error('No selected page');
 
       return addLayerToPage(state, currentPageIndex, action[1]);
+    case 'selectLayer':
+      return produce(state, (state) => {
+        state.selectedObjects = [action[1]];
+      });
     case 'selectPage':
       return produce(state, (state) => {
         state.selectedPage = action[1];

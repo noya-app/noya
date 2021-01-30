@@ -1,8 +1,9 @@
-import { Action, ApplicationState, PageLayer, Point, Rect } from 'ayano-state';
+import { PageLayer, Point, Rect } from 'ayano-state';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
 import { useEffect, useRef, useState } from 'react';
 import { drawLayer } from 'sketch-canvas';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import rectangleExample from '../rectangleExample';
 
@@ -12,10 +13,7 @@ declare module 'canvaskit-wasm' {
   }
 }
 
-interface Props {
-  state: ApplicationState;
-  dispatch: (action: Action) => void;
-}
+interface Props {}
 
 function getPoint(event: MouseEvent): Point {
   return { x: event.offsetX, y: event.offsetY };
@@ -30,7 +28,8 @@ function createRect(initialPoint: Point, finalPoint: Point): Rect {
   };
 }
 
-export default function Canvas({ state, dispatch }: Props) {
+export default function Canvas(props: Props) {
+  const [state, dispatch] = useApplicationState();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
   const [surface, setSurface] = useState<Surface | null>(null);
@@ -62,7 +61,7 @@ export default function Canvas({ state, dispatch }: Props) {
 
     if (!page) return;
 
-    context.canvas.clear(CanvasKit.WHITE);
+    context.canvas.clear(CanvasKit.Color(249, 249, 249));
 
     page.layers.forEach((layer) => {
       drawLayer(context, layer);

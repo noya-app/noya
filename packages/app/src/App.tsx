@@ -4,9 +4,13 @@ import {
   createInitialState,
   reducer,
 } from 'ayano-state';
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { parse, SketchFile } from 'sketch-zip';
 import Workspace from './containers/Workspace';
+import {
+  ApplicationStateProvider,
+  ApplicationStateContextValue,
+} from './contexts/ApplicationStateContext';
 import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
 
@@ -50,7 +54,17 @@ export default function App() {
     dispatch({ type: 'update', value: action });
   }, []);
 
-  if (state.type !== 'success') return null;
+  const contextValue: ApplicationStateContextValue | undefined = useMemo(
+    () =>
+      state.type === 'success' ? [state.value, handleDispatch] : undefined,
+    [state, handleDispatch],
+  );
 
-  return <Workspace state={state.value} dispatch={handleDispatch} />;
+  if (!contextValue) return null;
+
+  return (
+    <ApplicationStateProvider value={contextValue}>
+      <Workspace />
+    </ApplicationStateProvider>
+  );
 }

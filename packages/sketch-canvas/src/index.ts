@@ -1,7 +1,6 @@
-import type { CanvasKit, CanvasKitInit, Canvas } from 'canvaskit-wasm';
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type { Canvas, CanvasKit, CanvasKitInit } from 'canvaskit-wasm';
 import * as Primitives from './primitives';
-import { color } from './primitives';
 
 export interface Context {
   CanvasKit: CanvasKit;
