@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 const SeparatorContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
+    minHeight: '1px',
     height: '1px',
     background: selected ? '#648bdd' : theme.colors.divider,
   }),

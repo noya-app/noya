@@ -21,6 +21,7 @@
     "type": "app"
   },
   "devDependencies": {
+    "@types/resize-observer-browser": "^0.1.5",
     "@types/styled-components": "^5.1.7"
   }
 }

@@ -1,10 +1,11 @@
 import { PageLayer, Point, Rect } from 'ayano-state';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { drawLayer, uuid } from 'sketch-canvas';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
+import { useSize } from '../hooks/useSize';
 import rectangleExample from '../rectangleExample';
 
 declare module 'canvaskit-wasm' {
@@ -30,10 +31,23 @@ function createRect(initialPoint: Point, finalPoint: Point): Rect {
 
 export default function Canvas(props: Props) {
   const [state, dispatch] = useApplicationState();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
-  const [surface, setSurface] = useState<Surface | null>(null);
+  const surfaceRef = useRef<Surface | null>(null);
+  const containerSize = useSize(containerRef);
 
+  // Update the canvas size whenever the window is resized
+  useEffect(() => {
+    const canvasElement = canvasRef.current;
+
+    if (!canvasElement || !containerSize) return;
+
+    canvasElement.width = containerSize.width;
+    canvasElement.height = containerSize.height;
+  }, [containerSize]);
+
+  // Recreate the surface whenever the canvas resizes
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
@@ -42,17 +56,24 @@ export default function Canvas(props: Props) {
     const surface = CanvasKit.MakeCanvasSurface(canvasElement.id);
 
     if (!surface) {
-      setSurface(null);
+      surfaceRef.current = null;
 
       console.log('failed to create surface');
       return;
     }
 
-    setSurface(surface);
-  }, [CanvasKit]);
+    surfaceRef.current = surface;
+
+    return () => {
+      surfaceRef.current?.delete();
+      surfaceRef.current = null;
+    };
+  }, [CanvasKit, containerSize]);
 
   useEffect(() => {
-    if (!surface) return;
+    if (!surfaceRef.current) return;
+
+    const surface = surfaceRef.current;
 
     const { sketch, selectedPage, interactionState } = state;
     const context = { CanvasKit, canvas: surface.getCanvas() };
@@ -72,75 +93,76 @@ export default function Canvas(props: Props) {
     }
 
     surface.flush();
-  }, [CanvasKit, surface, state]);
+  }, [CanvasKit, state, containerSize]);
 
   return (
-    <canvas
-      onMouseDown={(event) => {
-        const point = getPoint(event.nativeEvent);
-        const rect = createRect(point, point);
+    <div ref={containerRef} style={{ flex: '1', position: 'relative' }}>
+      <canvas
+        id="main"
+        ref={canvasRef}
+        style={{ position: 'absolute', top: 0, left: 0 }}
+        onMouseDown={(event) => {
+          const point = getPoint(event.nativeEvent);
+          const rect = createRect(point, point);
 
-        const layer: PageLayer = {
-          ...rectangleExample,
-          do_objectID: uuid(),
-          frame: {
-            _class: 'rect',
-            constrainProportions: false,
-            ...rect,
-          },
-        };
-
-        dispatch([
-          'interaction',
-          {
-            type: 'drawing',
-            value: layer,
-            origin: point,
-          },
-        ]);
-      }}
-      onMouseMove={(event) => {
-        if (state.interactionState.type !== 'drawing') return;
-
-        const point = getPoint(event.nativeEvent);
-        const rect = createRect(state.interactionState.origin, point);
-
-        const layer = produce(state.interactionState.value, (layer) => {
-          layer.frame = {
-            ...layer.frame,
-            ...rect,
+          const layer: PageLayer = {
+            ...rectangleExample,
+            do_objectID: uuid(),
+            frame: {
+              _class: 'rect',
+              constrainProportions: false,
+              ...rect,
+            },
           };
-        });
 
-        dispatch([
-          'interaction',
-          {
-            type: 'drawing',
-            value: layer,
-            origin: state.interactionState.origin,
-          },
-        ]);
-      }}
-      onMouseUp={(event) => {
-        if (state.interactionState.type !== 'drawing') return;
+          dispatch([
+            'interaction',
+            {
+              type: 'drawing',
+              value: layer,
+              origin: point,
+            },
+          ]);
+        }}
+        onMouseMove={(event) => {
+          if (state.interactionState.type !== 'drawing') return;
 
-        const point = getPoint(event.nativeEvent);
-        const rect = createRect(state.interactionState.origin, point);
+          const point = getPoint(event.nativeEvent);
+          const rect = createRect(state.interactionState.origin, point);
 
-        const layer = produce(state.interactionState.value, (layer) => {
-          layer.frame = {
-            ...layer.frame,
-            ...rect,
-          };
-        });
+          const layer = produce(state.interactionState.value, (layer) => {
+            layer.frame = {
+              ...layer.frame,
+              ...rect,
+            };
+          });
 
-        dispatch(['interaction', { type: 'ready' }]);
-        dispatch(['addLayer', layer]);
-      }}
-      width={window.innerWidth}
-      height={window.innerHeight}
-      id="main"
-      ref={canvasRef}
-    />
+          dispatch([
+            'interaction',
+            {
+              type: 'drawing',
+              value: layer,
+              origin: state.interactionState.origin,
+            },
+          ]);
+        }}
+        onMouseUp={(event) => {
+          if (state.interactionState.type !== 'drawing') return;
+
+          const point = getPoint(event.nativeEvent);
+          const rect = createRect(state.interactionState.origin, point);
+
+          const layer = produce(state.interactionState.value, (layer) => {
+            layer.frame = {
+              ...layer.frame,
+              ...rect,
+            };
+          });
+
+          dispatch(['interaction', { type: 'ready' }]);
+          dispatch(['addLayer', layer]);
+        }}
+      />
+    </div>
   );
 }

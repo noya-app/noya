@@ -5,6 +5,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
   display: flex;
   flex-direction: row;
@@ -12,9 +14,9 @@ body {
 }
 
 #root {
+  flex: 1;
   display: flex;
   flex-direction: row;
-  align-items: stretch;
 }
 
 code {
