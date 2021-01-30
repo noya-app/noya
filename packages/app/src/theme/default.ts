@@ -11,6 +11,7 @@ export const colors = {
   divider: 'rgb(238, 238, 238)',
   primary: 'rgb(59, 108, 212)',
   neutralBackground: 'rgb(222,223,232)',
+  inputBackground: 'rgb(240, 240, 242)',
   codeBackground: 'rgb(250, 250, 250)',
   selectedBackground: 'rgb(242, 245, 250)',
   banner: {

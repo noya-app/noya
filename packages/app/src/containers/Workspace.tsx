@@ -3,6 +3,7 @@ import Divider from '../components/Divider';
 import * as Spacer from '../components/Spacer';
 import { defaultTheme } from '../theme';
 import Canvas from './Canvas';
+import Inspector from './Inspector';
 import LayerList from './LayerList';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
@@ -15,7 +16,7 @@ const LeftSidebar = styled.div(({ theme }) => ({
 }));
 
 const RightSidebar = styled.div(({ theme }) => ({
-  flex: '0 0 260px',
+  flex: '0 0 240px',
   borderLeft: `1px solid ${theme.colors.divider}`,
   display: 'flex',
   flexDirection: 'column',
@@ -47,7 +48,9 @@ export default function Workspace(props: Props) {
         <Toolbar />
         <ContentArea>
           <Canvas />
-          <RightSidebar />
+          <RightSidebar>
+            <Inspector />
+          </RightSidebar>
         </ContentArea>
       </MainView>
     </ThemeProvider>

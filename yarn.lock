@@ -1454,6 +1454,11 @@
     schema-utils "^2.6.5"
     source-map "^0.7.3"
 
+"@radix-ui/react-icons@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-icons/-/react-icons-1.0.1.tgz#37de40b8b4f3a8197ac1d29d04870e4a68f5c5b1"
+  integrity sha512-EKEB7aL4FaQyK77ff8hhl+XSIUE8wQ56pHh9XnJpuwXbYSDiYELQtbS+YNFo7KJJUDre6RVFmibc223SoUxozA==
+
 "@rollup/plugin-babel@^5.2.1":
   version "5.2.2"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-babel/-/plugin-babel-5.2.2.tgz#e5623a01dd8e37e004ba87f2de218c611727d9b2"

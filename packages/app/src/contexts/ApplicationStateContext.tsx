@@ -21,3 +21,17 @@ export const useApplicationState = () => {
 
   return value;
 };
+
+export const useCurrentPage = () => {
+  const [state] = useApplicationState();
+
+  const page = state.sketch.pages.find(
+    (page) => page.do_objectID === state.selectedPage,
+  );
+
+  if (!page) {
+    throw new Error('A page must always be selected');
+  }
+
+  return page;
+};

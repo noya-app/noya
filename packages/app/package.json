@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@radix-ui/react-icons": "^1.0.1",
     "styled-components": "^5.2.1"
   },
   "browserslist": {

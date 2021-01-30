@@ -152,6 +152,11 @@ export default function Canvas(props: Props) {
           const point = getPoint(event.nativeEvent);
           const rect = createRect(state.interactionState.origin, point);
 
+          if (rect.width === 0 || rect.height === 0) {
+            dispatch(['interaction', { type: 'ready' }]);
+            return;
+          }
+
           const layer = produce(state.interactionState.value, (layer) => {
             layer.frame = {
               ...layer.frame,
@@ -161,6 +166,7 @@ export default function Canvas(props: Props) {
 
           dispatch(['interaction', { type: 'ready' }]);
           dispatch(['addLayer', layer]);
+          dispatch(['selectLayer', layer.do_objectID]);
         }}
       />
     </div>
