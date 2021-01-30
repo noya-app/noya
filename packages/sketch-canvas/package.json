@@ -5,9 +5,11 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@sketch-hq/sketch-file-format-ts": "^5.2.2",
-    "canvaskit-wasm": "^0.22.0"
+    "canvaskit-wasm": "^0.22.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/uuid": "^8.3.0",
     "canvas": "^2.6.1"
   }
 }

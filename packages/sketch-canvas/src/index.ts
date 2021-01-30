@@ -1,6 +1,9 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { Canvas, CanvasKit, CanvasKitInit } from 'canvaskit-wasm';
+import { v4 as uuid } from 'uuid';
 import * as Primitives from './primitives';
+
+export { uuid };
 
 export interface Context {
   CanvasKit: CanvasKit;

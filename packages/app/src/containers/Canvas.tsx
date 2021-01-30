@@ -2,7 +2,7 @@ import { PageLayer, Point, Rect } from 'ayano-state';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
 import { useEffect, useRef, useState } from 'react';
-import { drawLayer } from 'sketch-canvas';
+import { drawLayer, uuid } from 'sketch-canvas';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import rectangleExample from '../rectangleExample';
@@ -82,6 +82,7 @@ export default function Canvas(props: Props) {
 
         const layer: PageLayer = {
           ...rectangleExample,
+          do_objectID: uuid(),
           frame: {
             _class: 'rect',
             constrainProportions: false,
