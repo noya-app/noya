@@ -1,5 +1,5 @@
 import { Action, ApplicationState } from 'ayano-state';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
 export type ApplicationStateContextValue = [
   ApplicationState,
@@ -22,16 +22,10 @@ export const useApplicationState = () => {
   return value;
 };
 
-export const useCurrentPage = () => {
+export function useSelector<Projection>(
+  selector: (state: ApplicationState) => Projection,
+) {
   const [state] = useApplicationState();
 
-  const page = state.sketch.pages.find(
-    (page) => page.do_objectID === state.selectedPage,
-  );
-
-  if (!page) {
-    throw new Error('A page must always be selected');
-  }
-
-  return page;
-};
+  return useMemo(() => selector(state), [selector, state]);
+}

@@ -1,6 +1,9 @@
-import { SketchFile } from 'sketch-zip';
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { SketchFile } from 'sketch-zip';
+import { getCurrentPageIndex, getSelectedLayerIndexes } from './selectors';
+
+export * as Selectors from './selectors';
 
 export type UUID = string;
 
@@ -37,6 +40,7 @@ export type Action =
   | [type: 'addLayer', layer: PageLayer]
   | [type: 'selectLayer', layerId: string]
   | [type: 'selectPage', pageId: UUID]
+  | [type: 'setFills', fills: Sketch.Fill[]]
   | [type: 'interaction', state: InteractionState];
 
 export const addLayerToPage = produce(
@@ -50,26 +54,39 @@ export function reducer(
   action: Action,
 ): ApplicationState {
   switch (action[0]) {
-    case 'addLayer':
-      const currentPageIndex = state.sketch.pages.findIndex(
-        (page) => page.do_objectID === state.selectedPage,
-      );
-
-      if (currentPageIndex === -1) throw new Error('No selected page');
-
-      return addLayerToPage(state, currentPageIndex, action[1]);
-    case 'selectLayer':
+    case 'addLayer': {
+      const pageIndex = getCurrentPageIndex(state);
+      return addLayerToPage(state, pageIndex, action[1]);
+    }
+    case 'selectLayer': {
       return produce(state, (state) => {
         state.selectedObjects = [action[1]];
       });
-    case 'selectPage':
+    }
+    case 'selectPage': {
       return produce(state, (state) => {
         state.selectedPage = action[1];
       });
-    case 'interaction':
+    }
+    case 'setFills': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (style) {
+            style.fills = action[1];
+          }
+        });
+      });
+    }
+    case 'interaction': {
       return produce(state, (state) => {
         state.interactionState = action[1];
       });
+    }
   }
 }
 

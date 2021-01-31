@@ -1,8 +1,9 @@
+import { Selectors } from 'ayano-state';
 import { useMemo } from 'react';
 import * as ListView from '../components/ListView';
 import {
   useApplicationState,
-  useCurrentPage,
+  useSelector,
 } from '../contexts/ApplicationStateContext';
 import withSeparatorElements from '../utils/withSeparatorElements';
 
@@ -10,7 +11,7 @@ interface Props {}
 
 export default function LayerList(props: Props) {
   const [state, dispatch] = useApplicationState();
-  const page = useCurrentPage();
+  const page = useSelector(Selectors.getCurrentPage);
 
   const layerElements = useMemo(() => {
     return withSeparatorElements(

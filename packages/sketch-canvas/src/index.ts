@@ -27,11 +27,15 @@ export function drawLayerShape(
 ) {
   const { canvas, CanvasKit } = context;
 
-  const fill = layer.style?.fills?.[0];
-
-  if (!fill) return;
-
   const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+
+  if (!layer.style) return;
+
+  layer.style.fills?.forEach((fill) => {
+    if (!fill.isEnabled) return;
+
+    canvas.drawPath(path, Primitives.fill(CanvasKit, fill));
+  });
 
   // const paint = new CanvasKit.Paint();
 
@@ -40,8 +44,6 @@ export function drawLayerShape(
   // paint.setAntiAlias(true);
 
   // canvas.drawPath(path, paint);
-
-  canvas.drawPath(path, Primitives.fill(CanvasKit, fill));
 }
 
 const init: typeof CanvasKitInit = require('canvaskit-wasm/bin/canvaskit.js');
