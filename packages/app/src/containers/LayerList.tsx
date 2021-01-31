@@ -19,6 +19,7 @@ export default function LayerList(props: Props) {
           key={layer.do_objectID}
           selected={state.selectedObjects.includes(layer.do_objectID)}
           onClick={() => {
+            dispatch(['interaction', { type: 'none' }]);
             dispatch(['selectLayer', layer.do_objectID]);
           }}
         >

@@ -19,11 +19,23 @@ export default function Toolbar(props: Props) {
   return (
     <Container>
       <Spacer.Horizontal size={8} />
-      <Button label="Rectangle">
+      <Button
+        active={state.interactionState.type === 'insertRectangle'}
+        label="Rectangle"
+        onClick={() => {
+          dispatch(['interaction', { type: 'insertRectangle' }]);
+        }}
+      >
         <SquareIcon />
       </Button>
       <Spacer.Horizontal size={16} />
-      <Button label="Circle">
+      <Button
+        active={state.interactionState.type === 'insertOval'}
+        label="Oval"
+        onClick={() => {
+          dispatch(['interaction', { type: 'insertOval' }]);
+        }}
+      >
         <CircleIcon />
       </Button>
       <Spacer.Horizontal size={8} />

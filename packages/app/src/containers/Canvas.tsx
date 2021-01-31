@@ -1,3 +1,4 @@
+import type FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { PageLayer, Point, Rect } from 'ayano-state';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
@@ -6,7 +7,9 @@ import { drawLayer, uuid } from 'sketch-canvas';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import rectangleExample from '../rectangleExample';
+import rectangle from '../rectangleExample';
+
+const oval = require('../models/oval.json') as FileFormat.Oval;
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -102,18 +105,29 @@ export default function Canvas(props: Props) {
         ref={canvasRef}
         style={{ position: 'absolute', top: 0, left: 0 }}
         onMouseDown={(event) => {
+          if (
+            state.interactionState.type !== 'insertRectangle' &&
+            state.interactionState.type !== 'insertOval'
+          ) {
+            return;
+          }
+
           const point = getPoint(event.nativeEvent);
           const rect = createRect(point, point);
 
-          const layer: PageLayer = {
-            ...rectangleExample,
-            do_objectID: uuid(),
-            frame: {
-              _class: 'rect',
-              constrainProportions: false,
-              ...rect,
-            },
+          // state.interactionState.type === 'insertRectangle' ?
+
+          const id = uuid();
+          const frame: FileFormat.Rect = {
+            _class: 'rect',
+            constrainProportions: false,
+            ...rect,
           };
+
+          let layer: PageLayer =
+            state.interactionState.type === 'insertOval'
+              ? { ...oval, do_objectID: id, frame }
+              : { ...rectangle, do_objectID: id, frame };
 
           dispatch([
             'interaction',
@@ -153,7 +167,7 @@ export default function Canvas(props: Props) {
           const rect = createRect(state.interactionState.origin, point);
 
           if (rect.width === 0 || rect.height === 0) {
-            dispatch(['interaction', { type: 'ready' }]);
+            dispatch(['interaction', { type: 'none' }]);
             return;
           }
 
@@ -164,7 +178,7 @@ export default function Canvas(props: Props) {
             };
           });
 
-          dispatch(['interaction', { type: 'ready' }]);
+          dispatch(['interaction', { type: 'none' }]);
           dispatch(['addLayer', layer]);
           dispatch(['selectLayer', layer.do_objectID]);
         }}

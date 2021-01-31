@@ -22,6 +22,7 @@ export default function PageList(props: Props) {
           key={page.do_objectID}
           selected={state.selectedPage === page.do_objectID}
           onClick={() => {
+            dispatch(['interaction', { type: 'none' }]);
             dispatch(['selectPage', page.do_objectID]);
           }}
         >

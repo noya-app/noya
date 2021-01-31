@@ -10,7 +10,13 @@ export type Rect = { x: number; y: number; width: number; height: number };
 
 export type InteractionState =
   | {
-      type: 'ready';
+      type: 'none';
+    }
+  | {
+      type: 'insertRectangle';
+    }
+  | {
+      type: 'insertOval';
     }
   | {
       type: 'drawing';
@@ -73,7 +79,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
-    interactionState: { type: 'ready' },
+    interactionState: { type: 'none' },
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     sketch,

@@ -8,34 +8,38 @@ import * as Spacer from '../components/Spacer';
 
 const ButtonLabel = styled.label(({ theme }) => ({
   ...theme.textStyles.small,
+  fontSize: '11px',
   flex: '0 0 auto',
   minWidth: '0',
+  letterSpacing: '0.4px',
 }));
 
 /* ----------------------------------------------------------------------------
  * Button
  * ------------------------------------------------------------------------- */
 
-const ButtonButton = styled.button(({ theme }) => ({
-  ...theme.textStyles.small,
-  flex: '0 0 auto',
-  position: 'relative',
-  border: '0',
-  outline: 'none',
-  minWidth: '0',
-  textAlign: 'left',
-  borderRadius: '4px',
-  paddingTop: '4px',
-  paddingRight: '6px',
-  paddingBottom: '4px',
-  paddingLeft: '6px',
-  background: theme.colors.inputBackground,
-  '&:focus': {
-    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
-  },
-  display: 'flex',
-  alignItems: 'center',
-}));
+const ButtonButton = styled.button<{ active: boolean }>(
+  ({ theme, active }) => ({
+    ...theme.textStyles.small,
+    flex: '0 0 auto',
+    position: 'relative',
+    border: '0',
+    outline: 'none',
+    minWidth: '0',
+    textAlign: 'left',
+    borderRadius: '4px',
+    paddingTop: '4px',
+    paddingRight: '6px',
+    paddingBottom: '4px',
+    paddingLeft: '6px',
+    background: active ? theme.colors.inputBackground : 'transparent',
+    '&:focus': {
+      boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+    },
+    display: 'flex',
+    alignItems: 'center',
+  }),
+);
 
 /* ----------------------------------------------------------------------------
  * Inner
@@ -67,14 +71,15 @@ const ButtonContainer = styled.span(({ theme }) => ({
 
 interface ButtonRootProps {
   children: ReactNode;
+  active?: boolean;
   label?: ReactNode;
   onClick?: () => void;
 }
 
-function Button({ label, onClick, children }: ButtonRootProps) {
+function Button({ label, active = false, onClick, children }: ButtonRootProps) {
   return (
     <ButtonContainer>
-      <ButtonButton onClick={onClick}>
+      <ButtonButton active={active} onClick={onClick}>
         <ButtonInner>{children}</ButtonInner>
       </ButtonButton>
       {label && (
