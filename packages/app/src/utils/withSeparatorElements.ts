@@ -10,7 +10,7 @@ export default function withSeparatorElements(
 ) {
   const childrenArray = Children.toArray(elements);
 
-  for (let i = childrenArray.length - 1; i >= 0; i--) {
+  for (let i = childrenArray.length - 1; i > 0; i--) {
     let sep =
       typeof separator === 'function'
         ? separator()

@@ -68,7 +68,7 @@ export default function Inspector(props: Props) {
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);
-  }, [selectedLayers]);
+  }, [dispatch, selectedLayers]);
 
   if (selectedLayers.length === 0) return null;
 

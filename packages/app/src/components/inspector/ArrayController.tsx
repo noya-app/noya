@@ -8,6 +8,7 @@ import Button from '../Button';
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
+  alignItems: 'center',
 }));
 
 const Title = styled.div(({ theme }) => ({
@@ -49,6 +50,7 @@ function ArrayController<Item extends { isEnabled: boolean }>({
         <Row key={getKey?.(item) ?? index}>
           <input
             type="checkbox"
+            style={{ margin: 0 }}
             checked={value[index].isEnabled}
             onChange={(event) => {
               const checked = event.target.checked;
@@ -60,7 +62,7 @@ function ArrayController<Item extends { isEnabled: boolean }>({
               );
             }}
           />
-          <Spacer.Horizontal size={4} />
+          <Spacer.Horizontal size={8} />
           {renderItem(item)}
         </Row>
       ))}
