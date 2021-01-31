@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@radix-ui/react-icons": "^1.0.1",
+    "react-beautiful-dnd": "^13.0.0",
     "styled-components": "^5.2.1"
   },
   "browserslist": {
@@ -22,6 +23,7 @@
     "type": "app"
   },
   "devDependencies": {
+    "@types/react-beautiful-dnd": "^13.0.0",
     "@types/resize-observer-browser": "^0.1.5",
     "@types/styled-components": "^5.1.7"
   }

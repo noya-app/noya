@@ -44,6 +44,7 @@ export default memo(function Inspector(props: Props) {
       </Fragment>,
       selectedLayers.length === 1 && (
         <ArrayController<FileFormat.Fill>
+          id="fills"
           key="fills"
           value={selectedLayers[0].style?.fills ?? []}
           onClickPlus={() => {
@@ -62,6 +63,7 @@ export default memo(function Inspector(props: Props) {
       ),
       selectedLayers.length === 1 && (
         <ArrayController<FileFormat.Border>
+          id="borders"
           key="borders"
           value={selectedLayers[0].style?.borders ?? []}
           onChange={(value) => {
