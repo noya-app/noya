@@ -31,25 +31,20 @@ export function drawLayerShape(
 
   if (!layer.style) return;
 
-  layer.style.fills?.forEach((fill) => {
+  const fills = (layer.style.fills ?? []).slice().reverse();
+  const borders = (layer.style.borders ?? []).slice().reverse();
+
+  fills.forEach((fill) => {
     if (!fill.isEnabled) return;
 
     canvas.drawPath(path, Primitives.fill(CanvasKit, fill));
   });
 
-  layer.style.borders?.forEach((border) => {
+  borders.forEach((border) => {
     if (!border.isEnabled || border.thickness === 0) return;
 
     canvas.drawPath(path, Primitives.border(CanvasKit, border));
   });
-
-  // const paint = new CanvasKit.Paint();
-
-  // paint.setColor(color(CanvasKit, fill.color));
-  // paint.setStyle(CanvasKit.PaintStyle.Stroke);
-  // paint.setAntiAlias(true);
-
-  // canvas.drawPath(path, paint);
 }
 
 const init: typeof CanvasKitInit = require('canvaskit-wasm/bin/canvaskit.js');

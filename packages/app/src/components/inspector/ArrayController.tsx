@@ -1,9 +1,8 @@
 import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
 import * as Spacer from '../Spacer';
-import { PlusIcon } from '@radix-ui/react-icons';
+import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import produce from 'immer';
-import Button from '../Button';
 
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
@@ -28,6 +27,8 @@ interface ArrayControllerProps<Item> {
   value: Item[];
   title: ReactNode;
   onChange: (item: Item[]) => void;
+  onClickPlus?: () => void;
+  onClickTrash?: () => void;
   getKey?: (item: Item) => string | number;
   children: (item: Item) => ReactNode;
 }
@@ -37,6 +38,8 @@ function ArrayController<Item extends { isEnabled: boolean }>({
   title,
   getKey,
   onChange,
+  onClickPlus,
+  onClickTrash,
   children: renderItem,
 }: ArrayControllerProps<Item>) {
   return (
@@ -44,7 +47,16 @@ function ArrayController<Item extends { isEnabled: boolean }>({
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <Title>{title}</Title>
         <Spacer.Horizontal />
-        <PlusIcon />
+        {onClickTrash && value.some((item) => !item.isEnabled) && (
+          <span onClick={onClickTrash}>
+            <TrashIcon />
+          </span>
+        )}
+        {onClickPlus && (
+          <span onClick={onClickPlus}>
+            <PlusIcon />
+          </span>
+        )}
       </div>
       {value.map((item, index) => (
         <Row key={getKey?.(item) ?? index}>

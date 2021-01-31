@@ -2,6 +2,7 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SketchFile } from 'sketch-zip';
 import { getCurrentPageIndex, getSelectedLayerIndexes } from './selectors';
+import * as Models from './models';
 
 export * as Selectors from './selectors';
 
@@ -41,6 +42,8 @@ export type Action =
   | [type: 'selectLayer', layerId: string]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'setFills', fills: Sketch.Fill[]]
+  | [type: 'addNewFill']
+  | [type: 'deleteDisabledFills']
   | [type: 'setBorders', borders: Sketch.Border[]]
   | [type: 'nudgeBorderWidth', amount: number]
   | [type: 'interaction', state: InteractionState];
@@ -68,6 +71,38 @@ export function reducer(
     case 'selectPage': {
       return produce(state, (state) => {
         state.selectedPage = action[1];
+      });
+    }
+    case 'addNewFill': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (style) {
+            if (!style.fills) {
+              style.fills = [];
+            }
+
+            style.fills?.unshift(Models.fill);
+          }
+        });
+      });
+    }
+    case 'deleteDisabledFills': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (style && style.fills) {
+            style.fills = style.fills.filter((fill) => fill.isEnabled);
+          }
+        });
       });
     }
     case 'setFills': {

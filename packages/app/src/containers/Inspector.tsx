@@ -1,26 +1,24 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
-// import EditableInput from '../components/input/EditableInput';
+import { PageLayer, Selectors } from 'ayano-state';
+import { Fragment, memo, useMemo } from 'react';
+import Divider from '../components/Divider';
 import AlignmentInspector from '../components/inspector/AlignmentInspector';
+import ArrayController from '../components/inspector/ArrayController';
+import BorderRow from '../components/inspector/BorderRow';
 import DimensionsInspector, {
   Props as DimensionsInspectorProps,
 } from '../components/inspector/DimensionsInspector';
+import FillRow from '../components/inspector/FillRow';
+import * as Spacer from '../components/Spacer';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import * as InputField from '../components/InputField';
-import * as Spacer from '../components/Spacer';
-import { PageLayer, Selectors } from 'ayano-state';
-import ArrayController from '../components/inspector/ArrayController';
-import Divider from '../components/Divider';
 import withSeparatorElements from '../utils/withSeparatorElements';
-import { Fragment, useMemo } from 'react';
-import FillRow from '../components/inspector/FillRow';
-import BorderRow from '../components/inspector/BorderRow';
 
 interface Props {}
 
-export default function Inspector(props: Props) {
+export default memo(function Inspector(props: Props) {
   const [state, dispatch] = useApplicationState();
   const page = useSelector(Selectors.getCurrentPage);
 
@@ -48,6 +46,12 @@ export default function Inspector(props: Props) {
         <ArrayController<FileFormat.Fill>
           key="fills"
           value={selectedLayers[0].style?.fills ?? []}
+          onClickPlus={() => {
+            dispatch(['addNewFill']);
+          }}
+          onClickTrash={() => {
+            dispatch(['deleteDisabledFills']);
+          }}
           onChange={(value) => {
             dispatch(['setFills', value]);
           }}
@@ -84,4 +88,4 @@ export default function Inspector(props: Props) {
   if (selectedLayers.length === 0) return null;
 
   return <>{elements}</>;
-}
+});
