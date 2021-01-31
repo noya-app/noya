@@ -7,6 +7,7 @@ import {
   useMemo,
 } from 'react';
 import styled from 'styled-components';
+import handleNudge from '../utils/handleNudge';
 
 type LabelPosition = 'start' | 'end';
 
@@ -79,16 +80,37 @@ const InputElement = styled.input<{ labelPosition: LabelPosition }>(
 interface InputFieldInputProps {
   value: string;
   onChange?: (value: string) => void;
+  onNudge?: (value: number) => void;
   children?: ReactNode;
 }
 
-function InputFieldInput({ value, children, onChange }: InputFieldInputProps) {
+function InputFieldInput({
+  value,
+  children,
+  onChange,
+  onNudge,
+}: InputFieldInputProps) {
   const { labelPosition } = useContext(InputFieldContext);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      const amount = handleNudge(event);
+
+      if (!amount) return;
+
+      onNudge?.(amount);
+
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [onNudge],
+  );
 
   return (
     <InputElement
       labelPosition={labelPosition}
       value={value}
+      onKeyDown={onNudge ? handleKeyDown : undefined}
       onChange={useCallback(
         (event) => {
           onChange?.(event.target.value);

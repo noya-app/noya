@@ -16,6 +16,7 @@ import Divider from '../components/Divider';
 import withSeparatorElements from '../utils/withSeparatorElements';
 import { Fragment, useMemo } from 'react';
 import FillRow from '../components/inspector/FillRow';
+import BorderRow from '../components/inspector/BorderRow';
 
 interface Props {}
 
@@ -57,12 +58,22 @@ export default function Inspector(props: Props) {
       ),
       selectedLayers.length === 1 && (
         <ArrayController<FileFormat.Border>
-          key="border"
-          value={[]}
-          onChange={() => {}}
+          key="borders"
+          value={selectedLayers[0].style?.borders ?? []}
+          onChange={(value) => {
+            dispatch(['setBorders', value]);
+          }}
           title="Borders"
         >
-          {(item) => null}
+          {(item) => (
+            <BorderRow
+              color={item.color}
+              width={item.thickness}
+              onNudgeWidth={(amount) => {
+                dispatch(['nudgeBorderWidth', amount]);
+              }}
+            />
+          )}
         </ArrayController>
       ),
     ].filter((element): element is JSX.Element => !!element);

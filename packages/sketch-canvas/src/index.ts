@@ -37,6 +37,12 @@ export function drawLayerShape(
     canvas.drawPath(path, Primitives.fill(CanvasKit, fill));
   });
 
+  layer.style.borders?.forEach((border) => {
+    if (!border.isEnabled || border.thickness === 0) return;
+
+    canvas.drawPath(path, Primitives.border(CanvasKit, border));
+  });
+
   // const paint = new CanvasKit.Paint();
 
   // paint.setColor(color(CanvasKit, fill.color));

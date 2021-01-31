@@ -22,9 +22,18 @@ export function fill(CanvasKit: CanvasKit, fill: Sketch.Fill): Paint {
   paint.setStyle(CanvasKit.PaintStyle.Fill);
   paint.setAntiAlias(true);
 
-  // paint.setMaskFilter(
-  //   CanvasKit.MaskFilter.MakeBlur(CanvasKit.BlurStyle.Normal, 5, true),
-  // );
+  return paint;
+}
+
+export function border(CanvasKit: CanvasKit, border: Sketch.Border): Paint {
+  const paint = new CanvasKit.Paint();
+
+  paint.setColor(
+    border.color ? color(CanvasKit, border.color) : clearColor(CanvasKit),
+  );
+  paint.setStrokeWidth(border.thickness);
+  paint.setStyle(CanvasKit.PaintStyle.Stroke);
+  paint.setAntiAlias(true);
 
   return paint;
 }

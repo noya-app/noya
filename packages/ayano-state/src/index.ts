@@ -41,6 +41,8 @@ export type Action =
   | [type: 'selectLayer', layerId: string]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'setFills', fills: Sketch.Fill[]]
+  | [type: 'setBorders', borders: Sketch.Border[]]
+  | [type: 'nudgeBorderWidth', amount: number]
   | [type: 'interaction', state: InteractionState];
 
 export const addLayerToPage = produce(
@@ -78,6 +80,36 @@ export function reducer(
 
           if (style) {
             style.fills = action[1];
+          }
+        });
+      });
+    }
+    case 'setBorders': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (style) {
+            style.borders = action[1];
+          }
+        });
+      });
+    }
+    case 'nudgeBorderWidth': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (style) {
+            style.borders?.forEach((border) => {
+              border.thickness = Math.max(0, border.thickness + action[1]);
+            });
           }
         });
       });
