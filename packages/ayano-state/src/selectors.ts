@@ -1,5 +1,4 @@
-import type { CanvasKit, Paint, Path } from 'canvaskit-wasm';
-// import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type { CanvasKit } from 'canvaskit-wasm';
 import * as Primitives from 'sketch-canvas/src/primitives';
 import type { ApplicationState, PageLayer, Point } from './index';
 
