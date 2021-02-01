@@ -46,6 +46,16 @@ export function drawArtboard(context: Context, artboard: Sketch.Artboard) {
 
   canvas.drawRect(blurRect, blur);
   canvas.drawRect(rect, paint);
+
+  canvas.save();
+  canvas.clipRect(rect, CanvasKit.ClipOp.Intersect, true);
+  canvas.translate(artboard.frame.x, artboard.frame.y);
+
+  artboard.layers.forEach((layer) => {
+    drawLayer(context, layer);
+  });
+
+  canvas.restore();
 }
 
 export function drawLayerShape(
