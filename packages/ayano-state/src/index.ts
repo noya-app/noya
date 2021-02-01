@@ -42,6 +42,7 @@ type StyleElementType = 'Fill' | 'Border';
 export type Action =
   | [type: 'addLayer', layer: PageLayer]
   | [type: 'selectLayer', layerId: string]
+  | [type: 'deselectAllLayers']
   | [type: 'selectPage', pageId: UUID]
   | [type: `addNew${StyleElementType}`]
   | [type: `delete${StyleElementType}`, index: number]
@@ -70,6 +71,11 @@ export function reducer(
     case 'selectLayer': {
       return produce(state, (state) => {
         state.selectedObjects = [action[1]];
+      });
+    }
+    case 'deselectAllLayers': {
+      return produce(state, (state) => {
+        state.selectedObjects = [];
       });
     }
     case 'selectPage': {

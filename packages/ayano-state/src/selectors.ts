@@ -1,5 +1,7 @@
+import type { CanvasKit, Paint, Path } from 'canvaskit-wasm';
 // import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { ApplicationState, PageLayer } from './index';
+import * as Primitives from 'sketch-canvas/src/primitives';
+import type { ApplicationState, PageLayer, Point } from './index';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -32,3 +34,32 @@ export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
     .map((id) => page.layers.find((layer) => layer.do_objectID === id))
     .filter((layer): layer is PageLayer => !!layer);
 };
+
+export function getLayerAtPoint(
+  CanvasKit: CanvasKit,
+  state: ApplicationState,
+  point: Point,
+): PageLayer | undefined {
+  const page = getCurrentPage(state);
+
+  const layers = page.layers.filter((layer) => {
+    const rect = layer.frame;
+
+    return (
+      rect.x <= point.x &&
+      point.x <= rect.x + rect.width &&
+      rect.y <= point.y &&
+      point.y <= rect.y + rect.height
+    );
+  });
+
+  return [...layers.reverse()].find((layer) => {
+    // TODO: Check path
+    if (layer._class === 'oval') {
+      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+      return path.contains(point.x, point.y);
+    }
+
+    return true;
+  });
+}

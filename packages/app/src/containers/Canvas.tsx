@@ -1,5 +1,6 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { PageLayer, Point, Rect } from 'ayano-state';
+import { getLayerAtPoint } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
@@ -161,14 +162,24 @@ export default function Canvas(props: Props) {
           ]);
         }}
         onMouseUp={(event) => {
+          const point = getPoint(event.nativeEvent);
+
+          if (state.interactionState.type === 'none') {
+            const layer = getLayerAtPoint(CanvasKit, state, point);
+
+            if (layer) {
+              return dispatch(['selectLayer', layer.do_objectID]);
+            } else {
+              return dispatch(['deselectAllLayers']);
+            }
+          }
+
           if (state.interactionState.type !== 'drawing') return;
 
-          const point = getPoint(event.nativeEvent);
           const rect = createRect(state.interactionState.origin, point);
 
           if (rect.width === 0 || rect.height === 0) {
-            dispatch(['interaction', { type: 'none' }]);
-            return;
+            return dispatch(['interaction', { type: 'none' }]);
           }
 
           const layer = produce(state.interactionState.value, (layer) => {

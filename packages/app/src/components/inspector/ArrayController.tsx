@@ -1,9 +1,8 @@
+import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { memo, ReactNode, useCallback } from 'react';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import * as Spacer from '../Spacer';
-import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import produce from 'immer';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 type BaseArrayItem = { isEnabled: boolean };
 
@@ -17,10 +16,6 @@ const ElementRow = styled.div(({ theme }) => ({
   alignItems: 'center',
   marginTop: '10px',
   cursor: 'initial !important', // Override draggableProps.style
-}));
-
-const Checkbox = styled.input(({ theme }) => ({
-  margin: 0,
 }));
 
 interface ArrayElementProps {
@@ -58,6 +53,10 @@ const Title = styled.div(({ theme }) => ({
   fontWeight: 'bold',
   display: 'flex',
   flexDirection: 'row',
+}));
+
+const Checkbox = styled.input(({ theme }) => ({
+  margin: 0,
 }));
 
 const ArrayControllerContainer = styled.div(({ theme }) => ({
