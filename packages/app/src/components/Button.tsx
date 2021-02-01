@@ -32,7 +32,8 @@ const ButtonButton = styled.button<{ active: boolean }>(
     paddingRight: '6px',
     paddingBottom: '4px',
     paddingLeft: '6px',
-    background: active ? theme.colors.inputBackground : 'transparent',
+    background: active ? theme.colors.primary : theme.colors.inputBackground,
+    color: active ? 'white' : theme.colors.text,
     '&:focus': {
       boxShadow: `0 0 0 2px ${theme.colors.primary}`,
     },

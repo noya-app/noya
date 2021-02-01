@@ -45,7 +45,7 @@ export default memo(function BorderRow({
             case hexInputId:
               return <Label.Label>Hex</Label.Label>;
             case widthInputId:
-              return <Label.Label>width</Label.Label>;
+              return <Label.Label>Width</Label.Label>;
             default:
               return null;
           }

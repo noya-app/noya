@@ -133,12 +133,13 @@ function ArrayController<Item extends BaseArrayItem>({
           <Spacer.Horizontal />
           {onClickTrash && value.some((item) => !item.isEnabled) && (
             <span onClick={onClickTrash}>
-              <TrashIcon />
+              <TrashIcon color="rgb(139,139,139)" />
             </span>
           )}
+          <Spacer.Horizontal size={12} />
           {onClickPlus && (
             <span onClick={onClickPlus}>
-              <PlusIcon />
+              <PlusIcon color="rgb(139,139,139)" />
             </span>
           )}
         </div>
