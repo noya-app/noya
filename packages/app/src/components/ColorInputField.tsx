@@ -10,12 +10,14 @@ const Row = styled.div<{ color: string }>(({ theme, color }) => ({
 }));
 
 interface Props {
+  id?: string;
   color: FileFormat.Color;
 }
 
-export default function ColorInputField({ color }: Props) {
+export default function ColorInputField({ id, color }: Props) {
   return (
     <Row
+      id={id}
       color={`rgba(${color.red * 255}, ${color.green * 255}, ${
         color.blue * 255
       }, ${color.alpha})`}

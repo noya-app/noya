@@ -136,12 +136,14 @@ const RootContainer = styled.div<{ size?: number }>(({ theme, size }) => ({
 }));
 
 interface InputFieldRootProps {
+  id?: string;
   children?: ReactNode;
   size?: number;
   labelPosition?: LabelPosition;
 }
 
 function InputFieldRoot({
+  id,
   children,
   size,
   labelPosition = 'end',
@@ -150,7 +152,9 @@ function InputFieldRoot({
 
   return (
     <InputFieldContext.Provider value={contextValue}>
-      <RootContainer size={size}>{children}</RootContainer>
+      <RootContainer id={id} size={size}>
+        {children}
+      </RootContainer>
     </InputFieldContext.Provider>
   );
 }

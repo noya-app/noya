@@ -16,6 +16,7 @@ const ElementRow = styled.div(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   marginTop: '10px',
+  cursor: 'initial !important', // Override draggableProps.style
 }));
 
 const Checkbox = styled.input(({ theme }) => ({
@@ -25,25 +26,14 @@ const Checkbox = styled.input(({ theme }) => ({
 interface ArrayElementProps {
   id: string;
   index: number;
-  checked: boolean;
-  onChangeChecked: (checked: boolean) => void;
   children: ReactNode;
 }
 
 const ArrayElement = memo(function ArrayElement({
   id,
   index,
-  checked,
-  onChangeChecked,
   children,
 }: ArrayElementProps) {
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChangeChecked(event.target.checked);
-    },
-    [onChangeChecked],
-  );
-
   return (
     <Draggable draggableId={id} index={index}>
       {(provided) => (
@@ -52,8 +42,6 @@ const ArrayElement = memo(function ArrayElement({
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
-          <Checkbox type="checkbox" checked={checked} onChange={handleChange} />
-          <Spacer.Horizontal size={8} />
           {children}
         </ElementRow>
       )}
@@ -86,7 +74,11 @@ interface ArrayControllerProps<Item> {
   onClickPlus?: () => void;
   onClickTrash?: () => void;
   getKey?: (item: Item) => string | number;
-  children: (item: Item) => ReactNode;
+  children: (props: {
+    item: Item;
+    index: number;
+    checkbox: ReactNode;
+  }) => ReactNode;
 }
 
 function ArrayController<Item extends BaseArrayItem>({
@@ -158,16 +150,24 @@ function ArrayController<Item extends BaseArrayItem>({
                   key={getKey?.(item) ?? index}
                   id={String(index)}
                   index={index}
-                  checked={value[index].isEnabled}
-                  onChangeChecked={(checked) => {
-                    onChange(
-                      produce(value, (value) => {
-                        value[index].isEnabled = checked;
-                      }),
-                    );
-                  }}
                 >
-                  {renderItem(item)}
+                  {renderItem({
+                    item,
+                    index,
+                    checkbox: (
+                      <Checkbox
+                        type="checkbox"
+                        checked={value[index].isEnabled}
+                        onChange={(event) => {
+                          onChange(
+                            produce(value, (value) => {
+                              value[index].isEnabled = event.target.checked;
+                            }),
+                          );
+                        }}
+                      />
+                    ),
+                  })}
                 </ArrayElement>
               ))}
               {provided.placeholder}

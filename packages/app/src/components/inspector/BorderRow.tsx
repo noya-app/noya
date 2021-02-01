@@ -1,9 +1,11 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { memo } from 'react';
+import { memo, ReactNode } from 'react';
 // import EditableInput from '../components/input/EditableInput';
 import styled from 'styled-components';
 import ColorInputField from '../ColorInputField';
 import * as InputField from '../InputField';
+import * as Label from '../Label';
+import LabeledElementView from '../LabeledElementView';
 import * as Spacer from '../Spacer';
 import { DimensionValue } from './DimensionsInspector';
 
@@ -15,24 +17,53 @@ const Row = styled.div(({ theme }) => ({
 }));
 
 interface Props {
+  id: string;
   color: FileFormat.Color;
   width: DimensionValue;
   onNudgeWidth: (amount: number) => void;
+  prefix?: ReactNode;
 }
 
-export default memo(function BorderRow({ color, width, onNudgeWidth }: Props) {
+export default memo(function BorderRow({
+  id,
+  color,
+  width,
+  onNudgeWidth,
+  prefix,
+}: Props) {
+  const colorInputId = `${id}-color`;
+  const hexInputId = `${id}-hex`;
+  const widthInputId = `${id}-width`;
+
   return (
     <Row>
-      <ColorInputField color={color} />
-      <Spacer.Horizontal size={8} />
-      <InputField.Root labelPosition="start">
-        <InputField.Input value={'FFFFFF'} />
-        <InputField.Label>#</InputField.Label>
-      </InputField.Root>
-      <Spacer.Horizontal size={8} />
-      <InputField.Root size={50}>
-        <InputField.Input value={String(width)} onNudge={onNudgeWidth} />
-      </InputField.Root>
+      <LabeledElementView
+        renderLabel={({ id }) => {
+          switch (id) {
+            case colorInputId:
+              return <Label.Label>Color</Label.Label>;
+            case hexInputId:
+              return <Label.Label>Hex</Label.Label>;
+            case widthInputId:
+              return <Label.Label>width</Label.Label>;
+            default:
+              return null;
+          }
+        }}
+      >
+        {prefix}
+        {prefix && <Spacer.Horizontal size={8} />}
+        <ColorInputField id={colorInputId} color={color} />
+        <Spacer.Horizontal size={8} />
+        <InputField.Root id={hexInputId} labelPosition="start">
+          <InputField.Input value={'FFFFFF'} />
+          <InputField.Label>#</InputField.Label>
+        </InputField.Root>
+        <Spacer.Horizontal size={8} />
+        <InputField.Root id={widthInputId} size={50}>
+          <InputField.Input value={String(width)} onNudge={onNudgeWidth} />
+        </InputField.Root>
+      </LabeledElementView>
     </Row>
   );
 });

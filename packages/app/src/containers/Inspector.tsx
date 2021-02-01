@@ -58,7 +58,13 @@ export default memo(function Inspector(props: Props) {
           }}
           title="Fills"
         >
-          {(item) => <FillRow color={item.color} />}
+          {({ item, index, checkbox }) => (
+            <FillRow
+              id={`fill-${index}`}
+              color={item.color}
+              prefix={checkbox}
+            />
+          )}
         </ArrayController>
       ),
       selectedLayers.length === 1 && (
@@ -71,9 +77,11 @@ export default memo(function Inspector(props: Props) {
           }}
           title="Borders"
         >
-          {(item) => (
+          {({ item, index, checkbox }) => (
             <BorderRow
+              id={`border-${index}`}
               color={item.color}
+              prefix={checkbox}
               width={item.thickness}
               onNudgeWidth={(amount) => {
                 dispatch(['nudgeBorderWidth', amount]);
@@ -89,5 +97,10 @@ export default memo(function Inspector(props: Props) {
 
   if (selectedLayers.length === 0) return null;
 
-  return <>{elements}</>;
+  return (
+    <>
+      {elements}
+      <Divider />
+    </>
+  );
 });
