@@ -70,7 +70,9 @@ interface ArrayControllerProps<Item> {
   id: string;
   value: Item[];
   title: ReactNode;
-  onChange: (item: Item[]) => void;
+  onDeleteItem?: (index: number) => void;
+  onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
+  onChangeCheckbox: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
   getKey?: (item: Item) => string | number;
@@ -86,9 +88,11 @@ function ArrayController<Item extends BaseArrayItem>({
   value,
   title,
   getKey,
-  onChange,
+  onDeleteItem,
+  onMoveItem,
   onClickPlus,
   onClickTrash,
+  onChangeCheckbox,
   children: renderItem,
 }: ArrayControllerProps<Item>) {
   const handleDragEnd = useCallback(
@@ -96,11 +100,7 @@ function ArrayController<Item extends BaseArrayItem>({
       const { destination, source } = result;
 
       if (!destination) {
-        onChange(
-          produce(value, (value) => {
-            value.splice(source.index, 1);
-          }),
-        );
+        onDeleteItem?.(source.index);
         return;
       }
 
@@ -113,16 +113,9 @@ function ArrayController<Item extends BaseArrayItem>({
         return;
       }
 
-      onChange(
-        produce(value, (value) => {
-          const sourceItem = value[source.index];
-
-          value.splice(source.index, 1);
-          value.splice(destination.index, 0, sourceItem);
-        }),
-      );
+      onMoveItem?.(source.index, destination.index);
     },
-    [onChange, value],
+    [onDeleteItem, onMoveItem],
   );
 
   return (
@@ -160,11 +153,7 @@ function ArrayController<Item extends BaseArrayItem>({
                         type="checkbox"
                         checked={value[index].isEnabled}
                         onChange={(event) => {
-                          onChange(
-                            produce(value, (value) => {
-                              value[index].isEnabled = event.target.checked;
-                            }),
-                          );
+                          onChangeCheckbox(index, event.target.checked);
                         }}
                       />
                     ),

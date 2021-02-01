@@ -47,15 +47,15 @@ export default memo(function Inspector(props: Props) {
           id="fills"
           key="fills"
           value={selectedLayers[0].style?.fills ?? []}
-          onClickPlus={() => {
-            dispatch(['addNewFill']);
-          }}
-          onClickTrash={() => {
-            dispatch(['deleteDisabledFills']);
-          }}
-          onChange={(value) => {
-            dispatch(['setFills', value]);
-          }}
+          onClickPlus={() => dispatch(['addNewFill'])}
+          onClickTrash={() => dispatch(['deleteDisabledFills'])}
+          onDeleteItem={(index) => dispatch(['deleteFill', index])}
+          onMoveItem={(sourceIndex, destinationIndex) =>
+            dispatch(['moveFill', sourceIndex, destinationIndex])
+          }
+          onChangeCheckbox={(index, checked) =>
+            dispatch(['setFillEnabled', index, checked])
+          }
           title="Fills"
         >
           {({ item, index, checkbox }) => (
@@ -72,9 +72,15 @@ export default memo(function Inspector(props: Props) {
           id="borders"
           key="borders"
           value={selectedLayers[0].style?.borders ?? []}
-          onChange={(value) => {
-            dispatch(['setBorders', value]);
-          }}
+          onClickPlus={() => dispatch(['addNewBorder'])}
+          onClickTrash={() => dispatch(['deleteDisabledBorders'])}
+          onDeleteItem={(index) => dispatch(['deleteBorder', index])}
+          onMoveItem={(sourceIndex, destinationIndex) =>
+            dispatch(['moveBorder', sourceIndex, destinationIndex])
+          }
+          onChangeCheckbox={(index, checked) =>
+            dispatch(['setBorderEnabled', index, checked])
+          }
           title="Borders"
         >
           {({ item, index, checkbox }) => (
@@ -83,9 +89,9 @@ export default memo(function Inspector(props: Props) {
               color={item.color}
               prefix={checkbox}
               width={item.thickness}
-              onNudgeWidth={(amount) => {
-                dispatch(['nudgeBorderWidth', amount]);
-              }}
+              onNudgeWidth={(amount) =>
+                dispatch(['nudgeBorderWidth', index, amount])
+              }
             />
           )}
         </ArrayController>

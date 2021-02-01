@@ -1,6 +1,5 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { memo, ReactNode } from 'react';
-// import EditableInput from '../components/input/EditableInput';
+import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import ColorInputField from '../ColorInputField';
 import * as InputField from '../InputField';
@@ -35,22 +34,25 @@ export default memo(function BorderRow({
   const hexInputId = `${id}-hex`;
   const widthInputId = `${id}-width`;
 
+  const renderLabel = useCallback(
+    ({ id }) => {
+      switch (id) {
+        case colorInputId:
+          return <Label.Label>Color</Label.Label>;
+        case hexInputId:
+          return <Label.Label>Hex</Label.Label>;
+        case widthInputId:
+          return <Label.Label>Width</Label.Label>;
+        default:
+          return null;
+      }
+    },
+    [colorInputId, hexInputId, widthInputId],
+  );
+
   return (
     <Row>
-      <LabeledElementView
-        renderLabel={({ id }) => {
-          switch (id) {
-            case colorInputId:
-              return <Label.Label>Color</Label.Label>;
-            case hexInputId:
-              return <Label.Label>Hex</Label.Label>;
-            case widthInputId:
-              return <Label.Label>Width</Label.Label>;
-            default:
-              return null;
-          }
-        }}
-      >
+      <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
         <ColorInputField id={colorInputId} color={color} />

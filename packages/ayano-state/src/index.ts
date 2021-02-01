@@ -37,22 +37,23 @@ export type ApplicationState = {
 
 export type PageLayer = Sketch.Page['layers'][0];
 
+type StyleElementType = 'Fill' | 'Border';
+
 export type Action =
   | [type: 'addLayer', layer: PageLayer]
   | [type: 'selectLayer', layerId: string]
   | [type: 'selectPage', pageId: UUID]
-  | [type: 'setFills', fills: Sketch.Fill[]]
-  | [type: 'addNewFill']
-  | [type: 'deleteDisabledFills']
-  | [type: 'setBorders', borders: Sketch.Border[]]
-  | [type: 'nudgeBorderWidth', amount: number]
+  | [type: `addNew${StyleElementType}`]
+  | [type: `delete${StyleElementType}`, index: number]
+  | [
+      type: `move${StyleElementType}`,
+      sourceIndex: number,
+      destinationIndex: number,
+    ]
+  | [type: `deleteDisabled${StyleElementType}s`]
+  | [type: `set${StyleElementType}Enabled`, index: number, isEnabled: boolean]
+  | [type: 'nudgeBorderWidth', index: number, amount: number]
   | [type: 'interaction', state: InteractionState];
-
-export const addLayerToPage = produce(
-  (state: ApplicationState, pageIndex: number, layer: PageLayer) => {
-    state.sketch.pages[pageIndex].layers.push(layer);
-  },
-);
 
 export function reducer(
   state: ApplicationState,
@@ -61,7 +62,10 @@ export function reducer(
   switch (action[0]) {
     case 'addLayer': {
       const pageIndex = getCurrentPageIndex(state);
-      return addLayerToPage(state, pageIndex, action[1]);
+
+      return produce(state, (state) => {
+        state.sketch.pages[pageIndex].layers.push(action[1]);
+      });
     }
     case 'selectLayer': {
       return produce(state, (state) => {
@@ -73,6 +77,7 @@ export function reducer(
         state.selectedPage = action[1];
       });
     }
+    case 'addNewBorder':
     case 'addNewFill': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexes = getSelectedLayerIndexes(state);
@@ -81,16 +86,114 @@ export function reducer(
         layerIndexes.forEach((layerIndex) => {
           const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
 
-          if (style) {
-            if (!style.fills) {
-              style.fills = [];
-            }
+          if (!style) return;
 
-            style.fills?.unshift(Models.fill);
+          switch (action[0]) {
+            case 'addNewBorder':
+              if (style.borders) {
+                style.borders.unshift(Models.border);
+              } else {
+                style.borders = [Models.border];
+              }
+              break;
+            case 'addNewFill':
+              if (style.fills) {
+                style.fills.unshift(Models.fill);
+              } else {
+                style.fills = [Models.fill];
+              }
+              break;
           }
         });
       });
     }
+    case 'setBorderEnabled':
+    case 'setFillEnabled': {
+      const [, index, isEnabled] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (!style) return;
+
+          switch (action[0]) {
+            case 'setBorderEnabled':
+              if (style.borders && style.borders[index]) {
+                style.borders[index].isEnabled = isEnabled;
+              }
+              break;
+            case 'setFillEnabled':
+              if (style.fills && style.fills[index]) {
+                style.fills[index].isEnabled = isEnabled;
+              }
+              break;
+          }
+        });
+      });
+    }
+    case 'deleteBorder':
+    case 'deleteFill': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (!style) return;
+
+          switch (action[0]) {
+            case 'deleteBorder':
+              if (style.borders) {
+                style.borders.splice(action[1], 1);
+              }
+              break;
+            case 'deleteFill':
+              if (style.fills) {
+                style.fills.splice(action[1], 1);
+              }
+              break;
+          }
+        });
+      });
+    }
+    case 'moveBorder':
+    case 'moveFill': {
+      const [, sourceIndex, destinationIndex] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (!style) return;
+
+          switch (action[0]) {
+            case 'moveBorder':
+              if (style.borders) {
+                const sourceItem = style.borders[sourceIndex];
+
+                style.borders.splice(sourceIndex, 1);
+                style.borders.splice(destinationIndex, 0, sourceItem);
+              }
+              break;
+            case 'moveFill':
+              if (style.fills) {
+                const sourceItem = style.fills[sourceIndex];
+
+                style.fills.splice(sourceIndex, 1);
+                style.fills.splice(destinationIndex, 0, sourceItem);
+              }
+              break;
+          }
+        });
+      });
+    }
+    case 'deleteDisabledBorders':
     case 'deleteDisabledFills': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexes = getSelectedLayerIndexes(state);
@@ -99,41 +202,27 @@ export function reducer(
         layerIndexes.forEach((layerIndex) => {
           const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
 
-          if (style && style.fills) {
-            style.fills = style.fills.filter((fill) => fill.isEnabled);
-          }
-        });
-      });
-    }
-    case 'setFills': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+          if (!style) return;
 
-      return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
-
-          if (style) {
-            style.fills = action[1];
-          }
-        });
-      });
-    }
-    case 'setBorders': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
-
-      return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
-
-          if (style) {
-            style.borders = action[1];
+          switch (action[0]) {
+            case 'deleteDisabledBorders':
+              if (style.borders) {
+                style.borders = style.borders.filter(
+                  (border) => border.isEnabled,
+                );
+              }
+              break;
+            case 'deleteDisabledFills':
+              if (style.fills) {
+                style.fills = style.fills.filter((fill) => fill.isEnabled);
+              }
+              break;
           }
         });
       });
     }
     case 'nudgeBorderWidth': {
+      const [, index, amount] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexes = getSelectedLayerIndexes(state);
 
@@ -141,10 +230,11 @@ export function reducer(
         layerIndexes.forEach((layerIndex) => {
           const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
 
-          if (style) {
-            style.borders?.forEach((border) => {
-              border.thickness = Math.max(0, border.thickness + action[1]);
-            });
+          if (style && style.borders && style.borders[index]) {
+            style.borders[index].thickness = Math.max(
+              0,
+              style.borders[index].thickness + amount,
+            );
           }
         });
       });

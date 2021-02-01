@@ -1,5 +1,5 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useCallback } from 'react';
 // import EditableInput from '../components/input/EditableInput';
 import styled from 'styled-components';
 import ColorInputField from '../ColorInputField';
@@ -26,22 +26,25 @@ export default memo(function FillRow({ id, color, prefix }: Props) {
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
 
+  const renderLabel = useCallback(
+    ({ id }) => {
+      switch (id) {
+        case colorInputId:
+          return <Label.Label>Color</Label.Label>;
+        case hexInputId:
+          return <Label.Label>Hex</Label.Label>;
+        case opacityInputId:
+          return <Label.Label>Opacity</Label.Label>;
+        default:
+          return null;
+      }
+    },
+    [colorInputId, hexInputId, opacityInputId],
+  );
+
   return (
     <Row id={id}>
-      <LabeledElementView
-        renderLabel={({ id }) => {
-          switch (id) {
-            case colorInputId:
-              return <Label.Label>Color</Label.Label>;
-            case hexInputId:
-              return <Label.Label>Hex</Label.Label>;
-            case opacityInputId:
-              return <Label.Label>Opacity</Label.Label>;
-            default:
-              return null;
-          }
-        }}
-      >
+      <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
         <ColorInputField id={colorInputId} color={color} />
