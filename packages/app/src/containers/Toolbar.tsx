@@ -23,7 +23,7 @@ export default function Toolbar(props: Props) {
         active={state.interactionState.type === 'insertRectangle'}
         label="Rectangle"
         onClick={() => {
-          dispatch(['interaction', { type: 'insertRectangle' }]);
+          dispatch('interaction', { type: 'insertRectangle' });
         }}
       >
         <SquareIcon />
@@ -33,7 +33,7 @@ export default function Toolbar(props: Props) {
         active={state.interactionState.type === 'insertOval'}
         label="Oval"
         onClick={() => {
-          dispatch(['interaction', { type: 'insertOval' }]);
+          dispatch('interaction', { type: 'insertOval' });
         }}
       >
         <CircleIcon />

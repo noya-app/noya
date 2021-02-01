@@ -12,14 +12,21 @@ const ApplicationStateContext = createContext<
 
 export const ApplicationStateProvider = ApplicationStateContext.Provider;
 
-export const useApplicationState = () => {
+type Dispatcher = (...args: Action) => void;
+
+export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   const value = useContext(ApplicationStateContext);
 
   if (!value) {
     throw new Error(`Missing ApplicationStateProvider`);
   }
 
-  return value;
+  // Simplify the dispatch function by flattening our Action tuple
+  const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
+    return [value[0], (...args: Action) => value[1](args)];
+  }, [value]);
+
+  return wrapped;
 };
 
 export function useSelector<Projection>(

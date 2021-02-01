@@ -130,14 +130,11 @@ export default function Canvas(props: Props) {
               ? { ...oval, do_objectID: id, frame }
               : { ...rectangle, do_objectID: id, frame };
 
-          dispatch([
-            'interaction',
-            {
-              type: 'drawing',
-              value: layer,
-              origin: point,
-            },
-          ]);
+          dispatch('interaction', {
+            type: 'drawing',
+            value: layer,
+            origin: point,
+          });
         }}
         onMouseMove={(event) => {
           if (state.interactionState.type !== 'drawing') return;
@@ -152,14 +149,11 @@ export default function Canvas(props: Props) {
             };
           });
 
-          dispatch([
-            'interaction',
-            {
-              type: 'drawing',
-              value: layer,
-              origin: state.interactionState.origin,
-            },
-          ]);
+          dispatch('interaction', {
+            type: 'drawing',
+            value: layer,
+            origin: state.interactionState.origin,
+          });
         }}
         onMouseUp={(event) => {
           const point = getPoint(event.nativeEvent);
@@ -168,9 +162,9 @@ export default function Canvas(props: Props) {
             const layer = getLayerAtPoint(CanvasKit, state, point);
 
             if (layer) {
-              return dispatch(['selectLayer', layer.do_objectID]);
+              return dispatch('selectLayer', layer.do_objectID);
             } else {
-              return dispatch(['deselectAllLayers']);
+              return dispatch('deselectAllLayers');
             }
           }
 
@@ -179,7 +173,7 @@ export default function Canvas(props: Props) {
           const rect = createRect(state.interactionState.origin, point);
 
           if (rect.width === 0 || rect.height === 0) {
-            return dispatch(['interaction', { type: 'none' }]);
+            return dispatch('interaction', { type: 'none' });
           }
 
           const layer = produce(state.interactionState.value, (layer) => {
@@ -189,9 +183,9 @@ export default function Canvas(props: Props) {
             };
           });
 
-          dispatch(['interaction', { type: 'none' }]);
-          dispatch(['addLayer', layer]);
-          dispatch(['selectLayer', layer.do_objectID]);
+          dispatch('interaction', { type: 'none' });
+          dispatch('addLayer', layer);
+          dispatch('selectLayer', layer.do_objectID);
         }}
       />
     </div>

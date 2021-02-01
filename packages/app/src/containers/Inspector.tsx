@@ -47,14 +47,14 @@ export default memo(function Inspector(props: Props) {
           id="fills"
           key="fills"
           value={selectedLayers[0].style?.fills ?? []}
-          onClickPlus={() => dispatch(['addNewFill'])}
-          onClickTrash={() => dispatch(['deleteDisabledFills'])}
-          onDeleteItem={(index) => dispatch(['deleteFill', index])}
+          onClickPlus={() => dispatch('addNewFill')}
+          onClickTrash={() => dispatch('deleteDisabledFills')}
+          onDeleteItem={(index) => dispatch('deleteFill', index)}
           onMoveItem={(sourceIndex, destinationIndex) =>
-            dispatch(['moveFill', sourceIndex, destinationIndex])
+            dispatch('moveFill', sourceIndex, destinationIndex)
           }
           onChangeCheckbox={(index, checked) =>
-            dispatch(['setFillEnabled', index, checked])
+            dispatch('setFillEnabled', index, checked)
           }
           title="Fills"
         >
@@ -72,14 +72,14 @@ export default memo(function Inspector(props: Props) {
           id="borders"
           key="borders"
           value={selectedLayers[0].style?.borders ?? []}
-          onClickPlus={() => dispatch(['addNewBorder'])}
-          onClickTrash={() => dispatch(['deleteDisabledBorders'])}
-          onDeleteItem={(index) => dispatch(['deleteBorder', index])}
+          onClickPlus={() => dispatch('addNewBorder')}
+          onClickTrash={() => dispatch('deleteDisabledBorders')}
+          onDeleteItem={(index) => dispatch('deleteBorder', index)}
           onMoveItem={(sourceIndex, destinationIndex) =>
-            dispatch(['moveBorder', sourceIndex, destinationIndex])
+            dispatch('moveBorder', sourceIndex, destinationIndex)
           }
           onChangeCheckbox={(index, checked) =>
-            dispatch(['setBorderEnabled', index, checked])
+            dispatch('setBorderEnabled', index, checked)
           }
           title="Borders"
         >
@@ -90,7 +90,7 @@ export default memo(function Inspector(props: Props) {
               prefix={checkbox}
               width={item.thickness}
               onNudgeWidth={(amount) =>
-                dispatch(['nudgeBorderWidth', index, amount])
+                dispatch('nudgeBorderWidth', index, amount)
               }
             />
           )}
