@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "license": "UNLICENSED",
   "dependencies": {
-    "immer": "^8.0.1"
+    "immer": "^8.0.1",
+    "tree-visit": "^0.0.7"
   }
 }

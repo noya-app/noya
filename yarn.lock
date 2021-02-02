@@ -11993,6 +11993,11 @@ tr46@^2.0.2:
   dependencies:
     punycode "^2.1.1"
 
+tree-visit@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/tree-visit/-/tree-visit-0.0.7.tgz#479c502b55cf2fbfbac52e71ba22d302216245a1"
+  integrity sha512-+lH4o4qi1/4eTOIto24lW4bqgqsXtaLOiY9U0NmUEv9L53ta+GPPqKAtHBSxEvwt9sFkw2yJf9SUPTFz+/H3Iw==
+
 tryer@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/tryer/-/tryer-1.0.1.tgz#f2c85406800b9b0f74c9f7465b81eaad241252f8"

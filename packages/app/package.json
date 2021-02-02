@@ -6,7 +6,8 @@
     "@radix-ui/react-icons": "^1.0.1",
     "kiwi.js": "^1.1.2",
     "react-beautiful-dnd": "^13.0.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^5.2.1",
+    "tree-visit": "^0.0.7"
   },
   "browserslist": {
     "production": [

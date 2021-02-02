@@ -1,8 +1,16 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SketchFile } from 'sketch-zip';
-import { getCurrentPageIndex, getSelectedLayerIndexes } from './selectors';
+import {
+  getCurrentPage,
+  getCurrentPageIndex,
+  getSelectedLayerIndexes,
+} from './selectors';
 import * as Models from './models';
+
+import * as Layers from './layers';
+
+export { Layers };
 
 export * as Selectors from './selectors';
 
@@ -42,6 +50,7 @@ type StyleElementType = 'Fill' | 'Border';
 export type Action =
   | [type: 'addLayer', layer: PageLayer]
   | [type: 'selectLayer', layerId: string]
+  | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'deselectAllLayers']
   | [type: 'selectPage', pageId: UUID]
   | [type: `addNew${StyleElementType}`]
@@ -61,6 +70,25 @@ export function reducer(
   action: Action,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setExpandedInLayerList':
+      const [, id, expanded] = action;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === id,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (state) => {
+        const layer = Layers.access(state.sketch.pages[pageIndex], indexPath);
+
+        layer.layerListExpandedType = expanded
+          ? Sketch.LayerListExpanded.Expanded
+          : Sketch.LayerListExpanded.Collapsed;
+      });
     case 'addLayer': {
       const pageIndex = getCurrentPageIndex(state);
 

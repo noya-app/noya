@@ -1,4 +1,4 @@
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 /* ----------------------------------------------------------------------------
@@ -41,10 +41,10 @@ const RowContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
     ...theme.textStyles.small,
     cursor: 'pointer',
-    borderRadius: '8px',
-    paddingTop: '8px',
+    borderRadius: '4px',
+    paddingTop: '6px',
     paddingRight: '12px',
-    paddingBottom: '8px',
+    paddingBottom: '6px',
     paddingLeft: '12px',
     marginLeft: '8px',
     marginRight: '8px',
@@ -52,6 +52,8 @@ const RowContainer = styled.div<{ selected: boolean }>(
       color: 'white',
       backgroundColor: theme.colors.primary,
     }),
+    display: 'flex',
+    alignItems: 'center',
   }),
 );
 
@@ -66,8 +68,17 @@ function ListViewRow({
   onClick,
   selected = false,
 }: ListViewRowProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+
+      onClick?.();
+    },
+    [onClick],
+  );
+
   return (
-    <RowContainer onClick={onClick} selected={selected}>
+    <RowContainer onClick={handleClick} selected={selected}>
       {children}
     </RowContainer>
   );
@@ -80,15 +91,22 @@ function ListViewRow({
 const SectionHeaderContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
     ...theme.textStyles.small,
+    fontWeight: 500,
     cursor: 'pointer',
-    paddingTop: '8px',
+    paddingTop: '6px',
     paddingRight: '20px',
-    paddingBottom: '8px',
+    paddingBottom: '6px',
     paddingLeft: '20px',
+    borderBottom: `1px solid ${
+      selected ? theme.colors.primaryDark : theme.colors.divider
+    }`,
+    backgroundColor: 'white',
     ...(selected && {
       color: 'white',
       backgroundColor: theme.colors.primary,
     }),
+    display: 'flex',
+    alignItems: 'center',
   }),
 );
 
@@ -97,8 +115,17 @@ function ListViewSectionHeader({
   onClick,
   selected = false,
 }: ListViewRowProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+
+      onClick?.();
+    },
+    [onClick],
+  );
+
   return (
-    <SectionHeaderContainer onClick={onClick} selected={selected}>
+    <SectionHeaderContainer onClick={handleClick} selected={selected}>
       {children}
     </SectionHeaderContainer>
   );
@@ -109,18 +136,28 @@ function ListViewSectionHeader({
  * ------------------------------------------------------------------------- */
 
 const RootContainer = styled.div(({ theme }) => ({
+  flex: '1',
   display: 'flex',
   flexDirection: 'column',
   flexWrap: 'nowrap',
-  backgroundColor: 'white',
 }));
 
 interface ListViewRootProps {
   children?: ReactNode;
+  onClick?: () => void;
 }
 
-function ListViewRoot({ children }: ListViewRootProps) {
-  return <RootContainer>{children}</RootContainer>;
+function ListViewRoot({ onClick, children }: ListViewRootProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+
+      onClick?.();
+    },
+    [onClick],
+  );
+
+  return <RootContainer onClick={handleClick}>{children}</RootContainer>;
 }
 
 export const Row = memo(ListViewRow);

@@ -13,10 +13,11 @@ const LeftSidebar = styled.div(({ theme }) => ({
   borderRight: `1px solid ${theme.colors.divider}`,
   display: 'flex',
   flexDirection: 'column',
+  backgroundColor: '#FAFAFA',
 }));
 
 const RightSidebar = styled.div(({ theme }) => ({
-  flex: '0 0 240px',
+  flex: '0 0 260px',
   borderLeft: `1px solid ${theme.colors.divider}`,
   display: 'flex',
   flexDirection: 'column',
@@ -39,7 +40,8 @@ export default function Workspace(props: Props) {
   return (
     <ThemeProvider theme={defaultTheme}>
       <LeftSidebar>
-        <Spacer.Vertical size={60} />
+        <Spacer.Vertical size={59} />
+        <Divider />
         <PageList />
         <Divider />
         <LayerList />
