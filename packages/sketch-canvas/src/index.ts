@@ -1,5 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Point } from 'ayano-state';
+import { ApplicationState } from 'ayano-state';
+import {
+  getCurrentPage,
+  getCurrentPageMetadata,
+} from 'ayano-state/src/selectors';
 import type { Canvas, CanvasKit, CanvasKitInit } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import * as Primitives from './primitives';
@@ -11,28 +15,76 @@ export interface Context {
   canvas: Canvas;
 }
 
-export function drawPage(
+export function drawCanvas(
   context: Context,
-  page: Sketch.Page,
-  scrollOrigin: Point,
-  zoomValue: number,
-  interactiveLayer?: Sketch.AnyLayer,
+  state: ApplicationState,
+  sidebarWidth: number,
 ) {
-  const { canvas } = context;
+  const { CanvasKit, canvas } = context;
+
+  const page = getCurrentPage(state);
+  const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+
+  canvas.clear(CanvasKit.Color(249, 249, 249));
 
   canvas.save();
-  canvas.translate(scrollOrigin.x, scrollOrigin.y);
+  canvas.translate(scrollOrigin.x + sidebarWidth, scrollOrigin.y);
   canvas.scale(zoomValue, zoomValue);
 
   page.layers.forEach((layer) => {
     drawLayer(context, layer);
   });
 
-  if (interactiveLayer) {
-    drawLayer(context, interactiveLayer);
+  page.layers.forEach((layer) => {
+    drawHoverOutline(context, layer, state.selectedObjects);
+  });
+
+  if (state.interactionState.type === 'drawing') {
+    drawLayer(context, state.interactionState.value);
   }
 
   canvas.restore();
+}
+
+export function drawHoverOutline(
+  context: Context,
+  layer: Sketch.AnyLayer,
+  selectedLayers: string[],
+) {
+  const { CanvasKit, canvas } = context;
+
+  switch (layer._class) {
+    case 'artboard':
+      canvas.save();
+      canvas.translate(layer.frame.x, layer.frame.y);
+
+      layer.layers.forEach((child) => {
+        drawHoverOutline(context, child, selectedLayers);
+      });
+
+      canvas.restore();
+      return;
+    case 'rectangle':
+    case 'oval':
+      if (!selectedLayers.includes(layer.do_objectID)) return;
+
+      const paint = new CanvasKit.Paint();
+
+      paint.setColor(CanvasKit.Color(132, 63, 255, 1));
+
+      paint.setStrokeWidth(2);
+      paint.setStyle(CanvasKit.PaintStyle.Stroke);
+      paint.setAntiAlias(true);
+
+      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+      path.setFillType(CanvasKit.FillType.EvenOdd);
+
+      canvas.drawPath(path, paint);
+      return;
+    default:
+      console.log(layer._class, 'not handled');
+      return;
+  }
 }
 
 export function drawLayer(context: Context, layer: Sketch.AnyLayer) {

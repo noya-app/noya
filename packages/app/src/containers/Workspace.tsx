@@ -9,11 +9,11 @@ import PageList from './PageList';
 import Toolbar from './Toolbar';
 
 const LeftSidebar = styled.div(({ theme }) => ({
-  flex: '0 0 260px',
+  flex: `0 0 ${theme.sizes.sidebarWidth}px`,
   borderRight: `1px solid ${theme.colors.divider}`,
   display: 'flex',
   flexDirection: 'column',
-  backgroundColor: 'rgba(255,255,255,0.85)',
+  backgroundColor: 'rgba(252,252,252,0.85)',
   WebkitBackdropFilter: 'blur(10px)',
   backdropFilter: 'blur(10px)',
 }));

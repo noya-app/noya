@@ -132,9 +132,6 @@ export const textStyles = {
 
 export const sizes = {
   sidebarWidth: 260,
-  tableOfContentsWidth: 240,
-  // Minimum iframe width is 920, then 60 padding on each size
-  contentWidth: 920 + 60 * 2,
   spacing: {
     nano: 2,
     micro: 4,

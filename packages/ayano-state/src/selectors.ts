@@ -18,6 +18,18 @@ export const getCurrentPage = (state: ApplicationState) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
 
+export const getCurrentPageMetadata = (state: ApplicationState) => {
+  const currentPage = getCurrentPage(state);
+
+  const meta: { scrollOrigin: string; zoomValue: number } =
+    state.sketch.user[currentPage.do_objectID];
+
+  return {
+    zoomValue: meta.zoomValue,
+    scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
+  };
+};
+
 export const getSelectedLayerIndexes = (state: ApplicationState): number[] => {
   const page = getCurrentPage(state);
 

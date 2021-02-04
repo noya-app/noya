@@ -1,6 +1,5 @@
-import { withOptions } from 'tree-visit';
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { PageLayer } from '.';
+import { withOptions } from 'tree-visit';
 
 export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   switch (layer._class) {

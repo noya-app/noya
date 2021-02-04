@@ -1,10 +1,14 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { PageLayer, Point, Rect } from 'ayano-state';
-import { getCurrentPage, getLayerAtPoint } from 'ayano-state/src/selectors';
+import {
+  getCurrentPage,
+  getCurrentPageMetadata,
+  getLayerAtPoint,
+} from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { drawLayer, drawPage, Primitives, uuid } from 'sketch-canvas';
+import { useCallback, useEffect, useRef } from 'react';
+import { drawCanvas, uuid } from 'sketch-canvas';
 import { useTheme } from 'styled-components';
 import {
   useApplicationState,
@@ -47,23 +51,7 @@ export default function Canvas(props: Props) {
   const containerSize = useSize(containerRef);
 
   const currentPage = useSelector(getCurrentPage);
-  const meta = useMemo(() => {
-    const meta: { scrollOrigin: string; zoomValue: number } =
-      state.sketch.user[currentPage.do_objectID];
-
-    return {
-      zoomValue: meta.zoomValue,
-      scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
-    };
-  }, [state, currentPage]);
-
-  // We move the canvas behind the layer list for a backdrop blur effect
-  const offsetCanvasPoint = useCallback(
-    (point: Point) => {
-      return { x: point.x + sidebarWidth, y: point.y };
-    },
-    [sidebarWidth],
-  );
+  const meta = useSelector(getCurrentPageMetadata);
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current document's offset from the origin
@@ -114,30 +102,12 @@ export default function Canvas(props: Props) {
     if (!surfaceRef.current) return;
 
     const surface = surfaceRef.current;
-
-    const { interactionState } = state;
     const context = { CanvasKit, canvas: surface.getCanvas() };
 
-    context.canvas.clear(CanvasKit.Color(249, 249, 249));
-
-    drawPage(
-      context,
-      currentPage,
-      offsetCanvasPoint(meta.scrollOrigin),
-      meta.zoomValue,
-      interactionState.type === 'drawing' ? interactionState.value : undefined,
-    );
+    drawCanvas(context, state, sidebarWidth);
 
     surface.flush();
-  }, [
-    CanvasKit,
-    state,
-    containerSize,
-    offsetCanvasPoint,
-    currentPage,
-    meta,
-    sidebarWidth,
-  ]);
+  }, [CanvasKit, state, containerSize, currentPage, meta, sidebarWidth]);
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent) => {
