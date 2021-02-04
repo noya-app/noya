@@ -1,13 +1,38 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Point } from 'ayano-state';
 import type { Canvas, CanvasKit, CanvasKitInit } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import * as Primitives from './primitives';
 
-export { uuid };
+export { uuid, Primitives };
 
 export interface Context {
   CanvasKit: CanvasKit;
   canvas: Canvas;
+}
+
+export function drawPage(
+  context: Context,
+  page: Sketch.Page,
+  scrollOrigin: Point,
+  zoomValue: number,
+  interactiveLayer?: Sketch.AnyLayer,
+) {
+  const { canvas } = context;
+
+  canvas.save();
+  canvas.translate(scrollOrigin.x, scrollOrigin.y);
+  canvas.scale(zoomValue, zoomValue);
+
+  page.layers.forEach((layer) => {
+    drawLayer(context, layer);
+  });
+
+  if (interactiveLayer) {
+    drawLayer(context, interactiveLayer);
+  }
+
+  canvas.restore();
 }
 
 export function drawLayer(context: Context, layer: Sketch.AnyLayer) {

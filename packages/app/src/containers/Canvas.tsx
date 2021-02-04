@@ -1,16 +1,20 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { PageLayer, Point, Rect } from 'ayano-state';
-import { getLayerAtPoint } from 'ayano-state/src/selectors';
+import { getCurrentPage, getLayerAtPoint } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import produce from 'immer';
-import { useEffect, useRef } from 'react';
-import { drawLayer, uuid } from 'sketch-canvas';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { drawLayer, drawPage, Primitives, uuid } from 'sketch-canvas';
+import { useTheme } from 'styled-components';
+import {
+  useApplicationState,
+  useSelector,
+} from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
 import rectangle from '../rectangleExample';
 
-const oval = require('../models/oval.json') as FileFormat.Oval;
+const oval = require('../models/oval.json') as Sketch.Oval;
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -34,6 +38,7 @@ function createRect(initialPoint: Point, finalPoint: Point): Rect {
 }
 
 export default function Canvas(props: Props) {
+  const { sidebarWidth } = useTheme().sizes;
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -41,15 +46,46 @@ export default function Canvas(props: Props) {
   const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
 
+  const currentPage = useSelector(getCurrentPage);
+  const meta = useMemo(() => {
+    const meta: { scrollOrigin: string; zoomValue: number } =
+      state.sketch.user[currentPage.do_objectID];
+
+    return {
+      zoomValue: meta.zoomValue,
+      scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
+    };
+  }, [state, currentPage]);
+
+  // We move the canvas behind the layer list for a backdrop blur effect
+  const offsetCanvasPoint = useCallback(
+    (point: Point) => {
+      return { x: point.x + sidebarWidth, y: point.y };
+    },
+    [sidebarWidth],
+  );
+
+  // Event coordinates are relative to (0,0), but we want them to include
+  // the current document's offset from the origin
+  const offsetEventPoint = useCallback(
+    (point: Point) => {
+      return {
+        x: point.x - meta.scrollOrigin.x,
+        y: point.y - meta.scrollOrigin.y,
+      };
+    },
+    [meta],
+  );
+
   // Update the canvas size whenever the window is resized
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
     if (!canvasElement || !containerSize) return;
 
-    canvasElement.width = containerSize.width;
+    canvasElement.width = containerSize.width + sidebarWidth;
     canvasElement.height = containerSize.height;
-  }, [containerSize]);
+  }, [containerSize, sidebarWidth]);
 
   // Recreate the surface whenever the canvas resizes
   useEffect(() => {
@@ -79,113 +115,139 @@ export default function Canvas(props: Props) {
 
     const surface = surfaceRef.current;
 
-    const { sketch, selectedPage, interactionState } = state;
+    const { interactionState } = state;
     const context = { CanvasKit, canvas: surface.getCanvas() };
-
-    const page = sketch.pages.find((page) => page.do_objectID === selectedPage);
-
-    if (!page) return;
 
     context.canvas.clear(CanvasKit.Color(249, 249, 249));
 
-    page.layers.forEach((layer) => {
-      drawLayer(context, layer);
-    });
-
-    if (interactionState.type === 'drawing') {
-      drawLayer(context, interactionState.value as any);
-    }
+    drawPage(
+      context,
+      currentPage,
+      offsetCanvasPoint(meta.scrollOrigin),
+      meta.zoomValue,
+      interactionState.type === 'drawing' ? interactionState.value : undefined,
+    );
 
     surface.flush();
-  }, [CanvasKit, state, containerSize]);
+  }, [
+    CanvasKit,
+    state,
+    containerSize,
+    offsetCanvasPoint,
+    currentPage,
+    meta,
+    sidebarWidth,
+  ]);
+
+  const handleMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      const point = offsetEventPoint(getPoint(event.nativeEvent));
+
+      if (
+        state.interactionState.type !== 'insertRectangle' &&
+        state.interactionState.type !== 'insertOval'
+      ) {
+        return;
+      }
+
+      const rect = createRect(point, point);
+
+      const id = uuid();
+      const frame: Sketch.Rect = {
+        _class: 'rect',
+        constrainProportions: false,
+        ...rect,
+      };
+
+      let layer: PageLayer =
+        state.interactionState.type === 'insertOval'
+          ? { ...oval, do_objectID: id, frame }
+          : { ...rectangle, do_objectID: id, frame };
+
+      dispatch('interaction', {
+        type: 'drawing',
+        value: layer,
+        origin: point,
+      });
+    },
+    [dispatch, state, offsetEventPoint],
+  );
+
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      if (state.interactionState.type !== 'drawing') return;
+
+      const point = offsetEventPoint(getPoint(event.nativeEvent));
+      const rect = createRect(state.interactionState.origin, point);
+
+      const layer = produce(state.interactionState.value, (layer) => {
+        layer.frame = {
+          ...layer.frame,
+          ...rect,
+        };
+      });
+
+      dispatch('interaction', {
+        type: 'drawing',
+        value: layer,
+        origin: state.interactionState.origin,
+      });
+    },
+    [dispatch, state, offsetEventPoint],
+  );
+
+  const handleMouseUp = useCallback(
+    (event) => {
+      const point = offsetEventPoint(getPoint(event.nativeEvent));
+
+      if (state.interactionState.type === 'none') {
+        const layer = getLayerAtPoint(CanvasKit, state, point);
+
+        if (layer) {
+          return dispatch('selectLayer', layer.do_objectID);
+        } else {
+          return dispatch('deselectAllLayers');
+        }
+      }
+
+      if (state.interactionState.type !== 'drawing') return;
+
+      const rect = createRect(state.interactionState.origin, point);
+
+      if (rect.width === 0 || rect.height === 0) {
+        return dispatch('interaction', { type: 'none' });
+      }
+
+      const layer = produce(state.interactionState.value, (layer) => {
+        layer.frame = {
+          ...layer.frame,
+          ...rect,
+        };
+      });
+
+      dispatch('interaction', { type: 'none' });
+      dispatch('addLayer', layer);
+      dispatch('selectLayer', layer.do_objectID);
+    },
+    [CanvasKit, dispatch, state, offsetEventPoint],
+  );
 
   return (
-    <div ref={containerRef} style={{ flex: '1', position: 'relative' }}>
+    <div
+      ref={containerRef}
+      style={{ flex: '1', position: 'relative' }}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
       <canvas
         id="main"
         ref={canvasRef}
-        style={{ position: 'absolute', top: 0, left: 0 }}
-        onMouseDown={(event) => {
-          if (
-            state.interactionState.type !== 'insertRectangle' &&
-            state.interactionState.type !== 'insertOval'
-          ) {
-            return;
-          }
-
-          const point = getPoint(event.nativeEvent);
-          const rect = createRect(point, point);
-
-          // state.interactionState.type === 'insertRectangle' ?
-
-          const id = uuid();
-          const frame: FileFormat.Rect = {
-            _class: 'rect',
-            constrainProportions: false,
-            ...rect,
-          };
-
-          let layer: PageLayer =
-            state.interactionState.type === 'insertOval'
-              ? { ...oval, do_objectID: id, frame }
-              : { ...rectangle, do_objectID: id, frame };
-
-          dispatch('interaction', {
-            type: 'drawing',
-            value: layer,
-            origin: point,
-          });
-        }}
-        onMouseMove={(event) => {
-          if (state.interactionState.type !== 'drawing') return;
-
-          const point = getPoint(event.nativeEvent);
-          const rect = createRect(state.interactionState.origin, point);
-
-          const layer = produce(state.interactionState.value, (layer) => {
-            layer.frame = {
-              ...layer.frame,
-              ...rect,
-            };
-          });
-
-          dispatch('interaction', {
-            type: 'drawing',
-            value: layer,
-            origin: state.interactionState.origin,
-          });
-        }}
-        onMouseUp={(event) => {
-          const point = getPoint(event.nativeEvent);
-
-          if (state.interactionState.type === 'none') {
-            const layer = getLayerAtPoint(CanvasKit, state, point);
-
-            if (layer) {
-              return dispatch('selectLayer', layer.do_objectID);
-            } else {
-              return dispatch('deselectAllLayers');
-            }
-          }
-
-          if (state.interactionState.type !== 'drawing') return;
-
-          const rect = createRect(state.interactionState.origin, point);
-
-          if (rect.width === 0 || rect.height === 0) {
-            return dispatch('interaction', { type: 'none' });
-          }
-
-          const layer = produce(state.interactionState.value, (layer) => {
-            layer.frame = {
-              ...layer.frame,
-              ...rect,
-            };
-          });
-
-          dispatch('interaction', { type: 'none' });
-          dispatch('addLayer', layer);
-          dispatch('selectLayer', layer.do_objectID);
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: -sidebarWidth,
+          zIndex: -1,
         }}
       />
     </div>

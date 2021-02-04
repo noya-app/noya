@@ -8,7 +8,7 @@ export const colors = {
   // textLink: 'rgb(51, 122, 183)',
   textLink: 'rgb(58, 108, 234)',
   textLinkFocused: 'rgb(35, 82, 124)',
-  divider: 'rgb(238, 238, 238)',
+  divider: 'rgba(0, 0, 0, 0.07)',
   primary: 'rgb(132, 63, 255)',
   primaryDark: 'rgb(116, 36, 255)',
   // primary: 'rgb(59, 108, 212)',
@@ -131,7 +131,7 @@ export const textStyles = {
 };
 
 export const sizes = {
-  sidebarWidth: 280,
+  sidebarWidth: 260,
   tableOfContentsWidth: 240,
   // Minimum iframe width is 920, then 60 padding on each size
   contentWidth: 920 + 60 * 2,

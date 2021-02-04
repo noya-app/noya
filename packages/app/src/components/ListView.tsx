@@ -40,6 +40,7 @@ function ListViewSpacer() {
 const RowContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
     ...theme.textStyles.small,
+    userSelect: 'none',
     cursor: 'pointer',
     borderRadius: '4px',
     paddingTop: '6px',
@@ -91,8 +92,9 @@ function ListViewRow({
 const SectionHeaderContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
     ...theme.textStyles.small,
-    fontWeight: 500,
+    userSelect: 'none',
     cursor: 'pointer',
+    fontWeight: 500,
     paddingTop: '6px',
     paddingRight: '20px',
     paddingBottom: '6px',
@@ -100,7 +102,7 @@ const SectionHeaderContainer = styled.div<{ selected: boolean }>(
     borderBottom: `1px solid ${
       selected ? theme.colors.primaryDark : theme.colors.divider
     }`,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255,255,255,0.9)',
     ...(selected && {
       color: 'white',
       backgroundColor: theme.colors.primary,

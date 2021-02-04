@@ -13,7 +13,9 @@ const LeftSidebar = styled.div(({ theme }) => ({
   borderRight: `1px solid ${theme.colors.divider}`,
   display: 'flex',
   flexDirection: 'column',
-  backgroundColor: '#FAFAFA',
+  backgroundColor: 'rgba(255,255,255,0.85)',
+  WebkitBackdropFilter: 'blur(10px)',
+  backdropFilter: 'blur(10px)',
 }));
 
 const RightSidebar = styled.div(({ theme }) => ({
