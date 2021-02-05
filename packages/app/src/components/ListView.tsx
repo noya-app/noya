@@ -1,5 +1,14 @@
 import { memo, ReactNode, useCallback } from 'react';
-import styled from 'styled-components';
+import styled, { CSSObject } from 'styled-components';
+
+export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
+
+const listReset: CSSObject = {
+  margin: 0,
+  padding: 0,
+  textIndent: 0,
+  listStyleType: 'none',
+};
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -37,49 +46,77 @@ function ListViewSpacer() {
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled.div<{ selected: boolean }>(
-  ({ theme, selected }) => ({
-    ...theme.textStyles.small,
-    userSelect: 'none',
-    cursor: 'pointer',
-    borderRadius: '4px',
-    paddingTop: '6px',
-    paddingRight: '12px',
-    paddingBottom: '6px',
-    paddingLeft: '12px',
-    marginLeft: '8px',
-    marginRight: '8px',
-    ...(selected && {
-      color: 'white',
-      backgroundColor: theme.colors.primary,
-    }),
-    display: 'flex',
-    alignItems: 'center',
+const RowContainer = styled.li<{
+  selected: boolean;
+  position: ListRowPosition;
+}>(({ theme, selected, position }) => ({
+  ...listReset,
+  ...theme.textStyles.small,
+  userSelect: 'none',
+  cursor: 'pointer',
+  borderTopRightRadius: '4px',
+  borderTopLeftRadius: '4px',
+  borderBottomRightRadius: '4px',
+  borderBottomLeftRadius: '4px',
+  paddingTop: '6px',
+  paddingRight: '12px',
+  paddingBottom: '6px',
+  paddingLeft: '12px',
+  marginLeft: '8px',
+  marginRight: '8px',
+  ...(selected && {
+    color: 'white',
+    backgroundColor: theme.colors.primary,
   }),
-);
+  display: 'flex',
+  alignItems: 'center',
+  ...(selected &&
+    (position === 'middle' || position === 'last') && {
+      borderTopRightRadius: '0px',
+      borderTopLeftRadius: '0px',
+    }),
+  ...(selected &&
+    (position === 'middle' || position === 'first') && {
+      borderBottomRightRadius: '0px',
+      borderBottomLeftRadius: '0px',
+    }),
+}));
+
+export interface ListViewClickInfo {
+  shiftKey: boolean;
+  altKey: boolean;
+  metaKey: boolean;
+}
 
 interface ListViewRowProps {
   children?: ReactNode;
   selected?: boolean;
-  onClick?: () => void;
+  position?: ListRowPosition;
+  onClick?: (info: ListViewClickInfo) => void;
 }
 
 function ListViewRow({
   children,
   onClick,
   selected = false,
+  position = 'only',
 }: ListViewRowProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
 
-      onClick?.();
+      onClick?.(event);
     },
     [onClick],
   );
 
   return (
-    <RowContainer onClick={handleClick} selected={selected}>
+    <RowContainer
+      onClick={handleClick}
+      selected={selected}
+      position={position}
+      aria-selected={selected}
+    >
       {children}
     </RowContainer>
   );
@@ -89,8 +126,9 @@ function ListViewRow({
  * SectionHeader
  * ------------------------------------------------------------------------- */
 
-const SectionHeaderContainer = styled.div<{ selected: boolean }>(
+const SectionHeaderContainer = styled.li<{ selected: boolean }>(
   ({ theme, selected }) => ({
+    ...listReset,
     ...theme.textStyles.small,
     userSelect: 'none',
     cursor: 'pointer',
@@ -109,6 +147,8 @@ const SectionHeaderContainer = styled.div<{ selected: boolean }>(
     }),
     display: 'flex',
     alignItems: 'center',
+    marginTop: '8px',
+    marginBottom: '8px',
   }),
 );
 
@@ -121,13 +161,17 @@ function ListViewSectionHeader({
     (event: React.MouseEvent) => {
       event.stopPropagation();
 
-      onClick?.();
+      onClick?.(event);
     },
     [onClick],
   );
 
   return (
-    <SectionHeaderContainer onClick={handleClick} selected={selected}>
+    <SectionHeaderContainer
+      onClick={handleClick}
+      selected={selected}
+      aria-selected={selected}
+    >
       {children}
     </SectionHeaderContainer>
   );
@@ -137,11 +181,14 @@ function ListViewSectionHeader({
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.div(({ theme }) => ({
+const RootContainer = styled.ul(({ theme }) => ({
+  ...listReset,
   flex: '1',
   display: 'flex',
   flexDirection: 'column',
   flexWrap: 'nowrap',
+  paddingTop: '8px',
+  paddingBottom: '8px',
 }));
 
 interface ListViewRootProps {

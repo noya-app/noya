@@ -45,11 +45,17 @@ export type ApplicationState = {
 
 export type PageLayer = Sketch.Page['layers'][0];
 
+export type SelectionType = 'replace' | 'intersection' | 'difference';
+
 type StyleElementType = 'Fill' | 'Border';
 
 export type Action =
   | [type: 'addLayer', layer: PageLayer]
-  | [type: 'selectLayer', layerId: string]
+  | [
+      type: 'selectLayer',
+      layerId: string | string[],
+      selectionType?: SelectionType,
+    ]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'deselectAllLayers']
   | [type: 'selectPage', pageId: UUID]
@@ -97,8 +103,28 @@ export function reducer(
       });
     }
     case 'selectLayer': {
+      const [, id, selectionType] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
       return produce(state, (state) => {
-        state.selectedObjects = [action[1]];
+        switch (selectionType) {
+          case 'intersection':
+            state.selectedObjects.push(
+              ...ids.filter((id) => !state.selectedObjects.includes(id)),
+            );
+            return;
+          case 'difference':
+            ids.forEach((id) => {
+              const selectedIndex = state.selectedObjects.indexOf(id);
+              state.selectedObjects.splice(selectedIndex, 1);
+            });
+            return;
+          case 'replace':
+          default:
+            state.selectedObjects = [...ids];
+            return;
+        }
       });
     }
     case 'deselectAllLayers': {

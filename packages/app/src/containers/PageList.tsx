@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import * as ListView from '../components/ListView';
+import * as Spacer from '../components/Spacer';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
-import withSeparatorElements from '../utils/withSeparatorElements';
 
 interface Props {}
 
@@ -12,35 +12,43 @@ const Container = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
+const Header = styled.div(({ theme }) => ({
+  ...theme.textStyles.small,
+  userSelect: 'none',
+  cursor: 'pointer',
+  fontWeight: 500,
+  paddingTop: '8px',
+  paddingRight: '20px',
+  paddingBottom: '0px',
+  paddingLeft: '20px',
+  backgroundColor: 'rgba(255,255,255,0.9)',
+  display: 'flex',
+  alignItems: 'center',
+}));
+
 export default function PageList(props: Props) {
   const [state, dispatch] = useApplicationState();
 
   const pageElements = useMemo(() => {
-    return withSeparatorElements(
-      state.sketch.pages.map((page) => (
-        <ListView.Row
-          key={page.do_objectID}
-          selected={state.selectedPage === page.do_objectID}
-          onClick={() => {
-            dispatch('interaction', { type: 'none' });
-            dispatch('selectPage', page.do_objectID);
-          }}
-        >
-          {page.name}
-        </ListView.Row>
-      )),
-      <ListView.Spacer />,
-    );
+    return state.sketch.pages.map((page) => (
+      <ListView.Row
+        key={page.do_objectID}
+        selected={state.selectedPage === page.do_objectID}
+        onClick={() => {
+          dispatch('interaction', { type: 'none' });
+          dispatch('selectPage', page.do_objectID);
+        }}
+      >
+        <Spacer.Horizontal size={6 + 15} />
+        {page.name}
+      </ListView.Row>
+    ));
   }, [state, dispatch]);
 
   return (
     <Container>
-      <ListView.Root>
-        <ListView.SectionHeader>
-          <strong>Pages</strong>
-        </ListView.SectionHeader>
-        {pageElements}
-      </ListView.Root>
+      <Header>Pages</Header>
+      <ListView.Root>{pageElements}</ListView.Root>
     </Container>
   );
 }
