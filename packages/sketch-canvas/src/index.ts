@@ -4,7 +4,7 @@ import {
   getCurrentPage,
   getCurrentPageMetadata,
 } from 'ayano-state/src/selectors';
-import type { Canvas, CanvasKit, CanvasKitInit } from 'canvaskit-wasm';
+import type { Canvas, CanvasKit, CanvasKitInit, FontMgr } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import * as Primitives from './primitives';
 
@@ -14,6 +14,8 @@ export interface Context {
   CanvasKit: CanvasKit;
   canvas: Canvas;
 }
+
+let fontManager: FontMgr;
 
 export function drawCanvas(
   context: Context,
@@ -54,7 +56,7 @@ export function drawHoverOutline(
   const { CanvasKit, canvas } = context;
 
   switch (layer._class) {
-    case 'artboard':
+    case 'artboard': {
       canvas.save();
       canvas.translate(layer.frame.x, layer.frame.y);
 
@@ -64,8 +66,23 @@ export function drawHoverOutline(
 
       canvas.restore();
       return;
+    }
+    case 'text': {
+      if (!selectedLayers.includes(layer.do_objectID)) return;
+
+      const paint = new CanvasKit.Paint();
+
+      paint.setColor(CanvasKit.Color(132, 63, 255, 1));
+
+      paint.setStrokeWidth(2);
+      paint.setStyle(CanvasKit.PaintStyle.Stroke);
+      paint.setAntiAlias(true);
+
+      canvas.drawRect(Primitives.rect(CanvasKit, layer.frame), paint);
+      return;
+    }
     case 'rectangle':
-    case 'oval':
+    case 'oval': {
       if (!selectedLayers.includes(layer.do_objectID)) return;
 
       const paint = new CanvasKit.Paint();
@@ -81,6 +98,7 @@ export function drawHoverOutline(
 
       canvas.drawPath(path, paint);
       return;
+    }
     default:
       console.log(layer._class, 'not handled');
       return;
@@ -91,6 +109,8 @@ export function drawLayer(context: Context, layer: Sketch.AnyLayer) {
   switch (layer._class) {
     case 'artboard':
       return drawArtboard(context, layer);
+    case 'text':
+      return drawText(context, layer);
     case 'rectangle':
     case 'oval':
       return drawLayerShape(context, layer);
@@ -133,6 +153,36 @@ export function drawArtboard(context: Context, artboard: Sketch.Artboard) {
   });
 
   canvas.restore();
+}
+
+export function drawText(context: Context, layer: Sketch.Text) {
+  const { canvas, CanvasKit } = context;
+
+  const paragraphStyle = new CanvasKit.ParagraphStyle({
+    textStyle: {
+      color: CanvasKit.BLACK,
+      fontFamilies: ['Roboto'],
+    },
+    textAlign: CanvasKit.TextAlign.Left,
+    // maxLines: 7,
+    // ellipsis: '...',
+  });
+
+  const builder = CanvasKit.ParagraphBuilder.Make(paragraphStyle, fontManager);
+
+  layer.attributedString.attributes.forEach((attribute) => {
+    const { location, length } = attribute;
+    const string = layer.attributedString.string.substr(location, length);
+    const style = Primitives.stringAttribute(CanvasKit, attribute);
+    builder.pushStyle(style);
+    builder.addText(string);
+    builder.pop();
+  });
+
+  const paragraph = builder.build();
+  paragraph.layout(layer.frame.width);
+
+  canvas.drawParagraph(paragraph, layer.frame.x, layer.frame.y);
 }
 
 export function drawLayerShape(
@@ -188,9 +238,18 @@ export function drawLayerShape(
 
 const init: typeof CanvasKitInit = require('canvaskit-wasm/bin/canvaskit.js');
 
-export function load() {
-  return init({
-    locateFile: (file: string) =>
-      'https://unpkg.com/canvaskit-wasm@^0.22.0/bin/' + file,
-  });
+export async function load() {
+  const [CanvasKit, fontBuffer] = await Promise.all([
+    init({
+      locateFile: (file: string) =>
+        'https://unpkg.com/canvaskit-wasm@^0.22.0/bin/' + file,
+    }),
+    fetch(
+      'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
+    ).then((resp) => resp.arrayBuffer()),
+  ]);
+
+  fontManager = CanvasKit.FontMgr.FromData(fontBuffer)!;
+
+  return CanvasKit;
 }

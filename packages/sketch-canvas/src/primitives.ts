@@ -1,4 +1,4 @@
-import type { CanvasKit, Paint, Path } from 'canvaskit-wasm';
+import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 
 export function color(CanvasKit: CanvasKit, color: Sketch.Color) {
@@ -100,4 +100,18 @@ export function path(
   path.close();
 
   return path;
+}
+
+export function stringAttribute(
+  CanvasKit: CanvasKit,
+  attribute: Sketch.StringAttribute,
+): TextStyle {
+  const textColor = attribute.attributes.MSAttributedStringColorAttribute;
+  const font = attribute.attributes.MSAttributedStringFontAttribute;
+
+  return new CanvasKit.TextStyle({
+    ...(textColor && { color: color(CanvasKit, textColor) }),
+    // fontFamilies: ['Roboto'], // TODO: Font family
+    fontSize: font.attributes.size,
+  });
 }
