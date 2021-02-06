@@ -55,6 +55,35 @@ export function drawHoverOutline(
 ) {
   const { CanvasKit, canvas } = context;
 
+  const paint = new CanvasKit.Paint();
+  paint.setColor(CanvasKit.Color(132, 63, 255, 1));
+  paint.setStrokeWidth(2);
+  paint.setStyle(CanvasKit.PaintStyle.Stroke);
+  paint.setAntiAlias(true);
+
+  switch (layer._class) {
+    case 'artboard':
+    case 'text': {
+      if (!selectedLayers.includes(layer.do_objectID)) break;
+
+      canvas.drawRect(Primitives.rect(CanvasKit, layer.frame), paint);
+      break;
+    }
+    case 'rectangle':
+    case 'oval': {
+      if (!selectedLayers.includes(layer.do_objectID)) break;
+
+      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+      path.setFillType(CanvasKit.FillType.EvenOdd);
+
+      canvas.drawPath(path, paint);
+      break;
+    }
+    default:
+      console.log(layer._class, 'not handled');
+      break;
+  }
+
   switch (layer._class) {
     case 'artboard': {
       canvas.save();
@@ -65,43 +94,10 @@ export function drawHoverOutline(
       });
 
       canvas.restore();
-      return;
-    }
-    case 'text': {
-      if (!selectedLayers.includes(layer.do_objectID)) return;
-
-      const paint = new CanvasKit.Paint();
-
-      paint.setColor(CanvasKit.Color(132, 63, 255, 1));
-
-      paint.setStrokeWidth(2);
-      paint.setStyle(CanvasKit.PaintStyle.Stroke);
-      paint.setAntiAlias(true);
-
-      canvas.drawRect(Primitives.rect(CanvasKit, layer.frame), paint);
-      return;
-    }
-    case 'rectangle':
-    case 'oval': {
-      if (!selectedLayers.includes(layer.do_objectID)) return;
-
-      const paint = new CanvasKit.Paint();
-
-      paint.setColor(CanvasKit.Color(132, 63, 255, 1));
-
-      paint.setStrokeWidth(2);
-      paint.setStyle(CanvasKit.PaintStyle.Stroke);
-      paint.setAntiAlias(true);
-
-      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
-      path.setFillType(CanvasKit.FillType.EvenOdd);
-
-      canvas.drawPath(path, paint);
-      return;
+      break;
     }
     default:
-      console.log(layer._class, 'not handled');
-      return;
+      break;
   }
 }
 
