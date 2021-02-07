@@ -19,6 +19,7 @@ import { UUID } from '../types';
 export type ApplicationState = {
   interactionState: InteractionState;
   selectedPage: string;
+  highlightedLayerId?: string;
   selectedObjects: string[];
   sketch: SketchFile;
 };
@@ -34,6 +35,7 @@ export type Action =
       layerId: string | string[],
       selectionType?: SelectionType,
     ]
+  | [type: 'highlightLayer', layerId: string | undefined]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'deselectAllLayers']
   | [type: 'selectPage', pageId: UUID]
@@ -114,6 +116,13 @@ export function reducer(
             state.selectedObjects = [...ids];
             return;
         }
+      });
+    }
+    case 'highlightLayer': {
+      const [, id] = action;
+
+      return produce(state, (state) => {
+        state.highlightedLayerId = id;
       });
     }
     case 'deselectAllLayers': {
@@ -310,6 +319,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
+    highlightedLayerId: undefined,
     sketch,
   };
 }

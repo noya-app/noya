@@ -1,5 +1,6 @@
 import { memo, ReactNode, useCallback } from 'react';
 import styled, { CSSObject } from 'styled-components';
+import { useHover } from '../hooks/useHover';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
@@ -9,38 +10,6 @@ const listReset: CSSObject = {
   textIndent: 0,
   listStyleType: 'none',
 };
-
-/* ----------------------------------------------------------------------------
- * Separator
- * ------------------------------------------------------------------------- */
-
-const SeparatorContainer = styled.div<{ selected: boolean }>(
-  ({ theme, selected }) => ({
-    minHeight: '1px',
-    height: '1px',
-    background: selected ? '#648bdd' : theme.colors.divider,
-  }),
-);
-
-interface ListViewSeparatorProps {
-  selected?: boolean;
-}
-
-function ListViewSeparator({ selected = false }: ListViewSeparatorProps) {
-  return <SeparatorContainer selected={selected} />;
-}
-
-/* ----------------------------------------------------------------------------
- * Spacer
- * ------------------------------------------------------------------------- */
-
-const SpacerContainer = styled.div(({ theme }) => ({
-  height: '3px',
-}));
-
-function ListViewSpacer() {
-  return <SpacerContainer />;
-}
 
 /* ----------------------------------------------------------------------------
  * Row
@@ -88,19 +57,25 @@ export interface ListViewClickInfo {
   metaKey: boolean;
 }
 
-interface ListViewRowProps {
+export interface ListViewRowProps {
   children?: ReactNode;
   selected?: boolean;
   position?: ListRowPosition;
   onClick?: (info: ListViewClickInfo) => void;
+  onHoverChange?: (isHovering: boolean) => void;
 }
 
 function ListViewRow({
   children,
   onClick,
+  onHoverChange,
   selected = false,
   position = 'only',
 }: ListViewRowProps) {
+  const { hoverProps } = useHover({
+    onHoverChange,
+  });
+
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -112,6 +87,7 @@ function ListViewRow({
 
   return (
     <RowContainer
+      {...hoverProps}
       onClick={handleClick}
       selected={selected}
       position={position}
@@ -155,8 +131,13 @@ const SectionHeaderContainer = styled.li<{ selected: boolean }>(
 function ListViewSectionHeader({
   children,
   onClick,
+  onHoverChange,
   selected = false,
-}: ListViewRowProps) {
+}: Omit<ListViewRowProps, 'position'>) {
+  const { hoverProps } = useHover({
+    onHoverChange,
+  });
+
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -168,6 +149,7 @@ function ListViewSectionHeader({
 
   return (
     <SectionHeaderContainer
+      {...hoverProps}
       onClick={handleClick}
       selected={selected}
       aria-selected={selected}
@@ -211,6 +193,4 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
 
 export const Row = memo(ListViewRow);
 export const SectionHeader = memo(ListViewSectionHeader);
-export const Separator = memo(ListViewSeparator);
-export const Spacer = memo(ListViewSpacer);
 export const Root = memo(ListViewRoot);

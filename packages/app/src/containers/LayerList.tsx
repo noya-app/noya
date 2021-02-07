@@ -120,12 +120,19 @@ export default function LayerList(props: Props) {
           }
         };
 
+        const handleHoverChange = (hovered: boolean) => {
+          dispatch('highlightLayer', hovered ? id : undefined);
+        };
+
+        const rowProps = {
+          key: id,
+          selected,
+          onClick: handleClick,
+          onHoverChange: handleHoverChange,
+        };
+
         return type === 'artboard' ? (
-          <ListView.SectionHeader
-            key={id}
-            selected={selected}
-            onClick={handleClick}
-          >
+          <ListView.SectionHeader {...rowProps}>
             <span
               style={{ display: 'flex', alignItems: 'center' }}
               onClick={(event) => {
@@ -140,12 +147,7 @@ export default function LayerList(props: Props) {
             {rowContent}
           </ListView.SectionHeader>
         ) : (
-          <ListView.Row
-            key={id}
-            selected={selected}
-            onClick={handleClick}
-            position={position}
-          >
+          <ListView.Row {...rowProps} position={position}>
             <Spacer.Horizontal size={6 + 15} />
             {rowContent}
           </ListView.Row>
