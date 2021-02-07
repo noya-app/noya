@@ -1,7 +1,7 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
 import styled from 'styled-components';
 import * as Popover from '@radix-ui/react-popover';
-// import DualAxisColorPicker from './color/DualAxisColorPicker';
+
 import {
   AlphaColorPicker,
   equalColorObjects,
