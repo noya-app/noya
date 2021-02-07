@@ -7,34 +7,20 @@ import {
   getSelectedLayerIndexes,
 } from './selectors';
 import * as Models from './models';
-
 import * as Layers from './layers';
+import {
+  ShapeType,
+  createInitialInteractionState,
+  InteractionAction,
+  interactionReducer,
+  InteractionState,
+} from './reducers/interaction';
+import { UUID } from './types';
 
 export { Layers };
-
+export type { ShapeType };
+export * from './types';
 export * as Selectors from './selectors';
-
-export type UUID = string;
-
-export type Point = { x: number; y: number };
-
-export type Rect = { x: number; y: number; width: number; height: number };
-
-export type InteractionState =
-  | {
-      type: 'none';
-    }
-  | {
-      type: 'insertRectangle';
-    }
-  | {
-      type: 'insertOval';
-    }
-  | {
-      type: 'drawing';
-      origin: Point;
-      value: PageLayer;
-    };
 
 export type ApplicationState = {
   interactionState: InteractionState;
@@ -50,7 +36,7 @@ export type SelectionType = 'replace' | 'intersection' | 'difference';
 type StyleElementType = 'Fill' | 'Border';
 
 export type Action =
-  | [type: 'addLayer', layer: PageLayer]
+  | [type: 'addDrawnLayer']
   | [
       type: 'selectLayer',
       layerId: string | string[],
@@ -69,7 +55,7 @@ export type Action =
   | [type: `deleteDisabled${StyleElementType}s`]
   | [type: `set${StyleElementType}Enabled`, index: number, isEnabled: boolean]
   | [type: 'nudgeBorderWidth', index: number, amount: number]
-  | [type: 'interaction', state: InteractionState];
+  | [type: 'interaction', action: InteractionAction];
 
 export function reducer(
   state: ApplicationState,
@@ -95,11 +81,22 @@ export function reducer(
           ? Sketch.LayerListExpanded.Expanded
           : Sketch.LayerListExpanded.Collapsed;
       });
-    case 'addLayer': {
+    case 'addDrawnLayer': {
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (state) => {
-        state.sketch.pages[pageIndex].layers.push(action[1]);
+        if (state.interactionState.type !== 'drawing') return;
+
+        const layer = state.interactionState.value;
+
+        if (layer.frame.width > 0 && layer.frame.height > 0) {
+          state.sketch.pages[pageIndex].layers.push(layer);
+          state.selectedObjects = [layer.do_objectID];
+        }
+
+        state.interactionState = interactionReducer(state.interactionState, [
+          'reset',
+        ]);
       });
     }
     case 'selectLayer': {
@@ -301,9 +298,14 @@ export function reducer(
     }
     case 'interaction': {
       return produce(state, (state) => {
-        state.interactionState = action[1];
+        state.interactionState = interactionReducer(
+          state.interactionState,
+          action[1],
+        );
       });
     }
+    default:
+      return state;
   }
 }
 
@@ -313,7 +315,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
-    interactionState: { type: 'none' },
+    interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     sketch,

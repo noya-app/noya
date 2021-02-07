@@ -1,12 +1,10 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { PageLayer, Point, Rect } from 'ayano-state';
+import { Point, ShapeType } from 'ayano-state';
 import {
   getCurrentPage,
   getCurrentPageMetadata,
   getLayerAtPoint,
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
-import produce from 'immer';
 import { useCallback, useEffect, useRef } from 'react';
 import { drawCanvas, uuid } from 'sketch-canvas';
 import { useTheme } from 'styled-components';
@@ -16,9 +14,6 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import rectangle from '../rectangleExample';
-
-const oval = require('../models/oval.json') as Sketch.Oval;
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -26,20 +21,11 @@ declare module 'canvaskit-wasm' {
   }
 }
 
-interface Props {}
-
 function getPoint(event: MouseEvent): Point {
   return { x: event.offsetX, y: event.offsetY };
 }
 
-function createRect(initialPoint: Point, finalPoint: Point): Rect {
-  return {
-    width: Math.abs(finalPoint.x - initialPoint.x),
-    height: Math.abs(finalPoint.y - initialPoint.y),
-    x: Math.min(finalPoint.x, initialPoint.x),
-    y: Math.min(finalPoint.y, initialPoint.y),
-  };
-}
+interface Props {}
 
 export default function Canvas(props: Props) {
   const { sidebarWidth } = useTheme().sizes;
@@ -115,30 +101,20 @@ export default function Canvas(props: Props) {
 
       if (
         state.interactionState.type !== 'insertRectangle' &&
-        state.interactionState.type !== 'insertOval'
+        state.interactionState.type !== 'insertOval' &&
+        state.interactionState.type !== 'insertText'
       ) {
         return;
       }
 
-      const rect = createRect(point, point);
-
       const id = uuid();
-      const frame: Sketch.Rect = {
-        _class: 'rect',
-        constrainProportions: false,
-        ...rect,
-      };
 
-      let layer: PageLayer =
-        state.interactionState.type === 'insertOval'
-          ? { ...oval, do_objectID: id, frame }
-          : { ...rectangle, do_objectID: id, frame };
-
-      dispatch('interaction', {
-        type: 'drawing',
-        value: layer,
-        origin: point,
-      });
+      dispatch('interaction', [
+        'startDrawing',
+        state.interactionState.type.slice(6).toLowerCase() as ShapeType,
+        id,
+        point,
+      ]);
     },
     [dispatch, state, offsetEventPoint],
   );
@@ -148,20 +124,8 @@ export default function Canvas(props: Props) {
       if (state.interactionState.type !== 'drawing') return;
 
       const point = offsetEventPoint(getPoint(event.nativeEvent));
-      const rect = createRect(state.interactionState.origin, point);
 
-      const layer = produce(state.interactionState.value, (layer) => {
-        layer.frame = {
-          ...layer.frame,
-          ...rect,
-        };
-      });
-
-      dispatch('interaction', {
-        type: 'drawing',
-        value: layer,
-        origin: state.interactionState.origin,
-      });
+      dispatch('interaction', ['updateDrawing', point]);
     },
     [dispatch, state, offsetEventPoint],
   );
@@ -182,22 +146,8 @@ export default function Canvas(props: Props) {
 
       if (state.interactionState.type !== 'drawing') return;
 
-      const rect = createRect(state.interactionState.origin, point);
-
-      if (rect.width === 0 || rect.height === 0) {
-        return dispatch('interaction', { type: 'none' });
-      }
-
-      const layer = produce(state.interactionState.value, (layer) => {
-        layer.frame = {
-          ...layer.frame,
-          ...rect,
-        };
-      });
-
-      dispatch('interaction', { type: 'none' });
-      dispatch('addLayer', layer);
-      dispatch('selectLayer', layer.do_objectID);
+      dispatch('interaction', ['updateDrawing', point]);
+      dispatch('addDrawnLayer');
     },
     [CanvasKit, dispatch, state, offsetEventPoint],
   );

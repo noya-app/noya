@@ -1,6 +1,7 @@
 import type { CanvasKit } from 'canvaskit-wasm';
 import * as Primitives from 'sketch-canvas/src/primitives';
-import type { ApplicationState, PageLayer, Point } from './index';
+import type { ApplicationState, PageLayer } from './index';
+import type { Point } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(

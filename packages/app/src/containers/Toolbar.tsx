@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import Button from '../components/Button';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
-import { SquareIcon, CircleIcon } from '@radix-ui/react-icons';
+import { SquareIcon, CircleIcon, TextIcon } from '@radix-ui/react-icons';
 import * as Spacer from '../components/Spacer';
 
 interface Props {}
@@ -23,7 +23,7 @@ export default function Toolbar(props: Props) {
         active={state.interactionState.type === 'insertRectangle'}
         label="Rectangle"
         onClick={() => {
-          dispatch('interaction', { type: 'insertRectangle' });
+          dispatch('interaction', ['insertRectangle']);
         }}
       >
         <SquareIcon />
@@ -33,10 +33,20 @@ export default function Toolbar(props: Props) {
         active={state.interactionState.type === 'insertOval'}
         label="Oval"
         onClick={() => {
-          dispatch('interaction', { type: 'insertOval' });
+          dispatch('interaction', ['insertOval']);
         }}
       >
         <CircleIcon />
+      </Button>
+      <Spacer.Horizontal size={16} />
+      <Button
+        active={state.interactionState.type === 'insertText'}
+        label="Text"
+        onClick={() => {
+          dispatch('interaction', ['insertText']);
+        }}
+      >
+        <TextIcon />
       </Button>
       <Spacer.Horizontal size={8} />
     </Container>

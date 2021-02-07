@@ -94,7 +94,7 @@ export default function LayerList(props: Props) {
         const handleClick = (info: ListView.ListViewClickInfo) => {
           const { metaKey, shiftKey } = info;
 
-          dispatch('interaction', { type: 'none' });
+          dispatch('interaction', ['reset']);
 
           if (metaKey) {
             dispatch(
