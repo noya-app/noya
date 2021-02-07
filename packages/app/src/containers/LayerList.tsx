@@ -1,8 +1,14 @@
 import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Layers, PageLayer, Selectors } from 'ayano-state';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { visit } from 'tree-visit';
+import {
+  SquareIcon,
+  CircleIcon,
+  TextIcon,
+  BoxModelIcon,
+} from '@radix-ui/react-icons';
 import * as ListView from '../components/ListView';
 import * as Spacer from '../components/Spacer';
 import {
@@ -12,8 +18,10 @@ import {
 
 interface Props {}
 
+type LayerType = PageLayer['_class'];
+
 type LayerListItem = {
-  type: PageLayer['_class'];
+  type: LayerType;
   id: string;
   name: string;
   depth: number;
@@ -74,6 +82,29 @@ function flattenLayerList(
   return flattened;
 }
 
+const LayerIcon = memo(function LayerIcon({
+  type,
+  selected,
+}: {
+  type: LayerType;
+  selected: boolean;
+}) {
+  const color = selected ? 'rgb(220, 220, 220)' : 'rgb(139, 139, 139)';
+
+  switch (type) {
+    case 'rectangle':
+      return <SquareIcon color={color} />;
+    case 'oval':
+      return <CircleIcon color={color} />;
+    case 'text':
+      return <TextIcon color={color} />;
+    case 'artboard':
+      return <BoxModelIcon color={color} />;
+    default:
+      return null;
+  }
+});
+
 export default function LayerList(props: Props) {
   const [state, dispatch] = useApplicationState();
   const selectedObjects = state.selectedObjects;
@@ -87,6 +118,8 @@ export default function LayerList(props: Props) {
         const rowContent = (
           <>
             <Spacer.Horizontal size={depth * 12} />
+            <LayerIcon type={type} selected={selected} />
+            <Spacer.Horizontal size={10} />
             {name}
           </>
         );
