@@ -12,6 +12,7 @@ const ButtonLabel = styled.label(({ theme }) => ({
   flex: '0 0 auto',
   minWidth: '0',
   letterSpacing: '0.4px',
+  userSelect: 'none',
 }));
 
 /* ----------------------------------------------------------------------------
@@ -35,7 +36,7 @@ const ButtonButton = styled.button<{ active: boolean }>(
     background: active ? theme.colors.primary : theme.colors.inputBackground,
     color: active ? 'white' : theme.colors.text,
     '&:focus': {
-      boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+      boxShadow: `0 0 0 1px white, 0 0 0 3px ${theme.colors.primary}`,
     },
     display: 'flex',
     alignItems: 'center',
@@ -71,22 +72,29 @@ const ButtonContainer = styled.span(({ theme }) => ({
 }));
 
 interface ButtonRootProps {
+  id: string;
   children: ReactNode;
   active?: boolean;
   label?: ReactNode;
   onClick?: () => void;
 }
 
-function Button({ label, active = false, onClick, children }: ButtonRootProps) {
+function Button({
+  id,
+  label,
+  active = false,
+  onClick,
+  children,
+}: ButtonRootProps) {
   return (
     <ButtonContainer>
-      <ButtonButton active={active} onClick={onClick}>
+      <ButtonButton id={id} active={active} onClick={onClick}>
         <ButtonInner>{children}</ButtonInner>
       </ButtonButton>
       {label && (
         <>
           <Spacer.Vertical size={2} />
-          <ButtonLabel>{label}</ButtonLabel>
+          <ButtonLabel htmlFor={id}>{label}</ButtonLabel>
         </>
       )}
     </ButtonContainer>

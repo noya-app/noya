@@ -20,6 +20,7 @@ export default function Toolbar(props: Props) {
     <Container>
       <Spacer.Horizontal size={8} />
       <Button
+        id="tool-rectangle"
         active={state.interactionState.type === 'insertRectangle'}
         label="Rectangle"
         onClick={() => {
@@ -30,6 +31,7 @@ export default function Toolbar(props: Props) {
       </Button>
       <Spacer.Horizontal size={16} />
       <Button
+        id="tool-oval"
         active={state.interactionState.type === 'insertOval'}
         label="Oval"
         onClick={() => {
@@ -40,6 +42,7 @@ export default function Toolbar(props: Props) {
       </Button>
       <Spacer.Horizontal size={16} />
       <Button
+        id="tool-text"
         active={state.interactionState.type === 'insertText'}
         label="Text"
         onClick={() => {

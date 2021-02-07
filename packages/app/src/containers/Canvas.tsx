@@ -7,7 +7,7 @@ import {
 import type { Surface } from 'canvaskit-wasm';
 import { useCallback, useEffect, useRef } from 'react';
 import { drawCanvas, uuid } from 'sketch-canvas';
-import { useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
   useSelector,
@@ -24,6 +24,18 @@ declare module 'canvaskit-wasm' {
 function getPoint(event: MouseEvent): Point {
   return { x: event.offsetX, y: event.offsetY };
 }
+
+const Container = styled.div({
+  flex: '1',
+  position: 'relative',
+});
+
+const CanvasComponent = styled.canvas(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  left: -theme.sizes.sidebarWidth,
+  zIndex: -1,
+}));
 
 interface Props {}
 
@@ -153,23 +165,13 @@ export default function Canvas(props: Props) {
   );
 
   return (
-    <div
+    <Container
       ref={containerRef}
-      style={{ flex: '1', position: 'relative' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      <canvas
-        id="main"
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: -sidebarWidth,
-          zIndex: -1,
-        }}
-      />
-    </div>
+      <CanvasComponent id="main" ref={canvasRef} />
+    </Container>
   );
 }
