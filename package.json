@@ -36,7 +36,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "eslint-config-modular-app": "^0.3.1",
-    "modular-scripts": "^0.9.0",
+    "modular-scripts": "^0.9.10",
     "prettier": "^2.2.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
