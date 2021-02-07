@@ -1,0 +1,15 @@
+{
+  "name": "ayano-colorpicker",
+  "version": "1.0.0",
+  "main": "src/index.tsx",
+  "license": "UNLICENSED",
+  "modular": {
+    "type": "view"
+  },
+  "dependencies": {
+    "styled-components": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/styled-components": "^5.1.7"
+  }
+}

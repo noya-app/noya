@@ -1,7 +1,20 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
 import styled from 'styled-components';
 import * as Popover from '@radix-ui/react-popover';
-import DualAxisColorPicker from './color/DualAxisColorPicker';
+// import DualAxisColorPicker from './color/DualAxisColorPicker';
+import {
+  AlphaColorPicker,
+  equalColorObjects,
+  hslaToHsva,
+  hsvaToHsla,
+  HslaColor,
+  ColorModel,
+} from 'ayano-colorpicker';
+
+// const YourComponent = () => {
+//   const [color, setColor] = useState("#aabbcc");
+//   return <HexColorPicker color={color} onChange={setColor} />;
+// };
 
 const Trigger = styled(Popover.Trigger)(({ color }) => ({
   width: '60px',
@@ -30,6 +43,13 @@ interface Props {
   color: FileFormat.Color;
 }
 
+const colorModel: ColorModel<HslaColor> = {
+  defaultColor: { h: 0, s: 0, l: 0, a: 1 },
+  toHsva: hslaToHsva,
+  fromHsva: hsvaToHsla,
+  equal: equalColorObjects,
+};
+
 export default function ColorInputField({ id, color }: Props) {
   const colorString = `rgba(${color.red * 255}, ${color.green * 255}, ${
     color.blue * 255
@@ -39,7 +59,8 @@ export default function ColorInputField({ id, color }: Props) {
     <Popover.Root>
       <Trigger color={colorString} id={id} />
       <StyledContent>
-        <DualAxisColorPicker color={{ h: 0, s: 1, l: 0.5, a: 1 }} />
+        <AlphaColorPicker colorModel={colorModel} />
+        {/* <DualAxisColorPicker color={{ h: 0, s: 1, l: 0.5, a: 1 }} /> */}
         <StyledArrow />
       </StyledContent>
     </Popover.Root>
