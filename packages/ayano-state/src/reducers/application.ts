@@ -16,10 +16,17 @@ import {
 } from './interaction';
 import { UUID } from '../types';
 
+export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
+
+export type LayerHighlight = {
+  id: string;
+  precedence: LayerHighlightPrecedence;
+};
+
 export type ApplicationState = {
   interactionState: InteractionState;
   selectedPage: string;
-  highlightedLayerId?: string;
+  highlightedLayer?: LayerHighlight;
   selectedObjects: string[];
   sketch: SketchFile;
 };
@@ -32,12 +39,11 @@ export type Action =
   | [type: 'addDrawnLayer']
   | [
       type: 'selectLayer',
-      layerId: string | string[],
+      layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
-  | [type: 'highlightLayer', layerId: string | undefined]
+  | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
-  | [type: 'deselectAllLayers']
   | [type: 'selectPage', pageId: UUID]
   | [type: `addNew${StyleElementType}`]
   | [type: `delete${StyleElementType}`, index: number]
@@ -94,9 +100,9 @@ export function reducer(
       });
     }
     case 'selectLayer': {
-      const [, id, selectionType] = action;
+      const [, id, selectionType = 'replace'] = action;
 
-      const ids = typeof id === 'string' ? [id] : id;
+      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
         switch (selectionType) {
@@ -112,22 +118,16 @@ export function reducer(
             });
             return;
           case 'replace':
-          default:
             state.selectedObjects = [...ids];
             return;
         }
       });
     }
     case 'highlightLayer': {
-      const [, id] = action;
+      const [, highlight] = action;
 
       return produce(state, (state) => {
-        state.highlightedLayerId = id;
-      });
-    }
-    case 'deselectAllLayers': {
-      return produce(state, (state) => {
-        state.selectedObjects = [];
+        state.highlightedLayer = highlight ? { ...highlight } : undefined;
       });
     }
     case 'selectPage': {
@@ -319,7 +319,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
-    highlightedLayerId: undefined,
+    highlightedLayer: undefined,
     sketch,
   };
 }

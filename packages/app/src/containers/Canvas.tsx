@@ -133,13 +133,25 @@ export default function Canvas(props: Props) {
 
   const handleMouseMove = useCallback(
     (event: React.MouseEvent) => {
-      if (state.interactionState.type !== 'drawing') return;
-
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
-      dispatch('interaction', ['updateDrawing', point]);
+      switch (state.interactionState.type) {
+        case 'drawing':
+          dispatch('interaction', ['updateDrawing', point]);
+          return;
+        case 'none':
+          const layer = getLayerAtPoint(CanvasKit, state, point);
+
+          dispatch(
+            'highlightLayer',
+            layer
+              ? { id: layer.do_objectID, precedence: 'belowSelection' }
+              : undefined,
+          );
+          return;
+      }
     },
-    [dispatch, state, offsetEventPoint],
+    [CanvasKit, state, dispatch, offsetEventPoint],
   );
 
   const handleMouseUp = useCallback(
@@ -149,11 +161,7 @@ export default function Canvas(props: Props) {
       if (state.interactionState.type === 'none') {
         const layer = getLayerAtPoint(CanvasKit, state, point);
 
-        if (layer) {
-          return dispatch('selectLayer', layer.do_objectID);
-        } else {
-          return dispatch('deselectAllLayers');
-        }
+        return dispatch('selectLayer', layer?.do_objectID);
       }
 
       if (state.interactionState.type !== 'drawing') return;

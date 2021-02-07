@@ -154,7 +154,10 @@ export default function LayerList(props: Props) {
         };
 
         const handleHoverChange = (hovered: boolean) => {
-          dispatch('highlightLayer', hovered ? id : undefined);
+          dispatch(
+            'highlightLayer',
+            hovered ? { id, precedence: 'aboveSelection' } : undefined,
+          );
         };
 
         const rowProps = {
@@ -190,7 +193,7 @@ export default function LayerList(props: Props) {
   }, [dispatch, selectedObjects, page]);
 
   return (
-    <ListView.Root onClick={() => dispatch('deselectAllLayers')}>
+    <ListView.Root onClick={() => dispatch('selectLayer', undefined)}>
       {layerElements}
     </ListView.Root>
   );

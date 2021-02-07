@@ -60,14 +60,18 @@ export function drawCanvas(
   highlightPaint.setStyle(CanvasKit.PaintStyle.Stroke);
   highlightPaint.setAntiAlias(true);
 
-  page.layers.forEach((layer) => {
-    drawHoverOutline(
-      context,
-      layer,
-      highlightPaint,
-      state.highlightedLayerId ? [state.highlightedLayerId] : [],
-    );
-  });
+  const highlightedLayer = state.highlightedLayer;
+
+  // Don't draw a highlight when hovering over a selected layer on the canvas
+  if (
+    highlightedLayer &&
+    (highlightedLayer.precedence === 'aboveSelection' ||
+      !state.selectedObjects.includes(highlightedLayer.id))
+  ) {
+    page.layers.forEach((layer) => {
+      drawHoverOutline(context, layer, highlightPaint, [highlightedLayer.id]);
+    });
+  }
 
   if (state.interactionState.type === 'drawing') {
     drawLayer(context, state.interactionState.value);
