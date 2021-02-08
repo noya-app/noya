@@ -39,7 +39,7 @@ export const colors = {
     secondaryBackground: 'rgb(160, 160, 160)',
   },
   listView: {
-    raisedBackground: 'rgba(255,255,255,0.9)',
+    raisedBackground: 'rgba(255,255,255,0.8)',
   },
   canvas: {
     background: 'rgb(249,249,249)',

@@ -36,7 +36,7 @@ const ButtonButton = styled.button<{ active: boolean }>(
     background: active ? theme.colors.primary : theme.colors.inputBackground,
     color: active ? 'white' : theme.colors.text,
     '&:focus': {
-      boxShadow: `0 0 0 1px white, 0 0 0 3px ${theme.colors.primary}`,
+      boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
     },
     display: 'flex',
     alignItems: 'center',

@@ -11,8 +11,12 @@ import handleNudge from '../utils/handleNudge';
 
 type LabelPosition = 'start' | 'end';
 
-const InputFieldContext = createContext<{ labelPosition: LabelPosition }>({
+const InputFieldContext = createContext<{
+  labelPosition: LabelPosition;
+  labelSize: number;
+}>({
   labelPosition: 'end',
+  labelSize: 6,
 });
 
 /* ----------------------------------------------------------------------------
@@ -54,32 +58,34 @@ function InputFieldLabel({ children = false }: InputFieldLabelProps) {
  * Input
  * ------------------------------------------------------------------------- */
 
-const InputElement = styled.input<{ labelPosition: LabelPosition }>(
-  ({ theme, labelPosition }) => ({
-    ...theme.textStyles.small,
-    color: theme.colors.text,
-    width: '0px', // Reset intrinsic width
-    flex: '1 1 0px',
-    position: 'relative',
-    border: '0',
-    outline: 'none',
-    minWidth: '0',
-    textAlign: 'left',
-    alignSelf: 'stretch',
-    borderRadius: '4px',
-    paddingTop: '4px',
-    paddingBottom: '4px',
-    paddingLeft: labelPosition === 'start' ? '18px' : '6px',
-    paddingRight: labelPosition === 'start' ? '6px' : '18px',
-    background: theme.colors.inputBackground,
-    '&:focus': {
-      boxShadow: `0 0 0 2px ${theme.colors.primary}`,
-    },
-  }),
-);
+const InputElement = styled.input<{
+  labelPosition: LabelPosition;
+  labelSize: number;
+}>(({ theme, labelPosition, labelSize }) => ({
+  ...theme.textStyles.small,
+  color: theme.colors.text,
+  width: '0px', // Reset intrinsic width
+  flex: '1 1 0px',
+  position: 'relative',
+  border: '0',
+  outline: 'none',
+  minWidth: '0',
+  textAlign: 'left',
+  alignSelf: 'stretch',
+  borderRadius: '4px',
+  paddingTop: '4px',
+  paddingBottom: '4px',
+  paddingLeft: labelPosition === 'start' ? `${6 + labelSize + 6}px` : '6px',
+  paddingRight: labelPosition === 'start' ? '6px' : `${6 + labelSize + 6}px`,
+  background: theme.colors.inputBackground,
+  '&:focus': {
+    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+  },
+}));
 
 interface InputFieldInputProps {
   value: string;
+  placeholder?: string;
   onChange?: (value: string) => void;
   onNudge?: (value: number) => void;
   children?: ReactNode;
@@ -87,11 +93,12 @@ interface InputFieldInputProps {
 
 function InputFieldInput({
   value,
+  placeholder,
   children,
   onChange,
   onNudge,
 }: InputFieldInputProps) {
-  const { labelPosition } = useContext(InputFieldContext);
+  const { labelPosition, labelSize } = useContext(InputFieldContext);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -110,7 +117,9 @@ function InputFieldInput({
   return (
     <InputElement
       labelPosition={labelPosition}
+      labelSize={labelSize}
       value={value}
+      placeholder={placeholder}
       onKeyDown={onNudge ? handleKeyDown : undefined}
       onChange={useCallback(
         (event) => {
@@ -141,6 +150,7 @@ interface InputFieldRootProps {
   children?: ReactNode;
   size?: number;
   labelPosition?: LabelPosition;
+  labelSize?: number;
 }
 
 function InputFieldRoot({
@@ -148,8 +158,12 @@ function InputFieldRoot({
   children,
   size,
   labelPosition = 'end',
+  labelSize = 6,
 }: InputFieldRootProps) {
-  const contextValue = useMemo(() => ({ labelPosition }), [labelPosition]);
+  const contextValue = useMemo(() => ({ labelPosition, labelSize }), [
+    labelPosition,
+    labelSize,
+  ]);
 
   return (
     <InputFieldContext.Provider value={contextValue}>
