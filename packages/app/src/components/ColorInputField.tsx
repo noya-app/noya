@@ -60,7 +60,7 @@ export default function ColorInputField({ id, color, onChange }: Props) {
       r: Math.floor(color.red * 255),
       g: Math.floor(color.green * 255),
       b: Math.floor(color.blue * 255),
-      a: 1,
+      a: color.alpha,
     }),
     [color],
   );
