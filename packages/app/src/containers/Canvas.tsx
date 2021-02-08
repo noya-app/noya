@@ -124,24 +124,36 @@ export default function Canvas(props: Props) {
     (event: React.MouseEvent) => {
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
-      if (
-        state.interactionState.type !== 'insertRectangle' &&
-        state.interactionState.type !== 'insertOval' &&
-        state.interactionState.type !== 'insertText'
-      ) {
-        return;
+      switch (state.interactionState.type) {
+        case 'insertRectangle':
+        case 'insertOval':
+        case 'insertText': {
+          const id = uuid();
+
+          dispatch('interaction', [
+            'startDrawing',
+            state.interactionState.type.slice(6).toLowerCase() as ShapeType,
+            id,
+            point,
+          ]);
+
+          break;
+        }
+        case 'none': {
+          const layer = getLayerAtPoint(CanvasKit, state, point);
+
+          dispatch('selectLayer', layer?.do_objectID);
+
+          if (layer) {
+            dispatch('interaction', ['maybeMove', layer.do_objectID, point]);
+            console.log('maybe move', layer.do_objectID);
+          }
+
+          break;
+        }
       }
-
-      const id = uuid();
-
-      dispatch('interaction', [
-        'startDrawing',
-        state.interactionState.type.slice(6).toLowerCase() as ShapeType,
-        id,
-        point,
-      ]);
     },
-    [dispatch, state, offsetEventPoint],
+    [offsetEventPoint, state, dispatch, CanvasKit],
   );
 
   const handleMouseMove = useCallback(
@@ -149,10 +161,31 @@ export default function Canvas(props: Props) {
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
       switch (state.interactionState.type) {
-        case 'drawing':
+        case 'maybeMove': {
+          const { origin } = state.interactionState;
+
+          if (
+            Math.abs(point.x - origin.x) > 2 ||
+            Math.abs(point.y - origin.y) > 2
+          ) {
+            // console.log('start move', state.interactionState, point);
+            dispatch('interaction', ['startMoving', point]);
+          }
+
+          break;
+        }
+        case 'moving': {
+          // console.log('update move', state.interactionState, point);
+          dispatch('interaction', ['updateMoving', point]);
+
+          break;
+        }
+        case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
-          return;
-        case 'none':
+
+          break;
+        }
+        case 'none': {
           const layer = getLayerAtPoint(CanvasKit, state, point);
 
           dispatch(
@@ -161,7 +194,9 @@ export default function Canvas(props: Props) {
               ? { id: layer.do_objectID, precedence: 'belowSelection' }
               : undefined,
           );
-          return;
+
+          break;
+        }
       }
     },
     [CanvasKit, state, dispatch, offsetEventPoint],
@@ -171,18 +206,27 @@ export default function Canvas(props: Props) {
     (event) => {
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
-      if (state.interactionState.type === 'none') {
-        const layer = getLayerAtPoint(CanvasKit, state, point);
+      switch (state.interactionState.type) {
+        case 'drawing': {
+          dispatch('interaction', ['updateDrawing', point]);
+          dispatch('addDrawnLayer');
 
-        return dispatch('selectLayer', layer?.do_objectID);
+          break;
+        }
+        case 'maybeMove': {
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
+        case 'moving': {
+          dispatch('interaction', ['updateMoving', point]);
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
       }
-
-      if (state.interactionState.type !== 'drawing') return;
-
-      dispatch('interaction', ['updateDrawing', point]);
-      dispatch('addDrawnLayer');
     },
-    [CanvasKit, dispatch, state, offsetEventPoint],
+    [dispatch, state, offsetEventPoint],
   );
 
   return (

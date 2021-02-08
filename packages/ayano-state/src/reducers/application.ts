@@ -15,6 +15,7 @@ import {
   InteractionState,
 } from './interaction';
 import { UUID } from '../types';
+import { Selectors } from '..';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -327,11 +328,38 @@ export function reducer(
       });
     }
     case 'interaction': {
+      let layerIndexPath: Selectors.LayerIndexPath | undefined;
+
+      switch (state.interactionState.type) {
+        case 'moving':
+        case 'maybeMove': {
+          layerIndexPath = Selectors.getLayerIndexPath(
+            state,
+            state.interactionState.id,
+          );
+          break;
+        }
+      }
+
       return produce(state, (state) => {
         state.interactionState = interactionReducer(
           state.interactionState,
           action[1],
         );
+
+        if (state.interactionState.type === 'moving' && layerIndexPath) {
+          const { previous, next } = state.interactionState;
+          const { pageIndex, indexPath } = layerIndexPath;
+          const layer = Layers.access(state.sketch.pages[pageIndex], indexPath);
+
+          const delta = {
+            x: next.x - previous.x,
+            y: next.y - previous.y,
+          };
+
+          layer.frame.x += delta.x;
+          layer.frame.y += delta.y;
+        }
       });
     }
     default:

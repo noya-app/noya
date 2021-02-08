@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import type { PageLayer } from '..';
-import { Point, Rect } from '../types';
+import { Point, Rect, UUID } from '../types';
 import * as Models from '../models';
 
 export type ShapeType = 'rectangle' | 'oval' | 'text';
@@ -9,8 +9,11 @@ export type ShapeType = 'rectangle' | 'oval' | 'text';
 export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
-  | [type: 'startDrawing', shapeType: ShapeType, id: string, point: Point]
-  | [type: 'updateDrawing', point: Point];
+  | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
+  | [type: 'updateDrawing', point: Point]
+  | [type: 'maybeMove', id: UUID, origin: Point]
+  | [type: 'startMoving', point: Point]
+  | [type: 'updateMoving', point: Point];
 
 export type InteractionState =
   | {
@@ -23,7 +26,9 @@ export type InteractionState =
       type: 'drawing';
       origin: Point;
       value: PageLayer;
-    };
+    }
+  | { type: 'maybeMove'; origin: Point; id: UUID }
+  | { type: 'moving'; previous: Point; next: Point; id: UUID };
 
 /**
  * Create a rectangle with a non-negative width and height
@@ -91,6 +96,39 @@ export function interactionReducer(
           ...rect,
         };
       });
+    }
+    case 'maybeMove': {
+      const [, id, origin] = action;
+
+      return { type: 'maybeMove', id, origin };
+    }
+    case 'startMoving': {
+      const [, point] = action;
+
+      if (state.type !== 'maybeMove') {
+        throw new Error('Bad interaction state - should be in `maybeMove`');
+      }
+
+      return {
+        type: 'moving',
+        id: state.id,
+        previous: state.origin,
+        next: point,
+      };
+    }
+    case 'updateMoving': {
+      const [, point] = action;
+
+      if (state.type !== 'moving') {
+        throw new Error('Bad interaction state - should be in `moving`');
+      }
+
+      return {
+        type: 'moving',
+        id: state.id,
+        previous: state.next,
+        next: point,
+      };
     }
     case 'reset': {
       return { type: 'none' };

@@ -1,7 +1,8 @@
 import type { CanvasKit } from 'canvaskit-wasm';
 import * as Primitives from 'sketch-canvas/src/primitives';
 import type { ApplicationState, PageLayer } from './index';
-import type { Point } from './types';
+import { findIndexPath } from './layers';
+import type { Point, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -45,6 +46,19 @@ export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   return state.selectedObjects
     .map((id) => page.layers.find((layer) => layer.do_objectID === id))
     .filter((layer): layer is PageLayer => !!layer);
+};
+
+export type LayerIndexPath = { pageIndex: number; indexPath: number[] };
+
+export const getLayerIndexPath = (
+  state: ApplicationState,
+  id: UUID,
+): LayerIndexPath | undefined => {
+  const page = getCurrentPage(state);
+  const pageIndex = getCurrentPageIndex(state);
+  const indexPath = findIndexPath(page, (layer) => layer.do_objectID === id);
+
+  return indexPath ? { pageIndex, indexPath } : undefined;
 };
 
 export function getLayerAtPoint(
