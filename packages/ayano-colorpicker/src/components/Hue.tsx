@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
-import { clamp } from '../../utils/clamp';
-import { round } from '../../utils/round';
+import { clamp } from '../utils/clamp';
+import { round } from '../utils/round';
 import { Interaction, Interactive } from './Interactive';
-import { Pointer } from './Pointer';
+import Pointer from './Pointer';
 
 const Container = styled.div(() => ({
   position: 'relative' as any,
@@ -28,7 +28,7 @@ interface Props {
   onChange: (newHue: { h: number }) => void;
 }
 
-const HueBase = ({ hue, onChange }: Props) => {
+export default memo(function HueBase({ hue, onChange }: Props) {
   const handleMove = (interaction: Interaction) => {
     onChange({ h: 360 * interaction.left });
   };
@@ -52,6 +52,4 @@ const HueBase = ({ hue, onChange }: Props) => {
       </Interactive>
     </Container>
   );
-};
-
-export const Hue = React.memo(HueBase);
+});

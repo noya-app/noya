@@ -1,24 +1,13 @@
-export { Alpha } from './components/common/Alpha';
-export { AlphaColorPicker } from './components/common/AlphaColorPicker';
-export { Hue } from './components/common/Hue';
-export { Interactive } from './components/common/Interactive';
-export { Pointer } from './components/common/Pointer';
-export { Saturation } from './components/common/Saturation';
+import Alpha from './components/Alpha';
+import Hue from './components/Hue';
+import Saturation from './components/Saturation';
+import Pointer from './components/Pointer';
+import HexColorInput from './components/HexColorInput';
+import ColorPicker from './components/ColorPicker';
 
+export { Alpha, Hue, Pointer, HexColorInput, Saturation, ColorPicker };
+
+export * from './components/Interactive';
 export * from './utils/convert';
 export * from './utils/compare';
-
-// // Additional components
-// export { HexColorInput } from './components/HexColorInput';
-
-// Color model types
-export type {
-  ColorModel,
-  ColorPickerBaseProps,
-  RgbColor,
-  RgbaColor,
-  HslColor,
-  HslaColor,
-  HsvColor,
-  HsvaColor,
-} from './types';
+export * from './types';

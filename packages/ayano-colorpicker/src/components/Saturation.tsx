@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Interactive, Interaction } from './Interactive';
-import { Pointer } from './Pointer';
-import { HsvaColor } from '../../types';
-import { hsvaToHslString } from '../../utils/convert';
-import { clamp } from '../../utils/clamp';
-import { round } from '../../utils/round';
+import Pointer from './Pointer';
+import { HsvaColor } from '../types';
+import { hsvaToHslString } from '../utils/convert';
+import { clamp } from '../utils/clamp';
+import { round } from '../utils/round';
 import styled from 'styled-components';
 
 const Container = styled.div<{ backgroundColor: string }>(
@@ -27,7 +27,7 @@ interface Props {
   onChange: (newColor: { s: number; v: number }) => void;
 }
 
-const SaturationBase = ({ hsva, onChange }: Props) => {
+export default memo(function SaturationBase({ hsva, onChange }: Props) {
   const handleMove = (interaction: Interaction) => {
     onChange({
       s: interaction.left * 100,
@@ -59,6 +59,4 @@ const SaturationBase = ({ hsva, onChange }: Props) => {
       </Interactive>
     </Container>
   );
-};
-
-export const Saturation = React.memo(SaturationBase);
+});

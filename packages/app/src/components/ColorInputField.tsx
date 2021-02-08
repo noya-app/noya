@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import * as Popover from '@radix-ui/react-popover';
 
 import {
-  AlphaColorPicker,
+  ColorPicker,
   equalColorObjects,
   hslaToHsva,
   hsvaToHsla,
@@ -59,7 +59,7 @@ export default function ColorInputField({ id, color }: Props) {
     <Popover.Root>
       <Trigger color={colorString} id={id} />
       <StyledContent>
-        <AlphaColorPicker colorModel={colorModel} />
+        <ColorPicker colorModel={colorModel} />
         {/* <DualAxisColorPicker color={{ h: 0, s: 1, l: 0.5, a: 1 }} /> */}
         <StyledArrow />
       </StyledContent>

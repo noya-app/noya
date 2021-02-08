@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
-import { HsvaColor } from '../../types';
-import { clamp } from '../../utils/clamp';
-import { hsvaToHslaString } from '../../utils/convert';
-import { round } from '../../utils/round';
+import { HsvaColor } from '../types';
+import { clamp } from '../utils/clamp';
+import { hsvaToHslaString } from '../utils/convert';
+import { round } from '../utils/round';
 import { Interaction, Interactive } from './Interactive';
-import { Pointer } from './Pointer';
+import Pointer from './Pointer';
 
 const Container = styled.div<{ colorFrom: string; colorTo: string }>(
   ({ colorFrom, colorTo }) => ({
@@ -27,7 +27,7 @@ interface Props {
   onChange: (newAlpha: { a: number }) => void;
 }
 
-export const Alpha = ({ hsva, onChange }: Props): JSX.Element => {
+export default memo(function Alpha({ hsva, onChange }: Props): JSX.Element {
   const handleMove = (interaction: Interaction) => {
     onChange({ a: interaction.left });
   };
@@ -54,4 +54,4 @@ export const Alpha = ({ hsva, onChange }: Props): JSX.Element => {
       </Interactive>
     </Container>
   );
-};
+});

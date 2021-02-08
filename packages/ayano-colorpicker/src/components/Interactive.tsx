@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 
-import { useIsomorphicLayoutEffect } from '../../hooks/useIsomorphicLayoutEffect';
-import { useEventCallback } from '../../hooks/useEventCallback';
-import { clamp } from '../../utils/clamp';
+import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
+import { useEventCallback } from '../hooks/useEventCallback';
+import { clamp } from '../utils/clamp';
 import styled from 'styled-components';
 
 const Container = styled.div(() => ({

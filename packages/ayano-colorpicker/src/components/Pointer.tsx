@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div(() => ({
@@ -17,7 +17,7 @@ interface Props {
   left: number;
 }
 
-export const Pointer = ({ left, top = 0.5 }: Props): JSX.Element => {
+export default memo(function Pointer({ left, top = 0.5 }: Props): JSX.Element {
   const style = useMemo(
     () => ({
       top: `${top * 100}%`,
@@ -27,4 +27,4 @@ export const Pointer = ({ left, top = 0.5 }: Props): JSX.Element => {
   );
 
   return <Container style={style} />;
-};
+});
