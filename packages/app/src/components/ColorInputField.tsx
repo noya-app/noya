@@ -46,23 +46,23 @@ const colorModel: ColorModel<RgbaColor> = {
 
 interface Props {
   id?: string;
-  color: FileFormat.Color;
+  value: FileFormat.Color;
   onChange: (color: FileFormat.Color) => void;
 }
 
-export default function ColorInputField({ id, color, onChange }: Props) {
-  const colorString = `rgba(${color.red * 255}, ${color.green * 255}, ${
-    color.blue * 255
-  }, ${color.alpha})`;
+export default function ColorInputField({ id, value, onChange }: Props) {
+  const colorString = `rgba(${value.red * 255}, ${value.green * 255}, ${
+    value.blue * 255
+  }, ${value.alpha})`;
 
   const rgbaColor: RgbaColor = useMemo(
     () => ({
-      r: Math.floor(color.red * 255),
-      g: Math.floor(color.green * 255),
-      b: Math.floor(color.blue * 255),
-      a: color.alpha,
+      r: Math.floor(value.red * 255),
+      g: Math.floor(value.green * 255),
+      b: Math.floor(value.blue * 255),
+      a: value.alpha,
     }),
-    [color],
+    [value],
   );
 
   const handleChange = useCallback(
