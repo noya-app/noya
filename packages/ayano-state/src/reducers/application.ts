@@ -55,6 +55,7 @@ export type Action =
   | [type: `deleteDisabled${StyleElementType}s`]
   | [type: `set${StyleElementType}Enabled`, index: number, isEnabled: boolean]
   | [type: 'nudgeBorderWidth', index: number, amount: number]
+  | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [type: 'interaction', action: InteractionAction];
 
 export function reducer(
@@ -273,6 +274,34 @@ export function reducer(
             case 'deleteDisabledFills':
               if (style.fills) {
                 style.fills = style.fills.filter((fill) => fill.isEnabled);
+              }
+              break;
+          }
+        });
+      });
+    }
+
+    case 'setBorderColor':
+    case 'setFillColor': {
+      const [, index, color] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (!style) return;
+
+          switch (action[0]) {
+            case 'setBorderColor':
+              if (style.borders && style.borders[index]) {
+                style.borders[index].color = color;
+              }
+              break;
+            case 'setFillColor':
+              if (style.fills && style.fills[index]) {
+                style.fills[index].color = color;
               }
               break;
           }

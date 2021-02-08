@@ -63,6 +63,9 @@ export default memo(function Inspector(props: Props) {
               id={`fill-${index}`}
               color={item.color}
               prefix={checkbox}
+              onChangeColor={(value) => {
+                dispatch('setFillColor', index, value);
+              }}
             />
           )}
         </ArrayController>
@@ -89,9 +92,12 @@ export default memo(function Inspector(props: Props) {
               color={item.color}
               prefix={checkbox}
               width={item.thickness}
-              onNudgeWidth={(amount) =>
-                dispatch('nudgeBorderWidth', index, amount)
+              onNudgeWidth={(value) =>
+                dispatch('nudgeBorderWidth', index, value)
               }
+              onChangeColor={(value) => {
+                dispatch('setBorderColor', index, value);
+              }}
             />
           )}
         </ArrayController>

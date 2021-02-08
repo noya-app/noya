@@ -19,6 +19,7 @@ interface Props {
   id: string;
   color: FileFormat.Color;
   width: DimensionValue;
+  onChangeColor: (color: FileFormat.Color) => void;
   onNudgeWidth: (amount: number) => void;
   prefix?: ReactNode;
 }
@@ -27,6 +28,7 @@ export default memo(function BorderRow({
   id,
   color,
   width,
+  onChangeColor,
   onNudgeWidth,
   prefix,
 }: Props) {
@@ -55,7 +57,11 @@ export default memo(function BorderRow({
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputField id={colorInputId} color={color} />
+        <ColorInputField
+          id={colorInputId}
+          color={color}
+          onChange={onChangeColor}
+        />
         <Spacer.Horizontal size={8} />
         <InputField.Root id={hexInputId} labelPosition="start">
           <InputField.Input value={'FFFFFF'} />

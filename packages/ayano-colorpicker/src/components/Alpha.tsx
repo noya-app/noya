@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { HsvaColor } from '../types';
+import { useColorPicker } from '../contexts/ColorPickerContext';
 import { clamp } from '../utils/clamp';
 import { hsvaToHslaString } from '../utils/convert';
 import { round } from '../utils/round';
@@ -22,12 +22,9 @@ const Container = styled.div<{ colorFrom: string; colorTo: string }>(
   }),
 );
 
-interface Props {
-  hsva: HsvaColor;
-  onChange: (newAlpha: { a: number }) => void;
-}
+export default memo(function Alpha(): JSX.Element {
+  const [hsva, onChange] = useColorPicker();
 
-export default memo(function Alpha({ hsva, onChange }: Props): JSX.Element {
   const handleMove = (interaction: Interaction) => {
     onChange({ a: interaction.left });
   };

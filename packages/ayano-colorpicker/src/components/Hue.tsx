@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { useColorPicker } from '../contexts/ColorPickerContext';
 import { clamp } from '../utils/clamp';
 import { round } from '../utils/round';
 import { Interaction, Interactive } from './Interactive';
@@ -23,12 +24,9 @@ const Container = styled.div(() => ({
   zIndex: 2,
 }));
 
-interface Props {
-  hue: number;
-  onChange: (newHue: { h: number }) => void;
-}
+export default memo(function HueBase() {
+  const [{ h: hue }, onChange] = useColorPicker();
 
-export default memo(function HueBase({ hue, onChange }: Props) {
   const handleMove = (interaction: Interaction) => {
     onChange({ h: 360 * interaction.left });
   };

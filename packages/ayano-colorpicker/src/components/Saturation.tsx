@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
-import { Interactive, Interaction } from './Interactive';
-import Pointer from './Pointer';
-import { HsvaColor } from '../types';
-import { hsvaToHslString } from '../utils/convert';
-import { clamp } from '../utils/clamp';
-import { round } from '../utils/round';
 import styled from 'styled-components';
+import { useColorPicker } from '../contexts/ColorPickerContext';
+import { clamp } from '../utils/clamp';
+import { hsvaToHslString } from '../utils/convert';
+import { round } from '../utils/round';
+import { Interaction, Interactive } from './Interactive';
+import Pointer from './Pointer';
 
 const Container = styled.div<{ backgroundColor: string }>(
   ({ backgroundColor }) => ({
@@ -19,15 +19,13 @@ const Container = styled.div<{ backgroundColor: string }>(
     ].join(', '),
     boxShadow: '0 0 0 1px rgba(0,0,0,0.2) inset',
     overflow: 'hidden',
+    minHeight: '150px',
   }),
 );
 
-interface Props {
-  hsva: HsvaColor;
-  onChange: (newColor: { s: number; v: number }) => void;
-}
+export default memo(function SaturationBase() {
+  const [hsva, onChange] = useColorPicker();
 
-export default memo(function SaturationBase({ hsva, onChange }: Props) {
   const handleMove = (interaction: Interaction) => {
     onChange({
       s: interaction.left * 100,

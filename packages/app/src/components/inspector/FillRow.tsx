@@ -18,10 +18,16 @@ const Row = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   color: FileFormat.Color;
+  onChangeColor: (color: FileFormat.Color) => void;
   prefix?: ReactNode;
 }
 
-export default memo(function FillRow({ id, color, prefix }: Props) {
+export default memo(function FillRow({
+  id,
+  color,
+  onChangeColor,
+  prefix,
+}: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
@@ -47,7 +53,11 @@ export default memo(function FillRow({ id, color, prefix }: Props) {
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputField id={colorInputId} color={color} />
+        <ColorInputField
+          id={colorInputId}
+          color={color}
+          onChange={onChangeColor}
+        />
         <Spacer.Horizontal size={8} />
         <InputField.Root id={hexInputId} labelPosition="start">
           <InputField.Input value={'FFFFFF'} />

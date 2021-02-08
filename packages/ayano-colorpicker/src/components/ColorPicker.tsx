@@ -1,43 +1,33 @@
-import React from 'react';
-
-import Hue from './Hue';
-import Saturation from './Saturation';
-import Alpha from './Alpha';
-
-import { ColorModel, ColorPickerBaseProps, AnyColor } from '../types';
-import { useColorManipulation } from '../hooks/useColorManipulation';
-
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { ColorPickerProvider } from '../contexts/ColorPickerContext';
+import { useColorManipulation } from '../hooks/useColorManipulation';
+import { AnyColor, ColorModel, ColorPickerBaseProps } from '../types';
 
 const Container = styled.div({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  minHeight: '200px',
   userSelect: 'none',
   cursor: 'default',
 });
 
 interface Props<T extends AnyColor> extends Partial<ColorPickerBaseProps<T>> {
   colorModel: ColorModel<T>;
+  children?: ReactNode;
 }
 
-export default function AlphaColorPicker<T extends AnyColor>({
+export default function ColorPicker<T extends AnyColor>({
   colorModel,
   color = colorModel.defaultColor,
   onChange,
+  children,
 }: Props<T>): JSX.Element {
-  const [hsva, updateHsva] = useColorManipulation<T>(
-    colorModel,
-    color,
-    onChange,
-  );
+  const contextValue = useColorManipulation<T>(colorModel, color, onChange);
 
   return (
-    <Container>
-      <Saturation hsva={hsva} onChange={updateHsva} />
-      <Hue hue={hsva.h} onChange={updateHsva} />
-      <Alpha hsva={hsva} onChange={updateHsva} />
-    </Container>
+    <ColorPickerProvider value={contextValue}>
+      <Container>{children}</Container>
+    </ColorPickerProvider>
   );
 }
