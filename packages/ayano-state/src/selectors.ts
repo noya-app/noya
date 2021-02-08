@@ -48,6 +48,17 @@ export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
     .filter((layer): layer is PageLayer => !!layer);
 };
 
+export const makeGetPageLayers = (
+  state: ApplicationState,
+): ((ids: UUID[]) => PageLayer[]) => {
+  const page = getCurrentPage(state);
+
+  return (ids: UUID[]) =>
+    ids
+      .map((id) => page.layers.find((layer) => layer.do_objectID === id))
+      .filter((layer): layer is PageLayer => !!layer);
+};
+
 export type LayerIndexPath = { pageIndex: number; indexPath: number[] };
 
 export const getLayerIndexPath = (

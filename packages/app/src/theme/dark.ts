@@ -10,7 +10,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.canvas.background = 'rgb(19,20,21)';
   colors.sidebar.background = 'rgba(40,40,40,0.85)';
   colors.popover.background = 'rgb(40,40,40)';
-  colors.listView.raisedBackground = 'rgba(50,50,50,0.9)';
+  colors.listView.raisedBackground = 'rgba(255,255,255,0.1)';
 });
 export const textStyles = lightTheme.textStyles;
 export const fonts = lightTheme.fonts;

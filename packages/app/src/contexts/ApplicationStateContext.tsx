@@ -1,5 +1,5 @@
 import { Action, ApplicationState } from 'ayano-state';
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useMemo } from 'react';
 
 export type ApplicationStateContextValue = [
   ApplicationState,
@@ -21,10 +21,17 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
     throw new Error(`Missing ApplicationStateProvider`);
   }
 
+  const [state, dispatch] = value;
+
   // Simplify the dispatch function by flattening our Action tuple
+  const wrappedDispatch: Dispatcher = useCallback(
+    (...args: Action) => dispatch(args),
+    [dispatch],
+  );
+
   const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
-    return [value[0], (...args: Action) => value[1](args)];
-  }, [value]);
+    return [state, wrappedDispatch];
+  }, [state, wrappedDispatch]);
 
   return wrapped;
 };

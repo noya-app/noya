@@ -8,13 +8,13 @@ import BorderRow from '../components/inspector/BorderRow';
 import DimensionsInspector, {
   Props as DimensionsInspectorProps,
 } from '../components/inspector/DimensionsInspector';
-import FillRow from '../components/inspector/FillRow';
 import * as Spacer from '../components/Spacer';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import withSeparatorElements from '../utils/withSeparatorElements';
+import FillInspector from './FillInspector';
 
 interface Props {}
 
@@ -42,34 +42,7 @@ export default memo(function Inspector(props: Props) {
         <DimensionsInspector {...dimensionsInspectorProps} />
         <Spacer.Vertical size={10} />
       </Fragment>,
-      selectedLayers.length === 1 && (
-        <ArrayController<FileFormat.Fill>
-          id="fills"
-          key="fills"
-          value={selectedLayers[0].style?.fills ?? []}
-          onClickPlus={() => dispatch('addNewFill')}
-          onClickTrash={() => dispatch('deleteDisabledFills')}
-          onDeleteItem={(index) => dispatch('deleteFill', index)}
-          onMoveItem={(sourceIndex, destinationIndex) =>
-            dispatch('moveFill', sourceIndex, destinationIndex)
-          }
-          onChangeCheckbox={(index, checked) =>
-            dispatch('setFillEnabled', index, checked)
-          }
-          title="Fills"
-        >
-          {({ item, index, checkbox }) => (
-            <FillRow
-              id={`fill-${index}`}
-              color={item.color}
-              prefix={checkbox}
-              onChangeColor={(value) => {
-                dispatch('setFillColor', index, value);
-              }}
-            />
-          )}
-        </ArrayController>
-      ),
+      selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && (
         <ArrayController<FileFormat.Border>
           id="borders"
