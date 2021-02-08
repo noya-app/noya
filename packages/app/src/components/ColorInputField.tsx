@@ -11,7 +11,7 @@ import {
   rgbaToHsva,
   Saturation,
 } from 'ayano-colorpicker';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as Spacer from '../components/Spacer';
 
@@ -50,7 +50,7 @@ interface Props {
   onChange: (color: FileFormat.Color) => void;
 }
 
-export default function ColorInputField({ id, value, onChange }: Props) {
+export default memo(function ColorInputField({ id, value, onChange }: Props) {
   const colorString = `rgba(${value.red * 255}, ${value.green * 255}, ${
     value.blue * 255
   }, ${value.alpha})`;
@@ -97,4 +97,4 @@ export default function ColorInputField({ id, value, onChange }: Props) {
       </Content>
     </Popover.Root>
   );
-}
+});

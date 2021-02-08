@@ -1,9 +1,8 @@
-import React, { useState, useRef, useCallback } from 'react';
-
-import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
-import { useEventCallback } from '../hooks/useEventCallback';
-import { clamp } from '../utils/clamp';
+import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
+import { useEventCallback } from '../hooks/useEventCallback';
+import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
+import { clamp } from '../utils/clamp';
 
 const Container = styled.div(() => ({
   position: 'absolute' as any,
@@ -52,7 +51,7 @@ interface Props {
 const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
-  const [isDragging, setDragging] = useState(false);
+  const isDragging = useRef(false);
   const onMoveCallback = useEventCallback<Interaction>(onMove);
   const onKeyCallback = useEventCallback<Interaction>(onKey);
 
@@ -66,22 +65,28 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
 
   const handleMove = useCallback(
     (event: MouseEvent | TouchEvent) => {
+      if (!isDragging.current || !container.current) return;
+
       event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
 
-      // If user moves the pointer outside of the window or iframe bounds and release it there,
-      // `mouseup`/`touchend` won't be fired. In order to stop the picker from following the cursor
-      // after the user has moved the mouse/finger back to the document, we check `event.buttons`
-      // and `event.touches`. It allows us to detect that the user is just moving his pointer
-      // without pressing it down
-      const isDown = isTouch(event)
-        ? event.touches.length > 0
-        : event.buttons > 0;
+      onMoveCallback(getRelativePosition(container.current, event));
 
-      if (isDown && container.current) {
-        onMoveCallback(getRelativePosition(container.current, event));
-      } else {
-        setDragging(false);
-      }
+      // // If user moves the pointer outside of the window or iframe bounds and release it there,
+      // // `mouseup`/`touchend` won't be fired. In order to stop the picker from following the cursor
+      // // after the user has moved the mouse/finger back to the document, we check `event.buttons`
+      // // and `event.touches`. It allows us to detect that the user is just moving his pointer
+      // // without pressing it down
+      // const isDown = isTouch(event)
+      //   ? event.touches.length > 0
+      //   : event.buttons > 0;
+
+      // if (isDown && container.current) {
+      //   onMoveCallback(getRelativePosition(container.current, event));
+      // } else {
+      //   isDragging.current = false;
+      // }
     },
     [onMoveCallback],
   );
@@ -95,7 +100,8 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
       // The node/ref must actually exist when user start an interaction.
       // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
       onMoveCallback(getRelativePosition(container.current!, event));
-      setDragging(true);
+
+      isDragging.current = true;
     },
     [onMoveCallback],
   );
@@ -119,26 +125,49 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
     [onKeyCallback],
   );
 
-  const handleMoveEnd = useCallback(() => setDragging(false), []);
+  const handleMoveEnd = useCallback((event: MouseEvent | TouchEvent) => {
+    // console.log('is dragging?', isDragging.current);
+
+    if (!isDragging.current) return;
+
+    // console.log('handle end');
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+
+    isDragging.current = false;
+  }, []);
 
   const toggleDocumentEvents = useCallback(
     (state) => {
+      // console.log(state ? 'add' : 'remove', 'events');
+
       // add or remove additional pointer event listeners
       const toggleEvent = state
         ? window.addEventListener
         : window.removeEventListener;
-      toggleEvent(hasTouched.current ? 'touchmove' : 'mousemove', handleMove);
-      toggleEvent(hasTouched.current ? 'touchend' : 'mouseup', handleMoveEnd);
+      toggleEvent(
+        hasTouched.current ? 'touchmove' : 'mousemove',
+        handleMove,
+        true,
+      );
+      toggleEvent(
+        hasTouched.current ? 'touchend' : 'mouseup',
+        handleMoveEnd,
+        true,
+      );
     },
     [handleMove, handleMoveEnd],
   );
 
   useIsomorphicLayoutEffect(() => {
-    toggleDocumentEvents(isDragging);
+    toggleDocumentEvents(true);
+
     return () => {
-      isDragging && toggleDocumentEvents(false);
+      toggleDocumentEvents(false);
     };
-  }, [isDragging, toggleDocumentEvents]);
+  }, [toggleDocumentEvents]);
 
   return (
     <Container
