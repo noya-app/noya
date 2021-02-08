@@ -21,7 +21,6 @@ const Header = styled.div(({ theme }) => ({
   paddingRight: '20px',
   paddingBottom: '0px',
   paddingLeft: '20px',
-  backgroundColor: 'rgba(255,255,255,0.9)',
   display: 'flex',
   alignItems: 'center',
 }));

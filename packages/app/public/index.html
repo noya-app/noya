@@ -25,6 +25,18 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
+    <style>
+      body {
+        background: white;
+      }
+
+      /* Prevent a flash of white by including this style before the page loads */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: rgb(19, 20, 21);
+        }
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

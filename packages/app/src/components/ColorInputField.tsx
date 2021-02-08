@@ -23,19 +23,19 @@ const Trigger = styled(Popover.Trigger)(({ color }) => ({
   backgroundColor: color,
 }));
 
-const StyledContent = styled(Popover.Content)({
+const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
   borderRadius: 4,
   padding: '10px',
   fontSize: 14,
-  backgroundColor: 'white',
+  backgroundColor: theme.colors.popover.background,
   color: 'black',
   boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
-});
+}));
 
-const StyledArrow = styled(Popover.Arrow)({
-  fill: 'white',
-});
+const StyledArrow = styled(Popover.Arrow)(({ theme }) => ({
+  fill: theme.colors.popover.background,
+}));
 
 const colorModel: ColorModel<RgbaColor> = {
   defaultColor: { r: 0, g: 0, b: 0, a: 1 },
@@ -81,7 +81,7 @@ export default function ColorInputField({ id, value, onChange }: Props) {
   return (
     <Popover.Root>
       <Trigger color={colorString} id={id} />
-      <StyledContent>
+      <Content>
         <ColorPicker
           colorModel={colorModel}
           color={rgbaColor}
@@ -94,7 +94,7 @@ export default function ColorInputField({ id, value, onChange }: Props) {
           <Alpha />
         </ColorPicker>
         <StyledArrow />
-      </StyledContent>
+      </Content>
     </Popover.Root>
   );
 }

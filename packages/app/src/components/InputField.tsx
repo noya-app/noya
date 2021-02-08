@@ -57,6 +57,7 @@ function InputFieldLabel({ children = false }: InputFieldLabelProps) {
 const InputElement = styled.input<{ labelPosition: LabelPosition }>(
   ({ theme, labelPosition }) => ({
     ...theme.textStyles.small,
+    color: theme.colors.text,
     width: '0px', // Reset intrinsic width
     flex: '1 1 0px',
     position: 'relative',

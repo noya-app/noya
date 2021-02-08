@@ -40,7 +40,12 @@ const CanvasComponent = styled.canvas(({ theme }) => ({
 interface Props {}
 
 export default function Canvas(props: Props) {
-  const { sidebarWidth } = useTheme().sizes;
+  const {
+    colors: {
+      canvas: { background: backgroundColor },
+    },
+    sizes: { sidebarWidth },
+  } = useTheme();
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -102,10 +107,18 @@ export default function Canvas(props: Props) {
     const surface = surfaceRef.current;
     const context = { CanvasKit, canvas: surface.getCanvas() };
 
-    drawCanvas(context, state, sidebarWidth);
+    drawCanvas(context, state, backgroundColor, sidebarWidth);
 
     surface.flush();
-  }, [CanvasKit, state, containerSize, currentPage, meta, sidebarWidth]);
+  }, [
+    CanvasKit,
+    state,
+    containerSize,
+    currentPage,
+    meta,
+    backgroundColor,
+    sidebarWidth,
+  ]);
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent) => {

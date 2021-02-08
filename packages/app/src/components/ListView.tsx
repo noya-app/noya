@@ -116,7 +116,7 @@ const SectionHeaderContainer = styled.li<{ selected: boolean }>(
     borderBottom: `1px solid ${
       selected ? theme.colors.primaryDark : theme.colors.divider
     }`,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: theme.colors.listView.raisedBackground,
     ...(selected && {
       color: 'white',
       backgroundColor: theme.colors.primary,
@@ -171,6 +171,7 @@ const RootContainer = styled.ul(({ theme }) => ({
   flexWrap: 'nowrap',
   paddingTop: '8px',
   paddingBottom: '8px',
+  color: theme.colors.textMuted,
 }));
 
 interface ListViewRootProps {

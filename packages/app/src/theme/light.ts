@@ -9,6 +9,7 @@ export const colors = {
   textLink: 'rgb(58, 108, 234)',
   textLinkFocused: 'rgb(35, 82, 124)',
   divider: 'rgba(0, 0, 0, 0.07)',
+  dividerStrong: 'rgba(0, 0, 0, 0.09)',
   primary: 'rgb(132, 63, 255)',
   primaryDark: 'rgb(116, 36, 255)',
   // primary: 'rgb(59, 108, 212)',
@@ -37,6 +38,18 @@ export const colors = {
     },
     secondaryBackground: 'rgb(160, 160, 160)',
   },
+  listView: {
+    raisedBackground: 'rgba(255,255,255,0.9)',
+  },
+  canvas: {
+    background: 'rgb(249,249,249)',
+  },
+  sidebar: {
+    background: 'rgba(252,252,252,0.85)',
+  },
+  popover: {
+    background: 'rgb(252,252,252)',
+  },
   icon: 'rgb(86,93,120)',
 };
 
@@ -53,7 +66,6 @@ export const textStyles = {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[0]}rem`,
     fontWeight: 'bold',
-    color: colors.text,
     lineHeight: '1.4',
     [mediaQuery.small]: {
       fontSize: '36px',
@@ -63,7 +75,6 @@ export const textStyles = {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[3]}rem`,
     fontWeight: 500,
-    color: colors.text,
     lineHeight: '1.75',
     [mediaQuery.small]: {
       fontSize: '18px',
@@ -73,21 +84,18 @@ export const textStyles = {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[2]}rem`,
     fontWeight: 500,
-    color: colors.text,
     lineHeight: '1.75',
   } as CSSObject,
   heading2: {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[3]}rem`,
     fontWeight: 500,
-    color: colors.text,
     lineHeight: '1.75',
   } as CSSObject,
   heading3: {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[4]}rem`,
     fontWeight: 500,
-    color: colors.text,
     lineHeight: '1.75',
   } as CSSObject,
   body: {
@@ -95,39 +103,18 @@ export const textStyles = {
     fontSize: `${typeScale[5]}rem`,
     fontWeight: 400,
     lineHeight: '1.75',
-    color: colors.text,
   } as CSSObject,
   small: {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[6]}rem`,
     fontWeight: 400,
     lineHeight: '1.4',
-    color: colors.textMuted,
   } as CSSObject,
   code: {
     fontFamily: fonts.monospace,
     fontSize: '90%',
     lineHeight: '1.5',
-    color: colors.textMuted,
   } as CSSObject,
-  sidebar: {
-    title: {
-      fontSize: '18px',
-      fontWeight: 400,
-      lineHeight: '84px',
-      color: colors.text,
-    } as CSSObject,
-    row: {
-      fontSize: '14px',
-      fontWeight: 400,
-      color: colors.textMuted,
-    } as CSSObject,
-    rowSmall: {
-      fontSize: '13px',
-      fontWeight: 400,
-      color: colors.textMuted,
-    } as CSSObject,
-  },
 };
 
 export const sizes = {

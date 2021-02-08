@@ -9,8 +9,10 @@ interface Props {}
 const Container = styled.header(({ theme }) => ({
   height: '60px',
   display: 'flex',
-  borderBottom: `1px solid ${theme.colors.divider}`,
+  borderBottom: `1px solid ${theme.colors.dividerStrong}`,
   alignItems: 'center',
+  backgroundColor: theme.colors.sidebar.background,
+  color: theme.colors.textMuted,
 }));
 
 export default function Toolbar(props: Props) {
