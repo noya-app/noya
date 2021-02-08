@@ -146,7 +146,6 @@ export default function Canvas(props: Props) {
 
           if (layer) {
             dispatch('interaction', ['maybeMove', layer.do_objectID, point]);
-            console.log('maybe move', layer.do_objectID);
           }
 
           break;
@@ -168,7 +167,6 @@ export default function Canvas(props: Props) {
             Math.abs(point.x - origin.x) > 2 ||
             Math.abs(point.y - origin.y) > 2
           ) {
-            // console.log('start move', state.interactionState, point);
             dispatch('interaction', ['startMoving', point]);
           }
 
@@ -188,12 +186,16 @@ export default function Canvas(props: Props) {
         case 'none': {
           const layer = getLayerAtPoint(CanvasKit, state, point);
 
-          dispatch(
-            'highlightLayer',
-            layer
-              ? { id: layer.do_objectID, precedence: 'belowSelection' }
-              : undefined,
-          );
+          // For perf, check that we actually need to update the highlight.
+          // This gets called on every mouse movement.
+          if (state.highlightedLayer?.id !== layer?.do_objectID) {
+            dispatch(
+              'highlightLayer',
+              layer
+                ? { id: layer.do_objectID, precedence: 'belowSelection' }
+                : undefined,
+            );
+          }
 
           break;
         }
