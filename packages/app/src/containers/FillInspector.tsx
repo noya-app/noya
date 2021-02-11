@@ -3,72 +3,70 @@ import { Selectors } from 'ayano-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import FillRow from '../components/inspector/FillRow';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useSelector,
+} from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
 
 export default memo(function FillInspector() {
-  const [state, dispatch] = useApplicationState();
+  const [, dispatch] = useApplicationState();
 
-  const getPageLayers = Selectors.makeGetPageLayers(state);
-
-  // TODO: Fills array isn't memoizing in a way that prevents re-render
-  const fills = useMemo(
-    () =>
-      getPageLayers(state.selectedObjects).map((layer) => layer.style?.fills),
-    [getPageLayers, state.selectedObjects],
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const fills = useShallowArray(
+    selectedLayers.map((layer) => layer.style?.fills),
   );
+  // TODO: Modify all fills
   const firstFill = useMemo(() => fills[0] || [], [fills]);
-
-  const onClickPlusFill = useCallback(() => dispatch('addNewFill'), [dispatch]);
-  const onClickTrashFill = useCallback(() => dispatch('deleteDisabledFills'), [
-    dispatch,
-  ]);
-  const onDeleteFill = useCallback((index) => dispatch('deleteFill', index), [
-    dispatch,
-  ]);
-  const onMoveFill = useCallback(
-    (sourceIndex, destinationIndex) =>
-      dispatch('moveFill', sourceIndex, destinationIndex),
-    [dispatch],
-  );
-  const onChangeCheckboxFill = useCallback(
-    (index, checked) => dispatch('setFillEnabled', index, checked),
-    [dispatch],
-  );
-  const arrayControllerChildrenFill = useCallback(
-    ({
-      item,
-      index,
-      checkbox,
-    }: {
-      item: FileFormat.Fill;
-      index: number;
-      checkbox: ReactNode;
-    }) => (
-      <FillRow
-        id={`fill-${index}`}
-        color={item.color}
-        prefix={checkbox}
-        onChangeColor={(value) => {
-          dispatch('setFillColor', index, value);
-        }}
-      />
-    ),
-    [dispatch],
-  );
 
   return (
     <ArrayController<FileFormat.Fill>
+      title="Fills"
       id="fills"
       key="fills"
       value={firstFill}
-      onClickPlus={onClickPlusFill}
-      onClickTrash={onClickTrashFill}
-      onDeleteItem={onDeleteFill}
-      onMoveItem={onMoveFill}
-      onChangeCheckbox={onChangeCheckboxFill}
-      title="Fills"
+      onClickPlus={useCallback(() => dispatch('addNewFill'), [dispatch])}
+      onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
+        dispatch,
+      ])}
+      onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
+        dispatch,
+      ])}
+      onMoveItem={useCallback(
+        (sourceIndex, destinationIndex) =>
+          dispatch('moveFill', sourceIndex, destinationIndex),
+        [dispatch],
+      )}
+      onChangeCheckbox={useCallback(
+        (index, checked) => dispatch('setFillEnabled', index, checked),
+        [dispatch],
+      )}
     >
-      {arrayControllerChildrenFill}
+      {useCallback(
+        ({
+          item,
+          index,
+          checkbox,
+        }: {
+          item: FileFormat.Fill;
+          index: number;
+          checkbox: ReactNode;
+        }) => (
+          <FillRow
+            id={`fill-${index}`}
+            color={item.color}
+            prefix={checkbox}
+            onChangeOpacity={(value) =>
+              dispatch('setFillOpacity', index, value)
+            }
+            onNudgeOpacity={(value) =>
+              dispatch('setFillOpacity', index, value, 'adjust')
+            }
+            onChangeColor={(value) => dispatch('setFillColor', index, value)}
+          />
+        ),
+        [dispatch],
+      )}
     </ArrayController>
   );
 });

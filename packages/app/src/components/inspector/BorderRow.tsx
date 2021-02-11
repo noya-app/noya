@@ -20,6 +20,7 @@ interface Props {
   color: FileFormat.Color;
   width: DimensionValue;
   onChangeColor: (color: FileFormat.Color) => void;
+  onChangeWidth: (amount: number) => void;
   onNudgeWidth: (amount: number) => void;
   prefix?: ReactNode;
 }
@@ -29,6 +30,7 @@ export default memo(function BorderRow({
   color,
   width,
   onChangeColor,
+  onChangeWidth,
   onNudgeWidth,
   prefix,
 }: Props) {
@@ -52,6 +54,15 @@ export default memo(function BorderRow({
     [colorInputId, hexInputId, widthInputId],
   );
 
+  const handleSubmitColor = useCallback((value: string) => {}, []);
+
+  const handleSubmitWidth = useCallback(
+    (value: number) => {
+      onChangeWidth(value);
+    },
+    [onChangeWidth],
+  );
+
   return (
     <Row>
       <LabeledElementView renderLabel={renderLabel}>
@@ -64,12 +75,17 @@ export default memo(function BorderRow({
         />
         <Spacer.Horizontal size={8} />
         <InputField.Root id={hexInputId} labelPosition="start">
-          <InputField.Input value={'FFFFFF'} />
+          <InputField.Input value={'FFFFFF'} onSubmit={handleSubmitColor} />
           <InputField.Label>#</InputField.Label>
         </InputField.Root>
         <Spacer.Horizontal size={8} />
         <InputField.Root id={widthInputId} size={50}>
-          <InputField.Input value={String(width)} onNudge={onNudgeWidth} />
+          <InputField.NumberInput
+            value={width}
+            onNudge={onNudgeWidth}
+            onSubmit={handleSubmitWidth}
+            placeholder={width === undefined ? 'multi' : ''}
+          />
         </InputField.Root>
       </LabeledElementView>
     </Row>

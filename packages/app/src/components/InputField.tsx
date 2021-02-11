@@ -8,6 +8,7 @@ import {
 } from 'react';
 import styled from 'styled-components';
 import handleNudge from '../utils/handleNudge';
+import TextInput, { TextInputProps } from './TextInput';
 
 type LabelPosition = 'start' | 'end';
 
@@ -58,7 +59,7 @@ function InputFieldLabel({ children = false }: InputFieldLabelProps) {
  * Input
  * ------------------------------------------------------------------------- */
 
-const InputElement = styled.input<{
+const InputElement = styled(TextInput)<{
   labelPosition: LabelPosition;
   labelSize: number;
 }>(({ theme, labelPosition, labelSize }) => ({
@@ -83,22 +84,58 @@ const InputElement = styled.input<{
   },
 }));
 
-interface InputFieldInputProps {
-  value: string;
-  placeholder?: string;
-  onChange?: (value: string) => void;
-  onNudge?: (value: number) => void;
-  children?: ReactNode;
+function InputFieldInput(props: TextInputProps) {
+  const { labelPosition, labelSize } = useContext(InputFieldContext);
+
+  return (
+    <InputElement
+      labelPosition={labelPosition}
+      labelSize={labelSize}
+      {...props}
+    />
+  );
 }
 
-function InputFieldInput({
-  value,
-  placeholder,
-  children,
-  onChange,
-  onNudge,
-}: InputFieldInputProps) {
-  const { labelPosition, labelSize } = useContext(InputFieldContext);
+/* ----------------------------------------------------------------------------
+ * NumberInput
+ * ------------------------------------------------------------------------- */
+
+type InputFieldNumberInputProps = Omit<
+  TextInputProps,
+  'value' | 'onChange' | 'onKeyDown' | 'onSubmit'
+> & {
+  value: number | undefined;
+  onNudge?: (value: number) => void;
+} & (
+    | {
+        onChange: (value: number) => void;
+      }
+    | {
+        onSubmit: (value: number, reset: () => void) => void;
+      }
+  );
+
+function parseNumber(value: string) {
+  return value ? Number(value) : NaN;
+}
+
+function InputFieldNumberInput(props: InputFieldNumberInputProps) {
+  const { value, placeholder, onNudge } = props;
+  const onSubmit = 'onSubmit' in props ? props.onSubmit : undefined;
+  const onChange = 'onChange' in props ? props.onChange : undefined;
+
+  const handleSubmit = useCallback(
+    (value: string, reset: () => void) => {
+      const newValue = parseNumber(value);
+
+      if (isNaN(newValue)) {
+        reset();
+      } else {
+        onSubmit?.(newValue, reset);
+      }
+    },
+    [onSubmit],
+  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -114,22 +151,23 @@ function InputFieldInput({
     [onNudge],
   );
 
+  const handleChange = useCallback(
+    (value: string) => {
+      onChange?.(parseNumber(value));
+    },
+    [onChange],
+  );
+
   return (
-    <InputElement
-      labelPosition={labelPosition}
-      labelSize={labelSize}
-      value={value}
+    <InputFieldInput
+      {...props}
+      value={value === undefined ? '' : String(value)}
       placeholder={placeholder}
-      onKeyDown={onNudge ? handleKeyDown : undefined}
-      onChange={useCallback(
-        (event) => {
-          onChange?.(event.target.value);
-        },
-        [onChange],
-      )}
-    >
-      {children}
-    </InputElement>
+      onKeyDown={handleKeyDown}
+      {...('onChange' in props
+        ? { onChange: handleChange }
+        : { onSubmit: handleSubmit })}
+    />
   );
 }
 
@@ -175,5 +213,6 @@ function InputFieldRoot({
 }
 
 export const Input = memo(InputFieldInput);
+export const NumberInput = memo(InputFieldNumberInput);
 export const Label = memo(InputFieldLabel);
 export const Root = memo(InputFieldRoot);

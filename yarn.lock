@@ -1545,7 +1545,7 @@
     "@radix-ui/react-polymorphic" "0.0.4"
     "@radix-ui/utils" "0.0.3"
 
-"@radix-ui/react-utils@0.0.4":
+"@radix-ui/react-utils@0.0.4", "@radix-ui/react-utils@^0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-utils/-/react-utils-0.0.4.tgz#4834cac08088163e0e738c3017fecab406236185"
   integrity sha512-HqC9OJJjoDun7LNqwYzVX9gYaH5yGhdNtaBRPoSt8wywh+Kv0iU6lDP5H7w7j+6TzZCHH8XEzRbmOSowzlpGAA==

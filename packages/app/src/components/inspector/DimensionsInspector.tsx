@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import * as InputField from '../InputField';
 import * as Spacer from '../Spacer';
 
-export type DimensionValue = number | 'multi';
+export type DimensionValue = number | undefined;
 
 export interface Props {
   x: DimensionValue;
@@ -24,24 +24,40 @@ export default function DimensionsInspector({ x, y, width, height }: Props) {
     <>
       <Row>
         <InputField.Root>
-          <InputField.Input value={String(x)} />
+          <InputField.NumberInput
+            value={x}
+            placeholder={x === undefined ? 'multi' : undefined}
+            onSubmit={() => {}}
+          />
           <InputField.Label>X</InputField.Label>
         </InputField.Root>
         <Spacer.Horizontal size={16} />
         <InputField.Root>
-          <InputField.Input value={String(y)} />
+          <InputField.NumberInput
+            value={y}
+            placeholder={y === undefined ? 'multi' : undefined}
+            onSubmit={() => {}}
+          />
           <InputField.Label>Y</InputField.Label>
         </InputField.Root>
       </Row>
       <Spacer.Vertical size={10} />
       <Row>
         <InputField.Root>
-          <InputField.Input value={String(width)} />
+          <InputField.NumberInput
+            value={width}
+            placeholder={width === undefined ? 'multi' : undefined}
+            onSubmit={() => {}}
+          />
           <InputField.Label>W</InputField.Label>
         </InputField.Root>
         <Spacer.Horizontal size={16} />
         <InputField.Root>
-          <InputField.Input value={String(height)} />
+          <InputField.NumberInput
+            value={height}
+            placeholder={height === undefined ? 'multi' : undefined}
+            onSubmit={() => {}}
+          />
           <InputField.Label>H</InputField.Label>
         </InputField.Root>
       </Row>

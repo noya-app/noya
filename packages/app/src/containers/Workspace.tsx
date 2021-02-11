@@ -61,7 +61,11 @@ export default function Workspace(props: Props) {
         <Spacer.Vertical size={59} />
         <FilterContainer>
           <InputField.Root labelPosition="start" labelSize={14}>
-            <InputField.Input value={''} placeholder="Filter layers" />
+            <InputField.Input
+              value={''}
+              onChange={() => {}}
+              placeholder="Filter layers"
+            />
             <InputField.Label>
               <MagnifyingGlassIcon />
             </InputField.Label>

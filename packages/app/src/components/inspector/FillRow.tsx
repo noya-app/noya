@@ -19,6 +19,8 @@ interface Props {
   id: string;
   color: FileFormat.Color;
   onChangeColor: (color: FileFormat.Color) => void;
+  onChangeOpacity: (amount: number) => void;
+  onNudgeOpacity: (amount: number) => void;
   prefix?: ReactNode;
 }
 
@@ -26,6 +28,8 @@ export default memo(function FillRow({
   id,
   color,
   onChangeColor,
+  onChangeOpacity,
+  onNudgeOpacity,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
@@ -48,6 +52,20 @@ export default memo(function FillRow({
     [colorInputId, hexInputId, opacityInputId],
   );
 
+  const handleSubmitOpacity = useCallback(
+    (opacity: number) => {
+      onChangeOpacity(opacity / 100);
+    },
+    [onChangeOpacity],
+  );
+
+  const handleNudgeOpacity = useCallback(
+    (amount: number) => {
+      onNudgeOpacity(amount / 100);
+    },
+    [onNudgeOpacity],
+  );
+
   return (
     <Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
@@ -60,12 +78,16 @@ export default memo(function FillRow({
         />
         <Spacer.Horizontal size={8} />
         <InputField.Root id={hexInputId} labelPosition="start">
-          <InputField.Input value={'FFFFFF'} />
+          <InputField.Input value={'FFFFFF'} onSubmit={() => {}} />
           <InputField.Label>#</InputField.Label>
         </InputField.Root>
         <Spacer.Horizontal size={8} />
         <InputField.Root id={opacityInputId} size={50}>
-          <InputField.Input value={String(Math.round(color.alpha * 100))} />
+          <InputField.NumberInput
+            value={Math.round(color.alpha * 100)}
+            onSubmit={handleSubmitOpacity}
+            onNudge={handleNudgeOpacity}
+          />
           <InputField.Label>%</InputField.Label>
         </InputField.Root>
       </LabeledElementView>

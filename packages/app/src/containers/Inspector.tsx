@@ -32,7 +32,7 @@ export default memo(function Inspector(props: Props) {
     const dimensionsInspectorProps: DimensionsInspectorProps =
       selectedLayers.length === 1
         ? selectedLayers[0].frame
-        : { x: 'multi', y: 'multi', width: 'multi', height: 'multi' };
+        : { x: undefined, y: undefined, width: undefined, height: undefined };
 
     const views = [
       <Fragment key="layout">

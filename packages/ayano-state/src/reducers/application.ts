@@ -34,6 +34,8 @@ export type ApplicationState = {
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
 
+export type SetNumberMode = 'replace' | 'adjust';
+
 type StyleElementType = 'Fill' | 'Border';
 
 export type Action =
@@ -55,7 +57,18 @@ export type Action =
     ]
   | [type: `deleteDisabled${StyleElementType}s`]
   | [type: `set${StyleElementType}Enabled`, index: number, isEnabled: boolean]
-  | [type: 'nudgeBorderWidth', index: number, amount: number]
+  | [
+      type: 'setBorderWidth',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setFillOpacity',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [type: 'interaction', action: InteractionAction];
 
@@ -309,8 +322,8 @@ export function reducer(
         });
       });
     }
-    case 'nudgeBorderWidth': {
-      const [, index, amount] = action;
+    case 'setBorderWidth': {
+      const [, index, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexes = getSelectedLayerIndexes(state);
 
@@ -319,10 +332,32 @@ export function reducer(
           const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
 
           if (style && style.borders && style.borders[index]) {
-            style.borders[index].thickness = Math.max(
-              0,
-              style.borders[index].thickness + amount,
-            );
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.borders[index].thickness + amount;
+
+            style.borders[index].thickness = Math.max(0, newValue);
+          }
+        });
+      });
+    }
+    case 'setFillOpacity': {
+      const [, index, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexes = getSelectedLayerIndexes(state);
+
+      return produce(state, (state) => {
+        layerIndexes.forEach((layerIndex) => {
+          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+
+          if (style && style.fills && style.fills[index]) {
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.fills[index].color.alpha + amount;
+
+            style.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
           }
         });
       });

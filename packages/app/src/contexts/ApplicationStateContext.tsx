@@ -1,5 +1,6 @@
 import { Action, ApplicationState } from 'ayano-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
+import { useGlobalInputBlurTrigger } from './GlobalInputBlurContext';
 
 export type ApplicationStateContextValue = [
   ApplicationState,
@@ -16,6 +17,7 @@ type Dispatcher = (...args: Action) => void;
 
 export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   const value = useContext(ApplicationStateContext);
+  const trigger = useGlobalInputBlurTrigger();
 
   if (!value) {
     throw new Error(`Missing ApplicationStateProvider`);
@@ -25,8 +27,15 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
 
   // Simplify the dispatch function by flattening our Action tuple
   const wrappedDispatch: Dispatcher = useCallback(
-    (...args: Action) => dispatch(args),
-    [dispatch],
+    (...args: Action) => {
+      // When changing selection, trigger any pending updates in input fields
+      if (args[0] === 'selectLayer' || args[0] === 'selectPage') {
+        trigger();
+      }
+
+      dispatch(args);
+    },
+    [dispatch, trigger],
   );
 
   const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
