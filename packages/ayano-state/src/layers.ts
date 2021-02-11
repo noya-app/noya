@@ -12,6 +12,11 @@ export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   }
 };
 
-export const { visit, findIndexPath, access } = withOptions<Sketch.AnyLayer>({
+export const {
+  visit,
+  findIndexPath,
+  findAllIndexPaths,
+  access,
+} = withOptions<Sketch.AnyLayer>({
   getChildren,
 });

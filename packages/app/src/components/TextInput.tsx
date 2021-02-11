@@ -135,6 +135,9 @@ function SubmittableTextInput({
 
 export type TextInputProps = ControlledProps | SubmittableProps;
 
+/**
+ * This component shouldn't be used directly. Instead use the InputField components.
+ */
 export default function TextInput(props: TextInputProps) {
   if ('onChange' in props) {
     return <ControlledTextInput {...props} />;

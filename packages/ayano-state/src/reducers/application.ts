@@ -4,7 +4,7 @@ import { SketchFile } from 'sketch-zip';
 import {
   getCurrentPage,
   getCurrentPageIndex,
-  getSelectedLayerIndexes,
+  getSelectedLayerIndexPaths,
 } from '../selectors';
 import * as Models from '../models';
 import * as Layers from '../layers';
@@ -16,6 +16,7 @@ import {
 } from './interaction';
 import { UUID } from '../types';
 import { Selectors } from '..';
+import { IndexPath } from 'tree-visit';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -153,11 +154,11 @@ export function reducer(
     case 'addNewBorder':
     case 'addNewFill': {
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (!style) return;
 
@@ -184,11 +185,11 @@ export function reducer(
     case 'setFillEnabled': {
       const [, index, isEnabled] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (!style) return;
 
@@ -210,11 +211,11 @@ export function reducer(
     case 'deleteBorder':
     case 'deleteFill': {
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (!style) return;
 
@@ -237,11 +238,11 @@ export function reducer(
     case 'moveFill': {
       const [, sourceIndex, destinationIndex] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (!style) return;
 
@@ -269,11 +270,11 @@ export function reducer(
     case 'deleteDisabledBorders':
     case 'deleteDisabledFills': {
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (!style) return;
 
@@ -299,11 +300,11 @@ export function reducer(
     case 'setFillColor': {
       const [, index, color] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (!style) return;
 
@@ -325,11 +326,11 @@ export function reducer(
     case 'setBorderWidth': {
       const [, index, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (style && style.borders && style.borders[index]) {
             const newValue =
@@ -345,11 +346,11 @@ export function reducer(
     case 'setFillOpacity': {
       const [, index, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexes = getSelectedLayerIndexes(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        layerIndexes.forEach((layerIndex) => {
-          const style = state.sketch.pages[pageIndex].layers[layerIndex].style;
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
 
           if (style && style.fills && style.fills[index]) {
             const newValue =
@@ -400,6 +401,22 @@ export function reducer(
     default:
       return state;
   }
+}
+
+/**
+ * Get an array of all layers using as few lookups as possible on the state tree.
+ *
+ * Immer will duplicate any objects we access within a produce method, so we
+ * don't want to walk every layer, since that would duplicate all of them.
+ */
+function accessPageLayers(
+  state: ApplicationState,
+  pageIndex: number,
+  layerIndexPaths: IndexPath[],
+): Sketch.AnyLayer[] {
+  return layerIndexPaths.map((layerIndex) => {
+    return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+  });
 }
 
 export function createInitialState(sketch: SketchFile): ApplicationState {

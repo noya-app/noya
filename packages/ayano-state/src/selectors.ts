@@ -1,6 +1,7 @@
 import type { CanvasKit } from 'canvaskit-wasm';
 import * as Primitives from 'sketch-canvas/src/primitives';
-import type { ApplicationState, PageLayer } from './index';
+import { IndexPath } from 'tree-visit';
+import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath } from './layers';
 import type { Point, UUID } from './types';
 
@@ -32,12 +33,14 @@ export const getCurrentPageMetadata = (state: ApplicationState) => {
   };
 };
 
-export const getSelectedLayerIndexes = (state: ApplicationState): number[] => {
+export const getSelectedLayerIndexPaths = (
+  state: ApplicationState,
+): IndexPath[] => {
   const page = getCurrentPage(state);
 
-  return state.selectedObjects
-    .map((id) => page.layers.findIndex((layer) => layer.do_objectID === id))
-    .filter((index) => index !== -1);
+  return Layers.findAllIndexPaths(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  );
 };
 
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
