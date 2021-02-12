@@ -1,6 +1,5 @@
 import { Point, ShapeType } from 'ayano-state';
 import {
-  getCurrentPage,
   getCurrentPageMetadata,
   getLayerAtPoint,
 } from 'ayano-state/src/selectors';
@@ -42,6 +41,7 @@ interface Props {}
 export default function Canvas(props: Props) {
   const {
     colors: {
+      textMuted: textColor,
       canvas: { background: backgroundColor },
     },
     sizes: { sidebarWidth },
@@ -103,15 +103,24 @@ export default function Canvas(props: Props) {
     if (!surfaceRef.current) return;
 
     const surface = surfaceRef.current;
-    const context = { CanvasKit, canvas: surface.getCanvas(), state };
+    const context = {
+      CanvasKit,
+      canvas: surface.getCanvas(),
+      state,
+      theme: {
+        textColor,
+        backgroundColor,
+      },
+    };
 
-    drawCanvas(context, backgroundColor, sidebarWidth);
+    drawCanvas(context, sidebarWidth);
 
     surface.flush();
   }, [
     CanvasKit,
     state,
     backgroundColor,
+    textColor,
     sidebarWidth,
     // `containerSize` affects rendering even though it isn't used here directly
     containerSize,

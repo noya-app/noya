@@ -22,21 +22,18 @@ export interface Context {
   state: ApplicationState;
   CanvasKit: CanvasKit;
   canvas: Canvas;
+  theme: { textColor: string; backgroundColor: string };
 }
 
 let fontManager: FontMgr;
 
-export function drawCanvas(
-  context: Context,
-  backgroundColor: string,
-  sidebarWidth: number,
-) {
-  const { CanvasKit, canvas, state } = context;
+export function drawCanvas(context: Context, sidebarWidth: number) {
+  const { CanvasKit, canvas, state, theme } = context;
 
   const page = getCurrentPage(state);
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
-  canvas.clear(CanvasKit.parseColorString(backgroundColor));
+  canvas.clear(CanvasKit.parseColorString(theme.backgroundColor));
 
   canvas.save();
   canvas.translate(scrollOrigin.x + sidebarWidth, scrollOrigin.y);
@@ -197,8 +194,8 @@ export function drawLayer(context: Context, layer: Sketch.AnyLayer) {
   }
 }
 
-export function drawArtboard(context: Context, artboard: Sketch.Artboard) {
-  const { canvas, CanvasKit } = context;
+export function drawArtboard(context: Context, layer: Sketch.Artboard) {
+  const { canvas, CanvasKit, theme } = context;
 
   const paint = new CanvasKit.Paint();
   paint.setColor(CanvasKit.WHITE);
@@ -212,10 +209,10 @@ export function drawArtboard(context: Context, artboard: Sketch.Artboard) {
     CanvasKit.MaskFilter.MakeBlur(CanvasKit.BlurStyle.Normal, 2, true),
   );
 
-  const rect = Primitives.rect(CanvasKit, artboard.frame);
+  const rect = Primitives.rect(CanvasKit, layer.frame);
   const blurRect = Primitives.rect(CanvasKit, {
-    ...artboard.frame,
-    y: artboard.frame.y + 1,
+    ...layer.frame,
+    y: layer.frame.y + 1,
   });
 
   canvas.drawRect(blurRect, blur);
@@ -223,13 +220,35 @@ export function drawArtboard(context: Context, artboard: Sketch.Artboard) {
 
   canvas.save();
   canvas.clipRect(rect, CanvasKit.ClipOp.Intersect, true);
-  canvas.translate(artboard.frame.x, artboard.frame.y);
+  canvas.translate(layer.frame.x, layer.frame.y);
 
-  artboard.layers.forEach((layer) => {
-    drawLayer(context, layer);
+  layer.layers.forEach((child) => {
+    drawLayer(context, child);
   });
 
   canvas.restore();
+
+  // Render label
+
+  const paragraphStyle = new CanvasKit.ParagraphStyle({
+    textStyle: {
+      color: CanvasKit.parseColorString(theme.textColor),
+      fontSize: 11,
+      fontFamilies: ['Roboto'],
+      letterSpacing: 0.2,
+    },
+  });
+
+  const builder = CanvasKit.ParagraphBuilder.Make(paragraphStyle, fontManager);
+  builder.addText(layer.name);
+  const paragraph = builder.build();
+  paragraph.layout(10000);
+
+  canvas.drawParagraph(
+    paragraph,
+    layer.frame.x + 3,
+    layer.frame.y - paragraph.getHeight() - 3,
+  );
 }
 
 export function drawText(context: Context, layer: Sketch.Text) {
