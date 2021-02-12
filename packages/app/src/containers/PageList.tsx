@@ -3,8 +3,7 @@ import styled from 'styled-components';
 import * as ListView from '../components/ListView';
 import * as Spacer from '../components/Spacer';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
-
-interface Props {}
+import useDeepArray from '../hooks/useDeepArray';
 
 const Container = styled.div(({ theme }) => ({
   height: '200px',
@@ -25,23 +24,20 @@ const Header = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-export default function PageList(props: Props) {
+export default function PageList() {
   const [state, dispatch] = useApplicationState();
 
+  const pageInfo = useDeepArray(
+    state.sketch.pages.map((page) => ({
+      do_objectID: page.do_objectID,
+      name: page.name,
+    })),
+  );
+
   const pageElements = useMemo(() => {
-    const pages = state.sketch.pages;
-    return pages.map((page, index) => (
+    return pageInfo.map((page) => (
       <ListView.Row
         key={page.do_objectID}
-        position={
-          pages.length === 1
-            ? 'only'
-            : index === 0
-            ? 'first'
-            : index === pages.length - 1
-            ? 'last'
-            : 'middle'
-        }
         selected={state.selectedPage === page.do_objectID}
         onClick={() => {
           dispatch('interaction', ['reset']);
@@ -52,7 +48,7 @@ export default function PageList(props: Props) {
         {page.name}
       </ListView.Row>
     ));
-  }, [state, dispatch]);
+  }, [pageInfo, state.selectedPage, dispatch]);
 
   return (
     <Container>

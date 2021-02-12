@@ -1,4 +1,11 @@
-import { memo, ReactNode, useCallback } from 'react';
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  memo,
+  ReactNode,
+  useCallback,
+} from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
 
@@ -199,7 +206,51 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
     [onClick],
   );
 
-  return <RootContainer onClick={handleClick}>{children}</RootContainer>;
+  const flattened = Children.toArray(children);
+  const mappedChildren: typeof flattened = [];
+
+  for (let i = 0; i < flattened.length; i++) {
+    const prev = flattened[i - 1];
+    const current = flattened[i];
+    const next = flattened[i + 1];
+
+    if (!isValidElement(current)) {
+      mappedChildren.push(current);
+      continue;
+    }
+
+    const nextItem =
+      isValidElement(next) && next.type !== SectionHeader ? next : undefined;
+    const prevItem =
+      isValidElement(prev) && prev.type !== SectionHeader ? prev : undefined;
+
+    const cloneProps = { ...current.props };
+
+    if (nextItem && prevItem) {
+      cloneProps.position = 'middle';
+    } else if (nextItem && !prevItem) {
+      cloneProps.position = 'first';
+    } else if (!nextItem && prevItem) {
+      cloneProps.position = 'last';
+    }
+
+    if (cloneProps.selected) {
+      const nextSelected = nextItem && nextItem.props.selected;
+      const prevSelected = prevItem && prevItem.props.selected;
+
+      if (nextSelected && prevSelected) {
+        cloneProps.selectedPosition = 'middle';
+      } else if (nextSelected && !prevSelected) {
+        cloneProps.selectedPosition = 'first';
+      } else if (!nextSelected && prevSelected) {
+        cloneProps.selectedPosition = 'last';
+      }
+    }
+
+    mappedChildren.push(cloneElement(current, cloneProps));
+  }
+
+  return <RootContainer onClick={handleClick}>{mappedChildren}</RootContainer>;
 }
 
 export const Row = memo(ListViewRow);

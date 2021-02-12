@@ -1,7 +1,7 @@
 import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Layers, PageLayer, Selectors } from 'ayano-state';
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { visit } from 'tree-visit';
 import {
   SquareIcon,
@@ -16,6 +16,8 @@ import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
+import useDeepArray from '../hooks/useDeepArray';
 
 interface Props {}
 
@@ -27,9 +29,7 @@ type LayerListItem = {
   name: string;
   depth: number;
   expanded: boolean;
-  position: ListView.ListRowPosition;
   selected: boolean;
-  selectedPosition: ListView.ListRowPosition;
 };
 
 function flattenLayerList(
@@ -56,42 +56,10 @@ function flattenLayerList(
         depth: indexPath.length - 1,
         expanded:
           layer.layerListExpandedType === Sketch.LayerListExpanded.Expanded,
-        position: 'only',
         selected: selectedObjects.includes(layer.do_objectID),
-        selectedPosition: 'only',
       });
     },
   });
-
-  for (let i = 0; i < flattened.length; i++) {
-    const prev = flattened[i - 1];
-    const current = flattened[i];
-    const next = flattened[i + 1];
-
-    const nextItem = next && next.type !== 'artboard';
-    const prevItem = prev && prev.type !== 'artboard';
-
-    if (nextItem && prevItem) {
-      current.position = 'middle';
-    } else if (nextItem && !prevItem) {
-      current.position = 'first';
-    } else if (!nextItem && prevItem) {
-      current.position = 'last';
-    }
-
-    if (current.selected) {
-      const nextSelected = next && next.type !== 'artboard' && next.selected;
-      const prevSelected = prev && prev.type !== 'artboard' && prev.selected;
-
-      if (nextSelected && prevSelected) {
-        current.selectedPosition = 'middle';
-      } else if (nextSelected && !prevSelected) {
-        current.selectedPosition = 'first';
-      } else if (!nextSelected && prevSelected) {
-        current.selectedPosition = 'last';
-      }
-    }
-  }
 
   return flattened;
 }
@@ -123,109 +91,94 @@ const LayerIcon = memo(function LayerIcon({
 
 export default function LayerList(props: Props) {
   const [state, dispatch] = useApplicationState();
-  const selectedObjects = state.selectedObjects;
   const page = useSelector(Selectors.getCurrentPage);
+  const selectedObjects = useShallowArray(state.selectedObjects);
+  const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
   const layerElements = useMemo(() => {
-    const items = flattenLayerList(page, selectedObjects);
+    return items.map(({ id, name, depth, type, expanded, selected }, index) => {
+      const rowContent = (
+        <>
+          <Spacer.Horizontal size={depth * 12} />
+          <LayerIcon type={type} selected={selected} />
+          <Spacer.Horizontal size={10} />
+          {name}
+        </>
+      );
 
-    return items.map(
-      (
-        {
-          id,
-          name,
-          depth,
-          type,
-          expanded,
-          position,
-          selected,
-          selectedPosition,
-        },
-        index,
-      ) => {
-        const rowContent = (
-          <>
-            <Spacer.Horizontal size={depth * 12} />
-            <LayerIcon type={type} selected={selected} />
-            <Spacer.Horizontal size={10} />
-            {name}
-          </>
-        );
+      const handleClick = (info: ListView.ListViewClickInfo) => {
+        const { metaKey, shiftKey } = info;
 
-        const handleClick = (info: ListView.ListViewClickInfo) => {
-          const { metaKey, shiftKey } = info;
+        dispatch('interaction', ['reset']);
 
-          dispatch('interaction', ['reset']);
-
-          if (metaKey) {
-            dispatch(
-              'selectLayer',
-              id,
-              selectedObjects.includes(id) ? 'difference' : 'intersection',
-            );
-          } else if (shiftKey && selectedObjects.length > 0) {
-            const lastSelectedIndex = items.findIndex(
-              (item) => item.id === selectedObjects[selectedObjects.length - 1],
-            );
-
-            const first = Math.min(index, lastSelectedIndex);
-            const last = Math.max(index, lastSelectedIndex) + 1;
-
-            dispatch(
-              'selectLayer',
-              items.slice(first, last).map((item) => item.id),
-              'intersection',
-            );
-          } else {
-            dispatch('selectLayer', id, 'replace');
-          }
-        };
-
-        const handleHoverChange = (hovered: boolean) => {
+        if (metaKey) {
           dispatch(
-            'highlightLayer',
-            hovered ? { id, precedence: 'aboveSelection' } : undefined,
+            'selectLayer',
+            id,
+            selectedObjects.includes(id) ? 'difference' : 'intersection',
           );
-        };
+        } else if (shiftKey && selectedObjects.length > 0) {
+          const lastSelectedIndex = items.findIndex(
+            (item) => item.id === selectedObjects[selectedObjects.length - 1],
+          );
 
-        const rowProps = {
-          key: id,
-          selected,
-          onClick: handleClick,
-          onHoverChange: handleHoverChange,
-        };
+          const first = Math.min(index, lastSelectedIndex);
+          const last = Math.max(index, lastSelectedIndex) + 1;
 
-        return type === 'artboard' ? (
-          <ListView.SectionHeader {...rowProps}>
-            <span
-              style={{ display: 'flex', alignItems: 'center' }}
-              onClick={(event) => {
-                event.stopPropagation();
+          dispatch(
+            'selectLayer',
+            items.slice(first, last).map((item) => item.id),
+            'intersection',
+          );
+        } else {
+          dispatch('selectLayer', id, 'replace');
+        }
+      };
 
-                dispatch('setExpandedInLayerList', id, !expanded);
-              }}
-            >
-              {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-            </span>
-            <Spacer.Horizontal size={6} />
-            {rowContent}
-          </ListView.SectionHeader>
-        ) : (
-          <ListView.Row
-            {...rowProps}
-            position={position}
-            selectedPosition={selectedPosition}
-          >
-            <Spacer.Horizontal size={6 + 15} />
-            {rowContent}
-          </ListView.Row>
+      const handleHoverChange = (hovered: boolean) => {
+        dispatch(
+          'highlightLayer',
+          hovered ? { id, precedence: 'aboveSelection' } : undefined,
         );
-      },
-    );
-  }, [dispatch, selectedObjects, page]);
+      };
+
+      const rowProps = {
+        key: id,
+        selected,
+        onClick: handleClick,
+        onHoverChange: handleHoverChange,
+      };
+
+      return type === 'artboard' ? (
+        <ListView.SectionHeader {...rowProps}>
+          <span
+            style={{ display: 'flex', alignItems: 'center' }}
+            onClick={(event) => {
+              event.stopPropagation();
+
+              dispatch('setExpandedInLayerList', id, !expanded);
+            }}
+          >
+            {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+          </span>
+          <Spacer.Horizontal size={6} />
+          {rowContent}
+        </ListView.SectionHeader>
+      ) : (
+        <ListView.Row {...rowProps}>
+          <Spacer.Horizontal size={6 + 15} />
+          {rowContent}
+        </ListView.Row>
+      );
+    });
+  }, [items, dispatch, selectedObjects]);
 
   return (
-    <ListView.Root onClick={() => dispatch('selectLayer', undefined)}>
+    <ListView.Root
+      onClick={useCallback(() => dispatch('selectLayer', undefined), [
+        dispatch,
+      ])}
+    >
       {layerElements}
     </ListView.Root>
   );
