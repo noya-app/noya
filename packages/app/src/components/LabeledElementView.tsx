@@ -9,6 +9,26 @@ import {
   useMemo,
   useRef,
 } from 'react';
+import styled from 'styled-components';
+
+const Container = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: '1',
+  flexDirection: 'column',
+  position: 'relative',
+}));
+
+const Tools = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: '1',
+  alignItems: 'center',
+}));
+
+const Labels = styled.div(({ theme }) => ({
+  height: 'var(--height)',
+  position: 'relative',
+  overflow: 'hidden',
+}));
 
 interface ContainerProps {
   children: ReactNode;
@@ -150,28 +170,9 @@ export default memo(function LabeledElementView({
   }, [refs, labelElements]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        display: 'flex',
-        flex: '1',
-        flexDirection: 'column',
-        position: 'relative',
-      }}
-    >
-      <div style={{ display: 'flex', flex: '1', alignItems: 'center' }}>
-        {children}
-      </div>
-      <div
-        style={{
-          height: 'var(--height)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-        id="label-container"
-      >
-        {labelElements}
-      </div>
-    </div>
+    <Container ref={containerRef}>
+      <Tools>{children}</Tools>
+      <Labels>{labelElements}</Labels>
+    </Container>
   );
 });
