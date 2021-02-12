@@ -11,7 +11,7 @@ export type InteractionAction =
   | [`insert${Capitalize<ShapeType>}`]
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
-  | [type: 'maybeMove', id: UUID, origin: Point]
+  | [type: 'maybeMove', origin: Point]
   | [type: 'startMoving', point: Point]
   | [type: 'updateMoving', point: Point];
 
@@ -27,8 +27,8 @@ export type InteractionState =
       origin: Point;
       value: PageLayer;
     }
-  | { type: 'maybeMove'; origin: Point; id: UUID }
-  | { type: 'moving'; previous: Point; next: Point; id: UUID };
+  | { type: 'maybeMove'; origin: Point }
+  | { type: 'moving'; previous: Point; next: Point };
 
 /**
  * Create a rectangle with a non-negative width and height
@@ -98,9 +98,9 @@ export function interactionReducer(
       });
     }
     case 'maybeMove': {
-      const [, id, origin] = action;
+      const [, origin] = action;
 
-      return { type: 'maybeMove', id, origin };
+      return { type: 'maybeMove', origin };
     }
     case 'startMoving': {
       const [, point] = action;
@@ -111,7 +111,6 @@ export function interactionReducer(
 
       return {
         type: 'moving',
-        id: state.id,
         previous: state.origin,
         next: point,
       };
@@ -125,7 +124,6 @@ export function interactionReducer(
 
       return {
         type: 'moving',
-        id: state.id,
         previous: state.next,
         next: point,
       };

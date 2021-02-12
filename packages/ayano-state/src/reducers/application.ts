@@ -365,18 +365,8 @@ export function reducer(
       });
     }
     case 'interaction': {
-      let layerIndexPath: Selectors.LayerIndexPath | undefined;
-
-      switch (state.interactionState.type) {
-        case 'moving':
-        case 'maybeMove': {
-          layerIndexPath = Selectors.getLayerIndexPath(
-            state,
-            state.interactionState.id,
-          );
-          break;
-        }
-      }
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
         state.interactionState = interactionReducer(
@@ -384,18 +374,20 @@ export function reducer(
           action[1],
         );
 
-        if (state.interactionState.type === 'moving' && layerIndexPath) {
+        if (state.interactionState.type === 'moving') {
           const { previous, next } = state.interactionState;
-          const { pageIndex, indexPath } = layerIndexPath;
-          const layer = Layers.access(state.sketch.pages[pageIndex], indexPath);
 
-          const delta = {
-            x: next.x - previous.x,
-            y: next.y - previous.y,
-          };
+          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              const delta = {
+                x: next.x - previous.x,
+                y: next.y - previous.y,
+              };
 
-          layer.frame.x += delta.x;
-          layer.frame.y += delta.y;
+              layer.frame.x += delta.x;
+              layer.frame.y += delta.y;
+            },
+          );
         }
       });
     }

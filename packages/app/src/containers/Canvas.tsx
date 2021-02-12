@@ -52,8 +52,6 @@ export default function Canvas(props: Props) {
   const CanvasKit = useCanvasKit();
   const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
-
-  const currentPage = useSelector(getCurrentPage);
   const meta = useSelector(getCurrentPageMetadata);
 
   // Event coordinates are relative to (0,0), but we want them to include
@@ -141,10 +139,14 @@ export default function Canvas(props: Props) {
         case 'none': {
           const layer = getLayerAtPoint(CanvasKit, state, point);
 
-          dispatch('selectLayer', layer?.do_objectID);
-
           if (layer) {
-            dispatch('interaction', ['maybeMove', layer.do_objectID, point]);
+            if (!state.selectedObjects.includes(layer.do_objectID)) {
+              dispatch('selectLayer', layer.do_objectID);
+            }
+
+            dispatch('interaction', ['maybeMove', point]);
+          } else {
+            dispatch('selectLayer', undefined);
           }
 
           break;
@@ -175,7 +177,6 @@ export default function Canvas(props: Props) {
           break;
         }
         case 'moving': {
-          // console.log('update move', state.interactionState, point);
           dispatch('interaction', ['updateMoving', point]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
