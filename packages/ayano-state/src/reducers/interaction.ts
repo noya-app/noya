@@ -4,7 +4,7 @@ import type { PageLayer } from '..';
 import { Point, Rect, UUID } from '../types';
 import * as Models from '../models';
 
-export type ShapeType = 'rectangle' | 'oval' | 'text';
+export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
 
 export type InteractionAction =
   | ['reset']
@@ -44,7 +44,7 @@ function createRect(initialPoint: Point, finalPoint: Point): Rect {
 
 function createShape(
   shapeType: ShapeType,
-): Sketch.Oval | Sketch.Rectangle | Sketch.Text {
+): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
   switch (shapeType) {
     case 'oval':
       return Models.oval;
@@ -52,6 +52,8 @@ function createShape(
       return Models.rectangle;
     case 'text':
       return Models.text;
+    case 'artboard':
+      return Models.artboard;
   }
 }
 
@@ -60,6 +62,7 @@ export function interactionReducer(
   action: InteractionAction,
 ): InteractionState {
   switch (action[0]) {
+    case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
     case 'insertText': {

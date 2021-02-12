@@ -29,9 +29,19 @@ export default function PageList(props: Props) {
   const [state, dispatch] = useApplicationState();
 
   const pageElements = useMemo(() => {
-    return state.sketch.pages.map((page) => (
+    const pages = state.sketch.pages;
+    return pages.map((page, index) => (
       <ListView.Row
         key={page.do_objectID}
+        position={
+          pages.length === 1
+            ? 'only'
+            : index === 0
+            ? 'first'
+            : index === pages.length - 1
+            ? 'last'
+            : 'middle'
+        }
         selected={state.selectedPage === page.do_objectID}
         onClick={() => {
           dispatch('interaction', ['reset']);

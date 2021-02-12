@@ -82,6 +82,8 @@ export function getLayerAtPoint(
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
 
+  // TODO: check if we're clicking the title of an artboard
+
   const layers = page.layers.filter((layer) => {
     const rect = layer.frame;
 
@@ -94,7 +96,6 @@ export function getLayerAtPoint(
   });
 
   return [...layers.reverse()].find((layer) => {
-    // TODO: Check path
     if (layer._class === 'oval') {
       const path = Primitives.path(CanvasKit, layer.points, layer.frame);
       return path.contains(point.x, point.y);

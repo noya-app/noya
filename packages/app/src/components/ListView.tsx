@@ -16,9 +16,10 @@ const listReset: CSSObject = {
  * ------------------------------------------------------------------------- */
 
 const RowContainer = styled.li<{
-  selected: boolean;
   position: ListRowPosition;
-}>(({ theme, selected, position }) => ({
+  selected: boolean;
+  selectedPosition: ListRowPosition;
+}>(({ theme, position, selected, selectedPosition }) => ({
   ...listReset,
   ...theme.textStyles.small,
   userSelect: 'none',
@@ -39,13 +40,19 @@ const RowContainer = styled.li<{
   }),
   display: 'flex',
   alignItems: 'center',
+  ...((position === 'first' || position === 'only') && {
+    marginTop: '8px',
+  }),
+  ...((position === 'last' || position === 'only') && {
+    marginBottom: '8px',
+  }),
   ...(selected &&
-    (position === 'middle' || position === 'last') && {
+    (selectedPosition === 'middle' || selectedPosition === 'last') && {
       borderTopRightRadius: '0px',
       borderTopLeftRadius: '0px',
     }),
   ...(selected &&
-    (position === 'middle' || position === 'first') && {
+    (selectedPosition === 'middle' || selectedPosition === 'first') && {
       borderBottomRightRadius: '0px',
       borderBottomLeftRadius: '0px',
     }),
@@ -59,8 +66,9 @@ export interface ListViewClickInfo {
 
 export interface ListViewRowProps {
   children?: ReactNode;
-  selected?: boolean;
   position?: ListRowPosition;
+  selected?: boolean;
+  selectedPosition?: ListRowPosition;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
 }
@@ -69,8 +77,9 @@ function ListViewRow({
   children,
   onClick,
   onHoverChange,
-  selected = false,
   position = 'only',
+  selected = false,
+  selectedPosition = 'only',
 }: ListViewRowProps) {
   const { hoverProps } = useHover({
     onHoverChange,
@@ -89,8 +98,9 @@ function ListViewRow({
     <RowContainer
       {...hoverProps}
       onClick={handleClick}
-      selected={selected}
       position={position}
+      selected={selected}
+      selectedPosition={selectedPosition}
       aria-selected={selected}
     >
       {children}
@@ -123,8 +133,8 @@ const SectionHeaderContainer = styled.li<{ selected: boolean }>(
     }),
     display: 'flex',
     alignItems: 'center',
-    marginTop: '8px',
-    marginBottom: '8px',
+    // marginTop: '8px',
+    // marginBottom: '8px',
   }),
 );
 
@@ -169,8 +179,8 @@ const RootContainer = styled.ul(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flexWrap: 'nowrap',
-  paddingTop: '8px',
-  paddingBottom: '8px',
+  // paddingTop: '8px',
+  // paddingBottom: '8px',
   color: theme.colors.textMuted,
 }));
 

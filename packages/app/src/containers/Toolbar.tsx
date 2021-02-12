@@ -1,7 +1,12 @@
 import styled from 'styled-components';
 import Button from '../components/Button';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
-import { SquareIcon, CircleIcon, TextIcon } from '@radix-ui/react-icons';
+import {
+  SquareIcon,
+  CircleIcon,
+  TextIcon,
+  BoxModelIcon,
+} from '@radix-ui/react-icons';
 import * as Spacer from '../components/Spacer';
 
 interface Props {}
@@ -21,6 +26,17 @@ export default function Toolbar(props: Props) {
   return (
     <Container>
       <Spacer.Horizontal size={8} />
+      <Button
+        id="tool-artboard"
+        active={state.interactionState.type === 'insertArtboard'}
+        label="Artboard"
+        onClick={() => {
+          dispatch('interaction', ['insertArtboard']);
+        }}
+      >
+        <BoxModelIcon />
+      </Button>
+      <Spacer.Horizontal size={16} />
       <Button
         id="tool-rectangle"
         active={state.interactionState.type === 'insertRectangle'}

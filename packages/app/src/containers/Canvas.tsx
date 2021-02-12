@@ -4,7 +4,7 @@ import {
   getLayerAtPoint,
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
-import { useCallback, useEffect, useRef } from 'react';
+import { CSSProperties, useCallback, useEffect, useRef } from 'react';
 import { drawCanvas, uuid } from 'sketch-canvas';
 import styled, { useTheme } from 'styled-components';
 import {
@@ -24,10 +24,13 @@ function getPoint(event: MouseEvent): Point {
   return { x: event.offsetX, y: event.offsetY };
 }
 
-const Container = styled.div({
-  flex: '1',
-  position: 'relative',
-});
+const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
+  ({ cursor }) => ({
+    flex: '1',
+    position: 'relative',
+    cursor,
+  }),
+);
 
 const CanvasComponent = styled.canvas(({ theme }) => ({
   position: 'absolute',
@@ -131,6 +134,7 @@ export default function Canvas(props: Props) {
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
       switch (state.interactionState.type) {
+        case 'insertArtboard':
         case 'insertRectangle':
         case 'insertOval':
         case 'insertText': {
@@ -258,6 +262,11 @@ export default function Canvas(props: Props) {
   return (
     <Container
       ref={containerRef}
+      cursor={
+        state.interactionState.type.startsWith('insert')
+          ? 'crosshair'
+          : 'default'
+      }
       onPointerDown={handleMouseDown}
       onPointerMove={handleMouseMove}
       onPointerUp={handleMouseUp}

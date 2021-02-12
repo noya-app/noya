@@ -27,8 +27,9 @@ type LayerListItem = {
   name: string;
   depth: number;
   expanded: boolean;
-  selected: boolean;
   position: ListView.ListRowPosition;
+  selected: boolean;
+  selectedPosition: ListView.ListRowPosition;
 };
 
 function flattenLayerList(
@@ -55,8 +56,9 @@ function flattenLayerList(
         depth: indexPath.length - 1,
         expanded:
           layer.layerListExpandedType === Sketch.LayerListExpanded.Expanded,
-        selected: selectedObjects.includes(layer.do_objectID),
         position: 'only',
+        selected: selectedObjects.includes(layer.do_objectID),
+        selectedPosition: 'only',
       });
     },
   });
@@ -66,16 +68,27 @@ function flattenLayerList(
     const current = flattened[i];
     const next = flattened[i + 1];
 
+    const nextItem = next && next.type !== 'artboard';
+    const prevItem = prev && prev.type !== 'artboard';
+
+    if (nextItem && prevItem) {
+      current.position = 'middle';
+    } else if (nextItem && !prevItem) {
+      current.position = 'first';
+    } else if (!nextItem && prevItem) {
+      current.position = 'last';
+    }
+
     if (current.selected) {
       const nextSelected = next && next.type !== 'artboard' && next.selected;
       const prevSelected = prev && prev.type !== 'artboard' && prev.selected;
 
       if (nextSelected && prevSelected) {
-        current.position = 'middle';
+        current.selectedPosition = 'middle';
       } else if (nextSelected && !prevSelected) {
-        current.position = 'first';
+        current.selectedPosition = 'first';
       } else if (!nextSelected && prevSelected) {
-        current.position = 'last';
+        current.selectedPosition = 'last';
       }
     }
   }
@@ -117,7 +130,19 @@ export default function LayerList(props: Props) {
     const items = flattenLayerList(page, selectedObjects);
 
     return items.map(
-      ({ id, name, depth, type, expanded, selected, position }, index) => {
+      (
+        {
+          id,
+          name,
+          depth,
+          type,
+          expanded,
+          position,
+          selected,
+          selectedPosition,
+        },
+        index,
+      ) => {
         const rowContent = (
           <>
             <Spacer.Horizontal size={depth * 12} />
@@ -186,7 +211,11 @@ export default function LayerList(props: Props) {
             {rowContent}
           </ListView.SectionHeader>
         ) : (
-          <ListView.Row {...rowProps} position={position}>
+          <ListView.Row
+            {...rowProps}
+            position={position}
+            selectedPosition={selectedPosition}
+          >
             <Spacer.Horizontal size={6 + 15} />
             {rowContent}
           </ListView.Row>
