@@ -8,6 +8,7 @@ import {
   CircleIcon,
   TextIcon,
   BoxModelIcon,
+  ImageIcon,
 } from '@radix-ui/react-icons';
 import * as ListView from '../components/ListView';
 import * as Spacer from '../components/Spacer';
@@ -100,6 +101,8 @@ const LayerIcon = memo(function LayerIcon({
       return <TextIcon color={color} />;
     case 'artboard':
       return <BoxModelIcon color={color} />;
+    case 'bitmap':
+      return <ImageIcon color={color} />;
     default:
       return null;
   }

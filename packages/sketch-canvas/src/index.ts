@@ -4,6 +4,7 @@ import {
   getCurrentPage,
   getCurrentPageMetadata,
 } from 'ayano-state/src/selectors';
+import memoize from 'ayano-state/src/utils/memoize';
 import type {
   Canvas,
   CanvasKit,
@@ -18,6 +19,7 @@ import * as Primitives from './primitives';
 export { uuid, Primitives };
 
 export interface Context {
+  state: ApplicationState;
   CanvasKit: CanvasKit;
   canvas: Canvas;
 }
@@ -26,11 +28,10 @@ let fontManager: FontMgr;
 
 export function drawCanvas(
   context: Context,
-  state: ApplicationState,
   backgroundColor: string,
   sidebarWidth: number,
 ) {
-  const { CanvasKit, canvas } = context;
+  const { CanvasKit, canvas, state } = context;
 
   const page = getCurrentPage(state);
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
@@ -91,6 +92,7 @@ export function drawHoverOutline(
 
   switch (layer._class) {
     case 'artboard':
+    case 'bitmap':
     case 'text': {
       if (!layerIds.includes(layer.do_objectID)) break;
 
@@ -139,6 +141,7 @@ export function drawSelectionOutline(
 
   switch (layer._class) {
     case 'artboard':
+    case 'bitmap':
     case 'rectangle':
     case 'oval':
     case 'text': {
@@ -183,6 +186,8 @@ export function drawLayer(context: Context, layer: Sketch.AnyLayer) {
       return drawArtboard(context, layer);
     case 'text':
       return drawText(context, layer);
+    case 'bitmap':
+      return drawBitmap(context, layer);
     case 'rectangle':
     case 'oval':
       return drawLayerShape(context, layer);
@@ -255,6 +260,55 @@ export function drawText(context: Context, layer: Sketch.Text) {
   paragraph.layout(layer.frame.width);
 
   canvas.drawParagraph(paragraph, layer.frame.x, layer.frame.y);
+}
+
+const decodeImage = memoize(
+  (
+    CanvasKit: CanvasKit,
+    data: ArrayBuffer,
+  ): ReturnType<CanvasKit['MakeImageFromEncoded']> => {
+    return CanvasKit.MakeImageFromEncoded(data);
+  },
+);
+
+export function drawBitmap(context: Context, layer: Sketch.Bitmap) {
+  const { state, canvas, CanvasKit } = context;
+
+  const ref = state.sketch.images[layer.image._ref];
+
+  if (!ref) {
+    console.log('Missing image ref', layer.image);
+    return;
+  }
+
+  const image = decodeImage(CanvasKit, ref);
+  // const image = CanvasKit.MakeImageFromEncoded(ref);
+
+  if (!image) {
+    console.log('Failed to decode image', layer.image);
+    return;
+  }
+
+  const paint = new CanvasKit.Paint();
+
+  // canvas.drawImageRect(
+  //   image,
+  //   CanvasKit.XYWHRect(0, 0, image.width(), image.height()),
+  //   Primitives.rect(CanvasKit, layer.frame),
+  //   paint,
+  //   true,
+  // );
+
+  // Number parameters "B" and "C" are for tweaking the cubic resampler:
+  // https://api.skia.org/SkSamplingOptions_8h_source.html
+  canvas.drawImageRectCubic(
+    image,
+    CanvasKit.XYWHRect(0, 0, image.width(), image.height()),
+    Primitives.rect(CanvasKit, layer.frame),
+    0,
+    0,
+    paint,
+  );
 }
 
 export function drawLayerShape(

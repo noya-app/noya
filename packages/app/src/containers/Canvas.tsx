@@ -105,19 +105,18 @@ export default function Canvas(props: Props) {
     if (!surfaceRef.current) return;
 
     const surface = surfaceRef.current;
-    const context = { CanvasKit, canvas: surface.getCanvas() };
+    const context = { CanvasKit, canvas: surface.getCanvas(), state };
 
-    drawCanvas(context, state, backgroundColor, sidebarWidth);
+    drawCanvas(context, backgroundColor, sidebarWidth);
 
     surface.flush();
   }, [
     CanvasKit,
     state,
-    containerSize,
-    currentPage,
-    meta,
     backgroundColor,
     sidebarWidth,
+    // `containerSize` affects rendering even though it isn't used here directly
+    containerSize,
   ]);
 
   const handleMouseDown = useCallback(

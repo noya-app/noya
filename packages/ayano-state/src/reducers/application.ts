@@ -17,6 +17,7 @@ import {
 import { UUID } from '../types';
 import { Selectors } from '..';
 import { IndexPath } from 'tree-visit';
+import { WritableDraft } from 'immer/dist/internal';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -410,7 +411,7 @@ export function reducer(
  * don't want to walk every layer, since that would duplicate all of them.
  */
 function accessPageLayers(
-  state: ApplicationState,
+  state: WritableDraft<ApplicationState>,
   pageIndex: number,
   layerIndexPaths: IndexPath[],
 ): Sketch.AnyLayer[] {
