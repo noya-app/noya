@@ -61,8 +61,8 @@ export default function Canvas(props: Props) {
   const offsetEventPoint = useCallback(
     (point: Point) => {
       return {
-        x: point.x - meta.scrollOrigin.x,
-        y: point.y - meta.scrollOrigin.y,
+        x: Math.round(point.x - meta.scrollOrigin.x),
+        y: Math.round(point.y - meta.scrollOrigin.y),
       };
     },
     [meta],
@@ -121,7 +121,7 @@ export default function Canvas(props: Props) {
   ]);
 
   const handleMouseDown = useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.PointerEvent) => {
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
       switch (state.interactionState.type) {
@@ -156,7 +156,7 @@ export default function Canvas(props: Props) {
   );
 
   const handleMouseMove = useCallback(
-    (event: React.MouseEvent) => {
+    (event: React.PointerEvent) => {
       const point = offsetEventPoint(getPoint(event.nativeEvent));
 
       switch (state.interactionState.type) {
@@ -170,16 +170,25 @@ export default function Canvas(props: Props) {
             dispatch('interaction', ['startMoving', point]);
           }
 
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
           break;
         }
         case 'moving': {
           // console.log('update move', state.interactionState, point);
           dispatch('interaction', ['updateMoving', point]);
 
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
           break;
         }
         case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
 
           break;
         }
@@ -213,16 +222,22 @@ export default function Canvas(props: Props) {
           dispatch('interaction', ['updateDrawing', point]);
           dispatch('addDrawnLayer');
 
+          containerRef.current?.releasePointerCapture(event.pointerId);
+
           break;
         }
         case 'maybeMove': {
           dispatch('interaction', ['reset']);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
         case 'moving': {
           dispatch('interaction', ['updateMoving', point]);
           dispatch('interaction', ['reset']);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
@@ -234,9 +249,9 @@ export default function Canvas(props: Props) {
   return (
     <Container
       ref={containerRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
+      onPointerDown={handleMouseDown}
+      onPointerMove={handleMouseMove}
+      onPointerUp={handleMouseUp}
     >
       <CanvasComponent id="main" ref={canvasRef} />
     </Container>
