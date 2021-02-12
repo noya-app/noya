@@ -1,8 +1,8 @@
 import { useRef } from 'react';
-import { shallowEqualArray } from './useShallowArray';
+import { isShallowEqualArray } from '../utils/shallowEqual';
 
-export function deepEqualArray<T>(a: T[], b: T[]) {
-  if (shallowEqualArray(a, b)) return true;
+function deepEqualArray<T>(a: T[], b: T[]) {
+  if (isShallowEqualArray(a, b)) return true;
 
   return JSON.stringify(a) === JSON.stringify(b);
 }
