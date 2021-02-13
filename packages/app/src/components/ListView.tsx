@@ -1,10 +1,11 @@
 import {
   Children,
-  cloneElement,
+  createContext,
   isValidElement,
   memo,
   ReactNode,
   useCallback,
+  useContext,
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
@@ -12,11 +13,27 @@ import { useHover } from '../hooks/useHover';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
 const listReset: CSSObject = {
-  margin: 0,
-  padding: 0,
+  marginTop: 0,
+  marginRight: 0,
+  marginBottom: 0,
+  marginLeft: 0,
+  paddingTop: 0,
+  paddingRight: 0,
+  paddingBottom: 0,
+  paddingLeft: 0,
   textIndent: 0,
   listStyleType: 'none',
 };
+
+type ListRowContextValue = {
+  position: ListRowPosition;
+  selectedPosition: ListRowPosition;
+};
+
+const ListRowContext = createContext<ListRowContextValue>({
+  position: 'only',
+  selectedPosition: 'only',
+});
 
 /* ----------------------------------------------------------------------------
  * Row
@@ -84,10 +101,9 @@ function ListViewRow({
   children,
   onClick,
   onHoverChange,
-  position = 'only',
   selected = false,
-  selectedPosition = 'only',
 }: ListViewRowProps) {
+  const { position, selectedPosition } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
   });
@@ -140,8 +156,6 @@ const SectionHeaderContainer = styled.li<{ selected: boolean }>(
     }),
     display: 'flex',
     alignItems: 'center',
-    // marginTop: '8px',
-    // marginBottom: '8px',
   }),
 );
 
@@ -186,8 +200,6 @@ const RootContainer = styled.ul(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flexWrap: 'nowrap',
-  // paddingTop: '8px',
-  // paddingBottom: '8px',
   color: theme.colors.textMuted,
 }));
 
@@ -195,6 +207,14 @@ interface ListViewRootProps {
   children?: ReactNode;
   onClick?: () => void;
 }
+
+const getDisplayName = (type: any): string | undefined => {
+  try {
+    return type.displayName;
+  } catch {
+    return undefined;
+  }
+};
 
 function ListViewRoot({ onClick, children }: ListViewRootProps) {
   const handleClick = useCallback(
@@ -207,52 +227,63 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
   );
 
   const flattened = Children.toArray(children);
-  const mappedChildren: typeof flattened = [];
 
-  for (let i = 0; i < flattened.length; i++) {
+  const mappedChildren = flattened.map((current, i) => {
     const prev = flattened[i - 1];
-    const current = flattened[i];
     const next = flattened[i + 1];
 
-    if (!isValidElement(current)) {
-      mappedChildren.push(current);
-      continue;
-    }
+    if (!isValidElement(current)) return current;
 
+    // We determine section headers by displayName - using a function is simpler
+    // but doesn't preserve across hot reloads.
     const nextItem =
-      isValidElement(next) && next.type !== SectionHeader ? next : undefined;
+      isValidElement(next) &&
+      getDisplayName(next.type) !== SectionHeader.displayName
+        ? next
+        : undefined;
     const prevItem =
-      isValidElement(prev) && prev.type !== SectionHeader ? prev : undefined;
+      isValidElement(prev) &&
+      getDisplayName(prev.type) !== SectionHeader.displayName
+        ? prev
+        : undefined;
 
-    const cloneProps = { ...current.props };
+    let position: ListRowPosition = 'only';
+    let selectedPosition: ListRowPosition = 'only';
 
     if (nextItem && prevItem) {
-      cloneProps.position = 'middle';
+      position = 'middle';
     } else if (nextItem && !prevItem) {
-      cloneProps.position = 'first';
+      position = 'first';
     } else if (!nextItem && prevItem) {
-      cloneProps.position = 'last';
+      position = 'last';
     }
 
-    if (cloneProps.selected) {
+    if (current.props.selected) {
       const nextSelected = nextItem && nextItem.props.selected;
       const prevSelected = prevItem && prevItem.props.selected;
 
       if (nextSelected && prevSelected) {
-        cloneProps.selectedPosition = 'middle';
+        selectedPosition = 'middle';
       } else if (nextSelected && !prevSelected) {
-        cloneProps.selectedPosition = 'first';
+        selectedPosition = 'first';
       } else if (!nextSelected && prevSelected) {
-        cloneProps.selectedPosition = 'last';
+        selectedPosition = 'last';
       }
     }
 
-    mappedChildren.push(cloneElement(current, cloneProps));
-  }
+    const contextValue = { position, selectedPosition };
+
+    return (
+      <ListRowContext.Provider key={current.key} value={contextValue}>
+        {current}
+      </ListRowContext.Provider>
+    );
+  });
 
   return <RootContainer onClick={handleClick}>{mappedChildren}</RootContainer>;
 }
 
 export const Row = memo(ListViewRow);
 export const SectionHeader = memo(ListViewSectionHeader);
+SectionHeader.displayName = 'SectionHeaderMemoized';
 export const Root = memo(ListViewRoot);
