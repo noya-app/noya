@@ -10,7 +10,7 @@ import {
   BoxModelIcon,
   ImageIcon,
 } from '@radix-ui/react-icons';
-import * as ListView from '../components/ListView';
+import * as TreeView from '../components/TreeView';
 import * as Spacer from '../components/Spacer';
 import {
   useApplicationState,
@@ -97,16 +97,7 @@ export default function LayerList(props: Props) {
 
   const layerElements = useMemo(() => {
     return items.map(({ id, name, depth, type, expanded, selected }, index) => {
-      const rowContent = (
-        <>
-          <Spacer.Horizontal size={depth * 12} />
-          <LayerIcon type={type} selected={selected} />
-          <Spacer.Horizontal size={10} />
-          {name}
-        </>
-      );
-
-      const handleClick = (info: ListView.ListViewClickInfo) => {
+      const handleClick = (info: TreeView.TreeViewClickInfo) => {
         const { metaKey, shiftKey } = info;
 
         dispatch('interaction', ['reset']);
@@ -144,42 +135,38 @@ export default function LayerList(props: Props) {
 
       const rowProps = {
         key: id,
+        depth,
         selected,
         onClick: handleClick,
         onHoverChange: handleHoverChange,
+        icon: <LayerIcon type={type} selected={selected} />,
       };
 
       return type === 'artboard' ? (
-        <ListView.SectionHeader {...rowProps}>
-          <span
-            style={{ display: 'flex', alignItems: 'center' }}
-            onClick={(event) => {
-              event.stopPropagation();
-
-              dispatch('setExpandedInLayerList', id, !expanded);
-            }}
-          >
-            {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-          </span>
-          <Spacer.Horizontal size={6} />
-          {rowContent}
-        </ListView.SectionHeader>
+        <TreeView.SectionHeader
+          expanded={expanded}
+          onClickChevron={() =>
+            dispatch('setExpandedInLayerList', id, !expanded)
+          }
+          {...rowProps}
+        >
+          <TreeView.RowTitle>{name}</TreeView.RowTitle>
+        </TreeView.SectionHeader>
       ) : (
-        <ListView.Row {...rowProps}>
-          <Spacer.Horizontal size={6 + 15} />
-          {rowContent}
-        </ListView.Row>
+        <TreeView.Row {...rowProps}>
+          <TreeView.RowTitle>{name}</TreeView.RowTitle>
+        </TreeView.Row>
       );
     });
   }, [items, dispatch, selectedObjects]);
 
   return (
-    <ListView.Root
+    <TreeView.Root
       onClick={useCallback(() => dispatch('selectLayer', undefined), [
         dispatch,
       ])}
     >
       {layerElements}
-    </ListView.Root>
+    </TreeView.Root>
   );
 }

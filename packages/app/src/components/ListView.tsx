@@ -36,6 +36,17 @@ const ListRowContext = createContext<ListRowContextValue>({
 });
 
 /* ----------------------------------------------------------------------------
+ * RowTitle
+ * ------------------------------------------------------------------------- */
+
+const ListViewRowTitle = styled.span(({ theme }) => ({
+  flex: '1 1 0',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'pre',
+}));
+
+/* ----------------------------------------------------------------------------
  * Row
  * ------------------------------------------------------------------------- */
 
@@ -46,6 +57,7 @@ const RowContainer = styled.li<{
 }>(({ theme, position, selected, selectedPosition }) => ({
   ...listReset,
   ...theme.textStyles.small,
+  flex: '0 0 auto',
   userSelect: 'none',
   cursor: 'pointer',
   borderTopRightRadius: '4px',
@@ -139,6 +151,7 @@ const SectionHeaderContainer = styled.li<{ selected: boolean }>(
   ({ theme, selected }) => ({
     ...listReset,
     ...theme.textStyles.small,
+    flex: '0 0 auto',
     userSelect: 'none',
     cursor: 'pointer',
     fontWeight: 500,
@@ -196,11 +209,12 @@ function ListViewSectionHeader({
 
 const RootContainer = styled.ul(({ theme }) => ({
   ...listReset,
-  flex: '1',
+  flex: '1 0 0',
   display: 'flex',
   flexDirection: 'column',
   flexWrap: 'nowrap',
   color: theme.colors.textMuted,
+  overflowY: 'auto',
 }));
 
 interface ListViewRootProps {
@@ -208,9 +222,9 @@ interface ListViewRootProps {
   onClick?: () => void;
 }
 
-const getDisplayName = (type: any): string | undefined => {
+const isSectionHeader = (type: any): string | undefined => {
   try {
-    return type.displayName;
+    return type.isSectionHeader;
   } catch {
     return undefined;
   }
@@ -229,23 +243,15 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
   const flattened = Children.toArray(children);
 
   const mappedChildren = flattened.map((current, i) => {
+    if (!isValidElement(current)) return current;
+
     const prev = flattened[i - 1];
     const next = flattened[i + 1];
 
-    if (!isValidElement(current)) return current;
-
-    // We determine section headers by displayName - using a function is simpler
-    // but doesn't preserve across hot reloads.
     const nextItem =
-      isValidElement(next) &&
-      getDisplayName(next.type) !== SectionHeader.displayName
-        ? next
-        : undefined;
+      isValidElement(next) && !isSectionHeader(next.type) ? next : undefined;
     const prevItem =
-      isValidElement(prev) &&
-      getDisplayName(prev.type) !== SectionHeader.displayName
-        ? prev
-        : undefined;
+      isValidElement(prev) && !isSectionHeader(prev.type) ? prev : undefined;
 
     let position: ListRowPosition = 'only';
     let selectedPosition: ListRowPosition = 'only';
@@ -283,7 +289,8 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
   return <RootContainer onClick={handleClick}>{mappedChildren}</RootContainer>;
 }
 
+export const RowTitle = memo(ListViewRowTitle);
 export const Row = memo(ListViewRow);
 export const SectionHeader = memo(ListViewSectionHeader);
-SectionHeader.displayName = 'SectionHeaderMemoized';
+(SectionHeader as any).isSectionHeader = true;
 export const Root = memo(ListViewRoot);

@@ -32,7 +32,11 @@ export default function Toolbar() {
           active={interactionType === 'insertArtboard'}
           label="Artboard"
           onClick={() => {
-            dispatch('interaction', ['insertArtboard']);
+            if (interactionType === 'insertArtboard') {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insertArtboard']);
+            }
           }}
         >
           <BoxModelIcon />
@@ -43,7 +47,11 @@ export default function Toolbar() {
           active={interactionType === 'insertRectangle'}
           label="Rectangle"
           onClick={() => {
-            dispatch('interaction', ['insertRectangle']);
+            if (interactionType === 'insertRectangle') {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insertRectangle']);
+            }
           }}
         >
           <SquareIcon />
@@ -54,7 +62,11 @@ export default function Toolbar() {
           active={interactionType === 'insertOval'}
           label="Oval"
           onClick={() => {
-            dispatch('interaction', ['insertOval']);
+            if (interactionType === 'insertOval') {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insertOval']);
+            }
           }}
         >
           <CircleIcon />
@@ -65,7 +77,11 @@ export default function Toolbar() {
           active={interactionType === 'insertText'}
           label="Text"
           onClick={() => {
-            dispatch('interaction', ['insertText']);
+            if (interactionType === 'insertText') {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insertText']);
+            }
           }}
         >
           <TextIcon />

@@ -11,9 +11,11 @@ import LayerList from './LayerList';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { useState } from 'react';
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
+  maxWidth: `${theme.sizes.sidebarWidth}px`,
   borderRight: `1px solid ${theme.colors.dividerStrong}`,
   display: 'flex',
   flexDirection: 'column',
@@ -24,7 +26,8 @@ const LeftSidebar = styled.div(({ theme }) => ({
 }));
 
 const RightSidebar = styled.div(({ theme }) => ({
-  flex: '0 0 260px',
+  flex: `0 0 ${theme.sizes.sidebarWidth}px`,
+  maxWidth: `${theme.sizes.sidebarWidth}px`,
   borderLeft: `1px solid ${theme.colors.dividerStrong}`,
   display: 'flex',
   flexDirection: 'column',
@@ -54,6 +57,7 @@ interface Props {}
 
 export default function Workspace(props: Props) {
   const colorScheme = useSystemColorScheme();
+  const [layersFilter, setLayersFilter] = useState('');
 
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
@@ -62,8 +66,8 @@ export default function Workspace(props: Props) {
         <FilterContainer>
           <InputField.Root labelPosition="start" labelSize={14}>
             <InputField.Input
-              value={''}
-              onChange={() => {}}
+              value={layersFilter}
+              onChange={setLayersFilter}
               placeholder="Filter layers"
             />
             <InputField.Label>

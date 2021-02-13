@@ -11,6 +11,7 @@ import {
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import withSeparatorElements from '../utils/withSeparatorElements';
+import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import FillInspector from './FillInspector';
 
@@ -47,12 +48,11 @@ export default memo(function Inspector(props: Props) {
     return withSeparatorElements(views, <Divider />);
   }, [selectedLayers]);
 
+  if (state.interactionState.type === 'insertArtboard') {
+    return <ArtboardSizeList />;
+  }
+
   if (selectedLayers.length === 0) return null;
 
-  return (
-    <>
-      {elements}
-      <Divider />
-    </>
-  );
+  return <>{elements}</>;
 });
