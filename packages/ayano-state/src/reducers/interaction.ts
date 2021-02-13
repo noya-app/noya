@@ -42,7 +42,7 @@ function createRect(initialPoint: Point, finalPoint: Point): Rect {
   };
 }
 
-function createShape(
+function createLayer(
   shapeType: ShapeType,
 ): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
   switch (shapeType) {
@@ -71,7 +71,7 @@ export function interactionReducer(
     case 'startDrawing': {
       const [, shapeType, id, point] = action;
 
-      let layer = produce(createShape(shapeType), (layer) => {
+      let layer = produce(createLayer(shapeType), (layer) => {
         layer.do_objectID = id;
         layer.frame = {
           _class: 'rect',

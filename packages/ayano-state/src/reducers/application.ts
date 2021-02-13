@@ -4,6 +4,7 @@ import { SketchFile } from 'sketch-zip';
 import {
   getCurrentPage,
   getCurrentPageIndex,
+  getCurrentPageMetadata,
   getSelectedLayerIndexPaths,
 } from '../selectors';
 import * as Models from '../models';
@@ -15,9 +16,9 @@ import {
   InteractionState,
 } from './interaction';
 import { UUID } from '../types';
-import { Selectors } from '..';
 import { IndexPath } from 'tree-visit';
 import { WritableDraft } from 'immer/dist/internal';
+import { uuid } from 'sketch-canvas';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -41,6 +42,10 @@ export type SetNumberMode = 'replace' | 'adjust';
 type StyleElementType = 'Fill' | 'Border';
 
 export type Action =
+  | [
+      type: 'insertArtboard',
+      details: { name: string; width: number; height: number },
+    ]
   | [type: 'addDrawnLayer']
   | [
       type: 'selectLayer',
@@ -79,7 +84,33 @@ export function reducer(
   action: Action,
 ): ApplicationState {
   switch (action[0]) {
-    case 'setExpandedInLayerList':
+    case 'insertArtboard': {
+      const [, { name, width, height }] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const { scrollOrigin } = getCurrentPageMetadata(state);
+
+      return produce(state, (state) => {
+        let layer = produce(Models.artboard, (layer) => {
+          layer.do_objectID = uuid();
+          layer.name = name;
+          layer.frame = {
+            _class: 'rect',
+            constrainProportions: false,
+            x: scrollOrigin.x + 100,
+            y: scrollOrigin.y + 100,
+            width,
+            height,
+          };
+        });
+
+        state.sketch.pages[pageIndex].layers.push(layer);
+        state.interactionState = interactionReducer(state.interactionState, [
+          'reset',
+        ]);
+        state.selectedObjects = [layer.do_objectID];
+      });
+    }
+    case 'setExpandedInLayerList': {
       const [, id, expanded] = action;
 
       const page = getCurrentPage(state);
@@ -98,6 +129,7 @@ export function reducer(
           ? Sketch.LayerListExpanded.Expanded
           : Sketch.LayerListExpanded.Collapsed;
       });
+    }
     case 'addDrawnLayer': {
       const pageIndex = getCurrentPageIndex(state);
 

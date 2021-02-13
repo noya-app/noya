@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as TreeView from '../components/TreeView';
 import * as Spacer from '../components/Spacer';
 import styled from 'styled-components';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 type Preset = { name: string; width: number; height: number };
 type PresetGroup = { name: string; presets: Preset[] };
@@ -71,16 +72,22 @@ const SizeLabel = styled.span(({ theme }) => ({
 }));
 
 export default function ArtboardSizeList() {
+  const [, dispatch] = useApplicationState();
+
   const layerElements = useMemo(() => {
     return canvasSizePresets[0].groups.map(({ name, presets }) => {
-      const handleClick = (info: TreeView.TreeViewClickInfo) => {};
-
       return [
-        <TreeView.SectionHeader expanded={true} depth={0} key={name}>
+        <TreeView.SectionHeader expanded={true} depth={0} key={`group-${name}`}>
           {name}
         </TreeView.SectionHeader>,
         ...presets.map(({ name, width, height }) => (
-          <TreeView.Row depth={1} key={name} onClick={handleClick}>
+          <TreeView.Row
+            depth={1}
+            key={name}
+            onClick={() => {
+              dispatch('insertArtboard', { name, width, height });
+            }}
+          >
             <TreeView.RowTitle>{name}</TreeView.RowTitle>
             <Spacer.Horizontal size={8} />
             <SizeLabel>
@@ -90,7 +97,7 @@ export default function ArtboardSizeList() {
         )),
       ];
     });
-  }, []);
+  }, [dispatch]);
 
   return <TreeView.Root>{layerElements}</TreeView.Root>;
 }
