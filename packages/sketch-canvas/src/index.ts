@@ -27,7 +27,7 @@ export interface Context {
 
 let fontManager: FontMgr;
 
-export function drawCanvas(context: Context, sidebarWidth: number) {
+export function drawCanvas(context: Context) {
   const { CanvasKit, canvas, state, theme } = context;
 
   const page = getCurrentPage(state);
@@ -36,7 +36,7 @@ export function drawCanvas(context: Context, sidebarWidth: number) {
   canvas.clear(CanvasKit.parseColorString(theme.backgroundColor));
 
   canvas.save();
-  canvas.translate(scrollOrigin.x + sidebarWidth, scrollOrigin.y);
+  canvas.translate(scrollOrigin.x + state.canvasInsets.left, scrollOrigin.y);
   canvas.scale(zoomValue, zoomValue);
 
   page.layers.forEach((layer) => {

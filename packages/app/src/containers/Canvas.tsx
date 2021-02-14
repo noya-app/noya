@@ -77,7 +77,13 @@ export default function Canvas(props: Props) {
 
     canvasElement.width = containerSize.width + sidebarWidth;
     canvasElement.height = containerSize.height;
-  }, [containerSize, sidebarWidth]);
+
+    dispatch(
+      'setCanvasSize',
+      { width: containerSize.width, height: containerSize.height },
+      { left: sidebarWidth },
+    );
+  }, [dispatch, containerSize, sidebarWidth]);
 
   // Recreate the surface whenever the canvas resizes
   useEffect(() => {
@@ -116,18 +122,10 @@ export default function Canvas(props: Props) {
       },
     };
 
-    drawCanvas(context, sidebarWidth);
+    drawCanvas(context);
 
     surface.flush();
-  }, [
-    CanvasKit,
-    state,
-    backgroundColor,
-    textColor,
-    sidebarWidth,
-    // `containerSize` affects rendering even though it isn't used here directly
-    containerSize,
-  ]);
+  }, [CanvasKit, state, backgroundColor, textColor]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {

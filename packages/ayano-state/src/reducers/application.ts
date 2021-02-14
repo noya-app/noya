@@ -33,6 +33,8 @@ export type ApplicationState = {
   highlightedLayer?: LayerHighlight;
   selectedObjects: string[];
   sketch: SketchFile;
+  canvasSize: { width: number; height: number };
+  canvasInsets: { left: number };
 };
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
@@ -42,6 +44,11 @@ export type SetNumberMode = 'replace' | 'adjust';
 type StyleElementType = 'Fill' | 'Border';
 
 export type Action =
+  | [
+      type: 'setCanvasSize',
+      size: { width: number; height: number },
+      insets: { left: number },
+    ]
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -84,6 +91,14 @@ export function reducer(
   action: Action,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setCanvasSize': {
+      const [, size, insets] = action;
+
+      return produce(state, (state) => {
+        state.canvasSize = size;
+        state.canvasInsets = insets;
+      });
+    }
     case 'insertArtboard': {
       const [, { name, width, height }] = action;
       const pageIndex = getCurrentPageIndex(state);
@@ -96,8 +111,10 @@ export function reducer(
           layer.frame = {
             _class: 'rect',
             constrainProportions: false,
-            x: scrollOrigin.x + 100,
-            y: scrollOrigin.y + 100,
+            // TODO: Figure out positioning based on other artboards.
+            // Also, don't hardcode sidebar width.
+            x: -scrollOrigin.x + 100,
+            y: -scrollOrigin.y + 100,
             width,
             height,
           };
@@ -455,5 +472,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     highlightedLayer: undefined,
     sketch,
+    canvasSize: { width: 0, height: 0 },
+    canvasInsets: { left: 0 },
   };
 }

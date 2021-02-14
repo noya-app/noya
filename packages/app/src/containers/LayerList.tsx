@@ -1,23 +1,21 @@
-import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import {
+  BoxModelIcon,
+  CircleIcon,
+  ImageIcon,
+  SquareIcon,
+  TextIcon,
+} from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Layers, PageLayer, Selectors } from 'ayano-state';
 import { memo, useCallback, useMemo } from 'react';
 import { visit } from 'tree-visit';
-import {
-  SquareIcon,
-  CircleIcon,
-  TextIcon,
-  BoxModelIcon,
-  ImageIcon,
-} from '@radix-ui/react-icons';
 import * as TreeView from '../components/TreeView';
-import * as Spacer from '../components/Spacer';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import useShallowArray from '../hooks/useShallowArray';
 import useDeepArray from '../hooks/useDeepArray';
+import useShallowArray from '../hooks/useShallowArray';
 
 interface Props {}
 
