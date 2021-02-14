@@ -1,5 +1,5 @@
 import type { CanvasKit } from 'canvaskit-wasm';
-import * as Primitives from 'sketch-canvas/src/primitives';
+import * as Primitives from 'ayano-renderer/src/primitives';
 import { IndexPath } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath } from './layers';

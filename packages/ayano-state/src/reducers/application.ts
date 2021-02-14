@@ -19,7 +19,7 @@ import {
 import { UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { WritableDraft } from 'immer/dist/internal';
-import { Primitives, uuid } from 'sketch-canvas';
+import { Primitives, uuid } from 'ayano-renderer';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 

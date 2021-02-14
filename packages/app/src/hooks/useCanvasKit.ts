@@ -1,5 +1,5 @@
 import type { CanvasKit } from 'canvaskit-wasm';
-import { load } from 'sketch-canvas';
+import { load } from 'ayano-renderer';
 import { SuspendedValue } from '../utils/SuspendedValue';
 
 let suspendedCanvasKit = new SuspendedValue<CanvasKit>(load());
