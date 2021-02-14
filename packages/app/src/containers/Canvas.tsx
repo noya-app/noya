@@ -75,13 +75,13 @@ export default function Canvas(props: Props) {
 
     if (!canvasElement || !containerSize) return;
 
-    canvasElement.width = containerSize.width + sidebarWidth;
+    canvasElement.width = containerSize.width + sidebarWidth * 2;
     canvasElement.height = containerSize.height;
 
     dispatch(
       'setCanvasSize',
       { width: containerSize.width, height: containerSize.height },
-      { left: sidebarWidth },
+      { left: sidebarWidth, right: sidebarWidth },
     );
   }, [dispatch, containerSize, sidebarWidth]);
 

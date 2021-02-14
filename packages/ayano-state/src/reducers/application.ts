@@ -35,7 +35,7 @@ export type ApplicationState = {
   selectedObjects: string[];
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
-  canvasInsets: { left: number };
+  canvasInsets: { left: number; right: number };
 };
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
@@ -48,7 +48,7 @@ export type Action =
   | [
       type: 'setCanvasSize',
       size: { width: number; height: number },
-      insets: { left: number },
+      insets: { left: number; right: number },
     ]
   | [
       type: 'insertArtboard',
@@ -503,6 +503,6 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },
-    canvasInsets: { left: 0 },
+    canvasInsets: { left: 0, right: 0 },
   };
 }

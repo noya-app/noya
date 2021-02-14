@@ -33,6 +33,8 @@ const RightSidebar = styled.div(({ theme }) => ({
   flexDirection: 'column',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
+  WebkitBackdropFilter: 'blur(10px)',
+  backdropFilter: 'blur(10px)',
 }));
 
 const MainView = styled.main(({ theme }) => ({
