@@ -1,12 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import * as TreeView from '../components/TreeView';
 import * as Spacer from '../components/Spacer';
 import styled from 'styled-components';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
+import Select from '../components/Select';
 
 type Preset = { name: string; width: number; height: number };
 type PresetGroup = { name: string; presets: Preset[] };
 type PresetCategory = { name: string; groups: PresetGroup[] };
+
+const Header = styled.div(({ theme }) => ({
+  display: 'flex',
+  padding: '8px',
+}));
 
 const canvasSizePresets: PresetCategory[] = [
   {
@@ -55,15 +61,19 @@ const canvasSizePresets: PresetCategory[] = [
   },
   {
     name: 'Android Devices',
-    groups: [
-      {
-        name: 'iPhone',
-        presets: [
-          { name: 'iPhone 8', width: 375, height: 667 },
-          { name: 'iPhone 8 Plus', width: 414, height: 736 },
-        ],
-      },
-    ],
+    groups: [],
+  },
+  {
+    name: 'Responsive Web',
+    groups: [],
+  },
+  {
+    name: 'Social Media',
+    groups: [],
+  },
+  {
+    name: 'Paper Sizes',
+    groups: [],
   },
 ];
 
@@ -74,30 +84,54 @@ const SizeLabel = styled.span(({ theme }) => ({
 export default function ArtboardSizeList() {
   const [, dispatch] = useApplicationState();
 
-  const layerElements = useMemo(() => {
-    return canvasSizePresets[0].groups.map(({ name, presets }) => {
-      return [
-        <TreeView.SectionHeader expanded={true} depth={0} key={`group-${name}`}>
-          {name}
-        </TreeView.SectionHeader>,
-        ...presets.map(({ name, width, height }) => (
-          <TreeView.Row
-            depth={1}
-            key={name}
-            onClick={() => {
-              dispatch('insertArtboard', { name, width, height });
-            }}
-          >
-            <TreeView.RowTitle>{name}</TreeView.RowTitle>
-            <Spacer.Horizontal size={8} />
-            <SizeLabel>
-              {width}×{height}
-            </SizeLabel>
-          </TreeView.Row>
-        )),
-      ];
-    });
-  }, [dispatch]);
+  const categoryNames = useMemo(
+    () => canvasSizePresets.map((category) => category.name),
+    [],
+  );
+  const [categoryName, setCategoryName] = useState(categoryNames[0]);
 
-  return <TreeView.Root>{layerElements}</TreeView.Root>;
+  const layerElements = useMemo(() => {
+    return canvasSizePresets
+      .find((category) => category.name === categoryName)!
+      .groups.map(({ name, presets }) => {
+        return [
+          <TreeView.SectionHeader
+            expanded={true}
+            depth={0}
+            key={`group-${name}`}
+          >
+            {name}
+          </TreeView.SectionHeader>,
+          ...presets.map(({ name, width, height }) => (
+            <TreeView.Row
+              depth={1}
+              key={name}
+              onClick={() => {
+                dispatch('insertArtboard', { name, width, height });
+              }}
+            >
+              <TreeView.RowTitle>{name}</TreeView.RowTitle>
+              <Spacer.Horizontal size={8} />
+              <SizeLabel>
+                {width}×{height}
+              </SizeLabel>
+            </TreeView.Row>
+          )),
+        ];
+      });
+  }, [dispatch, categoryName]);
+
+  return (
+    <>
+      <Header>
+        <Select
+          id="artboard-preset"
+          value={categoryName}
+          options={categoryNames}
+          onChange={setCategoryName}
+        />
+      </Header>
+      <TreeView.Root>{layerElements}</TreeView.Root>
+    </>
+  );
 }
