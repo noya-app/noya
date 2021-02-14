@@ -53,6 +53,7 @@ const Title = styled.div(({ theme }) => ({
   fontWeight: 'bold',
   display: 'flex',
   flexDirection: 'row',
+  userSelect: 'none',
 }));
 
 const Checkbox = styled.input(({ theme }) => ({

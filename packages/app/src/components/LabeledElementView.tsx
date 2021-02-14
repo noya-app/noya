@@ -28,6 +28,7 @@ const Labels = styled.div(({ theme }) => ({
   height: 'var(--height)',
   position: 'relative',
   overflow: 'hidden',
+  userSelect: 'none',
 }));
 
 interface ContainerProps {

@@ -37,6 +37,7 @@ const LabelContainer = styled.label<{ labelPosition: LabelPosition }>(
     fontWeight: 'bold',
     fontSize: '60%',
     opacity: 0.5,
+    userSelect: 'none',
     ...(labelPosition === 'start'
       ? { justifyContent: 'flex-start', paddingLeft: '6px' }
       : { justifyContent: 'flex-end', paddingRight: '6px' }),
