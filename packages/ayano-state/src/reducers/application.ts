@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { SketchFile } from 'sketch-zip';
+import { SketchFile } from 'ayano-sketch-file';
 import {
   EncodedPageMetadata,
   getCurrentPage,

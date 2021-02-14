@@ -5,7 +5,7 @@ import {
   reducer,
 } from 'ayano-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { parse, SketchFile } from 'sketch-zip';
+import { parse, SketchFile } from 'ayano-sketch-file';
 import Workspace from './containers/Workspace';
 import {
   ApplicationStateProvider,
