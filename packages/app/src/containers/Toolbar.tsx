@@ -6,6 +6,7 @@ import {
   CircleIcon,
   TextIcon,
   BoxModelIcon,
+  MoveIcon,
 } from '@radix-ui/react-icons';
 import * as Spacer from '../components/Spacer';
 import { useMemo } from 'react';
@@ -85,6 +86,25 @@ export default function Toolbar() {
           }}
         >
           <TextIcon />
+        </Button>
+        <Spacer.Horizontal size={16} />
+        <Button
+          id="tool-move"
+          active={
+            interactionType === 'panMode' ||
+            interactionType === 'maybePan' ||
+            interactionType === 'panning'
+          }
+          label="Pan"
+          onClick={() => {
+            if (interactionType === 'panMode') {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['enablePanMode']);
+            }
+          }}
+        >
+          <MoveIcon />
         </Button>
         <Spacer.Horizontal size={8} />
       </Container>

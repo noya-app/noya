@@ -2,6 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SketchFile } from 'sketch-zip';
 import {
+  EncodedPageMetadata,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
@@ -18,7 +19,7 @@ import {
 import { UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { WritableDraft } from 'immer/dist/internal';
-import { uuid } from 'sketch-canvas';
+import { Primitives, uuid } from 'sketch-canvas';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -414,29 +415,58 @@ export function reducer(
       });
     }
     case 'interaction': {
+      const currentPageId = getCurrentPage(state).do_objectID;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
+      const interactionState = interactionReducer(
+        state.interactionState,
+        action[1],
+      );
+
       return produce(state, (state) => {
-        state.interactionState = interactionReducer(
-          state.interactionState,
-          action[1],
-        );
+        state.interactionState = interactionState;
 
-        if (state.interactionState.type === 'moving') {
-          const { previous, next } = state.interactionState;
+        switch (interactionState.type) {
+          case 'moving': {
+            const { previous, next } = interactionState;
 
-          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
-              const delta = {
-                x: next.x - previous.x,
-                y: next.y - previous.y,
-              };
+            accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+              (layer) => {
+                const delta = {
+                  x: next.x - previous.x,
+                  y: next.y - previous.y,
+                };
 
-              layer.frame.x += delta.x;
-              layer.frame.y += delta.y;
-            },
-          );
+                layer.frame.x += delta.x;
+                layer.frame.y += delta.y;
+              },
+            );
+
+            break;
+          }
+          case 'panning': {
+            const { previous, next } = interactionState;
+
+            const delta = {
+              x: next.x - previous.x,
+              y: next.y - previous.y,
+            };
+
+            const meta: EncodedPageMetadata = state.sketch.user[currentPageId];
+
+            const parsed = Primitives.parsePoint(meta.scrollOrigin);
+
+            parsed.x += delta.x;
+            parsed.y += delta.y;
+
+            state.sketch.user[currentPageId] = {
+              ...meta,
+              scrollOrigin: Primitives.stringifyPoint(parsed),
+            };
+
+            break;
+          }
         }
       });
     }

@@ -4,7 +4,7 @@ import {
   getLayerAtPoint,
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
-import { CSSProperties, useCallback, useEffect, useRef } from 'react';
+import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
 import { drawCanvas, uuid } from 'sketch-canvas';
 import styled, { useTheme } from 'styled-components';
 import {
@@ -21,7 +21,7 @@ declare module 'canvaskit-wasm' {
 }
 
 function getPoint(event: MouseEvent): Point {
-  return { x: event.offsetX, y: event.offsetY };
+  return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
 const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
@@ -62,8 +62,8 @@ export default function Canvas(props: Props) {
   const offsetEventPoint = useCallback(
     (point: Point) => {
       return {
-        x: Math.round(point.x - meta.scrollOrigin.x),
-        y: Math.round(point.y - meta.scrollOrigin.y),
+        x: point.x - meta.scrollOrigin.x,
+        y: point.y - meta.scrollOrigin.y,
       };
     },
     [meta],
@@ -129,7 +129,8 @@ export default function Canvas(props: Props) {
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
-      const point = offsetEventPoint(getPoint(event.nativeEvent));
+      const rawPoint = getPoint(event.nativeEvent);
+      const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
         case 'insertArtboard':
@@ -145,6 +146,13 @@ export default function Canvas(props: Props) {
             point,
           ]);
 
+          break;
+        }
+        case 'panMode': {
+          dispatch('interaction', ['maybePan', rawPoint]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
           break;
         }
         case 'none': {
@@ -169,9 +177,22 @@ export default function Canvas(props: Props) {
 
   const handleMouseMove = useCallback(
     (event: React.PointerEvent) => {
-      const point = offsetEventPoint(getPoint(event.nativeEvent));
+      const rawPoint = getPoint(event.nativeEvent);
+      const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'maybePan': {
+          dispatch('interaction', ['startPanning', rawPoint]);
+
+          event.preventDefault();
+          break;
+        }
+        case 'panning': {
+          dispatch('interaction', ['updatePanning', rawPoint]);
+
+          event.preventDefault();
+          break;
+        }
         case 'maybeMove': {
           const { origin } = state.interactionState;
 
@@ -226,9 +247,24 @@ export default function Canvas(props: Props) {
 
   const handleMouseUp = useCallback(
     (event) => {
-      const point = offsetEventPoint(getPoint(event.nativeEvent));
+      const rawPoint = getPoint(event.nativeEvent);
+      const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'maybePan':
+          dispatch('interaction', ['enablePanMode']);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+
+          break;
+        case 'panning': {
+          dispatch('interaction', ['updatePanning', rawPoint]);
+          dispatch('interaction', ['enablePanMode']);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+
+          break;
+        }
         case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
           dispatch('addDrawnLayer');
@@ -257,14 +293,27 @@ export default function Canvas(props: Props) {
     [dispatch, state, offsetEventPoint],
   );
 
+  const cursor = useMemo((): CSSProperties['cursor'] => {
+    switch (state.interactionState.type) {
+      case 'panning':
+      case 'maybePan':
+        return 'grabbing';
+      case 'panMode':
+        return 'grab';
+      case 'insertArtboard':
+      case 'insertOval':
+      case 'insertRectangle':
+      case 'insertText':
+        return 'crosshair';
+      default:
+        return 'default';
+    }
+  }, [state.interactionState.type]);
+
   return (
     <Container
       ref={containerRef}
-      cursor={
-        state.interactionState.type.startsWith('insert')
-          ? 'crosshair'
-          : 'default'
-      }
+      cursor={cursor}
       onPointerDown={handleMouseDown}
       onPointerMove={handleMouseMove}
       onPointerUp={handleMouseUp}

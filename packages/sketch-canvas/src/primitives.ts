@@ -47,6 +47,10 @@ export function parsePoint(pointString: string): { x: number; y: number } {
   };
 }
 
+export function stringifyPoint({ x, y }: { x: number; y: number }): string {
+  return `{${x.toString()},${y.toString()}}`;
+}
+
 function zip<A, B>(array1: A[], array2: B[]): [A, B][] {
   return array1.map((item1, index) => [item1, array2[index]]);
 }

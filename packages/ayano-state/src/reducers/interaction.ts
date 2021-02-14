@@ -13,7 +13,11 @@ export type InteractionAction =
   | [type: 'updateDrawing', point: Point]
   | [type: 'maybeMove', origin: Point]
   | [type: 'startMoving', point: Point]
-  | [type: 'updateMoving', point: Point];
+  | [type: 'updateMoving', point: Point]
+  | [type: 'enablePanMode']
+  | [type: 'maybePan', origin: Point]
+  | [type: 'startPanning', point: Point]
+  | [type: 'updatePanning', point: Point];
 
 export type InteractionState =
   | {
@@ -28,7 +32,10 @@ export type InteractionState =
       value: PageLayer;
     }
   | { type: 'maybeMove'; origin: Point }
-  | { type: 'moving'; previous: Point; next: Point };
+  | { type: 'moving'; previous: Point; next: Point }
+  | { type: 'panMode' }
+  | { type: 'maybePan'; origin: Point }
+  | { type: 'panning'; previous: Point; next: Point };
 
 /**
  * Create a rectangle with a non-negative width and height
@@ -127,6 +134,39 @@ export function interactionReducer(
 
       return {
         type: 'moving',
+        previous: state.next,
+        next: point,
+      };
+    }
+    case 'enablePanMode':
+      return { type: 'panMode' };
+    case 'maybePan': {
+      const [, origin] = action;
+
+      return { type: 'maybePan', origin };
+    }
+    case 'startPanning': {
+      const [, point] = action;
+
+      if (state.type !== 'maybePan') {
+        throw new Error('Bad interaction state - should be in `maybePan`');
+      }
+
+      return {
+        type: 'panning',
+        previous: state.origin,
+        next: point,
+      };
+    }
+    case 'updatePanning': {
+      const [, point] = action;
+
+      if (state.type !== 'panning') {
+        throw new Error('Bad interaction state - should be in `panning`');
+      }
+
+      return {
+        type: 'panning',
         previous: state.next,
         next: point,
       };

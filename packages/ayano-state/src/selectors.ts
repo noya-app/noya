@@ -21,11 +21,22 @@ export const getCurrentPage = (state: ApplicationState) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
 
-export const getCurrentPageMetadata = (state: ApplicationState) => {
+export type EncodedPageMetadata = {
+  zoomValue: number;
+  scrollOrigin: string;
+};
+
+export type PageMetadata = {
+  zoomValue: number;
+  scrollOrigin: Point;
+};
+
+export const getCurrentPageMetadata = (
+  state: ApplicationState,
+): PageMetadata => {
   const currentPage = getCurrentPage(state);
 
-  const meta: { scrollOrigin: string; zoomValue: number } =
-    state.sketch.user[currentPage.do_objectID];
+  const meta: EncodedPageMetadata = state.sketch.user[currentPage.do_objectID];
 
   return {
     zoomValue: meta.zoomValue,
