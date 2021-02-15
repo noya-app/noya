@@ -326,7 +326,13 @@ export default function Canvas(props: Props) {
       onPointerMove={handleMouseMove}
       onPointerUp={handleMouseUp}
     >
-      <CanvasComponent id="main" ref={canvasRef} left={-insets.left} />
+      <CanvasComponent
+        id="main"
+        ref={canvasRef}
+        left={-insets.left}
+        width={0}
+        height={0}
+      />
     </Container>
   );
 }
