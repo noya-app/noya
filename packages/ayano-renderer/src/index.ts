@@ -337,24 +337,14 @@ export function drawBitmap(context: Context, layer: Sketch.Bitmap) {
  */
 function getGradientTransformationMatrix(
   context: Context,
-  layer: Sketch.AnyLayer,
+  rect: Sketch.Rect,
 ): number[] {
-  const { canvas, state } = context;
+  const { CanvasKit } = context;
 
-  canvas.save();
-
-  const { scrollOrigin } = getCurrentPageMetadata(state);
-
-  // We have to undo the scrollOrigin translation, although I don't understand why
-  canvas.translate(-scrollOrigin.x, -scrollOrigin.y);
-  canvas.translate(layer.frame.x, layer.frame.y);
-  canvas.scale(layer.frame.width, layer.frame.height);
-
-  const matrix = canvas.getTotalMatrix();
-
-  canvas.restore();
-
-  return matrix;
+  return CanvasKit.Matrix.multiply(
+    CanvasKit.Matrix.translated(rect.x, rect.y),
+    CanvasKit.Matrix.scaled(rect.width, rect.height),
+  );
 }
 
 export function drawLayerShape(
@@ -369,7 +359,7 @@ export function drawLayerShape(
 
   if (!layer.style) return;
 
-  const matrix = getGradientTransformationMatrix(context, layer);
+  const matrix = getGradientTransformationMatrix(context, layer.frame);
 
   const fills = (layer.style.fills ?? []).slice().reverse();
   const borders = (layer.style.borders ?? []).slice().reverse();
