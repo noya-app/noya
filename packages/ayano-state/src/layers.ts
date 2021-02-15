@@ -1,5 +1,5 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { withOptions } from 'tree-visit';
+import { withOptions, SKIP, STOP } from 'tree-visit';
 
 export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   switch (layer._class) {
@@ -14,9 +14,12 @@ export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
 
 export const {
   visit,
+  find,
   findIndexPath,
   findAllIndexPaths,
   access,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
 });
+
+export { SKIP, STOP };

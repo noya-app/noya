@@ -1,6 +1,6 @@
-import type { CanvasKit } from 'canvaskit-wasm';
 import * as Primitives from 'ayano-renderer/src/primitives';
-import { IndexPath } from 'tree-visit';
+import type { CanvasKit } from 'canvaskit-wasm';
+import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath } from './layers';
 import type { Point, UUID } from './types';
@@ -95,23 +95,52 @@ export function getLayerAtPoint(
 
   // TODO: check if we're clicking the title of an artboard
 
-  const layers = page.layers.filter((layer) => {
-    const rect = layer.frame;
+  // TODO: need to keep track of zoom also
+  let translate: Point = { x: 0, y: 0 };
+  let found: PageLayer | undefined;
 
-    return (
-      rect.x <= point.x &&
-      point.x <= rect.x + rect.width &&
-      rect.y <= point.y &&
-      point.y <= rect.y + rect.height
-    );
+  Layers.visit(page, {
+    onEnter: (layer) => {
+      if (layer._class === 'page') return;
+
+      const localPoint = { x: point.x + translate.x, y: point.y + translate.y };
+
+      let containsPoint = Primitives.rectContainsPoint(layer.frame, localPoint);
+
+      if (!containsPoint) return SKIP;
+
+      // Artboards can't be selected themselves, and instead only update the ctm
+      if (layer._class === 'artboard') {
+        translate.x -= layer.frame.x;
+        translate.y -= layer.frame.y;
+
+        return;
+      }
+
+      switch (layer._class) {
+        case 'oval': {
+          const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+
+          if (!path.contains(localPoint.x, localPoint.y)) return;
+
+          break;
+        }
+        default:
+          break;
+      }
+
+      found = layer as PageLayer;
+
+      return STOP;
+    },
+    onLeave: (layer) => {
+      if (layer._class === 'artboard') {
+        translate.x += layer.frame.x;
+        translate.y += layer.frame.y;
+        return;
+      }
+    },
   });
 
-  return [...layers.reverse()].find((layer) => {
-    if (layer._class === 'oval') {
-      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
-      return path.contains(point.x, point.y);
-    }
-
-    return true;
-  });
+  return found;
 }

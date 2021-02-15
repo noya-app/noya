@@ -2,11 +2,25 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { Point } from 'ayano-state';
 import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 
-function distance({ x: x1, y: y1 }: Point, { x: x2, y: y2 }: Point) {
+type RectLike = { x: number; y: number; width: number; height: number };
+
+export function distance(
+  { x: x1, y: y1 }: Point,
+  { x: x2, y: y2 }: Point,
+): number {
   const a = x1 - x2;
   const b = y1 - y2;
 
   return Math.sqrt(a * a + b * b);
+}
+
+export function rectContainsPoint(rect: RectLike, point: Point): boolean {
+  return (
+    rect.x <= point.x &&
+    point.x <= rect.x + rect.width &&
+    rect.y <= point.y &&
+    point.y <= rect.y + rect.height
+  );
 }
 
 export function point(point: Point): number[] {
