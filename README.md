@@ -40,3 +40,17 @@ yarn start
 
 This project is built with https://github.com/jpmorganchase/modular, which is an
 abstraction layer on top of yarn workspaces.
+
+## Running Tests
+
+To run tests for all packages, run:
+
+```
+yarn test
+```
+
+To run tests for a specific package, e.g. `ayano-sketch-file`, run:
+
+```
+yarn test ayano-sketch-file
+```

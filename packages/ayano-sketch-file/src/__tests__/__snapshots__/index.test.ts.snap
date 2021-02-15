@@ -78,6 +78,7 @@ Object {
       "objects": Array [],
     },
   },
+  "images": Object {},
   "meta": Object {
     "app": "com.bohemiancoding.sketch3",
     "appVersion": "70.2",

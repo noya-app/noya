@@ -1,8 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { Point } from 'ayano-state';
+import type { Point, Rect } from 'ayano-state';
 import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
-
-type RectLike = { x: number; y: number; width: number; height: number };
 
 export function distance(
   { x: x1, y: y1 }: Point,
@@ -14,7 +12,7 @@ export function distance(
   return Math.sqrt(a * a + b * b);
 }
 
-export function rectContainsPoint(rect: RectLike, point: Point): boolean {
+export function rectContainsPoint(rect: Rect, point: Point): boolean {
   return (
     rect.x <= point.x &&
     point.x <= rect.x + rect.width &&

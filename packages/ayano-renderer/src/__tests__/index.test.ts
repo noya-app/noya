@@ -5,6 +5,8 @@ import { rect, color, fill } from '../primitives';
 let ck: CanvasKit;
 
 beforeAll(async () => {
+  // Note: this actually fetches CanvasKit from unpkg. Maybe we should
+  // load from node_modules for testing purposes
   ck = await load();
 });
 
