@@ -1,13 +1,15 @@
-import type {
-  CanvasKit,
-  InputMatrix,
-  Paint,
-  Path,
-  TextStyle,
-} from 'canvaskit-wasm';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import type { Point } from 'ayano-state';
+import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 
-export function point(point: { x: number; y: number }): number[] {
+function distance({ x: x1, y: y1 }: Point, { x: x2, y: y2 }: Point) {
+  const a = x1 - x2;
+  const b = y1 - y2;
+
+  return Math.sqrt(a * a + b * b);
+}
+
+export function point(point: Point): number[] {
   return [point.x, point.y];
 }
 
@@ -26,7 +28,7 @@ export function clearColor(CanvasKit: CanvasKit) {
 export function fill(
   CanvasKit: CanvasKit,
   fill: Sketch.Fill,
-  localMatrix: InputMatrix,
+  localMatrix: Float32Array | number[],
 ): Paint {
   const paint = new CanvasKit.Paint();
 
@@ -48,16 +50,80 @@ export function fill(
       const fromPoint = parsePoint(fill.gradient.from);
       const toPoint = parsePoint(fill.gradient.to);
 
-      paint.setShader(
-        CanvasKit.Shader.MakeLinearGradient(
-          point(fromPoint),
-          point(toPoint),
-          colors,
-          positions,
-          CanvasKit.TileMode.Clamp,
-          localMatrix,
-        ),
-      );
+      switch (fill.gradient.gradientType) {
+        case Sketch.GradientType.Linear: {
+          paint.setShader(
+            CanvasKit.Shader.MakeLinearGradient(
+              point(fromPoint),
+              point(toPoint),
+              colors,
+              positions,
+              CanvasKit.TileMode.Clamp,
+              localMatrix,
+            ),
+          );
+          break;
+        }
+        case Sketch.GradientType.Radial: {
+          paint.setShader(
+            CanvasKit.Shader.MakeRadialGradient(
+              point(fromPoint),
+              distance(toPoint, fromPoint),
+              colors,
+              positions,
+              CanvasKit.TileMode.Clamp,
+              localMatrix,
+            ),
+          );
+          break;
+        }
+        case Sketch.GradientType.Angular: {
+          const hasStartPosition = positions[0] === 0;
+          const hasEndPosition = positions[positions.length - 1] === 1;
+          let rotationRadians = 0;
+
+          // If the gradient has no start or end, we shift all the colors stops
+          // to the beginning, and then rotate the gradient.
+          //
+          // We can't use the positions + angle parameters of MakeSweepGradient,
+          // since these are clamped (and TileMode doesn't seem to affect this)
+          if (!hasStartPosition && !hasEndPosition) {
+            const startPosition = positions[0];
+            positions = positions.map((p) => p - startPosition);
+            colors.push(colors[0]);
+            positions.push(1);
+
+            rotationRadians = startPosition * 2 * Math.PI;
+          } else if (hasEndPosition && !hasStartPosition) {
+            colors.unshift(colors[colors.length - 1]);
+            positions.unshift(0);
+          } else if (hasStartPosition && !hasEndPosition) {
+            colors.push(colors[0]);
+            positions.push(1);
+          }
+
+          const matrix =
+            rotationRadians > 0
+              ? CanvasKit.Matrix.multiply(
+                  localMatrix,
+                  CanvasKit.Matrix.rotated(rotationRadians, 0.5, 0.5),
+                )
+              : localMatrix;
+
+          paint.setShader(
+            CanvasKit.Shader.MakeSweepGradient(
+              0.5,
+              0.5,
+              colors,
+              positions,
+              CanvasKit.TileMode.Clamp,
+              matrix,
+            ),
+          );
+
+          break;
+        }
+      }
 
       break;
     }
@@ -82,7 +148,7 @@ export function border(CanvasKit: CanvasKit, border: Sketch.Border): Paint {
   return paint;
 }
 
-export function parsePoint(pointString: string): { x: number; y: number } {
+export function parsePoint(pointString: string): Point {
   const [x, y] = pointString.slice(1, -1).split(',');
 
   return {
@@ -91,7 +157,7 @@ export function parsePoint(pointString: string): { x: number; y: number } {
   };
 }
 
-export function stringifyPoint({ x, y }: { x: number; y: number }): string {
+export function stringifyPoint({ x, y }: Point): string {
   return `{${x.toString()},${y.toString()}}`;
 }
 
@@ -106,7 +172,7 @@ export function path(
 ): Path {
   const { x, y, width, height } = frame;
 
-  const scalePoint = (point: { x: number; y: number }) => {
+  const scalePoint = (point: Point) => {
     return { x: x + point.x * width, y: y + point.y * height };
   };
 
