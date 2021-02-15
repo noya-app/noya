@@ -330,6 +330,33 @@ export function drawBitmap(context: Context, layer: Sketch.Bitmap) {
   );
 }
 
+/**
+ * CanvasKit draws gradients in absolute coordinates, while Sketch draws them
+ * relative to the layer's frame. This function returns a matrix that converts
+ * absolute coordinates into the range (0, 1).
+ */
+function getGradientTransformationMatrix(
+  context: Context,
+  layer: Sketch.AnyLayer,
+): number[] {
+  const { canvas, state } = context;
+
+  canvas.save();
+
+  const { scrollOrigin } = getCurrentPageMetadata(state);
+
+  // We have to undo the scrollOrigin translation, although I don't understand why
+  canvas.translate(-scrollOrigin.x, -scrollOrigin.y);
+  canvas.translate(layer.frame.x, layer.frame.y);
+  canvas.scale(layer.frame.width, layer.frame.height);
+
+  const matrix = canvas.getTotalMatrix();
+
+  canvas.restore();
+
+  return matrix;
+}
+
 export function drawLayerShape(
   context: Context,
   layer: Sketch.Rectangle | Sketch.Oval,
@@ -342,13 +369,15 @@ export function drawLayerShape(
 
   if (!layer.style) return;
 
+  const matrix = getGradientTransformationMatrix(context, layer);
+
   const fills = (layer.style.fills ?? []).slice().reverse();
   const borders = (layer.style.borders ?? []).slice().reverse();
 
   fills.forEach((fill) => {
     if (!fill.isEnabled) return;
 
-    canvas.drawPath(path, Primitives.fill(CanvasKit, fill));
+    canvas.drawPath(path, Primitives.fill(CanvasKit, fill, matrix));
   });
 
   borders.forEach((border) => {

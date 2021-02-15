@@ -1,5 +1,15 @@
-import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type {
+  CanvasKit,
+  InputMatrix,
+  Paint,
+  Path,
+  TextStyle,
+} from 'canvaskit-wasm';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+
+export function point(point: { x: number; y: number }): number[] {
+  return [point.x, point.y];
+}
 
 export function color(CanvasKit: CanvasKit, color: Sketch.Color) {
   return CanvasKit.Color4f(color.red, color.green, color.blue, color.alpha);
@@ -13,12 +23,46 @@ export function clearColor(CanvasKit: CanvasKit) {
   return CanvasKit.Color4f(0, 0, 0, 0);
 }
 
-export function fill(CanvasKit: CanvasKit, fill: Sketch.Fill): Paint {
+export function fill(
+  CanvasKit: CanvasKit,
+  fill: Sketch.Fill,
+  localMatrix: InputMatrix,
+): Paint {
   const paint = new CanvasKit.Paint();
 
-  paint.setColor(
-    fill.color ? color(CanvasKit, fill.color) : clearColor(CanvasKit),
-  );
+  switch (fill.fillType) {
+    case Sketch.FillType.Color:
+      paint.setColor(
+        fill.color ? color(CanvasKit, fill.color) : clearColor(CanvasKit),
+      );
+      break;
+    case Sketch.FillType.Gradient: {
+      let colors: Float32Array[] = [];
+      let positions: number[] = [];
+
+      fill.gradient.stops.forEach((stop) => {
+        colors.push(color(CanvasKit, stop.color));
+        positions.push(stop.position);
+      });
+
+      const fromPoint = parsePoint(fill.gradient.from);
+      const toPoint = parsePoint(fill.gradient.to);
+
+      paint.setShader(
+        CanvasKit.Shader.MakeLinearGradient(
+          point(fromPoint),
+          point(toPoint),
+          colors,
+          positions,
+          CanvasKit.TileMode.Clamp,
+          localMatrix,
+        ),
+      );
+
+      break;
+    }
+  }
+
   paint.setStyle(CanvasKit.PaintStyle.Fill);
   paint.setAntiAlias(true);
 

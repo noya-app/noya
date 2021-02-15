@@ -32,10 +32,10 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   }),
 );
 
-const CanvasComponent = styled.canvas(({ theme }) => ({
+const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
   position: 'absolute',
   top: 0,
-  left: -theme.sizes.sidebarWidth,
+  left,
   zIndex: -1,
 }));
 
@@ -57,6 +57,14 @@ export default function Canvas(props: Props) {
   const containerSize = useSize(containerRef);
   const meta = useSelector(getCurrentPageMetadata);
 
+  const insets = useMemo(
+    () => ({
+      left: sidebarWidth,
+      right: sidebarWidth,
+    }),
+    [sidebarWidth],
+  );
+
   // Event coordinates are relative to (0,0), but we want them to include
   // the current document's offset from the origin
   const offsetEventPoint = useCallback(
@@ -75,15 +83,15 @@ export default function Canvas(props: Props) {
 
     if (!canvasElement || !containerSize) return;
 
-    canvasElement.width = containerSize.width + sidebarWidth * 2;
+    canvasElement.width = containerSize.width + insets.left + insets.right;
     canvasElement.height = containerSize.height;
 
     dispatch(
       'setCanvasSize',
       { width: containerSize.width, height: containerSize.height },
-      { left: sidebarWidth, right: sidebarWidth },
+      insets,
     );
-  }, [dispatch, containerSize, sidebarWidth]);
+  }, [dispatch, containerSize, insets]);
 
   // Recreate the surface whenever the canvas resizes
   useEffect(() => {
@@ -318,7 +326,7 @@ export default function Canvas(props: Props) {
       onPointerMove={handleMouseMove}
       onPointerUp={handleMouseUp}
     >
-      <CanvasComponent id="main" ref={canvasRef} />
+      <CanvasComponent id="main" ref={canvasRef} left={-insets.left} />
     </Container>
   );
 }
