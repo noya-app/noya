@@ -1,8 +1,9 @@
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as Primitives from 'ayano-renderer/src/primitives';
 import type { CanvasKit } from 'canvaskit-wasm';
 import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
-import { findIndexPath } from './layers';
+import { findIndexPath, INCLUDE_AND_SKIP } from './layers';
 import type { Point, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -52,6 +53,22 @@ export const getSelectedLayerIndexPaths = (
   return Layers.findAllIndexPaths(page, (layer) =>
     state.selectedObjects.includes(layer.do_objectID),
   );
+};
+
+export const getSelectedLayerIndexPathsExcludingDescendants = (
+  state: ApplicationState,
+): IndexPath[] => {
+  const page = getCurrentPage(state);
+
+  return Layers.findAllIndexPaths<Sketch.AnyLayer>(page, (layer) => {
+    const included = state.selectedObjects.includes(layer.do_objectID);
+
+    if (included && layer._class === 'artboard') {
+      return INCLUDE_AND_SKIP;
+    }
+
+    return included;
+  });
 };
 
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {

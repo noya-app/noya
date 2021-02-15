@@ -36,7 +36,7 @@ function flattenLayerList(
 ): LayerListItem[] {
   const flattened: LayerListItem[] = [];
 
-  visit(page, {
+  visit<PageLayer | Sketch.Page>(page, {
     getChildren: (layer) => {
       if (layer.layerListExpandedType === Sketch.LayerListExpanded.Collapsed) {
         return [];

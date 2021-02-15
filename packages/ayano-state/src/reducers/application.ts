@@ -7,6 +7,7 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getSelectedLayerIndexPaths,
+  getSelectedLayerIndexPathsExcludingDescendants,
 } from '../selectors';
 import * as Models from '../models';
 import * as Layers from '../layers';
@@ -417,7 +418,9 @@ export function reducer(
     case 'interaction': {
       const currentPageId = getCurrentPage(state).do_objectID;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+        state,
+      );
 
       const interactionState = interactionReducer(
         state.interactionState,
