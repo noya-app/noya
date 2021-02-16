@@ -29,7 +29,7 @@ export function color(CanvasKit: CanvasKit, color: Sketch.Color) {
   return CanvasKit.Color4f(color.red, color.green, color.blue, color.alpha);
 }
 
-export function rect(CanvasKit: CanvasKit, rect: Sketch.Rect) {
+export function rect<T extends Rect>(CanvasKit: CanvasKit, rect: T) {
   return CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height);
 }
 

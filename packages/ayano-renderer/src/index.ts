@@ -5,7 +5,7 @@ import {
 import type { CanvasKitInit, FontMgr } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import { renderHoverOutline } from './canvas/hover';
-import { renderSelectionOutline } from './canvas/selection';
+import { getBoundingRect, renderSelectionOutline } from './canvas/selection';
 import { Context } from './context';
 import { renderLayer } from './layers/layer';
 import * as Primitives from './primitives';
@@ -45,6 +45,12 @@ export function renderCanvas(context: Context) {
       state.selectedObjects,
     );
   });
+
+  const boundingRect = getBoundingRect(page, state.selectedObjects);
+
+  if (boundingRect) {
+    canvas.drawRect(Primitives.rect(CanvasKit, boundingRect), selectionPaint);
+  }
 
   const highlightPaint = new CanvasKit.Paint();
   highlightPaint.setColor(CanvasKit.Color(132, 63, 255, 1));

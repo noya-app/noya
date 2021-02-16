@@ -25,8 +25,6 @@ test('converts color', async () => {
 test('converts rect', async () => {
   expect(
     rect(ck, {
-      _class: 'rect',
-      constrainProportions: false,
       x: 10,
       y: 20,
       width: 30,
