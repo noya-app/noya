@@ -5,7 +5,7 @@ import {
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
-import { drawCanvas, uuid } from 'ayano-renderer';
+import { renderCanvas, uuid } from 'ayano-renderer';
 import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
@@ -130,7 +130,7 @@ export default function Canvas(props: Props) {
       },
     };
 
-    drawCanvas(context);
+    renderCanvas(context);
 
     surface.flush();
   }, [CanvasKit, state, backgroundColor, textColor]);
