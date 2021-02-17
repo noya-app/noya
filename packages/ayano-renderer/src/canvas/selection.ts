@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Rect } from 'ayano-state';
+import { Point, Rect } from 'ayano-state';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
@@ -8,7 +8,12 @@ export function getBoundingRect(
   layer: Sketch.AnyLayer,
   layerIds: string[],
 ): Rect | undefined {
-  let bounds = { minX: Infinity, minY: Infinity, maxX: 0, maxY: 0 };
+  let bounds = {
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+  };
   let translate = { x: 0, y: 0 };
 
   function inner(layer: Sketch.AnyLayer) {
@@ -20,15 +25,15 @@ export function getBoundingRect(
       case 'text': {
         if (!layerIds.includes(layer.do_objectID)) break;
 
-        const x = layer.frame.x + translate.x + 0.5;
-        const y = layer.frame.y + translate.y + 0.5;
-        const width = layer.frame.width - 1;
-        const height = layer.frame.height - 1;
+        const frame = Primitives.insetRect(layer.frame, 0.5, 0.5);
+
+        const x = frame.x + translate.x;
+        const y = frame.y + translate.y;
 
         bounds.minX = Math.min(x, bounds.minX);
         bounds.minY = Math.min(y, bounds.minY);
-        bounds.maxX = Math.max(x + width, bounds.maxX);
-        bounds.maxY = Math.max(y + height, bounds.maxY);
+        bounds.maxX = Math.max(x + frame.width, bounds.maxX);
+        bounds.maxY = Math.max(y + frame.height, bounds.maxY);
 
         break;
       }
@@ -57,7 +62,7 @@ export function getBoundingRect(
   inner(layer);
 
   // Check that at least one layer had a non-zero size
-  if (!isFinite(bounds.minX) || !isFinite(bounds.minY)) return undefined;
+  if (!Object.values(bounds).every(isFinite)) return undefined;
 
   return {
     x: bounds.minX,
@@ -65,6 +70,60 @@ export function getBoundingRect(
     width: bounds.maxX - bounds.minX,
     height: bounds.maxY - bounds.minY,
   };
+}
+
+const cardinalDirections = [
+  'n',
+  'ne',
+  'e',
+  'se',
+  's',
+  'sw',
+  'w',
+  'nw',
+] as const;
+
+type CardinalDirection = typeof cardinalDirections[number];
+
+const cardinalDirectionMap: Record<CardinalDirection, Point> = {
+  n: { x: 0.5, y: 0 },
+  ne: { x: 1, y: 0 },
+  e: { x: 1, y: 0.5 },
+  se: { x: 1, y: 1 },
+  s: { x: 0.5, y: 1 },
+  sw: { x: 0, y: 1 },
+  w: { x: 0, y: 0.5 },
+  nw: { x: 0, y: 0 },
+};
+
+type DragHandle = {
+  rect: Rect;
+  cardinalDirection: CardinalDirection;
+};
+
+export function getDragHandles(
+  boundingRect: Rect,
+  handleSize: number,
+): DragHandle[] {
+  return cardinalDirections.map((cardinalDirection) => {
+    const translationPercent = cardinalDirectionMap[cardinalDirection];
+
+    return {
+      rect: {
+        x:
+          boundingRect.x +
+          boundingRect.width * translationPercent.x -
+          handleSize / 2,
+        y:
+          boundingRect.y +
+          boundingRect.height * translationPercent.y -
+          handleSize / 2,
+        width: handleSize,
+        height: handleSize,
+      },
+      cardinalDirection,
+    };
+  });
 }
 
 export function renderSelectionOutline(
@@ -83,15 +142,10 @@ export function renderSelectionOutline(
     case 'text': {
       if (!layerIds.includes(layer.do_objectID)) break;
 
-      const frame = {
-        ...layer.frame,
-        x: layer.frame.x + 0.5,
-        y: layer.frame.y + 0.5,
-        width: layer.frame.width - 1,
-        height: layer.frame.height - 1,
-      };
-
-      canvas.drawRect(Primitives.rect(CanvasKit, frame), paint);
+      canvas.drawRect(
+        Primitives.rect(CanvasKit, Primitives.insetRect(layer.frame, 0.5, 0.5)),
+        paint,
+      );
 
       break;
     }

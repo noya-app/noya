@@ -167,8 +167,16 @@ export default function Canvas(props: Props) {
           const layer = getLayerAtPoint(CanvasKit, state, point);
 
           if (layer) {
-            if (!state.selectedObjects.includes(layer.do_objectID)) {
-              dispatch('selectLayer', layer.do_objectID);
+            if (state.selectedObjects.includes(layer.do_objectID)) {
+              if (event.shiftKey && state.selectedObjects.length !== 1) {
+                dispatch('selectLayer', layer.do_objectID, 'difference');
+              }
+            } else {
+              dispatch(
+                'selectLayer',
+                layer.do_objectID,
+                event.shiftKey ? 'intersection' : 'replace',
+              );
             }
 
             dispatch('interaction', ['maybeMove', point]);

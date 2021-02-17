@@ -5,7 +5,11 @@ import {
 import type { CanvasKitInit, FontMgr } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import { renderHoverOutline } from './canvas/hover';
-import { getBoundingRect, renderSelectionOutline } from './canvas/selection';
+import {
+  getBoundingRect,
+  getDragHandles,
+  renderSelectionOutline,
+} from './canvas/selection';
 import { Context } from './context';
 import { renderLayer } from './layers/layer';
 import * as Primitives from './primitives';
@@ -68,6 +72,22 @@ export function renderCanvas(context: Context) {
   ) {
     page.layers.forEach((layer) => {
       renderHoverOutline(context, layer, highlightPaint, [highlightedLayer.id]);
+    });
+  }
+
+  if (boundingRect) {
+    const dragHandlePaint = new CanvasKit.Paint();
+    dragHandlePaint.setColor(CanvasKit.Color(255, 255, 255, 1));
+    dragHandlePaint.setStyle(CanvasKit.PaintStyle.Fill);
+
+    const dragHandles = getDragHandles(boundingRect, 7);
+
+    dragHandles.forEach((handle) => {
+      canvas.drawRect(Primitives.rect(CanvasKit, handle.rect), dragHandlePaint);
+      canvas.drawRect(
+        Primitives.rect(CanvasKit, Primitives.insetRect(handle.rect, 0.5, 0.5)),
+        selectionPaint,
+      );
     });
   }
 

@@ -21,6 +21,15 @@ export function rectContainsPoint(rect: Rect, point: Point): boolean {
   );
 }
 
+export function insetRect(rect: Rect, dx: number, dy: number): Rect {
+  return {
+    x: rect.x + dx,
+    y: rect.y + dy,
+    width: rect.width - dx * 2,
+    height: rect.height - dy * 2,
+  };
+}
+
 export function point(point: Point): number[] {
   return [point.x, point.y];
 }
