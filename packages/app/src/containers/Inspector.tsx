@@ -14,6 +14,7 @@ import withSeparatorElements from '../utils/withSeparatorElements';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import FillInspector from './FillInspector';
+import ShadowInspector from './ShadowInspector';
 
 interface Props {}
 
@@ -43,6 +44,7 @@ export default memo(function Inspector(props: Props) {
       </Fragment>,
       selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && <BorderInspector />,
+      selectedLayers.length === 1 && <ShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);
