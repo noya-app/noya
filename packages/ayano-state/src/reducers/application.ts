@@ -1,6 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import produce from 'immer';
+import { Primitives, uuid } from 'ayano-renderer';
+import { getBoundingRect } from 'ayano-renderer/src/canvas/selection';
+import { normalizeRect, resizeRect } from 'ayano-renderer/src/primitives';
 import { SketchFile } from 'ayano-sketch-file';
+import produce from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
+import { IndexPath } from 'tree-visit';
+import * as Layers from '../layers';
+import * as Models from '../models';
 import {
   EncodedPageMetadata,
   getCurrentPage,
@@ -9,18 +16,15 @@ import {
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from '../selectors';
-import * as Models from '../models';
-import * as Layers from '../layers';
+import { Point, UUID } from '../types';
+import { AffineTransformation } from '../utils/AffineTransformation';
 import {
+  CompassDirection,
   createInitialInteractionState,
   InteractionAction,
   interactionReducer,
   InteractionState,
 } from './interaction';
-import { UUID } from '../types';
-import { IndexPath } from 'tree-visit';
-import { WritableDraft } from 'immer/dist/internal';
-import { Primitives, uuid } from 'ayano-renderer';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -86,7 +90,16 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
-  | [type: 'interaction', action: InteractionAction];
+  | [
+      type: 'interaction',
+      // Some actions may need to be augmented by additional state before
+      // being passed to nested reducers (e.g. `maybeScale` takes a snapshot
+      // of the current page). Maybe there's a better way? This still seems
+      // better than moving the whole reducer up into the parent.
+      action:
+        | Exclude<InteractionAction, ['maybeScale', ...any[]]>
+        | [type: 'maybeScale', origin: Point, direction: CompassDirection],
+    ];
 
 export function reducer(
   state: ApplicationState,
@@ -416,15 +429,19 @@ export function reducer(
       });
     }
     case 'interaction': {
-      const currentPageId = getCurrentPage(state).do_objectID;
+      const page = getCurrentPage(state);
+      const currentPageId = page.do_objectID;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
         state,
       );
+      const layerIds = layerIndexPaths.map(
+        (indexPath) => Layers.access(page, indexPath).do_objectID,
+      );
 
       const interactionState = interactionReducer(
         state.interactionState,
-        action[1],
+        action[1][0] === 'maybeScale' ? [...action[1], page] : action[1],
       );
 
       return produce(state, (state) => {
@@ -434,17 +451,95 @@ export function reducer(
           case 'moving': {
             const { previous, next } = interactionState;
 
+            const delta = {
+              x: next.x - previous.x,
+              y: next.y - previous.y,
+            };
+
             accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
               (layer) => {
-                const delta = {
-                  x: next.x - previous.x,
-                  y: next.y - previous.y,
-                };
-
                 layer.frame.x += delta.x;
                 layer.frame.y += delta.y;
               },
             );
+
+            break;
+          }
+          case 'scaling': {
+            const {
+              origin,
+              current,
+              pageSnapshot,
+              direction,
+            } = interactionState;
+
+            const originalBoundingRect = getBoundingRect(
+              pageSnapshot,
+              layerIds,
+            )!;
+
+            const offset: Point = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
+            const newBoundingRect = resizeRect(
+              originalBoundingRect,
+              offset,
+              direction,
+            );
+
+            const transformation = AffineTransformation.multiply(
+              // First, undo the original transform
+              AffineTransformation.translation(
+                -originalBoundingRect.x,
+                -originalBoundingRect.y,
+              ),
+              AffineTransformation.scale(
+                1 / originalBoundingRect.width,
+                1 / originalBoundingRect.height,
+              ),
+              // Then, apply the new transform
+              AffineTransformation.scale(
+                newBoundingRect.width,
+                newBoundingRect.height,
+              ),
+              AffineTransformation.translation(
+                newBoundingRect.x,
+                newBoundingRect.y,
+              ),
+            );
+
+            layerIndexPaths.forEach((layerIndex) => {
+              const originalLayer = Layers.access(pageSnapshot, layerIndex);
+
+              const newLayer = Layers.access(
+                state.sketch.pages[pageIndex],
+                layerIndex,
+              );
+
+              const min = transformation.applyTo({
+                x: originalLayer.frame.x,
+                y: originalLayer.frame.y,
+              });
+
+              const max = transformation.applyTo({
+                x: originalLayer.frame.x + originalLayer.frame.width,
+                y: originalLayer.frame.y + originalLayer.frame.height,
+              });
+
+              const newFrame = normalizeRect({
+                x: Math.round(min.x),
+                y: Math.round(min.y),
+                width: Math.round(max.x - min.x),
+                height: Math.round(max.y - min.y),
+              });
+
+              newLayer.frame.x = newFrame.x;
+              newLayer.frame.y = newFrame.y;
+              newLayer.frame.width = newFrame.width;
+              newLayer.frame.height = newFrame.height;
+            });
 
             break;
           }

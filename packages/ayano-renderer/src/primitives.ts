@@ -1,6 +1,43 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { Point, Rect } from 'ayano-state';
+import {
+  CompassDirection,
+  getCardinalDirections,
+  Point,
+  Rect,
+} from 'ayano-state';
 import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
+
+/**
+ * Resize a rect in a compass direction
+ */
+export function resizeRect(
+  rect: Rect,
+  offset: Point,
+  direction: CompassDirection,
+): Rect {
+  const newRect = { ...rect };
+
+  getCardinalDirections(direction).forEach((cardinalDirection) => {
+    switch (cardinalDirection) {
+      case 'e':
+        newRect.width += offset.x;
+        break;
+      case 'w':
+        newRect.width -= offset.x;
+        newRect.x += offset.x;
+        break;
+      case 's':
+        newRect.height += offset.y;
+        break;
+      case 'n':
+        newRect.height -= offset.y;
+        newRect.y += offset.y;
+        break;
+    }
+  });
+
+  return newRect;
+}
 
 export function distance(
   { x: x1, y: y1 }: Point,
@@ -19,6 +56,15 @@ export function rectContainsPoint(rect: Rect, point: Point): boolean {
     rect.y <= point.y &&
     point.y <= rect.y + rect.height
   );
+}
+
+export function normalizeRect(rect: Rect): Rect {
+  return {
+    x: Math.min(rect.x + rect.width, rect.x),
+    y: Math.min(rect.y + rect.height, rect.y),
+    width: Math.abs(rect.width),
+    height: Math.abs(rect.height),
+  };
 }
 
 export function insetRect(rect: Rect, dx: number, dy: number): Rect {

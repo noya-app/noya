@@ -1,5 +1,14 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Point, Rect } from 'ayano-state';
+import {
+  Bounds,
+  CardinalDirection,
+  cardinalDirections,
+  CompassDirection,
+  compassDirections,
+  DragHandle,
+  Point,
+  Rect,
+} from 'ayano-state';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
@@ -8,12 +17,13 @@ export function getBoundingRect(
   layer: Sketch.AnyLayer,
   layerIds: string[],
 ): Rect | undefined {
-  let bounds = {
+  let bounds: Bounds = {
     minX: Infinity,
     minY: Infinity,
     maxX: -Infinity,
     maxY: -Infinity,
   };
+
   let translate = { x: 0, y: 0 };
 
   function inner(layer: Sketch.AnyLayer) {
@@ -25,7 +35,7 @@ export function getBoundingRect(
       case 'text': {
         if (!layerIds.includes(layer.do_objectID)) break;
 
-        const frame = Primitives.insetRect(layer.frame, 0.5, 0.5);
+        const frame = layer.frame;
 
         const x = frame.x + translate.x;
         const y = frame.y + translate.y;
@@ -72,20 +82,7 @@ export function getBoundingRect(
   };
 }
 
-const cardinalDirections = [
-  'n',
-  'ne',
-  'e',
-  'se',
-  's',
-  'sw',
-  'w',
-  'nw',
-] as const;
-
-type CardinalDirection = typeof cardinalDirections[number];
-
-const cardinalDirectionMap: Record<CardinalDirection, Point> = {
+const compassDirectionMap: Record<CompassDirection, Point> = {
   n: { x: 0.5, y: 0 },
   ne: { x: 1, y: 0 },
   e: { x: 1, y: 0.5 },
@@ -96,17 +93,12 @@ const cardinalDirectionMap: Record<CardinalDirection, Point> = {
   nw: { x: 0, y: 0 },
 };
 
-type DragHandle = {
-  rect: Rect;
-  cardinalDirection: CardinalDirection;
-};
-
 export function getDragHandles(
   boundingRect: Rect,
-  handleSize: number,
+  handleSize: number = 7,
 ): DragHandle[] {
-  return cardinalDirections.map((cardinalDirection) => {
-    const translationPercent = cardinalDirectionMap[cardinalDirection];
+  return compassDirections.map((compassDirection) => {
+    const translationPercent = compassDirectionMap[compassDirection];
 
     return {
       rect: {
@@ -121,7 +113,7 @@ export function getDragHandles(
         width: handleSize,
         height: handleSize,
       },
-      cardinalDirection,
+      compassDirection,
     };
   });
 }

@@ -4,6 +4,29 @@ import type { PageLayer } from '..';
 import { Point, Rect, UUID } from '../types';
 import * as Models from '../models';
 
+export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
+export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
+
+export type CardinalDirection = typeof cardinalDirections[number];
+export type OrdinalDirection = typeof ordinalDirections[number];
+export type CompassDirection = CardinalDirection | OrdinalDirection;
+
+export const compassDirections: CompassDirection[] = [
+  ...cardinalDirections,
+  ...ordinalDirections,
+];
+
+export function getCardinalDirections(
+  direction: CompassDirection,
+): CardinalDirection[] {
+  return direction.split('') as CardinalDirection[];
+}
+
+export type DragHandle = {
+  rect: Rect;
+  compassDirection: CompassDirection;
+};
+
 export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
 
 export type InteractionAction =
@@ -12,12 +35,20 @@ export type InteractionAction =
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'maybeMove', origin: Point]
-  | [type: 'startMoving', point: Point]
-  | [type: 'updateMoving', point: Point]
-  | [type: 'enablePanMode']
+  | [
+      type: 'maybeScale',
+      origin: Point,
+      direction: CompassDirection,
+      pageSnapshot: Sketch.Page,
+    ]
   | [type: 'maybePan', origin: Point]
+  | [type: 'startMoving', point: Point]
+  | [type: 'startScaling', point: Point]
   | [type: 'startPanning', point: Point]
-  | [type: 'updatePanning', point: Point];
+  | [type: 'updateMoving', point: Point]
+  | [type: 'updateScaling', point: Point]
+  | [type: 'updatePanning', point: Point]
+  | [type: 'enablePanMode'];
 
 export type InteractionState =
   | {
@@ -32,7 +63,20 @@ export type InteractionState =
       value: PageLayer;
     }
   | { type: 'maybeMove'; origin: Point }
+  | {
+      type: 'maybeScale';
+      origin: Point;
+      direction: CompassDirection;
+      pageSnapshot: Sketch.Page;
+    }
   | { type: 'moving'; previous: Point; next: Point }
+  | {
+      type: 'scaling';
+      origin: Point;
+      current: Point;
+      direction: CompassDirection;
+      pageSnapshot: Sketch.Page;
+    }
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
   | { type: 'panning'; previous: Point; next: Point };
@@ -110,7 +154,17 @@ export function interactionReducer(
     case 'maybeMove': {
       const [, origin] = action;
 
-      return { type: 'maybeMove', origin };
+      return { type: action[0], origin };
+    }
+    case 'maybeScale': {
+      const [, origin, direction, pageSnapshot] = action;
+
+      return {
+        type: action[0],
+        origin,
+        direction,
+        pageSnapshot,
+      };
     }
     case 'startMoving': {
       const [, point] = action;
@@ -125,6 +179,21 @@ export function interactionReducer(
         next: point,
       };
     }
+    case 'startScaling': {
+      const [, point] = action;
+
+      if (state.type !== 'maybeScale') {
+        throw new Error('Bad interaction state - should be in `maybeScale`');
+      }
+
+      return {
+        type: 'scaling',
+        origin: state.origin,
+        current: point,
+        direction: state.direction,
+        pageSnapshot: state.pageSnapshot,
+      };
+    }
     case 'updateMoving': {
       const [, point] = action;
 
@@ -136,6 +205,21 @@ export function interactionReducer(
         type: 'moving',
         previous: state.next,
         next: point,
+      };
+    }
+    case 'updateScaling': {
+      const [, point] = action;
+
+      if (state.type !== 'scaling') {
+        throw new Error('Bad interaction state - should be in `scaling`');
+      }
+
+      return {
+        type: 'scaling',
+        origin: state.origin,
+        current: point,
+        direction: state.direction,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'enablePanMode':

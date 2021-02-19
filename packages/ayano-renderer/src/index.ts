@@ -53,7 +53,10 @@ export function renderCanvas(context: Context) {
   const boundingRect = getBoundingRect(page, state.selectedObjects);
 
   if (boundingRect) {
-    canvas.drawRect(Primitives.rect(CanvasKit, boundingRect), selectionPaint);
+    canvas.drawRect(
+      Primitives.rect(CanvasKit, Primitives.insetRect(boundingRect, 0.5, 0.5)),
+      selectionPaint,
+    );
   }
 
   const highlightPaint = new CanvasKit.Paint();
@@ -79,8 +82,9 @@ export function renderCanvas(context: Context) {
     const dragHandlePaint = new CanvasKit.Paint();
     dragHandlePaint.setColor(CanvasKit.Color(255, 255, 255, 1));
     dragHandlePaint.setStyle(CanvasKit.PaintStyle.Fill);
+    dragHandlePaint.setAntiAlias(true);
 
-    const dragHandles = getDragHandles(boundingRect, 7);
+    const dragHandles = getDragHandles(boundingRect);
 
     dragHandles.forEach((handle) => {
       canvas.drawRect(Primitives.rect(CanvasKit, handle.rect), dragHandlePaint);

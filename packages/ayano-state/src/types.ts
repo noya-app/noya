@@ -6,4 +6,11 @@ export type Point = { x: number; y: number };
 
 export type Rect = { x: number; y: number; width: number; height: number };
 
+export type Bounds = {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+};
+
 export type PageLayer = Sketch.Page['layers'][0];

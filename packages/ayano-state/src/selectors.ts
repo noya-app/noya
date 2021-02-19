@@ -1,9 +1,18 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import {
+  getBoundingRect,
+  getDragHandles,
+} from 'ayano-renderer/src/canvas/selection';
 import * as Primitives from 'ayano-renderer/src/primitives';
 import type { CanvasKit } from 'canvaskit-wasm';
 import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP } from './layers';
+import {
+  CardinalDirection,
+  CompassDirection,
+  DragHandle,
+} from './reducers/interaction';
 import type { Point, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -71,6 +80,18 @@ export const getSelectedLayerIndexPathsExcludingDescendants = (
   });
 };
 
+export const getSelectedLayersExcludingDescendants = (
+  state: ApplicationState,
+): Sketch.AnyLayer[] => {
+  const pageIndex = getCurrentPageIndex(state);
+
+  return getSelectedLayerIndexPathsExcludingDescendants(state).map(
+    (layerIndex) => {
+      return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+    },
+  );
+};
+
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 
@@ -102,6 +123,24 @@ export const getLayerIndexPath = (
 
   return indexPath ? { pageIndex, indexPath } : undefined;
 };
+
+export function getScaleDirectionAtPoint(
+  state: ApplicationState,
+  point: Point,
+): CompassDirection | undefined {
+  const page = getCurrentPage(state);
+  const boundingRect = getBoundingRect(page, state.selectedObjects);
+
+  if (!boundingRect) return;
+
+  const handles = getDragHandles(boundingRect);
+
+  const handle = handles.find((handle) =>
+    Primitives.rectContainsPoint(handle.rect, point),
+  );
+
+  return handle?.compassDirection;
+}
 
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,

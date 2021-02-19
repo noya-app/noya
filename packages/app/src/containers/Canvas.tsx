@@ -1,7 +1,9 @@
 import { Point, ShapeType } from 'ayano-state';
 import {
+  getCurrentPage,
   getCurrentPageMetadata,
   getLayerAtPoint,
+  getScaleDirectionAtPoint,
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -13,6 +15,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
+import { getBoundingRect } from 'ayano-renderer/src/canvas/selection';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -164,6 +167,16 @@ export default function Canvas(props: Props) {
           break;
         }
         case 'none': {
+          if (state.selectedObjects.length > 0) {
+            const direction = getScaleDirectionAtPoint(state, point);
+
+            if (direction) {
+              dispatch('interaction', ['maybeScale', point, direction]);
+
+              return;
+            }
+          }
+
           const layer = getLayerAtPoint(CanvasKit, state, point);
 
           if (layer) {
@@ -209,14 +222,20 @@ export default function Canvas(props: Props) {
           event.preventDefault();
           break;
         }
-        case 'maybeMove': {
+        case 'maybeMove':
+        case 'maybeScale': {
           const { origin } = state.interactionState;
 
           if (
             Math.abs(point.x - origin.x) > 2 ||
             Math.abs(point.y - origin.y) > 2
           ) {
-            dispatch('interaction', ['startMoving', point]);
+            dispatch('interaction', [
+              state.interactionState.type === 'maybeMove'
+                ? 'startMoving'
+                : 'startScaling',
+              point,
+            ]);
           }
 
           containerRef.current?.setPointerCapture(event.pointerId);
@@ -224,8 +243,14 @@ export default function Canvas(props: Props) {
 
           break;
         }
-        case 'moving': {
-          dispatch('interaction', ['updateMoving', point]);
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
@@ -289,15 +314,22 @@ export default function Canvas(props: Props) {
 
           break;
         }
-        case 'maybeMove': {
+        case 'maybeMove':
+        case 'maybeScale': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
-        case 'moving': {
-          dispatch('interaction', ['updateMoving', point]);
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
