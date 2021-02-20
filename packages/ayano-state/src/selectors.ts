@@ -7,12 +7,8 @@ import * as Primitives from 'ayano-renderer/src/primitives';
 import type { CanvasKit } from 'canvaskit-wasm';
 import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
-import { findIndexPath, INCLUDE_AND_SKIP } from './layers';
-import {
-  CardinalDirection,
-  CompassDirection,
-  DragHandle,
-} from './reducers/interaction';
+import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
+import { CompassDirection } from './reducers/interaction';
 import type { Point, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -95,9 +91,9 @@ export const getSelectedLayersExcludingDescendants = (
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 
-  return state.selectedObjects
-    .map((id) => page.layers.find((layer) => layer.do_objectID === id))
-    .filter((layer): layer is PageLayer => !!layer);
+  return Layers.findAll(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  ) as PageLayer[];
 };
 
 export const makeGetPageLayers = (
@@ -153,9 +149,9 @@ export function getLayerAtPoint(
 
   // TODO: need to keep track of zoom also
   let translate: Point = { x: 0, y: 0 };
-  let found: PageLayer | undefined;
+  let found: Sketch.AnyLayer | undefined;
 
-  Layers.visit(page, {
+  visitReversed(page, {
     onEnter: (layer) => {
       if (layer._class === 'page') return;
 
@@ -185,7 +181,7 @@ export function getLayerAtPoint(
           break;
       }
 
-      found = layer as PageLayer;
+      found = layer;
 
       return STOP;
     },
@@ -198,5 +194,5 @@ export function getLayerAtPoint(
     },
   });
 
-  return found;
+  return found as PageLayer;
 }

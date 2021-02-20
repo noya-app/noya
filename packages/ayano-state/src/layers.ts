@@ -19,6 +19,12 @@ export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   }
 };
 
+export const getChildrenReversed = <T extends Sketch.AnyLayer>(
+  layer: T,
+): T[] => {
+  return [...getChildren(layer)].reverse();
+};
+
 const INCLUDE_AND_SKIP = 'include_and_skip';
 const EXCLUDE_AND_SKIP = 'exclude_and_skip';
 
@@ -67,11 +73,16 @@ const findAllLayerIndexPaths = <T extends Sketch.AnyLayer>(
 export const {
   visit,
   find,
+  findAll,
   findIndexPath,
   access,
   accessPath,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
+});
+
+export const { visit: visitReversed } = withOptions<Sketch.AnyLayer>({
+  getChildren: getChildrenReversed,
 });
 
 export {

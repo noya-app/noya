@@ -1,4 +1,4 @@
-import { PageLayer, Selectors } from 'ayano-state';
+import { Layers, PageLayer, Selectors } from 'ayano-state';
 import { Fragment, memo, useMemo } from 'react';
 import Divider from '../components/Divider';
 import AlignmentInspector from '../components/inspector/AlignmentInspector';
@@ -10,6 +10,7 @@ import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from '../utils/withSeparatorElements';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
@@ -19,14 +20,9 @@ interface Props {}
 
 export default memo(function Inspector(props: Props) {
   const [state] = useApplicationState();
-  const page = useSelector(Selectors.getCurrentPage);
 
-  const selectedLayers = useMemo(
-    () =>
-      state.selectedObjects
-        .map((id) => page.layers.find((layer) => layer.do_objectID === id))
-        .filter((layer): layer is PageLayer => !!layer),
-    [page.layers, state.selectedObjects],
+  const selectedLayers = useShallowArray(
+    useSelector(Selectors.getSelectedLayers),
   );
 
   const elements = useMemo(() => {
