@@ -195,7 +195,9 @@ export default function Canvas(props: Props) {
             }
           }
 
-          const layer = getLayerAtPoint(CanvasKit, state, point);
+          const layer = getLayerAtPoint(CanvasKit, state, point, {
+            clickThroughGroups: event.metaKey,
+          });
 
           if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
@@ -297,7 +299,9 @@ export default function Canvas(props: Props) {
           break;
         }
         case 'none': {
-          const layer = getLayerAtPoint(CanvasKit, state, point);
+          const layer = getLayerAtPoint(CanvasKit, state, point, {
+            clickThroughGroups: event.metaKey,
+          });
 
           // For perf, check that we actually need to update the highlight.
           // This gets called on every mouse movement.

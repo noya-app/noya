@@ -154,6 +154,7 @@ export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
   point: Point,
+  options?: { clickThroughGroups: boolean },
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
 
@@ -174,7 +175,11 @@ export function getLayerAtPoint(
       if (!containsPoint) return SKIP;
 
       // Artboards can't be selected themselves, and instead only update the ctm
-      if (layer._class === 'artboard') {
+      if (
+        layer._class === 'artboard' ||
+        (layer._class === 'group' &&
+          (layer.hasClickThrough || options?.clickThroughGroups))
+      ) {
         translate.x -= layer.frame.x;
         translate.y -= layer.frame.y;
 

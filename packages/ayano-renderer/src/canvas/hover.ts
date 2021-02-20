@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { isParentLayer } from 'ayano-state/src/layers';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
@@ -36,19 +37,14 @@ export function renderHoverOutline(
       break;
   }
 
-  switch (layer._class) {
-    case 'artboard': {
-      canvas.save();
-      canvas.translate(layer.frame.x, layer.frame.y);
+  if (isParentLayer(layer)) {
+    canvas.save();
+    canvas.translate(layer.frame.x, layer.frame.y);
 
-      layer.layers.forEach((child) => {
-        renderHoverOutline(context, child, paint, layerIds);
-      });
+    layer.layers.forEach((child) => {
+      renderHoverOutline(context, child, paint, layerIds);
+    });
 
-      canvas.restore();
-      break;
-    }
-    default:
-      break;
+    canvas.restore();
   }
 }
