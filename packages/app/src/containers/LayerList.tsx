@@ -1,6 +1,7 @@
 import {
   BoxModelIcon,
   CircleIcon,
+  GroupIcon,
   ImageIcon,
   SquareIcon,
   TextIcon,
@@ -80,6 +81,8 @@ const LayerIcon = memo(function LayerIcon({
       return <TextIcon color={color} />;
     case 'artboard':
       return <BoxModelIcon color={color} />;
+    case 'group':
+      return <GroupIcon color={color} />;
     case 'bitmap':
       return <ImageIcon color={color} />;
     default:
@@ -131,29 +134,27 @@ export default function LayerList(props: Props) {
         );
       };
 
-      const rowProps = {
-        key: id,
-        depth,
-        selected,
-        onClick: handleClick,
-        onHoverChange: handleHoverChange,
-        icon: <LayerIcon type={type} selected={selected} />,
-      };
+      const handleClickChevron = () =>
+        dispatch('setExpandedInLayerList', id, !expanded);
 
-      return type === 'artboard' ? (
-        <TreeView.SectionHeader
-          expanded={expanded}
-          onClickChevron={() =>
-            dispatch('setExpandedInLayerList', id, !expanded)
+      const Component =
+        type === 'artboard' ? TreeView.SectionHeader : TreeView.Row;
+
+      return (
+        <Component
+          key={id}
+          depth={depth}
+          selected={selected}
+          onClick={handleClick}
+          onHoverChange={handleHoverChange}
+          icon={<LayerIcon type={type} selected={selected} />}
+          expanded={
+            type === 'artboard' || type === 'group' ? expanded : undefined
           }
-          {...rowProps}
+          onClickChevron={handleClickChevron}
         >
           <TreeView.RowTitle>{name}</TreeView.RowTitle>
-        </TreeView.SectionHeader>
-      ) : (
-        <TreeView.Row {...rowProps}>
-          <TreeView.RowTitle>{name}</TreeView.RowTitle>
-        </TreeView.Row>
+        </Component>
       );
     });
   }, [items, dispatch, selectedObjects]);

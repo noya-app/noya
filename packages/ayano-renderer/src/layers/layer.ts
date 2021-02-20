@@ -5,6 +5,7 @@ import { renderBitmap } from '../layers/bitmap';
 import { renderShape } from '../layers/shape';
 import { renderText } from '../layers/text';
 import { renderArtboard } from './artboard';
+import { renderGroup } from './group';
 
 // We roughly follow Skia's SVG renderer for opacity rendering.
 // Note: there are more optimizations that can be done here - we don't
@@ -32,6 +33,9 @@ export function renderLayer(
   switch (layer._class) {
     case 'artboard':
       renderArtboard(context, fontManager, layer);
+      break;
+    case 'group':
+      renderGroup(context, fontManager, layer);
       break;
     case 'text':
       renderText(context, fontManager, layer);

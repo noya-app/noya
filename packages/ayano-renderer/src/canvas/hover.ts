@@ -14,6 +14,7 @@ export function renderHoverOutline(
   switch (layer._class) {
     case 'artboard':
     case 'bitmap':
+    case 'group':
     case 'text': {
       if (!layerIds.includes(layer.do_objectID)) break;
 

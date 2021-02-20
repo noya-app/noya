@@ -9,6 +9,7 @@ import {
   Point,
   Rect,
 } from 'ayano-state';
+import { isParentLayer } from 'ayano-state/src/layers';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
@@ -30,6 +31,7 @@ export function getBoundingRect(
     switch (layer._class) {
       case 'artboard':
       case 'bitmap':
+      case 'group':
       case 'rectangle':
       case 'oval':
       case 'text': {
@@ -51,21 +53,14 @@ export function getBoundingRect(
         break;
     }
 
-    switch (layer._class) {
-      case 'page':
-      case 'artboard': {
-        translate.x += layer.frame.x;
-        translate.y += layer.frame.y;
+    if (isParentLayer(layer)) {
+      translate.x += layer.frame.x;
+      translate.y += layer.frame.y;
 
-        layer.layers.forEach(inner);
+      layer.layers.forEach(inner);
 
-        translate.x -= layer.frame.x;
-        translate.y -= layer.frame.y;
-
-        break;
-      }
-      default:
-        break;
+      translate.x -= layer.frame.x;
+      translate.y -= layer.frame.y;
     }
   }
 
@@ -128,6 +123,7 @@ export function renderSelectionOutline(
 
   switch (layer._class) {
     case 'artboard':
+    case 'group':
     case 'bitmap':
     case 'rectangle':
     case 'oval':
@@ -146,6 +142,7 @@ export function renderSelectionOutline(
   }
 
   switch (layer._class) {
+    case 'group':
     case 'artboard': {
       canvas.save();
       canvas.translate(layer.frame.x, layer.frame.y);
