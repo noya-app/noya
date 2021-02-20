@@ -50,6 +50,10 @@ export const colors = {
   popover: {
     background: 'rgb(252,252,252)',
   },
+  slider: {
+    background: 'white',
+    border: '#BBB',
+  },
   icon: 'rgb(86,93,120)',
 };
 

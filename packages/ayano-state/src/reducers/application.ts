@@ -89,6 +89,7 @@ export type Action =
       amount: number,
       mode?: SetNumberMode,
     ]
+  | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [
       type: 'interaction',
@@ -424,6 +425,26 @@ export function reducer(
                 : style.fills[index].color.alpha + amount;
 
             style.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
+          }
+        });
+      });
+    }
+    case 'setOpacity': {
+      const [, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
+
+          if (style && style.contextSettings) {
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.contextSettings.opacity + amount;
+
+            style.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
           }
         });
       });

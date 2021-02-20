@@ -15,6 +15,7 @@ import withSeparatorElements from '../utils/withSeparatorElements';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import FillInspector from './FillInspector';
+import OpacityInspector from './OpacityInspector';
 
 interface Props {}
 
@@ -24,6 +25,8 @@ export default memo(function Inspector(props: Props) {
   const selectedLayers = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   );
+  const hasContextSettingsLayers =
+    Selectors.getSelectedLayersWithContextSettings(state).length > 0;
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps: DimensionsInspectorProps =
@@ -37,12 +40,13 @@ export default memo(function Inspector(props: Props) {
         <DimensionsInspector {...dimensionsInspectorProps} />
         <Spacer.Vertical size={10} />
       </Fragment>,
+      hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && <BorderInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);
-  }, [selectedLayers]);
+  }, [selectedLayers, hasContextSettingsLayers]);
 
   if (state.interactionState.type === 'insertArtboard') {
     return <ArtboardSizeList />;

@@ -96,6 +96,18 @@ export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   ) as PageLayer[];
 };
 
+export const getSelectedLayersWithContextSettings = (
+  state: ApplicationState,
+): PageLayer[] => {
+  const page = getCurrentPage(state);
+
+  return (Layers.findAll(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  ) as PageLayer[]).filter(
+    (layer) => layer._class !== 'artboard' && layer.style?.contextSettings,
+  );
+};
+
 export const makeGetPageLayers = (
   state: ApplicationState,
 ): ((ids: UUID[]) => PageLayer[]) => {

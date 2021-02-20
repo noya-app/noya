@@ -1459,6 +1459,13 @@
     "@radix-ui/react-primitive" "0.0.3"
     "@radix-ui/utils" "0.0.3"
 
+"@radix-ui/react-collection@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-collection/-/react-collection-0.0.5.tgz#d7fdc779d1b6139c505ea79bd86f347a0c5de48b"
+  integrity sha512-vM22+fim9T3D/XJO4DFvL4pThlJ6hyJpsivipOYFFLYk3aBYMn/rE4kKv5q7eHG7lYamqLtU9LybhMWQeZqcLg==
+  dependencies:
+    "@radix-ui/react-utils" "0.0.5"
+
 "@radix-ui/react-dismissable-layer@0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-0.0.4.tgz#1d1fbc68c23fa6d62af75eaf92f3885d01095751"
@@ -1488,6 +1495,11 @@
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-polymorphic/-/react-polymorphic-0.0.4.tgz#15ae4d971054c4598141f384e56b98b4f952a23c"
   integrity sha512-VmMdYtv2GFMPUfZflO2cqB4s1Ge0BfsbrgALk16mZhNsRLwLyUKDlSgFT0SBMqcYRQKKfto0cRpZFHEJseicbg==
+
+"@radix-ui/react-polymorphic@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-polymorphic/-/react-polymorphic-0.0.5.tgz#7742695d5a47c732b3c5f627dfcd037c03f07f5b"
+  integrity sha512-XjAsBfFaa4FFYXZNPa9icHjDEqzvH+TVxQQwYJU2iY+6Ne1DhHXMLrGt/Vk0+BojMSPzg99NhjXROjQ4Fw30Hw==
 
 "@radix-ui/react-popover@^0.0.5":
   version "0.0.5"
@@ -1545,12 +1557,39 @@
     "@radix-ui/react-polymorphic" "0.0.4"
     "@radix-ui/utils" "0.0.3"
 
+"@radix-ui/react-primitive@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-primitive/-/react-primitive-0.0.4.tgz#c4ff716e8f5a57358beb75a3d447fefcd72c7a1b"
+  integrity sha512-FRiGr6WJRQG7/9i7bUHiXmyS9hLsBrAbMbsaqapYR8VPYlJyAavkNi5sXBXUoWa/VJdeZPI8jUKe/CRZ2ye5Lw==
+  dependencies:
+    "@radix-ui/react-polymorphic" "0.0.5"
+    "@radix-ui/utils" "0.0.3"
+
+"@radix-ui/react-slider@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-slider/-/react-slider-0.0.5.tgz#b6c6ee87818ac2f30ad83bda5f8c30c5e22fbdac"
+  integrity sha512-QnBArvkQ50QsNGPsf5Cr9wFv7fwTXa6ZLH3czJd76Si57g6m0OnaSUDdjIFBL/xTN5e/3oAdUfRVCqFfflg2ww==
+  dependencies:
+    "@radix-ui/react-collection" "0.0.5"
+    "@radix-ui/react-polymorphic" "0.0.5"
+    "@radix-ui/react-primitive" "0.0.4"
+    "@radix-ui/react-utils" "0.0.5"
+    "@radix-ui/utils" "0.0.3"
+
 "@radix-ui/react-utils@0.0.4", "@radix-ui/react-utils@^0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-utils/-/react-utils-0.0.4.tgz#4834cac08088163e0e738c3017fecab406236185"
   integrity sha512-HqC9OJJjoDun7LNqwYzVX9gYaH5yGhdNtaBRPoSt8wywh+Kv0iU6lDP5H7w7j+6TzZCHH8XEzRbmOSowzlpGAA==
   dependencies:
     "@radix-ui/react-polymorphic" "0.0.4"
+    "@radix-ui/utils" "0.0.3"
+
+"@radix-ui/react-utils@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-utils/-/react-utils-0.0.5.tgz#d312d4b3d1d1adb25f1ef284b6d1d861c572bb85"
+  integrity sha512-OEPLfh8J6JH0Cqv3VrvI8NYQKX1nw0qVVNM14lYCgRGmAI49YrK51tcOIzqzdfuBkXLCX5QzrwK8//DjwoAbhQ==
+  dependencies:
+    "@radix-ui/react-polymorphic" "0.0.5"
     "@radix-ui/utils" "0.0.3"
 
 "@radix-ui/utils@0.0.3":
