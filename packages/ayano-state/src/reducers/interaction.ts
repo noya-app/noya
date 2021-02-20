@@ -35,6 +35,7 @@ export type InteractionAction =
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'maybeMove', origin: Point]
+  | [type: 'hoverHandle', direction: CompassDirection]
   | [
       type: 'maybeScale',
       origin: Point,
@@ -63,6 +64,7 @@ export type InteractionState =
       value: PageLayer;
     }
   | { type: 'maybeMove'; origin: Point }
+  | { type: 'hoverHandle'; direction: CompassDirection }
   | {
       type: 'maybeScale';
       origin: Point;
@@ -118,6 +120,11 @@ export function interactionReducer(
     case 'insertRectangle':
     case 'insertText': {
       return { type: action[0] };
+    }
+    case 'hoverHandle': {
+      const [type, direction] = action;
+
+      return { type, direction };
     }
     case 'startDrawing': {
       const [, shapeType, id, point] = action;

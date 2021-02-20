@@ -1,13 +1,12 @@
-import { Point, ShapeType } from 'ayano-state';
+import { renderCanvas, uuid } from 'ayano-renderer';
+import { CompassDirection, Point, ShapeType } from 'ayano-state';
 import {
-  getCurrentPage,
   getCurrentPageMetadata,
   getLayerAtPoint,
   getScaleDirectionAtPoint,
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
-import { renderCanvas, uuid } from 'ayano-renderer';
 import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
@@ -15,11 +14,29 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import { getBoundingRect } from 'ayano-renderer/src/canvas/selection';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
     flush(): void;
+  }
+}
+
+function getCursorForDirection(
+  direction: CompassDirection,
+): CSSProperties['cursor'] {
+  switch (direction) {
+    case 'e':
+    case 'w':
+      return 'ew-resize';
+    case 'n':
+    case 's':
+      return 'ns-resize';
+    case 'ne':
+    case 'sw':
+      return 'nesw-resize';
+    case 'nw':
+    case 'se':
+      return 'nwse-resize';
   }
 }
 
@@ -166,6 +183,7 @@ export default function Canvas(props: Props) {
           event.preventDefault();
           break;
         }
+        case 'hoverHandle':
         case 'none': {
           if (state.selectedObjects.length > 0) {
             const direction = getScaleDirectionAtPoint(state, point);
@@ -265,6 +283,19 @@ export default function Canvas(props: Props) {
 
           break;
         }
+        case 'hoverHandle': {
+          const direction = getScaleDirectionAtPoint(state, point);
+
+          if (direction) {
+            if (direction !== state.interactionState.direction) {
+              dispatch('interaction', ['hoverHandle', direction]);
+            }
+          } else {
+            dispatch('interaction', ['reset']);
+          }
+
+          break;
+        }
         case 'none': {
           const layer = getLayerAtPoint(CanvasKit, state, point);
 
@@ -277,6 +308,16 @@ export default function Canvas(props: Props) {
                 ? { id: layer.do_objectID, precedence: 'belowSelection' }
                 : undefined,
             );
+          }
+
+          if (state.selectedObjects.length > 0) {
+            const direction = getScaleDirectionAtPoint(state, point);
+
+            if (direction) {
+              dispatch('interaction', ['hoverHandle', direction]);
+
+              return;
+            }
           }
 
           break;
@@ -341,6 +382,13 @@ export default function Canvas(props: Props) {
     [dispatch, state, offsetEventPoint],
   );
 
+  const handleDirection =
+    state.interactionState.type === 'hoverHandle' ||
+    state.interactionState.type === 'maybeScale' ||
+    state.interactionState.type === 'scaling'
+      ? state.interactionState.direction
+      : undefined;
+
   const cursor = useMemo((): CSSProperties['cursor'] => {
     switch (state.interactionState.type) {
       case 'panning':
@@ -353,10 +401,17 @@ export default function Canvas(props: Props) {
       case 'insertRectangle':
       case 'insertText':
         return 'crosshair';
+      case 'maybeScale':
+      case 'scaling':
+      case 'hoverHandle':
+        if (handleDirection) {
+          return getCursorForDirection(handleDirection);
+        }
+        return 'default';
       default:
         return 'default';
     }
-  }, [state.interactionState.type]);
+  }, [state.interactionState.type, handleDirection]);
 
   return (
     <Container
