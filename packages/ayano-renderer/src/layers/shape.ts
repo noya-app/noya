@@ -20,8 +20,6 @@ function getGradientTransformationMatrix(
   );
 }
 
-// We roughly follow Skia's SVG renderer for opacity rendering.
-// https://github.com/google/skia/blob/f326e4faef66d529904a7b53eb931fd576c82887/modules/svg/src/SkSVGRenderContext.cpp#L444
 export function renderShape(
   context: Context,
   layer: Sketch.Rectangle | Sketch.Oval,
@@ -36,34 +34,13 @@ export function renderShape(
 
   const matrix = getGradientTransformationMatrix(context, layer.frame);
 
-  const contextSettings = layer.style.contextSettings ?? { opacity: 1 };
   const fills = (layer.style.fills ?? []).slice().reverse();
   const borders = (layer.style.borders ?? []).slice().reverse();
-
-  const hasFill = fills.length > 0;
-  const hasBorder = borders.length > 0;
-
-  // Rendering into a layer is expensive, so if we have *either* a stroke
-  // or fill, combine opacity with fill or border paint.
-  const useLayer = contextSettings.opacity < 1 && hasFill && hasBorder;
-
-  const saveCount = canvas.getSaveCount();
-
-  if (useLayer) {
-    const opacityPaint = new CanvasKit.Paint();
-    opacityPaint.setAlphaf(contextSettings.opacity);
-
-    canvas.saveLayer(opacityPaint);
-  }
 
   fills.forEach((fill) => {
     if (!fill.isEnabled) return;
 
     const paint = Primitives.fill(CanvasKit, fill, matrix);
-
-    if (!useLayer) {
-      paint.setAlphaf(contextSettings.opacity);
-    }
 
     canvas.drawPath(path, paint);
   });
@@ -73,12 +50,6 @@ export function renderShape(
 
     const paint = Primitives.border(CanvasKit, border);
 
-    if (!useLayer) {
-      paint.setAlphaf(contextSettings.opacity);
-    }
-
     renderBorderPath(context, paint, path, border.position);
   });
-
-  canvas.restoreToCount(saveCount);
 }
