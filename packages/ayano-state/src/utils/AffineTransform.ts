@@ -1,7 +1,7 @@
 import { Point } from '../types';
 
 export interface Transformable {
-  transform(affineTransformation: AffineTransformation): this;
+  transform(affineTransform: AffineTransform): this;
 }
 
 /**
@@ -10,7 +10,7 @@ export interface Transformable {
  * https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
  * https://people.cs.clemson.edu/~dhouse/courses/401/notes/affines-matrices.pdf
  */
-export class AffineTransformation implements Transformable {
+export class AffineTransform implements Transformable {
   m00: number;
   m01: number;
   m02: number;
@@ -40,8 +40,8 @@ export class AffineTransformation implements Transformable {
     };
   }
 
-  transform(other: AffineTransformation): this {
-    return new AffineTransformation([
+  transform(other: AffineTransform): this {
+    return new AffineTransform([
       this.m00 * other.m00 + this.m01 * other.m10, // m00
       this.m00 * other.m01 + this.m01 * other.m11, // m01
       this.m00 * other.m02 + this.m01 * other.m12 + this.m02, // m02
@@ -51,14 +51,39 @@ export class AffineTransformation implements Transformable {
     ]) as this;
   }
 
-  // Static
-
-  static get identity(): AffineTransformation {
-    return new AffineTransformation([1, 0, 0, 0, 1, 0]);
+  get determinant() {
+    return this.m00 * this.m11 - this.m01 * this.m10;
   }
 
-  static rotation(theta: number): AffineTransformation {
-    return new AffineTransformation([
+  get isInvertible() {
+    const det = this.determinant;
+
+    return (
+      isFinite(det) && isFinite(this.m02) && isFinite(this.m12) && det !== 0
+    );
+  }
+
+  invert() {
+    const det = this.determinant;
+
+    return new AffineTransform([
+      this.m11 / det, // m00
+      -this.m01 / det, // m01
+      (this.m01 * this.m12 - this.m11 * this.m02) / det, // m02
+      -this.m10 / det, // m10
+      this.m00 / det, // m11
+      (this.m10 * this.m02 - this.m00 * this.m12) / det, // m12
+    ]);
+  }
+
+  // Static
+
+  static get identity(): AffineTransform {
+    return new AffineTransform([1, 0, 0, 0, 1, 0]);
+  }
+
+  static rotation(theta: number): AffineTransform {
+    return new AffineTransform([
       Math.cos(theta),
       -Math.sin(theta),
       0,
@@ -68,18 +93,18 @@ export class AffineTransformation implements Transformable {
     ]);
   }
 
-  static scale(sx: number, sy: number = sx): AffineTransformation {
-    return new AffineTransformation([sx, 0, 0, 0, sy, 0]);
+  static scale(sx: number, sy: number = sx): AffineTransform {
+    return new AffineTransform([sx, 0, 0, 0, sy, 0]);
   }
 
-  static translation(tx: number, ty: number): AffineTransformation {
-    return new AffineTransformation([1, 0, tx, 0, 1, ty]);
+  static translation(tx: number, ty: number): AffineTransform {
+    return new AffineTransform([1, 0, tx, 0, 1, ty]);
   }
 
-  static multiply(
-    ...[first, ...rest]: AffineTransformation[]
-  ): AffineTransformation {
-    if (!first) throw new Error('Bad call to AffineTransformation.multiply');
+  static multiply(...[first, ...rest]: AffineTransform[]): AffineTransform {
+    if (!first) return AffineTransform.identity;
+
+    // if (!first) throw new Error('Bad call to AffineTransform.multiply');
 
     return rest.reduce((result, item) => item.transform(result), first);
   }

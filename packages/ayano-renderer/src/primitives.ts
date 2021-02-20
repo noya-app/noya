@@ -58,6 +58,9 @@ export function rectContainsPoint(rect: Rect, point: Point): boolean {
   );
 }
 
+/**
+ * Ensure a rect has a non-negative width and height
+ */
 export function normalizeRect(rect: Rect): Rect {
   return {
     x: Math.min(rect.x + rect.width, rect.x),

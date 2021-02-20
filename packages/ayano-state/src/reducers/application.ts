@@ -17,7 +17,7 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
 } from '../selectors';
 import { Point, UUID } from '../types';
-import { AffineTransformation } from '../utils/AffineTransformation';
+import { AffineTransform } from '../utils/AffineTransform';
 import {
   CompassDirection,
   createInitialInteractionState,
@@ -478,52 +478,66 @@ export function reducer(
               layerIds,
             )!;
 
-            const offset: Point = {
-              x: current.x - origin.x,
-              y: current.y - origin.y,
-            };
-
             const newBoundingRect = resizeRect(
               originalBoundingRect,
-              offset,
+              {
+                x: current.x - origin.x,
+                y: current.y - origin.y,
+              },
               direction,
             );
 
-            const transformation = AffineTransformation.multiply(
-              // First, undo the original transform
-              AffineTransformation.translation(
-                -originalBoundingRect.x,
-                -originalBoundingRect.y,
+            const originalTransform = AffineTransform.multiply(
+              AffineTransform.scale(
+                originalBoundingRect.width,
+                originalBoundingRect.height,
               ),
-              AffineTransformation.scale(
-                1 / originalBoundingRect.width,
-                1 / originalBoundingRect.height,
+              AffineTransform.translation(
+                originalBoundingRect.x,
+                originalBoundingRect.y,
               ),
-              // Then, apply the new transform
-              AffineTransformation.scale(
+            ).invert();
+
+            const newTransform = AffineTransform.multiply(
+              AffineTransform.scale(
                 newBoundingRect.width,
                 newBoundingRect.height,
               ),
-              AffineTransformation.translation(
-                newBoundingRect.x,
-                newBoundingRect.y,
-              ),
+              AffineTransform.translation(newBoundingRect.x, newBoundingRect.y),
             );
 
             layerIndexPaths.forEach((layerIndex) => {
               const originalLayer = Layers.access(pageSnapshot, layerIndex);
+
+              const layerTransform = AffineTransform.multiply(
+                ...Layers.accessPath(pageSnapshot, layerIndex)
+                  .slice(1, -1) // Remove the page and current layer
+                  .map((layer) =>
+                    AffineTransform.translation(layer.frame.x, layer.frame.y),
+                  ),
+              );
 
               const newLayer = Layers.access(
                 state.sketch.pages[pageIndex],
                 layerIndex,
               );
 
-              const min = transformation.applyTo({
+              const min = AffineTransform.multiply(
+                layerTransform,
+                originalTransform,
+                newTransform,
+                layerTransform.invert(),
+              ).applyTo({
                 x: originalLayer.frame.x,
                 y: originalLayer.frame.y,
               });
 
-              const max = transformation.applyTo({
+              const max = AffineTransform.multiply(
+                layerTransform,
+                originalTransform,
+                newTransform,
+                layerTransform.invert(),
+              ).applyTo({
                 x: originalLayer.frame.x + originalLayer.frame.width,
                 y: originalLayer.frame.y + originalLayer.frame.height,
               });

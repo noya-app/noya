@@ -69,6 +69,7 @@ export const {
   find,
   findIndexPath,
   access,
+  accessPath,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
 });
