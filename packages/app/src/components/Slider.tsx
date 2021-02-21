@@ -42,10 +42,16 @@ interface Props {
   id?: string;
   value: number;
   onValueChange: (value: number) => void;
+  min: number;
+  max: number;
 }
 
-export default function Slider({ id, value, onValueChange }: Props) {
-  const arrayValue = useMemo(() => [value], [value]);
+export default function Slider({ id, value, onValueChange, min, max }: Props) {
+  const arrayValue = useMemo(() => [Math.min(Math.max(value, min), max)], [
+    value,
+    min,
+    max,
+  ]);
 
   const handleValueChange = useCallback(
     (arrayValue: number[]) => {
@@ -55,7 +61,13 @@ export default function Slider({ id, value, onValueChange }: Props) {
   );
 
   return (
-    <StyledSlider id={id} value={arrayValue} onValueChange={handleValueChange}>
+    <StyledSlider
+      min={min}
+      max={max}
+      id={id}
+      value={arrayValue}
+      onValueChange={handleValueChange}
+    >
       <StyledTrack>
         <StyledRange />
       </StyledTrack>

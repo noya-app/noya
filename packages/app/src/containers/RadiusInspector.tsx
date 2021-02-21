@@ -11,70 +11,64 @@ import {
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiValue from '../utils/getMultiValue';
 
-export default memo(function OpacityInspector() {
+export default memo(function RadiusInspector() {
   const [, dispatch] = useApplicationState();
 
   const selectedLayers = useShallowArray(
-    useSelector(Selectors.getSelectedLayersWithContextSettings),
+    useSelector(Selectors.getSelectedLayersWithFixedRadius),
   );
 
-  const contextSettings = useShallowArray(
-    selectedLayers.flatMap((layer) =>
-      layer.style?.contextSettings ? [layer.style.contextSettings] : [],
-    ),
+  const radii = useShallowArray(
+    selectedLayers.flatMap((layer) => layer.fixedRadius),
   );
 
-  const opacityValue = useMemo(
-    () => getMultiValue(contextSettings.map((item) => item.opacity)),
-    [contextSettings],
-  );
+  const radiusValue = useMemo(() => getMultiValue(radii), [radii]);
 
-  const handleSubmitOpacity = useCallback(
+  const handleSubmitRadius = useCallback(
     (value: number) => {
-      dispatch('setOpacity', value / 100, 'replace');
+      dispatch('setFixedRadius', value, 'replace');
     },
     [dispatch],
   );
 
-  const handleNudgeOpacity = useCallback(
+  const handleNudgeRadius = useCallback(
     (value: number) => {
-      dispatch('setOpacity', value / 100, 'adjust');
+      dispatch('setFixedRadius', value, 'adjust');
     },
     [dispatch],
   );
 
   return useMemo(() => {
     const roundedValue =
-      opacityValue !== undefined ? Math.round(opacityValue * 100) : undefined;
+      radiusValue !== undefined ? Math.round(radiusValue) : undefined;
 
     return (
       <>
         <InspectorPrimitives.Section>
           <InspectorPrimitives.SectionHeader>
-            <InspectorPrimitives.Title>Opacity</InspectorPrimitives.Title>
+            <InspectorPrimitives.Title>Radius</InspectorPrimitives.Title>
           </InspectorPrimitives.SectionHeader>
           <Spacer.Vertical size={4} />
           <InspectorPrimitives.Row>
             <Slider
-              id="opacity-slider"
+              id="radius-slider"
               value={roundedValue ?? 0}
-              onValueChange={handleSubmitOpacity}
+              onValueChange={handleSubmitRadius}
               min={0}
               max={100}
             />
             <Spacer.Horizontal size={10} />
-            <InputField.Root id="opacity-input" size={50}>
+            <InputField.Root id="radius-input" size={50}>
               <InputField.NumberInput
                 value={roundedValue}
                 placeholder={roundedValue === undefined ? 'multi' : undefined}
-                onSubmit={handleSubmitOpacity}
-                onNudge={handleNudgeOpacity}
+                onSubmit={handleSubmitRadius}
+                onNudge={handleNudgeRadius}
               />
-              <InputField.Label>%</InputField.Label>
             </InputField.Root>
           </InspectorPrimitives.Row>
         </InspectorPrimitives.Section>
       </>
     );
-  }, [opacityValue, handleSubmitOpacity, handleNudgeOpacity]);
+  }, [radiusValue, handleSubmitRadius, handleNudgeRadius]);
 });

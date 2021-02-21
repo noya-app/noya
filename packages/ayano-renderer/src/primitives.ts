@@ -5,7 +5,14 @@ import {
   Point,
   Rect,
 } from 'ayano-state';
-import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
+import type {
+  CanvasKit,
+  Paint,
+  Path,
+  PathCommand,
+  TextStyle,
+} from 'canvaskit-wasm';
+import * as PathUtils from './primitives/path';
 
 /**
  * Resize a rect in a compass direction
@@ -43,10 +50,17 @@ export function distance(
   { x: x1, y: y1 }: Point,
   { x: x2, y: y2 }: Point,
 ): number {
-  const a = x1 - x2;
-  const b = y1 - y2;
+  const a = x2 - x1;
+  const b = y2 - y1;
 
   return Math.sqrt(a * a + b * b);
+}
+
+export function sum({ x: x1, y: y1 }: Point, { x: x2, y: y2 }: Point): Point {
+  return {
+    x: x1 + x2,
+    y: y1 + y2,
+  };
 }
 
 export function rectContainsPoint(rect: Rect, point: Point): boolean {
@@ -231,59 +245,35 @@ export function stringifyPoint({ x, y }: Point): string {
   return `{${x.toString()},${y.toString()}}`;
 }
 
-function zip<A, B>(array1: A[], array2: B[]): [A, B][] {
-  return array1.map((item1, index) => [item1, array2[index]]);
+export function zip<A, B>(array1: A[], array2: B[]): [A, B][];
+export function zip<A, B, C>(
+  array1: A[],
+  array2: B[],
+  array3: C[],
+): [A, B, C][];
+export function zip(...arrays: unknown[][]): unknown[][] {
+  const length = Math.max(...arrays.map((array) => array.length));
+
+  const result: unknown[][] = [];
+
+  for (let i = 0; i < length; i++) {
+    result[i] = [];
+
+    for (let j = 0; j < arrays.length; j++) {
+      result[i][j] = arrays[j][i];
+    }
+  }
+
+  return result;
 }
 
 export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
+  fixedRadius: number,
 ): Path {
-  const { x, y, width, height } = frame;
-
-  const scalePoint = (point: Point) => {
-    return { x: x + point.x * width, y: y + point.y * height };
-  };
-
-  const curvePoints = [...points].map((curvePoint) => ({
-    ...curvePoint,
-    curveFrom: curvePoint.curveTo,
-    curveTo: curvePoint.curveFrom,
-  }));
-
-  const pairs = zip(curvePoints, [
-    ...curvePoints.slice(1),
-    ...curvePoints.slice(0, 1),
-  ]);
-
-  const path = new CanvasKit.Path();
-
-  if (pairs[0]) {
-    const [current] = pairs[0];
-    const currentPoint = scalePoint(parsePoint(current.point));
-    path.moveTo(currentPoint.x, currentPoint.y);
-  }
-
-  pairs.forEach((pair) => {
-    const [current, next] = pair;
-    const currentCurveTo = scalePoint(parsePoint(current.curveTo));
-    const nextCurveFrom = scalePoint(parsePoint(next.curveFrom));
-    const nextPoint = scalePoint(parsePoint(next.point));
-
-    path.cubicTo(
-      currentCurveTo.x,
-      currentCurveTo.y,
-      nextCurveFrom.x,
-      nextCurveFrom.y,
-      nextPoint.x,
-      nextPoint.y,
-    );
-  });
-
-  path.close();
-
-  return path;
+  return PathUtils.path(CanvasKit, points, frame, fixedRadius);
 }
 
 export function stringAttribute(

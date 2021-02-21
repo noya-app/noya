@@ -1,4 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { getLayerFixedRadius } from 'ayano-state/src/selectors';
+import { PathEffect } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
 import { renderBorderPath } from '../styles/border';
@@ -26,7 +28,12 @@ export function renderShape(
 ) {
   const { canvas, CanvasKit } = context;
 
-  const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+  const path = Primitives.path(
+    CanvasKit,
+    layer.points,
+    layer.frame,
+    getLayerFixedRadius(layer),
+  );
 
   path.setFillType(CanvasKit.FillType.EvenOdd);
 

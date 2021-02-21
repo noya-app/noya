@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { isParentLayer } from 'ayano-state/src/layers';
+import { getLayerFixedRadius } from 'ayano-state/src/selectors';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
@@ -26,7 +27,12 @@ export function renderHoverOutline(
     case 'oval': {
       if (!layerIds.includes(layer.do_objectID)) break;
 
-      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+      const path = Primitives.path(
+        CanvasKit,
+        layer.points,
+        layer.frame,
+        getLayerFixedRadius(layer),
+      );
       path.setFillType(CanvasKit.FillType.EvenOdd);
 
       canvas.drawPath(path, paint);

@@ -16,6 +16,7 @@ import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import FillInspector from './FillInspector';
 import OpacityInspector from './OpacityInspector';
+import RadiusInspector from './RadiusInspector';
 
 interface Props {}
 
@@ -27,6 +28,8 @@ export default memo(function Inspector(props: Props) {
   );
   const hasContextSettingsLayers =
     Selectors.getSelectedLayersWithContextSettings(state).length > 0;
+  const hasFixedRadiusLayers =
+    Selectors.getSelectedLayersWithFixedRadius(state).length > 0;
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps: DimensionsInspectorProps =
@@ -40,13 +43,14 @@ export default memo(function Inspector(props: Props) {
         <DimensionsInspector {...dimensionsInspectorProps} />
         <Spacer.Vertical size={10} />
       </Fragment>,
+      hasFixedRadiusLayers && <RadiusInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && <BorderInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);
-  }, [selectedLayers, hasContextSettingsLayers]);
+  }, [selectedLayers, hasContextSettingsLayers, hasFixedRadiusLayers]);
 
   if (state.interactionState.type === 'insertArtboard') {
     return <ArtboardSizeList />;

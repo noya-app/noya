@@ -108,6 +108,16 @@ export const getSelectedLayersWithContextSettings = (
   );
 };
 
+export const getSelectedLayersWithFixedRadius = (
+  state: ApplicationState,
+): Sketch.Rectangle[] => {
+  const page = getCurrentPage(state);
+
+  return Layers.findAll(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
+};
+
 export const makeGetPageLayers = (
   state: ApplicationState,
 ): ((ids: UUID[]) => PageLayer[]) => {
@@ -150,6 +160,10 @@ export function getScaleDirectionAtPoint(
   return handle?.compassDirection;
 }
 
+export function getLayerFixedRadius(layer: Sketch.AnyLayer): number {
+  return layer._class === 'rectangle' ? layer.fixedRadius : 0;
+}
+
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
@@ -187,8 +201,14 @@ export function getLayerAtPoint(
       }
 
       switch (layer._class) {
+        case 'rectangle':
         case 'oval': {
-          const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+          const path = Primitives.path(
+            CanvasKit,
+            layer.points,
+            layer.frame,
+            getLayerFixedRadius(layer),
+          );
 
           if (!path.contains(localPoint.x, localPoint.y)) return;
 

@@ -90,6 +90,7 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
+  | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [
       type: 'interaction',
@@ -445,6 +446,22 @@ export function reducer(
                 : style.contextSettings.opacity + amount;
 
             style.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
+          }
+        });
+      });
+    }
+    case 'setFixedRadius': {
+      const [, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class === 'rectangle') {
+            const newValue =
+              mode === 'replace' ? amount : layer.fixedRadius + amount;
+
+            layer.fixedRadius = Math.max(0, newValue);
           }
         });
       });
