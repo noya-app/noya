@@ -5,13 +5,7 @@ import {
   Point,
   Rect,
 } from 'ayano-state';
-import type {
-  CanvasKit,
-  Paint,
-  Path,
-  PathCommand,
-  TextStyle,
-} from 'canvaskit-wasm';
+import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 import * as PathUtils from './primitives/path';
 
 /**
@@ -243,28 +237,6 @@ export function parsePoint(pointString: string): Point {
 
 export function stringifyPoint({ x, y }: Point): string {
   return `{${x.toString()},${y.toString()}}`;
-}
-
-export function zip<A, B>(array1: A[], array2: B[]): [A, B][];
-export function zip<A, B, C>(
-  array1: A[],
-  array2: B[],
-  array3: C[],
-): [A, B, C][];
-export function zip(...arrays: unknown[][]): unknown[][] {
-  const length = Math.max(...arrays.map((array) => array.length));
-
-  const result: unknown[][] = [];
-
-  for (let i = 0; i < length; i++) {
-    result[i] = [];
-
-    for (let j = 0; j < arrays.length; j++) {
-      result[i][j] = arrays[j][i];
-    }
-  }
-
-  return result;
 }
 
 export function path(

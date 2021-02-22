@@ -1,7 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Point } from 'ayano-state';
+import { zip } from 'ayano-utils';
 import type { CanvasKit, Path } from 'canvaskit-wasm';
-import { distance, parsePoint, zip } from '../primitives';
+import { distance, parsePoint } from '../primitives';
 
 /**
  * The radius of an edge should be less than half the length of that edge

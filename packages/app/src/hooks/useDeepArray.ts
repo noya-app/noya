@@ -1,8 +1,8 @@
 import { useRef } from 'react';
-import { isShallowEqualArray } from '../utils/shallowEqual';
+import { isShallowEqual } from 'ayano-utils';
 
 function deepEqualArray<T>(a: T[], b: T[]) {
-  if (isShallowEqualArray(a, b)) return true;
+  if (isShallowEqual(a, b)) return true;
 
   return JSON.stringify(a) === JSON.stringify(b);
 }
