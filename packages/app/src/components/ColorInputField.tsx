@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import * as Spacer from '../components/Spacer';
 
 const Trigger = styled(Popover.Trigger)(({ color }) => ({
-  width: '60px',
+  width: '40px',
   height: '27px',
   borderRadius: '4px',
   border: '1px solid rgba(0,0,0,0.1)',

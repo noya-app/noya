@@ -15,6 +15,7 @@ import withSeparatorElements from '../utils/withSeparatorElements';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import FillInspector from './FillInspector';
+import ShadowInspector from './ShadowInspector';
 import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 
@@ -47,6 +48,7 @@ export default memo(function Inspector(props: Props) {
       hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && <BorderInspector />,
+      selectedLayers.length === 1 && <ShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);
