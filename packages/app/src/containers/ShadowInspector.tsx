@@ -17,28 +17,28 @@ export default memo(function ShadowInspector() {
     selectedLayers.map((layer) => layer.style?.shadows),
   );
   // TODO: Modify all shadows
-  const firstFill = useMemo(() => shadows[0] || [], [shadows]);
+  const firstShadow = useMemo(() => shadows[0] || [], [shadows]);
 
   return (
     <ArrayController<FileFormat.Shadow>
       title="Shadows"
-      id="fills"
-      key="fills"
-      value={firstFill}
-      onClickPlus={useCallback(() => dispatch('addNewFill'), [dispatch])}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
+      id="shadows"
+      key="shadows"
+      value={firstShadow}
+      onClickPlus={useCallback(() => dispatch('addNewShadow'), [dispatch])}
+      onClickTrash={useCallback(() => dispatch('deleteDisabledShadows'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
+      onDeleteItem={useCallback((index) => dispatch('deleteShadow', index), [
         dispatch,
       ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
-          dispatch('moveFill', sourceIndex, destinationIndex),
+          dispatch('moveShadow', sourceIndex, destinationIndex),
         [dispatch],
       )}
       onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setFillEnabled', index, checked),
+        (index, checked) => dispatch('setShadowEnabled', index, checked),
         [dispatch],
       )}
     >
@@ -62,7 +62,7 @@ export default memo(function ShadowInspector() {
             onNudgeOpacity={(value) =>
               dispatch('setFillOpacity', index, value, 'adjust')
             }
-            onChangeColor={(value) => dispatch('setFillColor', index, value)}
+            onChangeColor={(value) => dispatch('setShadowColor', index, value)}
           />
         ),
         [dispatch],

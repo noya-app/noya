@@ -42,9 +42,13 @@ export default memo(function FillRow({
         case colorInputId:
           return <Label.Label>Color</Label.Label>;
         case hexInputId:
-          return <Label.Label>Hex</Label.Label>;
+          return <Label.Label>X</Label.Label>;
         case opacityInputId:
-          return <Label.Label>Opacity</Label.Label>;
+          return <Label.Label>Y</Label.Label>;
+        case hexInputId:
+          return <Label.Label>Blur</Label.Label>;
+        case opacityInputId:
+          return <Label.Label>Spread</Label.Label>;
         default:
           return null;
       }

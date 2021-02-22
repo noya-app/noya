@@ -43,7 +43,7 @@ export type SelectionType = 'replace' | 'intersection' | 'difference';
 
 export type SetNumberMode = 'replace' | 'adjust';
 
-type StyleElementType = 'Fill' | 'Border';
+type StyleElementType = 'Fill' | 'Border' | 'Shadow';
 
 export type Action =
   | [
@@ -204,7 +204,8 @@ export function reducer(
       });
     }
     case 'addNewBorder':
-    case 'addNewFill': {
+    case 'addNewFill':
+    case 'addNewShadow': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
@@ -229,12 +230,20 @@ export function reducer(
                 style.fills = [Models.fill];
               }
               break;
+            case 'addNewShadow':
+              if (style.shadows) {
+                style.shadows.unshift(Models.shadow);
+              } else {
+                style.shadows = [Models.shadow];
+              }
+              break;
           }
         });
       });
     }
     case 'setBorderEnabled':
-    case 'setFillEnabled': {
+    case 'setFillEnabled':
+    case 'setShadowEnabled': {
       const [, index, isEnabled] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -256,12 +265,18 @@ export function reducer(
                 style.fills[index].isEnabled = isEnabled;
               }
               break;
+            case 'setShadowEnabled':
+              if (style.shadows && style.shadows[index]) {
+                style.shadows[index].isEnabled = isEnabled;
+              }
+              break;
           }
         });
       });
     }
     case 'deleteBorder':
-    case 'deleteFill': {
+    case 'deleteFill':
+    case 'deleteShadow': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
@@ -282,12 +297,18 @@ export function reducer(
                 style.fills.splice(action[1], 1);
               }
               break;
+            case 'deleteShadow':
+              if (style.shadows) {
+                style.shadows.splice(action[1], 1);
+              }
+              break;
           }
         });
       });
     }
     case 'moveBorder':
-    case 'moveFill': {
+    case 'moveFill':
+    case 'moveShadow': {
       const [, sourceIndex, destinationIndex] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -315,12 +336,21 @@ export function reducer(
                 style.fills.splice(destinationIndex, 0, sourceItem);
               }
               break;
+            case 'moveShadow':
+              if (style.shadows) {
+                const sourceItem = style.shadows[sourceIndex];
+
+                style.shadows.splice(sourceIndex, 1);
+                style.shadows.splice(destinationIndex, 0, sourceItem);
+              }
+              break;
           }
         });
       });
     }
     case 'deleteDisabledBorders':
-    case 'deleteDisabledFills': {
+    case 'deleteDisabledFills':
+    case 'deleteDisabledShadows': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
@@ -343,13 +373,19 @@ export function reducer(
                 style.fills = style.fills.filter((fill) => fill.isEnabled);
               }
               break;
+            case 'deleteDisabledShadows':
+              if (style.shadows) {
+                style.shadows = style.shadows.filter((fill) => fill.isEnabled);
+              }
+              break;
           }
         });
       });
     }
 
     case 'setBorderColor':
-    case 'setFillColor': {
+    case 'setFillColor':
+    case 'setShadowColor': {
       const [, index, color] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -369,6 +405,11 @@ export function reducer(
             case 'setFillColor':
               if (style.fills && style.fills[index]) {
                 style.fills[index].color = color;
+              }
+              break;
+            case 'setShadowColor':
+              if (style.shadows && style.shadows[index]) {
+                style.shadows[index].color = color;
               }
               break;
           }
