@@ -11,6 +11,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.sidebar.background = 'rgba(40,40,40,0.85)';
   colors.popover.background = 'rgb(40,40,40)';
   colors.listView.raisedBackground = 'rgba(255,255,255,0.1)';
+  colors.slider.background = '#BBB';
 });
 export const textStyles = lightTheme.textStyles;
 export const fonts = lightTheme.fonts;

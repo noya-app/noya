@@ -7,6 +7,8 @@ import * as Spacer from './Spacer';
 type TreeRowBaseProps = {
   icon?: ReactNode;
   depth: number;
+  expanded?: boolean;
+  onClickChevron?: () => void;
 };
 
 /* ----------------------------------------------------------------------------
@@ -19,33 +21,34 @@ const ChevronContainer = styled.span({
 });
 
 type TreeSectionHeaderProps = ComponentProps<typeof ListView['SectionHeader']> &
-  TreeRowBaseProps & {
-    expanded: boolean;
-    onClickChevron?: () => void;
-  };
+  TreeRowBaseProps;
 
 function TreeSectionHeader({
   depth,
   icon,
-  children,
   expanded,
   onClickChevron,
+  children,
   ...rest
 }: TreeSectionHeaderProps) {
+  const handleClickChevron = useCallback(
+    (event) => {
+      event.stopPropagation();
+      onClickChevron?.();
+    },
+    [onClickChevron],
+  );
+
   return (
     <ListView.SectionHeader {...rest}>
       <Spacer.Horizontal size={depth * 12} />
-      <ChevronContainer
-        onClick={useCallback(
-          (event) => {
-            event.stopPropagation();
-            onClickChevron?.();
-          },
-          [onClickChevron],
-        )}
-      >
-        {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-      </ChevronContainer>
+      {expanded === undefined ? (
+        <Spacer.Horizontal size={15} />
+      ) : (
+        <ChevronContainer onClick={handleClickChevron}>
+          {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+        </ChevronContainer>
+      )}
       <Spacer.Horizontal size={6} />
       {icon && (
         <>
@@ -64,12 +67,33 @@ function TreeSectionHeader({
 
 type TreeRowProps = ComponentProps<typeof ListView['Row']> & TreeRowBaseProps;
 
-function TreeRow({ depth, icon, children, ...rest }: TreeRowProps) {
+function TreeRow({
+  depth,
+  icon,
+  expanded,
+  onClickChevron,
+  children,
+  ...rest
+}: TreeRowProps) {
+  const handleClickChevron = useCallback(
+    (event) => {
+      event.stopPropagation();
+      onClickChevron?.();
+    },
+    [onClickChevron],
+  );
+
   return (
     <ListView.Row {...rest}>
       <Spacer.Horizontal size={depth * 12} />
-      {/* Same width as the chevron */}
-      <Spacer.Horizontal size={6 + 15} />
+      {expanded === undefined ? (
+        <Spacer.Horizontal size={15} />
+      ) : (
+        <ChevronContainer onClick={handleClickChevron}>
+          {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+        </ChevronContainer>
+      )}
+      <Spacer.Horizontal size={6} />
       {icon && (
         <>
           {icon}

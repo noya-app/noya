@@ -1,4 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { isParentLayer } from 'ayano-state/src/layers';
+import { getLayerFixedRadius } from 'ayano-state/src/selectors';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
@@ -14,6 +16,7 @@ export function renderHoverOutline(
   switch (layer._class) {
     case 'artboard':
     case 'bitmap':
+    case 'group':
     case 'text': {
       if (!layerIds.includes(layer.do_objectID)) break;
 
@@ -24,7 +27,12 @@ export function renderHoverOutline(
     case 'oval': {
       if (!layerIds.includes(layer.do_objectID)) break;
 
-      const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+      const path = Primitives.path(
+        CanvasKit,
+        layer.points,
+        layer.frame,
+        getLayerFixedRadius(layer),
+      );
       path.setFillType(CanvasKit.FillType.EvenOdd);
 
       canvas.drawPath(path, paint);
@@ -35,19 +43,14 @@ export function renderHoverOutline(
       break;
   }
 
-  switch (layer._class) {
-    case 'artboard': {
-      canvas.save();
-      canvas.translate(layer.frame.x, layer.frame.y);
+  if (isParentLayer(layer)) {
+    canvas.save();
+    canvas.translate(layer.frame.x, layer.frame.y);
 
-      layer.layers.forEach((child) => {
-        renderHoverOutline(context, child, paint, layerIds);
-      });
+    layer.layers.forEach((child) => {
+      renderHoverOutline(context, child, paint, layerIds);
+    });
 
-      canvas.restore();
-      break;
-    }
-    default:
-      break;
+    canvas.restore();
   }
 }

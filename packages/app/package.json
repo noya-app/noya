@@ -5,6 +5,8 @@
   "dependencies": {
     "@radix-ui/react-icons": "^1.0.1",
     "@radix-ui/react-popover": "^0.0.5",
+    "@radix-ui/react-radio-group": "^0.0.6",
+    "@radix-ui/react-slider": "^0.0.5",
     "@radix-ui/react-utils": "^0.0.4",
     "kiwi.js": "^1.1.2",
     "react-beautiful-dnd": "^13.0.0",

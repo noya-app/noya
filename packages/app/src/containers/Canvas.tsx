@@ -1,11 +1,12 @@
-import { Point, ShapeType } from 'ayano-state';
+import { renderCanvas, uuid } from 'ayano-renderer';
+import { CompassDirection, Point, ShapeType } from 'ayano-state';
 import {
   getCurrentPageMetadata,
   getLayerAtPoint,
+  getScaleDirectionAtPoint,
 } from 'ayano-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
-import { renderCanvas, uuid } from 'ayano-renderer';
 import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
@@ -17,6 +18,25 @@ import { useSize } from '../hooks/useSize';
 declare module 'canvaskit-wasm' {
   interface Surface {
     flush(): void;
+  }
+}
+
+function getCursorForDirection(
+  direction: CompassDirection,
+): CSSProperties['cursor'] {
+  switch (direction) {
+    case 'e':
+    case 'w':
+      return 'ew-resize';
+    case 'n':
+    case 's':
+      return 'ns-resize';
+    case 'ne':
+    case 'sw':
+      return 'nesw-resize';
+    case 'nw':
+    case 'se':
+      return 'nwse-resize';
   }
 }
 
@@ -163,8 +183,21 @@ export default function Canvas(props: Props) {
           event.preventDefault();
           break;
         }
+        case 'hoverHandle':
         case 'none': {
-          const layer = getLayerAtPoint(CanvasKit, state, point);
+          if (state.selectedObjects.length > 0) {
+            const direction = getScaleDirectionAtPoint(state, point);
+
+            if (direction) {
+              dispatch('interaction', ['maybeScale', point, direction]);
+
+              return;
+            }
+          }
+
+          const layer = getLayerAtPoint(CanvasKit, state, point, {
+            clickThroughGroups: event.metaKey,
+          });
 
           if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
@@ -209,14 +242,20 @@ export default function Canvas(props: Props) {
           event.preventDefault();
           break;
         }
-        case 'maybeMove': {
+        case 'maybeMove':
+        case 'maybeScale': {
           const { origin } = state.interactionState;
 
           if (
             Math.abs(point.x - origin.x) > 2 ||
             Math.abs(point.y - origin.y) > 2
           ) {
-            dispatch('interaction', ['startMoving', point]);
+            dispatch('interaction', [
+              state.interactionState.type === 'maybeMove'
+                ? 'startMoving'
+                : 'startScaling',
+              point,
+            ]);
           }
 
           containerRef.current?.setPointerCapture(event.pointerId);
@@ -224,8 +263,14 @@ export default function Canvas(props: Props) {
 
           break;
         }
-        case 'moving': {
-          dispatch('interaction', ['updateMoving', point]);
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
@@ -240,8 +285,23 @@ export default function Canvas(props: Props) {
 
           break;
         }
+        case 'hoverHandle': {
+          const direction = getScaleDirectionAtPoint(state, point);
+
+          if (direction) {
+            if (direction !== state.interactionState.direction) {
+              dispatch('interaction', ['hoverHandle', direction]);
+            }
+          } else {
+            dispatch('interaction', ['reset']);
+          }
+
+          break;
+        }
         case 'none': {
-          const layer = getLayerAtPoint(CanvasKit, state, point);
+          const layer = getLayerAtPoint(CanvasKit, state, point, {
+            clickThroughGroups: event.metaKey,
+          });
 
           // For perf, check that we actually need to update the highlight.
           // This gets called on every mouse movement.
@@ -252,6 +312,16 @@ export default function Canvas(props: Props) {
                 ? { id: layer.do_objectID, precedence: 'belowSelection' }
                 : undefined,
             );
+          }
+
+          if (state.selectedObjects.length > 0) {
+            const direction = getScaleDirectionAtPoint(state, point);
+
+            if (direction) {
+              dispatch('interaction', ['hoverHandle', direction]);
+
+              return;
+            }
           }
 
           break;
@@ -289,15 +359,22 @@ export default function Canvas(props: Props) {
 
           break;
         }
-        case 'maybeMove': {
+        case 'maybeMove':
+        case 'maybeScale': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
-        case 'moving': {
-          dispatch('interaction', ['updateMoving', point]);
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
@@ -308,6 +385,13 @@ export default function Canvas(props: Props) {
     },
     [dispatch, state, offsetEventPoint],
   );
+
+  const handleDirection =
+    state.interactionState.type === 'hoverHandle' ||
+    state.interactionState.type === 'maybeScale' ||
+    state.interactionState.type === 'scaling'
+      ? state.interactionState.direction
+      : undefined;
 
   const cursor = useMemo((): CSSProperties['cursor'] => {
     switch (state.interactionState.type) {
@@ -321,10 +405,17 @@ export default function Canvas(props: Props) {
       case 'insertRectangle':
       case 'insertText':
         return 'crosshair';
+      case 'maybeScale':
+      case 'scaling':
+      case 'hoverHandle':
+        if (handleDirection) {
+          return getCursorForDirection(handleDirection);
+        }
+        return 'default';
       default:
         return 'default';
     }
-  }, [state.interactionState.type]);
+  }, [state.interactionState.type, handleDirection]);
 
   return (
     <Container

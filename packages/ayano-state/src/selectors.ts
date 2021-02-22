@@ -1,9 +1,14 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import {
+  getBoundingRect,
+  getDragHandles,
+} from 'ayano-renderer/src/canvas/selection';
 import * as Primitives from 'ayano-renderer/src/primitives';
 import type { CanvasKit } from 'canvaskit-wasm';
 import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
-import { findIndexPath, INCLUDE_AND_SKIP } from './layers';
+import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
+import { CompassDirection } from './reducers/interaction';
 import type { Point, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -71,12 +76,46 @@ export const getSelectedLayerIndexPathsExcludingDescendants = (
   });
 };
 
+export const getSelectedLayersExcludingDescendants = (
+  state: ApplicationState,
+): Sketch.AnyLayer[] => {
+  const pageIndex = getCurrentPageIndex(state);
+
+  return getSelectedLayerIndexPathsExcludingDescendants(state).map(
+    (layerIndex) => {
+      return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+    },
+  );
+};
+
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 
-  return state.selectedObjects
-    .map((id) => page.layers.find((layer) => layer.do_objectID === id))
-    .filter((layer): layer is PageLayer => !!layer);
+  return Layers.findAll(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  ) as PageLayer[];
+};
+
+export const getSelectedLayersWithContextSettings = (
+  state: ApplicationState,
+): PageLayer[] => {
+  const page = getCurrentPage(state);
+
+  return (Layers.findAll(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  ) as PageLayer[]).filter(
+    (layer) => layer._class !== 'artboard' && layer.style?.contextSettings,
+  );
+};
+
+export const getSelectedLayersWithFixedRadius = (
+  state: ApplicationState,
+): Sketch.Rectangle[] => {
+  const page = getCurrentPage(state);
+
+  return Layers.findAll(page, (layer) =>
+    state.selectedObjects.includes(layer.do_objectID),
+  ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
 };
 
 export const makeGetPageLayers = (
@@ -103,10 +142,33 @@ export const getLayerIndexPath = (
   return indexPath ? { pageIndex, indexPath } : undefined;
 };
 
+export function getScaleDirectionAtPoint(
+  state: ApplicationState,
+  point: Point,
+): CompassDirection | undefined {
+  const page = getCurrentPage(state);
+  const boundingRect = getBoundingRect(page, state.selectedObjects);
+
+  if (!boundingRect) return;
+
+  const handles = getDragHandles(boundingRect);
+
+  const handle = handles.find((handle) =>
+    Primitives.rectContainsPoint(handle.rect, point),
+  );
+
+  return handle?.compassDirection;
+}
+
+export function getLayerFixedRadius(layer: Sketch.AnyLayer): number {
+  return layer._class === 'rectangle' ? layer.fixedRadius : 0;
+}
+
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
   point: Point,
+  options?: { clickThroughGroups: boolean },
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
 
@@ -114,9 +176,9 @@ export function getLayerAtPoint(
 
   // TODO: need to keep track of zoom also
   let translate: Point = { x: 0, y: 0 };
-  let found: PageLayer | undefined;
+  let found: Sketch.AnyLayer | undefined;
 
-  Layers.visit(page, {
+  visitReversed(page, {
     onEnter: (layer) => {
       if (layer._class === 'page') return;
 
@@ -127,7 +189,11 @@ export function getLayerAtPoint(
       if (!containsPoint) return SKIP;
 
       // Artboards can't be selected themselves, and instead only update the ctm
-      if (layer._class === 'artboard') {
+      if (
+        layer._class === 'artboard' ||
+        (layer._class === 'group' &&
+          (layer.hasClickThrough || options?.clickThroughGroups))
+      ) {
         translate.x -= layer.frame.x;
         translate.y -= layer.frame.y;
 
@@ -135,8 +201,14 @@ export function getLayerAtPoint(
       }
 
       switch (layer._class) {
+        case 'rectangle':
         case 'oval': {
-          const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+          const path = Primitives.path(
+            CanvasKit,
+            layer.points,
+            layer.frame,
+            getLayerFixedRadius(layer),
+          );
 
           if (!path.contains(localPoint.x, localPoint.y)) return;
 
@@ -146,7 +218,7 @@ export function getLayerAtPoint(
           break;
       }
 
-      found = layer as PageLayer;
+      found = layer;
 
       return STOP;
     },
@@ -159,5 +231,5 @@ export function getLayerAtPoint(
     },
   });
 
-  return found;
+  return found as PageLayer;
 }

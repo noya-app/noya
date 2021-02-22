@@ -101,19 +101,17 @@ export interface ListViewClickInfo {
 }
 
 export interface ListViewRowProps {
-  children?: ReactNode;
-  position?: ListRowPosition;
   selected?: boolean;
-  selectedPosition?: ListRowPosition;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
+  children?: ReactNode;
 }
 
 function ListViewRow({
-  children,
+  selected = false,
   onClick,
   onHoverChange,
-  selected = false,
+  children,
 }: ListViewRowProps) {
   const { position, selectedPosition } = useContext(ListRowContext);
   const { hoverProps } = useHover({
@@ -177,7 +175,7 @@ function ListViewSectionHeader({
   onClick,
   onHoverChange,
   selected = false,
-}: Omit<ListViewRowProps, 'position'>) {
+}: ListViewRowProps) {
   const { hoverProps } = useHover({
     onHoverChange,
   });

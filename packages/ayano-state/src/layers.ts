@@ -8,15 +8,29 @@ import {
   visit as visitNode,
 } from 'tree-visit';
 
-export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
+export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
+
+export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   switch (layer._class) {
-    case 'page':
-      return (layer as Sketch.Page).layers as T[];
     case 'artboard':
-      return (layer as Sketch.Artboard).layers as T[];
+    case 'group':
+    case 'page':
+    case 'shapeGroup':
+    case 'symbolMaster':
+      return true;
     default:
-      return [];
+      return false;
   }
+};
+
+export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
+  return isParentLayer(layer) ? (layer.layers as T[]) : [];
+};
+
+export const getChildrenReversed = <T extends Sketch.AnyLayer>(
+  layer: T,
+): T[] => {
+  return [...getChildren(layer)].reverse();
 };
 
 const INCLUDE_AND_SKIP = 'include_and_skip';
@@ -67,10 +81,16 @@ const findAllLayerIndexPaths = <T extends Sketch.AnyLayer>(
 export const {
   visit,
   find,
+  findAll,
   findIndexPath,
   access,
+  accessPath,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
+});
+
+export const { visit: visitReversed } = withOptions<Sketch.AnyLayer>({
+  getChildren: getChildrenReversed,
 });
 
 export {
