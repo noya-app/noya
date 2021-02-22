@@ -57,12 +57,16 @@ export default memo(function BorderInspector() {
             color={item.color}
             prefix={checkbox}
             width={item.thickness}
+            position={item.position}
             onNudgeWidth={(value) =>
               dispatch('setBorderWidth', index, value, 'adjust')
             }
             onChangeWidth={(value) => dispatch('setBorderWidth', index, value)}
             onChangeColor={(value) => {
               dispatch('setBorderColor', index, value);
+            }}
+            onChangePosition={(value) => {
+              dispatch('setBorderPosition', index, value);
             }}
           />
         ),

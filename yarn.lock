@@ -1491,6 +1491,16 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/react-icons/-/react-icons-1.0.1.tgz#37de40b8b4f3a8197ac1d29d04870e4a68f5c5b1"
   integrity sha512-EKEB7aL4FaQyK77ff8hhl+XSIUE8wQ56pHh9XnJpuwXbYSDiYELQtbS+YNFo7KJJUDre6RVFmibc223SoUxozA==
 
+"@radix-ui/react-label@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-label/-/react-label-0.0.5.tgz#68d05c31ed5669190e09967026b8660a2f4cf736"
+  integrity sha512-zc249n6Ak3GMxvEwljgJ0HVMOUKV3J4eaN84YdijotTeSX04H7b/e2f54oFJuiboaPpvTu32AiwciRKt00reQg==
+  dependencies:
+    "@radix-ui/react-polymorphic" "0.0.5"
+    "@radix-ui/react-primitive" "0.0.4"
+    "@radix-ui/react-utils" "0.0.5"
+    "@radix-ui/utils" "0.0.3"
+
 "@radix-ui/react-polymorphic@0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-polymorphic/-/react-polymorphic-0.0.4.tgz#15ae4d971054c4598141f384e56b98b4f952a23c"
@@ -1549,6 +1559,14 @@
     "@radix-ui/react-utils" "0.0.4"
     "@xstate/fsm" "^1.5.1"
 
+"@radix-ui/react-presence@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-presence/-/react-presence-0.0.5.tgz#18661555b388f2d00db88921adf4a8b8e5369bb2"
+  integrity sha512-r2jpfsz3P15RXgz6EdoUfLhAZCiss95/CF2RYQhIRROWQ/cKfNc4FpnD1mQxYry/UULcZ8RZ4UcyBkxLzzbLnQ==
+  dependencies:
+    "@radix-ui/react-utils" "0.0.5"
+    "@xstate/fsm" "^1.5.1"
+
 "@radix-ui/react-primitive@0.0.3":
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-primitive/-/react-primitive-0.0.3.tgz#208501ee0fceeb7595594529fab17d40cf224b09"
@@ -1563,6 +1581,27 @@
   integrity sha512-FRiGr6WJRQG7/9i7bUHiXmyS9hLsBrAbMbsaqapYR8VPYlJyAavkNi5sXBXUoWa/VJdeZPI8jUKe/CRZ2ye5Lw==
   dependencies:
     "@radix-ui/react-polymorphic" "0.0.5"
+    "@radix-ui/utils" "0.0.3"
+
+"@radix-ui/react-radio-group@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-radio-group/-/react-radio-group-0.0.6.tgz#03ab55f3d430c4c66ebfd4f70f9c0534f6c6b36e"
+  integrity sha512-KEJpX1TYiaH0H6pyKzTB4Y3DYJpO7VAU+b7N/qQJMMM4fyLwSLSrAMxTbImzYSb/IjX6ASqHCPxGF9uo2e9y+w==
+  dependencies:
+    "@radix-ui/react-label" "0.0.5"
+    "@radix-ui/react-polymorphic" "0.0.5"
+    "@radix-ui/react-presence" "0.0.5"
+    "@radix-ui/react-primitive" "0.0.4"
+    "@radix-ui/react-roving-focus" "0.0.5"
+    "@radix-ui/react-utils" "0.0.5"
+    "@radix-ui/utils" "0.0.3"
+
+"@radix-ui/react-roving-focus@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-roving-focus/-/react-roving-focus-0.0.5.tgz#ce92310bb154421f16df3df84e266f42b9b375ba"
+  integrity sha512-+Esp3HJxoMGiTx0qn0DVAp2DTiEMpyMLLN2ijlr22dFSDihmVMQH1+VpHEZu6nhclkUx8o/3lXhrgxj6wSfILA==
+  dependencies:
+    "@radix-ui/react-utils" "0.0.5"
     "@radix-ui/utils" "0.0.3"
 
 "@radix-ui/react-slider@^0.0.5":

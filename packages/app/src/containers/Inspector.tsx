@@ -1,4 +1,4 @@
-import { Layers, PageLayer, Selectors } from 'ayano-state';
+import { Selectors } from 'ayano-state';
 import { Fragment, memo, useMemo } from 'react';
 import Divider from '../components/Divider';
 import AlignmentInspector from '../components/inspector/AlignmentInspector';

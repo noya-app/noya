@@ -1,6 +1,5 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { memo, ReactNode, useCallback } from 'react';
-// import EditableInput from '../components/input/EditableInput';
 import styled from 'styled-components';
 import ColorInputField from '../ColorInputField';
 import * as InputField from '../InputField';
@@ -17,8 +16,8 @@ const Row = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  color: FileFormat.Color;
-  onChangeColor: (color: FileFormat.Color) => void;
+  color: Sketch.Color;
+  onChangeColor: (color: Sketch.Color) => void;
   onChangeOpacity: (amount: number) => void;
   onNudgeOpacity: (amount: number) => void;
   prefix?: ReactNode;

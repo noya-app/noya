@@ -83,6 +83,7 @@ export type Action =
       amount: number,
       mode?: SetNumberMode,
     ]
+  | [type: 'setBorderPosition', index: number, position: Sketch.BorderPosition]
   | [
       type: 'setFillOpacity',
       index: number,
@@ -462,6 +463,21 @@ export function reducer(
               mode === 'replace' ? amount : layer.fixedRadius + amount;
 
             layer.fixedRadius = Math.max(0, newValue);
+          }
+        });
+      });
+    }
+    case 'setBorderPosition': {
+      const [, index, position] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
+
+          if (style && style.borders && style.borders[index]) {
+            style.borders[index].position = position;
           }
         });
       });
