@@ -59,6 +59,7 @@ export default memo(function ShadowInspector() {
             y={item.offsetY}
             blur={item.blurRadius}
             spread={item.spread}
+            prefix={checkbox}
             onChangeColor={(value) => dispatch('setShadowColor', index, value)}
             onChangeX={(value) => dispatch('setShadowX', index, value)}
             onNudgeX={(value) => dispatch('setShadowX', index, value, 'adjust')}
