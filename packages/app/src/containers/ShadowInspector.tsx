@@ -55,14 +55,25 @@ export default memo(function ShadowInspector() {
           <ShadowRow
             id={`shadow-${index}`}
             color={item.color}
-            prefix={checkbox}
-            onChangeOpacity={(value) =>
-              dispatch('setFillOpacity', index, value)
-            }
-            onNudgeOpacity={(value) =>
-              dispatch('setFillOpacity', index, value, 'adjust')
-            }
+            x={item.offsetX}
+            y={item.offsetY}
+            blur={item.blurRadius}
+            spread={item.spread}
             onChangeColor={(value) => dispatch('setShadowColor', index, value)}
+            onChangeX={(value) => dispatch('setShadowX', index, value)}
+            onNudgeX={(value) => dispatch('setShadowX', index, value, 'adjust')}
+            onChangeY={(value) => dispatch('setShadowY', index, value)}
+            onNudgeY={(value) => dispatch('setShadowY', index, value, 'adjust')}
+            onChangeBlur={(value) => dispatch('setShadowBlur', index, value)}
+            onNudgeBlur={(value) =>
+              dispatch('setShadowBlur', index, value, 'adjust')
+            }
+            onChangeSpread={(value) =>
+              dispatch('setShadowSpread', index, value)
+            }
+            onNudgeSpread={(value) =>
+              dispatch('setShadowSpread', index, value, 'adjust')
+            }
           />
         ),
         [dispatch],

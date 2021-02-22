@@ -85,6 +85,15 @@ export type Action =
       amount: number,
       mode?: SetNumberMode,
     ]
+  | [type: 'setShadowX', index: number, amount: number, mode?: SetNumberMode]
+  | [type: 'setShadowY', index: number, amount: number, mode?: SetNumberMode]
+  | [type: 'setShadowBlur', index: number, amount: number, mode?: SetNumberMode]
+  | [
+      type: 'setShadowSpread',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [type: 'interaction', action: InteractionAction];
 
@@ -452,6 +461,86 @@ export function reducer(
                 : style.fills[index].color.alpha + amount;
 
             style.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
+          }
+        });
+      });
+    }
+    case 'setShadowX': {
+      const [, index, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
+
+          if (style && style.shadows && style.shadows[index]) {
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.shadows[index].offsetX + amount;
+
+            style.shadows[index].offsetX = newValue;
+          }
+        });
+      });
+    }
+    case 'setShadowY': {
+      const [, index, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
+
+          if (style && style.shadows && style.shadows[index]) {
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.shadows[index].offsetY + amount;
+
+            style.shadows[index].offsetY = newValue;
+          }
+        });
+      });
+    }
+    case 'setShadowBlur': {
+      const [, index, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
+
+          if (style && style.shadows && style.shadows[index]) {
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.shadows[index].blurRadius + amount;
+
+            style.shadows[index].blurRadius = newValue;
+          }
+        });
+      });
+    }
+    case 'setShadowSpread': {
+      const [, index, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = layer.style;
+
+          if (style && style.shadows && style.shadows[index]) {
+            const newValue =
+              mode === 'replace'
+                ? amount
+                : style.shadows[index].spread + amount;
+
+            style.shadows[index].spread = newValue;
           }
         });
       });
