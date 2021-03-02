@@ -1,17 +1,20 @@
 # Noya
 
-The hackable design tool.
+The open interface design tool.
+
+![Noya app screenshot](/docs/assets/noya-screenshot.png)
+
+> Note: This project is actively under development and not ready for use yet!
 
 ## Why?
 
-Building a design tool from scratch is challenging and time-consuming, which
-greatly limits innovation. This project aims to be the foundation for custom
-design tools.
+The design tool ecosystem is mostly closed source, furthering the gap between
+design and engineering. This project aims to bridge that gap.
 
 ## Packages
 
-The project is broken up into many packages that can be included indepently.
-Here's a quick summary of the key packages:
+The project is broken up into packages that can be included indepently. Here's a
+quick summary of the key packages:
 
 - [App](/packages/app) - The reference app of a design tool built with these
   packages
