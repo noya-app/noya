@@ -1,8 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Primitives, uuid } from 'ayano-renderer';
-import { getBoundingRect } from 'ayano-renderer/src/canvas/selection';
-import { normalizeRect, resizeRect } from 'ayano-renderer/src/primitives';
-import { SketchFile } from 'ayano-sketch-file';
+import { Primitives, uuid } from 'noya-renderer';
+import { getBoundingRect } from 'noya-renderer/src/canvas/selection';
+import { normalizeRect, resizeRect } from 'noya-renderer/src/primitives';
+import { SketchFile } from 'noya-sketch-file';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { IndexPath } from 'tree-visit';

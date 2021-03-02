@@ -2,8 +2,8 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   getBoundingRect,
   getDragHandles,
-} from 'ayano-renderer/src/canvas/selection';
-import * as Primitives from 'ayano-renderer/src/primitives';
+} from 'noya-renderer/src/canvas/selection';
+import * as Primitives from 'noya-renderer/src/primitives';
 import type { CanvasKit } from 'canvaskit-wasm';
 import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';

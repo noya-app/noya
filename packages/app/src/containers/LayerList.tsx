@@ -7,7 +7,7 @@ import {
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Layers, PageLayer, Selectors } from 'ayano-state';
+import { Layers, PageLayer, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { visit } from 'tree-visit';
 import * as TreeView from '../components/TreeView';

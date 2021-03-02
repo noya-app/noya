@@ -1,4 +1,4 @@
-# Ayano
+# Noya
 
 The hackable design tool.
 
@@ -15,13 +15,13 @@ Here's a quick summary of the key packages:
 
 - [App](/packages/app) - The reference app of a design tool built with these
   packages
-- [State](/packages/ayano-state) - Manages the internal state of the UI and
+- [State](/packages/noya-state) - Manages the internal state of the UI and
   `.sketch` file
-- [Renderer](/packages/ayano-renderer) - Render a `.sketch` file to an HTML5
+- [Renderer](/packages/noya-renderer) - Render a `.sketch` file to an HTML5
   canvas (via Google's
   [Skia compiled to webassembly](https://www.npmjs.com/package/canvaskit-wasm))
-- [Sketch File](/packages/ayano-sketch-file) - Parse a `.sketch` file into JSON
-- [Color Picker](/packages/ayano-colorpicker) - A React component for picking
+- [Sketch File](/packages/noya-sketch-file) - Parse a `.sketch` file into JSON
+- [Color Picker](/packages/noya-colorpicker) - A React component for picking
   colors (based on [react-colorful](https://github.com/omgovich/react-colorful))
 
 ## Development Setup
@@ -49,8 +49,8 @@ To run tests for all packages, run:
 yarn test
 ```
 
-To run tests for a specific package, e.g. `ayano-sketch-file`, run:
+To run tests for a specific package, e.g. `noya-sketch-file`, run:
 
 ```
-yarn test ayano-sketch-file
+yarn test noya-sketch-file
 ```

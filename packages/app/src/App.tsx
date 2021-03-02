@@ -3,9 +3,9 @@ import {
   ApplicationState,
   createInitialState,
   reducer,
-} from 'ayano-state';
+} from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { parse, SketchFile } from 'ayano-sketch-file';
+import { parse, SketchFile } from 'noya-sketch-file';
 import Workspace from './containers/Workspace';
 import {
   ApplicationStateProvider,

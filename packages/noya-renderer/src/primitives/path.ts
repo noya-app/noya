@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Point } from 'ayano-state';
-import { zip } from 'ayano-utils';
+import { Point } from 'noya-state';
+import { zip } from 'noya-utils';
 import type { CanvasKit, Path } from 'canvaskit-wasm';
 import { distance, parsePoint } from '../primitives';
 

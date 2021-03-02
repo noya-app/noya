@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { getLayerFixedRadius } from 'ayano-state/src/selectors';
+import { getLayerFixedRadius } from 'noya-state/src/selectors';
 import { PathEffect } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';

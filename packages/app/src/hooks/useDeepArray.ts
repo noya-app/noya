@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { isShallowEqual } from 'ayano-utils';
+import { isShallowEqual } from 'noya-utils';
 
 function deepEqualArray<T>(a: T[], b: T[]) {
   if (isShallowEqual(a, b)) return true;

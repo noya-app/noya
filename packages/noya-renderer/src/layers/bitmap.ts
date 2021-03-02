@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import memoize from 'ayano-state/src/utils/memoize';
+import memoize from 'noya-state/src/utils/memoize';
 import type { CanvasKit } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import { Context } from '../context';

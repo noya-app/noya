@@ -1,4 +1,4 @@
-import { ApplicationState } from 'ayano-state';
+import { ApplicationState } from 'noya-state';
 import { Canvas, CanvasKit } from 'canvaskit-wasm';
 
 export interface Context {

@@ -1,10 +1,10 @@
-import { renderCanvas, uuid } from 'ayano-renderer';
-import { CompassDirection, Point, ShapeType } from 'ayano-state';
+import { renderCanvas, uuid } from 'noya-renderer';
+import { CompassDirection, Point, ShapeType } from 'noya-state';
 import {
   getCurrentPageMetadata,
   getLayerAtPoint,
   getScaleDirectionAtPoint,
-} from 'ayano-state/src/selectors';
+} from 'noya-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
 import styled, { useTheme } from 'styled-components';

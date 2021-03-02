@@ -1,4 +1,4 @@
-import { Selectors } from 'ayano-state';
+import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import * as InputField from '../components/InputField';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';

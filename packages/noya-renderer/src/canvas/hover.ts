@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { isParentLayer } from 'ayano-state/src/layers';
-import { getLayerFixedRadius } from 'ayano-state/src/selectors';
+import { isParentLayer } from 'noya-state/src/layers';
+import { getLayerFixedRadius } from 'noya-state/src/selectors';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';

@@ -10,7 +10,7 @@ import {
   RgbaColor,
   rgbaToHsva,
   Saturation,
-} from 'ayano-colorpicker';
+} from 'noya-colorpicker';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as Spacer from '../components/Spacer';

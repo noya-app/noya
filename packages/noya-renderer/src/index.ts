@@ -1,7 +1,7 @@
 import {
   getCurrentPage,
   getCurrentPageMetadata,
-} from 'ayano-state/src/selectors';
+} from 'noya-state/src/selectors';
 import type { CanvasKitInit, FontMgr } from 'canvaskit-wasm';
 import { v4 as uuid } from 'uuid';
 import { renderHoverOutline } from './canvas/hover';

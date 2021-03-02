@@ -1,5 +1,5 @@
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
-import { Selectors } from 'ayano-state';
+import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';

@@ -4,7 +4,7 @@ import {
   getCardinalDirections,
   Point,
   Rect,
-} from 'ayano-state';
+} from 'noya-state';
 import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 import * as PathUtils from './primitives/path';
 

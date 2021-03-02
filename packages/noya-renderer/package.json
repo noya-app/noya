@@ -1,5 +1,5 @@
 {
-  "name": "ayano-renderer",
+  "name": "noya-renderer",
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "UNLICENSED",

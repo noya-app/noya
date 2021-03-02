@@ -1,4 +1,4 @@
-import { Selectors } from 'ayano-state';
+import { Selectors } from 'noya-state';
 import { Fragment, memo, useMemo } from 'react';
 import Divider from '../components/Divider';
 import AlignmentInspector from '../components/inspector/AlignmentInspector';

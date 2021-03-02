@@ -8,8 +8,8 @@ import {
   DragHandle,
   Point,
   Rect,
-} from 'ayano-state';
-import { isParentLayer } from 'ayano-state/src/layers';
+} from 'noya-state';
+import { isParentLayer } from 'noya-state/src/layers';
 import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
