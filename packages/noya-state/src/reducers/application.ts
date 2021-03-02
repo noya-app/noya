@@ -59,6 +59,7 @@ export type Action =
       size: { width: number; height: number },
       insets: { left: number; right: number },
     ]
+  | [type: 'movePage', sourceIndex: number, destinationIndex: number]
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -447,6 +448,16 @@ export function reducer(
               break;
           }
         });
+      });
+    }
+    case 'movePage': {
+      const [, sourceIndex, destinationIndex] = action;
+
+      return produce(state, (state) => {
+        const sourceItem = state.sketch.pages[sourceIndex];
+
+        state.sketch.pages.splice(sourceIndex, 1);
+        state.sketch.pages.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'deleteDisabledBorders':

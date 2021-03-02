@@ -1,4 +1,23 @@
 import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  restrictToFirstScrollableAncestor,
+  restrictToVerticalAxis,
+} from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
   Children,
   createContext,
   isValidElement,
@@ -6,6 +25,8 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useMemo,
+  useState,
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
@@ -28,11 +49,13 @@ const listReset: CSSObject = {
 type ListRowContextValue = {
   position: ListRowPosition;
   selectedPosition: ListRowPosition;
+  sortable: boolean;
 };
 
 const ListRowContext = createContext<ListRowContextValue>({
   position: 'only',
   selectedPosition: 'only',
+  sortable: false,
 });
 
 /* ----------------------------------------------------------------------------
@@ -101,19 +124,46 @@ export interface ListViewClickInfo {
 }
 
 export interface ListViewRowProps {
+  id?: string;
   selected?: boolean;
+  sortable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
 }
 
+function SortableItem({
+  active,
+  id,
+  children,
+}: {
+  active: boolean;
+  id: string;
+  children: (props: any) => JSX.Element;
+}) {
+  const sortable = useSortable({ id });
+
+  const { attributes, listeners, setNodeRef, transform, transition } = sortable;
+
+  const style = useMemo(
+    () => ({
+      transform: CSS.Transform.toString(transform),
+      transition,
+    }),
+    [transform, transition],
+  );
+
+  return children({ ref: setNodeRef, style, ...attributes, ...listeners });
+}
+
 function ListViewRow({
+  id,
   selected = false,
   onClick,
   onHoverChange,
   children,
 }: ListViewRowProps) {
-  const { position, selectedPosition } = useContext(ListRowContext);
+  const { position, selectedPosition, sortable } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
   });
@@ -127,18 +177,26 @@ function ListViewRow({
     [onClick],
   );
 
-  return (
-    <RowContainer
-      {...hoverProps}
-      onClick={handleClick}
-      position={position}
-      selected={selected}
-      selectedPosition={selectedPosition}
-      aria-selected={selected}
-    >
-      {children}
-    </RowContainer>
-  );
+  const props: React.ComponentProps<typeof RowContainer> = {
+    id: id,
+    ...hoverProps,
+    onClick: handleClick,
+    position: position,
+    selected: selected,
+    selectedPosition: selectedPosition,
+    'aria-selected': selected,
+    children,
+  };
+
+  if (sortable && id) {
+    return (
+      <SortableItem id={id} active={false}>
+        {(sortableProps) => <RowContainer {...props} {...sortableProps} />}
+      </SortableItem>
+    );
+  }
+
+  return <RowContainer {...props} />;
 }
 
 /* ----------------------------------------------------------------------------
@@ -218,6 +276,8 @@ const RootContainer = styled.ul(({ theme }) => ({
 interface ListViewRootProps {
   children?: ReactNode;
   onClick?: () => void;
+  sortable?: boolean;
+  onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
 }
 
 const isSectionHeader = (type: any): string | undefined => {
@@ -228,7 +288,58 @@ const isSectionHeader = (type: any): string | undefined => {
   }
 };
 
-function ListViewRoot({ onClick, children }: ListViewRootProps) {
+function SortableContainer({
+  keys,
+  children,
+  onMoveItem,
+}: {
+  keys: string[];
+  children: ReactNode;
+  onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
+}) {
+  const sensors = useSensors(useSensor(PointerSensor));
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  function handleDragStart(event: DragStartEvent) {
+    const { active } = event;
+
+    setActiveId(active.id);
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = keys.indexOf(active.id);
+      const newIndex = keys.indexOf(over.id);
+
+      onMoveItem?.(oldIndex, newIndex);
+    }
+
+    setActiveId(null);
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+    >
+      <SortableContext items={keys} strategy={verticalListSortingStrategy}>
+        {children}
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function ListViewRoot({
+  onClick,
+  children,
+  sortable = false,
+  onMoveItem,
+}: ListViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -239,6 +350,12 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
   );
 
   const flattened = Children.toArray(children);
+
+  const ids: string[] = flattened.flatMap((current) =>
+    isValidElement(current) && typeof current.props.id === 'string'
+      ? [current.props.id]
+      : [],
+  );
 
   const mappedChildren = flattened.map((current, i) => {
     if (!isValidElement(current)) return current;
@@ -275,7 +392,11 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
       }
     }
 
-    const contextValue = { position, selectedPosition };
+    const contextValue = {
+      position,
+      selectedPosition,
+      sortable,
+    };
 
     return (
       <ListRowContext.Provider key={current.key} value={contextValue}>
@@ -284,7 +405,23 @@ function ListViewRoot({ onClick, children }: ListViewRootProps) {
     );
   });
 
-  return <RootContainer onClick={handleClick}>{mappedChildren}</RootContainer>;
+  if (sortable && ids.length !== mappedChildren.length) {
+    throw new Error(
+      'Bad ListView props: each row element needs an id to be sortable',
+    );
+  }
+
+  const sortableChildren = sortable ? (
+    <SortableContainer onMoveItem={onMoveItem} keys={ids}>
+      {mappedChildren}
+    </SortableContainer>
+  ) : (
+    mappedChildren
+  );
+
+  return (
+    <RootContainer onClick={handleClick}>{sortableChildren}</RootContainer>
+  );
 }
 
 export const RowTitle = memo(ListViewRowTitle);

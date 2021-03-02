@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as ListView from '../components/ListView';
 import * as Spacer from '../components/Spacer';
@@ -37,6 +37,7 @@ export default function PageList() {
   const pageElements = useMemo(() => {
     return pageInfo.map((page) => (
       <ListView.Row
+        id={page.do_objectID}
         key={page.do_objectID}
         selected={state.selectedPage === page.do_objectID}
         onClick={() => {
@@ -53,7 +54,17 @@ export default function PageList() {
   return (
     <Container>
       <Header>Pages</Header>
-      <ListView.Root>{pageElements}</ListView.Root>
+      <ListView.Root
+        sortable={true}
+        onMoveItem={useCallback(
+          (sourceIndex, destinationIndex) => {
+            dispatch('movePage', sourceIndex, destinationIndex);
+          },
+          [dispatch],
+        )}
+      >
+        {pageElements}
+      </ListView.Root>
     </Container>
   );
 }
