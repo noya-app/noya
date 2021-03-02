@@ -68,6 +68,12 @@ export type Action =
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
+  | [type: 'alignLeft']
+  | [type: 'alignCenterHorizontally']
+  | [type: 'alignRight']
+  | [type: 'alignTop']
+  | [type: 'alignCenterVertically']
+  | [type: 'alignBottom']
   | [type: `addNew${StyleElementType}`]
   | [type: `delete${StyleElementType}`, index: number]
   | [
@@ -226,6 +232,62 @@ export function reducer(
     case 'selectPage': {
       return produce(state, (state) => {
         state.selectedPage = action[1];
+      });
+    }
+    case 'alignLeft': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
+        const [leftmostLayer] = layers.sort(
+          (layerA, layerB) => layerA.frame.x - layerB.frame.x,
+        );
+        layers.forEach((layer) => {
+          layer.frame.x = leftmostLayer.frame.x;
+        });
+      });
+    }
+    case 'alignRight': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
+        const [rightmostLayer] = layers.sort(
+          (layerA, layerB) => layerB.frame.x - layerA.frame.x,
+        );
+        layers.forEach((layer) => {
+          layer.frame.x = rightmostLayer.frame.x;
+        });
+      });
+    }
+    case 'alignTop': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
+        const [topmostLayer] = layers.sort(
+          (layerA, layerB) => layerA.frame.y - layerB.frame.y,
+        );
+        layers.forEach((layer) => {
+          layer.frame.y = topmostLayer.frame.y;
+        });
+      });
+    }
+    case 'alignBottom': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
+        const [bottommostLayer] = layers.sort(
+          (layerA, layerB) => layerB.frame.y - layerA.frame.y,
+        );
+        layers.forEach((layer) => {
+          layer.frame.y = bottommostLayer.frame.y;
+        });
       });
     }
     case 'addNewBorder':

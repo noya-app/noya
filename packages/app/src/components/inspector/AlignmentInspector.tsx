@@ -10,6 +10,7 @@ import {
   SpaceEvenlyHorizontallyIcon,
   SpaceEvenlyVerticallyIcon,
 } from '@radix-ui/react-icons';
+import { useApplicationState } from '../../contexts/ApplicationStateContext';
 
 const AlignmentInspectorContainer = styled.div(({ theme }) => ({
   display: 'flex',
@@ -23,16 +24,17 @@ const AlignmentInspectorContainer = styled.div(({ theme }) => ({
 interface AlignmentInspectorProps {}
 
 function AlignmentInspector(props: AlignmentInspectorProps) {
+  const [, dispatch] = useApplicationState();
   return (
     <AlignmentInspectorContainer>
       <SpaceEvenlyHorizontallyIcon />
       <SpaceEvenlyVerticallyIcon />
-      <AlignLeftIcon />
+      <AlignLeftIcon onClick={() => dispatch('alignLeft')} />
       <AlignCenterHorizontallyIcon />
-      <AlignRightIcon />
-      <AlignTopIcon />
+      <AlignRightIcon onClick={() => dispatch('alignRight')} />
+      <AlignTopIcon onClick={() => dispatch('alignTop')} />
       <AlignCenterVerticallyIcon />
-      <AlignBottomIcon />
+      <AlignBottomIcon onClick={() => dispatch('alignBottom')} />
     </AlignmentInspectorContainer>
   );
 }
