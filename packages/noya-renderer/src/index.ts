@@ -95,8 +95,31 @@ export function renderCanvas(context: Context) {
     });
   }
 
-  if (state.interactionState.type === 'drawing') {
-    renderLayer(context, fontManager, state.interactionState.value);
+  switch (state.interactionState.type) {
+    case 'drawing':
+      renderLayer(context, fontManager, state.interactionState.value);
+      break;
+    case 'marquee':
+      const marqueeStrokePaint = new CanvasKit.Paint();
+      marqueeStrokePaint.setColor(CanvasKit.Color(220, 220, 220, 0.9));
+      marqueeStrokePaint.setStrokeWidth(2);
+      marqueeStrokePaint.setStyle(CanvasKit.PaintStyle.Stroke);
+      marqueeStrokePaint.setAntiAlias(true);
+
+      const marqueeFillPaint = new CanvasKit.Paint();
+      marqueeFillPaint.setColor(CanvasKit.Color(255, 255, 255, 0.2));
+      marqueeFillPaint.setStyle(CanvasKit.PaintStyle.Fill);
+      marqueeFillPaint.setAntiAlias(true);
+
+      const { origin, current } = state.interactionState;
+
+      const rect = Primitives.rect(
+        CanvasKit,
+        Primitives.createRect(origin, current),
+      );
+      canvas.drawRect(rect, marqueeFillPaint);
+      canvas.drawRect(rect, marqueeStrokePaint);
+      break;
   }
 
   canvas.restore();

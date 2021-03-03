@@ -3,6 +3,7 @@ import produce from 'immer';
 import type { PageLayer } from '..';
 import { Point, Rect, UUID } from '../types';
 import * as Models from '../models';
+import { createRect } from 'noya-renderer/src/primitives';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -34,6 +35,8 @@ export type InteractionAction =
   | [`insert${Capitalize<ShapeType>}`]
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
+  | [type: 'startMarquee', point: Point]
+  | [type: 'updateMarquee', point: Point]
   | [type: 'maybeMove', origin: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
   | [
@@ -63,6 +66,11 @@ export type InteractionState =
       origin: Point;
       value: PageLayer;
     }
+  | {
+      type: 'marquee';
+      origin: Point;
+      current: Point;
+    }
   | { type: 'maybeMove'; origin: Point }
   | { type: 'hoverHandle'; direction: CompassDirection }
   | {
@@ -82,18 +90,6 @@ export type InteractionState =
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
   | { type: 'panning'; previous: Point; next: Point };
-
-/**
- * Create a rectangle with a non-negative width and height
- */
-function createRect(initialPoint: Point, finalPoint: Point): Rect {
-  return {
-    width: Math.abs(finalPoint.x - initialPoint.x),
-    height: Math.abs(finalPoint.y - initialPoint.y),
-    x: Math.min(finalPoint.x, initialPoint.x),
-    y: Math.min(finalPoint.y, initialPoint.y),
-  };
-}
 
 function createLayer(
   shapeType: ShapeType,
@@ -125,6 +121,24 @@ export function interactionReducer(
       const [type, direction] = action;
 
       return { type, direction };
+    }
+    case 'startMarquee': {
+      const [, point] = action;
+
+      return {
+        type: 'marquee',
+        origin: point,
+        current: point,
+      };
+    }
+    case 'updateMarquee': {
+      if (state.type !== 'marquee') return state;
+
+      const [, point] = action;
+
+      return produce(state, (state) => {
+        state.current = point;
+      });
     }
     case 'startDrawing': {
       const [, shapeType, id, point] = action;

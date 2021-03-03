@@ -3,6 +3,7 @@ import { CompassDirection, Point, ShapeType } from 'noya-state';
 import {
   getCurrentPageMetadata,
   getLayerAtPoint,
+  getLayersInRect,
   getScaleDirectionAtPoint,
 } from 'noya-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
@@ -14,6 +15,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
+import { createRect } from 'noya-renderer/src/primitives';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -215,6 +217,8 @@ export default function Canvas(props: Props) {
             dispatch('interaction', ['maybeMove', point]);
           } else {
             dispatch('selectLayer', undefined);
+
+            dispatch('interaction', ['startMarquee', point]);
           }
 
           break;
@@ -282,6 +286,30 @@ export default function Canvas(props: Props) {
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
+
+          break;
+        }
+        case 'marquee': {
+          dispatch('interaction', ['updateMarquee', point]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
+          const { origin, current } = state.interactionState;
+
+          const layers = getLayersInRect(
+            CanvasKit,
+            state,
+            createRect(origin, current),
+            {
+              clickThroughGroups: event.metaKey,
+            },
+          );
+
+          dispatch(
+            'selectLayer',
+            layers.map((layer) => layer.do_objectID),
+          );
 
           break;
         }
@@ -359,6 +387,29 @@ export default function Canvas(props: Props) {
 
           break;
         }
+        case 'marquee': {
+          dispatch('interaction', ['reset']);
+
+          const { origin, current } = state.interactionState;
+
+          const layers = getLayersInRect(
+            CanvasKit,
+            state,
+            createRect(origin, current),
+            {
+              clickThroughGroups: event.metaKey,
+            },
+          );
+
+          dispatch(
+            'selectLayer',
+            layers.map((layer) => layer.do_objectID),
+          );
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+
+          break;
+        }
         case 'maybeMove':
         case 'maybeScale': {
           dispatch('interaction', ['reset']);
@@ -383,7 +434,7 @@ export default function Canvas(props: Props) {
         }
       }
     },
-    [dispatch, state, offsetEventPoint],
+    [CanvasKit, offsetEventPoint, state, dispatch],
   );
 
   const handleDirection =

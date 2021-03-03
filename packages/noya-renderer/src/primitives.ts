@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
+  Bounds,
   CompassDirection,
   getCardinalDirections,
   Point,
@@ -7,6 +8,50 @@ import {
 } from 'noya-state';
 import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 import * as PathUtils from './primitives/path';
+import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+
+export function transformRect(rect: Rect, transform: AffineTransform): Rect {
+  const bounds = createBounds(rect);
+  const p1 = transform.applyTo({
+    x: bounds.minX,
+    y: bounds.minY,
+  });
+  const p2 = transform.applyTo({
+    x: bounds.maxX,
+    y: bounds.maxY,
+  });
+  return createRect(p1, p2);
+}
+
+/**
+ * Create a rectangle with a non-negative width and height
+ */
+export function createRect(initialPoint: Point, finalPoint: Point): Rect {
+  return {
+    width: Math.abs(finalPoint.x - initialPoint.x),
+    height: Math.abs(finalPoint.y - initialPoint.y),
+    x: Math.min(finalPoint.x, initialPoint.x),
+    y: Math.min(finalPoint.y, initialPoint.y),
+  };
+}
+
+export function createRectFromBounds(bounds: Bounds): Rect {
+  return {
+    x: bounds.minX,
+    y: bounds.minY,
+    width: bounds.maxX - bounds.minX,
+    height: bounds.maxY - bounds.minY,
+  };
+}
+
+export function createBounds(rect: Rect): Bounds {
+  return {
+    minX: Math.min(rect.x, rect.x + rect.width),
+    minY: Math.min(rect.y, rect.y + rect.height),
+    maxX: Math.max(rect.x, rect.x + rect.width),
+    maxY: Math.max(rect.y, rect.y + rect.height),
+  };
+}
 
 /**
  * Resize a rect in a compass direction
@@ -64,6 +109,16 @@ export function rectContainsPoint(rect: Rect, point: Point): boolean {
     rect.y <= point.y &&
     point.y <= rect.y + rect.height
   );
+}
+
+// https://searchfox.org/mozilla-beta/source/toolkit/modules/Geometry.jsm
+export function rectsIntersect(a: Rect, b: Rect): boolean {
+  const x1 = Math.max(a.x, b.x);
+  const x2 = Math.min(a.x + a.width, b.x + b.width);
+  const y1 = Math.max(a.y, b.y);
+  const y2 = Math.min(a.y + a.height, b.y + b.height);
+
+  return x1 < x2 && y1 < y2;
 }
 
 /**

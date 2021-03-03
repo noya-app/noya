@@ -9,7 +9,8 @@ import { IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
 import { CompassDirection } from './reducers/interaction';
-import type { Point, UUID } from './types';
+import type { Point, Rect, UUID } from './types';
+import { AffineTransform } from './utils/AffineTransform';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -164,6 +165,67 @@ export function getLayerFixedRadius(layer: Sketch.AnyLayer): number {
   return layer._class === 'rectangle' ? layer.fixedRadius : 0;
 }
 
+function shouldClickThrough(
+  layer: Sketch.AnyLayer,
+  options?: { clickThroughGroups: boolean },
+) {
+  return (
+    layer._class === 'artboard' ||
+    (layer._class === 'group' &&
+      (layer.hasClickThrough || options?.clickThroughGroups))
+  );
+}
+
+/**
+ * This function visits each layer while keeping track of the
+ * "current transformation matrix" (ctm).
+ *
+ * How this works: Every time we enter or exit an artboard/group,
+ * we need to keep track of the translation for that layer. For the
+ * artboard/group layers themselves, we want to run the `onEnter` callback
+ * before we transform the ctm, since that transformation should only
+ * apply to their children.
+ */
+function visitWithCurrentTransform(
+  layer: Sketch.AnyLayer,
+  options: {
+    clickThroughGroups: boolean;
+    onEnter: (
+      layer: Sketch.AnyLayer,
+      indexPath: IndexPath,
+      ctm: AffineTransform,
+    ) => ReturnType<typeof visitReversed>;
+  },
+) {
+  let ctm = AffineTransform.identity;
+
+  // TODO: do we need to keep track of zoom/rotation too?
+  visitReversed(layer, {
+    onEnter: (layer, indexPath) => {
+      if (layer._class === 'page') return;
+
+      if (shouldClickThrough(layer, options)) {
+        const result = options?.onEnter?.(layer, indexPath, ctm);
+
+        ctm = ctm.transform(
+          AffineTransform.translation(-layer.frame.x, -layer.frame.y),
+        );
+
+        return result;
+      }
+
+      return options?.onEnter?.(layer, indexPath, ctm);
+    },
+    onLeave: (layer) => {
+      if (shouldClickThrough(layer, options)) {
+        ctm = ctm.transform(
+          AffineTransform.translation(layer.frame.x, layer.frame.y),
+        );
+      }
+    },
+  });
+}
+
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
@@ -174,31 +236,23 @@ export function getLayerAtPoint(
 
   // TODO: check if we're clicking the title of an artboard
 
-  // TODO: need to keep track of zoom also
-  let translate: Point = { x: 0, y: 0 };
   let found: Sketch.AnyLayer | undefined;
 
-  visitReversed(page, {
-    onEnter: (layer) => {
+  visitWithCurrentTransform(page, {
+    clickThroughGroups: options?.clickThroughGroups ?? false,
+    onEnter: (layer, _, ctm) => {
       if (layer._class === 'page') return;
 
-      const localPoint = { x: point.x + translate.x, y: point.y + translate.y };
-
-      let containsPoint = Primitives.rectContainsPoint(layer.frame, localPoint);
+      const localPoint = ctm.applyTo(point);
+      const containsPoint = Primitives.rectContainsPoint(
+        layer.frame,
+        localPoint,
+      );
 
       if (!containsPoint) return SKIP;
 
       // Artboards can't be selected themselves, and instead only update the ctm
-      if (
-        layer._class === 'artboard' ||
-        (layer._class === 'group' &&
-          (layer.hasClickThrough || options?.clickThroughGroups))
-      ) {
-        translate.x -= layer.frame.x;
-        translate.y -= layer.frame.y;
-
-        return;
-      }
+      if (shouldClickThrough(layer, options)) return;
 
       switch (layer._class) {
         case 'rectangle':
@@ -222,14 +276,39 @@ export function getLayerAtPoint(
 
       return STOP;
     },
-    onLeave: (layer) => {
-      if (layer._class === 'artboard') {
-        translate.x += layer.frame.x;
-        translate.y += layer.frame.y;
-        return;
-      }
-    },
   });
 
   return found as PageLayer;
+}
+
+export function getLayersInRect(
+  CanvasKit: CanvasKit,
+  state: ApplicationState,
+  rect: Rect,
+  options?: { clickThroughGroups: boolean },
+): PageLayer[] {
+  const page = getCurrentPage(state);
+
+  let found: Sketch.AnyLayer[] = [];
+
+  visitWithCurrentTransform(page, {
+    clickThroughGroups: options?.clickThroughGroups ?? false,
+    onEnter: (layer, _, ctm) => {
+      if (layer._class === 'page') return;
+
+      let hasIntersect = Primitives.rectsIntersect(
+        layer.frame,
+        Primitives.transformRect(rect, ctm),
+      );
+
+      if (!hasIntersect) return SKIP;
+
+      // Artboards can't be selected themselves, and instead only update the ctm
+      if (shouldClickThrough(layer, options)) return;
+
+      found.push(layer);
+    },
+  });
+
+  return found as PageLayer[];
 }
