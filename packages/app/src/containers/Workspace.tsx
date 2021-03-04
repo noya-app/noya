@@ -1,6 +1,6 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Selectors } from 'noya-state';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
 import Divider from '../components/Divider';
 import * as InputField from '../components/InputField';
@@ -58,15 +58,11 @@ const FilterContainer = styled.div(({ theme }) => ({
   display: 'flex',
 }));
 
-interface Props {}
-
-export default function Workspace(props: Props) {
-  const colorScheme = useSystemColorScheme();
+const CanvasTab = memo(function CanvasTab() {
   const [layersFilter, setLayersFilter] = useState('');
-  const currentTab = useSelector(Selectors.getCurrentTab);
 
   return (
-    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+    <>
       <LeftSidebar>
         <Menubar />
         <FilterContainer>
@@ -89,16 +85,42 @@ export default function Workspace(props: Props) {
       <MainView>
         <Toolbar />
         <ContentArea>
-          {currentTab === 'canvas' ? (
-            <Canvas />
-          ) : (
-            <div style={{ flex: 1 }}>Placeholder</div>
-          )}
+          <Canvas />
           <RightSidebar>
             <Inspector />
           </RightSidebar>
         </ContentArea>
       </MainView>
+    </>
+  );
+});
+
+const ComponentsTab = memo(function ComponentsTab() {
+  return (
+    <>
+      <LeftSidebar>
+        <Menubar />
+      </LeftSidebar>
+      <MainView>
+        <Toolbar />
+        <ContentArea>
+          <div style={{ flex: 1 }}>Placeholder</div>
+          <RightSidebar>
+            <Inspector />
+          </RightSidebar>
+        </ContentArea>
+      </MainView>
+    </>
+  );
+});
+
+export default function Workspace() {
+  const colorScheme = useSystemColorScheme();
+  const currentTab = useSelector(Selectors.getCurrentTab);
+
+  return (
+    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+      {currentTab === 'canvas' ? <CanvasTab /> : <ComponentsTab />}
     </ThemeProvider>
   );
 }
