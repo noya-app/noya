@@ -19,9 +19,7 @@ import ShadowInspector from './ShadowInspector';
 import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 
-interface Props {}
-
-export default memo(function Inspector(props: Props) {
+export default memo(function Inspector() {
   const [state] = useApplicationState();
 
   const selectedLayers = useShallowArray(

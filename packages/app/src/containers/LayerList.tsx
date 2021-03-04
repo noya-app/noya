@@ -18,8 +18,6 @@ import {
 import useDeepArray from '../hooks/useDeepArray';
 import useShallowArray from '../hooks/useShallowArray';
 
-interface Props {}
-
 type LayerType = PageLayer['_class'];
 
 type LayerListItem = {
@@ -90,7 +88,7 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-export default function LayerList(props: Props) {
+export default memo(function LayerList() {
   const [state, dispatch] = useApplicationState();
   const page = useSelector(Selectors.getCurrentPage);
   const selectedObjects = useShallowArray(state.selectedObjects);
@@ -168,4 +166,4 @@ export default function LayerList(props: Props) {
       {layerElements}
     </TreeView.Root>
   );
-}
+});

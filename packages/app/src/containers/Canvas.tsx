@@ -7,7 +7,14 @@ import {
   getScaleDirectionAtPoint,
 } from 'noya-state/src/selectors';
 import type { Surface } from 'canvaskit-wasm';
-import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  CSSProperties,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
@@ -61,9 +68,7 @@ const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
   zIndex: -1,
 }));
 
-interface Props {}
-
-export default function Canvas(props: Props) {
+export default memo(function Canvas() {
   const {
     colors: {
       textMuted: textColor,
@@ -485,4 +490,4 @@ export default function Canvas(props: Props) {
       />
     </Container>
   );
-}
+});
