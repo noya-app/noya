@@ -321,16 +321,16 @@ function ListViewRoot({
     );
   }
 
-  const sortableChildren = sortable ? (
-    <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
-      {mappedChildren}
-    </Sortable.Root>
-  ) : (
-    mappedChildren
-  );
-
   return (
-    <RootContainer onClick={handleClick}>{sortableChildren}</RootContainer>
+    <RootContainer onClick={handleClick}>
+      {sortable ? (
+        <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
+          {mappedChildren}
+        </Sortable.Root>
+      ) : (
+        mappedChildren
+      )}
+    </RootContainer>
   );
 }
 
