@@ -123,9 +123,9 @@ export const textStyles = {
 
 export const sizes = {
   sidebarWidth: 260,
-  toolbarHeight: {
-    large: 60,
-    small: 46,
+  toolbar: {
+    height: 46,
+    itemSeparator: 8,
   },
   spacing: {
     nano: 2,

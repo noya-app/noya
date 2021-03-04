@@ -39,8 +39,6 @@ export type PageMetadata = {
   scrollOrigin: Point;
 };
 
-export const getShowToolbarLabels = (_state: ApplicationState) => false;
-
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;
 };

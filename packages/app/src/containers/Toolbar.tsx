@@ -1,46 +1,37 @@
-import styled from 'styled-components';
-import Button from '../components/Button';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
 import {
-  SquareIcon,
-  CircleIcon,
-  TextIcon,
   BoxModelIcon,
+  CircleIcon,
   MoveIcon,
+  SquareIcon,
+  TextIcon,
 } from '@radix-ui/react-icons';
-import * as Spacer from '../components/Spacer';
 import { useMemo } from 'react';
-import { Selectors } from 'noya-state';
+import styled, { useTheme } from 'styled-components';
+import Button from '../components/Button';
+import * as Spacer from '../components/Spacer';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
 
-const Container = styled.header<{ showLabels: boolean }>(
-  ({ theme, showLabels }) => ({
-    height: `${
-      showLabels
-        ? theme.sizes.toolbarHeight.large
-        : theme.sizes.toolbarHeight.small
-    }px`,
-    display: 'flex',
-    borderBottom: `1px solid ${theme.colors.dividerStrong}`,
-    alignItems: 'center',
-    backgroundColor: theme.colors.sidebar.background,
-    color: theme.colors.textMuted,
-  }),
-);
+const Container = styled.header(({ theme }) => ({
+  height: `${theme.sizes.toolbar.height}px`,
+  display: 'flex',
+  borderBottom: `1px solid ${theme.colors.dividerStrong}`,
+  alignItems: 'center',
+  backgroundColor: theme.colors.sidebar.background,
+  color: theme.colors.textMuted,
+}));
 
 export default function Toolbar() {
   const [state, dispatch] = useApplicationState();
-  const showLabels = Selectors.getShowToolbarLabels(state);
-  const itemSeparatorSize = showLabels ? 16 : 8;
+  const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
   const interactionType = state.interactionState.type;
 
   return useMemo(
     () => (
-      <Container showLabels={showLabels}>
+      <Container>
         <Spacer.Horizontal size={8} />
         <Button
           id="tool-artboard"
           active={interactionType === 'insertArtboard'}
-          label={showLabels ? 'Artboard' : undefined}
           onClick={() => {
             if (interactionType === 'insertArtboard') {
               dispatch('interaction', ['reset']);
@@ -55,7 +46,6 @@ export default function Toolbar() {
         <Button
           id="tool-rectangle"
           active={interactionType === 'insertRectangle'}
-          label={showLabels ? 'Rectangle' : undefined}
           onClick={() => {
             if (interactionType === 'insertRectangle') {
               dispatch('interaction', ['reset']);
@@ -70,7 +60,6 @@ export default function Toolbar() {
         <Button
           id="tool-oval"
           active={interactionType === 'insertOval'}
-          label={showLabels ? 'Oval' : undefined}
           onClick={() => {
             if (interactionType === 'insertOval') {
               dispatch('interaction', ['reset']);
@@ -85,7 +74,6 @@ export default function Toolbar() {
         <Button
           id="tool-text"
           active={interactionType === 'insertText'}
-          label={showLabels ? 'Text' : undefined}
           onClick={() => {
             if (interactionType === 'insertText') {
               dispatch('interaction', ['reset']);
@@ -104,7 +92,6 @@ export default function Toolbar() {
             interactionType === 'maybePan' ||
             interactionType === 'panning'
           }
-          label={showLabels ? 'Pan' : undefined}
           onClick={() => {
             if (interactionType === 'panMode') {
               dispatch('interaction', ['reset']);
@@ -118,6 +105,6 @@ export default function Toolbar() {
         <Spacer.Horizontal size={8} />
       </Container>
     ),
-    [dispatch, interactionType, itemSeparatorSize, showLabels],
+    [dispatch, interactionType, itemSeparatorSize],
   );
 }
