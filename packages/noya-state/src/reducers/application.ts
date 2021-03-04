@@ -26,6 +26,8 @@ import {
   InteractionState,
 } from './interaction';
 
+export type WorkspaceTab = 'canvas' | 'components';
+
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
 export type LayerHighlight = {
@@ -34,6 +36,7 @@ export type LayerHighlight = {
 };
 
 export type ApplicationState = {
+  currentTab: WorkspaceTab;
   interactionState: InteractionState;
   selectedPage: string;
   highlightedLayer?: LayerHighlight;
@@ -50,6 +53,7 @@ export type SetNumberMode = 'replace' | 'adjust';
 type StyleElementType = 'Fill' | 'Border' | 'Shadow';
 
 export type Action =
+  | [type: 'setTab', value: WorkspaceTab]
   | [
       type: 'setCanvasSize',
       size: { width: number; height: number },
@@ -124,6 +128,16 @@ export function reducer(
   action: Action,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setTab': {
+      const [, value] = action;
+
+      return produce(state, (state) => {
+        state.currentTab = value;
+        state.interactionState = interactionReducer(state.interactionState, [
+          'reset',
+        ]);
+      });
+    }
     case 'setCanvasSize': {
       const [, size, insets] = action;
 
@@ -855,6 +869,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
+    currentTab: 'canvas',
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],

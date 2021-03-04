@@ -11,6 +11,7 @@ import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
 import { CompassDirection } from './reducers/interaction';
 import type { Point, Rect, UUID } from './types';
 import { AffineTransform } from './utils/AffineTransform';
+import { WorkspaceTab } from './reducers/application';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -36,6 +37,12 @@ export type EncodedPageMetadata = {
 export type PageMetadata = {
   zoomValue: number;
   scrollOrigin: Point;
+};
+
+export const getShowToolbarLabels = (_state: ApplicationState) => false;
+
+export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
+  return state.currentTab;
 };
 
 export const getCurrentPageMetadata = (

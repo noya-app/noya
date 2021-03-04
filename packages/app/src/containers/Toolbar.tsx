@@ -10,28 +10,37 @@ import {
 } from '@radix-ui/react-icons';
 import * as Spacer from '../components/Spacer';
 import { useMemo } from 'react';
+import { Selectors } from 'noya-state';
 
-const Container = styled.header(({ theme }) => ({
-  height: '60px',
-  display: 'flex',
-  borderBottom: `1px solid ${theme.colors.dividerStrong}`,
-  alignItems: 'center',
-  backgroundColor: theme.colors.sidebar.background,
-  color: theme.colors.textMuted,
-}));
+const Container = styled.header<{ showLabels: boolean }>(
+  ({ theme, showLabels }) => ({
+    height: `${
+      showLabels
+        ? theme.sizes.toolbarHeight.large
+        : theme.sizes.toolbarHeight.small
+    }px`,
+    display: 'flex',
+    borderBottom: `1px solid ${theme.colors.dividerStrong}`,
+    alignItems: 'center',
+    backgroundColor: theme.colors.sidebar.background,
+    color: theme.colors.textMuted,
+  }),
+);
 
 export default function Toolbar() {
   const [state, dispatch] = useApplicationState();
+  const showLabels = Selectors.getShowToolbarLabels(state);
+  const itemSeparatorSize = showLabels ? 16 : 8;
   const interactionType = state.interactionState.type;
 
   return useMemo(
     () => (
-      <Container>
+      <Container showLabels={showLabels}>
         <Spacer.Horizontal size={8} />
         <Button
           id="tool-artboard"
           active={interactionType === 'insertArtboard'}
-          label="Artboard"
+          label={showLabels ? 'Artboard' : undefined}
           onClick={() => {
             if (interactionType === 'insertArtboard') {
               dispatch('interaction', ['reset']);
@@ -42,11 +51,11 @@ export default function Toolbar() {
         >
           <BoxModelIcon />
         </Button>
-        <Spacer.Horizontal size={16} />
+        <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-rectangle"
           active={interactionType === 'insertRectangle'}
-          label="Rectangle"
+          label={showLabels ? 'Rectangle' : undefined}
           onClick={() => {
             if (interactionType === 'insertRectangle') {
               dispatch('interaction', ['reset']);
@@ -57,11 +66,11 @@ export default function Toolbar() {
         >
           <SquareIcon />
         </Button>
-        <Spacer.Horizontal size={16} />
+        <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-oval"
           active={interactionType === 'insertOval'}
-          label="Oval"
+          label={showLabels ? 'Oval' : undefined}
           onClick={() => {
             if (interactionType === 'insertOval') {
               dispatch('interaction', ['reset']);
@@ -72,11 +81,11 @@ export default function Toolbar() {
         >
           <CircleIcon />
         </Button>
-        <Spacer.Horizontal size={16} />
+        <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-text"
           active={interactionType === 'insertText'}
-          label="Text"
+          label={showLabels ? 'Text' : undefined}
           onClick={() => {
             if (interactionType === 'insertText') {
               dispatch('interaction', ['reset']);
@@ -87,7 +96,7 @@ export default function Toolbar() {
         >
           <TextIcon />
         </Button>
-        <Spacer.Horizontal size={16} />
+        <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-move"
           active={
@@ -95,7 +104,7 @@ export default function Toolbar() {
             interactionType === 'maybePan' ||
             interactionType === 'panning'
           }
-          label="Pan"
+          label={showLabels ? 'Pan' : undefined}
           onClick={() => {
             if (interactionType === 'panMode') {
               dispatch('interaction', ['reset']);
@@ -109,6 +118,6 @@ export default function Toolbar() {
         <Spacer.Horizontal size={8} />
       </Container>
     ),
-    [dispatch, interactionType],
+    [dispatch, interactionType, itemSeparatorSize, showLabels],
   );
 }

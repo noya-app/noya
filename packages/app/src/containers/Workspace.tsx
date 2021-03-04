@@ -1,17 +1,20 @@
+import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { Selectors } from 'noya-state';
+import { useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
 import Divider from '../components/Divider';
-import * as Spacer from '../components/Spacer';
 import * as InputField from '../components/InputField';
+import * as Spacer from '../components/Spacer';
+import { useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
-import * as lightTheme from '../theme/light';
 import * as darkTheme from '../theme/dark';
+import * as lightTheme from '../theme/light';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
+import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { useState } from 'react';
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
@@ -60,11 +63,12 @@ interface Props {}
 export default function Workspace(props: Props) {
   const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
+  const currentTab = useSelector(Selectors.getCurrentTab);
 
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       <LeftSidebar>
-        <Spacer.Vertical size={59} />
+        <Menubar />
         <FilterContainer>
           <InputField.Root labelPosition="start" labelSize={14}>
             <InputField.Input
@@ -85,7 +89,11 @@ export default function Workspace(props: Props) {
       <MainView>
         <Toolbar />
         <ContentArea>
-          <Canvas />
+          {currentTab === 'canvas' ? (
+            <Canvas />
+          ) : (
+            <div style={{ flex: 1 }}>Placeholder</div>
+          )}
           <RightSidebar>
             <Inspector />
           </RightSidebar>

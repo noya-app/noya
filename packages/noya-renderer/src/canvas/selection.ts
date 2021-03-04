@@ -1,8 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import type { Paint } from 'canvaskit-wasm';
 import {
   Bounds,
-  CardinalDirection,
-  cardinalDirections,
   CompassDirection,
   compassDirections,
   DragHandle,
@@ -10,7 +9,6 @@ import {
   Rect,
 } from 'noya-state';
 import { isParentLayer } from 'noya-state/src/layers';
-import type { Paint } from 'canvaskit-wasm';
 import { Context } from '../context';
 import * as Primitives from '../primitives';
 
