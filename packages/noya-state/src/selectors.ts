@@ -26,6 +26,10 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
   return pageIndex;
 };
 
+export const getSharedSwatches = (state: ApplicationState) => {
+  return state.sketch.document.sharedSwatches ?? [];
+};
+
 export const getCurrentPage = (state: ApplicationState) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
