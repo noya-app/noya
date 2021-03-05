@@ -1,4 +1,4 @@
-import mediaQuery from '../utils/mediaQuery';
+import mediaQuery from '../mediaQuery';
 import { CSSObject } from 'styled-components';
 
 export const colors = {
