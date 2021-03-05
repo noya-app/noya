@@ -18,6 +18,7 @@ export * as Sortable from './components/Sortable';
 export * as InputField from './components/InputField';
 export * as RadioGroup from './components/RadioGroup';
 export * as Spacer from './components/Spacer';
+export { default as Tooltip } from './components/Tooltip';
 
 // Contexts
 export * from './contexts/GlobalInputBlurContext';

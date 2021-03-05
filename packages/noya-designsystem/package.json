@@ -2,5 +2,13 @@
   "name": "noya-designsystem",
   "version": "1.0.0",
   "main": "src/index.tsx",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@radix-ui/react-popover": "^0.0.7",
+    "@radix-ui/react-radio-group": "^0.0.7",
+    "@radix-ui/react-slider": "^0.0.6",
+    "@radix-ui/react-slot": "^0.0.4",
+    "@radix-ui/react-tooltip": "^0.0.8",
+    "@radix-ui/react-utils": "^0.0.5"
+  }
 }

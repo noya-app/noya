@@ -31,6 +31,7 @@ export default function Toolbar() {
         <Spacer.Horizontal size={8} />
         <Button
           id="tool-artboard"
+          tooltip="Insert an artboard"
           active={interactionType === 'insertArtboard'}
           onClick={() => {
             if (interactionType === 'insertArtboard') {
@@ -45,6 +46,7 @@ export default function Toolbar() {
         <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-rectangle"
+          tooltip="Insert a rectangle"
           active={interactionType === 'insertRectangle'}
           onClick={() => {
             if (interactionType === 'insertRectangle') {
@@ -59,6 +61,7 @@ export default function Toolbar() {
         <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-oval"
+          tooltip="Insert an oval"
           active={interactionType === 'insertOval'}
           onClick={() => {
             if (interactionType === 'insertOval') {
@@ -73,6 +76,7 @@ export default function Toolbar() {
         <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-text"
+          tooltip="Insert text"
           active={interactionType === 'insertText'}
           onClick={() => {
             if (interactionType === 'insertText') {
@@ -87,6 +91,7 @@ export default function Toolbar() {
         <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
           id="tool-move"
+          tooltip="Move the canvas"
           active={
             interactionType === 'panMode' ||
             interactionType === 'maybePan' ||
