@@ -1,3 +1,4 @@
+import { Spacer } from 'noya-designsystem';
 import {
   BoxModelIcon,
   CircleIcon,
@@ -7,8 +8,7 @@ import {
 } from '@radix-ui/react-icons';
 import { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import Button from '../components/Button';
-import * as Spacer from '../components/Spacer';
+import Button from 'noya-designsystem/src/components/Button';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 const Container = styled.header(({ theme }) => ({

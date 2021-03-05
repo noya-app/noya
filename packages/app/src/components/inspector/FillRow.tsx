@@ -1,11 +1,13 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import {
+  ColorInputField,
+  InputField,
+  Label,
+  LabeledElementView,
+  Spacer,
+} from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
-import ColorInputField from '../ColorInputField';
-import * as InputField from '../InputField';
-import * as Spacer from '../Spacer';
-import * as Label from '../Label';
-import LabeledElementView from '../LabeledElementView';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',

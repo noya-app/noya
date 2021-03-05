@@ -1,11 +1,10 @@
+import { InputField, Divider, Spacer } from 'noya-designsystem';
+
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import Divider from '../components/Divider';
-import * as InputField from '../components/InputField';
-import * as Spacer from '../components/Spacer';
 import { useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';

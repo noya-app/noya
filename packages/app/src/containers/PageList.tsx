@@ -1,7 +1,6 @@
+import { ListView, Spacer } from 'noya-designsystem';
 import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import * as ListView from '../components/ListView';
-import * as Spacer from '../components/Spacer';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import useDeepArray from '../hooks/useDeepArray';
 

@@ -1,11 +1,10 @@
+import { Divider, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { Fragment, memo, useMemo } from 'react';
-import Divider from '../components/Divider';
 import AlignmentInspector from '../components/inspector/AlignmentInspector';
 import DimensionsInspector, {
   Props as DimensionsInspectorProps,
 } from '../components/inspector/DimensionsInspector';
-import * as Spacer from '../components/Spacer';
 import {
   useApplicationState,
   useSelector,

@@ -1,6 +1,6 @@
 import { Action, ApplicationState } from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { useGlobalInputBlurTrigger } from './GlobalInputBlurContext';
+import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
 export type ApplicationStateContextValue = [
   ApplicationState,

@@ -1,9 +1,7 @@
+import { InputField, Slider, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import * as InputField from '../components/InputField';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import Slider from '../components/Slider';
-import * as Spacer from '../components/Spacer';
 import {
   useApplicationState,
   useSelector,

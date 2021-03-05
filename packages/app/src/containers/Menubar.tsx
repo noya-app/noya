@@ -1,3 +1,4 @@
+import { RadioGroup, Spacer } from 'noya-designsystem';
 import {
   HamburgerMenuIcon,
   StackIcon,
@@ -6,9 +7,7 @@ import {
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import Button from '../components/Button';
-import * as RadioGroup from '../components/RadioGroup';
-import * as Spacer from '../components/Spacer';
+import Button from 'noya-designsystem/src/components/Button';
 import {
   useApplicationState,
   useSelector,

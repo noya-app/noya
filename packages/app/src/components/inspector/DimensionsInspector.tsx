@@ -1,7 +1,5 @@
-// import EditableInput from '../components/input/EditableInput';
+import { InputField, Spacer } from 'noya-designsystem';
 import styled from 'styled-components';
-import * as InputField from '../InputField';
-import * as Spacer from '../Spacer';
 
 export type DimensionValue = number | undefined;
 

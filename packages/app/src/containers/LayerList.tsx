@@ -1,3 +1,4 @@
+import { TreeView } from 'noya-designsystem';
 import {
   BoxModelIcon,
   CircleIcon,
@@ -10,7 +11,6 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { visit } from 'tree-visit';
-import * as TreeView from '../components/TreeView';
 import {
   useApplicationState,
   useSelector,

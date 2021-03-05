@@ -1,8 +1,8 @@
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import { Spacer } from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
-import * as Spacer from '../Spacer';
 
 type BaseArrayItem = { isEnabled: boolean };
 
