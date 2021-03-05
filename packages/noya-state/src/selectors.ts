@@ -12,6 +12,7 @@ import { CompassDirection } from './reducers/interaction';
 import type { Point, Rect, UUID } from './types';
 import { AffineTransform } from './utils/AffineTransform';
 import { WorkspaceTab } from './reducers/application';
+import { EnterReturnValue } from 'tree-visit';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -199,7 +200,7 @@ function visitWithCurrentTransform(
       layer: Sketch.AnyLayer,
       indexPath: IndexPath,
       ctm: AffineTransform,
-    ) => ReturnType<typeof visitReversed>;
+    ) => EnterReturnValue;
   },
 ) {
   let ctm = AffineTransform.identity;
@@ -211,6 +212,9 @@ function visitWithCurrentTransform(
 
       if (shouldClickThrough(layer, options)) {
         const result = options?.onEnter?.(layer, indexPath, ctm);
+
+        // Don't apply the transformation if we're going to skip children
+        if (result === SKIP || result === STOP) return result;
 
         ctm = ctm.transform(
           AffineTransform.translation(-layer.frame.x, -layer.frame.y),
