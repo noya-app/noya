@@ -1,6 +1,7 @@
 import * as RadixRadioGroup from '@radix-ui/react-radio-group';
 import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
+import { Tooltip } from '..';
 
 const RadioRoot = styled(RadixRadioGroup.Root)(({ theme }) => ({
   appearance: 'none',
@@ -66,17 +67,24 @@ const IndicatorContainer = styled.div({
 
 interface Props {
   value: string;
+  tooltip?: ReactNode;
   children: ReactNode;
 }
 
-function RadioItem({ value, children }: Props) {
-  return (
+function RadioItem({ value, tooltip, children }: Props) {
+  const itemElement = (
     <StyledItem value={value}>
       {children}
       <IndicatorContainer>
         <StyledIndicator>{children}</StyledIndicator>
       </IndicatorContainer>
     </StyledItem>
+  );
+
+  return tooltip ? (
+    <Tooltip content={tooltip}>{itemElement}</Tooltip>
+  ) : (
+    itemElement
   );
 }
 

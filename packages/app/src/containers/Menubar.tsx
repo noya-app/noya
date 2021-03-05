@@ -44,15 +44,15 @@ export default function Menubar() {
       <Container>
         <Spacer.Horizontal size={8} />
         <Row>
-          <Button id="menu">
+          <Button id="menu" tooltip="Menu">
             <HamburgerMenuIcon />
           </Button>
           <Spacer.Horizontal />
           <RadioGroup.Root value={currentTab} onValueChange={handleChangeTab}>
-            <RadioGroup.Item value="canvas">
+            <RadioGroup.Item value="canvas" tooltip="Canvas">
               <StackIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="components">
+            <RadioGroup.Item value="components" tooltip="Components">
               <TokensIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>

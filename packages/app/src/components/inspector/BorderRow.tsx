@@ -118,13 +118,13 @@ export default memo(function BorderRow({
           value={toPositionString(position)}
           onValueChange={handleChangePosition}
         >
-          <RadioGroup.Item value="inside">
+          <RadioGroup.Item value="inside" tooltip="Inside">
             <BorderInsideIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="center">
+          <RadioGroup.Item value="center" tooltip="Center">
             <BorderCenterIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="outside">
+          <RadioGroup.Item value="outside" tooltip="Outside">
             <BorderOutsideIcon />
           </RadioGroup.Item>
         </RadioGroup.Root>

@@ -25,7 +25,7 @@ export default memo(function Tooltip({ children, content }: Props) {
   return (
     <TooltipPrimitive.Root>
       <TooltipPrimitive.Trigger as={Slot}>{children}</TooltipPrimitive.Trigger>
-      <Content side="top" align="center">
+      <Content side="bottom" align="center">
         {content}
         <Arrow />
       </Content>

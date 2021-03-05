@@ -81,7 +81,7 @@ export default memo(function ColorInputField({ id, value, onChange }: Props) {
   return (
     <Popover.Root>
       <Trigger color={colorString} id={id} />
-      <Content>
+      <Content side="bottom" align="center">
         <ColorPicker
           colorModel={colorModel}
           color={rgbaColor}

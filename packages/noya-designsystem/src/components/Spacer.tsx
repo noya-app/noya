@@ -23,5 +23,4 @@ const SpacerHorizontal = styled.span<Props>(({ size }) => ({
 }));
 
 export const Vertical = SpacerVertical;
-
 export const Horizontal = SpacerHorizontal;
