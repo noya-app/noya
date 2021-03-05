@@ -2,9 +2,9 @@
 
 The open interface design tool.
 
-![Noya app screenshot](/docs/assets/noya-screenshot.png)
-
 > Note: This project is actively under development and not ready for use yet!
+
+![Noya app screenshot](/docs/assets/noya-screenshot.png)
 
 ## Why?
 
@@ -23,6 +23,8 @@ quick summary of the key packages:
 - [Renderer](/packages/noya-renderer) - Render a `.sketch` file to an HTML5
   canvas (via Google's
   [Skia compiled to webassembly](https://www.npmjs.com/package/canvaskit-wasm))
+- [Design System](/packages/noya-designsystem) - Common UI components, like
+  buttons and inputs
 - [Sketch File](/packages/noya-sketch-file) - Parse a `.sketch` file into JSON
 - [Color Picker](/packages/noya-colorpicker) - A React component for picking
   colors (based on [react-colorful](https://github.com/omgovich/react-colorful))
