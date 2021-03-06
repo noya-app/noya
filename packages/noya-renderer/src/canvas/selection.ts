@@ -1,5 +1,4 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { Paint } from 'canvaskit-wasm';
 import {
   Bounds,
   CompassDirection,
@@ -9,8 +8,6 @@ import {
   Rect,
 } from 'noya-state';
 import { isParentLayer } from 'noya-state/src/layers';
-import { Context } from '../context';
-import * as Primitives from '../primitives';
 
 export function getBoundingRect(
   layer: Sketch.AnyLayer,
@@ -109,50 +106,4 @@ export function getDragHandles(
       compassDirection,
     };
   });
-}
-
-export function renderSelectionOutline(
-  context: Context,
-  layer: Sketch.AnyLayer,
-  paint: Paint,
-  layerIds: string[],
-) {
-  const { CanvasKit, canvas } = context;
-
-  switch (layer._class) {
-    case 'artboard':
-    case 'group':
-    case 'bitmap':
-    case 'rectangle':
-    case 'oval':
-    case 'text': {
-      if (!layerIds.includes(layer.do_objectID)) break;
-
-      canvas.drawRect(
-        Primitives.rect(CanvasKit, Primitives.insetRect(layer.frame, 0.5, 0.5)),
-        paint,
-      );
-
-      break;
-    }
-    default:
-      break;
-  }
-
-  switch (layer._class) {
-    case 'group':
-    case 'artboard': {
-      canvas.save();
-      canvas.translate(layer.frame.x, layer.frame.y);
-
-      layer.layers.forEach((child) => {
-        renderSelectionOutline(context, child, paint, layerIds);
-      });
-
-      canvas.restore();
-      break;
-    }
-    default:
-      break;
-  }
 }

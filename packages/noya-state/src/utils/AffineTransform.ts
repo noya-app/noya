@@ -76,6 +76,20 @@ export class AffineTransform implements Transformable {
     ]);
   }
 
+  get float32Array(): Float32Array {
+    return new Float32Array([
+      this.m00,
+      this.m01,
+      this.m02,
+      this.m10,
+      this.m11,
+      this.m12,
+      0,
+      0,
+      1,
+    ]);
+  }
+
   // Static
 
   static get identity(): AffineTransform {

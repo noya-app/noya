@@ -1,0 +1,12 @@
+{
+  "name": "noya-react-canvaskit",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "react-reconciler": "^0.26.1"
+  },
+  "devDependencies": {
+    "@types/react-reconciler": "^0.26.0"
+  }
+}

@@ -1,4 +1,7 @@
-import { renderCanvas, uuid } from 'noya-renderer';
+import type { Surface } from 'canvaskit-wasm';
+import { render, unmount } from 'noya-react-canvaskit';
+import { uuid } from 'noya-renderer';
+import { createRect } from 'noya-renderer/src/primitives';
 import { CompassDirection, Point, ShapeType } from 'noya-state';
 import {
   getCurrentPageMetadata,
@@ -6,12 +9,12 @@ import {
   getLayersInRect,
   getScaleDirectionAtPoint,
 } from 'noya-state/src/selectors';
-import type { Surface } from 'canvaskit-wasm';
 import {
   CSSProperties,
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
 } from 'react';
@@ -22,7 +25,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import { createRect } from 'noya-renderer/src/primitives';
+import { SketchFileRenderer } from 'noya-renderer';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -143,23 +146,33 @@ export default memo(function Canvas() {
     };
   }, [CanvasKit, containerSize]);
 
-  useEffect(() => {
-    if (!surfaceRef.current) return;
+  // We use `useLayoutEffect` so that the canvas updates as soon as possible,
+  // even at the expense of the UI stuttering slightly.
+  // With `useEffect`, the updates are batched and potentially delayed, which
+  // makes continuous events like modifying a color unusably slow.
+  useLayoutEffect(() => {
+    if (!surfaceRef.current || surfaceRef.current.isDeleted()) return;
 
-    const surface = surfaceRef.current;
-    const context = {
-      CanvasKit,
-      canvas: surface.getCanvas(),
-      state,
-      theme: {
-        textColor,
-        backgroundColor,
-      },
-    };
+    try {
+      const surface = surfaceRef.current;
+      const context = {
+        CanvasKit,
+        canvas: surface.getCanvas(),
+        state,
+        theme: {
+          textColor,
+          backgroundColor,
+        },
+      };
 
-    renderCanvas(context);
+      render(<SketchFileRenderer />, surface, context);
 
-    surface.flush();
+      return () => {
+        unmount(surface, context);
+      };
+    } catch (e) {
+      console.log('rendering error', e);
+    }
   }, [CanvasKit, state, backgroundColor, textColor]);
 
   const handleMouseDown = useCallback(
