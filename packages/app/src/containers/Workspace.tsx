@@ -9,10 +9,13 @@ import { useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
+import SwatchesInspector from './SwatchesInspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
+import ComponentsWindow from './ComponentsWindow';
+
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
@@ -102,9 +105,9 @@ const ComponentsTab = memo(function ComponentsTab() {
       <MainView>
         <Toolbar />
         <ContentArea>
-          <div style={{ flex: 1 }}>Placeholder</div>
+          <ComponentsWindow/>
           <RightSidebar>
-            <Inspector />
+            <SwatchesInspector />
           </RightSidebar>
         </ContentArea>
       </MainView>
