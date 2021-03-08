@@ -62,7 +62,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
   scheduleTimeout: setTimeout,
   cancelTimeout: clearTimeout,
   noTimeout: -1,
-  queueMicrotask: queueMicrotask,
+  queueMicrotask:
+    typeof queueMicrotask !== 'undefined' ? queueMicrotask : setTimeout,
   now: performance.now,
   supportsMutation: false,
   supportsPersistence: true,
