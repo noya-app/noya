@@ -270,10 +270,16 @@ export function reducer(
       return produce(state, (state) => {
         const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
         const [rightmostLayer] = layers.sort(
-          (layerA, layerB) => layerB.frame.x - layerA.frame.x,
+          (layerA, layerB) =>
+            layerB.frame.x +
+            layerB.frame.width -
+            (layerA.frame.x + layerA.frame.width),
         );
         layers.forEach((layer) => {
-          layer.frame.x = rightmostLayer.frame.x;
+          layer.frame.x =
+            rightmostLayer.frame.x +
+            rightmostLayer.frame.width -
+            layer.frame.width;
         });
       });
     }
@@ -298,10 +304,16 @@ export function reducer(
       return produce(state, (state) => {
         const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
         const [bottommostLayer] = layers.sort(
-          (layerA, layerB) => layerB.frame.y - layerA.frame.y,
+          (layerA, layerB) =>
+            layerB.frame.y +
+            layerB.frame.height -
+            (layerA.frame.y + layerA.frame.height),
         );
         layers.forEach((layer) => {
-          layer.frame.y = bottommostLayer.frame.y;
+          layer.frame.y =
+            bottommostLayer.frame.y +
+            bottommostLayer.frame.height -
+            layer.frame.height;
         });
       });
     }
