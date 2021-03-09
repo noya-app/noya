@@ -254,46 +254,77 @@ export function reducer(
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [leftmostLayer] = layers.sort(
-          (layerA, layerB) => layerA.frame.x - layerB.frame.x,
-        );
-        layers.forEach((layer) => {
-          layer.frame.x = leftmostLayer.frame.x;
+        const page = state.sketch.pages[pageIndex];
+        const bounds = getNormalizedBounds(layerIndexPaths, page);
+        const minX = Math.min(...bounds.map((layer) => layer.minX));
+
+        layerIndexPaths.map((layerIndexPath, index) => {
+          const layerTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+          const { minY } = bounds[index];
+          const newOrigin = layerTransform.applyTo({
+            x: minX,
+            y: minY,
+          });
+
+          layer.frame.x = newOrigin.x;
         });
       });
+    }
+    case 'alignCenterHorizontally': {
     }
     case 'alignRight': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [rightmostLayer] = layers.sort(
-          (layerA, layerB) =>
-            layerB.frame.x +
-            layerB.frame.width -
-            (layerA.frame.x + layerA.frame.width),
-        );
-        layers.forEach((layer) => {
-          layer.frame.x =
-            rightmostLayer.frame.x +
-            rightmostLayer.frame.width -
-            layer.frame.width;
+        const page = state.sketch.pages[pageIndex];
+        const bounds = getNormalizedBounds(layerIndexPaths, page);
+        const maxX = Math.max(...bounds.map((layer) => layer.maxX));
+
+        layerIndexPaths.map((layerIndexPath, index) => {
+          const layerTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+          const { minY } = bounds[index];
+          const newOrigin = layerTransform.applyTo({
+            x: maxX - layer.frame.width,
+            y: minY,
+          });
+
+          layer.frame.x = newOrigin.x;
         });
       });
+    }
+    case 'alignCenterVertically': {
     }
     case 'alignTop': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [topmostLayer] = layers.sort(
-          (layerA, layerB) => layerA.frame.y - layerB.frame.y,
-        );
-        layers.forEach((layer) => {
-          layer.frame.y = topmostLayer.frame.y;
+        const page = state.sketch.pages[pageIndex];
+        const bounds = getNormalizedBounds(layerIndexPaths, page);
+        const minY = Math.min(...bounds.map((layer) => layer.minY));
+
+        layerIndexPaths.map((layerIndexPath, index) => {
+          const layerTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+          const { minX } = bounds[index];
+          const newOrigin = layerTransform.applyTo({
+            x: minX,
+            y: minY,
+          });
+
+          layer.frame.y = newOrigin.y;
         });
       });
     }
@@ -302,18 +333,23 @@ export function reducer(
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [bottommostLayer] = layers.sort(
-          (layerA, layerB) =>
-            layerB.frame.y +
-            layerB.frame.height -
-            (layerA.frame.y + layerA.frame.height),
-        );
-        layers.forEach((layer) => {
-          layer.frame.y =
-            bottommostLayer.frame.y +
-            bottommostLayer.frame.height -
-            layer.frame.height;
+        const page = state.sketch.pages[pageIndex];
+        const bounds = getNormalizedBounds(layerIndexPaths, page);
+        const maxY = Math.max(...bounds.map((layer) => layer.maxY));
+
+        layerIndexPaths.map((layerIndexPath, index) => {
+          const layerTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+          const { minX } = bounds[index];
+          const newOrigin = layerTransform.applyTo({
+            x: minX,
+            y: maxY - layer.frame.height,
+          });
+
+          layer.frame.y = newOrigin.y;
         });
       });
     }
@@ -883,6 +919,31 @@ function accessPageLayers(
 ): Sketch.AnyLayer[] {
   return layerIndexPaths.map((layerIndex) => {
     return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+  });
+}
+
+function getNormalizedTransform(page: Sketch.Page, indexPath: IndexPath) {
+  return AffineTransform.multiply(
+    ...Layers.accessPath(page, indexPath)
+      .slice(1, -1) // Remove the page and current layer
+      .map((layer) =>
+        AffineTransform.translation(layer.frame.x, layer.frame.y),
+      ),
+  );
+}
+
+function getNormalizedBounds(layerIndexPaths: IndexPath[], page: Sketch.Page) {
+  return layerIndexPaths.map((layerIndexPath) => {
+    const layer = Layers.access(page, layerIndexPath);
+    const transform = getNormalizedTransform(page, layerIndexPath);
+    const origin = transform.applyTo({
+      x: layer.frame.x,
+      y: layer.frame.y,
+    });
+    return Primitives.createBounds({
+      ...layer.frame,
+      ...origin,
+    });
   });
 }
 
