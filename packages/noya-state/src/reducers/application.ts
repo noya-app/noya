@@ -255,19 +255,18 @@ export function reducer(
 
       return produce(state, (state) => {
         const page = state.sketch.pages[pageIndex];
-        const bounds = getNormalizedBounds(layerIndexPaths, page);
-        const minX = Math.min(...bounds.map((layer) => layer.minX));
+        const normalizedBounds = getNormalizedBounds(layerIndexPaths, page);
+        const minX = Math.min(...normalizedBounds.map((layer) => layer.minX));
 
-        layerIndexPaths.map((layerIndexPath, index) => {
-          const layerTransform = getNormalizedTransform(
+        layerIndexPaths.map((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
             page,
             layerIndexPath,
           ).invert();
           const layer = Layers.access(page, layerIndexPath);
-          const { minY } = bounds[index];
-          const newOrigin = layerTransform.applyTo({
+          const newOrigin = normalizedTransform.applyTo({
             x: minX,
-            y: minY,
+            y: 0,
           });
 
           layer.frame.x = newOrigin.x;
@@ -275,6 +274,28 @@ export function reducer(
       });
     }
     case 'alignCenterHorizontally': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        const page = state.sketch.pages[pageIndex];
+        const selectedRect = getSelectedRect(layerIndexPaths, page);
+        const midX = selectedRect.x + selectedRect.width / 2;
+
+        layerIndexPaths.map((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+          const newOrigin = normalizedTransform.applyTo({
+            x: midX - layer.frame.width / 2,
+            y: 0,
+          });
+
+          layer.frame.x = newOrigin.x;
+        });
+      });
     }
     case 'alignRight': {
       const pageIndex = getCurrentPageIndex(state);
@@ -282,19 +303,18 @@ export function reducer(
 
       return produce(state, (state) => {
         const page = state.sketch.pages[pageIndex];
-        const bounds = getNormalizedBounds(layerIndexPaths, page);
-        const maxX = Math.max(...bounds.map((layer) => layer.maxX));
+        const normalizedBounds = getNormalizedBounds(layerIndexPaths, page);
+        const maxX = Math.max(...normalizedBounds.map((layer) => layer.maxX));
 
-        layerIndexPaths.map((layerIndexPath, index) => {
-          const layerTransform = getNormalizedTransform(
+        layerIndexPaths.map((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
             page,
             layerIndexPath,
           ).invert();
           const layer = Layers.access(page, layerIndexPath);
-          const { minY } = bounds[index];
-          const newOrigin = layerTransform.applyTo({
+          const newOrigin = normalizedTransform.applyTo({
             x: maxX - layer.frame.width,
-            y: minY,
+            y: 0,
           });
 
           layer.frame.x = newOrigin.x;
@@ -302,6 +322,28 @@ export function reducer(
       });
     }
     case 'alignCenterVertically': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        const page = state.sketch.pages[pageIndex];
+        const selectedRect = getSelectedRect(layerIndexPaths, page);
+        const midY = selectedRect.y + selectedRect.height / 2;
+
+        layerIndexPaths.map((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+          const newOrigin = normalizedTransform.applyTo({
+            x: 0,
+            y: midY - layer.frame.height / 2,
+          });
+
+          layer.frame.y = newOrigin.y;
+        });
+      });
     }
     case 'alignTop': {
       const pageIndex = getCurrentPageIndex(state);
@@ -309,18 +351,17 @@ export function reducer(
 
       return produce(state, (state) => {
         const page = state.sketch.pages[pageIndex];
-        const bounds = getNormalizedBounds(layerIndexPaths, page);
-        const minY = Math.min(...bounds.map((layer) => layer.minY));
+        const normalizedBounds = getNormalizedBounds(layerIndexPaths, page);
+        const minY = Math.min(...normalizedBounds.map((layer) => layer.minY));
 
-        layerIndexPaths.map((layerIndexPath, index) => {
-          const layerTransform = getNormalizedTransform(
+        layerIndexPaths.map((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
             page,
             layerIndexPath,
           ).invert();
           const layer = Layers.access(page, layerIndexPath);
-          const { minX } = bounds[index];
-          const newOrigin = layerTransform.applyTo({
-            x: minX,
+          const newOrigin = normalizedTransform.applyTo({
+            x: 0,
             y: minY,
           });
 
@@ -334,18 +375,17 @@ export function reducer(
 
       return produce(state, (state) => {
         const page = state.sketch.pages[pageIndex];
-        const bounds = getNormalizedBounds(layerIndexPaths, page);
-        const maxY = Math.max(...bounds.map((layer) => layer.maxY));
+        const normalizedBounds = getNormalizedBounds(layerIndexPaths, page);
+        const maxY = Math.max(...normalizedBounds.map((layer) => layer.maxY));
 
-        layerIndexPaths.map((layerIndexPath, index) => {
-          const layerTransform = getNormalizedTransform(
+        layerIndexPaths.map((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
             page,
             layerIndexPath,
           ).invert();
           const layer = Layers.access(page, layerIndexPath);
-          const { minX } = bounds[index];
-          const newOrigin = layerTransform.applyTo({
-            x: minX,
+          const newOrigin = normalizedTransform.applyTo({
+            x: 0,
             y: maxY - layer.frame.height,
           });
 
@@ -945,6 +985,13 @@ function getNormalizedBounds(layerIndexPaths: IndexPath[], page: Sketch.Page) {
       ...origin,
     });
   });
+}
+
+function getSelectedRect(layerIndexPaths: IndexPath[], page: Sketch.Page) {
+  const layerIds = layerIndexPaths.map(
+    (indexPath) => Layers.access(page, indexPath).do_objectID,
+  );
+  return getBoundingRect(page, layerIds)!;
 }
 
 export function createInitialState(sketch: SketchFile): ApplicationState {

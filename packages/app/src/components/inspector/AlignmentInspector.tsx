@@ -30,10 +30,14 @@ function AlignmentInspector(props: AlignmentInspectorProps) {
       <SpaceEvenlyHorizontallyIcon />
       <SpaceEvenlyVerticallyIcon />
       <AlignLeftIcon onClick={() => dispatch('alignLeft')} />
-      <AlignCenterHorizontallyIcon />
+      <AlignCenterHorizontallyIcon
+        onClick={() => dispatch('alignCenterHorizontally')}
+      />
       <AlignRightIcon onClick={() => dispatch('alignRight')} />
       <AlignTopIcon onClick={() => dispatch('alignTop')} />
-      <AlignCenterVerticallyIcon />
+      <AlignCenterVerticallyIcon
+        onClick={() => dispatch('alignCenterVertically')}
+      />
       <AlignBottomIcon onClick={() => dispatch('alignBottom')} />
     </AlignmentInspectorContainer>
   );
