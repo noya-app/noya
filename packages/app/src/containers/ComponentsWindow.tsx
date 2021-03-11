@@ -1,11 +1,14 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { RgbaColor } from 'noya-colorpicker/src/types';
 import { memo, useState } from 'react';
 import ColorSwatch from '../components/swatches/ColorSwatch';
-import styled, { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
 import {
   useApplicationState,
-  useSelector,
 } from '../contexts/ApplicationStateContext';
+import {
+  getSharedSwatches
+} from 'noya-state/src/selectors';
 
 const ComponetsGrid = styled.div(({ theme, color }) => ({
     flex: 1, 
@@ -15,7 +18,7 @@ const ComponetsGrid = styled.div(({ theme, color }) => ({
     gridTemplateColumns: "repeat(auto-fill, 200px)",
     gridTemplateRows: "repeat(auto-fill, 180px)",
     justifyContent: "space-between",
-    gap: "20px"
+    gap: "20px",
 }));
 
 
@@ -30,29 +33,54 @@ const ComponetsGrid = styled.div(({ theme, color }) => ({
  * TODO: Allow to change color name i guess.
  */
 
+export interface RgbaColorName extends RgbaColor {
+  name: string;
+}
+
 export default memo(function ComponentsWindow() {
-    let elements: Array< Sketch.Color >;
-    const colors = ['pink', 'blue', 'green', 'purple', 'white', 'black'];
     const [selected, setSelected] = useState(0);
     const [state, dispatch] = useApplicationState();
 
+    let sharedSwatches: Sketch.SwatchContainer | never[] = getSharedSwatches(state);
+
+    let colorsX: Array<RgbaColorName> = []
+    let tesst : Array<Sketch.Color> = []
+    if (sharedSwatches){
+      sharedSwatches = sharedSwatches as Sketch.SwatchContainer
+      colorsX = sharedSwatches.objects.map((swatch: Sketch.Swatch) => {
+        const value: Sketch.Color = swatch.value;
+        tesst.push(value);
+        return ({
+          "name": swatch.name,
+          "a": value.alpha,
+          "r": Math.round(value.red   * 255),
+          "g": Math.round(value.green * 255),
+          "b": Math.round(value.blue  * 255)
+        })
+      })
+    }
+
+    
     return (
       <>
         <ComponetsGrid>
-        {colors.map((value, index) => {
+        {colorsX.map((value, index) => {
             return(
-                <ColorSwatch 
-                    key = {index} 
-                    value = {value}
-                    selected = {selected === index}
-                    onClick = {
-                        (value) => {
-                          setSelected(index)
-                          console.log(value);
-                          //dispatch('setFillColor', index, elements[0])
-                        }
-                    }
-                />
+              <ColorSwatch 
+                  key   = {index} 
+                  value = {value}
+                  selected  = {selected === index}
+                  onClick   = {
+                      (value) => {
+                        sharedSwatches = sharedSwatches as Sketch.SwatchContainer;
+                        const id = sharedSwatches.objects[index].do_objectID;
+
+                        setSelected(index);
+                        //dispatch('setSwatchColor', id, tesst[index]);
+                        dispatch('selectSwatch', id);
+                      }
+                  }
+              />
             )
           })}
         </ComponetsGrid>

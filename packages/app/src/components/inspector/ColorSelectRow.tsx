@@ -6,7 +6,7 @@ import {
   LabeledElementView,
   Spacer,
 } from 'noya-designsystem';
-import { memo, ReactNode, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
 const Row = styled.div(({ theme }) => ({
@@ -22,6 +22,9 @@ const Column = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
+const InputFieldRoot = styled(InputField.Root)`
+  flex: 0;
+`
 
 interface Props {
   id: string;
@@ -74,9 +77,9 @@ export default memo(function ColorSelectRow({
 
   return (
     <Column>
-      <InputField.Root id={'colorName'}>
+      <InputFieldRoot id={'colorName'}>
           <InputField.Input value={'colorName'} onSubmit={() => {}} />
-      </InputField.Root>
+      </InputFieldRoot>
       <ColorInputField
             id={colorInputId}
             value={color}

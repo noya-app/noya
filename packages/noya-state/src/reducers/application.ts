@@ -41,6 +41,7 @@ export type ApplicationState = {
   selectedPage: string;
   highlightedLayer?: LayerHighlight;
   selectedObjects: string[];
+  selectedSwatchIds: string[];
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
@@ -67,6 +68,11 @@ export type Action =
   | [type: 'addDrawnLayer']
   | [
       type: 'selectLayer',
+      layerId: string | string[] | undefined,
+      selectionType?: SelectionType,
+    ]
+  | [
+      type: 'selectSwatch',
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
@@ -113,6 +119,19 @@ export type Action =
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
+  | [
+      type: 'setSwatchColor', 
+      swatchId: string | string[] | undefined,
+      color: Sketch.Color
+    ]
+  | [
+      type: 'setSwatchName', 
+      swatchId: string | string[] | undefined,
+      name: string
+    ]
+  | [
+      type: 'addColorSwatch',
+    ]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -494,7 +513,6 @@ export function reducer(
         });
       });
     }
-
     case 'setBorderColor':
     case 'setFillColor':
     case 'setShadowColor': {
@@ -853,10 +871,120 @@ export function reducer(
         }
       });
     }
+    case 'addColorSwatch': {
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches;
+
+        const nuevoSwatch: Sketch.Color = {
+          "_class": "color",
+          "alpha": 1,
+          "red": 50,
+          "green": 50,
+          "blue": 0
+        }
+        const swatch: Sketch.Swatch = {
+          "_class": "swatch",
+          "do_objectID": "string",
+          "name": "Undefined",
+          "value": nuevoSwatch,
+        }
+        sharedSwatches?.objects.push(swatch);
+      });
+    }
+    case 'selectSwatch': {
+      const [, id, selectionType = 'replace'] = action;
+
+      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        switch (selectionType) {
+          case 'intersection':
+            state.selectedSwatchIds.push(
+              ...ids.filter((id) => !state.selectedSwatchIds.includes(id)),
+            );
+            return;
+          case 'difference':
+            ids.forEach((id) => {
+              const selectedIndex = state.selectedSwatchIds.indexOf(id);
+              state.selectedSwatchIds.splice(selectedIndex, 1);
+            });
+            return;
+          case 'replace':
+            state.selectedSwatchIds = [...ids];
+            return;
+        }
+      });
+    }
+    case 'setSwatchColor': {
+      const [, swatchId, color] = action;
+      let index = -1;
+
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches as Sketch.SwatchContainer;
+
+        if (typeof swatchId === undefined){
+          return;
+        }
+
+        const isTheSwatch = (swatch: Sketch.Swatch, i: Number) => {
+          if (index !== undefined && index >= i){
+            return false;
+          }
+
+          if (typeof swatchId === 'string'){
+            return swatch.do_objectID === swatchId;
+          }
+          else {
+            const ids = swatchId as string[];
+            return ids.includes(swatch.do_objectID);
+          }
+        };
+
+        index = sharedSwatches.objects.findIndex(isTheSwatch);
+        while (index != -1) {
+            sharedSwatches.objects[index].value = color;
+            index = sharedSwatches.objects.findIndex(isTheSwatch);
+        }
+      });
+    }
+    case 'setSwatchName': {
+      const [, swatchId, name] = action;
+      let index = -1;
+
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches as Sketch.SwatchContainer;
+
+        if (typeof swatchId === undefined){
+          return;
+        }
+
+        const isTheSwatch = (swatch: Sketch.Swatch, i: Number) => {
+          if (index !== undefined && index >= i){
+            return false;
+          }
+
+          if (typeof swatchId === 'string'){
+            return swatch.do_objectID === swatchId;
+          }
+          else {
+            const ids = swatchId as string[];
+            return ids.includes(swatch.do_objectID);
+          }
+        };
+
+        index = sharedSwatches.objects.findIndex(isTheSwatch);
+        while (index != -1) {
+            sharedSwatches.objects[index].name = name;
+            index = sharedSwatches.objects.findIndex(isTheSwatch);
+        }
+      });
+    }
     default:
       return state;
   }
 }
+
+// Modify setSwatchColor and setSwatchName to be one
 
 /**
  * Get an array of all layers using as few lookups as possible on the state tree.
@@ -874,6 +1002,17 @@ function accessPageLayers(
   });
 }
 
+function createColorSketch(
+  state: WritableDraft<ApplicationState>,
+  pageIndex: number,
+  layerIndexPaths: IndexPath[],
+): Sketch.AnyLayer[] {
+  return layerIndexPaths.map((layerIndex) => {
+    const swatch = state.sketch.document.sharedSwatches;
+    return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+  });
+}
+
 export function createInitialState(sketch: SketchFile): ApplicationState {
   if (sketch.pages.length === 0) {
     throw new Error('Invalid Sketch file - no pages');
@@ -884,6 +1023,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
+    selectedSwatchIds: [],
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },

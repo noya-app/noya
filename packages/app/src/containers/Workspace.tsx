@@ -14,6 +14,7 @@ import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
+import ToolbarComponent from './ToolbarComponent';
 import ComponentsWindow from './ComponentsWindow';
 
 
@@ -103,7 +104,7 @@ const ComponentsTab = memo(function ComponentsTab() {
         <Menubar />
       </LeftSidebar>
       <MainView>
-        <Toolbar />
+        <ToolbarComponent />
         <ContentArea>
           <ComponentsWindow/>
           <RightSidebar>

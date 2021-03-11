@@ -52,7 +52,9 @@ export type InteractionAction =
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
-  | [type: 'enablePanMode'];
+  | [type: 'enablePanMode']
+  | [type: 'modifyColor']
+  | [type: 'addColor'];
 
 export type InteractionState =
   | {
@@ -89,7 +91,8 @@ export type InteractionState =
     }
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
-  | { type: 'panning'; previous: Point; next: Point };
+  | { type: 'panning'; previous: Point; next: Point }
+  | { type: 'addColor' };
 
 function createLayer(
   shapeType: ShapeType,
@@ -114,7 +117,9 @@ export function interactionReducer(
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
-    case 'insertText': {
+    case 'insertText': 
+    case 'addColor':
+    {
       return { type: action[0] };
     }
     case 'hoverHandle': {

@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import styled from 'styled-components';
+import { RgbaColor } from 'noya-colorpicker/src/types';
 
 const ColorSwatchContainer = styled.div(({ selected }: PropsSelected) => ({
     width: '200px',
@@ -33,8 +34,12 @@ const ColoredCircle = styled.div(({ theme, color }) => ({
     borderRadius: "50%",
 }));
 
+export interface RgbaColorName extends RgbaColor {
+    name: string;
+}
+
 type ColorSwatchProps = {
-    value: string; 
+    value: RgbaColorName; 
     selected?: boolean;
     key: number; 
     onClick: (value:string) => void;
@@ -48,22 +53,29 @@ interface PropsSelected{
     selected?: boolean;
 }
 
+function rgb2hex(rgb: string){
+    const rgba = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+    const hex = (rgba && rgba.length === 4) ? "#" +
+     ("0" + parseInt(rgba[1],10).toString(16)).slice(-2) +
+     ("0" + parseInt(rgba[2],10).toString(16)).slice(-2) +
+     ("0" + parseInt(rgba[3],10).toString(16)).slice(-2) : '';
+
+    return hex.toUpperCase();
+}
+
 export default memo(function ColorSwatch(props: ColorSwatchProps){
     const { value, selected, onClick } = props;
-    const test = () => {
-        console.log("testing Colors")
-        //onClick('test')
-    }
 
+    const color: string = `rgba(${value.r}, ${value.g}, ${value.b}, ${value.a})`;
     return (
-        <SwatchContainer onClick={() => onClick(value)}>
+        <SwatchContainer onClick={() => onClick('value')}>
             <ColorSwatchContainer selected={selected}>
-                <ColoredCircle color = {value}/>
+                <ColoredCircle color = {color}/>
             </ColorSwatchContainer>
-            <ColorSwatchDescription onClick = {test}>
-                Color Name<br/>
+            <ColorSwatchDescription>
+                {value.name}<br/>
                 <span style={{color: 'white'}} >
-                #{props.value} - 100%
+                {rgb2hex(color)} - {Math.round(value.a * 100)}%
                 </span>
             </ColorSwatchDescription>
         </SwatchContainer>
