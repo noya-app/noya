@@ -129,6 +129,27 @@ export const getSelectedLayersWithFixedRadius = (
   ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
 };
 
+export const getSelectedSwatches = (
+  state: ApplicationState,
+): Sketch.Swatch[] => {
+  const sharedSwatches = getSharedSwatches(state) as Sketch.SwatchContainer;
+  const swatches = sharedSwatches.objects;
+  return swatches.filter((swatch) =>
+      state.selectedSwatchIds.includes(swatch.do_objectID),
+    )
+};
+
+export const getSelectedColorSwatches = (
+  state: ApplicationState,
+): Sketch.Swatch[] => {
+  const sharedSwatches = getSharedSwatches(state) as Sketch.SwatchContainer;
+  const swatches = sharedSwatches.objects;
+
+  return swatches.filter((swatch) =>
+      state.selectedSwatchIds.includes(swatch.do_objectID),
+    ).filter((swatch): swatch is Sketch.Swatch => swatch.value._class === 'color');
+};
+
 export const makeGetPageLayers = (
   state: ApplicationState,
 ): ((ids: UUID[]) => PageLayer[]) => {

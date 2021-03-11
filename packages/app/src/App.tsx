@@ -15,7 +15,7 @@ import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
 
 export default function App() {
-  const sketchFile = useResource<ArrayBuffer>('/Demo.sketch', 'arrayBuffer');
+  const sketchFile = useResource<ArrayBuffer>('/ColorAsset.sketch', 'arrayBuffer');
 
   const [state, dispatch] = useReducer(
     (
