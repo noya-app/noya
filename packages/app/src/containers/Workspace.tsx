@@ -51,6 +51,7 @@ const MainView = styled.main(({ theme }) => ({
 const ContentArea = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
+  overflow: 'hidden'
 }));
 
 const FilterContainer = styled.div(({ theme }) => ({

@@ -88,7 +88,7 @@ interface Props {
 }
 
 interface ColorProps {
-  swatch: Sketch.Swatch;
+  swatches: Sketch.Swatch[];
   index: number;
 }
 
@@ -181,8 +181,9 @@ const ColorSelectRow = memo(function ColorSelectRow({
     <Column>
       <InputField.Root  id={'colorName'}>
           <InputField.Input 
-            value   = {name} 
-            onSubmit= {onInputChange} 
+            value   = {name === "New Color Variable" || name === "Multiple" ? '' : name} 
+            placeholder = {name}
+            onChange = {onInputChange} 
           />
       </InputField.Root >
       <ColorInputFieldFull
@@ -213,8 +214,10 @@ const ColorSelectRow = memo(function ColorSelectRow({
 });
 
 
-const ColorPickerInspector =  memo(function ColorPickerInspector({swatch, index}: ColorProps) {
+const ColorPickerInspector =  memo(function ColorPickerInspector({swatches, index}: ColorProps) {
   const [, dispatch] = useApplicationState();
+  const swatch: Sketch.Swatch = swatches[0];
+
   const color = swatch.value as Sketch.Color;
   const rgbObj = {
     "r": Math.round(color.red   * 255),
@@ -233,7 +236,9 @@ const ColorPickerInspector =  memo(function ColorPickerInspector({swatch, index}
   }
   const rgb: string = `rgba(${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b})`;
 
-  const name = swatch.name !== 'Undefined' ? swatch.name : undefined;
+  const name = swatch.name !== 'Undefined' ? swatch.name 
+      : (swatches.length > 1) ? "Multiple" : undefined ;
+        
   return (
       <Container>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -252,10 +257,14 @@ const ColorPickerInspector =  memo(function ColorPickerInspector({swatch, index}
             console.log(value)
           }
           onChangeColor={(value) => 
-            dispatch('setSwatchColor', swatch.do_objectID, value)
+            swatches.forEach(swatch => {
+              dispatch('setSwatchColor', swatch.do_objectID, value)
+            })
           }
-          onInputChange={(value) =>
-            dispatch('setSwatchName', swatch.do_objectID, value)
+          onInputChange={(value) => 
+            swatches.forEach(swatch => {
+              dispatch('setSwatchName', swatch.do_objectID, value)
+            })
           }
         />
     </Container>
@@ -274,7 +283,7 @@ export default memo(function SwatchesInspector() {
     const views = [
       <Fragment key="layout">
         <ColorPickerInspector 
-          swatch={selectedSwatches[0]} 
+          swatches={selectedSwatches} 
           index={0}
         />
         <Spacer.Vertical size={10} />

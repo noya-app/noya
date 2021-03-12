@@ -875,20 +875,22 @@ export function reducer(
       return produce(state, (state) => {
         const sharedSwatches = state.sketch.document.sharedSwatches;
 
-        const nuevoSwatch: Sketch.Color = {
+        const swatchColor: Sketch.Color = {
           "_class": "color",
-          "alpha": 1,
-          "red": 50,
-          "green": 50,
+          "alpha": 0.5,
+          "red": 0,
+          "green": 0,
           "blue": 0
         }
         const swatch: Sketch.Swatch = {
           "_class": "swatch",
-          "do_objectID": "string",
+          "do_objectID": uuid(),
           "name": "Undefined",
-          "value": nuevoSwatch,
+          "value": swatchColor,
         }
+
         sharedSwatches?.objects.push(swatch);
+        state.selectedSwatchIds = [swatch.do_objectID];
       });
     }
     case 'selectSwatch': {
@@ -983,8 +985,6 @@ export function reducer(
       return state;
   }
 }
-
-// Modify setSwatchColor and setSwatchName to be one
 
 /**
  * Get an array of all layers using as few lookups as possible on the state tree.
