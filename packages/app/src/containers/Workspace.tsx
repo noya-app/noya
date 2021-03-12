@@ -9,13 +9,13 @@ import { useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
-import SwatchesInspector from './SwatchesInspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
-import ToolbarComponent from './ToolbarComponent';
+import SwatchesToolbar from './SwatchesToolbar';
 import ComponentsWindow from './ComponentsWindow';
+import ColorSwatchesInspector from './ColorSwatchesInspector';
 
 
 const LeftSidebar = styled.div(({ theme }) => ({
@@ -105,11 +105,11 @@ const ComponentsTab = memo(function ComponentsTab() {
         <Menubar />
       </LeftSidebar>
       <MainView>
-        <ToolbarComponent />
+        <SwatchesToolbar />
         <ContentArea>
           <ComponentsWindow/>
           <RightSidebar>
-            <SwatchesInspector />
+            <ColorSwatchesInspector />
           </RightSidebar>
         </ContentArea>
       </MainView>

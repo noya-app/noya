@@ -298,5 +298,5 @@ export default memo(function SwatchesInspector() {
     }
 
     return <>{elements}</>;
-  });
+});
   

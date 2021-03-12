@@ -1,54 +1,28 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { memo, useState, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import ColorSwatch from '../components/swatches/ColorSwatch';
-import styled from 'styled-components';
+import ColorSwatchGrid from './ColorSwatchGrid';
 import {
   useApplicationState,
 } from '../contexts/ApplicationStateContext';
 import {
   getSharedSwatches
 } from 'noya-state/src/selectors';
-const ScrollContainer = styled.div`
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-
-  /* Track */
-  &::-webkit-scrollbar-track {
-    background: rgba(40,40,40,0.85); 
-    margin: 12px;
-  }
-  
-  /* Handle */
-  &::-webkit-scrollbar-thumb {
-    background: #999; 
-    width: 8px;    
-    border-radius: 12px;
-  }
-
-  /* Handle on hover */
-  &::-webkit-scrollbar-thumb:hover {
-    background: #888; 
-  }
-`;
-const ComponetsGrid = styled(ScrollContainer)(({ theme }) => ({
-    flex: 1, 
-    color: 'white', 
-    display: 'grid',
-    padding: '14px',
-    gridTemplateColumns: "repeat(auto-fill, 200px)",
-    gridTemplateRows: "repeat(auto-fill, 180px)",
-    justifyContent: "space-between",
-    gap: "20px",
-    overflowY: 'scroll'
-}));
-
-
+import styled from 'styled-components';
 
 /**
  * TODO: Multiselect and change color 
  * TODO: Clean code
  */
+
+const SwatchContainer = styled.div`
+  height: 175px,
+  &:hover {
+      cursor: pointer;
+  }
+`
+
+
 
 export default memo(function ComponentsWindow() {
     const [state, dispatch] = useApplicationState();
@@ -70,7 +44,7 @@ export default memo(function ComponentsWindow() {
             }
 
             const content = event.nativeEvent.composedPath()[0] as HTMLInputElement;
-            if (content.classList.contains("swatch-grid")){
+            if (content.classList.contains("color-swatch-grid")){
                 dispatch('selectSwatch', undefined);
                 return;
             }
@@ -96,22 +70,22 @@ export default memo(function ComponentsWindow() {
     );
 
     return (
-      <>
-        <ComponetsGrid
-          className="swatch-grid"
+        <ColorSwatchGrid
+          className="color-swatch-grid"
           onPointerDown ={handleMouseDown}
         >
-        {swatches.map((swatch, index) => {
-            return(
+        {swatches.map((swatch, index) => (
+            <SwatchContainer 
+                key   = {index} 
+                className="color-swatch"
+                onPointerDown={e => handleMouseDown(e, swatch)}
+            >
               <ColorSwatch 
-                  key   = {index} 
-                  value = {swatch}
-                  selected  = { state.selectedSwatchIds.includes(swatch.do_objectID) }
-                  onPointerDown ={handleMouseDown}
+                value = {swatch}
+                selected  = { state.selectedSwatchIds.includes(swatch.do_objectID) }
               />
-            )
-          })}
-        </ComponetsGrid>
-      </>
+            </SwatchContainer>
+        ))}
+        </ColorSwatchGrid>
     );
   });

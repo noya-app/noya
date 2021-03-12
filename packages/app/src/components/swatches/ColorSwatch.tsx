@@ -17,16 +17,9 @@ const ColorSwatchContainer = styled.div(({ selected }: PropsSelected) => ({
 }));
          
 const ColorSwatchDescription = styled.p(({ theme }) => ({
-    color: "pink",
+    color: theme.colors.textDecorativeLight,
     margin: "10px 0px" 
 }));
-
-const SwatchContainer = styled.div<Props>`
-    height: 175px,
-    &:hover {
-        cursor: pointer;
-    }
-`
 
 const ColoredCircle = styled.div(({ theme, color }) => ({
     height: "50px",
@@ -39,12 +32,6 @@ const ColoredCircle = styled.div(({ theme, color }) => ({
 type ColorSwatchProps = {
     value: Sketch.Swatch; 
     selected?: boolean;
-    key: number; 
-    onPointerDown: (event: React.PointerEvent, swatch: Sketch.Swatch) => void;
-}
-
-interface Props{
-    onClick?: () => void;
 }
 
 interface PropsSelected{
@@ -62,7 +49,7 @@ function rgb2hex(rgb: string){
 }
 
 export default memo(function ColorSwatch(props: ColorSwatchProps){
-    const { value, selected, onPointerDown } = props;
+    const { value, selected } = props;
 
     const color: RgbaColor = {
         "a": value.value.alpha,
@@ -73,19 +60,18 @@ export default memo(function ColorSwatch(props: ColorSwatchProps){
 
     const colorString: string = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
     return (
-        <SwatchContainer 
-            className="color-swatch"
-            onPointerDown={e => onPointerDown(e, value)}
-        >
+        <>
             <ColorSwatchContainer selected={selected}>
                 <ColoredCircle color = {colorString}/>
             </ColorSwatchContainer>
             <ColorSwatchDescription>
                 {value.name}<br/>
                 <span style={{color: 'white'}} >
-                {rgb2hex(colorString)} - {Math.round(color.a * 100)}%
+                    {rgb2hex(colorString)} - {Math.round(color.a * 100)}%
                 </span>
             </ColorSwatchDescription>
-        </SwatchContainer>
+        </>
     )
 })
+
+
