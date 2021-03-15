@@ -13,6 +13,7 @@ import type { Point, Rect, UUID } from './types';
 import { AffineTransform } from './utils/AffineTransform';
 import { WorkspaceTab } from './reducers/application';
 import { EnterReturnValue } from 'tree-visit';
+import { uuid } from 'noya-renderer';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -25,9 +26,12 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
 
   return pageIndex;
 };
-
-export const getSharedSwatches = (state: ApplicationState) => {
-  return state.sketch.document.sharedSwatches ?? [];
+export const getSharedSwatches = (
+  state: ApplicationState
+): Sketch.Swatch[] => {
+  return (
+    state.sketch.document.sharedSwatches?.objects ?? []
+  );
 };
 
 export const getCurrentPage = (state: ApplicationState) => {
@@ -129,25 +133,14 @@ export const getSelectedLayersWithFixedRadius = (
   ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
 };
 
-export const getSelectedSwatches = (
-  state: ApplicationState,
-): Sketch.Swatch[] => {
-  const sharedSwatches = getSharedSwatches(state) as Sketch.SwatchContainer;
-  const swatches = sharedSwatches.objects;
-  return swatches.filter((swatch) =>
-      state.selectedSwatchIds.includes(swatch.do_objectID),
-    )
-};
-
 export const getSelectedColorSwatches = (
   state: ApplicationState,
 ): Sketch.Swatch[] => {
-  const sharedSwatches = getSharedSwatches(state) as Sketch.SwatchContainer;
-  const swatches = sharedSwatches.objects;
+  const sharedSwatches = getSharedSwatches(state);
 
-  return swatches.filter((swatch) =>
+  return sharedSwatches.filter((swatch) =>
       state.selectedSwatchIds.includes(swatch.do_objectID),
-    ).filter((swatch): swatch is Sketch.Swatch => swatch.value._class === 'color');
+    ).filter(swatch => swatch.value._class === 'color');
 };
 
 export const makeGetPageLayers = (

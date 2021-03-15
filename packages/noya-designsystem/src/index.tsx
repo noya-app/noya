@@ -14,6 +14,7 @@ export { default as Slider } from './components/Slider';
 export * as TreeView from './components/TreeView';
 export { default as Divider } from './components/Divider';
 export * as ListView from './components/ListView';
+export * as GridView from './components/GridView';
 export * as Sortable from './components/Sortable';
 export * as InputField from './components/InputField';
 export * as RadioGroup from './components/RadioGroup';

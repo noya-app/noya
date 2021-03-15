@@ -53,8 +53,6 @@ export type InteractionAction =
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
-  | [type: 'modifyColor']
-  | [type: 'addColor'];
 
 export type InteractionState =
   | {
@@ -92,7 +90,6 @@ export type InteractionState =
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
   | { type: 'panning'; previous: Point; next: Point }
-  | { type: 'addColor' };
 
 function createLayer(
   shapeType: ShapeType,
@@ -118,7 +115,6 @@ export function interactionReducer(
     case 'insertOval':
     case 'insertRectangle':
     case 'insertText': 
-    case 'addColor':
     {
       return { type: action[0] };
     }

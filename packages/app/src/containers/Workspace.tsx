@@ -1,5 +1,4 @@
 import { InputField, Divider, Spacer } from 'noya-designsystem';
-
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
@@ -16,7 +15,6 @@ import Toolbar from './Toolbar';
 import SwatchesToolbar from './SwatchesToolbar';
 import ComponentsWindow from './ComponentsWindow';
 import ColorSwatchesInspector from './ColorSwatchesInspector';
-
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
@@ -51,7 +49,6 @@ const MainView = styled.main(({ theme }) => ({
 const ContentArea = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
-  overflow: 'hidden'
 }));
 
 const FilterContainer = styled.div(({ theme }) => ({
@@ -107,7 +104,7 @@ const ComponentsTab = memo(function ComponentsTab() {
       <MainView>
         <SwatchesToolbar />
         <ContentArea>
-          <ComponentsWindow/>
+          <ComponentsWindow />
           <RightSidebar>
             <ColorSwatchesInspector />
           </RightSidebar>

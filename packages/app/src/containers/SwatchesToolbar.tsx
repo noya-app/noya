@@ -1,7 +1,5 @@
 import { Spacer } from 'noya-designsystem';
-import {
-  PlusIcon,
-} from '@radix-ui/react-icons';
+import { PlusIcon } from '@radix-ui/react-icons';
 import { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import Button from 'noya-designsystem/src/components/Button';
@@ -16,25 +14,28 @@ const Container = styled.header(({ theme }) => ({
   color: theme.colors.textMuted,
 }));
 
+const Title = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  color: theme.colors.title.right,
+}));
+
 export default function Toolbar() {
-  const [state, dispatch] = useApplicationState();
+  const [, dispatch] = useApplicationState();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
-  const interactionType = state.interactionState.type;
 
   return useMemo(
     () => (
       <Container>
-        <div>
-            <p>Untitle <br/> Edited</p>
-        </div>
+        <Title>
+          <span>Untitle</span>
+          <span>Edited</span>
+        </Title>
         <Spacer.Horizontal size={50} />
         <Button
-          id="tool-artboard"
-          tooltip="Insert an artboard"
-          active={interactionType === 'addColor'}
-          onClick={() => {
-            dispatch('addColorSwatch');
-          }}
+          id="tool-swatch"
+          tooltip="Insert an Swatch"
+          onClick={() => dispatch('addColorSwatch')}
         >
           <PlusIcon />
         </Button>
@@ -42,6 +43,6 @@ export default function Toolbar() {
         <Spacer.Horizontal size={8} />
       </Container>
     ),
-    [dispatch, interactionType, itemSeparatorSize],
+    [dispatch, itemSeparatorSize],
   );
 }

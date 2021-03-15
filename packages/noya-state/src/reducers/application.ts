@@ -121,13 +121,19 @@ export type Action =
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [
       type: 'setSwatchColor', 
-      swatchId: string | string[] | undefined,
+      id: string | string[],
       color: Sketch.Color
     ]
   | [
       type: 'setSwatchName', 
-      swatchId: string | string[] | undefined,
+      id: string | string[],
       name: string
+    ]
+  | [
+      type: 'setSwatchOpacity', 
+      id: string | string[],
+      alpha: number,
+      mode?: 'replace' | 'adjust'
     ]
   | [
       type: 'addColorSwatch',
@@ -873,7 +879,11 @@ export function reducer(
     }
     case 'addColorSwatch': {
       return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches;
+        const sharedSwatches = state.sketch.document.sharedSwatches ?? {
+          "_class": "swatchContainer",
+          "do_objectID": uuid(),
+          "objects" : []
+        }
 
         const swatchColor: Sketch.Color = {
           "_class": "color",
@@ -882,14 +892,16 @@ export function reducer(
           "green": 0,
           "blue": 0
         }
+        
         const swatch: Sketch.Swatch = {
           "_class": "swatch",
           "do_objectID": uuid(),
-          "name": "Undefined",
+          "name": "New Color Variable",
           "value": swatchColor,
         }
 
-        sharedSwatches?.objects.push(swatch);
+        sharedSwatches.objects.push(swatch);
+        state.sketch.document.sharedSwatches = sharedSwatches;
         state.selectedSwatchIds = [swatch.do_objectID];
       });
     }
@@ -918,69 +930,55 @@ export function reducer(
       });
     }
     case 'setSwatchColor': {
-      const [, swatchId, color] = action;
-      let index = -1;
+      const [, id, color] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches as Sketch.SwatchContainer;
+        const sharedSwatches = state.sketch.document.sharedSwatches?.objects ?? []
 
-        if (typeof swatchId === undefined){
-          return;
-        }
-
-        const isTheSwatch = (swatch: Sketch.Swatch, i: Number) => {
-          if (index !== undefined && index >= i){
-            return false;
+        sharedSwatches.forEach((swatch: Sketch.Swatch) => {
+          if ( ids.includes(swatch.do_objectID) ){
+            swatch.value = color;
           }
-
-          if (typeof swatchId === 'string'){
-            return swatch.do_objectID === swatchId;
-          }
-          else {
-            const ids = swatchId as string[];
-            return ids.includes(swatch.do_objectID);
-          }
-        };
-
-        index = sharedSwatches.objects.findIndex(isTheSwatch);
-        while (index != -1) {
-            sharedSwatches.objects[index].value = color;
-            index = sharedSwatches.objects.findIndex(isTheSwatch);
-        }
+        });
       });
     }
     case 'setSwatchName': {
-      const [, swatchId, name] = action;
-      let index = -1;
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches as Sketch.SwatchContainer;
+        const sharedSwatches = state.sketch.document.sharedSwatches?.objects ?? []
 
-        if (typeof swatchId === undefined){
-          return;
-        }
-
-        const isTheSwatch = (swatch: Sketch.Swatch, i: Number) => {
-          if (index !== undefined && index >= i){
-            return false;
+        sharedSwatches.forEach((swatch: Sketch.Swatch) => {
+          if ( ids.includes(swatch.do_objectID) ){
+            swatch.name = name;
           }
-
-          if (typeof swatchId === 'string'){
-            return swatch.do_objectID === swatchId;
-          }
-          else {
-            const ids = swatchId as string[];
-            return ids.includes(swatch.do_objectID);
-          }
-        };
-
-        index = sharedSwatches.objects.findIndex(isTheSwatch);
-        while (index != -1) {
-            sharedSwatches.objects[index].name = name;
-            index = sharedSwatches.objects.findIndex(isTheSwatch);
-        }
+        });
       });
     }
+    case 'setSwatchOpacity': {
+      const [, id, alpha, mode = 'replace'] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches?.objects ?? []
+
+        sharedSwatches.forEach((swatch: Sketch.Swatch) => {
+          if ( ids.includes(swatch.do_objectID) ){
+            const newValue =
+              mode === 'replace'
+                ? alpha
+                : swatch.value.alpha + alpha;
+            
+            swatch.value.alpha = Math.min(Math.max(0, newValue), 1);
+          }
+        });
+      });
+    }    
     default:
       return state;
   }
@@ -998,17 +996,6 @@ function accessPageLayers(
   layerIndexPaths: IndexPath[],
 ): Sketch.AnyLayer[] {
   return layerIndexPaths.map((layerIndex) => {
-    return Layers.access(state.sketch.pages[pageIndex], layerIndex);
-  });
-}
-
-function createColorSketch(
-  state: WritableDraft<ApplicationState>,
-  pageIndex: number,
-  layerIndexPaths: IndexPath[],
-): Sketch.AnyLayer[] {
-  return layerIndexPaths.map((layerIndex) => {
-    const swatch = state.sketch.document.sharedSwatches;
     return Layers.access(state.sketch.pages[pageIndex], layerIndex);
   });
 }
