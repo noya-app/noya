@@ -20,7 +20,7 @@ import {
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from '../selectors';
-import { Point, UUID } from '../types';
+import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from '../utils/AffineTransform';
 import {
   CompassDirection,
@@ -77,14 +77,15 @@ export type Action =
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
+  | [type: 'distribute', placement: 'horizontal' | 'vertical']
   | [
       type: 'align',
       placement:
         | 'left'
-        | 'centerHorizontally'
+        | 'centerHorizontal'
         | 'right'
         | 'top'
-        | 'centerVertically'
+        | 'centerVertical'
         | 'bottom',
     ]
   | [type: `addNew${StyleElementType}`]
@@ -257,6 +258,77 @@ export function reducer(
         state.selectedPage = action[1];
       });
     }
+    case 'distribute': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const axis = action[1];
+
+      return produce(state, (state) => {
+        const page = state.sketch.pages[pageIndex];
+        const selectedRect = getSelectedRect(layerIndexPaths, page);
+        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
+        const combinedWidths = layers.reduce(
+          (width, layer) => layer.frame.width + width,
+          0,
+        );
+        const combinedHeights = layers.reduce(
+          (height, layer) => layer.frame.height + height,
+          0,
+        );
+        const differenceWidth = selectedRect.width - combinedWidths;
+        const differenceHeight = selectedRect.height - combinedHeights;
+        const gapX = differenceWidth / (layers.length - 1);
+        const gapY = differenceHeight / (layers.length - 1);
+        const sortBy = axis === 'horizontal' ? 'minX' : 'minY'; // TODO: should sort by mid point
+
+        let currentX = 0;
+        let currentY = 0;
+
+        layerIndexPaths
+          .map((layerIndexPath) => {
+            const layer = Layers.access(page, layerIndexPath);
+            const transform = getNormalizedTransform(page, layerIndexPath);
+            const origin = transform.applyTo({
+              x: layer.frame.x,
+              y: layer.frame.y,
+            });
+            const bounds = Primitives.createBounds({
+              ...layer.frame,
+              ...origin,
+            });
+            return [bounds, layerIndexPath] as [Bounds, IndexPath];
+          })
+          .sort((a, b) => a[0][sortBy] - b[0][sortBy])
+          .forEach(([_, layerIndexPath]) => {
+            const normalizedTransform = getNormalizedTransform(
+              page,
+              layerIndexPath,
+            ).invert();
+            const layer = Layers.access(page, layerIndexPath);
+
+            switch (axis) {
+              case 'horizontal': {
+                const newOrigin = normalizedTransform.applyTo({
+                  x: selectedRect.x + currentX,
+                  y: 0,
+                });
+                currentX += layer.frame.width + gapX;
+                layer.frame.x = newOrigin.x;
+                break;
+              }
+              case 'vertical': {
+                const newOrigin = normalizedTransform.applyTo({
+                  x: 0,
+                  y: selectedRect.y + currentY,
+                });
+                currentY += layer.frame.height + gapY;
+                layer.frame.y = newOrigin.y;
+                break;
+              }
+            }
+          });
+      });
+    }
     case 'align': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -269,7 +341,7 @@ export function reducer(
         const midX = selectedRect.x + selectedRect.width / 2;
         const midY = selectedRect.y + selectedRect.height / 2;
 
-        layerIndexPaths.map((layerIndexPath) => {
+        layerIndexPaths.forEach((layerIndexPath) => {
           const normalizedTransform = getNormalizedTransform(
             page,
             layerIndexPath,
@@ -285,7 +357,7 @@ export function reducer(
               layer.frame.x = newOrigin.x;
               break;
             }
-            case 'centerHorizontally': {
+            case 'centerHorizontal': {
               const newOrigin = normalizedTransform.applyTo({
                 x: midX - layer.frame.width / 2,
                 y: 0,
@@ -309,7 +381,7 @@ export function reducer(
               layer.frame.y = newOrigin.y;
               break;
             }
-            case 'centerVertically': {
+            case 'centerVertical': {
               const newOrigin = normalizedTransform.applyTo({
                 x: 0,
                 y: midY - layer.frame.height / 2,
@@ -906,21 +978,6 @@ function getNormalizedTransform(page: Sketch.Page, indexPath: IndexPath) {
         AffineTransform.translation(layer.frame.x, layer.frame.y),
       ),
   );
-}
-
-function getNormalizedBounds(layerIndexPaths: IndexPath[], page: Sketch.Page) {
-  return layerIndexPaths.map((layerIndexPath) => {
-    const layer = Layers.access(page, layerIndexPath);
-    const transform = getNormalizedTransform(page, layerIndexPath);
-    const origin = transform.applyTo({
-      x: layer.frame.x,
-      y: layer.frame.y,
-    });
-    return Primitives.createBounds({
-      ...layer.frame,
-      ...origin,
-    });
-  });
 }
 
 function getSelectedRect(layerIndexPaths: IndexPath[], page: Sketch.Page) {
