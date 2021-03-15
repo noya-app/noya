@@ -279,12 +279,8 @@ export function reducer(
         const differenceHeight = selectedRect.height - combinedHeights;
         const gapX = differenceWidth / (layers.length - 1);
         const gapY = differenceHeight / (layers.length - 1);
-        const sortBy = axis === 'horizontal' ? 'minX' : 'minY'; // TODO: should sort by mid point
-
-        let currentX = 0;
-        let currentY = 0;
-
-        layerIndexPaths
+        const sortBy = axis === 'horizontal' ? 'minX' : 'minY'; // TODO: sort by mid point once it's available
+        const sortedLayerIndexPaths = layerIndexPaths
           .map((layerIndexPath) => {
             const layer = Layers.access(page, layerIndexPath);
             const transform = getNormalizedTransform(page, layerIndexPath);
@@ -296,37 +292,42 @@ export function reducer(
               ...layer.frame,
               ...origin,
             });
-            return [bounds, layerIndexPath] as [Bounds, IndexPath];
+            return [layerIndexPath, bounds] as [IndexPath, Bounds];
           })
-          .sort((a, b) => a[0][sortBy] - b[0][sortBy])
-          .forEach(([_, layerIndexPath]) => {
-            const normalizedTransform = getNormalizedTransform(
-              page,
-              layerIndexPath,
-            ).invert();
-            const layer = Layers.access(page, layerIndexPath);
+          .sort((a, b) => a[1][sortBy] - b[1][sortBy])
+          .map(([layerIndexPath]) => layerIndexPath);
 
-            switch (axis) {
-              case 'horizontal': {
-                const newOrigin = normalizedTransform.applyTo({
-                  x: selectedRect.x + currentX,
-                  y: 0,
-                });
-                currentX += layer.frame.width + gapX;
-                layer.frame.x = newOrigin.x;
-                break;
-              }
-              case 'vertical': {
-                const newOrigin = normalizedTransform.applyTo({
-                  x: 0,
-                  y: selectedRect.y + currentY,
-                });
-                currentY += layer.frame.height + gapY;
-                layer.frame.y = newOrigin.y;
-                break;
-              }
+        let currentX = 0;
+        let currentY = 0;
+
+        sortedLayerIndexPaths.forEach((layerIndexPath) => {
+          const normalizedTransform = getNormalizedTransform(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(page, layerIndexPath);
+
+          switch (axis) {
+            case 'horizontal': {
+              const newOrigin = normalizedTransform.applyTo({
+                x: selectedRect.x + currentX,
+                y: 0,
+              });
+              currentX += layer.frame.width + gapX;
+              layer.frame.x = newOrigin.x;
+              break;
             }
-          });
+            case 'vertical': {
+              const newOrigin = normalizedTransform.applyTo({
+                x: 0,
+                y: selectedRect.y + currentY,
+              });
+              currentY += layer.frame.height + gapY;
+              layer.frame.y = newOrigin.y;
+              break;
+            }
+          }
+        });
       });
     }
     case 'align': {
