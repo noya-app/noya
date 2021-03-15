@@ -4,6 +4,7 @@ import { CSSObject } from 'styled-components';
 export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
+  textDisabled: 'rgb(160, 160, 160)',
   textDecorativeLight: 'rgb(168, 185, 212)',
   // textLink: 'rgb(51, 122, 183)',
   textLink: 'rgb(58, 108, 234)',

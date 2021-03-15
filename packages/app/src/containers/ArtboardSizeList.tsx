@@ -93,13 +93,14 @@ export default function ArtboardSizeList() {
       .find((category) => category.name === categoryName)!
       .groups.map(({ name, presets }) => {
         return [
-          <TreeView.SectionHeader
-            expanded={true}
+          <TreeView.Row
+            isSectionHeader
+            expanded
             depth={0}
             key={`group-${name}`}
           >
             {name}
-          </TreeView.SectionHeader>,
+          </TreeView.Row>,
           ...presets.map(({ name, width, height }) => (
             <TreeView.Row
               depth={1}

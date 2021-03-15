@@ -53,11 +53,41 @@ const ListViewRowTitle = styled.span(({ theme }) => ({
  * Row
  * ------------------------------------------------------------------------- */
 
+const SectionHeaderContainer = styled.li<{
+  selected: boolean;
+  disabled: boolean;
+}>(({ theme, selected, disabled }) => ({
+  ...listReset,
+  ...theme.textStyles.small,
+  flex: '0 0 auto',
+  userSelect: 'none',
+  cursor: 'pointer',
+  fontWeight: 500,
+  paddingTop: '6px',
+  paddingRight: '20px',
+  paddingBottom: '6px',
+  paddingLeft: '20px',
+  borderBottom: `1px solid ${
+    selected ? theme.colors.primaryDark : theme.colors.divider
+  }`,
+  backgroundColor: theme.colors.listView.raisedBackground,
+  ...(disabled && {
+    color: theme.colors.textDisabled,
+  }),
+  ...(selected && {
+    color: 'white',
+    backgroundColor: theme.colors.primary,
+  }),
+  display: 'flex',
+  alignItems: 'center',
+}));
+
 const RowContainer = styled.li<{
   position: ListRowPosition;
   selected: boolean;
   selectedPosition: ListRowPosition;
-}>(({ theme, position, selected, selectedPosition }) => ({
+  disabled: boolean;
+}>(({ theme, position, selected, selectedPosition, disabled }) => ({
   ...listReset,
   ...theme.textStyles.small,
   flex: '0 0 auto',
@@ -73,6 +103,9 @@ const RowContainer = styled.li<{
   paddingLeft: '12px',
   marginLeft: '8px',
   marginRight: '8px',
+  ...(disabled && {
+    color: theme.colors.textDisabled,
+  }),
   ...(selected && {
     color: 'white',
     backgroundColor: theme.colors.primary,
@@ -106,15 +139,19 @@ export interface ListViewClickInfo {
 export interface ListViewRowProps {
   id?: string;
   selected?: boolean;
+  disabled?: boolean;
   sortable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
+  isSectionHeader?: boolean;
 }
 
 function ListViewRow({
   id,
   selected = false,
+  disabled = false,
+  isSectionHeader = false,
   onClick,
   onHoverChange,
   children,
@@ -134,85 +171,28 @@ function ListViewRow({
   );
 
   const props: React.ComponentProps<typeof RowContainer> = {
-    id: id,
+    id,
     ...hoverProps,
     onClick: handleClick,
-    position: position,
-    selected: selected,
-    selectedPosition: selectedPosition,
+    position,
+    disabled,
+    selected,
+    selectedPosition,
     'aria-selected': selected,
     children,
   };
 
+  const Component = isSectionHeader ? SectionHeaderContainer : RowContainer;
+
   if (sortable && id) {
     return (
       <Sortable.Item id={id}>
-        {(sortableProps) => <RowContainer {...props} {...sortableProps} />}
+        {(sortableProps) => <Component {...props} {...sortableProps} />}
       </Sortable.Item>
     );
   }
 
-  return <RowContainer {...props} />;
-}
-
-/* ----------------------------------------------------------------------------
- * SectionHeader
- * ------------------------------------------------------------------------- */
-
-const SectionHeaderContainer = styled.li<{ selected: boolean }>(
-  ({ theme, selected }) => ({
-    ...listReset,
-    ...theme.textStyles.small,
-    flex: '0 0 auto',
-    userSelect: 'none',
-    cursor: 'pointer',
-    fontWeight: 500,
-    paddingTop: '6px',
-    paddingRight: '20px',
-    paddingBottom: '6px',
-    paddingLeft: '20px',
-    borderBottom: `1px solid ${
-      selected ? theme.colors.primaryDark : theme.colors.divider
-    }`,
-    backgroundColor: theme.colors.listView.raisedBackground,
-    ...(selected && {
-      color: 'white',
-      backgroundColor: theme.colors.primary,
-    }),
-    display: 'flex',
-    alignItems: 'center',
-  }),
-);
-
-function ListViewSectionHeader({
-  children,
-  onClick,
-  onHoverChange,
-  selected = false,
-}: ListViewRowProps) {
-  const { hoverProps } = useHover({
-    onHoverChange,
-  });
-
-  const handleClick = useCallback(
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-
-      onClick?.(event);
-    },
-    [onClick],
-  );
-
-  return (
-    <SectionHeaderContainer
-      {...hoverProps}
-      onClick={handleClick}
-      selected={selected}
-      aria-selected={selected}
-    >
-      {children}
-    </SectionHeaderContainer>
-  );
+  return <Component {...props} />;
 }
 
 /* ----------------------------------------------------------------------------
@@ -235,14 +215,6 @@ interface ListViewRootProps {
   sortable?: boolean;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
 }
-
-const isSectionHeader = (type: any): string | undefined => {
-  try {
-    return type.isSectionHeader;
-  } catch {
-    return undefined;
-  }
-};
 
 function ListViewRoot({
   onClick,
@@ -274,9 +246,9 @@ function ListViewRoot({
     const next = flattened[i + 1];
 
     const nextItem =
-      isValidElement(next) && !isSectionHeader(next.type) ? next : undefined;
+      isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
     const prevItem =
-      isValidElement(prev) && !isSectionHeader(prev.type) ? prev : undefined;
+      isValidElement(prev) && !prev.props.isSectionHeader ? prev : undefined;
 
     let position: ListRowPosition = 'only';
     let selectedPosition: ListRowPosition = 'only';
@@ -336,6 +308,4 @@ function ListViewRoot({
 
 export const RowTitle = memo(ListViewRowTitle);
 export const Row = memo(ListViewRow);
-export const SectionHeader = memo(ListViewSectionHeader);
-(SectionHeader as any).isSectionHeader = true;
 export const Root = memo(ListViewRoot);

@@ -11,6 +11,8 @@ interface Props {
 }
 
 export default memo(function SketchLayer({ layer }: Props) {
+  if (!layer.isVisible) return null;
+
   switch (layer._class) {
     case 'artboard':
       return <SketchArtboard layer={layer} />;

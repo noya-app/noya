@@ -1,15 +1,23 @@
-import { TreeView } from 'noya-designsystem';
 import {
   BoxModelIcon,
   CircleIcon,
+  EyeClosedIcon,
+  EyeOpenIcon,
   GroupIcon,
   ImageIcon,
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Spacer, TreeView } from 'noya-designsystem';
 import { Layers, PageLayer, Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import React, {
+  ComponentProps,
+  memo,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import { visit } from 'tree-visit';
 import {
   useApplicationState,
@@ -27,6 +35,7 @@ type LayerListItem = {
   depth: number;
   expanded: boolean;
   selected: boolean;
+  visible: boolean;
 };
 
 function flattenLayerList(
@@ -54,6 +63,7 @@ function flattenLayerList(
         expanded:
           layer.layerListExpandedType === Sketch.LayerListExpanded.Expanded,
         selected: selectedObjects.includes(layer.do_objectID),
+        visible: layer.isVisible,
       });
     },
   });
@@ -88,6 +98,67 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
+const LayerRow = memo(function LayerRow({
+  name,
+  selected,
+  visible,
+  onHoverChange,
+  onChangeVisible,
+  ...props
+}: ComponentProps<typeof TreeView.Row> & {
+  name: string;
+  selected: boolean;
+  visible: boolean;
+  onChangeVisible: (visible: boolean) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  const handleHoverChange = useCallback(
+    (hovered: boolean) => {
+      onHoverChange?.(hovered);
+      setHovered(hovered);
+    },
+    [onHoverChange],
+  );
+
+  const handleSetVisible = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onChangeVisible(true);
+    },
+    [onChangeVisible],
+  );
+
+  const handleSetHidden = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onChangeVisible(false);
+    },
+    [onChangeVisible],
+  );
+
+  return (
+    <TreeView.Row
+      onHoverChange={handleHoverChange}
+      selected={selected}
+      disabled={!visible}
+      {...props}
+    >
+      <TreeView.RowTitle>{name}</TreeView.RowTitle>
+      {(hovered || !visible) && (
+        <>
+          <Spacer.Horizontal size={4} />
+          {visible ? (
+            <EyeOpenIcon onClick={handleSetHidden} />
+          ) : (
+            <EyeClosedIcon onClick={handleSetVisible} />
+          )}
+        </>
+      )}
+    </TreeView.Row>
+  );
+});
+
 export default memo(function LayerList() {
   const [state, dispatch] = useApplicationState();
   const page = useSelector(Selectors.getCurrentPage);
@@ -95,66 +166,70 @@ export default memo(function LayerList() {
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
   const layerElements = useMemo(() => {
-    return items.map(({ id, name, depth, type, expanded, selected }, index) => {
-      const handleClick = (info: TreeView.TreeViewClickInfo) => {
-        const { metaKey, shiftKey } = info;
+    return items.map(
+      ({ id, name, depth, type, expanded, selected, visible }, index) => {
+        const handleClick = (info: TreeView.TreeViewClickInfo) => {
+          const { metaKey, shiftKey } = info;
 
-        dispatch('interaction', ['reset']);
+          dispatch('interaction', ['reset']);
 
-        if (metaKey) {
-          dispatch(
-            'selectLayer',
-            id,
-            selectedObjects.includes(id) ? 'difference' : 'intersection',
-          );
-        } else if (shiftKey && selectedObjects.length > 0) {
-          const lastSelectedIndex = items.findIndex(
-            (item) => item.id === selectedObjects[selectedObjects.length - 1],
-          );
+          if (metaKey) {
+            dispatch(
+              'selectLayer',
+              id,
+              selectedObjects.includes(id) ? 'difference' : 'intersection',
+            );
+          } else if (shiftKey && selectedObjects.length > 0) {
+            const lastSelectedIndex = items.findIndex(
+              (item) => item.id === selectedObjects[selectedObjects.length - 1],
+            );
 
-          const first = Math.min(index, lastSelectedIndex);
-          const last = Math.max(index, lastSelectedIndex) + 1;
+            const first = Math.min(index, lastSelectedIndex);
+            const last = Math.max(index, lastSelectedIndex) + 1;
 
-          dispatch(
-            'selectLayer',
-            items.slice(first, last).map((item) => item.id),
-            'intersection',
-          );
-        } else {
-          dispatch('selectLayer', id, 'replace');
-        }
-      };
-
-      const handleHoverChange = (hovered: boolean) => {
-        dispatch(
-          'highlightLayer',
-          hovered ? { id, precedence: 'aboveSelection' } : undefined,
-        );
-      };
-
-      const handleClickChevron = () =>
-        dispatch('setExpandedInLayerList', id, !expanded);
-
-      const Component =
-        type === 'artboard' ? TreeView.SectionHeader : TreeView.Row;
-
-      return (
-        <Component
-          key={id}
-          depth={depth}
-          selected={selected}
-          onClick={handleClick}
-          onHoverChange={handleHoverChange}
-          icon={<LayerIcon type={type} selected={selected} />}
-          expanded={
-            type === 'artboard' || type === 'group' ? expanded : undefined
+            dispatch(
+              'selectLayer',
+              items.slice(first, last).map((item) => item.id),
+              'intersection',
+            );
+          } else {
+            dispatch('selectLayer', id, 'replace');
           }
-          onClickChevron={handleClickChevron}
-        >
-          <TreeView.RowTitle>{name}</TreeView.RowTitle>
-        </Component>
-      );
-    });
+        };
+
+        const handleHoverChange = (hovered: boolean) => {
+          dispatch(
+            'highlightLayer',
+            hovered ? { id, precedence: 'aboveSelection' } : undefined,
+          );
+        };
+
+        const handleClickChevron = () =>
+          dispatch('setExpandedInLayerList', id, !expanded);
+
+        const handleChangeVisible = (value: boolean) =>
+          dispatch('setLayerVisible', id, value);
+
+        return (
+          <LayerRow
+            key={id}
+            name={name}
+            visible={visible}
+            depth={depth}
+            selected={selected}
+            onClick={handleClick}
+            onHoverChange={handleHoverChange}
+            onChangeVisible={handleChangeVisible}
+            icon={<LayerIcon type={type} selected={selected} />}
+            isSectionHeader={type === 'artboard'}
+            expanded={
+              type === 'artboard' || type === 'group' ? expanded : undefined
+            }
+            onClickChevron={handleClickChevron}
+          />
+        );
+      },
+    );
   }, [items, dispatch, selectedObjects]);
 
   return (

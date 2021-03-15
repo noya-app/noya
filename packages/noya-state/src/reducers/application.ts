@@ -71,6 +71,7 @@ export type Action =
       selectionType?: SelectionType,
     ]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
+  | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'alignLeft']
@@ -173,6 +174,25 @@ export function reducer(
           'reset',
         ]);
         state.selectedObjects = [layer.do_objectID];
+      });
+    }
+    case 'setLayerVisible': {
+      const [, id, visible] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+        ids.includes(layer.do_objectID),
+      );
+
+      return produce(state, (state) => {
+        const layers = accessPageLayers(state, pageIndex, indexPaths);
+
+        layers.forEach((layer) => {
+          layer.isVisible = visible;
+        });
       });
     }
     case 'setExpandedInLayerList': {
