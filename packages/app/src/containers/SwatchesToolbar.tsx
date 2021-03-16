@@ -14,12 +14,6 @@ const Container = styled.header(({ theme }) => ({
   color: theme.colors.textMuted,
 }));
 
-const Title = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  color: theme.colors.title.right,
-}));
-
 export default function Toolbar() {
   const [, dispatch] = useApplicationState();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
@@ -27,11 +21,7 @@ export default function Toolbar() {
   return useMemo(
     () => (
       <Container>
-        <Title>
-          <span>Untitle</span>
-          <span>Edited</span>
-        </Title>
-        <Spacer.Horizontal size={50} />
+        <Spacer.Horizontal size={8} />
         <Button
           id="tool-swatch"
           tooltip="Insert an Swatch"

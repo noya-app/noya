@@ -7,10 +7,10 @@ const Grid = styled.div(({ theme }) => ({
   display: 'grid',
   padding: '14px',
   gridTemplateColumns: 'repeat(auto-fill, 200px)',
-  gridTemplateRows: 'repeat(auto-fill, 180px)', // Makes it go
+  gridAutoRows: '170px',
   justifyContent: 'space-between',
   gap: '20px',
-  overflowY: 'scroll',
+  overflowY: 'auto',
 }));
 
 const ScrollArea = styled.div(({ theme }) => ({
@@ -28,12 +28,12 @@ const Container = styled.div(({ theme }) => ({
 
 const ItemContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
+    display: 'flex',
     width: '200px',
-    height: '130px',
+    flex: '1',
     backgroundColor: theme.colors.sidebar.background,
     alignItems: 'center',
     justifyContent: 'center',
-    display: 'flex',
     borderRadius: '12px',
     cursor: 'pointer',
     border: `2px ${selected ? 'solid' : 'none'} rgb(132,63,255)`,
@@ -41,17 +41,19 @@ const ItemContainer = styled.div<{ selected: boolean }>(
 );
 
 const SwatchContainer = styled.div(({ theme }) => ({
-  heigth: '180px',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1',
 }));
 
 const ItemTitle = styled.span(({ theme }) => ({
   color: theme.colors.textDecorativeLight,
-  margin: '0px',
+  userSelect: 'none',
 }));
 
-const ItemDescription = styled.div(({ theme }) => ({
+const ItemDescription = styled.span(({ theme }) => ({
   color: theme.colors.text,
-  margin: '0px',
+  userSelect: 'none',
 }));
 
 interface ItemProps {
@@ -63,9 +65,19 @@ interface ItemProps {
 }
 
 function GridItem({ children, title, subtitle, selected, onClick }: ItemProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      onClick?.(event);
+    },
+    [onClick],
+  );
+
   return (
     <SwatchContainer>
-      <ItemContainer onClick={onClick} selected={selected}>
+      <ItemContainer onClick={handleClick} selected={selected}>
         {children}
       </ItemContainer>
       <ItemTitle>{title}</ItemTitle>

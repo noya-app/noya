@@ -52,7 +52,7 @@ export type InteractionAction =
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
-  | [type: 'enablePanMode']
+  | [type: 'enablePanMode'];
 
 export type InteractionState =
   | {

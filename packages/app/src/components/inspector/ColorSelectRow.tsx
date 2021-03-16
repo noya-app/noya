@@ -34,9 +34,8 @@ const Column = styled.div(({ theme }) => ({
 }));
 
 const FullContent = styled.div(({ theme }) => ({
-  width: '240px',
   borderRadius: 4,
-  padding: '10px',
+  padding: '10px 0',
   fontSize: 14,
   color: 'black',
 }));
@@ -56,7 +55,7 @@ interface ColorInputProps {
 
 interface Props {
   id: string;
-  name: string;
+  name: string | undefined;
   color: Sketch.Color;
   hexValue?: string;
   onChangeColor: (color: Sketch.Color) => void;
@@ -158,8 +157,8 @@ export default memo(function ColorSelectRow({
     <Column>
       <InputField.Root id={'colorName'}>
         <InputField.Input
-          value={name === 'Multiple' ? '' : name}
-          placeholder={name}
+          value={name || ''}
+          placeholder={name || 'Multiple'}
           onChange={onInputChange}
         />
       </InputField.Root>

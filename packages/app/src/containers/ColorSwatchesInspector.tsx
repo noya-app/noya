@@ -1,6 +1,6 @@
 import { Selectors } from 'noya-state';
 import { rgbaToHex } from 'noya-colorpicker';
-import { Fragment, memo, useMemo } from 'react';
+import { Fragment, memo, useMemo, useCallback } from 'react';
 import useShallowArray from '../hooks/useShallowArray';
 import ColorSelectRow from '../components/inspector/ColorSelectRow';
 import {
@@ -46,35 +46,41 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
   const name =
     selectedSwatches.length > 1 &&
     (firstSwatch.name === 'New Color Variable' || !sameName())
-      ? 'Multiple'
+      ? undefined
       : firstSwatch.name;
 
   const ids = state.selectedSwatchIds;
   return (
     <Container>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Title>{'Name'}</Title>
-        <Spacer.Horizontal size={12} />
-      </div>
+      <Title>{'Name'}</Title>
+      <Spacer.Vertical size={12} />
       <ColorSelectRow
-        id={`fill-${'color'}`}
+        id={'color-swatch'}
         color={selectedSwatches[0].value}
         name={name}
-        hexValue={rgbaToHex(firstColor)}
-        onChangeOpacity={(value) => dispatch('setSwatchOpacity', ids, value)}
-        onNudgeOpacity={(value) =>
-          dispatch('setSwatchOpacity', ids, value, 'adjust')
-        }
-        onChangeColor={(value) => dispatch('setSwatchColor', ids, value)}
-        onInputChange={(value) => dispatch('setSwatchName', ids, value)}
+        hexValue={rgbaToHex(firstColor).slice(1)}
+        onChangeOpacity={useCallback(
+          (value) => dispatch('setSwatchOpacity', ids, value),
+          [dispatch, ids],
+        )}
+        onNudgeOpacity={useCallback(
+          (value) => dispatch('setSwatchOpacity', ids, value, 'adjust'),
+          [dispatch, ids],
+        )}
+        onChangeColor={useCallback(
+          (value) => dispatch('setSwatchColor', ids, value),
+          [dispatch, ids],
+        )}
+        onInputChange={useCallback(
+          (value) => dispatch('setSwatchName', ids, value),
+          [dispatch, ids],
+        )}
       />
     </Container>
   );
 });
 
 export default memo(function SwatchesInspector() {
-  const currentTab = useSelector(Selectors.getCurrentTab);
-
   const selectedSwatches = useShallowArray(
     useSelector(Selectors.getSelectedColorSwatches),
   );
@@ -90,7 +96,7 @@ export default memo(function SwatchesInspector() {
     return withSeparatorElements(views, <Divider />);
   }, []);
 
-  if (!(currentTab === 'components') || selectedSwatches.length === 0) {
+  if (selectedSwatches.length === 0) {
     return null;
   }
 

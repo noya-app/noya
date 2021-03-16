@@ -140,7 +140,7 @@ export const getSelectedColorSwatches = (
 
   return sharedSwatches.filter((swatch) =>
       state.selectedSwatchIds.includes(swatch.do_objectID),
-    ).filter(swatch => swatch.value._class === 'color');
+    );
 };
 
 export const makeGetPageLayers = (
