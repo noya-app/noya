@@ -44,10 +44,7 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
     selectedSwatches.every((v) => v.name === firstSwatch.name);
 
   const name =
-    selectedSwatches.length > 1 &&
-    (firstSwatch.name === 'New Color Variable' || !sameName())
-      ? undefined
-      : firstSwatch.name;
+    selectedSwatches.length > 1 && !sameName() ? undefined : firstSwatch.name;
 
   const ids = state.selectedSwatchIds;
   return (

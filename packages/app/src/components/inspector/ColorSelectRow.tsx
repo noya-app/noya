@@ -158,7 +158,7 @@ export default memo(function ColorSelectRow({
       <InputField.Root id={'colorName'}>
         <InputField.Input
           value={name || ''}
-          placeholder={name || 'Multiple'}
+          placeholder={name === undefined ? 'Multiple' : name}
           onChange={onInputChange}
         />
       </InputField.Root>

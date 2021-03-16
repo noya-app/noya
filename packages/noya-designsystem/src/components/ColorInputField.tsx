@@ -50,7 +50,6 @@ interface Props {
   onChange: (color: FileFormat.Color) => void;
 }
 
-
 export default memo(function ColorInputField({ id, value, onChange }: Props) {
   const colorString = `rgba(${value.red * 255}, ${value.green * 255}, ${
     value.blue * 255
@@ -99,4 +98,3 @@ export default memo(function ColorInputField({ id, value, onChange }: Props) {
     </Popover.Root>
   );
 });
-

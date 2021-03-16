@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import ColorSwatch from '../components/swatches/ColorSwatch';
 import { GridView } from 'noya-designsystem';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
@@ -8,16 +8,21 @@ import { rgbaToHex } from 'noya-colorpicker';
 export default memo(function ComponentsWindow() {
   const [state, dispatch] = useApplicationState();
 
-  const sortedItems = [...getSharedSwatches(state)].sort((a, b) => {
-    const aName = a.name.toUpperCase();
-    const bName = b.name.toUpperCase();
+  const sharedSwatches = getSharedSwatches(state);
+  const sortedItems = useMemo(
+    () =>
+      [...sharedSwatches].sort((a, b) => {
+        const aName = a.name.toUpperCase();
+        const bName = b.name.toUpperCase();
 
-    return aName > bName ? 1 : aName < bName ? -1 : 0;
-  });
+        return aName > bName ? 1 : aName < bName ? -1 : 0;
+      }),
+    [sharedSwatches],
+  );
 
   return (
     <GridView.Root onClick={() => dispatch('selectSwatch', undefined)}>
-      {sortedItems.map((item, index) => {
+      {sortedItems.map((item) => {
         const color = {
           a: item.value.alpha,
           r: Math.round(item.value.red * 255),
@@ -27,7 +32,7 @@ export default memo(function ComponentsWindow() {
 
         return (
           <GridView.Item
-            key={index}
+            key={item.do_objectID}
             title={item.name}
             subtitle={`${rgbaToHex(color)} - ${Math.round(color.a * 100)}%`}
             selected={state.selectedSwatchIds.includes(item.do_objectID)}
@@ -46,11 +51,3 @@ export default memo(function ComponentsWindow() {
     </GridView.Root>
   );
 });
-
-/**
- * 
-          
-
-
-          
- */

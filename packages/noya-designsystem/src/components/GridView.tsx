@@ -43,7 +43,6 @@ const ItemContainer = styled.div<{ selected: boolean }>(
 const SwatchContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  flex: '1',
 }));
 
 const ItemTitle = styled.span(({ theme }) => ({
