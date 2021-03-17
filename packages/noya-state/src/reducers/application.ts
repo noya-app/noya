@@ -263,7 +263,7 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
       const selectedRect = getSelectedRect(layerIndexPaths, page);
-      const axis = action[1];
+      const [, axis] = action;
 
       return produce(state, (state) => {
         const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
@@ -338,7 +338,7 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
       const selectedRect = getSelectedRect(layerIndexPaths, page);
-      const placement = action[1];
+      const [, placement] = action;
 
       return produce(state, (state) => {
         const selectedBounds = createBounds(selectedRect);
