@@ -130,25 +130,15 @@ export type Action =
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
+  | [type: 'setSwatchColor', id: string | string[], color: Sketch.Color]
+  | [type: 'setSwatchName', id: string | string[], name: string]
   | [
-      type: 'setSwatchColor', 
-      id: string | string[],
-      color: Sketch.Color
-    ]
-  | [
-      type: 'setSwatchName', 
-      id: string | string[],
-      name: string
-    ]
-  | [
-      type: 'setSwatchOpacity', 
+      type: 'setSwatchOpacity',
       id: string | string[],
       alpha: number,
-      mode?: 'replace' | 'adjust'
+      mode?: 'replace' | 'adjust',
     ]
-  | [
-      type: 'addColorSwatch',
-    ]
+  | [type: 'addColorSwatch']
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -993,25 +983,25 @@ export function reducer(
     case 'addColorSwatch': {
       return produce(state, (state) => {
         const sharedSwatches = state.sketch.document.sharedSwatches ?? {
-          "_class": "swatchContainer",
-          "do_objectID": uuid(),
-          "objects" : []
-        }
+          _class: 'swatchContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
 
         const swatchColor: Sketch.Color = {
-          "_class": "color",
-          "alpha": 0.5,
-          "red": 0,
-          "green": 0,
-          "blue": 0
-        }
-        
+          _class: 'color',
+          alpha: 0.5,
+          red: 0,
+          green: 0,
+          blue: 0,
+        };
+
         const swatch: Sketch.Swatch = {
-          "_class": "swatch",
-          "do_objectID": uuid(),
-          "name": "New Color Variable",
-          "value": swatchColor,
-        }
+          _class: 'swatch',
+          do_objectID: uuid(),
+          name: 'New Color Variable',
+          value: swatchColor,
+        };
 
         sharedSwatches.objects.push(swatch);
         state.sketch.document.sharedSwatches = sharedSwatches;
@@ -1048,10 +1038,11 @@ export function reducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches?.objects ?? []
+        const sharedSwatches =
+          state.sketch.document.sharedSwatches?.objects ?? [];
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if ( ids.includes(swatch.do_objectID) ){
+          if (ids.includes(swatch.do_objectID)) {
             swatch.value = color;
           }
         });
@@ -1063,10 +1054,11 @@ export function reducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches?.objects ?? []
+        const sharedSwatches =
+          state.sketch.document.sharedSwatches?.objects ?? [];
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if ( ids.includes(swatch.do_objectID) ){
+          if (ids.includes(swatch.do_objectID)) {
             swatch.name = name;
           }
         });
@@ -1078,20 +1070,19 @@ export function reducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches?.objects ?? []
+        const sharedSwatches =
+          state.sketch.document.sharedSwatches?.objects ?? [];
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if ( ids.includes(swatch.do_objectID) ){
+          if (ids.includes(swatch.do_objectID)) {
             const newValue =
-              mode === 'replace'
-                ? alpha
-                : swatch.value.alpha + alpha;
-            
+              mode === 'replace' ? alpha : swatch.value.alpha + alpha;
+
             swatch.value.alpha = Math.min(Math.max(0, newValue), 1);
           }
         });
       });
-    }    
+    }
     default:
       return state;
   }

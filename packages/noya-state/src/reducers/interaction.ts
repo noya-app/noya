@@ -89,7 +89,7 @@ export type InteractionState =
     }
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
-  | { type: 'panning'; previous: Point; next: Point }
+  | { type: 'panning'; previous: Point; next: Point };
 
 function createLayer(
   shapeType: ShapeType,
@@ -114,8 +114,7 @@ export function interactionReducer(
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
-    case 'insertText': 
-    {
+    case 'insertText': {
       return { type: action[0] };
     }
     case 'hoverHandle': {

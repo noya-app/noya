@@ -1,19 +1,17 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type { CanvasKit } from 'canvaskit-wasm';
 import {
   getBoundingRect,
   getDragHandles,
 } from 'noya-renderer/src/canvas/selection';
 import * as Primitives from 'noya-renderer/src/primitives';
-import type { CanvasKit } from 'canvaskit-wasm';
-import { IndexPath, SKIP, STOP } from 'tree-visit';
+import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
+import { WorkspaceTab } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
 import type { Point, Rect, UUID } from './types';
 import { AffineTransform } from './utils/AffineTransform';
-import { WorkspaceTab } from './reducers/application';
-import { EnterReturnValue } from 'tree-visit';
-import { uuid } from 'noya-renderer';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -26,12 +24,8 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
 
   return pageIndex;
 };
-export const getSharedSwatches = (
-  state: ApplicationState
-): Sketch.Swatch[] => {
-  return (
-    state.sketch.document.sharedSwatches?.objects ?? []
-  );
+export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
+  return state.sketch.document.sharedSwatches?.objects ?? [];
 };
 
 export const getCurrentPage = (state: ApplicationState) => {
@@ -148,8 +142,8 @@ export const getSelectedColorSwatches = (
   const sharedSwatches = getSharedSwatches(state);
 
   return sharedSwatches.filter((swatch) =>
-      state.selectedSwatchIds.includes(swatch.do_objectID),
-    );
+    state.selectedSwatchIds.includes(swatch.do_objectID),
+  );
 };
 
 export const makeGetPageLayers = (
