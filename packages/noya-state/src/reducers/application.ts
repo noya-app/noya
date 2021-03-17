@@ -77,9 +77,9 @@ export type Action =
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
-  | [type: 'distribute', placement: 'horizontal' | 'vertical']
+  | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']
   | [
-      type: 'align',
+      type: 'alignLayers',
       placement:
         | 'left'
         | 'centerHorizontal'
@@ -258,7 +258,7 @@ export function reducer(
         state.selectedPage = action[1];
       });
     }
-    case 'distribute': {
+    case 'distributeLayers': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
       const axis = action[1];
@@ -330,7 +330,7 @@ export function reducer(
         });
       });
     }
-    case 'align': {
+    case 'alignLayers': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
       const placement = action[1];

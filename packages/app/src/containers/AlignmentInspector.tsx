@@ -28,21 +28,21 @@ function AlignmentInspector(props: AlignmentInspectorProps) {
   return (
     <AlignmentInspectorContainer>
       <SpaceEvenlyHorizontallyIcon
-        onClick={() => dispatch('distribute', 'horizontal')}
+        onClick={() => dispatch('distributeLayers', 'horizontal')}
       />
       <SpaceEvenlyVerticallyIcon
-        onClick={() => dispatch('distribute', 'vertical')}
+        onClick={() => dispatch('distributeLayers', 'vertical')}
       />
-      <AlignLeftIcon onClick={() => dispatch('align', 'left')} />
+      <AlignLeftIcon onClick={() => dispatch('alignLayers', 'left')} />
       <AlignCenterHorizontallyIcon
-        onClick={() => dispatch('align', 'centerHorizontal')}
+        onClick={() => dispatch('alignLayers', 'centerHorizontal')}
       />
-      <AlignRightIcon onClick={() => dispatch('align', 'right')} />
-      <AlignTopIcon onClick={() => dispatch('align', 'top')} />
+      <AlignRightIcon onClick={() => dispatch('alignLayers', 'right')} />
+      <AlignTopIcon onClick={() => dispatch('alignLayers', 'top')} />
       <AlignCenterVerticallyIcon
-        onClick={() => dispatch('align', 'centerVertical')}
+        onClick={() => dispatch('alignLayers', 'centerVertical')}
       />
-      <AlignBottomIcon onClick={() => dispatch('align', 'bottom')} />
+      <AlignBottomIcon onClick={() => dispatch('alignLayers', 'bottom')} />
     </AlignmentInspectorContainer>
   );
 }
