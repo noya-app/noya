@@ -1,7 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Primitives, uuid } from 'noya-renderer';
 import { getBoundingRect } from 'noya-renderer/src/canvas/selection';
-import { normalizeRect, resizeRect } from 'noya-renderer/src/primitives';
+import {
+  createBounds,
+  normalizeRect,
+  resizeRect,
+} from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
@@ -15,8 +19,9 @@ import {
   getCurrentPageMetadata,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSelectedRect,
 } from '../selectors';
-import { Point, UUID } from '../types';
+import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from '../utils/AffineTransform';
 import {
   CompassDirection,
@@ -80,12 +85,17 @@ export type Action =
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
-  | [type: 'alignLeft']
-  | [type: 'alignCenterHorizontally']
-  | [type: 'alignRight']
-  | [type: 'alignTop']
-  | [type: 'alignCenterVertically']
-  | [type: 'alignBottom']
+  | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']
+  | [
+      type: 'alignLayers',
+      placement:
+        | 'left'
+        | 'centerHorizontal'
+        | 'right'
+        | 'top'
+        | 'centerVertical'
+        | 'bottom',
+    ]
   | [type: `addNew${StyleElementType}`]
   | [type: `delete${StyleElementType}`, index: number]
   | [
@@ -294,59 +304,142 @@ export function reducer(
         state.selectedPage = action[1];
       });
     }
-    case 'alignLeft': {
+    case 'distributeLayers': {
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const selectedRect = getSelectedRect(state);
+      const [, axis] = action;
 
       return produce(state, (state) => {
         const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [leftmostLayer] = layers.sort(
-          (layerA, layerB) => layerA.frame.x - layerB.frame.x,
+        const combinedWidths = layers.reduce(
+          (width, layer) => layer.frame.width + width,
+          0,
         );
-        layers.forEach((layer) => {
-          layer.frame.x = leftmostLayer.frame.x;
+        const combinedHeights = layers.reduce(
+          (height, layer) => layer.frame.height + height,
+          0,
+        );
+        const differenceWidth = selectedRect.width - combinedWidths;
+        const differenceHeight = selectedRect.height - combinedHeights;
+        const gapX = differenceWidth / (layers.length - 1);
+        const gapY = differenceHeight / (layers.length - 1);
+        const sortBy = axis === 'horizontal' ? 'minX' : 'minY'; // TODO: sort by mid point once it's available
+        const sortedLayerIndexPaths = layerIndexPaths.sort(
+          (a, b) =>
+            getNormalizedBounds(page, a)[sortBy] -
+            getNormalizedBounds(page, b)[sortBy],
+        );
+
+        let currentX = 0;
+        let currentY = 0;
+
+        sortedLayerIndexPaths.forEach((layerIndexPath) => {
+          const transform = getLayerTransformAtIndexPath(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(
+            state.sketch.pages[pageIndex], // access page again since we need to write to it
+            layerIndexPath,
+          );
+
+          switch (axis) {
+            case 'horizontal': {
+              const newOrigin = transform.applyTo({
+                x: selectedRect.x + currentX,
+                y: 0,
+              });
+              currentX += layer.frame.width + gapX;
+              layer.frame.x = newOrigin.x;
+              break;
+            }
+            case 'vertical': {
+              const newOrigin = transform.applyTo({
+                x: 0,
+                y: selectedRect.y + currentY,
+              });
+              currentY += layer.frame.height + gapY;
+              layer.frame.y = newOrigin.y;
+              break;
+            }
+          }
         });
       });
     }
-    case 'alignRight': {
+    case 'alignLayers': {
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const selectedRect = getSelectedRect(state);
+      const [, placement] = action;
 
       return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [rightmostLayer] = layers.sort(
-          (layerA, layerB) => layerB.frame.x - layerA.frame.x,
-        );
-        layers.forEach((layer) => {
-          layer.frame.x = rightmostLayer.frame.x;
-        });
-      });
-    }
-    case 'alignTop': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+        const selectedBounds = createBounds(selectedRect);
+        const midX = selectedRect.x + selectedRect.width / 2;
+        const midY = selectedRect.y + selectedRect.height / 2;
 
-      return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [topmostLayer] = layers.sort(
-          (layerA, layerB) => layerA.frame.y - layerB.frame.y,
-        );
-        layers.forEach((layer) => {
-          layer.frame.y = topmostLayer.frame.y;
-        });
-      });
-    }
-    case 'alignBottom': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+        layerIndexPaths.forEach((layerIndexPath) => {
+          const transform = getLayerTransformAtIndexPath(
+            page,
+            layerIndexPath,
+          ).invert();
+          const layer = Layers.access(
+            state.sketch.pages[pageIndex], // access page again since we need to write to it
+            layerIndexPath,
+          );
 
-      return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const [bottommostLayer] = layers.sort(
-          (layerA, layerB) => layerB.frame.y - layerA.frame.y,
-        );
-        layers.forEach((layer) => {
-          layer.frame.y = bottommostLayer.frame.y;
+          switch (placement) {
+            case 'left': {
+              const newOrigin = transform.applyTo({
+                x: selectedBounds.minX,
+                y: 0,
+              });
+              layer.frame.x = newOrigin.x;
+              break;
+            }
+            case 'centerHorizontal': {
+              const newOrigin = transform.applyTo({
+                x: midX - layer.frame.width / 2,
+                y: 0,
+              });
+              layer.frame.x = newOrigin.x;
+              break;
+            }
+            case 'right': {
+              const newOrigin = transform.applyTo({
+                x: selectedBounds.maxX - layer.frame.width,
+                y: 0,
+              });
+              layer.frame.x = newOrigin.x;
+              break;
+            }
+            case 'top': {
+              const newOrigin = transform.applyTo({
+                x: 0,
+                y: selectedBounds.minY,
+              });
+              layer.frame.y = newOrigin.y;
+              break;
+            }
+            case 'centerVertical': {
+              const newOrigin = transform.applyTo({
+                x: 0,
+                y: midY - layer.frame.height / 2,
+              });
+              layer.frame.y = newOrigin.y;
+              break;
+            }
+            case 'bottom': {
+              const newOrigin = transform.applyTo({
+                x: 0,
+                y: selectedBounds.maxY - layer.frame.height,
+              });
+              layer.frame.y = newOrigin.y;
+              break;
+            }
+          }
         });
       });
     }
@@ -1018,6 +1111,30 @@ function accessPageLayers(
   return layerIndexPaths.map((layerIndex) => {
     return Layers.access(state.sketch.pages[pageIndex], layerIndex);
   });
+}
+
+function getLayerTransformAtIndexPath(
+  node: Sketch.AnyLayer,
+  indexPath: IndexPath,
+) {
+  return AffineTransform.multiply(
+    ...Layers.accessPath(node, indexPath)
+      .slice(1, -1) // Remove the page and current layer
+      .map((layer) =>
+        AffineTransform.translation(layer.frame.x, layer.frame.y),
+      ),
+  );
+}
+
+function getNormalizedBounds(
+  page: Sketch.Page,
+  layerIndexPath: IndexPath,
+): Bounds {
+  const layer = Layers.access(page, layerIndexPath);
+  const transform = getLayerTransformAtIndexPath(page, layerIndexPath);
+  return Primitives.createBounds(
+    Primitives.transformRect(layer.frame, transform),
+  );
 }
 
 export function createInitialState(sketch: SketchFile): ApplicationState {

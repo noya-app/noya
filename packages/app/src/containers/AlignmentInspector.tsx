@@ -10,7 +10,7 @@ import {
   SpaceEvenlyHorizontallyIcon,
   SpaceEvenlyVerticallyIcon,
 } from '@radix-ui/react-icons';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 const AlignmentInspectorContainer = styled.div(({ theme }) => ({
   display: 'flex',
@@ -27,14 +27,22 @@ function AlignmentInspector(props: AlignmentInspectorProps) {
   const [, dispatch] = useApplicationState();
   return (
     <AlignmentInspectorContainer>
-      <SpaceEvenlyHorizontallyIcon />
-      <SpaceEvenlyVerticallyIcon />
-      <AlignLeftIcon onClick={() => dispatch('alignLeft')} />
-      <AlignCenterHorizontallyIcon />
-      <AlignRightIcon onClick={() => dispatch('alignRight')} />
-      <AlignTopIcon onClick={() => dispatch('alignTop')} />
-      <AlignCenterVerticallyIcon />
-      <AlignBottomIcon onClick={() => dispatch('alignBottom')} />
+      <SpaceEvenlyHorizontallyIcon
+        onClick={() => dispatch('distributeLayers', 'horizontal')}
+      />
+      <SpaceEvenlyVerticallyIcon
+        onClick={() => dispatch('distributeLayers', 'vertical')}
+      />
+      <AlignLeftIcon onClick={() => dispatch('alignLayers', 'left')} />
+      <AlignCenterHorizontallyIcon
+        onClick={() => dispatch('alignLayers', 'centerHorizontal')}
+      />
+      <AlignRightIcon onClick={() => dispatch('alignLayers', 'right')} />
+      <AlignTopIcon onClick={() => dispatch('alignLayers', 'top')} />
+      <AlignCenterVerticallyIcon
+        onClick={() => dispatch('alignLayers', 'centerVertical')}
+      />
+      <AlignBottomIcon onClick={() => dispatch('alignLayers', 'bottom')} />
     </AlignmentInspectorContainer>
   );
 }

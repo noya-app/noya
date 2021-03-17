@@ -1,7 +1,7 @@
 import { Divider, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { Fragment, memo, useMemo } from 'react';
-import AlignmentInspector from '../components/inspector/AlignmentInspector';
+import AlignmentInspector from './AlignmentInspector';
 import DimensionsInspector, {
   Props as DimensionsInspectorProps,
 } from '../components/inspector/DimensionsInspector';
