@@ -291,7 +291,7 @@ export function reducer(
         let currentY = 0;
 
         sortedLayerIndexPaths.forEach((layerIndexPath) => {
-          const normalizedTransform = getNormalizedTransform(
+          const transform = getLayerTransformAtIndexPath(
             page,
             layerIndexPath,
           ).invert();
@@ -302,7 +302,7 @@ export function reducer(
 
           switch (axis) {
             case 'horizontal': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: selectedRect.x + currentX,
                 y: 0,
               });
@@ -311,7 +311,7 @@ export function reducer(
               break;
             }
             case 'vertical': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: 0,
                 y: selectedRect.y + currentY,
               });
@@ -336,7 +336,7 @@ export function reducer(
         const midY = selectedRect.y + selectedRect.height / 2;
 
         layerIndexPaths.forEach((layerIndexPath) => {
-          const normalizedTransform = getNormalizedTransform(
+          const transform = getLayerTransformAtIndexPath(
             page,
             layerIndexPath,
           ).invert();
@@ -347,7 +347,7 @@ export function reducer(
 
           switch (placement) {
             case 'left': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: selectedBounds.minX,
                 y: 0,
               });
@@ -355,7 +355,7 @@ export function reducer(
               break;
             }
             case 'centerHorizontal': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: midX - layer.frame.width / 2,
                 y: 0,
               });
@@ -363,7 +363,7 @@ export function reducer(
               break;
             }
             case 'right': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: selectedBounds.maxX - layer.frame.width,
                 y: 0,
               });
@@ -371,7 +371,7 @@ export function reducer(
               break;
             }
             case 'top': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: 0,
                 y: selectedBounds.minY,
               });
@@ -379,7 +379,7 @@ export function reducer(
               break;
             }
             case 'centerVertical': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: 0,
                 y: midY - layer.frame.height / 2,
               });
@@ -387,7 +387,7 @@ export function reducer(
               break;
             }
             case 'bottom': {
-              const newOrigin = normalizedTransform.applyTo({
+              const newOrigin = transform.applyTo({
                 x: 0,
                 y: selectedBounds.maxY - layer.frame.height,
               });
@@ -967,9 +967,12 @@ function accessPageLayers(
   });
 }
 
-function getNormalizedTransform(page: Sketch.Page, indexPath: IndexPath) {
+function getLayerTransformAtIndexPath(
+  node: Sketch.AnyLayer,
+  indexPath: IndexPath,
+) {
   return AffineTransform.multiply(
-    ...Layers.accessPath(page, indexPath)
+    ...Layers.accessPath(node, indexPath)
       .slice(1, -1) // Remove the page and current layer
       .map((layer) =>
         AffineTransform.translation(layer.frame.x, layer.frame.y),
@@ -982,7 +985,7 @@ function getNormalizedBounds(
   layerIndexPath: IndexPath,
 ): Bounds {
   const layer = Layers.access(page, layerIndexPath);
-  const transform = getNormalizedTransform(page, layerIndexPath);
+  const transform = getLayerTransformAtIndexPath(page, layerIndexPath);
   return Primitives.createBounds(
     Primitives.transformRect(layer.frame, transform),
   );
