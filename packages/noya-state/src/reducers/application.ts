@@ -990,7 +990,7 @@ export function reducer(
 
         const swatchColor: Sketch.Color = {
           _class: 'color',
-          alpha: 0.5,
+          alpha: 1,
           red: 0,
           green: 0,
           blue: 0,

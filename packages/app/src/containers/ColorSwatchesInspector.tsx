@@ -1,15 +1,15 @@
+import { Divider, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { rgbaToHex } from 'noya-colorpicker';
-import { Fragment, memo, useMemo, useCallback } from 'react';
-import useShallowArray from '../hooks/useShallowArray';
-import ColorSelectRow from '../components/inspector/ColorSelectRow';
+import { Fragment, memo, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+import ColorSelectRow from '../components/inspector/ColorInspector';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
+import { sketchColorToHex } from 'noya-designsystem';
 import withSeparatorElements from '../utils/withSeparatorElements';
-import { Divider, Spacer } from 'noya-designsystem';
-import styled from 'styled-components';
 
 const Title = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
@@ -33,29 +33,35 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
   );
   const firstSwatch = selectedSwatches[0];
 
-  const firstColor = {
-    r: Math.round(firstSwatch.value.red * 255),
-    g: Math.round(firstSwatch.value.green * 255),
-    b: Math.round(firstSwatch.value.blue * 255),
-    a: firstSwatch.value.alpha,
-  };
-
-  let sameName = () =>
-    selectedSwatches.every((v) => v.name === firstSwatch.name);
-
   const name =
-    selectedSwatches.length > 1 && !sameName() ? undefined : firstSwatch.name;
+    selectedSwatches.length > 1 &&
+    !selectedSwatches.every((v) => v.name === firstSwatch.name)
+      ? undefined
+      : firstSwatch.name;
+
+  const firstSwatchHex = sketchColorToHex(firstSwatch.value);
+  const hexValue = useMemo(
+    () =>
+      selectedSwatches.length > 1 &&
+      !selectedSwatches.every(
+        (v) => sketchColorToHex(v.value) === firstSwatchHex,
+      )
+        ? undefined
+        : firstSwatchHex.slice(1).toUpperCase(),
+    [firstSwatchHex, selectedSwatches],
+  );
 
   const ids = state.selectedSwatchIds;
+
   return (
     <Container>
-      <Title>{'Name'}</Title>
-      <Spacer.Vertical size={12} />
+      <Title>Name</Title>
+      <Spacer.Vertical size={4} />
       <ColorSelectRow
         id={'color-swatch'}
-        color={selectedSwatches[0].value}
+        color={firstSwatch.value}
         name={name}
-        hexValue={rgbaToHex(firstColor).slice(1)}
+        hexValue={hexValue}
         onChangeOpacity={useCallback(
           (value) => dispatch('setSwatchOpacity', ids, value),
           [dispatch, ids],

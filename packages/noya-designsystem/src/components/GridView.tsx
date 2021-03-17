@@ -1,12 +1,13 @@
 import { memo, useCallback, ReactNode } from 'react';
 import styled from 'styled-components';
+import { Spacer } from '..';
 
 const Grid = styled.div(({ theme }) => ({
   flex: 1,
   color: theme.colors.text,
   display: 'grid',
   padding: '14px',
-  gridTemplateColumns: 'repeat(auto-fill, 200px)',
+  gridTemplateColumns: 'repeat(auto-fill, 250px)',
   gridAutoRows: '170px',
   justifyContent: 'space-between',
   gap: '20px',
@@ -29,7 +30,6 @@ const Container = styled.div(({ theme }) => ({
 const ItemContainer = styled.div<{ selected: boolean }>(
   ({ theme, selected }) => ({
     display: 'flex',
-    width: '200px',
     flex: '1',
     backgroundColor: theme.colors.sidebar.background,
     alignItems: 'center',
@@ -46,13 +46,22 @@ const SwatchContainer = styled.div(({ theme }) => ({
 }));
 
 const ItemTitle = styled.span(({ theme }) => ({
-  color: theme.colors.textDecorativeLight,
+  ...theme.textStyles.small,
+  color: theme.colors.text,
+  fontWeight: 500,
   userSelect: 'none',
+  whiteSpace: 'pre',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 }));
 
 const ItemDescription = styled.span(({ theme }) => ({
-  color: theme.colors.text,
+  ...theme.textStyles.small,
+  color: theme.colors.textMuted,
   userSelect: 'none',
+  whiteSpace: 'pre',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 }));
 
 interface ItemProps {
@@ -79,8 +88,10 @@ function GridItem({ children, title, subtitle, selected, onClick }: ItemProps) {
       <ItemContainer onClick={handleClick} selected={selected}>
         {children}
       </ItemContainer>
-      <ItemTitle>{title}</ItemTitle>
-      <ItemDescription>{subtitle}</ItemDescription>
+      <Spacer.Vertical size={8} />
+      {/* Use an empty string to ensure element height */}
+      <ItemTitle>{title || ' '}</ItemTitle>
+      <ItemDescription>{subtitle || ' '}</ItemDescription>
     </SwatchContainer>
   );
 }

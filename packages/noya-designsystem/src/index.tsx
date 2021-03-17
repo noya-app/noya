@@ -13,6 +13,7 @@ export { default as LabeledElementView } from './components/LabeledElementView';
 export { default as Slider } from './components/Slider';
 export * as TreeView from './components/TreeView';
 export { default as Divider } from './components/Divider';
+export { default as ColorPicker } from './components/ColorPicker';
 export * as ListView from './components/ListView';
 export * as GridView from './components/GridView';
 export * as Sortable from './components/Sortable';
@@ -23,3 +24,6 @@ export { default as Tooltip } from './components/Tooltip';
 
 // Contexts
 export * from './contexts/GlobalInputBlurContext';
+
+// Utils
+export * from './utils/sketchColor';

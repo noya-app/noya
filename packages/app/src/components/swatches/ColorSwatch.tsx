@@ -1,24 +1,26 @@
-import { RgbaColor } from 'noya-colorpicker/src/types';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { hsvaToRgbaString, rgbaToHsva } from 'noya-colorpicker';
+import { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { memo } from 'react';
+import { sketchColorToRgba } from 'noya-designsystem';
 
 const ColoredCircle = styled.div(({ theme, color }) => ({
-  height: '50px',
-  width: '50px',
+  height: '65px',
+  width: '65px',
   backgroundColor: color,
   borderRadius: '50%',
-  borderColor: 'black',
+  border: '1px solid rgba(0,0,0,0.1)',
 }));
 
-export default memo(function ColorSwatch({ value }: { value: Sketch.Color }) {
-  const color: RgbaColor = {
-    a: value.alpha,
-    r: Math.round(value.red * 255),
-    g: Math.round(value.green * 255),
-    b: Math.round(value.blue * 255),
-  };
+interface Props {
+  value: Sketch.Color;
+}
 
-  const colorString: string = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
+export default memo(function ColorSwatch({ value }: Props) {
+  const colorString = useMemo(
+    () => hsvaToRgbaString(rgbaToHsva(sketchColorToRgba(value))),
+    [value],
+  );
+
   return <ColoredCircle color={colorString} />;
 });

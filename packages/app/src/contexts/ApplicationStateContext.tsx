@@ -29,7 +29,11 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   const wrappedDispatch: Dispatcher = useCallback(
     (...args: Action) => {
       // When changing selection, trigger any pending updates in input fields
-      if (args[0] === 'selectLayer' || args[0] === 'selectPage') {
+      if (
+        args[0] === 'selectLayer' ||
+        args[0] === 'selectPage' ||
+        args[0] === 'setTab'
+      ) {
         trigger();
       }
 
