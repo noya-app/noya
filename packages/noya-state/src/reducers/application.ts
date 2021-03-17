@@ -259,13 +259,13 @@ export function reducer(
       });
     }
     case 'distributeLayers': {
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const selectedRect = getSelectedRect(layerIndexPaths, page);
       const axis = action[1];
 
       return produce(state, (state) => {
-        const page = state.sketch.pages[pageIndex];
-        const selectedRect = getSelectedRect(layerIndexPaths, page);
         const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
         const combinedWidths = layers.reduce(
           (width, layer) => layer.frame.width + width,
@@ -305,7 +305,10 @@ export function reducer(
             page,
             layerIndexPath,
           ).invert();
-          const layer = Layers.access(page, layerIndexPath);
+          const layer = Layers.access(
+            state.sketch.pages[pageIndex], // access page again since we need to write to it
+            layerIndexPath,
+          );
 
           switch (axis) {
             case 'horizontal': {
@@ -331,13 +334,13 @@ export function reducer(
       });
     }
     case 'alignLayers': {
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const selectedRect = getSelectedRect(layerIndexPaths, page);
       const placement = action[1];
 
       return produce(state, (state) => {
-        const page = state.sketch.pages[pageIndex];
-        const selectedRect = getSelectedRect(layerIndexPaths, page);
         const selectedBounds = createBounds(selectedRect);
         const midX = selectedRect.x + selectedRect.width / 2;
         const midY = selectedRect.y + selectedRect.height / 2;
@@ -347,7 +350,10 @@ export function reducer(
             page,
             layerIndexPath,
           ).invert();
-          const layer = Layers.access(page, layerIndexPath);
+          const layer = Layers.access(
+            state.sketch.pages[pageIndex], // access page again since we need to write to it
+            layerIndexPath,
+          );
 
           switch (placement) {
             case 'left': {
