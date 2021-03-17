@@ -238,7 +238,6 @@ export default memo(function Canvas() {
 
             dispatch('interaction', ['startMarquee', point]);
           }
-
           break;
         }
       }

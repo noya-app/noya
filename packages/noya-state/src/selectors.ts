@@ -13,6 +13,7 @@ import type { Point, Rect, UUID } from './types';
 import { AffineTransform } from './utils/AffineTransform';
 import { WorkspaceTab } from './reducers/application';
 import { EnterReturnValue } from 'tree-visit';
+import { uuid } from 'noya-renderer';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -24,6 +25,13 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
   }
 
   return pageIndex;
+};
+export const getSharedSwatches = (
+  state: ApplicationState
+): Sketch.Swatch[] => {
+  return (
+    state.sketch.document.sharedSwatches?.objects ?? []
+  );
 };
 
 export const getCurrentPage = (state: ApplicationState) => {
@@ -123,6 +131,16 @@ export const getSelectedLayersWithFixedRadius = (
   return Layers.findAll(page, (layer) =>
     state.selectedObjects.includes(layer.do_objectID),
   ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
+};
+
+export const getSelectedColorSwatches = (
+  state: ApplicationState,
+): Sketch.Swatch[] => {
+  const sharedSwatches = getSharedSwatches(state);
+
+  return sharedSwatches.filter((swatch) =>
+      state.selectedSwatchIds.includes(swatch.do_objectID),
+    );
 };
 
 export const makeGetPageLayers = (
