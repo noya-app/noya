@@ -280,22 +280,11 @@ export function reducer(
         const gapX = differenceWidth / (layers.length - 1);
         const gapY = differenceHeight / (layers.length - 1);
         const sortBy = axis === 'horizontal' ? 'minX' : 'minY'; // TODO: sort by mid point once it's available
-        const sortedLayerIndexPaths = layerIndexPaths
-          .map((layerIndexPath) => {
-            const layer = Layers.access(page, layerIndexPath);
-            const transform = getNormalizedTransform(page, layerIndexPath);
-            const origin = transform.applyTo({
-              x: layer.frame.x,
-              y: layer.frame.y,
-            });
-            const bounds = Primitives.createBounds({
-              ...layer.frame,
-              ...origin,
-            });
-            return [layerIndexPath, bounds] as [IndexPath, Bounds];
-          })
-          .sort((a, b) => a[1][sortBy] - b[1][sortBy])
-          .map(([layerIndexPath]) => layerIndexPath);
+        const sortedLayerIndexPaths = layerIndexPaths.sort(
+          (a, b) =>
+            getNormalizedBounds(page, a)[sortBy] -
+            getNormalizedBounds(page, b)[sortBy],
+        );
 
         let currentX = 0;
         let currentY = 0;
@@ -985,6 +974,22 @@ function getNormalizedTransform(page: Sketch.Page, indexPath: IndexPath) {
         AffineTransform.translation(layer.frame.x, layer.frame.y),
       ),
   );
+}
+
+function getNormalizedBounds(
+  page: Sketch.Page,
+  layerIndexPath: IndexPath,
+): Bounds {
+  const layer = Layers.access(page, layerIndexPath);
+  const transform = getNormalizedTransform(page, layerIndexPath);
+  const origin = transform.applyTo({
+    x: layer.frame.x,
+    y: layer.frame.y,
+  });
+  return Primitives.createBounds({
+    ...layer.frame,
+    ...origin,
+  });
 }
 
 function getSelectedRect(layerIndexPaths: IndexPath[], page: Sketch.Page) {
