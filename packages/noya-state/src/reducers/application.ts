@@ -982,14 +982,9 @@ function getNormalizedBounds(
 ): Bounds {
   const layer = Layers.access(page, layerIndexPath);
   const transform = getNormalizedTransform(page, layerIndexPath);
-  const origin = transform.applyTo({
-    x: layer.frame.x,
-    y: layer.frame.y,
-  });
-  return Primitives.createBounds({
-    ...layer.frame,
-    ...origin,
-  });
+  return Primitives.createBounds(
+    Primitives.transformRect(layer.frame, transform),
+  );
 }
 
 function getSelectedRect(layerIndexPaths: IndexPath[], page: Sketch.Page) {
