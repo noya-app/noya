@@ -10,7 +10,7 @@ import {
   SpaceEvenlyHorizontallyIcon,
   SpaceEvenlyVerticallyIcon,
 } from '@radix-ui/react-icons';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 const AlignmentInspectorContainer = styled.div(({ theme }) => ({
   display: 'flex',
