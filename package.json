@@ -16,6 +16,7 @@
     "build": "modular build app",
     "test": "modular test",
     "lint": "eslint . --ext .js,.ts,.tsx",
+    "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
     "postinstall": "husky install"
   },

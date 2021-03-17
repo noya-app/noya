@@ -4,6 +4,8 @@ import { rect, color, fill } from '../primitives';
 
 let ck: CanvasKit;
 
+jest.setTimeout(20000);
+
 beforeAll(async () => {
   // Note: this actually fetches CanvasKit from unpkg. Maybe we should
   // load from node_modules for testing purposes
