@@ -19,6 +19,7 @@ import {
   getCurrentPageMetadata,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSelectedRect,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from '../utils/AffineTransform';
@@ -262,7 +263,7 @@ export function reducer(
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
-      const selectedRect = getSelectedRect(layerIndexPaths, page);
+      const selectedRect = getSelectedRect(state);
       const [, axis] = action;
 
       return produce(state, (state) => {
@@ -326,7 +327,7 @@ export function reducer(
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
-      const selectedRect = getSelectedRect(layerIndexPaths, page);
+      const selectedRect = getSelectedRect(state);
       const [, placement] = action;
 
       return produce(state, (state) => {
@@ -985,13 +986,6 @@ function getNormalizedBounds(
   return Primitives.createBounds(
     Primitives.transformRect(layer.frame, transform),
   );
-}
-
-function getSelectedRect(layerIndexPaths: IndexPath[], page: Sketch.Page) {
-  const layerIds = layerIndexPaths.map(
-    (indexPath) => Layers.access(page, indexPath).do_objectID,
-  );
-  return getBoundingRect(page, layerIds)!;
 }
 
 export function createInitialState(sketch: SketchFile): ApplicationState {

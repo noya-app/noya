@@ -103,6 +103,15 @@ export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   ) as PageLayer[];
 };
 
+export const getSelectedRect = (state: ApplicationState): Rect => {
+  const page = getCurrentPage(state);
+  const layerIndexPaths = getSelectedLayerIndexPaths(state);
+  const layerIds = layerIndexPaths.map(
+    (indexPath) => Layers.access(page, indexPath).do_objectID,
+  );
+  return getBoundingRect(page, layerIds)!;
+};
+
 export const getSelectedLayersWithContextSettings = (
   state: ApplicationState,
 ): PageLayer[] => {
