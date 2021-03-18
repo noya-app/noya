@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  Bounds,
   CompassDirection,
   compassDirections,
   DragHandle,
@@ -13,7 +12,7 @@ export function getBoundingRect(
   layer: Sketch.AnyLayer,
   layerIds: string[],
 ): Rect | undefined {
-  let bounds: Bounds = {
+  let bounds = {
     minX: Infinity,
     minY: Infinity,
     maxX: -Infinity,

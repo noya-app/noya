@@ -45,11 +45,21 @@ export function createRectFromBounds(bounds: Bounds): Rect {
 }
 
 export function createBounds(rect: Rect): Bounds {
+  const minX = Math.min(rect.x, rect.x + rect.width);
+  const minY = Math.min(rect.y, rect.y + rect.height);
+  const maxX = Math.max(rect.x, rect.x + rect.width);
+  const maxY = Math.max(rect.y, rect.y + rect.height);
+
+  const midX = (maxX - minX) / 2;
+  const midY = (maxY - minY) / 2;
+
   return {
-    minX: Math.min(rect.x, rect.x + rect.width),
-    minY: Math.min(rect.y, rect.y + rect.height),
-    maxX: Math.max(rect.x, rect.x + rect.width),
-    maxY: Math.max(rect.y, rect.y + rect.height),
+    minX,
+    midX,
+    maxX,
+    minY,
+    midY,
+    maxY,
   };
 }
 

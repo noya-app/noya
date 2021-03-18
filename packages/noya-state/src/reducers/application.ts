@@ -17,6 +17,7 @@ import {
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
+  getLayerTransformAtIndexPath,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
@@ -315,7 +316,20 @@ export function reducer(
         const differenceHeight = selectedRect.height - combinedHeights;
         const gapX = differenceWidth / (layers.length - 1);
         const gapY = differenceHeight / (layers.length - 1);
-        const sortBy = axis === 'horizontal' ? 'minX' : 'minY'; // TODO: sort by mid point once it's available
+        const sortBy = axis === 'horizontal' ? 'midX' : 'midY';
+
+        // Bounds are all transformed to the page's coordinate system
+        function getNormalizedBounds(
+          page: Sketch.Page,
+          layerIndexPath: IndexPath,
+        ): Bounds {
+          const layer = Layers.access(page, layerIndexPath);
+          const transform = getLayerTransformAtIndexPath(page, layerIndexPath);
+          return Primitives.createBounds(
+            Primitives.transformRect(layer.frame, transform),
+          );
+        }
+
         const sortedLayerIndexPaths = layerIndexPaths.sort(
           (a, b) =>
             getNormalizedBounds(page, a)[sortBy] -
@@ -1102,30 +1116,6 @@ function accessPageLayers(
   return layerIndexPaths.map((layerIndex) => {
     return Layers.access(state.sketch.pages[pageIndex], layerIndex);
   });
-}
-
-function getLayerTransformAtIndexPath(
-  node: Sketch.AnyLayer,
-  indexPath: IndexPath,
-) {
-  return AffineTransform.multiply(
-    ...Layers.accessPath(node, indexPath)
-      .slice(1, -1) // Remove the page and current layer
-      .map((layer) =>
-        AffineTransform.translation(layer.frame.x, layer.frame.y),
-      ),
-  );
-}
-
-function getNormalizedBounds(
-  page: Sketch.Page,
-  layerIndexPath: IndexPath,
-): Bounds {
-  const layer = Layers.access(page, layerIndexPath);
-  const transform = getLayerTransformAtIndexPath(page, layerIndexPath);
-  return Primitives.createBounds(
-    Primitives.transformRect(layer.frame, transform),
-  );
 }
 
 export function createInitialState(sketch: SketchFile): ApplicationState {

@@ -342,3 +342,16 @@ export function getLayersInRect(
 
   return found as PageLayer[];
 }
+
+export function getLayerTransformAtIndexPath(
+  node: Sketch.AnyLayer,
+  indexPath: IndexPath,
+) {
+  return AffineTransform.multiply(
+    ...Layers.accessPath(node, indexPath)
+      .slice(1, -1) // Remove the page and current layer
+      .map((layer) =>
+        AffineTransform.translation(layer.frame.x, layer.frame.y),
+      ),
+  );
+}
