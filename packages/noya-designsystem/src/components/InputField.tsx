@@ -25,7 +25,8 @@ const InputFieldContext = createContext<{
  * ------------------------------------------------------------------------- */
 
 const LabelContainer = styled.label<{ labelPosition: LabelPosition }>(
-  ({ labelPosition }) => ({
+  ({ theme, labelPosition }) => ({
+    color: theme.colors.textMuted,
     position: 'absolute',
     top: 0,
     right: 0,

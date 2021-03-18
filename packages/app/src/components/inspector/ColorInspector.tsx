@@ -4,9 +4,11 @@ import {
   InputField,
   Label,
   LabeledElementView,
+  sketchColorToHex,
   Spacer,
 } from 'noya-designsystem';
-import { memo, useCallback } from 'react';
+import { clamp } from 'noya-utils';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 const Row = styled.div(({ theme }) => ({
@@ -24,28 +26,39 @@ const Column = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  name: string | undefined;
-  hexValue: string | undefined;
-  color: Sketch.Color;
+  colors: Sketch.Color[];
+
+  /**
+   * The only required change handler is `onChangeColor`. However, to handle
+   * more granular changes specially, e.g. nudging opacity, you can pass other
+   * handlers.
+   */
   onChangeColor: (color: Sketch.Color) => void;
-  onChangeOpacity: (amount: number) => void;
-  onNudgeOpacity: (amount: number) => void;
-  onInputChange: (value: string) => void;
+  onChangeOpacity?: (amount: number) => void;
+  onNudgeOpacity?: (amount: number) => void;
 }
 
 export default memo(function ColorInspector({
   id,
-  name,
-  color,
-  hexValue,
+  colors,
   onChangeColor,
   onChangeOpacity,
   onNudgeOpacity,
-  onInputChange,
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
+
+  const firstColor = colors[0];
+  const firstColorHex = sketchColorToHex(firstColor);
+  const hexValue = useMemo(
+    () =>
+      colors.length > 1 &&
+      !colors.every((v) => sketchColorToHex(v) === firstColorHex)
+        ? undefined
+        : firstColorHex.slice(1).toUpperCase(),
+    [firstColorHex, colors],
+  );
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -65,29 +78,35 @@ export default memo(function ColorInspector({
 
   const handleSubmitOpacity = useCallback(
     (opacity: number) => {
-      onChangeOpacity(opacity / 100);
+      if (onChangeOpacity) {
+        onChangeOpacity(opacity / 100);
+      } else {
+        onChangeColor({
+          ...firstColor,
+          alpha: clamp(opacity / 100, 0, 1),
+        });
+      }
     },
-    [onChangeOpacity],
+    [onChangeOpacity, onChangeColor, firstColor],
   );
 
   const handleNudgeOpacity = useCallback(
     (amount: number) => {
-      onNudgeOpacity(amount / 100);
+      if (onNudgeOpacity) {
+        onNudgeOpacity(amount / 100);
+      } else {
+        onChangeColor({
+          ...firstColor,
+          alpha: clamp(firstColor.alpha + amount / 100, 0, 1),
+        });
+      }
     },
-    [onNudgeOpacity],
+    [firstColor, onChangeColor, onNudgeOpacity],
   );
 
   return (
     <Column>
-      <InputField.Root id={'colorName'}>
-        <InputField.Input
-          value={name || ''}
-          placeholder={name === undefined ? 'Multiple' : 'Color name'}
-          onChange={onInputChange}
-        />
-      </InputField.Root>
-      <Spacer.Vertical size={10} />
-      <ColorPicker value={color} onChange={onChangeColor} />
+      <ColorPicker value={firstColor} onChange={onChangeColor} />
       <Spacer.Vertical size={10} />
       <Row id={id}>
         <LabeledElementView renderLabel={renderLabel}>
@@ -96,14 +115,14 @@ export default memo(function ColorInspector({
             <InputField.Input
               value={hexValue ?? ''}
               placeholder={hexValue ? '' : 'Multiple'}
-              onSubmit={() => {}}
+              onSubmit={useCallback(() => {}, [])}
             />
             <InputField.Label>#</InputField.Label>
           </InputField.Root>
           <Spacer.Horizontal size={8} />
           <InputField.Root id={opacityInputId} size={50}>
             <InputField.NumberInput
-              value={Math.round(color.alpha * 100)}
+              value={Math.round(firstColor.alpha * 100)}
               onSubmit={handleSubmitOpacity}
               onNudge={handleNudgeOpacity}
             />

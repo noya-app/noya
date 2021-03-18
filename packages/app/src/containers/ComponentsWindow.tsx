@@ -24,7 +24,7 @@ export default memo(function ComponentsWindow() {
     <GridView.Root onClick={() => dispatch('selectSwatch', undefined)}>
       {sortedItems.map((item) => {
         const color = sketchColorToRgba(item.value);
-        const hex = rgbaToHex(color);
+        const hex = rgbaToHex(color).toUpperCase();
         const alphaPercent = `${Math.round(color.a * 100)}%`;
 
         return (

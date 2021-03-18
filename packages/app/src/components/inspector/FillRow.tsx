@@ -1,6 +1,5 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  ColorInputField,
   InputField,
   Label,
   LabeledElementView,
@@ -8,6 +7,7 @@ import {
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
+import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -72,7 +72,7 @@ export default memo(function FillRow({
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputField
+        <ColorInputFieldWithPicker
           id={colorInputId}
           value={color}
           onChange={onChangeColor}

@@ -1,4 +1,4 @@
-import { Divider, Spacer } from 'noya-designsystem';
+import { Divider, InputField, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -8,7 +8,6 @@ import {
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
-import { sketchColorToHex } from 'noya-designsystem';
 import withSeparatorElements from '../utils/withSeparatorElements';
 
 const Title = styled.div(({ theme }) => ({
@@ -31,37 +30,37 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
   const selectedSwatches = useShallowArray(
     useSelector(Selectors.getSelectedColorSwatches),
   );
-  const firstSwatch = selectedSwatches[0];
 
+  const firstSwatch = selectedSwatches[0];
   const name =
     selectedSwatches.length > 1 &&
     !selectedSwatches.every((v) => v.name === firstSwatch.name)
       ? undefined
       : firstSwatch.name;
 
-  const firstSwatchHex = sketchColorToHex(firstSwatch.value);
-  const hexValue = useMemo(
-    () =>
-      selectedSwatches.length > 1 &&
-      !selectedSwatches.every(
-        (v) => sketchColorToHex(v.value) === firstSwatchHex,
-      )
-        ? undefined
-        : firstSwatchHex.slice(1).toUpperCase(),
-    [firstSwatchHex, selectedSwatches],
-  );
-
   const ids = state.selectedSwatchIds;
+  const colors = useMemo(() => selectedSwatches.map((swatch) => swatch.value), [
+    selectedSwatches,
+  ]);
 
   return (
     <Container>
       <Title>Name</Title>
       <Spacer.Vertical size={4} />
+      <InputField.Root id={'colorName'}>
+        <InputField.Input
+          value={name || ''}
+          placeholder={name === undefined ? 'Multiple' : 'Color name'}
+          onChange={useCallback(
+            (value) => dispatch('setSwatchName', ids, value),
+            [dispatch, ids],
+          )}
+        />
+      </InputField.Root>
+      <Spacer.Vertical size={10} />
       <ColorSelectRow
         id={'color-swatch'}
-        color={firstSwatch.value}
-        name={name}
-        hexValue={hexValue}
+        colors={colors}
         onChangeOpacity={useCallback(
           (value) => dispatch('setSwatchOpacity', ids, value),
           [dispatch, ids],
@@ -72,10 +71,6 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
         )}
         onChangeColor={useCallback(
           (value) => dispatch('setSwatchColor', ids, value),
-          [dispatch, ids],
-        )}
-        onInputChange={useCallback(
-          (value) => dispatch('setSwatchName', ids, value),
           [dispatch, ids],
         )}
       />

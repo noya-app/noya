@@ -1,17 +1,17 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  ColorInputField,
   InputField,
   Label,
-  Spacer,
-  RadioGroup,
   LabeledElementView,
+  RadioGroup,
+  Spacer,
 } from 'noya-designsystem';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
-import BorderOutsideIcon from '../icons/BorderOutsideIcon';
-import BorderInsideIcon from '../icons/BorderInsideIcon';
 import BorderCenterIcon from '../icons/BorderCenterIcon';
+import BorderInsideIcon from '../icons/BorderInsideIcon';
+import BorderOutsideIcon from '../icons/BorderOutsideIcon';
+import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
 import { DimensionValue } from './DimensionsInspector';
 
 function toPositionString(position: Sketch.BorderPosition) {
@@ -107,7 +107,7 @@ export default memo(function BorderRow({
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputField
+        <ColorInputFieldWithPicker
           id={colorInputId}
           value={color}
           onChange={onChangeColor}

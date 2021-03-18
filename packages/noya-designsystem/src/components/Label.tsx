@@ -8,6 +8,7 @@ import * as Spacer from '../components/Spacer';
 
 const LabelLabel = styled.label(({ theme }) => ({
   ...theme.textStyles.small,
+  color: theme.colors.textMuted,
   fontSize: '11px',
   flex: '0 0 auto',
   minWidth: '0',
