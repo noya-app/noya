@@ -1,9 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit } from 'canvaskit-wasm';
-import {
-  getBoundingRect,
-  getDragHandles,
-} from 'noya-renderer/src/canvas/selection';
+import { getDragHandles } from 'noya-renderer/src/canvas/selection';
 import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
@@ -111,7 +108,7 @@ export const getSelectedRect = (state: ApplicationState): Rect => {
   const layerIds = layerIndexPaths.map(
     (indexPath) => Layers.access(page, indexPath).do_objectID,
   );
-  return getBoundingRect(page, layerIds)!;
+  return getBoundingRect(page, getCanvasTransform(state), layerIds)!;
 };
 
 export const getSelectedLayersWithContextSettings = (
@@ -175,7 +172,11 @@ export function getScaleDirectionAtPoint(
   point: Point,
 ): CompassDirection | undefined {
   const page = getCurrentPage(state);
-  const boundingRect = getBoundingRect(page, state.selectedObjects);
+  const boundingRect = getBoundingRect(
+    page,
+    AffineTransform.identity,
+    state.selectedObjects,
+  );
 
   if (!boundingRect) return;
 
@@ -192,66 +193,47 @@ export function getLayerFixedRadius(layer: Sketch.AnyLayer): number {
   return layer._class === 'rectangle' ? layer.fixedRadius : 0;
 }
 
+export type LayerTraversalOptions = {
+  includeHiddenLayers: boolean;
+  clickThroughGroups: boolean;
+};
+
 function shouldClickThrough(
   layer: Sketch.AnyLayer,
-  options?: { clickThroughGroups: boolean },
+  options: LayerTraversalOptions,
 ) {
   return (
     layer._class === 'artboard' ||
     (layer._class === 'group' &&
-      (layer.hasClickThrough || options?.clickThroughGroups))
+      (layer.hasClickThrough || options.clickThroughGroups))
   );
 }
 
-/**
- * This function visits each layer while keeping track of the
- * "current transformation matrix" (ctm).
- *
- * How this works: Every time we enter or exit an artboard/group,
- * we need to keep track of the translation for that layer. For the
- * artboard/group layers themselves, we want to run the `onEnter` callback
- * before we transform the ctm, since that transformation should only
- * apply to their children.
- */
-function visitWithCurrentTransform(
-  layer: Sketch.AnyLayer,
-  options: {
-    clickThroughGroups: boolean;
-    onEnter: (
-      layer: Sketch.AnyLayer,
-      indexPath: IndexPath,
-      ctm: AffineTransform,
-    ) => EnterReturnValue;
-  },
+function visitLayersReversed(
+  rootLayer: Sketch.AnyLayer,
+  ctm: AffineTransform,
+  options: LayerTraversalOptions,
+  onEnter: (layer: Sketch.AnyLayer, ctm: AffineTransform) => EnterReturnValue,
 ) {
-  let ctm = AffineTransform.identity;
-
-  // TODO: do we need to keep track of zoom/rotation too?
-  visitReversed(layer, {
+  visitReversed(rootLayer, {
     onEnter: (layer, indexPath) => {
       if (layer._class === 'page') return;
 
-      if (shouldClickThrough(layer, options)) {
-        const result = options?.onEnter?.(layer, indexPath, ctm);
+      if (!layer.isVisible && !options.includeHiddenLayers) return SKIP;
 
-        // Don't apply the transformation if we're going to skip children
-        if (result === SKIP || result === STOP) return result;
+      const transform = getLayerTransformAtIndexPathReversed(
+        rootLayer,
+        indexPath,
+        ctm,
+      );
 
-        ctm = ctm.transform(
-          AffineTransform.translation(-layer.frame.x, -layer.frame.y),
-        );
+      const result = onEnter(layer, transform);
 
-        return result;
-      }
+      if (result === STOP) return result;
 
-      return options?.onEnter?.(layer, indexPath, ctm);
-    },
-    onLeave: (layer) => {
-      if (shouldClickThrough(layer, options)) {
-        ctm = ctm.transform(
-          AffineTransform.translation(layer.frame.x, layer.frame.y),
-        );
-      }
+      if (!shouldClickThrough(layer, options)) return SKIP;
+
+      return result;
     },
   });
 }
@@ -260,98 +242,257 @@ export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
   point: Point,
-  options?: { clickThroughGroups: boolean },
+  traversalOptions?: LayerTraversalOptions,
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
+  const canvasTransform = getCanvasTransform(state);
+  const screenTransform = getScreenTransform(state);
+
+  const options = traversalOptions ?? {
+    clickThroughGroups: false,
+    includeHiddenLayers: false,
+  };
 
   // TODO: check if we're clicking the title of an artboard
 
   let found: Sketch.AnyLayer | undefined;
 
-  visitWithCurrentTransform(page, {
-    clickThroughGroups: options?.clickThroughGroups ?? false,
-    onEnter: (layer, _, ctm) => {
-      if (layer._class === 'page') return;
+  const screenPoint = screenTransform.applyTo(point);
 
-      const localPoint = ctm.applyTo(point);
-      const containsPoint = Primitives.rectContainsPoint(
-        layer.frame,
-        localPoint,
-      );
+  visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
+    const transform = AffineTransform.multiply(
+      getLayerRotationTransform(layer),
+      ctm,
+    );
 
-      if (!containsPoint) return SKIP;
+    const framePoints = Primitives.getRectCornerPoints(layer.frame);
+    const localPoints = framePoints.map((point) => transform.applyTo(point));
 
-      // Artboards can't be selected themselves, and instead only update the ctm
-      if (shouldClickThrough(layer, options)) return;
+    const containsPoint = Primitives.rotatedRectContainsPoint(
+      localPoints,
+      screenPoint,
+    );
 
-      switch (layer._class) {
-        case 'rectangle':
-        case 'oval': {
-          const path = Primitives.path(
-            CanvasKit,
-            layer.points,
-            layer.frame,
-            getLayerFixedRadius(layer),
-          );
+    if (!containsPoint) return SKIP;
 
-          if (!path.contains(localPoint.x, localPoint.y)) return;
+    // Artboards can't be selected themselves, and instead only update the ctm
+    if (shouldClickThrough(layer, options)) return;
 
-          break;
-        }
-        default:
-          break;
+    switch (layer._class) {
+      case 'rectangle':
+      case 'oval': {
+        const pathPoint = transform.invert().applyTo(screenPoint);
+
+        const path = Primitives.path(
+          CanvasKit,
+          layer.points,
+          layer.frame,
+          getLayerFixedRadius(layer),
+        );
+
+        if (!path.contains(pathPoint.x, pathPoint.y)) return;
+
+        break;
       }
+      default:
+        break;
+    }
 
-      found = layer;
+    found = layer;
 
-      return STOP;
-    },
+    return STOP;
   });
 
   return found as PageLayer;
+}
+
+export function getBoundingRect(
+  rootLayer: Sketch.AnyLayer,
+  ctm: AffineTransform,
+  layerIds: string[],
+  options?: LayerTraversalOptions,
+): Rect | undefined {
+  options = options ?? {
+    clickThroughGroups: false,
+    includeHiddenLayers: false,
+  };
+
+  let bounds = {
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+  };
+
+  visitLayersReversed(rootLayer, ctm, options, (layer, ctm) => {
+    if (!layerIds.includes(layer.do_objectID)) return;
+
+    const transform = AffineTransform.multiply(
+      getLayerRotationTransform(layer),
+      ctm,
+    );
+
+    const framePoints = Primitives.getRectCornerPoints(layer.frame);
+    const localPoints = framePoints.map((point) => transform.applyTo(point));
+
+    const xs = localPoints.map((point) => point.x);
+    const ys = localPoints.map((point) => point.y);
+
+    bounds.minX = Math.min(bounds.minX, ...xs);
+    bounds.minY = Math.min(bounds.minY, ...ys);
+    bounds.maxX = Math.max(bounds.maxX, ...xs);
+    bounds.maxY = Math.max(bounds.maxY, ...ys);
+  });
+
+  // Check that at least one layer had a non-zero size
+  if (!Object.values(bounds).every(isFinite)) return undefined;
+
+  return Primitives.createRectFromBounds(bounds);
+}
+
+export function getBoundingPoints(
+  rootLayer: Sketch.AnyLayer,
+  ctm: AffineTransform,
+  layerId: string,
+  options?: LayerTraversalOptions,
+): Point[] {
+  options = options ?? {
+    clickThroughGroups: false,
+    includeHiddenLayers: false,
+  };
+
+  let points: Point[] = [];
+
+  visitLayersReversed(rootLayer, ctm, options, (layer, ctm) => {
+    if (layerId !== layer.do_objectID) return;
+
+    const transform = AffineTransform.multiply(
+      getLayerRotationTransform(layer),
+      ctm,
+    );
+
+    const framePoints = Primitives.getRectCornerPoints(layer.frame);
+    points = framePoints.map((point) => transform.applyTo(point));
+
+    return STOP;
+  });
+
+  return points;
 }
 
 export function getLayersInRect(
   CanvasKit: CanvasKit,
   state: ApplicationState,
   rect: Rect,
-  options?: { clickThroughGroups: boolean },
+  traversalOptions?: LayerTraversalOptions,
 ): PageLayer[] {
+  const options = traversalOptions ?? {
+    clickThroughGroups: false,
+    includeHiddenLayers: false,
+  };
+
   const page = getCurrentPage(state);
 
   let found: Sketch.AnyLayer[] = [];
 
-  visitWithCurrentTransform(page, {
-    clickThroughGroups: options?.clickThroughGroups ?? false,
-    onEnter: (layer, _, ctm) => {
-      if (layer._class === 'page') return;
+  const screenTransform = getScreenTransform(state);
+  const screenRect = Primitives.transformRect(rect, screenTransform);
 
-      let hasIntersect = Primitives.rectsIntersect(
-        layer.frame,
-        Primitives.transformRect(rect, ctm),
+  visitLayersReversed(
+    page,
+    getCanvasTransform(state),
+    options,
+    (layer, ctm) => {
+      // TODO: Handle rotated rectangle collision
+      const hasIntersect = Primitives.rectsIntersect(
+        Primitives.transformRect(layer.frame, ctm),
+        screenRect,
       );
 
       if (!hasIntersect) return SKIP;
 
-      // Artboards can't be selected themselves, and instead only update the ctm
+      // Artboards can't be selected themselves
       if (shouldClickThrough(layer, options)) return;
 
       found.push(layer);
     },
-  });
+  );
 
   return found as PageLayer[];
+}
+
+export function getLayerTransform(
+  ctm: AffineTransform,
+  layer: Sketch.AnyLayer,
+): AffineTransform {
+  const rotation = getLayerRotationTransform(layer);
+  const translation = getLayerTranslationTransform(layer);
+
+  return AffineTransform.multiply(translation, rotation, ctm);
+}
+
+export function getLayerTranslationTransform(
+  layer: Sketch.AnyLayer,
+): AffineTransform {
+  return AffineTransform.translation(layer.frame.x, layer.frame.y);
+}
+
+export function getLayerRotationTransform(
+  layer: Sketch.AnyLayer,
+): AffineTransform {
+  const bounds = Primitives.createBounds(layer.frame);
+  const midpoint = { x: bounds.midX, y: bounds.midY };
+  const rotation = getLayerRotationRadians(layer);
+
+  return AffineTransform.rotation(rotation, midpoint.x, midpoint.y);
 }
 
 export function getLayerTransformAtIndexPath(
   node: Sketch.AnyLayer,
   indexPath: IndexPath,
-) {
+  ctm: AffineTransform,
+): AffineTransform {
+  const path = Layers.accessPath(node, indexPath).slice(1, -1);
+
+  return path.reduce((result, layer) => getLayerTransform(result, layer), ctm);
+}
+
+export function getLayerTransformAtIndexPathReversed(
+  node: Sketch.AnyLayer,
+  indexPath: IndexPath,
+  ctm: AffineTransform,
+): AffineTransform {
+  const path = Layers.accessPathReversed(node, indexPath).slice(1, -1);
+
+  return path.reduce((result, layer) => getLayerTransform(result, layer), ctm);
+}
+
+export function getLayerRotationMultiplier(layer: Sketch.AnyLayer): number {
+  return layer._class === 'group' ? -1 : 1;
+}
+
+export function getLayerRotation(layer: Sketch.AnyLayer): number {
+  return layer.rotation * getLayerRotationMultiplier(layer);
+}
+
+function toRadians(degrees: number) {
+  return (degrees * Math.PI) / 180;
+}
+
+export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {
+  return toRadians(getLayerRotation(layer));
+}
+
+export function getScreenTransform(state: ApplicationState) {
+  return AffineTransform.translation(state.canvasInsets.left, 0);
+}
+
+export function getCanvasTransform(state: ApplicationState) {
+  const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+
   return AffineTransform.multiply(
-    ...Layers.accessPath(node, indexPath)
-      .slice(1, -1) // Remove the page and current layer
-      .map((layer) =>
-        AffineTransform.translation(layer.frame.x, layer.frame.y),
-      ),
+    getScreenTransform(state),
+    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
+    AffineTransform.scale(zoomValue),
   );
 }

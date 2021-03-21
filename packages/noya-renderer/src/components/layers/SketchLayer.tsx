@@ -1,4 +1,6 @@
+import { Group } from 'noya-react-canvaskit';
 import { PageLayer } from 'noya-state';
+import { getLayerRotationTransform } from 'noya-state/src/selectors';
 import { memo } from 'react';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
@@ -13,20 +15,35 @@ interface Props {
 export default memo(function SketchLayer({ layer }: Props) {
   if (!layer.isVisible) return null;
 
+  let element: JSX.Element;
+
   switch (layer._class) {
     case 'artboard':
-      return <SketchArtboard layer={layer} />;
+      element = <SketchArtboard layer={layer} />;
+      break;
     case 'group':
-      return <SketchGroup layer={layer} />;
+      element = <SketchGroup layer={layer} />;
+      break;
     case 'text':
-      return <SketchText layer={layer} />;
+      element = <SketchText layer={layer} />;
+      break;
     case 'bitmap':
-      return <SketchBitmap layer={layer} />;
+      element = <SketchBitmap layer={layer} />;
+      break;
     case 'rectangle':
     case 'oval':
-      return <SketchShape layer={layer} />;
+      element = <SketchShape layer={layer} />;
+      break;
     default:
       console.log(layer._class, 'not handled');
       return null;
   }
+
+  if (layer.rotation % 360 !== 0) {
+    const rotation = getLayerRotationTransform(layer);
+
+    return <Group transform={rotation}>{element}</Group>;
+  }
+
+  return element;
 });

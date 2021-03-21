@@ -5,5 +5,12 @@ export interface Context {
   state: ApplicationState;
   CanvasKit: CanvasKit;
   canvas: Canvas;
-  theme: { textColor: string; backgroundColor: string };
+  canvasSize: {
+    width: number;
+    height: number;
+  };
+  theme: {
+    textColor: string;
+    backgroundColor: string;
+  };
 }

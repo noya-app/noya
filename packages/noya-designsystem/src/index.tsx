@@ -4,7 +4,7 @@ export * as lightTheme from './theme/light';
 export * as darkTheme from './theme/dark';
 
 // Components
-export * as Button from './components/Button';
+export { default as Button } from './components/Button';
 export * as Label from './components/Label';
 export { default as Select } from './components/Select';
 export { default as TextInput } from './components/TextInput';

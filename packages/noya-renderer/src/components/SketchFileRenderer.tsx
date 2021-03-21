@@ -1,7 +1,7 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit-wasm';
 import {
   Group,
+  Polyline,
   Rect as RCKRect,
   usePaint,
   useReactCanvasKit,
@@ -10,34 +10,19 @@ import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
 import {
+  getBoundingPoints,
+  getBoundingRect,
+  getCanvasTransform,
   getCurrentPage,
-  getCurrentPageMetadata,
+  getLayerTransformAtIndexPath,
+  getScreenTransform,
 } from 'noya-state/src/selectors';
 import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
 import React, { memo, useMemo } from 'react';
-import { getBoundingRect, getDragHandles } from '../canvas/selection';
+import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
 import SketchLayer from './layers/SketchLayer';
-
-const HighlightedLayerOutline = memo(function HighlightedLayerOutline({
-  layer,
-  transform,
-}: {
-  layer: Sketch.AnyLayer;
-  transform: AffineTransform;
-}) {
-  const { CanvasKit } = useReactCanvasKit();
-
-  const highlightPaint = usePaint({
-    color: CanvasKit.Color(132, 63, 255, 1),
-    style: CanvasKit.PaintStyle.Stroke,
-    strokeWidth: 2,
-  });
-
-  return (
-    <HoverOutline transform={transform} layer={layer} paint={highlightPaint} />
-  );
-});
+import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -129,19 +114,9 @@ const Marquee = memo(function Marquee({
 export default memo(function SketchFileRenderer() {
   const { CanvasKit, state } = useReactCanvasKit();
   const page = getCurrentPage(state);
-  const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
-
-  const transform = useMemo(
-    () =>
-      AffineTransform.multiply(
-        AffineTransform.translation(
-          scrollOrigin.x + state.canvasInsets.left,
-          scrollOrigin.y,
-        ),
-        AffineTransform.scale(zoomValue),
-      ),
-    [scrollOrigin.x, scrollOrigin.y, state.canvasInsets.left, zoomValue],
-  );
+  const showRulers = state.preferences.showRulers;
+  const screenTransform = getScreenTransform(state);
+  const canvasTransform = getCanvasTransform(state);
 
   const selectionPaint = usePaint({
     style: CanvasKit.PaintStyle.Stroke,
@@ -149,8 +124,29 @@ export default memo(function SketchFileRenderer() {
     strokeWidth: 1,
   });
 
+  const highlightPaint = usePaint({
+    color: CanvasKit.Color(132, 63, 255, 1),
+    style: CanvasKit.PaintStyle.Stroke,
+    strokeWidth: 2,
+  });
+
   const boundingRect = useMemo(
-    () => getBoundingRect(page, state.selectedObjects),
+    () =>
+      getBoundingRect(page, AffineTransform.identity, state.selectedObjects, {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+      }),
+    [page, state.selectedObjects],
+  );
+
+  const boundingPoints = useMemo(
+    () =>
+      state.selectedObjects.map((id) =>
+        getBoundingPoints(page, AffineTransform.identity, id, {
+          clickThroughGroups: true,
+          includeHiddenLayers: true,
+        }),
+      ),
     [page, state.selectedObjects],
   );
 
@@ -174,42 +170,52 @@ export default memo(function SketchFileRenderer() {
     if (!indexPath) return;
 
     const layer = Layers.access(page, indexPath);
-    const layerTransform = AffineTransform.multiply(
-      ...Layers.accessPath(page, indexPath)
-        .slice(1, -1) // Remove the page and current layer
-        .map((layer) =>
-          AffineTransform.translation(layer.frame.x, layer.frame.y),
-        ),
+    const layerTransform = getLayerTransformAtIndexPath(
+      page,
+      indexPath,
+      AffineTransform.identity,
     );
 
     return (
       highlightedLayer && (
-        <HighlightedLayerOutline layer={layer} transform={layerTransform} />
+        <HoverOutline
+          transform={layerTransform}
+          layer={layer}
+          paint={highlightPaint}
+        />
       )
     );
-  }, [page, state]);
+  }, [highlightPaint, page, state.highlightedLayer, state.selectedObjects]);
 
   return (
-    <Group transform={transform}>
-      {page.layers.map((layer) => (
-        <SketchLayer key={layer.do_objectID} layer={layer} />
-      ))}
-      {boundingRect && (
-        <BoundingRect rect={boundingRect} selectionPaint={selectionPaint} />
-      )}
-      {highlightedLayer}
-      {boundingRect && (
-        <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
-      )}
-      {state.interactionState.type === 'marquee' && (
-        <Marquee interactionState={state.interactionState} />
-      )}
-      {state.interactionState.type === 'drawing' && (
-        <SketchLayer
-          key={state.interactionState.value.do_objectID}
-          layer={state.interactionState.value}
-        />
-      )}
-    </Group>
+    <>
+      <Group transform={canvasTransform}>
+        {page.layers.map((layer) => (
+          <SketchLayer key={layer.do_objectID} layer={layer} />
+        ))}
+        {boundingRect && (
+          <BoundingRect rect={boundingRect} selectionPaint={selectionPaint} />
+        )}
+        {boundingPoints.map((points, index) => (
+          <Polyline key={index} points={points} paint={selectionPaint} />
+        ))}
+        {highlightedLayer}
+        {boundingRect && (
+          <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
+        )}
+        {state.interactionState.type === 'drawing' && (
+          <SketchLayer
+            key={state.interactionState.value.do_objectID}
+            layer={state.interactionState.value}
+          />
+        )}
+      </Group>
+      <Group transform={screenTransform}>
+        {state.interactionState.type === 'marquee' && (
+          <Marquee interactionState={state.interactionState} />
+        )}
+        {showRulers && <HorizontalRuler />}
+      </Group>
+    </>
   );
 });

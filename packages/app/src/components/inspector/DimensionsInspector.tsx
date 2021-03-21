@@ -1,14 +1,11 @@
-import { InputField, Spacer } from 'noya-designsystem';
+import { Button, InputField, Spacer } from 'noya-designsystem';
+import { SetNumberMode } from 'noya-state';
+import { useCallback } from 'react';
 import styled from 'styled-components';
+import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
+import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 
 export type DimensionValue = number | undefined;
-
-export interface Props {
-  x: DimensionValue;
-  y: DimensionValue;
-  width: DimensionValue;
-  height: DimensionValue;
-}
 
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
@@ -17,7 +14,29 @@ const Row = styled.div(({ theme }) => ({
   paddingRight: '10px',
 }));
 
-export default function DimensionsInspector({ x, y, width, height }: Props) {
+const FlipButtonContainer = styled.div(({ theme }) => ({
+  flex: '1',
+  display: 'flex',
+  flexDirection: 'row',
+}));
+
+export interface Props {
+  x: DimensionValue;
+  y: DimensionValue;
+  width: DimensionValue;
+  height: DimensionValue;
+  rotation: DimensionValue;
+  onSetRotation: (value: number, mode: SetNumberMode) => void;
+}
+
+export default function DimensionsInspector({
+  x,
+  y,
+  width,
+  height,
+  rotation,
+  onSetRotation,
+}: Props) {
   return (
     <>
       <Row>
@@ -37,6 +56,26 @@ export default function DimensionsInspector({ x, y, width, height }: Props) {
             onSubmit={() => {}}
           />
           <InputField.Label>Y</InputField.Label>
+        </InputField.Root>
+        <Spacer.Horizontal size={16} />
+        <InputField.Root>
+          <InputField.NumberInput
+            value={rotation}
+            placeholder={rotation === undefined ? 'multi' : undefined}
+            onNudge={useCallback(
+              (value: number) => {
+                onSetRotation(value, 'adjust');
+              },
+              [onSetRotation],
+            )}
+            onSubmit={useCallback(
+              (value) => {
+                onSetRotation(value, 'replace');
+              },
+              [onSetRotation],
+            )}
+          />
+          <InputField.Label>°</InputField.Label>
         </InputField.Root>
       </Row>
       <Spacer.Vertical size={10} />
@@ -58,6 +97,28 @@ export default function DimensionsInspector({ x, y, width, height }: Props) {
           />
           <InputField.Label>H</InputField.Label>
         </InputField.Root>
+        <Spacer.Horizontal size={16} />
+        <FlipButtonContainer>
+          <Button
+            id="flip-horizontal"
+            tooltip="Flip horizontally"
+            onClick={useCallback(() => {}, [])}
+          >
+            <Spacer.Horizontal size={2} />
+            <FlipHorizontalIcon color={'rgb(139, 139, 139)'} />
+            <Spacer.Horizontal size={2} />
+          </Button>
+          <Spacer.Horizontal />
+          <Button
+            id="flip-vertical"
+            tooltip="Flip vertically"
+            onClick={useCallback(() => {}, [])}
+          >
+            <Spacer.Horizontal size={2} />
+            <FlipVerticalIcon color={'rgb(139, 139, 139)'} />
+            <Spacer.Horizontal size={2} />
+          </Button>
+        </FlipButtonContainer>
       </Row>
     </>
   );

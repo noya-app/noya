@@ -1,22 +1,25 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import produce from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
 import { Primitives, uuid } from 'noya-renderer';
-import { getBoundingRect } from 'noya-renderer/src/canvas/selection';
 import {
   createBounds,
   normalizeRect,
   resizeRect,
 } from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
-import produce from 'immer';
-import { WritableDraft } from 'immer/dist/internal';
+import { sum } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
   EncodedPageMetadata,
+  getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
+  getLayerRotation,
+  getLayerRotationMultiplier,
   getLayerTransformAtIndexPath,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
@@ -51,6 +54,9 @@ export type ApplicationState = {
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
+  preferences: {
+    showRulers: boolean;
+  };
 };
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
@@ -66,6 +72,7 @@ export type Action =
       size: { width: number; height: number },
       insets: { left: number; right: number },
     ]
+  | [type: 'setShowRulers', value: boolean]
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
   | [
       type: 'insertArtboard',
@@ -129,6 +136,7 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
+  | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [type: 'setSwatchColor', id: string | string[], color: Sketch.Color]
@@ -137,7 +145,7 @@ export type Action =
       type: 'setSwatchOpacity',
       id: string | string[],
       alpha: number,
-      mode?: 'replace' | 'adjust',
+      mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
   | [
@@ -172,6 +180,13 @@ export function reducer(
       return produce(state, (state) => {
         state.canvasSize = size;
         state.canvasInsets = insets;
+      });
+    }
+    case 'setShowRulers': {
+      const [, value] = action;
+
+      return produce(state, (state) => {
+        state.preferences.showRulers = value;
       });
     }
     case 'insertArtboard': {
@@ -304,14 +319,8 @@ export function reducer(
 
       return produce(state, (state) => {
         const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
-        const combinedWidths = layers.reduce(
-          (width, layer) => layer.frame.width + width,
-          0,
-        );
-        const combinedHeights = layers.reduce(
-          (height, layer) => layer.frame.height + height,
-          0,
-        );
+        const combinedWidths = sum(layers.map((layer) => layer.frame.width));
+        const combinedHeights = sum(layers.map((layer) => layer.frame.height));
         const differenceWidth = selectedRect.width - combinedWidths;
         const differenceHeight = selectedRect.height - combinedHeights;
         const gapX = differenceWidth / (layers.length - 1);
@@ -324,7 +333,11 @@ export function reducer(
           layerIndexPath: IndexPath,
         ): Bounds {
           const layer = Layers.access(page, layerIndexPath);
-          const transform = getLayerTransformAtIndexPath(page, layerIndexPath);
+          const transform = getLayerTransformAtIndexPath(
+            page,
+            layerIndexPath,
+            AffineTransform.identity,
+          );
           return Primitives.createBounds(
             Primitives.transformRect(layer.frame, transform),
           );
@@ -343,6 +356,7 @@ export function reducer(
           const transform = getLayerTransformAtIndexPath(
             page,
             layerIndexPath,
+            AffineTransform.identity,
           ).invert();
           const layer = Layers.access(
             state.sketch.pages[pageIndex], // access page again since we need to write to it
@@ -388,6 +402,7 @@ export function reducer(
           const transform = getLayerTransformAtIndexPath(
             page,
             layerIndexPath,
+            AffineTransform.identity,
           ).invert();
           const layer = Layers.access(
             state.sketch.pages[pageIndex], // access page again since we need to write to it
@@ -725,6 +740,20 @@ export function reducer(
         });
       });
     }
+    case 'setLayerRotation': {
+      const [, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const rotation = getLayerRotation(layer);
+          const newValue = mode === 'replace' ? amount : rotation + amount;
+
+          layer.rotation = newValue * getLayerRotationMultiplier(layer);
+        });
+      });
+    }
     case 'setOpacity': {
       const [, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
@@ -887,6 +916,7 @@ export function reducer(
 
             const originalBoundingRect = getBoundingRect(
               pageSnapshot,
+              AffineTransform.identity,
               layerIds,
             )!;
 
@@ -1133,5 +1163,8 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     sketch,
     canvasSize: { width: 0, height: 0 },
     canvasInsets: { left: 0, right: 0 },
+    preferences: {
+      showRulers: false,
+    },
   };
 }

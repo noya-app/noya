@@ -1,14 +1,15 @@
-import { Spacer } from 'noya-designsystem';
 import {
   BoxModelIcon,
   CircleIcon,
   MoveIcon,
+  RulerHorizontalIcon,
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
+import { Spacer } from 'noya-designsystem';
+import Button from 'noya-designsystem/src/components/Button';
 import { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import Button from 'noya-designsystem/src/components/Button';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 const Container = styled.header(({ theme }) => ({
@@ -22,6 +23,7 @@ const Container = styled.header(({ theme }) => ({
 
 export default function Toolbar() {
   const [state, dispatch] = useApplicationState();
+  const showRulers = state.preferences.showRulers;
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
   const interactionType = state.interactionState.type;
 
@@ -107,9 +109,20 @@ export default function Toolbar() {
         >
           <MoveIcon />
         </Button>
+        <Spacer.Horizontal size={40} />
+        <Button
+          id="tool-rulers"
+          tooltip="Show rulers"
+          active={showRulers}
+          onClick={() => {
+            dispatch('setShowRulers', !showRulers);
+          }}
+        >
+          <RulerHorizontalIcon />
+        </Button>
         <Spacer.Horizontal size={8} />
       </Container>
     ),
-    [dispatch, interactionType, itemSeparatorSize],
+    [dispatch, interactionType, itemSeparatorSize, showRulers],
   );
 }

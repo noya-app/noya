@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
 import {
   Bounds,
   CompassDirection,
@@ -6,9 +7,9 @@ import {
   Point,
   Rect,
 } from 'noya-state';
-import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
-import * as PathUtils from './primitives/path';
 import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+import { isNumberEqual } from 'noya-utils';
+import * as PathUtils from './primitives/path';
 
 export function transformRect(rect: Rect, transform: AffineTransform): Rect {
   const bounds = createBounds(rect);
@@ -35,7 +36,9 @@ export function createRect(initialPoint: Point, finalPoint: Point): Rect {
   };
 }
 
-export function createRectFromBounds(bounds: Bounds): Rect {
+export function createRectFromBounds(
+  bounds: Omit<Bounds, 'midX' | 'midY'>,
+): Rect {
   return {
     x: bounds.minX,
     y: bounds.minY,
@@ -44,14 +47,54 @@ export function createRectFromBounds(bounds: Bounds): Rect {
   };
 }
 
+export function getRectCornerPoints(rect: Rect): [Point, Point, Point, Point] {
+  return [
+    { x: rect.x, y: rect.y },
+    { x: rect.x + rect.width, y: rect.y },
+    { x: rect.x + rect.width, y: rect.y + rect.height },
+    { x: rect.x, y: rect.y + rect.height },
+  ];
+}
+
+function areaOfTriangle(p1: Point, p2: Point, p3: Point): number {
+  const { x: x1, y: y1 } = p1;
+  const { x: x2, y: y2 } = p2;
+  const { x: x3, y: y3 } = p3;
+
+  return (
+    Math.abs(x1 * y2 + x2 * y3 + x3 * y1 - y1 * x2 - y2 * x3 - y3 * x1) / 2
+  );
+}
+
+// https://stackoverflow.com/a/17146376
+export function rotatedRectContainsPoint(points: Point[], p: Point): boolean {
+  const [a, b, c, d] = points;
+
+  // Calculate the sum of areas of △APD, △DPC, △CPB, △BPA.
+  const triangleArea =
+    areaOfTriangle(a, p, d) +
+    areaOfTriangle(d, p, c) +
+    areaOfTriangle(c, p, b) +
+    areaOfTriangle(b, p, a);
+
+  const rectangleArea = areaOfTriangle(a, b, c) + areaOfTriangle(a, c, d);
+
+  if (isNumberEqual(triangleArea, rectangleArea)) return true;
+
+  // If this sum is greater than the area of the rectangle:
+  // Then point P(x,y) is outside the rectangle.
+  // Else it is in or on the rectangle.
+  return !(triangleArea > rectangleArea);
+}
+
 export function createBounds(rect: Rect): Bounds {
   const minX = Math.min(rect.x, rect.x + rect.width);
   const minY = Math.min(rect.y, rect.y + rect.height);
   const maxX = Math.max(rect.x, rect.x + rect.width);
   const maxY = Math.max(rect.y, rect.y + rect.height);
 
-  const midX = (maxX - minX) / 2;
-  const midY = (maxY - minY) / 2;
+  const midX = (maxX + minX) / 2;
+  const midY = (maxY + minY) / 2;
 
   return {
     minX,
@@ -105,7 +148,10 @@ export function distance(
   return Math.sqrt(a * a + b * b);
 }
 
-export function sum({ x: x1, y: y1 }: Point, { x: x2, y: y2 }: Point): Point {
+export function pointSum(
+  { x: x1, y: y1 }: Point,
+  { x: x2, y: y2 }: Point,
+): Point {
   return {
     x: x1 + x2,
     y: y1 + y2,
