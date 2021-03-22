@@ -76,7 +76,7 @@ interface Props {
 }
 
 interface SwatchesProps {
-  selectedSwatchId: string;
+  selectedSwatchId?: string;
   swatches: Sketch.Swatch[];
   onSelectSwatch: (color: Sketch.Color) => void;
 }
@@ -149,7 +149,6 @@ export default memo(function ColorInputFieldWithPicker({
   // TODO: The value prop here can be an array, and other
   // inspector rows may also take arrays
   const values = useMemo(() => [value], [value]);
-  const selectedSwatchId = value.swatchID || '';
 
   const [state] = useApplicationState();
 
@@ -203,13 +202,13 @@ export default memo(function ColorInputFieldWithPicker({
         <PaddedSection>
           {swatchLayout === 'grid' ? (
             <SwatchesGrid
-              selectedSwatchId={selectedSwatchId}
+              selectedSwatchId={value.swatchID}
               swatches={sharedSwatches}
               onSelectSwatch={onChange}
             />
           ) : (
             <SwatchesList
-              selectedSwatchId={selectedSwatchId}
+              selectedSwatchId={value.swatchID}
               swatches={sharedSwatches}
               onSelectSwatch={onChange}
             />
