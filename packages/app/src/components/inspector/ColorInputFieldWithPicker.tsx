@@ -78,13 +78,13 @@ interface Props {
 interface SwatchesProps {
   selectedSwatchId: string;
   swatches: Sketch.Swatch[];
-  onClick: (color: Sketch.Color) => void;
+  onSelectSwatch: (color: Sketch.Color) => void;
 }
 
 const SwatchesList = memo(function SwatchesList({
   selectedSwatchId,
   swatches,
-  onClick,
+  onSelectSwatch,
 }: SwatchesProps) {
   return (
     <ListView.Root>
@@ -97,7 +97,7 @@ const SwatchesList = memo(function SwatchesList({
             key={item.do_objectID}
             selected={selectedSwatchId === item.do_objectID}
             onClick={() => {
-              onClick({
+              onSelectSwatch({
                 ...item.value,
                 swatchID: item.do_objectID,
               });
@@ -116,7 +116,7 @@ const SwatchesList = memo(function SwatchesList({
 const SwatchesGrid = memo(function SwatchesGrid({
   selectedSwatchId,
   swatches,
-  onClick,
+  onSelectSwatch,
 }: SwatchesProps) {
   return (
     <GridSmall>
@@ -129,7 +129,7 @@ const SwatchesGrid = memo(function SwatchesGrid({
             color={colorString}
             selected={selectedSwatchId === item.do_objectID}
             onClick={() => {
-              onClick({
+              onSelectSwatch({
                 ...item.value,
                 swatchID: item.do_objectID,
               });
@@ -205,13 +205,13 @@ export default memo(function ColorInputFieldWithPicker({
             <SwatchesGrid
               selectedSwatchId={selectedSwatchId}
               swatches={sharedSwatches}
-              onClick={(color) => onChange(color)}
+              onSelectSwatch={onChange}
             />
           ) : (
             <SwatchesList
               selectedSwatchId={selectedSwatchId}
               swatches={sharedSwatches}
-              onClick={(color) => onChange(color)}
+              onSelectSwatch={onChange}
             />
           )}
         </PaddedSection>
