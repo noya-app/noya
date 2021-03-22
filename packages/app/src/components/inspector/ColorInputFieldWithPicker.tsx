@@ -9,14 +9,13 @@ import {
   RadioGroup,
   Select,
   Spacer,
-  sketchColorToRgba,
+  sketchColorToRgbaString,
   ListView,
 } from 'noya-designsystem';
 import { getSharedSwatches } from 'noya-state/src/selectors';
 import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
-import { hsvaToRgbaString, rgbaToHsva } from 'noya-colorpicker';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -76,69 +75,69 @@ interface Props {
   onChange: (color: Sketch.Color) => void;
 }
 
-interface GridProps {
-  id?: string;
+interface SwatchesProps {
+  selectedSwatchId: string;
   swatches: Sketch.Swatch[];
-  layout: SwatchLayout;
   onClick: (color: Sketch.Color) => void;
 }
 
-const SwatchesSelector = memo(function SwatchesSelector({
+const SwatchesList = memo(function SwatchesList({
+  selectedSwatchId,
   swatches,
-  layout,
   onClick,
-}: GridProps) {
-  const [selected, setSelected] = useState<string>('');
-
+}: SwatchesProps) {
   return (
-    <>
-      {layout === 'grid' && (
-        <GridSmall>
-          {swatches.map((item) => {
-            const colorString = hsvaToRgbaString(
-              rgbaToHsva(sketchColorToRgba(item.value)),
-            );
+    <ListView.Root>
+      {swatches.map((item) => {
+        const colorString = sketchColorToRgbaString(item.value);
 
-            return (
-              <Square
-                key={item.do_objectID}
-                color={colorString}
-                selected={selected === item.do_objectID}
-                onClick={() => {
-                  onClick(item.value);
-                  setSelected(item.do_objectID);
-                }}
-              />
-            );
-          })}
-        </GridSmall>
-      )}
-      {layout === 'list' && (
-        <ListView.Root>
-          {swatches.map((item) => {
-            const colorString = hsvaToRgbaString(
-              rgbaToHsva(sketchColorToRgba(item.value)),
-            );
+        return (
+          <ListView.Row
+            id={item.do_objectID}
+            key={item.do_objectID}
+            selected={selectedSwatchId === item.do_objectID}
+            onClick={() => {
+              onClick({
+                ...item.value,
+                swatchID: item.do_objectID,
+              });
+            }}
+          >
+            <Square color={colorString} />
+            <Spacer.Horizontal size={8} />
+            {item.name}
+          </ListView.Row>
+        );
+      })}
+    </ListView.Root>
+  );
+});
 
-            return (
-              <ListView.Row
-                id={item.do_objectID}
-                key={item.do_objectID}
-                selected={selected === item.do_objectID}
-                onClick={() => {
-                  onClick(item.value);
-                  setSelected(item.do_objectID);
-                }}
-              >
-                <Square color={colorString} />
-                <Spacer.Horizontal size={8} />
-                {item.name}
-              </ListView.Row>
-            );
-          })}
-        </ListView.Root>
-      )}
-    </>
+const SwatchesGrid = memo(function SwatchesGrid({
+  selectedSwatchId,
+  swatches,
+  onClick,
+}: SwatchesProps) {
+  return (
+    <GridSmall>
+      {swatches.map((item) => {
+        const colorString = sketchColorToRgbaString(item.value);
+
+        return (
+          <Square
+            key={item.do_objectID}
+            color={colorString}
+            selected={selectedSwatchId === item.do_objectID}
+            onClick={() => {
+              onClick({
+                ...item.value,
+                swatchID: item.do_objectID,
+              });
+            }}
+          />
+        );
+      })}
+    </GridSmall>
   );
 });
 
@@ -150,6 +149,8 @@ export default memo(function ColorInputFieldWithPicker({
   // TODO: The value prop here can be an array, and other
   // inspector rows may also take arrays
   const values = useMemo(() => [value], [value]);
+  const selectedSwatchId = value.swatchID || '';
+
   const [state] = useApplicationState();
 
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
@@ -199,13 +200,20 @@ export default memo(function ColorInputFieldWithPicker({
             </RadioGroupContainer>
           </Row>
         </PaddedSection>
-        <Divider />
         <PaddedSection>
-          <SwatchesSelector
-            layout={swatchLayout}
-            swatches={sharedSwatches}
-            onClick={useCallback((color) => onChange(color), [onChange])}
-          />
+          {swatchLayout === 'grid' ? (
+            <SwatchesGrid
+              selectedSwatchId={selectedSwatchId}
+              swatches={sharedSwatches}
+              onClick={(color) => onChange(color)}
+            />
+          ) : (
+            <SwatchesList
+              selectedSwatchId={selectedSwatchId}
+              swatches={sharedSwatches}
+              onClick={(color) => onChange(color)}
+            />
+          )}
         </PaddedSection>
         <StyledArrow />
       </Content>
