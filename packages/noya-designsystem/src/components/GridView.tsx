@@ -6,11 +6,11 @@ const Grid = styled.div(({ theme }) => ({
   flex: 1,
   color: theme.colors.text,
   display: 'grid',
-  padding: '14px',
   gridTemplateColumns: 'repeat(auto-fill, 250px)',
   gridAutoRows: '170px',
   justifyContent: 'space-between',
   gap: '20px',
+  padding: '20px',
   overflowY: 'auto',
 }));
 

@@ -1,6 +1,12 @@
-import { Spacer } from 'noya-designsystem';
-import { PlusIcon } from '@radix-ui/react-icons';
-import { useMemo } from 'react';
+import { RadioGroup, Spacer } from 'noya-designsystem';
+import {
+  BlendingModeIcon,
+  ComponentInstanceIcon,
+  LetterCaseToggleIcon,
+  MarginIcon,
+  PlusIcon,
+} from '@radix-ui/react-icons';
+import React, { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import Button from 'noya-designsystem/src/components/Button';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
@@ -14,25 +20,64 @@ const Container = styled.header(({ theme }) => ({
   color: theme.colors.textMuted,
 }));
 
+const TabsContainer = styled.div(({ theme }) => ({
+  minWidth: `${54 * 4}px`,
+  maxWidth: `${54 * 4}px`,
+  height: '27px',
+  display: 'flex',
+  flex: '1',
+}));
+
+const RightContainer = styled.div(({ theme }) => ({
+  flex: '1 1 0',
+  display: 'flex',
+  flexDirection: 'row',
+}));
+
 export default function Toolbar() {
   const [, dispatch] = useApplicationState();
-  const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
+  const {
+    sizes: { sidebarWidth },
+  } = useTheme();
 
   return useMemo(
     () => (
       <Container>
         <Spacer.Horizontal size={8} />
-        <Button
-          id="tool-swatch"
-          tooltip="Insert an Swatch"
-          onClick={() => dispatch('addColorSwatch')}
-        >
-          <PlusIcon />
-        </Button>
-        <Spacer.Horizontal size={itemSeparatorSize} />
-        <Spacer.Horizontal size={8} />
+        <Spacer.Horizontal />
+        <TabsContainer>
+          <RadioGroup.Root
+            id={'test'}
+            value={'swatches'}
+            onValueChange={() => {}}
+          >
+            <RadioGroup.Item value="swatches" tooltip="Shared colors">
+              <BlendingModeIcon />
+            </RadioGroup.Item>
+            <RadioGroup.Item value="textStyles" tooltip="Shared text styles">
+              <LetterCaseToggleIcon />
+            </RadioGroup.Item>
+            <RadioGroup.Item value="layerStyles" tooltip="Shared layer styles">
+              <MarginIcon />
+            </RadioGroup.Item>
+            <RadioGroup.Item value="symbols" tooltip="Shared symbols">
+              <ComponentInstanceIcon />
+            </RadioGroup.Item>
+          </RadioGroup.Root>
+        </TabsContainer>
+        <RightContainer>
+          <Spacer.Horizontal size={24} />
+          <Button
+            id="tool-swatch"
+            tooltip="Add a shared color"
+            onClick={() => dispatch('addColorSwatch')}
+          >
+            <PlusIcon />
+          </Button>
+        </RightContainer>
+        <Spacer.Horizontal size={sidebarWidth + 8} />
       </Container>
     ),
-    [dispatch, itemSeparatorSize],
+    [dispatch, sidebarWidth],
   );
 }
