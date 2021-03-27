@@ -2,7 +2,10 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit-wasm';
 import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { getLayerFixedRadius } from 'noya-state/src/selectors';
+import {
+  getLayerFixedRadius,
+  getLayerRotationTransform,
+} from 'noya-state/src/selectors';
 import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
 import { ReactNode, useMemo } from 'react';
 
@@ -56,6 +59,11 @@ interface Props {
 }
 
 export default function HoverOutline({ layer, paint, transform }: Props) {
+  let localTransform = useMemo(
+    () => AffineTransform.multiply(getLayerRotationTransform(layer), transform),
+    [layer, transform],
+  );
+
   let element: ReactNode;
 
   switch (layer._class) {
@@ -77,5 +85,5 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
       break;
   }
 
-  return <Group transform={transform}>{element}</Group>;
+  return <Group transform={localTransform}>{element}</Group>;
 }

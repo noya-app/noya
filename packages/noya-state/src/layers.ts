@@ -89,7 +89,10 @@ export const {
   getChildren,
 });
 
-export const { visit: visitReversed } = withOptions<Sketch.AnyLayer>({
+export const {
+  visit: visitReversed,
+  accessPath: accessPathReversed,
+} = withOptions<Sketch.AnyLayer>({
   getChildren: getChildrenReversed,
 });
 

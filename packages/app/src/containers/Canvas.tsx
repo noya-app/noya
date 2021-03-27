@@ -151,7 +151,13 @@ export default memo(function Canvas() {
   // With `useEffect`, the updates are batched and potentially delayed, which
   // makes continuous events like modifying a color unusably slow.
   useLayoutEffect(() => {
-    if (!surfaceRef.current || surfaceRef.current.isDeleted()) return;
+    if (
+      !surfaceRef.current ||
+      surfaceRef.current.isDeleted() ||
+      !containerSize
+    ) {
+      return;
+    }
 
     try {
       const surface = surfaceRef.current;
@@ -159,6 +165,7 @@ export default memo(function Canvas() {
         CanvasKit,
         canvas: surface.getCanvas(),
         state,
+        canvasSize: containerSize,
         theme: {
           textColor,
           backgroundColor,
@@ -173,7 +180,7 @@ export default memo(function Canvas() {
     } catch (e) {
       console.log('rendering error', e);
     }
-  }, [CanvasKit, state, backgroundColor, textColor]);
+  }, [CanvasKit, state, backgroundColor, textColor, containerSize]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -215,8 +222,9 @@ export default memo(function Canvas() {
             }
           }
 
-          const layer = getLayerAtPoint(CanvasKit, state, point, {
+          const layer = getLayerAtPoint(CanvasKit, state, rawPoint, {
             clickThroughGroups: event.metaKey,
+            includeHiddenLayers: false,
           });
 
           if (layer) {
@@ -236,7 +244,7 @@ export default memo(function Canvas() {
           } else {
             dispatch('selectLayer', undefined);
 
-            dispatch('interaction', ['startMarquee', point]);
+            dispatch('interaction', ['startMarquee', rawPoint]);
           }
           break;
         }
@@ -307,7 +315,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'marquee': {
-          dispatch('interaction', ['updateMarquee', point]);
+          dispatch('interaction', ['updateMarquee', rawPoint]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
@@ -320,6 +328,7 @@ export default memo(function Canvas() {
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
+              includeHiddenLayers: false,
             },
           );
 
@@ -344,8 +353,9 @@ export default memo(function Canvas() {
           break;
         }
         case 'none': {
-          const layer = getLayerAtPoint(CanvasKit, state, point, {
+          const layer = getLayerAtPoint(CanvasKit, state, rawPoint, {
             clickThroughGroups: event.metaKey,
+            includeHiddenLayers: false,
           });
 
           // For perf, check that we actually need to update the highlight.
@@ -415,6 +425,7 @@ export default memo(function Canvas() {
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
+              includeHiddenLayers: false,
             },
           );
 
