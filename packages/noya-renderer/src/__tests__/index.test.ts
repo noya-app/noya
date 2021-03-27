@@ -1,15 +1,19 @@
 import { CanvasKit } from 'canvaskit-wasm';
-import { load } from '../index';
-import { rect, color, fill } from '../primitives';
+import { VirtualConsole } from 'jsdom';
+import { color, fill, rect } from '../primitives';
 
 let ck: CanvasKit;
 
-jest.setTimeout(20000);
+const originalVirtualConsole: VirtualConsole = global._virtualConsole;
 
 beforeAll(async () => {
-  // Note: this actually fetches CanvasKit from unpkg. Maybe we should
-  // load from node_modules for testing purposes
-  ck = await load();
+  global._virtualConsole = new VirtualConsole();
+
+  ck = await global.loadCanvasKit();
+});
+
+afterAll(() => {
+  global._virtualConsole = originalVirtualConsole;
 });
 
 test('converts color', async () => {
@@ -92,7 +96,6 @@ test('converts fill', async () => {
     },
     ck.Matrix.identity(),
   );
-
   expect(paint.getColor()).toMatchSnapshot();
 });
 
