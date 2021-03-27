@@ -1,4 +1,4 @@
-import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+import { AffineTransform } from 'noya-geometry';
 import { createElement, memo, ReactNode, useMemo } from 'react';
 import { ClipProps, GroupComponentProps } from '../types';
 

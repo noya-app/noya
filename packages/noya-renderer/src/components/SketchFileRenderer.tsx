@@ -17,7 +17,7 @@ import {
   getLayerTransformAtIndexPath,
   getScreenTransform,
 } from 'noya-state/src/selectors';
-import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import React, { memo, useMemo } from 'react';
 import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
@@ -33,12 +33,12 @@ const BoundingRect = memo(function BoundingRect({
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
-  const insetRect = useMemo(
-    () => Primitives.rect(CanvasKit, Primitives.insetRect(rect, 0.5, 0.5)),
+  const alignedRect = useMemo(
+    () => Primitives.rect(CanvasKit, insetRect(rect, 0.5, 0.5)),
     [CanvasKit, rect],
   );
 
-  return <RCKRect rect={insetRect} paint={selectionPaint} />;
+  return <RCKRect rect={alignedRect} paint={selectionPaint} />;
 });
 
 const DragHandles = memo(function DragHandles({
@@ -66,10 +66,7 @@ const DragHandles = memo(function DragHandles({
             paint={dragHandlePaint}
           />
           <RCKRect
-            rect={Primitives.rect(
-              CanvasKit,
-              Primitives.insetRect(handle.rect, 0.5, 0.5),
-            )}
+            rect={Primitives.rect(CanvasKit, insetRect(handle.rect, 0.5, 0.5))}
             paint={selectionPaint}
           />
         </React.Fragment>
@@ -98,10 +95,7 @@ const Marquee = memo(function Marquee({
 
   const { origin, current } = interactionState;
 
-  const rect = Primitives.rect(
-    CanvasKit,
-    Primitives.createRect(origin, current),
-  );
+  const rect = Primitives.rect(CanvasKit, createRect(origin, current));
 
   return (
     <>

@@ -1,9 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { createRect } from 'noya-geometry';
 import type { PageLayer } from '..';
-import { Point, Rect, UUID } from '../types';
 import * as Models from '../models';
-import { createRect } from 'noya-renderer/src/primitives';
+import { Point, Rect, UUID } from '../types';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;

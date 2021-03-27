@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Group } from 'noya-react-canvaskit';
-import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+import { AffineTransform } from 'noya-geometry';
 import { memo, useMemo } from 'react';
 import SketchLayer from './SketchLayer';
 

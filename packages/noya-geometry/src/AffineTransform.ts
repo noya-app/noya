@@ -1,4 +1,4 @@
-import { Point } from '../types';
+import { Point } from './types';
 
 export interface Transformable {
   transform(affineTransform: AffineTransform): this;

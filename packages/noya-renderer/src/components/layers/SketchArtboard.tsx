@@ -10,7 +10,7 @@ import {
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+import { AffineTransform } from 'noya-geometry';
 import { memo, useMemo } from 'react';
 import SketchLayer from './SketchLayer';
 

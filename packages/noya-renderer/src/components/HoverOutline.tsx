@@ -6,7 +6,7 @@ import {
   getLayerFixedRadius,
   getLayerRotationTransform,
 } from 'noya-state/src/selectors';
-import { AffineTransform } from 'noya-state/src/utils/AffineTransform';
+import { AffineTransform } from 'noya-geometry';
 import { ReactNode, useMemo } from 'react';
 
 function useLayerPath(layer: Sketch.Rectangle | Sketch.Oval) {

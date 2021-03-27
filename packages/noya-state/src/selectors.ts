@@ -1,5 +1,15 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit } from 'canvaskit-wasm';
+import {
+  AffineTransform,
+  rotatedRectContainsPoint,
+  rectContainsPoint,
+  getRectCornerPoints,
+  createRectFromBounds,
+  transformRect,
+  createBounds,
+  rectsIntersect,
+} from 'noya-geometry';
 import { getDragHandles } from 'noya-renderer/src/canvas/selection';
 import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
@@ -8,7 +18,6 @@ import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
 import { WorkspaceTab } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
 import type { Point, Rect, UUID } from './types';
-import { AffineTransform } from './utils/AffineTransform';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -183,7 +192,7 @@ export function getScaleDirectionAtPoint(
   const handles = getDragHandles(boundingRect);
 
   const handle = handles.find((handle) =>
-    Primitives.rectContainsPoint(handle.rect, point),
+    rectContainsPoint(handle.rect, point),
   );
 
   return handle?.compassDirection;
@@ -265,13 +274,10 @@ export function getLayerAtPoint(
       ctm,
     );
 
-    const framePoints = Primitives.getRectCornerPoints(layer.frame);
+    const framePoints = getRectCornerPoints(layer.frame);
     const localPoints = framePoints.map((point) => transform.applyTo(point));
 
-    const containsPoint = Primitives.rotatedRectContainsPoint(
-      localPoints,
-      screenPoint,
-    );
+    const containsPoint = rotatedRectContainsPoint(localPoints, screenPoint);
 
     if (!containsPoint) return SKIP;
 
@@ -332,7 +338,7 @@ export function getBoundingRect(
       ctm,
     );
 
-    const framePoints = Primitives.getRectCornerPoints(layer.frame);
+    const framePoints = getRectCornerPoints(layer.frame);
     const localPoints = framePoints.map((point) => transform.applyTo(point));
 
     const xs = localPoints.map((point) => point.x);
@@ -347,7 +353,7 @@ export function getBoundingRect(
   // Check that at least one layer had a non-zero size
   if (!Object.values(bounds).every(isFinite)) return undefined;
 
-  return Primitives.createRectFromBounds(bounds);
+  return createRectFromBounds(bounds);
 }
 
 export function getBoundingPoints(
@@ -371,7 +377,7 @@ export function getBoundingPoints(
       ctm,
     );
 
-    const framePoints = Primitives.getRectCornerPoints(layer.frame);
+    const framePoints = getRectCornerPoints(layer.frame);
     points = framePoints.map((point) => transform.applyTo(point));
 
     return STOP;
@@ -396,7 +402,7 @@ export function getLayersInRect(
   let found: Sketch.AnyLayer[] = [];
 
   const screenTransform = getScreenTransform(state);
-  const screenRect = Primitives.transformRect(rect, screenTransform);
+  const screenRect = transformRect(rect, screenTransform);
 
   visitLayersReversed(
     page,
@@ -404,8 +410,8 @@ export function getLayersInRect(
     options,
     (layer, ctm) => {
       // TODO: Handle rotated rectangle collision
-      const hasIntersect = Primitives.rectsIntersect(
-        Primitives.transformRect(layer.frame, ctm),
+      const hasIntersect = rectsIntersect(
+        transformRect(layer.frame, ctm),
         screenRect,
       );
 
@@ -440,7 +446,7 @@ export function getLayerTranslationTransform(
 export function getLayerRotationTransform(
   layer: Sketch.AnyLayer,
 ): AffineTransform {
-  const bounds = Primitives.createBounds(layer.frame);
+  const bounds = createBounds(layer.frame);
   const midpoint = { x: bounds.midX, y: bounds.midY };
   const rotation = getLayerRotationRadians(layer);
 

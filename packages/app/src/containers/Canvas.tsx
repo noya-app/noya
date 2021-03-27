@@ -1,7 +1,7 @@
 import type { Surface } from 'canvaskit-wasm';
 import { render, unmount } from 'noya-react-canvaskit';
 import { uuid } from 'noya-renderer';
-import { createRect } from 'noya-renderer/src/primitives';
+import { createRect } from 'noya-geometry';
 import { CompassDirection, Point, ShapeType } from 'noya-state';
 import {
   getCurrentPageMetadata,

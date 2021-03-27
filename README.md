@@ -19,15 +19,17 @@ quick summary of the key packages:
 - [App](/packages/app) - The reference app of a design tool built with these
   packages
 - [State](/packages/noya-state) - Manages the internal state of the UI and
-  `.sketch` file
-- [Renderer](/packages/noya-renderer) - Render a `.sketch` file to an HTML5
-  canvas (via Google's
+  design file
+- [Renderer](/packages/noya-renderer) - Render a design file to an HTML5 canvas
+  (via Google's
   [Skia compiled to webassembly](https://www.npmjs.com/package/canvaskit-wasm))
 - [Design System](/packages/noya-designsystem) - Common UI components, like
   buttons and inputs
 - [Sketch File](/packages/noya-sketch-file) - Parse a `.sketch` file into JSON
 - [Color Picker](/packages/noya-colorpicker) - A React component for picking
   colors (based on [react-colorful](https://github.com/omgovich/react-colorful))
+- [Geometry](/packages/noya-geometry) - A library for working with shapes and
+  matrices
 
 ## Development Setup
 

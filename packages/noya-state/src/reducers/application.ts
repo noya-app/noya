@@ -2,14 +2,11 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { Primitives, uuid } from 'noya-renderer';
-import {
-  createBounds,
-  normalizeRect,
-  resizeRect,
-} from 'noya-renderer/src/primitives';
+import { resizeRect } from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
 import { sum } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
+import { transformRect, createBounds, normalizeRect } from 'noya-geometry';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -26,7 +23,7 @@ import {
   getSelectedRect,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
-import { AffineTransform } from '../utils/AffineTransform';
+import { AffineTransform } from 'noya-geometry';
 import {
   CompassDirection,
   createInitialInteractionState,
@@ -338,9 +335,7 @@ export function reducer(
             layerIndexPath,
             AffineTransform.identity,
           );
-          return Primitives.createBounds(
-            Primitives.transformRect(layer.frame, transform),
-          );
+          return createBounds(transformRect(layer.frame, transform));
         }
 
         const sortedLayerIndexPaths = layerIndexPaths.sort(
