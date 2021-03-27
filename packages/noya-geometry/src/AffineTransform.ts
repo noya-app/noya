@@ -76,8 +76,8 @@ export class AffineTransform implements Transformable {
     ]);
   }
 
-  get float32Array(): Float32Array {
-    return new Float32Array([
+  get array(): number[] {
+    return [
       this.m00,
       this.m01,
       this.m02,
@@ -87,7 +87,11 @@ export class AffineTransform implements Transformable {
       0,
       0,
       1,
-    ]);
+    ];
+  }
+
+  get float32Array(): Float32Array {
+    return new Float32Array(this.array);
   }
 
   // Static
@@ -112,9 +116,9 @@ export class AffineTransform implements Transformable {
 
     if (rx !== 0 || ry !== 0) {
       return AffineTransform.multiply(
-        AffineTransform.translation(-rx, -ry),
-        rotation,
         AffineTransform.translation(rx, ry),
+        rotation,
+        AffineTransform.translation(-rx, -ry),
       );
     }
 
@@ -129,11 +133,12 @@ export class AffineTransform implements Transformable {
     return new AffineTransform([1, 0, tx, 0, 1, ty]);
   }
 
+  /**
+   * Multiply the matrices together from left to right.
+   */
   static multiply(...[first, ...rest]: AffineTransform[]): AffineTransform {
     if (!first) return AffineTransform.identity;
 
-    // if (!first) throw new Error('Bad call to AffineTransform.multiply');
-
-    return rest.reduce((result, item) => item.transform(result), first);
+    return rest.reduce((result, item) => result.transform(item), first);
   }
 }

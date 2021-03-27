@@ -270,8 +270,8 @@ export function getLayerAtPoint(
 
   visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
     const transform = AffineTransform.multiply(
-      getLayerRotationTransform(layer),
       ctm,
+      getLayerRotationTransform(layer),
     );
 
     const framePoints = getRectCornerPoints(layer.frame);
@@ -334,8 +334,8 @@ export function getBoundingRect(
     if (!layerIds.includes(layer.do_objectID)) return;
 
     const transform = AffineTransform.multiply(
-      getLayerRotationTransform(layer),
       ctm,
+      getLayerRotationTransform(layer),
     );
 
     const framePoints = getRectCornerPoints(layer.frame);
@@ -373,8 +373,8 @@ export function getBoundingPoints(
     if (layerId !== layer.do_objectID) return;
 
     const transform = AffineTransform.multiply(
-      getLayerRotationTransform(layer),
       ctm,
+      getLayerRotationTransform(layer),
     );
 
     const framePoints = getRectCornerPoints(layer.frame);
@@ -434,7 +434,7 @@ export function getLayerTransform(
   const rotation = getLayerRotationTransform(layer);
   const translation = getLayerTranslationTransform(layer);
 
-  return AffineTransform.multiply(translation, rotation, ctm);
+  return AffineTransform.multiply(ctm, rotation, translation);
 }
 
 export function getLayerTranslationTransform(
@@ -497,8 +497,8 @@ export function getCanvasTransform(state: ApplicationState) {
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
   return AffineTransform.multiply(
-    getScreenTransform(state),
-    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
     AffineTransform.scale(zoomValue),
+    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
+    getScreenTransform(state),
   );
 }

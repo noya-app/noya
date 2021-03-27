@@ -925,22 +925,22 @@ export function reducer(
             );
 
             const originalTransform = AffineTransform.multiply(
-              AffineTransform.scale(
-                originalBoundingRect.width,
-                originalBoundingRect.height,
-              ),
               AffineTransform.translation(
                 originalBoundingRect.x,
                 originalBoundingRect.y,
               ),
+              AffineTransform.scale(
+                originalBoundingRect.width,
+                originalBoundingRect.height,
+              ),
             ).invert();
 
             const newTransform = AffineTransform.multiply(
+              AffineTransform.translation(newBoundingRect.x, newBoundingRect.y),
               AffineTransform.scale(
                 newBoundingRect.width,
                 newBoundingRect.height,
               ),
-              AffineTransform.translation(newBoundingRect.x, newBoundingRect.y),
             );
 
             layerIndexPaths.forEach((layerIndex) => {
@@ -951,7 +951,8 @@ export function reducer(
                   .slice(1, -1) // Remove the page and current layer
                   .map((layer) =>
                     AffineTransform.translation(layer.frame.x, layer.frame.y),
-                  ),
+                  )
+                  .reverse(),
               );
 
               const newLayer = Layers.access(
@@ -960,20 +961,20 @@ export function reducer(
               );
 
               const min = AffineTransform.multiply(
-                layerTransform,
-                originalTransform,
-                newTransform,
                 layerTransform.invert(),
+                newTransform,
+                originalTransform,
+                layerTransform,
               ).applyTo({
                 x: originalLayer.frame.x,
                 y: originalLayer.frame.y,
               });
 
               const max = AffineTransform.multiply(
-                layerTransform,
-                originalTransform,
-                newTransform,
                 layerTransform.invert(),
+                newTransform,
+                originalTransform,
+                layerTransform,
               ).applyTo({
                 x: originalLayer.frame.x + originalLayer.frame.width,
                 y: originalLayer.frame.y + originalLayer.frame.height,

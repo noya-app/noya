@@ -60,7 +60,7 @@ interface Props {
 
 export default function HoverOutline({ layer, paint, transform }: Props) {
   let localTransform = useMemo(
-    () => AffineTransform.multiply(getLayerRotationTransform(layer), transform),
+    () => AffineTransform.multiply(transform, getLayerRotationTransform(layer)),
     [layer, transform],
   );
 
