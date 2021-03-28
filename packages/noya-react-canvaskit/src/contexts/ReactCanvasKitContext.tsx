@@ -1,12 +1,25 @@
-import { Context } from 'noya-renderer';
+import { Canvas, CanvasKit } from 'canvaskit-wasm';
 import { createContext, useContext } from 'react';
 
-const ReactCanvasKitContext = createContext<Context | undefined>(undefined);
+export interface ReactCanvasKitContext {
+  CanvasKit: CanvasKit;
+  canvas: Canvas;
+  canvasSize: {
+    width: number;
+    height: number;
+  };
+  theme: {
+    textColor: string;
+    backgroundColor: string;
+  };
+}
 
-export const ReactCanvasKitProvider = ReactCanvasKitContext.Provider;
+const RCKContext = createContext<ReactCanvasKitContext | undefined>(undefined);
 
-export const useReactCanvasKit = (): Context => {
-  const value = useContext(ReactCanvasKitContext);
+export const ReactCanvasKitProvider = RCKContext.Provider;
+
+export const useReactCanvasKit = (): ReactCanvasKitContext => {
+  const value = useContext(RCKContext);
 
   if (!value) throw new Error(`Missing ReactCanvasKitProvider`);
 

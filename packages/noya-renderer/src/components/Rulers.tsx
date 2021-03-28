@@ -11,6 +11,7 @@ import {
   getCurrentPageMetadata,
 } from 'noya-state/src/selectors';
 import React, { useMemo } from 'react';
+import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 
 function RulerLabel({ text, origin }: { text: string; origin: Point }) {
   const { CanvasKit, theme } = useReactCanvasKit();
@@ -71,7 +72,8 @@ function range(
 }
 
 export function HorizontalRuler() {
-  const { CanvasKit, state, canvasSize, theme } = useReactCanvasKit();
+  const { CanvasKit, canvasSize, theme } = useReactCanvasKit();
+  const [state] = useApplicationState();
   const page = getCurrentPage(state);
   const { scrollOrigin } = getCurrentPageMetadata(state);
 

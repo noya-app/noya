@@ -2,12 +2,15 @@
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
 import { Surface } from 'canvaskit-wasm';
-import { Context, fontManager } from 'noya-renderer';
+import { fontManager } from 'noya-renderer';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
 import ReactReconciler from 'react-reconciler';
 import { FontManagerProvider } from './contexts/FontManagerContext';
-import { ReactCanvasKitProvider } from './contexts/ReactCanvasKitContext';
+import {
+  ReactCanvasKitContext,
+  ReactCanvasKitProvider,
+} from './contexts/ReactCanvasKitContext';
 import {
   AnyElementInstance,
   AnyElementProps,
@@ -50,7 +53,7 @@ interface ReactCanvasKitHostConfig
     any, // SuspenseInstance
     any, // HydratableInstance
     PublicInstance, // PublicInstance
-    Context, // HostContext
+    ReactCanvasKitContext, // HostContext
     any, // UpdatePayload
     ChildSet, // _ChildSet
     any, // TimeoutHandle
@@ -89,7 +92,9 @@ const hostConfig: ReactCanvasKitHostConfig = {
     container.children = newChildren;
   },
 
-  getRootHostContext(rootContainerInstance: RootComponent): Context {
+  getRootHostContext(
+    rootContainerInstance: RootComponent,
+  ): ReactCanvasKitContext {
     return rootContainerInstance.context;
   },
 
@@ -104,7 +109,11 @@ const hostConfig: ReactCanvasKitHostConfig = {
    * most commonly <div id="root"></div>
    * @return A context object that you wish to pass to immediate child.
    */
-  getChildHostContext(parentHostContext, type, rootContainerInstance): Context {
+  getChildHostContext(
+    parentHostContext,
+    type,
+    rootContainerInstance,
+  ): ReactCanvasKitContext {
     return parentHostContext;
   },
 
@@ -240,7 +249,11 @@ const hostConfig: ReactCanvasKitHostConfig = {
         context: { CanvasKit, canvas, theme },
       } = containerInfo;
 
-      canvas.clear(CanvasKit.parseColorString(theme.backgroundColor));
+      try {
+        // This sometimes throws an error when surfaces are mounted and unmounted,
+        // not sure why. It doesn't seem to cause any problems when it fails though.
+        canvas.clear(CanvasKit.parseColorString(theme.backgroundColor));
+      } catch {}
 
       const draw = (element: AnyElementInstance) => {
         switch (element.type) {
@@ -314,7 +327,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
         containerInfo.surface.flush();
       }
     } catch (e) {
-      // console.log('err!', e);
+      console.log('noya-react-canvaskit error!', e);
     }
   },
 
@@ -363,7 +376,10 @@ canvaskitReconciler.injectIntoDevTools({
   rendererPackageName: 'react-canvaskit', // package name
 });
 
-function getContainerForSurface(surface: Surface, context: Context) {
+function getContainerForSurface(
+  surface: Surface,
+  context: ReactCanvasKitContext,
+) {
   let extendedSurface = surface as Surface & { _container: any };
 
   if (!extendedSurface._container) {
@@ -376,7 +392,12 @@ function getContainerForSurface(surface: Surface, context: Context) {
   return extendedSurface._container;
 }
 
-export function render(element: ReactNode, surface: Surface, context: Context) {
+export function render(
+  element: ReactNode,
+  surface: Surface,
+  context: ReactCanvasKitContext,
+  callback?: () => void,
+) {
   const container = getContainerForSurface(surface, context);
 
   canvaskitReconciler.updateContainer(
@@ -385,12 +406,20 @@ export function render(element: ReactNode, surface: Surface, context: Context) {
     </ReactCanvasKitProvider>,
     container,
     null,
-    () => {},
+    () => {
+      callback?.();
+    },
   );
 }
 
-export function unmount(surface: Surface, context: Context) {
+export function unmount(
+  surface: Surface,
+  context: ReactCanvasKitContext,
+  callback?: () => void,
+) {
   const container = getContainerForSurface(surface, context);
 
-  canvaskitReconciler.updateContainer(null, container, null, () => {});
+  canvaskitReconciler.updateContainer(null, container, null, () => {
+    callback?.();
+  });
 }

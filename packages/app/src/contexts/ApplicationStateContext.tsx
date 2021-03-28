@@ -15,13 +15,30 @@ export const ApplicationStateProvider = ApplicationStateContext.Provider;
 
 type Dispatcher = (...args: Action) => void;
 
-export const useApplicationState = (): [ApplicationState, Dispatcher] => {
+/**
+ * This should only be used to propagate state between React reconcilers
+ */
+export const useRawApplicationState = (): ApplicationStateContextValue => {
   const value = useContext(ApplicationStateContext);
-  const trigger = useGlobalInputBlurTrigger();
 
+  // If this happens, we'll conditionally call hooks afterward
+  // TODO: Is there a better solution?
   if (!value) {
     throw new Error(`Missing ApplicationStateProvider`);
   }
+
+  return value;
+};
+
+/**
+ * Get the application state, and a dispatch function to modify it.
+ *
+ * Only "container" components should use this, while "presentational" components
+ * should instead be passed their data via props.
+ */
+export const useApplicationState = (): [ApplicationState, Dispatcher] => {
+  const value = useRawApplicationState();
+  const trigger = useGlobalInputBlurTrigger();
 
   const [state, dispatch] = value;
 

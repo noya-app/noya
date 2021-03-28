@@ -20,7 +20,9 @@ import {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import {
+  ApplicationStateProvider,
   useApplicationState,
+  useRawApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
@@ -79,6 +81,7 @@ export default memo(function Canvas() {
     },
     sizes: { sidebarWidth },
   } = useTheme();
+  const rawApplicationState = useRawApplicationState();
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -124,12 +127,15 @@ export default memo(function Canvas() {
   }, [dispatch, containerSize, insets]);
 
   // Recreate the surface whenever the canvas resizes
+  //
+  // TODO: This should also be a layout effect so that it happens before the canvas is rendered.
+  // However, there seems to be a problem with the ordering of things when it's a layout effect.
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
     if (!canvasElement) return;
 
-    const surface = CanvasKit.MakeCanvasSurface(canvasElement.id);
+    const surface = CanvasKit.MakeCanvasSurface(canvasElement);
 
     if (!surface) {
       surfaceRef.current = null;
@@ -159,20 +165,25 @@ export default memo(function Canvas() {
       return;
     }
 
-    try {
-      const surface = surfaceRef.current;
-      const context = {
-        CanvasKit,
-        canvas: surface.getCanvas(),
-        state,
-        canvasSize: containerSize,
-        theme: {
-          textColor,
-          backgroundColor,
-        },
-      };
+    const surface = surfaceRef.current;
+    const context = {
+      CanvasKit,
+      canvas: surface.getCanvas(),
+      canvasSize: containerSize,
+      theme: {
+        textColor,
+        backgroundColor,
+      },
+    };
 
-      render(<SketchFileRenderer />, surface, context);
+    try {
+      render(
+        <ApplicationStateProvider value={rawApplicationState}>
+          <SketchFileRenderer />
+        </ApplicationStateProvider>,
+        surface,
+        context,
+      );
 
       return () => {
         unmount(surface, context);
@@ -180,7 +191,7 @@ export default memo(function Canvas() {
     } catch (e) {
       console.log('rendering error', e);
     }
-  }, [CanvasKit, state, backgroundColor, textColor, containerSize]);
+  }, [CanvasKit, state, backgroundColor, textColor, containerSize, rawApplicationState]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -505,7 +516,6 @@ export default memo(function Canvas() {
       onPointerUp={handleMouseUp}
     >
       <CanvasComponent
-        id="main"
         ref={canvasRef}
         left={-insets.left}
         width={0}

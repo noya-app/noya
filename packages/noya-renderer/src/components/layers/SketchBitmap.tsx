@@ -2,13 +2,15 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Group, Image, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { memo, useMemo } from 'react';
+import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 
 interface Props {
   layer: Sketch.Bitmap;
 }
 
 export default memo(function SketchBitmap({ layer }: Props) {
-  const { CanvasKit, state } = useReactCanvasKit();
+  const [state] = useApplicationState();
+  const { CanvasKit } = useReactCanvasKit();
 
   const ref = state.sketch.images[layer.image._ref];
   const paint = useMemo(() => new CanvasKit.Paint(), [CanvasKit]);

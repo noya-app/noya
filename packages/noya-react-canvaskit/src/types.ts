@@ -8,8 +8,8 @@ import {
   Rect,
   Surface,
 } from 'canvaskit-wasm';
-import { Context } from 'noya-renderer';
 import { ReactNode } from 'react';
+import { ReactCanvasKitContext } from './contexts/ReactCanvasKitContext';
 
 export interface RectComponentProps {
   rect: Rect;
@@ -87,7 +87,7 @@ export type AnyElementInstance = ElementInstance<ElementType>;
 export type AnyElementProps = ElementProps<ElementType>;
 
 export interface RootComponent {
-  context: Context;
+  context: ReactCanvasKitContext;
   surface: Surface;
   children: ElementInstance<ElementType>[];
 }

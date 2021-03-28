@@ -23,6 +23,7 @@ import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
 import SketchLayer from './layers/SketchLayer';
 import { HorizontalRuler } from './Rulers';
+import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -106,7 +107,8 @@ const Marquee = memo(function Marquee({
 });
 
 export default memo(function SketchFileRenderer() {
-  const { CanvasKit, state } = useReactCanvasKit();
+  const [state] = useApplicationState();
+  const { CanvasKit } = useReactCanvasKit();
   const page = getCurrentPage(state);
   const showRulers = state.preferences.showRulers;
   const screenTransform = getScreenTransform(state);
