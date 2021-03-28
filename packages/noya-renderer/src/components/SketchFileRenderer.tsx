@@ -1,8 +1,11 @@
+import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import * as CanvasKit from 'canvaskit-wasm';
+import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import {
   Group,
   Polyline,
   Rect as RCKRect,
+  useColorFill,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
@@ -17,13 +20,12 @@ import {
   getLayerTransformAtIndexPath,
   getScreenTransform,
 } from 'noya-state/src/selectors';
-import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import React, { memo, useMemo } from 'react';
+import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
 import SketchLayer from './layers/SketchLayer';
 import { HorizontalRuler } from './Rulers';
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -114,6 +116,21 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = getScreenTransform(state);
   const canvasTransform = getCanvasTransform(state);
 
+  const canvasSize = state.canvasSize;
+  const canvasInsets = state.canvasInsets;
+  const canvasRect = useMemo(
+    () =>
+      CanvasKit.XYWHRect(
+        canvasInsets.left,
+        0,
+        canvasSize.width,
+        canvasSize.height,
+      ),
+    [CanvasKit, canvasInsets.left, canvasSize.height, canvasSize.width],
+  );
+  const backgroundColor = useTheme().colors.canvas.background;
+  const backgroundFill = useColorFill(backgroundColor);
+
   const selectionPaint = usePaint({
     style: CanvasKit.PaintStyle.Stroke,
     color: CanvasKit.Color(180, 180, 180, 0.5),
@@ -185,6 +202,7 @@ export default memo(function SketchFileRenderer() {
 
   return (
     <>
+      <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         {page.layers.map((layer) => (
           <SketchLayer key={layer.do_objectID} layer={layer} />

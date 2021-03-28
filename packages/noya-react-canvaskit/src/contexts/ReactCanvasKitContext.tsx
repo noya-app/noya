@@ -4,14 +4,6 @@ import { createContext, useContext } from 'react';
 export interface ReactCanvasKitContext {
   CanvasKit: CanvasKit;
   canvas: Canvas;
-  canvasSize: {
-    width: number;
-    height: number;
-  };
-  theme: {
-    textColor: string;
-    backgroundColor: string;
-  };
 }
 
 const RCKContext = createContext<ReactCanvasKitContext | undefined>(undefined);

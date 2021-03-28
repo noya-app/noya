@@ -1,3 +1,4 @@
+import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import {
   Rect as RCKRect,
   Text,
@@ -11,16 +12,17 @@ import {
   getCurrentPageMetadata,
 } from 'noya-state/src/selectors';
 import React, { useMemo } from 'react';
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
+import { useTheme } from 'styled-components';
 
 function RulerLabel({ text, origin }: { text: string; origin: Point }) {
-  const { CanvasKit, theme } = useReactCanvasKit();
+  const { CanvasKit } = useReactCanvasKit();
+  const textColor = useTheme().colors.textMuted;
   const fontManager = useFontManager();
 
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
-        color: CanvasKit.parseColorString(theme.textColor),
+        color: CanvasKit.parseColorString(textColor),
         fontSize: 11,
         fontFamilies: ['Roboto'],
         letterSpacing: 0.2,
@@ -37,7 +39,7 @@ function RulerLabel({ text, origin }: { text: string; origin: Point }) {
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, fontManager, text, theme.textColor]);
+  }, [CanvasKit, fontManager, text, textColor]);
 
   const labelRect = useMemo(
     () =>
@@ -72,9 +74,12 @@ function range(
 }
 
 export function HorizontalRuler() {
-  const { CanvasKit, canvasSize, theme } = useReactCanvasKit();
+  const { CanvasKit } = useReactCanvasKit();
+  const backgroundColor = useTheme().colors.canvas.background;
+
   const [state] = useApplicationState();
   const page = getCurrentPage(state);
+  const canvasSize = state.canvasSize;
   const { scrollOrigin } = getCurrentPageMetadata(state);
 
   const rulerRect = useMemo(
@@ -86,7 +91,7 @@ export function HorizontalRuler() {
     [CanvasKit, canvasSize.width],
   );
 
-  const backgroundPaint = useColorFill(theme.backgroundColor);
+  const backgroundPaint = useColorFill(backgroundColor);
   const dividerPaint = useColorFill('#555');
 
   const markOffset = page.horizontalRulerData.base;

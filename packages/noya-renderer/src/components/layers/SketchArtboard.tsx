@@ -1,17 +1,18 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { AffineTransform } from 'noya-geometry';
 import {
+  ClipProps,
   Group,
   Rect,
   Text,
-  ClipProps,
   useBlurMaskFilter,
   useFontManager,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { AffineTransform } from 'noya-geometry';
 import { memo, useMemo } from 'react';
+import { useTheme } from 'styled-components';
 import SketchLayer from './SketchLayer';
 
 interface Props {
@@ -19,7 +20,8 @@ interface Props {
 }
 
 export default memo(function SketchArtboard({ layer }: Props) {
-  const { CanvasKit, theme } = useReactCanvasKit();
+  const { CanvasKit } = useReactCanvasKit();
+  const textColor = useTheme().colors.textMuted;
   const fontManager = useFontManager();
 
   const paint = usePaint({
@@ -62,7 +64,7 @@ export default memo(function SketchArtboard({ layer }: Props) {
   const labelParagraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
-        color: CanvasKit.parseColorString(theme.textColor),
+        color: CanvasKit.parseColorString(textColor),
         fontSize: 11,
         fontFamilies: ['Roboto'],
         letterSpacing: 0.2,
@@ -79,7 +81,7 @@ export default memo(function SketchArtboard({ layer }: Props) {
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, fontManager, layer.name, theme.textColor]);
+  }, [CanvasKit, fontManager, layer.name, textColor]);
 
   const labelRect = Primitives.rect(CanvasKit, {
     x: layer.frame.x + 3,

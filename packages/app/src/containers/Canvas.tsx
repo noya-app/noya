@@ -18,7 +18,7 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { ThemeProvider, useTheme } from 'styled-components';
 import {
   ApplicationStateProvider,
   useApplicationState,
@@ -74,13 +74,10 @@ const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
 }));
 
 export default memo(function Canvas() {
+  const theme = useTheme();
   const {
-    colors: {
-      textMuted: textColor,
-      canvas: { background: backgroundColor },
-    },
     sizes: { sidebarWidth },
-  } = useTheme();
+  } = theme;
   const rawApplicationState = useRawApplicationState();
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -169,18 +166,15 @@ export default memo(function Canvas() {
     const context = {
       CanvasKit,
       canvas: surface.getCanvas(),
-      canvasSize: containerSize,
-      theme: {
-        textColor,
-        backgroundColor,
-      },
     };
 
     try {
       render(
-        <ApplicationStateProvider value={rawApplicationState}>
-          <SketchFileRenderer />
-        </ApplicationStateProvider>,
+        <ThemeProvider theme={theme}>
+          <ApplicationStateProvider value={rawApplicationState}>
+            <SketchFileRenderer />
+          </ApplicationStateProvider>
+        </ThemeProvider>,
         surface,
         context,
       );
@@ -191,7 +185,7 @@ export default memo(function Canvas() {
     } catch (e) {
       console.log('rendering error', e);
     }
-  }, [CanvasKit, state, backgroundColor, textColor, containerSize, rawApplicationState]);
+  }, [CanvasKit, state, containerSize, rawApplicationState, theme]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {

@@ -246,14 +246,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
   resetAfterCommit(containerInfo) {
     try {
       const {
-        context: { CanvasKit, canvas, theme },
+        context: { CanvasKit, canvas },
       } = containerInfo;
-
-      try {
-        // This sometimes throws an error when surfaces are mounted and unmounted,
-        // not sure why. It doesn't seem to cause any problems when it fails though.
-        canvas.clear(CanvasKit.parseColorString(theme.backgroundColor));
-      } catch {}
 
       const draw = (element: AnyElementInstance) => {
         switch (element.type) {
