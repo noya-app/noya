@@ -497,8 +497,8 @@ export function getCanvasTransform(state: ApplicationState) {
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
   return AffineTransform.multiply(
-    AffineTransform.scale(zoomValue),
-    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
     getScreenTransform(state),
+    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
+    AffineTransform.scale(zoomValue),
   );
 }
