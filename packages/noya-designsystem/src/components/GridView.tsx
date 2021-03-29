@@ -67,7 +67,7 @@ const ItemDescription = styled.span(({ theme }) => ({
 interface ItemProps {
   children?: ReactNode;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
 }

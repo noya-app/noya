@@ -6,10 +6,14 @@ import {
   MarginIcon,
   PlusIcon,
 } from '@radix-ui/react-icons';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 import Button from 'noya-designsystem/src/components/Button';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useSelector,
+} from '../contexts/ApplicationStateContext';
+import { Selectors, ComponentsTab } from 'noya-state';
 
 const Container = styled.header(({ theme }) => ({
   height: `${theme.sizes.toolbar.height}px`,
@@ -34,11 +38,19 @@ const RightContainer = styled.div(({ theme }) => ({
   flexDirection: 'row',
 }));
 
-export default function Toolbar() {
+export default function SwatchesToolbar() {
   const [, dispatch] = useApplicationState();
   const {
     sizes: { sidebarWidth },
   } = useTheme();
+  const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
+
+  const handleChangeTab = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      dispatch('setComponentsTab', event.target.value as ComponentsTab);
+    },
+    [dispatch],
+  );
 
   return useMemo(
     () => (
@@ -48,8 +60,8 @@ export default function Toolbar() {
         <TabsContainer>
           <RadioGroup.Root
             id={'test'}
-            value={'swatches'}
-            onValueChange={() => {}}
+            value={componentsTab}
+            onValueChange={handleChangeTab}
           >
             <RadioGroup.Item value="swatches" tooltip="Shared colors">
               <BlendingModeIcon />
@@ -68,9 +80,17 @@ export default function Toolbar() {
         <RightContainer>
           <Spacer.Horizontal size={24} />
           <Button
-            id="tool-swatch"
-            tooltip="Add a shared color"
-            onClick={() => dispatch('addColorSwatch')}
+            id="add-style"
+            onClick={() => {
+              switch (componentsTab) {
+                case 'swatches':
+                  dispatch('addColorSwatch');
+                  break;
+                case 'layerStyles':
+                  dispatch('addLayerStyle');
+                  break;
+              }
+            }}
           >
             <PlusIcon />
           </Button>
@@ -78,6 +98,6 @@ export default function Toolbar() {
         <Spacer.Horizontal size={sidebarWidth + 8} />
       </Container>
     ),
-    [dispatch, sidebarWidth],
+    [dispatch, sidebarWidth, componentsTab, handleChangeTab],
   );
 }

@@ -34,6 +34,12 @@ import {
 
 export type WorkspaceTab = 'canvas' | 'components';
 
+export type ComponentsTab =
+  | 'swatches'
+  | 'textStyles'
+  | 'layerStyles'
+  | 'symbols';
+
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
 export type LayerHighlight = {
@@ -43,11 +49,13 @@ export type LayerHighlight = {
 
 export type ApplicationState = {
   currentTab: WorkspaceTab;
+  currentComponentsTab: ComponentsTab;
   interactionState: InteractionState;
-  selectedPage: string;
   highlightedLayer?: LayerHighlight;
+  selectedPage: string;
   selectedObjects: string[];
   selectedSwatchIds: string[];
+  selectedLayerStyleIds: string[];
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
@@ -64,6 +72,7 @@ type StyleElementType = 'Fill' | 'Border' | 'Shadow';
 
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
+  | [type: 'setComponentsTab', value: ComponentsTab]
   | [
       type: 'setCanvasSize',
       size: { width: number; height: number },
@@ -83,6 +92,11 @@ export type Action =
     ]
   | [
       type: 'selectSwatch',
+      swatchId: string | string[] | undefined,
+      selectionType?: SelectionType,
+    ]
+  | [
+      type: 'selectLayerStyle',
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
@@ -145,6 +159,8 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
+  | [type: 'addLayerStyle']
+  | [type: 'setLayerStyleName', id: string | string[], name: string]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -154,6 +170,66 @@ export type Action =
       action:
         | Exclude<InteractionAction, ['maybeScale', ...any[]]>
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
+    ]
+  | [type: `addNewLayer${StyleElementType}`]
+  | [
+      type: `setLayer${StyleElementType}Enabled`,
+      index: number,
+      isEnabled: boolean,
+    ]
+  | [
+      type: `setLayer${StyleElementType}Color`,
+      index: number,
+      value: Sketch.Color,
+    ]
+  | [type: `deleteLayer${StyleElementType}`, index: number]
+  | [
+      type: `moveLayer${StyleElementType}`,
+      sourceIndex: number,
+      destinationIndex: number,
+    ]
+  | [type: `deleteDisabledLayer${StyleElementType}s`]
+  | [
+      type: 'setLayerFillOpacity',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setLayerBorderWidth',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setLayerBorderPosition',
+      index: number,
+      position: Sketch.BorderPosition,
+    ]
+  | [type: 'setLayerOpacity', amount: number, mode?: SetNumberMode]
+  | [
+      type: 'setLayerShadowX',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setLayerShadowY',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setLayerShadowBlur',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setLayerShadowSpread',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
     ];
 
 export function reducer(
@@ -166,6 +242,16 @@ export function reducer(
 
       return produce(state, (state) => {
         state.currentTab = value;
+        state.interactionState = interactionReducer(state.interactionState, [
+          'reset',
+        ]);
+      });
+    }
+    case 'setComponentsTab': {
+      const [, value] = action;
+
+      return produce(state, (state) => {
+        state.currentComponentsTab = value;
         state.interactionState = interactionReducer(state.interactionState, [
           'reset',
         ]);
@@ -1123,6 +1209,471 @@ export function reducer(
         });
       });
     }
+    case 'addLayerStyle': {
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles ?? {
+          _class: 'sharedStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        const style = {} as Sketch.Style;
+        const fill = {} as Sketch.Fill;
+
+        fill.color = {
+          _class: 'color',
+          alpha: 1,
+          red: 0,
+          green: 0,
+          blue: 0,
+        };
+
+        style.fills = [fill];
+
+        const sharedStyle: Sketch.SharedStyle = {
+          _class: 'sharedStyle',
+          do_objectID: uuid(),
+          name: 'New Style Layer',
+          value: style,
+        };
+
+        layerStyles.objects.push(sharedStyle);
+        state.sketch.document.layerStyles = layerStyles;
+        state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+      });
+    }
+    case 'selectLayerStyle': {
+      const [, id, selectionType = 'replace'] = action;
+
+      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
+      return produce(state, (state) => {
+        switch (selectionType) {
+          case 'intersection':
+            state.selectedLayerStyleIds.push(
+              ...ids.filter((id) => !state.selectedSwatchIds.includes(id)),
+            );
+            return;
+          case 'difference':
+            ids.forEach((id) => {
+              const selectedIndex = state.selectedSwatchIds.indexOf(id);
+              state.selectedLayerStyleIds.splice(selectedIndex, 1);
+            });
+            return;
+          case 'replace':
+            state.selectedLayerStyleIds = [...ids];
+            return;
+        }
+      });
+    }
+    case 'setLayerStyleName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+
+        layerStyles.forEach((style: Sketch.SharedStyle) => {
+          if (ids.includes(style.do_objectID)) {
+            style.name = name;
+          }
+        });
+      });
+    }
+    case 'addNewLayerBorder':
+    case 'addNewLayerFill':
+    case 'addNewLayerShadow': {
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            switch (action[0]) {
+              case 'addNewLayerBorder':
+                if (style.borders) {
+                  style.borders.unshift(Models.border);
+                } else {
+                  style.borders = [Models.border];
+                }
+                break;
+              case 'addNewLayerFill':
+                if (style.fills) {
+                  style.fills.unshift(Models.fill);
+                } else {
+                  style.fills = [Models.fill];
+                }
+                break;
+              case 'addNewLayerShadow':
+                if (style.shadows) {
+                  style.shadows.unshift(Models.shadow);
+                } else {
+                  style.shadows = [Models.shadow];
+                }
+                break;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerBorderEnabled':
+    case 'setLayerFillEnabled':
+    case 'setLayerShadowEnabled': {
+      const [, index, isEnabled] = action;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            switch (action[0]) {
+              case 'setLayerBorderEnabled':
+                if (style.borders && style.borders[index]) {
+                  style.borders[index].isEnabled = isEnabled;
+                }
+                break;
+              case 'setLayerFillEnabled':
+                if (style.fills && style.fills[index]) {
+                  style.fills[index].isEnabled = isEnabled;
+                }
+                break;
+              case 'setLayerShadowEnabled':
+                if (style.shadows && style.shadows[index]) {
+                  style.shadows[index].isEnabled = isEnabled;
+                }
+                break;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerBorderColor':
+    case 'setLayerFillColor':
+    case 'setLayerShadowColor': {
+      const [, index, color] = action;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            switch (action[0]) {
+              case 'setLayerBorderColor':
+                if (style.borders && style.borders[index]) {
+                  style.borders[index].color = color;
+                }
+                break;
+              case 'setLayerFillColor':
+                if (style.fills && style.fills[index]) {
+                  style.fills[index].color = color;
+                }
+                break;
+              case 'setLayerShadowColor':
+                if (style.shadows && style.shadows[index]) {
+                  style.shadows[index].color = color;
+                }
+                break;
+            }
+          }
+        });
+      });
+    }
+    case 'deleteLayerBorder':
+    case 'deleteLayerFill':
+    case 'deleteLayerShadow': {
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            switch (action[0]) {
+              case 'deleteLayerBorder':
+                if (style.borders) {
+                  style.borders.splice(action[1], 1);
+                }
+                break;
+              case 'deleteLayerFill':
+                if (style.fills) {
+                  style.fills.splice(action[1], 1);
+                }
+                break;
+              case 'deleteLayerShadow':
+                if (style.shadows) {
+                  style.shadows.splice(action[1], 1);
+                }
+                break;
+            }
+          }
+        });
+      });
+    }
+    case 'moveLayerBorder':
+    case 'moveLayerFill':
+    case 'moveLayerShadow': {
+      const [, sourceIndex, destinationIndex] = action;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            switch (action[0]) {
+              case 'moveLayerBorder':
+                if (style.borders) {
+                  const sourceItem = style.borders[sourceIndex];
+
+                  style.borders.splice(sourceIndex, 1);
+                  style.borders.splice(destinationIndex, 0, sourceItem);
+                }
+                break;
+              case 'moveLayerFill':
+                if (style.fills) {
+                  const sourceItem = style.fills[sourceIndex];
+
+                  style.fills.splice(sourceIndex, 1);
+                  style.fills.splice(destinationIndex, 0, sourceItem);
+                }
+                break;
+              case 'moveLayerShadow':
+                if (style.shadows) {
+                  const sourceItem = style.shadows[sourceIndex];
+
+                  style.shadows.splice(sourceIndex, 1);
+                  style.shadows.splice(destinationIndex, 0, sourceItem);
+                }
+                break;
+            }
+          }
+        });
+      });
+    }
+    case 'deleteDisabledLayerBorders':
+    case 'deleteDisabledLayerFills':
+    case 'deleteDisabledLayerShadows': {
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            switch (action[0]) {
+              case 'deleteDisabledLayerBorders':
+                if (style.borders) {
+                  style.borders = style.borders.filter(
+                    (border) => border.isEnabled,
+                  );
+                }
+                break;
+              case 'deleteDisabledLayerFills':
+                if (style.fills) {
+                  style.fills = style.fills.filter((fill) => fill.isEnabled);
+                }
+                break;
+              case 'deleteDisabledLayerShadows':
+                if (style.shadows) {
+                  style.shadows = style.shadows.filter(
+                    (fill) => fill.isEnabled,
+                  );
+                }
+                break;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerFillOpacity': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.fills && style.fills[index]) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.fills[index].color.alpha + amount;
+
+              style.fills[index].color.alpha = Math.min(
+                Math.max(0, newValue),
+                1,
+              );
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerBorderWidth': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.borders && style.borders[index]) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.borders[index].thickness + amount;
+
+              style.borders[index].thickness = Math.max(0, newValue);
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerBorderPosition': {
+      const [, index, position] = action;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.borders && style.borders[index]) {
+              style.borders[index].position = position;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerOpacity': {
+      const [, amount, mode = 'replace'] = action;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.contextSettings) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.contextSettings.opacity + amount;
+
+              style.contextSettings.opacity = Math.min(
+                Math.max(0, newValue),
+                1,
+              );
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerShadowX': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.shadows && style.shadows[index]) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.shadows[index].offsetX + amount;
+
+              style.shadows[index].offsetX = newValue;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerShadowY': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.shadows && style.shadows[index]) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.shadows[index].offsetY + amount;
+
+              style.shadows[index].offsetY = newValue;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerShadowBlur': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.shadows && style.shadows[index]) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.shadows[index].blurRadius + amount;
+
+              style.shadows[index].blurRadius = newValue;
+            }
+          }
+        });
+      });
+    }
+    case 'setLayerShadowSpread': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        layerStyles.forEach((layerStyle) => {
+          const style = layerStyle.value;
+
+          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+            if (style && style.shadows && style.shadows[index]) {
+              const newValue =
+                mode === 'replace'
+                  ? amount
+                  : style.shadows[index].spread + amount;
+
+              style.shadows[index].spread = newValue;
+            }
+          }
+        });
+      });
+    }
     default:
       return state;
   }
@@ -1151,10 +1702,12 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
 
   return {
     currentTab: 'canvas',
+    currentComponentsTab: 'swatches',
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     selectedSwatchIds: [],
+    selectedLayerStyleIds: [],
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },
