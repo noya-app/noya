@@ -1219,16 +1219,21 @@ export function reducer(
 
         const style = {} as Sketch.Style;
         const fill = {} as Sketch.Fill;
+        const contextSettings = {} as Sketch.GraphicsContextSettings;
 
         fill.color = {
           _class: 'color',
           alpha: 1,
-          red: 0,
-          green: 0,
-          blue: 0,
+          red: 216 / 256,
+          green: 216 / 256,
+          blue: 216 / 256,
         };
+        fill.isEnabled = true;
+
+        contextSettings.opacity = 1;
 
         style.fills = [fill];
+        style.contextSettings = contextSettings;
 
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
@@ -1238,6 +1243,7 @@ export function reducer(
         };
 
         layerStyles.objects.push(sharedStyle);
+        console.log(sharedStyle);
         state.sketch.document.layerStyles = layerStyles;
         state.selectedLayerStyleIds = [sharedStyle.do_objectID];
       });
