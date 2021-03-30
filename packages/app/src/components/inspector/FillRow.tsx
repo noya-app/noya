@@ -3,6 +3,7 @@ import {
   InputField,
   Label,
   LabeledElementView,
+  sketchColorToHex,
   Spacer,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
@@ -79,7 +80,10 @@ export default memo(function FillRow({
         />
         <Spacer.Horizontal size={8} />
         <InputField.Root id={hexInputId} labelPosition="start">
-          <InputField.Input value={'FFFFFF'} onSubmit={() => {}} />
+          <InputField.Input
+            value={`${sketchColorToHex(color).replace('#', '').toUpperCase()}`}
+            onSubmit={() => {}}
+          />
           <InputField.Label>#</InputField.Label>
         </InputField.Root>
         <Spacer.Horizontal size={8} />

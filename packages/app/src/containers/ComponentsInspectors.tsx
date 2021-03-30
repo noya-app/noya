@@ -19,14 +19,6 @@ import ShadowRow from '../components/inspector/ShadowRow';
 
 // TODO: Maybe move stuff to different files?
 
-const Title = styled.div(({ theme }) => ({
-  ...theme.textStyles.small,
-  fontWeight: 'bold',
-  display: 'flex',
-  flexDirection: 'row',
-  userSelect: 'none',
-}));
-
 const Container = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -104,33 +96,29 @@ const StyleOpacityInspector = memo(function OpacityInspector() {
       opacityValue !== undefined ? Math.round(opacityValue * 100) : undefined;
 
     return (
-      <>
-        <InspectorPrimitives.Section>
-          <InspectorPrimitives.SectionHeader>
-            <InspectorPrimitives.Title>Opacity</InspectorPrimitives.Title>
-          </InspectorPrimitives.SectionHeader>
-          <Spacer.Vertical size={4} />
-          <InspectorPrimitives.Row>
-            <Slider
-              id="opacity-slider"
-              value={value ?? 0}
-              onValueChange={handleSubmitOpacity}
-              min={0}
-              max={100}
+      <InspectorPrimitives.Section>
+        <InspectorPrimitives.Title>Opacity</InspectorPrimitives.Title>
+        <Spacer.Vertical size={4} />
+        <InspectorPrimitives.Row>
+          <Slider
+            id="opacity-slider"
+            value={value ?? 0}
+            onValueChange={handleSubmitOpacity}
+            min={0}
+            max={100}
+          />
+          <Spacer.Horizontal size={10} />
+          <InputField.Root id="opacity-input" size={50}>
+            <InputField.NumberInput
+              value={value}
+              placeholder={value === undefined ? 'multi' : undefined}
+              onSubmit={handleSubmitOpacity}
+              onNudge={handleNudgeOpacity}
             />
-            <Spacer.Horizontal size={10} />
-            <InputField.Root id="opacity-input" size={50}>
-              <InputField.NumberInput
-                value={value}
-                placeholder={value === undefined ? 'multi' : undefined}
-                onSubmit={handleSubmitOpacity}
-                onNudge={handleNudgeOpacity}
-              />
-              <InputField.Label>%</InputField.Label>
-            </InputField.Root>
-          </InspectorPrimitives.Row>
-        </InspectorPrimitives.Section>
-      </>
+            <InputField.Label>%</InputField.Label>
+          </InputField.Root>
+        </InspectorPrimitives.Row>
+      </InspectorPrimitives.Section>
     );
   }, [opacityValue, handleSubmitOpacity, handleNudgeOpacity]);
 });
@@ -362,16 +350,17 @@ const NameInspector = memo(function NameInspector({
 
   return (
     <InspectorPrimitives.Section>
-      <Title>Name</Title>
+      <InspectorPrimitives.Title>Name</InspectorPrimitives.Title>
       <Spacer.Vertical size={4} />
-      <InputField.Root id={'colorName'}>
-        <InputField.Input
-          value={name || ''}
-          placeholder={name === undefined ? 'Multiple' : ''}
-          onChange={onNameChange}
-        />
-      </InputField.Root>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.Row>
+        <InputField.Root id={'colorName'}>
+          <InputField.Input
+            value={name || ''}
+            placeholder={name === undefined ? 'Multiple' : ''}
+            onChange={onNameChange}
+          />
+        </InputField.Root>
+      </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>
   );
 });
@@ -409,7 +398,6 @@ export default memo(function ComponentsInspectors() {
       ),
       tab === 'layerStyles' && (
         <Fragment key="layout">
-          <Spacer.Vertical size={10} />
           <NameInspector
             selected={selectedStyles.map((v) => v.name)}
             onNameChange={(value) =>
@@ -420,13 +408,12 @@ export default memo(function ComponentsInspectors() {
               )
             }
           />
-          <StyleOpacityInspector />,
-          <StyleFillInspector />,
-          <StyleBorderInspector />,
-          <StyleShadowInspector />,
-          <Spacer.Vertical size={10} />
         </Fragment>
       ),
+      tab === 'layerStyles' && <StyleOpacityInspector />,
+      tab === 'layerStyles' && <StyleFillInspector />,
+      tab === 'layerStyles' && <StyleBorderInspector />,
+      tab === 'layerStyles' && <StyleShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);
