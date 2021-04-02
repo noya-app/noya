@@ -1,14 +1,12 @@
-import { InputField, Spacer } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
+import { Spacer } from 'noya-designsystem';
+import { Selectors } from 'noya-state';
 import styled from 'styled-components';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
 import ColorSelectRow from '../components/inspector/ColorInspector';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import { useSelector } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
+import NameInspector from './NameInspector';
 
 const Container = styled.div(({ theme }) => ({
   display: 'flex',
@@ -50,41 +48,7 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
   );
 });
 
-interface Props {
-  selected: string[];
-  onNameChange: (value: any) => void;
-}
-
-const NameInspector = memo(function NameInspector({
-  selected,
-  onNameChange,
-}: Props) {
-  const first = selected[0];
-  const name =
-    selected.length > 1 && !selected.every((v) => v === first)
-      ? undefined
-      : first;
-
-  return (
-    <InspectorPrimitives.Section>
-      <InspectorPrimitives.Title>Name</InspectorPrimitives.Title>
-      <Spacer.Vertical size={4} />
-      <InspectorPrimitives.Row>
-        <InputField.Root id={'colorName'}>
-          <InputField.Input
-            value={name || ''}
-            placeholder={name === undefined ? 'Multiple' : ''}
-            onChange={onNameChange}
-          />
-        </InputField.Root>
-      </InspectorPrimitives.Row>
-    </InspectorPrimitives.Section>
-  );
-});
-
 export default memo(function ComponentsInspectors() {
-  const [, dispatch] = useApplicationState();
-
   const selectedSwatches = useShallowArray(
     useSelector(Selectors.getSelectedColorSwatches),
   );
@@ -94,14 +58,8 @@ export default memo(function ComponentsInspectors() {
   return (
     <Fragment key="layout">
       <NameInspector
-        selected={selectedSwatches.map((v) => v.name)}
-        onNameChange={(value) =>
-          dispatch(
-            'setSwatchName',
-            selectedSwatches.map((v) => v.do_objectID),
-            value,
-          )
-        }
+        names={selectedSwatches.map((v) => v.name)}
+        ids={selectedSwatches.map((v) => v.do_objectID)}
       />
       <ColorPickerInspector />
       <Spacer.Vertical size={10} />

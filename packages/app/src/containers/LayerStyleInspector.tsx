@@ -14,8 +14,7 @@ import FillRow from '../components/inspector/FillRow';
 import BorderRow from '../components/inspector/BorderRow';
 import ShadowRow from '../components/inspector/ShadowRow';
 import withSeparatorElements from '../utils/withSeparatorElements';
-
-// TODO: Maybe move stuff to different files?
+import NameInspector from './NameInspector';
 
 const StyleOpacityInspector = memo(function OpacityInspector() {
   const [, dispatch] = useApplicationState();
@@ -80,7 +79,6 @@ const StyleOpacityInspector = memo(function OpacityInspector() {
     );
   }, [opacityValue, handleSubmitOpacity, handleNudgeOpacity]);
 });
-
 const StyleFillInspector = memo(function FillInspector() {
   const [, dispatch] = useApplicationState();
 
@@ -208,7 +206,6 @@ const StyleBorderInspector = memo(function BorderInspector() {
     </ArrayController>
   );
 });
-
 const StyleShadowInspector = memo(function ShadowInspector() {
   const [, dispatch] = useApplicationState();
 
@@ -283,55 +280,15 @@ const StyleShadowInspector = memo(function ShadowInspector() {
   );
 });
 
-interface Props {
-  selected: string[];
-  onNameChange: (value: any) => void;
-}
-
-const NameInspector = memo(function NameInspector({
-  selected,
-  onNameChange,
-}: Props) {
-  const first = selected[0];
-  const name =
-    selected.length > 1 && !selected.every((v) => v === first)
-      ? undefined
-      : first;
-
-  return (
-    <InspectorPrimitives.Section>
-      <InspectorPrimitives.Title>Name</InspectorPrimitives.Title>
-      <Spacer.Vertical size={4} />
-      <InspectorPrimitives.Row>
-        <InputField.Root id={'colorName'}>
-          <InputField.Input
-            value={name || ''}
-            placeholder={name === undefined ? 'Multiple' : ''}
-            onChange={onNameChange}
-          />
-        </InputField.Root>
-      </InspectorPrimitives.Row>
-    </InspectorPrimitives.Section>
-  );
-});
-
 export default memo(function LayerStyleInspector() {
-  const [, dispatch] = useApplicationState();
-
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedLayerStyle),
   );
 
   const elements = [
     <NameInspector
-      selected={selectedStyles.map((v) => v.name)}
-      onNameChange={(value) =>
-        dispatch(
-          'setLayerStyleName',
-          selectedStyles.map((v) => v.do_objectID),
-          value,
-        )
-      }
+      names={selectedStyles.map((v) => v.name)}
+      ids={selectedStyles.map((v) => v.do_objectID)}
     />,
     <StyleOpacityInspector />,
     <StyleFillInspector />,

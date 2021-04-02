@@ -22,6 +22,7 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
   getCurrentTab,
+  getCurrentComponentsTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -118,7 +119,6 @@ export type Action =
   | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setSwatchColor', id: string | string[], color: Sketch.Color]
-  | [type: 'setSwatchName', id: string | string[], name: string]
   | [
       type: 'setSwatchOpacity',
       id: string | string[],
@@ -127,7 +127,7 @@ export type Action =
     ]
   | [type: 'addColorSwatch']
   | [type: 'addLayerStyle']
-  | [type: 'setLayerStyleName', id: string | string[], name: string]
+  | [type: 'setComponentName', id: string | string[], name: string]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -771,22 +771,6 @@ export function reducer(
         });
       });
     }
-    case 'setSwatchName': {
-      const [, id, name] = action;
-
-      const ids = typeof id === 'string' ? [id] : id;
-
-      return produce(state, (state) => {
-        const sharedSwatches =
-          state.sketch.document.sharedSwatches?.objects ?? [];
-
-        sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if (ids.includes(swatch.do_objectID)) {
-            swatch.name = name;
-          }
-        });
-      });
-    }
     case 'setSwatchOpacity': {
       const [, id, alpha, mode = 'replace'] = action;
 
@@ -868,17 +852,22 @@ export function reducer(
         }
       });
     }
-    case 'setLayerStyleName': {
+    case 'setComponentName': {
       const [, id, name] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
+      // is this the most optimal selector?
+      const currentComponentsTab = getCurrentComponentsTab(state);
 
       return produce(state, (state) => {
-        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        const array =
+          currentComponentsTab === 'swatches'
+            ? state.sketch.document.sharedSwatches?.objects ?? []
+            : state.sketch.document.layerStyles?.objects ?? [];
 
-        layerStyles.forEach((style: Sketch.SharedStyle) => {
-          if (ids.includes(style.do_objectID)) {
-            style.name = name;
+        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
+          if (ids.includes(object.do_objectID)) {
+            object.name = name;
           }
         });
       });
