@@ -30,5 +30,5 @@ export function rgbaToSketchColor(value: RgbaColor): Sketch.Color {
 }
 
 export function sketchColorToHex(value: Sketch.Color): string {
-  return hsvaToHex(rgbaToHsva(sketchColorToRgba(value)));
+  return hsvaToHex(rgbaToHsva(sketchColorToRgba(value))).toUpperCase();
 }

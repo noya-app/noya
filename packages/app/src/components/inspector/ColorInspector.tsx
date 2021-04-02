@@ -56,7 +56,7 @@ export default memo(function ColorInspector({
       colors.length > 1 &&
       !colors.every((v) => sketchColorToHex(v) === firstColorHex)
         ? undefined
-        : firstColorHex.slice(1).toUpperCase(),
+        : firstColorHex.slice(1),
     [firstColorHex, colors],
   );
 

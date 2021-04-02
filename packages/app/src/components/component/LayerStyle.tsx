@@ -26,8 +26,6 @@ const LayerStyle = styled.div(
   }),
 );
 
-// TODO: Handle multiple borders in preview.
-
 export default memo(function SharedStyle({ style }: Props) {
   const enabledBorders = useMemo(
     () => style.borders?.filter((border) => border.isEnabled),
