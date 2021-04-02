@@ -21,6 +21,7 @@ import {
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
+  getCurrentTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -479,13 +480,32 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (!layer.style) return;
+      const currentTab = getCurrentTab(state);
 
-          layer.style = styleReducer(layer.style, action);
+      console.log(currentTab);
+      if (currentTab === 'canvas') {
+        return produce(state, (state) => {
+          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (!layer.style) return;
+
+              layer.style = styleReducer(layer.style, action);
+            },
+          );
         });
-      });
+      } else {
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+
+        return produce(state, (state) => {
+          const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+
+          layerStyles.forEach((layerStyle) => {
+            if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+              layerStyle.value = styleReducer(layerStyle.value, action);
+            }
+          });
+        });
+      }
     }
     case 'setFixedRadius': {
       const [, amount, mode = 'replace'] = action;
@@ -859,44 +879,6 @@ export function reducer(
         layerStyles.forEach((style: Sketch.SharedStyle) => {
           if (ids.includes(style.do_objectID)) {
             style.name = name;
-          }
-        });
-      });
-    }
-    case 'addNewLayerBorder':
-    case 'addNewLayerFill':
-    case 'addNewLayerShadow':
-    case 'setLayerBorderEnabled':
-    case 'setLayerFillEnabled':
-    case 'setLayerShadowEnabled':
-    case 'setLayerBorderColor':
-    case 'setLayerFillColor':
-    case 'setLayerShadowColor':
-    case 'deleteLayerBorder':
-    case 'deleteLayerFill':
-    case 'deleteLayerShadow':
-    case 'moveLayerBorder':
-    case 'moveLayerFill':
-    case 'moveLayerShadow':
-    case 'deleteDisabledLayerBorders':
-    case 'deleteDisabledLayerFills':
-    case 'deleteDisabledLayerShadows':
-    case 'setLayerFillOpacity':
-    case 'setLayerBorderWidth':
-    case 'setLayerBorderPosition':
-    case 'setLayerOpacity':
-    case 'setLayerShadowX':
-    case 'setLayerShadowY':
-    case 'setLayerShadowBlur':
-    case 'setLayerShadowSpread': {
-      const selectedLayerStyleIds = state.selectedLayerStyleIds;
-
-      return produce(state, (state) => {
-        const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
-
-        layerStyles.forEach((layerStyle) => {
-          if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
-            layerStyle.value = styleReducer(layerStyle.value, action);
           }
         });
       });

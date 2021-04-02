@@ -37,14 +37,14 @@ const StyleOpacityInspector = memo(function OpacityInspector() {
 
   const handleSubmitOpacity = useCallback(
     (value: number) => {
-      dispatch('setLayerOpacity', value / 100, 'replace');
+      dispatch('setOpacity', value / 100, 'replace');
     },
     [dispatch],
   );
 
   const handleNudgeOpacity = useCallback(
     (value: number) => {
-      dispatch('setLayerOpacity', value / 100, 'adjust');
+      dispatch('setOpacity', value / 100, 'adjust');
     },
     [dispatch],
   );
@@ -97,20 +97,20 @@ const StyleFillInspector = memo(function FillInspector() {
       id="fills"
       key="fills"
       value={firstFill}
-      onClickPlus={useCallback(() => dispatch('addNewLayerFill'), [dispatch])}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledLayerFills'), [
+      onClickPlus={useCallback(() => dispatch('addNewFill'), [dispatch])}
+      onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteLayerFill', index), [
+      onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
         dispatch,
       ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
-          dispatch('moveLayerFill', sourceIndex, destinationIndex),
+          dispatch('moveFill', sourceIndex, destinationIndex),
         [dispatch],
       )}
       onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setLayerFillEnabled', index, checked),
+        (index, checked) => dispatch('setFillEnabled', index, checked),
         [dispatch],
       )}
     >
@@ -129,14 +129,12 @@ const StyleFillInspector = memo(function FillInspector() {
             color={item.color}
             prefix={checkbox}
             onChangeOpacity={(value) =>
-              dispatch('setLayerFillOpacity', index, value)
+              dispatch('setFillOpacity', index, value)
             }
             onNudgeOpacity={(value) =>
-              dispatch('setLayerFillOpacity', index, value, 'adjust')
+              dispatch('setFillOpacity', index, value, 'adjust')
             }
-            onChangeColor={(value) =>
-              dispatch('setLayerFillColor', index, value)
-            }
+            onChangeColor={(value) => dispatch('setFillColor', index, value)}
           />
         ),
         [dispatch],
@@ -160,21 +158,20 @@ const StyleBorderInspector = memo(function BorderInspector() {
       id="borders"
       key="borders"
       value={firstBorder}
-      onClickPlus={useCallback(() => dispatch('addNewLayerBorder'), [dispatch])}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledLayerBorders'), [
+      onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
+      onClickTrash={useCallback(() => dispatch('deleteDisabledBorders'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback(
-        (index) => dispatch('deleteLayerBorder', index),
-        [dispatch],
-      )}
+      onDeleteItem={useCallback((index) => dispatch('deleteBorder', index), [
+        dispatch,
+      ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
-          dispatch('moveLayerBorder', sourceIndex, destinationIndex),
+          dispatch('moveBorder', sourceIndex, destinationIndex),
         [dispatch],
       )}
       onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setLayerBorderEnabled', index, checked),
+        (index, checked) => dispatch('setBorderEnabled', index, checked),
         [dispatch],
       )}
     >
@@ -195,16 +192,14 @@ const StyleBorderInspector = memo(function BorderInspector() {
             width={item.thickness}
             position={item.position}
             onNudgeWidth={(value) =>
-              dispatch('setLayerBorderWidth', index, value, 'adjust')
+              dispatch('setBorderWidth', index, value, 'adjust')
             }
-            onChangeWidth={(value) =>
-              dispatch('setLayerBorderWidth', index, value)
-            }
+            onChangeWidth={(value) => dispatch('setBorderWidth', index, value)}
             onChangeColor={(value) => {
-              dispatch('setLayerBorderColor', index, value);
+              dispatch('setBorderColor', index, value);
             }}
             onChangePosition={(value) => {
-              dispatch('setLayerBorderPosition', index, value);
+              dispatch('setBorderPosition', index, value);
             }}
           />
         ),
@@ -230,21 +225,20 @@ const StyleShadowInspector = memo(function ShadowInspector() {
       id="shadows"
       key="shadows"
       value={firstShadow}
-      onClickPlus={useCallback(() => dispatch('addNewLayerShadow'), [dispatch])}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledLayerShadows'), [
+      onClickPlus={useCallback(() => dispatch('addNewShadow'), [dispatch])}
+      onClickTrash={useCallback(() => dispatch('deleteDisabledShadows'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback(
-        (index) => dispatch('deleteLayerShadow', index),
-        [dispatch],
-      )}
+      onDeleteItem={useCallback((index) => dispatch('deleteShadow', index), [
+        dispatch,
+      ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
-          dispatch('moveLayerShadow', sourceIndex, destinationIndex),
+          dispatch('moveShadow', sourceIndex, destinationIndex),
         [dispatch],
       )}
       onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setLayerShadowEnabled', index, checked),
+        (index, checked) => dispatch('setShadowEnabled', index, checked),
         [dispatch],
       )}
     >
@@ -266,9 +260,7 @@ const StyleShadowInspector = memo(function ShadowInspector() {
             blur={item.blurRadius}
             spread={item.spread}
             prefix={checkbox}
-            onChangeColor={(value) =>
-              dispatch('setLayerShadowColor', index, value)
-            }
+            onChangeColor={(value) => dispatch('setShadowColor', index, value)}
             onChangeX={(value) => dispatch('setShadowX', index, value)}
             onNudgeX={(value) => dispatch('setShadowX', index, value, 'adjust')}
             onChangeY={(value) => dispatch('setShadowY', index, value)}
