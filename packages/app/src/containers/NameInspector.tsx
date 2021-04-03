@@ -1,15 +1,13 @@
 import { InputField, Spacer } from 'noya-designsystem';
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 interface Props {
   names: string[];
-  ids: string[];
+  onNameChange: (value: string) => void;
 }
 
-export default memo(function NameInspector({ names, ids }: Props) {
-  const [, dispatch] = useApplicationState();
+export default memo(function NameInspector({ names, onNameChange }: Props) {
   const firstName = names[0];
 
   const name =
@@ -26,10 +24,7 @@ export default memo(function NameInspector({ names, ids }: Props) {
           <InputField.Input
             value={name || ''}
             placeholder={name === undefined ? 'Multiple' : ''}
-            onChange={useCallback(
-              (value: string) => dispatch('setComponentName', ids, value),
-              [ids, dispatch],
-            )}
+            onChange={onNameChange}
           />
         </InputField.Root>
       </InspectorPrimitives.Row>

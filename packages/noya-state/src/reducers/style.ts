@@ -31,11 +31,8 @@ export type StyleAction =
       amount: number,
       mode?: SetNumberMode,
     ]
-  | [type: 'setShadowX', index: number, amount: number, mode?: SetNumberMode]
-  | [type: 'setShadowY', index: number, amount: number, mode?: SetNumberMode]
-  | [type: 'setShadowBlur', index: number, amount: number, mode?: SetNumberMode]
   | [
-      type: 'setShadowSpread',
+      type: `setShadow${StyleShadowType}`,
       index: number,
       amount: number,
       mode?: SetNumberMode,

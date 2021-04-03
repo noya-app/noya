@@ -1,7 +1,6 @@
 import { useSelector } from '../contexts/ApplicationStateContext';
-import { GridView } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import LayerStylesGrid from './LayerStylesGrid';
 import SwatchesGrid from './SwatchesGrid';
 
@@ -16,16 +15,18 @@ const Container = styled.main(({ theme }) => ({
 export default memo(function ComponentsWindow() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
-  return (
-    <Container>
-      {componentsTab === 'swatches' && <SwatchesGrid />}
-      {componentsTab === 'textStyles' && (
-        <GridView.Root onClick={() => {}}></GridView.Root>
-      )}
-      {componentsTab === 'layerStyles' && <LayerStylesGrid />}
-      {componentsTab === 'symbols' && (
-        <GridView.Root onClick={() => {}}></GridView.Root>
-      )}
-    </Container>
-  );
+  const gridElement = useMemo(() => {
+    switch (componentsTab) {
+      case 'swatches':
+        return <SwatchesGrid />;
+      case 'textStyles':
+        return <></>;
+      case 'layerStyles':
+        return <LayerStylesGrid />;
+      case 'symbols':
+        return <></>;
+    }
+  }, [componentsTab]);
+
+  return <Container>{gridElement}</Container>;
 });

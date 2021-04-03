@@ -81,7 +81,7 @@ export default memo(function FillRow({
         <Spacer.Horizontal size={8} />
         <InputField.Root id={hexInputId} labelPosition="start">
           <InputField.Input
-            value={`${sketchColorToHex(color).replace('#', '')}`}
+            value={sketchColorToHex(color).replace('#', '')}
             onSubmit={() => {}}
           />
           <InputField.Label>#</InputField.Label>

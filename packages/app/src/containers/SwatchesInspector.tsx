@@ -1,12 +1,12 @@
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import { Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import styled from 'styled-components';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import ColorSelectRow from '../components/inspector/ColorInspector';
 import { useSelector } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import NameInspector from './NameInspector';
+import styled from 'styled-components';
 
 const Container = styled.div(({ theme }) => ({
   display: 'flex',
@@ -49,6 +49,8 @@ const ColorPickerInspector = memo(function ColorPickerInspector() {
 });
 
 export default memo(function ComponentsInspectors() {
+  const [, dispatch] = useApplicationState();
+
   const selectedSwatches = useShallowArray(
     useSelector(Selectors.getSelectedColorSwatches),
   );
@@ -59,8 +61,15 @@ export default memo(function ComponentsInspectors() {
     <Fragment key="layout">
       <NameInspector
         names={selectedSwatches.map((v) => v.name)}
-        ids={selectedSwatches.map((v) => v.do_objectID)}
+        onNameChange={(value: string) =>
+          dispatch(
+            'setSwatchName',
+            selectedSwatches.map((v) => v.do_objectID),
+            value,
+          )
+        }
       />
+      ,
       <ColorPickerInspector />
       <Spacer.Vertical size={10} />
     </Fragment>

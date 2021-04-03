@@ -22,7 +22,6 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
   getCurrentTab,
-  getCurrentComponentsTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -127,7 +126,6 @@ export type Action =
     ]
   | [type: 'addColorSwatch']
   | [type: 'addLayerStyle']
-  | [type: 'setComponentName', id: string | string[], name: string]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -138,6 +136,8 @@ export type Action =
         | Exclude<InteractionAction, ['maybeScale', ...any[]]>
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
     ]
+  | [type: `setSwatchName`, id: string | string[], name: string]
+  | [type: `setLayerStyleName`, id: string | string[], name: string]
   | StyleAction;
 
 export function reducer(
@@ -160,9 +160,6 @@ export function reducer(
 
       return produce(state, (state) => {
         state.currentComponentsTab = value;
-        state.interactionState = interactionReducer(state.interactionState, [
-          'reset',
-        ]);
       });
     }
     case 'setCanvasSize': {
@@ -481,8 +478,6 @@ export function reducer(
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       const currentTab = getCurrentTab(state);
-
-      console.log(currentTab);
       if (currentTab === 'canvas') {
         return produce(state, (state) => {
           accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
@@ -735,7 +730,6 @@ export function reducer(
       const [, id, selectionType = 'replace'] = action;
 
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
-
       return produce(state, (state) => {
         switch (selectionType) {
           case 'intersection':
@@ -798,33 +792,14 @@ export function reducer(
           objects: [],
         };
 
-        const style = {} as Sketch.Style;
-        const fill = {} as Sketch.Fill;
-        const contextSettings = {} as Sketch.GraphicsContextSettings;
-
-        fill.color = {
-          _class: 'color',
-          alpha: 1,
-          red: 216 / 256,
-          green: 216 / 256,
-          blue: 216 / 256,
-        };
-        fill.isEnabled = true;
-
-        contextSettings.opacity = 1;
-
-        style.fills = [fill];
-        style.contextSettings = contextSettings;
-
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
           name: 'New Style Layer',
-          value: style,
+          value: Models.style,
         };
 
         layerStyles.objects.push(sharedStyle);
-        console.log(sharedStyle);
         state.sketch.document.layerStyles = layerStyles;
         state.selectedLayerStyleIds = [sharedStyle.do_objectID];
       });
@@ -837,12 +812,12 @@ export function reducer(
         switch (selectionType) {
           case 'intersection':
             state.selectedLayerStyleIds.push(
-              ...ids.filter((id) => !state.selectedSwatchIds.includes(id)),
+              ...ids.filter((id) => !state.selectedLayerStyleIds.includes(id)),
             );
             return;
           case 'difference':
             ids.forEach((id) => {
-              const selectedIndex = state.selectedSwatchIds.indexOf(id);
+              const selectedIndex = state.selectedLayerStyleIds.indexOf(id);
               state.selectedLayerStyleIds.splice(selectedIndex, 1);
             });
             return;
@@ -852,16 +827,16 @@ export function reducer(
         }
       });
     }
-    case 'setComponentName': {
+    case 'setLayerStyleName':
+    case 'setSwatchName': {
       const [, id, name] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
       // is this the most optimal selector?
-      const currentComponentsTab = getCurrentComponentsTab(state);
 
       return produce(state, (state) => {
         const array =
-          currentComponentsTab === 'swatches'
+          action[0] === 'setSwatchName'
             ? state.sketch.document.sharedSwatches?.objects ?? []
             : state.sketch.document.layerStyles?.objects ?? [];
 

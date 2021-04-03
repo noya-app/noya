@@ -281,6 +281,8 @@ const StyleShadowInspector = memo(function ShadowInspector() {
 });
 
 export default memo(function LayerStyleInspector() {
+  const [, dispatch] = useApplicationState();
+
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedLayerStyle),
   );
@@ -288,7 +290,13 @@ export default memo(function LayerStyleInspector() {
   const elements = [
     <NameInspector
       names={selectedStyles.map((v) => v.name)}
-      ids={selectedStyles.map((v) => v.do_objectID)}
+      onNameChange={(value: string) =>
+        dispatch(
+          'setLayerStyleName',
+          selectedStyles.map((v) => v.do_objectID),
+          value,
+        )
+      }
     />,
     <StyleOpacityInspector />,
     <StyleFillInspector />,
