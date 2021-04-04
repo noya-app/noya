@@ -117,7 +117,7 @@ export const getSelectedRect = (state: ApplicationState): Rect => {
   const layerIds = layerIndexPaths.map(
     (indexPath) => Layers.access(page, indexPath).do_objectID,
   );
-  return getBoundingRect(page, getCanvasTransform(state), layerIds)!;
+  return getBoundingRect(page, AffineTransform.identity, layerIds)!;
 };
 
 export const getSelectedLayersWithContextSettings = (
