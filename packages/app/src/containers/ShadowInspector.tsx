@@ -12,9 +12,11 @@ import useShallowArray from '../hooks/useShallowArray';
 export default memo(function ShadowInspector() {
   const [, dispatch] = useApplicationState();
 
-  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const selectedStyles = useShallowArray(
+    useSelector(Selectors.getSelectedStyles),
+  );
   const shadows = useShallowArray(
-    selectedLayers.map((layer) => layer.style?.shadows),
+    selectedStyles.map((style) => style?.shadows),
   );
   // TODO: Modify all shadows
   const firstShadow = useMemo(() => shadows[0] || [], [shadows]);

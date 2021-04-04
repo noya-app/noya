@@ -55,19 +55,23 @@ export default memo(function ComponentsInspectors() {
     useSelector(Selectors.getSelectedColorSwatches),
   );
 
+  const handleNameChange = useCallback(
+    (value: string) =>
+      dispatch(
+        'setSwatchName',
+        selectedSwatches.map((v) => v.do_objectID),
+        value,
+      ),
+    [dispatch, selectedSwatches],
+  );
+
   if (selectedSwatches.length === 0) return null;
 
   return (
     <Fragment key="layout">
       <NameInspector
         names={selectedSwatches.map((v) => v.name)}
-        onNameChange={(value: string) =>
-          dispatch(
-            'setSwatchName',
-            selectedSwatches.map((v) => v.do_objectID),
-            value,
-          )
-        }
+        onNameChange={handleNameChange}
       />
       ,
       <ColorPickerInspector />

@@ -796,7 +796,10 @@ export function reducer(
           _class: 'sharedStyle',
           do_objectID: uuid(),
           name: 'New Style Layer',
-          value: Models.style,
+          value: produce(Models.style, (style) => {
+            style.do_objectID = uuid();
+            return style;
+          }),
         };
 
         layerStyles.objects.push(sharedStyle);

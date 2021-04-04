@@ -12,9 +12,12 @@ import useShallowArray from '../hooks/useShallowArray';
 export default memo(function BorderInspector() {
   const [, dispatch] = useApplicationState();
 
-  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const selectedStyles = useShallowArray(
+    useSelector(Selectors.getSelectedStyles),
+  );
+
   const borders = useShallowArray(
-    selectedLayers.map((layer) => layer.style?.borders),
+    selectedStyles.map((style) => style?.borders),
   );
   // TODO: Modify all borders
   const firstBorder = useMemo(() => borders[0] || [], [borders]);

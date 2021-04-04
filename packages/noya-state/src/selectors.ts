@@ -115,6 +115,16 @@ export const getSelectedLayersExcludingDescendants = (
   );
 };
 
+export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
+  const currentTab = getCurrentTab(state);
+
+  return currentTab === 'canvas'
+    ? getSelectedLayers(state).flatMap((layer) =>
+        layer.style ? [layer.style] : [],
+      )
+    : getSelectedLayerStyle(state).flatMap((style) => style.value);
+};
+
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 
