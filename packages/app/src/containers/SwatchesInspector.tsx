@@ -8,7 +8,7 @@ import {
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
-import NameInspector from './NameInspector';
+import NameInspector from '../components/inspector/NameInspector';
 
 const Container = styled.div(({ theme }) => ({
   display: 'flex',

@@ -1,17 +1,20 @@
-import { memo, useMemo } from 'react';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { GridView } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
-import LayerStyle from '../components/theme/LayerStyle';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { SelectionType } from 'noya-state';
+import { memo, useMemo } from 'react';
+import LayerStyle from './LayerStyle';
 
-export default memo(function LayerStylesGrid() {
-  const [state, dispatch] = useApplicationState();
+interface Props {
+  sharedStyles: Sketch.SharedStyle[];
+  selectedSharedStyleIds: string[];
+  onSelectSharedStyle: (id?: string, selectionType?: SelectionType) => void;
+}
 
-  const sharedStyles = useSelector(Selectors.getSharedStyles);
-
+export default memo(function LayerStylesGrid({
+  sharedStyles,
+  selectedSharedStyleIds: selectedIds,
+  onSelectSharedStyle: onSelect,
+}: Props) {
   const sortedStyles = useMemo(
     () =>
       [...sharedStyles].sort((a, b) => {
@@ -24,16 +27,15 @@ export default memo(function LayerStylesGrid() {
   );
 
   return (
-    <GridView.Root onClick={() => dispatch('selectLayerStyle', undefined)}>
+    <GridView.Root onClick={() => onSelect(undefined, 'replace')}>
       {sortedStyles.map((item) => {
         return (
           <GridView.Item
             key={item.do_objectID}
             title={item.name}
-            selected={state.selectedLayerStyleIds.includes(item.do_objectID)}
+            selected={selectedIds.includes(item.do_objectID)}
             onClick={(event) =>
-              dispatch(
-                'selectLayerStyle',
+              onSelect(
                 item.do_objectID,
                 event.shiftKey ? 'intersection' : 'replace',
               )
