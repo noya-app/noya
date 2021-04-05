@@ -122,7 +122,7 @@ export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
     ? getSelectedLayers(state).flatMap((layer) =>
         layer.style ? [layer.style] : [],
       )
-    : getSelectedLayerStyle(state).flatMap((style) => style.value);
+    : getSelectedLayerStyles(state).map((style) => style.value);
 };
 
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
@@ -174,7 +174,7 @@ export const getSelectedColorSwatches = (
   );
 };
 
-export const getSelectedLayerStyle = (
+export const getSelectedLayerStyles = (
   state: ApplicationState,
 ): Sketch.SharedStyle[] => {
   const sharedSwatches = getSharedStyles(state);

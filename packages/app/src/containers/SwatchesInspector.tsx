@@ -73,7 +73,6 @@ export default memo(function ComponentsInspectors() {
         names={selectedSwatches.map((v) => v.name)}
         onNameChange={handleNameChange}
       />
-      ,
       <ColorPickerInspector />
       <Spacer.Vertical size={10} />
     </Fragment>

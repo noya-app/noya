@@ -6,7 +6,7 @@ export type SetNumberMode = 'replace' | 'adjust';
 
 export type StyleElementType = 'Fill' | 'Border' | 'Shadow';
 
-export type StyleShadowType = 'X' | 'Y' | 'Blur' | 'Spread';
+export type StyleShadowProperty = 'X' | 'Y' | 'Blur' | 'Spread';
 
 export type StyleAction =
   | [type: `addNew${StyleElementType}`]
@@ -32,7 +32,7 @@ export type StyleAction =
       mode?: SetNumberMode,
     ]
   | [
-      type: `setShadow${StyleShadowType}`,
+      type: `setShadow${StyleShadowProperty}`,
       index: number,
       amount: number,
       mode?: SetNumberMode,

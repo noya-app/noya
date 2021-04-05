@@ -17,7 +17,7 @@ export default memo(function LayerStyleInspector() {
   const [, dispatch] = useApplicationState();
 
   const selectedStyles = useShallowArray(
-    useSelector(Selectors.getSelectedLayerStyle),
+    useSelector(Selectors.getSelectedLayerStyles),
   );
 
   const handleNameChange = useCallback(
@@ -30,6 +30,8 @@ export default memo(function LayerStyleInspector() {
     [dispatch, selectedStyles],
   );
 
+  if (selectedStyles.length === 0) return null;
+
   const elements = [
     <NameInspector
       names={selectedStyles.map((v) => v.name)}
@@ -40,8 +42,6 @@ export default memo(function LayerStyleInspector() {
     <BorderInspector />,
     <ShadowInspector />,
   ];
-
-  if (selectedStyles.length === 0) return null;
 
   return <>{withSeparatorElements(elements, <Divider />)}</>;
 });

@@ -795,7 +795,7 @@ export function reducer(
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
-          name: 'New Style Layer',
+          name: 'New Layer Layer',
           value: produce(Models.style, (style) => {
             style.do_objectID = uuid();
             return style;
@@ -835,7 +835,6 @@ export function reducer(
       const [, id, name] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
-      // is this the most optimal selector?
 
       return produce(state, (state) => {
         const array =
