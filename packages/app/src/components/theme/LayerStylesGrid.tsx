@@ -13,7 +13,7 @@ interface Props {
 export default memo(function LayerStylesGrid({
   sharedStyles,
   selectedSharedStyleIds: selectedIds,
-  onSelectSharedStyle: onSelect,
+  onSelectSharedStyle,
 }: Props) {
   const sortedStyles = useMemo(
     () =>
@@ -27,7 +27,7 @@ export default memo(function LayerStylesGrid({
   );
 
   return (
-    <GridView.Root onClick={() => onSelect(undefined, 'replace')}>
+    <GridView.Root onClick={() => onSelectSharedStyle(undefined, 'replace')}>
       {sortedStyles.map((item) => {
         return (
           <GridView.Item
@@ -35,7 +35,7 @@ export default memo(function LayerStylesGrid({
             title={item.name}
             selected={selectedIds.includes(item.do_objectID)}
             onClick={(event) =>
-              onSelect(
+              onSelectSharedStyle(
                 item.do_objectID,
                 event.shiftKey ? 'intersection' : 'replace',
               )
