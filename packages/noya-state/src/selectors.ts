@@ -15,7 +15,7 @@ import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
-import { WorkspaceTab } from './reducers/application';
+import { WorkspaceTab, ComponentsTab } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
 import type { Point, Rect, UUID } from './types';
 
@@ -34,6 +34,12 @@ export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
 };
 
+export const getSharedStyles = (
+  state: ApplicationState,
+): Sketch.SharedStyle[] => {
+  return state.sketch.document.layerStyles?.objects ?? [];
+};
+
 export const getCurrentPage = (state: ApplicationState) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
@@ -50,6 +56,12 @@ export type PageMetadata = {
 
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;
+};
+
+export const getCurrentComponentsTab = (
+  state: ApplicationState,
+): ComponentsTab => {
+  return state.currentComponentsTab;
 };
 
 export const getCurrentPageMetadata = (
@@ -103,6 +115,16 @@ export const getSelectedLayersExcludingDescendants = (
   );
 };
 
+export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
+  const currentTab = getCurrentTab(state);
+
+  return currentTab === 'canvas'
+    ? getSelectedLayers(state).flatMap((layer) =>
+        layer.style ? [layer.style] : [],
+      )
+    : getSelectedLayerStyles(state).map((style) => style.value);
+};
+
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 
@@ -149,6 +171,16 @@ export const getSelectedColorSwatches = (
 
   return sharedSwatches.filter((swatch) =>
     state.selectedSwatchIds.includes(swatch.do_objectID),
+  );
+};
+
+export const getSelectedLayerStyles = (
+  state: ApplicationState,
+): Sketch.SharedStyle[] => {
+  const sharedSwatches = getSharedStyles(state);
+
+  return sharedSwatches.filter((swatch) =>
+    state.selectedLayerStyleIds.includes(swatch.do_objectID),
   );
 };
 

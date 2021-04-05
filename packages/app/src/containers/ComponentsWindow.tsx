@@ -1,10 +1,10 @@
-import { rgbaToHex } from 'noya-colorpicker';
-import { GridView, sketchColorToRgba } from 'noya-designsystem';
-import { getSharedSwatches } from 'noya-state/src/selectors';
+import { useSelector } from '../contexts/ApplicationStateContext';
+import { Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
+import LayerStylesGrid from './LayerStylesGrid';
+import SwatchesGrid from './SwatchesGrid';
+
 import styled from 'styled-components';
-import ColorSwatch from '../components/swatches/ColorSwatch';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 const Container = styled.main(({ theme }) => ({
   flex: '1',
@@ -13,47 +13,20 @@ const Container = styled.main(({ theme }) => ({
 }));
 
 export default memo(function ComponentsWindow() {
-  const [state, dispatch] = useApplicationState();
+  const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
-  const sharedSwatches = getSharedSwatches(state);
-  const sortedItems = useMemo(
-    () =>
-      [...sharedSwatches].sort((a, b) => {
-        const aName = a.name.toUpperCase();
-        const bName = b.name.toUpperCase();
+  const gridElement = useMemo(() => {
+    switch (componentsTab) {
+      case 'swatches':
+        return <SwatchesGrid />;
+      case 'textStyles':
+        return <></>;
+      case 'layerStyles':
+        return <LayerStylesGrid />;
+      case 'symbols':
+        return <></>;
+    }
+  }, [componentsTab]);
 
-        return aName > bName ? 1 : aName < bName ? -1 : 0;
-      }),
-    [sharedSwatches],
-  );
-
-  return (
-    <Container>
-      <GridView.Root onClick={() => dispatch('selectSwatch', undefined)}>
-        {sortedItems.map((item) => {
-          const color = sketchColorToRgba(item.value);
-          const hex = rgbaToHex(color).toUpperCase();
-          const alphaPercent = `${Math.round(color.a * 100)}%`;
-
-          return (
-            <GridView.Item
-              key={item.do_objectID}
-              title={item.name}
-              subtitle={`${hex} — ${alphaPercent}`}
-              selected={state.selectedSwatchIds.includes(item.do_objectID)}
-              onClick={(event) =>
-                dispatch(
-                  'selectSwatch',
-                  item.do_objectID,
-                  event.shiftKey ? 'intersection' : 'replace',
-                )
-              }
-            >
-              <ColorSwatch value={item.value} />
-            </GridView.Item>
-          );
-        })}
-      </GridView.Root>
-    </Container>
-  );
+  return <Container>{gridElement}</Container>;
 });

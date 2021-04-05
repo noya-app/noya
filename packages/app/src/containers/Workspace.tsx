@@ -14,7 +14,7 @@ import PageList from './PageList';
 import Toolbar from './Toolbar';
 import SwatchesToolbar from './SwatchesToolbar';
 import ComponentsWindow from './ComponentsWindow';
-import ColorSwatchesInspector from './ColorSwatchesInspector';
+import ComponentsInspectors from './ComponentsInspectors';
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
@@ -106,7 +106,7 @@ const ComponentsTab = memo(function ComponentsTab() {
         <ContentArea>
           <ComponentsWindow />
           <RightSidebar>
-            <ColorSwatchesInspector />
+            <ComponentsInspectors />
           </RightSidebar>
         </ContentArea>
       </MainView>

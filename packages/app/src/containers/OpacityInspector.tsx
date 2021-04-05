@@ -12,13 +12,13 @@ import getMultiValue from '../utils/getMultiValue';
 export default memo(function OpacityInspector() {
   const [, dispatch] = useApplicationState();
 
-  const selectedLayers = useShallowArray(
-    useSelector(Selectors.getSelectedLayersWithContextSettings),
+  const selectedStyles = useShallowArray(
+    useSelector(Selectors.getSelectedStyles),
   );
 
   const contextSettings = useShallowArray(
-    selectedLayers.flatMap((layer) =>
-      layer.style?.contextSettings ? [layer.style.contextSettings] : [],
+    selectedStyles.flatMap((style) =>
+      style?.contextSettings ? [style.contextSettings] : [],
     ),
   );
 

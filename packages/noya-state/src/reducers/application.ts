@@ -21,6 +21,7 @@ import {
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
+  getCurrentTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -31,8 +32,17 @@ import {
   interactionReducer,
   InteractionState,
 } from './interaction';
+import { SetNumberMode, StyleAction, styleReducer } from './style';
+
+export type { SetNumberMode };
 
 export type WorkspaceTab = 'canvas' | 'components';
+
+export type ComponentsTab =
+  | 'swatches'
+  | 'textStyles'
+  | 'layerStyles'
+  | 'symbols';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -43,11 +53,13 @@ export type LayerHighlight = {
 
 export type ApplicationState = {
   currentTab: WorkspaceTab;
+  currentComponentsTab: ComponentsTab;
   interactionState: InteractionState;
-  selectedPage: string;
   highlightedLayer?: LayerHighlight;
+  selectedPage: string;
   selectedObjects: string[];
   selectedSwatchIds: string[];
+  selectedLayerStyleIds: string[];
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
@@ -58,12 +70,9 @@ export type ApplicationState = {
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
 
-export type SetNumberMode = 'replace' | 'adjust';
-
-type StyleElementType = 'Fill' | 'Border' | 'Shadow';
-
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
+  | [type: 'setComponentsTab', value: ComponentsTab]
   | [
       type: 'setCanvasSize',
       size: { width: number; height: number },
@@ -83,6 +92,11 @@ export type Action =
     ]
   | [
       type: 'selectSwatch',
+      swatchId: string | string[] | undefined,
+      selectionType?: SelectionType,
+    ]
+  | [
+      type: 'selectLayerStyle',
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
@@ -101,43 +115,9 @@ export type Action =
         | 'centerVertical'
         | 'bottom',
     ]
-  | [type: `addNew${StyleElementType}`]
-  | [type: `delete${StyleElementType}`, index: number]
-  | [
-      type: `move${StyleElementType}`,
-      sourceIndex: number,
-      destinationIndex: number,
-    ]
-  | [type: `deleteDisabled${StyleElementType}s`]
-  | [type: `set${StyleElementType}Enabled`, index: number, isEnabled: boolean]
-  | [
-      type: 'setBorderWidth',
-      index: number,
-      amount: number,
-      mode?: SetNumberMode,
-    ]
-  | [type: 'setBorderPosition', index: number, position: Sketch.BorderPosition]
-  | [
-      type: 'setFillOpacity',
-      index: number,
-      amount: number,
-      mode?: SetNumberMode,
-    ]
-  | [type: 'setShadowX', index: number, amount: number, mode?: SetNumberMode]
-  | [type: 'setShadowY', index: number, amount: number, mode?: SetNumberMode]
-  | [type: 'setShadowBlur', index: number, amount: number, mode?: SetNumberMode]
-  | [
-      type: 'setShadowSpread',
-      index: number,
-      amount: number,
-      mode?: SetNumberMode,
-    ]
-  | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
-  | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [type: 'setSwatchColor', id: string | string[], color: Sketch.Color]
-  | [type: 'setSwatchName', id: string | string[], name: string]
   | [
       type: 'setSwatchOpacity',
       id: string | string[],
@@ -145,6 +125,7 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
+  | [type: 'addLayerStyle']
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -154,7 +135,10 @@ export type Action =
       action:
         | Exclude<InteractionAction, ['maybeScale', ...any[]]>
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
-    ];
+    ]
+  | [type: `setSwatchName`, id: string | string[], name: string]
+  | [type: `setLayerStyleName`, id: string | string[], name: string]
+  | StyleAction;
 
 export function reducer(
   state: ApplicationState,
@@ -169,6 +153,13 @@ export function reducer(
         state.interactionState = interactionReducer(state.interactionState, [
           'reset',
         ]);
+      });
+    }
+    case 'setComponentsTab': {
+      const [, value] = action;
+
+      return produce(state, (state) => {
+        state.currentComponentsTab = value;
       });
     }
     case 'setCanvasSize': {
@@ -459,265 +450,57 @@ export function reducer(
     }
     case 'addNewBorder':
     case 'addNewFill':
-    case 'addNewShadow': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (!style) return;
-
-          switch (action[0]) {
-            case 'addNewBorder':
-              if (style.borders) {
-                style.borders.unshift(Models.border);
-              } else {
-                style.borders = [Models.border];
-              }
-              break;
-            case 'addNewFill':
-              if (style.fills) {
-                style.fills.unshift(Models.fill);
-              } else {
-                style.fills = [Models.fill];
-              }
-              break;
-            case 'addNewShadow':
-              if (style.shadows) {
-                style.shadows.unshift(Models.shadow);
-              } else {
-                style.shadows = [Models.shadow];
-              }
-              break;
-          }
-        });
-      });
-    }
+    case 'addNewShadow':
     case 'setBorderEnabled':
     case 'setFillEnabled':
-    case 'setShadowEnabled': {
-      const [, index, isEnabled] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (!style) return;
-
-          switch (action[0]) {
-            case 'setBorderEnabled':
-              if (style.borders && style.borders[index]) {
-                style.borders[index].isEnabled = isEnabled;
-              }
-              break;
-            case 'setFillEnabled':
-              if (style.fills && style.fills[index]) {
-                style.fills[index].isEnabled = isEnabled;
-              }
-              break;
-            case 'setShadowEnabled':
-              if (style.shadows && style.shadows[index]) {
-                style.shadows[index].isEnabled = isEnabled;
-              }
-              break;
-          }
-        });
-      });
-    }
+    case 'setShadowEnabled':
     case 'deleteBorder':
     case 'deleteFill':
-    case 'deleteShadow': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (!style) return;
-
-          switch (action[0]) {
-            case 'deleteBorder':
-              if (style.borders) {
-                style.borders.splice(action[1], 1);
-              }
-              break;
-            case 'deleteFill':
-              if (style.fills) {
-                style.fills.splice(action[1], 1);
-              }
-              break;
-            case 'deleteShadow':
-              if (style.shadows) {
-                style.shadows.splice(action[1], 1);
-              }
-              break;
-          }
-        });
-      });
-    }
+    case 'deleteShadow':
     case 'moveBorder':
     case 'moveFill':
-    case 'moveShadow': {
-      const [, sourceIndex, destinationIndex] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (!style) return;
-
-          switch (action[0]) {
-            case 'moveBorder':
-              if (style.borders) {
-                const sourceItem = style.borders[sourceIndex];
-
-                style.borders.splice(sourceIndex, 1);
-                style.borders.splice(destinationIndex, 0, sourceItem);
-              }
-              break;
-            case 'moveFill':
-              if (style.fills) {
-                const sourceItem = style.fills[sourceIndex];
-
-                style.fills.splice(sourceIndex, 1);
-                style.fills.splice(destinationIndex, 0, sourceItem);
-              }
-              break;
-            case 'moveShadow':
-              if (style.shadows) {
-                const sourceItem = style.shadows[sourceIndex];
-
-                style.shadows.splice(sourceIndex, 1);
-                style.shadows.splice(destinationIndex, 0, sourceItem);
-              }
-              break;
-          }
-        });
-      });
-    }
-    case 'movePage': {
-      const [, sourceIndex, destinationIndex] = action;
-
-      return produce(state, (state) => {
-        const sourceItem = state.sketch.pages[sourceIndex];
-
-        state.sketch.pages.splice(sourceIndex, 1);
-        state.sketch.pages.splice(destinationIndex, 0, sourceItem);
-      });
-    }
+    case 'moveShadow':
     case 'deleteDisabledBorders':
     case 'deleteDisabledFills':
-    case 'deleteDisabledShadows': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (!style) return;
-
-          switch (action[0]) {
-            case 'deleteDisabledBorders':
-              if (style.borders) {
-                style.borders = style.borders.filter(
-                  (border) => border.isEnabled,
-                );
-              }
-              break;
-            case 'deleteDisabledFills':
-              if (style.fills) {
-                style.fills = style.fills.filter((fill) => fill.isEnabled);
-              }
-              break;
-            case 'deleteDisabledShadows':
-              if (style.shadows) {
-                style.shadows = style.shadows.filter((fill) => fill.isEnabled);
-              }
-              break;
-          }
-        });
-      });
-    }
+    case 'deleteDisabledShadows':
     case 'setBorderColor':
     case 'setFillColor':
-    case 'setShadowColor': {
-      const [, index, color] = action;
+    case 'setShadowColor':
+    case 'setBorderWidth':
+    case 'setFillOpacity':
+    case 'setOpacity':
+    case 'setShadowX':
+    case 'setShadowY':
+    case 'setShadowBlur':
+    case 'setBorderPosition':
+    case 'setShadowSpread': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
+      const currentTab = getCurrentTab(state);
+      if (currentTab === 'canvas') {
+        return produce(state, (state) => {
+          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (!layer.style) return;
 
-          if (!style) return;
-
-          switch (action[0]) {
-            case 'setBorderColor':
-              if (style.borders && style.borders[index]) {
-                style.borders[index].color = color;
-              }
-              break;
-            case 'setFillColor':
-              if (style.fills && style.fills[index]) {
-                style.fills[index].color = color;
-              }
-              break;
-            case 'setShadowColor':
-              if (style.shadows && style.shadows[index]) {
-                style.shadows[index].color = color;
-              }
-              break;
-          }
+              layer.style = styleReducer(layer.style, action);
+            },
+          );
         });
-      });
-    }
-    case 'setBorderWidth': {
-      const [, index, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      } else {
+        const selectedLayerStyleIds = state.selectedLayerStyleIds;
 
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
+        return produce(state, (state) => {
+          const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
 
-          if (style && style.borders && style.borders[index]) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.borders[index].thickness + amount;
-
-            style.borders[index].thickness = Math.max(0, newValue);
-          }
+          layerStyles.forEach((layerStyle) => {
+            if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
+              layerStyle.value = styleReducer(layerStyle.value, action);
+            }
+          });
         });
-      });
-    }
-    case 'setFillOpacity': {
-      const [, index, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (style && style.fills && style.fills[index]) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.fills[index].color.alpha + amount;
-
-            style.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
-          }
-        });
-      });
+      }
     }
     case 'setFixedRadius': {
       const [, amount, mode = 'replace'] = action;
@@ -749,119 +532,14 @@ export function reducer(
         });
       });
     }
-    case 'setOpacity': {
-      const [, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+    case 'movePage': {
+      const [, sourceIndex, destinationIndex] = action;
 
       return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
+        const sourceItem = state.sketch.pages[sourceIndex];
 
-          if (style && style.contextSettings) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.contextSettings.opacity + amount;
-
-            style.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
-          }
-        });
-      });
-    }
-    case 'setShadowX': {
-      const [, index, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (style && style.shadows && style.shadows[index]) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.shadows[index].offsetX + amount;
-
-            style.shadows[index].offsetX = newValue;
-          }
-        });
-      });
-    }
-    case 'setShadowY': {
-      const [, index, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (style && style.shadows && style.shadows[index]) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.shadows[index].offsetY + amount;
-
-            style.shadows[index].offsetY = newValue;
-          }
-        });
-      });
-    }
-    case 'setShadowBlur': {
-      const [, index, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (style && style.shadows && style.shadows[index]) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.shadows[index].blurRadius + amount;
-
-            style.shadows[index].blurRadius = newValue;
-          }
-        });
-      });
-    }
-    case 'setBorderPosition': {
-      const [, index, position] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (style && style.borders && style.borders[index]) {
-            style.borders[index].position = position;
-          }
-        });
-      });
-    }
-    case 'setShadowSpread': {
-      const [, index, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = layer.style;
-
-          if (style && style.shadows && style.shadows[index]) {
-            const newValue =
-              mode === 'replace'
-                ? amount
-                : style.shadows[index].spread + amount;
-
-            style.shadows[index].spread = newValue;
-          }
-        });
+        state.sketch.pages.splice(sourceIndex, 1);
+        state.sketch.pages.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'interaction': {
@@ -1052,7 +730,6 @@ export function reducer(
       const [, id, selectionType = 'replace'] = action;
 
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
-
       return produce(state, (state) => {
         switch (selectionType) {
           case 'intersection':
@@ -1088,22 +765,6 @@ export function reducer(
         });
       });
     }
-    case 'setSwatchName': {
-      const [, id, name] = action;
-
-      const ids = typeof id === 'string' ? [id] : id;
-
-      return produce(state, (state) => {
-        const sharedSwatches =
-          state.sketch.document.sharedSwatches?.objects ?? [];
-
-        sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if (ids.includes(swatch.do_objectID)) {
-            swatch.name = name;
-          }
-        });
-      });
-    }
     case 'setSwatchOpacity': {
       const [, id, alpha, mode = 'replace'] = action;
 
@@ -1119,6 +780,71 @@ export function reducer(
               mode === 'replace' ? alpha : swatch.value.alpha + alpha;
 
             swatch.value.alpha = Math.min(Math.max(0, newValue), 1);
+          }
+        });
+      });
+    }
+    case 'addLayerStyle': {
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles ?? {
+          _class: 'sharedStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        const sharedStyle: Sketch.SharedStyle = {
+          _class: 'sharedStyle',
+          do_objectID: uuid(),
+          name: 'New Layer Style',
+          value: produce(Models.style, (style) => {
+            style.do_objectID = uuid();
+            return style;
+          }),
+        };
+
+        layerStyles.objects.push(sharedStyle);
+        state.sketch.document.layerStyles = layerStyles;
+        state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+      });
+    }
+    case 'selectLayerStyle': {
+      const [, id, selectionType = 'replace'] = action;
+
+      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
+      return produce(state, (state) => {
+        switch (selectionType) {
+          case 'intersection':
+            state.selectedLayerStyleIds.push(
+              ...ids.filter((id) => !state.selectedLayerStyleIds.includes(id)),
+            );
+            return;
+          case 'difference':
+            ids.forEach((id) => {
+              const selectedIndex = state.selectedLayerStyleIds.indexOf(id);
+              state.selectedLayerStyleIds.splice(selectedIndex, 1);
+            });
+            return;
+          case 'replace':
+            state.selectedLayerStyleIds = [...ids];
+            return;
+        }
+      });
+    }
+    case 'setLayerStyleName':
+    case 'setSwatchName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const array =
+          action[0] === 'setSwatchName'
+            ? state.sketch.document.sharedSwatches?.objects ?? []
+            : state.sketch.document.layerStyles?.objects ?? [];
+
+        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
+          if (ids.includes(object.do_objectID)) {
+            object.name = name;
           }
         });
       });
@@ -1151,10 +877,12 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
 
   return {
     currentTab: 'canvas',
+    currentComponentsTab: 'swatches',
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     selectedSwatchIds: [],
+    selectedLayerStyleIds: [],
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },

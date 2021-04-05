@@ -12,10 +12,13 @@ import useShallowArray from '../hooks/useShallowArray';
 export default memo(function FillInspector() {
   const [, dispatch] = useApplicationState();
 
-  const selectedLayers = useSelector(Selectors.getSelectedLayers);
-  const fills = useShallowArray(
-    selectedLayers.map((layer) => layer.style?.fills),
+  const selectedStyles = useShallowArray(
+    useSelector(Selectors.getSelectedStyles),
   );
+
+  const fills = useMemo(() => selectedStyles.map((style) => style?.fills), [
+    selectedStyles,
+  ]);
   // TODO: Modify all fills
   const firstFill = useMemo(() => fills[0] || [], [fills]);
 
