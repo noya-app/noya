@@ -174,8 +174,8 @@ export default memo(function ColorInputFieldWithPicker({
           <Row>
             <Select
               id="colors-category"
-              options={useMemo(() => ['Document colors'], [])}
-              value="Document colors"
+              options={useMemo(() => ['Theme colors'], [])}
+              value="Theme colors"
               onChange={useCallback(() => {}, [])}
             />
             <Spacer.Horizontal size={8} />
