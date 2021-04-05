@@ -52,7 +52,7 @@ export default function Menubar() {
             <RadioGroup.Item value="canvas" tooltip="Canvas">
               <StackIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="components" tooltip="Components">
+            <RadioGroup.Item value="theme" tooltip="Theme">
               <TokensIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>

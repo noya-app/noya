@@ -36,13 +36,9 @@ import { SetNumberMode, StyleAction, styleReducer } from './style';
 
 export type { SetNumberMode };
 
-export type WorkspaceTab = 'canvas' | 'components';
+export type WorkspaceTab = 'canvas' | 'theme';
 
-export type ComponentsTab =
-  | 'swatches'
-  | 'textStyles'
-  | 'layerStyles'
-  | 'symbols';
+export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -53,7 +49,7 @@ export type LayerHighlight = {
 
 export type ApplicationState = {
   currentTab: WorkspaceTab;
-  currentComponentsTab: ComponentsTab;
+  currentThemeTab: ThemeTab;
   interactionState: InteractionState;
   highlightedLayer?: LayerHighlight;
   selectedPage: string;
@@ -72,7 +68,7 @@ export type SelectionType = 'replace' | 'intersection' | 'difference';
 
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
-  | [type: 'setComponentsTab', value: ComponentsTab]
+  | [type: 'setThemeTab', value: ThemeTab]
   | [
       type: 'setCanvasSize',
       size: { width: number; height: number },
@@ -155,11 +151,11 @@ export function reducer(
         ]);
       });
     }
-    case 'setComponentsTab': {
+    case 'setThemeTab': {
       const [, value] = action;
 
       return produce(state, (state) => {
-        state.currentComponentsTab = value;
+        state.currentThemeTab = value;
       });
     }
     case 'setCanvasSize': {
@@ -877,7 +873,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
 
   return {
     currentTab: 'canvas',
-    currentComponentsTab: 'swatches',
+    currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],

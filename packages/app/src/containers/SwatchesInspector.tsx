@@ -1,12 +1,14 @@
-import { Fragment, memo, useCallback, useMemo } from 'react';
-import { Spacer } from 'noya-designsystem';
+import { Divider } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
-import ColorSelectRow from '../components/inspector/ColorInspector';
-import { useSelector } from '../contexts/ApplicationStateContext';
-import useShallowArray from '../hooks/useShallowArray';
-import NameInspector from './NameInspector';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import ColorInspector from '../components/inspector/ColorInspector';
+import {
+  useApplicationState,
+  useSelector,
+} from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
+import NameInspector from '../components/inspector/NameInspector';
 
 const Container = styled.div(({ theme }) => ({
   display: 'flex',
@@ -14,46 +16,16 @@ const Container = styled.div(({ theme }) => ({
   padding: '10px',
 }));
 
-const ColorPickerInspector = memo(function ColorPickerInspector() {
+export default memo(function SwatchesInspectors() {
   const [state, dispatch] = useApplicationState();
 
   const selectedSwatches = useShallowArray(
     useSelector(Selectors.getSelectedColorSwatches),
   );
-
   const ids = state.selectedSwatchIds;
   const colors = useMemo(() => selectedSwatches.map((swatch) => swatch.value), [
     selectedSwatches,
   ]);
-
-  return (
-    <Container>
-      <ColorSelectRow
-        id={'color-swatch'}
-        colors={colors}
-        onChangeOpacity={useCallback(
-          (value) => dispatch('setSwatchOpacity', ids, value),
-          [dispatch, ids],
-        )}
-        onNudgeOpacity={useCallback(
-          (value) => dispatch('setSwatchOpacity', ids, value, 'adjust'),
-          [dispatch, ids],
-        )}
-        onChangeColor={useCallback(
-          (value) => dispatch('setSwatchColor', ids, value),
-          [dispatch, ids],
-        )}
-      />
-    </Container>
-  );
-});
-
-export default memo(function ComponentsInspectors() {
-  const [, dispatch] = useApplicationState();
-
-  const selectedSwatches = useShallowArray(
-    useSelector(Selectors.getSelectedColorSwatches),
-  );
 
   const handleNameChange = useCallback(
     (value: string) =>
@@ -65,16 +37,37 @@ export default memo(function ComponentsInspectors() {
     [dispatch, selectedSwatches],
   );
 
+  const handleChangeOpacity = useCallback(
+    (value) => dispatch('setSwatchOpacity', ids, value),
+    [dispatch, ids],
+  );
+  const handleNudgeOpacity = useCallback(
+    (value) => dispatch('setSwatchOpacity', ids, value, 'adjust'),
+    [dispatch, ids],
+  );
+  const handleChangeColor = useCallback(
+    (value) => dispatch('setSwatchColor', ids, value),
+    [dispatch, ids],
+  );
+
   if (selectedSwatches.length === 0) return null;
 
   return (
-    <Fragment key="layout">
+    <>
       <NameInspector
         names={selectedSwatches.map((v) => v.name)}
         onNameChange={handleNameChange}
       />
-      <ColorPickerInspector />
-      <Spacer.Vertical size={10} />
-    </Fragment>
+      <Divider />
+      <Container>
+        <ColorInspector
+          id={'color-swatch'}
+          colors={colors}
+          onChangeOpacity={handleChangeOpacity}
+          onNudgeOpacity={handleNudgeOpacity}
+          onChangeColor={handleChangeColor}
+        />
+      </Container>
+    </>
   );
 });

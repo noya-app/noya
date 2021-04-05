@@ -8,7 +8,7 @@ import {
 import useShallowArray from '../hooks/useShallowArray';
 import FillInspector from './FillInspector';
 import withSeparatorElements from '../utils/withSeparatorElements';
-import NameInspector from './NameInspector';
+import NameInspector from '../components/inspector/NameInspector';
 import OpacityInspector from './OpacityInspector';
 import BorderInspector from './BorderInspector';
 import ShadowInspector from './ShadowInspector';

@@ -1,30 +1,34 @@
-import { memo, useMemo } from 'react';
-import ColorSwatch from '../components/component/ColorSwatch';
-import { GridView, sketchColorToRgba } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { rgbaToHex } from 'noya-colorpicker';
+import { GridView, sketchColorToRgba } from 'noya-designsystem';
+import { SelectionType } from 'noya-state';
+import { memo, useMemo } from 'react';
+import ColorSwatch from './ColorSwatch';
 
-export default memo(function SwatchInspector() {
-  const [state, dispatch] = useApplicationState();
+interface Props {
+  swatches: Sketch.Swatch[];
+  selectedSwatchIds: string[];
+  onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
+}
 
-  const sharedSwatches = useSelector(Selectors.getSharedSwatches);
-
+export default memo(function SwatchesGrid({
+  swatches,
+  selectedSwatchIds,
+  onSelectSwatch,
+}: Props) {
   const sortedSwatches = useMemo(
     () =>
-      [...sharedSwatches].sort((a, b) => {
+      [...swatches].sort((a, b) => {
         const aName = a.name.toUpperCase();
         const bName = b.name.toUpperCase();
 
         return aName > bName ? 1 : aName < bName ? -1 : 0;
       }),
-    [sharedSwatches],
+    [swatches],
   );
+
   return (
-    <GridView.Root onClick={() => dispatch('selectSwatch', undefined)}>
+    <GridView.Root onClick={() => onSelectSwatch(undefined, 'replace')}>
       {sortedSwatches.map((item) => {
         const color = sketchColorToRgba(item.value);
         const hex = rgbaToHex(color);
@@ -35,10 +39,9 @@ export default memo(function SwatchInspector() {
             key={item.do_objectID}
             title={item.name}
             subtitle={`${hex} — ${alphaPercent}`}
-            selected={state.selectedSwatchIds.includes(item.do_objectID)}
+            selected={selectedSwatchIds.includes(item.do_objectID)}
             onClick={(event) =>
-              dispatch(
-                'selectSwatch',
+              onSelectSwatch(
                 item.do_objectID,
                 event.shiftKey ? 'intersection' : 'replace',
               )

@@ -1,6 +1,6 @@
 import { InputField, Spacer } from 'noya-designsystem';
 import { memo } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
   names: string[];
