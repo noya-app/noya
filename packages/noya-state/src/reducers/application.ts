@@ -795,7 +795,7 @@ export function reducer(
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
-          name: 'New Layer Layer',
+          name: 'New Layer Style',
           value: produce(Models.style, (style) => {
             style.do_objectID = uuid();
             return style;
