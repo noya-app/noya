@@ -1,7 +1,7 @@
 import { Button, InputField, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { useCallback } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
 import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 
@@ -37,6 +37,8 @@ export default function DimensionsInspector({
   rotation,
   onSetRotation,
 }: Props) {
+  const iconColor = useTheme().colors.icon;
+
   return (
     <>
       <Row>
@@ -104,9 +106,7 @@ export default function DimensionsInspector({
             tooltip="Flip horizontally"
             onClick={useCallback(() => {}, [])}
           >
-            <Spacer.Horizontal size={2} />
-            <FlipHorizontalIcon color={'rgb(139, 139, 139)'} />
-            <Spacer.Horizontal size={2} />
+            <FlipHorizontalIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal />
           <Button
@@ -114,9 +114,7 @@ export default function DimensionsInspector({
             tooltip="Flip vertically"
             onClick={useCallback(() => {}, [])}
           >
-            <Spacer.Horizontal size={2} />
-            <FlipVerticalIcon color={'rgb(139, 139, 139)'} />
-            <Spacer.Horizontal size={2} />
+            <FlipVerticalIcon color={iconColor} />
           </Button>
         </FlipButtonContainer>
       </Row>

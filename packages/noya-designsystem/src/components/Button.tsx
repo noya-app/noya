@@ -13,7 +13,7 @@ const ButtonElement = styled.button<{ active: boolean }>(
     position: 'relative',
     border: '0',
     outline: 'none',
-    minWidth: '0',
+    minWidth: '31px',
     textAlign: 'left',
     borderRadius: '4px',
     paddingTop: '4px',
@@ -27,6 +27,7 @@ const ButtonElement = styled.button<{ active: boolean }>(
     },
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
   }),
 );
 
