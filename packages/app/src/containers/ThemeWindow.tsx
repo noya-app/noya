@@ -12,7 +12,7 @@ const Container = styled.main(({ theme }) => ({
   flexDirection: 'column',
 }));
 
-export default memo(function ComponentsWindow() {
+export default memo(function ThemeWindow() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
   const gridElement = useMemo(() => {

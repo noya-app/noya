@@ -15,7 +15,7 @@ import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
-import { WorkspaceTab, ComponentsTab } from './reducers/application';
+import { WorkspaceTab, ThemeTab } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
 import type { Point, Rect, UUID } from './types';
 
@@ -58,10 +58,8 @@ export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;
 };
 
-export const getCurrentComponentsTab = (
-  state: ApplicationState,
-): ComponentsTab => {
-  return state.currentComponentsTab;
+export const getCurrentComponentsTab = (state: ApplicationState): ThemeTab => {
+  return state.currentThemeTab;
 };
 
 export const getCurrentPageMetadata = (

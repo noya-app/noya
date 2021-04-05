@@ -13,8 +13,8 @@ import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
 import SwatchesToolbar from './SwatchesToolbar';
-import ComponentsWindow from './ComponentsWindow';
-import ComponentsInspectors from './ComponentsInspectors';
+import ComponentsWindow from './ThemeWindow';
+import ComponentsInspectors from './ThemeInspector';
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,

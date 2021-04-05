@@ -4,7 +4,7 @@ import { useSelector } from '../contexts/ApplicationStateContext';
 import SwatchInspector from './SwatchesInspector';
 import LayerStyleInspector from './LayerStyleInspector';
 
-export default memo(function ComponentsInspectors() {
+export default memo(function ThemeInspector() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
 
   const element = useMemo(() => {

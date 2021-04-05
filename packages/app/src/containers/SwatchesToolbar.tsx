@@ -13,7 +13,7 @@ import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import { Selectors, ComponentsTab } from 'noya-state';
+import { Selectors, ThemeTab } from 'noya-state';
 
 const Container = styled.header(({ theme }) => ({
   height: `${theme.sizes.toolbar.height}px`,
@@ -47,7 +47,7 @@ export default function SwatchesToolbar() {
 
   const handleChangeTab = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch('setComponentsTab', event.target.value as ComponentsTab);
+      dispatch('setThemeTab', event.target.value as ThemeTab);
     },
     [dispatch],
   );
@@ -63,16 +63,16 @@ export default function SwatchesToolbar() {
             value={componentsTab}
             onValueChange={handleChangeTab}
           >
-            <RadioGroup.Item value="swatches" tooltip="Shared colors">
+            <RadioGroup.Item value="swatches" tooltip="Theme colors">
               <BlendingModeIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="textStyles" tooltip="Shared text styles">
+            <RadioGroup.Item value="textStyles" tooltip="Theme text styles">
               <LetterCaseToggleIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="layerStyles" tooltip="Shared layer styles">
+            <RadioGroup.Item value="layerStyles" tooltip="Theme layer styles">
               <MarginIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="symbols" tooltip="Shared symbols">
+            <RadioGroup.Item value="symbols" tooltip="Theme symbols">
               <ComponentInstanceIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>

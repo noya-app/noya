@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import ColorSwatch from '../components/component/ColorSwatch';
+import ColorSwatch from '../components/theme/ColorSwatch';
 import { GridView, sketchColorToRgba } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import {

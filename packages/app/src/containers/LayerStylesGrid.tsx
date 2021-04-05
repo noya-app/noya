@@ -1,13 +1,13 @@
 import { memo, useMemo } from 'react';
 import { GridView } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import LayerStyle from '../components/component/LayerStyle';
+import LayerStyle from '../components/theme/LayerStyle';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 
-export default memo(function SwatchInspector() {
+export default memo(function LayerStylesGrid() {
   const [state, dispatch] = useApplicationState();
 
   const sharedStyles = useSelector(Selectors.getSharedStyles);
