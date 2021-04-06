@@ -121,7 +121,7 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
-  | [type: 'addLayerStyle']
+  | [type: 'addLayerStyle', name?: string, style?: Sketch.Style]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -134,6 +134,7 @@ export type Action =
     ]
   | [type: `setSwatchName`, id: string | string[], name: string]
   | [type: `setLayerStyleName`, id: string | string[], name: string]
+  | [type: 'setLayerStyle', id: string, style: Sketch.Style | undefined]
   | StyleAction;
 
 export function reducer(
@@ -781,6 +782,8 @@ export function reducer(
       });
     }
     case 'addLayerStyle': {
+      const [, name, style] = action;
+
       return produce(state, (state) => {
         const layerStyles = state.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
@@ -788,19 +791,27 @@ export function reducer(
           objects: [],
         };
 
+        const sharedStyleId = uuid();
+
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
-          do_objectID: uuid(),
-          name: 'New Layer Style',
-          value: produce(Models.style, (style) => {
-            style.do_objectID = uuid();
-            return style;
-          }),
+          do_objectID: sharedStyleId,
+          name: name === undefined || name === '' ? 'New Layer Style' : name,
+          value: produce(
+            style === undefined ? Models.style : style,
+            (style) => {
+              style.do_objectID = uuid();
+              return style;
+            },
+          ),
         };
 
         layerStyles.objects.push(sharedStyle);
         state.sketch.document.layerStyles = layerStyles;
-        state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+
+        if (name === undefined) {
+          state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+        }
       });
     }
     case 'selectLayerStyle': {
@@ -841,6 +852,28 @@ export function reducer(
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (ids.includes(object.do_objectID)) {
             object.name = name;
+          }
+        });
+      });
+    }
+    case 'setLayerStyle': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const [, id, style] = action;
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (!layer.style) return;
+
+          if (style) {
+            layer.sharedStyleID = id;
+            layer.style = produce(style, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            });
+          } else {
+            layer.sharedStyleID = '';
           }
         });
       });

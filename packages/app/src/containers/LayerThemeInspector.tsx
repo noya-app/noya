@@ -10,15 +10,33 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useSelector } from '../contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useSelector,
+} from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 
 const NO_LAYER_STYLE = 'none';
 
 export default memo(function LayerThemeInspector() {
+  const [, dispatch] = useApplicationState();
+
   const iconColor = useTheme().colors.icon;
 
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
+  const selectedLayers = useShallowArray(
+    useSelector(Selectors.getSelectedLayers),
+  );
+
+  const selectedLayerStyleId = useMemo(
+    () =>
+      !selectedLayers.every(
+        (v) => v.sharedStyleID === selectedLayers[0].sharedStyleID,
+      )
+        ? undefined
+        : selectedLayers[0].sharedStyleID,
+    [selectedLayers],
+  );
 
   const layerStyleOptions = useMemo(
     () => [NO_LAYER_STYLE, ...sharedStyles.map((style) => style.do_objectID)],
@@ -33,6 +51,25 @@ export default memo(function LayerThemeInspector() {
     [sharedStyles],
   );
 
+  const onLayerStyleChange = useCallback(
+    (value) => {
+      const style = sharedStyles.find((s) => s.do_objectID === value);
+
+      if (style !== undefined) dispatch('setLayerStyle', value, style.value);
+      else dispatch('setLayerStyle', value, undefined);
+    },
+    [sharedStyles, dispatch],
+  );
+
+  const onAddLayerStyle = useCallback(() => {
+    const styleName = String(prompt('New Style Layout Name'));
+
+    dispatch('addLayerStyle', styleName, selectedLayers[0].style);
+  }, [selectedLayers, dispatch]);
+
+  /**
+   * When adding a new style  layout. Whay should happen when multiselecting?
+   */
   return (
     <>
       <InspectorPrimitives.Section>
@@ -43,10 +80,10 @@ export default memo(function LayerThemeInspector() {
         <InspectorPrimitives.Row>
           <Select
             id="theme-layer-style"
-            value={'No Layer Style'}
+            value={selectedLayerStyleId || 'No Layer Style'}
             options={layerStyleOptions}
             getTitle={getLayerStyleTitle}
-            onChange={() => {}}
+            onChange={onLayerStyleChange}
           />
         </InspectorPrimitives.Row>
         <Spacer.Vertical size={10} />
@@ -54,7 +91,7 @@ export default memo(function LayerThemeInspector() {
           <Button
             id="create-layer-style"
             tooltip="Create theme style from layer"
-            onClick={useCallback(() => {}, [])}
+            onClick={onAddLayerStyle}
           >
             <PlusIcon color={iconColor} />
           </Button>
