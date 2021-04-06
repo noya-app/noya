@@ -785,6 +785,9 @@ export function reducer(
     case 'addLayerStyle': {
       const [, name, style] = action;
 
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
       return produce(state, (state) => {
         const layerStyles = state.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
@@ -808,8 +811,16 @@ export function reducer(
         layerStyles.objects.push(sharedStyle);
         state.sketch.document.layerStyles = layerStyles;
 
-        if (name === undefined) {
+        if (style === undefined) {
           state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+        } else {
+          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (!layer.style) return;
+
+              layer.sharedStyleID = sharedStyle.do_objectID;
+            },
+          );
         }
       });
     }

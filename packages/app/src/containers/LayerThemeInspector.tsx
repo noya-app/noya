@@ -73,23 +73,18 @@ export default memo(function LayerThemeInspector() {
   }, [selectedLayers, dispatch]);
 
   const onRename = useCallback(() => {
-    const id = selectedLayers[0].sharedStyleID;
-
-    if (id !== undefined) {
-      const newName = prompt('Rename Layout style ');
+    if (selectedLayerStyleId !== undefined) {
+      const newName = prompt('Rename Layout style');
 
       if (newName !== null) {
-        dispatch('setLayerStyleName', id, newName);
+        dispatch('setLayerStyleName', selectedLayerStyleId, newName);
       }
     } else {
       alert('No Layer Selected');
     }
-  }, [selectedLayers, dispatch]);
+  }, [selectedLayerStyleId, dispatch]);
 
-  const onDetach = useCallback(
-    () => dispatch('setLayerStyle', undefined, undefined),
-    [dispatch],
-  );
+  const onDetach = useCallback(() => dispatch('setLayerStyle'), [dispatch]);
 
   const onUpdate = useCallback(
     () =>
