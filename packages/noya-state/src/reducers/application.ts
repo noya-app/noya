@@ -122,6 +122,7 @@ export type Action =
     ]
   | [type: 'addColorSwatch']
   | [type: 'addLayerStyle', name?: string, style?: Sketch.Style]
+  | [type: 'updateLayerStyle', id: string, style: Sketch.Style | undefined]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -134,7 +135,7 @@ export type Action =
     ]
   | [type: `setSwatchName`, id: string | string[], name: string]
   | [type: `setLayerStyleName`, id: string | string[], name: string]
-  | [type: 'setLayerStyle', id: string, style: Sketch.Style | undefined]
+  | [type: 'setLayerStyle', id?: string, style?: Sketch.Style | undefined]
   | StyleAction;
 
 export function reducer(
@@ -791,11 +792,9 @@ export function reducer(
           objects: [],
         };
 
-        const sharedStyleId = uuid();
-
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
-          do_objectID: sharedStyleId,
+          do_objectID: uuid(),
           name: name === undefined || name === '' ? 'New Layer Style' : name,
           value: produce(
             style === undefined ? Models.style : style,
@@ -873,7 +872,25 @@ export function reducer(
               return style;
             });
           } else {
-            layer.sharedStyleID = '';
+            layer.sharedStyleID = undefined;
+          }
+        });
+      });
+    }
+    case 'updateLayerStyle': {
+      const [, id, style] = action;
+
+      return produce(state, (state) => {
+        if (!style) return;
+
+        const sharedStyle = state.sketch.document.layerStyles.objects;
+
+        sharedStyle.forEach((SStyle: Sketch.SharedStyle) => {
+          if (id === SStyle.do_objectID) {
+            SStyle.value = produce(style, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            });
           }
         });
       });

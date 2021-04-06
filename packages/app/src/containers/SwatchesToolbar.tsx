@@ -52,6 +52,14 @@ export default function SwatchesToolbar() {
     [dispatch],
   );
 
+  const addColorSwatch = useCallback(() => dispatch('addColorSwatch'), [
+    dispatch,
+  ]);
+
+  const addLayerStyle = useCallback(() => dispatch('addLayerStyle'), [
+    dispatch,
+  ]);
+
   return useMemo(
     () => (
       <Container>
@@ -84,10 +92,10 @@ export default function SwatchesToolbar() {
             onClick={() => {
               switch (componentsTab) {
                 case 'swatches':
-                  dispatch('addColorSwatch');
+                  addColorSwatch();
                   break;
                 case 'layerStyles':
-                  dispatch('addLayerStyle');
+                  addLayerStyle();
                   break;
               }
             }}
@@ -98,6 +106,12 @@ export default function SwatchesToolbar() {
         <Spacer.Horizontal size={sidebarWidth + 8} />
       </Container>
     ),
-    [dispatch, sidebarWidth, componentsTab, handleChangeTab],
+    [
+      sidebarWidth,
+      componentsTab,
+      addLayerStyle,
+      addColorSwatch,
+      handleChangeTab,
+    ],
   );
 }

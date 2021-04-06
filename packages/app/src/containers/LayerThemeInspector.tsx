@@ -51,25 +51,68 @@ export default memo(function LayerThemeInspector() {
     [sharedStyles],
   );
 
-  const onLayerStyleChange = useCallback(
+  const onSelect = useCallback(
     (value) => {
       const style = sharedStyles.find((s) => s.do_objectID === value);
 
-      if (style !== undefined) dispatch('setLayerStyle', value, style.value);
-      else dispatch('setLayerStyle', value, undefined);
+      if (style !== undefined) {
+        dispatch('setLayerStyle', value, style.value);
+      } else {
+        dispatch('setLayerStyle', value, undefined);
+      }
     },
     [sharedStyles, dispatch],
   );
 
-  const onAddLayerStyle = useCallback(() => {
-    const styleName = String(prompt('New Style Layout Name'));
+  const onAdd = useCallback(() => {
+    const styleName = prompt('New Style Layout Name');
 
-    dispatch('addLayerStyle', styleName, selectedLayers[0].style);
+    if (styleName != null) {
+      dispatch('addLayerStyle', styleName, selectedLayers[0].style);
+    }
   }, [selectedLayers, dispatch]);
 
-  /**
-   * When adding a new style  layout. Whay should happen when multiselecting?
-   */
+  const onRename = useCallback(() => {
+    const id = selectedLayers[0].sharedStyleID;
+
+    if (id !== undefined) {
+      const newName = prompt('Rename Layout style ');
+
+      if (newName !== null) {
+        dispatch('setLayerStyleName', id, newName);
+      }
+    } else {
+      alert('No Layer Selected');
+    }
+  }, [selectedLayers, dispatch]);
+
+  const onDetach = useCallback(
+    () => dispatch('setLayerStyle', undefined, undefined),
+    [dispatch],
+  );
+
+  const onUpdate = useCallback(
+    () =>
+      selectedLayerStyleId
+        ? dispatch(
+            'updateLayerStyle',
+            selectedLayerStyleId,
+            selectedLayers[0].style,
+          )
+        : undefined,
+    [selectedLayerStyleId, selectedLayers, dispatch],
+  );
+
+  const onReset = useCallback(() => {
+    const style = sharedStyles.find(
+      (s) => s.do_objectID === selectedLayerStyleId,
+    );
+
+    if (selectedLayerStyleId && style) {
+      dispatch('setLayerStyle', selectedLayerStyleId, style.value);
+    }
+  }, [selectedLayerStyleId, sharedStyles, dispatch]);
+
   return (
     <>
       <InspectorPrimitives.Section>
@@ -83,7 +126,7 @@ export default memo(function LayerThemeInspector() {
             value={selectedLayerStyleId || 'No Layer Style'}
             options={layerStyleOptions}
             getTitle={getLayerStyleTitle}
-            onChange={onLayerStyleChange}
+            onChange={onSelect}
           />
         </InspectorPrimitives.Row>
         <Spacer.Vertical size={10} />
@@ -91,39 +134,43 @@ export default memo(function LayerThemeInspector() {
           <Button
             id="create-layer-style"
             tooltip="Create theme style from layer"
-            onClick={onAddLayerStyle}
+            onClick={onAdd}
           >
             <PlusIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
             id="update-layer-style"
+            disabled={selectedLayerStyleId === undefined}
             tooltip="Update theme style to match layer"
-            onClick={useCallback(() => {}, [])}
+            onClick={onUpdate}
           >
             <UpdateIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
             id="detach-layer-style"
+            disabled={selectedLayerStyleId === undefined}
             tooltip="Detach style from theme"
-            onClick={useCallback(() => {}, [])}
+            onClick={onDetach}
           >
             <LinkBreak2Icon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
             id="rename-style"
+            disabled={selectedLayerStyleId === undefined}
             tooltip="Rename theme style"
-            onClick={useCallback(() => {}, [])}
+            onClick={onRename}
           >
             <CursorTextIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
             id="reset-style"
+            disabled={selectedLayerStyleId === undefined}
             tooltip="Reset layer style to theme style"
-            onClick={useCallback(() => {}, [])}
+            onClick={onReset}
           >
             <ResetIcon color={iconColor} />
           </Button>
