@@ -56,7 +56,7 @@ export default function SwatchesToolbar() {
     dispatch,
   ]);
 
-  const addLayerStyle = useCallback(() => dispatch('addLayerStyle'), [
+  const addLayerStyle = useCallback(() => dispatch('addThemeStyle'), [
     dispatch,
   ]);
 

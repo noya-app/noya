@@ -23,7 +23,7 @@ export default memo(function LayerStyleInspector() {
   const handleNameChange = useCallback(
     (value: string) =>
       dispatch(
-        'setLayerStyleName',
+        'setThemeStyleName',
         selectedStyles.map((v) => v.do_objectID),
         value,
       ),

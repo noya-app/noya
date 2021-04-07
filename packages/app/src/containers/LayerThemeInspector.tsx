@@ -53,50 +53,35 @@ export default memo(function LayerThemeInspector() {
 
   const onSelect = useCallback(
     (value) => {
-      const style = sharedStyles.find((s) => s.do_objectID === value);
-
-      if (style !== undefined) {
-        dispatch('setLayerStyle', value, style.value);
-      } else {
-        dispatch('setLayerStyle', value, undefined);
-      }
+      dispatch('setThemeStyle', value === NO_LAYER_STYLE ? undefined : value);
     },
-    [sharedStyles, dispatch],
+    [dispatch],
   );
 
   const onAdd = useCallback(() => {
     const styleName = prompt('New Style Layout Name');
 
-    if (styleName != null) {
-      dispatch('addLayerStyle', styleName, selectedLayers[0].style);
-    }
+    if (!styleName) return;
+    dispatch('addThemeStyle', styleName, selectedLayers[0].style);
   }, [selectedLayers, dispatch]);
 
   const onRename = useCallback(() => {
-    if (selectedLayerStyleId !== undefined) {
-      const newName = prompt('Rename Layout style');
+    if (!selectedLayerStyleId) return;
 
-      if (newName !== null) {
-        dispatch('setLayerStyleName', selectedLayerStyleId, newName);
-      }
-    } else {
-      alert('No Layer Selected');
-    }
+    const newName = prompt('Rename Layout style');
+
+    if (!newName) return;
+    dispatch('setThemeStyleName', selectedLayerStyleId, newName);
   }, [selectedLayerStyleId, dispatch]);
 
-  const onDetach = useCallback(() => dispatch('setLayerStyle'), [dispatch]);
+  const onDetach = useCallback(() => dispatch('setThemeStyle'), [dispatch]);
 
-  const onUpdate = useCallback(
-    () =>
-      selectedLayerStyleId
-        ? dispatch(
-            'updateLayerStyle',
-            selectedLayerStyleId,
-            selectedLayers[0].style,
-          )
-        : undefined,
-    [selectedLayerStyleId, selectedLayers, dispatch],
-  );
+  const onUpdate = useCallback(() => {
+    console.log('why?');
+    if (!selectedLayerStyleId) return;
+
+    dispatch('updateThemeStyle', selectedLayerStyleId, selectedLayers[0].style);
+  }, [selectedLayerStyleId, selectedLayers, dispatch]);
 
   const onReset = useCallback(() => {
     const style = sharedStyles.find(
@@ -104,7 +89,7 @@ export default memo(function LayerThemeInspector() {
     );
 
     if (selectedLayerStyleId && style) {
-      dispatch('setLayerStyle', selectedLayerStyleId, style.value);
+      dispatch('setThemeStyle', selectedLayerStyleId, style.value);
     }
   }, [selectedLayerStyleId, sharedStyles, dispatch]);
 
@@ -118,7 +103,7 @@ export default memo(function LayerThemeInspector() {
         <InspectorPrimitives.Row>
           <Select
             id="theme-layer-style"
-            value={selectedLayerStyleId || 'No Layer Style'}
+            value={selectedLayerStyleId || NO_LAYER_STYLE}
             options={layerStyleOptions}
             getTitle={getLayerStyleTitle}
             onChange={onSelect}
