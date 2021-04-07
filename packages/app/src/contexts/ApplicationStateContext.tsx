@@ -1,9 +1,9 @@
-import { Action, ApplicationState } from 'noya-state';
+import { Action, HistoryState } from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
 export type ApplicationStateContextValue = [
-  ApplicationState,
+  HistoryState,
   (action: Action) => void,
 ];
 
