@@ -136,6 +136,8 @@ export type Action =
   | [type: `setSwatchName`, id: string | string[], name: string]
   | [type: `setLayerStyleName`, id: string | string[], name: string]
   | [type: 'setLayerStyle', id?: string, style?: Sketch.Style | undefined]
+  | [type: 'removeSwatch']
+  | [type: 'removeLayerStyle']
   | StyleAction;
 
 export function reducer(
@@ -904,6 +906,38 @@ export function reducer(
             });
           }
         });
+      });
+    }
+    case 'removeSwatch': {
+      const ids = state.selectedSwatchIds;
+
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches;
+
+        if (!sharedSwatches) return;
+
+        const filterSwatches = sharedSwatches.objects.filter(
+          (object: Sketch.Swatch) => !ids.includes(object.do_objectID),
+        );
+        sharedSwatches.objects = filterSwatches;
+
+        state.sketch.document.sharedSwatches = sharedSwatches;
+      });
+    }
+    case 'removeLayerStyle': {
+      const ids = state.selectedLayerStyleIds;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles;
+
+        if (!layerStyles) return;
+
+        const filterLayer = layerStyles.objects.filter(
+          (object: Sketch.SharedStyle) => !ids.includes(object.do_objectID),
+        );
+        layerStyles.objects = filterLayer;
+
+        state.sketch.document.layerStyles = layerStyles;
       });
     }
     default:
