@@ -1,22 +1,20 @@
 import produce from 'immer';
 import { ApplicationState, Action, reducer } from './application';
 
-export type History = {
+export type HistoryState = {
   past: Array<ApplicationState>;
   present: ApplicationState;
   future: Array<ApplicationState>;
 };
 
-export type HistoryAction =
-  | [type: 'undo', value: null]
-  | [type: 'redo', value: null];
+export type HistoryAction = [type: 'undo'] | [type: 'redo'];
 
-export function historyReducer(state: History, action: HistoryAction) {
+export function historyReducer(state: HistoryState, action: HistoryAction) {
   switch (action[0]) {
     case 'undo':
       return produce(state, (state) => {
         if (state.past.length > 0) {
-          const newPresent = state.past.pop();
+          const newPresent = state.past.pop() as ApplicationState;
           state.future.unshift(state.present);
           state.present = newPresent;
         }
@@ -24,7 +22,7 @@ export function historyReducer(state: History, action: HistoryAction) {
     case 'redo':
       return produce(state, (state) => {
         if (state.future.length > 0) {
-          const newPresent = state.future.shift();
+          const newPresent = state.future.shift() as ApplicationState;
           state.past.push(state.present);
           state.present = newPresent;
         }
@@ -32,7 +30,10 @@ export function historyReducer(state: History, action: HistoryAction) {
     default:
       return produce(state, (state) => {
         state.past.push(state.present);
-        state.present = reducer(state.present, action as Action);
+        state.present = reducer(
+          state.present as ApplicationState,
+          action as Action,
+        );
         state.future = [];
       });
   }
