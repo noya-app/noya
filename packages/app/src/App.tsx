@@ -2,7 +2,7 @@ import {
   Action,
   ApplicationState,
   createInitialState,
-  reducer,
+  historyReducer,
 } from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { parse, SketchFile } from 'noya-sketch-file';
@@ -34,7 +34,7 @@ export default function App() {
           if (state.type === 'success') {
             return {
               type: 'success',
-              value: reducer(state.value, action.value),
+              value: historyReducer(state.value, action.value),
             };
           } else {
             return state;
@@ -56,7 +56,9 @@ export default function App() {
 
   const contextValue: ApplicationStateContextValue | undefined = useMemo(
     () =>
-      state.type === 'success' ? [state.value, handleDispatch] : undefined,
+      state.type === 'success'
+        ? [state.value.present, handleDispatch]
+        : undefined,
     [state, handleDispatch],
   );
 
