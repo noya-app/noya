@@ -5,6 +5,7 @@ import {
   LetterCaseToggleIcon,
   MarginIcon,
   PlusIcon,
+  TrashIcon,
 } from '@radix-ui/react-icons';
 import React, { useMemo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -52,6 +53,14 @@ export default function SwatchesToolbar() {
     [dispatch],
   );
 
+  const removeColorSwatch = useCallback(() => dispatch('removeSwatch'), [
+    dispatch,
+  ]);
+
+  const removeLayerStyle = useCallback(() => dispatch('removeLayerStyle'), [
+    dispatch,
+  ]);
+
   return useMemo(
     () => (
       <Container>
@@ -94,10 +103,33 @@ export default function SwatchesToolbar() {
           >
             <PlusIcon />
           </Button>
+          <Spacer.Horizontal size={4} />
+          <Button
+            id="add-style"
+            onClick={() => {
+              switch (componentsTab) {
+                case 'swatches':
+                  removeColorSwatch();
+                  break;
+                case 'layerStyles':
+                  removeLayerStyle();
+                  break;
+              }
+            }}
+          >
+            <TrashIcon />
+          </Button>
         </RightContainer>
         <Spacer.Horizontal size={sidebarWidth + 8} />
       </Container>
     ),
-    [dispatch, sidebarWidth, componentsTab, handleChangeTab],
+    [
+      dispatch,
+      sidebarWidth,
+      componentsTab,
+      removeColorSwatch,
+      removeLayerStyle,
+      handleChangeTab,
+    ],
   );
 }
