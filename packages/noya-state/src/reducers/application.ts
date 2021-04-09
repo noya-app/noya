@@ -34,6 +34,7 @@ import {
   interactionReducer,
   InteractionState,
 } from './interaction';
+import { HistoryState } from './history';
 import { SetNumberMode, StyleAction, styleReducer } from './style';
 
 export type { SetNumberMode };
@@ -1278,12 +1279,12 @@ function accessPageLayers(
   });
 }
 
-export function createInitialState(sketch: SketchFile): ApplicationState {
+export function createInitialState(sketch: SketchFile): HistoryState {
   if (sketch.pages.length === 0) {
     throw new Error('Invalid Sketch file - no pages');
   }
 
-  return {
+  const applicationState: ApplicationState = {
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),
@@ -1300,5 +1301,11 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     preferences: {
       showRulers: false,
     },
+  };
+
+  return {
+    past: [],
+    present: applicationState,
+    future: [],
   };
 }

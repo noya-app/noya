@@ -1,8 +1,8 @@
 import {
-  Action,
-  ApplicationState,
   createInitialState,
+  HistoryAction,
   historyReducer,
+  HistoryState,
 } from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { parse, SketchFile } from 'noya-sketch-file';
@@ -19,11 +19,11 @@ export default function App() {
 
   const [state, dispatch] = useReducer(
     (
-      state: PromiseState<ApplicationState>,
+      state: PromiseState<HistoryState>,
       action:
         | { type: 'set'; value: SketchFile }
-        | { type: 'update'; value: Action },
-    ): PromiseState<ApplicationState> => {
+        | { type: 'update'; value: HistoryAction },
+    ): PromiseState<HistoryState> => {
       switch (action.type) {
         case 'set':
           return {
@@ -50,15 +50,13 @@ export default function App() {
     });
   }, [sketchFile]);
 
-  const handleDispatch = useCallback((action: Action) => {
+  const handleDispatch = useCallback((action: HistoryAction) => {
     dispatch({ type: 'update', value: action });
   }, []);
 
   const contextValue: ApplicationStateContextValue | undefined = useMemo(
     () =>
-      state.type === 'success'
-        ? [state.value.present, handleDispatch]
-        : undefined,
+      state.type === 'success' ? [state.value, handleDispatch] : undefined,
     [state, handleDispatch],
   );
 

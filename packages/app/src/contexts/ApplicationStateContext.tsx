@@ -1,10 +1,15 @@
-import { Action, HistoryState } from 'noya-state';
+import {
+  Action,
+  ApplicationState,
+  HistoryAction,
+  HistoryState,
+} from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
 export type ApplicationStateContextValue = [
   HistoryState,
-  (action: Action) => void,
+  (action: HistoryAction) => void,
 ];
 
 const ApplicationStateContext = createContext<
@@ -60,8 +65,8 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   );
 
   const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
-    return [state, wrappedDispatch];
-  }, [state, wrappedDispatch]);
+    return [state.present, wrappedDispatch];
+  }, [state.present, wrappedDispatch]);
 
   return wrapped;
 };
