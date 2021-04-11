@@ -12,7 +12,7 @@ function renderImageFromCanvas(
   const surface = CanvasKit.MakeSurface(width, height);
 
   if (!surface) {
-    console.log('failed to create surface');
+    console.warn('failed to create surface');
     return Promise.resolve(undefined);
   }
 

@@ -80,7 +80,7 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
       break;
     }
     default:
-      console.log(layer._class, 'not handled');
+      console.info(layer._class, 'not handled');
       element = null;
       break;
   }

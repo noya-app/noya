@@ -35,7 +35,7 @@ export default memo(function SketchLayer({ layer }: Props) {
       element = <SketchShape layer={layer} />;
       break;
     default:
-      console.log(layer._class, 'not handled');
+      console.info(layer._class, 'not handled');
       return null;
   }
 

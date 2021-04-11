@@ -321,7 +321,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
         containerInfo.surface.flush();
       }
     } catch (e) {
-      console.log('noya-react-canvaskit error!', e);
+      console.warn('noya-react-canvaskit error!', e);
     }
   },
 

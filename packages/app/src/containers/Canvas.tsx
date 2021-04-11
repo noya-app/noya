@@ -137,7 +137,7 @@ export default memo(function Canvas() {
     if (!surface) {
       surfaceRef.current = null;
 
-      console.log('failed to create surface');
+      console.warn('failed to create surface');
       return;
     }
 
@@ -183,7 +183,7 @@ export default memo(function Canvas() {
         unmount(surface, context);
       };
     } catch (e) {
-      console.log('rendering error', e);
+      console.warn('rendering error', e);
     }
   }, [CanvasKit, state, containerSize, rawApplicationState, theme]);
 
