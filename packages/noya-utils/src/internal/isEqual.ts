@@ -40,7 +40,7 @@ function isEqualObject<T extends Record<string, any>>(
   return true;
 }
 
-function isEqual<T>(a: T, b: T, deep: boolean) {
+export function isEqual<T>(a: T, b: T, deep: boolean) {
   const aType = typeof a;
   const bType = typeof b;
 
@@ -53,12 +53,4 @@ function isEqual<T>(a: T, b: T, deep: boolean) {
   }
 
   return isEqualObject(a, b, deep);
-}
-
-export function isDeepEqual<T>(a: T, b: T): boolean {
-  return isEqual(a, b, true);
-}
-
-export function isShallowEqual<T>(a: T, b: T): boolean {
-  return isEqual(a, b, false);
 }
