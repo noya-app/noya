@@ -1,4 +1,4 @@
-export * from './shallowEqual';
+export * from './isEqual';
 export * from './zip';
 export * from './clamp';
 export * from './sum';
