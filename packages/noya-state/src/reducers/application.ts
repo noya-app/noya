@@ -145,7 +145,7 @@ export type Action =
       style?: Sketch.Style | undefined,
     ]
   | [type: 'removeSwatch']
-  | [type: 'removeLayerStyle']
+  | [type: 'removeThemeStyle']
   | StyleAction;
 
 export function reducer(
@@ -930,7 +930,7 @@ export function reducer(
         state.sketch.document.sharedSwatches = sharedSwatches;
       });
     }
-    case 'removeLayerStyle': {
+    case 'removeThemeStyle': {
       const ids = state.selectedLayerStyleIds;
 
       return produce(state, (state) => {
