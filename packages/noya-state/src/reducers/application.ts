@@ -22,6 +22,7 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
   getCurrentTab,
+  getAllIndexPaths,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -485,6 +486,8 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
+      const pagesIndexPaths = getAllIndexPaths(state);
+
       const currentTab = getCurrentTab(state);
       if (currentTab === 'canvas') {
         return produce(state, (state) => {
@@ -505,6 +508,17 @@ export function reducer(
           layerStyles.forEach((layerStyle) => {
             if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
               layerStyle.value = styleReducer(layerStyle.value, action);
+
+              pagesIndexPaths.forEach((indexPaths, index) =>
+                accessPageLayers(state, index, indexPaths).forEach((layer) => {
+                  if (layer.sharedStyleID === layerStyle.do_objectID) {
+                    layer.style = produce(layerStyle.value, (style) => {
+                      style.do_objectID = uuid();
+                      return style;
+                    });
+                  }
+                }),
+              );
             }
           });
         });
@@ -931,10 +945,7 @@ export function reducer(
       });
     }
     case 'removeThemeStyle': {
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-      // Get all the pages
-      const indexPaths = Layers.findAllIndexPaths(page, () => true);
+      const pagesIndexPaths = getAllIndexPaths(state);
 
       const ids = state.selectedLayerStyleIds;
 
@@ -946,15 +957,18 @@ export function reducer(
         const filterLayer = layerStyles.objects.filter(
           (object: Sketch.SharedStyle) => !ids.includes(object.do_objectID),
         );
+
         layerStyles.objects = filterLayer;
 
         state.sketch.document.layerStyles = layerStyles;
 
-        accessPageLayers(state, pageIndex, indexPaths).forEach((layer) => {
-          if (layer.sharedStyleID && ids.includes(layer.sharedStyleID)) {
-            delete layer.sharedStyleID;
-          }
-        });
+        pagesIndexPaths.forEach((indexPaths, index) =>
+          accessPageLayers(state, index, indexPaths).forEach((layer) => {
+            if (layer.sharedStyleID && ids.includes(layer.sharedStyleID)) {
+              delete layer.sharedStyleID;
+            }
+          }),
+        );
       });
     }
     default:
