@@ -878,10 +878,9 @@ export function reducer(
 
       return produce(state, (state) => {
         accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style =
-            state.sketch.document.layerStyles?.objects.find(
-              (s) => s.do_objectID === id,
-            ) || null;
+          const style = state.sketch.document.layerStyles?.objects.find(
+            (s) => s.do_objectID === id,
+          );
 
           if (style) {
             layer.sharedStyleID = id;

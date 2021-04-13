@@ -77,7 +77,6 @@ export default memo(function LayerThemeInspector() {
   const onDetach = useCallback(() => dispatch('setThemeStyle'), [dispatch]);
 
   const onUpdate = useCallback(() => {
-    console.log('why?');
     if (!selectedLayerStyleId) return;
 
     dispatch('updateThemeStyle', selectedLayerStyleId, selectedLayers[0].style);
