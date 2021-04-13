@@ -56,9 +56,9 @@ export default memo(function LayerThemeInspector() {
       const style = sharedStyles.find((s) => s.do_objectID === value);
 
       if (style !== undefined) {
-        dispatch('setLayerStyle', value, style.value);
+        dispatch('setThemeStyle', value, style.value);
       } else {
-        dispatch('setLayerStyle', value, undefined);
+        dispatch('setThemeStyle', value, undefined);
       }
     },
     [sharedStyles, dispatch],
@@ -68,7 +68,7 @@ export default memo(function LayerThemeInspector() {
     const styleName = prompt('New Style Layout Name');
 
     if (styleName != null) {
-      dispatch('addLayerStyle', styleName, selectedLayers[0].style);
+      dispatch('setThemeStyle', styleName, selectedLayers[0].style);
     }
   }, [selectedLayers, dispatch]);
 
@@ -77,20 +77,20 @@ export default memo(function LayerThemeInspector() {
       const newName = prompt('Rename Layout style');
 
       if (newName !== null) {
-        dispatch('setLayerStyleName', selectedLayerStyleId, newName);
+        dispatch('setThemeStyleName', selectedLayerStyleId, newName);
       }
     } else {
       alert('No Layer Selected');
     }
   }, [selectedLayerStyleId, dispatch]);
 
-  const onDetach = useCallback(() => dispatch('setLayerStyle'), [dispatch]);
+  const onDetach = useCallback(() => dispatch('setThemeStyle'), [dispatch]);
 
   const onUpdate = useCallback(
     () =>
       selectedLayerStyleId
         ? dispatch(
-            'updateLayerStyle',
+            'updateThemeStyle',
             selectedLayerStyleId,
             selectedLayers[0].style,
           )
@@ -104,7 +104,7 @@ export default memo(function LayerThemeInspector() {
     );
 
     if (selectedLayerStyleId && style) {
-      dispatch('setLayerStyle', selectedLayerStyleId, style.value);
+      dispatch('setThemeStyle', selectedLayerStyleId, style.value);
     }
   }, [selectedLayerStyleId, sharedStyles, dispatch]);
 

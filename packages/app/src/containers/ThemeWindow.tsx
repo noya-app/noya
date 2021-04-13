@@ -24,7 +24,7 @@ const LayerStyles = memo(function LayerStyles() {
       selectedSharedStyleIds={state.selectedLayerStyleIds}
       onSelectSharedStyle={useCallback(
         (id, type) => {
-          dispatch('selectLayerStyle', id, type);
+          dispatch('selectThemeStyle', id, type);
         },
         [dispatch],
       )}
