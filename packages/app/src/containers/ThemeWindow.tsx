@@ -6,7 +6,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import LayerStylesGrid from '../components/theme/LayerStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
-
+import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
 
 const Container = styled.main(({ theme }) => ({
@@ -17,14 +17,14 @@ const Container = styled.main(({ theme }) => ({
 
 const LayerStyles = memo(function LayerStyles() {
   const [state, dispatch] = useApplicationState();
-
+  const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
   return (
     <LayerStylesGrid
-      sharedStyles={useSelector(Selectors.getSharedStyles)}
+      sharedStyles={sharedStyles}
       selectedSharedStyleIds={state.selectedLayerStyleIds}
       onSelectSharedStyle={useCallback(
         (id, type) => {
-          dispatch('selectLayerStyle', id, type);
+          dispatch('selectThemeStyle', id, type);
         },
         [dispatch],
       )}
@@ -35,9 +35,10 @@ const LayerStyles = memo(function LayerStyles() {
 const Swatches = memo(function Swatches() {
   const [state, dispatch] = useApplicationState();
 
+  const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
   return (
     <SwatchesGrid
-      swatches={useSelector(Selectors.getSharedSwatches)}
+      swatches={swatches}
       selectedSwatchIds={state.selectedSwatchIds}
       onSelectSwatch={useCallback(
         (id, type) => {

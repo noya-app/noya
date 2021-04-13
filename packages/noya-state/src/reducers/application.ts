@@ -92,8 +92,8 @@ export type Action =
       selectionType?: SelectionType,
     ]
   | [
-      type: 'selectLayerStyle',
-      layerId: string | string[] | undefined,
+      type: 'selectThemeStyle',
+      sharedStyleId: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
@@ -113,15 +113,20 @@ export type Action =
     ]
   | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
-  | [type: 'setSwatchColor', id: string | string[], color: Sketch.Color]
+  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
   | [
       type: 'setSwatchOpacity',
-      id: string | string[],
+      swatchId: string | string[],
       alpha: number,
       mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
-  | [type: 'addLayerStyle']
+  | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
+  | [
+      type: 'updateThemeStyle',
+      sharedStyleId: string,
+      style: Sketch.Style | undefined,
+    ]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -132,8 +137,13 @@ export type Action =
         | Exclude<InteractionAction, ['maybeScale', ...any[]]>
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
     ]
-  | [type: `setSwatchName`, id: string | string[], name: string]
-  | [type: `setLayerStyleName`, id: string | string[], name: string]
+  | [type: `setSwatchName`, swatchId: string | string[], name: string]
+  | [type: `setThemeStyleName`, sharedStyleId: string | string[], name: string]
+  | [
+      type: 'setThemeStyle',
+      sharedStyleId?: string,
+      style?: Sketch.Style | undefined,
+    ]
   | StyleAction;
 
 export function reducer(
@@ -780,7 +790,13 @@ export function reducer(
         });
       });
     }
-    case 'addLayerStyle': {
+    case 'addThemeStyle': {
+      const [, name, style] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const currentTab = state.currentTab;
       return produce(state, (state) => {
         const layerStyles = state.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
@@ -791,8 +807,8 @@ export function reducer(
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
-          name: 'New Layer Style',
-          value: produce(Models.style, (style) => {
+          name: name || 'New Layer Style',
+          value: produce(style || Models.style, (style) => {
             style.do_objectID = uuid();
             return style;
           }),
@@ -800,10 +816,19 @@ export function reducer(
 
         layerStyles.objects.push(sharedStyle);
         state.sketch.document.layerStyles = layerStyles;
-        state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+
+        if (currentTab === 'theme') {
+          state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+        } else {
+          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              layer.sharedStyleID = sharedStyle.do_objectID;
+            },
+          );
+        }
       });
     }
-    case 'selectLayerStyle': {
+    case 'selectThemeStyle': {
       const [, id, selectionType = 'replace'] = action;
 
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
@@ -826,7 +851,7 @@ export function reducer(
         }
       });
     }
-    case 'setLayerStyleName':
+    case 'setThemeStyleName':
     case 'setSwatchName': {
       const [, id, name] = action;
 
@@ -841,6 +866,48 @@ export function reducer(
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (ids.includes(object.do_objectID)) {
             object.name = name;
+          }
+        });
+      });
+    }
+    case 'setThemeStyle': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const [, id] = action;
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = state.sketch.document.layerStyles?.objects.find(
+            (s) => s.do_objectID === id,
+          );
+
+          if (style) {
+            layer.sharedStyleID = id;
+            layer.style = produce(style.value, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            });
+          } else {
+            delete layer.sharedStyleID;
+          }
+        });
+      });
+    }
+    case 'updateThemeStyle': {
+      const [, id, style] = action;
+
+      return produce(state, (state) => {
+        if (!style) return;
+
+        const sharedStyles = state.sketch.document.layerStyles.objects;
+
+        sharedStyles.forEach((sharedStyle: Sketch.SharedStyle) => {
+          if (id === sharedStyle.do_objectID) {
+            sharedStyle.value = produce(style, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            });
           }
         });
       });

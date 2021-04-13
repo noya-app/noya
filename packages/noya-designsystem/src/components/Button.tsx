@@ -7,7 +7,7 @@ import { Tooltip } from '..';
  * ------------------------------------------------------------------------- */
 
 const ButtonElement = styled.button<{ active: boolean }>(
-  ({ theme, active }) => ({
+  ({ theme, active, disabled }) => ({
     ...theme.textStyles.small,
     flex: '0 0 auto',
     position: 'relative',
@@ -22,6 +22,7 @@ const ButtonElement = styled.button<{ active: boolean }>(
     paddingLeft: '6px',
     background: active ? theme.colors.primary : theme.colors.inputBackground,
     color: active ? 'white' : theme.colors.text,
+    opacity: disabled ? 0.25 : 1,
     '&:focus': {
       boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
     },
@@ -51,6 +52,7 @@ interface ButtonRootProps {
   id: string;
   children: ReactNode;
   active?: boolean;
+  disabled?: boolean;
   tooltip?: ReactNode;
   onClick?: () => void;
 }
@@ -59,11 +61,17 @@ function Button({
   id,
   tooltip,
   active = false,
+  disabled = false,
   onClick,
   children,
 }: ButtonRootProps) {
   const buttonElement = (
-    <ButtonElement id={id} active={active} onClick={onClick}>
+    <ButtonElement
+      id={id}
+      active={active}
+      disabled={disabled}
+      onClick={onClick}
+    >
       <ButtonContent>{children}</ButtonContent>
     </ButtonElement>
   );
