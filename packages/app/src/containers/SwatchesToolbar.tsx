@@ -5,6 +5,7 @@ import {
   LetterCaseToggleIcon,
   MarginIcon,
   PlusIcon,
+  TrashIcon,
 } from '@radix-ui/react-icons';
 import React, { useMemo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -60,6 +61,36 @@ export default function SwatchesToolbar() {
     dispatch,
   ]);
 
+  const removeColorSwatch = useCallback(() => dispatch('removeSwatch'), [
+    dispatch,
+  ]);
+
+  const removeThemeStyle = useCallback(() => dispatch('removeThemeStyle'), [
+    dispatch,
+  ]);
+
+  const addComponent = useCallback(() => {
+    switch (componentsTab) {
+      case 'swatches':
+        addColorSwatch();
+        break;
+      case 'layerStyles':
+        addLayerStyle();
+        break;
+    }
+  }, [componentsTab, addColorSwatch, addLayerStyle]);
+
+  const removeComponent = useCallback(() => {
+    switch (componentsTab) {
+      case 'swatches':
+        removeColorSwatch();
+        break;
+      case 'layerStyles':
+        removeThemeStyle();
+        break;
+    }
+  }, [componentsTab, removeColorSwatch, removeThemeStyle]);
+
   return useMemo(
     () => (
       <Container>
@@ -67,7 +98,7 @@ export default function SwatchesToolbar() {
         <Spacer.Horizontal />
         <TabsContainer>
           <RadioGroup.Root
-            id={'test'}
+            id={'components'}
             value={componentsTab}
             onValueChange={handleChangeTab}
           >
@@ -87,20 +118,12 @@ export default function SwatchesToolbar() {
         </TabsContainer>
         <RightContainer>
           <Spacer.Horizontal size={24} />
-          <Button
-            id="add-style"
-            onClick={() => {
-              switch (componentsTab) {
-                case 'swatches':
-                  addColorSwatch();
-                  break;
-                case 'layerStyles':
-                  addLayerStyle();
-                  break;
-              }
-            }}
-          >
+          <Button id="add-component" onClick={addComponent}>
             <PlusIcon />
+          </Button>
+          <Spacer.Horizontal size={4} />
+          <Button id="remove-component" onClick={removeComponent}>
+            <TrashIcon />
           </Button>
         </RightContainer>
         <Spacer.Horizontal size={sidebarWidth + 8} />
@@ -109,9 +132,9 @@ export default function SwatchesToolbar() {
     [
       sidebarWidth,
       componentsTab,
-      addLayerStyle,
-      addColorSwatch,
       handleChangeTab,
+      addComponent,
+      removeComponent,
     ],
   );
 }
