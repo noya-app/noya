@@ -135,6 +135,7 @@ export type Action =
     ]
   | [type: `setSwatchName`, id: string | string[], name: string]
   | [type: `setLayerStyleName`, id: string | string[], name: string]
+  | [type: 'setLayerStyle', id?: string, style?: Sketch.Style | undefined]
   | [type: 'removeSwatch']
   | [type: 'removeLayerStyle']
   | StyleAction;
@@ -863,6 +864,46 @@ export function reducer(
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (ids.includes(object.do_objectID)) {
             object.name = name;
+          }
+        });
+      });
+    }
+    case 'setLayerStyle': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const [, id, style] = action;
+
+      return produce(state, (state) => {
+        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (!layer.style) return;
+
+          if (style) {
+            layer.sharedStyleID = id;
+            layer.style = produce(style, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            });
+          } else {
+            layer.sharedStyleID = undefined;
+          }
+        });
+      });
+    }
+    case 'updateLayerStyle': {
+      const [, id, style] = action;
+
+      return produce(state, (state) => {
+        if (!style) return;
+
+        const sharedStyle = state.sketch.document.layerStyles.objects;
+
+        sharedStyle.forEach((SStyle: Sketch.SharedStyle) => {
+          if (id === SStyle.do_objectID) {
+            SStyle.value = produce(style, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            });
           }
         });
       });
