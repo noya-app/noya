@@ -931,6 +931,11 @@ export function reducer(
       });
     }
     case 'removeThemeStyle': {
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      // Get all the pages
+      const indexPaths = Layers.findAllIndexPaths(page, () => true);
+
       const ids = state.selectedLayerStyleIds;
 
       return produce(state, (state) => {
@@ -944,6 +949,12 @@ export function reducer(
         layerStyles.objects = filterLayer;
 
         state.sketch.document.layerStyles = layerStyles;
+
+        accessPageLayers(state, pageIndex, indexPaths).forEach((layer) => {
+          if (layer.sharedStyleID && ids.includes(layer.sharedStyleID)) {
+            delete layer.sharedStyleID;
+          }
+        });
       });
     }
     default:
