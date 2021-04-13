@@ -68,6 +68,29 @@ export default function SwatchesToolbar() {
   const removeLayerStyle = useCallback(() => dispatch('removeLayerStyle'), [
     dispatch,
   ]);
+
+  const addComponent = useCallback(() => {
+    switch (componentsTab) {
+      case 'swatches':
+        addColorSwatch();
+        break;
+      case 'layerStyles':
+        addLayerStyle();
+        break;
+    }
+  }, [componentsTab, addColorSwatch, addLayerStyle]);
+
+  const removeComponent = useCallback(() => {
+    switch (componentsTab) {
+      case 'swatches':
+        removeColorSwatch();
+        break;
+      case 'layerStyles':
+        removeLayerStyle();
+        break;
+    }
+  }, [componentsTab, removeColorSwatch, removeLayerStyle]);
+
   return useMemo(
     () => (
       <Container>
@@ -75,7 +98,7 @@ export default function SwatchesToolbar() {
         <Spacer.Horizontal />
         <TabsContainer>
           <RadioGroup.Root
-            id={'test'}
+            id={'components'}
             value={componentsTab}
             onValueChange={handleChangeTab}
           >
@@ -95,35 +118,11 @@ export default function SwatchesToolbar() {
         </TabsContainer>
         <RightContainer>
           <Spacer.Horizontal size={24} />
-          <Button
-            id="add-style"
-            onClick={() => {
-              switch (componentsTab) {
-                case 'swatches':
-                  addColorSwatch();
-                  break;
-                case 'layerStyles':
-                  addLayerStyle();
-                  break;
-              }
-            }}
-          >
+          <Button id="add-component" onClick={addComponent}>
             <PlusIcon />
           </Button>
           <Spacer.Horizontal size={4} />
-          <Button
-            id="add-style"
-            onClick={() => {
-              switch (componentsTab) {
-                case 'swatches':
-                  removeColorSwatch();
-                  break;
-                case 'layerStyles':
-                  removeLayerStyle();
-                  break;
-              }
-            }}
-          >
+          <Button id="remove-component" onClick={removeComponent}>
             <TrashIcon />
           </Button>
         </RightContainer>
@@ -133,11 +132,9 @@ export default function SwatchesToolbar() {
     [
       sidebarWidth,
       componentsTab,
-      addLayerStyle,
-      addColorSwatch,
-      removeColorSwatch,
-      removeLayerStyle,
       handleChangeTab,
+      addComponent,
+      removeComponent,
     ],
   );
 }
