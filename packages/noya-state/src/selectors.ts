@@ -30,6 +30,15 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
 
   return pageIndex;
 };
+
+export const getAllIndexPaths = (state: ApplicationState) => {
+  const pages = state.sketch.pages;
+  const indexPaths = pages.map((page) =>
+    Layers.findAllIndexPaths(page, () => true),
+  );
+
+  return indexPaths;
+};
 export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
 };
