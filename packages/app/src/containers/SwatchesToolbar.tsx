@@ -57,7 +57,7 @@ export default function SwatchesToolbar() {
     dispatch,
   ]);
 
-  const addThemeStyle = useCallback(() => dispatch('addThemeStyle'), [
+  const addLayerStyle = useCallback(() => dispatch('addLayerStyle'), [
     dispatch,
   ]);
 
@@ -75,10 +75,10 @@ export default function SwatchesToolbar() {
         addColorSwatch();
         break;
       case 'layerStyles':
-        addThemeStyle();
+        addLayerStyle();
         break;
     }
-  }, [componentsTab, addColorSwatch, addThemeStyle]);
+  }, [componentsTab, addColorSwatch, addLayerStyle]);
 
   const removeComponent = useCallback(() => {
     switch (componentsTab) {
