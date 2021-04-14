@@ -4,6 +4,8 @@
   "main": "src/index.tsx",
   "license": "UNLICENSED",
   "dependencies": {
+    "@radix-ui/react-compose-refs": "^0.0.5",
+    "@radix-ui/react-context-menu": "^0.0.17",
     "@radix-ui/react-popover": "^0.0.7",
     "@radix-ui/react-radio-group": "^0.0.7",
     "@radix-ui/react-slider": "^0.0.6",

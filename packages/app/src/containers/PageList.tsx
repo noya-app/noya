@@ -1,4 +1,5 @@
 import { ListView, Spacer } from 'noya-designsystem';
+import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
@@ -23,6 +24,8 @@ const Header = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
+type MenuItemType = 'duplicate' | 'delete';
+
 export default function PageList() {
   const [state, dispatch] = useApplicationState();
 
@@ -33,9 +36,21 @@ export default function PageList() {
     })),
   );
 
+  const menuItems: MenuItem<MenuItemType>[] = useMemo(
+    () => [
+      { value: 'duplicate', title: 'Duplicate Page' },
+      { value: 'delete', title: 'Delete Page' },
+    ],
+    [],
+  );
+
+  const onSelectMenuItem = useCallback((value: MenuItemType) => {
+    // TODO: Handle context menu actions
+  }, []);
+
   const pageElements = useMemo(() => {
     return pageInfo.map((page) => (
-      <ListView.Row
+      <ListView.Row<MenuItemType>
         id={page.do_objectID}
         key={page.do_objectID}
         selected={state.selectedPage === page.do_objectID}
@@ -43,12 +58,17 @@ export default function PageList() {
           dispatch('interaction', ['reset']);
           dispatch('selectPage', page.do_objectID);
         }}
+        menuItems={menuItems}
+        onSelectMenuItem={onSelectMenuItem}
+        onContextMenu={() => {
+          dispatch('selectPage', page.do_objectID);
+        }}
       >
         <Spacer.Horizontal size={6 + 15} />
         {page.name}
       </ListView.Row>
     ));
-  }, [pageInfo, state.selectedPage, dispatch]);
+  }, [pageInfo, state.selectedPage, menuItems, onSelectMenuItem, dispatch]);
 
   return (
     <Container>

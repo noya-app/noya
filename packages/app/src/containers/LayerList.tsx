@@ -9,10 +9,12 @@ import {
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Spacer, TreeView } from 'noya-designsystem';
+import { ContextMenu, Spacer, TreeView } from 'noya-designsystem';
+import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import React, {
-  ComponentProps,
+  ForwardedRef,
+  forwardRef,
   memo,
   useCallback,
   useMemo,
@@ -98,72 +100,103 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-const LayerRow = memo(function LayerRow({
-  name,
-  selected,
-  visible,
-  onHoverChange,
-  onChangeVisible,
-  ...props
-}: ComponentProps<typeof TreeView.Row> & {
-  name: string;
-  selected: boolean;
-  visible: boolean;
-  onChangeVisible: (visible: boolean) => void;
-}) {
-  const [hovered, setHovered] = useState(false);
+type MenuItemType = 'duplicate' | 'delete';
 
-  const handleHoverChange = useCallback(
-    (hovered: boolean) => {
-      onHoverChange?.(hovered);
-      setHovered(hovered);
+const LayerRow = memo(
+  forwardRef(function LayerRow(
+    {
+      name,
+      selected,
+      visible,
+      onHoverChange,
+      onChangeVisible,
+      ...props
+    }: TreeView.TreeRowProps<MenuItemType> & {
+      name: string;
+      selected: boolean;
+      visible: boolean;
+      onChangeVisible: (visible: boolean) => void;
     },
-    [onHoverChange],
-  );
+    forwardedRef: ForwardedRef<HTMLLIElement>,
+  ) {
+    const [hovered, setHovered] = useState(false);
 
-  const handleSetVisible = useCallback(
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-      onChangeVisible(true);
-    },
-    [onChangeVisible],
-  );
+    const handleHoverChange = useCallback(
+      (hovered: boolean) => {
+        onHoverChange?.(hovered);
+        setHovered(hovered);
+      },
+      [onHoverChange],
+    );
 
-  const handleSetHidden = useCallback(
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-      onChangeVisible(false);
-    },
-    [onChangeVisible],
-  );
+    const handleSetVisible = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onChangeVisible(true);
+      },
+      [onChangeVisible],
+    );
 
-  return (
-    <TreeView.Row
-      onHoverChange={handleHoverChange}
-      selected={selected}
-      disabled={!visible}
-      {...props}
-    >
-      <TreeView.RowTitle>{name}</TreeView.RowTitle>
-      {(hovered || !visible) && (
-        <>
-          <Spacer.Horizontal size={4} />
-          {visible ? (
-            <EyeOpenIcon onClick={handleSetHidden} />
-          ) : (
-            <EyeClosedIcon onClick={handleSetVisible} />
-          )}
-        </>
-      )}
-    </TreeView.Row>
-  );
-});
+    const handleSetHidden = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onChangeVisible(false);
+      },
+      [onChangeVisible],
+    );
+
+    return (
+      <TreeView.Row<MenuItemType>
+        ref={forwardedRef}
+        onHoverChange={handleHoverChange}
+        selected={selected}
+        disabled={!visible}
+        {...props}
+      >
+        <TreeView.RowTitle>{name}</TreeView.RowTitle>
+        {(hovered || !visible) && (
+          <>
+            <Spacer.Horizontal size={4} />
+            {visible ? (
+              <EyeOpenIcon onClick={handleSetHidden} />
+            ) : (
+              <EyeClosedIcon onClick={handleSetVisible} />
+            )}
+          </>
+        )}
+      </TreeView.Row>
+    );
+  }),
+);
 
 export default memo(function LayerList() {
   const [state, dispatch] = useApplicationState();
   const page = useSelector(Selectors.getCurrentPage);
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
+
+  const menuItems: MenuItem<MenuItemType>[] = useMemo(
+    () => [
+      { value: 'duplicate', title: 'Duplicate' },
+      ContextMenu.SEPARATOR_ITEM,
+      { value: 'delete', title: 'Delete' },
+    ],
+    [],
+  );
+
+  const onSelectMenuItem = useCallback(
+    (value: MenuItemType) => {
+      switch (value) {
+        case 'delete':
+          dispatch('deleteLayer', selectedObjects);
+          return;
+        case 'duplicate':
+          // TODO: Handle delete
+          return;
+      }
+    },
+    [dispatch, selectedObjects],
+  );
 
   const layerElements = useMemo(() => {
     return items.map(
@@ -210,8 +243,17 @@ export default memo(function LayerList() {
         const handleChangeVisible = (value: boolean) =>
           dispatch('setLayerVisible', id, value);
 
+        const handleContextMenu = () => {
+          if (selected) return;
+
+          dispatch('selectLayer', id);
+        };
+
         return (
           <LayerRow
+            menuItems={menuItems}
+            onSelectMenuItem={onSelectMenuItem}
+            onContextMenu={handleContextMenu}
             key={id}
             name={name}
             visible={visible}
@@ -230,7 +272,7 @@ export default memo(function LayerList() {
         );
       },
     );
-  }, [items, dispatch, selectedObjects]);
+  }, [items, menuItems, dispatch, selectedObjects, onSelectMenuItem]);
 
   return (
     <TreeView.Root

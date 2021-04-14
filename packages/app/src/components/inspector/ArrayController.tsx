@@ -169,4 +169,4 @@ function ArrayController<Item extends BaseArrayItem>({
   );
 }
 
-export default memo(ArrayController) as typeof ArrayController;
+export default memo(ArrayController);

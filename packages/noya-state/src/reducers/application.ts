@@ -82,6 +82,7 @@ export type Action =
       details: { name: string; width: number; height: number },
     ]
   | [type: 'addDrawnLayer']
+  | [type: 'deleteLayer', layerId: string | string[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -269,6 +270,32 @@ export function reducer(
         state.interactionState = interactionReducer(state.interactionState, [
           'reset',
         ]);
+      });
+    }
+    case 'deleteLayer': {
+      const [, id] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+        ids.includes(layer.do_objectID),
+      );
+
+      // We delete in reverse so that the indexPaths remain accurate even
+      // after some layers are deleted.
+      const reversed = [...indexPaths.reverse()];
+
+      return produce(state, (state) => {
+        reversed.forEach((indexPath) => {
+          const childIndex = indexPath[indexPath.length - 1];
+          const parent = Layers.access(
+            state.sketch.pages[pageIndex],
+            indexPath.slice(0, -1),
+          ) as Layers.ParentLayer;
+          parent.layers.splice(childIndex, 1);
+        });
       });
     }
     case 'selectLayer': {
