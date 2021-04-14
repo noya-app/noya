@@ -1,4 +1,5 @@
-import { ListView, Spacer } from 'noya-designsystem';
+import { PlusIcon } from '@radix-ui/react-icons';
+import { Button, ListView, Spacer } from 'noya-designsystem';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -17,7 +18,7 @@ const Header = styled.div(({ theme }) => ({
   cursor: 'pointer',
   fontWeight: 500,
   paddingTop: '8px',
-  paddingRight: '20px',
+  paddingRight: '8px',
   paddingBottom: '0px',
   paddingLeft: '20px',
   display: 'flex',
@@ -44,8 +45,12 @@ export default function PageList() {
     [],
   );
 
-  const onSelectMenuItem = useCallback((value: MenuItemType) => {
+  const handleSelectMenuItem = useCallback((value: MenuItemType) => {
     // TODO: Handle context menu actions
+  }, []);
+
+  const handleAddPage = useCallback(() => {
+    // TODO: Handle add page
   }, []);
 
   const pageElements = useMemo(() => {
@@ -59,7 +64,7 @@ export default function PageList() {
           dispatch('selectPage', page.do_objectID);
         }}
         menuItems={menuItems}
-        onSelectMenuItem={onSelectMenuItem}
+        onSelectMenuItem={handleSelectMenuItem}
         onContextMenu={() => {
           dispatch('selectPage', page.do_objectID);
         }}
@@ -68,11 +73,17 @@ export default function PageList() {
         {page.name}
       </ListView.Row>
     ));
-  }, [pageInfo, state.selectedPage, menuItems, onSelectMenuItem, dispatch]);
+  }, [pageInfo, state.selectedPage, menuItems, handleSelectMenuItem, dispatch]);
 
   return (
     <Container>
-      <Header>Pages</Header>
+      <Header>
+        Pages
+        <Spacer.Horizontal />
+        <Button id="add-page" tooltip="Add a new page" onClick={handleAddPage}>
+          <PlusIcon />
+        </Button>
+      </Header>
       <ListView.Root
         sortable={true}
         onMoveItem={useCallback(
