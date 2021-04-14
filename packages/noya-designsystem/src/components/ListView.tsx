@@ -1,14 +1,19 @@
+import { composeRefs } from '@radix-ui/react-compose-refs';
 import {
   Children,
   createContext,
+  ForwardedRef,
+  forwardRef,
   isValidElement,
   memo,
   ReactNode,
+  Ref,
   useCallback,
   useContext,
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
+import * as ContextMenu from './ContextMenu';
 import * as Sortable from './Sortable';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
@@ -136,7 +141,7 @@ export interface ListViewClickInfo {
   metaKey: boolean;
 }
 
-export interface ListViewRowProps {
+export interface ListViewRowProps<MenuItemType extends string = string> {
   id?: string;
   selected?: boolean;
   disabled?: boolean;
@@ -145,17 +150,28 @@ export interface ListViewRowProps {
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
   isSectionHeader?: boolean;
+  menuItems?: ContextMenu.MenuItem<MenuItemType>[];
+  onSelectMenuItem?: (value: MenuItemType) => void;
+  onContextMenu?: () => void;
 }
 
-function ListViewRow({
-  id,
-  selected = false,
-  disabled = false,
-  isSectionHeader = false,
-  onClick,
-  onHoverChange,
-  children,
-}: ListViewRowProps) {
+const ListViewRow = forwardRef(function ListViewRow<
+  MenuItemType extends string
+>(
+  {
+    id,
+    selected = false,
+    disabled = false,
+    isSectionHeader = false,
+    onClick,
+    onHoverChange,
+    children,
+    menuItems,
+    onContextMenu,
+    onSelectMenuItem,
+  }: ListViewRowProps<MenuItemType>,
+  forwardedRef: ForwardedRef<HTMLLIElement>,
+) {
   const { position, selectedPosition, sortable } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
@@ -170,30 +186,56 @@ function ListViewRow({
     [onClick],
   );
 
-  const props: React.ComponentProps<typeof RowContainer> = {
-    id,
-    ...hoverProps,
-    onClick: handleClick,
-    position,
-    disabled,
-    selected,
-    selectedPosition,
-    'aria-selected': selected,
-    children,
-  };
+  const renderContent = (
+    renderProps: React.ComponentProps<typeof RowContainer>,
+    ref: Ref<HTMLLIElement>,
+  ) => {
+    const Component = isSectionHeader ? SectionHeaderContainer : RowContainer;
 
-  const Component = isSectionHeader ? SectionHeaderContainer : RowContainer;
+    const element = (
+      <Component
+        ref={ref}
+        onContextMenu={onContextMenu}
+        id={id}
+        {...hoverProps}
+        onClick={handleClick}
+        position={position}
+        disabled={disabled}
+        selected={selected}
+        selectedPosition={selectedPosition}
+        aria-selected={selected}
+        {...renderProps}
+      >
+        {children}
+      </Component>
+    );
+
+    if (menuItems) {
+      return (
+        <ContextMenu.Root<MenuItemType>
+          items={menuItems}
+          onSelect={onSelectMenuItem}
+        >
+          {element}
+        </ContextMenu.Root>
+      );
+    }
+
+    return element;
+  };
 
   if (sortable && id) {
     return (
       <Sortable.Item id={id}>
-        {(sortableProps) => <Component {...props} {...sortableProps} />}
+        {({ ref: sortableRef, ...sortableProps }) =>
+          renderContent(sortableProps, composeRefs(sortableRef, forwardedRef))
+        }
       </Sortable.Item>
     );
   }
 
-  return <Component {...props} />;
-}
+  return renderContent({}, forwardedRef);
+});
 
 /* ----------------------------------------------------------------------------
  * Root

@@ -65,4 +65,4 @@ function Select<T extends string>({
   );
 }
 
-export default memo(Select) as typeof Select;
+export default memo(Select);

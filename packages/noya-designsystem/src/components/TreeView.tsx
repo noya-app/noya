@@ -1,7 +1,8 @@
 import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons';
-import { ComponentProps, memo, ReactNode, useCallback } from 'react';
+import { ForwardedRef, forwardRef, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import * as ListView from './ListView';
+import { ListViewRowProps } from './ListView';
 import * as Spacer from './Spacer';
 
 /* ----------------------------------------------------------------------------
@@ -20,16 +21,21 @@ const ChevronContainer = styled.span({
   alignItems: 'center',
 });
 
-type TreeRowProps = ComponentProps<typeof ListView['Row']> & TreeRowBaseProps;
+export type TreeRowProps<
+  MenuItemType extends string
+> = ListViewRowProps<MenuItemType> & TreeRowBaseProps;
 
-function TreeRow({
-  depth,
-  icon,
-  expanded,
-  onClickChevron,
-  children,
-  ...rest
-}: TreeRowProps) {
+const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
+  {
+    depth,
+    icon,
+    expanded,
+    onClickChevron,
+    children,
+    ...rest
+  }: TreeRowProps<MenuItemType>,
+  forwardedRef: ForwardedRef<HTMLLIElement>,
+) {
   const handleClickChevron = useCallback(
     (event) => {
       event.stopPropagation();
@@ -39,7 +45,7 @@ function TreeRow({
   );
 
   return (
-    <ListView.Row {...rest}>
+    <ListView.Row ref={forwardedRef} {...rest}>
       <Spacer.Horizontal size={depth * 12} />
       {expanded === undefined ? (
         <Spacer.Horizontal size={15} />
@@ -58,7 +64,7 @@ function TreeRow({
       {children}
     </ListView.Row>
   );
-}
+});
 
 /* ----------------------------------------------------------------------------
  * Root
