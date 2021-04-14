@@ -22,7 +22,7 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
   getCurrentTab,
-  getAllIndexPaths,
+  findPageLayerIndexPaths,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -486,7 +486,14 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      const pagesIndexPaths = getAllIndexPaths(state);
+      const ids = state.selectedLayerStyleIds;
+
+      const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.sharedStyleID !== undefined &&
+          ids.includes(layer.sharedStyleID),
+      );
 
       const currentTab = getCurrentTab(state);
       if (currentTab === 'canvas') {
@@ -509,14 +516,16 @@ export function reducer(
             if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
               layerStyle.value = styleReducer(layerStyle.value, action);
 
-              pagesIndexPaths.forEach((indexPaths, index) =>
-                accessPageLayers(state, index, indexPaths).forEach((layer) => {
-                  if (layer.sharedStyleID === layerStyle.do_objectID) {
-                    layer.style = produce(layerStyle.value, (style) => {
-                      style.do_objectID = uuid();
-                      return style;
-                    });
-                  }
+              layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+                accessPageLayers(
+                  state,
+                  layerPath.pageIndex,
+                  layerPath.indexPath,
+                ).forEach((layer) => {
+                  layer.style = produce(layerStyle.value, (style) => {
+                    style.do_objectID = uuid();
+                    return style;
+                  });
                 }),
               );
             }
@@ -945,9 +954,14 @@ export function reducer(
       });
     }
     case 'removeThemeStyle': {
-      const pagesIndexPaths = getAllIndexPaths(state);
-
       const ids = state.selectedLayerStyleIds;
+
+      const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.sharedStyleID !== undefined &&
+          ids.includes(layer.sharedStyleID),
+      );
 
       return produce(state, (state) => {
         const layerStyles = state.sketch.document.layerStyles;
@@ -959,14 +973,15 @@ export function reducer(
         );
 
         layerStyles.objects = filterLayer;
-
         state.sketch.document.layerStyles = layerStyles;
 
-        pagesIndexPaths.forEach((indexPaths, index) =>
-          accessPageLayers(state, index, indexPaths).forEach((layer) => {
-            if (layer.sharedStyleID && ids.includes(layer.sharedStyleID)) {
-              delete layer.sharedStyleID;
-            }
+        layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+          accessPageLayers(
+            state,
+            layerPath.pageIndex,
+            layerPath.indexPath,
+          ).forEach((layer) => {
+            delete layer.sharedStyleID;
           }),
         );
       });
