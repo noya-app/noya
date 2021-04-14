@@ -540,22 +540,22 @@ export function reducer(
           const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
 
           layerStyles.forEach((layerStyle) => {
-            if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
-              layerStyle.value = styleReducer(layerStyle.value, action);
+            if (!selectedLayerStyleIds.includes(layerStyle.do_objectID)) return;
 
-              layerIndexPathsWithSharedStyle.forEach((layerPath) =>
-                accessPageLayers(
-                  state,
-                  layerPath.pageIndex,
-                  layerPath.indexPaths,
-                ).forEach((layer) => {
-                  layer.style = produce(layerStyle.value, (style) => {
-                    style.do_objectID = uuid();
-                    return style;
-                  });
-                }),
-              );
-            }
+            layerStyle.value = styleReducer(layerStyle.value, action);
+
+            layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+              accessPageLayers(
+                state,
+                layerPath.pageIndex,
+                layerPath.indexPaths,
+              ).forEach((layer) => {
+                layer.style = produce(layerStyle.value, (style) => {
+                  style.do_objectID = uuid();
+                  return style;
+                });
+              }),
+            );
           });
         });
       }
@@ -567,12 +567,12 @@ export function reducer(
 
       return produce(state, (state) => {
         accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class === 'rectangle') {
-            const newValue =
-              mode === 'replace' ? amount : layer.fixedRadius + amount;
+          if (layer._class !== 'rectangle') return;
 
-            layer.fixedRadius = Math.max(0, newValue);
-          }
+          const newValue =
+            mode === 'replace' ? amount : layer.fixedRadius + amount;
+
+          layer.fixedRadius = Math.max(0, newValue);
         });
       });
     }
@@ -833,12 +833,12 @@ export function reducer(
           state.sketch.document.sharedSwatches?.objects ?? [];
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if (ids.includes(swatch.do_objectID)) {
-            const newValue =
-              mode === 'replace' ? alpha : swatch.value.alpha + alpha;
+          if (!ids.includes(swatch.do_objectID)) return;
 
-            swatch.value.alpha = Math.min(Math.max(0, newValue), 1);
-          }
+          const newValue =
+            mode === 'replace' ? alpha : swatch.value.alpha + alpha;
+
+          swatch.value.alpha = Math.min(Math.max(0, newValue), 1);
         });
       });
     }

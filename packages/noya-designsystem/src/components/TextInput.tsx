@@ -76,17 +76,17 @@ function SubmittableTextInput({
   }, [value]);
 
   const handleSubmit = useCallback(() => {
-    if (initialFocusValue !== internalValue) {
-      let didReset = false;
+    if (initialFocusValue === internalValue) return;
 
-      onSubmit(internalValue, () => {
-        didReset = true;
-        setInternalValue(value);
-      });
+    let didReset = false;
 
-      if (!didReset) {
-        setInitialFocusValue(internalValue);
-      }
+    onSubmit(internalValue, () => {
+      didReset = true;
+      setInternalValue(value);
+    });
+
+    if (!didReset) {
+      setInitialFocusValue(internalValue);
     }
   }, [onSubmit, internalValue, initialFocusValue, value]);
 

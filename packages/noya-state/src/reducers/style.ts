@@ -115,34 +115,34 @@ export function styleReducer(
     case 'moveBorder': {
       const [, sourceIndex, destinationIndex] = action;
       return produce(state, (state) => {
-        if (state.borders) {
-          const sourceItem = state.borders[sourceIndex];
+        if (!state.borders) return;
 
-          state.borders.splice(sourceIndex, 1);
-          state.borders.splice(destinationIndex, 0, sourceItem);
-        }
+        const sourceItem = state.borders[sourceIndex];
+
+        state.borders.splice(sourceIndex, 1);
+        state.borders.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'moveFill': {
       const [, sourceIndex, destinationIndex] = action;
       return produce(state, (state) => {
-        if (state.fills) {
-          const sourceItem = state.fills[sourceIndex];
+        if (!state.fills) return;
 
-          state.fills.splice(sourceIndex, 1);
-          state.fills.splice(destinationIndex, 0, sourceItem);
-        }
+        const sourceItem = state.fills[sourceIndex];
+
+        state.fills.splice(sourceIndex, 1);
+        state.fills.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'moveShadow': {
       const [, sourceIndex, destinationIndex] = action;
       return produce(state, (state) => {
-        if (state.shadows) {
-          const sourceItem = state.shadows[sourceIndex];
+        if (!state.shadows) return;
 
-          state.shadows.splice(sourceIndex, 1);
-          state.shadows.splice(destinationIndex, 0, sourceItem);
-        }
+        const sourceItem = state.shadows[sourceIndex];
+
+        state.shadows.splice(sourceIndex, 1);
+        state.shadows.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'deleteDisabledBorders':
@@ -190,99 +190,94 @@ export function styleReducer(
     case 'setBorderWidth': {
       const [, index, amount, mode = 'replace'] = action;
       return produce(state, (state) => {
-        if (state.borders && state.borders[index]) {
-          const newValue =
-            mode === 'replace'
-              ? amount
-              : state.borders[index].thickness + amount;
+        if (!state.borders || !state.borders[index]) return;
 
-          state.borders[index].thickness = Math.max(0, newValue);
-        }
+        const newValue =
+          mode === 'replace' ? amount : state.borders[index].thickness + amount;
+
+        state.borders[index].thickness = Math.max(0, newValue);
       });
     }
     case 'setFillOpacity': {
       const [, index, amount, mode = 'replace'] = action;
       return produce(state, (state) => {
-        if (state.fills && state.fills[index]) {
-          const newValue =
-            mode === 'replace'
-              ? amount
-              : state.fills[index].color.alpha + amount;
+        if (!state.fills || !state.fills[index]) return;
 
-          state.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
-        }
+        const newValue =
+          mode === 'replace' ? amount : state.fills[index].color.alpha + amount;
+
+        state.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
       });
     }
     case 'setOpacity': {
       const [, amount, mode = 'replace'] = action;
-      return produce(state, (state) => {
-        if (state && state.contextSettings) {
-          const newValue =
-            mode === 'replace'
-              ? amount
-              : state.contextSettings.opacity + amount;
 
-          state.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
-        }
+      return produce(state, (state) => {
+        if (!state.contextSettings) return;
+
+        const newValue =
+          mode === 'replace' ? amount : state.contextSettings.opacity + amount;
+
+        state.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
       });
     }
     case 'setShadowX': {
       const [, index, amount, mode = 'replace'] = action;
 
       return produce(state, (state) => {
-        if (state && state.shadows && state.shadows[index]) {
-          const newValue =
-            mode === 'replace' ? amount : state.shadows[index].offsetX + amount;
+        if (!state.shadows || !state.shadows[index]) return;
 
-          state.shadows[index].offsetX = newValue;
-        }
+        const newValue =
+          mode === 'replace' ? amount : state.shadows[index].offsetX + amount;
+
+        state.shadows[index].offsetX = newValue;
       });
     }
     case 'setShadowY': {
       const [, index, amount, mode = 'replace'] = action;
 
       return produce(state, (state) => {
-        if (state && state.shadows && state.shadows[index]) {
-          const newValue =
-            mode === 'replace' ? amount : state.shadows[index].offsetY + amount;
+        if (!state.shadows || !state.shadows[index]) return;
 
-          state.shadows[index].offsetY = newValue;
-        }
+        const newValue =
+          mode === 'replace' ? amount : state.shadows[index].offsetY + amount;
+
+        state.shadows[index].offsetY = newValue;
       });
     }
     case 'setShadowBlur': {
       const [, index, amount, mode = 'replace'] = action;
 
       return produce(state, (state) => {
-        if (state && state.shadows && state.shadows[index]) {
-          const newValue =
-            mode === 'replace'
-              ? amount
-              : state.shadows[index].blurRadius + amount;
+        if (!state.shadows || !state.shadows[index]) return;
 
-          state.shadows[index].blurRadius = newValue;
-        }
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : state.shadows[index].blurRadius + amount;
+
+        state.shadows[index].blurRadius = newValue;
       });
     }
     case 'setShadowSpread': {
       const [, index, amount, mode = 'replace'] = action;
 
       return produce(state, (state) => {
-        if (state && state.shadows && state.shadows[index]) {
-          const newValue =
-            mode === 'replace' ? amount : state.shadows[index].spread + amount;
+        if (!state.shadows || !state.shadows[index]) return;
 
-          state.shadows[index].spread = newValue;
-        }
+        const newValue =
+          mode === 'replace' ? amount : state.shadows[index].spread + amount;
+
+        state.shadows[index].spread = newValue;
       });
     }
     case 'setBorderPosition': {
       const [, index, position] = action;
 
       return produce(state, (state) => {
-        if (state && state.borders && state.borders[index]) {
-          state.borders[index].position = position;
-        }
+        if (!state.borders || !state.borders[index]) return;
+
+        state.borders[index].position = position;
       });
     }
     default:
