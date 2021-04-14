@@ -30,6 +30,17 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
 
   return pageIndex;
 };
+
+export const findPageLayerIndexPaths = (
+  state: ApplicationState,
+  predicate: (layer: Sketch.AnyLayer) => boolean,
+): LayerIndexPaths[] => {
+  return state.sketch.pages.map((page, pageIndex) => ({
+    pageIndex: pageIndex,
+    indexPaths: Layers.findAllIndexPaths(page, predicate),
+  }));
+};
+
 export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
 };
@@ -193,7 +204,9 @@ export const makeGetPageLayers = (
       .filter((layer): layer is PageLayer => !!layer);
 };
 
-export type LayerIndexPath = { pageIndex: number; indexPath: number[] };
+export type LayerIndexPath = { pageIndex: number; indexPath: IndexPath };
+
+export type LayerIndexPaths = { pageIndex: number; indexPaths: IndexPath[] };
 
 export const getLayerIndexPath = (
   state: ApplicationState,

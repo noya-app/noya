@@ -22,6 +22,7 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
   getCurrentTab,
+  findPageLayerIndexPaths,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -485,6 +486,15 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
+      const ids = state.selectedLayerStyleIds;
+
+      const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.sharedStyleID !== undefined &&
+          ids.includes(layer.sharedStyleID),
+      );
+
       const currentTab = getCurrentTab(state);
       if (currentTab === 'canvas') {
         return produce(state, (state) => {
@@ -505,6 +515,19 @@ export function reducer(
           layerStyles.forEach((layerStyle) => {
             if (selectedLayerStyleIds.includes(layerStyle.do_objectID)) {
               layerStyle.value = styleReducer(layerStyle.value, action);
+
+              layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+                accessPageLayers(
+                  state,
+                  layerPath.pageIndex,
+                  layerPath.indexPaths,
+                ).forEach((layer) => {
+                  layer.style = produce(layerStyle.value, (style) => {
+                    style.do_objectID = uuid();
+                    return style;
+                  });
+                }),
+              );
             }
           });
         });
@@ -933,6 +956,13 @@ export function reducer(
     case 'removeThemeStyle': {
       const ids = state.selectedLayerStyleIds;
 
+      const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.sharedStyleID !== undefined &&
+          ids.includes(layer.sharedStyleID),
+      );
+
       return produce(state, (state) => {
         const layerStyles = state.sketch.document.layerStyles;
 
@@ -941,9 +971,19 @@ export function reducer(
         const filterLayer = layerStyles.objects.filter(
           (object: Sketch.SharedStyle) => !ids.includes(object.do_objectID),
         );
-        layerStyles.objects = filterLayer;
 
+        layerStyles.objects = filterLayer;
         state.sketch.document.layerStyles = layerStyles;
+
+        layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+          accessPageLayers(
+            state,
+            layerPath.pageIndex,
+            layerPath.indexPaths,
+          ).forEach((layer) => {
+            delete layer.sharedStyleID;
+          }),
+        );
       });
     }
     default:
