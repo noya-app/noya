@@ -37,7 +37,7 @@ export const findPageLayerIndexPaths = (
 ): LayerIndexPaths[] => {
   return state.sketch.pages.map((page, pageIndex) => ({
     pageIndex: pageIndex,
-    indexPath: Layers.findAllIndexPaths(page, predicate),
+    indexPaths: Layers.findAllIndexPaths(page, predicate),
   }));
 };
 
@@ -206,7 +206,7 @@ export const makeGetPageLayers = (
 
 export type LayerIndexPath = { pageIndex: number; indexPath: IndexPath };
 
-export type LayerIndexPaths = { pageIndex: number; indexPath: IndexPath[] };
+export type LayerIndexPaths = { pageIndex: number; indexPaths: IndexPath[] };
 
 export const getLayerIndexPath = (
   state: ApplicationState,

@@ -520,7 +520,7 @@ export function reducer(
                 accessPageLayers(
                   state,
                   layerPath.pageIndex,
-                  layerPath.indexPath,
+                  layerPath.indexPaths,
                 ).forEach((layer) => {
                   layer.style = produce(layerStyle.value, (style) => {
                     style.do_objectID = uuid();
@@ -979,7 +979,7 @@ export function reducer(
           accessPageLayers(
             state,
             layerPath.pageIndex,
-            layerPath.indexPath,
+            layerPath.indexPaths,
           ).forEach((layer) => {
             delete layer.sharedStyleID;
           }),
