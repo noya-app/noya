@@ -25,7 +25,7 @@ const Header = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-type MenuItemType = 'duplicate' | 'delete';
+type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
 export default function PageList() {
   const [state, dispatch] = useApplicationState();
@@ -40,6 +40,7 @@ export default function PageList() {
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'duplicate', title: 'Duplicate Page' },
+      { value: 'rename', title: 'Rename Page' },
       { value: 'delete', title: 'Delete Page' },
     ],
     [],
