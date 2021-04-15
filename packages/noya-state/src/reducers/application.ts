@@ -102,6 +102,10 @@ export type Action =
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
+  | [type: 'addPage', name: string]
+  | [type: 'deletePage']
+  | [type: 'renamePage', name: string]
+  | [type: 'duplicatePage']
   | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']
   | [
       type: 'alignLayers',
@@ -332,6 +336,86 @@ export function reducer(
     case 'selectPage': {
       return produce(state, (state) => {
         state.selectedPage = action[1];
+      });
+    }
+    case 'addPage': {
+      const [, name] = action;
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const user = state.sketch.user;
+
+        const newPage: Sketch.Page = produce(Models.page, (page) => {
+          page.do_objectID = uuid();
+          page.name = name || `Page ${pages.length + 1}`;
+          return page;
+        });
+
+        user[newPage.do_objectID] = {
+          scrollOrigin: '{0, 0}',
+          zoomValue: 1,
+        };
+
+        pages.push(newPage);
+
+        state.selectedPage = newPage.do_objectID;
+      });
+    }
+    case 'renamePage': {
+      const [, name] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const page = pages[pageIndex];
+
+        pages[pageIndex] = produce(page, (page) => {
+          page.name = name || `Page ${pages.length + 1}`;
+          return page;
+        });
+      });
+    }
+    case 'duplicatePage': {
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const user = state.sketch.user;
+        const page = pages[pageIndex];
+
+        const duplicatePage = produce(page, (page) => {
+          page.name = `${page.name} Copy`;
+
+          Layers.visit(page, (layer) => {
+            layer.do_objectID = uuid();
+            if (layer.style) layer.style.do_objectID = uuid();
+          });
+
+          return page;
+        });
+
+        user[duplicatePage.do_objectID] = {
+          scrollOrigin: user[page.do_objectID].scrollOrigin,
+          zoomValue: user[page.do_objectID].zoomValue,
+        };
+
+        pages.push(duplicatePage);
+        state.selectedPage = duplicatePage.do_objectID;
+      });
+    }
+    case 'deletePage': {
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const user = state.sketch.user;
+
+        delete user[page.do_objectID];
+        pages.splice(pageIndex, 1);
+
+        const newIndex = Math.max(pageIndex - 1, 0);
+        state.selectedPage = pages[newIndex].do_objectID;
       });
     }
     case 'distributeLayers': {

@@ -37,22 +37,44 @@ export default function PageList() {
     })),
   );
 
+  const moreThanOnePage = state.sketch.pages.length > 1;
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'duplicate', title: 'Duplicate Page' },
       { value: 'rename', title: 'Rename Page' },
-      { value: 'delete', title: 'Delete Page' },
+      ...(moreThanOnePage
+        ? [{ value: 'delete' as MenuItemType, title: 'Delete Page' }]
+        : []),
     ],
-    [],
+    [moreThanOnePage],
   );
 
-  const handleSelectMenuItem = useCallback((value: MenuItemType) => {
-    // TODO: Handle context menu actions
-  }, []);
+  const handleSelectMenuItem = useCallback(
+    (value: MenuItemType) => {
+      switch (value) {
+        case 'rename': {
+          const name = prompt('New page Name');
+
+          if (name) dispatch('renamePage', name);
+          break;
+        }
+        case 'duplicate': {
+          dispatch('duplicatePage');
+          break;
+        }
+        case 'delete':
+          dispatch('deletePage');
+          break;
+      }
+    },
+    [dispatch],
+  );
 
   const handleAddPage = useCallback(() => {
-    // TODO: Handle add page
-  }, []);
+    const name = prompt('New page Name');
+
+    if (name !== null) dispatch('addPage', name);
+  }, [dispatch]);
 
   const pageElements = useMemo(() => {
     return pageInfo.map((page) => (
