@@ -57,6 +57,7 @@ export type ApplicationState = {
   selectedObjects: string[];
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
+  selectedGroupSwatch: string;
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
@@ -152,6 +153,7 @@ export type Action =
     ]
   | [type: 'removeSwatch']
   | [type: 'removeThemeStyle']
+  | [type: 'setSelectedSwatchGroup', value: string]
   | StyleAction;
 
 export function reducer(
@@ -1114,6 +1116,12 @@ export function reducer(
         );
       });
     }
+    case 'setSelectedSwatchGroup': {
+      const [, value] = action;
+      return produce(state, (state) => {
+        state.selectedGroupSwatch = value;
+      });
+    }
     default:
       return state;
   }
@@ -1148,6 +1156,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
+    selectedGroupSwatch: '',
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },

@@ -17,7 +17,9 @@ const Container = styled.main(({ theme }) => ({
 
 const LayerStyles = memo(function LayerStyles() {
   const [state, dispatch] = useApplicationState();
+
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
+
   return (
     <LayerStylesGrid
       sharedStyles={sharedStyles}
