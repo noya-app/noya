@@ -40,10 +40,18 @@ const LayerStyles = memo(function LayerStyles() {
 const Swatches = memo(function Swatches() {
   const [state, dispatch] = useApplicationState();
 
+  const selectedGroup = state.selectedGroupSwatch;
+
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
+
+  const filterSwatches = useMemo(
+    () => [...swatches].filter((swatch) => swatch.name.includes(selectedGroup)),
+    [swatches, selectedGroup],
+  );
+
   return (
     <SwatchesGrid
-      swatches={swatches}
+      swatches={filterSwatches}
       selectedSwatchIds={state.selectedSwatchIds}
       onSelectSwatch={useCallback(
         (id, type) => {
