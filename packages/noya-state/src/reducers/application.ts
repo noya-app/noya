@@ -1002,9 +1002,9 @@ export function reducer(
             : state.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
-          if (ids.includes(object.do_objectID)) {
-            object.name = name;
-          }
+          if (!ids.includes(object.do_objectID)) return;
+          const groupTitle = object.name.split('/').slice(0, -1).join('/');
+          object.name = groupTitle + '/' + name;
         });
       });
     }

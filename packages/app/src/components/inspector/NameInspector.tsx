@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default memo(function NameInspector({ names, onNameChange }: Props) {
-  const firstName = names[0];
+  const firstName = names[0].split('/').pop() || '';
 
   const name =
     names.length > 1 && !names.every((v: string) => v === firstName)
