@@ -36,11 +36,12 @@ export default memo(function SwatchesGrid({
 
         return (
           <GridView.Item
+            id={item.do_objectID}
             key={item.do_objectID}
             title={item.name}
             subtitle={`${hex} — ${alphaPercent}`}
             selected={selectedSwatchIds.includes(item.do_objectID)}
-            onClick={(event) =>
+            onClick={(event: React.MouseEvent) =>
               onSelectSwatch(
                 item.do_objectID,
                 event.shiftKey ? 'intersection' : 'replace',
