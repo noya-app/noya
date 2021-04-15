@@ -1,11 +1,4 @@
-import {
-  memo,
-  ForwardedRef,
-  forwardRef,
-  ReactNode,
-  Ref,
-  useCallback,
-} from 'react';
+import { memo, forwardRef, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Spacer, ContextMenu } from '..';
 
@@ -85,19 +78,16 @@ interface ItemProps {
 }
 
 const GridItem = memo(
-  forwardRef(function GridItem(
-    {
-      title,
-      subtitle,
-      selected,
-      onClick,
-      children,
-      menuItems,
-      onSelectMenuItem,
-      onContextMenu,
-    }: ItemProps,
-    forwardedRef: ForwardedRef<HTMLLIElement>,
-  ) {
+  forwardRef(function GridItem({
+    title,
+    subtitle,
+    selected,
+    onClick,
+    children,
+    menuItems,
+    onSelectMenuItem,
+    onContextMenu,
+  }: ItemProps) {
     const handleClick = useCallback(
       (event: React.MouseEvent) => {
         event.stopPropagation();
@@ -108,37 +98,33 @@ const GridItem = memo(
       [onClick],
     );
 
-    const renderContent = (ref: Ref<HTMLLIElement>) => {
-      const element = (
-        <GridContainer>
-          <ItemContainer
-            selected={selected}
-            onClick={handleClick}
-            onContextMenu={onContextMenu}
-          >
-            {children}
-          </ItemContainer>
-          <Spacer.Vertical size={8} />
-          <ItemTitle>{title || ' '}</ItemTitle>
-          <ItemDescription>{subtitle || ' '}</ItemDescription>
-        </GridContainer>
+    const element = (
+      <GridContainer>
+        <ItemContainer
+          selected={selected}
+          onClick={handleClick}
+          onContextMenu={onContextMenu}
+        >
+          {children}
+        </ItemContainer>
+        <Spacer.Vertical size={8} />
+        <ItemTitle>{title || ' '}</ItemTitle>
+        <ItemDescription>{subtitle || ' '}</ItemDescription>
+      </GridContainer>
+    );
+
+    if (menuItems) {
+      return (
+        <ContextMenu.Root<MenuItemType>
+          items={menuItems}
+          onSelect={onSelectMenuItem}
+        >
+          {element}
+        </ContextMenu.Root>
       );
+    }
 
-      if (menuItems) {
-        return (
-          <ContextMenu.Root<MenuItemType>
-            items={menuItems}
-            onSelect={onSelectMenuItem}
-          >
-            {element}
-          </ContextMenu.Root>
-        );
-      }
-
-      return element;
-    };
-
-    return renderContent(forwardedRef);
+    return element;
   }),
 );
 
