@@ -948,19 +948,36 @@ export function reducer(
     }
     case 'updateThemeStyle': {
       const [, id, style] = action;
-
+      const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.sharedStyleID !== undefined && id === layer.sharedStyleID,
+      );
       return produce(state, (state) => {
         if (!style) return;
 
         const sharedStyles = state.sketch.document.layerStyles.objects;
 
         sharedStyles.forEach((sharedStyle: Sketch.SharedStyle) => {
-          if (id === sharedStyle.do_objectID) {
-            sharedStyle.value = produce(style, (style) => {
-              style.do_objectID = uuid();
-              return style;
-            });
-          }
+          if (id !== sharedStyle.do_objectID) return;
+
+          sharedStyle.value = produce(style, (style) => {
+            style.do_objectID = uuid();
+            return style;
+          });
+
+          layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+            accessPageLayers(
+              state,
+              layerPath.pageIndex,
+              layerPath.indexPaths,
+            ).forEach((layer) => {
+              layer.style = produce(style, (style) => {
+                style.do_objectID = uuid();
+                return style;
+              });
+            }),
+          );
         });
       });
     }
