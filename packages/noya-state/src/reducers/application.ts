@@ -102,6 +102,7 @@ export type Action =
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
+  | [type: 'addPage']
   | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']
   | [
       type: 'alignLayers',
@@ -332,6 +333,29 @@ export function reducer(
     case 'selectPage': {
       return produce(state, (state) => {
         state.selectedPage = action[1];
+      });
+    }
+    case 'addPage': {
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const user = state.sketch.user;
+
+        const pageId = uuid();
+        const newPage: Sketch.Page = produce(Models.page, (page) => {
+          page.do_objectID = pageId;
+          page.name = `Page ${pages.length + 1}`;
+          return page;
+        });
+
+        user[pageId] = {
+          scrollOrigin: '{0, 0}',
+          zoomValue: 1,
+        };
+
+        pages.push(newPage);
+
+        state.sketch.pages = pages;
+        state.sketch.user = user;
       });
     }
     case 'distributeLayers': {

@@ -50,9 +50,7 @@ export default function PageList() {
     // TODO: Handle context menu actions
   }, []);
 
-  const handleAddPage = useCallback(() => {
-    // TODO: Handle add page
-  }, []);
+  const handleAddPage = useCallback(() => dispatch('addPage'), [dispatch]);
 
   const pageElements = useMemo(() => {
     return pageInfo.map((page) => (
