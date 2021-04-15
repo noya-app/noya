@@ -3,6 +3,7 @@ import { ApplicationState, Action, reducer } from './application';
 
 export type HistoryState = {
   past: Array<ApplicationState>;
+  previous?: ApplicationState;
   present: ApplicationState;
   future: Array<ApplicationState>;
 };
@@ -32,11 +33,17 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
         }
       });
     default:
-      const newPresent = state.present;
+      const currentPresent = state.present;
       return produce(state, (state) => {
-        state.past.push(newPresent);
-        state.present = reducer(newPresent, action);
-        state.future = [];
+        const incomingPresent = reducer(currentPresent, action);
+        if (
+          JSON.stringify(currentPresent.sketch) !==
+          JSON.stringify(incomingPresent.sketch)
+        ) {
+          state.past.push(currentPresent);
+          state.future = [];
+        }
+        state.present = incomingPresent;
       });
   }
 }

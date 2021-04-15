@@ -1,9 +1,4 @@
-import {
-  Action,
-  ApplicationState,
-  HistoryAction,
-  HistoryState,
-} from 'noya-state';
+import { ApplicationState, HistoryAction, HistoryState } from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
@@ -18,7 +13,7 @@ const ApplicationStateContext = createContext<
 
 export const ApplicationStateProvider = ApplicationStateContext.Provider;
 
-type Dispatcher = (...args: Action) => void;
+type Dispatcher = (...args: HistoryAction) => void;
 
 /**
  * This should only be used to propagate state between React reconcilers
@@ -41,7 +36,10 @@ export const useRawApplicationState = (): ApplicationStateContextValue => {
  * Only "container" components should use this, while "presentational" components
  * should instead be passed their data via props.
  */
-export const useApplicationState = (): [ApplicationState, Dispatcher] => {
+export const useApplicationState = (): [
+  ApplicationState & { undoDisabled: boolean; redoDisabled: boolean },
+  Dispatcher,
+] => {
   const value = useRawApplicationState();
   const trigger = useGlobalInputBlurTrigger();
 
@@ -49,7 +47,7 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
 
   // Simplify the dispatch function by flattening our Action tuple
   const wrappedDispatch: Dispatcher = useCallback(
-    (...args: Action) => {
+    (...args: HistoryAction) => {
       // When changing selection, trigger any pending updates in input fields
       if (
         args[0] === 'selectLayer' ||
@@ -64,9 +62,19 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
     [dispatch, trigger],
   );
 
-  const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
-    return [state.present, wrappedDispatch];
-  }, [state.present, wrappedDispatch]);
+  const wrapped: [
+    ApplicationState & { undoDisabled: boolean; redoDisabled: boolean },
+    Dispatcher,
+  ] = useMemo(() => {
+    return [
+      {
+        ...state.present,
+        undoDisabled: state.past.length === 0,
+        redoDisabled: state.future.length === 0,
+      },
+      wrappedDispatch,
+    ];
+  }, [state, wrappedDispatch]);
 
   return wrapped;
 };

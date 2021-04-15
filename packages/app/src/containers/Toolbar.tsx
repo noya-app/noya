@@ -120,9 +120,27 @@ export default function Toolbar() {
         >
           <RulerHorizontalIcon />
         </Button>
+        <Button
+          id="undo"
+          disabled={state.undoDisabled}
+          onClick={() => {
+            dispatch('undo');
+          }}
+        >
+          Undo
+        </Button>
+        <Button
+          id="redo"
+          disabled={state.redoDisabled}
+          onClick={() => {
+            dispatch('redo');
+          }}
+        >
+          Redo
+        </Button>
         <Spacer.Horizontal size={8} />
       </Container>
     ),
-    [dispatch, interactionType, itemSeparatorSize, showRulers],
+    [state, dispatch, interactionType, itemSeparatorSize, showRulers],
   );
 }
