@@ -180,10 +180,12 @@ function GridViewSection({ children }: { children?: ReactNode }) {
 }
 
 interface GridViewSectionHeaderProps {
-  groupedTitle: string[];
+  title: string;
 }
 
-function GridViewSectionHeader({ groupedTitle }: GridViewSectionHeaderProps) {
+function GridViewSectionHeader({ title }: GridViewSectionHeaderProps) {
+  const groupedTitle = title.split('/');
+
   return (
     <SectionHeaderContainer>
       {groupedTitle.map((title, index) => {
