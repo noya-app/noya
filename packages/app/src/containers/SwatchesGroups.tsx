@@ -41,6 +41,7 @@ export default memo(function SwatchesGroups() {
       if (titles.some((t) => t.full === full) || value === '') return;
       titles.push({ value, full, depth });
     });
+
     return titles;
   }, [swatches]);
 
@@ -69,7 +70,7 @@ export default memo(function SwatchesGroups() {
     <Container>
       <ListView.Root>
         <ListView.Row
-          id={'a'}
+          id={'All Color Variables'}
           onClick={() => handleClick()}
           selected={selectedGroup === ''}
         >
