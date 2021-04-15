@@ -103,9 +103,9 @@ export type Action =
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'addPage', name: string]
-  | [type: 'deletePage', pageId: UUID]
-  | [type: 'renamePage', pageId: UUID]
-  | [type: 'duplicatePage', pageId: UUID]
+  | [type: 'deletePage']
+  | [type: 'renamePage', name: string]
+  | [type: 'duplicatePage']
   | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']
   | [
       type: 'alignLayers',
@@ -345,14 +345,13 @@ export function reducer(
         const pages = state.sketch.pages;
         const user = state.sketch.user;
 
-        const pageId = uuid();
         const newPage: Sketch.Page = produce(Models.page, (page) => {
-          page.do_objectID = pageId;
+          page.do_objectID = uuid();
           page.name = name || `Page ${pages.length + 1}`;
           return page;
         });
 
-        user[pageId] = {
+        user[newPage.do_objectID] = {
           scrollOrigin: '{0, 0}',
           zoomValue: 1,
         };
@@ -361,6 +360,66 @@ export function reducer(
 
         state.sketch.pages = pages;
         state.sketch.user = user;
+        state.selectedPage = newPage.do_objectID;
+      });
+    }
+    case 'renamePage': {
+      const [, name] = action;
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+
+        pages[pageIndex] = produce(page, (page) => {
+          page.name = name || `Page ${pages.length + 1}`;
+          return page;
+        });
+
+        state.sketch.pages = pages;
+      });
+    }
+    case 'duplicatePage': {
+      const page = getCurrentPage(state);
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const user = state.sketch.user;
+
+        const newPage = produce(page, (page) => {
+          page.do_objectID = uuid();
+          page.name = `${page.name} Copy`;
+          return page;
+        });
+
+        user[newPage.do_objectID] = {
+          scrollOrigin: '{0, 0}',
+          zoomValue: 1,
+        };
+
+        pages.push(newPage);
+
+        state.sketch.pages = pages;
+        state.sketch.user = user;
+        state.selectedPage = newPage.do_objectID;
+      });
+    }
+    case 'deletePage': {
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (state) => {
+        const pages = state.sketch.pages;
+        const user = state.sketch.user;
+
+        delete user[page.do_objectID];
+        pages.splice(pageIndex, 1);
+
+        state.sketch.pages = pages;
+        state.sketch.user = user;
+
+        const newIndex = pageIndex - 1 > 0 ? pageIndex - 1 : 0;
+        state.selectedPage = pages[newIndex].do_objectID;
       });
     }
     case 'distributeLayers': {

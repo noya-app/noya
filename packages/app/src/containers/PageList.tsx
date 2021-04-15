@@ -46,9 +46,26 @@ export default function PageList() {
     [],
   );
 
-  const handleSelectMenuItem = useCallback((value: MenuItemType) => {
-    // TODO: Handle context menu actions
-  }, []);
+  const handleSelectMenuItem = useCallback(
+    (value: MenuItemType) => {
+      switch (value) {
+        case 'rename': {
+          const name = prompt('New page Name');
+
+          if (name) dispatch('renamePage', name);
+          break;
+        }
+        case 'duplicate': {
+          dispatch('duplicatePage');
+          break;
+        }
+        case 'delete':
+          dispatch('deletePage');
+          break;
+      }
+    },
+    [dispatch],
+  );
 
   const handleAddPage = useCallback(() => {
     const name = prompt('New page Name');
