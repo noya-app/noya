@@ -1,4 +1,4 @@
-import { memo, forwardRef, ReactNode, useCallback } from 'react';
+import { memo, ForwardedRef, forwardRef, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Spacer, ContextMenu } from '..';
 
@@ -67,6 +67,7 @@ const ItemDescription = styled.span(({ theme }) => ({
 type MenuItemType = 'delete' | 'copy';
 
 interface ItemProps {
+  id?: string;
   title?: string;
   subtitle?: string;
   selected: boolean;
@@ -78,16 +79,20 @@ interface ItemProps {
 }
 
 const GridItem = memo(
-  forwardRef(function GridItem({
-    title,
-    subtitle,
-    selected,
-    onClick,
-    children,
-    menuItems,
-    onSelectMenuItem,
-    onContextMenu,
-  }: ItemProps) {
+  forwardRef(function GridItem(
+    {
+      id,
+      title,
+      subtitle,
+      selected,
+      onClick,
+      children,
+      menuItems,
+      onSelectMenuItem,
+      onContextMenu,
+    }: ItemProps,
+    forwardedRef: ForwardedRef<HTMLDivElement>,
+  ) {
     const handleClick = useCallback(
       (event: React.MouseEvent) => {
         event.stopPropagation();
@@ -99,7 +104,7 @@ const GridItem = memo(
     );
 
     const element = (
-      <GridContainer>
+      <GridContainer id={id} ref={forwardedRef}>
         <ItemContainer
           selected={selected}
           onClick={handleClick}

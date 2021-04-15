@@ -36,6 +36,7 @@ export default memo(function SwatchesGrid({
 
         return (
           <GridView.Item
+            id={item.do_objectID}
             key={item.do_objectID}
             title={item.name}
             subtitle={`${hex} — ${alphaPercent}`}

@@ -54,6 +54,7 @@ export default memo(function LayerStylesGrid({
       {sortedStyles.map((item) => {
         return (
           <GridView.Item
+            id={item.do_objectID}
             key={item.do_objectID}
             title={item.name}
             menuItems={menuItems}
