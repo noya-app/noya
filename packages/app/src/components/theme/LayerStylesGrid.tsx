@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { GridView, ContextMenu } from 'noya-designsystem';
+import { GridView } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { memo, useMemo, useCallback } from 'react';
@@ -12,7 +12,7 @@ interface Props {
   onSelectThemeStyle: (id?: string, selectionType?: SelectionType) => void;
 }
 
-type MenuItemType = 'delete' | 'copy';
+type MenuItemType = 'delete';
 
 export default memo(function LayerStylesGrid({
   sharedStyles,
@@ -32,11 +32,7 @@ export default memo(function LayerStylesGrid({
   );
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [
-      { value: 'delete', title: 'Delete' },
-      ContextMenu.SEPARATOR_ITEM,
-      { value: 'copy', title: 'Copy' },
-    ],
+    () => [{ value: 'delete', title: 'Delete' }],
     [],
   );
   const handleSelectMenuItem = useCallback(
@@ -53,7 +49,7 @@ export default memo(function LayerStylesGrid({
     <GridView.Root onClick={() => onSelectThemeStyle(undefined, 'replace')}>
       {sortedStyles.map((item) => {
         return (
-          <GridView.Item
+          <GridView.Item<MenuItemType>
             id={item.do_objectID}
             key={item.do_objectID}
             title={item.name}

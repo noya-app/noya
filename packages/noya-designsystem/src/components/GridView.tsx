@@ -64,11 +64,9 @@ const ItemDescription = styled.span(({ theme }) => ({
   textOverflow: 'ellipsis',
 }));
 
-type MenuItemType = 'delete' | 'copy';
-
-interface ItemProps {
-  id?: string;
-  title?: string;
+interface ItemProps<MenuItemType extends string = string> {
+  id: string;
+  title: string;
   subtitle?: string;
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
@@ -78,60 +76,58 @@ interface ItemProps {
   onContextMenu?: () => void;
 }
 
-const GridItem = memo(
-  forwardRef(function GridItem(
-    {
-      id,
-      title,
-      subtitle,
-      selected,
-      onClick,
-      children,
-      menuItems,
-      onSelectMenuItem,
-      onContextMenu,
-    }: ItemProps,
-    forwardedRef: ForwardedRef<HTMLDivElement>,
-  ) {
-    const handleClick = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        event.preventDefault();
+const GridItem = forwardRef(function GridItem<MenuItemType extends string>(
+  {
+    id,
+    title,
+    subtitle,
+    selected,
+    onClick,
+    children,
+    menuItems,
+    onSelectMenuItem,
+    onContextMenu,
+  }: ItemProps<MenuItemType>,
+  forwardedRef: ForwardedRef<HTMLDivElement>,
+) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
 
-        onClick?.(event);
-      },
-      [onClick],
+      onClick?.(event);
+    },
+    [onClick],
+  );
+
+  const element = (
+    <GridContainer id={id} ref={forwardedRef}>
+      <ItemContainer
+        selected={selected}
+        onClick={handleClick}
+        onContextMenu={onContextMenu}
+      >
+        {children}
+      </ItemContainer>
+      <Spacer.Vertical size={8} />
+      <ItemTitle>{title || ' '}</ItemTitle>
+      <ItemDescription>{subtitle || ' '}</ItemDescription>
+    </GridContainer>
+  );
+
+  if (menuItems) {
+    return (
+      <ContextMenu.Root<MenuItemType>
+        items={menuItems}
+        onSelect={onSelectMenuItem}
+      >
+        {element}
+      </ContextMenu.Root>
     );
+  }
 
-    const element = (
-      <GridContainer id={id} ref={forwardedRef}>
-        <ItemContainer
-          selected={selected}
-          onClick={handleClick}
-          onContextMenu={onContextMenu}
-        >
-          {children}
-        </ItemContainer>
-        <Spacer.Vertical size={8} />
-        <ItemTitle>{title || ' '}</ItemTitle>
-        <ItemDescription>{subtitle || ' '}</ItemDescription>
-      </GridContainer>
-    );
-
-    if (menuItems) {
-      return (
-        <ContextMenu.Root<MenuItemType>
-          items={menuItems}
-          onSelect={onSelectMenuItem}
-        >
-          {element}
-        </ContextMenu.Root>
-      );
-    }
-
-    return element;
-  }),
-);
+  return element;
+});
 
 interface GridViewRootProps {
   children?: ReactNode;
