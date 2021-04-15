@@ -13,7 +13,9 @@ import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
 import ThemeToolbar from './ThemeToolbar';
+import ThemeGroups from './ThemeGroups';
 import ThemeWindow from './ThemeWindow';
+
 import ThemeInspector from './ThemeInspector';
 
 const LeftSidebar = styled.div(({ theme }) => ({
@@ -100,6 +102,8 @@ const ComponentsTab = memo(function ComponentsTab() {
     <>
       <LeftSidebar>
         <Menubar />
+        <Spacer.Vertical size={4} />
+        <ThemeGroups />
       </LeftSidebar>
       <MainView>
         <ThemeToolbar />

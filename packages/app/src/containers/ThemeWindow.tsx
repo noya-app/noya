@@ -17,7 +17,9 @@ const Container = styled.main(({ theme }) => ({
 
 const LayerStyles = memo(function LayerStyles() {
   const [state, dispatch] = useApplicationState();
+
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
+
   return (
     <LayerStylesGrid
       sharedStyles={sharedStyles}
@@ -38,11 +40,25 @@ const LayerStyles = memo(function LayerStyles() {
 const Swatches = memo(function Swatches() {
   const [state, dispatch] = useApplicationState();
 
+  const selectedGroup = state.selectedGroupSwatch;
+
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
+
+  const filterSwatches = useMemo(
+    () => [...swatches].filter((swatch) => swatch.name.includes(selectedGroup)),
+    [swatches, selectedGroup],
+  );
+
   return (
     <SwatchesGrid
-      swatches={swatches}
+      swatches={filterSwatches}
       selectedSwatchIds={state.selectedSwatchIds}
+      onGroupSwatch={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupSwatches', id, name);
+        },
+        [dispatch],
+      )}
       onSelectSwatch={useCallback(
         (id, type) => {
           dispatch('selectSwatch', id, type);
