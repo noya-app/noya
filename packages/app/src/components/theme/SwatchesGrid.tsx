@@ -29,29 +29,31 @@ export default memo(function SwatchesGrid({
 
   return (
     <GridView.Root onClick={() => onSelectSwatch(undefined, 'replace')}>
-      {sortedSwatches.map((item) => {
-        const color = sketchColorToRgba(item.value);
-        const hex = rgbaToHex(color);
-        const alphaPercent = `${Math.round(color.a * 100)}%`;
+      <GridView.Section>
+        {sortedSwatches.map((item) => {
+          const color = sketchColorToRgba(item.value);
+          const hex = rgbaToHex(color);
+          const alphaPercent = `${Math.round(color.a * 100)}%`;
 
-        return (
-          <GridView.Item
-            id={item.do_objectID}
-            key={item.do_objectID}
-            title={item.name}
-            subtitle={`${hex} — ${alphaPercent}`}
-            selected={selectedSwatchIds.includes(item.do_objectID)}
-            onClick={(event: React.MouseEvent) =>
-              onSelectSwatch(
-                item.do_objectID,
-                event.shiftKey ? 'intersection' : 'replace',
-              )
-            }
-          >
-            <ColorSwatch value={item.value} />
-          </GridView.Item>
-        );
-      })}
+          return (
+            <GridView.Item
+              id={item.do_objectID}
+              key={item.do_objectID}
+              title={item.name}
+              subtitle={`${hex} — ${alphaPercent}`}
+              selected={selectedSwatchIds.includes(item.do_objectID)}
+              onClick={(event: React.MouseEvent) =>
+                onSelectSwatch(
+                  item.do_objectID,
+                  event.shiftKey ? 'intersection' : 'replace',
+                )
+              }
+            >
+              <ColorSwatch value={item.value} />
+            </GridView.Item>
+          );
+        })}
+      </GridView.Section>
     </GridView.Root>
   );
 });
