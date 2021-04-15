@@ -21,13 +21,16 @@ const LayerStyles = memo(function LayerStyles() {
   return (
     <LayerStylesGrid
       sharedStyles={sharedStyles}
-      selectedSharedStyleIds={state.selectedLayerStyleIds}
-      onSelectSharedStyle={useCallback(
+      selectedThemeStyleIds={state.selectedLayerStyleIds}
+      onSelectThemeStyle={useCallback(
         (id, type) => {
           dispatch('selectThemeStyle', id, type);
         },
         [dispatch],
       )}
+      onDeleteThemeStyle={useCallback(() => dispatch('removeThemeStyle'), [
+        dispatch,
+      ])}
     />
   );
 });

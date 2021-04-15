@@ -40,7 +40,7 @@ export default memo(function SwatchesGrid({
             title={item.name}
             subtitle={`${hex} — ${alphaPercent}`}
             selected={selectedSwatchIds.includes(item.do_objectID)}
-            onClick={(event) =>
+            onClick={(event: React.MouseEvent) =>
               onSelectSwatch(
                 item.do_objectID,
                 event.shiftKey ? 'intersection' : 'replace',

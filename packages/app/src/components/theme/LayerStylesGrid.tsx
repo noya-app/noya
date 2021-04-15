@@ -1,19 +1,24 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { GridView } from 'noya-designsystem';
+import { GridView, ContextMenu } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
-import { memo, useMemo } from 'react';
+import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { memo, useMemo, useCallback } from 'react';
 import LayerStyle from './LayerStyle';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
-  selectedSharedStyleIds: string[];
-  onSelectSharedStyle: (id?: string, selectionType?: SelectionType) => void;
+  selectedThemeStyleIds: string[];
+  onDeleteThemeStyle: (id?: string) => void;
+  onSelectThemeStyle: (id?: string, selectionType?: SelectionType) => void;
 }
+
+type MenuItemType = 'delete' | 'copy';
 
 export default memo(function LayerStylesGrid({
   sharedStyles,
-  selectedSharedStyleIds: selectedIds,
-  onSelectSharedStyle,
+  selectedThemeStyleIds,
+  onDeleteThemeStyle,
+  onSelectThemeStyle,
 }: Props) {
   const sortedStyles = useMemo(
     () =>
@@ -26,16 +31,37 @@ export default memo(function LayerStylesGrid({
     [sharedStyles],
   );
 
+  const menuItems: MenuItem<MenuItemType>[] = useMemo(
+    () => [
+      { value: 'delete', title: 'Delete' },
+      ContextMenu.SEPARATOR_ITEM,
+      { value: 'copy', title: 'Copy' },
+    ],
+    [],
+  );
+  const handleSelectMenuItem = useCallback(
+    (value: MenuItemType) => {
+      switch (value) {
+        case 'delete':
+          onDeleteThemeStyle();
+      }
+    },
+    [onDeleteThemeStyle],
+  );
+
   return (
-    <GridView.Root onClick={() => onSelectSharedStyle(undefined, 'replace')}>
+    <GridView.Root onClick={() => onSelectThemeStyle(undefined, 'replace')}>
       {sortedStyles.map((item) => {
         return (
           <GridView.Item
             key={item.do_objectID}
             title={item.name}
-            selected={selectedIds.includes(item.do_objectID)}
-            onClick={(event) =>
-              onSelectSharedStyle(
+            menuItems={menuItems}
+            selected={selectedThemeStyleIds.includes(item.do_objectID)}
+            onSelectMenuItem={handleSelectMenuItem}
+            onContextMenu={() => onSelectThemeStyle(item.do_objectID)}
+            onClick={(event: React.MouseEvent) =>
+              onSelectThemeStyle(
                 item.do_objectID,
                 event.shiftKey ? 'intersection' : 'replace',
               )

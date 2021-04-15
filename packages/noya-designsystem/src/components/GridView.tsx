@@ -1,6 +1,13 @@
-import { memo, useCallback, ReactNode } from 'react';
+import {
+  memo,
+  ForwardedRef,
+  forwardRef,
+  ReactNode,
+  Ref,
+  useCallback,
+} from 'react';
 import styled from 'styled-components';
-import { Spacer } from '..';
+import { Spacer, ContextMenu } from '..';
 
 const Grid = styled.div(({ theme }) => ({
   flex: 1,
@@ -40,7 +47,7 @@ const ItemContainer = styled.div<{ selected: boolean }>(
   }),
 );
 
-const SwatchContainer = styled.div(({ theme }) => ({
+const GridContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
 }));
@@ -64,37 +71,76 @@ const ItemDescription = styled.span(({ theme }) => ({
   textOverflow: 'ellipsis',
 }));
 
+type MenuItemType = 'delete' | 'copy';
+
 interface ItemProps {
-  children?: ReactNode;
-  title: string;
+  title?: string;
   subtitle?: string;
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
+  children?: ReactNode;
+  menuItems?: ContextMenu.MenuItem<MenuItemType>[];
+  onSelectMenuItem?: (value: MenuItemType) => void;
+  onContextMenu?: () => void;
 }
 
-function GridItem({ children, title, subtitle, selected, onClick }: ItemProps) {
-  const handleClick = useCallback(
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-      event.preventDefault();
+const GridItem = memo(
+  forwardRef(function GridItem(
+    {
+      title,
+      subtitle,
+      selected,
+      onClick,
+      children,
+      menuItems,
+      onSelectMenuItem,
+      onContextMenu,
+    }: ItemProps,
+    forwardedRef: ForwardedRef<HTMLLIElement>,
+  ) {
+    const handleClick = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        event.preventDefault();
 
-      onClick?.(event);
-    },
-    [onClick],
-  );
+        onClick?.(event);
+      },
+      [onClick],
+    );
 
-  return (
-    <SwatchContainer>
-      <ItemContainer onClick={handleClick} selected={selected}>
-        {children}
-      </ItemContainer>
-      <Spacer.Vertical size={8} />
-      {/* Use an empty string to ensure element height */}
-      <ItemTitle>{title || ' '}</ItemTitle>
-      <ItemDescription>{subtitle || ' '}</ItemDescription>
-    </SwatchContainer>
-  );
-}
+    const renderContent = (ref: Ref<HTMLLIElement>) => {
+      const element = (
+        <GridContainer>
+          <ItemContainer
+            selected={selected}
+            onClick={handleClick}
+            onContextMenu={onContextMenu}
+          >
+            {children}
+          </ItemContainer>
+          <Spacer.Vertical size={8} />
+          <ItemTitle>{title || ' '}</ItemTitle>
+          <ItemDescription>{subtitle || ' '}</ItemDescription>
+        </GridContainer>
+      );
+
+      if (menuItems) {
+        return (
+          <ContextMenu.Root<MenuItemType>
+            items={menuItems}
+            onSelect={onSelectMenuItem}
+          >
+            {element}
+          </ContextMenu.Root>
+        );
+      }
+
+      return element;
+    };
+
+    return renderContent(forwardedRef);
+  }),
+);
 
 interface GridViewRootProps {
   children?: ReactNode;
