@@ -12,9 +12,9 @@ import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
 import Toolbar from './Toolbar';
-import SwatchesToolbar from './SwatchesToolbar';
-import ComponentsWindow from './ThemeWindow';
-import ComponentsInspectors from './ThemeInspector';
+import ThemeToolbar from './ThemeToolbar';
+import ThemeWindow from './ThemeWindow';
+import ThemeInspector from './ThemeInspector';
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
@@ -102,11 +102,11 @@ const ComponentsTab = memo(function ComponentsTab() {
         <Menubar />
       </LeftSidebar>
       <MainView>
-        <SwatchesToolbar />
+        <ThemeToolbar />
         <ContentArea>
-          <ComponentsWindow />
+          <ThemeWindow />
           <RightSidebar>
-            <ComponentsInspectors />
+            <ThemeInspector />
           </RightSidebar>
         </ContentArea>
       </MainView>
