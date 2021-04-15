@@ -386,22 +386,40 @@ export function reducer(
         const pages = state.sketch.pages;
         const user = state.sketch.user;
 
-        const newPage = produce(page, (page) => {
+        const duplicatePage = produce(page, (page) => {
           page.do_objectID = uuid();
           page.name = `${page.name} Copy`;
+          if (page.style) page.style.do_objectID = uuid();
+
+          page.layers = page.layers.map((layer) => {
+            layer.do_objectID = uuid();
+            if (layer.style) layer.style.do_objectID = uuid();
+
+            if (layer._class === 'artboard') {
+              layer.layers = layer.layers.map((innerLayer) => {
+                innerLayer.do_objectID = uuid();
+                if (innerLayer.style) innerLayer.style.do_objectID = uuid();
+
+                return innerLayer;
+              });
+            }
+
+            return layer;
+          });
+
           return page;
         });
 
-        user[newPage.do_objectID] = {
-          scrollOrigin: '{0, 0}',
-          zoomValue: 1,
+        user[duplicatePage.do_objectID] = {
+          scrollOrigin: user[page.do_objectID].scrollOrigin,
+          zoomValue: user[page.do_objectID].zoomValue,
         };
 
-        pages.push(newPage);
+        pages.push(duplicatePage);
 
         state.sketch.pages = pages;
         state.sketch.user = user;
-        state.selectedPage = newPage.do_objectID;
+        state.selectedPage = duplicatePage.do_objectID;
       });
     }
     case 'deletePage': {

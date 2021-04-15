@@ -37,13 +37,16 @@ export default function PageList() {
     })),
   );
 
+  const moreThanOnePage = state.sketch.pages.length > 1;
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'duplicate', title: 'Duplicate Page' },
       { value: 'rename', title: 'Rename Page' },
-      { value: 'delete', title: 'Delete Page' },
+      ...(moreThanOnePage
+        ? [{ value: 'delete' as MenuItemType, title: 'Delete Page' }]
+        : []),
     ],
-    [],
+    [moreThanOnePage],
   );
 
   const handleSelectMenuItem = useCallback(
