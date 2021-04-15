@@ -358,53 +358,37 @@ export function reducer(
 
         pages.push(newPage);
 
-        state.sketch.pages = pages;
-        state.sketch.user = user;
         state.selectedPage = newPage.do_objectID;
       });
     }
     case 'renamePage': {
       const [, name] = action;
-      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (state) => {
         const pages = state.sketch.pages;
+        const page = pages[pageIndex];
 
         pages[pageIndex] = produce(page, (page) => {
           page.name = name || `Page ${pages.length + 1}`;
           return page;
         });
-
-        state.sketch.pages = pages;
       });
     }
     case 'duplicatePage': {
-      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (state) => {
         const pages = state.sketch.pages;
         const user = state.sketch.user;
+        const page = pages[pageIndex];
 
         const duplicatePage = produce(page, (page) => {
-          page.do_objectID = uuid();
           page.name = `${page.name} Copy`;
-          if (page.style) page.style.do_objectID = uuid();
 
-          page.layers = page.layers.map((layer) => {
+          Layers.visit(page, (layer) => {
             layer.do_objectID = uuid();
             if (layer.style) layer.style.do_objectID = uuid();
-
-            if (layer._class === 'artboard') {
-              layer.layers = layer.layers.map((innerLayer) => {
-                innerLayer.do_objectID = uuid();
-                if (innerLayer.style) innerLayer.style.do_objectID = uuid();
-
-                return innerLayer;
-              });
-            }
-
-            return layer;
           });
 
           return page;
@@ -416,9 +400,6 @@ export function reducer(
         };
 
         pages.push(duplicatePage);
-
-        state.sketch.pages = pages;
-        state.sketch.user = user;
         state.selectedPage = duplicatePage.do_objectID;
       });
     }
@@ -433,10 +414,7 @@ export function reducer(
         delete user[page.do_objectID];
         pages.splice(pageIndex, 1);
 
-        state.sketch.pages = pages;
-        state.sketch.user = user;
-
-        const newIndex = pageIndex - 1 > 0 ? pageIndex - 1 : 0;
+        const newIndex = Math.max(pageIndex - 1, 0);
         state.selectedPage = pages[newIndex].do_objectID;
       });
     }
