@@ -1139,9 +1139,12 @@ export function reducer(
 
         array.forEach((object: Sketch.Swatch) => {
           if (!ids.includes(object.do_objectID)) return;
-          const name = object.name.split('/').pop() || '';
+          const values = object.name.split('/');
 
-          const group = value ? value + '/' : '';
+          const name = values.pop() || '';
+          const prevGroup = values.length ? values.join('/') + '/' : '';
+
+          const group = value ? prevGroup + value + '/' : '';
           object.name = group + name;
         });
         state.selectedGroupSwatch = value || '';
