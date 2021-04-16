@@ -1,14 +1,17 @@
 import produce from 'immer';
 import { ApplicationState, Action, reducer } from './application';
+import { createInitialInteractionState } from './interaction';
 
 export type HistoryState = {
   past: Array<ApplicationState>;
-  previous?: ApplicationState;
   present: ApplicationState;
   future: Array<ApplicationState>;
+  timestamp?: number;
 };
 
 export type HistoryAction = [type: 'undo'] | [type: 'redo'] | Action;
+
+const FILE_CHANGED_TIMEOUT = 300;
 
 export function historyReducer(state: HistoryState, action: HistoryAction) {
   switch (action[0]) {
@@ -35,15 +38,24 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
     default:
       const currentPresent = state.present;
       return produce(state, (state) => {
-        const incomingPresent = reducer(currentPresent, action);
-        if (
+        const newPresent = reducer(currentPresent, action);
+        const newTimestamp = Date.now();
+        const sketchFileChanged =
           JSON.stringify(currentPresent.sketch) !==
-          JSON.stringify(incomingPresent.sketch)
+          JSON.stringify(newPresent.sketch);
+        if (
+          sketchFileChanged &&
+          state.timestamp &&
+          newTimestamp - state.timestamp > FILE_CHANGED_TIMEOUT
         ) {
-          state.past.push(currentPresent);
+          state.past.push({
+            ...currentPresent,
+            interactionState: createInitialInteractionState(),
+          });
           state.future = [];
         }
-        state.present = incomingPresent;
+        state.timestamp = newTimestamp;
+        state.present = newPresent;
       });
   }
 }
