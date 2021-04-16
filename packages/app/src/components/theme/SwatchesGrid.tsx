@@ -9,6 +9,7 @@ import ColorSwatch from './ColorSwatch';
 interface Props {
   swatches: Sketch.Swatch[];
   selectedSwatchIds: string[];
+  onDeleteSwatch: () => void;
   onGroupSwatch: (id: string[], name?: string) => void;
   onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
 }
@@ -27,6 +28,7 @@ export default memo(function SwatchesGrid({
   swatches,
   selectedSwatchIds,
   onGroupSwatch,
+  onDeleteSwatch,
   onSelectSwatch,
 }: Props) {
   const swatchesGrouped = useMemo(() => {
@@ -61,7 +63,7 @@ export default memo(function SwatchesGrid({
     (value: MenuItemType) => {
       switch (value) {
         case 'delete':
-          onSelectSwatch();
+          onDeleteSwatch();
           break;
         case 'group': {
           const groupName = prompt('Group Name');
@@ -75,7 +77,7 @@ export default memo(function SwatchesGrid({
           break;
       }
     },
-    [onSelectSwatch, onGroupSwatch, selectedSwatchIds],
+    [onSelectSwatch, onGroupSwatch, onDeleteSwatch, selectedSwatchIds],
   );
 
   const handleOnContextMenu = useCallback(
