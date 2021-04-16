@@ -191,10 +191,10 @@ function GridViewSectionHeader({ title }: GridViewSectionHeaderProps) {
       {groupedTitle.map((title, index) => {
         const lastText = index === groupedTitle.length - 1;
         return (
-          <>
+          <React.Fragment key={index}>
             <SectionTitle last={lastText}>{title}</SectionTitle>
             {!lastText && <SectionTitle> / </SectionTitle>}
-          </>
+          </React.Fragment>
         );
       })}
       <Spacer.Vertical size={8} />

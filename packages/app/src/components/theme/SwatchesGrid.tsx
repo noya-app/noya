@@ -88,11 +88,11 @@ export default memo(function SwatchesGrid({
 
   return (
     <GridView.Root onClick={() => onSelectSwatch(undefined, 'replace')}>
-      {swatchesGrouped.map((group) => {
+      {swatchesGrouped.map((group, index) => {
         const sortedSwatches = sortArray(group.items, 'name');
 
         return (
-          <Fragment key={group.full}>
+          <Fragment key={index}>
             {group.title && <GridView.SectionHeader title={group.title} />}
             <GridView.Section>
               {sortedSwatches.map((item) => {
