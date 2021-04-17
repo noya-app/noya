@@ -30,6 +30,11 @@ export const useRawApplicationState = (): ApplicationStateContextValue => {
   return value;
 };
 
+type WrappedApplicationState = ApplicationState & {
+  undoDisabled: boolean;
+  redoDisabled: boolean;
+};
+
 /**
  * Get the application state, and a dispatch function to modify it.
  *
@@ -37,7 +42,7 @@ export const useRawApplicationState = (): ApplicationStateContextValue => {
  * should instead be passed their data via props.
  */
 export const useApplicationState = (): [
-  ApplicationState & { undoDisabled: boolean; redoDisabled: boolean },
+  WrappedApplicationState,
   Dispatcher,
 ] => {
   const value = useRawApplicationState();
@@ -62,10 +67,7 @@ export const useApplicationState = (): [
     [dispatch, trigger],
   );
 
-  const wrapped: [
-    ApplicationState & { undoDisabled: boolean; redoDisabled: boolean },
-    Dispatcher,
-  ] = useMemo(() => {
+  const wrapped: [WrappedApplicationState, Dispatcher] = useMemo(() => {
     return [
       {
         ...state.present,

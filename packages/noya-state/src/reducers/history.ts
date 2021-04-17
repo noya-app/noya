@@ -2,7 +2,7 @@ import produce from 'immer';
 import { ApplicationState, Action, reducer } from './application';
 import { createInitialInteractionState } from './interaction';
 
-type HistoryEntry = {
+export type HistoryEntry = {
   actionType: Action[0];
   timestamp: number;
   state: ApplicationState;
