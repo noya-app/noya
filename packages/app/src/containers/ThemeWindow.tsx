@@ -53,6 +53,7 @@ const Swatches = memo(function Swatches() {
     <SwatchesGrid
       swatches={filterSwatches}
       selectedSwatchIds={state.selectedSwatchIds}
+      onDeleteSwatch={() => {}}
       onGroupSwatch={useCallback(
         (id: string[], name?: string) => {
           dispatch('groupSwatches', id, name);

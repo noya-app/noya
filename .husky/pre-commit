@@ -2,3 +2,6 @@
 . "$(dirname "$0")/_/husky.sh"
 
 npm run lint-staged
+
+echo "\nChecking TypeScript types...\n"
+npx tsc --noEmit
