@@ -5,3 +5,4 @@ export * from './zip';
 export * from './clamp';
 export * from './sum';
 export * from './windowsOf';
+export * as delimitedPath from './delimitedPath';
