@@ -4,7 +4,27 @@ import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { ContextMenu, GridView, sketchColorToRgba } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
 import { memo, useMemo, useCallback, Fragment } from 'react';
+import { SwatchGroup, createSwatchTree } from '../../utils/createSwatchTree';
+import { sortBy } from 'noya-utils';
 import ColorSwatch from './ColorSwatch';
+
+function flatten(
+  swatch: SwatchGroup,
+  parent: string,
+): {
+  path: string;
+  swatches: Sketch.Swatch[];
+}[] {
+  const path = (parent ? parent + '/' : '') + swatch.name;
+
+  return Array.prototype.concat.apply(
+    {
+      path: path,
+      swatches: swatch.swatches,
+    },
+    swatch.children.map((x) => flatten(x, path)),
+  );
+}
 
 interface Props {
   swatches: Sketch.Swatch[];
@@ -13,14 +33,6 @@ interface Props {
   onGroupSwatch: (id: string[], name?: string) => void;
   onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
 }
-
-const sortArray = (array: any[], key: string) =>
-  [...array].sort((a, b) => {
-    const aName = a[key].toUpperCase();
-    const bName = b[key].toUpperCase();
-
-    return aName > bName ? 1 : aName < bName ? -1 : 0;
-  });
 
 type MenuItemType = 'delete' | 'group' | 'ungroup';
 
@@ -31,24 +43,6 @@ export default memo(function SwatchesGrid({
   onDeleteSwatch,
   onSelectSwatch,
 }: Props) {
-  const swatchesGrouped = useMemo(() => {
-    const group: { title: string; items: Sketch.Swatch[] }[] = [];
-    const indexes: { [key: string]: number } = {};
-
-    swatches.forEach((swatch) => {
-      const groupTitle = swatch.name.split('/').slice(0, -1).join('/');
-
-      if (!(groupTitle in indexes)) {
-        indexes[groupTitle] = group.length;
-        group.push({ title: groupTitle, items: [] });
-      }
-
-      group[indexes[groupTitle]].items.push(swatch);
-    });
-
-    return sortArray(group, 'title');
-  }, [swatches]);
-
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'delete', title: 'Delete' },
@@ -58,7 +52,7 @@ export default memo(function SwatchesGrid({
     ],
     [],
   );
-  //Handle tree view sorting correctly
+
   const handleSelectMenuItem = useCallback(
     (value: MenuItemType) => {
       switch (value) {
@@ -88,14 +82,25 @@ export default memo(function SwatchesGrid({
     [selectedSwatchIds, onSelectSwatch],
   );
 
+  const flatSwatchGroup = useMemo(
+    () =>
+      sortBy(
+        flatten(createSwatchTree(swatches), '').filter(
+          (group) => group.swatches.length,
+        ),
+        'path',
+      ),
+    [swatches],
+  );
+
   return (
     <GridView.Root onClick={() => onSelectSwatch(undefined, 'replace')}>
-      {swatchesGrouped.map((group, index) => {
-        const sortedSwatches = sortArray(group.items, 'name');
+      {flatSwatchGroup.map((group, index) => {
+        const sortedSwatches = sortBy(group.swatches, 'name');
 
         return (
           <Fragment key={index}>
-            {group.title && <GridView.SectionHeader title={group.title} />}
+            {group.path && <GridView.SectionHeader title={group.path} />}
             <GridView.Section>
               {sortedSwatches.map((item) => {
                 const color = sketchColorToRgba(item.value);

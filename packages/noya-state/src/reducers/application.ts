@@ -4,7 +4,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
-import { sum } from 'noya-utils';
+import { sum, delimitedPath } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { transformRect, createBounds, normalizeRect } from 'noya-geometry';
 import * as Layers from '../layers';
@@ -997,6 +997,7 @@ export function reducer(
     case 'setThemeStyleName':
     case 'setSwatchName': {
       const [, id, name] = action;
+      const { dirname } = delimitedPath;
 
       const ids = typeof id === 'string' ? [id] : id;
 
@@ -1008,10 +1009,9 @@ export function reducer(
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (!ids.includes(object.do_objectID)) return;
-          const group = object.name.split('/').slice(0, -1).join('/');
 
-          const groupName = group ? group + '/' : '';
-          object.name = groupName + name;
+          const group = dirname(object.name);
+          object.name = (group ? group + '/' : '') + name;
         });
       });
     }
@@ -1133,18 +1133,20 @@ export function reducer(
       const [, id, value] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
+      const { basename, dirname } = delimitedPath;
 
       return produce(state, (state) => {
         const array = state.sketch.document.sharedSwatches?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch) => {
           if (!ids.includes(object.do_objectID)) return;
-          const values = object.name.split('/');
 
-          const name = values.pop() || '';
-          const prevGroup = values.length ? values.join('/') + '/' : '';
+          const prevGroup = dirname(object.name);
+          const name = basename(object.name);
 
-          const group = value ? prevGroup + value + '/' : '';
+          const group = value
+            ? (prevGroup ? prevGroup + '/' : '') + value + '/'
+            : '';
           object.name = group + name;
         });
         state.selectedGroupSwatch = value || '';

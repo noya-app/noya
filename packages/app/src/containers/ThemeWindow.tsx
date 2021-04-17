@@ -45,7 +45,7 @@ const Swatches = memo(function Swatches() {
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
 
   const filterSwatches = useMemo(
-    () => [...swatches].filter((swatch) => swatch.name.includes(selectedGroup)),
+    () => swatches.filter((swatch) => swatch.name.startsWith(selectedGroup)),
     [swatches, selectedGroup],
   );
 
@@ -53,13 +53,15 @@ const Swatches = memo(function Swatches() {
     <SwatchesGrid
       swatches={filterSwatches}
       selectedSwatchIds={state.selectedSwatchIds}
-      onDeleteSwatch={() => {}}
       onGroupSwatch={useCallback(
         (id: string[], name?: string) => {
           dispatch('groupSwatches', id, name);
         },
         [dispatch],
       )}
+      onDeleteSwatch={useCallback(() => {
+        dispatch('removeSwatch');
+      }, [dispatch])}
       onSelectSwatch={useCallback(
         (id, type) => {
           dispatch('selectSwatch', id, type);
