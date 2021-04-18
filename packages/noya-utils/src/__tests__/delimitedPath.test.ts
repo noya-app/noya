@@ -1,6 +1,6 @@
 import { delimitedPath } from '../index';
 
-const { basename, dirname } = delimitedPath;
+const { basename, dirname, join } = delimitedPath;
 
 test('basename', () => {
   expect(basename('foo')).toEqual('foo');
@@ -20,4 +20,14 @@ test('dirname', () => {
   expect(dirname('')).toEqual('');
   expect(dirname('/')).toEqual('');
   expect(dirname('bar/')).toEqual('bar');
+});
+
+test('join', () => {
+  expect(join(['foo'])).toEqual('foo');
+  expect(join(['bar', 'foo'])).toEqual('bar/foo');
+  expect(join(['bar', 'baz', 'foo'])).toEqual('bar/baz/foo');
+
+  expect(join([''])).toEqual('');
+  expect(join(['bar', '', 'foo'])).toEqual('bar/foo');
+  expect(join(['bar', undefined, 'foo'])).toEqual('bar/foo');
 });
