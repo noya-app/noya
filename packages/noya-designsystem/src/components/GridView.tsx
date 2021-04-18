@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import styled from 'styled-components';
+import withSeparatorElements from '../utils/withSeparatorElements';
 import { Spacer, ContextMenu, Divider } from '..';
 
 const Grid = styled.div(({ theme }) => ({
@@ -153,8 +154,8 @@ const GridViewItem = forwardRef(function GridViewItem<
 });
 
 interface GridViewRootProps {
-  children?: ReactNode;
-  onClick?: () => void;
+  children: ReactNode;
+  onClick: () => void;
 }
 
 function GridViewRoot({ children, onClick }: GridViewRootProps) {
@@ -179,24 +180,19 @@ function GridViewSection({ children }: { children?: ReactNode }) {
   return <Grid>{children}</Grid>;
 }
 
-interface GridViewSectionHeaderProps {
-  title: string;
-}
-
-function GridViewSectionHeader({ title }: GridViewSectionHeaderProps) {
-  const groupedTitle = title.split('/');
+function GridViewSectionHeader({ title }: { title: string }) {
+  const grouped = title.split('/');
 
   return (
     <SectionHeaderContainer>
-      {groupedTitle.map((title, index) => {
-        const lastText = index === groupedTitle.length - 1;
-        return (
-          <>
-            <SectionTitle last={lastText}>{title}</SectionTitle>
-            {!lastText && <SectionTitle> / </SectionTitle>}
-          </>
-        );
-      })}
+      {withSeparatorElements(
+        grouped.map((title, index) => (
+          <SectionTitle last={index === grouped.length - 1}>
+            {title}
+          </SectionTitle>
+        )),
+        <SectionTitle> / </SectionTitle>,
+      )}
       <Spacer.Vertical size={8} />
       <Divider />
     </SectionHeaderContainer>

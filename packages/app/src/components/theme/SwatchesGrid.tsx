@@ -4,22 +4,36 @@ import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { ContextMenu, GridView, sketchColorToRgba } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
 import { memo, useMemo, useCallback, Fragment } from 'react';
+import { SwatchGroup, createSwatchTree } from '../../utils/createSwatchTree';
+import { sortBy } from 'noya-utils';
 import ColorSwatch from './ColorSwatch';
+import { delimitedPath } from 'noya-utils';
+
+function flatten(
+  swatchGroup: SwatchGroup,
+  parent: string,
+): {
+  path: string;
+  swatches: Sketch.Swatch[];
+}[] {
+  const path = (parent ? parent + '/' : '') + swatchGroup.name;
+
+  return [
+    {
+      path: path,
+      swatches: swatchGroup.swatches,
+    },
+    ...swatchGroup.children.flatMap((x) => flatten(x, path)),
+  ];
+}
 
 interface Props {
   swatches: Sketch.Swatch[];
   selectedSwatchIds: string[];
+  onDeleteSwatch: () => void;
   onGroupSwatch: (id: string[], name?: string) => void;
   onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
 }
-
-const sortArray = (array: any[], key: string) =>
-  [...array].sort((a, b) => {
-    const aName = a[key].toUpperCase();
-    const bName = b[key].toUpperCase();
-
-    return aName > bName ? 1 : aName < bName ? -1 : 0;
-  });
 
 type MenuItemType = 'delete' | 'group' | 'ungroup';
 
@@ -27,25 +41,10 @@ export default memo(function SwatchesGrid({
   swatches,
   selectedSwatchIds,
   onGroupSwatch,
+  onDeleteSwatch,
   onSelectSwatch,
 }: Props) {
-  const swatchesGrouped = useMemo(() => {
-    const group: { title: string; items: Sketch.Swatch[] }[] = [];
-    const indexes: { [key: string]: number } = {};
-
-    swatches.forEach((swatch) => {
-      const groupTitle = swatch.name.split('/').slice(0, -1).join('/');
-
-      if (!(groupTitle in indexes)) {
-        indexes[groupTitle] = group.length;
-        group.push({ title: groupTitle, items: [] });
-      }
-
-      group[indexes[groupTitle]].items.push(swatch);
-    });
-
-    return sortArray(group, 'title');
-  }, [swatches]);
+  const { basename } = delimitedPath;
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
@@ -56,12 +55,12 @@ export default memo(function SwatchesGrid({
     ],
     [],
   );
-  //Handle tree view sorting correctly
+
   const handleSelectMenuItem = useCallback(
     (value: MenuItemType) => {
       switch (value) {
         case 'delete':
-          onSelectSwatch();
+          onDeleteSwatch();
           break;
         case 'group': {
           const groupName = prompt('Group Name');
@@ -75,57 +74,63 @@ export default memo(function SwatchesGrid({
           break;
       }
     },
-    [onSelectSwatch, onGroupSwatch, selectedSwatchIds],
+    [onSelectSwatch, onGroupSwatch, onDeleteSwatch, selectedSwatchIds],
   );
 
   const handleOnContextMenu = useCallback(
     (id: string) => {
-      if (selectedSwatchIds.length && selectedSwatchIds.includes(id)) return;
+      if (selectedSwatchIds.includes(id)) return;
       onSelectSwatch(id);
     },
     [selectedSwatchIds, onSelectSwatch],
   );
 
+  const flatSwatchGroup = useMemo(
+    () =>
+      sortBy(
+        flatten(createSwatchTree(swatches), '').filter(
+          (group) => group.swatches.length,
+        ),
+        'path',
+      ),
+    [swatches],
+  );
+
   return (
     <GridView.Root onClick={() => onSelectSwatch(undefined, 'replace')}>
-      {swatchesGrouped.map((group) => {
-        const sortedSwatches = sortArray(group.items, 'name');
+      {flatSwatchGroup.map((group, index) => (
+        <Fragment key={index}>
+          {group.path && <GridView.SectionHeader title={group.path} />}
+          <GridView.Section>
+            {group.swatches.map((item: Sketch.Swatch) => {
+              const color = sketchColorToRgba(item.value);
+              const hex = rgbaToHex(color);
+              const alphaPercent = `${Math.round(color.a * 100)}%`;
 
-        return (
-          <Fragment key={group.full}>
-            {group.title && <GridView.SectionHeader title={group.title} />}
-            <GridView.Section>
-              {sortedSwatches.map((item) => {
-                const color = sketchColorToRgba(item.value);
-                const hex = rgbaToHex(color);
-                const alphaPercent = `${Math.round(color.a * 100)}%`;
-                const name = item.name.split('/').pop() || '';
-
-                return (
-                  <GridView.Item<MenuItemType>
-                    id={item.do_objectID}
-                    key={item.do_objectID}
-                    title={name}
-                    subtitle={`${hex} — ${alphaPercent}`}
-                    selected={selectedSwatchIds.includes(item.do_objectID)}
-                    onClick={(event: React.MouseEvent) =>
-                      onSelectSwatch(
-                        item.do_objectID,
-                        event.shiftKey ? 'intersection' : 'replace',
-                      )
-                    }
-                    onContextMenu={() => handleOnContextMenu(item.do_objectID)}
-                    menuItems={menuItems}
-                    onSelectMenuItem={handleSelectMenuItem}
-                  >
-                    <ColorSwatch value={item.value} />
-                  </GridView.Item>
-                );
-              })}
-            </GridView.Section>
-          </Fragment>
-        );
-      })}
+              return (
+                <GridView.Item<MenuItemType>
+                  id={item.do_objectID}
+                  key={item.do_objectID}
+                  title={basename(item.name)}
+                  subtitle={`${hex} — ${alphaPercent}`}
+                  selected={selectedSwatchIds.includes(item.do_objectID)}
+                  onClick={(event: React.MouseEvent) =>
+                    onSelectSwatch(
+                      item.do_objectID,
+                      event.shiftKey ? 'intersection' : 'replace',
+                    )
+                  }
+                  onContextMenu={() => handleOnContextMenu(item.do_objectID)}
+                  menuItems={menuItems}
+                  onSelectMenuItem={handleSelectMenuItem}
+                >
+                  <ColorSwatch value={item.value} />
+                </GridView.Item>
+              );
+            })}
+          </GridView.Section>
+        </Fragment>
+      ))}
     </GridView.Root>
   );
 });
