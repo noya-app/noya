@@ -57,7 +57,7 @@ export type ApplicationState = {
   selectedObjects: string[];
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
-  selectedGroupSwatch: string;
+  selectedSwatchGroup: string;
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
@@ -1011,7 +1011,7 @@ export function reducer(
           if (!ids.includes(object.do_objectID)) return;
 
           const group = dirname(object.name);
-          object.name = (group ? group + '/' : '') + name;
+          object.name = [group, name].filter((x) => !!x).join('/');
         });
       });
     }
@@ -1126,7 +1126,7 @@ export function reducer(
     case 'setSelectedSwatchGroup': {
       const [, value] = action;
       return produce(state, (state) => {
-        state.selectedGroupSwatch = value;
+        state.selectedSwatchGroup = value;
       });
     }
     case 'groupSwatches': {
@@ -1144,12 +1144,11 @@ export function reducer(
           const prevGroup = dirname(object.name);
           const name = basename(object.name);
 
-          const group = value
-            ? (prevGroup ? prevGroup + '/' : '') + value + '/'
-            : '';
-          object.name = group + name;
+          const newName = [prevGroup, value, name].filter((x) => !!x).join('/');
+          object.name = newName;
         });
-        state.selectedGroupSwatch = value || '';
+
+        state.selectedSwatchGroup = '';
       });
     }
     default:
@@ -1186,7 +1185,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
-    selectedGroupSwatch: '',
+    selectedSwatchGroup: '',
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },

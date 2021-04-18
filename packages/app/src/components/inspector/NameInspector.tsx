@@ -1,5 +1,4 @@
 import { InputField, Spacer } from 'noya-designsystem';
-import { delimitedPath } from 'noya-utils';
 import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -9,11 +8,10 @@ interface Props {
 }
 
 export default memo(function NameInspector({ names, onNameChange }: Props) {
-  const firstName = delimitedPath.basename(names[0]);
+  const firstName = names[0];
 
   const name =
-    names.length > 1 &&
-    !names.every((name: string) => delimitedPath.basename(name) === firstName)
+    names.length > 1 && !names.every((name: string) => name === firstName)
       ? undefined
       : firstName;
 

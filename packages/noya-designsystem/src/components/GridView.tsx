@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import styled from 'styled-components';
-import withSeparatorElements from '../../../app/src/utils/withSeparatorElements';
+import withSeparatorElements from '../utils/withSeparatorElements';
 import { Spacer, ContextMenu, Divider } from '..';
 
 const Grid = styled.div(({ theme }) => ({

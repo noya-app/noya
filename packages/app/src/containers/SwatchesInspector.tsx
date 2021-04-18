@@ -9,6 +9,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import NameInspector from '../components/inspector/NameInspector';
+import { delimitedPath } from 'noya-utils';
 
 const Container = styled.div(({ theme }) => ({
   display: 'flex',
@@ -55,7 +56,7 @@ export default memo(function SwatchesInspectors() {
   return (
     <>
       <NameInspector
-        names={selectedSwatches.map((v) => v.name)}
+        names={selectedSwatches.map((v) => delimitedPath.basename(v.name))}
         onNameChange={handleNameChange}
       />
       <Divider />

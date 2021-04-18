@@ -17,7 +17,6 @@ export function createSwatchTree(swatches: Sketch.Swatch[]): SwatchGroup {
     let group = root;
     while (pathComponents.length > 0) {
       const component = pathComponents.shift()!;
-      if (!group.children) continue;
 
       const existing = group.children.find((group) => group.name === component);
       if (existing) {

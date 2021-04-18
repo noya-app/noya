@@ -40,7 +40,7 @@ const LayerStyles = memo(function LayerStyles() {
 const Swatches = memo(function Swatches() {
   const [state, dispatch] = useApplicationState();
 
-  const selectedGroup = state.selectedGroupSwatch;
+  const selectedGroup = state.selectedSwatchGroup;
 
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
 

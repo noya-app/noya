@@ -48,7 +48,7 @@ export default memo(function SwatchesGroups() {
   const [state, dispatch] = useApplicationState();
 
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
-  const selectedGroup = state.selectedGroupSwatch;
+  const selectedGroup = state.selectedSwatchGroup;
 
   const flatSwatchGroup = useMemo(() => {
     const flat = flatten(createSwatchTree(swatches), '', -1);
