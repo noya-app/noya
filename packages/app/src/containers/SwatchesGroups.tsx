@@ -28,19 +28,19 @@ type SwatchTitles = {
 };
 
 function flatten(
-  SwatchGroup: SwatchGroup,
+  swatchGroup: SwatchGroup,
   parent: string,
   depth: number,
 ): SwatchTitles[] {
-  const path = (parent ? parent + '/' : '') + SwatchGroup.name;
+  const path = (parent ? parent + '/' : '') + swatchGroup.name;
 
   return [
     {
-      name: SwatchGroup.name,
+      name: swatchGroup.name,
       path: path,
       depth: depth,
     },
-    ...SwatchGroup.children.flatMap((x) => flatten(x, path, depth + 1)),
+    ...swatchGroup.children.flatMap((x) => flatten(x, path, depth + 1)),
   ];
 }
 

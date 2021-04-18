@@ -10,20 +10,20 @@ import ColorSwatch from './ColorSwatch';
 import { delimitedPath } from 'noya-utils';
 
 function flatten(
-  SwatchGroup: SwatchGroup,
+  swatchGroup: SwatchGroup,
   parent: string,
 ): {
   path: string;
   swatches: Sketch.Swatch[];
 }[] {
-  const path = (parent ? parent + '/' : '') + SwatchGroup.name;
+  const path = (parent ? parent + '/' : '') + swatchGroup.name;
 
   return [
     {
       path: path,
-      swatches: SwatchGroup.swatches,
+      swatches: swatchGroup.swatches,
     },
-    ...SwatchGroup.children.flatMap((x) => flatten(x, path)),
+    ...swatchGroup.children.flatMap((x) => flatten(x, path)),
   ];
 }
 
