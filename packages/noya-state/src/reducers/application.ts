@@ -997,7 +997,6 @@ export function reducer(
     case 'setThemeStyleName':
     case 'setSwatchName': {
       const [, id, name] = action;
-      const { dirname } = delimitedPath;
 
       const ids = typeof id === 'string' ? [id] : id;
 
@@ -1010,8 +1009,9 @@ export function reducer(
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (!ids.includes(object.do_objectID)) return;
 
-          const group = dirname(object.name);
-          object.name = [group, name].filter((x) => !!x).join('/');
+          const group = delimitedPath.dirname(object.name);
+
+          object.name = delimitedPath.join([group, name]);
         });
       });
     }
@@ -1133,7 +1133,6 @@ export function reducer(
       const [, id, value] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
-      const { basename, dirname } = delimitedPath;
 
       return produce(state, (state) => {
         const array = state.sketch.document.sharedSwatches?.objects ?? [];
@@ -1141,10 +1140,10 @@ export function reducer(
         array.forEach((object: Sketch.Swatch) => {
           if (!ids.includes(object.do_objectID)) return;
 
-          const prevGroup = dirname(object.name);
-          const name = basename(object.name);
+          const prevGroup = delimitedPath.dirname(object.name);
+          const name = delimitedPath.basename(object.name);
+          const newName = delimitedPath.join([prevGroup, value, name]);
 
-          const newName = [prevGroup, value, name].filter((x) => !!x).join('/');
           object.name = newName;
         });
 
