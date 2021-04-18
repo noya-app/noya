@@ -18,13 +18,13 @@ function flatten(
 }[] {
   const path = (parent ? parent + '/' : '') + SwatchGroup.name;
 
-  return Array.prototype.concat.apply(
+  return [
     {
       path: path,
       swatches: SwatchGroup.swatches,
     },
-    SwatchGroup.children.map((x) => flatten(x, path)),
-  );
+    ...SwatchGroup.children.flatMap((x) => flatten(x, path)),
+  ];
 }
 
 interface Props {

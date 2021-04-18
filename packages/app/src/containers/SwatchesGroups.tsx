@@ -28,20 +28,20 @@ type SwatchTitles = {
 };
 
 function flatten(
-  swatch: SwatchGroup,
+  SwatchGroup: SwatchGroup,
   parent: string,
   depth: number,
 ): SwatchTitles[] {
-  const path = (parent ? parent + '/' : '') + swatch.name;
+  const path = (parent ? parent + '/' : '') + SwatchGroup.name;
 
-  return Array.prototype.concat.apply(
+  return [
     {
-      name: swatch.name,
+      name: SwatchGroup.name,
       path: path,
       depth: depth,
     },
-    swatch.children.map((x) => flatten(x, path, depth + 1)),
-  );
+    ...SwatchGroup.children.flatMap((x) => flatten(x, path, depth + 1)),
+  ];
 }
 
 export default memo(function SwatchesGroups() {
