@@ -1,15 +1,15 @@
-import {
-  useSelector,
-  useApplicationState,
-} from '../contexts/ApplicationStateContext';
-import { memo, useMemo, useCallback } from 'react';
 import { GroupIcon } from '@radix-ui/react-icons';
-import styled from 'styled-components';
 import { ListView, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import useShallowArray from '../hooks/useShallowArray';
-import { SwatchGroup, createSwatchTree } from '../utils/createSwatchTree';
 import { sortBy } from 'noya-utils';
+import { memo, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+import {
+  useApplicationState,
+  useSelector,
+} from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
+import { createThemeGroups } from '../utils/themeTree';
 
 const Container = styled.div(({ theme }) => ({
   height: '100%',
@@ -18,31 +18,8 @@ const Container = styled.div(({ theme }) => ({
 }));
 
 const Header = styled.div(({ theme }) => ({
-  fontWeight: 600,
+  fontWeight: 500,
 }));
-
-type SwatchTitles = {
-  name: string;
-  path: string;
-  depth: number;
-};
-
-function flatten(
-  swatchGroup: SwatchGroup,
-  parent: string,
-  depth: number,
-): SwatchTitles[] {
-  const path = (parent ? parent + '/' : '') + swatchGroup.name;
-
-  return [
-    {
-      name: swatchGroup.name,
-      path: path,
-      depth: depth,
-    },
-    ...swatchGroup.children.flatMap((x) => flatten(x, path, depth + 1)),
-  ];
-}
 
 export default memo(function SwatchesGroups() {
   const [state, dispatch] = useApplicationState();
@@ -50,11 +27,11 @@ export default memo(function SwatchesGroups() {
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
   const selectedGroup = state.selectedSwatchGroup;
 
-  const flatSwatchGroup = useMemo(() => {
-    const flat = flatten(createSwatchTree(swatches), '', -1);
-    flat.shift();
+  const groups = useMemo(() => {
+    const groups = createThemeGroups(swatches);
+    groups.shift();
 
-    return sortBy(flat, 'path');
+    return sortBy(groups, 'path');
   }, [swatches]);
 
   const handleClick = useCallback(
@@ -64,7 +41,7 @@ export default memo(function SwatchesGroups() {
 
   const groupElements = useMemo(
     () =>
-      flatSwatchGroup.map((group) => (
+      groups.map((group) => (
         <ListView.Row
           id={group.name}
           key={group.name}
@@ -77,18 +54,17 @@ export default memo(function SwatchesGroups() {
           {group.name}
         </ListView.Row>
       )),
-    [flatSwatchGroup, selectedGroup, handleClick],
+    [groups, selectedGroup, handleClick],
   );
 
   return (
     <Container>
       <ListView.Root>
         <ListView.Row
-          id={'All Color Variables'}
           onClick={() => handleClick('')}
           selected={selectedGroup === ''}
         >
-          <Header>{'All Color Variables'}</Header>
+          <Header>All Theme Colors</Header>
         </ListView.Row>
         {groupElements}
       </ListView.Root>

@@ -866,7 +866,7 @@ export function reducer(
         const swatch: Sketch.Swatch = {
           _class: 'swatch',
           do_objectID: uuid(),
-          name: 'New Color Variable',
+          name: 'New Theme Color',
           value: swatchColor,
         };
 
