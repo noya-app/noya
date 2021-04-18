@@ -47,27 +47,29 @@ export default memo(function LayerStylesGrid({
 
   return (
     <GridView.Root onClick={() => onSelectThemeStyle(undefined, 'replace')}>
-      {sortedStyles.map((item) => {
-        return (
-          <GridView.Item<MenuItemType>
-            id={item.do_objectID}
-            key={item.do_objectID}
-            title={item.name}
-            menuItems={menuItems}
-            selected={selectedThemeStyleIds.includes(item.do_objectID)}
-            onSelectMenuItem={handleSelectMenuItem}
-            onContextMenu={() => onSelectThemeStyle(item.do_objectID)}
-            onClick={(event: React.MouseEvent) =>
-              onSelectThemeStyle(
-                item.do_objectID,
-                event.shiftKey ? 'intersection' : 'replace',
-              )
-            }
-          >
-            <LayerStyle style={item.value} />
-          </GridView.Item>
-        );
-      })}
+      <GridView.Section>
+        {sortedStyles.map((item) => {
+          return (
+            <GridView.Item<MenuItemType>
+              id={item.do_objectID}
+              key={item.do_objectID}
+              title={item.name}
+              menuItems={menuItems}
+              selected={selectedThemeStyleIds.includes(item.do_objectID)}
+              onSelectMenuItem={handleSelectMenuItem}
+              onContextMenu={() => onSelectThemeStyle(item.do_objectID)}
+              onClick={(event: React.MouseEvent) =>
+                onSelectThemeStyle(
+                  item.do_objectID,
+                  event.shiftKey ? 'intersection' : 'replace',
+                )
+              }
+            >
+              <LayerStyle style={item.value} />
+            </GridView.Item>
+          );
+        })}
+      </GridView.Section>
     </GridView.Root>
   );
 });

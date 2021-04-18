@@ -1,9 +1,15 @@
-import { memo, ForwardedRef, forwardRef, ReactNode, useCallback } from 'react';
+import React, {
+  memo,
+  ForwardedRef,
+  forwardRef,
+  ReactNode,
+  useCallback,
+} from 'react';
 import styled from 'styled-components';
-import { Spacer, ContextMenu } from '..';
+import withSeparatorElements from '../utils/withSeparatorElements';
+import { Spacer, ContextMenu, Divider } from '..';
 
 const Grid = styled.div(({ theme }) => ({
-  flex: 1,
   color: theme.colors.text,
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, 250px)',
@@ -11,7 +17,6 @@ const Grid = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   gap: '20px',
   padding: '20px',
-  overflowY: 'auto',
 }));
 
 const ScrollArea = styled.div(({ theme }) => ({
@@ -25,6 +30,7 @@ const Container = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
   flexDirection: 'column',
+  overflowY: 'auto',
 }));
 
 const ItemContainer = styled.div<{ selected: boolean }>(
@@ -64,6 +70,22 @@ const ItemDescription = styled.span(({ theme }) => ({
   textOverflow: 'ellipsis',
 }));
 
+const SectionTitle = styled.span<{ last?: boolean }>(
+  ({ theme, last = false }) => ({
+    ...theme.textStyles.body,
+    color: last ? theme.colors.text : theme.colors.textMuted,
+    fontWeight: 500,
+    userSelect: 'none',
+    whiteSpace: 'pre',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+);
+
+const SectionHeaderContainer = styled.div(({ theme }) => ({
+  padding: '0 20px',
+}));
+
 interface ItemProps<MenuItemType extends string = string> {
   id: string;
   title: string;
@@ -76,7 +98,9 @@ interface ItemProps<MenuItemType extends string = string> {
   onContextMenu?: () => void;
 }
 
-const GridItem = forwardRef(function GridItem<MenuItemType extends string>(
+const GridViewItem = forwardRef(function GridViewItem<
+  MenuItemType extends string
+>(
   {
     id,
     title,
@@ -130,8 +154,8 @@ const GridItem = forwardRef(function GridItem<MenuItemType extends string>(
 });
 
 interface GridViewRootProps {
-  children?: ReactNode;
-  onClick?: () => void;
+  children: ReactNode;
+  onClick: () => void;
 }
 
 function GridViewRoot({ children, onClick }: GridViewRootProps) {
@@ -147,12 +171,35 @@ function GridViewRoot({ children, onClick }: GridViewRootProps) {
 
   return (
     <Container onClick={handleClick}>
-      <ScrollArea>
-        <Grid>{children}</Grid>
-      </ScrollArea>
+      <ScrollArea>{children}</ScrollArea>
     </Container>
   );
 }
 
+function GridViewSection({ children }: { children?: ReactNode }) {
+  return <Grid>{children}</Grid>;
+}
+
+function GridViewSectionHeader({ title }: { title: string }) {
+  const grouped = title.split('/');
+
+  return (
+    <SectionHeaderContainer>
+      {withSeparatorElements(
+        grouped.map((title, index) => (
+          <SectionTitle last={index === grouped.length - 1}>
+            {title}
+          </SectionTitle>
+        )),
+        <SectionTitle> / </SectionTitle>,
+      )}
+      <Spacer.Vertical size={8} />
+      <Divider />
+    </SectionHeaderContainer>
+  );
+}
+
 export const Root = memo(GridViewRoot);
-export const Item = memo(GridItem);
+export const Item = memo(GridViewItem);
+export const Section = memo(GridViewSection);
+export const SectionHeader = memo(GridViewSectionHeader);

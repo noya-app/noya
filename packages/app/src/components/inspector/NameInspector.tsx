@@ -11,7 +11,7 @@ export default memo(function NameInspector({ names, onNameChange }: Props) {
   const firstName = names[0];
 
   const name =
-    names.length > 1 && !names.every((v: string) => v === firstName)
+    names.length > 1 && !names.every((name: string) => name === firstName)
       ? undefined
       : firstName;
 
