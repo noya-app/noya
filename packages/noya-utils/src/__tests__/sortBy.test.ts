@@ -11,14 +11,10 @@ test('first key', () => {
         { name: 'Liam', last: 'Smith' },
         { name: 'Noah', last: 'Benjamin' },
         { name: 'Sophia', last: 'Brown' },
-        { name: 'Emma', last: 'Jones' },
-        { name: 'Ava', last: 'Davis' },
       ],
       'name',
     ),
   ).toEqual([
-    { name: 'Ava', last: 'Davis' },
-    { name: 'Emma', last: 'Jones' },
     { name: 'Liam', last: 'Smith' },
     { name: 'Noah', last: 'Benjamin' },
     { name: 'Sophia', last: 'Brown' },
@@ -29,10 +25,8 @@ test('second key', () => {
   expect(
     sortBy(
       [
-        { name: 'Liam', last: 'Smith' },
         { name: 'Noah', last: 'Benjamin' },
         { name: 'Sophia', last: 'Brown' },
-        { name: 'Emma', last: 'Jones' },
         { name: 'Ava', last: 'Davis' },
       ],
       'last',
@@ -41,8 +35,6 @@ test('second key', () => {
     { name: 'Noah', last: 'Benjamin' },
     { name: 'Sophia', last: 'Brown' },
     { name: 'Ava', last: 'Davis' },
-    { name: 'Emma', last: 'Jones' },
-    { name: 'Liam', last: 'Smith' },
   ]);
 });
 
@@ -64,22 +56,36 @@ test('same value', () => {
 });
 
 test('empty space', () => {
+  expect(sortBy([{ group: 'dogs' }, { group: '' }], 'group')).toEqual([
+    { group: '' },
+    { group: 'dogs' },
+  ]);
+});
+
+test('upper and lower case', () => {
   expect(
     sortBy(
-      [
-        { group: 'cloud', ammount: 9 },
-        { group: 'dogs', ammount: 5 },
-        { group: 'computer', ammount: 4 },
-        { group: '', ammount: 8 },
-        { group: 'square', ammount: 2 },
-      ],
+      [{ letter: 'B' }, { letter: 'a' }, { letter: 'A' }, { letter: 'b' }],
+      'letter',
+    ),
+  ).toEqual([
+    { letter: 'a' },
+    { letter: 'A' },
+    { letter: 'B' },
+    { letter: 'b' },
+  ]);
+});
+
+test('"/" usage', () => {
+  expect(
+    sortBy(
+      [{ group: 'B/a' }, { group: 'A/d' }, { group: 'B/c' }, { group: 'A/n' }],
       'group',
     ),
   ).toEqual([
-    { group: '', ammount: 8 },
-    { group: 'cloud', ammount: 9 },
-    { group: 'computer', ammount: 4 },
-    { group: 'dogs', ammount: 5 },
-    { group: 'square', ammount: 2 },
+    { group: 'A/d' },
+    { group: 'A/n' },
+    { group: 'B/a' },
+    { group: 'B/c' },
   ]);
 });
