@@ -17,12 +17,17 @@ const Container = styled.main(({ theme }) => ({
 
 const LayerStyles = memo(function LayerStyles() {
   const [state, dispatch] = useApplicationState();
+  const selectedGroup = state.selectedThemeStyleGroup;
 
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
 
+  const filterSwatches = useMemo(
+    () => sharedStyles.filter((style) => style.name.startsWith(selectedGroup)),
+    [sharedStyles, selectedGroup],
+  );
   return (
     <ThemeStylesGrid
-      sharedStyles={sharedStyles}
+      sharedStyles={filterSwatches}
       selectedThemeStyleIds={state.selectedLayerStyleIds}
       onGroupThemeStyle={useCallback(
         (id: string[], name?: string) => {

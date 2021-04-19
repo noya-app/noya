@@ -48,7 +48,6 @@ export type LayerHighlight = {
   precedence: LayerHighlightPrecedence;
 };
 
-//NOTE: The selected groups could be an object
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -1154,15 +1153,15 @@ export function reducer(
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (!ids.includes(object.do_objectID)) return;
-
-          const prevGroup = delimitedPath.dirname(object.name);
+          const prevGroup = value ? delimitedPath.dirname(object.name) : '';
           const name = delimitedPath.basename(object.name);
           const newName = delimitedPath.join([prevGroup, value, name]);
 
           object.name = newName;
         });
 
-        state.selectedSwatchGroup = '';
+        if (action[0] === 'groupSwatches') state.selectedSwatchGroup = '';
+        else state.selectedThemeStyleGroup = '';
       });
     }
     default:

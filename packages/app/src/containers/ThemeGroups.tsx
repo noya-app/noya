@@ -2,6 +2,7 @@ import { Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useSelector } from '../contexts/ApplicationStateContext';
 import SwatchesGroups from './SwatchesGroups';
+import ThemeStylesGroups from './ThemeStylesGroups';
 
 export default memo(function ThemeGroups() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
@@ -11,7 +12,7 @@ export default memo(function ThemeGroups() {
       case 'swatches':
         return <SwatchesGroups />;
       case 'layerStyles':
-        return <></>;
+        return <ThemeStylesGroups />;
     }
     return null;
   }, [tab]);
