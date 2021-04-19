@@ -4,7 +4,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import LayerStylesGrid from '../components/theme/LayerStylesGrid';
+import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
 import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
@@ -21,7 +21,7 @@ const LayerStyles = memo(function LayerStyles() {
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
 
   return (
-    <LayerStylesGrid
+    <ThemeStylesGrid
       sharedStyles={sharedStyles}
       selectedThemeStyleIds={state.selectedLayerStyleIds}
       onGroupThemeStyle={useCallback(

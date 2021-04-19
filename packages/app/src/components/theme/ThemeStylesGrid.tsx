@@ -5,7 +5,7 @@ import { SelectionType } from 'noya-state';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { createThemeGroups } from '../../utils/themeTree';
-import LayerStyle from './LayerStyle';
+import ThemeStyle from './ThemeStyle';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
@@ -17,7 +17,7 @@ interface Props {
 
 type MenuItemType = 'delete' | 'group' | 'ungroup';
 
-export default memo(function LayerStylesGrid({
+export default memo(function ThemeStylesGrid({
   sharedStyles,
   selectedThemeStyleIds,
   onGroupThemeStyle,
@@ -101,7 +101,7 @@ export default memo(function LayerStylesGrid({
                     )
                   }
                 >
-                  <LayerStyle style={item.value} />
+                  <ThemeStyle style={item.value} />
                 </GridView.Item>
               );
             })}
