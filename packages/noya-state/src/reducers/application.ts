@@ -4,7 +4,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
-import { sum, delimitedPath } from 'noya-utils';
+import { sum, getIncrementedName, delimitedPath } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { transformRect, createBounds, normalizeRect } from 'noya-geometry';
 import * as Layers from '../layers';
@@ -128,6 +128,7 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
+  | [type: 'duplicateColorSwatch', id: string[]]
   | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
   | [
       type: 'updateThemeStyle',
@@ -873,6 +874,33 @@ export function reducer(
         sharedSwatches.objects.push(swatch);
         state.sketch.document.sharedSwatches = sharedSwatches;
         state.selectedSwatchIds = [swatch.do_objectID];
+      });
+    }
+    case 'duplicateColorSwatch': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches ?? {
+          _class: 'swatchContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        sharedSwatches.objects.forEach((swatch: Sketch.Swatch) => {
+          if (!ids.includes(swatch.do_objectID)) return;
+          const swatchColor = swatch.value;
+
+          const newSwatch: Sketch.Swatch = {
+            _class: 'swatch',
+            do_objectID: uuid(),
+            name: getIncrementedName(swatch.name),
+            value: swatchColor,
+          };
+
+          sharedSwatches.objects.push(newSwatch);
+        });
+        state.sketch.document.sharedSwatches = sharedSwatches;
       });
     }
     case 'selectSwatch': {

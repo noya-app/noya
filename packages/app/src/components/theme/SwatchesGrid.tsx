@@ -14,9 +14,9 @@ interface Props {
   onDeleteSwatch: () => void;
   onGroupSwatch: (id: string[], name?: string) => void;
   onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
+  onDuplicateSwatch: (id: string[]) => void;
 }
-
-type MenuItemType = 'delete' | 'group' | 'ungroup';
+type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
 
 export default memo(function SwatchesGrid({
   swatches,
@@ -24,15 +24,17 @@ export default memo(function SwatchesGrid({
   onGroupSwatch,
   onDeleteSwatch,
   onSelectSwatch,
+  onDuplicateSwatch,
 }: Props) {
   const { basename } = delimitedPath;
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
-      { value: 'delete', title: 'Delete' },
-      ContextMenu.SEPARATOR_ITEM,
+      { value: 'duplicate', title: 'Duplicate' },
       { value: 'group', title: 'Group' },
       { value: 'ungroup', title: 'Ungroup' },
+      ContextMenu.SEPARATOR_ITEM,
+      { value: 'delete', title: 'Delete' },
     ],
     [],
   );
@@ -40,6 +42,9 @@ export default memo(function SwatchesGrid({
   const handleSelectMenuItem = useCallback(
     (value: MenuItemType) => {
       switch (value) {
+        case 'duplicate':
+          onDuplicateSwatch(selectedSwatchIds);
+          break;
         case 'delete':
           onDeleteSwatch();
           break;
@@ -55,7 +60,13 @@ export default memo(function SwatchesGrid({
           break;
       }
     },
-    [onSelectSwatch, onGroupSwatch, onDeleteSwatch, selectedSwatchIds],
+    [
+      onSelectSwatch,
+      onGroupSwatch,
+      onDeleteSwatch,
+      onDuplicateSwatch,
+      selectedSwatchIds,
+    ],
   );
 
   const handleOnContextMenu = useCallback(
