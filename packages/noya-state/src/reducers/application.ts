@@ -48,6 +48,7 @@ export type LayerHighlight = {
   precedence: LayerHighlightPrecedence;
 };
 
+//NOTE: The selected groups could be an object
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -58,6 +59,7 @@ export type ApplicationState = {
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedSwatchGroup: string;
+  selectedThemeStyleGroup: string;
   sketch: SketchFile;
   canvasSize: { width: number; height: number };
   canvasInsets: { left: number; right: number };
@@ -153,9 +155,15 @@ export type Action =
     ]
   | [type: 'removeSwatch']
   | [type: 'removeThemeStyle']
-  | [type: 'setSelectedSwatchGroup', value: string]
+  | [type: 'setSelectedSwatchGroup', groupId: string]
+  | [type: 'setSelectedThemeStyleGroup', groupId: string]
   | [
       type: 'groupSwatches',
+      swatchId: string | string[],
+      name: string | undefined,
+    ]
+  | [
+      type: 'groupThemeStyles',
       swatchId: string | string[],
       name: string | undefined,
     ]
@@ -1123,21 +1131,28 @@ export function reducer(
         );
       });
     }
-    case 'setSelectedSwatchGroup': {
-      const [, value] = action;
+    case 'setSelectedSwatchGroup':
+    case 'setSelectedThemeStyleGroup': {
+      const [, id] = action;
       return produce(state, (state) => {
-        state.selectedSwatchGroup = value;
+        if (action[0] === 'setSelectedSwatchGroup')
+          state.selectedSwatchGroup = id;
+        else state.selectedThemeStyleGroup = id;
       });
     }
-    case 'groupSwatches': {
+    case 'groupSwatches':
+    case 'groupThemeStyles': {
       const [, id, value] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (state) => {
-        const array = state.sketch.document.sharedSwatches?.objects ?? [];
+        const array =
+          action[0] === 'groupSwatches'
+            ? state.sketch.document.sharedSwatches?.objects ?? []
+            : state.sketch.document.layerStyles?.objects ?? [];
 
-        array.forEach((object: Sketch.Swatch) => {
+        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (!ids.includes(object.do_objectID)) return;
 
           const prevGroup = delimitedPath.dirname(object.name);
@@ -1185,6 +1200,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
     selectedSwatchGroup: '',
+    selectedThemeStyleGroup: '',
     highlightedLayer: undefined,
     sketch,
     canvasSize: { width: 0, height: 0 },

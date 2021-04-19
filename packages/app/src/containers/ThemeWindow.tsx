@@ -24,6 +24,12 @@ const LayerStyles = memo(function LayerStyles() {
     <LayerStylesGrid
       sharedStyles={sharedStyles}
       selectedThemeStyleIds={state.selectedLayerStyleIds}
+      onGroupThemeStyle={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupThemeStyles', id, name);
+        },
+        [dispatch],
+      )}
       onSelectThemeStyle={useCallback(
         (id, type) => {
           dispatch('selectThemeStyle', id, type);
