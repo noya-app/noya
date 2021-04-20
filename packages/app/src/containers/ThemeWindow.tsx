@@ -30,6 +30,10 @@ const LayerStyles = memo(function LayerStyles() {
         },
         [dispatch],
       )}
+      onDuplicateThemeStyle={useCallback(
+        (id: string[]) => dispatch('duplicateThemeStyle', id),
+        [dispatch],
+      )}
       onDeleteThemeStyle={useCallback(() => dispatch('removeThemeStyle'), [
         dispatch,
       ])}

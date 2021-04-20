@@ -10,15 +10,17 @@ interface Props {
   selectedThemeStyleIds: string[];
   onDeleteThemeStyle: (id?: string) => void;
   onSelectThemeStyle: (id?: string, selectionType?: SelectionType) => void;
+  onDuplicateThemeStyle: (id: string[]) => void;
 }
 
-type MenuItemType = 'delete';
+type MenuItemType = 'duplicate' | 'delete';
 
 export default memo(function LayerStylesGrid({
   sharedStyles,
   selectedThemeStyleIds,
   onDeleteThemeStyle,
   onSelectThemeStyle,
+  onDuplicateThemeStyle,
 }: Props) {
   const sortedStyles = useMemo(
     () =>
@@ -32,7 +34,10 @@ export default memo(function LayerStylesGrid({
   );
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [{ value: 'delete', title: 'Delete' }],
+    () => [
+      { value: 'duplicate', title: 'Duplicate' },
+      { value: 'delete', title: 'Delete' },
+    ],
     [],
   );
   const handleSelectMenuItem = useCallback(
@@ -40,9 +45,13 @@ export default memo(function LayerStylesGrid({
       switch (value) {
         case 'delete':
           onDeleteThemeStyle();
+          break;
+        case 'duplicate':
+          onDuplicateThemeStyle(selectedThemeStyleIds);
+          break;
       }
     },
-    [onDeleteThemeStyle],
+    [onDeleteThemeStyle, onDuplicateThemeStyle, selectedThemeStyleIds],
   );
 
   return (

@@ -128,13 +128,14 @@ export type Action =
       mode?: SetNumberMode,
     ]
   | [type: 'addColorSwatch']
-  | [type: 'duplicateColorSwatch', id: string[]]
   | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
       style: Sketch.Style | undefined,
     ]
+  | [type: 'duplicateColorSwatch', id: string[]]
+  | [type: 'duplicateThemeStyle', id: string[]]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -901,6 +902,36 @@ export function reducer(
           sharedSwatches.objects.push(newSwatch);
         });
         state.sketch.document.sharedSwatches = sharedSwatches;
+      });
+    }
+    case 'duplicateThemeStyle': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles ?? {
+          _class: 'sharedStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        layerStyles.objects.forEach((sharedStyle: Sketch.SharedStyle) => {
+          if (!ids.includes(sharedStyle.do_objectID)) return;
+
+          const newSharedStyle: Sketch.SharedStyle = {
+            _class: 'sharedStyle',
+            do_objectID: uuid(),
+            name: getIncrementedName(sharedStyle.name),
+            value: produce(sharedStyle.value, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            }),
+          };
+
+          layerStyles.objects.push(newSharedStyle);
+        });
+
+        state.sketch.document.layerStyles = layerStyles;
       });
     }
     case 'selectSwatch': {
