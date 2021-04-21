@@ -84,3 +84,24 @@ test('"/" usage', () => {
     { group: 'BB/a' },
   ]);
 });
+
+test('w/ number', () => {
+  expect(
+    sortBy(
+      [
+        { value: 'A' },
+        { value: 'A 2' },
+        { value: 'A 1' },
+        { value: 'A 4' },
+        { value: 'A 1' },
+      ],
+      'value',
+    ),
+  ).toEqual([
+    { value: 'A' },
+    { value: 'A 1' },
+    { value: 'A 1' },
+    { value: 'A 2' },
+    { value: 'A 4' },
+  ]);
+});
