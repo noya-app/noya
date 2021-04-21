@@ -4,7 +4,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import LayerStylesGrid from '../components/theme/LayerStylesGrid';
+import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
 import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
@@ -17,13 +17,24 @@ const Container = styled.main(({ theme }) => ({
 
 const LayerStyles = memo(function LayerStyles() {
   const [state, dispatch] = useApplicationState();
+  const selectedGroup = state.selectedThemeStyleGroup;
 
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
 
+  const filterSwatches = useMemo(
+    () => sharedStyles.filter((style) => style.name.startsWith(selectedGroup)),
+    [sharedStyles, selectedGroup],
+  );
   return (
-    <LayerStylesGrid
-      sharedStyles={sharedStyles}
+    <ThemeStylesGrid
+      sharedStyles={filterSwatches}
       selectedThemeStyleIds={state.selectedLayerStyleIds}
+      onGroupThemeStyle={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupThemeStyles', id, name);
+        },
+        [dispatch],
+      )}
       onSelectThemeStyle={useCallback(
         (id, type) => {
           dispatch('selectThemeStyle', id, type);

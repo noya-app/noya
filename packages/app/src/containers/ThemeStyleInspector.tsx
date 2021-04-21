@@ -12,6 +12,7 @@ import NameInspector from '../components/inspector/NameInspector';
 import OpacityInspector from './OpacityInspector';
 import BorderInspector from './BorderInspector';
 import ShadowInspector from './ShadowInspector';
+import { delimitedPath } from 'noya-utils';
 
 export default memo(function LayerStyleInspector() {
   const [, dispatch] = useApplicationState();
@@ -34,7 +35,7 @@ export default memo(function LayerStyleInspector() {
 
   const elements = [
     <NameInspector
-      names={selectedStyles.map((v) => v.name)}
+      names={selectedStyles.map((v) => delimitedPath.basename(v.name))}
       onNameChange={handleNameChange}
     />,
     <OpacityInspector />,
