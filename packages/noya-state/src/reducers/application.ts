@@ -23,6 +23,7 @@ import {
   getSelectedRect,
   getCurrentTab,
   findPageLayerIndexPaths,
+  visitColors,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -706,7 +707,6 @@ export function reducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ? [...action[1], page] : action[1],
       );
-
       return produce(state, (state) => {
         state.interactionState = interactionState;
 
@@ -907,10 +907,33 @@ export function reducer(
         const sharedSwatches =
           state.sketch.document.sharedSwatches?.objects ?? [];
 
+        const sharedStyles = state.sketch.document.layerStyles.objects;
+
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if (ids.includes(swatch.do_objectID)) {
-            swatch.value = color;
-          }
+          if (!ids.includes(swatch.do_objectID)) return;
+
+          swatch.value = color;
+
+          const changeColor = (c: Sketch.Color) => {
+            if (c.swatchID !== swatch.do_objectID) return;
+
+            c.alpha = color.alpha;
+            c.red = color.red;
+            c.blue = color.blue;
+            c.green = color.green;
+          };
+
+          state.sketch.pages.forEach((page) => {
+            Layers.visit(page, (layer) => {
+              if (!layer.style) return;
+              visitColors(layer.style, changeColor);
+            });
+          });
+
+          sharedStyles.forEach((sharedStyle) => {
+            if (!sharedStyle.value) return;
+            visitColors(sharedStyle.value, changeColor);
+          });
         });
       });
     }
