@@ -66,6 +66,19 @@ export type ApplicationState = {
   };
 };
 
+//This function should be moved
+function visitColors(
+  item: Sketch.AnyLayer | Sketch.SharedStyle,
+  f: (color: Sketch.Color) => void,
+): void {
+  const style = item._class === 'sharedStyle' ? item.value : item.style;
+
+  style?.fills?.forEach((fill) => f(fill.color));
+  style?.borders?.forEach((border) => f(border.color));
+  style?.shadows?.forEach((shadow) => f(shadow.color));
+  style?.fills?.forEach((fill) => f(fill.color));
+}
+
 export type SelectionType = 'replace' | 'intersection' | 'difference';
 
 export type Action =
@@ -706,7 +719,6 @@ export function reducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ? [...action[1], page] : action[1],
       );
-
       return produce(state, (state) => {
         state.interactionState = interactionState;
 
@@ -903,14 +915,43 @@ export function reducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
+      const layerIndexPaths = findPageLayerIndexPaths(
+        state,
+        (layer) => layer.do_objectID !== undefined,
+      );
+
       return produce(state, (state) => {
         const sharedSwatches =
           state.sketch.document.sharedSwatches?.objects ?? [];
+        const sharedStyles = state.sketch.document.layerStyles.objects;
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
-          if (ids.includes(swatch.do_objectID)) {
-            swatch.value = color;
-          }
+          if (!ids.includes(swatch.do_objectID)) return;
+
+          swatch.value = color;
+
+          const changeColor = (c: Sketch.Color) => {
+            if (!(c.swatchID === swatch.do_objectID)) return;
+
+            c.alpha = color.alpha;
+            c.red = color.red;
+            c.blue = color.blue;
+            c.green = color.green;
+          };
+
+          layerIndexPaths.forEach((layerPath) =>
+            accessPageLayers(
+              state,
+              layerPath.pageIndex,
+              layerPath.indexPaths,
+            ).forEach((layer) => {
+              visitColors(layer, changeColor);
+            }),
+          );
+
+          sharedStyles.forEach((sharedStyle) =>
+            visitColors(sharedStyle, changeColor),
+          );
         });
       });
     }
