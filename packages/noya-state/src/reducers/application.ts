@@ -873,7 +873,10 @@ export function reducer(
         const swatch: Sketch.Swatch = {
           _class: 'swatch',
           do_objectID: uuid(),
-          name: 'New Theme Color',
+          name: delimitedPath.join([
+            state.selectedSwatchGroup,
+            'New Theme Color',
+          ]),
           value: swatchColor,
         };
 
@@ -957,13 +960,15 @@ export function reducer(
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
-          name: name || 'New Layer Style',
+          name: delimitedPath.join([
+            state.selectedThemeStyleGroup,
+            name || 'New Layer Style',
+          ]),
           value: produce(style || Models.style, (style) => {
             style.do_objectID = uuid();
             return style;
           }),
         };
-
         layerStyles.objects.push(sharedStyle);
         state.sketch.document.layerStyles = layerStyles;
 
