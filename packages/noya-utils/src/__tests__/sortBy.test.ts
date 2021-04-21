@@ -1,40 +1,28 @@
 import { sortBy } from '../index';
 
+const names = [
+  { name: 'Liam', last: 'Smith' },
+  { name: 'Ava', last: 'Davis' },
+  { name: 'Sophia', last: 'Brown' },
+];
+
 test('empty array', () => {
   expect(sortBy([], '')).toEqual([]);
 });
 
 test('first key', () => {
-  expect(
-    sortBy(
-      [
-        { name: 'Liam', last: 'Smith' },
-        { name: 'Noah', last: 'Benjamin' },
-        { name: 'Sophia', last: 'Brown' },
-      ],
-      'name',
-    ),
-  ).toEqual([
+  expect(sortBy(names, 'name')).toEqual([
+    { name: 'Ava', last: 'Davis' },
     { name: 'Liam', last: 'Smith' },
-    { name: 'Noah', last: 'Benjamin' },
     { name: 'Sophia', last: 'Brown' },
   ]);
 });
 
 test('second key', () => {
-  expect(
-    sortBy(
-      [
-        { name: 'Noah', last: 'Benjamin' },
-        { name: 'Sophia', last: 'Brown' },
-        { name: 'Ava', last: 'Davis' },
-      ],
-      'last',
-    ),
-  ).toEqual([
-    { name: 'Noah', last: 'Benjamin' },
+  expect(sortBy(names, 'last')).toEqual([
     { name: 'Sophia', last: 'Brown' },
     { name: 'Ava', last: 'Davis' },
+    { name: 'Liam', last: 'Smith' },
   ]);
 });
 
@@ -79,13 +67,20 @@ test('upper and lower case', () => {
 test('"/" usage', () => {
   expect(
     sortBy(
-      [{ group: 'B/a' }, { group: 'A/d' }, { group: 'B/c' }, { group: 'A/n' }],
+      [
+        { group: 'B/a' },
+        { group: 'A/d' },
+        { group: 'A/n' },
+        { group: 'BB/a' },
+        { group: 'AA/b' },
+      ],
       'group',
     ),
   ).toEqual([
     { group: 'A/d' },
     { group: 'A/n' },
+    { group: 'AA/b' },
     { group: 'B/a' },
-    { group: 'B/c' },
+    { group: 'BB/a' },
   ]);
 });
