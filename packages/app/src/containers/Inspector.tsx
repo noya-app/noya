@@ -13,7 +13,7 @@ import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import FillInspector from './FillInspector';
-import LayerThemeInspector from './ThemeStyleInspector';
+import LayerThemeInspector from './LayerThemeInspector';
 import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
