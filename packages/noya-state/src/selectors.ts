@@ -173,7 +173,7 @@ export const getSelectedLayersWithFixedRadius = (
   ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
 };
 
-export const getSelectedColorSwatches = (
+export const getSelectedSwatches = (
   state: ApplicationState,
 ): Sketch.Swatch[] => {
   const sharedSwatches = getSharedSwatches(state);
