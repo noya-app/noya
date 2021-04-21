@@ -1,4 +1,4 @@
-const numberSuffixRegExp = /(.*?)(\s\d+)?$/;
+export const numberSuffixRegExp = /(.*?)(\s\d+)?$/;
 
 export function getIncrementedName(name: string): string {
   const [, prefix, number] = name.match(numberSuffixRegExp) || [];

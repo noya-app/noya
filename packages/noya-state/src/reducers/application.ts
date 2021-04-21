@@ -4,7 +4,12 @@ import { WritableDraft } from 'immer/dist/internal';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
-import { sum, getIncrementedName, delimitedPath } from 'noya-utils';
+import {
+  sum,
+  numberSuffixRegExp,
+  getIncrementedName,
+  delimitedPath,
+} from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { transformRect, createBounds, normalizeRect } from 'noya-geometry';
 import * as Layers from '../layers';
@@ -892,10 +897,17 @@ export function reducer(
           if (!ids.includes(swatch.do_objectID)) return;
           const swatchColor = swatch.value;
 
+          const lastName = sharedSwatches.objects
+            .filter((s) => {
+              const [, prefix] = s.name.match(numberSuffixRegExp) || [];
+              return s.name.startsWith(prefix);
+            })
+            .pop()?.name;
+
           const newSwatch: Sketch.Swatch = {
             _class: 'swatch',
             do_objectID: uuid(),
-            name: getIncrementedName(swatch.name),
+            name: getIncrementedName(lastName || swatch.name),
             value: swatchColor,
           };
 
@@ -918,10 +930,17 @@ export function reducer(
         layerStyles.objects.forEach((sharedStyle: Sketch.SharedStyle) => {
           if (!ids.includes(sharedStyle.do_objectID)) return;
 
+          const lastName = layerStyles.objects
+            .filter((l) => {
+              const [, prefix] = l.name.match(numberSuffixRegExp) || [];
+              return l.name.startsWith(prefix);
+            })
+            .pop()?.name;
+
           const newSharedStyle: Sketch.SharedStyle = {
             _class: 'sharedStyle',
             do_objectID: uuid(),
-            name: getIncrementedName(sharedStyle.name),
+            name: getIncrementedName(lastName || sharedStyle.name),
             value: produce(sharedStyle.value, (style) => {
               style.do_objectID = uuid();
               return style;
