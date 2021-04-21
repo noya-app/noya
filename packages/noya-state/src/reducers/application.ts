@@ -4,7 +4,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import { SketchFile } from 'noya-sketch-file';
-import { sum, delimitedPath } from 'noya-utils';
+import { sum, getIncrementedName, delimitedPath } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { transformRect, createBounds, normalizeRect } from 'noya-geometry';
 import * as Layers from '../layers';
@@ -128,13 +128,15 @@ export type Action =
       alpha: number,
       mode?: SetNumberMode,
     ]
-  | [type: 'addColorSwatch']
+  | [type: 'addSwatch']
   | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
       style: Sketch.Style | undefined,
     ]
+  | [type: 'duplicateSwatch', id: string[]]
+  | [type: 'duplicateThemeStyle', id: string[]]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -854,7 +856,7 @@ export function reducer(
         }
       });
     }
-    case 'addColorSwatch': {
+    case 'addSwatch': {
       return produce(state, (state) => {
         const sharedSwatches = state.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
@@ -883,6 +885,69 @@ export function reducer(
         sharedSwatches.objects.push(swatch);
         state.sketch.document.sharedSwatches = sharedSwatches;
         state.selectedSwatchIds = [swatch.do_objectID];
+      });
+    }
+    case 'duplicateSwatch': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const sharedSwatches = state.sketch.document.sharedSwatches ?? {
+          _class: 'swatchContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        sharedSwatches.objects.forEach((swatch: Sketch.Swatch) => {
+          if (!ids.includes(swatch.do_objectID)) return;
+          const swatchColor = swatch.value;
+
+          const newSwatch: Sketch.Swatch = {
+            _class: 'swatch',
+            do_objectID: uuid(),
+            name: getIncrementedName(
+              swatch.name,
+              sharedSwatches.objects.map((s) => s.name),
+            ),
+            value: swatchColor,
+          };
+
+          sharedSwatches.objects.push(newSwatch);
+        });
+        state.sketch.document.sharedSwatches = sharedSwatches;
+      });
+    }
+    case 'duplicateThemeStyle': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (state) => {
+        const layerStyles = state.sketch.document.layerStyles ?? {
+          _class: 'sharedStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        layerStyles.objects.forEach((sharedStyle: Sketch.SharedStyle) => {
+          if (!ids.includes(sharedStyle.do_objectID)) return;
+
+          const newSharedStyle: Sketch.SharedStyle = {
+            _class: 'sharedStyle',
+            do_objectID: uuid(),
+            name: getIncrementedName(
+              sharedStyle.name,
+              layerStyles.objects.map((s) => s.name),
+            ),
+            value: produce(sharedStyle.value, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            }),
+          };
+
+          layerStyles.objects.push(newSharedStyle);
+        });
+
+        state.sketch.document.layerStyles = layerStyles;
       });
     }
     case 'selectSwatch': {

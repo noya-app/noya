@@ -13,9 +13,10 @@ interface Props {
   onGroupThemeStyle: (id: string[], name?: string) => void;
   onDeleteThemeStyle: (id?: string) => void;
   onSelectThemeStyle: (id?: string, selectionType?: SelectionType) => void;
+  onDuplicateThemeStyle: (id: string[]) => void;
 }
 
-type MenuItemType = 'delete' | 'group' | 'ungroup';
+type MenuItemType = 'duplicate' | 'delete' | 'group' | 'ungroup';
 
 export default memo(function ThemeStylesGrid({
   sharedStyles,
@@ -23,15 +24,17 @@ export default memo(function ThemeStylesGrid({
   onGroupThemeStyle,
   onDeleteThemeStyle,
   onSelectThemeStyle,
+  onDuplicateThemeStyle,
 }: Props) {
   const { basename } = delimitedPath;
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
-      { value: 'delete', title: 'Delete' },
-      ContextMenu.SEPARATOR_ITEM,
+      { value: 'duplicate', title: 'Duplicate' },
       { value: 'group', title: 'Group' },
       { value: 'ungroup', title: 'Ungroup' },
+      ContextMenu.SEPARATOR_ITEM,
+      { value: 'delete', title: 'Delete' },
     ],
     [],
   );
@@ -52,12 +55,16 @@ export default memo(function ThemeStylesGrid({
           onGroupThemeStyle(selectedThemeStyleIds);
           onSelectThemeStyle();
           break;
+        case 'duplicate':
+          onDuplicateThemeStyle(selectedThemeStyleIds);
+          break;
       }
     },
     [
       onDeleteThemeStyle,
       onSelectThemeStyle,
       onGroupThemeStyle,
+      onDuplicateThemeStyle,
       selectedThemeStyleIds,
     ],
   );

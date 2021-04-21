@@ -41,6 +41,10 @@ const LayerStyles = memo(function LayerStyles() {
         },
         [dispatch],
       )}
+      onDuplicateThemeStyle={useCallback(
+        (id: string[]) => dispatch('duplicateThemeStyle', id),
+        [dispatch],
+      )}
       onDeleteThemeStyle={useCallback(() => dispatch('removeThemeStyle'), [
         dispatch,
       ])}
@@ -68,6 +72,10 @@ const Swatches = memo(function Swatches() {
         (id: string[], name?: string) => {
           dispatch('groupSwatches', id, name);
         },
+        [dispatch],
+      )}
+      onDuplicateSwatch={useCallback(
+        (id: string[]) => dispatch('duplicateSwatch', id),
         [dispatch],
       )}
       onDeleteSwatch={useCallback(() => {
