@@ -21,7 +21,7 @@ export default memo(function SwatchesInspectors() {
   const [state, dispatch] = useApplicationState();
 
   const selectedSwatches = useShallowArray(
-    useSelector(Selectors.getSelectedColorSwatches),
+    useSelector(Selectors.getSelectedSwatches),
   );
   const ids = state.selectedSwatchIds;
   const colors = useMemo(() => selectedSwatches.map((swatch) => swatch.value), [

@@ -127,14 +127,14 @@ export type Action =
       alpha: number,
       mode?: SetNumberMode,
     ]
-  | [type: 'addColorSwatch']
+  | [type: 'addSwatch']
   | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
       style: Sketch.Style | undefined,
     ]
-  | [type: 'duplicateColorSwatch', id: string[]]
+  | [type: 'duplicateSwatch', id: string[]]
   | [type: 'duplicateThemeStyle', id: string[]]
   | [
       type: 'interaction',
@@ -849,7 +849,7 @@ export function reducer(
         }
       });
     }
-    case 'addColorSwatch': {
+    case 'addSwatch': {
       return produce(state, (state) => {
         const sharedSwatches = state.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
@@ -877,7 +877,7 @@ export function reducer(
         state.selectedSwatchIds = [swatch.do_objectID];
       });
     }
-    case 'duplicateColorSwatch': {
+    case 'duplicateSwatch': {
       const [, id] = action;
       const ids = typeof id === 'string' ? [id] : id;
 

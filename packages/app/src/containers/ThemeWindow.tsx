@@ -64,7 +64,7 @@ const Swatches = memo(function Swatches() {
         [dispatch],
       )}
       onDuplicateSwatch={useCallback(
-        (id: string[]) => dispatch('duplicateColorSwatch', id),
+        (id: string[]) => dispatch('duplicateSwatch', id),
         [dispatch],
       )}
       onDeleteSwatch={useCallback(() => {

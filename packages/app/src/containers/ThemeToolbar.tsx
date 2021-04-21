@@ -53,17 +53,13 @@ export default function SwatchesToolbar() {
     [dispatch],
   );
 
-  const addColorSwatch = useCallback(() => dispatch('addColorSwatch'), [
-    dispatch,
-  ]);
+  const addSwatch = useCallback(() => dispatch('addSwatch'), [dispatch]);
 
   const addLayerStyle = useCallback(() => dispatch('addThemeStyle'), [
     dispatch,
   ]);
 
-  const removeColorSwatch = useCallback(() => dispatch('removeSwatch'), [
-    dispatch,
-  ]);
+  const removeSwatch = useCallback(() => dispatch('removeSwatch'), [dispatch]);
 
   const removeThemeStyle = useCallback(() => dispatch('removeThemeStyle'), [
     dispatch,
@@ -72,24 +68,24 @@ export default function SwatchesToolbar() {
   const addComponent = useCallback(() => {
     switch (componentsTab) {
       case 'swatches':
-        addColorSwatch();
+        addSwatch();
         break;
       case 'layerStyles':
         addLayerStyle();
         break;
     }
-  }, [componentsTab, addColorSwatch, addLayerStyle]);
+  }, [componentsTab, addSwatch, addLayerStyle]);
 
   const removeComponent = useCallback(() => {
     switch (componentsTab) {
       case 'swatches':
-        removeColorSwatch();
+        removeSwatch();
         break;
       case 'layerStyles':
         removeThemeStyle();
         break;
     }
-  }, [componentsTab, removeColorSwatch, removeThemeStyle]);
+  }, [componentsTab, removeSwatch, removeThemeStyle]);
 
   return useMemo(
     () => (
