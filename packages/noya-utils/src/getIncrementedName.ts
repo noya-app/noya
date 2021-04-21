@@ -6,15 +6,14 @@ export function getIncrementedName(
 ): string {
   const [, prefix] = originalName.match(numberSuffixRegExp) || [];
 
-  const number = [originalName, ...names]
+  const numbers = [originalName, ...names]
     .filter((name) => name.startsWith(prefix))
     .map((name) => {
       const [, , number] = name.match(numberSuffixRegExp) || [];
       return parseInt(number || '1');
     })
-    .sort()
-    .pop();
+    .sort();
 
-  const parsedNumber = number ? number : 1;
-  return `${prefix} ${parsedNumber + 1}`;
+  const maxNumber = numbers[numbers.length - 1];
+  return `${prefix} ${maxNumber + 1}`;
 }
