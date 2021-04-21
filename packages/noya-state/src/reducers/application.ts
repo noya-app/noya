@@ -23,6 +23,7 @@ import {
   getSelectedRect,
   getCurrentTab,
   findPageLayerIndexPaths,
+  visitColors,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -65,19 +66,6 @@ export type ApplicationState = {
     showRulers: boolean;
   };
 };
-
-//This function should be moved
-function visitColors(
-  item: Sketch.AnyLayer | Sketch.SharedStyle,
-  f: (color: Sketch.Color) => void,
-): void {
-  const style = item._class === 'sharedStyle' ? item.value : item.style;
-
-  style?.fills?.forEach((fill) => f(fill.color));
-  style?.borders?.forEach((border) => f(border.color));
-  style?.shadows?.forEach((shadow) => f(shadow.color));
-  style?.fills?.forEach((fill) => f(fill.color));
-}
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
 
@@ -915,14 +903,10 @@ export function reducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      const layerIndexPaths = findPageLayerIndexPaths(
-        state,
-        (layer) => layer.do_objectID !== undefined,
-      );
-
       return produce(state, (state) => {
         const sharedSwatches =
           state.sketch.document.sharedSwatches?.objects ?? [];
+
         const sharedStyles = state.sketch.document.layerStyles.objects;
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
@@ -931,7 +915,7 @@ export function reducer(
           swatch.value = color;
 
           const changeColor = (c: Sketch.Color) => {
-            if (!(c.swatchID === swatch.do_objectID)) return;
+            if (c.swatchID !== swatch.do_objectID) return;
 
             c.alpha = color.alpha;
             c.red = color.red;
@@ -939,19 +923,17 @@ export function reducer(
             c.green = color.green;
           };
 
-          layerIndexPaths.forEach((layerPath) =>
-            accessPageLayers(
-              state,
-              layerPath.pageIndex,
-              layerPath.indexPaths,
-            ).forEach((layer) => {
-              visitColors(layer, changeColor);
-            }),
-          );
+          state.sketch.pages.forEach((page) => {
+            Layers.visit(page, (layer) => {
+              if (!layer.style) return;
+              visitColors(layer.style, changeColor);
+            });
+          });
 
-          sharedStyles.forEach((sharedStyle) =>
-            visitColors(sharedStyle, changeColor),
-          );
+          sharedStyles.forEach((sharedStyle) => {
+            if (!sharedStyle.value) return;
+            visitColors(sharedStyle.value, changeColor);
+          });
         });
       });
     }

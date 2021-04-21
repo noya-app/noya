@@ -545,3 +545,13 @@ export function getCanvasTransform(state: ApplicationState) {
     AffineTransform.scale(zoomValue),
   );
 }
+
+export function visitColors(
+  style: Sketch.Style,
+  f: (color: Sketch.Color) => void,
+): void {
+  style?.fills?.forEach((fill) => f(fill.color));
+  style?.borders?.forEach((border) => f(border.color));
+  style?.shadows?.forEach((shadow) => f(shadow.color));
+  style?.innerShadows.forEach((fill) => f(fill.color));
+}
