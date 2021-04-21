@@ -10,10 +10,11 @@ export function getIncrementedName(
     .filter((name) => name.startsWith(prefix))
     .map((name) => {
       const [, , number] = name.match(numberSuffixRegExp) || [];
-      return parseInt(number || '1');
+      return number ? parseInt(number) : 1;
     })
     .sort();
 
   const maxNumber = numbers[numbers.length - 1];
+
   return `${prefix} ${maxNumber + 1}`;
 }
