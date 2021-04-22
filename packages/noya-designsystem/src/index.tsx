@@ -21,7 +21,6 @@ export * as darkTheme from './theme/dark';
 export { default as Button } from './components/Button';
 export * as Label from './components/Label';
 export { default as Select } from './components/Select';
-export { default as TextInput } from './components/TextInput';
 export { default as ColorInputField } from './components/ColorInputField';
 export { default as LabeledElementView } from './components/LabeledElementView';
 export { default as Slider } from './components/Slider';

@@ -8,7 +8,7 @@ import {
 } from 'react';
 import styled from 'styled-components';
 import handleNudge from '../utils/handleNudge';
-import TextInput, { TextInputProps } from './TextInput';
+import TextInput, { TextInputProps } from './internal/TextInput';
 
 type LabelPosition = 'start' | 'end';
 

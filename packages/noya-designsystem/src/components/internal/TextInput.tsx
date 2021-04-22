@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useGlobalInputBlurListener } from '../contexts/GlobalInputBlurContext';
+import { useGlobalInputBlurListener } from '../../contexts/GlobalInputBlurContext';
 
 type Props = {
   id?: string;
