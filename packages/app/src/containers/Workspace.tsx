@@ -2,9 +2,9 @@ import { InputField, Divider, Spacer } from 'noya-designsystem';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { darkTheme, lightTheme } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useSelector } from '../contexts/ApplicationStateContext';
+import { useHistory, useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
@@ -118,10 +118,25 @@ const ComponentsTab = memo(function ComponentsTab() {
   );
 });
 
+function useKeyboardShortcuts() {
+  const { redo, undo } = useHistory();
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'z') {
+        event.shiftKey ? redo() : undo();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [redo, undo]);
+}
+
 export default function Workspace() {
   const colorScheme = useSystemColorScheme();
   const currentTab = useSelector(Selectors.getCurrentTab);
-
+  useKeyboardShortcuts();
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       {currentTab === 'canvas' ? <CanvasTab /> : <ComponentsTab />}
