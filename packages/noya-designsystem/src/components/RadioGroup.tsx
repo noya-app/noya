@@ -20,6 +20,7 @@ const RadioRoot = styled(RadixRadioGroup.Root)(({ theme }) => ({
   },
   display: 'flex',
   alignItems: 'stretch',
+  minHeight: '27px',
 }));
 
 const StyledItem = styled(RadixRadioGroup.Item)(({ theme }) => ({

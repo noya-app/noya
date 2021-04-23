@@ -14,7 +14,7 @@ import BorderInspector from './BorderInspector';
 import ShadowInspector from './ShadowInspector';
 import { delimitedPath } from 'noya-utils';
 
-export default memo(function LayerStyleInspector() {
+export default memo(function ThemeStyleInspector() {
   const [, dispatch] = useApplicationState();
 
   const selectedStyles = useShallowArray(
