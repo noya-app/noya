@@ -30,7 +30,7 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
     case 'undo':
       return produce(state, (state) => {
         if (state.past.length > 0) {
-          const newPresent = state.past.pop() as HistoryEntry;
+          const newPresent = state.past.pop();
           if (newPresent) {
             state.future.unshift(
               createHistoryEntry(newPresent.actionType, currentPresent),
