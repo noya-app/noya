@@ -42,7 +42,7 @@ interface TextAligmentRowProps {
   fontAlignment: string;
   fontHorizontalAlignment: string;
   fontVerticalAlignment: string;
-  onChangeFontAlingment: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeFontAlignment: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeFontHorizontalAlignment: (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => void;
@@ -66,10 +66,9 @@ const TextStyleRow = memo(function TextStyleRow({
   onChangeFontFamily,
   onChangeFontWeight,
 }: TextStyleRowProps) {
-  const id = '1';
-  const characterInputId = `${id}-char`;
-  const lineInputId = `${id}-line`;
-  const paragraphInputId = `${id}-paragraph`;
+  const characterInputId = `char`;
+  const lineInputId = `line`;
+  const paragraphInputId = `paragraph`;
 
   const fontFamilies = ['Arial', 'Helvetica', 'Verdana', 'Trebuchet MS'];
   const fontSize = ['Regular', 'Bold', 'Semi Bold'];
@@ -128,7 +127,7 @@ const TextStyleRow = memo(function TextStyleRow({
       </InspectorPrimitives.Row>
 
       <Spacer.Vertical size={6} />
-      <InspectorPrimitives.Row id={'text-aligment'}>
+      <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
           <InputField.NumberInput
             id={characterInputId}
@@ -165,7 +164,7 @@ const TextAligmentRow = memo(function TextAligmentRow({
   fontAlignment,
   fontHorizontalAlignment,
   fontVerticalAlignment,
-  onChangeFontAlingment,
+  onChangeFontAlignment,
   onChangeFontHorizontalAlignment,
   onChangeFontVerticalAlignment,
 }: TextAligmentRowProps) {
@@ -176,11 +175,13 @@ const TextAligmentRow = memo(function TextAligmentRow({
       </InspectorPrimitives.SectionHeader>
       <Spacer.Vertical size={10} />
       <InspectorPrimitives.Row>
-        <LabeledElementView renderLabel={() => 'Auto Height'}>
+        <LabeledElementView
+          renderLabel={() => <Label.Label>Auto Height</Label.Label>}
+        >
           <RadioGroup.Root
             id={'text-alignment'}
             value={fontAlignment}
-            onValueChange={onChangeFontAlingment}
+            onValueChange={onChangeFontAlignment}
           >
             <RadioGroup.Item value="horizontal" tooltip="Horizontal">
               <StretchHorizontallyIcon />
@@ -208,7 +209,7 @@ const TextAligmentRow = memo(function TextAligmentRow({
           <RadioGroup.Item value="center" tooltip="Center">
             <TextAlignCenterIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="Right" tooltip="Right">
+          <RadioGroup.Item value="right" tooltip="Right">
             <TextAlignRightIcon />
           </RadioGroup.Item>
           <RadioGroup.Item value="justify" tooltip="Justify">
@@ -244,9 +245,8 @@ const TextOptionsRow = memo(function TextOptionsRow({
   onChangeFontCase,
   onChangeFontDecorator,
 }: TextOptionsRowProps) {
-  const id = '1';
-  const decoratorInputId = `${id}-decorator`;
-  const transformInputId = `${id}-transform`;
+  const decoratorInputId = `decorator`;
+  const transformInputId = `transform`;
   const decorator = ['None', 'Underline', 'Strikethrough'];
 
   const renderLabel = useCallback(
@@ -268,7 +268,7 @@ const TextOptionsRow = memo(function TextOptionsRow({
         <InspectorPrimitives.Title>Text Options</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
       <Spacer.Vertical size={10} />
-      <InspectorPrimitives.Row id={'id'}>
+      <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
           <Select
             id={decoratorInputId}
@@ -300,7 +300,6 @@ const TextOptionsRow = memo(function TextOptionsRow({
 });
 
 export default memo(function TextStyleInspector() {
-  // useStates for testing the options :D
   const [fontFamily, setFontFamily] = useState('Arial');
   const [fontWeight, setFontWeight] = useState('Regular');
   const [fontDecorator, setFontDecorator] = useState('None');
@@ -339,7 +338,7 @@ export default memo(function TextStyleInspector() {
         fontAlignment={fontAlignment}
         fontVerticalAlignment={verticalAlignment}
         fontHorizontalAlignment={horizontalAlignment}
-        onChangeFontAlingment={useCallback(
+        onChangeFontAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
             setFontAlignment(event.target.value);
           },

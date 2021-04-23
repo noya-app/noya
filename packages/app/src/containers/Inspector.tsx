@@ -52,7 +52,9 @@ export default memo(function Inspector() {
             rotation: undefined,
           };
 
-    const Dimentions = (
+    const hasTextLayer = selectedLayers[0]._class === 'text';
+
+    const views = [
       <Fragment key="layout">
         <AlignmentInspector />
         <DimensionsInspector
@@ -60,23 +62,10 @@ export default memo(function Inspector() {
           onSetRotation={handleSetRotation}
         />
         <Spacer.Vertical size={10} />
-      </Fragment>
-    );
-
-    // Only show the text inspector if layer is a text
-    if (selectedLayers.length === 1 && selectedLayers[0]._class === 'text') {
-      return (
-        <>
-          {Dimentions}
-          <TextStyleInspector />
-        </>
-      );
-    }
-
-    const views = [
-      Dimentions,
+      </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
       <LayerThemeInspector />,
+      hasTextLayer && <TextStyleInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && <BorderInspector />,
