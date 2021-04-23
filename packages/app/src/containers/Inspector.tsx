@@ -17,6 +17,7 @@ import LayerThemeInspector from './LayerThemeInspector';
 import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
+import TextStyleInspector from '../components/inspector/TextStyleInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -51,7 +52,7 @@ export default memo(function Inspector() {
             rotation: undefined,
           };
 
-    const views = [
+    const Dimentions = (
       <Fragment key="layout">
         <AlignmentInspector />
         <DimensionsInspector
@@ -59,7 +60,21 @@ export default memo(function Inspector() {
           onSetRotation={handleSetRotation}
         />
         <Spacer.Vertical size={10} />
-      </Fragment>,
+      </Fragment>
+    );
+
+    // Only show the text inspector if layer is a text
+    if (selectedLayers.length === 1 && selectedLayers[0]._class === 'text') {
+      return (
+        <>
+          {Dimentions}
+          <TextStyleInspector />
+        </>
+      );
+    }
+
+    const views = [
+      Dimentions,
       hasFixedRadiusLayers && <RadiusInspector />,
       <LayerThemeInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
