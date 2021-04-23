@@ -31,13 +31,13 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
       if (state.past.length === 0) {
         return state;
       } else {
-        return produce(state, (draftState) => {
-          const nextPresent = draftState.past.pop();
+        return produce(state, (draft) => {
+          const nextPresent = draft.past.pop();
           if (nextPresent) {
-            draftState.future.unshift(
+            draft.future.unshift(
               createHistoryEntry(nextPresent.actionType, currentState),
             );
-            draftState.present = nextPresent.state;
+            draft.present = nextPresent.state;
           }
         });
       }
@@ -45,13 +45,13 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
       if (state.future.length === 0) {
         return state;
       } else {
-        return produce(state, (draftState) => {
-          const nextPresent = draftState.future.shift();
+        return produce(state, (draft) => {
+          const nextPresent = draft.future.shift();
           if (nextPresent) {
-            draftState.past.push(
+            draft.past.push(
               createHistoryEntry(nextPresent.actionType, currentState),
             );
-            draftState.present = nextPresent.state;
+            draft.present = nextPresent.state;
           }
         });
       }
@@ -59,23 +59,23 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
       const nextState = reducer(currentState, action);
       const mergableEntry = getMergableHistoryEntry(state, action[0]);
       const sketchFileChanged = currentState.sketch !== nextState.sketch;
-      return produce(state, (draftState) => {
+      return produce(state, (draft) => {
         const historyEntry = createHistoryEntry(action[0], {
           ...currentState,
           interactionState: createInitialInteractionState(),
         });
         if (sketchFileChanged) {
           if (mergableEntry) {
-            draftState.past[draftState.past.length - 1] = {
+            draft.past[draft.past.length - 1] = {
               ...historyEntry,
               state: mergableEntry.state,
             };
           } else {
-            draftState.past.push(historyEntry);
+            draft.past.push(historyEntry);
           }
-          draftState.future = [];
+          draft.future = [];
         }
-        draftState.present = nextState;
+        draft.present = nextState;
       });
   }
 }

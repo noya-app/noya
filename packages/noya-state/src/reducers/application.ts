@@ -179,9 +179,9 @@ export function reducer(
     case 'setTab': {
       const [, value] = action;
 
-      return produce(state, (state) => {
-        state.currentTab = value;
-        state.interactionState = interactionReducer(state.interactionState, [
+      return produce(state, (draft) => {
+        draft.currentTab = value;
+        draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
       });
@@ -189,23 +189,23 @@ export function reducer(
     case 'setThemeTab': {
       const [, value] = action;
 
-      return produce(state, (state) => {
-        state.currentThemeTab = value;
+      return produce(state, (draft) => {
+        draft.currentThemeTab = value;
       });
     }
     case 'setCanvasSize': {
       const [, size, insets] = action;
 
-      return produce(state, (state) => {
-        state.canvasSize = size;
-        state.canvasInsets = insets;
+      return produce(state, (draft) => {
+        draft.canvasSize = size;
+        draft.canvasInsets = insets;
       });
     }
     case 'setShowRulers': {
       const [, value] = action;
 
-      return produce(state, (state) => {
-        state.preferences.showRulers = value;
+      return produce(state, (draft) => {
+        draft.preferences.showRulers = value;
       });
     }
     case 'insertArtboard': {
@@ -213,7 +213,7 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const { scrollOrigin } = getCurrentPageMetadata(state);
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         let layer = produce(Models.artboard, (layer) => {
           layer.do_objectID = uuid();
           layer.name = name;
@@ -229,11 +229,11 @@ export function reducer(
           };
         });
 
-        state.sketch.pages[pageIndex].layers.push(layer);
-        state.interactionState = interactionReducer(state.interactionState, [
+        draft.sketch.pages[pageIndex].layers.push(layer);
+        draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
-        state.selectedObjects = [layer.do_objectID];
+        draft.selectedObjects = [layer.do_objectID];
       });
     }
     case 'setLayerVisible': {
@@ -247,8 +247,8 @@ export function reducer(
         ids.includes(layer.do_objectID),
       );
 
-      return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, indexPaths);
+      return produce(state, (draft) => {
+        const layers = accessPageLayers(draft, pageIndex, indexPaths);
 
         layers.forEach((layer) => {
           layer.isVisible = visible;
@@ -267,8 +267,8 @@ export function reducer(
 
       if (!indexPath) return state;
 
-      return produce(state, (state) => {
-        const layer = Layers.access(state.sketch.pages[pageIndex], indexPath);
+      return produce(state, (draft) => {
+        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
 
         layer.layerListExpandedType = expanded
           ? Sketch.LayerListExpanded.Expanded
@@ -278,17 +278,17 @@ export function reducer(
     case 'addDrawnLayer': {
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (state) => {
-        if (state.interactionState.type !== 'drawing') return;
+      return produce(state, (draft) => {
+        if (draft.interactionState.type !== 'drawing') return;
 
-        const layer = state.interactionState.value;
+        const layer = draft.interactionState.value;
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
-          state.sketch.pages[pageIndex].layers.push(layer);
-          state.selectedObjects = [layer.do_objectID];
+          draft.sketch.pages[pageIndex].layers.push(layer);
+          draft.selectedObjects = [layer.do_objectID];
         }
 
-        state.interactionState = interactionReducer(state.interactionState, [
+        draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
       });
@@ -308,11 +308,11 @@ export function reducer(
       // after some layers are deleted.
       const reversed = [...indexPaths.reverse()];
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         reversed.forEach((indexPath) => {
           const childIndex = indexPath[indexPath.length - 1];
           const parent = Layers.access(
-            state.sketch.pages[pageIndex],
+            draft.sketch.pages[pageIndex],
             indexPath.slice(0, -1),
           ) as Layers.ParentLayer;
           parent.layers.splice(childIndex, 1);
@@ -324,21 +324,21 @@ export function reducer(
 
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         switch (selectionType) {
           case 'intersection':
-            state.selectedObjects.push(
-              ...ids.filter((id) => !state.selectedObjects.includes(id)),
+            draft.selectedObjects.push(
+              ...ids.filter((id) => !draft.selectedObjects.includes(id)),
             );
             return;
           case 'difference':
             ids.forEach((id) => {
-              const selectedIndex = state.selectedObjects.indexOf(id);
-              state.selectedObjects.splice(selectedIndex, 1);
+              const selectedIndex = draft.selectedObjects.indexOf(id);
+              draft.selectedObjects.splice(selectedIndex, 1);
             });
             return;
           case 'replace':
-            state.selectedObjects = [...ids];
+            draft.selectedObjects = [...ids];
             return;
         }
       });
@@ -346,21 +346,21 @@ export function reducer(
     case 'highlightLayer': {
       const [, highlight] = action;
 
-      return produce(state, (state) => {
-        state.highlightedLayer = highlight ? { ...highlight } : undefined;
+      return produce(state, (draft) => {
+        draft.highlightedLayer = highlight ? { ...highlight } : undefined;
       });
     }
     case 'selectPage': {
-      return produce(state, (state) => {
-        state.selectedPage = action[1];
+      return produce(state, (draft) => {
+        draft.selectedPage = action[1];
       });
     }
     case 'addPage': {
       const [, name] = action;
 
-      return produce(state, (state) => {
-        const pages = state.sketch.pages;
-        const user = state.sketch.user;
+      return produce(state, (draft) => {
+        const pages = draft.sketch.pages;
+        const user = draft.sketch.user;
 
         const newPage: Sketch.Page = produce(Models.page, (page) => {
           page.do_objectID = uuid();
@@ -375,15 +375,15 @@ export function reducer(
 
         pages.push(newPage);
 
-        state.selectedPage = newPage.do_objectID;
+        draft.selectedPage = newPage.do_objectID;
       });
     }
     case 'renamePage': {
       const [, name] = action;
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (state) => {
-        const pages = state.sketch.pages;
+      return produce(state, (draft) => {
+        const pages = draft.sketch.pages;
         const page = pages[pageIndex];
 
         pages[pageIndex] = produce(page, (page) => {
@@ -395,9 +395,9 @@ export function reducer(
     case 'duplicatePage': {
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (state) => {
-        const pages = state.sketch.pages;
-        const user = state.sketch.user;
+      return produce(state, (draft) => {
+        const pages = draft.sketch.pages;
+        const user = draft.sketch.user;
         const page = pages[pageIndex];
 
         const duplicatePage = produce(page, (page) => {
@@ -417,22 +417,22 @@ export function reducer(
         };
 
         pages.push(duplicatePage);
-        state.selectedPage = duplicatePage.do_objectID;
+        draft.selectedPage = duplicatePage.do_objectID;
       });
     }
     case 'deletePage': {
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (state) => {
-        const pages = state.sketch.pages;
-        const user = state.sketch.user;
+      return produce(state, (draft) => {
+        const pages = draft.sketch.pages;
+        const user = draft.sketch.user;
 
         delete user[page.do_objectID];
         pages.splice(pageIndex, 1);
 
         const newIndex = Math.max(pageIndex - 1, 0);
-        state.selectedPage = pages[newIndex].do_objectID;
+        draft.selectedPage = pages[newIndex].do_objectID;
       });
     }
     case 'distributeLayers': {
@@ -442,8 +442,8 @@ export function reducer(
       const selectedRect = getSelectedRect(state);
       const [, axis] = action;
 
-      return produce(state, (state) => {
-        const layers = accessPageLayers(state, pageIndex, layerIndexPaths);
+      return produce(state, (draft) => {
+        const layers = accessPageLayers(draft, pageIndex, layerIndexPaths);
         const combinedWidths = sum(layers.map((layer) => layer.frame.width));
         const combinedHeights = sum(layers.map((layer) => layer.frame.height));
         const differenceWidth = selectedRect.width - combinedWidths;
@@ -482,7 +482,7 @@ export function reducer(
             AffineTransform.identity,
           ).invert();
           const layer = Layers.access(
-            state.sketch.pages[pageIndex], // access page again since we need to write to it
+            draft.sketch.pages[pageIndex], // access page again since we need to write to it
             layerIndexPath,
           );
 
@@ -516,7 +516,7 @@ export function reducer(
       const selectedRect = getSelectedRect(state);
       const [, placement] = action;
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         const selectedBounds = createBounds(selectedRect);
         const midX = selectedRect.x + selectedRect.width / 2;
         const midY = selectedRect.y + selectedRect.height / 2;
@@ -528,7 +528,7 @@ export function reducer(
             AffineTransform.identity,
           ).invert();
           const layer = Layers.access(
-            state.sketch.pages[pageIndex], // access page again since we need to write to it
+            draft.sketch.pages[pageIndex], // access page again since we need to write to it
             layerIndexPath,
           );
 
@@ -625,8 +625,8 @@ export function reducer(
 
       const currentTab = getCurrentTab(state);
       if (currentTab === 'canvas') {
-        return produce(state, (state) => {
-          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
               if (!layer.style) return;
 
@@ -637,8 +637,8 @@ export function reducer(
       } else {
         const selectedLayerStyleIds = state.selectedLayerStyleIds;
 
-        return produce(state, (state) => {
-          const layerStyles = state.sketch.document.layerStyles?.objects ?? [];
+        return produce(state, (draft) => {
+          const layerStyles = draft.sketch.document.layerStyles?.objects ?? [];
 
           layerStyles.forEach((layerStyle) => {
             if (!selectedLayerStyleIds.includes(layerStyle.do_objectID)) return;
@@ -647,7 +647,7 @@ export function reducer(
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(
-                state,
+                draft,
                 layerPath.pageIndex,
                 layerPath.indexPaths,
               ).forEach((layer) => {
@@ -666,8 +666,8 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           if (layer._class !== 'rectangle') return;
 
           const newValue =
@@ -682,8 +682,8 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           const rotation = getLayerRotation(layer);
           const newValue = mode === 'replace' ? amount : rotation + amount;
 
@@ -694,11 +694,11 @@ export function reducer(
     case 'movePage': {
       const [, sourceIndex, destinationIndex] = action;
 
-      return produce(state, (state) => {
-        const sourceItem = state.sketch.pages[sourceIndex];
+      return produce(state, (draft) => {
+        const sourceItem = draft.sketch.pages[sourceIndex];
 
-        state.sketch.pages.splice(sourceIndex, 1);
-        state.sketch.pages.splice(destinationIndex, 0, sourceItem);
+        draft.sketch.pages.splice(sourceIndex, 1);
+        draft.sketch.pages.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'interaction': {
@@ -716,8 +716,8 @@ export function reducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ? [...action[1], page] : action[1],
       );
-      return produce(state, (state) => {
-        state.interactionState = interactionState;
+      return produce(state, (draft) => {
+        draft.interactionState = interactionState;
 
         switch (interactionState.type) {
           case 'moving': {
@@ -728,7 +728,7 @@ export function reducer(
               y: next.y - previous.y,
             };
 
-            accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+            accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
               (layer) => {
                 layer.frame.x += delta.x;
                 layer.frame.y += delta.y;
@@ -792,7 +792,7 @@ export function reducer(
               );
 
               const newLayer = Layers.access(
-                state.sketch.pages[pageIndex],
+                draft.sketch.pages[pageIndex],
                 layerIndex,
               );
 
@@ -839,14 +839,14 @@ export function reducer(
               y: next.y - previous.y,
             };
 
-            const meta: EncodedPageMetadata = state.sketch.user[currentPageId];
+            const meta: EncodedPageMetadata = draft.sketch.user[currentPageId];
 
             const parsed = Primitives.parsePoint(meta.scrollOrigin);
 
             parsed.x += delta.x;
             parsed.y += delta.y;
 
-            state.sketch.user[currentPageId] = {
+            draft.sketch.user[currentPageId] = {
               ...meta,
               scrollOrigin: Primitives.stringifyPoint(parsed),
             };
@@ -857,8 +857,8 @@ export function reducer(
       });
     }
     case 'addSwatch': {
-      return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches ?? {
+      return produce(state, (draft) => {
+        const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
           do_objectID: uuid(),
           objects: [],
@@ -876,23 +876,23 @@ export function reducer(
           _class: 'swatch',
           do_objectID: uuid(),
           name: delimitedPath.join([
-            state.selectedSwatchGroup,
+            draft.selectedSwatchGroup,
             'New Theme Color',
           ]),
           value: swatchColor,
         };
 
         sharedSwatches.objects.push(swatch);
-        state.sketch.document.sharedSwatches = sharedSwatches;
-        state.selectedSwatchIds = [swatch.do_objectID];
+        draft.sketch.document.sharedSwatches = sharedSwatches;
+        draft.selectedSwatchIds = [swatch.do_objectID];
       });
     }
     case 'duplicateSwatch': {
       const [, id] = action;
       const ids = typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches ?? {
+      return produce(state, (draft) => {
+        const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
           do_objectID: uuid(),
           objects: [],
@@ -914,15 +914,15 @@ export function reducer(
 
           sharedSwatches.objects.push(newSwatch);
         });
-        state.sketch.document.sharedSwatches = sharedSwatches;
+        draft.sketch.document.sharedSwatches = sharedSwatches;
       });
     }
     case 'duplicateThemeStyle': {
       const [, id] = action;
       const ids = typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
-        const layerStyles = state.sketch.document.layerStyles ?? {
+      return produce(state, (draft) => {
+        const layerStyles = draft.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
           do_objectID: uuid(),
           objects: [],
@@ -947,28 +947,28 @@ export function reducer(
           layerStyles.objects.push(newSharedStyle);
         });
 
-        state.sketch.document.layerStyles = layerStyles;
+        draft.sketch.document.layerStyles = layerStyles;
       });
     }
     case 'selectSwatch': {
       const [, id, selectionType = 'replace'] = action;
 
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         switch (selectionType) {
           case 'intersection':
-            state.selectedSwatchIds.push(
-              ...ids.filter((id) => !state.selectedSwatchIds.includes(id)),
+            draft.selectedSwatchIds.push(
+              ...ids.filter((id) => !draft.selectedSwatchIds.includes(id)),
             );
             return;
           case 'difference':
             ids.forEach((id) => {
-              const selectedIndex = state.selectedSwatchIds.indexOf(id);
-              state.selectedSwatchIds.splice(selectedIndex, 1);
+              const selectedIndex = draft.selectedSwatchIds.indexOf(id);
+              draft.selectedSwatchIds.splice(selectedIndex, 1);
             });
             return;
           case 'replace':
-            state.selectedSwatchIds = [...ids];
+            draft.selectedSwatchIds = [...ids];
             return;
         }
       });
@@ -978,11 +978,11 @@ export function reducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         const sharedSwatches =
-          state.sketch.document.sharedSwatches?.objects ?? [];
+          draft.sketch.document.sharedSwatches?.objects ?? [];
 
-        const sharedStyles = state.sketch.document.layerStyles.objects;
+        const sharedStyles = draft.sketch.document.layerStyles.objects;
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
           if (!ids.includes(swatch.do_objectID)) return;
@@ -998,7 +998,7 @@ export function reducer(
             c.green = color.green;
           };
 
-          state.sketch.pages.forEach((page) => {
+          draft.sketch.pages.forEach((page) => {
             Layers.visit(page, (layer) => {
               if (!layer.style) return;
               visitColors(layer.style, changeColor);
@@ -1017,9 +1017,9 @@ export function reducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         const sharedSwatches =
-          state.sketch.document.sharedSwatches?.objects ?? [];
+          draft.sketch.document.sharedSwatches?.objects ?? [];
 
         sharedSwatches.forEach((swatch: Sketch.Swatch) => {
           if (!ids.includes(swatch.do_objectID)) return;
@@ -1038,8 +1038,8 @@ export function reducer(
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       const currentTab = state.currentTab;
-      return produce(state, (state) => {
-        const layerStyles = state.sketch.document.layerStyles ?? {
+      return produce(state, (draft) => {
+        const layerStyles = draft.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
           do_objectID: uuid(),
           objects: [],
@@ -1049,7 +1049,7 @@ export function reducer(
           _class: 'sharedStyle',
           do_objectID: uuid(),
           name: delimitedPath.join([
-            state.selectedThemeStyleGroup,
+            draft.selectedThemeStyleGroup,
             name || 'New Layer Style',
           ]),
           value: produce(style || Models.style, (style) => {
@@ -1058,12 +1058,12 @@ export function reducer(
           }),
         };
         layerStyles.objects.push(sharedStyle);
-        state.sketch.document.layerStyles = layerStyles;
+        draft.sketch.document.layerStyles = layerStyles;
 
         if (currentTab === 'theme') {
-          state.selectedLayerStyleIds = [sharedStyle.do_objectID];
+          draft.selectedLayerStyleIds = [sharedStyle.do_objectID];
         } else {
-          accessPageLayers(state, pageIndex, layerIndexPaths).forEach(
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
               layer.sharedStyleID = sharedStyle.do_objectID;
             },
@@ -1075,21 +1075,21 @@ export function reducer(
       const [, id, selectionType = 'replace'] = action;
 
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         switch (selectionType) {
           case 'intersection':
-            state.selectedLayerStyleIds.push(
-              ...ids.filter((id) => !state.selectedLayerStyleIds.includes(id)),
+            draft.selectedLayerStyleIds.push(
+              ...ids.filter((id) => !draft.selectedLayerStyleIds.includes(id)),
             );
             return;
           case 'difference':
             ids.forEach((id) => {
-              const selectedIndex = state.selectedLayerStyleIds.indexOf(id);
-              state.selectedLayerStyleIds.splice(selectedIndex, 1);
+              const selectedIndex = draft.selectedLayerStyleIds.indexOf(id);
+              draft.selectedLayerStyleIds.splice(selectedIndex, 1);
             });
             return;
           case 'replace':
-            state.selectedLayerStyleIds = [...ids];
+            draft.selectedLayerStyleIds = [...ids];
             return;
         }
       });
@@ -1100,11 +1100,11 @@ export function reducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         const array =
           action[0] === 'setSwatchName'
-            ? state.sketch.document.sharedSwatches?.objects ?? []
-            : state.sketch.document.layerStyles?.objects ?? [];
+            ? draft.sketch.document.sharedSwatches?.objects ?? []
+            : draft.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (!ids.includes(object.do_objectID)) return;
@@ -1121,9 +1121,9 @@ export function reducer(
 
       const [, id] = action;
 
-      return produce(state, (state) => {
-        accessPageLayers(state, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = state.sketch.document.layerStyles?.objects.find(
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          const style = draft.sketch.document.layerStyles?.objects.find(
             (s) => s.do_objectID === id,
           );
 
@@ -1146,10 +1146,10 @@ export function reducer(
         (layer) =>
           layer.sharedStyleID !== undefined && id === layer.sharedStyleID,
       );
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         if (!style) return;
 
-        const sharedStyles = state.sketch.document.layerStyles.objects;
+        const sharedStyles = draft.sketch.document.layerStyles.objects;
 
         sharedStyles.forEach((sharedStyle: Sketch.SharedStyle) => {
           if (id !== sharedStyle.do_objectID) return;
@@ -1161,7 +1161,7 @@ export function reducer(
 
           layerIndexPathsWithSharedStyle.forEach((layerPath) =>
             accessPageLayers(
-              state,
+              draft,
               layerPath.pageIndex,
               layerPath.indexPaths,
             ).forEach((layer) => {
@@ -1177,8 +1177,8 @@ export function reducer(
     case 'removeSwatch': {
       const ids = state.selectedSwatchIds;
 
-      return produce(state, (state) => {
-        const sharedSwatches = state.sketch.document.sharedSwatches;
+      return produce(state, (draft) => {
+        const sharedSwatches = draft.sketch.document.sharedSwatches;
 
         if (!sharedSwatches) return;
 
@@ -1187,7 +1187,7 @@ export function reducer(
         );
         sharedSwatches.objects = filterSwatches;
 
-        state.sketch.document.sharedSwatches = sharedSwatches;
+        draft.sketch.document.sharedSwatches = sharedSwatches;
       });
     }
     case 'removeThemeStyle': {
@@ -1200,8 +1200,8 @@ export function reducer(
           ids.includes(layer.sharedStyleID),
       );
 
-      return produce(state, (state) => {
-        const layerStyles = state.sketch.document.layerStyles;
+      return produce(state, (draft) => {
+        const layerStyles = draft.sketch.document.layerStyles;
 
         if (!layerStyles) return;
 
@@ -1210,11 +1210,11 @@ export function reducer(
         );
 
         layerStyles.objects = filterLayer;
-        state.sketch.document.layerStyles = layerStyles;
+        draft.sketch.document.layerStyles = layerStyles;
 
         layerIndexPathsWithSharedStyle.forEach((layerPath) =>
           accessPageLayers(
-            state,
+            draft,
             layerPath.pageIndex,
             layerPath.indexPaths,
           ).forEach((layer) => {
@@ -1226,10 +1226,10 @@ export function reducer(
     case 'setSelectedSwatchGroup':
     case 'setSelectedThemeStyleGroup': {
       const [, id] = action;
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         if (action[0] === 'setSelectedSwatchGroup')
-          state.selectedSwatchGroup = id;
-        else state.selectedThemeStyleGroup = id;
+          draft.selectedSwatchGroup = id;
+        else draft.selectedThemeStyleGroup = id;
       });
     }
     case 'groupSwatches':
@@ -1238,11 +1238,11 @@ export function reducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      return produce(state, (state) => {
+      return produce(state, (draft) => {
         const array =
           action[0] === 'groupSwatches'
-            ? state.sketch.document.sharedSwatches?.objects ?? []
-            : state.sketch.document.layerStyles?.objects ?? [];
+            ? draft.sketch.document.sharedSwatches?.objects ?? []
+            : draft.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
           if (!ids.includes(object.do_objectID)) return;
@@ -1253,8 +1253,8 @@ export function reducer(
           object.name = newName;
         });
 
-        if (action[0] === 'groupSwatches') state.selectedSwatchGroup = '';
-        else state.selectedThemeStyleGroup = '';
+        if (action[0] === 'groupSwatches') draft.selectedSwatchGroup = '';
+        else draft.selectedThemeStyleGroup = '';
       });
     }
     default:
