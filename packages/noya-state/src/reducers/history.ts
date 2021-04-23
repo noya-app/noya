@@ -26,8 +26,7 @@ const FILE_CHANGED_TIMEOUT = 300;
 
 export function historyReducer(state: HistoryState, action: HistoryAction) {
   const currentPresent = state.present;
-  const [actionType] = action;
-  switch (actionType) {
+  switch (action[0]) {
     case 'undo':
       return produce(state, (state) => {
         if (state.past.length > 0) {
@@ -53,13 +52,13 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
         }
       });
     default:
-      const newPresent = reducer(currentPresent, action as Action);
+      const newPresent = reducer(currentPresent, action);
       return produce(state, (state) => {
         const sketchFileChanged =
           JSON.stringify(currentPresent.sketch) !==
           JSON.stringify(newPresent.sketch);
 
-        const historyEntry = createHistoryEntry(actionType, {
+        const historyEntry = createHistoryEntry(action[0], {
           ...currentPresent,
           interactionState: createInitialInteractionState(),
         });
@@ -74,7 +73,7 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
             const previousEntry = state.past[state.past.length - 1];
             if (
               newTimestamp - previousEntry.timestamp < FILE_CHANGED_TIMEOUT &&
-              actionType === previousEntry.actionType
+              action[0] === previousEntry.actionType
             ) {
               state.past[state.past.length - 1] = {
                 ...historyEntry,
