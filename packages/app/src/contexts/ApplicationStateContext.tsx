@@ -1,4 +1,9 @@
-import { ApplicationState, HistoryAction, HistoryState } from 'noya-state';
+import {
+  Action,
+  ApplicationState,
+  HistoryAction,
+  HistoryState,
+} from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
@@ -13,7 +18,7 @@ const ApplicationStateContext = createContext<
 
 export const ApplicationStateProvider = ApplicationStateContext.Provider;
 
-type Dispatcher = (...args: HistoryAction) => void;
+type Dispatcher = (...args: Action) => void;
 
 /**
  * This should only be used to propagate state between React reconcilers
@@ -30,22 +35,13 @@ export const useRawApplicationState = (): ApplicationStateContextValue => {
   return value;
 };
 
-type WrappedApplicationState = ApplicationState & {
-  undoDisabled: boolean;
-  redoDisabled: boolean;
-  fullHistory: HistoryState;
-};
-
 /**
  * Get the application state, and a dispatch function to modify it.
  *
  * Only "container" components should use this, while "presentational" components
  * should instead be passed their data via props.
  */
-export const useApplicationState = (): [
-  WrappedApplicationState,
-  Dispatcher,
-] => {
+export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   const value = useRawApplicationState();
   const trigger = useGlobalInputBlurTrigger();
 
@@ -53,7 +49,7 @@ export const useApplicationState = (): [
 
   // Simplify the dispatch function by flattening our Action tuple
   const wrappedDispatch: Dispatcher = useCallback(
-    (...args: HistoryAction) => {
+    (...args: Action) => {
       // When changing selection, trigger any pending updates in input fields
       if (
         args[0] === 'selectLayer' ||
@@ -68,19 +64,26 @@ export const useApplicationState = (): [
     [dispatch, trigger],
   );
 
-  const wrapped: [WrappedApplicationState, Dispatcher] = useMemo(() => {
-    return [
-      {
-        ...state.present,
-        fullHistory: state,
-        undoDisabled: state.past.length === 0,
-        redoDisabled: state.future.length === 0,
-      },
-      wrappedDispatch,
-    ];
-  }, [state, wrappedDispatch]);
+  const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
+    return [state.present, wrappedDispatch];
+  }, [state.present, wrappedDispatch]);
 
   return wrapped;
+};
+
+export const useHistory = () => {
+  const [state, dispatch] = useRawApplicationState();
+  const redoDisabled = state.future.length === 0;
+  const undoDisabled = state.past.length === 0;
+  return useMemo(
+    () => ({
+      redo: () => dispatch(['redo']),
+      undo: () => dispatch(['undo']),
+      redoDisabled,
+      undoDisabled,
+    }),
+    [dispatch, redoDisabled, undoDisabled],
+  );
 };
 
 export function useSelector<Projection>(

@@ -10,7 +10,10 @@ import { Spacer } from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
 import { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useHistory,
+} from '../contexts/ApplicationStateContext';
 
 const Container = styled.header(({ theme }) => ({
   height: `${theme.sizes.toolbar.height}px`,
@@ -23,7 +26,8 @@ const Container = styled.header(({ theme }) => ({
 
 export default function Toolbar() {
   const [state, dispatch] = useApplicationState();
-  const { interactionState, preferences, redoDisabled, undoDisabled } = state;
+  const { redo, redoDisabled, undo, undoDisabled } = useHistory();
+  const { interactionState, preferences } = state;
   const showRulers = preferences.showRulers;
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
   const interactionType = interactionState.type;
@@ -121,22 +125,10 @@ export default function Toolbar() {
         >
           <RulerHorizontalIcon />
         </Button>
-        <Button
-          id="undo"
-          disabled={undoDisabled}
-          onClick={() => {
-            dispatch('undo');
-          }}
-        >
+        <Button id="undo" disabled={undoDisabled} onClick={undo}>
           Undo
         </Button>
-        <Button
-          id="redo"
-          disabled={redoDisabled}
-          onClick={() => {
-            dispatch('redo');
-          }}
-        >
+        <Button id="redo" disabled={redoDisabled} onClick={redo}>
           Redo
         </Button>
         <Spacer.Horizontal size={8} />
@@ -146,8 +138,10 @@ export default function Toolbar() {
       dispatch,
       interactionType,
       itemSeparatorSize,
+      redo,
       redoDisabled,
       showRulers,
+      undo,
       undoDisabled,
     ],
   );
