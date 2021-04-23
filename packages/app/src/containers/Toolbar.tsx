@@ -23,9 +23,10 @@ const Container = styled.header(({ theme }) => ({
 
 export default function Toolbar() {
   const [state, dispatch] = useApplicationState();
-  const showRulers = state.preferences.showRulers;
+  const { interactionState, preferences, redoDisabled, undoDisabled } = state;
+  const showRulers = preferences.showRulers;
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
-  const interactionType = state.interactionState.type;
+  const interactionType = interactionState.type;
 
   return useMemo(
     () => (
@@ -122,7 +123,7 @@ export default function Toolbar() {
         </Button>
         <Button
           id="undo"
-          disabled={state.undoDisabled}
+          disabled={undoDisabled}
           onClick={() => {
             dispatch('undo');
           }}
@@ -131,7 +132,7 @@ export default function Toolbar() {
         </Button>
         <Button
           id="redo"
-          disabled={state.redoDisabled}
+          disabled={redoDisabled}
           onClick={() => {
             dispatch('redo');
           }}
@@ -141,6 +142,13 @@ export default function Toolbar() {
         <Spacer.Horizontal size={8} />
       </Container>
     ),
-    [state, dispatch, interactionType, itemSeparatorSize, showRulers],
+    [
+      dispatch,
+      interactionType,
+      itemSeparatorSize,
+      redoDisabled,
+      showRulers,
+      undoDisabled,
+    ],
   );
 }
