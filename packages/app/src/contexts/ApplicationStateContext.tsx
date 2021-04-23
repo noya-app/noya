@@ -1,10 +1,15 @@
-import { Action, ApplicationState } from 'noya-state';
+import {
+  Action,
+  ApplicationState,
+  HistoryAction,
+  HistoryState,
+} from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
 export type ApplicationStateContextValue = [
-  ApplicationState,
-  (action: Action) => void,
+  HistoryState,
+  (action: HistoryAction) => void,
 ];
 
 const ApplicationStateContext = createContext<
@@ -60,10 +65,25 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   );
 
   const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
-    return [state, wrappedDispatch];
-  }, [state, wrappedDispatch]);
+    return [state.present, wrappedDispatch];
+  }, [state.present, wrappedDispatch]);
 
   return wrapped;
+};
+
+export const useHistory = () => {
+  const [state, dispatch] = useRawApplicationState();
+  const redoDisabled = state.future.length === 0;
+  const undoDisabled = state.past.length === 0;
+  return useMemo(
+    () => ({
+      redo: () => dispatch(['redo']),
+      undo: () => dispatch(['undo']),
+      redoDisabled,
+      undoDisabled,
+    }),
+    [dispatch, redoDisabled, undoDisabled],
+  );
 };
 
 export function useSelector<Projection>(
