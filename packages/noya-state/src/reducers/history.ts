@@ -28,8 +28,10 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
   const currentPresent = state.present;
   switch (action[0]) {
     case 'undo':
-      return produce(state, (state) => {
-        if (state.past.length > 0) {
+      if (state.past.length === 0) {
+        return state;
+      } else {
+        return produce(state, (state) => {
           const newPresent = state.past.pop();
           if (newPresent) {
             state.future.unshift(
@@ -37,11 +39,13 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
             );
             state.present = newPresent.state;
           }
-        }
-      });
+        });
+      }
     case 'redo':
-      return produce(state, (state) => {
-        if (state.future.length > 0) {
+      if (state.future.length === 0) {
+        return state;
+      } else {
+        return produce(state, (state) => {
           const newPresent = state.future.shift();
           if (newPresent) {
             state.past.push(
@@ -49,8 +53,8 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
             );
             state.present = newPresent.state;
           }
-        }
-      });
+        });
+      }
     default:
       const newPresent = reducer(currentPresent, action);
       return produce(state, (state) => {
