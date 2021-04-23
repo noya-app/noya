@@ -57,34 +57,21 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
       }
     default:
       const nextState = reducer(currentState, action);
+      const mergableEntry = getMergableHistoryEntry(state, action[0]);
       const sketchFileChanged = currentState.sketch !== nextState.sketch;
       return produce(state, (draftState) => {
         const historyEntry = createHistoryEntry(action[0], {
           ...currentState,
           interactionState: createInitialInteractionState(),
         });
-
-        const pushHistoryEntry = () => {
-          draftState.past.push(historyEntry);
-        };
-
         if (sketchFileChanged) {
-          if (draftState.past.length > 0) {
-            const newTimestamp = Date.now();
-            const previousEntry = draftState.past[draftState.past.length - 1];
-            if (
-              newTimestamp - previousEntry.timestamp < FILE_CHANGED_TIMEOUT &&
-              action[0] === previousEntry.actionType
-            ) {
-              draftState.past[draftState.past.length - 1] = {
-                ...historyEntry,
-                state: previousEntry.state,
-              };
-            } else {
-              pushHistoryEntry();
-            }
+          if (mergableEntry) {
+            draftState.past[draftState.past.length - 1] = {
+              ...historyEntry,
+              state: mergableEntry.state,
+            };
           } else {
-            pushHistoryEntry();
+            draftState.past.push(historyEntry);
           }
           draftState.future = [];
         }
@@ -111,4 +98,25 @@ function createHistoryEntry(
     state,
     timestamp: Date.now(),
   };
+}
+
+function getMergableHistoryEntry(
+  state: HistoryState,
+  actionType: Action[0],
+): HistoryEntry | undefined {
+  if (state.past.length === 0) {
+    return;
+  }
+
+  const newTimestamp = Date.now();
+  const previousEntry = state.past[state.past.length - 1];
+
+  if (
+    actionType !== previousEntry.actionType ||
+    newTimestamp - previousEntry.timestamp > FILE_CHANGED_TIMEOUT
+  ) {
+    return;
+  }
+
+  return previousEntry;
 }
