@@ -53,7 +53,7 @@ export default memo(function Inspector() {
           };
 
     const hasTextLayer =
-      selectedLayers.length > 1 && selectedLayers[0]._class === 'text';
+      selectedLayers.length > 0 && selectedLayers[0]._class === 'text';
 
     const views = [
       <Fragment key="layout">
