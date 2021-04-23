@@ -25,19 +25,19 @@ export type HistoryAction = [type: 'undo'] | [type: 'redo'] | Action;
 const FILE_CHANGED_TIMEOUT = 300;
 
 export function historyReducer(state: HistoryState, action: HistoryAction) {
-  const currentPresent = state.present;
+  const currentState = state.present;
   switch (action[0]) {
     case 'undo':
       if (state.past.length === 0) {
         return state;
       } else {
-        return produce(state, (state) => {
-          const newPresent = state.past.pop();
-          if (newPresent) {
-            state.future.unshift(
-              createHistoryEntry(newPresent.actionType, currentPresent),
+        return produce(state, (draftState) => {
+          const nextPresent = draftState.past.pop();
+          if (nextPresent) {
+            draftState.future.unshift(
+              createHistoryEntry(nextPresent.actionType, currentState),
             );
-            state.present = newPresent.state;
+            draftState.present = nextPresent.state;
           }
         });
       }
@@ -45,41 +45,38 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
       if (state.future.length === 0) {
         return state;
       } else {
-        return produce(state, (state) => {
-          const newPresent = state.future.shift();
-          if (newPresent) {
-            state.past.push(
-              createHistoryEntry(newPresent.actionType, currentPresent),
+        return produce(state, (draftState) => {
+          const nextPresent = draftState.future.shift();
+          if (nextPresent) {
+            draftState.past.push(
+              createHistoryEntry(nextPresent.actionType, currentState),
             );
-            state.present = newPresent.state;
+            draftState.present = nextPresent.state;
           }
         });
       }
     default:
-      const newPresent = reducer(currentPresent, action);
-      return produce(state, (state) => {
-        const sketchFileChanged =
-          JSON.stringify(currentPresent.sketch) !==
-          JSON.stringify(newPresent.sketch);
-
+      const nextState = reducer(currentState, action);
+      const sketchFileChanged = currentState.sketch !== nextState.sketch;
+      return produce(state, (draftState) => {
         const historyEntry = createHistoryEntry(action[0], {
-          ...currentPresent,
+          ...currentState,
           interactionState: createInitialInteractionState(),
         });
 
         const pushHistoryEntry = () => {
-          state.past.push(historyEntry);
+          draftState.past.push(historyEntry);
         };
 
         if (sketchFileChanged) {
-          if (state.past.length > 0) {
+          if (draftState.past.length > 0) {
             const newTimestamp = Date.now();
-            const previousEntry = state.past[state.past.length - 1];
+            const previousEntry = draftState.past[draftState.past.length - 1];
             if (
               newTimestamp - previousEntry.timestamp < FILE_CHANGED_TIMEOUT &&
               action[0] === previousEntry.actionType
             ) {
-              state.past[state.past.length - 1] = {
+              draftState.past[draftState.past.length - 1] = {
                 ...historyEntry,
                 state: previousEntry.state,
               };
@@ -89,9 +86,9 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
           } else {
             pushHistoryEntry();
           }
-          state.future = [];
+          draftState.future = [];
         }
-        state.present = newPresent;
+        draftState.present = nextState;
       });
   }
 }
