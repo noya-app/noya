@@ -1,5 +1,5 @@
 import {
-  createInitialState,
+  createInitialHistoryState,
   HistoryAction,
   historyReducer,
   HistoryState,
@@ -28,7 +28,7 @@ export default function App() {
         case 'set':
           return {
             type: 'success',
-            value: createInitialState(action.value),
+            value: createInitialHistoryState(action.value),
           };
         case 'update':
           if (state.type === 'success') {

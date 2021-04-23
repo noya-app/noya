@@ -33,6 +33,7 @@ export const useRawApplicationState = (): ApplicationStateContextValue => {
 type WrappedApplicationState = ApplicationState & {
   undoDisabled: boolean;
   redoDisabled: boolean;
+  fullHistory: HistoryState;
 };
 
 /**
@@ -71,6 +72,7 @@ export const useApplicationState = (): [
     return [
       {
         ...state.present,
+        fullHistory: state,
         undoDisabled: state.past.length === 0,
         redoDisabled: state.future.length === 0,
       },

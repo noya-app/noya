@@ -1,5 +1,11 @@
+import { SketchFile } from 'noya-sketch-file';
 import produce from 'immer';
-import { ApplicationState, Action, reducer } from './application';
+import {
+  ApplicationState,
+  Action,
+  reducer,
+  createInitialState,
+} from './application';
 import { createInitialInteractionState } from './interaction';
 
 export type HistoryEntry = {
@@ -85,6 +91,15 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
         state.present = newPresent;
       });
   }
+}
+
+export function createInitialHistoryState(sketch: SketchFile): HistoryState {
+  const applicationState = createInitialState(sketch);
+  return {
+    past: [],
+    present: applicationState,
+    future: [],
+  };
 }
 
 function createHistoryEntry(
