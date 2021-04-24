@@ -1,4 +1,7 @@
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useWorkspace,
+} from 'app/src/contexts/ApplicationStateContext';
 import {
   Rect as RCKRect,
   Text,
@@ -78,8 +81,8 @@ export function HorizontalRuler() {
   const backgroundColor = useTheme().colors.canvas.background;
 
   const [state] = useApplicationState();
+  const { canvasSize } = useWorkspace();
   const page = getCurrentPage(state);
-  const canvasSize = state.canvasSize;
   const { scrollOrigin } = getCurrentPageMetadata(state);
 
   const rulerRect = useMemo(

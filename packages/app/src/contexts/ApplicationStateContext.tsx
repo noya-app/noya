@@ -1,15 +1,16 @@
+import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 import {
   Action,
   ApplicationState,
-  HistoryAction,
-  HistoryState,
+  LayerHighlight,
+  WorkspaceAction,
+  WorkspaceState,
 } from 'noya-state';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 
 export type ApplicationStateContextValue = [
-  HistoryState,
-  (action: HistoryAction) => void,
+  WorkspaceState,
+  (action: WorkspaceAction) => void,
 ];
 
 const ApplicationStateContext = createContext<
@@ -65,16 +66,43 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
   );
 
   const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
-    return [state.present, wrappedDispatch];
-  }, [state.present, wrappedDispatch]);
+    return [state.history.present, wrappedDispatch];
+  }, [state.history.present, wrappedDispatch]);
 
   return wrapped;
 };
 
+export const useWorkspace = () => {
+  const [state, dispatch] = useRawApplicationState();
+
+  const { highlightedLayer, canvasSize, canvasInsets, preferences } = state;
+
+  return useMemo(
+    () => ({
+      setCanvasSize: (
+        size: { width: number; height: number },
+        insets: { left: number; right: number },
+      ) => {
+        // console.log('scs', size, insets);
+        dispatch(['setCanvasSize', size, insets]);
+      },
+      setShowRulers: (value: boolean) => dispatch(['setShowRulers', value]),
+      highlightLayer: (highlight?: LayerHighlight) =>
+        dispatch(['highlightLayer', highlight]),
+
+      highlightedLayer,
+      canvasSize,
+      canvasInsets,
+      preferences,
+    }),
+    [canvasInsets, canvasSize, dispatch, highlightedLayer, preferences],
+  );
+};
+
 export const useHistory = () => {
   const [state, dispatch] = useRawApplicationState();
-  const redoDisabled = state.future.length === 0;
-  const undoDisabled = state.past.length === 0;
+  const redoDisabled = state.history.future.length === 0;
+  const undoDisabled = state.history.past.length === 0;
   return useMemo(
     () => ({
       redo: () => dispatch(['redo']),

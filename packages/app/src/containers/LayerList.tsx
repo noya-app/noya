@@ -24,6 +24,7 @@ import { visit } from 'tree-visit';
 import {
   useApplicationState,
   useSelector,
+  useWorkspace,
 } from '../contexts/ApplicationStateContext';
 import useDeepArray from '../hooks/useDeepArray';
 import useShallowArray from '../hooks/useShallowArray';
@@ -172,6 +173,7 @@ const LayerRow = memo(
 export default memo(function LayerList() {
   const [state, dispatch] = useApplicationState();
   const page = useSelector(Selectors.getCurrentPage);
+  const { highlightLayer } = useWorkspace();
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
@@ -231,8 +233,7 @@ export default memo(function LayerList() {
         };
 
         const handleHoverChange = (hovered: boolean) => {
-          dispatch(
-            'highlightLayer',
+          highlightLayer(
             hovered ? { id, precedence: 'aboveSelection' } : undefined,
           );
         };
@@ -272,7 +273,14 @@ export default memo(function LayerList() {
         );
       },
     );
-  }, [items, menuItems, dispatch, selectedObjects, onSelectMenuItem]);
+  }, [
+    items,
+    menuItems,
+    onSelectMenuItem,
+    dispatch,
+    selectedObjects,
+    highlightLayer,
+  ]);
 
   return (
     <TreeView.Root

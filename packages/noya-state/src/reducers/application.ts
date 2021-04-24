@@ -42,18 +42,10 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
-export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
-
-export type LayerHighlight = {
-  id: string;
-  precedence: LayerHighlightPrecedence;
-};
-
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
-  highlightedLayer?: LayerHighlight;
   selectedPage: string;
   selectedObjects: string[];
   selectedSwatchIds: string[];
@@ -61,11 +53,6 @@ export type ApplicationState = {
   selectedSwatchGroup: string;
   selectedThemeStyleGroup: string;
   sketch: SketchFile;
-  canvasSize: { width: number; height: number };
-  canvasInsets: { left: number; right: number };
-  preferences: {
-    showRulers: boolean;
-  };
 };
 
 export type SelectionType = 'replace' | 'intersection' | 'difference';
@@ -73,12 +60,6 @@ export type SelectionType = 'replace' | 'intersection' | 'difference';
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setThemeTab', value: ThemeTab]
-  | [
-      type: 'setCanvasSize',
-      size: { width: number; height: number },
-      insets: { left: number; right: number },
-    ]
-  | [type: 'setShowRulers', value: boolean]
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
   | [
       type: 'insertArtboard',
@@ -101,7 +82,6 @@ export type Action =
       sharedStyleId: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
-  | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
@@ -191,21 +171,6 @@ export function reducer(
 
       return produce(state, (draft) => {
         draft.currentThemeTab = value;
-      });
-    }
-    case 'setCanvasSize': {
-      const [, size, insets] = action;
-
-      return produce(state, (draft) => {
-        draft.canvasSize = size;
-        draft.canvasInsets = insets;
-      });
-    }
-    case 'setShowRulers': {
-      const [, value] = action;
-
-      return produce(state, (draft) => {
-        draft.preferences.showRulers = value;
       });
     }
     case 'insertArtboard': {
@@ -341,13 +306,6 @@ export function reducer(
             draft.selectedObjects = [...ids];
             return;
         }
-      });
-    }
-    case 'highlightLayer': {
-      const [, highlight] = action;
-
-      return produce(state, (draft) => {
-        draft.highlightedLayer = highlight ? { ...highlight } : undefined;
       });
     }
     case 'selectPage': {
@@ -1293,12 +1251,6 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedLayerStyleIds: [],
     selectedSwatchGroup: '',
     selectedThemeStyleGroup: '',
-    highlightedLayer: undefined,
     sketch,
-    canvasSize: { width: 0, height: 0 },
-    canvasInsets: { left: 0, right: 0 },
-    preferences: {
-      showRulers: false,
-    },
   };
 }
