@@ -169,6 +169,9 @@ export type Action =
       swatchId: string | string[],
       name: string | undefined,
     ]
+  | [type: `setTextColor`, value: Sketch.Color]
+  | [type: `setTextFontName`, value: string]
+  | [type: `setTextFontSize`, value: number]
   | StyleAction;
 
 export function reducer(
@@ -1255,6 +1258,95 @@ export function reducer(
 
         if (action[0] === 'groupSwatches') draft.selectedSwatchGroup = '';
         else draft.selectedThemeStyleGroup = '';
+      });
+    }
+    case 'setTextColor': {
+      const [, color] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text') return;
+          const encoded = layer.style?.textStyle?.encodedAttributes;
+          const attributes = layer.attributedString.attributes[0].attributes;
+
+          if (encoded) {
+            if (!encoded.MSAttributedStringColorAttribute) {
+              encoded.MSAttributedStringColorAttribute = color;
+              return;
+            }
+
+            encoded.MSAttributedStringColorAttribute.alpha = color.alpha;
+            encoded.MSAttributedStringColorAttribute.blue = color.blue;
+            encoded.MSAttributedStringColorAttribute.red = color.red;
+            encoded.MSAttributedStringColorAttribute.green = color.green;
+          }
+          if (attributes.MSAttributedStringColorAttribute) {
+            if (!attributes.MSAttributedStringColorAttribute) {
+              attributes.MSAttributedStringColorAttribute = color;
+              return;
+            }
+
+            attributes.MSAttributedStringColorAttribute.alpha = color.alpha;
+            attributes.MSAttributedStringColorAttribute.blue = color.blue;
+            attributes.MSAttributedStringColorAttribute.red = color.red;
+            attributes.MSAttributedStringColorAttribute.green = color.green;
+          }
+        });
+      });
+    }
+    case 'setTextFontName': {
+      const [, value] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text') return;
+          const encoded =
+            layer.style?.textStyle?.encodedAttributes
+              .MSAttributedStringFontAttribute.attributes;
+          const attributes =
+            layer.attributedString.attributes[0].attributes
+              .MSAttributedStringFontAttribute.attributes;
+
+          if (!encoded) return;
+
+          const face = encoded.name.split('-')[1]
+            ? '-' + encoded.name.split('-')[1]
+            : '';
+
+          const newName = value.startsWith('-')
+            ? encoded.name.split('-')[0] + value
+            : value + face;
+
+          encoded.name = newName;
+          if (attributes) attributes.name = newName;
+        });
+      });
+    }
+    case 'setTextFontSize': {
+      const [, value] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text') return;
+          const encoded =
+            layer.style?.textStyle?.encodedAttributes
+              .MSAttributedStringFontAttribute.attributes;
+          const attributes =
+            layer.attributedString.attributes[0].attributes
+              .MSAttributedStringFontAttribute.attributes;
+
+          if (encoded) encoded.size = value;
+          if (attributes) attributes.size = value;
+        });
       });
     }
     default:

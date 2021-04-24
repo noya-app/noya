@@ -1,5 +1,4 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-
 import {
   StretchHorizontallyIcon,
   StretchVerticallyIcon,
@@ -23,16 +22,22 @@ import {
   LabeledElementView,
   Divider,
 } from 'noya-designsystem';
+import { Selectors } from 'noya-state';
 import { Spacer } from 'noya-designsystem';
-import { useCallback, memo, useState } from 'react';
+import { useCallback, memo, useState, useMemo } from 'react';
 import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
-
+import useShallowArray from '../../hooks/useShallowArray';
+import {
+  useSelector,
+  useApplicationState,
+} from '../../contexts/ApplicationStateContext';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextStyleRowProps {
+  fontSize: number;
   fontFamily: string;
-  fontWeight: string;
   fontColor: Sketch.Color;
+  onChangeFontSize: (value: number) => void;
   onChangeFontFamily: (value: string) => void;
   onChangeFontWeight: (value: string) => void;
   onChangeFontColor: (color: Sketch.Color) => void;
@@ -53,16 +58,17 @@ interface TextAligmentRowProps {
 
 interface TextOptionsRowProps {
   fontCase: string;
-  fontDecorator: string;
+  fontDecorator: number;
   onChangeFontCase: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeFontDecorator: (value: string) => void;
+  onChangeFontDecorator: (value: number) => void;
 }
 
 const TextStyleRow = memo(function TextStyleRow({
   fontColor,
+  fontSize,
   fontFamily,
-  fontWeight,
   onChangeFontColor,
+  onChangeFontSize,
   onChangeFontFamily,
   onChangeFontWeight,
 }: TextStyleRowProps) {
@@ -70,8 +76,28 @@ const TextStyleRow = memo(function TextStyleRow({
   const lineInputId = `line`;
   const paragraphInputId = `paragraph`;
 
-  const fontFamilies = ['Arial', 'Helvetica', 'Verdana', 'Trebuchet MS'];
-  const fontSize = ['Regular', 'Bold', 'Semi Bold'];
+  const [family, size] = fontFamily.replace('MT', '').split('-');
+  const fontFamilies = [
+    'Arial',
+    'Helvetica',
+    'Verdana',
+    'Trebuchet MS',
+    'Times',
+    'SegoeUI',
+  ];
+  const fontSizes = useMemo(
+    () => [
+      { id: '', text: 'Regular' },
+      { id: 'Oblique', text: 'Oblique' },
+      { id: 'LightOblique', text: 'Light Oblique' },
+      { id: 'Light', text: 'Light' },
+      { id: 'Bold', text: 'Bold' },
+      { id: 'SemiBold', text: 'Semi Bold' },
+      { id: 'BoldOblique', text: 'Bold Oblique' },
+      { id: 'Italic', text: 'Italic' },
+    ],
+    [],
+  );
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -89,6 +115,15 @@ const TextStyleRow = memo(function TextStyleRow({
     [characterInputId, lineInputId, paragraphInputId],
   );
 
+  const textSizeOptions = useMemo(
+    () => [...fontSizes.map((style) => style.id)],
+    [fontSizes],
+  );
+  const getTextSizeTitle = useCallback(
+    (id) => fontSizes.find((size) => size.id === id)!.text,
+    [fontSizes],
+  );
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
@@ -99,7 +134,7 @@ const TextStyleRow = memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
-          value={fontFamily}
+          value={family}
           options={fontFamilies}
           getTitle={(name) => name}
           onChange={onChangeFontFamily}
@@ -110,16 +145,16 @@ const TextStyleRow = memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-weight"
-          value={fontWeight}
-          options={fontSize}
-          getTitle={(name) => name}
+          value={size || 'Regular'}
+          options={textSizeOptions}
+          getTitle={getTextSizeTitle}
           onChange={onChangeFontWeight}
         />
         <Spacer.Horizontal size={8} />
         <InputField.Root id="font-size" size={50}>
           <InputField.NumberInput
-            value={32}
-            onSubmit={() => {}}
+            value={fontSize}
+            onSubmit={onChangeFontSize}
             onNudge={() => {}}
           />
           <InputField.Label>px</InputField.Label>
@@ -203,16 +238,16 @@ const TextAligmentRow = memo(function TextAligmentRow({
           value={fontHorizontalAlignment}
           onValueChange={onChangeFontHorizontalAlignment}
         >
-          <RadioGroup.Item value="left" tooltip="Left">
+          <RadioGroup.Item value="0" tooltip="Left">
             <TextAlignLeftIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="center" tooltip="Center">
+          <RadioGroup.Item value="2" tooltip="Center">
             <TextAlignCenterIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="right" tooltip="Right">
+          <RadioGroup.Item value="1" tooltip="Right">
             <TextAlignRightIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="justify" tooltip="Justify">
+          <RadioGroup.Item value="3" tooltip="Justify">
             <TextAlignJustifyIcon />
           </RadioGroup.Item>
         </RadioGroup.Root>
@@ -225,13 +260,13 @@ const TextAligmentRow = memo(function TextAligmentRow({
           value={fontVerticalAlignment}
           onValueChange={onChangeFontVerticalAlignment}
         >
-          <RadioGroup.Item value="top" tooltip="Top">
+          <RadioGroup.Item value="0" tooltip="Top">
             <PinTopIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="center" tooltip="Center">
+          <RadioGroup.Item value="1" tooltip="Middle">
             <AlignCenterVerticallyIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="bottom" tooltip="Bottom">
+          <RadioGroup.Item value="2" tooltip="Bottom">
             <PinBottomIcon />
           </RadioGroup.Item>
         </RadioGroup.Root>
@@ -272,10 +307,10 @@ const TextOptionsRow = memo(function TextOptionsRow({
         <LabeledElementView renderLabel={renderLabel}>
           <Select
             id={decoratorInputId}
-            value={fontDecorator}
+            value={decorator[fontDecorator || 0]}
             options={decorator}
             getTitle={(name) => name}
-            onChange={onChangeFontDecorator}
+            onChange={(value) => onChangeFontDecorator(Number(value))}
           />
           <Spacer.Horizontal size={8} />
           <RadioGroup.Root
@@ -283,13 +318,13 @@ const TextOptionsRow = memo(function TextOptionsRow({
             value={fontCase}
             onValueChange={onChangeFontCase}
           >
-            <RadioGroup.Item value="capitalize" tooltip="Capitalize">
+            <RadioGroup.Item value="0" tooltip="Capitalize">
               <LetterCaseCapitalizeIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="uppercase" tooltip="Uppercase">
+            <RadioGroup.Item value="1" tooltip="Uppercase">
               <LetterCaseUppercaseIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="lowercase" tooltip="Lowercase">
+            <RadioGroup.Item value="1" tooltip="Lowercase">
               <LetterCaseLowercaseIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>
@@ -300,38 +335,97 @@ const TextOptionsRow = memo(function TextOptionsRow({
 });
 
 export default memo(function TextStyleInspector() {
-  const [fontFamily, setFontFamily] = useState('Arial');
-  const [fontWeight, setFontWeight] = useState('Regular');
-  const [fontDecorator, setFontDecorator] = useState('None');
+  const [, dispatch] = useApplicationState();
+
+  const selectedTextStyles = useShallowArray(
+    useSelector(Selectors.getSelectedTextStyles),
+  );
+
+  const fontColor = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) =>
+          style?.textStyle?.encodedAttributes.MSAttributedStringColorAttribute,
+      ),
+    [selectedTextStyles],
+  );
+
+  const fontFamily = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) =>
+          style?.textStyle?.encodedAttributes.MSAttributedStringFontAttribute
+            .attributes.name,
+      ),
+    [selectedTextStyles],
+  );
+
+  const fontDecoration = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) => style?.textStyle?.encodedAttributes.underlineStyle || 0,
+      ),
+    [selectedTextStyles],
+  );
+
+  const fontSize = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) =>
+          style?.textStyle?.encodedAttributes.MSAttributedStringFontAttribute
+            .attributes.size || 24,
+      ),
+    [selectedTextStyles],
+  );
+
+  const firstColor = useMemo(
+    () =>
+      fontColor[0] ||
+      ({
+        _class: 'color',
+        red: 0.5,
+        blue: 0.5,
+        green: 0.5,
+        alpha: 0.5,
+      } as Sketch.Color),
+    [fontColor],
+  );
+
+  const firstFontFamily = useMemo(() => fontFamily[0] || 'Arial', [fontFamily]);
+
+  const [fontDecorator, setFontDecorator] = useState(fontDecoration[0]);
   const [fontCase, setFontCase] = useState('capitalize');
 
   const [fontAlignment, setFontAlignment] = useState('horizontal');
-  const [verticalAlignment, setFontVerticalAlignment] = useState('top');
+  const [verticalAlignment, setFontVerticalAlignment] = useState('0');
   const [horizontalAlignment, setFontHorizontalAlignment] = useState('left');
-
-  const [fontColor, setFontColor] = useState({
-    _class: 'color',
-    red: 1,
-    blue: 1,
-    green: 1,
-    alpha: 1,
-  } as Sketch.Color);
 
   return (
     <>
       <TextStyleRow
-        fontColor={fontColor}
-        fontFamily={fontFamily}
-        fontWeight={fontWeight}
-        onChangeFontFamily={useCallback((value) => setFontFamily(value), [
-          setFontFamily,
-        ])}
-        onChangeFontWeight={useCallback((value) => setFontWeight(value), [
-          setFontWeight,
-        ])}
-        onChangeFontColor={useCallback((value) => setFontColor(value), [
-          setFontColor,
-        ])}
+        fontColor={firstColor}
+        fontFamily={firstFontFamily}
+        fontSize={fontSize[0]}
+        onChangeFontFamily={useCallback(
+          (value) => {
+            dispatch('setTextFontName', value);
+          },
+          [dispatch],
+        )}
+        onChangeFontWeight={useCallback(
+          (value) => {
+            dispatch('setTextFontName', '-' + value);
+          },
+          [dispatch],
+        )}
+        onChangeFontColor={useCallback(
+          (value) => dispatch('setTextColor', value),
+          [dispatch],
+        )}
+        onChangeFontSize={useCallback(
+          (value) => dispatch('setTextFontSize', value),
+          [dispatch],
+        )}
       />
       <Divider />
       <TextAligmentRow
