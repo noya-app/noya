@@ -47,237 +47,237 @@ export function styleReducer(
 ): Sketch.Style {
   switch (action[0]) {
     case 'addNewBorder':
-      return produce(state, (state) => {
-        if (state.borders) {
-          state.borders.unshift(Models.border);
+      return produce(state, (draft) => {
+        if (draft.borders) {
+          draft.borders.unshift(Models.border);
         } else {
-          state.borders = [Models.border];
+          draft.borders = [Models.border];
         }
       });
     case 'addNewFill':
-      return produce(state, (state) => {
-        if (state.fills) {
-          state.fills.unshift(Models.fill);
+      return produce(state, (draft) => {
+        if (draft.fills) {
+          draft.fills.unshift(Models.fill);
         } else {
-          state.fills = [Models.fill];
+          draft.fills = [Models.fill];
         }
       });
     case 'addNewShadow':
-      return produce(state, (state) => {
-        if (state.shadows) {
-          state.shadows.unshift(Models.shadow);
+      return produce(state, (draft) => {
+        if (draft.shadows) {
+          draft.shadows.unshift(Models.shadow);
         } else {
-          state.shadows = [Models.shadow];
+          draft.shadows = [Models.shadow];
         }
       });
     case 'setBorderEnabled': {
       const [, index, isEnabled] = action;
-      return produce(state, (state) => {
-        if (state.borders && state.borders[index]) {
-          state.borders[index].isEnabled = isEnabled;
+      return produce(state, (draft) => {
+        if (draft.borders && draft.borders[index]) {
+          draft.borders[index].isEnabled = isEnabled;
         }
       });
     }
     case 'setFillEnabled': {
       const [, index, isEnabled] = action;
-      return produce(state, (state) => {
-        if (state.fills && state.fills[index]) {
-          state.fills[index].isEnabled = isEnabled;
+      return produce(state, (draft) => {
+        if (draft.fills && draft.fills[index]) {
+          draft.fills[index].isEnabled = isEnabled;
         }
       });
     }
     case 'setShadowEnabled': {
       const [, index, isEnabled] = action;
-      return produce(state, (state) => {
-        if (state.shadows && state.shadows[index]) {
-          state.shadows[index].isEnabled = isEnabled;
+      return produce(state, (draft) => {
+        if (draft.shadows && draft.shadows[index]) {
+          draft.shadows[index].isEnabled = isEnabled;
         }
       });
     }
     case 'deleteBorder':
-      return produce(state, (state) => {
-        if (state.borders) {
-          state.borders.splice(action[1], 1);
+      return produce(state, (draft) => {
+        if (draft.borders) {
+          draft.borders.splice(action[1], 1);
         }
       });
     case 'deleteFill':
-      return produce(state, (state) => {
-        if (state.fills) {
-          state.fills.splice(action[1], 1);
+      return produce(state, (draft) => {
+        if (draft.fills) {
+          draft.fills.splice(action[1], 1);
         }
       });
     case 'deleteShadow':
-      return produce(state, (state) => {
-        if (state.shadows) {
-          state.shadows.splice(action[1], 1);
+      return produce(state, (draft) => {
+        if (draft.shadows) {
+          draft.shadows.splice(action[1], 1);
         }
       });
     case 'moveBorder': {
       const [, sourceIndex, destinationIndex] = action;
-      return produce(state, (state) => {
-        if (!state.borders) return;
+      return produce(state, (draft) => {
+        if (!draft.borders) return;
 
-        const sourceItem = state.borders[sourceIndex];
+        const sourceItem = draft.borders[sourceIndex];
 
-        state.borders.splice(sourceIndex, 1);
-        state.borders.splice(destinationIndex, 0, sourceItem);
+        draft.borders.splice(sourceIndex, 1);
+        draft.borders.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'moveFill': {
       const [, sourceIndex, destinationIndex] = action;
-      return produce(state, (state) => {
-        if (!state.fills) return;
+      return produce(state, (draft) => {
+        if (!draft.fills) return;
 
-        const sourceItem = state.fills[sourceIndex];
+        const sourceItem = draft.fills[sourceIndex];
 
-        state.fills.splice(sourceIndex, 1);
-        state.fills.splice(destinationIndex, 0, sourceItem);
+        draft.fills.splice(sourceIndex, 1);
+        draft.fills.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'moveShadow': {
       const [, sourceIndex, destinationIndex] = action;
-      return produce(state, (state) => {
-        if (!state.shadows) return;
+      return produce(state, (draft) => {
+        if (!draft.shadows) return;
 
-        const sourceItem = state.shadows[sourceIndex];
+        const sourceItem = draft.shadows[sourceIndex];
 
-        state.shadows.splice(sourceIndex, 1);
-        state.shadows.splice(destinationIndex, 0, sourceItem);
+        draft.shadows.splice(sourceIndex, 1);
+        draft.shadows.splice(destinationIndex, 0, sourceItem);
       });
     }
     case 'deleteDisabledBorders':
-      return produce(state, (state) => {
-        if (state.borders) {
-          state.borders = state.borders.filter((border) => border.isEnabled);
+      return produce(state, (draft) => {
+        if (draft.borders) {
+          draft.borders = draft.borders.filter((border) => border.isEnabled);
         }
       });
     case 'deleteDisabledFills':
-      return produce(state, (state) => {
-        if (state.fills) {
-          state.fills = state.fills.filter((fill) => fill.isEnabled);
+      return produce(state, (draft) => {
+        if (draft.fills) {
+          draft.fills = draft.fills.filter((fill) => fill.isEnabled);
         }
       });
     case 'deleteDisabledShadows':
-      return produce(state, (state) => {
-        if (state.shadows) {
-          state.shadows = state.shadows.filter((fill) => fill.isEnabled);
+      return produce(state, (draft) => {
+        if (draft.shadows) {
+          draft.shadows = draft.shadows.filter((fill) => fill.isEnabled);
         }
       });
     case 'setBorderColor': {
       const [, index, color] = action;
-      return produce(state, (state) => {
-        if (state.borders && state.borders[index]) {
-          state.borders[index].color = color;
+      return produce(state, (draft) => {
+        if (draft.borders && draft.borders[index]) {
+          draft.borders[index].color = color;
         }
       });
     }
     case 'setFillColor': {
       const [, index, color] = action;
-      return produce(state, (state) => {
-        if (state.fills && state.fills[index]) {
-          state.fills[index].color = color;
+      return produce(state, (draft) => {
+        if (draft.fills && draft.fills[index]) {
+          draft.fills[index].color = color;
         }
       });
     }
     case 'setShadowColor': {
       const [, index, color] = action;
-      return produce(state, (state) => {
-        if (state.shadows && state.shadows[index]) {
-          state.shadows[index].color = color;
+      return produce(state, (draft) => {
+        if (draft.shadows && draft.shadows[index]) {
+          draft.shadows[index].color = color;
         }
       });
     }
     case 'setBorderWidth': {
       const [, index, amount, mode = 'replace'] = action;
-      return produce(state, (state) => {
-        if (!state.borders || !state.borders[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.borders || !draft.borders[index]) return;
 
         const newValue =
-          mode === 'replace' ? amount : state.borders[index].thickness + amount;
+          mode === 'replace' ? amount : draft.borders[index].thickness + amount;
 
-        state.borders[index].thickness = Math.max(0, newValue);
+        draft.borders[index].thickness = Math.max(0, newValue);
       });
     }
     case 'setFillOpacity': {
       const [, index, amount, mode = 'replace'] = action;
-      return produce(state, (state) => {
-        if (!state.fills || !state.fills[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
 
         const newValue =
-          mode === 'replace' ? amount : state.fills[index].color.alpha + amount;
+          mode === 'replace' ? amount : draft.fills[index].color.alpha + amount;
 
-        state.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
+        draft.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
       });
     }
     case 'setOpacity': {
       const [, amount, mode = 'replace'] = action;
 
-      return produce(state, (state) => {
-        if (!state.contextSettings) return;
+      return produce(state, (draft) => {
+        if (!draft.contextSettings) return;
 
         const newValue =
-          mode === 'replace' ? amount : state.contextSettings.opacity + amount;
+          mode === 'replace' ? amount : draft.contextSettings.opacity + amount;
 
-        state.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
+        draft.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
       });
     }
     case 'setShadowX': {
       const [, index, amount, mode = 'replace'] = action;
 
-      return produce(state, (state) => {
-        if (!state.shadows || !state.shadows[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.shadows || !draft.shadows[index]) return;
 
         const newValue =
-          mode === 'replace' ? amount : state.shadows[index].offsetX + amount;
+          mode === 'replace' ? amount : draft.shadows[index].offsetX + amount;
 
-        state.shadows[index].offsetX = newValue;
+        draft.shadows[index].offsetX = newValue;
       });
     }
     case 'setShadowY': {
       const [, index, amount, mode = 'replace'] = action;
 
-      return produce(state, (state) => {
-        if (!state.shadows || !state.shadows[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.shadows || !draft.shadows[index]) return;
 
         const newValue =
-          mode === 'replace' ? amount : state.shadows[index].offsetY + amount;
+          mode === 'replace' ? amount : draft.shadows[index].offsetY + amount;
 
-        state.shadows[index].offsetY = newValue;
+        draft.shadows[index].offsetY = newValue;
       });
     }
     case 'setShadowBlur': {
       const [, index, amount, mode = 'replace'] = action;
 
-      return produce(state, (state) => {
-        if (!state.shadows || !state.shadows[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.shadows || !draft.shadows[index]) return;
 
         const newValue =
           mode === 'replace'
             ? amount
-            : state.shadows[index].blurRadius + amount;
+            : draft.shadows[index].blurRadius + amount;
 
-        state.shadows[index].blurRadius = newValue;
+        draft.shadows[index].blurRadius = newValue;
       });
     }
     case 'setShadowSpread': {
       const [, index, amount, mode = 'replace'] = action;
 
-      return produce(state, (state) => {
-        if (!state.shadows || !state.shadows[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.shadows || !draft.shadows[index]) return;
 
         const newValue =
-          mode === 'replace' ? amount : state.shadows[index].spread + amount;
+          mode === 'replace' ? amount : draft.shadows[index].spread + amount;
 
-        state.shadows[index].spread = newValue;
+        draft.shadows[index].spread = newValue;
       });
     }
     case 'setBorderPosition': {
       const [, index, position] = action;
 
-      return produce(state, (state) => {
-        if (!state.borders || !state.borders[index]) return;
+      return produce(state, (draft) => {
+        if (!draft.borders || !draft.borders[index]) return;
 
-        state.borders[index].position = position;
+        draft.borders[index].position = position;
       });
     }
     default:

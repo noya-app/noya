@@ -136,8 +136,8 @@ export function interactionReducer(
 
       const [, point] = action;
 
-      return produce(state, (state) => {
-        state.current = point;
+      return produce(state, (draft) => {
+        draft.current = point;
       });
     }
     case 'startDrawing': {
@@ -165,9 +165,9 @@ export function interactionReducer(
 
       const rect = createRect(state.origin, point);
 
-      return produce(state, (state) => {
-        state.value.frame = {
-          ...state.value.frame,
+      return produce(state, (draft) => {
+        draft.value.frame = {
+          ...draft.value.frame,
           ...rect,
         };
       });
