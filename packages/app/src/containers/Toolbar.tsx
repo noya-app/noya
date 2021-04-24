@@ -13,6 +13,7 @@ import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
   useHistory,
+  useWorkspace,
 } from '../contexts/ApplicationStateContext';
 
 const Container = styled.header(({ theme }) => ({
@@ -26,9 +27,12 @@ const Container = styled.header(({ theme }) => ({
 
 export default function Toolbar() {
   const [state, dispatch] = useApplicationState();
+  const {
+    setShowRulers,
+    preferences: { showRulers },
+  } = useWorkspace();
   const { redo, redoDisabled, undo, undoDisabled } = useHistory();
-  const { interactionState, preferences } = state;
-  const showRulers = preferences.showRulers;
+  const { interactionState } = state;
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
   const interactionType = interactionState.type;
 
@@ -120,7 +124,7 @@ export default function Toolbar() {
           tooltip="Show rulers"
           active={showRulers}
           onClick={() => {
-            dispatch('setShowRulers', !showRulers);
+            setShowRulers(!showRulers);
           }}
         >
           <RulerHorizontalIcon />
@@ -140,6 +144,7 @@ export default function Toolbar() {
       itemSeparatorSize,
       redo,
       redoDisabled,
+      setShowRulers,
       showRulers,
       undo,
       undoDisabled,

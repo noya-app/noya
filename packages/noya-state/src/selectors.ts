@@ -17,6 +17,7 @@ import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
 import { WorkspaceTab, ThemeTab } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
+import { CanvasInsets } from './reducers/workspace';
 import type { Point, Rect, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -293,12 +294,13 @@ function visitLayersReversed(
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
+  insets: CanvasInsets,
   point: Point,
   traversalOptions?: LayerTraversalOptions,
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
-  const canvasTransform = getCanvasTransform(state);
-  const screenTransform = getScreenTransform(state);
+  const canvasTransform = getCanvasTransform(state, insets);
+  const screenTransform = getScreenTransform(insets);
 
   const options = traversalOptions ?? {
     clickThroughGroups: false,
@@ -432,6 +434,7 @@ export function getBoundingPoints(
 export function getLayersInRect(
   CanvasKit: CanvasKit,
   state: ApplicationState,
+  insets: CanvasInsets,
   rect: Rect,
   traversalOptions?: LayerTraversalOptions,
 ): PageLayer[] {
@@ -444,12 +447,12 @@ export function getLayersInRect(
 
   let found: Sketch.AnyLayer[] = [];
 
-  const screenTransform = getScreenTransform(state);
+  const screenTransform = getScreenTransform(insets);
   const screenRect = transformRect(rect, screenTransform);
 
   visitLayersReversed(
     page,
-    getCanvasTransform(state),
+    getCanvasTransform(state, insets),
     options,
     (layer, ctm) => {
       // TODO: Handle rotated rectangle collision
@@ -532,15 +535,18 @@ export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {
   return toRadians(getLayerRotation(layer));
 }
 
-export function getScreenTransform(state: ApplicationState) {
-  return AffineTransform.translation(state.canvasInsets.left, 0);
+export function getScreenTransform(insets: CanvasInsets) {
+  return AffineTransform.translation(insets.left, 0);
 }
 
-export function getCanvasTransform(state: ApplicationState) {
+export function getCanvasTransform(
+  state: ApplicationState,
+  insets: CanvasInsets,
+) {
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
   return AffineTransform.multiply(
-    getScreenTransform(state),
+    getScreenTransform(insets),
     AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
     AffineTransform.scale(zoomValue),
   );

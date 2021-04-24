@@ -1,15 +1,15 @@
+import { parse, SketchFile } from 'noya-sketch-file';
 import {
-  createInitialHistoryState,
-  HistoryAction,
-  historyReducer,
-  HistoryState,
+  createInitialWorkspaceState,
+  WorkspaceAction,
+  workspaceReducer,
+  WorkspaceState,
 } from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { parse, SketchFile } from 'noya-sketch-file';
 import Workspace from './containers/Workspace';
 import {
-  ApplicationStateProvider,
   ApplicationStateContextValue,
+  ApplicationStateProvider,
 } from './contexts/ApplicationStateContext';
 import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
@@ -19,22 +19,22 @@ export default function App() {
 
   const [state, dispatch] = useReducer(
     (
-      state: PromiseState<HistoryState>,
+      state: PromiseState<WorkspaceState>,
       action:
         | { type: 'set'; value: SketchFile }
-        | { type: 'update'; value: HistoryAction },
-    ): PromiseState<HistoryState> => {
+        | { type: 'update'; value: WorkspaceAction },
+    ): PromiseState<WorkspaceState> => {
       switch (action.type) {
         case 'set':
           return {
             type: 'success',
-            value: createInitialHistoryState(action.value),
+            value: createInitialWorkspaceState(action.value),
           };
         case 'update':
           if (state.type === 'success') {
             return {
               type: 'success',
-              value: historyReducer(state.value, action.value),
+              value: workspaceReducer(state.value, action.value),
             };
           } else {
             return state;
@@ -50,7 +50,7 @@ export default function App() {
     });
   }, [sketchFile]);
 
-  const handleDispatch = useCallback((action: HistoryAction) => {
+  const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });
   }, []);
 

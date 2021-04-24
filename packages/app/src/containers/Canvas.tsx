@@ -24,6 +24,7 @@ import {
   useApplicationState,
   useRawApplicationState,
   useSelector,
+  useWorkspace,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
@@ -86,6 +87,7 @@ export default memo(function Canvas() {
   const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
   const meta = useSelector(getCurrentPageMetadata);
+  const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
 
   const insets = useMemo(
     () => ({
@@ -116,12 +118,11 @@ export default memo(function Canvas() {
     canvasElement.width = containerSize.width + insets.left + insets.right;
     canvasElement.height = containerSize.height;
 
-    dispatch(
-      'setCanvasSize',
+    setCanvasSize(
       { width: containerSize.width, height: containerSize.height },
       insets,
     );
-  }, [dispatch, containerSize, insets]);
+  }, [dispatch, containerSize, insets, setCanvasSize]);
 
   // Recreate the surface whenever the canvas resizes
   //
@@ -227,7 +228,7 @@ export default memo(function Canvas() {
             }
           }
 
-          const layer = getLayerAtPoint(CanvasKit, state, rawPoint, {
+          const layer = getLayerAtPoint(CanvasKit, state, insets, rawPoint, {
             clickThroughGroups: event.metaKey,
             includeHiddenLayers: false,
           });
@@ -255,7 +256,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit],
+    [offsetEventPoint, state, dispatch, CanvasKit, insets],
   );
 
   const handleMouseMove = useCallback(
@@ -330,6 +331,7 @@ export default memo(function Canvas() {
           const layers = getLayersInRect(
             CanvasKit,
             state,
+            insets,
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
@@ -358,16 +360,15 @@ export default memo(function Canvas() {
           break;
         }
         case 'none': {
-          const layer = getLayerAtPoint(CanvasKit, state, rawPoint, {
+          const layer = getLayerAtPoint(CanvasKit, state, insets, rawPoint, {
             clickThroughGroups: event.metaKey,
             includeHiddenLayers: false,
           });
 
           // For perf, check that we actually need to update the highlight.
           // This gets called on every mouse movement.
-          if (state.highlightedLayer?.id !== layer?.do_objectID) {
-            dispatch(
-              'highlightLayer',
+          if (highlightedLayer?.id !== layer?.do_objectID) {
+            highlightLayer(
               layer
                 ? { id: layer.do_objectID, precedence: 'belowSelection' }
                 : undefined,
@@ -388,7 +389,15 @@ export default memo(function Canvas() {
         }
       }
     },
-    [CanvasKit, state, dispatch, offsetEventPoint],
+    [
+      offsetEventPoint,
+      state,
+      dispatch,
+      CanvasKit,
+      insets,
+      highlightedLayer?.id,
+      highlightLayer,
+    ],
   );
 
   const handleMouseUp = useCallback(
@@ -427,6 +436,7 @@ export default memo(function Canvas() {
           const layers = getLayersInRect(
             CanvasKit,
             state,
+            insets,
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
@@ -467,7 +477,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [CanvasKit, offsetEventPoint, state, dispatch],
+    [offsetEventPoint, state, dispatch, CanvasKit, insets],
   );
 
   const handleDirection =

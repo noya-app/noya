@@ -1,4 +1,7 @@
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useWorkspace,
+} from 'app/src/contexts/ApplicationStateContext';
 import * as CanvasKit from 'canvaskit-wasm';
 import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import {
@@ -109,15 +112,18 @@ const Marquee = memo(function Marquee({
 });
 
 export default memo(function SketchFileRenderer() {
+  const {
+    canvasSize,
+    canvasInsets,
+    preferences: { showRulers },
+    highlightedLayer,
+  } = useWorkspace();
   const [state] = useApplicationState();
   const { CanvasKit } = useReactCanvasKit();
   const page = getCurrentPage(state);
-  const showRulers = state.preferences.showRulers;
-  const screenTransform = getScreenTransform(state);
-  const canvasTransform = getCanvasTransform(state);
+  const screenTransform = getScreenTransform(canvasInsets);
+  const canvasTransform = getCanvasTransform(state, canvasInsets);
 
-  const canvasSize = state.canvasSize;
-  const canvasInsets = state.canvasInsets;
   const canvasRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
@@ -163,9 +169,7 @@ export default memo(function SketchFileRenderer() {
     [page, state.selectedObjects],
   );
 
-  const highlightedLayer = useMemo(() => {
-    const highlightedLayer = state.highlightedLayer;
-
+  const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
       // Don't draw a highlight when hovering over a selected layer on the canvas
@@ -198,7 +202,7 @@ export default memo(function SketchFileRenderer() {
         />
       )
     );
-  }, [highlightPaint, page, state.highlightedLayer, state.selectedObjects]);
+  }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
   return (
     <>
@@ -213,7 +217,7 @@ export default memo(function SketchFileRenderer() {
         {boundingPoints.map((points, index) => (
           <Polyline key={index} points={points} paint={selectionPaint} />
         ))}
-        {highlightedLayer}
+        {highlightedSketchLayer}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
         )}
