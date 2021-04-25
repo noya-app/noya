@@ -169,9 +169,12 @@ export type Action =
       swatchId: string | string[],
       name: string | undefined,
     ]
-  | [type: `setTextColor`, value: Sketch.Color]
-  | [type: `setTextFontName`, value: string]
-  | [type: `setTextFontSize`, value: number]
+  | [type: 'setTextColor', value: Sketch.Color]
+  | [type: 'setTextFontName', value: string]
+  | [type: 'setTextFontSize', value: number]
+  | [type: 'setTextLetterSpacing', value: number]
+  | [type: 'setTextLineSpacing', value: number]
+  | [type: 'setTextParagraphSpacing', value: number]
   | StyleAction;
 
 export function reducer(
@@ -1005,6 +1008,15 @@ export function reducer(
             Layers.visit(page, (layer) => {
               if (!layer.style) return;
               visitColors(layer.style, changeColor);
+
+              if (layer._class !== 'text') return;
+              const attributes = layer.attributedString.attributes;
+              if (attributes) {
+                attributes.forEach((a) => {
+                  if (a.attributes.MSAttributedStringColorAttribute)
+                    changeColor(a.attributes.MSAttributedStringColorAttribute);
+                });
+              }
             });
           });
 
@@ -1346,6 +1358,62 @@ export function reducer(
 
           if (encoded) encoded.size = value;
           if (attributes) attributes.size = value;
+        });
+      });
+    }
+    case 'setTextLetterSpacing':
+    case 'setTextLineSpacing':
+    case 'setTextParagraphSpacing': {
+      const [, value] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text') return;
+          const encoded = layer.style?.textStyle?.encodedAttributes;
+          const attributes = layer.attributedString.attributes[0].attributes;
+
+          if (!encoded || !attributes) return;
+
+          switch (action[0]) {
+            case 'setTextLetterSpacing': {
+              encoded.kerning = value;
+              attributes.kerning = value;
+              break;
+            }
+            case 'setTextLineSpacing': {
+              const paragraphStyle =
+                encoded.paragraphStyle ||
+                ({
+                  _class: 'paragraphStyle',
+                  alignment: 0,
+                } as Sketch.ParagraphStyle);
+
+              paragraphStyle.maximumLineHeight = value;
+              paragraphStyle.maximumLineHeight = value;
+
+              encoded.paragraphStyle = paragraphStyle;
+              attributes.paragraphStyle = paragraphStyle;
+              break;
+            }
+            case 'setTextParagraphSpacing': {
+              const paragraphStyle =
+                encoded.paragraphStyle ||
+                ({
+                  _class: 'paragraphStyle',
+                  alignment: 0,
+                } as Sketch.ParagraphStyle);
+
+              paragraphStyle.paragraphSpacing = value;
+              paragraphStyle.paragraphSpacing = value;
+
+              encoded.paragraphStyle = paragraphStyle;
+              attributes.paragraphStyle = paragraphStyle;
+              break;
+            }
+          }
         });
       });
     }

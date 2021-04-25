@@ -14,26 +14,41 @@ interface TextStyleRowProps {
   fontSize: number;
   fontFamily: string;
   fontColor: Sketch.Color;
+  lineSpacing: number;
+  letterSpacing: number;
+  paragraphSpacing: number;
   onChangeFontSize: (value: number) => void;
   onChangeFontFamily: (value: string) => void;
   onChangeFontWeight: (value: string) => void;
   onChangeFontColor: (color: Sketch.Color) => void;
+  onChangeLineSpacing: (value: number) => void;
+  onChangeLetterSpacing: (value: number) => void;
+  onChagenParagraphSpacing: (value: number) => void;
 }
 
 export default memo(function TextStyleRow({
   fontColor,
   fontSize,
   fontFamily,
+  lineSpacing,
+  letterSpacing,
+  paragraphSpacing,
   onChangeFontColor,
   onChangeFontSize,
   onChangeFontFamily,
   onChangeFontWeight,
+  onChangeLineSpacing,
+  onChangeLetterSpacing,
+  onChagenParagraphSpacing,
 }: TextStyleRowProps) {
   const characterInputId = `char`;
   const lineInputId = `line`;
   const paragraphInputId = `paragraph`;
 
-  const [family, size] = fontFamily.replace('MT', '').split('-');
+  const [family, size] = useMemo(
+    () => fontFamily.replace('MT', '').split('-'),
+    [fontFamily],
+  );
 
   // This it's for testing
   const fontFamilies = [
@@ -125,22 +140,22 @@ export default memo(function TextStyleRow({
         <LabeledElementView renderLabel={renderLabel}>
           <InputField.NumberInput
             id={characterInputId}
-            value={32}
-            onSubmit={() => {}}
+            value={lineSpacing}
+            onSubmit={onChangeLineSpacing}
             onNudge={() => {}}
           />
           <Spacer.Horizontal size={8} />
           <InputField.NumberInput
             id={lineInputId}
-            value={32}
-            onSubmit={() => {}}
+            value={letterSpacing}
+            onSubmit={onChangeLetterSpacing}
             onNudge={() => {}}
           />
           <Spacer.Horizontal size={8} />
           <InputField.NumberInput
             id={paragraphInputId}
-            value={32}
-            onSubmit={() => {}}
+            value={paragraphSpacing}
+            onSubmit={onChagenParagraphSpacing}
             onNudge={() => {}}
           />
           <Spacer.Horizontal size={8} />

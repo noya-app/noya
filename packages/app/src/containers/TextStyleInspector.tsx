@@ -14,6 +14,7 @@ import {
 export default memo(function TextStyleInspector() {
   const [, dispatch] = useApplicationState();
 
+  //Todo: Handle multiple texts
   const selectedTextStyles = useShallowArray(
     useSelector(Selectors.getSelectedTextStyles),
   );
@@ -68,21 +69,47 @@ export default memo(function TextStyleInspector() {
     [fontColor],
   );
 
-  const firstFontFamily = useMemo(() => fontFamily[0] || 'Arial', [fontFamily]);
+  const lineSpacing = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) => style?.textStyle?.encodedAttributes.kerning,
+      ),
+    [selectedTextStyles],
+  );
+  const letterSpacing = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) =>
+          style?.textStyle?.encodedAttributes.paragraphStyle?.maximumLineHeight,
+      ),
+    [selectedTextStyles],
+  );
+  const paragraphSpacing = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) =>
+          style?.textStyle?.encodedAttributes.paragraphStyle?.paragraphSpacing,
+      ),
+    [selectedTextStyles],
+  );
 
   const [fontDecorator, setFontDecorator] = useState(fontDecoration[0]);
   const [fontCase, setFontCase] = useState('0');
 
-  const [fontAlignment, setFontAlignment] = useState('horizontal');
+  const [fontAlignment, setFontAlignment] = useState('0');
   const [verticalAlignment, setFontVerticalAlignment] = useState('0');
-  const [horizontalAlignment, setFontHorizontalAlignment] = useState('left');
+  const [horizontalAlignment, setFontHorizontalAlignment] = useState('0');
 
+  // default value for the spacing (?)
   return (
     <>
       <TextStyleRow
         fontColor={firstColor}
-        fontFamily={firstFontFamily}
+        fontFamily={fontFamily[0] || 'Arial'}
         fontSize={fontSize[0]}
+        lineSpacing={lineSpacing[0] !== undefined ? lineSpacing[0] : 0}
+        letterSpacing={letterSpacing[0] || 0}
+        paragraphSpacing={paragraphSpacing[0] || 0}
         onChangeFontFamily={useCallback(
           (value) => {
             dispatch('setTextFontName', value);
@@ -101,6 +128,18 @@ export default memo(function TextStyleInspector() {
         )}
         onChangeFontSize={useCallback(
           (value) => dispatch('setTextFontSize', value),
+          [dispatch],
+        )}
+        onChangeLineSpacing={useCallback(
+          (value) => dispatch('setTextLetterSpacing', value),
+          [dispatch],
+        )}
+        onChangeLetterSpacing={useCallback(
+          (value) => dispatch('setTextLineSpacing', value),
+          [dispatch],
+        )}
+        onChagenParagraphSpacing={useCallback(
+          (value) => dispatch('setTextParagraphSpacing', value),
           [dispatch],
         )}
       />
