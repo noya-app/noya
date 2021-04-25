@@ -142,6 +142,12 @@ export const getSelectedTextStyles = (
     .flatMap((layer) => (layer.style ? [layer.style] : []));
 };
 
+export const getSelectedText = (state: ApplicationState): Sketch.Text[] => {
+  return getSelectedLayers(state)
+    .filter((layer) => layer._class === 'text')
+    .map((layer) => layer as Sketch.Text);
+};
+
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 

@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Divider } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { useCallback, memo, useState, useMemo } from 'react';
+import { useCallback, memo, useMemo } from 'react';
 import useShallowArray from '../hooks/useShallowArray';
 import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextAlignmentRow from '../components/inspector/TextAlignmentRow';
@@ -11,6 +11,11 @@ import {
   useApplicationState,
 } from '../contexts/ApplicationStateContext';
 
+/**
+ * TODO: Handle mixed styles
+ * TODO: Maybe some of this style to a selector
+ */
+
 export default memo(function TextStyleInspector() {
   const [, dispatch] = useApplicationState();
 
@@ -18,6 +23,8 @@ export default memo(function TextStyleInspector() {
   const selectedTextStyles = useShallowArray(
     useSelector(Selectors.getSelectedTextStyles),
   );
+
+  const seletedText = useShallowArray(useSelector(Selectors.getSelectedText));
 
   const fontColor = useMemo(
     () =>
@@ -34,14 +41,6 @@ export default memo(function TextStyleInspector() {
         (style) =>
           style?.textStyle?.encodedAttributes.MSAttributedStringFontAttribute
             .attributes.name,
-      ),
-    [selectedTextStyles],
-  );
-
-  const fontDecoration = useMemo(
-    () =>
-      selectedTextStyles.map(
-        (style) => style?.textStyle?.encodedAttributes.underlineStyle || 0,
       ),
     [selectedTextStyles],
   );
@@ -93,12 +92,46 @@ export default memo(function TextStyleInspector() {
     [selectedTextStyles],
   );
 
-  const [fontDecorator, setFontDecorator] = useState(fontDecoration[0]);
-  const [fontCase, setFontCase] = useState('0');
+  const fontAlignment = useMemo(
+    () => seletedText.map((text) => text.textBehaviour),
+    [seletedText],
+  );
 
-  const [fontAlignment, setFontAlignment] = useState('0');
-  const [verticalAlignment, setFontVerticalAlignment] = useState('0');
-  const [horizontalAlignment, setFontHorizontalAlignment] = useState('0');
+  const horizontalAlignment = useMemo(
+    () =>
+      seletedText.map(
+        (text) =>
+          text.style?.textStyle?.encodedAttributes.paragraphStyle?.alignment,
+      ),
+    [seletedText],
+  );
+
+  const verticalAlignment = useMemo(
+    () => seletedText.map((text) => text.style?.textStyle?.verticalAlignment),
+    [seletedText],
+  );
+
+  const fontDecoration = useMemo(
+    () =>
+      selectedTextStyles.map((style) =>
+        style?.textStyle?.encodedAttributes.underlineStyle
+          ? 1
+          : style?.textStyle?.encodedAttributes.strikethroughStyle
+          ? 2
+          : 0,
+      ),
+    [selectedTextStyles],
+  );
+
+  const fontCase = useMemo(
+    () =>
+      selectedTextStyles.map(
+        (style) =>
+          style?.textStyle?.encodedAttributes
+            .MSAttributedStringTextTransformAttribute || 0,
+      ),
+    [selectedTextStyles],
+  );
 
   // default value for the spacing (?)
   return (
@@ -145,40 +178,41 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextAlignmentRow
-        fontAlignment={fontAlignment}
-        fontVerticalAlignment={verticalAlignment}
-        fontHorizontalAlignment={horizontalAlignment}
+        fontAlignment={fontAlignment[0] || 0}
+        fontVerticalAlignment={verticalAlignment[0] || 0}
+        fontHorizontalAlignment={horizontalAlignment[0] || 0}
         onChangeFontAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
-            setFontAlignment(event.target.value);
+            dispatch('setTextAlignment', Number(event.target.value));
           },
-          [setFontAlignment],
+          [dispatch],
         )}
         onChangeFontHorizontalAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
-            setFontHorizontalAlignment(event.target.value);
+            dispatch('setTextHorizontalAlignment', Number(event.target.value));
           },
-          [setFontHorizontalAlignment],
+          [dispatch],
         )}
         onChangeFontVerticalAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
-            setFontVerticalAlignment(event.target.value);
+            dispatch('setTextVerticalAlignment', Number(event.target.value));
           },
-          [setFontVerticalAlignment],
+          [dispatch],
         )}
       />
       <Divider />
       <TextOptionsRow
-        fontCase={fontCase}
-        fontDecorator={fontDecorator}
-        onChangeFontDecorator={useCallback((value) => setFontDecorator(value), [
-          setFontDecorator,
-        ])}
+        fontCase={fontCase[0]}
+        fontDecorator={fontDecoration[0]}
+        onChangeFontDecorator={useCallback(
+          (value) => dispatch('setTextDecoration', value),
+          [dispatch],
+        )}
         onChangeFontCase={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
-            setFontCase(event.target.value);
+            dispatch('setTextCase', Number(event.target.value));
           },
-          [setFontCase],
+          [dispatch],
         )}
       />
     </>

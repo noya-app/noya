@@ -16,9 +16,9 @@ import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextAligmentRowProps {
-  fontAlignment: string;
-  fontHorizontalAlignment: string;
-  fontVerticalAlignment: string;
+  fontAlignment: number;
+  fontHorizontalAlignment: number;
+  fontVerticalAlignment: number;
   onChangeFontAlignment: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeFontHorizontalAlignment: (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -48,16 +48,16 @@ export default memo(function TextAlignmentRow({
         >
           <RadioGroup.Root
             id={'text-alignment'}
-            value={fontAlignment}
+            value={fontAlignment.toString()}
             onValueChange={onChangeFontAlignment}
           >
-            <RadioGroup.Item value="horizontal" tooltip="Horizontal">
+            <RadioGroup.Item value="0" tooltip="Horizontal">
               <StretchHorizontallyIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="vertical" tooltip="Vertical">
+            <RadioGroup.Item value="1" tooltip="Vertical">
               <StretchVerticallyIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="outside" tooltip="Outside">
+            <RadioGroup.Item value="2" tooltip="Outside">
               <SquareIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>
@@ -68,7 +68,7 @@ export default memo(function TextAlignmentRow({
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id={'text-horizontal-aligment'}
-          value={fontHorizontalAlignment}
+          value={fontHorizontalAlignment.toString()}
           onValueChange={onChangeFontHorizontalAlignment}
         >
           <RadioGroup.Item value="0" tooltip="Left">
@@ -90,7 +90,7 @@ export default memo(function TextAlignmentRow({
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id={'text-vertical-aligment'}
-          value={fontVerticalAlignment}
+          value={fontVerticalAlignment.toString()}
           onValueChange={onChangeFontVerticalAlignment}
         >
           <RadioGroup.Item value="0" tooltip="Top">

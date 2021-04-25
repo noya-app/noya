@@ -10,11 +10,11 @@ import {
   LabeledElementView,
 } from 'noya-designsystem';
 import { Spacer } from 'noya-designsystem';
-import { useCallback, memo } from 'react';
+import { useCallback, useMemo, memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextOptionsRowProps {
-  fontCase: string;
+  fontCase: number;
   fontDecorator: number;
   onChangeFontCase: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeFontDecorator: (value: number) => void;
@@ -28,7 +28,15 @@ export default memo(function TextOptionsRow({
 }: TextOptionsRowProps) {
   const decoratorInputId = `decorator`;
   const transformInputId = `transform`;
-  const decorator = ['None', 'Underline', 'Strikethrough'];
+
+  const decorator = useMemo(
+    () => [
+      { id: 0, name: 'None' },
+      { id: 1, name: 'Underline' },
+      { id: 2, name: 'Strikethrough' },
+    ],
+    [],
+  );
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -43,6 +51,15 @@ export default memo(function TextOptionsRow({
     },
     [decoratorInputId, transformInputId],
   );
+
+  const onChangeDecorator = useCallback(
+    (value) => {
+      const id = decorator.find((d) => d.name === value)?.id || 0;
+      onChangeFontDecorator(id);
+    },
+    [onChangeFontDecorator, decorator],
+  );
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
@@ -53,24 +70,24 @@ export default memo(function TextOptionsRow({
         <LabeledElementView renderLabel={renderLabel}>
           <Select
             id={decoratorInputId}
-            value={decorator[fontDecorator || 0]}
-            options={decorator}
+            value={decorator[fontDecorator].name}
+            options={decorator.map((d) => d.name)}
             getTitle={(name) => name}
-            onChange={(value) => onChangeFontDecorator(Number(value))}
+            onChange={onChangeDecorator}
           />
           <Spacer.Horizontal size={8} />
           <RadioGroup.Root
             id={transformInputId}
-            value={fontCase}
+            value={fontCase.toString()}
             onValueChange={onChangeFontCase}
           >
-            <RadioGroup.Item value="0" tooltip="Capitalize">
+            <RadioGroup.Item value="0" tooltip="None">
               <LetterCaseCapitalizeIcon />
             </RadioGroup.Item>
             <RadioGroup.Item value="1" tooltip="Uppercase">
               <LetterCaseUppercaseIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="1" tooltip="Lowercase">
+            <RadioGroup.Item value="2" tooltip="Lowercase">
               <LetterCaseLowercaseIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>

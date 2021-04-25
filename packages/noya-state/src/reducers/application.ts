@@ -175,6 +175,11 @@ export type Action =
   | [type: 'setTextLetterSpacing', value: number]
   | [type: 'setTextLineSpacing', value: number]
   | [type: 'setTextParagraphSpacing', value: number]
+  | [type: 'setTextAlignment', value: number]
+  | [type: 'setTextHorizontalAlignment', value: number]
+  | [type: 'setTextVerticalAlignment', value: number]
+  | [type: 'setTextDecoration', value: number]
+  | [type: 'setTextCase', value: number]
   | StyleAction;
 
 export function reducer(
@@ -1377,6 +1382,13 @@ export function reducer(
 
           if (!encoded || !attributes) return;
 
+          const paragraphStyle =
+            encoded.paragraphStyle ||
+            ({
+              _class: 'paragraphStyle',
+              alignment: 0,
+            } as Sketch.ParagraphStyle);
+
           switch (action[0]) {
             case 'setTextLetterSpacing': {
               encoded.kerning = value;
@@ -1384,13 +1396,6 @@ export function reducer(
               break;
             }
             case 'setTextLineSpacing': {
-              const paragraphStyle =
-                encoded.paragraphStyle ||
-                ({
-                  _class: 'paragraphStyle',
-                  alignment: 0,
-                } as Sketch.ParagraphStyle);
-
               paragraphStyle.maximumLineHeight = value;
               paragraphStyle.maximumLineHeight = value;
 
@@ -1399,18 +1404,98 @@ export function reducer(
               break;
             }
             case 'setTextParagraphSpacing': {
-              const paragraphStyle =
-                encoded.paragraphStyle ||
-                ({
-                  _class: 'paragraphStyle',
-                  alignment: 0,
-                } as Sketch.ParagraphStyle);
-
               paragraphStyle.paragraphSpacing = value;
               paragraphStyle.paragraphSpacing = value;
 
               encoded.paragraphStyle = paragraphStyle;
               attributes.paragraphStyle = paragraphStyle;
+              break;
+            }
+          }
+        });
+      });
+    }
+    case 'setTextAlignment':
+    case 'setTextHorizontalAlignment':
+    case 'setTextVerticalAlignment': {
+      const [, value] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text') return;
+          const textStyle = layer.style?.textStyle;
+          const attributes = layer.attributedString.attributes[0].attributes;
+
+          if (!textStyle || !attributes) return;
+
+          switch (action[0]) {
+            case 'setTextAlignment': {
+              layer.textBehaviour = value;
+              break;
+            }
+            case 'setTextHorizontalAlignment': {
+              const paragraphStyle =
+                textStyle.encodedAttributes.paragraphStyle ||
+                ({
+                  _class: 'paragraphStyle',
+                  alignment: 0,
+                } as Sketch.ParagraphStyle);
+              paragraphStyle.alignment = value;
+              paragraphStyle.alignment = value;
+
+              textStyle.encodedAttributes.paragraphStyle = paragraphStyle;
+              attributes.paragraphStyle = paragraphStyle;
+              break;
+            }
+            case 'setTextVerticalAlignment': {
+              textStyle.verticalAlignment = value;
+              textStyle.encodedAttributes.textStyleVerticalAlignmentKey = value;
+              attributes.textStyleVerticalAlignmentKey = value;
+              break;
+            }
+          }
+        });
+      });
+    }
+    case 'setTextDecoration':
+    case 'setTextCase': {
+      const [, value] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text') return;
+          const encoded = layer.style?.textStyle?.encodedAttributes;
+
+          if (!encoded) return;
+
+          switch (action[0]) {
+            case 'setTextDecoration': {
+              switch (value) {
+                case 1: {
+                  encoded.underlineStyle = 1;
+                  encoded.strikethroughStyle = 0;
+                  break;
+                }
+                case 2: {
+                  encoded.underlineStyle = 0;
+                  encoded.strikethroughStyle = 1;
+                  break;
+                }
+                default: {
+                  encoded.underlineStyle = 0;
+                  encoded.strikethroughStyle = 0;
+                }
+              }
+              break;
+            }
+            case 'setTextCase': {
+              encoded.MSAttributedStringTextTransformAttribute = value;
               break;
             }
           }
