@@ -15,10 +15,10 @@ import { Spacer } from 'noya-designsystem';
 import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
-interface TextAligmentRowProps {
-  fontAlignment: number;
-  fontHorizontalAlignment: number;
-  fontVerticalAlignment: number;
+interface TextLayoutRowProps {
+  textLayout: number;
+  textHorizontalAlignment: number;
+  textVerticalAlignment: number;
   onChangeFontAlignment: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onChangeFontHorizontalAlignment: (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -28,14 +28,14 @@ interface TextAligmentRowProps {
   ) => void;
 }
 
-export default memo(function TextAlignmentRow({
-  fontAlignment,
-  fontHorizontalAlignment,
-  fontVerticalAlignment,
+export default memo(function TextLayoutRowRow({
+  textLayout,
+  textHorizontalAlignment,
+  textVerticalAlignment,
   onChangeFontAlignment,
   onChangeFontHorizontalAlignment,
   onChangeFontVerticalAlignment,
-}: TextAligmentRowProps) {
+}: TextLayoutRowProps) {
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
@@ -48,7 +48,7 @@ export default memo(function TextAlignmentRow({
         >
           <RadioGroup.Root
             id={'text-alignment'}
-            value={fontAlignment.toString()}
+            value={textLayout.toString()}
             onValueChange={onChangeFontAlignment}
           >
             <RadioGroup.Item value="0" tooltip="Horizontal">
@@ -68,7 +68,7 @@ export default memo(function TextAlignmentRow({
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id={'text-horizontal-aligment'}
-          value={fontHorizontalAlignment.toString()}
+          value={textHorizontalAlignment.toString()}
           onValueChange={onChangeFontHorizontalAlignment}
         >
           <RadioGroup.Item value="0" tooltip="Left">
@@ -90,7 +90,7 @@ export default memo(function TextAlignmentRow({
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id={'text-vertical-aligment'}
-          value={fontVerticalAlignment.toString()}
+          value={textVerticalAlignment.toString()}
           onValueChange={onChangeFontVerticalAlignment}
         >
           <RadioGroup.Item value="0" tooltip="Top">

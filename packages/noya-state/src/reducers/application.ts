@@ -35,6 +35,7 @@ import {
   InteractionState,
 } from './interaction';
 import { SetNumberMode, StyleAction, styleReducer } from './style';
+import { TextStyleAction, textStyleReducer } from './textStyle';
 
 export type { SetNumberMode };
 
@@ -169,18 +170,8 @@ export type Action =
       swatchId: string | string[],
       name: string | undefined,
     ]
-  | [type: 'setTextColor', value: Sketch.Color]
-  | [type: 'setTextFontName', value: string]
-  | [type: 'setTextFontSize', value: number]
-  | [type: 'setTextLetterSpacing', value: number]
-  | [type: 'setTextLineSpacing', value: number]
-  | [type: 'setTextParagraphSpacing', value: number]
-  | [type: 'setTextAlignment', value: number]
-  | [type: 'setTextHorizontalAlignment', value: number]
-  | [type: 'setTextVerticalAlignment', value: number]
-  | [type: 'setTextDecoration', value: number]
-  | [type: 'setTextCase', value: number]
-  | StyleAction;
+  | StyleAction
+  | TextStyleAction;
 
 export function reducer(
   state: ApplicationState,
@@ -1277,228 +1268,40 @@ export function reducer(
         else draft.selectedThemeStyleGroup = '';
       });
     }
-    case 'setTextColor': {
-      const [, color] = action;
-
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text') return;
-          const encoded = layer.style?.textStyle?.encodedAttributes;
-          const attributes = layer.attributedString.attributes[0].attributes;
-
-          if (encoded) {
-            if (!encoded.MSAttributedStringColorAttribute) {
-              encoded.MSAttributedStringColorAttribute = color;
-              return;
-            }
-
-            encoded.MSAttributedStringColorAttribute.alpha = color.alpha;
-            encoded.MSAttributedStringColorAttribute.blue = color.blue;
-            encoded.MSAttributedStringColorAttribute.red = color.red;
-            encoded.MSAttributedStringColorAttribute.green = color.green;
-          }
-          if (attributes.MSAttributedStringColorAttribute) {
-            if (!attributes.MSAttributedStringColorAttribute) {
-              attributes.MSAttributedStringColorAttribute = color;
-              return;
-            }
-
-            attributes.MSAttributedStringColorAttribute.alpha = color.alpha;
-            attributes.MSAttributedStringColorAttribute.blue = color.blue;
-            attributes.MSAttributedStringColorAttribute.red = color.red;
-            attributes.MSAttributedStringColorAttribute.green = color.green;
-          }
-        });
-      });
-    }
-    case 'setTextFontName': {
-      const [, value] = action;
-
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text') return;
-          const encoded =
-            layer.style?.textStyle?.encodedAttributes
-              .MSAttributedStringFontAttribute.attributes;
-          const attributes =
-            layer.attributedString.attributes[0].attributes
-              .MSAttributedStringFontAttribute.attributes;
-
-          if (!encoded) return;
-
-          const face = encoded.name.split('-')[1]
-            ? '-' + encoded.name.split('-')[1]
-            : '';
-
-          const newName = value.startsWith('-')
-            ? encoded.name.split('-')[0] + value
-            : value + face;
-
-          encoded.name = newName;
-          if (attributes) attributes.name = newName;
-        });
-      });
-    }
-    case 'setTextFontSize': {
-      const [, value] = action;
-
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text') return;
-          const encoded =
-            layer.style?.textStyle?.encodedAttributes
-              .MSAttributedStringFontAttribute.attributes;
-          const attributes =
-            layer.attributedString.attributes[0].attributes
-              .MSAttributedStringFontAttribute.attributes;
-
-          if (encoded) encoded.size = value;
-          if (attributes) attributes.size = value;
-        });
-      });
-    }
-    case 'setTextLetterSpacing':
-    case 'setTextLineSpacing':
-    case 'setTextParagraphSpacing': {
-      const [, value] = action;
-
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text') return;
-          const encoded = layer.style?.textStyle?.encodedAttributes;
-          const attributes = layer.attributedString.attributes[0].attributes;
-
-          if (!encoded || !attributes) return;
-
-          const paragraphStyle =
-            encoded.paragraphStyle ||
-            ({
-              _class: 'paragraphStyle',
-              alignment: 0,
-            } as Sketch.ParagraphStyle);
-
-          switch (action[0]) {
-            case 'setTextLetterSpacing': {
-              encoded.kerning = value;
-              attributes.kerning = value;
-              break;
-            }
-            case 'setTextLineSpacing': {
-              paragraphStyle.maximumLineHeight = value;
-              paragraphStyle.maximumLineHeight = value;
-
-              encoded.paragraphStyle = paragraphStyle;
-              attributes.paragraphStyle = paragraphStyle;
-              break;
-            }
-            case 'setTextParagraphSpacing': {
-              paragraphStyle.paragraphSpacing = value;
-              paragraphStyle.paragraphSpacing = value;
-
-              encoded.paragraphStyle = paragraphStyle;
-              attributes.paragraphStyle = paragraphStyle;
-              break;
-            }
-          }
-        });
-      });
-    }
+    case 'setTextCase':
+    case 'setTextColor':
+    case 'setTextFontName':
+    case 'setTextFontSize':
     case 'setTextAlignment':
+    case 'setTextDecoration':
+    case 'setTextLineSpacing':
+    case 'setTextLetterSpacing':
+    case 'setTextParagraphSpacing':
     case 'setTextHorizontalAlignment':
     case 'setTextVerticalAlignment': {
-      const [, value] = action;
-
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text') return;
-          const textStyle = layer.style?.textStyle;
-          const attributes = layer.attributedString.attributes[0].attributes;
+          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
+            return;
 
-          if (!textStyle || !attributes) return;
-
-          switch (action[0]) {
-            case 'setTextAlignment': {
-              layer.textBehaviour = value;
-              break;
-            }
-            case 'setTextHorizontalAlignment': {
-              const paragraphStyle =
-                textStyle.encodedAttributes.paragraphStyle ||
-                ({
-                  _class: 'paragraphStyle',
-                  alignment: 0,
-                } as Sketch.ParagraphStyle);
-              paragraphStyle.alignment = value;
-              paragraphStyle.alignment = value;
-
-              textStyle.encodedAttributes.paragraphStyle = paragraphStyle;
-              attributes.paragraphStyle = paragraphStyle;
-              break;
-            }
-            case 'setTextVerticalAlignment': {
-              textStyle.verticalAlignment = value;
-              textStyle.encodedAttributes.textStyleVerticalAlignmentKey = value;
-              attributes.textStyleVerticalAlignmentKey = value;
-              break;
-            }
+          if (action[0] === 'setTextAlignment') {
+            layer.textBehaviour = action[1];
+            return;
           }
-        });
-      });
-    }
-    case 'setTextDecoration':
-    case 'setTextCase': {
-      const [, value] = action;
+          // It's this optimal ?
+          layer.style.textStyle = textStyleReducer(
+            layer.style.textStyle,
+            action,
+          ) as Sketch.TextStyle;
 
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text') return;
-          const encoded = layer.style?.textStyle?.encodedAttributes;
-
-          if (!encoded) return;
-
-          switch (action[0]) {
-            case 'setTextDecoration': {
-              switch (value) {
-                case 1: {
-                  encoded.underlineStyle = 1;
-                  encoded.strikethroughStyle = 0;
-                  break;
-                }
-                case 2: {
-                  encoded.underlineStyle = 0;
-                  encoded.strikethroughStyle = 1;
-                  break;
-                }
-                default: {
-                  encoded.underlineStyle = 0;
-                  encoded.strikethroughStyle = 0;
-                }
-              }
-              break;
-            }
-            case 'setTextCase': {
-              encoded.MSAttributedStringTextTransformAttribute = value;
-              break;
-            }
-          }
+          layer.attributedString.attributes.forEach((attribute, index) => {
+            layer.attributedString.attributes[index] = textStyleReducer(
+              attribute,
+              action,
+            ) as Sketch.StringAttribute;
+          });
         });
       });
     }
