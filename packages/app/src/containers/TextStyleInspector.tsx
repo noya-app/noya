@@ -25,6 +25,8 @@ export default memo(function TextStyleInspector() {
     const encodedAttributes = textStyle?.encodedAttributes;
     const paragraphStyle = encodedAttributes?.paragraphStyle;
 
+    const attributes = layer.attributedString.attributes;
+
     const color = {
       _class: 'color',
       red: 0.5,
@@ -38,36 +40,54 @@ export default memo(function TextStyleInspector() {
       fontFamily:
         encodedAttributes?.MSAttributedStringFontAttribute.attributes.name ||
         'Arial',
-      fontSize: layers.every((layer) => {
-        const textStyle = layer.style?.textStyle;
-        const encoded = textStyle?.encodedAttributes;
-        return (
-          encoded?.MSAttributedStringFontAttribute.attributes.size ===
-          encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
-        );
-      })
-        ? encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
-        : undefined,
-      lineHeight: layers.every((layer) => {
-        const textStyle = layer.style?.textStyle;
-        const encoded = textStyle?.encodedAttributes;
-        const paragraph = encoded?.paragraphStyle;
+      fontSize:
+        layers.every((layer) => {
+          const textStyle = layer.style?.textStyle;
+          const encoded = textStyle?.encodedAttributes;
+          return (
+            encoded?.MSAttributedStringFontAttribute.attributes.size ===
+            encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
+          );
+        }) &&
+        attributes.every(
+          (a) =>
+            a.attributes.MSAttributedStringFontAttribute.attributes.size ===
+            encodedAttributes?.MSAttributedStringFontAttribute.attributes.size,
+        )
+          ? encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
+          : undefined,
+      lineHeight:
+        layers.every((layer) => {
+          const textStyle = layer.style?.textStyle;
+          const encoded = textStyle?.encodedAttributes;
+          const paragraph = encoded?.paragraphStyle;
 
-        return (
-          paragraph?.maximumLineHeight === paragraphStyle?.maximumLineHeight
-        );
-      })
-        ? paragraphStyle?.maximumLineHeight || 0
-        : undefined,
-      horizontalAlignment: layers.every((layer) => {
-        const textStyle = layer.style?.textStyle;
-        const encoded = textStyle?.encodedAttributes;
-        const paragraph = encoded?.paragraphStyle;
+          return (
+            paragraph?.maximumLineHeight === paragraphStyle?.maximumLineHeight
+          );
+        }) &&
+        attributes.every(
+          (a) =>
+            a.attributes.paragraphStyle?.maximumLineHeight ===
+            paragraphStyle?.maximumLineHeight,
+        )
+          ? paragraphStyle?.maximumLineHeight ?? 22
+          : undefined,
+      horizontalAlignment:
+        layers.every((layer) => {
+          const textStyle = layer.style?.textStyle;
+          const encoded = textStyle?.encodedAttributes;
+          const paragraph = encoded?.paragraphStyle;
 
-        return paragraph?.alignment === paragraphStyle?.alignment;
-      })
-        ? paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left
-        : undefined,
+          return paragraph?.alignment === paragraphStyle?.alignment;
+        }) &&
+        attributes.every(
+          (a) =>
+            a.attributes.paragraphStyle?.alignment ===
+            paragraphStyle?.alignment,
+        )
+          ? paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left
+          : undefined,
       textTransform: layers.every((layer) => {
         const textStyle = layer.style?.textStyle;
         const encoded = textStyle?.encodedAttributes;
@@ -84,23 +104,35 @@ export default memo(function TextStyleInspector() {
         : encodedAttributes?.strikethroughStyle
         ? SimpleTextDecoration.Strikethrough
         : SimpleTextDecoration.None,
-      letterSpacing: layers.every((layer) => {
-        const textStyle = layer.style?.textStyle;
-        const encoded = textStyle?.encodedAttributes;
+      letterSpacing:
+        layers.every((layer) => {
+          const textStyle = layer.style?.textStyle;
+          const encoded = textStyle?.encodedAttributes;
 
-        return encodedAttributes?.kerning === encoded?.kerning;
-      })
-        ? encodedAttributes?.kerning || 0
-        : undefined,
-      paragraphSpacing: layers.every((layer) => {
-        const textStyle = layer.style?.textStyle;
-        const encoded = textStyle?.encodedAttributes;
-        const paragraph = encoded?.paragraphStyle;
+          return encodedAttributes?.kerning === encoded?.kerning;
+        }) &&
+        attributes.every(
+          (a) => a.attributes.kerning === encodedAttributes?.kerning,
+        )
+          ? encodedAttributes?.kerning || 0
+          : undefined,
+      paragraphSpacing:
+        layers.every((layer) => {
+          const textStyle = layer.style?.textStyle;
+          const encoded = textStyle?.encodedAttributes;
+          const paragraph = encoded?.paragraphStyle;
 
-        return paragraphStyle?.paragraphSpacing === paragraph?.paragraphSpacing;
-      })
-        ? paragraphStyle?.paragraphSpacing || 0
-        : undefined,
+          return (
+            paragraphStyle?.paragraphSpacing === paragraph?.paragraphSpacing
+          );
+        }) &&
+        attributes.every(
+          (a) =>
+            a.attributes.paragraphStyle?.paragraphSpacing ===
+            paragraphStyle?.paragraphSpacing,
+        )
+          ? paragraphStyle?.paragraphSpacing || 0
+          : undefined,
       verticalAlignment: layers.every((layer) => {
         const style = layer.style?.textStyle;
 
@@ -217,3 +249,9 @@ export default memo(function TextStyleInspector() {
     </>
   );
 });
+
+/**
+ * Color
+ * - Size
+ * - FontFamily ? Weight
+ */

@@ -1281,7 +1281,7 @@ export function reducer(
             layer.textBehaviour = action[1];
             return;
           }
-          // It's this optimal ?
+
           layer.style.textStyle = textStyleReducer(
             layer.style.textStyle,
             action,
