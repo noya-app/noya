@@ -560,7 +560,7 @@ export function getCanvasTransform(state: ApplicationState) {
   );
 }
 
-export function visitColors(
+export function visitStyleColors(
   style: Sketch.Style,
   f: (color: Sketch.Color) => void,
 ): void {
@@ -571,4 +571,21 @@ export function visitColors(
   style?.borders?.forEach((border) => f(border.color));
   style?.shadows?.forEach((shadow) => f(shadow.color));
   style?.innerShadows.forEach((fill) => f(fill.color));
+}
+
+export function visitLayerColors(
+  layer: Sketch.AnyLayer,
+  f: (color: Sketch.Color) => void,
+) {
+  if (layer.style) visitStyleColors(layer.style, f);
+
+  if (layer._class === 'text') {
+    const attributes = layer.attributedString.attributes;
+    if (attributes) {
+      attributes.forEach((a) => {
+        if (a.attributes.MSAttributedStringColorAttribute)
+          f(a.attributes.MSAttributedStringColorAttribute);
+      });
+    }
+  }
 }

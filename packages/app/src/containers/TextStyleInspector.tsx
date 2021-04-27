@@ -3,7 +3,9 @@ import { Divider } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { useCallback, memo, useMemo } from 'react';
 import useShallowArray from '../hooks/useShallowArray';
-import TextOptionsRow from '../components/inspector/TextOptionsRow';
+import TextOptionsRow, {
+  SimpleTextDecoration,
+} from '../components/inspector/TextOptionsRow';
 import TextAlignmentRow from '../components/inspector/TextLayoutRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
 import {
@@ -17,60 +19,129 @@ export default memo(function TextStyleInspector() {
   //Todo: Handle multiple texts
   const seletedText = useShallowArray(useSelector(Selectors.getSelectedText));
 
-  const getTextStyleAttributes = useCallback((layer: Sketch.Text) => {
+  const getTextStyleAttributes = useCallback((layers: Sketch.Text[]) => {
+    const layer = layers[0];
     const textStyle = layer.style?.textStyle;
     const encodedAttributes = textStyle?.encodedAttributes;
     const paragraphStyle = encodedAttributes?.paragraphStyle;
 
+    const color = {
+      _class: 'color',
+      red: 0.5,
+      blue: 0.5,
+      green: 0.5,
+      alpha: 0.5,
+    } as Sketch.Color;
+
     return {
-      fontColor:
-        encodedAttributes?.MSAttributedStringColorAttribute ||
-        ({
-          _class: 'color',
-          red: 0.5,
-          blue: 0.5,
-          green: 0.5,
-          alpha: 0.5,
-        } as Sketch.Color),
+      fontColor: encodedAttributes?.MSAttributedStringColorAttribute || color,
       fontFamily:
         encodedAttributes?.MSAttributedStringFontAttribute.attributes.name ||
         'Arial',
-      fontSize:
-        encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ??
-        12,
-      lineHeight: paragraphStyle?.maximumLineHeight,
-      horizontalAlignment:
-        paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left,
-      textTransform:
-        encodedAttributes?.MSAttributedStringTextTransformAttribute ??
-        Sketch.TextTransform.None,
+      fontSize: layers.every((layer) => {
+        const textStyle = layer.style?.textStyle;
+        const encoded = textStyle?.encodedAttributes;
+        return (
+          encoded?.MSAttributedStringFontAttribute.attributes.size ===
+          encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
+        );
+      })
+        ? encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
+        : undefined,
+      lineHeight: layers.every((layer) => {
+        const textStyle = layer.style?.textStyle;
+        const encoded = textStyle?.encodedAttributes;
+        const paragraph = encoded?.paragraphStyle;
+
+        return (
+          paragraph?.maximumLineHeight === paragraphStyle?.maximumLineHeight
+        );
+      })
+        ? paragraphStyle?.maximumLineHeight || 0
+        : undefined,
+      horizontalAlignment: layers.every((layer) => {
+        const textStyle = layer.style?.textStyle;
+        const encoded = textStyle?.encodedAttributes;
+        const paragraph = encoded?.paragraphStyle;
+
+        return paragraph?.alignment === paragraphStyle?.alignment;
+      })
+        ? paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left
+        : undefined,
+      textTransform: layers.every((layer) => {
+        const textStyle = layer.style?.textStyle;
+        const encoded = textStyle?.encodedAttributes;
+        return (
+          encoded?.MSAttributedStringTextTransformAttribute ===
+          encodedAttributes?.MSAttributedStringTextTransformAttribute
+        );
+      })
+        ? encodedAttributes?.MSAttributedStringTextTransformAttribute ??
+          Sketch.TextTransform.None
+        : undefined,
       textDecoration: encodedAttributes?.underlineStyle
-        ? 1
+        ? SimpleTextDecoration.Underlined
         : encodedAttributes?.strikethroughStyle
-        ? 2
-        : 0,
-      letterSpacing: encodedAttributes?.kerning,
-      paragraphSpacing: paragraphStyle?.paragraphSpacing,
-      verticalAlignment: textStyle?.verticalAlignment,
-      fontAlignment: layer.textBehaviour,
+        ? SimpleTextDecoration.Strikethrough
+        : SimpleTextDecoration.None,
+      letterSpacing: layers.every((layer) => {
+        const textStyle = layer.style?.textStyle;
+        const encoded = textStyle?.encodedAttributes;
+
+        return encodedAttributes?.kerning === encoded?.kerning;
+      })
+        ? encodedAttributes?.kerning || 0
+        : undefined,
+      paragraphSpacing: layers.every((layer) => {
+        const textStyle = layer.style?.textStyle;
+        const encoded = textStyle?.encodedAttributes;
+        const paragraph = encoded?.paragraphStyle;
+
+        return paragraphStyle?.paragraphSpacing === paragraph?.paragraphSpacing;
+      })
+        ? paragraphStyle?.paragraphSpacing || 0
+        : undefined,
+      verticalAlignment: layers.every((layer) => {
+        const style = layer.style?.textStyle;
+
+        return style?.verticalAlignment === textStyle?.verticalAlignment;
+      })
+        ? textStyle?.verticalAlignment ?? Sketch.TextVerticalAlignment.Top
+        : undefined,
+      fontAlignment: layers.every(
+        (l) => l?.textBehaviour === layer.textBehaviour,
+      )
+        ? layer?.textBehaviour ?? 0
+        : undefined,
     };
   }, []);
 
-  const textStyleAttributes = useMemo(
-    () => getTextStyleAttributes(seletedText[0]),
-    [getTextStyleAttributes, seletedText],
-  );
-
+  const {
+    fontColor,
+    fontAlignment,
+    verticalAlignment,
+    textTransform,
+    textDecoration,
+    horizontalAlignment,
+    paragraphSpacing,
+    fontFamily,
+    fontSize,
+    lineHeight,
+    letterSpacing,
+  } = useMemo(() => getTextStyleAttributes(seletedText), [
+    getTextStyleAttributes,
+    seletedText,
+  ]);
   // default value for the spacing (?)
   return (
     <>
       <TextStyleRow
-        fontColor={textStyleAttributes.fontColor}
-        fontFamily={textStyleAttributes.fontFamily}
-        fontSize={textStyleAttributes.fontSize}
-        lineSpacing={textStyleAttributes.lineHeight || 0}
-        letterSpacing={textStyleAttributes.letterSpacing || 0}
-        paragraphSpacing={textStyleAttributes.paragraphSpacing || 0}
+        fontColor={fontColor}
+        fontFamily={fontFamily}
+        fontSize={fontSize}
+        letterSpacing={letterSpacing}
+        lineSpacing={lineHeight}
+        paragraphSpacing={paragraphSpacing}
         onChangeFontFamily={useCallback(
           (value) => {
             dispatch('setTextFontName', value);
@@ -106,22 +177,22 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextAlignmentRow
-        textLayout={textStyleAttributes.fontAlignment}
-        textVerticalAlignment={textStyleAttributes.verticalAlignment || 0}
-        textHorizontalAlignment={textStyleAttributes.horizontalAlignment || 0}
-        onChangeFontAlignment={useCallback(
+        textLayout={fontAlignment}
+        textVerticalAlignment={verticalAlignment}
+        textHorizontalAlignment={horizontalAlignment}
+        onChangeTextAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
             dispatch('setTextAlignment', Number(event.target.value));
           },
           [dispatch],
         )}
-        onChangeFontHorizontalAlignment={useCallback(
+        onChangeTextHorizontalAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
             dispatch('setTextHorizontalAlignment', Number(event.target.value));
           },
           [dispatch],
         )}
-        onChangeFontVerticalAlignment={useCallback(
+        onChangeTextVerticalAlignment={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
             dispatch('setTextVerticalAlignment', Number(event.target.value));
           },
@@ -130,15 +201,15 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextOptionsRow
-        fontCase={textStyleAttributes.textTransform}
-        fontDecorator={textStyleAttributes.textDecoration}
-        onChangeFontDecorator={useCallback(
+        textCase={textTransform}
+        textDecorator={textDecoration}
+        onChangeTextDecorator={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],
         )}
-        onChangeFontCase={useCallback(
+        onChangeTextCase={useCallback(
           (event: React.ChangeEvent<HTMLInputElement>) => {
-            dispatch('setTextCase', Number(event.target.value));
+            dispatch('setTextCase', parseInt(event.target.value));
           },
           [dispatch],
         )}

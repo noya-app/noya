@@ -11,12 +11,12 @@ import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextStyleRowProps {
-  fontSize: number;
+  fontSize: number | undefined;
   fontFamily: string;
   fontColor: Sketch.Color;
-  lineSpacing: number;
-  letterSpacing: number;
-  paragraphSpacing: number;
+  lineSpacing: number | undefined;
+  letterSpacing: number | undefined;
+  paragraphSpacing: number | undefined;
   onChangeFontSize: (value: number) => void;
   onChangeFontFamily: (value: string) => void;
   onChangeFontWeight: (value: string) => void;
@@ -127,6 +127,7 @@ export default memo(function TextStyleRow({
         <Spacer.Horizontal size={8} />
         <InputField.Root id="font-size" size={50}>
           <InputField.NumberInput
+            placeholder={fontSize ? '' : 'multiple'}
             value={fontSize}
             onSubmit={onChangeFontSize}
             onNudge={() => {}}
@@ -140,20 +141,23 @@ export default memo(function TextStyleRow({
         <LabeledElementView renderLabel={renderLabel}>
           <InputField.NumberInput
             id={characterInputId}
-            value={lineSpacing}
+            placeholder={letterSpacing ? '' : 'multiple'}
+            value={letterSpacing}
             onSubmit={onChangeLineSpacing}
             onNudge={() => {}}
           />
           <Spacer.Horizontal size={8} />
           <InputField.NumberInput
             id={lineInputId}
-            value={letterSpacing}
+            placeholder={lineSpacing ? '' : 'multiple'}
+            value={lineSpacing}
             onSubmit={onChangeLetterSpacing}
             onNudge={() => {}}
           />
           <Spacer.Horizontal size={8} />
           <InputField.NumberInput
             id={paragraphInputId}
+            placeholder={paragraphSpacing ? '' : 'multiple'}
             value={paragraphSpacing}
             onSubmit={onChagenParagraphSpacing}
             onNudge={() => {}}

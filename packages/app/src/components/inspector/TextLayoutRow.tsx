@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   StretchHorizontallyIcon,
   StretchVerticallyIcon,
@@ -16,14 +17,14 @@ import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextLayoutRowProps {
-  textLayout: number;
-  textHorizontalAlignment: number;
-  textVerticalAlignment: number;
-  onChangeFontAlignment: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeFontHorizontalAlignment: (
+  textLayout: Sketch.TextBehaviour | undefined;
+  textHorizontalAlignment: Sketch.TextHorizontalAlignment | undefined;
+  textVerticalAlignment: Sketch.TextVerticalAlignment | undefined;
+  onChangeTextAlignment: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeTextHorizontalAlignment: (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => void;
-  onChangeFontVerticalAlignment: (
+  onChangeTextVerticalAlignment: (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => void;
 }
@@ -32,9 +33,9 @@ export default memo(function TextLayoutRowRow({
   textLayout,
   textHorizontalAlignment,
   textVerticalAlignment,
-  onChangeFontAlignment,
-  onChangeFontHorizontalAlignment,
-  onChangeFontVerticalAlignment,
+  onChangeTextAlignment,
+  onChangeTextHorizontalAlignment,
+  onChangeTextVerticalAlignment,
 }: TextLayoutRowProps) {
   return (
     <InspectorPrimitives.Section>
@@ -48,16 +49,25 @@ export default memo(function TextLayoutRowRow({
         >
           <RadioGroup.Root
             id={'text-alignment'}
-            value={textLayout.toString()}
-            onValueChange={onChangeFontAlignment}
+            value={textLayout !== undefined ? textLayout.toString() : ''}
+            onValueChange={onChangeTextAlignment}
           >
-            <RadioGroup.Item value="0" tooltip="Horizontal">
+            <RadioGroup.Item
+              value={Sketch.TextBehaviour.Flexible.toString()}
+              tooltip="Horizontal"
+            >
               <StretchHorizontallyIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="1" tooltip="Vertical">
+            <RadioGroup.Item
+              value={Sketch.TextBehaviour.Fixed.toString()}
+              tooltip="Vertical"
+            >
               <StretchVerticallyIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="2" tooltip="Outside">
+            <RadioGroup.Item
+              value={Sketch.TextBehaviour.FixedWidthAndHeight?.toString()}
+              tooltip="Outside"
+            >
               <SquareIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>
@@ -68,19 +78,35 @@ export default memo(function TextLayoutRowRow({
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id={'text-horizontal-aligment'}
-          value={textHorizontalAlignment.toString()}
-          onValueChange={onChangeFontHorizontalAlignment}
+          value={
+            textHorizontalAlignment !== undefined
+              ? textHorizontalAlignment.toString()
+              : ''
+          }
+          onValueChange={onChangeTextHorizontalAlignment}
         >
-          <RadioGroup.Item value="0" tooltip="Left">
+          <RadioGroup.Item
+            value={Sketch.TextHorizontalAlignment.Left.toString()}
+            tooltip="Left"
+          >
             <TextAlignLeftIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="2" tooltip="Center">
+          <RadioGroup.Item
+            value={Sketch.TextHorizontalAlignment.Centered.toString()}
+            tooltip="Center"
+          >
             <TextAlignCenterIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="1" tooltip="Right">
+          <RadioGroup.Item
+            value={Sketch.TextHorizontalAlignment.Right.toString()}
+            tooltip="Right"
+          >
             <TextAlignRightIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="3" tooltip="Justify">
+          <RadioGroup.Item
+            value={Sketch.TextHorizontalAlignment.Justified.toString()}
+            tooltip="Justify"
+          >
             <TextAlignJustifyIcon />
           </RadioGroup.Item>
         </RadioGroup.Root>
@@ -90,16 +116,29 @@ export default memo(function TextLayoutRowRow({
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id={'text-vertical-aligment'}
-          value={textVerticalAlignment.toString()}
-          onValueChange={onChangeFontVerticalAlignment}
+          value={
+            textVerticalAlignment !== undefined
+              ? textVerticalAlignment.toString()
+              : ''
+          }
+          onValueChange={onChangeTextVerticalAlignment}
         >
-          <RadioGroup.Item value="0" tooltip="Top">
+          <RadioGroup.Item
+            value={Sketch.TextVerticalAlignment.Top.toString()}
+            tooltip="Top"
+          >
             <PinTopIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="1" tooltip="Middle">
+          <RadioGroup.Item
+            value={Sketch.TextVerticalAlignment.Middle.toString()}
+            tooltip="Middle"
+          >
             <AlignCenterVerticallyIcon />
           </RadioGroup.Item>
-          <RadioGroup.Item value="2" tooltip="Bottom">
+          <RadioGroup.Item
+            value={Sketch.TextVerticalAlignment.Bottom.toString()}
+            tooltip="Bottom"
+          >
             <PinBottomIcon />
           </RadioGroup.Item>
         </RadioGroup.Root>

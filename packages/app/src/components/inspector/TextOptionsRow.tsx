@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   LetterCaseLowercaseIcon,
   LetterCaseCapitalizeIcon,
@@ -13,18 +14,24 @@ import { Spacer } from 'noya-designsystem';
 import { useCallback, useMemo, memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
+export enum SimpleTextDecoration {
+  None = 0,
+  Underlined = 1,
+  Strikethrough = 2,
+}
+
 interface TextOptionsRowProps {
-  fontCase: number;
-  fontDecorator: number;
-  onChangeFontCase: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeFontDecorator: (value: number) => void;
+  textCase: Sketch.TextTransform | undefined;
+  textDecorator: SimpleTextDecoration | undefined;
+  onChangeTextCase: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChangeTextDecorator: (value: number) => void;
 }
 
 export default memo(function TextOptionsRow({
-  fontCase,
-  fontDecorator,
-  onChangeFontCase,
-  onChangeFontDecorator,
+  textCase,
+  textDecorator,
+  onChangeTextCase,
+  onChangeTextDecorator,
 }: TextOptionsRowProps) {
   const decoratorInputId = `decorator`;
   const transformInputId = `transform`;
@@ -55,9 +62,9 @@ export default memo(function TextOptionsRow({
   const onChangeDecorator = useCallback(
     (value) => {
       const id = decorator.find((d) => d.name === value)?.id || 0;
-      onChangeFontDecorator(id);
+      onChangeTextDecorator(id);
     },
-    [onChangeFontDecorator, decorator],
+    [onChangeTextDecorator, decorator],
   );
 
   return (
@@ -70,7 +77,7 @@ export default memo(function TextOptionsRow({
         <LabeledElementView renderLabel={renderLabel}>
           <Select
             id={decoratorInputId}
-            value={decorator[fontDecorator].name}
+            value={textDecorator ? decorator[textDecorator].name : ''}
             options={decorator.map((d) => d.name)}
             getTitle={(name) => name}
             onChange={onChangeDecorator}
@@ -78,16 +85,25 @@ export default memo(function TextOptionsRow({
           <Spacer.Horizontal size={8} />
           <RadioGroup.Root
             id={transformInputId}
-            value={fontCase.toString()}
-            onValueChange={onChangeFontCase}
+            value={textCase !== undefined ? textCase.toString() : ''}
+            onValueChange={onChangeTextCase}
           >
-            <RadioGroup.Item value="0" tooltip="None">
+            <RadioGroup.Item
+              value={Sketch.TextTransform.None.toString()}
+              tooltip="None"
+            >
               <LetterCaseCapitalizeIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="1" tooltip="Uppercase">
+            <RadioGroup.Item
+              value={Sketch.TextTransform.Uppercase.toString()}
+              tooltip="Uppercase"
+            >
               <LetterCaseUppercaseIcon />
             </RadioGroup.Item>
-            <RadioGroup.Item value="2" tooltip="Lowercase">
+            <RadioGroup.Item
+              value={Sketch.TextTransform.Lowercase.toString()}
+              tooltip="Lowercase"
+            >
               <LetterCaseLowercaseIcon />
             </RadioGroup.Item>
           </RadioGroup.Root>

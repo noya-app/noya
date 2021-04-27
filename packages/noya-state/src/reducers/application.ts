@@ -23,7 +23,8 @@ import {
   getSelectedRect,
   getCurrentTab,
   findPageLayerIndexPaths,
-  visitColors,
+  visitStyleColors,
+  visitLayerColors,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -1002,23 +1003,13 @@ export function reducer(
 
           draft.sketch.pages.forEach((page) => {
             Layers.visit(page, (layer) => {
-              if (!layer.style) return;
-              visitColors(layer.style, changeColor);
-
-              if (layer._class !== 'text') return;
-              const attributes = layer.attributedString.attributes;
-              if (attributes) {
-                attributes.forEach((a) => {
-                  if (a.attributes.MSAttributedStringColorAttribute)
-                    changeColor(a.attributes.MSAttributedStringColorAttribute);
-                });
-              }
+              visitLayerColors(layer, changeColor);
             });
           });
 
           sharedStyles.forEach((sharedStyle) => {
             if (!sharedStyle.value) return;
-            visitColors(sharedStyle.value, changeColor);
+            visitStyleColors(sharedStyle.value, changeColor);
           });
         });
       });
