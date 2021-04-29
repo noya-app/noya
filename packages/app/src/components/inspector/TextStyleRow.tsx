@@ -11,12 +11,12 @@ import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextStyleRowProps {
-  fontSize: number | undefined;
+  fontSize?: number;
   fontFamily: string;
   fontColor: Sketch.Color;
-  lineSpacing: number | undefined;
-  letterSpacing: number | undefined;
-  paragraphSpacing: number | undefined;
+  lineSpacing?: number;
+  letterSpacing?: number;
+  paragraphSpacing?: number;
   onChangeFontSize: (value: number) => void;
   onChangeFontFamily: (value: string) => void;
   onChangeFontWeight: (value: string) => void;
@@ -149,7 +149,7 @@ export default memo(function TextStyleRow({
           <Spacer.Horizontal size={8} />
           <InputField.NumberInput
             id={lineInputId}
-            placeholder={lineSpacing ? '' : 'multiple'}
+            placeholder={lineSpacing === undefined ? 'multiple' : undefined}
             value={lineSpacing}
             onSubmit={onChangeLetterSpacing}
             onNudge={() => {}}

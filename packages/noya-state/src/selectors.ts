@@ -137,15 +137,17 @@ export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
 export const getSelectedTextStyles = (
   state: ApplicationState,
 ): Sketch.Style[] => {
-  return getSelectedLayers(state)
-    .filter((layer) => layer._class === 'text')
-    .flatMap((layer) => (layer.style ? [layer.style] : []));
+  return getSelectedTextLayers(state).flatMap((layer) =>
+    layer.style ? [layer.style] : [],
+  );
 };
 
-export const getSelectedText = (state: ApplicationState): Sketch.Text[] => {
-  return getSelectedLayers(state)
-    .filter((layer) => layer._class === 'text')
-    .map((layer) => layer as Sketch.Text);
+export const getSelectedTextLayers = (
+  state: ApplicationState,
+): Sketch.Text[] => {
+  return getSelectedLayers(state).filter(
+    (layer): layer is Sketch.Text => layer._class === 'text',
+  );
 };
 
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {

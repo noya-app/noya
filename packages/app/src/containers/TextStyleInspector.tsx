@@ -12,12 +12,14 @@ import {
   useSelector,
   useApplicationState,
 } from '../contexts/ApplicationStateContext';
+import getMultiValue from '../utils/getMultiValue';
 
 export default memo(function TextStyleInspector() {
   const [, dispatch] = useApplicationState();
 
-  //Todo: Handle multiple texts
-  const seletedText = useShallowArray(useSelector(Selectors.getSelectedText));
+  const seletedText = useShallowArray(
+    useSelector(Selectors.getSelectedTextLayers),
+  );
 
   const getTextStyleAttributes = useCallback((layers: Sketch.Text[]) => {
     const layer = layers[0];
@@ -41,107 +43,89 @@ export default memo(function TextStyleInspector() {
         encodedAttributes?.MSAttributedStringFontAttribute.attributes.name ||
         'Arial',
       fontSize:
-        layers.every((layer) => {
-          const textStyle = layer.style?.textStyle;
-          const encoded = textStyle?.encodedAttributes;
-          return (
-            encoded?.MSAttributedStringFontAttribute.attributes.size ===
-            encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
-          );
-        }) &&
-        attributes.every(
-          (a) =>
-            a.attributes.MSAttributedStringFontAttribute.attributes.size ===
-            encodedAttributes?.MSAttributedStringFontAttribute.attributes.size,
+        getMultiValue<number | undefined>(
+          layers.map(
+            (l) =>
+              l.style?.textStyle?.encodedAttributes
+                .MSAttributedStringFontAttribute.attributes.size,
+          ),
+        ) &&
+        getMultiValue<number | undefined>(
+          attributes.map(
+            (a) => a.attributes.MSAttributedStringFontAttribute.attributes.size,
+          ),
         )
           ? encodedAttributes?.MSAttributedStringFontAttribute.attributes.size
           : undefined,
       lineHeight:
-        layers.every((layer) => {
-          const textStyle = layer.style?.textStyle;
-          const encoded = textStyle?.encodedAttributes;
-          const paragraph = encoded?.paragraphStyle;
-
-          return (
-            paragraph?.maximumLineHeight === paragraphStyle?.maximumLineHeight
-          );
-        }) &&
-        attributes.every(
-          (a) =>
-            a.attributes.paragraphStyle?.maximumLineHeight ===
-            paragraphStyle?.maximumLineHeight,
+        getMultiValue<number | undefined>(
+          layers.map(
+            (l) =>
+              l.style?.textStyle?.encodedAttributes.paragraphStyle
+                ?.maximumLineHeight,
+          ),
+        ) &&
+        getMultiValue<number | undefined>(
+          attributes.map((a) => a.attributes.paragraphStyle?.maximumLineHeight),
         )
           ? paragraphStyle?.maximumLineHeight ?? 22
           : undefined,
       horizontalAlignment:
-        layers.every((layer) => {
-          const textStyle = layer.style?.textStyle;
-          const encoded = textStyle?.encodedAttributes;
-          const paragraph = encoded?.paragraphStyle;
-
-          return paragraph?.alignment === paragraphStyle?.alignment;
-        }) &&
-        attributes.every(
-          (a) =>
-            a.attributes.paragraphStyle?.alignment ===
-            paragraphStyle?.alignment,
+        getMultiValue<Sketch.TextHorizontalAlignment | undefined>(
+          layers.map(
+            (l) =>
+              l.style?.textStyle?.encodedAttributes.paragraphStyle?.alignment,
+          ),
+        ) &&
+        getMultiValue<Sketch.TextHorizontalAlignment | undefined>(
+          attributes.map((a) => a.attributes.paragraphStyle?.alignment),
         )
           ? paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left
           : undefined,
-      textTransform: layers.every((layer) => {
-        const textStyle = layer.style?.textStyle;
-        const encoded = textStyle?.encodedAttributes;
-        return (
-          encoded?.MSAttributedStringTextTransformAttribute ===
-          encodedAttributes?.MSAttributedStringTextTransformAttribute
-        );
-      })
+      textTransform: getMultiValue<Sketch.TextTransform | undefined>(
+        layers.map(
+          (l) =>
+            l.style?.textStyle?.encodedAttributes
+              ?.MSAttributedStringTextTransformAttribute,
+        ),
+      )
         ? encodedAttributes?.MSAttributedStringTextTransformAttribute ??
           Sketch.TextTransform.None
         : undefined,
       textDecoration: encodedAttributes?.underlineStyle
-        ? SimpleTextDecoration.Underlined
+        ? 'underline'
         : encodedAttributes?.strikethroughStyle
-        ? SimpleTextDecoration.Strikethrough
-        : SimpleTextDecoration.None,
+        ? 'strikethrough'
+        : 'none',
       letterSpacing:
-        layers.every((layer) => {
-          const textStyle = layer.style?.textStyle;
-          const encoded = textStyle?.encodedAttributes;
-
-          return encodedAttributes?.kerning === encoded?.kerning;
-        }) &&
-        attributes.every(
-          (a) => a.attributes.kerning === encodedAttributes?.kerning,
+        getMultiValue<number | undefined>(
+          layers.map((l) => l.style?.textStyle?.encodedAttributes?.kerning),
+        ) &&
+        getMultiValue<number | undefined>(
+          attributes.map((a) => a.attributes.kerning),
         )
           ? encodedAttributes?.kerning || 0
           : undefined,
       paragraphSpacing:
-        layers.every((layer) => {
-          const textStyle = layer.style?.textStyle;
-          const encoded = textStyle?.encodedAttributes;
-          const paragraph = encoded?.paragraphStyle;
-
-          return (
-            paragraphStyle?.paragraphSpacing === paragraph?.paragraphSpacing
-          );
-        }) &&
-        attributes.every(
-          (a) =>
-            a.attributes.paragraphStyle?.paragraphSpacing ===
-            paragraphStyle?.paragraphSpacing,
+        getMultiValue<number | undefined>(
+          layers.map(
+            (l) =>
+              l.style?.textStyle?.encodedAttributes?.paragraphStyle
+                ?.paragraphSpacing,
+          ),
+        ) &&
+        getMultiValue<number | undefined>(
+          attributes.map((a) => a.attributes.paragraphStyle?.paragraphSpacing),
         )
           ? paragraphStyle?.paragraphSpacing || 0
           : undefined,
-      verticalAlignment: layers.every((layer) => {
-        const style = layer.style?.textStyle;
-
-        return style?.verticalAlignment === textStyle?.verticalAlignment;
-      })
+      verticalAlignment: getMultiValue<number | undefined>(
+        layers.map((l) => l.style?.textStyle?.verticalAlignment),
+      )
         ? textStyle?.verticalAlignment ?? Sketch.TextVerticalAlignment.Top
         : undefined,
-      fontAlignment: layers.every(
-        (l) => l?.textBehaviour === layer.textBehaviour,
+      fontAlignment: getMultiValue<Sketch.TextBehaviour | undefined>(
+        layers.map((l) => l.textBehaviour),
       )
         ? layer?.textBehaviour ?? 0
         : undefined,
@@ -164,6 +148,7 @@ export default memo(function TextStyleInspector() {
     getTextStyleAttributes,
     seletedText,
   ]);
+
   // default value for the spacing (?)
   return (
     <>
@@ -212,21 +197,21 @@ export default memo(function TextStyleInspector() {
         textLayout={fontAlignment}
         textVerticalAlignment={verticalAlignment}
         textHorizontalAlignment={horizontalAlignment}
-        onChangeTextAlignment={useCallback(
-          (event: React.ChangeEvent<HTMLInputElement>) => {
-            dispatch('setTextAlignment', Number(event.target.value));
+        onChangeTextLayout={useCallback(
+          (value: Sketch.TextBehaviour) => {
+            dispatch('setTextAlignment', value);
           },
           [dispatch],
         )}
         onChangeTextHorizontalAlignment={useCallback(
-          (event: React.ChangeEvent<HTMLInputElement>) => {
-            dispatch('setTextHorizontalAlignment', Number(event.target.value));
+          (value: Sketch.TextHorizontalAlignment) => {
+            dispatch('setTextHorizontalAlignment', value);
           },
           [dispatch],
         )}
         onChangeTextVerticalAlignment={useCallback(
-          (event: React.ChangeEvent<HTMLInputElement>) => {
-            dispatch('setTextVerticalAlignment', Number(event.target.value));
+          (value: Sketch.TextVerticalAlignment) => {
+            dispatch('setTextVerticalAlignment', value);
           },
           [dispatch],
         )}
@@ -234,14 +219,14 @@ export default memo(function TextStyleInspector() {
       <Divider />
       <TextOptionsRow
         textCase={textTransform}
-        textDecorator={textDecoration}
+        textDecorator={textDecoration as SimpleTextDecoration}
         onChangeTextDecorator={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],
         )}
         onChangeTextCase={useCallback(
-          (event: React.ChangeEvent<HTMLInputElement>) => {
-            dispatch('setTextCase', parseInt(event.target.value));
+          (value: Sketch.TextTransform) => {
+            dispatch('setTextCase', value);
           },
           [dispatch],
         )}
@@ -249,9 +234,3 @@ export default memo(function TextStyleInspector() {
     </>
   );
 });
-
-/**
- * Color
- * - Size
- * - FontFamily ? Weight
- */

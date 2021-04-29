@@ -14,16 +14,12 @@ import { Spacer } from 'noya-designsystem';
 import { useCallback, useMemo, memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
-export enum SimpleTextDecoration {
-  None = 0,
-  Underlined = 1,
-  Strikethrough = 2,
-}
+export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
 interface TextOptionsRowProps {
-  textCase: Sketch.TextTransform | undefined;
-  textDecorator: SimpleTextDecoration | undefined;
-  onChangeTextCase: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  textCase?: Sketch.TextTransform;
+  textDecorator?: SimpleTextDecoration;
+  onChangeTextCase: (value: Sketch.TextTransform) => void;
   onChangeTextDecorator: (value: number) => void;
 }
 
@@ -67,6 +63,10 @@ export default memo(function TextOptionsRow({
     [onChangeTextDecorator, decorator],
   );
 
+  const textDecoratorCapitalize = textDecorator
+    ? textDecorator.charAt(0).toUpperCase() + textDecorator.slice(1)
+    : '';
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
@@ -77,7 +77,7 @@ export default memo(function TextOptionsRow({
         <LabeledElementView renderLabel={renderLabel}>
           <Select
             id={decoratorInputId}
-            value={textDecorator ? decorator[textDecorator].name : ''}
+            value={textDecoratorCapitalize}
             options={decorator.map((d) => d.name)}
             getTitle={(name) => name}
             onChange={onChangeDecorator}
@@ -86,7 +86,9 @@ export default memo(function TextOptionsRow({
           <RadioGroup.Root
             id={transformInputId}
             value={textCase !== undefined ? textCase.toString() : ''}
-            onValueChange={onChangeTextCase}
+            onValueChange={(event) =>
+              onChangeTextCase(parseInt(event.target.value))
+            }
           >
             <RadioGroup.Item
               value={Sketch.TextTransform.None.toString()}

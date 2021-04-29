@@ -17,23 +17,21 @@ import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextLayoutRowProps {
-  textLayout: Sketch.TextBehaviour | undefined;
-  textHorizontalAlignment: Sketch.TextHorizontalAlignment | undefined;
-  textVerticalAlignment: Sketch.TextVerticalAlignment | undefined;
-  onChangeTextAlignment: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  textLayout?: Sketch.TextBehaviour;
+  textHorizontalAlignment?: Sketch.TextHorizontalAlignment;
+  textVerticalAlignment?: Sketch.TextVerticalAlignment;
+  onChangeTextLayout: (value: Sketch.TextBehaviour) => void;
   onChangeTextHorizontalAlignment: (
-    event: React.ChangeEvent<HTMLInputElement>,
+    value: Sketch.TextHorizontalAlignment,
   ) => void;
-  onChangeTextVerticalAlignment: (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => void;
+  onChangeTextVerticalAlignment: (value: Sketch.TextVerticalAlignment) => void;
 }
 
 export default memo(function TextLayoutRowRow({
   textLayout,
   textHorizontalAlignment,
   textVerticalAlignment,
-  onChangeTextAlignment,
+  onChangeTextLayout,
   onChangeTextHorizontalAlignment,
   onChangeTextVerticalAlignment,
 }: TextLayoutRowProps) {
@@ -50,7 +48,9 @@ export default memo(function TextLayoutRowRow({
           <RadioGroup.Root
             id={'text-alignment'}
             value={textLayout !== undefined ? textLayout.toString() : ''}
-            onValueChange={onChangeTextAlignment}
+            onValueChange={(event) =>
+              onChangeTextLayout(parseInt(event.target.value))
+            }
           >
             <RadioGroup.Item
               value={Sketch.TextBehaviour.Flexible.toString()}
@@ -83,7 +83,9 @@ export default memo(function TextLayoutRowRow({
               ? textHorizontalAlignment.toString()
               : ''
           }
-          onValueChange={onChangeTextHorizontalAlignment}
+          onValueChange={(event) =>
+            onChangeTextHorizontalAlignment(parseInt(event.target.value))
+          }
         >
           <RadioGroup.Item
             value={Sketch.TextHorizontalAlignment.Left.toString()}
@@ -121,7 +123,9 @@ export default memo(function TextLayoutRowRow({
               ? textVerticalAlignment.toString()
               : ''
           }
-          onValueChange={onChangeTextVerticalAlignment}
+          onValueChange={(event) =>
+            onChangeTextVerticalAlignment(parseInt(event.target.value))
+          }
         >
           <RadioGroup.Item
             value={Sketch.TextVerticalAlignment.Top.toString()}

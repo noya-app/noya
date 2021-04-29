@@ -7,7 +7,7 @@ import {
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiValue from '../utils/getMultiValue';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 export default memo(function RadiusInspector() {
   const [, dispatch] = useApplicationState();
@@ -20,7 +20,7 @@ export default memo(function RadiusInspector() {
     selectedLayers.flatMap((layer) => layer.fixedRadius),
   );
 
-  const radiusValue = useMemo(() => getMultiValue(radii), [radii]);
+  const radiusValue = useMemo(() => getMultiNumberValue(radii), [radii]);
 
   const handleSubmitRadius = useCallback(
     (value: number) => {
