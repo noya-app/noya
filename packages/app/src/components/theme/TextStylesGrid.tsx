@@ -1,16 +1,23 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { GridView } from 'noya-designsystem';
 import { delimitedPath } from 'noya-utils';
+import { SelectionType } from 'noya-state';
 import TextStyle from './TextStyle';
 import { memo } from 'react';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
+  selectedTextStyles: string[];
+  onSelectTextStyle: (id?: string, selectionType?: SelectionType) => void;
 }
 
-export default memo(function SwatchesGrid({ sharedStyles }: Props) {
+export default memo(function SwatchesGrid({
+  sharedStyles,
+  selectedTextStyles,
+  onSelectTextStyle,
+}: Props) {
   return (
-    <GridView.Root onClick={() => {}}>
+    <GridView.Root onClick={() => onSelectTextStyle(undefined, 'replace')}>
       <GridView.Section>
         {sharedStyles.map((item) => {
           const text = delimitedPath.basename(item.name);
@@ -25,8 +32,14 @@ export default memo(function SwatchesGrid({ sharedStyles }: Props) {
             <GridView.Item
               id={item.do_objectID}
               key={item.do_objectID}
-              selected={false}
+              selected={selectedTextStyles.includes(item.do_objectID)}
               title={text}
+              onClick={(event: React.MouseEvent) =>
+                onSelectTextStyle(
+                  item.do_objectID,
+                  event.shiftKey ? 'intersection' : 'replace',
+                )
+              }
             >
               <TextStyle text={text} size={attributes.size} color={color} />
             </GridView.Item>

@@ -89,6 +89,26 @@
       "patternTileScale": 1
     }
   ],
+  "textStyle": {
+    "_class": "textStyle",
+    "verticalAlignment": 0,
+    "encodedAttributes": {
+      "MSAttributedStringFontAttribute": {
+        "_class": "fontDescriptor",
+        "attributes": {
+          "name": "Arial",
+          "size": 12
+        }
+      },
+      "MSAttributedStringColorAttribute": {
+        "_class": "color",
+        "alpha": 1,
+        "blue": 0,
+        "green": 0,
+        "red": 0
+      }
+    }
+  },
   "innerShadows": [],
   "shadows": []
 }
