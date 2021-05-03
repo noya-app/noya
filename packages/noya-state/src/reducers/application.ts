@@ -1036,7 +1036,9 @@ export function reducer(
       const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
       return produce(state, (draft) => {
         const draftIds =
-          action[0] === 'selectSwatch'
+          selectionType === 'replace'
+            ? [...ids]
+            : action[0] === 'selectSwatch'
             ? draft.selectedSwatchIds
             : action[0] === 'selectThemeStyle'
             ? draft.selectedLayerStyleIds
@@ -1056,18 +1058,15 @@ export function reducer(
 
         switch (action[0]) {
           case 'selectSwatch': {
-            draft.selectedSwatchIds =
-              selectionType === 'replace' ? [...ids] : draftIds;
+            draft.selectedSwatchIds = draftIds;
             return;
           }
           case 'selectThemeStyle': {
-            draft.selectedLayerStyleIds =
-              selectionType === 'replace' ? [...ids] : draftIds;
+            draft.selectedLayerStyleIds = draftIds;
             return;
           }
           case 'selectTextStyle': {
-            draft.selectedTextStyleIds =
-              selectionType === 'replace' ? [...ids] : draftIds;
+            draft.selectedTextStyleIds = draftIds;
             return;
           }
         }
