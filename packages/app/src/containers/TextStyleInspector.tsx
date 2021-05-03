@@ -225,9 +225,7 @@ export default memo(function TextStyleInspector() {
           [dispatch],
         )}
         onChangeTextCase={useCallback(
-          (value: Sketch.TextTransform) => {
-            dispatch('setTextCase', value);
-          },
+          (value: Sketch.TextTransform) => dispatch('setTextCase', value),
           [dispatch],
         )}
       />

@@ -14,7 +14,7 @@ export type TextStyleAction =
   | [type: 'setTextDecoration', value: number]
   | [type: 'setTextCase', value: number];
 
-export function textStyleReducer(
+export function stringAttributeReducer(
   state: Sketch.TextStyle | Sketch.StringAttribute,
   action: TextStyleAction,
 ): Sketch.TextStyle | Sketch.StringAttribute {
@@ -164,45 +164,6 @@ export function textStyleReducer(
         attributes.textStyleVerticalAlignmentKey = value;
 
         if (draft._class !== 'stringAttribute') draft.verticalAlignment = value;
-      });
-    }
-    case 'setTextDecoration': {
-      const [, value] = action;
-
-      return produce(state, (draft) => {
-        if (draft._class === 'stringAttribute') return;
-
-        const attributes = draft.encodedAttributes;
-
-        if (!attributes) return;
-
-        switch (value) {
-          case 1: {
-            attributes.underlineStyle = 1;
-            attributes.strikethroughStyle = 0;
-            break;
-          }
-          case 2: {
-            attributes.underlineStyle = 0;
-            attributes.strikethroughStyle = 1;
-            break;
-          }
-          default: {
-            attributes.underlineStyle = 0;
-            attributes.strikethroughStyle = 0;
-          }
-        }
-      });
-    }
-    case 'setTextCase': {
-      const [, value] = action;
-
-      return produce(state, (draft) => {
-        if (draft._class === 'stringAttribute') return;
-
-        const encoded = draft.encodedAttributes;
-        if (!encoded) return;
-        encoded.MSAttributedStringTextTransformAttribute = value;
       });
     }
     default:

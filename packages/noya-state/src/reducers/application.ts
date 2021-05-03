@@ -36,7 +36,7 @@ import {
   InteractionState,
 } from './interaction';
 import { SetNumberMode, StyleAction, styleReducer } from './style';
-import { TextStyleAction, textStyleReducer } from './textStyle';
+import { TextStyleAction, stringAttributeReducer } from './stringAttribute';
 
 export type { SetNumberMode };
 
@@ -1277,22 +1277,42 @@ export function reducer(
           if (layer._class !== 'text' || layer.style?.textStyle === undefined)
             return;
 
-          if (action[0] === 'setTextAlignment') {
-            layer.textBehaviour = action[1];
-            return;
+          switch (action[0]) {
+            case 'setTextAlignment': {
+              layer.textBehaviour = action[1];
+
+              break;
+            }
+            case 'setTextDecoration': {
+              const attributes = layer.style?.textStyle?.encodedAttributes;
+              if (!attributes) return;
+              attributes.underlineStyle = action[1] === 1 ? 1 : 0;
+              attributes.strikethroughStyle = action[1] === 2 ? 1 : 0;
+
+              break;
+            }
+            case 'setTextCase': {
+              const encoded = layer.style?.textStyle?.encodedAttributes;
+              if (!encoded) return;
+              encoded.MSAttributedStringTextTransformAttribute = action[1];
+              break;
+            }
+            default: {
+              layer.style.textStyle = stringAttributeReducer(
+                layer.style.textStyle,
+                action,
+              ) as Sketch.TextStyle;
+
+              layer.attributedString.attributes.forEach((attribute, index) => {
+                layer.attributedString.attributes[
+                  index
+                ] = stringAttributeReducer(
+                  attribute,
+                  action,
+                ) as Sketch.StringAttribute;
+              });
+            }
           }
-
-          layer.style.textStyle = textStyleReducer(
-            layer.style.textStyle,
-            action,
-          ) as Sketch.TextStyle;
-
-          layer.attributedString.attributes.forEach((attribute, index) => {
-            layer.attributedString.attributes[index] = textStyleReducer(
-              attribute,
-              action,
-            ) as Sketch.StringAttribute;
-          });
         });
       });
     }
