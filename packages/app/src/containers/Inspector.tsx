@@ -17,7 +17,7 @@ import LayerThemeInspector from './LayerThemeInspector';
 import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
-import TextStyleInspector from '../components/inspector/TextStyleInspector';
+import TextStyleInspector from './TextStyleInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();

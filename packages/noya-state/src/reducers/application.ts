@@ -23,7 +23,8 @@ import {
   getSelectedRect,
   getCurrentTab,
   findPageLayerIndexPaths,
-  visitColors,
+  visitStyleColors,
+  visitLayerColors,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -35,6 +36,7 @@ import {
   InteractionState,
 } from './interaction';
 import { SetNumberMode, StyleAction, styleReducer } from './style';
+import { TextStyleAction, stringAttributeReducer } from './stringAttribute';
 
 export type { SetNumberMode };
 
@@ -149,7 +151,8 @@ export type Action =
       swatchId: string | string[],
       name: string | undefined,
     ]
-  | StyleAction;
+  | StyleAction
+  | TextStyleAction;
 
 export function reducer(
   state: ApplicationState,
@@ -958,14 +961,13 @@ export function reducer(
 
           draft.sketch.pages.forEach((page) => {
             Layers.visit(page, (layer) => {
-              if (!layer.style) return;
-              visitColors(layer.style, changeColor);
+              visitLayerColors(layer, changeColor);
             });
           });
 
           sharedStyles.forEach((sharedStyle) => {
             if (!sharedStyle.value) return;
-            visitColors(sharedStyle.value, changeColor);
+            visitStyleColors(sharedStyle.value, changeColor);
           });
         });
       });
@@ -1213,6 +1215,63 @@ export function reducer(
 
         if (action[0] === 'groupSwatches') draft.selectedSwatchGroup = '';
         else draft.selectedThemeStyleGroup = '';
+      });
+    }
+    case 'setTextCase':
+    case 'setTextColor':
+    case 'setTextFontName':
+    case 'setTextFontSize':
+    case 'setTextAlignment':
+    case 'setTextDecoration':
+    case 'setTextLineSpacing':
+    case 'setTextLetterSpacing':
+    case 'setTextParagraphSpacing':
+    case 'setTextHorizontalAlignment':
+    case 'setTextVerticalAlignment': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
+            return;
+
+          switch (action[0]) {
+            case 'setTextAlignment': {
+              layer.textBehaviour = action[1];
+
+              break;
+            }
+            case 'setTextDecoration': {
+              const attributes = layer.style?.textStyle?.encodedAttributes;
+              if (!attributes) return;
+              attributes.underlineStyle = action[1] === 1 ? 1 : 0;
+              attributes.strikethroughStyle = action[1] === 2 ? 1 : 0;
+
+              break;
+            }
+            case 'setTextCase': {
+              const encoded = layer.style?.textStyle?.encodedAttributes;
+              if (!encoded) return;
+              encoded.MSAttributedStringTextTransformAttribute = action[1];
+              break;
+            }
+            default: {
+              layer.style.textStyle = stringAttributeReducer(
+                layer.style.textStyle,
+                action,
+              ) as Sketch.TextStyle;
+
+              layer.attributedString.attributes.forEach((attribute, index) => {
+                layer.attributedString.attributes[
+                  index
+                ] = stringAttributeReducer(
+                  attribute,
+                  action,
+                ) as Sketch.StringAttribute;
+              });
+            }
+          }
+        });
       });
     }
     default:

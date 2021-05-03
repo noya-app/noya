@@ -1,5 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { CanvasKit, Paint, Path, TextStyle } from 'canvaskit-wasm';
+import type {
+  CanvasKit,
+  Paint,
+  Path,
+  TextAlign,
+  TextStyle,
+} from 'canvaskit-wasm';
 import { distance } from 'noya-geometry';
 import {
   CompassDirection,
@@ -202,9 +208,30 @@ export function path(
   return PathUtils.path(CanvasKit, points, frame, fixedRadius);
 }
 
+export function textHorizontalAlignment(
+  CanvasKit: CanvasKit,
+  alignment: Sketch.TextHorizontalAlignment,
+): TextAlign {
+  switch (alignment) {
+    case Sketch.TextHorizontalAlignment.Left:
+      return CanvasKit.TextAlign.Left;
+    case Sketch.TextHorizontalAlignment.Centered:
+      return CanvasKit.TextAlign.Center;
+    case Sketch.TextHorizontalAlignment.Right:
+      return CanvasKit.TextAlign.Right;
+    case Sketch.TextHorizontalAlignment.Justified:
+      return CanvasKit.TextAlign.Justify;
+    case Sketch.TextHorizontalAlignment.Natural: // What is this?
+      return CanvasKit.TextAlign.Start;
+  }
+}
+
+export type SimpleTextDecoration = 'underline' | 'strikethrough';
+
 export function stringAttribute(
   CanvasKit: CanvasKit,
   attribute: Sketch.StringAttribute,
+  decoration?: SimpleTextDecoration,
 ): TextStyle {
   const textColor = attribute.attributes.MSAttributedStringColorAttribute;
   const font = attribute.attributes.MSAttributedStringFontAttribute;
@@ -213,5 +240,14 @@ export function stringAttribute(
     ...(textColor && { color: color(CanvasKit, textColor) }),
     // fontFamilies: ['Roboto'], // TODO: Font family
     fontSize: font.attributes.size,
+    letterSpacing: attribute.attributes.kerning,
+    ...(decoration && {
+      decoration:
+        decoration === 'underline'
+          ? CanvasKit.UnderlineDecoration
+          : CanvasKit.LineThroughDecoration,
+      // There's currently a typo in the TypeScript types, "decration"
+      ['decorationStyle' as any]: CanvasKit.DecorationStyle.Solid,
+    }),
   });
 }

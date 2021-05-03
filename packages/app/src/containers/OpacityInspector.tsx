@@ -7,7 +7,7 @@ import {
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiValue from '../utils/getMultiValue';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 export default memo(function OpacityInspector() {
   const [, dispatch] = useApplicationState();
@@ -23,7 +23,7 @@ export default memo(function OpacityInspector() {
   );
 
   const opacityValue = useMemo(
-    () => getMultiValue(contextSettings.map((item) => item.opacity)),
+    () => getMultiNumberValue(contextSettings.map((item) => item.opacity)),
     [contextSettings],
   );
 

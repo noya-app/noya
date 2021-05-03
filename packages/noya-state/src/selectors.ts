@@ -135,6 +135,22 @@ export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
     : getSelectedLayerStyles(state).map((style) => style.value);
 };
 
+export const getSelectedTextStyles = (
+  state: ApplicationState,
+): Sketch.Style[] => {
+  return getSelectedTextLayers(state).flatMap((layer) =>
+    layer.style ? [layer.style] : [],
+  );
+};
+
+export const getSelectedTextLayers = (
+  state: ApplicationState,
+): Sketch.Text[] => {
+  return getSelectedLayers(state).filter(
+    (layer): layer is Sketch.Text => layer._class === 'text',
+  );
+};
+
 export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
   const page = getCurrentPage(state);
 
@@ -552,12 +568,32 @@ export function getCanvasTransform(
   );
 }
 
-export function visitColors(
+export function visitStyleColors(
   style: Sketch.Style,
   f: (color: Sketch.Color) => void,
 ): void {
+  if (style?.textStyle?.encodedAttributes.MSAttributedStringColorAttribute) {
+    f(style?.textStyle?.encodedAttributes.MSAttributedStringColorAttribute);
+  }
   style?.fills?.forEach((fill) => f(fill.color));
   style?.borders?.forEach((border) => f(border.color));
   style?.shadows?.forEach((shadow) => f(shadow.color));
   style?.innerShadows.forEach((fill) => f(fill.color));
+}
+
+export function visitLayerColors(
+  layer: Sketch.AnyLayer,
+  f: (color: Sketch.Color) => void,
+) {
+  if (layer.style) visitStyleColors(layer.style, f);
+
+  if (layer._class === 'text') {
+    const attributes = layer.attributedString.attributes;
+    if (attributes) {
+      attributes.forEach((a) => {
+        if (a.attributes.MSAttributedStringColorAttribute)
+          f(a.attributes.MSAttributedStringColorAttribute);
+      });
+    }
+  }
 }
