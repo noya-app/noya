@@ -226,12 +226,12 @@ export function textHorizontalAlignment(
   }
 }
 
-export type SimpleTextDecoration = 'underline' | 'strikethrough';
+export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
 export function stringAttribute(
   CanvasKit: CanvasKit,
   attribute: Sketch.StringAttribute,
-  decoration?: SimpleTextDecoration,
+  decoration: SimpleTextDecoration,
 ): TextStyle {
   const textColor = attribute.attributes.MSAttributedStringColorAttribute;
   const font = attribute.attributes.MSAttributedStringFontAttribute;
@@ -241,13 +241,15 @@ export function stringAttribute(
     // fontFamilies: ['Roboto'], // TODO: Font family
     fontSize: font.attributes.size,
     letterSpacing: attribute.attributes.kerning,
-    ...(decoration && {
-      decoration:
-        decoration === 'underline'
-          ? CanvasKit.UnderlineDecoration
-          : CanvasKit.LineThroughDecoration,
-      // There's currently a typo in the TypeScript types, "decration"
-      ['decorationStyle' as any]: CanvasKit.DecorationStyle.Solid,
-    }),
+    ...(decoration === 'none'
+      ? {}
+      : {
+          decoration:
+            decoration === 'underline'
+              ? CanvasKit.UnderlineDecoration
+              : CanvasKit.LineThroughDecoration,
+          // There's currently a typo in the TypeScript types, "decration"
+          ['decorationStyle' as any]: CanvasKit.DecorationStyle.Solid,
+        }),
   });
 }
