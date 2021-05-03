@@ -122,7 +122,6 @@ const TextStyleInspector = memo(function TextStyleInspector() {
     seletedText,
   ]);
 
-  const fontAlignment = 0 as Sketch.TextBehaviour;
   // default value for the spacing (?)
   return (
     <>
@@ -168,15 +167,10 @@ const TextStyleInspector = memo(function TextStyleInspector() {
       />
       <Divider />
       <TextAlignmentRow
-        textLayout={fontAlignment}
+        textLayout={undefined}
         textVerticalAlignment={verticalAlignment}
         textHorizontalAlignment={horizontalAlignment}
-        onChangeTextLayout={useCallback(
-          (value: Sketch.TextBehaviour) => {
-            dispatch('setTextAlignment', value);
-          },
-          [dispatch],
-        )}
+        onChangeTextLayout={useCallback(() => {}, [])}
         onChangeTextHorizontalAlignment={useCallback(
           (value: Sketch.TextHorizontalAlignment) => {
             dispatch('setTextHorizontalAlignment', value);

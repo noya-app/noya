@@ -4,28 +4,52 @@ import styled from 'styled-components';
 import { sketchColorToRgbaString, sketchColorToRgba } from 'noya-designsystem';
 
 // It has very basic bacground color preview.
-const TextStylePrev = styled.span<{ size: number; backgroundColor: string }>(
-  ({ color, size, backgroundColor }) => ({
-    fontSize: size,
-    backgroundColor: backgroundColor,
-    height: '90%',
-    width: '90%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    color: color,
-    pointerEvents: 'none',
-    userSelect: 'none',
-  }),
-);
+export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
+const TextStylePrev = styled.span<{
+  size: number;
+  backgroundColor: string;
+  textTransform?: number;
+  textDecoration: SimpleTextDecoration;
+}>(({ color, size, textTransform, textDecoration, backgroundColor }) => ({
+  fontSize: size,
+  backgroundColor: backgroundColor,
+  height: '90%',
+  width: '90%',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  color: color,
+  textTransform:
+    textTransform === 1
+      ? 'uppercase'
+      : textTransform === 2
+      ? 'lowercase'
+      : 'none',
+  pointerEvents: 'none',
+  userSelect: 'none',
+  textDecoration:
+    textDecoration === 'underline'
+      ? 'underline'
+      : textDecoration === 'strikethrough'
+      ? 'line-through'
+      : 'none',
+}));
 interface Props {
   text: string;
   size: number;
   color: Sketch.Color;
+  textDecoration: SimpleTextDecoration;
+  textTransform: Sketch.TextTransform | undefined;
 }
 
-export default memo(function TextStyle({ color, size, text }: Props) {
+export default memo(function TextStyle({
+  color,
+  size,
+  text,
+  textDecoration,
+  textTransform,
+}: Props) {
   const colorString = useMemo(() => sketchColorToRgbaString(color), [color]);
   const backgroundColor = useMemo(() => {
     const rbga = sketchColorToRgba(color);
@@ -37,7 +61,9 @@ export default memo(function TextStyle({ color, size, text }: Props) {
     <TextStylePrev
       color={colorString}
       size={size}
+      textDecoration={textDecoration}
       backgroundColor={backgroundColor}
+      textTransform={textTransform}
     >
       {text}
     </TextStylePrev>
