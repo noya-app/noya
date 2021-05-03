@@ -1318,49 +1318,92 @@ export function reducer(
     case 'setTextVerticalAlignment': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
 
-          switch (action[0]) {
-            case 'setTextAlignment': {
-              layer.textBehaviour = action[1];
+      const currentTab = getCurrentTab(state);
+      const ids = state.selectedTextStyleIds;
+      if (currentTab === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-              break;
-            }
-            case 'setTextDecoration': {
-              const attributes = layer.style?.textStyle?.encodedAttributes;
-              if (!attributes) return;
-              attributes.underlineStyle = action[1] === 1 ? 1 : 0;
-              attributes.strikethroughStyle = action[1] === 2 ? 1 : 0;
+              switch (action[0]) {
+                case 'setTextAlignment': {
+                  layer.textBehaviour = action[1];
 
-              break;
-            }
-            case 'setTextCase': {
-              const encoded = layer.style?.textStyle?.encodedAttributes;
-              if (!encoded) return;
-              encoded.MSAttributedStringTextTransformAttribute = action[1];
-              break;
-            }
-            default: {
-              layer.style.textStyle = stringAttributeReducer(
-                layer.style.textStyle,
-                action,
-              ) as Sketch.TextStyle;
+                  break;
+                }
+                case 'setTextDecoration': {
+                  const attributes = layer.style?.textStyle?.encodedAttributes;
+                  if (!attributes) return;
+                  attributes.underlineStyle = action[1] === 1 ? 1 : 0;
+                  attributes.strikethroughStyle = action[1] === 2 ? 1 : 0;
 
-              layer.attributedString.attributes.forEach((attribute, index) => {
-                layer.attributedString.attributes[
-                  index
-                ] = stringAttributeReducer(
-                  attribute,
-                  action,
-                ) as Sketch.StringAttribute;
-              });
-            }
-          }
+                  break;
+                }
+                case 'setTextCase': {
+                  const encoded = layer.style?.textStyle?.encodedAttributes;
+                  if (!encoded) return;
+                  encoded.MSAttributedStringTextTransformAttribute = action[1];
+                  break;
+                }
+                default: {
+                  layer.style.textStyle = stringAttributeReducer(
+                    layer.style.textStyle,
+                    action,
+                  ) as Sketch.TextStyle;
+
+                  layer.attributedString.attributes.forEach(
+                    (attribute, index) => {
+                      layer.attributedString.attributes[
+                        index
+                      ] = stringAttributeReducer(
+                        attribute,
+                        action,
+                      ) as Sketch.StringAttribute;
+                    },
+                  );
+                }
+              }
+            },
+          );
         });
-      });
+      } else {
+        return produce(state, (draft) => {
+          const array = draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          array.forEach((object: Sketch.SharedStyle) => {
+            const textStyle = object?.value.textStyle;
+            if (!ids.includes(object.do_objectID) || !textStyle) return;
+
+            switch (action[0]) {
+              case 'setTextDecoration': {
+                const attributes = textStyle.encodedAttributes;
+                if (!attributes) return;
+                attributes.underlineStyle = action[1] === 1 ? 1 : 0;
+                attributes.strikethroughStyle = action[1] === 2 ? 1 : 0;
+                return;
+              }
+              case 'setTextCase': {
+                const encoded = textStyle.encodedAttributes;
+                if (!encoded) return;
+                encoded.MSAttributedStringTextTransformAttribute = action[1];
+                return;
+              }
+              default: {
+                object.value.textStyle = stringAttributeReducer(
+                  textStyle,
+                  action,
+                ) as Sketch.TextStyle;
+              }
+            }
+          });
+        });
+      }
     }
     default:
       return state;
