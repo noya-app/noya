@@ -29,7 +29,7 @@ function getTextStyleAttributes(layer: Sketch.Text) {
       ? ('underline' as const)
       : encodedAttributes?.strikethroughStyle
       ? ('strikethrough' as const)
-      : undefined,
+      : ('none' as const),
   };
 }
 
