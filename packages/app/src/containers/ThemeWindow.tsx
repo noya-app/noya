@@ -102,10 +102,10 @@ const TextStyles = memo(function TextStyles() {
   return (
     <TextStylesGrid
       sharedStyles={textStyles}
-      selectedTextStyles={state.selectedLayerStyleIds}
+      selectedTextStyles={state.selectedTextStyleIds}
       onSelectTextStyle={useCallback(
         (id, type) => {
-          dispatch('selectThemeStyle', id, type);
+          dispatch('selectTextStyle', id, type);
         },
         [dispatch],
       )}

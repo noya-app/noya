@@ -25,6 +25,7 @@ import {
   findPageLayerIndexPaths,
   visitStyleColors,
   visitLayerColors,
+  getCurrentComponentsTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -143,6 +144,7 @@ export type Action =
     ]
   | [type: `setSwatchName`, swatchId: string | string[], name: string]
   | [type: `setThemeStyleName`, sharedStyleId: string | string[], name: string]
+  | [type: `setTextStyleName`, sharedStyleId: string | string[], name: string]
   | [
       type: 'setThemeStyle',
       sharedStyleId?: string,
@@ -610,23 +612,31 @@ export function reducer(
           );
         });
       } else {
-        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+        const currentComponentsTab = getCurrentComponentsTab(state);
+        const selectedIds =
+          currentComponentsTab === 'layerStyles'
+            ? state.selectedLayerStyleIds
+            : state.selectedTextStyleIds;
 
         return produce(state, (draft) => {
-          const layerStyles = draft.sketch.document.layerStyles?.objects ?? [];
+          const styles =
+            currentComponentsTab === 'layerStyles'
+              ? draft.sketch.document.layerStyles?.objects
+              : draft.sketch.document.layerTextStyles?.objects ?? [];
 
-          layerStyles.forEach((layerStyle) => {
-            if (!selectedLayerStyleIds.includes(layerStyle.do_objectID)) return;
+          styles.forEach((style) => {
+            if (!selectedIds.includes(style.do_objectID)) return;
 
-            layerStyle.value = styleReducer(layerStyle.value, action);
+            style.value = styleReducer(style.value, action);
 
+            if (currentComponentsTab === 'textStyles') return;
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(
                 draft,
                 layerPath.pageIndex,
                 layerPath.indexPaths,
               ).forEach((layer) => {
-                layer.style = produce(layerStyle.value, (style) => {
+                layer.style = produce(style.value, (style) => {
                   style.do_objectID = uuid();
                   return style;
                 });
@@ -1094,6 +1104,7 @@ export function reducer(
       });
     }
     case 'setThemeStyleName':
+    case 'setTextStyleName':
     case 'setSwatchName': {
       const [, id, name] = action;
 
@@ -1103,6 +1114,8 @@ export function reducer(
         const array =
           action[0] === 'setSwatchName'
             ? draft.sketch.document.sharedSwatches?.objects ?? []
+            : action[0] === 'setTextStyleName'
+            ? draft.sketch.document.layerTextStyles?.objects ?? []
             : draft.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {

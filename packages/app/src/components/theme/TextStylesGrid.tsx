@@ -11,7 +11,7 @@ interface Props {
   onSelectTextStyle: (id?: string, selectionType?: SelectionType) => void;
 }
 
-export default memo(function SwatchesGrid({
+export default memo(function TextStylesGrid({
   sharedStyles,
   selectedTextStyles,
   onSelectTextStyle,
