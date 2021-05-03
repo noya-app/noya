@@ -132,20 +132,15 @@ export const getSelectedLayersExcludingDescendants = (
 
 export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
   const currentTab = getCurrentTab(state);
+  const currentComponentsTab = getCurrentComponentsTab(state);
 
   return currentTab === 'canvas'
     ? getSelectedLayers(state).flatMap((layer) =>
         layer.style ? [layer.style] : [],
       )
-    : getSelectedLayerStyles(state).map((style) => style.value);
-};
-
-export const getSelectedTextStyles = (
-  state: ApplicationState,
-): Sketch.Style[] => {
-  return getSelectedTextLayers(state).flatMap((layer) =>
-    layer.style ? [layer.style] : [],
-  );
+    : currentComponentsTab === 'layerStyles'
+    ? getSelectedLayerStyles(state).map((style) => style.value)
+    : getSelectedThemeTextStyles(state).map((style) => style.value);
 };
 
 export const getSelectedTextLayers = (
@@ -208,10 +203,20 @@ export const getSelectedSwatches = (
 export const getSelectedLayerStyles = (
   state: ApplicationState,
 ): Sketch.SharedStyle[] => {
-  const sharedSwatches = getSharedStyles(state);
+  const sharedStyles = getSharedStyles(state);
 
-  return sharedSwatches.filter((swatch) =>
+  return sharedStyles.filter((swatch) =>
     state.selectedLayerStyleIds.includes(swatch.do_objectID),
+  );
+};
+
+export const getSelectedThemeTextStyles = (
+  state: ApplicationState,
+): Sketch.SharedStyle[] => {
+  const sharedStyles = getSharedTextStyles(state);
+
+  return sharedStyles.filter((swatch) =>
+    state.selectedTextStyleIds.includes(swatch.do_objectID),
   );
 };
 

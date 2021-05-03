@@ -2,6 +2,7 @@ import { Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useSelector } from '../contexts/ApplicationStateContext';
 import SwatchInspector from './SwatchesInspector';
+import ThemeTextStyleInspector from './ThemeTextStyleInspector';
 import ThemeStyleInspector from './ThemeStyleInspector';
 
 export default memo(function ThemeInspector() {
@@ -11,6 +12,8 @@ export default memo(function ThemeInspector() {
     switch (tab) {
       case 'swatches':
         return <SwatchInspector />;
+      case 'textStyles':
+        return <ThemeTextStyleInspector />;
       case 'layerStyles':
         return <ThemeStyleInspector />;
     }
