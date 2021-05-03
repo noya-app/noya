@@ -8,8 +8,8 @@ include:
   macOS
 - [Cairo](https://www.cairographics.org/) for most platforms
 - [Skia](https://skia.org/) for most platforms
-- HTML5 Canvas's (2D
-  Context)[https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D]
+- HTML5 Canvas's [2D
+  Context](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D)
 - PDF and EPS file formats
 
 These 2D graphics engines all expose fairly similar APIs.
