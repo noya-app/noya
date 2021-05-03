@@ -5,7 +5,7 @@ import { sketchColorToRgbaString, sketchColorToRgba } from 'noya-designsystem';
 
 // It has very basic bacground color preview.
 const TextStylePrev = styled.span<{ size: number; backgroundColor: string }>(
-  ({ theme, color, size, backgroundColor }) => ({
+  ({ color, size, backgroundColor }) => ({
     fontSize: size,
     backgroundColor: backgroundColor,
     height: '90%',
@@ -14,6 +14,8 @@ const TextStylePrev = styled.span<{ size: number; backgroundColor: string }>(
     justifyContent: 'center',
     alignItems: 'center',
     color: color,
+    pointerEvents: 'none',
+    userSelect: 'none',
   }),
 );
 

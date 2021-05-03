@@ -93,11 +93,24 @@ const Swatches = memo(function Swatches() {
 });
 
 const TextStyles = memo(function TextStyles() {
+  const [state, dispatch] = useApplicationState();
+
   const textStyles = useShallowArray(
     useSelector(Selectors.getSharedTextStyles),
   );
 
-  return <TextStylesGrid sharedStyles={textStyles} />;
+  return (
+    <TextStylesGrid
+      sharedStyles={textStyles}
+      selectedTextStyles={state.selectedLayerStyleIds}
+      onSelectTextStyle={useCallback(
+        (id, type) => {
+          dispatch('selectThemeStyle', id, type);
+        },
+        [dispatch],
+      )}
+    />
+  );
 });
 
 export default memo(function ThemeWindow() {
