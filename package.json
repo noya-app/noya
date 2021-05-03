@@ -18,7 +18,8 @@
     "lint": "eslint . --ext .js,.ts,.tsx",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "start:canvaskit-sandbox": "modular start canvaskit-sandbox"
   },
   "eslintConfig": {
     "extends": "modular-app"
