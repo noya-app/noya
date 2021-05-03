@@ -45,6 +45,12 @@ export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
 };
 
+export const getSharedTextStyles = (
+  state: ApplicationState,
+): Sketch.SharedStyle[] => {
+  return state.sketch.document.layerTextStyles?.objects ?? [];
+};
+
 export const getSharedStyles = (
   state: ApplicationState,
 ): Sketch.SharedStyle[] => {
