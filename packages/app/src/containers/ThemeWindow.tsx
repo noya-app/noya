@@ -5,6 +5,7 @@ import {
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
+import TextStylesGrid from '../components/theme/TextStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
 import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
@@ -15,19 +16,19 @@ const Container = styled.main(({ theme }) => ({
   flexDirection: 'column',
 }));
 
-const LayerStyles = memo(function LayerStyles() {
+const ThemeStyles = memo(function ThemeStyles() {
   const [state, dispatch] = useApplicationState();
   const selectedGroup = state.selectedThemeStyleGroup;
 
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
 
-  const filterSwatches = useMemo(
+  const filterTheme = useMemo(
     () => sharedStyles.filter((style) => style.name.startsWith(selectedGroup)),
     [sharedStyles, selectedGroup],
   );
   return (
     <ThemeStylesGrid
-      sharedStyles={filterSwatches}
+      sharedStyles={filterTheme}
       selectedThemeStyleIds={state.selectedLayerStyleIds}
       onGroupThemeStyle={useCallback(
         (id: string[], name?: string) => {
@@ -91,6 +92,14 @@ const Swatches = memo(function Swatches() {
   );
 });
 
+const TextStyles = memo(function TextStyles() {
+  const textStyles = useShallowArray(
+    useSelector(Selectors.getSharedTextStyles),
+  );
+
+  return <TextStylesGrid sharedStyles={textStyles} />;
+});
+
 export default memo(function ThemeWindow() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
@@ -99,9 +108,9 @@ export default memo(function ThemeWindow() {
       case 'swatches':
         return <Swatches />;
       case 'textStyles':
-        return <></>;
+        return <TextStyles />;
       case 'layerStyles':
-        return <LayerStyles />;
+        return <ThemeStyles />;
       case 'symbols':
         return <></>;
     }
