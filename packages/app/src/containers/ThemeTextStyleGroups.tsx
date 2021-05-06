@@ -37,7 +37,7 @@ export default memo(function TextGroups() {
   }, [textStyles]);
 
   const handleClick = useCallback(
-    (title?) => dispatch('setSelectedTextStyleGroup', title || ''),
+    (title) => dispatch('setSelectedTextStyleGroup', title),
     [dispatch],
   );
 
@@ -62,7 +62,10 @@ export default memo(function TextGroups() {
   return (
     <Container>
       <ListView.Root>
-        <ListView.Row onClick={handleClick} selected={selectedGroup === ''}>
+        <ListView.Row
+          onClick={() => handleClick('')}
+          selected={selectedGroup === ''}
+        >
           <Header>All Text Styles</Header>
         </ListView.Row>
         {groupElements}

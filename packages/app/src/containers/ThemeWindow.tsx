@@ -99,9 +99,15 @@ const TextStyles = memo(function TextStyles() {
     useSelector(Selectors.getSharedTextStyles),
   );
 
+  const selectedGroup = state.selectedTextStyleGroup;
+  const filterText = useMemo(
+    () => textStyles.filter((swatch) => swatch.name.startsWith(selectedGroup)),
+    [textStyles, selectedGroup],
+  );
+
   return (
     <TextStylesGrid
-      sharedStyles={textStyles}
+      sharedStyles={filterText}
       selectedTextStyles={state.selectedTextStyleIds}
       onGroupTextStyle={useCallback(
         (id: string[], name?: string) => {

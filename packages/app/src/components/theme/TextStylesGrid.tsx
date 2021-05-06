@@ -1,10 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ContextMenu, GridView } from 'noya-designsystem';
-import { delimitedPath } from 'noya-utils';
+import { delimitedPath, sortBy } from 'noya-utils';
 import { SelectionType } from 'noya-state';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { createThemeGroups } from '../../utils/themeTree';
+import { Fragment, memo, useMemo, useCallback } from 'react';
 import TextStyle from './TextStyle';
-import { memo, useMemo, useCallback } from 'react';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
@@ -67,6 +68,14 @@ export default memo(function TextStylesGrid({
     ],
   );
 
+  const groups = useMemo(() => {
+    const groups = createThemeGroups(sharedStyles).filter(
+      (group) => group.items.length,
+    );
+
+    return sortBy(groups, 'path');
+  }, [sharedStyles]);
+
   const handleOnContextMenu: (id: string) => void = useCallback(
     (id: string) => {
       if (selectedTextStyles.includes(id)) return;
@@ -77,50 +86,55 @@ export default memo(function TextStylesGrid({
 
   return (
     <GridView.Root onClick={() => onSelectTextStyle(undefined, 'replace')}>
-      <GridView.Section>
-        {sharedStyles.map((item) => {
-          const text = delimitedPath.basename(item.name);
-          const encoded = item.value.textStyle?.encodedAttributes;
-          const color = encoded?.MSAttributedStringColorAttribute;
-          const textTransform =
-            encoded?.MSAttributedStringTextTransformAttribute;
-          const attributes =
-            encoded?.MSAttributedStringFontAttribute.attributes;
+      {groups.map((group, index) => (
+        <Fragment key={index}>
+          {group.path && <GridView.SectionHeader title={group.path} />}
+          <GridView.Section>
+            {group.items.map((item) => {
+              const text = delimitedPath.basename(item.name);
+              const encoded = item.value.textStyle?.encodedAttributes;
+              const color = encoded?.MSAttributedStringColorAttribute;
+              const textTransform =
+                encoded?.MSAttributedStringTextTransformAttribute;
+              const attributes =
+                encoded?.MSAttributedStringFontAttribute.attributes;
 
-          const textDecoration = encoded?.underlineStyle
-            ? 'underline'
-            : encoded?.strikethroughStyle
-            ? 'strikethrough'
-            : 'none';
-          if (!attributes || !color) return null;
+              const textDecoration = encoded?.underlineStyle
+                ? 'underline'
+                : encoded?.strikethroughStyle
+                ? 'strikethrough'
+                : 'none';
+              if (!attributes || !color) return null;
 
-          return (
-            <GridView.Item
-              id={item.do_objectID}
-              key={item.do_objectID}
-              selected={selectedTextStyles.includes(item.do_objectID)}
-              title={text}
-              menuItems={menuItems}
-              onSelectMenuItem={handleSelectMenuItem}
-              onContextMenu={() => handleOnContextMenu(item.do_objectID)}
-              onClick={(event: React.MouseEvent) =>
-                onSelectTextStyle(
-                  item.do_objectID,
-                  event.shiftKey ? 'intersection' : 'replace',
-                )
-              }
-            >
-              <TextStyle
-                text={text}
-                size={attributes.size}
-                color={color}
-                textDecoration={textDecoration}
-                textTransform={textTransform}
-              />
-            </GridView.Item>
-          );
-        })}
-      </GridView.Section>
+              return (
+                <GridView.Item
+                  id={item.do_objectID}
+                  key={item.do_objectID}
+                  selected={selectedTextStyles.includes(item.do_objectID)}
+                  title={text}
+                  menuItems={menuItems}
+                  onSelectMenuItem={handleSelectMenuItem}
+                  onContextMenu={() => handleOnContextMenu(item.do_objectID)}
+                  onClick={(event: React.MouseEvent) =>
+                    onSelectTextStyle(
+                      item.do_objectID,
+                      event.shiftKey ? 'intersection' : 'replace',
+                    )
+                  }
+                >
+                  <TextStyle
+                    text={text}
+                    size={attributes.size}
+                    color={color}
+                    textDecoration={textDecoration}
+                    textTransform={textTransform}
+                  />
+                </GridView.Item>
+              );
+            })}
+          </GridView.Section>
+        </Fragment>
+      ))}
     </GridView.Root>
   );
 });

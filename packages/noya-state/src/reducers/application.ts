@@ -1283,9 +1283,20 @@ export function reducer(
     case 'setSelectedTextStyleGroup': {
       const [, id] = action;
       return produce(state, (draft) => {
-        if (action[0] === 'setSelectedSwatchGroup')
-          draft.selectedSwatchGroup = id;
-        else draft.selectedThemeStyleGroup = id;
+        switch (action[0]) {
+          case 'setSelectedSwatchGroup': {
+            draft.selectedSwatchGroup = id;
+            return;
+          }
+          case 'setSelectedThemeStyleGroup': {
+            draft.selectedThemeStyleGroup = id;
+            return;
+          }
+          case 'setSelectedTextStyleGroup': {
+            draft.selectedTextStyleGroup = id;
+            return;
+          }
+        }
       });
     }
     case 'groupSwatches':
@@ -1312,11 +1323,20 @@ export function reducer(
           object.name = newName;
         });
 
-        if (action[0] === 'groupSwatches') draft.selectedSwatchGroup = '';
-        else if (action[0] === 'groupThemeStyles')
-          draft.selectedThemeStyleGroup = '';
-        else if (action[0] === 'groupTextStyles')
-          draft.selectedTextStyleGroup = '';
+        switch (action[0]) {
+          case 'groupSwatches': {
+            draft.selectedSwatchGroup = '';
+            return;
+          }
+          case 'groupThemeStyles': {
+            draft.selectedThemeStyleGroup = '';
+            return;
+          }
+          case 'groupTextStyles': {
+            draft.selectedTextStyleGroup = '';
+            return;
+          }
+        }
       });
     }
     case 'setTextColor':
