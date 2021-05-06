@@ -106,12 +106,19 @@ export default memo(function TextStylesGrid({
                 : 'none';
               if (!attributes || !color) return null;
 
+              const [font, weight] = attributes.name
+                .replace('MT', '')
+                .split('-');
+
               return (
                 <GridView.Item
                   id={item.do_objectID}
                   key={item.do_objectID}
                   selected={selectedTextStyles.includes(item.do_objectID)}
                   title={text}
+                  subtitle={`${font} (${weight || 'Regular'}) - ${
+                    attributes.size
+                  }`}
                   menuItems={menuItems}
                   onSelectMenuItem={handleSelectMenuItem}
                   onContextMenu={() => handleOnContextMenu(item.do_objectID)}
