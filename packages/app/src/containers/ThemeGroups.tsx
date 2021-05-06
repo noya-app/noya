@@ -133,14 +133,18 @@ const ThemeStylesGroup = memo(() => {
 export default memo(function ThemeGroups() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
 
-  switch (tab) {
-    case 'swatches':
-      return <SwatchesGroup />;
-    case 'textStyles':
-      return <TextStylesGroup />;
-    case 'layerStyles':
-      return <ThemeStylesGroup />;
-    default:
-      return null;
-  }
+  const element = useMemo(() => {
+    switch (tab) {
+      case 'swatches':
+        return <SwatchesGroup />;
+      case 'textStyles':
+        return <TextStylesGroup />;
+      case 'layerStyles':
+        return <ThemeStylesGroup />;
+      default:
+        return null;
+    }
+  }, [tab]);
+
+  return <>{element}</>;
 });
