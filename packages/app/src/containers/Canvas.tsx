@@ -370,7 +370,7 @@ export default memo(function Canvas() {
           if (highlightedLayer?.id !== layer?.do_objectID) {
             highlightLayer(
               layer
-                ? { id: layer.do_objectID, precedence: 'belowSelection' }
+                ? { id: layer.do_objectID, precedence: 'belowSelection', isMeasured: event.altKey}
                 : undefined,
             );
           }

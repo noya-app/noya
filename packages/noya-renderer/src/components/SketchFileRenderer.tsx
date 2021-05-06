@@ -7,13 +7,16 @@ import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import {
   Group,
   Polyline,
+  Text,
+  Path,
   Rect as RCKRect,
   useColorFill,
   usePaint,
   useReactCanvasKit,
+  useFontManager,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { InteractionState, Layers, Rect } from 'noya-state';
+import { InteractionState, Layers, Rect, Point } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
 import {
   getBoundingPoints,
@@ -22,6 +25,7 @@ import {
   getCurrentPage,
   getLayerTransformAtIndexPath,
   getScreenTransform,
+  getLayersInRect,
 } from 'noya-state/src/selectors';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -169,6 +173,117 @@ export default memo(function SketchFileRenderer() {
     [page, state.selectedObjects],
   );
 
+  const visibleLayersInCanvas = function(){
+    const layers = getLayersInRect(
+      CanvasKit,
+      state,
+      canvasInsets,
+      createRect({x: 0, y: 0 }, {x: canvasSize.height, y: canvasSize.width }),
+      {
+        clickThroughGroups: false,
+        includeHiddenLayers: false,
+      },
+    );
+    return layers;
+  }
+
+  function measureDistanceBetweenVisibleLayers(selectedLayer: any, visibleLayers: any){
+    let distanceArray: number[] = [];
+    let closestLayer: any;
+    const selectedLayerCeneterPointX = selectedLayer.frame.x + selectedLayer.frame.width / 2;
+    const selectedLayerCeneterPointY = selectedLayer.frame.y + selectedLayer.frame.height / 2;
+
+    visibleLayers.forEach(function(layer: any){
+      if(selectedLayer.do_objectID !== layer.do_objectID){
+        //calculate center point
+        const visibleLayerCeneterPointX = layer.frame.x + layer.frame.width / 2;
+        const visibleLayerCeneterPointY = layer.frame.y + layer.frame.height / 2;
+
+        const distanceSquared =
+        Math.pow(selectedLayerCeneterPointX - visibleLayerCeneterPointX, 2) + Math.pow(selectedLayerCeneterPointY - visibleLayerCeneterPointY, 2);
+        const distance = Math.sqrt(distanceSquared)
+        distanceArray.push(distance);
+
+        if (!closestLayer || (closestLayer && distance < closestLayer.distance)){
+          closestLayer = {layer: layer, distance: distance};
+        } 
+      }
+    })  
+    //const closestDistance = Math.min(...distanceArray);
+    return closestLayer;
+  }
+  
+  function makePath(CanvasKit: any, points: Point[]) {
+    const path = new CanvasKit.Path();
+  
+    const [first, ...rest] = points;
+  
+    if (!first) return path;
+  
+    path.moveTo(first.x, first.y);
+  
+    rest.forEach((point) => {
+      path.lineTo(point.x, point.y);
+    });
+  
+    path.close();
+  
+    return path;
+  }
+
+  function DistanceLabelAndPath({ labelText, labelOrigin, pathStartPoint, pathEndPoint }: { labelText: string; labelOrigin: Point; pathStartPoint: Point; pathEndPoint:Point }) {
+    const fontManager = useFontManager();
+    const paragraph = useMemo(() => {
+      const paragraphStyle = new CanvasKit.ParagraphStyle({
+        textStyle: {
+          color: CanvasKit.parseColorString('ff0000'),
+          fontSize: 11,
+          fontFamilies: ['Roboto'],
+          letterSpacing: 0.2,
+        },
+      });
+
+    const builder = CanvasKit.ParagraphBuilder.Make(
+      paragraphStyle,
+      fontManager,
+    );
+    builder.addText(labelText);
+
+    const paragraph = builder.build();
+    paragraph.layout(10000);
+
+    return paragraph;
+  }, [CanvasKit, fontManager, labelText, 'ff0000']);
+
+    const labelRect = useMemo(
+      () =>
+        CanvasKit.XYWHRect(
+          labelOrigin.x,
+          labelOrigin.y,
+          paragraph.getMinIntrinsicWidth(),
+          paragraph.getHeight(),
+        ),
+      [CanvasKit, paragraph, 0, 0],
+    );
+
+    const points=[
+      pathStartPoint,
+      pathEndPoint
+    ]
+
+    const pathToSibling = makePath(CanvasKit, points);
+    const strokeToSibling = usePaint({
+      color: CanvasKit.Color(255, 69, 0, 0.9),
+      strokeWidth: 1,
+      style: CanvasKit.PaintStyle.Stroke,
+      });
+
+    return <>
+    <Text rect={labelRect} paragraph={paragraph} />
+    <Path paint={strokeToSibling} path={pathToSibling}></Path>
+    </>;
+  }
+
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
@@ -192,14 +307,31 @@ export default memo(function SketchFileRenderer() {
       indexPath,
       AffineTransform.identity,
     );
-
+    
+    let closestLayer;
+    let closestLayerDistance;
+    if(highlightedLayer.isMeasured){
+      const layersToMeasureDistance = visibleLayersInCanvas();
+      closestLayer = measureDistanceBetweenVisibleLayers(layer, layersToMeasureDistance).layer
+      closestLayerDistance = Math.round(measureDistanceBetweenVisibleLayers(layer, layersToMeasureDistance).distance)
+    } 
+    
     return (
       highlightedLayer && (
-        <HoverOutline
-          transform={layerTransform}
-          layer={layer}
-          paint={highlightPaint}
-        />
+        <>
+          <HoverOutline
+            transform={layerTransform}
+            layer={layer}
+            paint={highlightPaint}
+           />
+           {closestLayerDistance && 
+             <DistanceLabelAndPath
+             labelOrigin={{ x: layer.frame.x, y: layer.frame.y }}
+             labelText={closestLayerDistance.toString()}
+             pathStartPoint={{x: layer.frame.x, y: layer.frame.y}}
+             pathEndPoint={{x: closestLayer.frame.x, y: closestLayer.frame.y}}
+           />}
+        </>
       )
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
