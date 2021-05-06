@@ -60,7 +60,7 @@ export default function SwatchesToolbar() {
   const addTextStyle = useCallback(() => dispatch('addTextStyle'), [dispatch]);
 
   const removeSwatch = useCallback(() => dispatch('removeSwatch'), [dispatch]);
-  const removeTextStyle = useCallback(() => dispatch('removeSwatch'), [
+  const removeTextStyle = useCallback(() => dispatch('removeTextStyle'), [
     dispatch,
   ]);
   const removeThemeStyle = useCallback(() => dispatch('removeThemeStyle'), [

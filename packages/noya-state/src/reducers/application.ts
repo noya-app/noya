@@ -48,6 +48,8 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
+export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -81,18 +83,8 @@ export type Action =
       selectionType?: SelectionType,
     ]
   | [
-      type: 'selectSwatch',
-      swatchId: string | string[] | undefined,
-      selectionType?: SelectionType,
-    ]
-  | [
-      type: 'selectThemeStyle',
-      sharedStyleId: string | string[] | undefined,
-      selectionType?: SelectionType,
-    ]
-  | [
-      type: 'selectTextStyle',
-      sharedStyleId: string | string[] | undefined,
+      type: `select${ComponentsElements}`,
+      id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
@@ -122,16 +114,13 @@ export type Action =
       alpha: number,
       mode?: SetNumberMode,
     ]
-  | [type: 'addSwatch']
-  | [type: 'addTextStyle', name?: string, style?: Sketch.Style]
-  | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
+  | [type: `add${ComponentsElements}`, name?: string, style?: Sketch.Style]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
       style: Sketch.Style | undefined,
     ]
-  | [type: 'duplicateSwatch', id: string[]]
-  | [type: 'duplicateThemeStyle', id: string[]]
+  | [type: `duplicate${ComponentsElements}`, id: string[]]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -142,18 +131,13 @@ export type Action =
         | Exclude<InteractionAction, ['maybeScale', ...any[]]>
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
     ]
-  | [type: `setSwatchName`, swatchId: string | string[], name: string]
-  | [type: `setThemeStyleName`, sharedStyleId: string | string[], name: string]
-  | [type: `setTextStyleName`, sharedStyleId: string | string[], name: string]
   | [
-      type: 'setThemeStyle',
-      sharedStyleId?: string,
-      style?: Sketch.Style | undefined,
+      type: `set${ComponentsElements}Name`,
+      swatchId: string | string[],
+      name: string,
     ]
-  | [type: 'removeSwatch']
-  | [type: 'removeThemeStyle']
-  | [type: 'setSelectedSwatchGroup', groupId: string]
-  | [type: 'setSelectedThemeStyleGroup', groupId: string]
+  | [type: `remove${ComponentsElements}`]
+  | [type: `setSelected${ComponentsElements}Group`, groupId: string]
   | [
       type: 'groupSwatches',
       swatchId: string | string[],
@@ -163,6 +147,16 @@ export type Action =
       type: 'groupThemeStyles',
       swatchId: string | string[],
       name: string | undefined,
+    ]
+  | [
+      type: 'groupTextStyles',
+      swatchId: string | string[],
+      name: string | undefined,
+    ]
+  | [
+      type: 'setThemeStyle',
+      sharedStyleId?: string,
+      style?: Sketch.Style | undefined,
     ]
   | StyleAction
   | StringAttributeAction
@@ -886,7 +880,7 @@ export function reducer(
           _class: 'sharedStyle',
           do_objectID: uuid(),
           name: delimitedPath.join([
-            draft.selectedThemeStyleGroup,
+            draft.selectedTextStyleGroup,
             name || 'New Text Style',
           ]),
           value: produce(style || Models.style, (style) => {
@@ -1000,6 +994,39 @@ export function reducer(
         });
 
         draft.sketch.document.layerStyles = layerStyles;
+      });
+    }
+    case 'duplicateTextStyle': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const textStyles = draft.sketch.document.layerTextStyles ?? {
+          _class: 'sharedTextStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        textStyles.objects.forEach((sharedStyle: Sketch.SharedStyle) => {
+          if (!ids.includes(sharedStyle.do_objectID)) return;
+
+          const newSharedStyle: Sketch.SharedStyle = {
+            _class: 'sharedStyle',
+            do_objectID: uuid(),
+            name: getIncrementedName(
+              sharedStyle.name,
+              textStyles.objects.map((s) => s.name),
+            ),
+            value: produce(sharedStyle.value, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            }),
+          };
+
+          textStyles.objects.push(newSharedStyle);
+        });
+
+        draft.sketch.document.layerTextStyles = textStyles;
       });
     }
     case 'selectSwatch':
@@ -1202,6 +1229,22 @@ export function reducer(
         draft.sketch.document.sharedSwatches = sharedSwatches;
       });
     }
+    case 'removeTextStyle': {
+      const ids = state.selectedTextStyleIds;
+
+      return produce(state, (draft) => {
+        const layerStyles = draft.sketch.document.layerTextStyles;
+
+        if (!layerStyles) return;
+
+        const filterLayer = layerStyles.objects.filter(
+          (object: Sketch.SharedStyle) => !ids.includes(object.do_objectID),
+        );
+
+        layerStyles.objects = filterLayer;
+        draft.sketch.document.layerTextStyles = layerStyles;
+      });
+    }
     case 'removeThemeStyle': {
       const ids = state.selectedLayerStyleIds;
 
@@ -1236,7 +1279,8 @@ export function reducer(
       });
     }
     case 'setSelectedSwatchGroup':
-    case 'setSelectedThemeStyleGroup': {
+    case 'setSelectedThemeStyleGroup':
+    case 'setSelectedTextStyleGroup': {
       const [, id] = action;
       return produce(state, (draft) => {
         if (action[0] === 'setSelectedSwatchGroup')
@@ -1245,6 +1289,7 @@ export function reducer(
       });
     }
     case 'groupSwatches':
+    case 'groupTextStyles':
     case 'groupThemeStyles': {
       const [, id, value] = action;
 
@@ -1254,6 +1299,8 @@ export function reducer(
         const array =
           action[0] === 'groupSwatches'
             ? draft.sketch.document.sharedSwatches?.objects ?? []
+            : action[0] === 'groupTextStyles'
+            ? draft.sketch.document.layerTextStyles?.objects ?? []
             : draft.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
@@ -1266,7 +1313,10 @@ export function reducer(
         });
 
         if (action[0] === 'groupSwatches') draft.selectedSwatchGroup = '';
-        else draft.selectedThemeStyleGroup = '';
+        else if (action[0] === 'groupThemeStyles')
+          draft.selectedThemeStyleGroup = '';
+        else if (action[0] === 'groupTextStyles')
+          draft.selectedTextStyleGroup = '';
       });
     }
     case 'setTextColor':
