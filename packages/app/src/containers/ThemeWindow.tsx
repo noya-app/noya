@@ -103,12 +103,27 @@ const TextStyles = memo(function TextStyles() {
     <TextStylesGrid
       sharedStyles={textStyles}
       selectedTextStyles={state.selectedTextStyleIds}
+      onGroupTextStyle={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupTextStyles', id, name);
+        },
+        [dispatch],
+      )}
       onSelectTextStyle={useCallback(
         (id, type) => {
           dispatch('selectTextStyle', id, type);
         },
         [dispatch],
       )}
+      onDuplicateTextStyle={useCallback(
+        (id: string[]) => {
+          dispatch('duplicateTextStyle', id);
+        },
+        [dispatch],
+      )}
+      onDeleteTextStyle={useCallback(() => dispatch('removeTextStyle'), [
+        dispatch,
+      ])}
     />
   );
 });
