@@ -79,7 +79,7 @@ const ContainerGroup = memo(function ContainerGroup({
   );
 });
 
-const SwatchesGroup = () => {
+const SwatchesGroup = memo(() => {
   const [state, dispatch] = useApplicationState();
   const swatches = useSelector(Selectors.getSharedSwatches);
 
@@ -94,16 +94,16 @@ const SwatchesGroup = () => {
       selectedGroup={state.selectedSwatchGroup}
     />
   );
-};
+});
 
-const TextStylesGroup = () => {
+const TextStylesGroup = memo(() => {
   const [state, dispatch] = useApplicationState();
   const textStyles = useSelector(Selectors.getSharedTextStyles);
 
   return (
     <ContainerGroup
       array={textStyles}
-      headerTitle="Text"
+      headerTitle="Texts"
       onClick={useCallback(
         (title: string) => dispatch('setSelectedTextStyleGroup', title),
         [dispatch],
@@ -111,9 +111,9 @@ const TextStylesGroup = () => {
       selectedGroup={state.selectedTextStyleGroup}
     />
   );
-};
+});
 
-const ThemeStylesGroup = () => {
+const ThemeStylesGroup = memo(() => {
   const [state, dispatch] = useApplicationState();
   const styles = useSelector(Selectors.getSharedStyles);
 
@@ -128,7 +128,7 @@ const ThemeStylesGroup = () => {
       selectedGroup={state.selectedThemeStyleGroup}
     />
   );
-};
+});
 
 export default memo(function ThemeGroups() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
