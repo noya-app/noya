@@ -184,14 +184,14 @@ const TextStyleInspector = memo(function TextStyleInspector() {
       />
       <Divider />
       <TextOptionsRow
-        textCase={textTransform}
-        textDecorator={textDecoration}
-        onChangeTextDecorator={useCallback(
+        textTransform={textTransform}
+        textDecoration={textDecoration}
+        onChangeTextDecoration={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],
         )}
-        onChangeTextCase={useCallback(
-          (value: Sketch.TextTransform) => dispatch('setTextCase', value),
+        onChangeTextTransform={useCallback(
+          (value: Sketch.TextTransform) => dispatch('setTextTransform', value),
           [dispatch],
         )}
       />

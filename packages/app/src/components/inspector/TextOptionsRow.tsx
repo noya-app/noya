@@ -1,71 +1,55 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  LetterCaseLowercaseIcon,
   LetterCaseCapitalizeIcon,
+  LetterCaseLowercaseIcon,
   LetterCaseUppercaseIcon,
 } from '@radix-ui/react-icons';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   Label,
-  Select,
-  RadioGroup,
   LabeledElementView,
+  RadioGroup,
+  Select,
+  Spacer,
 } from 'noya-designsystem';
-import { Spacer } from 'noya-designsystem';
-import { useCallback, useMemo, memo } from 'react';
+import { SimpleTextDecoration } from 'noya-renderer';
+import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
-export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
-
 interface TextOptionsRowProps {
-  textCase?: Sketch.TextTransform;
-  textDecorator?: SimpleTextDecoration;
-  onChangeTextCase: (value: Sketch.TextTransform) => void;
-  onChangeTextDecorator: (value: number) => void;
+  textTransform?: Sketch.TextTransform;
+  textDecoration?: SimpleTextDecoration;
+  onChangeTextTransform: (value: Sketch.TextTransform) => void;
+  onChangeTextDecoration: (value: SimpleTextDecoration) => void;
 }
 
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);
+
+const TextDecorationOptions: SimpleTextDecoration[] = [
+  'none',
+  'underline',
+  'strikethrough',
+];
+
+const decorationInputId = `decoration`;
+const transformInputId = `transform`;
+
 export default memo(function TextOptionsRow({
-  textCase,
-  textDecorator,
-  onChangeTextCase,
-  onChangeTextDecorator,
+  textTransform,
+  textDecoration,
+  onChangeTextTransform,
+  onChangeTextDecoration,
 }: TextOptionsRowProps) {
-  const decoratorInputId = `decorator`;
-  const transformInputId = `transform`;
-
-  const decorator = useMemo(
-    () => [
-      { id: 0, name: 'None' },
-      { id: 1, name: 'Underline' },
-      { id: 2, name: 'Strikethrough' },
-    ],
-    [],
-  );
-
-  const renderLabel = useCallback(
-    ({ id }) => {
-      switch (id) {
-        case decoratorInputId:
-          return <Label.Label>Decoration</Label.Label>;
-        case transformInputId:
-          return <Label.Label>Transform</Label.Label>;
-        default:
-          return null;
-      }
-    },
-    [decoratorInputId, transformInputId],
-  );
-
-  const onChangeDecorator = useCallback(
-    (value) => {
-      const id = decorator.find((d) => d.name === value)?.id || 0;
-      onChangeTextDecorator(id);
-    },
-    [onChangeTextDecorator, decorator],
-  );
-
-  const textDecoratorCapitalize = textDecorator
-    ? textDecorator.charAt(0).toUpperCase() + textDecorator.slice(1)
-    : '';
+  const renderLabel = useCallback(({ id }) => {
+    switch (id) {
+      case decorationInputId:
+        return <Label.Label>Decoration</Label.Label>;
+      case transformInputId:
+        return <Label.Label>Transform</Label.Label>;
+      default:
+        return null;
+    }
+  }, []);
 
   return (
     <InspectorPrimitives.Section>
@@ -75,20 +59,21 @@ export default memo(function TextOptionsRow({
       <Spacer.Vertical size={10} />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
-          <Select
-            id={decoratorInputId}
-            value={textDecoratorCapitalize}
-            options={decorator.map((d) => d.name)}
-            getTitle={(name) => name}
-            onChange={onChangeDecorator}
+          <Select<SimpleTextDecoration>
+            id={decorationInputId}
+            value={textDecoration ?? 'none'}
+            options={TextDecorationOptions}
+            getTitle={capitalize}
+            onChange={onChangeTextDecoration}
           />
           <Spacer.Horizontal size={8} />
           <RadioGroup.Root
             id={transformInputId}
-            value={textCase !== undefined ? textCase.toString() : ''}
-            onValueChange={(event) =>
-              onChangeTextCase(parseInt(event.target.value))
-            }
+            value={textTransform !== undefined ? textTransform.toString() : ''}
+            onValueChange={useCallback(
+              (event) => onChangeTextTransform(parseInt(event.target.value)),
+              [onChangeTextTransform],
+            )}
           >
             <RadioGroup.Item
               value={Sketch.TextTransform.None.toString()}

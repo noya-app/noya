@@ -1,50 +1,39 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 
-export type TextStyleAction =
+export type StringAttributeAction =
   | [type: 'setTextColor', value: Sketch.Color]
   | [type: 'setTextFontName', value: string]
   | [type: 'setTextFontSize', value: number]
   | [type: 'setTextLetterSpacing', value: number]
   | [type: 'setTextLineSpacing', value: number]
   | [type: 'setTextParagraphSpacing', value: number]
-  | [type: 'setTextAlignment', value: number]
   | [type: 'setTextHorizontalAlignment', value: number]
-  | [type: 'setTextVerticalAlignment', value: number]
-  | [type: 'setTextDecoration', value: number]
-  | [type: 'setTextCase', value: number];
+  | [type: 'setTextVerticalAlignment', value: number];
 
-export function stringAttributeReducer(
-  state: Sketch.TextStyle | Sketch.StringAttribute,
-  action: TextStyleAction,
-): Sketch.TextStyle | Sketch.StringAttribute {
+type CommonStringAttributes =
+  | Sketch.StringAttribute['attributes']
+  | Sketch.TextStyle['encodedAttributes'];
+
+export function stringAttributeReducer<T extends CommonStringAttributes>(
+  state: T,
+  action: StringAttributeAction,
+): T {
   switch (action[0]) {
     case 'setTextColor': {
       const [, color] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes
-            : draft.encodedAttributes;
-
-        if (!attributes) return;
-
-        attributes.MSAttributedStringColorAttribute = color;
+        draft.MSAttributedStringColorAttribute = color;
       });
     }
     case 'setTextFontName': {
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes.MSAttributedStringFontAttribute.attributes
-            : draft.encodedAttributes.MSAttributedStringFontAttribute
-                .attributes;
+        const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        if (!attributes) return;
-
+        // This logic is temporary and will be replaced when we handle fonts
         const split = attributes.name.split('-');
         const face = split[1] ? '-' + split[1] : '';
 
@@ -57,113 +46,58 @@ export function stringAttributeReducer(
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes.MSAttributedStringFontAttribute.attributes
-            : draft.encodedAttributes.MSAttributedStringFontAttribute
-                .attributes;
-
-        if (!attributes) return;
-
-        attributes.size = value;
+        draft.MSAttributedStringFontAttribute.attributes.size = value;
       });
     }
     case 'setTextLetterSpacing': {
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes
-            : draft.encodedAttributes;
-
-        if (!attributes) return;
-
-        attributes.kerning = value;
+        draft.kerning = value;
       });
     }
     case 'setTextLineSpacing': {
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes
-            : draft.encodedAttributes;
+        draft.paragraphStyle = draft.paragraphStyle ?? {
+          _class: 'paragraphStyle',
+          alignment: 0,
+        };
 
-        if (!attributes) return;
-
-        const paragraphStyle =
-          attributes.paragraphStyle ||
-          ({
-            _class: 'paragraphStyle',
-            alignment: 0,
-          } as Sketch.ParagraphStyle);
-        paragraphStyle.maximumLineHeight = value;
-        paragraphStyle.maximumLineHeight = value;
-
-        attributes.paragraphStyle = paragraphStyle;
+        draft.paragraphStyle.maximumLineHeight = value;
+        draft.paragraphStyle.maximumLineHeight = value;
       });
     }
     case 'setTextParagraphSpacing': {
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes
-            : draft.encodedAttributes;
+        draft.paragraphStyle = draft.paragraphStyle ?? {
+          _class: 'paragraphStyle',
+          alignment: 0,
+        };
 
-        if (!attributes) return;
-
-        const paragraphStyle =
-          attributes.paragraphStyle ||
-          ({
-            _class: 'paragraphStyle',
-            alignment: 0,
-          } as Sketch.ParagraphStyle);
-
-        paragraphStyle.paragraphSpacing = value;
-        paragraphStyle.paragraphSpacing = value;
-
-        attributes.paragraphStyle = paragraphStyle;
+        draft.paragraphStyle.paragraphSpacing = value;
       });
     }
     case 'setTextHorizontalAlignment': {
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes
-            : draft.encodedAttributes;
+        draft.paragraphStyle = draft.paragraphStyle ?? {
+          _class: 'paragraphStyle',
+          alignment: 0,
+        };
 
-        if (!attributes) return;
-
-        const paragraphStyle =
-          attributes.paragraphStyle ||
-          ({
-            _class: 'paragraphStyle',
-            alignment: 0,
-          } as Sketch.ParagraphStyle);
-
-        paragraphStyle.alignment = value;
-        attributes.paragraphStyle = paragraphStyle;
+        draft.paragraphStyle.alignment = value;
       });
     }
     case 'setTextVerticalAlignment': {
       const [, value] = action;
 
       return produce(state, (draft) => {
-        const attributes =
-          draft._class === 'stringAttribute'
-            ? draft.attributes
-            : draft.encodedAttributes;
-
-        if (!attributes) return;
-        attributes.textStyleVerticalAlignmentKey = value;
-
-        if (draft._class !== 'stringAttribute') draft.verticalAlignment = value;
+        draft.textStyleVerticalAlignmentKey = value;
       });
     }
     default:

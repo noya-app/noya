@@ -1,15 +1,15 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Divider } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { useCallback, memo, useMemo } from 'react';
-import useShallowArray from '../hooks/useShallowArray';
-import TextOptionsRow from '../components/inspector/TextOptionsRow';
+import { memo, useCallback, useMemo } from 'react';
 import TextAlignmentRow from '../components/inspector/TextLayoutRow';
+import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
 import {
-  useSelector,
   useApplicationState,
+  useSelector,
 } from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
 import getMultiValue from '../utils/getMultiValue';
 
 export default memo(function TextStyleInspector() {
@@ -27,13 +27,13 @@ export default memo(function TextStyleInspector() {
 
     const attributes = layer.attributedString.attributes;
 
-    const color = {
+    const color: Sketch.Color = {
       _class: 'color',
       red: 0.5,
       blue: 0.5,
       green: 0.5,
       alpha: 0.5,
-    } as Sketch.Color;
+    };
 
     return {
       fontColor: encodedAttributes?.MSAttributedStringColorAttribute || color,
@@ -216,14 +216,14 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextOptionsRow
-        textCase={textTransform}
-        textDecorator={textDecoration}
-        onChangeTextDecorator={useCallback(
+        textTransform={textTransform}
+        textDecoration={textDecoration}
+        onChangeTextDecoration={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],
         )}
-        onChangeTextCase={useCallback(
-          (value: Sketch.TextTransform) => dispatch('setTextCase', value),
+        onChangeTextTransform={useCallback(
+          (value) => dispatch('setTextTransform', value),
           [dispatch],
         )}
       />

@@ -226,7 +226,7 @@ export function textHorizontalAlignment(
   }
 }
 
-export type SimpleTextDecoration = 'underline' | 'strikethrough';
+export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
 export function stringAttribute(
   CanvasKit: CanvasKit,
@@ -249,5 +249,15 @@ export function stringAttribute(
       // There's currently a typo in the TypeScript types, "decration"
       ['decorationStyle' as any]: CanvasKit.DecorationStyle.Solid,
     }),
+    ...(decoration === 'none'
+      ? {}
+      : {
+          decoration:
+            decoration === 'underline'
+              ? CanvasKit.UnderlineDecoration
+              : CanvasKit.LineThroughDecoration,
+          // There's currently a typo in the TypeScript types, "decration"
+          ['decorationStyle' as any]: CanvasKit.DecorationStyle.Solid,
+        }),
   });
 }

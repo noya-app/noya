@@ -6,6 +6,7 @@ export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 
 export type { Context };
 export { uuid, Primitives };
+export type SimpleTextDecoration = Primitives.SimpleTextDecoration;
 
 export let fontManager: FontMgr;
 
