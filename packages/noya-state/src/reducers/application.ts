@@ -615,7 +615,6 @@ export function reducer(
 
             style.value = styleReducer(style.value, action);
 
-            if (currentComponentsTab === 'textStyles') return;
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(
                 draft,
@@ -1316,31 +1315,61 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+      if (getCurrentTab(state) === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-          switch (action[0]) {
-            case 'setTextVerticalAlignment': {
-              layer.style.textStyle.verticalAlignment = action[1];
+              switch (action[0]) {
+                case 'setTextVerticalAlignment': {
+                  layer.style.textStyle.verticalAlignment = action[1];
 
-              break;
-            }
-          }
+                  break;
+                }
+              }
 
-          layer.style.textStyle.encodedAttributes = stringAttributeReducer(
-            layer.style.textStyle.encodedAttributes,
-            action,
+              layer.style.textStyle.encodedAttributes = stringAttributeReducer(
+                layer.style.textStyle.encodedAttributes,
+                action,
+              );
+
+              layer.attributedString.attributes.forEach((attribute, index) => {
+                layer.attributedString.attributes[
+                  index
+                ].attributes = stringAttributeReducer(
+                  attribute.attributes,
+                  action,
+                );
+              });
+            },
           );
+        });
+      } else {
+        const ids = state.selectedTextStyleIds;
 
-          layer.attributedString.attributes.forEach((attribute, index) => {
-            layer.attributedString.attributes[
-              index
-            ].attributes = stringAttributeReducer(attribute.attributes, action);
+        return produce(state, (draft) => {
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
+
+            sharedTextStyle.value.textStyle.encodedAttributes = stringAttributeReducer(
+              sharedTextStyle.value.textStyle.encodedAttributes,
+              action,
+            );
           });
         });
-      });
+      }
     }
     case 'setTextAlignment': {
       const pageIndex = getCurrentPageIndex(state);
@@ -1355,39 +1384,99 @@ export function reducer(
         });
       });
     }
-    case 'setTextDecoration':
+    case 'setTextDecoration': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+      if (getCurrentTab(state) === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-          const attributes = layer.style?.textStyle?.encodedAttributes;
+              const attributes = layer.style?.textStyle?.encodedAttributes;
 
-          if (!attributes) return;
+              if (!attributes) return;
 
-          attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-          attributes.strikethroughStyle = action[1] === 'strikethrough' ? 1 : 0;
+              attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+              attributes.strikethroughStyle =
+                action[1] === 'strikethrough' ? 1 : 0;
+            },
+          );
         });
-      });
+      } else {
+        return produce(state, (draft) => {
+          const ids = state.selectedTextStyleIds;
+
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
+            const attributes =
+              sharedTextStyle.value.textStyle?.encodedAttributes;
+
+            if (!attributes) return;
+
+            attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+            attributes.strikethroughStyle =
+              action[1] === 'strikethrough' ? 1 : 0;
+          });
+        });
+      }
+    }
     case 'setTextTransform': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+      if (getCurrentTab(state) === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-          const encoded = layer.style?.textStyle?.encodedAttributes;
+              const encoded = layer.style?.textStyle?.encodedAttributes;
 
-          if (!encoded) return;
+              if (!encoded) return;
 
-          encoded.MSAttributedStringTextTransformAttribute = action[1];
+              encoded.MSAttributedStringTextTransformAttribute = action[1];
+            },
+          );
         });
-      });
+      } else {
+        return produce(state, (draft) => {
+          const ids = state.selectedTextStyleIds;
+
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
+            const attributes =
+              sharedTextStyle.value.textStyle?.encodedAttributes;
+
+            if (!attributes) return;
+
+            attributes.MSAttributedStringTextTransformAttribute = action[1];
+          });
+        });
+      }
     }
     default:
       return state;
