@@ -50,9 +50,9 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
-export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
-
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
+
+export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
 export type LayerHighlight = {
   id: string;

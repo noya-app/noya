@@ -17,8 +17,8 @@ import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
 import { WorkspaceTab, ThemeTab, SelectionType } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
-import { delimitedPath } from 'noya-utils';
 import type { Point, Rect, UUID } from './types';
+import { delimitedPath } from 'noya-utils';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
