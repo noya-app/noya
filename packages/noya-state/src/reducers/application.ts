@@ -1384,7 +1384,7 @@ export function reducer(
         });
       });
     }
-    case 'setTextDecoration': {
+    case 'setTextDecoration':
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
@@ -1432,7 +1432,6 @@ export function reducer(
           });
         });
       }
-    }
     case 'setTextTransform': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
