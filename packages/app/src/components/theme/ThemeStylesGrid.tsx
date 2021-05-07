@@ -1,10 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { memo, useMemo, useCallback, Fragment } from 'react';
-import { ContextMenu, GridView } from 'noya-designsystem';
+import { GridView } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { createThemeGroups } from '../../utils/themeTree';
+import { menuItems, ThemeMenuItemType } from './menuItems';
 import ThemeStyle from './ThemeStyle';
 
 interface Props {
@@ -16,8 +16,6 @@ interface Props {
   onDuplicateThemeStyle: (id: string[]) => void;
 }
 
-type MenuItemType = 'duplicate' | 'delete' | 'group' | 'ungroup';
-
 export default memo(function ThemeStylesGrid({
   sharedStyles,
   selectedThemeStyleIds,
@@ -28,19 +26,8 @@ export default memo(function ThemeStylesGrid({
 }: Props) {
   const { basename } = delimitedPath;
 
-  const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [
-      { value: 'duplicate', title: 'Duplicate' },
-      { value: 'group', title: 'Group' },
-      { value: 'ungroup', title: 'Ungroup' },
-      ContextMenu.SEPARATOR_ITEM,
-      { value: 'delete', title: 'Delete' },
-    ],
-    [],
-  );
-
   const handleSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
+    (value: ThemeMenuItemType) => {
       switch (value) {
         case 'delete':
           onDeleteThemeStyle();
@@ -93,7 +80,7 @@ export default memo(function ThemeStylesGrid({
           <GridView.Section>
             {group.items.map((item) => {
               return (
-                <GridView.Item<MenuItemType>
+                <GridView.Item<ThemeMenuItemType>
                   id={item.do_objectID}
                   key={item.do_objectID}
                   title={basename(item.name)}

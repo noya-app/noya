@@ -1,11 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu, GridView } from 'noya-designsystem';
+import { GridView } from 'noya-designsystem';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { SelectionType } from 'noya-state';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { createThemeGroups } from '../../utils/themeTree';
 import { Fragment, memo, useMemo, useCallback } from 'react';
 import TextStyle from './TextStyle';
+import { menuItems, ThemeMenuItemType } from './menuItems';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
@@ -16,7 +16,6 @@ interface Props {
   onDuplicateTextStyle: (id: string[]) => void;
 }
 
-type MenuItemType = 'duplicate' | 'delete' | 'group' | 'ungroup';
 export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
 export default memo(function TextStylesGrid({
@@ -27,19 +26,8 @@ export default memo(function TextStylesGrid({
   onDeleteTextStyle,
   onSelectTextStyle,
 }: Props) {
-  const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [
-      { value: 'duplicate', title: 'Duplicate' },
-      { value: 'group', title: 'Group' },
-      { value: 'ungroup', title: 'Ungroup' },
-      ContextMenu.SEPARATOR_ITEM,
-      { value: 'delete', title: 'Delete' },
-    ],
-    [],
-  );
-
   const handleSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
+    (value: ThemeMenuItemType) => {
       switch (value) {
         case 'delete':
           onDeleteTextStyle();
@@ -111,7 +99,7 @@ export default memo(function TextStylesGrid({
                 .split('-');
 
               return (
-                <GridView.Item
+                <GridView.Item<ThemeMenuItemType>
                   id={item.do_objectID}
                   key={item.do_objectID}
                   selected={selectedTextStyles.includes(item.do_objectID)}

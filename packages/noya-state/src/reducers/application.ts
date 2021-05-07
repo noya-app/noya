@@ -25,6 +25,8 @@ import {
   findPageLayerIndexPaths,
   visitStyleColors,
   visitLayerColors,
+  updateSelection,
+  groupThemeComponents,
   getCurrentComponentsTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
@@ -156,18 +158,8 @@ export type Action =
   | [type: `remove${ComponentsElements}`]
   | [type: `setSelected${ComponentsElements}Group`, groupId: string]
   | [
-      type: 'groupSwatches',
-      swatchId: string | string[],
-      name: string | undefined,
-    ]
-  | [
-      type: 'groupThemeStyles',
-      swatchId: string | string[],
-      name: string | undefined,
-    ]
-  | [
-      type: 'groupTextStyles',
-      swatchId: string | string[],
+      type: `group${ComponentsElements}`,
+      id: string | string[],
       name: string | undefined,
     ]
   | [
@@ -919,7 +911,7 @@ export function reducer(
             draft.selectedTextStyleGroup,
             name || 'New Text Style',
           ]),
-          value: produce(style || Models.style, (style) => {
+          value: produce(style || Models.textStyle, (style) => {
             style.do_objectID = uuid();
             return style;
           }),
@@ -1065,48 +1057,25 @@ export function reducer(
         draft.sketch.document.layerTextStyles = textStyles;
       });
     }
-    case 'selectSwatch':
-    case 'selectThemeStyle':
+    case 'selectSwatch': {
+      const [, id, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedSwatchIds, id, selectionType);
+      });
+    }
+    case 'selectThemeStyle': {
+      const [, id, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedLayerStyleIds, id, selectionType);
+      });
+    }
     case 'selectTextStyle': {
       const [, id, selectionType = 'replace'] = action;
 
-      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
       return produce(state, (draft) => {
-        const draftIds =
-          selectionType === 'replace'
-            ? [...ids]
-            : action[0] === 'selectSwatch'
-            ? draft.selectedSwatchIds
-            : action[0] === 'selectThemeStyle'
-            ? draft.selectedLayerStyleIds
-            : draft.selectedTextStyleIds;
-
-        switch (selectionType) {
-          case 'intersection':
-            draftIds.push(...ids.filter((id) => !draftIds.includes(id)));
-            break;
-          case 'difference':
-            ids.forEach((id) => {
-              const selectedIndex = draftIds.indexOf(id);
-              draftIds.splice(selectedIndex, 1);
-            });
-            break;
-        }
-
-        switch (action[0]) {
-          case 'selectSwatch': {
-            draft.selectedSwatchIds = draftIds;
-            return;
-          }
-          case 'selectThemeStyle': {
-            draft.selectedLayerStyleIds = draftIds;
-            return;
-          }
-          case 'selectTextStyle': {
-            draft.selectedTextStyleIds = draftIds;
-            return;
-          }
-        }
+        updateSelection(draft.selectedTextStyleIds, id, selectionType);
       });
     }
     case 'setSwatchColor': {
@@ -1314,65 +1283,62 @@ export function reducer(
         );
       });
     }
-    case 'setSelectedSwatchGroup':
-    case 'setSelectedThemeStyleGroup':
+    case 'setSelectedSwatchGroup': {
+      const [, id] = action;
+      return produce(state, (draft) => {
+        draft.selectedSwatchGroup = id;
+      });
+    }
+    case 'setSelectedThemeStyleGroup': {
+      const [, id] = action;
+      return produce(state, (draft) => {
+        draft.selectedThemeStyleGroup = id;
+      });
+    }
     case 'setSelectedTextStyleGroup': {
       const [, id] = action;
       return produce(state, (draft) => {
-        switch (action[0]) {
-          case 'setSelectedSwatchGroup': {
-            draft.selectedSwatchGroup = id;
-            return;
-          }
-          case 'setSelectedThemeStyleGroup': {
-            draft.selectedThemeStyleGroup = id;
-            return;
-          }
-          case 'setSelectedTextStyleGroup': {
-            draft.selectedTextStyleGroup = id;
-            return;
-          }
-        }
+        draft.selectedTextStyleGroup = id;
       });
     }
-    case 'groupSwatches':
-    case 'groupTextStyles':
-    case 'groupThemeStyles': {
+    case 'groupSwatch': {
       const [, id, value] = action;
-
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        const array =
-          action[0] === 'groupSwatches'
-            ? draft.sketch.document.sharedSwatches?.objects ?? []
-            : action[0] === 'groupTextStyles'
-            ? draft.sketch.document.layerTextStyles?.objects ?? []
-            : draft.sketch.document.layerStyles?.objects ?? [];
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.document.sharedSwatches?.objects ?? [],
+        );
+        draft.selectedSwatchGroup = '';
+      });
+    }
+    case 'groupTextStyle': {
+      const [, id, value] = action;
+      const ids = typeof id === 'string' ? [id] : id;
 
-        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
-          if (!ids.includes(object.do_objectID)) return;
-          const prevGroup = value ? delimitedPath.dirname(object.name) : '';
-          const name = delimitedPath.basename(object.name);
-          const newName = delimitedPath.join([prevGroup, value, name]);
+      return produce(state, (draft) => {
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.document.layerTextStyles.objects ?? [],
+        );
 
-          object.name = newName;
-        });
+        draft.selectedThemeStyleGroup = '';
+      });
+    }
+    case 'groupThemeStyle': {
+      const [, id, value] = action;
+      const ids = typeof id === 'string' ? [id] : id;
 
-        switch (action[0]) {
-          case 'groupSwatches': {
-            draft.selectedSwatchGroup = '';
-            return;
-          }
-          case 'groupThemeStyles': {
-            draft.selectedThemeStyleGroup = '';
-            return;
-          }
-          case 'groupTextStyles': {
-            draft.selectedTextStyleGroup = '';
-            return;
-          }
-        }
+      return produce(state, (draft) => {
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.document.layerStyles?.objects ?? [],
+        );
+        draft.selectedTextStyleGroup = '';
       });
     }
     case 'setTextCase':

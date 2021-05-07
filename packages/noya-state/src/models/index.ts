@@ -8,4 +8,5 @@ export const artboard = require('./artboard.json') as Sketch.Artboard;
 export const rectangle = require('./rectangle.json') as Sketch.Rectangle;
 export const style = require('./style.json') as Sketch.Style;
 export const text = require('./text.json') as Sketch.Text;
+export const textStyle = require('./textStyle.json') as Sketch.Style;
 export const page = require('./page.json') as Sketch.Page;

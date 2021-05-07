@@ -1,12 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { rgbaToHex } from 'noya-colorpicker';
-import { ContextMenu, GridView, sketchColorToRgba } from 'noya-designsystem';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { GridView, sketchColorToRgba } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import { createThemeGroups } from '../../utils/themeTree';
 import ColorSwatch from './ColorSwatch';
+import { menuItems, ThemeMenuItemType } from './menuItems';
 
 interface Props {
   swatches: Sketch.Swatch[];
@@ -16,7 +16,6 @@ interface Props {
   onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
   onDuplicateSwatch: (id: string[]) => void;
 }
-type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
 
 export default memo(function SwatchesGrid({
   swatches,
@@ -28,19 +27,8 @@ export default memo(function SwatchesGrid({
 }: Props) {
   const { basename } = delimitedPath;
 
-  const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [
-      { value: 'duplicate', title: 'Duplicate' },
-      { value: 'group', title: 'Group' },
-      { value: 'ungroup', title: 'Ungroup' },
-      ContextMenu.SEPARATOR_ITEM,
-      { value: 'delete', title: 'Delete' },
-    ],
-    [],
-  );
-
   const handleSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
+    (value: ThemeMenuItemType) => {
       switch (value) {
         case 'duplicate':
           onDuplicateSwatch(selectedSwatchIds);
@@ -97,7 +85,7 @@ export default memo(function SwatchesGrid({
               const alphaPercent = `${Math.round(color.a * 100)}%`;
 
               return (
-                <GridView.Item<MenuItemType>
+                <GridView.Item<ThemeMenuItemType>
                   id={item.do_objectID}
                   key={item.do_objectID}
                   title={basename(item.name)}
