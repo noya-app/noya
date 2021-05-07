@@ -53,6 +53,11 @@ export default memo(function TextStyle({
   const colorString = useMemo(() => sketchColorToRgbaString(color), [color]);
   const backgroundColor = useMemo(() => {
     const rbga = sketchColorToRgba(color);
+    /*
+      Formula found in this question 
+      https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
+      Source: https://en.wikipedia.org/wiki/Relative_luminance 
+    */
     const Y = 0.2126 * rbga.r + 0.7152 * rbga.g + 0.0722 * rbga.b;
     return Y < 128 ? 'white' : 'black';
   }, [color]);

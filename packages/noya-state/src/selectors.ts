@@ -15,9 +15,10 @@ import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
-import { WorkspaceTab, ThemeTab } from './reducers/application';
+import { WorkspaceTab, ThemeTab, SelectionType } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
 import { CanvasInsets } from './reducers/workspace';
+import { delimitedPath } from 'noya-utils';
 import type { Point, Rect, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -607,4 +608,45 @@ export function visitLayerColors(
       });
     }
   }
+}
+
+export function updateSelection(
+  currentIds: string[],
+  newIds: string | string[] | undefined,
+  selectionType: SelectionType,
+) {
+  const ids =
+    newIds === undefined ? [] : typeof newIds === 'string' ? [newIds] : newIds;
+
+  switch (selectionType) {
+    case 'intersection':
+      currentIds.push(...ids.filter((id) => !currentIds.includes(id)));
+      return;
+    case 'difference':
+      ids.forEach((id) => {
+        const selectedIndex = currentIds.indexOf(id);
+        currentIds.splice(selectedIndex, 1);
+      });
+      return;
+    case 'replace':
+      // Update currentIds array in-place
+      currentIds.length = 0;
+      currentIds.push(...ids);
+      return;
+  }
+}
+
+export function groupThemeComponents<
+  T extends Sketch.Swatch | Sketch.SharedStyle
+>(currentIds: string[], groupName: string | undefined, array: T[]) {
+  array.forEach((object: T) => {
+    if (!currentIds.includes(object.do_objectID)) return;
+    const prevGroup = groupName ? delimitedPath.dirname(object.name) : '';
+    const name = delimitedPath.basename(object.name);
+    const newName = delimitedPath.join([prevGroup, groupName, name]);
+
+    object.name = newName;
+  });
+
+  return array;
 }

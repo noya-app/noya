@@ -32,7 +32,7 @@ const ThemeStyles = memo(function ThemeStyles() {
       selectedThemeStyleIds={state.selectedLayerStyleIds}
       onGroupThemeStyle={useCallback(
         (id: string[], name?: string) => {
-          dispatch('groupThemeStyles', id, name);
+          dispatch('groupThemeStyle', id, name);
         },
         [dispatch],
       )}
@@ -71,7 +71,7 @@ const Swatches = memo(function Swatches() {
       selectedSwatchIds={state.selectedSwatchIds}
       onGroupSwatch={useCallback(
         (id: string[], name?: string) => {
-          dispatch('groupSwatches', id, name);
+          dispatch('groupSwatch', id, name);
         },
         [dispatch],
       )}
@@ -111,7 +111,7 @@ const TextStyles = memo(function TextStyles() {
       selectedTextStyles={state.selectedTextStyleIds}
       onGroupTextStyle={useCallback(
         (id: string[], name?: string) => {
-          dispatch('groupTextStyles', id, name);
+          dispatch('groupTextStyle', id, name);
         },
         [dispatch],
       )}

@@ -14,9 +14,7 @@ import OpacityInspector from './OpacityInspector';
 import BorderInspector from './BorderInspector';
 import ShadowInspector from './ShadowInspector';
 import { delimitedPath } from 'noya-utils';
-import TextOptionsRow, {
-  SimpleTextDecoration,
-} from '../components/inspector/TextOptionsRow';
+import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextAlignmentRow from '../components/inspector/TextLayoutRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
 import getMultiValue from '../utils/getMultiValue';
@@ -81,10 +79,10 @@ const TextStyleInspector = memo(function TextStyleInspector() {
           Sketch.TextTransform.None
         : undefined,
       textDecoration: encodedAttributes?.underlineStyle
-        ? 'underline'
+        ? ('underline' as const)
         : encodedAttributes?.strikethroughStyle
-        ? 'strikethrough'
-        : 'none',
+        ? ('strikethrough' as const)
+        : ('none' as const),
       letterSpacing: getMultiValue<number | undefined>(
         styles.map((s) => s?.textStyle?.encodedAttributes?.kerning),
       )
@@ -187,7 +185,7 @@ const TextStyleInspector = memo(function TextStyleInspector() {
       <Divider />
       <TextOptionsRow
         textCase={textTransform}
-        textDecorator={textDecoration as SimpleTextDecoration}
+        textDecorator={textDecoration}
         onChangeTextDecorator={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],
