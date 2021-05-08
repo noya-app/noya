@@ -24,7 +24,7 @@ import {
   visitLayerColors,
   visitStyleColors,
 } from '../selectors/selectors';
-import { Point, UUID } from '../types';
+import { Point } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import {
@@ -38,6 +38,7 @@ import {
   LayerPropertyAction,
   layerPropertyReducer,
 } from './layerPropertyReducer';
+import { PageAction, pageReducer } from './pageReducer';
 import {
   StringAttributeAction,
   stringAttributeReducer,
@@ -70,7 +71,7 @@ export type ApplicationState = {
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setThemeTab', value: ThemeTab]
-  | [type: 'movePage', sourceIndex: number, destinationIndex: number]
+  | PageAction
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -87,11 +88,6 @@ export type Action =
       id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
-  | [type: 'selectPage', pageId: UUID]
-  | [type: 'addPage', name: string]
-  | [type: 'deletePage']
-  | [type: 'renamePage', name: string]
-  | [type: 'duplicatePage']
   | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
   | [
       type: 'setSwatchOpacity',
@@ -162,6 +158,14 @@ export function applicationReducer(
       return produce(state, (draft) => {
         draft.currentThemeTab = value;
       });
+    }
+    case 'selectPage':
+    case 'addPage':
+    case 'renamePage':
+    case 'duplicatePage':
+    case 'deletePage':
+    case 'movePage': {
+      return pageReducer(state, action);
     }
     case 'insertArtboard': {
       const [, { name, width, height }] = action;
@@ -247,91 +251,7 @@ export function applicationReducer(
         updateSelection(draft.selectedObjects, id, selectionType);
       });
     }
-    case 'selectPage': {
-      return produce(state, (draft) => {
-        draft.selectedPage = action[1];
-      });
-    }
-    case 'addPage': {
-      const [, name] = action;
 
-      return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const user = draft.sketch.user;
-
-        const newPage: Sketch.Page = produce(Models.page, (page) => {
-          page.do_objectID = uuid();
-          page.name = name || `Page ${pages.length + 1}`;
-          return page;
-        });
-
-        user[newPage.do_objectID] = {
-          scrollOrigin: '{0, 0}',
-          zoomValue: 1,
-        };
-
-        pages.push(newPage);
-
-        draft.selectedPage = newPage.do_objectID;
-      });
-    }
-    case 'renamePage': {
-      const [, name] = action;
-      const pageIndex = getCurrentPageIndex(state);
-
-      return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const page = pages[pageIndex];
-
-        pages[pageIndex] = produce(page, (page) => {
-          page.name = name || `Page ${pages.length + 1}`;
-          return page;
-        });
-      });
-    }
-    case 'duplicatePage': {
-      const pageIndex = getCurrentPageIndex(state);
-
-      return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const user = draft.sketch.user;
-        const page = pages[pageIndex];
-
-        const duplicatePage = produce(page, (page) => {
-          page.name = `${page.name} Copy`;
-
-          Layers.visit(page, (layer) => {
-            layer.do_objectID = uuid();
-            if (layer.style) layer.style.do_objectID = uuid();
-          });
-
-          return page;
-        });
-
-        user[duplicatePage.do_objectID] = {
-          scrollOrigin: user[page.do_objectID].scrollOrigin,
-          zoomValue: user[page.do_objectID].zoomValue,
-        };
-
-        pages.push(duplicatePage);
-        draft.selectedPage = duplicatePage.do_objectID;
-      });
-    }
-    case 'deletePage': {
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-
-      return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const user = draft.sketch.user;
-
-        delete user[page.do_objectID];
-        pages.splice(pageIndex, 1);
-
-        const newIndex = Math.max(pageIndex - 1, 0);
-        draft.selectedPage = pages[newIndex].do_objectID;
-      });
-    }
     case 'distributeLayers':
     case 'alignLayers': {
       return alignmentReducer(state, action);
@@ -418,16 +338,6 @@ export function applicationReducer(
           });
         });
       }
-    }
-    case 'movePage': {
-      const [, sourceIndex, destinationIndex] = action;
-
-      return produce(state, (draft) => {
-        const sourceItem = draft.sketch.pages[sourceIndex];
-
-        draft.sketch.pages.splice(sourceIndex, 1);
-        draft.sketch.pages.splice(destinationIndex, 0, sourceItem);
-      });
     }
     case 'interaction': {
       const page = getCurrentPage(state);
