@@ -18,9 +18,9 @@ export default memo(function TextStyleInspector() {
     useSelector(Selectors.getSelectedTextLayers),
   );
   const textStyles = useShallowArray(useSelector(Selectors.getSelectedStyles));
-  const crrTab = Selectors.getCurrentTab(state);
+  const currentTab = Selectors.getCurrentTab(state);
 
-  const seletedText = crrTab === 'canvas' ? textLayer : textStyles;
+  const seletedText = currentTab === 'canvas' ? textLayer : textStyles;
 
   const {
     fontColor,
@@ -83,7 +83,7 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextAlignmentRow
-        textLayout={crrTab === 'canvas' ? fontAlignment : undefined}
+        textLayout={currentTab === 'canvas' ? fontAlignment : undefined}
         textVerticalAlignment={verticalAlignment}
         textHorizontalAlignment={horizontalAlignment}
         onChangeTextLayout={useCallback(

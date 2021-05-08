@@ -16,8 +16,6 @@ interface Props {
   onDuplicateTextStyle: (id: string[]) => void;
 }
 
-export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
-
 export default memo(function TextStylesGrid({
   sharedStyles,
   selectedTextStyles,
