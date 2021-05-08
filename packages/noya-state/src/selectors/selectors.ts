@@ -2,47 +2,41 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit } from 'canvaskit-wasm';
 import {
   AffineTransform,
-  rotatedRectContainsPoint,
-  rectContainsPoint,
-  getRectCornerPoints,
-  createRectFromBounds,
-  transformRect,
   createBounds,
+  createRectFromBounds,
+  getRectCornerPoints,
+  rectContainsPoint,
   rectsIntersect,
+  rotatedRectContainsPoint,
+  transformRect,
 } from 'noya-geometry';
 import { getDragHandles } from 'noya-renderer/src/canvas/selection';
 import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
-import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from '../layers';
-import { WorkspaceTab, ThemeTab } from '../reducers/application';
+import { visitReversed } from '../layers';
+import { ThemeTab, WorkspaceTab } from '../reducers/application';
 import { CompassDirection } from '../reducers/interaction';
 import { CanvasInsets } from '../reducers/workspace';
 import type { Point, Rect, UUID } from '../types';
 import { toRadians } from '../utils/radians';
-
 import {
-  getSelectedLayerStyles,
-  getSelectedThemeTextStyles,
-} from './themeSelectors';
+  getSelectedLayerIndexPaths,
+  getSelectedLayerIndexPathsExcludingDescendants,
+} from './indexPathSelectors';
 import {
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
 } from './pageSelectors';
+import {
+  getSelectedLayerStyles,
+  getSelectedThemeTextStyles,
+} from './themeSelectors';
 
-export * from './themeSelectors';
+export * from './indexPathSelectors';
 export * from './pageSelectors';
-
-export const findPageLayerIndexPaths = (
-  state: ApplicationState,
-  predicate: (layer: Sketch.AnyLayer) => boolean,
-): LayerIndexPaths[] => {
-  return state.sketch.pages.map((page, pageIndex) => ({
-    pageIndex: pageIndex,
-    indexPaths: Layers.findAllIndexPaths(page, predicate),
-  }));
-};
+export * from './themeSelectors';
 
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;
@@ -50,32 +44,6 @@ export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
 
 export const getCurrentComponentsTab = (state: ApplicationState): ThemeTab => {
   return state.currentThemeTab;
-};
-
-export const getSelectedLayerIndexPaths = (
-  state: ApplicationState,
-): IndexPath[] => {
-  const page = getCurrentPage(state);
-
-  return Layers.findAllIndexPaths(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
-  );
-};
-
-export const getSelectedLayerIndexPathsExcludingDescendants = (
-  state: ApplicationState,
-): IndexPath[] => {
-  const page = getCurrentPage(state);
-
-  return Layers.findAllIndexPaths<Sketch.AnyLayer>(page, (layer) => {
-    const included = state.selectedObjects.includes(layer.do_objectID);
-
-    if (included && layer._class === 'artboard') {
-      return INCLUDE_AND_SKIP;
-    }
-
-    return included;
-  });
 };
 
 export const getSelectedLayersExcludingDescendants = (
@@ -159,21 +127,6 @@ export const makeGetPageLayers = (
     ids
       .map((id) => page.layers.find((layer) => layer.do_objectID === id))
       .filter((layer): layer is PageLayer => !!layer);
-};
-
-export type LayerIndexPath = { pageIndex: number; indexPath: IndexPath };
-
-export type LayerIndexPaths = { pageIndex: number; indexPaths: IndexPath[] };
-
-export const getLayerIndexPath = (
-  state: ApplicationState,
-  id: UUID,
-): LayerIndexPath | undefined => {
-  const page = getCurrentPage(state);
-  const pageIndex = getCurrentPageIndex(state);
-  const indexPath = findIndexPath(page, (layer) => layer.do_objectID === id);
-
-  return indexPath ? { pageIndex, indexPath } : undefined;
 };
 
 export function getScaleDirectionAtPoint(
