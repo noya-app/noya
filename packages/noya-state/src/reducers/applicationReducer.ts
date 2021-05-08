@@ -18,8 +18,6 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getCurrentTab,
-  getLayerRotation,
-  getLayerRotationMultiplier,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
   groupThemeComponents,
@@ -36,6 +34,10 @@ import {
   interactionReducer,
   InteractionState,
 } from './interactionReducer';
+import {
+  LayerPropertyAction,
+  layerPropertyReducer,
+} from './layerPropertyReducer';
 import {
   StringAttributeAction,
   stringAttributeReducer,
@@ -85,15 +87,11 @@ export type Action =
       id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
-  | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
-  | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'addPage', name: string]
   | [type: 'deletePage']
   | [type: 'renamePage', name: string]
   | [type: 'duplicatePage']
-  | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
-  | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
   | [
       type: 'setSwatchOpacity',
@@ -138,6 +136,7 @@ export type Action =
   | StyleAction
   | StringAttributeAction
   | AlignmentAction
+  | LayerPropertyAction
   | [type: 'setTextAlignment', value: number]
   | [type: 'setTextDecoration', value: SimpleTextDecoration]
   | [type: 'setTextTransform', value: number];
@@ -192,45 +191,11 @@ export function applicationReducer(
         draft.selectedObjects = [layer.do_objectID];
       });
     }
-    case 'setLayerVisible': {
-      const [, id, visible] = action;
-
-      const ids = typeof id === 'string' ? [id] : id;
-
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
-        ids.includes(layer.do_objectID),
-      );
-
-      return produce(state, (draft) => {
-        const layers = accessPageLayers(draft, pageIndex, indexPaths);
-
-        layers.forEach((layer) => {
-          layer.isVisible = visible;
-        });
-      });
-    }
-    case 'setExpandedInLayerList': {
-      const [, id, expanded] = action;
-
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-      const indexPath = Layers.findIndexPath(
-        page,
-        (layer) => layer.do_objectID === id,
-      );
-
-      if (!indexPath) return state;
-
-      return produce(state, (draft) => {
-        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
-
-        layer.layerListExpandedType = expanded
-          ? Sketch.LayerListExpanded.Expanded
-          : Sketch.LayerListExpanded.Collapsed;
-      });
-    }
+    case 'setLayerVisible':
+    case 'setExpandedInLayerList':
+    case 'setFixedRadius':
+    case 'setLayerRotation':
+      return layerPropertyReducer(state, action);
     case 'addDrawnLayer': {
       const pageIndex = getCurrentPageIndex(state);
 
@@ -453,36 +418,6 @@ export function applicationReducer(
           });
         });
       }
-    }
-    case 'setFixedRadius': {
-      const [, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'rectangle') return;
-
-          const newValue =
-            mode === 'replace' ? amount : layer.fixedRadius + amount;
-
-          layer.fixedRadius = Math.max(0, newValue);
-        });
-      });
-    }
-    case 'setLayerRotation': {
-      const [, amount, mode = 'replace'] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          const rotation = getLayerRotation(layer);
-          const newValue = mode === 'replace' ? amount : rotation + amount;
-
-          layer.rotation = newValue * getLayerRotationMultiplier(layer);
-        });
-      });
     }
     case 'movePage': {
       const [, sourceIndex, destinationIndex] = action;
