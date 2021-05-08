@@ -179,6 +179,10 @@ export function getLayerAtPoint(
   return found as PageLayer;
 }
 
+/**
+ * Returns an axis-aligned Rect that contains all layers passed via `layerIds`,
+ * or undefined if no layers were passed.
+ */
 export function getBoundingRect(
   rootLayer: Sketch.AnyLayer,
   ctm: AffineTransform,
