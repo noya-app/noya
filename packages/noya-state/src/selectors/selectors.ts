@@ -21,23 +21,18 @@ import { CanvasInsets } from '../reducers/workspace';
 import type { Point, Rect, UUID } from '../types';
 import { toRadians } from '../utils/radians';
 
-import * as ThemeSelectors from './themeSelectors';
-import * as PageSelectors from './pageSelectors';
+import {
+  getSelectedLayerStyles,
+  getSelectedThemeTextStyles,
+} from './themeSelectors';
+import {
+  getCurrentPage,
+  getCurrentPageIndex,
+  getCurrentPageMetadata,
+} from './pageSelectors';
 
 export * from './themeSelectors';
 export * from './pageSelectors';
-
-export const getCurrentPageIndex = (state: ApplicationState) => {
-  const pageIndex = state.sketch.pages.findIndex(
-    (page) => page.do_objectID === state.selectedPage,
-  );
-
-  if (pageIndex === -1) {
-    throw new Error('A page must always be selected');
-  }
-
-  return pageIndex;
-};
 
 export const findPageLayerIndexPaths = (
   state: ApplicationState,
@@ -47,10 +42,6 @@ export const findPageLayerIndexPaths = (
     pageIndex: pageIndex,
     indexPaths: Layers.findAllIndexPaths(page, predicate),
   }));
-};
-
-export const getCurrentPage = (state: ApplicationState) => {
-  return state.sketch.pages[getCurrentPageIndex(state)];
 };
 
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
@@ -108,10 +99,8 @@ export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
         layer.style ? [layer.style] : [],
       )
     : currentComponentsTab === 'layerStyles'
-    ? ThemeSelectors.getSelectedLayerStyles(state).map((style) => style.value)
-    : ThemeSelectors.getSelectedThemeTextStyles(state).map(
-        (style) => style.value,
-      );
+    ? getSelectedLayerStyles(state).map((style) => style.value)
+    : getSelectedThemeTextStyles(state).map((style) => style.value);
 };
 
 export const getSelectedTextLayers = (
@@ -506,9 +495,7 @@ export function getCanvasTransform(
   state: ApplicationState,
   insets: CanvasInsets,
 ) {
-  const { scrollOrigin, zoomValue } = PageSelectors.getCurrentPageMetadata(
-    state,
-  );
+  const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
   return AffineTransform.multiply(
     getScreenTransform(insets),
