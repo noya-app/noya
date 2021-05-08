@@ -25,6 +25,9 @@ import {
   findPageLayerIndexPaths,
   visitStyleColors,
   visitLayerColors,
+  updateSelection,
+  groupThemeComponents,
+  getCurrentComponentsTab,
 } from '../selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
@@ -47,6 +50,8 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
+export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -55,7 +60,9 @@ export type ApplicationState = {
   selectedObjects: string[];
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
+  selectedTextStyleIds: string[];
   selectedSwatchGroup: string;
+  selectedTextStyleGroup: string;
   selectedThemeStyleGroup: string;
   sketch: SketchFile;
 };
@@ -78,13 +85,8 @@ export type Action =
       selectionType?: SelectionType,
     ]
   | [
-      type: 'selectSwatch',
-      swatchId: string | string[] | undefined,
-      selectionType?: SelectionType,
-    ]
-  | [
-      type: 'selectThemeStyle',
-      sharedStyleId: string | string[] | undefined,
+      type: `select${ComponentsElements}`,
+      id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
@@ -114,15 +116,13 @@ export type Action =
       alpha: number,
       mode?: SetNumberMode,
     ]
-  | [type: 'addSwatch']
-  | [type: 'addThemeStyle', name?: string, style?: Sketch.Style]
+  | [type: `add${ComponentsElements}`, name?: string, style?: Sketch.Style]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
       style: Sketch.Style | undefined,
     ]
-  | [type: 'duplicateSwatch', id: string[]]
-  | [type: 'duplicateThemeStyle', id: string[]]
+  | [type: `duplicate${ComponentsElements}`, id: string[]]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -133,26 +133,22 @@ export type Action =
         | Exclude<InteractionAction, ['maybeScale', ...any[]]>
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
     ]
-  | [type: `setSwatchName`, swatchId: string | string[], name: string]
-  | [type: `setThemeStyleName`, sharedStyleId: string | string[], name: string]
+  | [
+      type: `set${ComponentsElements}Name`,
+      swatchId: string | string[],
+      name: string,
+    ]
+  | [type: `remove${ComponentsElements}`]
+  | [type: `setSelected${ComponentsElements}Group`, groupId: string]
+  | [
+      type: `group${ComponentsElements}`,
+      id: string | string[],
+      name: string | undefined,
+    ]
   | [
       type: 'setThemeStyle',
       sharedStyleId?: string,
       style?: Sketch.Style | undefined,
-    ]
-  | [type: 'removeSwatch']
-  | [type: 'removeThemeStyle']
-  | [type: 'setSelectedSwatchGroup', groupId: string]
-  | [type: 'setSelectedThemeStyleGroup', groupId: string]
-  | [
-      type: 'groupSwatches',
-      swatchId: string | string[],
-      name: string | undefined,
-    ]
-  | [
-      type: 'groupThemeStyles',
-      swatchId: string | string[],
-      name: string | undefined,
     ]
   | StyleAction
   | StringAttributeAction
@@ -602,15 +598,22 @@ export function reducer(
           );
         });
       } else {
-        const selectedLayerStyleIds = state.selectedLayerStyleIds;
+        const currentComponentsTab = getCurrentComponentsTab(state);
+        const selectedIds =
+          currentComponentsTab === 'layerStyles'
+            ? state.selectedLayerStyleIds
+            : state.selectedTextStyleIds;
 
         return produce(state, (draft) => {
-          const layerStyles = draft.sketch.document.layerStyles?.objects ?? [];
+          const styles =
+            currentComponentsTab === 'layerStyles'
+              ? draft.sketch.document.layerStyles?.objects
+              : draft.sketch.document.layerTextStyles?.objects ?? [];
 
-          layerStyles.forEach((layerStyle) => {
-            if (!selectedLayerStyleIds.includes(layerStyle.do_objectID)) return;
+          styles.forEach((style) => {
+            if (!selectedIds.includes(style.do_objectID)) return;
 
-            layerStyle.value = styleReducer(layerStyle.value, action);
+            style.value = styleReducer(style.value, action);
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(
@@ -618,7 +621,7 @@ export function reducer(
                 layerPath.pageIndex,
                 layerPath.indexPaths,
               ).forEach((layer) => {
-                layer.style = produce(layerStyle.value, (style) => {
+                layer.style = produce(style.value, (style) => {
                   style.do_objectID = uuid();
                   return style;
                 });
@@ -854,6 +857,73 @@ export function reducer(
         draft.selectedSwatchIds = [swatch.do_objectID];
       });
     }
+    case 'addTextStyle': {
+      const [, name, style] = action;
+
+      return produce(state, (draft) => {
+        const textStyles = draft.sketch.document.layerTextStyles ?? {
+          _class: 'sharedTextStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        const sharedStyle: Sketch.SharedStyle = {
+          _class: 'sharedStyle',
+          do_objectID: uuid(),
+          name: delimitedPath.join([
+            draft.selectedTextStyleGroup,
+            name || 'New Text Style',
+          ]),
+          value: produce(style || Models.textStyle, (style) => {
+            style.do_objectID = uuid();
+            return style;
+          }),
+        };
+
+        textStyles.objects.push(sharedStyle);
+        draft.sketch.document.layerTextStyles = textStyles;
+      });
+    }
+    case 'addThemeStyle': {
+      const [, name, style] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const currentTab = state.currentTab;
+      return produce(state, (draft) => {
+        const layerStyles = draft.sketch.document.layerStyles ?? {
+          _class: 'sharedStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        const sharedStyle: Sketch.SharedStyle = {
+          _class: 'sharedStyle',
+          do_objectID: uuid(),
+          name: delimitedPath.join([
+            draft.selectedThemeStyleGroup,
+            name || 'New Layer Style',
+          ]),
+          value: produce(style || Models.style, (style) => {
+            style.do_objectID = uuid();
+            return style;
+          }),
+        };
+        layerStyles.objects.push(sharedStyle);
+        draft.sketch.document.layerStyles = layerStyles;
+
+        if (currentTab === 'theme') {
+          draft.selectedLayerStyleIds = [sharedStyle.do_objectID];
+        } else {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              layer.sharedStyleID = sharedStyle.do_objectID;
+            },
+          );
+        }
+      });
+    }
     case 'duplicateSwatch': {
       const [, id] = action;
       const ids = typeof id === 'string' ? [id] : id;
@@ -917,27 +987,58 @@ export function reducer(
         draft.sketch.document.layerStyles = layerStyles;
       });
     }
+    case 'duplicateTextStyle': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const textStyles = draft.sketch.document.layerTextStyles ?? {
+          _class: 'sharedTextStyleContainer',
+          do_objectID: uuid(),
+          objects: [],
+        };
+
+        textStyles.objects.forEach((sharedStyle: Sketch.SharedStyle) => {
+          if (!ids.includes(sharedStyle.do_objectID)) return;
+
+          const newSharedStyle: Sketch.SharedStyle = {
+            _class: 'sharedStyle',
+            do_objectID: uuid(),
+            name: getIncrementedName(
+              sharedStyle.name,
+              textStyles.objects.map((s) => s.name),
+            ),
+            value: produce(sharedStyle.value, (style) => {
+              style.do_objectID = uuid();
+              return style;
+            }),
+          };
+
+          textStyles.objects.push(newSharedStyle);
+        });
+
+        draft.sketch.document.layerTextStyles = textStyles;
+      });
+    }
     case 'selectSwatch': {
       const [, id, selectionType = 'replace'] = action;
 
-      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
       return produce(state, (draft) => {
-        switch (selectionType) {
-          case 'intersection':
-            draft.selectedSwatchIds.push(
-              ...ids.filter((id) => !draft.selectedSwatchIds.includes(id)),
-            );
-            return;
-          case 'difference':
-            ids.forEach((id) => {
-              const selectedIndex = draft.selectedSwatchIds.indexOf(id);
-              draft.selectedSwatchIds.splice(selectedIndex, 1);
-            });
-            return;
-          case 'replace':
-            draft.selectedSwatchIds = [...ids];
-            return;
-        }
+        updateSelection(draft.selectedSwatchIds, id, selectionType);
+      });
+    }
+    case 'selectThemeStyle': {
+      const [, id, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedLayerStyleIds, id, selectionType);
+      });
+    }
+    case 'selectTextStyle': {
+      const [, id, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedTextStyleIds, id, selectionType);
       });
     }
     case 'setSwatchColor': {
@@ -997,70 +1098,8 @@ export function reducer(
         });
       });
     }
-    case 'addThemeStyle': {
-      const [, name, style] = action;
-
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      const currentTab = state.currentTab;
-      return produce(state, (draft) => {
-        const layerStyles = draft.sketch.document.layerStyles ?? {
-          _class: 'sharedStyleContainer',
-          do_objectID: uuid(),
-          objects: [],
-        };
-
-        const sharedStyle: Sketch.SharedStyle = {
-          _class: 'sharedStyle',
-          do_objectID: uuid(),
-          name: delimitedPath.join([
-            draft.selectedThemeStyleGroup,
-            name || 'New Layer Style',
-          ]),
-          value: produce(style || Models.style, (style) => {
-            style.do_objectID = uuid();
-            return style;
-          }),
-        };
-        layerStyles.objects.push(sharedStyle);
-        draft.sketch.document.layerStyles = layerStyles;
-
-        if (currentTab === 'theme') {
-          draft.selectedLayerStyleIds = [sharedStyle.do_objectID];
-        } else {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
-              layer.sharedStyleID = sharedStyle.do_objectID;
-            },
-          );
-        }
-      });
-    }
-    case 'selectThemeStyle': {
-      const [, id, selectionType = 'replace'] = action;
-
-      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
-      return produce(state, (draft) => {
-        switch (selectionType) {
-          case 'intersection':
-            draft.selectedLayerStyleIds.push(
-              ...ids.filter((id) => !draft.selectedLayerStyleIds.includes(id)),
-            );
-            return;
-          case 'difference':
-            ids.forEach((id) => {
-              const selectedIndex = draft.selectedLayerStyleIds.indexOf(id);
-              draft.selectedLayerStyleIds.splice(selectedIndex, 1);
-            });
-            return;
-          case 'replace':
-            draft.selectedLayerStyleIds = [...ids];
-            return;
-        }
-      });
-    }
     case 'setThemeStyleName':
+    case 'setTextStyleName':
     case 'setSwatchName': {
       const [, id, name] = action;
 
@@ -1070,6 +1109,8 @@ export function reducer(
         const array =
           action[0] === 'setSwatchName'
             ? draft.sketch.document.sharedSwatches?.objects ?? []
+            : action[0] === 'setTextStyleName'
+            ? draft.sketch.document.layerTextStyles?.objects ?? []
             : draft.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
@@ -1156,6 +1197,22 @@ export function reducer(
         draft.sketch.document.sharedSwatches = sharedSwatches;
       });
     }
+    case 'removeTextStyle': {
+      const ids = state.selectedTextStyleIds;
+
+      return produce(state, (draft) => {
+        const layerStyles = draft.sketch.document.layerTextStyles;
+
+        if (!layerStyles) return;
+
+        const filterLayer = layerStyles.objects.filter(
+          (object: Sketch.SharedStyle) => !ids.includes(object.do_objectID),
+        );
+
+        layerStyles.objects = filterLayer;
+        draft.sketch.document.layerTextStyles = layerStyles;
+      });
+    }
     case 'removeThemeStyle': {
       const ids = state.selectedLayerStyleIds;
 
@@ -1189,38 +1246,62 @@ export function reducer(
         );
       });
     }
-    case 'setSelectedSwatchGroup':
+    case 'setSelectedSwatchGroup': {
+      const [, id] = action;
+      return produce(state, (draft) => {
+        draft.selectedSwatchGroup = id;
+      });
+    }
     case 'setSelectedThemeStyleGroup': {
       const [, id] = action;
       return produce(state, (draft) => {
-        if (action[0] === 'setSelectedSwatchGroup')
-          draft.selectedSwatchGroup = id;
-        else draft.selectedThemeStyleGroup = id;
+        draft.selectedThemeStyleGroup = id;
       });
     }
-    case 'groupSwatches':
-    case 'groupThemeStyles': {
+    case 'setSelectedTextStyleGroup': {
+      const [, id] = action;
+      return produce(state, (draft) => {
+        draft.selectedTextStyleGroup = id;
+      });
+    }
+    case 'groupSwatch': {
       const [, id, value] = action;
-
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        const array =
-          action[0] === 'groupSwatches'
-            ? draft.sketch.document.sharedSwatches?.objects ?? []
-            : draft.sketch.document.layerStyles?.objects ?? [];
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.document.sharedSwatches?.objects ?? [],
+        );
+        draft.selectedSwatchGroup = '';
+      });
+    }
+    case 'groupTextStyle': {
+      const [, id, value] = action;
+      const ids = typeof id === 'string' ? [id] : id;
 
-        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
-          if (!ids.includes(object.do_objectID)) return;
-          const prevGroup = value ? delimitedPath.dirname(object.name) : '';
-          const name = delimitedPath.basename(object.name);
-          const newName = delimitedPath.join([prevGroup, value, name]);
+      return produce(state, (draft) => {
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.document.layerTextStyles.objects ?? [],
+        );
 
-          object.name = newName;
-        });
+        draft.selectedThemeStyleGroup = '';
+      });
+    }
+    case 'groupThemeStyle': {
+      const [, id, value] = action;
+      const ids = typeof id === 'string' ? [id] : id;
 
-        if (action[0] === 'groupSwatches') draft.selectedSwatchGroup = '';
-        else draft.selectedThemeStyleGroup = '';
+      return produce(state, (draft) => {
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.document.layerStyles?.objects ?? [],
+        );
+        draft.selectedTextStyleGroup = '';
       });
     }
     case 'setTextColor':
@@ -1234,31 +1315,61 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+      if (getCurrentTab(state) === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-          switch (action[0]) {
-            case 'setTextVerticalAlignment': {
-              layer.style.textStyle.verticalAlignment = action[1];
+              switch (action[0]) {
+                case 'setTextVerticalAlignment': {
+                  layer.style.textStyle.verticalAlignment = action[1];
 
-              break;
-            }
-          }
+                  break;
+                }
+              }
 
-          layer.style.textStyle.encodedAttributes = stringAttributeReducer(
-            layer.style.textStyle.encodedAttributes,
-            action,
+              layer.style.textStyle.encodedAttributes = stringAttributeReducer(
+                layer.style.textStyle.encodedAttributes,
+                action,
+              );
+
+              layer.attributedString.attributes.forEach((attribute, index) => {
+                layer.attributedString.attributes[
+                  index
+                ].attributes = stringAttributeReducer(
+                  attribute.attributes,
+                  action,
+                );
+              });
+            },
           );
+        });
+      } else {
+        const ids = state.selectedTextStyleIds;
 
-          layer.attributedString.attributes.forEach((attribute, index) => {
-            layer.attributedString.attributes[
-              index
-            ].attributes = stringAttributeReducer(attribute.attributes, action);
+        return produce(state, (draft) => {
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
+
+            sharedTextStyle.value.textStyle.encodedAttributes = stringAttributeReducer(
+              sharedTextStyle.value.textStyle.encodedAttributes,
+              action,
+            );
           });
         });
-      });
+      }
     }
     case 'setTextAlignment': {
       const pageIndex = getCurrentPageIndex(state);
@@ -1277,35 +1388,94 @@ export function reducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+      if (getCurrentTab(state) === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-          const attributes = layer.style?.textStyle?.encodedAttributes;
+              const attributes = layer.style?.textStyle?.encodedAttributes;
 
-          if (!attributes) return;
+              if (!attributes) return;
 
-          attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-          attributes.strikethroughStyle = action[1] === 'strikethrough' ? 1 : 0;
+              attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+              attributes.strikethroughStyle =
+                action[1] === 'strikethrough' ? 1 : 0;
+            },
+          );
         });
-      });
+      } else {
+        return produce(state, (draft) => {
+          const ids = state.selectedTextStyleIds;
+
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
+            const attributes =
+              sharedTextStyle.value.textStyle?.encodedAttributes;
+
+            if (!attributes) return;
+
+            attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+            attributes.strikethroughStyle =
+              action[1] === 'strikethrough' ? 1 : 0;
+          });
+        });
+      }
     case 'setTextTransform': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+      if (getCurrentTab(state) === 'canvas') {
+        return produce(state, (draft) => {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              if (
+                layer._class !== 'text' ||
+                layer.style?.textStyle === undefined
+              )
+                return;
 
-          const encoded = layer.style?.textStyle?.encodedAttributes;
+              const encoded = layer.style?.textStyle?.encodedAttributes;
 
-          if (!encoded) return;
+              if (!encoded) return;
 
-          encoded.MSAttributedStringTextTransformAttribute = action[1];
+              encoded.MSAttributedStringTextTransformAttribute = action[1];
+            },
+          );
         });
-      });
+      } else {
+        return produce(state, (draft) => {
+          const ids = state.selectedTextStyleIds;
+
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
+
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
+            const attributes =
+              sharedTextStyle.value.textStyle?.encodedAttributes;
+
+            if (!attributes) return;
+
+            attributes.MSAttributedStringTextTransformAttribute = action[1];
+          });
+        });
+      }
     }
     default:
       return state;
@@ -1341,8 +1511,10 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
+    selectedTextStyleIds: [],
     selectedSwatchGroup: '',
     selectedThemeStyleGroup: '',
+    selectedTextStyleGroup: '',
     sketch,
   };
 }

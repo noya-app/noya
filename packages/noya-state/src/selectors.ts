@@ -15,9 +15,10 @@ import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from './index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
-import { WorkspaceTab, ThemeTab } from './reducers/application';
+import { WorkspaceTab, ThemeTab, SelectionType } from './reducers/application';
 import { CompassDirection } from './reducers/interaction';
 import { CanvasInsets } from './reducers/workspace';
+import { delimitedPath } from 'noya-utils';
 import type { Point, Rect, UUID } from './types';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
@@ -44,6 +45,12 @@ export const findPageLayerIndexPaths = (
 
 export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
+};
+
+export const getSharedTextStyles = (
+  state: ApplicationState,
+): Sketch.SharedStyle[] => {
+  return state.sketch.document.layerTextStyles?.objects ?? [];
 };
 
 export const getSharedStyles = (
@@ -127,20 +134,15 @@ export const getSelectedLayersExcludingDescendants = (
 
 export const getSelectedStyles = (state: ApplicationState): Sketch.Style[] => {
   const currentTab = getCurrentTab(state);
+  const currentComponentsTab = getCurrentComponentsTab(state);
 
   return currentTab === 'canvas'
     ? getSelectedLayers(state).flatMap((layer) =>
         layer.style ? [layer.style] : [],
       )
-    : getSelectedLayerStyles(state).map((style) => style.value);
-};
-
-export const getSelectedTextStyles = (
-  state: ApplicationState,
-): Sketch.Style[] => {
-  return getSelectedTextLayers(state).flatMap((layer) =>
-    layer.style ? [layer.style] : [],
-  );
+    : currentComponentsTab === 'layerStyles'
+    ? getSelectedLayerStyles(state).map((style) => style.value)
+    : getSelectedThemeTextStyles(state).map((style) => style.value);
 };
 
 export const getSelectedTextLayers = (
@@ -203,10 +205,20 @@ export const getSelectedSwatches = (
 export const getSelectedLayerStyles = (
   state: ApplicationState,
 ): Sketch.SharedStyle[] => {
-  const sharedSwatches = getSharedStyles(state);
+  const sharedStyles = getSharedStyles(state);
 
-  return sharedSwatches.filter((swatch) =>
+  return sharedStyles.filter((swatch) =>
     state.selectedLayerStyleIds.includes(swatch.do_objectID),
+  );
+};
+
+export const getSelectedThemeTextStyles = (
+  state: ApplicationState,
+): Sketch.SharedStyle[] => {
+  const sharedStyles = getSharedTextStyles(state);
+
+  return sharedStyles.filter((swatch) =>
+    state.selectedTextStyleIds.includes(swatch.do_objectID),
   );
 };
 
@@ -596,4 +608,45 @@ export function visitLayerColors(
       });
     }
   }
+}
+
+export function updateSelection(
+  currentIds: string[],
+  newIds: string | string[] | undefined,
+  selectionType: SelectionType,
+) {
+  const ids =
+    newIds === undefined ? [] : typeof newIds === 'string' ? [newIds] : newIds;
+
+  switch (selectionType) {
+    case 'intersection':
+      currentIds.push(...ids.filter((id) => !currentIds.includes(id)));
+      return;
+    case 'difference':
+      ids.forEach((id) => {
+        const selectedIndex = currentIds.indexOf(id);
+        currentIds.splice(selectedIndex, 1);
+      });
+      return;
+    case 'replace':
+      // Update currentIds array in-place
+      currentIds.length = 0;
+      currentIds.push(...ids);
+      return;
+  }
+}
+
+export function groupThemeComponents<
+  T extends Sketch.Swatch | Sketch.SharedStyle
+>(currentIds: string[], groupName: string | undefined, array: T[]) {
+  array.forEach((object: T) => {
+    if (!currentIds.includes(object.do_objectID)) return;
+    const prevGroup = groupName ? delimitedPath.dirname(object.name) : '';
+    const name = delimitedPath.basename(object.name);
+    const newName = delimitedPath.join([prevGroup, groupName, name]);
+
+    object.name = newName;
+  });
+
+  return array;
 }
