@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { SimpleTextDecoration, uuid } from 'noya-renderer';
+import { uuid } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
@@ -25,11 +25,8 @@ import {
 } from './layerPropertyReducer';
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
-import {
-  StringAttributeAction,
-  stringAttributeReducer,
-} from './stringAttributeReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
+import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 
 export type { SetNumberMode };
@@ -57,15 +54,12 @@ export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | PageAction
   | CanvasAction
-  | LayerAction
-  | StyleAction
-  | StringAttributeAction
-  | AlignmentAction
   | LayerPropertyAction
-  | ThemeAction
-  | [type: 'setTextAlignment', value: number]
-  | [type: 'setTextDecoration', value: SimpleTextDecoration]
-  | [type: 'setTextTransform', value: number];
+  | LayerAction
+  | AlignmentAction
+  | StyleAction
+  | TextStyleAction
+  | ThemeAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -196,156 +190,11 @@ export function applicationReducer(
     case 'setTextLetterSpacing':
     case 'setTextParagraphSpacing':
     case 'setTextHorizontalAlignment':
-    case 'setTextVerticalAlignment': {
-      if (getCurrentTab(state) === 'canvas') {
-        const pageIndex = getCurrentPageIndex(state);
-        const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-        return produce(state, (draft) => {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
-              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
-                return;
-
-              switch (action[0]) {
-                case 'setTextVerticalAlignment': {
-                  layer.style.textStyle.verticalAlignment = action[1];
-
-                  break;
-                }
-              }
-
-              layer.style.textStyle.encodedAttributes = stringAttributeReducer(
-                layer.style.textStyle.encodedAttributes,
-                action,
-              );
-
-              layer.attributedString.attributes.forEach((attribute, index) => {
-                layer.attributedString.attributes[
-                  index
-                ].attributes = stringAttributeReducer(
-                  attribute.attributes,
-                  action,
-                );
-              });
-            },
-          );
-        });
-      } else {
-        const ids = state.selectedTextStyleIds;
-
-        return produce(state, (draft) => {
-          const layerTextStyles =
-            draft.sketch.document.layerTextStyles?.objects ?? [];
-
-          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
-            if (
-              !ids.includes(sharedTextStyle.do_objectID) ||
-              sharedTextStyle.value.textStyle === undefined
-            )
-              return;
-
-            sharedTextStyle.value.textStyle.encodedAttributes = stringAttributeReducer(
-              sharedTextStyle.value.textStyle.encodedAttributes,
-              action,
-            );
-          });
-        });
-      }
-    }
-    case 'setTextAlignment': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-      return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer)) return;
-
-          layer.textBehaviour = action[1];
-        });
-      });
-    }
+    case 'setTextVerticalAlignment':
+    case 'setTextAlignment':
     case 'setTextDecoration':
-      if (getCurrentTab(state) === 'canvas') {
-        const pageIndex = getCurrentPageIndex(state);
-        const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-        return produce(state, (draft) => {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
-              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
-                return;
-
-              const attributes = layer.style.textStyle.encodedAttributes;
-
-              attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-              attributes.strikethroughStyle =
-                action[1] === 'strikethrough' ? 1 : 0;
-            },
-          );
-        });
-      } else {
-        return produce(state, (draft) => {
-          const ids = state.selectedTextStyleIds;
-
-          const layerTextStyles =
-            draft.sketch.document.layerTextStyles?.objects ?? [];
-
-          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
-            if (
-              !ids.includes(sharedTextStyle.do_objectID) ||
-              sharedTextStyle.value.textStyle === undefined
-            )
-              return;
-
-            const attributes =
-              sharedTextStyle.value.textStyle.encodedAttributes;
-
-            attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-            attributes.strikethroughStyle =
-              action[1] === 'strikethrough' ? 1 : 0;
-          });
-        });
-      }
-    case 'setTextTransform': {
-      if (getCurrentTab(state) === 'canvas') {
-        const pageIndex = getCurrentPageIndex(state);
-        const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
-        return produce(state, (draft) => {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
-              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
-                return;
-
-              const attributes = layer.style.textStyle.encodedAttributes;
-
-              attributes.MSAttributedStringTextTransformAttribute = action[1];
-            },
-          );
-        });
-      } else {
-        return produce(state, (draft) => {
-          const ids = state.selectedTextStyleIds;
-
-          const layerTextStyles =
-            draft.sketch.document.layerTextStyles?.objects ?? [];
-
-          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
-            if (
-              !ids.includes(sharedTextStyle.do_objectID) ||
-              sharedTextStyle.value.textStyle === undefined
-            )
-              return;
-
-            const attributes =
-              sharedTextStyle.value.textStyle.encodedAttributes;
-
-            attributes.MSAttributedStringTextTransformAttribute = action[1];
-          });
-        });
-      }
-    }
+    case 'setTextTransform':
+      return textStyleReducer(state, action);
     default:
       return themeReducer(state, action);
   }
