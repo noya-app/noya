@@ -22,7 +22,10 @@ import type { Point, Rect, UUID } from '../types';
 import { toRadians } from '../utils/radians';
 
 import * as ThemeSelectors from './themeSelectors';
+import * as PageSelectors from './pageSelectors';
+
 export * from './themeSelectors';
+export * from './pageSelectors';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -50,35 +53,12 @@ export const getCurrentPage = (state: ApplicationState) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
 
-export type EncodedPageMetadata = {
-  zoomValue: number;
-  scrollOrigin: string;
-};
-
-export type PageMetadata = {
-  zoomValue: number;
-  scrollOrigin: Point;
-};
-
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;
 };
 
 export const getCurrentComponentsTab = (state: ApplicationState): ThemeTab => {
   return state.currentThemeTab;
-};
-
-export const getCurrentPageMetadata = (
-  state: ApplicationState,
-): PageMetadata => {
-  const currentPage = getCurrentPage(state);
-
-  const meta: EncodedPageMetadata = state.sketch.user[currentPage.do_objectID];
-
-  return {
-    zoomValue: meta.zoomValue,
-    scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
-  };
 };
 
 export const getSelectedLayerIndexPaths = (
@@ -526,7 +506,9 @@ export function getCanvasTransform(
   state: ApplicationState,
   insets: CanvasInsets,
 ) {
-  const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+  const { scrollOrigin, zoomValue } = PageSelectors.getCurrentPageMetadata(
+    state,
+  );
 
   return AffineTransform.multiply(
     getScreenTransform(insets),
