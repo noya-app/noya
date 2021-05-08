@@ -1,6 +1,5 @@
 import { Group } from 'noya-react-canvaskit';
-import { PageLayer } from 'noya-state';
-import { getLayerRotationTransform } from 'noya-state/src/selectors';
+import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
@@ -40,7 +39,7 @@ export default memo(function SketchLayer({ layer }: Props) {
   }
 
   if (layer.rotation % 360 !== 0) {
-    const rotation = getLayerRotationTransform(layer);
+    const rotation = Selectors.getLayerRotationTransform(layer);
 
     return <Group transform={rotation}>{element}</Group>;
   }

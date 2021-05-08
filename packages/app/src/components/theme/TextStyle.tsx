@@ -2,9 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { sketchColorToRgbaString, sketchColorToRgba } from 'noya-designsystem';
-
-// It has very basic bacground color preview.
-export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
+import { SimpleTextDecoration } from 'noya-renderer';
 
 const TextStylePrev = styled.span<{
   size: number;

@@ -1,6 +1,5 @@
 import { Divider, Spacer } from 'noya-designsystem';
 import { Selectors, SetNumberMode } from 'noya-state';
-import { getLayerRotation } from 'noya-state/src/selectors';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import {
@@ -42,7 +41,7 @@ export default memo(function Inspector() {
       selectedLayers.length === 1
         ? {
             ...selectedLayers[0].frame,
-            rotation: getLayerRotation(selectedLayers[0]),
+            rotation: Selectors.getLayerRotation(selectedLayers[0]),
           }
         : {
             x: undefined,

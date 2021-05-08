@@ -3,10 +3,10 @@ import produce from 'immer';
 import {
   ApplicationState,
   Action,
-  reducer,
+  applicationReducer,
   createInitialState,
-} from './application';
-import { createInitialInteractionState } from './interaction';
+} from './applicationReducer';
+import { createInitialInteractionState } from './interactionReducer';
 
 export type HistoryEntry = {
   actionType: Action[0];
@@ -56,7 +56,7 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
         });
       }
     default:
-      const nextState = reducer(currentState, action);
+      const nextState = applicationReducer(currentState, action);
       const mergableEntry = getMergableHistoryEntry(state, action[0]);
       const sketchFileChanged = currentState.sketch !== nextState.sketch;
       return produce(state, (draft) => {

@@ -10,10 +10,7 @@ import {
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import { Point } from 'noya-state';
-import {
-  getCurrentPage,
-  getCurrentPageMetadata,
-} from 'noya-state/src/selectors';
+import { Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
@@ -82,8 +79,8 @@ export function HorizontalRuler() {
 
   const [state] = useApplicationState();
   const { canvasSize } = useWorkspace();
-  const page = getCurrentPage(state);
-  const { scrollOrigin } = getCurrentPageMetadata(state);
+  const page = Selectors.getCurrentPage(state);
+  const { scrollOrigin } = Selectors.getCurrentPageMetadata(state);
 
   const rulerRect = useMemo(
     () => CanvasKit.XYWHRect(0, 0, canvasSize.width, 25),
