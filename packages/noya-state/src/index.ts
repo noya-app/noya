@@ -8,3 +8,5 @@ export * from './reducers/application';
 export * from './reducers/history';
 export * from './reducers/interaction';
 export * from './types';
+
+export type { SelectionType } from './utils/selection';

@@ -15,7 +15,7 @@ import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from '../layers';
-import { WorkspaceTab, ThemeTab, SelectionType } from '../reducers/application';
+import { WorkspaceTab, ThemeTab } from '../reducers/application';
 import { CompassDirection } from '../reducers/interaction';
 import { CanvasInsets } from '../reducers/workspace';
 import type { Point, Rect, UUID } from '../types';
@@ -562,31 +562,5 @@ export function visitLayerColors(
           f(a.attributes.MSAttributedStringColorAttribute);
       });
     }
-  }
-}
-
-export function updateSelection(
-  currentIds: string[],
-  newIds: string | string[] | undefined,
-  selectionType: SelectionType,
-) {
-  const ids =
-    newIds === undefined ? [] : typeof newIds === 'string' ? [newIds] : newIds;
-
-  switch (selectionType) {
-    case 'intersection':
-      currentIds.push(...ids.filter((id) => !currentIds.includes(id)));
-      return;
-    case 'difference':
-      ids.forEach((id) => {
-        const selectedIndex = currentIds.indexOf(id);
-        currentIds.splice(selectedIndex, 1);
-      });
-      return;
-    case 'replace':
-      // Update currentIds array in-place
-      currentIds.length = 0;
-      currentIds.push(...ids);
-      return;
   }
 }

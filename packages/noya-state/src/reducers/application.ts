@@ -25,7 +25,6 @@ import {
   findPageLayerIndexPaths,
   visitStyleColors,
   visitLayerColors,
-  updateSelection,
   groupThemeComponents,
   getCurrentComponentsTab,
 } from '../selectors/selectors';
@@ -43,6 +42,7 @@ import {
   StringAttributeAction,
   stringAttributeReducer,
 } from './stringAttribute';
+import { SelectionType, updateSelection } from '../utils/selection';
 
 export type { SetNumberMode };
 
@@ -66,8 +66,6 @@ export type ApplicationState = {
   selectedThemeStyleGroup: string;
   sketch: SketchFile;
 };
-
-export type SelectionType = 'replace' | 'intersection' | 'difference';
 
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
@@ -292,25 +290,8 @@ export function reducer(
     case 'selectLayer': {
       const [, id, selectionType = 'replace'] = action;
 
-      const ids = id === undefined ? [] : typeof id === 'string' ? [id] : id;
-
       return produce(state, (draft) => {
-        switch (selectionType) {
-          case 'intersection':
-            draft.selectedObjects.push(
-              ...ids.filter((id) => !draft.selectedObjects.includes(id)),
-            );
-            return;
-          case 'difference':
-            ids.forEach((id) => {
-              const selectedIndex = draft.selectedObjects.indexOf(id);
-              draft.selectedObjects.splice(selectedIndex, 1);
-            });
-            return;
-          case 'replace':
-            draft.selectedObjects = [...ids];
-            return;
-        }
+        updateSelection(draft.selectedObjects, id, selectionType);
       });
     }
     case 'selectPage': {
