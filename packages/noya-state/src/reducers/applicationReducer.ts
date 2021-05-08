@@ -132,20 +132,10 @@ export function applicationReducer(
     case 'setShadowBlur':
     case 'setBorderPosition':
     case 'setShadowSpread': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      const ids = state.selectedLayerStyleIds;
-
-      const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
-        state,
-        (layer) =>
-          layer.sharedStyleID !== undefined &&
-          ids.includes(layer.sharedStyleID),
-      );
-
-      const currentTab = getCurrentTab(state);
-      if (currentTab === 'canvas') {
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
@@ -156,7 +146,17 @@ export function applicationReducer(
           );
         });
       } else {
+        const ids = state.selectedLayerStyleIds;
+
+        const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+          state,
+          (layer) =>
+            layer.sharedStyleID !== undefined &&
+            ids.includes(layer.sharedStyleID),
+        );
+
         const currentComponentsTab = getCurrentComponentsTab(state);
+
         const selectedIds =
           currentComponentsTab === 'layerStyles'
             ? state.selectedLayerStyleIds
@@ -197,17 +197,14 @@ export function applicationReducer(
     case 'setTextParagraphSpacing':
     case 'setTextHorizontalAlignment':
     case 'setTextVerticalAlignment': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
       if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
-              if (
-                layer._class !== 'text' ||
-                layer.style?.textStyle === undefined
-              )
+              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
                 return;
 
               switch (action[0]) {
@@ -262,30 +259,24 @@ export function applicationReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          if (layer._class !== 'text' || layer.style?.textStyle === undefined)
-            return;
+          if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer)) return;
 
           layer.textBehaviour = action[1];
         });
       });
     }
     case 'setTextDecoration':
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
       if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
-              if (
-                layer._class !== 'text' ||
-                layer.style?.textStyle === undefined
-              )
+              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
                 return;
 
-              const attributes = layer.style?.textStyle?.encodedAttributes;
-
-              if (!attributes) return;
+              const attributes = layer.style.textStyle.encodedAttributes;
 
               attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
               attributes.strikethroughStyle =
@@ -306,10 +297,9 @@ export function applicationReducer(
               sharedTextStyle.value.textStyle === undefined
             )
               return;
-            const attributes =
-              sharedTextStyle.value.textStyle?.encodedAttributes;
 
-            if (!attributes) return;
+            const attributes =
+              sharedTextStyle.value.textStyle.encodedAttributes;
 
             attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
             attributes.strikethroughStyle =
@@ -318,24 +308,19 @@ export function applicationReducer(
         });
       }
     case 'setTextTransform': {
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-
       if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
-              if (
-                layer._class !== 'text' ||
-                layer.style?.textStyle === undefined
-              )
+              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
                 return;
 
-              const encoded = layer.style?.textStyle?.encodedAttributes;
+              const attributes = layer.style.textStyle.encodedAttributes;
 
-              if (!encoded) return;
-
-              encoded.MSAttributedStringTextTransformAttribute = action[1];
+              attributes.MSAttributedStringTextTransformAttribute = action[1];
             },
           );
         });
@@ -352,10 +337,9 @@ export function applicationReducer(
               sharedTextStyle.value.textStyle === undefined
             )
               return;
-            const attributes =
-              sharedTextStyle.value.textStyle?.encodedAttributes;
 
-            if (!attributes) return;
+            const attributes =
+              sharedTextStyle.value.textStyle.encodedAttributes;
 
             attributes.MSAttributedStringTextTransformAttribute = action[1];
           });
