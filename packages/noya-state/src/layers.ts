@@ -103,3 +103,7 @@ export {
   EXCLUDE_AND_SKIP,
   findAllLayerIndexPaths as findAllIndexPaths,
 };
+
+export function getFixedRadius(layer: Sketch.AnyLayer): number {
+  return layer._class === 'rectangle' ? layer.fixedRadius : 0;
+}

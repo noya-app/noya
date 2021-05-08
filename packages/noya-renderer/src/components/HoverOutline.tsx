@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit-wasm';
 import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { Selectors } from 'noya-state';
+import { Selectors, Layers } from 'noya-state';
 import { AffineTransform } from 'noya-geometry';
 import { ReactNode, useMemo } from 'react';
 
@@ -14,7 +14,7 @@ function useLayerPath(layer: Sketch.Rectangle | Sketch.Oval) {
       CanvasKit,
       layer.points,
       layer.frame,
-      Selectors.getLayerFixedRadius(layer),
+      Layers.getFixedRadius(layer),
     );
 
     path.setFillType(CanvasKit.FillType.EvenOdd);

@@ -2,7 +2,6 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit } from 'canvaskit-wasm';
 import {
   AffineTransform,
-  createBounds,
   createRectFromBounds,
   getRectCornerPoints,
   rectContainsPoint,
@@ -12,31 +11,33 @@ import {
 } from 'noya-geometry';
 import { getDragHandles } from 'noya-renderer/src/canvas/selection';
 import * as Primitives from 'noya-renderer/src/primitives';
-import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
+import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { ThemeTab, WorkspaceTab } from '../reducers/application';
 import { CompassDirection } from '../reducers/interaction';
 import { CanvasInsets } from '../reducers/workspace';
 import type { Point, Rect, UUID } from '../types';
-import { toRadians } from '../utils/radians';
 import {
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from './indexPathSelectors';
-import {
-  getCurrentPage,
-  getCurrentPageIndex,
-  getCurrentPageMetadata,
-} from './pageSelectors';
+import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 import {
   getSelectedLayerStyles,
   getSelectedThemeTextStyles,
 } from './themeSelectors';
+import {
+  getCanvasTransform,
+  getLayerRotationTransform,
+  getLayerTransformAtIndexPathReversed,
+  getScreenTransform,
+} from './transformSelectors';
 
 export * from './indexPathSelectors';
 export * from './pageSelectors';
 export * from './themeSelectors';
+export * from './transformSelectors';
 
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;
@@ -151,10 +152,6 @@ export function getScaleDirectionAtPoint(
   return handle?.compassDirection;
 }
 
-export function getLayerFixedRadius(layer: Sketch.AnyLayer): number {
-  return layer._class === 'rectangle' ? layer.fixedRadius : 0;
-}
-
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
   clickThroughGroups: boolean;
@@ -247,7 +244,7 @@ export function getLayerAtPoint(
           CanvasKit,
           layer.points,
           layer.frame,
-          getLayerFixedRadius(layer),
+          Layers.getFixedRadius(layer),
         );
 
         if (!path.contains(pathPoint.x, pathPoint.y)) return;
@@ -380,81 +377,6 @@ export function getLayersInRect(
   );
 
   return found as PageLayer[];
-}
-
-export function getLayerTransform(
-  ctm: AffineTransform,
-  layer: Sketch.AnyLayer,
-): AffineTransform {
-  const rotation = getLayerRotationTransform(layer);
-  const translation = getLayerTranslationTransform(layer);
-
-  return AffineTransform.multiply(ctm, rotation, translation);
-}
-
-export function getLayerTranslationTransform(
-  layer: Sketch.AnyLayer,
-): AffineTransform {
-  return AffineTransform.translation(layer.frame.x, layer.frame.y);
-}
-
-export function getLayerRotationTransform(
-  layer: Sketch.AnyLayer,
-): AffineTransform {
-  const bounds = createBounds(layer.frame);
-  const midpoint = { x: bounds.midX, y: bounds.midY };
-  const rotation = getLayerRotationRadians(layer);
-
-  return AffineTransform.rotation(rotation, midpoint.x, midpoint.y);
-}
-
-export function getLayerTransformAtIndexPath(
-  node: Sketch.AnyLayer,
-  indexPath: IndexPath,
-  ctm: AffineTransform,
-): AffineTransform {
-  const path = Layers.accessPath(node, indexPath).slice(1, -1);
-
-  return path.reduce((result, layer) => getLayerTransform(result, layer), ctm);
-}
-
-export function getLayerTransformAtIndexPathReversed(
-  node: Sketch.AnyLayer,
-  indexPath: IndexPath,
-  ctm: AffineTransform,
-): AffineTransform {
-  const path = Layers.accessPathReversed(node, indexPath).slice(1, -1);
-
-  return path.reduce((result, layer) => getLayerTransform(result, layer), ctm);
-}
-
-export function getLayerRotationMultiplier(layer: Sketch.AnyLayer): number {
-  return layer._class === 'group' ? -1 : 1;
-}
-
-export function getLayerRotation(layer: Sketch.AnyLayer): number {
-  return layer.rotation * getLayerRotationMultiplier(layer);
-}
-
-export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {
-  return toRadians(getLayerRotation(layer));
-}
-
-export function getScreenTransform(insets: CanvasInsets) {
-  return AffineTransform.translation(insets.left, 0);
-}
-
-export function getCanvasTransform(
-  state: ApplicationState,
-  insets: CanvasInsets,
-) {
-  const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
-
-  return AffineTransform.multiply(
-    getScreenTransform(insets),
-    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
-    AffineTransform.scale(zoomValue),
-  );
 }
 
 export function visitStyleColors(
