@@ -5,8 +5,8 @@ import {
   Action,
   reducer,
   createInitialState,
-} from './application';
-import { createInitialInteractionState } from './interaction';
+} from './applicationReducer';
+import { createInitialInteractionState } from './interactionReducer';
 
 export type HistoryEntry = {
   actionType: Action[0];

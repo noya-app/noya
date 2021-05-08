@@ -5,7 +5,7 @@ import {
   HistoryAction,
   historyReducer,
   HistoryState,
-} from './history';
+} from './historyReducer';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 

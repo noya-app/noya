@@ -36,12 +36,12 @@ import {
   InteractionAction,
   interactionReducer,
   InteractionState,
-} from './interaction';
-import { SetNumberMode, StyleAction, styleReducer } from './style';
+} from './interactionReducer';
+import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import {
   StringAttributeAction,
   stringAttributeReducer,
-} from './stringAttribute';
+} from './stringAttributeReducer';
 import { SelectionType, updateSelection } from '../utils/selection';
 
 export type { SetNumberMode };

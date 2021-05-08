@@ -1,6 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { delimitedPath } from 'noya-utils';
-import { ApplicationState } from '../reducers/application';
+import { ApplicationState } from '../reducers/applicationReducer';
 
 export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];

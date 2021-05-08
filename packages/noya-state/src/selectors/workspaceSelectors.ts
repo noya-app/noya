@@ -1,5 +1,5 @@
 import { ApplicationState } from '../index';
-import { ThemeTab, WorkspaceTab } from '../reducers/application';
+import { ThemeTab, WorkspaceTab } from '../reducers/applicationReducer';
 
 export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
   return state.currentTab;

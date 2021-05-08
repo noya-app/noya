@@ -2,7 +2,7 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { AffineTransform, createBounds } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import { ApplicationState, Layers } from '../index';
-import { CanvasInsets } from '../reducers/workspace';
+import { CanvasInsets } from '../reducers/workspaceReducer';
 import { toRadians } from '../utils/radians';
 import { getCurrentPageMetadata } from './pageSelectors';
 
