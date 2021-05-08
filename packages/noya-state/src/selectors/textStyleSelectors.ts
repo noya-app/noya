@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import getMultiValue from './utils/getMultiValue';
+import getMultiValue from '../utils/getMultiValue';
 
 type EncodedAttribute = Sketch.TextStyle['encodedAttributes'] | undefined;
 

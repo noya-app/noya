@@ -28,7 +28,7 @@ import {
   updateSelection,
   groupThemeComponents,
   getCurrentComponentsTab,
-} from '../selectors';
+} from '../selectors/selectors';
 import { Bounds, Point, UUID } from '../types';
 import { AffineTransform } from 'noya-geometry';
 import {

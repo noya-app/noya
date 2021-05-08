@@ -8,7 +8,7 @@ import {
   useDeletable,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { getLayerFixedRadius } from 'noya-state/src/selectors';
+import { Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
 
 /**
@@ -105,7 +105,7 @@ export default memo(function SketchShape({ layer }: Props) {
     CanvasKit,
     layer.points,
     layer.frame,
-    getLayerFixedRadius(layer),
+    Selectors.getLayerFixedRadius(layer),
   );
 
   path.setFillType(CanvasKit.FillType.EvenOdd);

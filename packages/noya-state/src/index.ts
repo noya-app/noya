@@ -1,7 +1,7 @@
 export * as Layers from './layers';
-export * as Selectors from './selectors';
+export * as Selectors from './selectors/selectors';
 export * as Models from './models';
-export * as TextStyleSelectors from './textStyleSelectors';
+export * as TextStyleSelectors from './selectors/textStyleSelectors';
 
 export * from './reducers/workspace';
 export * from './reducers/application';

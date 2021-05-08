@@ -13,13 +13,14 @@ import {
 import { getDragHandles } from 'noya-renderer/src/canvas/selection';
 import * as Primitives from 'noya-renderer/src/primitives';
 import { EnterReturnValue, IndexPath, SKIP, STOP } from 'tree-visit';
-import { ApplicationState, Layers, PageLayer } from './index';
-import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from './layers';
-import { WorkspaceTab, ThemeTab, SelectionType } from './reducers/application';
-import { CompassDirection } from './reducers/interaction';
-import { CanvasInsets } from './reducers/workspace';
+import { ApplicationState, Layers, PageLayer } from '../index';
+import { findIndexPath, INCLUDE_AND_SKIP, visitReversed } from '../layers';
+import { WorkspaceTab, ThemeTab, SelectionType } from '../reducers/application';
+import { CompassDirection } from '../reducers/interaction';
+import { CanvasInsets } from '../reducers/workspace';
 import { delimitedPath } from 'noya-utils';
-import type { Point, Rect, UUID } from './types';
+import type { Point, Rect, UUID } from '../types';
+import { toRadians } from '../utils/radians';
 
 export const getCurrentPageIndex = (state: ApplicationState) => {
   const pageIndex = state.sketch.pages.findIndex(
@@ -553,10 +554,6 @@ export function getLayerRotationMultiplier(layer: Sketch.AnyLayer): number {
 
 export function getLayerRotation(layer: Sketch.AnyLayer): number {
   return layer.rotation * getLayerRotationMultiplier(layer);
-}
-
-function toRadians(degrees: number) {
-  return (degrees * Math.PI) / 180;
 }
 
 export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {

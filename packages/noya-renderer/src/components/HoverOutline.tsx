@@ -2,10 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit-wasm';
 import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import {
-  getLayerFixedRadius,
-  getLayerRotationTransform,
-} from 'noya-state/src/selectors';
+import { Selectors } from 'noya-state';
 import { AffineTransform } from 'noya-geometry';
 import { ReactNode, useMemo } from 'react';
 
@@ -17,7 +14,7 @@ function useLayerPath(layer: Sketch.Rectangle | Sketch.Oval) {
       CanvasKit,
       layer.points,
       layer.frame,
-      getLayerFixedRadius(layer),
+      Selectors.getLayerFixedRadius(layer),
     );
 
     path.setFillType(CanvasKit.FillType.EvenOdd);
@@ -60,7 +57,11 @@ interface Props {
 
 export default function HoverOutline({ layer, paint, transform }: Props) {
   let localTransform = useMemo(
-    () => AffineTransform.multiply(transform, getLayerRotationTransform(layer)),
+    () =>
+      AffineTransform.multiply(
+        transform,
+        Selectors.getLayerRotationTransform(layer),
+      ),
     [layer, transform],
   );
 
