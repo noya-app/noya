@@ -1,14 +1,14 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit-wasm';
 import {
+  ClipProps,
   Group,
   Path,
-  useReactCanvasKit,
-  ClipProps,
   useDeletable,
+  useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { getLayerFixedRadius } from 'noya-state/src/selectors';
+import { Layers } from 'noya-state';
 import { memo, useMemo } from 'react';
 
 /**
@@ -105,7 +105,7 @@ export default memo(function SketchShape({ layer }: Props) {
     CanvasKit,
     layer.points,
     layer.frame,
-    getLayerFixedRadius(layer),
+    Layers.getFixedRadius(layer),
   );
 
   path.setFillType(CanvasKit.FillType.EvenOdd);

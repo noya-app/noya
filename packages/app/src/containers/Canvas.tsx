@@ -3,12 +3,7 @@ import { render, unmount } from 'noya-react-canvaskit';
 import { uuid } from 'noya-renderer';
 import { createRect } from 'noya-geometry';
 import { CompassDirection, Point, ShapeType } from 'noya-state';
-import {
-  getCurrentPageMetadata,
-  getLayerAtPoint,
-  getLayersInRect,
-  getScaleDirectionAtPoint,
-} from 'noya-state/src/selectors';
+import { Selectors } from 'noya-state';
 import {
   CSSProperties,
   memo,
@@ -86,7 +81,7 @@ export default memo(function Canvas() {
   const CanvasKit = useCanvasKit();
   const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
-  const meta = useSelector(getCurrentPageMetadata);
+  const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
 
   const insets = useMemo(
@@ -219,7 +214,7 @@ export default memo(function Canvas() {
         case 'hoverHandle':
         case 'none': {
           if (state.selectedObjects.length > 0) {
-            const direction = getScaleDirectionAtPoint(state, point);
+            const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction) {
               dispatch('interaction', ['maybeScale', point, direction]);
@@ -228,10 +223,16 @@ export default memo(function Canvas() {
             }
           }
 
-          const layer = getLayerAtPoint(CanvasKit, state, insets, rawPoint, {
-            clickThroughGroups: event.metaKey,
-            includeHiddenLayers: false,
-          });
+          const layer = Selectors.getLayerAtPoint(
+            CanvasKit,
+            state,
+            insets,
+            rawPoint,
+            {
+              clickThroughGroups: event.metaKey,
+              includeHiddenLayers: false,
+            },
+          );
 
           if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
@@ -328,7 +329,7 @@ export default memo(function Canvas() {
 
           const { origin, current } = state.interactionState;
 
-          const layers = getLayersInRect(
+          const layers = Selectors.getLayersInRect(
             CanvasKit,
             state,
             insets,
@@ -347,7 +348,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'hoverHandle': {
-          const direction = getScaleDirectionAtPoint(state, point);
+          const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
           if (direction) {
             if (direction !== state.interactionState.direction) {
@@ -360,10 +361,16 @@ export default memo(function Canvas() {
           break;
         }
         case 'none': {
-          const layer = getLayerAtPoint(CanvasKit, state, insets, rawPoint, {
-            clickThroughGroups: event.metaKey,
-            includeHiddenLayers: false,
-          });
+          const layer = Selectors.getLayerAtPoint(
+            CanvasKit,
+            state,
+            insets,
+            rawPoint,
+            {
+              clickThroughGroups: event.metaKey,
+              includeHiddenLayers: false,
+            },
+          );
 
           // For perf, check that we actually need to update the highlight.
           // This gets called on every mouse movement.
@@ -376,7 +383,7 @@ export default memo(function Canvas() {
           }
 
           if (state.selectedObjects.length > 0) {
-            const direction = getScaleDirectionAtPoint(state, point);
+            const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction) {
               dispatch('interaction', ['hoverHandle', direction]);
@@ -433,7 +440,7 @@ export default memo(function Canvas() {
 
           const { origin, current } = state.interactionState;
 
-          const layers = getLayersInRect(
+          const layers = Selectors.getLayersInRect(
             CanvasKit,
             state,
             insets,

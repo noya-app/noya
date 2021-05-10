@@ -23,6 +23,16 @@ export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   }
 };
 
+export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {
+  return layer._class === 'text';
+};
+
+export const hasTextStyle = (
+  layer: Sketch.Text,
+): layer is Sketch.Text & { style: { textStyle: Sketch.TextStyle } } => {
+  return !!layer.style?.textStyle;
+};
+
 export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   return isParentLayer(layer) ? (layer.layers as T[]) : [];
 };
@@ -103,3 +113,7 @@ export {
   EXCLUDE_AND_SKIP,
   findAllLayerIndexPaths as findAllIndexPaths,
 };
+
+export function getFixedRadius(layer: Sketch.AnyLayer): number {
+  return layer._class === 'rectangle' ? layer.fixedRadius : 0;
+}

@@ -10,7 +10,7 @@
     "kiwi.js": "^1.1.2",
     "react-beautiful-dnd": "^13.0.0",
     "styled-components": "^5.2.1",
-    "tree-visit": "^0.0.7"
+    "tree-visit": "^0.0.9"
   },
   "browserslist": {
     "production": [

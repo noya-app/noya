@@ -12,7 +12,7 @@ import {
   sketchColorToRgbaString,
   ListView,
 } from 'noya-designsystem';
-import { getSharedSwatches } from 'noya-state/src/selectors';
+import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
@@ -154,7 +154,7 @@ export default memo(function ColorInputFieldWithPicker({
 
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
-  const sharedSwatches = getSharedSwatches(state);
+  const sharedSwatches = Selectors.getSharedSwatches(state);
 
   return (
     <Popover.Root>

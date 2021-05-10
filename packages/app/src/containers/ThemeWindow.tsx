@@ -5,6 +5,7 @@ import {
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
+import TextStylesGrid from '../components/theme/TextStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
 import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
@@ -15,23 +16,23 @@ const Container = styled.main(({ theme }) => ({
   flexDirection: 'column',
 }));
 
-const LayerStyles = memo(function LayerStyles() {
+const ThemeStyles = memo(function ThemeStyles() {
   const [state, dispatch] = useApplicationState();
   const selectedGroup = state.selectedThemeStyleGroup;
 
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
 
-  const filterSwatches = useMemo(
+  const filterTheme = useMemo(
     () => sharedStyles.filter((style) => style.name.startsWith(selectedGroup)),
     [sharedStyles, selectedGroup],
   );
   return (
     <ThemeStylesGrid
-      sharedStyles={filterSwatches}
+      sharedStyles={filterTheme}
       selectedThemeStyleIds={state.selectedLayerStyleIds}
       onGroupThemeStyle={useCallback(
         (id: string[], name?: string) => {
-          dispatch('groupThemeStyles', id, name);
+          dispatch('groupThemeStyle', id, name);
         },
         [dispatch],
       )}
@@ -70,7 +71,7 @@ const Swatches = memo(function Swatches() {
       selectedSwatchIds={state.selectedSwatchIds}
       onGroupSwatch={useCallback(
         (id: string[], name?: string) => {
-          dispatch('groupSwatches', id, name);
+          dispatch('groupSwatch', id, name);
         },
         [dispatch],
       )}
@@ -91,6 +92,48 @@ const Swatches = memo(function Swatches() {
   );
 });
 
+const TextStyles = memo(function TextStyles() {
+  const [state, dispatch] = useApplicationState();
+
+  const textStyles = useShallowArray(
+    useSelector(Selectors.getSharedTextStyles),
+  );
+
+  const selectedGroup = state.selectedTextStyleGroup;
+  const filterText = useMemo(
+    () => textStyles.filter((swatch) => swatch.name.startsWith(selectedGroup)),
+    [textStyles, selectedGroup],
+  );
+
+  return (
+    <TextStylesGrid
+      sharedStyles={filterText}
+      selectedTextStyles={state.selectedTextStyleIds}
+      onGroupTextStyle={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupTextStyle', id, name);
+        },
+        [dispatch],
+      )}
+      onSelectTextStyle={useCallback(
+        (id, type) => {
+          dispatch('selectTextStyle', id, type);
+        },
+        [dispatch],
+      )}
+      onDuplicateTextStyle={useCallback(
+        (id: string[]) => {
+          dispatch('duplicateTextStyle', id);
+        },
+        [dispatch],
+      )}
+      onDeleteTextStyle={useCallback(() => dispatch('removeTextStyle'), [
+        dispatch,
+      ])}
+    />
+  );
+});
+
 export default memo(function ThemeWindow() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
@@ -99,9 +142,9 @@ export default memo(function ThemeWindow() {
       case 'swatches':
         return <Swatches />;
       case 'textStyles':
-        return <></>;
+        return <TextStyles />;
       case 'layerStyles':
-        return <LayerStyles />;
+        return <ThemeStyles />;
       case 'symbols':
         return <></>;
     }
