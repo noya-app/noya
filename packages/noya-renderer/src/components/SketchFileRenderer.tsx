@@ -29,7 +29,7 @@ import {
   getLayerTransformAtIndexPath,
   getScreenTransform,
   getLayersInRect,
-} from 'noya-state/src/selectors';
+} from 'noya-state/src/selectors/selectors';
 import React, { memo, useMemo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
