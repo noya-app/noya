@@ -16,19 +16,21 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 
-const NO_LAYER_STYLE = 'none';
+const NO_TEXT_STYLE = 'none';
 
-export default memo(function LayerThemeInspector() {
+export default memo(function ThemeTextInspector() {
   const [, dispatch] = useApplicationState();
 
   const iconColor = useTheme().colors.icon;
 
-  const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
+  const sharedTextStyles = useShallowArray(
+    useSelector(Selectors.getSharedTextStyles),
+  );
   const selectedLayers = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   );
 
-  const selectedLayerStyleId = useMemo(
+  const selectedTextStyleId = useMemo(
     () =>
       !selectedLayers.every(
         (v) => v.sharedStyleID === selectedLayers[0].sharedStyleID,
@@ -38,72 +40,75 @@ export default memo(function LayerThemeInspector() {
     [selectedLayers],
   );
 
-  const layerStyleOptions = useMemo(
-    () => [NO_LAYER_STYLE, ...sharedStyles.map((style) => style.do_objectID)],
-    [sharedStyles],
+  const textStyleOptions = useMemo(
+    () => [
+      NO_TEXT_STYLE,
+      ...sharedTextStyles.map((style) => style.do_objectID),
+    ],
+    [sharedTextStyles],
   );
 
   const getLayerStyleTitle = useCallback(
     (id) =>
-      id === NO_LAYER_STYLE
+      id === NO_TEXT_STYLE
         ? 'No Layer Style'
-        : sharedStyles.find((style) => style.do_objectID === id)!.name,
-    [sharedStyles],
+        : sharedTextStyles.find((style) => style.do_objectID === id)!.name,
+    [sharedTextStyles],
   );
 
   const onSelect = useCallback(
     (value) => {
-      dispatch('setThemeStyle', value === NO_LAYER_STYLE ? undefined : value);
+      dispatch('setTextStyle', value === NO_TEXT_STYLE ? undefined : value);
     },
     [dispatch],
   );
 
   const onAdd = useCallback(() => {
-    const styleName = prompt('New Style Layout Name');
+    const styleName = prompt('New Text Style Name');
 
     if (!styleName) return;
-    dispatch('addThemeStyle', styleName, selectedLayers[0].style);
+    dispatch('addTextStyle', styleName, selectedLayers[0].style);
   }, [selectedLayers, dispatch]);
 
   const onRename = useCallback(() => {
-    if (!selectedLayerStyleId) return;
+    if (!selectedTextStyleId) return;
 
-    const newName = prompt('Rename Layout style');
+    const newName = prompt('Rename Text Style');
 
     if (!newName) return;
-    dispatch('setThemeStyleName', selectedLayerStyleId, newName);
-  }, [selectedLayerStyleId, dispatch]);
+    dispatch('setTextStyleName', selectedTextStyleId, newName);
+  }, [selectedTextStyleId, dispatch]);
 
-  const onDetach = useCallback(() => dispatch('setThemeStyle'), [dispatch]);
+  const onDetach = useCallback(() => dispatch('setTextStyle'), [dispatch]);
 
   const onUpdate = useCallback(() => {
-    if (!selectedLayerStyleId) return;
+    if (!selectedTextStyleId) return;
 
-    dispatch('updateThemeStyle', selectedLayerStyleId, selectedLayers[0].style);
-  }, [selectedLayerStyleId, selectedLayers, dispatch]);
+    dispatch('updateTextStyle', selectedTextStyleId, selectedLayers[0].style);
+  }, [selectedTextStyleId, selectedLayers, dispatch]);
 
   const onReset = useCallback(() => {
-    const style = sharedStyles.find(
-      (s) => s.do_objectID === selectedLayerStyleId,
+    const style = sharedTextStyles.find(
+      (s) => s.do_objectID === selectedTextStyleId,
     );
 
-    if (selectedLayerStyleId && style) {
-      dispatch('setThemeStyle', selectedLayerStyleId);
+    if (selectedTextStyleId && style) {
+      dispatch('setTextStyle', selectedTextStyleId);
     }
-  }, [selectedLayerStyleId, sharedStyles, dispatch]);
+  }, [selectedTextStyleId, sharedTextStyles, dispatch]);
 
   return (
     <>
       <InspectorPrimitives.Section>
         <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Theme</InspectorPrimitives.Title>
+          <InspectorPrimitives.Title>Text Style</InspectorPrimitives.Title>
         </InspectorPrimitives.SectionHeader>
         <Spacer.Vertical size={10} />
         <InspectorPrimitives.Row>
           <Select
-            id="theme-layer-style"
-            value={selectedLayerStyleId || NO_LAYER_STYLE}
-            options={layerStyleOptions}
+            id="theme-text-style"
+            value={selectedTextStyleId || NO_TEXT_STYLE}
+            options={textStyleOptions}
             getTitle={getLayerStyleTitle}
             onChange={onSelect}
           />
@@ -111,44 +116,44 @@ export default memo(function LayerThemeInspector() {
         <Spacer.Vertical size={10} />
         <InspectorPrimitives.Row>
           <Button
-            id="create-layer-style"
-            tooltip="Create theme style from layer"
+            id="create-text-style"
+            tooltip="Create text style from text"
             onClick={onAdd}
           >
             <PlusIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
-            id="update-layer-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Update theme style to match layer"
+            id="update-text-style"
+            disabled={selectedTextStyleId === undefined}
+            tooltip="Update text style to match text"
             onClick={onUpdate}
           >
             <UpdateIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
-            id="detach-layer-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Detach style from theme"
+            id="detach-text-style"
+            disabled={selectedTextStyleId === undefined}
+            tooltip="Detach text from text style"
             onClick={onDetach}
           >
             <LinkBreak2Icon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
-            id="rename-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Rename theme style"
+            id="rename-text-style"
+            disabled={selectedTextStyleId === undefined}
+            tooltip="Rename text style"
             onClick={onRename}
           >
             <CursorTextIcon color={iconColor} />
           </Button>
           <Spacer.Horizontal size={10} />
           <Button
-            id="reset-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Reset layer style to theme style"
+            id="reset-text-style"
+            disabled={selectedTextStyleId === undefined}
+            tooltip="Reset text to text style"
             onClick={onReset}
           >
             <ResetIcon color={iconColor} />

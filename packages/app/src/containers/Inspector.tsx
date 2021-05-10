@@ -17,6 +17,7 @@ import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
 import TextStyleInspector from './TextStyleInspector';
+import ThemeTextInspector from './ThemeTextInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -63,7 +64,8 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
-      <LayerThemeInspector />,
+      hasTextLayer && <ThemeTextInspector />,
+      !hasTextLayer && <LayerThemeInspector />,
       hasTextLayer && <TextStyleInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,
