@@ -3,13 +3,7 @@ import {
   useWorkspace,
 } from 'app/src/contexts/ApplicationStateContext';
 import * as CanvasKit from 'canvaskit-wasm';
-import {
-  AffineTransform,
-  createRect,
-  insetRect,
-  distance,
-  createBounds,
-} from 'noya-geometry';
+import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import {
   Group,
   Polyline,
@@ -28,7 +22,6 @@ import {
   getCurrentPage,
   getLayerTransformAtIndexPath,
   getScreenTransform,
-  getLayersInRect,
 } from 'noya-state/src/selectors/selectors';
 import React, { memo, useMemo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
@@ -177,44 +170,31 @@ export default memo(function SketchFileRenderer() {
     [page, state.selectedObjects],
   );
 
-  /*const visibleLayersInCanvas = function () {
-    const layers = getLayersInRect(
-      CanvasKit,
-      state,
-      canvasInsets,
-      createRect({ x: 0, y: 0 }, { x: canvasSize.height, y: canvasSize.width }),
+  const getSelectedAndHighlightedLayerBoundingRec = useCallback(() => {
+    if (
+      state.selectedObjects.length === 0 ||
+      !highlightedLayer ||
+      !boundingRect
+    ) {
+      return;
+    }
+
+    const highlightedBoundingRec = getBoundingRect(
+      page,
+      AffineTransform.identity,
+      [highlightedLayer.id],
       {
-        clickThroughGroups: false,
-        includeHiddenLayers: false,
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
       },
     );
-    return layers;
-  };
-*/
-  function measureDistanceBetweenVisibleLayers(
-    selectedLayer: any,
-    visibleLayers: any,
-  ) {
-    let closestLayer: any;
-    visibleLayers.forEach(function (layer: any) {
-      if (selectedLayer.do_objectID === layer.do_objectID) {
-        return;
-      }
-      const layerDistance = distance(
-        { x: selectedLayer.frame.x, y: selectedLayer.frame.y },
-        { x: layer.frame.x, y: layer.frame.y },
-      );
+    return {
+      selectedBoundingRec: boundingRect,
+      highlightedBoundingRec: highlightedBoundingRec,
+    };
+  }, [boundingRect, highlightedLayer, page, state.selectedObjects.length]);
 
-      if (
-        !closestLayer ||
-        (closestLayer && layerDistance < closestLayer.layerDistance)
-      ) {
-        closestLayer = { layer: layer, layerDistance: layerDistance };
-      }
-    });
-    return closestLayer;
-  }
-
+  /*
   const visibleLayersInCanvas = useCallback(() => {
     const layers = getLayersInRect(
       CanvasKit,
@@ -228,6 +208,7 @@ export default memo(function SketchFileRenderer() {
     );
     return layers;
   }, [CanvasKit, state, canvasInsets, canvasSize.height, canvasSize.width]);
+*/
 
   const highlightedSketchLayer = useMemo(() => {
     if (
@@ -253,29 +234,9 @@ export default memo(function SketchFileRenderer() {
       AffineTransform.identity,
     );
 
-    let closestLayerDistance;
-    let closestLayerMidpoint;
-    let selectedMidpoint;
+    let measurePayload;
     if (highlightedLayer.isMeasured) {
-      const layersToMeasureDistance = visibleLayersInCanvas();
-      const closestLayer = measureDistanceBetweenVisibleLayers(
-        layer,
-        layersToMeasureDistance,
-      ).layer;
-
-      const closestLayerBounds = createBounds(closestLayer.frame);
-      const selectedBounds = createBounds(layer.frame);
-
-      closestLayerMidpoint = {
-        x: closestLayerBounds.midX,
-        y: closestLayerBounds.midY,
-      };
-      selectedMidpoint = { x: selectedBounds.midX, y: selectedBounds.midY };
-
-      closestLayerDistance = Math.round(
-        measureDistanceBetweenVisibleLayers(layer, layersToMeasureDistance)
-          .layerDistance,
-      );
+      measurePayload = getSelectedAndHighlightedLayerBoundingRec();
     }
 
     return (
@@ -286,12 +247,10 @@ export default memo(function SketchFileRenderer() {
             layer={layer}
             paint={highlightPaint}
           />
-          {closestLayerDistance && selectedMidpoint && closestLayerMidpoint && (
+          {measurePayload && (
             <DistanceLabelAndPath
-              labelOrigin={{ x: layer.frame.x, y: layer.frame.y }}
-              labelText={closestLayerDistance.toString()}
-              pathStartPoint={selectedMidpoint}
-              pathEndPoint={closestLayerMidpoint}
+              selectedLayer={measurePayload.selectedBoundingRec}
+              highlightedLayer={measurePayload.highlightedBoundingRec}
             />
           )}
         </>
@@ -302,7 +261,7 @@ export default memo(function SketchFileRenderer() {
     highlightedLayer,
     page,
     state.selectedObjects,
-    visibleLayersInCanvas,
+    getSelectedAndHighlightedLayerBoundingRec,
   ]);
 
   return (
