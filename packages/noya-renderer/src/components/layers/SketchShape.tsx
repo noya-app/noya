@@ -1,12 +1,15 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit-wasm';
+import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,
   Group,
   Path,
   useDeletable,
+  usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
+import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
 import { Primitives } from 'noya-renderer';
 import { Layers } from 'noya-state';
 import { memo, useMemo } from 'react';
@@ -47,6 +50,77 @@ const SketchFill = memo(function SketchFill({
   useDeletable(paint);
 
   return <Path path={path} paint={paint} />;
+});
+
+// TODO: Handle shadows of layers with borders but no fill
+const SketchShadow = memo(function SketchShadow({
+  path,
+  shadow,
+  clipPath,
+}: {
+  path: CanvasKit.Path;
+  shadow: Sketch.Shadow;
+  clipPath?: CanvasKit.Path;
+}) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const paintParameters: PaintParameters = useMemo(
+    () => ({
+      style: CanvasKit.PaintStyle.Fill,
+      color: Primitives.color(CanvasKit, shadow.color),
+      maskFilter: CanvasKit.MaskFilter.MakeBlur(
+        CanvasKit.BlurStyle.Normal,
+        shadow.blurRadius / 2, // Skia blurs seem twice as large as Sketch blurs
+        true,
+      ),
+    }),
+    [CanvasKit, shadow],
+  );
+  const paint = usePaint(paintParameters);
+
+  const transform = useMemo(
+    () => AffineTransform.translation(shadow.offsetX, shadow.offsetY),
+    [shadow.offsetX, shadow.offsetY],
+  );
+
+  const clip: ClipProps | undefined = clipPath
+    ? {
+        path: clipPath,
+        op: CanvasKit.ClipOp.Difference,
+      }
+    : undefined;
+
+  // TODO: We can optimize this: if there's no spread, we don't need to copy the path.
+  // We currently need to copy the path since we use `useDeletable` after, and don't want
+  // to delete a path passed in as a prop.
+  const strokedPath: CanvasKit.Path = useMemo(() => {
+    const copy = path.copy();
+
+    if (shadow.spread === 0) return copy;
+
+    if (
+      !copy.stroke({
+        width: shadow.spread,
+      })
+    ) {
+      console.info('Failed to stroke path when drawing shadow');
+      return copy;
+    }
+
+    if (!copy.op(path, CanvasKit.PathOp.Union)) {
+      console.info('Failed to combine paths when drawing shadow');
+    }
+
+    return copy;
+  }, [CanvasKit, path, shadow.spread])!;
+
+  useDeletable(strokedPath);
+
+  return (
+    <Group transform={transform} clip={clip}>
+      <Path path={strokedPath} paint={paint} />
+    </Group>
+  );
 });
 
 const SketchBorder = memo(function SketchBorder({
@@ -117,26 +191,35 @@ export default memo(function SketchShape({ layer }: Props) {
 
   if (!layer.style) return null;
 
-  const fills = (layer.style.fills ?? []).slice().reverse();
-  const borders = (layer.style.borders ?? []).slice().reverse();
+  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled).reverse();
+  const borders = (layer.style.borders ?? [])
+    .filter((x) => x.isEnabled)
+    .reverse();
+  const shadows = (layer.style.shadows ?? [])
+    .filter((x) => x.isEnabled)
+    .reverse();
 
   const elements = (
     <>
-      {fills.map((fill, index) =>
-        fill.isEnabled ? (
-          <SketchFill
-            key={`fill-${index}`}
-            fill={fill}
-            path={path}
-            transform={transform}
-          />
-        ) : null,
-      )}
-      {borders.map((border, index) =>
-        border.isEnabled ? (
-          <SketchBorder key={`border-${index}`} border={border} path={path} />
-        ) : null,
-      )}
+      {shadows.map((shadow, index) => (
+        <SketchShadow
+          key={`shadow-${index}`}
+          shadow={shadow}
+          path={path}
+          clipPath={fills.length > 0 ? path : undefined}
+        />
+      ))}
+      {fills.map((fill, index) => (
+        <SketchFill
+          key={`fill-${index}`}
+          fill={fill}
+          path={path}
+          transform={transform}
+        />
+      ))}
+      {borders.map((border, index) => (
+        <SketchBorder key={`border-${index}`} border={border} path={path} />
+      ))}
     </>
   );
 
