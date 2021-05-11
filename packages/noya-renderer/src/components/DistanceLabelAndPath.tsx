@@ -6,6 +6,7 @@ import {
   useFontManager,
 } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
+import { createBounds } from 'noya-geometry';
 
 // calculate the angle between two points: https://stackoverflow.com/questions/9614109/how-to-calculate-an-angle-from-points/9614122#9614122
 function angle360(cx: number, cy: number, ex: number, ey: number) {
@@ -31,18 +32,81 @@ function ImplicitPaths({
 }) {
   // determine the angle between two points, then use the angle to determine coordinates for implicit paths
   const angleBetweenSelectedAndHighlightedLayer = angle360(
-    selectedLayer.x,
-    selectedLayer.y,
-    highlightedLayer.x,
-    highlightedLayer.y,
+    createBounds(highlightedLayer).midX,
+    createBounds(highlightedLayer).midY,
+    createBounds(selectedLayer).midX,
+    createBounds(selectedLayer).midY,
   );
+
   let xAxisPoints: any;
   let yAxisPoints: any;
 
-  //TODO: clean up switch statment to use applicable coordinates
   switch (true) {
-    case angleBetweenSelectedAndHighlightedLayer === 0 ||
-      angleBetweenSelectedAndHighlightedLayer < 90:
+    case angleBetweenSelectedAndHighlightedLayer > 45 &&
+      angleBetweenSelectedAndHighlightedLayer <= 135:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        { x: selectedLayer.x, y: highlightedLayer.y + highlightedLayer.height },
+      ];
+
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: selectedLayer.y + selectedLayer.height,
+        },
+      ];
+      break;
+    case angleBetweenSelectedAndHighlightedLayer > 135 &&
+      angleBetweenSelectedAndHighlightedLayer <= 225:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y,
+        },
+        { x: highlightedLayer.x, y: selectedLayer.y },
+      ];
+
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        {
+          x: selectedLayer.x,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+      ];
+      break;
+    case angleBetweenSelectedAndHighlightedLayer > 225 &&
+      angleBetweenSelectedAndHighlightedLayer <= 315:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y,
+        },
+        { x: highlightedLayer.x, y: selectedLayer.y },
+      ];
+
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y,
+        },
+        {
+          x: selectedLayer.x + selectedLayer.width,
+          y: highlightedLayer.y,
+        },
+      ];
+      break;
+    case angleBetweenSelectedAndHighlightedLayer > 315 &&
+      angleBetweenSelectedAndHighlightedLayer <= 45:
       xAxisPoints = [
         {
           x: highlightedLayer.x + highlightedLayer.width,
@@ -62,8 +126,7 @@ function ImplicitPaths({
         },
       ];
       break;
-    case angleBetweenSelectedAndHighlightedLayer === 90 ||
-      angleBetweenSelectedAndHighlightedLayer < 180:
+    default:
       xAxisPoints = [
         {
           x: highlightedLayer.x + highlightedLayer.width,
@@ -82,49 +145,6 @@ function ImplicitPaths({
           y: highlightedLayer.y + highlightedLayer.height,
         },
       ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer === 180 ||
-      angleBetweenSelectedAndHighlightedLayer < 270:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y,
-        },
-        { x: highlightedLayer.x + highlightedLayer.width, y: selectedLayer.y },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x + selectedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer === 270 ||
-      angleBetweenSelectedAndHighlightedLayer <= 360:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y,
-        },
-        { x: highlightedLayer.x + highlightedLayer.width, y: selectedLayer.y },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x + selectedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-      ];
-      break;
   }
 
   const { CanvasKit } = useReactCanvasKit();
