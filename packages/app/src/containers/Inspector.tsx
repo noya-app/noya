@@ -53,6 +53,7 @@ export default memo(function Inspector() {
           };
 
     const hasTextLayer = selectedLayers.some((l) => l._class === 'text');
+    const hasAllTextLayer = selectedLayers.every((l) => l._class === 'text');
 
     const views = [
       <Fragment key="layout">
@@ -64,7 +65,7 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
-      hasTextLayer && <ThemeTextInspector />,
+      hasAllTextLayer && <ThemeTextInspector />,
       !hasTextLayer && <LayerThemeInspector />,
       hasTextLayer && <TextStyleInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
