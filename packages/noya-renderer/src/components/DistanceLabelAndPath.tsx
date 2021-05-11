@@ -12,7 +12,7 @@ import { createBounds } from 'noya-geometry';
 function angle360(cx: number, cy: number, ex: number, ey: number) {
   var theta = angle(cx, cy, ex, ey); // range (-180, 180]
   if (theta < 0) theta = 360 + theta; // range [0, 360)
-  return theta;
+  return Math.round(theta);
 }
 
 function angle(cx: number, cy: number, ex: number, ey: number) {
@@ -41,7 +41,93 @@ function ImplicitPaths({
   let xAxisPoints: any;
   let yAxisPoints: any;
 
+  //TODO: Refactor switch statement
   switch (true) {
+    case angleBetweenSelectedAndHighlightedLayer === 90:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        {
+          x: highlightedLayer.x,
+          y: selectedLayer.y + selectedLayer.height,
+        },
+      ];
+
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: selectedLayer.y + selectedLayer.height,
+        },
+      ];
+      break;
+    case angleBetweenSelectedAndHighlightedLayer === 270:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x,
+          y: highlightedLayer.y,
+        },
+        {
+          x: highlightedLayer.x,
+          y: selectedLayer.y,
+        },
+      ];
+
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y + selectedLayer.height,
+        },
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: selectedLayer.y,
+        },
+      ];
+      break;
+    case angleBetweenSelectedAndHighlightedLayer === 0:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y,
+        },
+        { x: selectedLayer.x + selectedLayer.width, y: highlightedLayer.y },
+      ];
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        {
+          x: selectedLayer.x + selectedLayer.width,
+          y: selectedLayer.y + selectedLayer.height,
+        },
+      ];
+      break;
+    case angleBetweenSelectedAndHighlightedLayer === 180:
+      xAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y,
+        },
+        { x: selectedLayer.x, y: highlightedLayer.y },
+      ];
+      yAxisPoints = [
+        {
+          x: highlightedLayer.x + highlightedLayer.width,
+          y: highlightedLayer.y + highlightedLayer.height,
+        },
+        {
+          x: selectedLayer.x,
+          y: selectedLayer.y + selectedLayer.height,
+        },
+      ];
+      break;
+
     case angleBetweenSelectedAndHighlightedLayer > 45 &&
       angleBetweenSelectedAndHighlightedLayer <= 135:
       xAxisPoints = [
@@ -170,7 +256,6 @@ export default function DistanceLabelAndPath({
   selectedLayer: any;
   highlightedLayer: any;
 }) {
-  // Find all intrensic lines
   // Draw explicit lines from intrensic lines
   // Calculate distance
 
