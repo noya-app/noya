@@ -1,5 +1,6 @@
 import { Divider, Spacer } from 'noya-designsystem';
 import { Selectors, SetNumberMode } from 'noya-state';
+import * as Layers from 'noya-state/src/layers';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import {
@@ -52,8 +53,8 @@ export default memo(function Inspector() {
             rotation: undefined,
           };
 
-    const hasTextLayer = selectedLayers.some((l) => l._class === 'text');
-    const hasAllTextLayer = selectedLayers.every((l) => l._class === 'text');
+    const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
 
     const views = [
       <Fragment key="layout">
