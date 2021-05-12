@@ -53,14 +53,18 @@ const SketchFill = memo(function SketchFill({
 });
 
 // TODO: Handle shadows of layers with borders but no fill
-const SketchShadow = memo(function SketchShadow({
+const SketchFillShadow = memo(function SketchShadow({
   path,
   shadow,
   clipPath,
+  borderWidth,
+  borderPosition,
 }: {
   path: CanvasKit.Path;
   shadow: Sketch.Shadow;
   clipPath?: CanvasKit.Path;
+  borderWidth: number;
+  borderPosition: Sketch.BorderPosition;
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
@@ -90,17 +94,26 @@ const SketchShadow = memo(function SketchShadow({
       }
     : undefined;
 
+  const additionalRadius =
+    shadow.spread +
+    borderWidth *
+      (borderPosition === Sketch.BorderPosition.Outside
+        ? 2
+        : borderPosition === Sketch.BorderPosition.Center
+        ? 1
+        : 0);
+
   // TODO: We can optimize this: if there's no spread, we don't need to copy the path.
   // We currently need to copy the path since we use `useDeletable` after, and don't want
   // to delete a path passed in as a prop.
   const strokedPath: CanvasKit.Path = useMemo(() => {
     const copy = path.copy();
 
-    if (shadow.spread === 0) return copy;
+    if (additionalRadius === 0) return copy;
 
     if (
       !copy.stroke({
-        width: shadow.spread,
+        width: additionalRadius,
       })
     ) {
       console.info('Failed to stroke path when drawing shadow');
@@ -112,7 +125,7 @@ const SketchShadow = memo(function SketchShadow({
     }
 
     return copy;
-  }, [CanvasKit, path, shadow.spread])!;
+  }, [CanvasKit, path, additionalRadius])!;
 
   useDeletable(strokedPath);
 
@@ -192,21 +205,25 @@ export default memo(function SketchShape({ layer }: Props) {
   if (!layer.style) return null;
 
   const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled).reverse();
-  const borders = (layer.style.borders ?? [])
-    .filter((x) => x.isEnabled)
-    .reverse();
+  const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
   const shadows = (layer.style.shadows ?? [])
     .filter((x) => x.isEnabled)
     .reverse();
 
+  const borderWidth = Math.max(0, ...borders.map((border) => border.thickness));
+  const borderPosition =
+    borders.length > 0 ? borders[0].position : Sketch.BorderPosition.Inside;
+
   const elements = (
     <>
       {shadows.map((shadow, index) => (
-        <SketchShadow
+        <SketchFillShadow
           key={`shadow-${index}`}
           shadow={shadow}
           path={path}
           clipPath={fills.length > 0 ? path : undefined}
+          borderWidth={borderWidth}
+          borderPosition={borderPosition}
         />
       ))}
       {fills.map((fill, index) => (
