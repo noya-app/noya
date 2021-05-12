@@ -91,6 +91,7 @@ const LayerIcon = memo(function LayerIcon({
     case 'text':
       return <TextIcon color={color} />;
     case 'artboard':
+    case 'symbolMaster':
       return <BoxModelIcon color={color} />;
     case 'group':
       return <GroupIcon color={color} />;
@@ -264,9 +265,11 @@ export default memo(function LayerList() {
             onHoverChange={handleHoverChange}
             onChangeVisible={handleChangeVisible}
             icon={<LayerIcon type={type} selected={selected} />}
-            isSectionHeader={type === 'artboard'}
+            isSectionHeader={type === 'artboard' || type === 'symbolMaster'}
             expanded={
-              type === 'artboard' || type === 'group' ? expanded : undefined
+              type === 'artboard' || type === 'symbolMaster' || type === 'group'
+                ? expanded
+                : undefined
             }
             onClickChevron={handleClickChevron}
           />
