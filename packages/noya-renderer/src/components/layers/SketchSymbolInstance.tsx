@@ -38,8 +38,10 @@ export default memo(function SketchSymbolInstance({ layer }: Props) {
 
   if (!symbolMaster) return null;
 
+  const opacity = layer.style?.contextSettings?.opacity ?? 1;
+
   return (
-    <Group transform={transform}>
+    <Group transform={transform} opacity={opacity}>
       <SketchGroup layer={symbolMaster} />
     </Group>
   );
