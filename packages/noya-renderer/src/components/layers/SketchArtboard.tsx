@@ -1,5 +1,4 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,
   Group,
@@ -13,15 +12,17 @@ import {
 import { Primitives } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import SketchLayer from './SketchLayer';
+import SketchGroup from './SketchGroup';
 
 interface Props {
-  layer: Sketch.Artboard;
+  layer: Sketch.Artboard | Sketch.SymbolMaster;
+  isSymbolMaster: boolean;
 }
 
-export default memo(function SketchArtboard({ layer }: Props) {
+export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
   const { CanvasKit } = useReactCanvasKit();
-  const textColor = useTheme().colors.textMuted;
+  const { colors } = useTheme();
+  const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
   const fontManager = useFontManager();
 
   const paint = usePaint({
@@ -47,11 +48,6 @@ export default memo(function SketchArtboard({ layer }: Props) {
     ...layer.frame,
     y: layer.frame.y + 1,
   });
-
-  const transform = useMemo(
-    () => AffineTransform.translation(layer.frame.x, layer.frame.y),
-    [layer.frame.x, layer.frame.y],
-  );
 
   const clip: ClipProps = useMemo(
     () => ({
@@ -90,21 +86,13 @@ export default memo(function SketchArtboard({ layer }: Props) {
     height: layer.frame.height,
   });
 
-  const childrenElements = useMemo(
-    () =>
-      layer.layers.map((layer) => (
-        <SketchLayer key={layer.do_objectID} layer={layer} />
-      )),
-    [layer.layers],
-  );
-
   return (
     <>
       <Text rect={labelRect} paragraph={labelParagraph} />
       <Rect rect={blurRect} paint={blur} />
       <Rect rect={rect} paint={paint} />
-      <Group transform={transform} clip={clip}>
-        {childrenElements}
+      <Group clip={clip}>
+        <SketchGroup layer={layer} />
       </Group>
     </>
   );

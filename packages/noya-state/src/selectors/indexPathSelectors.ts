@@ -48,7 +48,7 @@ export const getSelectedLayerIndexPathsExcludingDescendants = (
   return Layers.findAllIndexPaths<Sketch.AnyLayer>(page, (layer) => {
     const included = state.selectedObjects.includes(layer.do_objectID);
 
-    if (included && layer._class === 'artboard') {
+    if (included && Layers.isParentLayer(layer)) {
       return INCLUDE_AND_SKIP;
     }
 
