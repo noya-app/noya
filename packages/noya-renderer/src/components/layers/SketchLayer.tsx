@@ -18,7 +18,10 @@ export default memo(function SketchLayer({ layer }: Props) {
 
   switch (layer._class) {
     case 'artboard':
-      element = <SketchArtboard layer={layer} />;
+      element = <SketchArtboard layer={layer} isSymbolMaster={false} />;
+      break;
+    case 'symbolMaster':
+      element = <SketchArtboard layer={layer} isSymbolMaster={true} />;
       break;
     case 'group':
       element = <SketchGroup layer={layer} />;
