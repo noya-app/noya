@@ -6,6 +6,7 @@ import {
   Group,
   Path,
   useDeletable,
+  useFill,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
@@ -13,6 +14,7 @@ import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
 import { Primitives } from 'noya-renderer';
 import { Layers } from 'noya-state';
 import { memo, useMemo } from 'react';
+import { getStrokedPath } from '../../primitives/path';
 
 /**
  * CanvasKit draws gradients in absolute coordinates, while Sketch draws them
@@ -52,8 +54,7 @@ const SketchFill = memo(function SketchFill({
   return <Path path={path} paint={paint} />;
 });
 
-// TODO: Handle shadows of layers with borders but no fill
-const SketchFillShadow = memo(function SketchShadow({
+const SketchShadow = memo(function SketchShadow({
   path,
   shadow,
   clipPath,
@@ -106,26 +107,12 @@ const SketchFillShadow = memo(function SketchShadow({
   // TODO: We can optimize this: if there's no spread, we don't need to copy the path.
   // We currently need to copy the path since we use `useDeletable` after, and don't want
   // to delete a path passed in as a prop.
-  const strokedPath: CanvasKit.Path = useMemo(() => {
-    const copy = path.copy();
-
-    if (additionalRadius === 0) return copy;
-
-    if (
-      !copy.stroke({
-        width: additionalRadius,
-      })
-    ) {
-      console.info('Failed to stroke path when drawing shadow');
-      return copy;
-    }
-
-    if (!copy.op(path, CanvasKit.PathOp.Union)) {
-      console.info('Failed to combine paths when drawing shadow');
-    }
-
-    return copy;
-  }, [CanvasKit, path, additionalRadius])!;
+  const strokedPath: CanvasKit.Path = getStrokedPath(
+    CanvasKit,
+    path,
+    additionalRadius,
+    CanvasKit.PathOp.Union,
+  );
 
   useDeletable(strokedPath);
 
@@ -133,6 +120,36 @@ const SketchFillShadow = memo(function SketchShadow({
     <Group transform={transform} clip={clip}>
       <Path path={strokedPath} paint={paint} />
     </Group>
+  );
+});
+
+/**
+ * This is a special case of layer shadow. If there are no fills but
+ * at least one border, then we draw a shadow just for the border.
+ */
+const SketchBorderShadow = memo(function SketchBorderShadow({
+  path,
+  shadow,
+  border,
+}: {
+  path: CanvasKit.Path;
+  shadow: Sketch.Shadow;
+  border: Sketch.Border;
+}) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const strokedPath = useMemo(
+    () => Primitives.getStrokedBorderPath(CanvasKit, path, border),
+    [CanvasKit, border, path],
+  );
+
+  return (
+    <SketchShadow
+      shadow={shadow}
+      path={strokedPath}
+      borderWidth={0}
+      borderPosition={Sketch.BorderPosition.Inside}
+    />
   );
 });
 
@@ -145,40 +162,18 @@ const SketchBorder = memo(function SketchBorder({
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
-  const paint = useMemo(() => {
-    const paint = Primitives.border(CanvasKit, border);
+  const paint = useFill({
+    color: Primitives.color(CanvasKit, border.color),
+  });
 
-    switch (border.position) {
-      case Sketch.BorderPosition.Center:
-        return paint;
-      case Sketch.BorderPosition.Outside:
-      case Sketch.BorderPosition.Inside:
-        paint.setStrokeWidth(border.thickness * 2);
-        return paint;
-    }
-  }, [CanvasKit, border]);
+  const strokedPath = useMemo(
+    () => Primitives.getStrokedBorderPath(CanvasKit, path, border),
+    [CanvasKit, border, path],
+  );
 
-  useDeletable(paint);
+  useDeletable(strokedPath);
 
-  let clip: ClipProps | undefined = useMemo(() => {
-    switch (border.position) {
-      case Sketch.BorderPosition.Center:
-        return;
-      case Sketch.BorderPosition.Outside:
-        return { path, op: CanvasKit.ClipOp.Difference };
-      case Sketch.BorderPosition.Inside:
-        return { path, op: CanvasKit.ClipOp.Intersect };
-    }
-  }, [
-    CanvasKit.ClipOp.Difference,
-    CanvasKit.ClipOp.Intersect,
-    border.position,
-    path,
-  ]);
-
-  const element = <Path path={path} paint={paint} />;
-
-  return clip ? <Group clip={clip}>{element}</Group> : element;
+  return <Path path={strokedPath} paint={paint} />;
 });
 
 interface Props {
@@ -216,16 +211,25 @@ export default memo(function SketchShape({ layer }: Props) {
 
   const elements = (
     <>
-      {shadows.map((shadow, index) => (
-        <SketchFillShadow
-          key={`shadow-${index}`}
-          shadow={shadow}
-          path={path}
-          clipPath={fills.length > 0 ? path : undefined}
-          borderWidth={borderWidth}
-          borderPosition={borderPosition}
-        />
-      ))}
+      {shadows.map((shadow, index) =>
+        fills.length === 0 && borders.length > 0 ? (
+          <SketchBorderShadow
+            key={`shadow-${index}`}
+            shadow={shadow}
+            path={path}
+            border={borders[0]}
+          />
+        ) : (
+          <SketchShadow
+            key={`shadow-${index}`}
+            shadow={shadow}
+            path={path}
+            clipPath={fills.length > 0 ? path : undefined}
+            borderWidth={borderWidth}
+            borderPosition={borderPosition}
+          />
+        ),
+      )}
       {fills.map((fill, index) => (
         <SketchFill
           key={`fill-${index}`}
