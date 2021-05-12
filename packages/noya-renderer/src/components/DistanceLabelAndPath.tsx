@@ -6,231 +6,73 @@ import {
   useFontManager,
 } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
-import { createBounds } from 'noya-geometry';
+import { createBounds, Point, Rect } from 'noya-geometry';
 
 // calculate the angle between two points: https://stackoverflow.com/questions/9614109/how-to-calculate-an-angle-from-points/9614122#9614122
-function angle360(cx: number, cy: number, ex: number, ey: number) {
-  var theta = angle(cx, cy, ex, ey); // range (-180, 180]
-  if (theta < 0) theta = 360 + theta; // range [0, 360)
-  return Math.round(theta);
-}
+// function angle360(cx: number, cy: number, ex: number, ey: number) {
+//   var theta = angle(cx, cy, ex, ey); // range (-180, 180]
+//   if (theta < 0) theta = 360 + theta; // range [0, 360)
+//   return Math.round(theta);
+// }
 
-function angle(cx: number, cy: number, ex: number, ey: number) {
-  const dy = ey - cy;
-  const dx = ex - cx;
-  let theta = Math.atan2(dy, dx);
-  theta *= 180 / Math.PI;
-  return theta;
-}
+// function angle(cx: number, cy: number, ex: number, ey: number) {
+//   const dy = ey - cy;
+//   const dx = ex - cx;
+//   let theta = Math.atan2(dy, dx);
+//   theta *= 180 / Math.PI;
+//   return theta;
+// }
 
 function ImplicitPaths({
   selectedLayer,
   highlightedLayer,
 }: {
-  selectedLayer: any;
-  highlightedLayer: any;
+  selectedLayer: Rect;
+  highlightedLayer: Rect;
 }) {
-  // determine the angle between two points, then use the angle to determine coordinates for implicit paths
-  const angleBetweenSelectedAndHighlightedLayer = angle360(
-    createBounds(highlightedLayer).midX,
-    createBounds(highlightedLayer).midY,
-    createBounds(selectedLayer).midX,
-    createBounds(selectedLayer).midY,
-  );
+  const highlightedBounds = createBounds(highlightedLayer);
+  const selectedBounds = createBounds(selectedLayer);
 
-  let xAxisPoints: any;
-  let yAxisPoints: any;
+  let implicitLines: Point[][] = [];
 
-  //TODO: Refactor switch statement
-  switch (true) {
-    case angleBetweenSelectedAndHighlightedLayer === 90:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: highlightedLayer.x,
-          y: selectedLayer.y + selectedLayer.height,
-        },
-      ];
+  let leftEdgeOfSelectedBounds =
+    highlightedBounds.maxX < selectedBounds.minX
+      ? highlightedBounds.maxX
+      : highlightedBounds.minX < selectedBounds.minX
+      ? highlightedBounds.minX
+      : undefined;
 
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: selectedLayer.y + selectedLayer.height,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer === 270:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y,
-        },
-        {
-          x: highlightedLayer.x,
-          y: selectedLayer.y,
-        },
-      ];
+  if (leftEdgeOfSelectedBounds !== undefined) {
+    implicitLines.push([
+      { x: leftEdgeOfSelectedBounds, y: highlightedBounds.minY },
+      {
+        x: leftEdgeOfSelectedBounds,
+        y:
+          highlightedBounds.midY < selectedBounds.midY
+            ? selectedBounds.maxY
+            : selectedBounds.minY,
+      },
+    ]);
+  }
 
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + selectedLayer.height,
-        },
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: selectedLayer.y,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer === 0:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y,
-        },
-        { x: selectedLayer.x + selectedLayer.width, y: highlightedLayer.y },
-      ];
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x + selectedLayer.width,
-          y: selectedLayer.y + selectedLayer.height,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer === 180:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y,
-        },
-        { x: selectedLayer.x, y: highlightedLayer.y },
-      ];
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x,
-          y: selectedLayer.y + selectedLayer.height,
-        },
-      ];
-      break;
+  let rightEdgeOfSelectedBounds =
+    highlightedBounds.minX > selectedBounds.maxX
+      ? highlightedBounds.minX
+      : highlightedBounds.maxX > selectedBounds.maxX
+      ? highlightedBounds.maxX
+      : undefined;
 
-    case angleBetweenSelectedAndHighlightedLayer > 45 &&
-      angleBetweenSelectedAndHighlightedLayer <= 135:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        { x: selectedLayer.x, y: highlightedLayer.y + highlightedLayer.height },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: selectedLayer.y + selectedLayer.height,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer > 135 &&
-      angleBetweenSelectedAndHighlightedLayer <= 225:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y,
-        },
-        { x: highlightedLayer.x, y: selectedLayer.y },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer > 225 &&
-      angleBetweenSelectedAndHighlightedLayer <= 315:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y,
-        },
-        { x: highlightedLayer.x, y: selectedLayer.y },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x,
-          y: highlightedLayer.y,
-        },
-        {
-          x: selectedLayer.x + selectedLayer.width,
-          y: highlightedLayer.y,
-        },
-      ];
-      break;
-    case angleBetweenSelectedAndHighlightedLayer > 315 &&
-      angleBetweenSelectedAndHighlightedLayer <= 45:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y,
-        },
-        { x: highlightedLayer.x + highlightedLayer.width, y: selectedLayer.y },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x + selectedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-      ];
-      break;
-    default:
-      xAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y,
-        },
-        { x: highlightedLayer.x + highlightedLayer.width, y: selectedLayer.y },
-      ];
-
-      yAxisPoints = [
-        {
-          x: highlightedLayer.x + highlightedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-        {
-          x: selectedLayer.x + selectedLayer.width,
-          y: highlightedLayer.y + highlightedLayer.height,
-        },
-      ];
+  if (rightEdgeOfSelectedBounds !== undefined) {
+    implicitLines.push([
+      { x: rightEdgeOfSelectedBounds, y: highlightedBounds.minY },
+      {
+        x: rightEdgeOfSelectedBounds,
+        y:
+          highlightedBounds.midY < selectedBounds.midY
+            ? selectedBounds.maxY
+            : selectedBounds.minY,
+      },
+    ]);
   }
 
   const { CanvasKit } = useReactCanvasKit();
@@ -243,8 +85,9 @@ function ImplicitPaths({
 
   return (
     <>
-      <Polyline paint={paint} points={xAxisPoints}></Polyline>
-      <Polyline paint={paint} points={yAxisPoints}></Polyline>
+      {implicitLines.map((points, index) => (
+        <Polyline key={index} paint={paint} points={points}></Polyline>
+      ))}
     </>
   );
 }
