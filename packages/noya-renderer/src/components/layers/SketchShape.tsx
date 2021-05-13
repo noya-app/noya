@@ -57,15 +57,9 @@ const SketchFill = memo(function SketchFill({
 const SketchShadow = memo(function SketchShadow({
   path,
   shadow,
-  clipPath,
-  borderWidth,
-  borderPosition,
 }: {
   path: CanvasKit.Path;
   shadow: Sketch.Shadow;
-  clipPath?: CanvasKit.Path;
-  borderWidth: number;
-  borderPosition: Sketch.BorderPosition;
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
@@ -88,37 +82,9 @@ const SketchShadow = memo(function SketchShadow({
     [shadow.offsetX, shadow.offsetY],
   );
 
-  const clip: ClipProps | undefined = clipPath
-    ? {
-        path: clipPath,
-        op: CanvasKit.ClipOp.Difference,
-      }
-    : undefined;
-
-  const additionalRadius =
-    shadow.spread +
-    borderWidth *
-      (borderPosition === Sketch.BorderPosition.Outside
-        ? 2
-        : borderPosition === Sketch.BorderPosition.Center
-        ? 1
-        : 0);
-
-  // TODO: We can optimize this: if there's no spread, we don't need to copy the path.
-  // We currently need to copy the path since we use `useDeletable` after, and don't want
-  // to delete a path passed in as a prop.
-  const strokedPath: CanvasKit.Path = getStrokedPath(
-    CanvasKit,
-    path,
-    additionalRadius,
-    CanvasKit.PathOp.Union,
-  );
-
-  useDeletable(strokedPath);
-
   return (
-    <Group transform={transform} clip={clip}>
-      <Path path={strokedPath} paint={paint} />
+    <Group transform={transform}>
+      <Path path={path} paint={paint} />
     </Group>
   );
 });
@@ -151,13 +117,61 @@ const SketchBorderShadow = memo(function SketchBorderShadow({
     [CanvasKit, borderPosition, borderWidth, path],
   );
 
+  return <SketchShadow shadow={shadow} path={strokedPath} />;
+});
+
+const SketchFillShadow = memo(function SketchFillShadow({
+  path,
+  shadow,
+  borderWidth,
+  borderPosition,
+  shouldClipPath,
+}: {
+  path: CanvasKit.Path;
+  shadow: Sketch.Shadow;
+  borderWidth: number;
+  borderPosition: Sketch.BorderPosition;
+  shouldClipPath: boolean;
+}) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  // Spread needs to be multiplied by 2 to match Sketch's behavior
+  const additionalRadius =
+    shadow.spread * 2 +
+    borderWidth *
+      (borderPosition === Sketch.BorderPosition.Outside
+        ? 2
+        : borderPosition === Sketch.BorderPosition.Center
+        ? 1
+        : 0);
+
+  // TODO: We can optimize this: if there's no spread, we don't need to copy the path.
+  // We currently need to copy the path since we use `useDeletable` after, and don't want
+  // to delete a path passed in as a prop.
+  const strokedPath: CanvasKit.Path = getStrokedPath(
+    CanvasKit,
+    path,
+    additionalRadius,
+    CanvasKit.PathOp.Union,
+  );
+
+  useDeletable(strokedPath);
+
+  const clip: ClipProps | undefined = useMemo(
+    () =>
+      shouldClipPath
+        ? {
+            path: path,
+            op: CanvasKit.ClipOp.Difference,
+          }
+        : undefined,
+    [CanvasKit.ClipOp.Difference, path, shouldClipPath],
+  );
+
   return (
-    <SketchShadow
-      shadow={shadow}
-      path={strokedPath}
-      borderWidth={0}
-      borderPosition={Sketch.BorderPosition.Inside}
-    />
+    <Group clip={clip}>
+      <SketchShadow shadow={shadow} path={strokedPath} />
+    </Group>
   );
 });
 
@@ -235,11 +249,11 @@ export default memo(function SketchShape({ layer }: Props) {
             borderPosition={borderPosition}
           />
         ) : (
-          <SketchShadow
+          <SketchFillShadow
             key={`shadow-${index}`}
             shadow={shadow}
             path={path}
-            clipPath={fills.length > 0 ? path : undefined}
+            shouldClipPath={fills.length > 0}
             borderWidth={borderWidth}
             borderPosition={borderPosition}
           />
