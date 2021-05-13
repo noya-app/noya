@@ -11,6 +11,7 @@ import type { Rect } from '../types';
 export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayer', layerId: string | string[], name: string]
+  | [type: 'ungroupLayer', layerId: string | string[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -84,7 +85,6 @@ export function layerReducer(
           x: -Infinity,
           y: -Infinity,
         };
-
         const frame = {
           x: Infinity,
           y: Infinity,
@@ -116,7 +116,7 @@ export function layerReducer(
         frame.width = lastPoint.x - frame.x;
         frame.height = lastPoint.y - frame.y;
 
-        let layer = produce(Models.group, (layer) => {
+        const layer = produce(Models.group, (layer) => {
           layer.do_objectID = uuid();
           layer.name = name;
           layer.frame = {
@@ -131,6 +131,42 @@ export function layerReducer(
 
         draft.sketch.pages[pageIndex].layers.push(layer);
         draft.selectedObjects = [layer.do_objectID];
+      });
+    }
+    case 'ungroupLayer': {
+      const [, id] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPath = Layers.findAllIndexPaths(page, (layer) =>
+        ids.includes(layer.do_objectID),
+      )[0];
+
+      const selectedLayers: (Layers.ChildLayer | Sketch.Group)[] = [];
+
+      const addLayers = (layer: Sketch.AnyLayer) => {
+        if (Layers.isParentLayer(layer) && !Layers.isGroup(layer)) return;
+        selectedLayers.push(layer);
+      };
+
+      return produce(state, (draft) => {
+        const parent = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath.slice(0, -1),
+        ) as Layers.ParentLayer;
+
+        const groupIndex = indexPath[indexPath.length - 1];
+        const group = page.layers[groupIndex] as Sketch.Group;
+
+        parent.layers.splice(groupIndex, 1);
+        group.layers.forEach((layer) => {
+          addLayers(layer);
+        });
+
+        draft.sketch.pages[pageIndex].layers.push(...selectedLayers);
+        draft.selectedObjects = [];
       });
     }
     case 'selectLayer': {

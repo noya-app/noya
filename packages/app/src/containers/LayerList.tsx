@@ -102,7 +102,7 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-type MenuItemType = 'duplicate' | 'group' | 'delete';
+type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -178,14 +178,25 @@ export default memo(function LayerList() {
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
+  const canUngroup = useCallback(
+    () =>
+      selectedObjects.length === 1 &&
+      items.some((i) => i.id === selectedObjects[0]) &&
+      items.filter((i) => i.id === selectedObjects[0])[0].type === 'group',
+    [selectedObjects, items],
+  );
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'group', title: 'Group' },
+      canUngroup()
+        ? { value: 'ungroup', title: 'Ungroup' }
+        : ContextMenu.SEPARATOR_ITEM,
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
     ],
-    [],
+    [canUngroup],
   );
 
   const onSelectMenuItem = useCallback(
@@ -201,6 +212,9 @@ export default memo(function LayerList() {
           const name = prompt('New group Name');
 
           if (name) dispatch('groupLayer', selectedObjects, name);
+          return;
+        case 'ungroup':
+          dispatch('ungroupLayer', selectedObjects);
           return;
       }
     },
