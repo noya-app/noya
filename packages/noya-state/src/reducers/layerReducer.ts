@@ -6,7 +6,6 @@ import * as Models from '../models';
 import { getCurrentPage, getCurrentPageIndex } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
-import type { Rect } from '../types';
 
 export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
@@ -68,18 +67,6 @@ export function layerReducer(
         selectedLayers.push(layer);
       };
 
-      const updateLayerPosition = (
-        layer: Layers.ChildLayer | Sketch.Group,
-        frame: Rect,
-      ) =>
-        produce(layer, (l) => {
-          l.frame = {
-            ...l.frame,
-            x: l.frame.x - frame.x,
-            y: l.frame.y - frame.y,
-          };
-        });
-
       return produce(state, (draft) => {
         const lastPoint = {
           x: -Infinity,
@@ -99,9 +86,7 @@ export function layerReducer(
             indexPath.slice(0, -1),
           ) as Layers.ParentLayer;
 
-          if (parent._class === 'group') return;
           const layer = parent.layers.splice(childIndex, 1)[0];
-
           frame.y = layer.frame.y < frame.y ? layer.frame.y : frame.y;
           frame.x = layer.frame.x < frame.x ? layer.frame.x : frame.x;
 
@@ -125,11 +110,22 @@ export function layerReducer(
             ...frame,
           };
           layer.layers = selectedLayers.map((l) =>
-            updateLayerPosition(l, frame),
+            produce(l, (l) => {
+              l.frame = {
+                ...l.frame,
+                x: l.frame.x - frame.x,
+                y: l.frame.y - frame.y,
+              };
+            }),
           );
         });
 
-        draft.sketch.pages[pageIndex].layers.push(layer);
+        const parent = Layers.access(
+          draft.sketch.pages[pageIndex],
+          reversed.slice(-1)[0].slice(0, -1),
+        ) as Layers.ParentLayer;
+
+        parent.layers.push(layer);
         draft.selectedObjects = [layer.do_objectID];
       });
     }
@@ -144,13 +140,6 @@ export function layerReducer(
         ids.includes(layer.do_objectID),
       )[0];
 
-      const selectedLayers: (Layers.ChildLayer | Sketch.Group)[] = [];
-
-      const addLayers = (layer: Sketch.AnyLayer) => {
-        if (Layers.isParentLayer(layer) && !Layers.isGroup(layer)) return;
-        selectedLayers.push(layer);
-      };
-
       return produce(state, (draft) => {
         const parent = Layers.access(
           draft.sketch.pages[pageIndex],
@@ -158,15 +147,21 @@ export function layerReducer(
         ) as Layers.ParentLayer;
 
         const groupIndex = indexPath[indexPath.length - 1];
-        const group = page.layers[groupIndex] as Sketch.Group;
+        const group = parent.layers[groupIndex] as Sketch.Group;
 
         parent.layers.splice(groupIndex, 1);
-        group.layers.forEach((layer) => {
-          addLayers(layer);
-        });
-
-        draft.sketch.pages[pageIndex].layers.push(...selectedLayers);
-        draft.selectedObjects = [];
+        parent.layers.push(
+          ...[...group.layers].map((l) =>
+            produce(l, (l) => {
+              l.frame = {
+                ...l.frame,
+                x: l.frame.x + group.frame.x,
+                y: l.frame.y + group.frame.y,
+              };
+            }),
+          ),
+        );
+        draft.selectedObjects = [parent.do_objectID];
       });
     }
     case 'selectLayer': {
