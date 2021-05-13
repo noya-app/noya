@@ -2,6 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   Group,
   Text,
+  useDeletable,
   useFontManager,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
@@ -44,7 +45,7 @@ function applyTextTransform(text: string, transform: Sketch.TextTransform) {
   }
 }
 
-export default memo(function SketchText({ layer }: Props) {
+export function useTextLayerParagraph(layer: Sketch.Text) {
   const { CanvasKit } = useReactCanvasKit();
   const fontManager = useFontManager();
 
@@ -104,6 +105,9 @@ export default memo(function SketchText({ layer }: Props) {
     });
 
     const paragraph = builder.build();
+
+    builder.delete();
+
     paragraph.layout(layer.frame.width);
 
     return paragraph;
@@ -120,12 +124,22 @@ export default memo(function SketchText({ layer }: Props) {
     textTransform,
   ]);
 
-  const element = (
-    <Text
-      paragraph={paragraph}
-      rect={Primitives.rect(CanvasKit, layer.frame)}
-    />
-  );
+  useDeletable(paragraph);
+
+  return paragraph;
+}
+
+export default memo(function SketchText({ layer }: Props) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const paragraph = useTextLayerParagraph(layer);
+
+  const rect = useMemo(() => Primitives.rect(CanvasKit, layer.frame), [
+    CanvasKit,
+    layer.frame,
+  ]);
+
+  const element = <Text paragraph={paragraph} rect={rect} />;
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 

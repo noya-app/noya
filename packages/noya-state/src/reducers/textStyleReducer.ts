@@ -57,10 +57,8 @@ export function textStyleReducer(
                 action,
               );
 
-              layer.attributedString.attributes.forEach((attribute, index) => {
-                layer.attributedString.attributes[
-                  index
-                ].attributes = stringAttributeReducer(
+              layer.attributedString.attributes.forEach((attribute) => {
+                attribute.attributes = stringAttributeReducer(
                   attribute.attributes,
                   action,
                 );
