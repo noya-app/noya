@@ -1,27 +1,11 @@
 import {
   Polyline,
   Text,
-  usePaint,
   useReactCanvasKit,
   useFontManager,
 } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { createBounds, Point, Rect } from 'noya-geometry';
-
-// calculate the angle between two points: https://stackoverflow.com/questions/9614109/how-to-calculate-an-angle-from-points/9614122#9614122
-// function angle360(cx: number, cy: number, ex: number, ey: number) {
-//   var theta = angle(cx, cy, ex, ey); // range (-180, 180]
-//   if (theta < 0) theta = 360 + theta; // range [0, 360)
-//   return Math.round(theta);
-// }
-
-// function angle(cx: number, cy: number, ex: number, ey: number) {
-//   const dy = ey - cy;
-//   const dx = ex - cx;
-//   let theta = Math.atan2(dy, dx);
-//   theta *= 180 / Math.PI;
-//   return theta;
-// }
 
 function ImplicitPaths({
   selectedLayer,
@@ -39,6 +23,8 @@ function ImplicitPaths({
     highlightedBounds.maxX < selectedBounds.minX
       ? highlightedBounds.maxX
       : highlightedBounds.minX < selectedBounds.minX
+      ? highlightedBounds.minX
+      : highlightedBounds.minX > selectedBounds.minX
       ? highlightedBounds.minX
       : undefined;
 
@@ -60,6 +46,8 @@ function ImplicitPaths({
       ? highlightedBounds.minX
       : highlightedBounds.maxX > selectedBounds.maxX
       ? highlightedBounds.maxX
+      : highlightedBounds.maxX < selectedBounds.maxX
+      ? highlightedBounds.maxX
       : undefined;
 
   if (rightEdgeOfSelectedBounds !== undefined) {
@@ -71,6 +59,48 @@ function ImplicitPaths({
           highlightedBounds.midY < selectedBounds.midY
             ? selectedBounds.maxY
             : selectedBounds.minY,
+      },
+    ]);
+  }
+
+  let topEdgeOfSelectedBounds =
+    highlightedBounds.maxY < selectedBounds.minY
+      ? highlightedBounds.maxY
+      : highlightedBounds.minY < selectedBounds.minY
+      ? highlightedBounds.minY
+      : undefined;
+
+  if (topEdgeOfSelectedBounds !== undefined) {
+    implicitLines.push([
+      { x: highlightedBounds.minX, y: topEdgeOfSelectedBounds },
+      {
+        x:
+          highlightedBounds.midX < selectedBounds.midX
+            ? selectedBounds.maxX
+            : selectedBounds.minX,
+        y: topEdgeOfSelectedBounds,
+      },
+    ]);
+  }
+
+  let bottomEdgeOfSelectedBounds =
+    highlightedBounds.minY > selectedBounds.maxY
+      ? highlightedBounds.minY
+      : highlightedBounds.maxY < selectedBounds.maxY
+      ? highlightedBounds.maxY
+      : highlightedBounds.maxY > selectedBounds.maxY
+      ? highlightedBounds.maxY
+      : undefined;
+
+  if (bottomEdgeOfSelectedBounds !== undefined) {
+    implicitLines.push([
+      { x: highlightedBounds.minX, y: bottomEdgeOfSelectedBounds },
+      {
+        x:
+          highlightedBounds.midX < selectedBounds.midX
+            ? selectedBounds.maxX
+            : selectedBounds.minX,
+        y: bottomEdgeOfSelectedBounds,
       },
     ]);
   }
@@ -99,9 +129,6 @@ export default function DistanceLabelAndPath({
   selectedLayer: any;
   highlightedLayer: any;
 }) {
-  // Draw explicit lines from intrensic lines
-  // Calculate distance
-
   const { CanvasKit } = useReactCanvasKit();
   const fontManager = useFontManager();
   const paragraph = useMemo(() => {
@@ -137,21 +164,9 @@ export default function DistanceLabelAndPath({
     [CanvasKit, paragraph],
   );
 
-  const points = [
-    { x: 0, y: 0 },
-    { x: 100, y: 100 },
-  ];
-
-  const stroke = usePaint({
-    color: CanvasKit.Color(255, 69, 0, 0.9),
-    strokeWidth: 1,
-    style: CanvasKit.PaintStyle.Stroke,
-  });
-
   return (
     <>
-      <Text rect={labelRect} paragraph={paragraph} />
-      <Polyline paint={stroke} points={points}></Polyline>
+      <Text rect={labelRect} paragraph={paragraph}></Text>
       <ImplicitPaths
         selectedLayer={selectedLayer}
         highlightedLayer={highlightedLayer}
