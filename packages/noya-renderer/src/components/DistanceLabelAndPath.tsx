@@ -68,11 +68,19 @@ function ImplicitPaths({
       ? highlightedBounds.maxY
       : highlightedBounds.minY < selectedBounds.minY
       ? highlightedBounds.minY
+      : highlightedBounds.minY > selectedBounds.minY
+      ? highlightedBounds.minY
       : undefined;
 
   if (topEdgeOfSelectedBounds !== undefined) {
     implicitLines.push([
-      { x: highlightedBounds.minX, y: topEdgeOfSelectedBounds },
+      {
+        x:
+          highlightedBounds.minX < selectedBounds.minX
+            ? highlightedBounds.maxX
+            : highlightedBounds.minX,
+        y: topEdgeOfSelectedBounds,
+      },
       {
         x:
           highlightedBounds.midX < selectedBounds.midX
@@ -84,11 +92,9 @@ function ImplicitPaths({
   }
 
   let bottomEdgeOfSelectedBounds =
-    highlightedBounds.minY > selectedBounds.maxY
+    highlightedBounds.minY < selectedBounds.maxY
       ? highlightedBounds.minY
       : highlightedBounds.maxY < selectedBounds.maxY
-      ? highlightedBounds.maxY
-      : highlightedBounds.maxY > selectedBounds.maxY
       ? highlightedBounds.maxY
       : undefined;
 
