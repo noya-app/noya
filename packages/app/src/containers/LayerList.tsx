@@ -188,9 +188,10 @@ export default memo(function LayerList() {
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'group', title: 'Group' },
-      canUngroup()
-        ? { value: 'ungroup' as const, title: 'Ungroup' }
-        : ContextMenu.EMPTY_ITEM,
+      ...(canUngroup()
+        ? [{ value: 'ungroup' as const, title: 'Ungroup' }]
+        : []),
+
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
