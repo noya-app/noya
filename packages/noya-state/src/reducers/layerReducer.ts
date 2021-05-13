@@ -99,6 +99,7 @@ export function layerReducer(
             indexPath.slice(0, -1),
           ) as Layers.ParentLayer;
 
+          if (parent._class === 'group') return;
           const layer = parent.layers.splice(childIndex, 1)[0];
 
           frame.y = layer.frame.y < frame.y ? layer.frame.y : frame.y;

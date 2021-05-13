@@ -198,7 +198,9 @@ export default memo(function LayerList() {
           // TODO: Handle duplicate
           return;
         case 'group':
-          dispatch('groupLayer', selectedObjects, 'group');
+          const name = prompt('New group Name');
+
+          if (name) dispatch('groupLayer', selectedObjects, name);
           return;
       }
     },
