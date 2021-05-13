@@ -95,6 +95,7 @@ export function applicationReducer(
       return layerPropertyReducer(state, action);
     case 'deleteLayer':
     case 'selectLayer':
+    case 'groupLayer':
       return layerReducer(state, action);
     case 'distributeLayers':
     case 'alignLayers': {

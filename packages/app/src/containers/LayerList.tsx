@@ -102,7 +102,7 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-type MenuItemType = 'duplicate' | 'delete';
+type MenuItemType = 'duplicate' | 'group' | 'delete';
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -180,6 +180,7 @@ export default memo(function LayerList() {
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
+      { value: 'group', title: 'Group' },
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
@@ -194,7 +195,10 @@ export default memo(function LayerList() {
           dispatch('deleteLayer', selectedObjects);
           return;
         case 'duplicate':
-          // TODO: Handle delete
+          // TODO: Handle duplicate
+          return;
+        case 'group':
+          dispatch('groupLayer', selectedObjects, 'group');
           return;
       }
     },

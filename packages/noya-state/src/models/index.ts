@@ -10,3 +10,4 @@ export const style = require('./style.json') as Sketch.Style;
 export const text = require('./text.json') as Sketch.Text;
 export const textStyle = require('./textStyle.json') as Sketch.Style;
 export const page = require('./page.json') as Sketch.Page;
+export const group = require('./group.json') as Sketch.Group;
