@@ -19,24 +19,29 @@ function ImplicitPaths({
 
   let implicitLines: Point[][] = [];
 
+  const startY =
+    highlightedBounds.midY < selectedBounds.midY
+      ? highlightedBounds.maxY
+      : highlightedBounds.minY;
+
+  const endY =
+    highlightedBounds.midY < selectedBounds.midY
+      ? selectedBounds.maxY
+      : selectedBounds.minY;
+
   let leftEdgeOfSelectedBounds =
     highlightedBounds.maxX < selectedBounds.minX
       ? highlightedBounds.maxX
-      : highlightedBounds.minX < selectedBounds.minX
-      ? highlightedBounds.minX
-      : highlightedBounds.minX > selectedBounds.minX
+      : highlightedBounds.maxX < selectedBounds.maxX
       ? highlightedBounds.minX
       : undefined;
 
   if (leftEdgeOfSelectedBounds !== undefined) {
     implicitLines.push([
-      { x: leftEdgeOfSelectedBounds, y: highlightedBounds.minY },
+      { x: leftEdgeOfSelectedBounds, y: startY },
       {
         x: leftEdgeOfSelectedBounds,
-        y:
-          highlightedBounds.midY < selectedBounds.midY
-            ? selectedBounds.maxY
-            : selectedBounds.minY,
+        y: endY,
       },
     ]);
   }
@@ -44,68 +49,62 @@ function ImplicitPaths({
   let rightEdgeOfSelectedBounds =
     highlightedBounds.minX > selectedBounds.maxX
       ? highlightedBounds.minX
-      : highlightedBounds.maxX > selectedBounds.maxX
-      ? highlightedBounds.maxX
-      : highlightedBounds.maxX < selectedBounds.maxX
+      : highlightedBounds.minX > selectedBounds.minX
       ? highlightedBounds.maxX
       : undefined;
 
   if (rightEdgeOfSelectedBounds !== undefined) {
     implicitLines.push([
-      { x: rightEdgeOfSelectedBounds, y: highlightedBounds.minY },
+      { x: rightEdgeOfSelectedBounds, y: startY },
       {
         x: rightEdgeOfSelectedBounds,
-        y:
-          highlightedBounds.midY < selectedBounds.midY
-            ? selectedBounds.maxY
-            : selectedBounds.minY,
+        y: endY,
       },
     ]);
   }
 
+  const startX =
+    highlightedBounds.midX < selectedBounds.midX
+      ? highlightedBounds.maxX
+      : highlightedBounds.minX;
+
+  const endX =
+    highlightedBounds.midX < selectedBounds.midX
+      ? selectedBounds.maxX
+      : selectedBounds.minX;
+
   let topEdgeOfSelectedBounds =
     highlightedBounds.maxY < selectedBounds.minY
       ? highlightedBounds.maxY
-      : highlightedBounds.minY < selectedBounds.minY
-      ? highlightedBounds.minY
-      : highlightedBounds.minY > selectedBounds.minY
+      : highlightedBounds.maxY < selectedBounds.maxY
       ? highlightedBounds.minY
       : undefined;
 
   if (topEdgeOfSelectedBounds !== undefined) {
     implicitLines.push([
       {
-        x:
-          highlightedBounds.minX < selectedBounds.minX
-            ? highlightedBounds.maxX
-            : highlightedBounds.minX,
+        x: startX,
         y: topEdgeOfSelectedBounds,
       },
       {
-        x:
-          highlightedBounds.midX < selectedBounds.midX
-            ? selectedBounds.maxX
-            : selectedBounds.minX,
+        x: endX,
         y: topEdgeOfSelectedBounds,
       },
     ]);
   }
 
   let bottomEdgeOfSelectedBounds =
-    highlightedBounds.minY < selectedBounds.maxY
+    highlightedBounds.minY > selectedBounds.maxY
       ? highlightedBounds.minY
-      : highlightedBounds.maxY < selectedBounds.maxY
+      : highlightedBounds.minY > selectedBounds.minY
       ? highlightedBounds.maxY
       : undefined;
 
   if (bottomEdgeOfSelectedBounds !== undefined) {
     implicitLines.push([
-      { x: highlightedBounds.minX, y: bottomEdgeOfSelectedBounds },
+      { x: startX, y: bottomEdgeOfSelectedBounds },
       {
-        x:
-          highlightedBounds.midX < selectedBounds.midX
-            ? selectedBounds.maxX
-            : selectedBounds.minX,
+        x: endX,
         y: bottomEdgeOfSelectedBounds,
       },
     ]);
