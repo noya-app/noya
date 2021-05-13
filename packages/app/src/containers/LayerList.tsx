@@ -191,7 +191,6 @@ export default memo(function LayerList() {
       ...(canUngroup()
         ? [{ value: 'ungroup' as const, title: 'Ungroup' }]
         : []),
-
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
