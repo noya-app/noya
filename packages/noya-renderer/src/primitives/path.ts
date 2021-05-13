@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { CanvasKit, Path } from 'canvaskit-wasm';
+import { CanvasKit, Path, PathOp } from 'canvaskit-wasm';
 import { distance } from 'noya-geometry';
 import { Point } from 'noya-state';
 import { zip } from 'noya-utils';
@@ -153,4 +153,66 @@ export function path(
   // console.log(path.toCmds());
 
   return path;
+}
+
+const getBorderPositionPathOp = (
+  CanvasKit: CanvasKit,
+  position: Sketch.BorderPosition,
+): PathOp | undefined => {
+  switch (position) {
+    case Sketch.BorderPosition.Center:
+      return;
+    case Sketch.BorderPosition.Outside:
+      return CanvasKit.PathOp.Difference;
+    case Sketch.BorderPosition.Inside:
+      return CanvasKit.PathOp.Intersect;
+  }
+};
+
+export function getStrokedPath(
+  CanvasKit: CanvasKit,
+  path: Path,
+  width: number,
+  pathOp?: PathOp,
+) {
+  const copy = path.copy();
+
+  // A 0-width path will never change the original when unioned
+  if (width === 0 && pathOp === CanvasKit.PathOp.Union) return copy;
+
+  if (
+    !copy.stroke({
+      width,
+    })
+  ) {
+    console.info('[getStrokedPath] Failed to stroke path');
+    return copy;
+  }
+
+  if (pathOp !== undefined) {
+    if (!copy.op(path, pathOp)) {
+      console.info('[getStrokedPath] Failed to combine paths');
+    }
+  }
+
+  return copy;
+}
+
+export function getStrokedBorderPath(
+  CanvasKit: CanvasKit,
+  path: Path,
+  borderWidth: number,
+  borderPosition: Sketch.BorderPosition,
+) {
+  switch (borderPosition) {
+    case Sketch.BorderPosition.Center:
+      break;
+    case Sketch.BorderPosition.Outside:
+    case Sketch.BorderPosition.Inside:
+      borderWidth *= 2;
+  }
+
+  const pathOp = getBorderPositionPathOp(CanvasKit, borderPosition);
+
+  return getStrokedPath(CanvasKit, path, borderWidth, pathOp);
 }
