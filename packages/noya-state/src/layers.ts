@@ -10,7 +10,10 @@ import {
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
-export type ChildLayer = Exclude<Sketch.AnyLayer, { layers: any }>;
+export type ChildLayer = Exclude<
+  Sketch.AnyLayer,
+  { _class: 'artboard' | 'symbolMaster' | 'page' }
+>;
 
 export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   switch (layer._class) {

@@ -181,8 +181,7 @@ export default memo(function LayerList() {
   const canUngroup = useCallback(
     () =>
       selectedObjects.length === 1 &&
-      items.some((i) => i.id === selectedObjects[0]) &&
-      items.filter((i) => i.id === selectedObjects[0])[0].type === 'group',
+      items.find((i) => i.id === selectedObjects[0])?.type === 'group',
     [selectedObjects, items],
   );
 
@@ -190,8 +189,8 @@ export default memo(function LayerList() {
     () => [
       { value: 'group', title: 'Group' },
       canUngroup()
-        ? { value: 'ungroup', title: 'Ungroup' }
-        : ContextMenu.SEPARATOR_ITEM,
+        ? { value: 'ungroup' as const, title: 'Ungroup' }
+        : ContextMenu.EMPTY_ITEM,
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
@@ -211,7 +210,8 @@ export default memo(function LayerList() {
         case 'group':
           const name = prompt('New group Name');
 
-          if (name) dispatch('groupLayer', selectedObjects, name);
+          if (!name) return;
+          dispatch('groupLayer', selectedObjects, name);
           return;
         case 'ungroup':
           dispatch('ungroupLayer', selectedObjects);

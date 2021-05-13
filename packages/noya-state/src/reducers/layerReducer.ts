@@ -3,9 +3,15 @@ import produce from 'immer';
 import * as Layers from '../layers';
 import { uuid } from 'noya-renderer';
 import * as Models from '../models';
-import { getCurrentPage, getCurrentPageIndex } from '../selectors/selectors';
+import {
+  getCurrentPage,
+  getCurrentPageIndex,
+  getSelectedLayersExcludingDescendants,
+} from '../selectors/selectors';
+import { createBounds } from 'noya-geometry/src/rect';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
+import { Bounds, Rect } from '../types';
 
 export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
@@ -16,6 +22,34 @@ export type LayerAction =
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ];
+
+// Where can i move this function ?
+const groupFrame = (): ((bounds?: Bounds) => Rect | void) => {
+  const lastPoint = {
+    x: -Infinity,
+    y: -Infinity,
+  };
+
+  const frame = {
+    x: Infinity,
+    y: Infinity,
+    width: -Infinity,
+    height: -Infinity,
+  };
+
+  return (bounds?: Bounds) => {
+    if (!bounds) {
+      frame.width = lastPoint.x - frame.x;
+      frame.height = lastPoint.y - frame.y;
+      return frame;
+    }
+
+    frame.y = Math.min(bounds.minY, frame.y);
+    frame.x = Math.min(bounds.minX, frame.x);
+    lastPoint.y = Math.max(bounds.maxY, lastPoint.y);
+    lastPoint.x = Math.max(bounds.maxX, lastPoint.x);
+  };
+};
 
 export function layerReducer(
   state: ApplicationState,
@@ -57,29 +91,17 @@ export function layerReducer(
       const pageIndex = getCurrentPageIndex(state);
       const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
         ids.includes(layer.do_objectID),
+      ).reverse();
+
+      const layers = getSelectedLayersExcludingDescendants(state);
+      const selectedLayers: Layers.ChildLayer[] = layers.flatMap((layer) =>
+        !Layers.isParentLayer(layer) || Layers.isGroup(layer) ? [layer] : [],
       );
 
-      const reversed = [...indexPaths.reverse()];
-      const selectedLayers: (Layers.ChildLayer | Sketch.Group)[] = [];
-
-      const addLayers = (layer: Sketch.AnyLayer) => {
-        if (Layers.isParentLayer(layer) && !Layers.isGroup(layer)) return;
-        selectedLayers.push(layer);
-      };
-
       return produce(state, (draft) => {
-        const lastPoint = {
-          x: -Infinity,
-          y: -Infinity,
-        };
-        const frame = {
-          x: Infinity,
-          y: Infinity,
-          width: -Infinity,
-          height: -Infinity,
-        };
+        const calculateFrame = groupFrame();
 
-        reversed.forEach((indexPath) => {
+        indexPaths.forEach((indexPath) => {
           const childIndex = indexPath[indexPath.length - 1];
           const parent = Layers.access(
             draft.sketch.pages[pageIndex],
@@ -87,19 +109,12 @@ export function layerReducer(
           ) as Layers.ParentLayer;
 
           const layer = parent.layers.splice(childIndex, 1)[0];
-          frame.y = layer.frame.y < frame.y ? layer.frame.y : frame.y;
-          frame.x = layer.frame.x < frame.x ? layer.frame.x : frame.x;
 
-          const endPointY = layer.frame.y + layer.frame.height;
-          const endPointX = layer.frame.x + layer.frame.width;
-          lastPoint.y = endPointY > lastPoint.y ? endPointY : lastPoint.y;
-          lastPoint.x = endPointX > lastPoint.x ? endPointX : lastPoint.x;
-
-          addLayers(layer);
+          //TODO: Account for rotations
+          calculateFrame(createBounds(layer.frame));
         });
 
-        frame.width = lastPoint.x - frame.x;
-        frame.height = lastPoint.y - frame.y;
+        const frame = calculateFrame() as Rect;
 
         const layer = produce(Models.group, (layer) => {
           layer.do_objectID = uuid();
@@ -120,12 +135,14 @@ export function layerReducer(
           );
         });
 
+        const lastIndexPath = indexPaths[indexPaths.length - 1];
+
         const parent = Layers.access(
           draft.sketch.pages[pageIndex],
-          reversed.slice(-1)[0].slice(0, -1),
+          lastIndexPath.slice(0, -1),
         ) as Layers.ParentLayer;
 
-        parent.layers.push(layer);
+        parent.layers.splice(lastIndexPath[lastIndexPath.length - 1], 0, layer);
         draft.selectedObjects = [layer.do_objectID];
       });
     }
@@ -151,7 +168,7 @@ export function layerReducer(
 
         parent.layers.splice(groupIndex, 1);
         parent.layers.push(
-          ...[...group.layers].map((l) =>
+          ...group.layers.map((l) =>
             produce(l, (l) => {
               l.frame = {
                 ...l.frame,

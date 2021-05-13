@@ -4,6 +4,7 @@ import { memo, ReactNode } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 
 export const SEPARATOR_ITEM = 'separator';
+export const EMPTY_ITEM = 'empty';
 
 const StyledSeparator = styled(ContextMenu.Separator)(({ theme }) => ({
   height: '1px',
@@ -60,6 +61,7 @@ const RootElement = styled(ContextMenu.Content)(({ theme }) => ({
 
 export type MenuItem<T extends string> =
   | typeof SEPARATOR_ITEM
+  | typeof EMPTY_ITEM
   | { value: T; title: string };
 
 interface Props<T extends string> {
@@ -77,18 +79,23 @@ function ContextMenuRoot<T extends string>({
     <ContextMenu.Root>
       <ContextMenu.Trigger as={Slot}>{children}</ContextMenu.Trigger>
       <RootElement>
-        {items.map((item, index) =>
-          item === SEPARATOR_ITEM ? (
-            <StyledSeparator key={index} />
-          ) : (
-            <ContextMenuItem
-              key={item.value}
-              onSelect={() => onSelect?.(item.value)}
-            >
-              {item.title}
-            </ContextMenuItem>
-          ),
-        )}
+        {items.map((item, index) => {
+          switch (item) {
+            case SEPARATOR_ITEM:
+              return <StyledSeparator key={index} />;
+            case EMPTY_ITEM:
+              return null;
+            default:
+              return (
+                <ContextMenuItem
+                  key={item.value}
+                  onSelect={() => onSelect?.(item.value)}
+                >
+                  {item.title}
+                </ContextMenuItem>
+              );
+          }
+        })}
       </RootElement>
     </ContextMenu.Root>
   );
