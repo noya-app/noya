@@ -130,17 +130,25 @@ const SketchShadow = memo(function SketchShadow({
 const SketchBorderShadow = memo(function SketchBorderShadow({
   path,
   shadow,
-  border,
+  borderWidth,
+  borderPosition,
 }: {
   path: CanvasKit.Path;
   shadow: Sketch.Shadow;
-  border: Sketch.Border;
+  borderWidth: number;
+  borderPosition: Sketch.BorderPosition;
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
   const strokedPath = useMemo(
-    () => Primitives.getStrokedBorderPath(CanvasKit, path, border),
-    [CanvasKit, border, path],
+    () =>
+      Primitives.getStrokedBorderPath(
+        CanvasKit,
+        path,
+        borderWidth,
+        borderPosition,
+      ),
+    [CanvasKit, borderPosition, borderWidth, path],
   );
 
   return (
@@ -167,8 +175,14 @@ const SketchBorder = memo(function SketchBorder({
   });
 
   const strokedPath = useMemo(
-    () => Primitives.getStrokedBorderPath(CanvasKit, path, border),
-    [CanvasKit, border, path],
+    () =>
+      Primitives.getStrokedBorderPath(
+        CanvasKit,
+        path,
+        border.thickness,
+        border.position,
+      ),
+    [CanvasKit, border.position, border.thickness, path],
   );
 
   useDeletable(strokedPath);
@@ -217,7 +231,8 @@ export default memo(function SketchShape({ layer }: Props) {
             key={`shadow-${index}`}
             shadow={shadow}
             path={path}
-            border={borders[0]}
+            borderWidth={borderWidth}
+            borderPosition={borderPosition}
           />
         ) : (
           <SketchShadow
@@ -239,7 +254,7 @@ export default memo(function SketchShape({ layer }: Props) {
         />
       ))}
       {borders.map((border, index) => (
-        <SketchBorder key={`border-${index}`} border={border} path={path} />
+        <SketchBorder key={`border-${index}`} path={path} border={border} />
       ))}
     </>
   );

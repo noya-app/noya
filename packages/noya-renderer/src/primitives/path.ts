@@ -201,19 +201,18 @@ export function getStrokedPath(
 export function getStrokedBorderPath(
   CanvasKit: CanvasKit,
   path: Path,
-  border: Sketch.Border,
+  borderWidth: number,
+  borderPosition: Sketch.BorderPosition,
 ) {
-  let thickness = border.thickness;
-
-  switch (border.position) {
+  switch (borderPosition) {
     case Sketch.BorderPosition.Center:
       break;
     case Sketch.BorderPosition.Outside:
     case Sketch.BorderPosition.Inside:
-      thickness *= 2;
+      borderWidth *= 2;
   }
 
-  const pathOp = getBorderPositionPathOp(CanvasKit, border.position);
+  const pathOp = getBorderPositionPathOp(CanvasKit, borderPosition);
 
-  return getStrokedPath(CanvasKit, path, thickness, pathOp);
+  return getStrokedPath(CanvasKit, path, borderWidth, pathOp);
 }
