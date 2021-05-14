@@ -18,7 +18,7 @@ function getTextStyleColor(encodedAttributes: EncodedAttribute) {
 function getTextFontFamily(encodedAttributes: EncodedAttribute) {
   return (
     encodedAttributes?.MSAttributedStringFontAttribute.attributes.name ??
-    'Arial'
+    'Helvetica'
   );
 }
 
