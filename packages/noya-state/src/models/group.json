@@ -1,0 +1,45 @@
+{
+  "_class": "group",
+  "do_objectID": "859377A4-59B9-40A4-9262-C5A863F8D9B8",
+  "booleanOperation": -1,
+  "isFixedToViewport": false,
+  "isFlippedHorizontal": false,
+  "isFlippedVertical": false,
+  "isLocked": false,
+  "isVisible": true,
+  "layerListExpandedType": 2,
+  "name": "Group",
+  "nameIsFixed": false,
+  "resizingConstraint": 63,
+  "resizingType": 0,
+  "rotation": 0,
+  "shouldBreakMaskChain": false,
+  "exportOptions": {
+    "_class": "exportOptions",
+    "includedLayerIds": [],
+    "layerOptions": 0,
+    "shouldTrim": false,
+    "exportFormats": []
+  },
+  "frame": {
+    "_class": "rect",
+    "constrainProportions": false,
+    "height": 0,
+    "width": 0,
+    "x": -1,
+    "y": -1
+  },
+  "clippingMaskMode": 0,
+  "hasClippingMask": false,
+  "style": {
+    "_class": "style",
+    "do_objectID": "188944B7-6C79-4FAC-99E8-36EAB33F239F",
+    "endMarkerType": 0,
+    "miterLimit": 0,
+    "startMarkerType": 0,
+    "windingRule": 1
+  },
+  "hasClickThrough": false,
+  "groupLayout": { "_class": "MSImmutableFreeformGroupLayout" },
+  "layers": []
+}

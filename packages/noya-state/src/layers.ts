@@ -10,6 +10,11 @@ import {
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
+export type ChildLayer = Exclude<
+  Sketch.AnyLayer,
+  { _class: 'artboard' | 'symbolMaster' | 'page' }
+>;
+
 export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   switch (layer._class) {
     case 'artboard':
@@ -23,8 +28,20 @@ export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   }
 };
 
+export const isChildLayer = (layer: Sketch.AnyLayer): layer is ChildLayer => {
+  return (
+    layer._class !== 'artboard' &&
+    layer._class !== 'symbolMaster' &&
+    layer._class !== 'page'
+  );
+};
+
 export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {
   return layer._class === 'text';
+};
+
+export const isGroup = (layer: Sketch.AnyLayer): layer is Sketch.Group => {
+  return layer._class === 'group';
 };
 
 export const isSymbolMaster = (
