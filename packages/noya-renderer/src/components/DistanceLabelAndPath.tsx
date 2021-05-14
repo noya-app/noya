@@ -9,12 +9,12 @@ import {
 import React, { useMemo } from 'react';
 import { createBounds, Point, Rect, distance } from 'noya-geometry';
 
-type DistanceMeasurement = {
+type DistanceMeasurementProps = {
   distance: number;
   bounds: Point;
 };
 
-function DistanceMeasurements(item: DistanceMeasurement) {
+function DistanceMeasurement({ distance, bounds }: DistanceMeasurementProps) {
   const { CanvasKit } = useReactCanvasKit();
   const fontManager = useFontManager();
   const paragraph = useMemo(() => {
@@ -31,34 +31,34 @@ function DistanceMeasurements(item: DistanceMeasurement) {
       paragraphStyle,
       fontManager,
     );
-    builder.addText(item.distance.toString());
+    builder.addText(distance.toString());
 
     const paragraph = builder.build();
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, fontManager, item.distance]);
+  }, [CanvasKit, fontManager, distance]);
 
   const labelRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        item.bounds.x,
-        item.bounds.y,
+        bounds.x,
+        bounds.y,
         paragraph.getMinIntrinsicWidth(),
         paragraph.getHeight(),
       ),
-    [CanvasKit, paragraph, item],
+    [CanvasKit, paragraph, bounds],
   );
 
   const bgRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        item.bounds.x - 2,
-        item.bounds.y - 1,
+        bounds.x - 2,
+        bounds.y - 1,
         paragraph.getMinIntrinsicWidth() + 5,
         paragraph.getHeight() + 2,
       ),
-    [CanvasKit, paragraph, item],
+    [CanvasKit, paragraph, bounds],
   );
 
   const backgroundFill = useColorFill('rgb(43, 92, 207)');
@@ -66,7 +66,7 @@ function DistanceMeasurements(item: DistanceMeasurement) {
   return (
     <>
       <RCKRect rect={bgRect} paint={backgroundFill} />
-      <Text rect={labelRect} paragraph={paragraph}></Text>
+      <Text rect={labelRect} paragraph={paragraph} />
     </>
   );
 }
@@ -83,7 +83,7 @@ function MeasureAndExtensionPaths({
 
   let implicitLines: Point[][] = [];
   let explicitLines: Point[][] = [];
-  let distanceMeasurements: DistanceMeasurement[] = [];
+  let distanceMeasurements: DistanceMeasurementProps[] = [];
 
   const startY =
     highlightedBounds.midY < selectedBounds.midY
@@ -287,22 +287,20 @@ function MeasureAndExtensionPaths({
   return (
     <>
       {implicitLines.map((points, index) => (
-        <Polyline key={index} paint={paint} points={points}></Polyline>
+        <Polyline key={index} paint={paint} points={points} />
       ))}
       {explicitLines.map((explicitPoints, index) => (
-        <Polyline
-          key={index}
-          paint={explicitPaint}
-          points={explicitPoints}
-        ></Polyline>
+        <Polyline key={index} paint={explicitPaint} points={explicitPoints} />
       ))}
-      {distanceMeasurements.map((item: DistanceMeasurement, index: number) => (
-        <DistanceMeasurements
-          bounds={item.bounds}
-          distance={item.distance}
-          key={index}
-        ></DistanceMeasurements>
-      ))}
+      {distanceMeasurements.map(
+        (item: DistanceMeasurementProps, index: number) => (
+          <DistanceMeasurement
+            bounds={item.bounds}
+            distance={item.distance}
+            key={index}
+          />
+        ),
+      )}
     </>
   );
 }
@@ -319,7 +317,7 @@ export default function DistanceLabelAndPath({
       <MeasureAndExtensionPaths
         selectedLayer={selectedLayer}
         highlightedLayer={highlightedLayer}
-      ></MeasureAndExtensionPaths>
+      />
     </>
   );
 }
