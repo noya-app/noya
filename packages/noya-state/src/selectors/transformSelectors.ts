@@ -35,9 +35,13 @@ export function getLayerRotationTransform(
 export function getLayerTransformAtIndexPath(
   node: Sketch.AnyLayer,
   indexPath: IndexPath,
-  ctm: AffineTransform,
+  ctm: AffineTransform = AffineTransform.identity,
+  behavior?: 'includeLast',
 ): AffineTransform {
-  const path = Layers.accessPath(node, indexPath).slice(1, -1);
+  const path = Layers.accessPath(node, indexPath).slice(
+    1,
+    behavior === 'includeLast' ? undefined : -1,
+  );
 
   return path.reduce((result, layer) => getLayerTransform(result, layer), ctm);
 }

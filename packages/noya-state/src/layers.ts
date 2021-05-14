@@ -28,6 +28,14 @@ export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   }
 };
 
+export const isChildLayer = (layer: Sketch.AnyLayer): layer is ChildLayer => {
+  return (
+    layer._class !== 'artboard' &&
+    layer._class !== 'symbolMaster' &&
+    layer._class !== 'page'
+  );
+};
+
 export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {
   return layer._class === 'text';
 };
