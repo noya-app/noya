@@ -5,8 +5,9 @@ import { uuid } from 'noya-renderer';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
-  getBoundingRect,
+  deleteLayers,
   getCurrentPage,
+  getBoundingRect,
   getCurrentPageIndex,
   getCurrentSymbolsPage,
   getLayerTransformAtIndexPath,
@@ -47,14 +48,7 @@ export function layerReducer(
       const reversed = [...indexPaths.reverse()];
 
       return produce(state, (draft) => {
-        reversed.forEach((indexPath) => {
-          const childIndex = indexPath[indexPath.length - 1];
-          const parent = Layers.access(
-            draft.sketch.pages[pageIndex],
-            indexPath.slice(0, -1),
-          ) as Layers.ParentLayer;
-          parent.layers.splice(childIndex, 1);
-        });
+        deleteLayers(reversed, draft.sketch.pages[pageIndex]);
       });
     }
     case 'groupLayer': {
@@ -134,16 +128,7 @@ export function layerReducer(
 
       // Fire we remove selected layers, then we insert the group layer
       return produce(state, (draft) => {
-        selectedIndexPaths.forEach((indexPath) => {
-          const childIndex = indexPath[indexPath.length - 1];
-
-          const parent = Layers.access(
-            draft.sketch.pages[pageIndex],
-            indexPath.slice(0, -1),
-          ) as Layers.ParentLayer;
-
-          parent.layers.splice(childIndex, 1);
-        });
+        deleteLayers(selectedIndexPaths, draft.sketch.pages[pageIndex]);
 
         const parent = Layers.access(
           draft.sketch.pages[pageIndex],
@@ -306,33 +291,24 @@ export function layerReducer(
       };
 
       return produce(state, (draft) => {
-        selectedIndexPaths.forEach((indexPath) => {
-          const childIndex = indexPath[indexPath.length - 1];
-
-          const parent = Layers.access(
-            draft.sketch.pages[pageIndex],
-            indexPath.slice(0, -1),
-          ) as Layers.ParentLayer;
-
-          parent.layers.splice(childIndex, 1);
-        });
-
-        const symbolsPage =
-          symbolsPageIndex === -1
-            ? createSymbolsPage(draft.sketch.pages, draft.sketch.user)
-            : draft.sketch.pages[symbolsPageIndex];
+        deleteLayers(selectedIndexPaths, draft.sketch.pages[pageIndex]);
 
         const crrParent = Layers.access(
           draft.sketch.pages[pageIndex],
           selectedIndexPaths[0].slice(0, -1),
         ) as Sketch.Page;
 
-        symbolsPage.layers.push(symbolMasters);
         crrParent.layers.splice(
           lastIndexPath[lastIndexPath.length - 1],
           0,
           symbolInstance,
         );
+
+        const symbolsPage =
+          symbolsPageIndex === -1
+            ? createSymbolsPage(draft.sketch.pages, draft.sketch.user)
+            : draft.sketch.pages[symbolsPageIndex];
+        symbolsPage.layers.push(symbolMasters);
         draft.selectedObjects = [symbolInstance.do_objectID];
       });
     }

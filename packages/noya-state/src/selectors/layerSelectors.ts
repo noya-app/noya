@@ -1,6 +1,7 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import type { UUID } from '../types';
+import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 
@@ -63,4 +64,15 @@ export const makeGetPageLayers = (
     ids
       .map((id) => page.layers.find((layer) => layer.do_objectID === id))
       .filter((layer): layer is PageLayer => !!layer);
+};
+
+export const deleteLayers = (layers: IndexPath[], page: Sketch.Page) => {
+  layers.forEach((indexPath) => {
+    const childIndex = indexPath[indexPath.length - 1];
+    const parent = Layers.access(
+      page,
+      indexPath.slice(0, -1),
+    ) as Layers.ParentLayer;
+    parent.layers.splice(childIndex, 1);
+  });
 };
