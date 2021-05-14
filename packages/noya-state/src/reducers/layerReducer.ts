@@ -107,7 +107,7 @@ export function layerReducer(
           constrainProportions: false,
           ...groupFrame,
         };
-        draft.layers = selectedIndexPaths.map((indexPath) => {
+        draft.layers = [...selectedIndexPaths].reverse().map((indexPath) => {
           const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
 
           const originalParentTransform = getLayerTransformAtIndexPath(
