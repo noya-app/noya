@@ -320,19 +320,16 @@ export function layerReducer(
         const symbolsPage =
           symbolsPageIndex === -1
             ? createSymbolsPage(draft.sketch.pages, draft.sketch.user)
-            : (Layers.access(
-                draft.sketch.pages[symbolsPageIndex],
-                selectedIndexPaths[0].slice(0, -1),
-              ) as Sketch.Page);
+            : draft.sketch.pages[symbolsPageIndex];
 
-        const crrPage = Layers.access(
+        const crrParent = Layers.access(
           draft.sketch.pages[pageIndex],
           selectedIndexPaths[0].slice(0, -1),
         ) as Sketch.Page;
 
         //ANCHOR: ERROR WHEN ADDING THE SYMBOL IN THE SAME PAGEE
         symbolsPage.layers.push(symbolMasters);
-        crrPage.layers.splice(
+        crrParent.layers.splice(
           lastIndexPath[lastIndexPath.length - 1],
           0,
           symbolInstance,
