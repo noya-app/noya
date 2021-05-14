@@ -217,7 +217,7 @@ export default memo(function LayerList() {
           const name = prompt('New Symbol Name');
 
           if (!name) return;
-          dispatch('addSymbol', selectedObjects, 'symbol');
+          dispatch('addSymbol', selectedObjects, name);
           return;
         }
       }
