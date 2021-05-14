@@ -8,8 +8,9 @@ import {
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
-  getLayerIndexPathsExcludingDescendants,
+  getCurrentSymbolsPage,
   getLayerTransformAtIndexPath,
+  getLayerIndexPathsExcludingDescendants,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -18,6 +19,7 @@ export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayer', layerId: string | string[], name: string]
   | [type: 'ungroupLayer', layerId: string | string[]]
+  | [type: 'addSymbol', layerId: string | string[], name: string]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -193,6 +195,141 @@ export function layerReducer(
 
       return produce(state, (draft) => {
         updateSelection(draft.selectedObjects, id, selectionType);
+      });
+    }
+    case 'addSymbol': {
+      const [, id, name] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const symbolsPageIndex = getCurrentSymbolsPage(state);
+
+      const selectedIndexPaths = getLayerIndexPathsExcludingDescendants(
+        state,
+        ids,
+      )
+        .filter((indexPath) =>
+          Layers.isChildLayer(Layers.access(page, indexPath)),
+        )
+        // Reverse the indexPaths to simplify deletion
+        .reverse();
+
+      const boundingRect = getBoundingRect(
+        page,
+        AffineTransform.identity,
+        ids,
+        { clickThroughGroups: true, includeHiddenLayers: true },
+      );
+
+      if (!boundingRect) {
+        console.info('[groupLayer] Selected layers not found');
+        return state;
+      }
+
+      const lastIndexPath = selectedIndexPaths[selectedIndexPaths.length - 1];
+      const newParentTransform = getLayerTransformAtIndexPath(
+        page,
+        lastIndexPath,
+      );
+      const groupFrame = transformRect(
+        boundingRect,
+        newParentTransform.invert(),
+      );
+      const newGroupTransform = AffineTransform.multiply(
+        newParentTransform,
+        AffineTransform.translation(groupFrame.x, groupFrame.y),
+      );
+
+      const symbolMasters = produce(Models.symbolMaster, (draft) => {
+        draft.do_objectID = uuid();
+        draft.name = name;
+        draft.frame = {
+          _class: 'rect',
+          constrainProportions: false,
+          ...groupFrame,
+        };
+        draft.symbolID = uuid();
+        draft.layers = [...selectedIndexPaths].reverse().map((indexPath) => {
+          const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
+
+          const originalParentTransform = getLayerTransformAtIndexPath(
+            page,
+            indexPath,
+          );
+
+          // First we undo original parent's transform, then we apply the new group's transform
+          const transform = AffineTransform.multiply(
+            originalParentTransform,
+            newGroupTransform.invert(),
+          );
+
+          return produce(layer, (draftLayer) => {
+            draftLayer.frame = {
+              ...draftLayer.frame,
+              ...transformRect(draftLayer.frame, transform),
+            };
+          });
+        });
+      });
+
+      const symbolInstance = produce(Models.symbolInstance, (draft) => {
+        draft.do_objectID = uuid();
+        draft.name = name;
+        draft.frame = symbolMasters.frame;
+        draft.symbolID = symbolMasters.symbolID;
+      });
+
+      const createSymbolsPage = (
+        pages: Sketch.Page[],
+        user: Sketch.User,
+      ): Sketch.Page => {
+        const newPage: Sketch.Page = produce(Models.page, (page) => {
+          page.do_objectID = uuid();
+          page.name = 'Symbols';
+          return page;
+        });
+
+        user[newPage.do_objectID] = {
+          scrollOrigin: '{0, 0}',
+          zoomValue: 1,
+        };
+
+        pages.push(newPage);
+
+        return pages[pages.length - 2];
+      };
+
+      return produce(state, (draft) => {
+        //Create a symbolMaster
+        selectedIndexPaths.forEach((indexPath) => {
+          const childIndex = indexPath[indexPath.length - 1];
+
+          const parent = Layers.access(
+            draft.sketch.pages[pageIndex],
+            indexPath.slice(0, -1),
+          ) as Layers.ParentLayer;
+
+          parent.layers.splice(childIndex, 1);
+          //Make them a master and then call an instance .
+        });
+
+        const symbolsPage =
+          pageIndex === -1
+            ? createSymbolsPage(draft.sketch.pages, draft.sketch.user)
+            : (Layers.access(
+                draft.sketch.pages[symbolsPageIndex],
+                selectedIndexPaths[0].slice(0, -1),
+              ) as Sketch.Page);
+
+        const crrPage = Layers.access(
+          draft.sketch.pages[pageIndex],
+          selectedIndexPaths[0].slice(0, -1),
+        ) as Sketch.Page;
+
+        //ANCHOR: ERROR WHEN ADDING THE SYMBOL IN THE SAME PAGEE and When creating new symbols page
+        symbolsPage.layers.push(symbolMasters);
+        crrPage.layers.push(symbolInstance);
       });
     }
     default:
