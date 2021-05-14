@@ -214,9 +214,9 @@ export default memo(function LayerList() {
           dispatch('ungroupLayer', selectedObjects);
           return;
         case 'addSymbol': {
-          //const name = prompt('New Symbol Name');
+          const name = prompt('New Symbol Name');
 
-          //if (!name) return;
+          if (!name) return;
           dispatch('addSymbol', selectedObjects, 'symbol');
           return;
         }

@@ -327,7 +327,6 @@ export function layerReducer(
           selectedIndexPaths[0].slice(0, -1),
         ) as Sketch.Page;
 
-        //ANCHOR: ERROR WHEN ADDING THE SYMBOL IN THE SAME PAGEE
         symbolsPage.layers.push(symbolMasters);
         crrParent.layers.splice(
           lastIndexPath[lastIndexPath.length - 1],
