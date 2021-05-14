@@ -194,22 +194,6 @@ export default memo(function SketchFileRenderer() {
     };
   }, [boundingRect, highlightedLayer, page, state.selectedObjects.length]);
 
-  /*
-  const visibleLayersInCanvas = useCallback(() => {
-    const layers = getLayersInRect(
-      CanvasKit,
-      state,
-      canvasInsets,
-      createRect({ x: 0, y: 0 }, { x: canvasSize.height, y: canvasSize.width }),
-      {
-        clickThroughGroups: false,
-        includeHiddenLayers: false,
-      },
-    );
-    return layers;
-  }, [CanvasKit, state, canvasInsets, canvasSize.height, canvasSize.width]);
-*/
-
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
@@ -234,9 +218,9 @@ export default memo(function SketchFileRenderer() {
       AffineTransform.identity,
     );
 
-    let measurePayload;
+    let selectedAndHighlightedLayers;
     if (highlightedLayer.isMeasured) {
-      measurePayload = getSelectedAndHighlightedLayerBoundingRec();
+      selectedAndHighlightedLayers = getSelectedAndHighlightedLayerBoundingRec();
     }
 
     return (
@@ -247,12 +231,15 @@ export default memo(function SketchFileRenderer() {
             layer={layer}
             paint={highlightPaint}
           />
-          {measurePayload && (
-            <DistanceLabelAndPath
-              selectedLayer={measurePayload.selectedBoundingRec}
-              highlightedLayer={measurePayload.highlightedBoundingRec}
-            />
-          )}
+          {selectedAndHighlightedLayers &&
+            selectedAndHighlightedLayers.highlightedBoundingRec && (
+              <DistanceLabelAndPath
+                selectedLayer={selectedAndHighlightedLayers.selectedBoundingRec}
+                highlightedLayer={
+                  selectedAndHighlightedLayers.highlightedBoundingRec
+                }
+              />
+            )}
         </>
       )
     );
