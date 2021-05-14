@@ -249,6 +249,9 @@ export function layerReducer(
           constrainProportions: false,
           ...groupFrame,
         };
+        draft.style = produce(Models.style, (s) => {
+          s.do_objectID = uuid();
+        });
         draft.symbolID = uuid();
         draft.layers = [...selectedIndexPaths].reverse().map((indexPath) => {
           const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
@@ -277,6 +280,9 @@ export function layerReducer(
         draft.do_objectID = uuid();
         draft.name = name;
         draft.frame = symbolMasters.frame;
+        draft.style = produce(Models.style, (s) => {
+          s.do_objectID = uuid();
+        });
         draft.symbolID = symbolMasters.symbolID;
       });
 
@@ -284,7 +290,7 @@ export function layerReducer(
         pages: Sketch.Page[],
         user: Sketch.User,
       ): Sketch.Page => {
-        const newPage: Sketch.Page = produce(Models.page, (page) => {
+        const newPage = produce(Models.page, (page) => {
           page.do_objectID = uuid();
           page.name = 'Symbols';
           return page;
@@ -296,12 +302,10 @@ export function layerReducer(
         };
 
         pages.push(newPage);
-
         return pages[pages.length - 2];
       };
 
       return produce(state, (draft) => {
-        //Create a symbolMaster
         selectedIndexPaths.forEach((indexPath) => {
           const childIndex = indexPath[indexPath.length - 1];
 
@@ -311,11 +315,10 @@ export function layerReducer(
           ) as Layers.ParentLayer;
 
           parent.layers.splice(childIndex, 1);
-          //Make them a master and then call an instance .
         });
 
         const symbolsPage =
-          pageIndex === -1
+          symbolsPageIndex === -1
             ? createSymbolsPage(draft.sketch.pages, draft.sketch.user)
             : (Layers.access(
                 draft.sketch.pages[symbolsPageIndex],
@@ -327,9 +330,14 @@ export function layerReducer(
           selectedIndexPaths[0].slice(0, -1),
         ) as Sketch.Page;
 
-        //ANCHOR: ERROR WHEN ADDING THE SYMBOL IN THE SAME PAGEE and When creating new symbols page
+        //ANCHOR: ERROR WHEN ADDING THE SYMBOL IN THE SAME PAGEE
         symbolsPage.layers.push(symbolMasters);
-        crrPage.layers.push(symbolInstance);
+        crrPage.layers.splice(
+          lastIndexPath[lastIndexPath.length - 1],
+          0,
+          symbolInstance,
+        );
+        draft.selectedObjects = [symbolInstance.do_objectID];
       });
     }
     default:
