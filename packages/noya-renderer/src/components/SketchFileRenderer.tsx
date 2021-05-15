@@ -194,6 +194,48 @@ export default memo(function SketchFileRenderer() {
     };
   }, [boundingRect, highlightedLayer, page, state.selectedObjects.length]);
 
+  const distanceLabelAndPathBetweenSketchLayers = useMemo(() => {
+    if (
+      !highlightedLayer ||
+      state.selectedObjects.includes(highlightedLayer.id)
+    ) {
+      return;
+    }
+
+    const indexPath = findIndexPath(
+      page,
+      (layer) => layer.do_objectID === highlightedLayer.id,
+    );
+
+    if (!indexPath) return;
+
+    let selectedAndHighlightedLayers;
+    if (highlightedLayer.isMeasured) {
+      selectedAndHighlightedLayers = getSelectedAndHighlightedLayerBoundingRec();
+    }
+
+    return (
+      highlightedLayer && (
+        <>
+          {selectedAndHighlightedLayers &&
+            selectedAndHighlightedLayers.highlightedBoundingRec && (
+              <DistanceLabelAndPath
+                selectedLayer={selectedAndHighlightedLayers.selectedBoundingRec}
+                highlightedLayer={
+                  selectedAndHighlightedLayers.highlightedBoundingRec
+                }
+              />
+            )}
+        </>
+      )
+    );
+  }, [
+    highlightedLayer,
+    page,
+    state.selectedObjects,
+    getSelectedAndHighlightedLayerBoundingRec,
+  ]);
+
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
@@ -218,11 +260,6 @@ export default memo(function SketchFileRenderer() {
       AffineTransform.identity,
     );
 
-    let selectedAndHighlightedLayers;
-    if (highlightedLayer.isMeasured) {
-      selectedAndHighlightedLayers = getSelectedAndHighlightedLayerBoundingRec();
-    }
-
     return (
       highlightedLayer && (
         <>
@@ -231,25 +268,10 @@ export default memo(function SketchFileRenderer() {
             layer={layer}
             paint={highlightPaint}
           />
-          {selectedAndHighlightedLayers &&
-            selectedAndHighlightedLayers.highlightedBoundingRec && (
-              <DistanceLabelAndPath
-                selectedLayer={selectedAndHighlightedLayers.selectedBoundingRec}
-                highlightedLayer={
-                  selectedAndHighlightedLayers.highlightedBoundingRec
-                }
-              />
-            )}
         </>
       )
     );
-  }, [
-    highlightPaint,
-    highlightedLayer,
-    page,
-    state.selectedObjects,
-    getSelectedAndHighlightedLayerBoundingRec,
-  ]);
+  }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
   return (
     <>
@@ -265,6 +287,7 @@ export default memo(function SketchFileRenderer() {
           <Polyline key={index} points={points} paint={selectionPaint} />
         ))}
         {highlightedSketchLayer}
+        {distanceLabelAndPathBetweenSketchLayers}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
         )}
