@@ -170,13 +170,10 @@ export function layerReducer(
 
       // Fire we remove selected layers, then we insert the group layer
       return produce(state, (draft) => {
-        deleteLayers(selectedIndexPaths, draft.sketch.pages[pageIndex]);
+        const pages = draft.sketch.pages;
+        deleteLayers(selectedIndexPaths, pages[pageIndex]);
 
-        addToParentLayer(
-          draft.sketch.pages[pageIndex],
-          selectedIndexPaths,
-          group,
-        );
+        addToParentLayer(pages[pageIndex], selectedIndexPaths, group);
 
         draft.selectedObjects = [group.do_objectID];
       });
@@ -259,18 +256,15 @@ export function layerReducer(
       });
 
       return produce(state, (draft) => {
-        deleteLayers(selectedIndexPaths, draft.sketch.pages[pageIndex]);
+        const pages = draft.sketch.pages;
 
-        addToParentLayer(
-          draft.sketch.pages[pageIndex],
-          selectedIndexPaths,
-          symbolInstance,
-        );
+        deleteLayers(selectedIndexPaths, pages[pageIndex]);
+        addToParentLayer(pages[pageIndex], selectedIndexPaths, symbolInstance);
 
         const symbolsPage =
           symbolsPageIndex === -1
-            ? createPage(draft.sketch.pages, draft.sketch.user, 'Symbols')
-            : draft.sketch.pages[symbolsPageIndex];
+            ? createPage(pages, draft.sketch.user, 'Symbols')
+            : pages[symbolsPageIndex];
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
 
         draft.selectedObjects = [symbolInstance.do_objectID];
