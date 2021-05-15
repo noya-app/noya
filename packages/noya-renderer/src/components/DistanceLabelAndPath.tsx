@@ -122,7 +122,8 @@ function getGuides(
 
   let edge = isFurther(selected[minM], highlighted[maxM])
     ? highlighted[maxM]
-    : isFurther(selected[maxM], highlighted[maxM])
+    : isFurther(selected[maxM], highlighted[maxM]) ||
+      isFurther(selected[minM], highlighted[minM])
     ? highlighted[minM]
     : undefined;
 
