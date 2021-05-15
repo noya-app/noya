@@ -2,6 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { AffineTransform, transformRect } from 'noya-geometry';
 import { uuid } from 'noya-renderer';
+import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -9,12 +10,13 @@ import {
   getCurrentPage,
   getBoundingRect,
   getCurrentPageIndex,
-  getCurrentSymbolsPage,
+  getSymbolsPageIndex,
   getLayerTransformAtIndexPath,
   getLayerIndexPathsExcludingDescendants,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
+import { createPage } from './pageReducer';
 
 export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
@@ -26,6 +28,102 @@ export type LayerAction =
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ];
+
+const getParentLayer = (pages: Sketch.AnyLayer, lastIndexPath: IndexPath) => {
+  return Layers.access(pages, lastIndexPath.slice(0, -1)) as Sketch.Page;
+};
+const addToParentLayer = (
+  pages: Sketch.AnyLayer,
+  selectedIndexPaths: IndexPath[],
+  element: Exclude<Sketch.AnyLayer, { _class: 'page' }>,
+) => {
+  const lastIndexPath = selectedIndexPaths[selectedIndexPaths.length - 1];
+  const parent = getParentLayer(pages, lastIndexPath);
+
+  parent.layers.splice(lastIndexPath[lastIndexPath.length - 1], 0, element);
+};
+
+const getReversedDirectChildrensLayersIndexPaths = (
+  state: ApplicationState,
+  ids: string[],
+) => {
+  return (
+    getLayerIndexPathsExcludingDescendants(state, ids)
+      .filter((indexPath) =>
+        Layers.isChildLayer(Layers.access(getCurrentPage(state), indexPath)),
+      )
+      // Reverse the indexPaths to simplify deletion
+      .reverse()
+  );
+};
+
+const createGroup = (
+  action: 'group' | 'symbolMaster',
+  page: Sketch.Page,
+  ids: string[],
+  name: string,
+  selectedIndexPaths: IndexPath[],
+): Sketch.Group | Sketch.SymbolMaster | undefined => {
+  const lastIndexPath = selectedIndexPaths[selectedIndexPaths.length - 1];
+  const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
+    clickThroughGroups: true,
+    includeHiddenLayers: true,
+  });
+
+  if (!boundingRect) {
+    console.info('[groupLayer] Selected layers not found');
+    return undefined;
+  }
+
+  const newParentTransform = getLayerTransformAtIndexPath(page, lastIndexPath);
+  const groupFrame = transformRect(boundingRect, newParentTransform.invert());
+  const newGroupTransform = AffineTransform.multiply(
+    newParentTransform,
+    AffineTransform.translation(groupFrame.x, groupFrame.y),
+  );
+
+  return produce(
+    action === 'group' ? Models.group : Models.symbolMaster,
+    (draft) => {
+      draft.do_objectID = uuid();
+      draft.name = name;
+      draft.frame = {
+        _class: 'rect',
+        constrainProportions: false,
+        ...groupFrame,
+      };
+      draft.style = produce(Models.style, (s) => {
+        s.do_objectID = uuid();
+      });
+
+      if (draft._class === 'symbolMaster') {
+        draft.symbolID = uuid();
+      }
+
+      draft.layers = [...selectedIndexPaths].reverse().map((indexPath) => {
+        const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
+
+        const originalParentTransform = getLayerTransformAtIndexPath(
+          page,
+          indexPath,
+        );
+
+        // First we undo original parent's transform, then we apply the new group's transform
+        const transform = AffineTransform.multiply(
+          originalParentTransform,
+          newGroupTransform.invert(),
+        );
+
+        return produce(layer, (draftLayer) => {
+          draftLayer.frame = {
+            ...draftLayer.frame,
+            ...transformRect(draftLayer.frame, transform),
+          };
+        });
+      });
+    },
+  );
+};
 
 export function layerReducer(
   state: ApplicationState,
@@ -59,83 +157,26 @@ export function layerReducer(
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
 
-      const selectedIndexPaths = getLayerIndexPathsExcludingDescendants(
+      const selectedIndexPaths = getReversedDirectChildrensLayersIndexPaths(
         state,
         ids,
-      )
-        .filter((indexPath) =>
-          Layers.isChildLayer(Layers.access(page, indexPath)),
-        )
-        // Reverse the indexPaths to simplify deletion
-        .reverse();
-
-      const boundingRect = getBoundingRect(
-        page,
-        AffineTransform.identity,
-        ids,
-        { clickThroughGroups: true, includeHiddenLayers: true },
       );
 
-      if (!boundingRect) {
+      const group = createGroup('group', page, ids, name, selectedIndexPaths);
+      if (!group) {
         console.info('[groupLayer] Selected layers not found');
         return state;
       }
-
-      const lastIndexPath = selectedIndexPaths[selectedIndexPaths.length - 1];
-      const newParentTransform = getLayerTransformAtIndexPath(
-        page,
-        lastIndexPath,
-      );
-      const groupFrame = transformRect(
-        boundingRect,
-        newParentTransform.invert(),
-      );
-      const newGroupTransform = AffineTransform.multiply(
-        newParentTransform,
-        AffineTransform.translation(groupFrame.x, groupFrame.y),
-      );
-
-      const group = produce(Models.group, (draft) => {
-        draft.do_objectID = uuid();
-        draft.name = name;
-        draft.frame = {
-          _class: 'rect',
-          constrainProportions: false,
-          ...groupFrame,
-        };
-        draft.layers = [...selectedIndexPaths].reverse().map((indexPath) => {
-          const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
-
-          const originalParentTransform = getLayerTransformAtIndexPath(
-            page,
-            indexPath,
-          );
-
-          // First we undo original parent's transform, then we apply the new group's transform
-          const transform = AffineTransform.multiply(
-            originalParentTransform,
-            newGroupTransform.invert(),
-          );
-
-          return produce(layer, (draftLayer) => {
-            draftLayer.frame = {
-              ...draftLayer.frame,
-              ...transformRect(draftLayer.frame, transform),
-            };
-          });
-        });
-      });
 
       // Fire we remove selected layers, then we insert the group layer
       return produce(state, (draft) => {
         deleteLayers(selectedIndexPaths, draft.sketch.pages[pageIndex]);
 
-        const parent = Layers.access(
+        addToParentLayer(
           draft.sketch.pages[pageIndex],
-          lastIndexPath.slice(0, -1),
-        ) as Layers.ParentLayer;
-
-        parent.layers.splice(lastIndexPath[lastIndexPath.length - 1], 0, group);
+          selectedIndexPaths,
+          group,
+        );
 
         draft.selectedObjects = [group.do_objectID];
       });
@@ -152,10 +193,10 @@ export function layerReducer(
       )[0];
 
       return produce(state, (draft) => {
-        const parent = Layers.access(
+        const parent = getParentLayer(
           draft.sketch.pages[pageIndex],
           indexPath.slice(0, -1),
-        ) as Layers.ParentLayer;
+        );
 
         const groupIndex = indexPath[indexPath.length - 1];
         const group = parent.layers[groupIndex] as Sketch.Group;
@@ -188,79 +229,25 @@ export function layerReducer(
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
-      const symbolsPageIndex = getCurrentSymbolsPage(state);
+      const symbolsPageIndex = getSymbolsPageIndex(state);
 
-      const selectedIndexPaths = getLayerIndexPathsExcludingDescendants(
+      const selectedIndexPaths = getReversedDirectChildrensLayersIndexPaths(
         state,
         ids,
-      )
-        .filter((indexPath) =>
-          Layers.isChildLayer(Layers.access(page, indexPath)),
-        )
-        // Reverse the indexPaths to simplify deletion
-        .reverse();
-
-      const boundingRect = getBoundingRect(
-        page,
-        AffineTransform.identity,
-        ids,
-        { clickThroughGroups: true, includeHiddenLayers: true },
       );
 
-      if (!boundingRect) {
+      const symbolMasters = createGroup(
+        'symbolMaster',
+        page,
+        ids,
+        name,
+        selectedIndexPaths,
+      ) as Sketch.SymbolMaster;
+
+      if (!symbolMasters) {
         console.info('[groupLayer] Selected layers not found');
         return state;
       }
-
-      const lastIndexPath = selectedIndexPaths[selectedIndexPaths.length - 1];
-      const newParentTransform = getLayerTransformAtIndexPath(
-        page,
-        lastIndexPath,
-      );
-      const groupFrame = transformRect(
-        boundingRect,
-        newParentTransform.invert(),
-      );
-      const newGroupTransform = AffineTransform.multiply(
-        newParentTransform,
-        AffineTransform.translation(groupFrame.x, groupFrame.y),
-      );
-
-      const symbolMasters = produce(Models.symbolMaster, (draft) => {
-        draft.do_objectID = uuid();
-        draft.name = name;
-        draft.frame = {
-          _class: 'rect',
-          constrainProportions: false,
-          ...groupFrame,
-        };
-        draft.style = produce(Models.style, (s) => {
-          s.do_objectID = uuid();
-        });
-        draft.symbolID = uuid();
-        draft.layers = [...selectedIndexPaths].reverse().map((indexPath) => {
-          const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
-
-          const originalParentTransform = getLayerTransformAtIndexPath(
-            page,
-            indexPath,
-          );
-
-          // First we undo original parent's transform, then we apply the new group's transform
-          const transform = AffineTransform.multiply(
-            originalParentTransform,
-            newGroupTransform.invert(),
-          );
-
-          return produce(layer, (draftLayer) => {
-            draftLayer.frame = {
-              ...draftLayer.frame,
-              ...transformRect(draftLayer.frame, transform),
-            };
-          });
-        });
-      });
-
       const symbolInstance = produce(Models.symbolInstance, (draft) => {
         draft.do_objectID = uuid();
         draft.name = name;
@@ -271,44 +258,21 @@ export function layerReducer(
         draft.symbolID = symbolMasters.symbolID;
       });
 
-      const createSymbolsPage = (
-        pages: Sketch.Page[],
-        user: Sketch.User,
-      ): Sketch.Page => {
-        const newPage = produce(Models.page, (page) => {
-          page.do_objectID = uuid();
-          page.name = 'Symbols';
-          return page;
-        });
-
-        user[newPage.do_objectID] = {
-          scrollOrigin: '{0, 0}',
-          zoomValue: 1,
-        };
-
-        pages.push(newPage);
-        return pages[pages.length - 2];
-      };
-
       return produce(state, (draft) => {
         deleteLayers(selectedIndexPaths, draft.sketch.pages[pageIndex]);
 
-        const crrParent = Layers.access(
+        addToParentLayer(
           draft.sketch.pages[pageIndex],
-          selectedIndexPaths[0].slice(0, -1),
-        ) as Sketch.Page;
-
-        crrParent.layers.splice(
-          lastIndexPath[lastIndexPath.length - 1],
-          0,
+          selectedIndexPaths,
           symbolInstance,
         );
 
         const symbolsPage =
           symbolsPageIndex === -1
-            ? createSymbolsPage(draft.sketch.pages, draft.sketch.user)
+            ? createPage(draft.sketch.pages, draft.sketch.user, 'Symbols')
             : draft.sketch.pages[symbolsPageIndex];
-        symbolsPage.layers.push(symbolMasters);
+        symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
+
         draft.selectedObjects = [symbolInstance.do_objectID];
       });
     }

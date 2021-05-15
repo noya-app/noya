@@ -15,6 +15,26 @@ export type PageAction =
   | [type: 'renamePage', name: string]
   | [type: 'duplicatePage'];
 
+export const createPage = (
+  pages: Sketch.Page[],
+  user: Sketch.User,
+  name: string,
+): Sketch.Page => {
+  const newPage = produce(Models.page, (page) => {
+    page.do_objectID = uuid();
+    page.name = name;
+    return page;
+  });
+
+  user[newPage.do_objectID] = {
+    scrollOrigin: '{0, 0}',
+    zoomValue: 1,
+  };
+
+  pages.push(newPage);
+  return newPage;
+};
+
 export function pageReducer(
   state: ApplicationState,
   action: PageAction,
@@ -29,22 +49,7 @@ export function pageReducer(
       const [, name] = action;
 
       return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const user = draft.sketch.user;
-
-        const newPage: Sketch.Page = produce(Models.page, (page) => {
-          page.do_objectID = uuid();
-          page.name = name || `Page ${pages.length + 1}`;
-          return page;
-        });
-
-        user[newPage.do_objectID] = {
-          scrollOrigin: '{0, 0}',
-          zoomValue: 1,
-        };
-
-        pages.push(newPage);
-
+        const newPage = createPage(draft.sketch.pages, draft.sketch.user, name);
         draft.selectedPage = newPage.do_objectID;
       });
     }
