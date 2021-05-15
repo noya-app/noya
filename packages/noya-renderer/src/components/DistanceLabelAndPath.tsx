@@ -4,6 +4,7 @@ import {
   useReactCanvasKit,
   Rect as RCKRect,
   useFontManager,
+  usePaint,
   useColorFill,
 } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
@@ -81,8 +82,8 @@ function MeasureAndExtensionPaths({
   const highlightedBounds = createBounds(highlightedLayer);
   const selectedBounds = createBounds(selectedLayer);
 
-  let implicitLines: Point[][] = [];
-  let explicitLines: Point[][] = [];
+  let extensionGuideLines: Point[][] = [];
+  let measureGuideLines: Point[][] = [];
   let distanceMeasurements: DistanceMeasurementProps[] = [];
 
   const startY =
@@ -103,7 +104,7 @@ function MeasureAndExtensionPaths({
       : undefined;
 
   if (leftEdgeOfSelectedBounds !== undefined) {
-    implicitLines.push([
+    extensionGuideLines.push([
       { x: leftEdgeOfSelectedBounds, y: startY },
       {
         x: leftEdgeOfSelectedBounds,
@@ -111,7 +112,7 @@ function MeasureAndExtensionPaths({
       },
     ]);
 
-    explicitLines.push([
+    measureGuideLines.push([
       { x: selectedBounds.minX, y: selectedBounds.midY },
       {
         x: leftEdgeOfSelectedBounds,
@@ -130,7 +131,7 @@ function MeasureAndExtensionPaths({
     distanceMeasurements.push({
       distance: itemDistance,
       bounds: {
-        x: selectedBounds.minX - itemDistance / 2,
+        x: (selectedBounds.minX + leftEdgeOfSelectedBounds) / 2,
         y: selectedBounds.midY,
       },
     });
@@ -144,7 +145,7 @@ function MeasureAndExtensionPaths({
       : undefined;
 
   if (rightEdgeOfSelectedBounds !== undefined) {
-    implicitLines.push([
+    extensionGuideLines.push([
       { x: rightEdgeOfSelectedBounds, y: startY },
       {
         x: rightEdgeOfSelectedBounds,
@@ -152,7 +153,7 @@ function MeasureAndExtensionPaths({
       },
     ]);
 
-    explicitLines.push([
+    measureGuideLines.push([
       { x: selectedBounds.maxX, y: selectedBounds.midY },
       {
         x: rightEdgeOfSelectedBounds,
@@ -170,7 +171,7 @@ function MeasureAndExtensionPaths({
 
     distanceMeasurements.push({
       bounds: {
-        x: selectedBounds.maxX + itemDistance / 2,
+        x: (selectedBounds.maxX + rightEdgeOfSelectedBounds) / 2,
         y: selectedBounds.midY,
       },
       distance: itemDistance,
@@ -195,7 +196,7 @@ function MeasureAndExtensionPaths({
       : undefined;
 
   if (topEdgeOfSelectedBounds !== undefined) {
-    implicitLines.push([
+    extensionGuideLines.push([
       {
         x: startX,
         y: topEdgeOfSelectedBounds,
@@ -206,7 +207,7 @@ function MeasureAndExtensionPaths({
       },
     ]);
 
-    explicitLines.push([
+    measureGuideLines.push([
       { x: selectedBounds.midX, y: selectedBounds.minY },
       {
         x: selectedBounds.midX,
@@ -225,7 +226,7 @@ function MeasureAndExtensionPaths({
     distanceMeasurements.push({
       bounds: {
         x: selectedBounds.midX,
-        y: selectedBounds.minY - itemDistance / 2,
+        y: (selectedBounds.minY + topEdgeOfSelectedBounds) / 2,
       },
       distance: itemDistance,
     });
@@ -239,7 +240,7 @@ function MeasureAndExtensionPaths({
       : undefined;
 
   if (bottomEdgeOfSelectedBounds !== undefined) {
-    implicitLines.push([
+    extensionGuideLines.push([
       { x: startX, y: bottomEdgeOfSelectedBounds },
       {
         x: endX,
@@ -247,7 +248,7 @@ function MeasureAndExtensionPaths({
       },
     ]);
 
-    explicitLines.push([
+    measureGuideLines.push([
       { x: selectedBounds.midX, y: selectedBounds.maxY },
       {
         x: selectedBounds.midX,
@@ -266,31 +267,37 @@ function MeasureAndExtensionPaths({
     distanceMeasurements.push({
       bounds: {
         x: selectedBounds.midX,
-        y: selectedBounds.maxY + itemDistance / 2,
+        y: (selectedBounds.maxY + bottomEdgeOfSelectedBounds) / 2,
       },
       distance: itemDistance,
     });
   }
 
   const { CanvasKit } = useReactCanvasKit();
-  const paint = new CanvasKit.Paint();
-  paint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));
-  paint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
-  paint.setStyle(CanvasKit.PaintStyle.Stroke);
-  paint.setStrokeWidth(1);
 
-  const explicitPaint = new CanvasKit.Paint();
-  explicitPaint.setColor(CanvasKit.Color4f(0.0, 0.2, 1.0));
-  explicitPaint.setStyle(CanvasKit.PaintStyle.Stroke);
-  explicitPaint.setStrokeWidth(1);
+  const extensionGuidePaint = new CanvasKit.Paint();
+  extensionGuidePaint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));
+  extensionGuidePaint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
+  extensionGuidePaint.setStyle(CanvasKit.PaintStyle.Stroke);
+  extensionGuidePaint.setStrokeWidth(1);
+
+  const measureGuidePaint = usePaint({
+    color: CanvasKit.Color4f(0.0, 0.2, 1.0),
+    strokeWidth: 1,
+    style: CanvasKit.PaintStyle.Stroke,
+  });
 
   return (
     <>
-      {implicitLines.map((points, index) => (
-        <Polyline key={index} paint={paint} points={points} />
+      {extensionGuideLines.map((points, index) => (
+        <Polyline key={index} paint={extensionGuidePaint} points={points} />
       ))}
-      {explicitLines.map((explicitPoints, index) => (
-        <Polyline key={index} paint={explicitPaint} points={explicitPoints} />
+      {measureGuideLines.map((explicitPoints, index) => (
+        <Polyline
+          key={index}
+          paint={measureGuidePaint}
+          points={explicitPoints}
+        />
       ))}
       {distanceMeasurements.map(
         (item: DistanceMeasurementProps, index: number) => (
