@@ -1,14 +1,14 @@
+import { Bounds, createBounds, distance, Point, Rect } from 'noya-geometry';
 import {
   Polyline,
-  Text,
-  useReactCanvasKit,
   Rect as RCKRect,
+  Text,
+  useColorFill,
   useFontManager,
   usePaint,
-  useColorFill,
+  useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
-import { createBounds, Point, Rect, distance } from 'noya-geometry';
 
 type DistanceMeasurementProps = {
   distance: number;
@@ -72,244 +72,83 @@ function DistanceMeasurement({ distance, bounds }: DistanceMeasurementProps) {
   );
 }
 
-function MeasureAndExtensionPaths({
-  selectedLayer,
-  highlightedLayer,
-}: {
-  selectedLayer: Rect;
-  highlightedLayer: Rect;
-}) {
-  const highlightedBounds = createBounds(highlightedLayer);
-  const selectedBounds = createBounds(selectedLayer);
+type BoundsKey = keyof Bounds;
+type Axis = 'x' | 'y';
+type Direction = '+' | '-';
 
-  let extensionGuideLines: Point[][] = [];
-  let measureGuideLines: Point[][] = [];
-  let distanceMeasurements: DistanceMeasurementProps[] = [];
+const ALL_DIRECTIONS = [
+  ['+', 'x'],
+  ['-', 'x'],
+  ['+', 'y'],
+  ['-', 'y'],
+] as const;
 
-  const startY =
-    highlightedBounds.midY < selectedBounds.midY
-      ? highlightedBounds.maxY
-      : highlightedBounds.minY;
-
-  const endY =
-    highlightedBounds.midY < selectedBounds.midY
-      ? selectedBounds.maxY
-      : selectedBounds.minY;
-
-  let leftEdgeOfSelectedBounds =
-    highlightedBounds.maxX < selectedBounds.minX
-      ? highlightedBounds.maxX
-      : highlightedBounds.maxX < selectedBounds.maxX
-      ? highlightedBounds.minX
-      : undefined;
-
-  if (leftEdgeOfSelectedBounds !== undefined) {
-    extensionGuideLines.push([
-      { x: leftEdgeOfSelectedBounds, y: startY },
-      {
-        x: leftEdgeOfSelectedBounds,
-        y: endY,
-      },
-    ]);
-
-    measureGuideLines.push([
-      { x: selectedBounds.minX, y: selectedBounds.midY },
-      {
-        x: leftEdgeOfSelectedBounds,
-        y: selectedBounds.midY,
-      },
-    ]);
-
-    const itemDistance = distance(
-      { x: selectedBounds.minX, y: selectedBounds.midY },
-      {
-        x: leftEdgeOfSelectedBounds,
-        y: selectedBounds.midY,
-      },
-    );
-
-    distanceMeasurements.push({
-      distance: itemDistance,
-      bounds: {
-        x: (selectedBounds.minX + leftEdgeOfSelectedBounds) / 2,
-        y: selectedBounds.midY,
-      },
-    });
+function getAxisProperties(
+  axis: Axis,
+  direction: Direction,
+): [BoundsKey, BoundsKey, BoundsKey] {
+  switch (`${direction}${axis}` as const) {
+    case '+x':
+      return ['minX', 'midX', 'maxX'];
+    case '-x':
+      return ['maxX', 'midX', 'minX'];
+    case '+y':
+      return ['minY', 'midY', 'maxY'];
+    case '-y':
+      return ['maxY', 'midY', 'minY'];
   }
+}
 
-  let rightEdgeOfSelectedBounds =
-    highlightedBounds.minX > selectedBounds.maxX
-      ? highlightedBounds.minX
-      : highlightedBounds.minX > selectedBounds.minX
-      ? highlightedBounds.maxX
-      : undefined;
+function getGuides(
+  mainDirection: Direction,
+  mainAxis: Axis,
+  selected: Bounds,
+  highlighted: Bounds,
+) {
+  const m = mainAxis;
+  const c = mainAxis === 'x' ? 'y' : 'x';
 
-  if (rightEdgeOfSelectedBounds !== undefined) {
-    extensionGuideLines.push([
-      { x: rightEdgeOfSelectedBounds, y: startY },
-      {
-        x: rightEdgeOfSelectedBounds,
-        y: endY,
-      },
-    ]);
+  const [minM, , maxM] = getAxisProperties(m, mainDirection);
+  const [minC, midC, maxC] = getAxisProperties(c, '+');
 
-    measureGuideLines.push([
-      { x: selectedBounds.maxX, y: selectedBounds.midY },
-      {
-        x: rightEdgeOfSelectedBounds,
-        y: selectedBounds.midY,
-      },
-    ]);
+  const [startC, endC] =
+    selected[midC] > highlighted[midC]
+      ? [highlighted[maxC], selected[maxC]]
+      : [highlighted[minC], selected[minC]];
 
-    const itemDistance = distance(
-      { x: selectedBounds.maxX, y: selectedBounds.midY },
-      {
-        x: rightEdgeOfSelectedBounds,
-        y: selectedBounds.midY,
-      },
-    );
+  // Is `a` further along the direction of the primary axis than `b`?
+  const isFurther = (a: number, b: number) =>
+    mainDirection === '+' ? a > b : a < b;
 
-    distanceMeasurements.push({
-      bounds: {
-        x: (selectedBounds.maxX + rightEdgeOfSelectedBounds) / 2,
-        y: selectedBounds.midY,
-      },
-      distance: itemDistance,
-    });
-  }
+  let edge = isFurther(selected[minM], highlighted[maxM])
+    ? highlighted[maxM]
+    : isFurther(selected[maxM], highlighted[maxM])
+    ? highlighted[minM]
+    : undefined;
 
-  const startX =
-    highlightedBounds.midX < selectedBounds.midX
-      ? highlightedBounds.maxX
-      : highlightedBounds.minX;
+  if (edge === undefined) return;
 
-  const endX =
-    highlightedBounds.midX < selectedBounds.midX
-      ? selectedBounds.maxX
-      : selectedBounds.minX;
+  const extension = [
+    { [m]: edge, [c]: startC } as Point,
+    { [m]: edge, [c]: endC } as Point,
+  ];
 
-  let topEdgeOfSelectedBounds =
-    highlightedBounds.maxY < selectedBounds.minY
-      ? highlightedBounds.maxY
-      : highlightedBounds.maxY < selectedBounds.maxY
-      ? highlightedBounds.minY
-      : undefined;
+  const measurement = [
+    { [m]: selected[minM], [c]: selected[midC] } as Point,
+    { [m]: edge, [c]: selected[midC] } as Point,
+  ];
 
-  if (topEdgeOfSelectedBounds !== undefined) {
-    extensionGuideLines.push([
-      {
-        x: startX,
-        y: topEdgeOfSelectedBounds,
-      },
-      {
-        x: endX,
-        y: topEdgeOfSelectedBounds,
-      },
-    ]);
-
-    measureGuideLines.push([
-      { x: selectedBounds.midX, y: selectedBounds.minY },
-      {
-        x: selectedBounds.midX,
-        y: topEdgeOfSelectedBounds,
-      },
-    ]);
-
-    const itemDistance = distance(
-      { x: selectedBounds.midX, y: selectedBounds.minY },
-      {
-        x: selectedBounds.midX,
-        y: topEdgeOfSelectedBounds,
-      },
-    );
-
-    distanceMeasurements.push({
-      bounds: {
-        x: selectedBounds.midX,
-        y: (selectedBounds.minY + topEdgeOfSelectedBounds) / 2,
-      },
-      distance: itemDistance,
-    });
-  }
-
-  let bottomEdgeOfSelectedBounds =
-    highlightedBounds.minY > selectedBounds.maxY
-      ? highlightedBounds.minY
-      : highlightedBounds.minY > selectedBounds.minY
-      ? highlightedBounds.maxY
-      : undefined;
-
-  if (bottomEdgeOfSelectedBounds !== undefined) {
-    extensionGuideLines.push([
-      { x: startX, y: bottomEdgeOfSelectedBounds },
-      {
-        x: endX,
-        y: bottomEdgeOfSelectedBounds,
-      },
-    ]);
-
-    measureGuideLines.push([
-      { x: selectedBounds.midX, y: selectedBounds.maxY },
-      {
-        x: selectedBounds.midX,
-        y: bottomEdgeOfSelectedBounds,
-      },
-    ]);
-
-    const itemDistance = distance(
-      { x: selectedBounds.midX, y: selectedBounds.maxY },
-      {
-        x: selectedBounds.midX,
-        y: bottomEdgeOfSelectedBounds,
-      },
-    );
-
-    distanceMeasurements.push({
-      bounds: {
-        x: selectedBounds.midX,
-        y: (selectedBounds.maxY + bottomEdgeOfSelectedBounds) / 2,
-      },
-      distance: itemDistance,
-    });
-  }
-
-  const { CanvasKit } = useReactCanvasKit();
-
-  const extensionGuidePaint = new CanvasKit.Paint();
-  extensionGuidePaint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));
-  extensionGuidePaint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
-  extensionGuidePaint.setStyle(CanvasKit.PaintStyle.Stroke);
-  extensionGuidePaint.setStrokeWidth(1);
-
-  const measureGuidePaint = usePaint({
-    color: CanvasKit.Color4f(0.0, 0.2, 1.0),
-    strokeWidth: 1,
-    style: CanvasKit.PaintStyle.Stroke,
-  });
-
-  return (
-    <>
-      {extensionGuideLines.map((points, index) => (
-        <Polyline key={index} paint={extensionGuidePaint} points={points} />
-      ))}
-      {measureGuideLines.map((explicitPoints, index) => (
-        <Polyline
-          key={index}
-          paint={measureGuidePaint}
-          points={explicitPoints}
-        />
-      ))}
-      {distanceMeasurements.map(
-        (item: DistanceMeasurementProps, index: number) => (
-          <DistanceMeasurement
-            bounds={item.bounds}
-            distance={item.distance}
-            key={index}
-          />
-        ),
-      )}
-    </>
+  const itemDistance = distance(
+    { [m]: selected[minM], [c]: selected[midC] } as Point,
+    { [m]: edge, [c]: selected[midC] } as Point,
   );
+
+  const distanceMeasurement: DistanceMeasurementProps = {
+    distance: itemDistance,
+    bounds: { [m]: (selected[minM] + edge) / 2, [c]: selected[midC] } as Point,
+  };
+
+  return { extension, measurement, distanceMeasurement };
 }
 
 export default function DistanceLabelAndPath({
@@ -319,12 +158,57 @@ export default function DistanceLabelAndPath({
   selectedLayer: Rect;
   highlightedLayer: Rect;
 }) {
+  const highlightedBounds = createBounds(highlightedLayer);
+  const selectedBounds = createBounds(selectedLayer);
+
+  const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
+    const result = getGuides(
+      direction,
+      axis,
+      selectedBounds,
+      highlightedBounds,
+    );
+
+    return result ? [result] : [];
+  });
+
+  const { CanvasKit } = useReactCanvasKit();
+
+  const extensionGuidePaint = new CanvasKit.Paint();
+  extensionGuidePaint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));
+  extensionGuidePaint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
+  extensionGuidePaint.setStyle(CanvasKit.PaintStyle.Stroke);
+  extensionGuidePaint.setStrokeWidth(1);
+
+  const measurementGuidePaint = usePaint({
+    color: CanvasKit.Color4f(0.0, 0.2, 1.0),
+    strokeWidth: 1,
+    style: CanvasKit.PaintStyle.Stroke,
+  });
+
+  const extensionGuides = guides.map((line) => line.extension);
+  const measurementGuides = guides.map((line) => line.measurement);
+  const distanceMeasurements = guides.map((line) => line.distanceMeasurement);
+
   return (
     <>
-      <MeasureAndExtensionPaths
-        selectedLayer={selectedLayer}
-        highlightedLayer={highlightedLayer}
-      />
+      {extensionGuides.map((points, index) => (
+        <Polyline key={index} paint={extensionGuidePaint} points={points} />
+      ))}
+      {measurementGuides.map((explicitPoints, index) => (
+        <Polyline
+          key={index}
+          paint={measurementGuidePaint}
+          points={explicitPoints}
+        />
+      ))}
+      {distanceMeasurements.map((item, index) => (
+        <DistanceMeasurement
+          key={index}
+          bounds={item.bounds}
+          distance={item.distance}
+        />
+      ))}
     </>
   );
 }
