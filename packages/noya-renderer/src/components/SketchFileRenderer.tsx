@@ -23,7 +23,7 @@ import {
   getLayerTransformAtIndexPath,
   getScreenTransform,
 } from 'noya-state/src/selectors/selectors';
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
@@ -170,33 +170,12 @@ export default memo(function SketchFileRenderer() {
     [page, state.selectedObjects],
   );
 
-  const getSelectedAndHighlightedLayerBoundingRec = useCallback(() => {
-    if (
-      state.selectedObjects.length === 0 ||
-      !highlightedLayer ||
-      !boundingRect
-    ) {
-      return;
-    }
-
-    const highlightedBoundingRec = getBoundingRect(
-      page,
-      AffineTransform.identity,
-      [highlightedLayer.id],
-      {
-        clickThroughGroups: true,
-        includeHiddenLayers: true,
-      },
-    );
-    return {
-      selectedBoundingRec: boundingRect,
-      highlightedBoundingRec: highlightedBoundingRec,
-    };
-  }, [boundingRect, highlightedLayer, page, state.selectedObjects.length]);
-
   const distanceLabelAndPathBetweenSketchLayers = useMemo(() => {
     if (
       !highlightedLayer ||
+      !highlightedLayer.isMeasured ||
+      !boundingRect ||
+      state.selectedObjects.length === 0 ||
       state.selectedObjects.includes(highlightedLayer.id)
     ) {
       return;
@@ -209,32 +188,30 @@ export default memo(function SketchFileRenderer() {
 
     if (!indexPath) return;
 
-    let selectedAndHighlightedLayers;
-    if (highlightedLayer.isMeasured) {
-      selectedAndHighlightedLayers = getSelectedAndHighlightedLayerBoundingRec();
-    }
+    const highlightedBoundingRec = getBoundingRect(
+      page,
+      AffineTransform.identity,
+      [highlightedLayer.id],
+      {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+      },
+    );
+
+    const selectedAndHighlightedLayers = {
+      selectedBoundingRec: boundingRect,
+      highlightedBoundingRec: highlightedBoundingRec,
+    };
 
     return (
-      highlightedLayer && (
-        <>
-          {selectedAndHighlightedLayers &&
-            selectedAndHighlightedLayers.highlightedBoundingRec && (
-              <DistanceLabelAndPath
-                selectedLayer={selectedAndHighlightedLayers.selectedBoundingRec}
-                highlightedLayer={
-                  selectedAndHighlightedLayers.highlightedBoundingRec
-                }
-              />
-            )}
-        </>
+      selectedAndHighlightedLayers.highlightedBoundingRec && (
+        <DistanceLabelAndPath
+          selectedLayer={selectedAndHighlightedLayers.selectedBoundingRec}
+          highlightedLayer={selectedAndHighlightedLayers.highlightedBoundingRec}
+        />
       )
     );
-  }, [
-    highlightedLayer,
-    page,
-    state.selectedObjects,
-    getSelectedAndHighlightedLayerBoundingRec,
-  ]);
+  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
@@ -262,13 +239,11 @@ export default memo(function SketchFileRenderer() {
 
     return (
       highlightedLayer && (
-        <>
-          <HoverOutline
-            transform={layerTransform}
-            layer={layer}
-            paint={highlightPaint}
-          />
-        </>
+        <HoverOutline
+          transform={layerTransform}
+          layer={layer}
+          paint={highlightPaint}
+        />
       )
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
