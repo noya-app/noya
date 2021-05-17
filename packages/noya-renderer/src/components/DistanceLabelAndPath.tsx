@@ -153,14 +153,14 @@ function getGuides(
 }
 
 export default function DistanceLabelAndPath({
-  selectedLayer,
-  highlightedLayer,
+  selectedRect,
+  highlightedRect,
 }: {
-  selectedLayer: Rect;
-  highlightedLayer: Rect;
+  selectedRect: Rect;
+  highlightedRect: Rect;
 }) {
-  const highlightedBounds = createBounds(highlightedLayer);
-  const selectedBounds = createBounds(selectedLayer);
+  const highlightedBounds = createBounds(highlightedRect);
+  const selectedBounds = createBounds(selectedRect);
 
   const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
     const result = getGuides(

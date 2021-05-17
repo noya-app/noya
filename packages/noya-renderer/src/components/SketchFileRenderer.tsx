@@ -188,7 +188,7 @@ export default memo(function SketchFileRenderer() {
 
     if (!indexPath) return;
 
-    const highlightedBoundingRec = getBoundingRect(
+    const highlightedBoundingRect = getBoundingRect(
       page,
       AffineTransform.identity,
       [highlightedLayer.id],
@@ -198,16 +198,11 @@ export default memo(function SketchFileRenderer() {
       },
     );
 
-    const selectedAndHighlightedLayers = {
-      selectedBoundingRec: boundingRect,
-      highlightedBoundingRec: highlightedBoundingRec,
-    };
-
     return (
-      selectedAndHighlightedLayers.highlightedBoundingRec && (
+      highlightedBoundingRect && (
         <DistanceLabelAndPath
-          selectedLayer={selectedAndHighlightedLayers.selectedBoundingRec}
-          highlightedLayer={selectedAndHighlightedLayers.highlightedBoundingRec}
+          selectedRect={boundingRect}
+          highlightedRect={highlightedBoundingRect}
         />
       )
     );
