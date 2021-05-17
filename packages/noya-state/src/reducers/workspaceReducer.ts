@@ -12,6 +12,7 @@ export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 export type LayerHighlight = {
   id: string;
   precedence: LayerHighlightPrecedence;
+  isMeasured: boolean;
 };
 
 export type CanvasInsets = { left: number; right: number };
@@ -72,7 +73,7 @@ export function workspaceReducer(
     }
     case 'highlightLayer': {
       const [, highlight] = action;
-
+      
       return produce(state, (draft) => {
         draft.highlightedLayer = highlight ? { ...highlight } : undefined;
       });

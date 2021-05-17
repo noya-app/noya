@@ -27,6 +27,7 @@ import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
+import DistanceLabelAndPath from './DistanceLabelAndPath';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import { HorizontalRuler } from './Rulers';
@@ -170,6 +171,44 @@ export default memo(function SketchFileRenderer() {
     [page, state.selectedObjects],
   );
 
+  const distanceLabelAndPathBetweenSketchLayers = useMemo(() => {
+    if (
+      !highlightedLayer ||
+      !highlightedLayer.isMeasured ||
+      !boundingRect ||
+      state.selectedObjects.length === 0 ||
+      state.selectedObjects.includes(highlightedLayer.id)
+    ) {
+      return;
+    }
+
+    const indexPath = findIndexPath(
+      page,
+      (layer) => layer.do_objectID === highlightedLayer.id,
+    );
+
+    if (!indexPath) return;
+
+    const highlightedBoundingRect = getBoundingRect(
+      page,
+      AffineTransform.identity,
+      [highlightedLayer.id],
+      {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+      },
+    );
+
+    return (
+      highlightedBoundingRect && (
+        <DistanceLabelAndPath
+          selectedRect={boundingRect}
+          highlightedRect={highlightedBoundingRect}
+        />
+      )
+    );
+  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
@@ -217,6 +256,7 @@ export default memo(function SketchFileRenderer() {
           <Polyline key={index} points={points} paint={selectionPaint} />
         ))}
         {highlightedSketchLayer}
+        {distanceLabelAndPathBetweenSketchLayers}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
         )}

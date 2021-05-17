@@ -251,7 +251,7 @@ export default memo(function LayerList() {
 
         const handleHoverChange = (hovered: boolean) => {
           highlightLayer(
-            hovered ? { id, precedence: 'aboveSelection' } : undefined,
+            hovered ? { id, precedence: 'aboveSelection', isMeasured:false } : undefined,
           );
         };
 
