@@ -5,6 +5,7 @@ import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
+import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
 
 interface Props {
@@ -18,7 +19,10 @@ export default memo(function SketchLayer({ layer }: Props) {
 
   switch (layer._class) {
     case 'artboard':
-      element = <SketchArtboard layer={layer} />;
+      element = <SketchArtboard layer={layer} isSymbolMaster={false} />;
+      break;
+    case 'symbolMaster':
+      element = <SketchArtboard layer={layer} isSymbolMaster={true} />;
       break;
     case 'group':
       element = <SketchGroup layer={layer} />;
@@ -32,6 +36,9 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'rectangle':
     case 'oval':
       element = <SketchShape layer={layer} />;
+      break;
+    case 'symbolInstance':
+      element = <SketchSymbolInstance layer={layer} />;
       break;
     default:
       console.info(layer._class, 'not handled');

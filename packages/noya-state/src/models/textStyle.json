@@ -43,8 +43,8 @@
       "MSAttributedStringFontAttribute": {
         "_class": "fontDescriptor",
         "attributes": {
-          "name": "Arial",
-          "size": 12
+          "name": "Helvetica",
+          "size": 18
         }
       },
       "MSAttributedStringColorAttribute": {
@@ -53,6 +53,11 @@
         "blue": 0,
         "green": 0,
         "red": 0
+      },
+      "textStyleVerticalAlignmentKey": 0,
+      "paragraphStyle": {
+        "_class": "paragraphStyle",
+        "alignment": 0
       }
     }
   },

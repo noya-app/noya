@@ -1,55 +1,96 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { memo, useMemo } from 'react';
-import styled from 'styled-components';
-import { sketchColorToRgbaString, sketchColorToRgba } from 'noya-designsystem';
-import { SimpleTextDecoration } from 'noya-renderer';
+import produce from 'immer';
+import { sketchColorToRgba } from 'noya-designsystem';
+import { Size } from 'noya-geometry';
+import { uuid } from 'noya-renderer';
+import SketchLayer from 'noya-renderer/src/components/layers/SketchLayer';
+import { useTextLayerParagraph } from 'noya-renderer/src/components/layers/SketchText';
+import { Models } from 'noya-state';
+import React, { memo, useMemo } from 'react';
+import CanvasGridItem from './CanvasGridItem';
 
-const TextStylePrev = styled.span<{
-  size: number;
-  backgroundColor: string;
-  textTransform?: number;
-  textDecoration: SimpleTextDecoration;
-}>(({ color, size, textTransform, textDecoration, backgroundColor }) => ({
-  fontSize: size,
-  backgroundColor: backgroundColor,
-  height: '90%',
-  width: '90%',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  color: color,
-  textTransform:
-    textTransform === 1
-      ? 'uppercase'
-      : textTransform === 2
-      ? 'lowercase'
-      : 'none',
-  pointerEvents: 'none',
-  userSelect: 'none',
-  textDecoration:
-    textDecoration === 'underline'
-      ? 'underline'
-      : textDecoration === 'strikethrough'
-      ? 'line-through'
-      : 'none',
-}));
 interface Props {
-  text: string;
-  size: number;
-  color: Sketch.Color;
-  textDecoration: SimpleTextDecoration;
-  textTransform: Sketch.TextTransform | undefined;
+  name: string;
+  style: Sketch.Style;
 }
 
-export default memo(function TextStyle({
-  color,
+function RCKTextStylePreview({
+  name,
+  style,
   size,
-  text,
-  textDecoration,
-  textTransform,
-}: Props) {
-  const colorString = useMemo(() => sketchColorToRgbaString(color), [color]);
+}: {
+  name: string;
+  style: Sketch.Style;
+  size: Size;
+}) {
+  const layer = useMemo(() => {
+    const layer = produce(Models.text, (draft) => {
+      draft.do_objectID = uuid();
+      draft.style = style;
+      draft.attributedString.string = name;
+
+      const encodedAttributes = draft.style.textStyle?.encodedAttributes;
+
+      if (encodedAttributes) {
+        draft.attributedString.attributes = [
+          {
+            _class: 'stringAttribute',
+            location: 0,
+            length: name.length,
+            attributes: encodedAttributes,
+          },
+        ];
+
+        encodedAttributes.paragraphStyle = encodedAttributes.paragraphStyle ?? {
+          _class: 'paragraphStyle',
+        };
+
+        // Always center-align previews
+        encodedAttributes.paragraphStyle.alignment =
+          Sketch.TextHorizontalAlignment.Centered;
+      }
+    });
+
+    layer.frame = {
+      ...layer.frame,
+      x: 0,
+      y: 0,
+      width: size.width,
+      height: size.height,
+    };
+
+    return layer;
+  }, [size, style, name]);
+
+  const paragraph = useTextLayerParagraph(layer);
+
+  const measuredLayer = useMemo(() => {
+    // Round up to avoid wrapping
+    const width = Math.ceil(paragraph.getMaxWidth());
+    const height = paragraph.getHeight();
+
+    return {
+      ...layer,
+      frame: {
+        ...layer.frame,
+        x: (size.width - width) / 2,
+        y: (size.height - height) / 2,
+        width,
+        height,
+      },
+    };
+  }, [layer, paragraph, size]);
+
+  return <SketchLayer layer={measuredLayer} />;
+}
+
+export default memo(function TextStyle({ name, style }: Props) {
+  const color =
+    style.textStyle?.encodedAttributes.MSAttributedStringColorAttribute;
+
   const backgroundColor = useMemo(() => {
+    if (!color) return 'white';
+
     const rbga = sketchColorToRgba(color);
     /*
       Formula found in this question 
@@ -61,14 +102,11 @@ export default memo(function TextStyle({
   }, [color]);
 
   return (
-    <TextStylePrev
-      color={colorString}
-      size={size}
-      textDecoration={textDecoration}
+    <CanvasGridItem
       backgroundColor={backgroundColor}
-      textTransform={textTransform}
-    >
-      {text}
-    </TextStylePrev>
+      renderContent={(size) => (
+        <RCKTextStylePreview name={name} style={style} size={size} />
+      )}
+    />
   );
 });

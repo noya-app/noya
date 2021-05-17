@@ -79,18 +79,10 @@ export default memo(function TextStylesGrid({
             {group.items.map((item) => {
               const text = delimitedPath.basename(item.name);
               const encoded = item.value.textStyle?.encodedAttributes;
-              const color = encoded?.MSAttributedStringColorAttribute;
-              const textTransform =
-                encoded?.MSAttributedStringTextTransformAttribute;
               const attributes =
                 encoded?.MSAttributedStringFontAttribute.attributes;
 
-              const textDecoration = encoded?.underlineStyle
-                ? 'underline'
-                : encoded?.strikethroughStyle
-                ? 'strikethrough'
-                : 'none';
-              if (!attributes || !color) return null;
+              if (!attributes) return null;
 
               const [font, weight] = attributes.name
                 .replace('MT', '')
@@ -115,13 +107,7 @@ export default memo(function TextStylesGrid({
                     )
                   }
                 >
-                  <TextStyle
-                    text={text}
-                    size={attributes.size}
-                    color={color}
-                    textDecoration={textDecoration}
-                    textTransform={textTransform}
-                  />
+                  <TextStyle name={text} style={item.value} />
                 </GridView.Item>
               );
             })}

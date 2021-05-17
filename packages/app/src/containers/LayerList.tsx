@@ -91,6 +91,7 @@ const LayerIcon = memo(function LayerIcon({
     case 'text':
       return <TextIcon color={color} />;
     case 'artboard':
+    case 'symbolMaster':
       return <BoxModelIcon color={color} />;
     case 'group':
       return <GroupIcon color={color} />;
@@ -101,7 +102,7 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-type MenuItemType = 'duplicate' | 'delete';
+type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -177,13 +178,19 @@ export default memo(function LayerList() {
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
+  const canUngroup =
+    selectedObjects.length === 1 &&
+    items.find((i) => i.id === selectedObjects[0])?.type === 'group';
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
+      { value: 'group', title: 'Group' },
+      ...(canUngroup ? [{ value: 'ungroup' as const, title: 'Ungroup' }] : []),
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
     ],
-    [],
+    [canUngroup],
   );
 
   const onSelectMenuItem = useCallback(
@@ -193,7 +200,17 @@ export default memo(function LayerList() {
           dispatch('deleteLayer', selectedObjects);
           return;
         case 'duplicate':
-          // TODO: Handle delete
+          // TODO: Handle duplicate
+          return;
+        case 'group':
+          const name = prompt('New group Name');
+
+          if (!name) return;
+
+          dispatch('groupLayer', selectedObjects, name);
+          return;
+        case 'ungroup':
+          dispatch('ungroupLayer', selectedObjects);
           return;
       }
     },
@@ -264,9 +281,11 @@ export default memo(function LayerList() {
             onHoverChange={handleHoverChange}
             onChangeVisible={handleChangeVisible}
             icon={<LayerIcon type={type} selected={selected} />}
-            isSectionHeader={type === 'artboard'}
+            isSectionHeader={type === 'artboard' || type === 'symbolMaster'}
             expanded={
-              type === 'artboard' || type === 'group' ? expanded : undefined
+              type === 'artboard' || type === 'symbolMaster' || type === 'group'
+                ? expanded
+                : undefined
             }
             onClickChevron={handleClickChevron}
           />

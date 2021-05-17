@@ -1,12 +1,27 @@
 import type { CanvasKit } from 'canvaskit-wasm';
+import { Theme } from 'noya-designsystem';
 import { render, unmount } from 'noya-react-canvaskit';
-import { memo, ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { ThemeProvider, useTheme } from 'styled-components';
+import {
+  ApplicationStateContextValue,
+  ApplicationStateProvider,
+  useRawApplicationState,
+} from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 
 function renderImageFromCanvas(
   CanvasKit: CanvasKit,
   width: number,
   height: number,
+  theme: Theme,
+  state: ApplicationStateContextValue,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
   const surface = CanvasKit.MakeSurface(width, height);
@@ -22,7 +37,15 @@ function renderImageFromCanvas(
   };
 
   return new Promise((resolve) => {
-    render(renderContent(), surface, context, () => {
+    const root = (
+      <ThemeProvider theme={theme}>
+        <ApplicationStateProvider value={state}>
+          {renderContent()}
+        </ApplicationStateProvider>
+      </ThemeProvider>
+    );
+
+    render(root, surface, context, () => {
       const image = surface.makeImageSnapshot();
 
       const colorSpace = image.getColorSpace();
@@ -55,26 +78,33 @@ export default memo(function CanvasViewer({
   renderContent,
 }: Props) {
   const CanvasKit = useCanvasKit();
+  const rawApplicationState = useRawApplicationState();
+  const theme = useTheme();
   const [imageData, setImageData] = useState<ImageData | undefined>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useLayoutEffect(() => {
     let valid = true;
 
-    renderImageFromCanvas(CanvasKit, width, height, renderContent).then(
-      (bytes) => {
-        if (!valid || !bytes) return;
+    renderImageFromCanvas(
+      CanvasKit,
+      width,
+      height,
+      theme,
+      rawApplicationState,
+      renderContent,
+    ).then((bytes) => {
+      if (!valid || !bytes) return;
 
-        setImageData(
-          new ImageData(new Uint8ClampedArray(bytes.buffer), width, height),
-        );
-      },
-    );
+      setImageData(
+        new ImageData(new Uint8ClampedArray(bytes.buffer), width, height),
+      );
+    });
 
     return () => {
       valid = false;
     };
-  }, [CanvasKit, width, height, renderContent]);
+  }, [CanvasKit, width, height, theme, rawApplicationState, renderContent]);
 
   useLayoutEffect(() => {
     if (!imageData) return;
@@ -88,14 +118,3 @@ export default memo(function CanvasViewer({
 
   return <canvas ref={canvasRef} width={width} height={height} />;
 });
-
-// function RCKColorSwatch({ color }: { color: string }) {
-//   const { CanvasKit } = useReactCanvasKit();
-//   const fill = useColorFill(color);
-//   const path = useMemo(() => {
-//     const path = new CanvasKit.Path();
-//     path.addOval(CanvasKit.XYWHRect(0, 0, 60, 60));
-//     return path;
-//   }, [CanvasKit]);
-//   return <Path path={path} paint={fill} />;
-// }

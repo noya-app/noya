@@ -28,6 +28,7 @@ import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
 import DistanceLabelAndPath from './DistanceLabelAndPath';
+import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import { HorizontalRuler } from './Rulers';
 
@@ -247,9 +248,7 @@ export default memo(function SketchFileRenderer() {
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
-        {page.layers.map((layer) => (
-          <SketchLayer key={layer.do_objectID} layer={layer} />
-        ))}
+        <SketchGroup layer={page} />
         {boundingRect && (
           <BoundingRect rect={boundingRect} selectionPaint={selectionPaint} />
         )}

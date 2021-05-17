@@ -42,6 +42,11 @@ export type ThemeAction =
       sharedStyleId: string,
       style: Sketch.Style | undefined,
     ]
+  | [
+      type: 'updateTextStyle',
+      sharedStyleId: string,
+      style: Sketch.Style | undefined,
+    ]
   | [type: `duplicate${ComponentsElements}`, id: string[]]
   | [
       type: `set${ComponentsElements}Name`,
@@ -55,11 +60,8 @@ export type ThemeAction =
       id: string | string[],
       name: string | undefined,
     ]
-  | [
-      type: 'setThemeStyle',
-      sharedStyleId?: string,
-      style?: Sketch.Style | undefined,
-    ];
+  | [type: 'setThemeStyle', sharedStyleId?: string]
+  | [type: 'setTextStyle', sharedStyleId?: string];
 
 export function themeReducer(
   state: ApplicationState,
@@ -106,6 +108,9 @@ export function themeReducer(
     }
     case 'addTextStyle': {
       const [, name, style] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const currentTab = state.currentTab;
 
       return produce(state, (draft) => {
         const textStyles = draft.sketch.document.layerTextStyles ?? {
@@ -129,6 +134,16 @@ export function themeReducer(
 
         textStyles.objects.push(sharedStyle);
         draft.sketch.document.layerTextStyles = textStyles;
+
+        if (currentTab === 'theme') {
+          draft.selectedLayerStyleIds = [sharedStyle.do_objectID];
+        } else {
+          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              layer.sharedStyleID = sharedStyle.do_objectID;
+            },
+          );
+        }
       });
     }
     case 'addThemeStyle': {
@@ -157,6 +172,7 @@ export function themeReducer(
             return style;
           }),
         };
+
         layerStyles.objects.push(sharedStyle);
         draft.sketch.document.layerStyles = layerStyles;
 
@@ -369,7 +385,8 @@ export function themeReducer(
         });
       });
     }
-    case 'setThemeStyle': {
+    case 'setThemeStyle':
+    case 'setTextStyle': {
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
@@ -377,9 +394,14 @@ export function themeReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          const style = draft.sketch.document.layerStyles?.objects.find(
-            (s) => s.do_objectID === id,
-          );
+          const style =
+            action[0] === 'setThemeStyle'
+              ? draft.sketch.document.layerStyles?.objects.find(
+                  (s) => s.do_objectID === id,
+                )
+              : draft.sketch.document.layerTextStyles?.objects.find(
+                  (s) => s.do_objectID === id,
+                );
 
           if (style) {
             layer.sharedStyleID = id;
@@ -393,7 +415,8 @@ export function themeReducer(
         });
       });
     }
-    case 'updateThemeStyle': {
+    case 'updateThemeStyle':
+    case 'updateTextStyle': {
       const [, id, style] = action;
       const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
         state,
@@ -403,8 +426,10 @@ export function themeReducer(
       return produce(state, (draft) => {
         if (!style) return;
 
-        const sharedStyles = draft.sketch.document.layerStyles.objects;
-
+        const sharedStyles =
+          action[0] === 'updateThemeStyle'
+            ? draft.sketch.document.layerStyles.objects
+            : draft.sketch.document.layerTextStyles?.objects;
         sharedStyles.forEach((sharedStyle: Sketch.SharedStyle) => {
           if (id !== sharedStyle.do_objectID) return;
 

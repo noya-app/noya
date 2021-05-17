@@ -40,18 +40,25 @@ export const getSelectedLayerIndexPaths = (
   );
 };
 
-export const getSelectedLayerIndexPathsExcludingDescendants = (
+export const getLayerIndexPathsExcludingDescendants = (
   state: ApplicationState,
+  ids: string[],
 ): IndexPath[] => {
   const page = getCurrentPage(state);
 
   return Layers.findAllIndexPaths<Sketch.AnyLayer>(page, (layer) => {
-    const included = state.selectedObjects.includes(layer.do_objectID);
+    const included = ids.includes(layer.do_objectID);
 
-    if (included && layer._class === 'artboard') {
+    if (included && Layers.isParentLayer(layer)) {
       return INCLUDE_AND_SKIP;
     }
 
     return included;
   });
+};
+
+export const getSelectedLayerIndexPathsExcludingDescendants = (
+  state: ApplicationState,
+): IndexPath[] => {
+  return getLayerIndexPathsExcludingDescendants(state, state.selectedObjects);
 };

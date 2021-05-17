@@ -1,5 +1,6 @@
 import { Divider, Spacer } from 'noya-designsystem';
 import { Selectors, SetNumberMode } from 'noya-state';
+import * as Layers from 'noya-state/src/layers';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import {
@@ -17,6 +18,7 @@ import OpacityInspector from './OpacityInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
 import TextStyleInspector from './TextStyleInspector';
+import ThemeTextInspector from './ThemeTextInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -51,7 +53,8 @@ export default memo(function Inspector() {
             rotation: undefined,
           };
 
-    const hasTextLayer = selectedLayers.some((l) => l._class === 'text');
+    const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
 
     const views = [
       <Fragment key="layout">
@@ -63,7 +66,8 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
-      <LayerThemeInspector />,
+      hasAllTextLayer && <ThemeTextInspector />,
+      !hasTextLayer && <LayerThemeInspector />,
       hasTextLayer && <TextStyleInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,

@@ -37,6 +37,7 @@ function shouldClickThrough(
 ) {
   return (
     layer._class === 'artboard' ||
+    layer._class === 'symbolMaster' ||
     (layer._class === 'group' &&
       (layer.hasClickThrough || options.clickThroughGroups))
   );

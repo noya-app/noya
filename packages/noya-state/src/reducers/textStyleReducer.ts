@@ -1,11 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SimpleTextDecoration } from 'noya-renderer';
+import { uuid } from 'noya-renderer';
 import * as Layers from '../layers';
 import {
-  getCurrentPageIndex,
   getCurrentTab,
+  getCurrentPageIndex,
   getSelectedLayerIndexPaths,
+  findPageLayerIndexPaths,
 } from '../selectors/selectors';
 import { accessPageLayers, ApplicationState } from './applicationReducer';
 import {
@@ -55,10 +57,8 @@ export function textStyleReducer(
                 action,
               );
 
-              layer.attributedString.attributes.forEach((attribute, index) => {
-                layer.attributedString.attributes[
-                  index
-                ].attributes = stringAttributeReducer(
+              layer.attributedString.attributes.forEach((attribute) => {
+                attribute.attributes = stringAttributeReducer(
                   attribute.attributes,
                   action,
                 );
@@ -68,6 +68,13 @@ export function textStyleReducer(
         });
       } else {
         const ids = state.selectedTextStyleIds;
+
+        const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+          state,
+          (layer) =>
+            layer.sharedStyleID !== undefined &&
+            ids.includes(layer.sharedStyleID),
+        );
 
         return produce(state, (draft) => {
           const layerTextStyles =
@@ -83,6 +90,22 @@ export function textStyleReducer(
             sharedTextStyle.value.textStyle.encodedAttributes = stringAttributeReducer(
               sharedTextStyle.value.textStyle.encodedAttributes,
               action,
+            );
+
+            layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+              accessPageLayers(
+                draft,
+                layerPath.pageIndex,
+                layerPath.indexPaths,
+              ).forEach((layer) => {
+                layer.style = produce(
+                  sharedTextStyle.value,
+                  (sharedTextStyle) => {
+                    sharedTextStyle.do_objectID = uuid();
+                    return sharedTextStyle;
+                  },
+                );
+              }),
             );
           });
         });

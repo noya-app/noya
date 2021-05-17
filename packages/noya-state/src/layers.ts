@@ -10,6 +10,11 @@ import {
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
+export type ChildLayer = Exclude<
+  Sketch.AnyLayer,
+  { _class: 'artboard' | 'symbolMaster' | 'page' }
+>;
+
 export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   switch (layer._class) {
     case 'artboard':
@@ -23,8 +28,26 @@ export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   }
 };
 
+export const isChildLayer = (layer: Sketch.AnyLayer): layer is ChildLayer => {
+  return (
+    layer._class !== 'artboard' &&
+    layer._class !== 'symbolMaster' &&
+    layer._class !== 'page'
+  );
+};
+
 export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {
   return layer._class === 'text';
+};
+
+export const isGroup = (layer: Sketch.AnyLayer): layer is Sketch.Group => {
+  return layer._class === 'group';
+};
+
+export const isSymbolMaster = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.SymbolMaster => {
+  return layer._class === 'symbolMaster';
 };
 
 export const hasTextStyle = (
@@ -98,6 +121,23 @@ export const {
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
 });
+
+/**
+ * An alternative to the `find` method that searches within an array, rather than
+ * a single layer.
+ *
+ * This is useful for searching the top-level pages array.
+ */
+export function findInArray(
+  layers: Sketch.AnyLayer[],
+  predicate: (layer: Sketch.AnyLayer) => boolean,
+): Sketch.AnyLayer | undefined {
+  for (let i = 0; i < layers.length; i++) {
+    const result = find(layers[i], predicate);
+
+    if (result) return result;
+  }
+}
 
 export const {
   visit: visitReversed,
