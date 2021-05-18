@@ -102,7 +102,7 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
+type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete' | 'addSymbol';
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -184,6 +184,7 @@ export default memo(function LayerList() {
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
+      { value: 'addSymbol', title: 'Create Symbol' },
       { value: 'group', title: 'Group' },
       ...(canUngroup ? [{ value: 'ungroup' as const, title: 'Ungroup' }] : []),
       { value: 'duplicate', title: 'Duplicate' },
@@ -202,16 +203,23 @@ export default memo(function LayerList() {
         case 'duplicate':
           // TODO: Handle duplicate
           return;
-        case 'group':
+        case 'group': {
           const name = prompt('New group Name');
 
           if (!name) return;
-
           dispatch('groupLayer', selectedObjects, name);
           return;
+        }
         case 'ungroup':
           dispatch('ungroupLayer', selectedObjects);
           return;
+        case 'addSymbol': {
+          const name = prompt('New Symbol Name');
+
+          if (!name) return;
+          dispatch('addSymbol', selectedObjects, name);
+          return;
+        }
       }
     },
     [dispatch, selectedObjects],

@@ -11,3 +11,5 @@ export const text = require('./text.json') as Sketch.Text;
 export const textStyle = require('./textStyle.json') as Sketch.Style;
 export const page = require('./page.json') as Sketch.Page;
 export const group = require('./group.json') as Sketch.Group;
+export const symbolMaster = require('./symbolMaster.json') as Sketch.SymbolMaster;
+export const symbolInstance = require('./symbolInstance.json') as Sketch.SymbolInstance;

@@ -62,3 +62,15 @@ export const getSelectedLayerIndexPathsExcludingDescendants = (
 ): IndexPath[] => {
   return getLayerIndexPathsExcludingDescendants(state, state.selectedObjects);
 };
+
+export const getIndexPathsForGroup = (
+  state: ApplicationState,
+  ids: string[],
+) => {
+  return getLayerIndexPathsExcludingDescendants(
+    state,
+    ids,
+  ).filter((indexPath) =>
+    Layers.isChildLayer(Layers.access(getCurrentPage(state), indexPath)),
+  );
+};

@@ -24,6 +24,14 @@ export const getCurrentPageIndex = (state: ApplicationState) => {
   return pageIndex;
 };
 
+export const getSymbolsPageIndex = (state: ApplicationState) => {
+  const pageIndex = state.sketch.pages.findIndex(
+    (page) => page.name === 'Symbols',
+  );
+
+  return pageIndex;
+};
+
 export const getCurrentPage = (state: ApplicationState) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
