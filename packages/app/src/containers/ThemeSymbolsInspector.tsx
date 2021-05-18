@@ -8,8 +8,6 @@ import {
 import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from '../utils/withSeparatorElements';
 import NameInspector from '../components/inspector/NameInspector';
-import OpacityInspector from './OpacityInspector';
-import ShadowInspector from './ShadowInspector';
 import { delimitedPath } from 'noya-utils';
 
 export default memo(function ThemeSymbolsInspector() {
@@ -36,8 +34,6 @@ export default memo(function ThemeSymbolsInspector() {
       names={selectedSymbols.map((v) => delimitedPath.basename(v.name))}
       onNameChange={handleNameChange}
     />,
-    <OpacityInspector />,
-    <ShadowInspector />,
   ];
 
   return <>{withSeparatorElements(elements, <Divider />)}</>;

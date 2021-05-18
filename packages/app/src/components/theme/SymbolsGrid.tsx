@@ -1,43 +1,90 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { GridView } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
-import { delimitedPath } from 'noya-utils';
-import { memo } from 'react';
-import { ThemeMenuItemType } from './menuItems';
+import { delimitedPath, sortBy } from 'noya-utils';
+import { Fragment, memo, useCallback, useMemo } from 'react';
+import { ThemeMenuItemType, menuItems } from './menuItems';
+import { createThemeGroups } from '../../utils/themeTree';
 
 interface Props {
   symbols: Sketch.SymbolMaster[];
   selectedSymbolsIds: string[];
+  onGroupSymbol: (id: string[], name?: string) => void;
   onSelectSymbol: (id?: string, selectionType?: SelectionType) => void;
 }
 
 export default memo(function SymbolsGrid({
   symbols,
   selectedSymbolsIds,
+  onGroupSymbol,
   onSelectSymbol,
 }: Props) {
   const { basename } = delimitedPath;
 
+  const handleSelectMenuItem = useCallback(
+    (value: ThemeMenuItemType) => {
+      switch (value) {
+        case 'delete':
+          break;
+        case 'group': {
+          const groupName = prompt('Group Name');
+          if (!groupName) return;
+          onGroupSymbol(selectedSymbolsIds, groupName);
+          break;
+        }
+        case 'ungroup':
+          onGroupSymbol(selectedSymbolsIds);
+          onSelectSymbol();
+          break;
+        case 'duplicate':
+          break;
+      }
+    },
+    [onGroupSymbol, onSelectSymbol, selectedSymbolsIds],
+  );
+
+  const groups = useMemo(() => {
+    const groups = createThemeGroups(symbols).filter(
+      (group) => group.items.length,
+    );
+
+    return sortBy(groups, 'path');
+  }, [symbols]);
+
+  const handleOnContextMenu: (id: string) => void = useCallback(
+    (id: string) => {
+      if (selectedSymbolsIds.includes(id)) return;
+      onSelectSymbol(id);
+    },
+    [onSelectSymbol, selectedSymbolsIds],
+  );
+
   return (
     <GridView.Root onClick={() => onSelectSymbol(undefined, 'replace')}>
-      <GridView.Section>
-        {symbols.map((item: Sketch.SymbolMaster) => {
-          return (
-            <GridView.Item<ThemeMenuItemType>
-              id={item.do_objectID}
-              key={item.do_objectID}
-              title={basename(item.name)}
-              selected={selectedSymbolsIds.includes(item.do_objectID)}
-              onClick={(event: React.MouseEvent) =>
-                onSelectSymbol(
-                  item.do_objectID,
-                  event.shiftKey ? 'intersection' : 'replace',
-                )
-              }
-            ></GridView.Item>
-          );
-        })}
-      </GridView.Section>
+      {groups.map((group, index) => (
+        <Fragment key={index}>
+          {group.path && <GridView.SectionHeader title={group.path} />}
+          <GridView.Section>
+            {group.items.map((item) => (
+              <GridView.Item<ThemeMenuItemType>
+                id={item.do_objectID}
+                key={item.do_objectID}
+                title={basename(item.name)}
+                menuItems={menuItems}
+                onSelectMenuItem={handleSelectMenuItem}
+                onContextMenu={() => handleOnContextMenu(item.do_objectID)}
+                selected={selectedSymbolsIds.includes(item.do_objectID)}
+                onClick={(event: React.MouseEvent) =>
+                  onSelectSymbol(
+                    item.do_objectID,
+                    event.shiftKey ? 'intersection' : 'replace',
+                  )
+                }
+              ></GridView.Item>
+            ))}
+          </GridView.Section>
+        </Fragment>
+      ))}
     </GridView.Root>
   );
 });

@@ -102,7 +102,7 @@ const TextStyles = memo(function TextStyles() {
 
   const selectedGroup = state.selectedTextStyleGroup;
   const filterText = useMemo(
-    () => textStyles.filter((swatch) => swatch.name.startsWith(selectedGroup)),
+    () => textStyles.filter((item) => item.name.startsWith(selectedGroup)),
     [textStyles, selectedGroup],
   );
 
@@ -139,13 +139,25 @@ const Symbols = memo(function Symbols() {
   const [state, dispatch] = useApplicationState();
 
   const symbols = useShallowArray(useSelector(Selectors.getSymbols));
+  const selectedGroup = state.selectedSymbolGroup;
+  const filterSymbols = useMemo(
+    () => symbols.filter((item) => item.name.startsWith(selectedGroup)),
+    [symbols, selectedGroup],
+  );
+
   return (
     <SymbolsGrid
-      symbols={symbols}
+      symbols={filterSymbols}
       selectedSymbolsIds={state.selectedSymbolsIds}
       onSelectSymbol={useCallback(
         (id, type) => {
           dispatch('selectSymbol', id, type);
+        },
+        [dispatch],
+      )}
+      onGroupSymbol={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupSymbol', id, name);
         },
         [dispatch],
       )}

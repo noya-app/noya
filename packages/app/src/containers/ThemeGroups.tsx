@@ -22,7 +22,7 @@ const Header = styled.div(({ theme }) => ({
   fontWeight: 500,
 }));
 
-type ContainerType = Sketch.Swatch | Sketch.SharedStyle;
+type ContainerType = Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster;
 
 interface ContainerGroupProps {
   array: Array<ContainerType>;
@@ -130,6 +130,23 @@ const ThemeStylesGroup = memo(() => {
   );
 });
 
+const SymbolsGroup = memo(() => {
+  const [state, dispatch] = useApplicationState();
+  const symbols = useSelector(Selectors.getSymbols);
+
+  return (
+    <ContainerGroup
+      array={symbols}
+      headerTitle="Symbols"
+      onClick={useCallback(
+        (title: string) => dispatch('setSelectedSymbolGroup', title),
+        [dispatch],
+      )}
+      selectedGroup={state.selectedSymbolGroup}
+    />
+  );
+});
+
 export default memo(function ThemeGroups() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
 
@@ -141,8 +158,8 @@ export default memo(function ThemeGroups() {
         return <TextStylesGroup />;
       case 'layerStyles':
         return <ThemeStylesGroup />;
-      default:
-        return null;
+      case 'symbols':
+        return <SymbolsGroup />;
     }
   }, [tab]);
 

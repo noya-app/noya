@@ -48,6 +48,7 @@ export type ApplicationState = {
   selectedSwatchGroup: string;
   selectedTextStyleGroup: string;
   selectedThemeStyleGroup: string;
+  selectedSymbolGroup: string;
   sketch: SketchFile;
 };
 
@@ -226,8 +227,8 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
-    currentTab: 'canvas',
-    currentThemeTab: 'swatches',
+    currentTab: 'theme',
+    currentThemeTab: 'symbols',
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
@@ -238,6 +239,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedSwatchGroup: '',
     selectedThemeStyleGroup: '',
     selectedTextStyleGroup: '',
+    selectedSymbolGroup: '',
     sketch,
   };
 }

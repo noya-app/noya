@@ -1,5 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { delimitedPath } from 'noya-utils';
+import { Layers } from '..';
 import { ApplicationState } from '../reducers/applicationReducer';
 
 export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
@@ -49,7 +50,7 @@ export const getSelectedThemeTextStyles = (
 };
 
 export function groupThemeComponents<
-  T extends Sketch.Swatch | Sketch.SharedStyle
+  T extends Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster
 >(currentIds: string[], groupName: string | undefined, array: T[]) {
   array.forEach((object: T) => {
     if (!currentIds.includes(object.do_objectID)) return;
@@ -64,15 +65,9 @@ export function groupThemeComponents<
 }
 
 export const getSymbols = (state: ApplicationState): Sketch.SymbolMaster[] => {
-  const symbols: Sketch.SymbolMaster[] = [];
-
-  state.sketch.pages.forEach((p) =>
-    symbols.push(
-      ...p.layers.flatMap((l) => (l._class === 'symbolMaster' ? [l] : [])),
-    ),
+  return state.sketch.pages.flatMap((p) =>
+    p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
   );
-
-  return symbols;
 };
 
 export const getSelectedSymbols = (

@@ -25,16 +25,10 @@ export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
 export type ThemeAction =
   | [type: 'setThemeTab', value: ThemeTab]
   | [
-      type: `select${ComponentsElements}`,
+      type: `select${ComponentsElements | 'Symbol'}`,
       id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
-  | [
-      type: `selectSymbol`,
-      id: string | string[] | undefined,
-      selectionType?: SelectionType,
-    ]
-  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
   | [
       type: 'setSwatchOpacity',
       swatchId: string | string[],
@@ -53,17 +47,21 @@ export type ThemeAction =
       style: Sketch.Style | undefined,
     ]
   | [type: `duplicate${ComponentsElements}`, id: string[]]
-  | [type: `set${ComponentsElements}Name`, id: string | string[], name: string]
-  | [type: `setSymbolName`, id: string | string[], name: string]
-  | [type: `remove${ComponentsElements}`]
-  | [type: `setSelected${ComponentsElements}Group`, groupId: string]
   | [
-      type: `group${ComponentsElements}`,
+      type: `set${ComponentsElements | 'Symbol'}Name`,
+      id: string | string[],
+      name: string,
+    ]
+  | [type: `remove${ComponentsElements}`]
+  | [type: `setSelected${ComponentsElements | 'Symbol'}Group`, groupId: string]
+  | [
+      type: `group${ComponentsElements | 'Symbol'}`,
       id: string | string[],
       name: string | undefined,
     ]
   | [type: 'setThemeStyle', sharedStyleId?: string]
-  | [type: 'setTextStyle', sharedStyleId?: string];
+  | [type: 'setTextStyle', sharedStyleId?: string]
+  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color];
 
 export function themeReducer(
   state: ApplicationState,
@@ -400,16 +398,8 @@ export function themeReducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        const symbols: Sketch.SymbolMaster[] = [];
-
-        draft.sketch.pages.forEach((p) =>
-          symbols.push(
-            ...p.layers.flatMap((l) =>
-              l._class === 'symbolMaster' && ids.includes(l.do_objectID)
-                ? [l]
-                : [],
-            ),
-          ),
+        const symbols = draft.sketch.pages.flatMap((p) =>
+          p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
         );
 
         symbols.forEach((object: Sketch.SymbolMaster) => {
@@ -572,6 +562,12 @@ export function themeReducer(
         draft.selectedTextStyleGroup = id;
       });
     }
+    case 'setSelectedSymbolGroup': {
+      const [, id] = action;
+      return produce(state, (draft) => {
+        draft.selectedSymbolGroup = id;
+      });
+    }
     case 'groupSwatch': {
       const [, id, value] = action;
       const ids = typeof id === 'string' ? [id] : id;
@@ -610,6 +606,21 @@ export function themeReducer(
           draft.sketch.document.layerStyles?.objects ?? [],
         );
         draft.selectedTextStyleGroup = '';
+      });
+    }
+    case 'groupSymbol': {
+      const [, id, value] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        groupThemeComponents(
+          ids,
+          value,
+          draft.sketch.pages.flatMap((p) =>
+            p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
+          ),
+        );
+        draft.selectedSymbolGroup = '';
       });
     }
     default:
