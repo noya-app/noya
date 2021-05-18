@@ -8,7 +8,9 @@ import {
   findPageLayerIndexPaths,
   getCurrentPageIndex,
   getSelectedLayerIndexPaths,
+  getSymbols,
   groupThemeComponents,
+  setComponentName,
   visitLayerColors,
   visitStyleColors,
 } from '../selectors/selectors';
@@ -21,6 +23,11 @@ import {
 import { SetNumberMode } from './styleReducer';
 
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
+
+export type ComponentsTypes =
+  | Sketch.Swatch
+  | Sketch.SharedStyle
+  | Sketch.SymbolMaster;
 
 export type ThemeAction =
   | [type: 'setThemeTab', value: ThemeTab]
@@ -368,28 +375,43 @@ export function themeReducer(
         });
       });
     }
-    case 'setThemeStyleName':
-    case 'setTextStyleName':
+    case 'setThemeStyleName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        setComponentName(
+          ids,
+          name,
+          draft.sketch.document.layerTextStyles?.objects ?? [],
+        );
+      });
+    }
+    case 'setTextStyleName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        setComponentName(
+          ids,
+          name,
+          draft.sketch.document.layerTextStyles?.objects,
+        );
+      });
+    }
     case 'setSwatchName': {
       const [, id, name] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        const array =
-          action[0] === 'setSwatchName'
-            ? draft.sketch.document.sharedSwatches?.objects ?? []
-            : action[0] === 'setTextStyleName'
-            ? draft.sketch.document.layerTextStyles?.objects ?? []
-            : draft.sketch.document.layerStyles?.objects ?? [];
-
-        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
-          if (!ids.includes(object.do_objectID)) return;
-
-          const group = delimitedPath.dirname(object.name);
-
-          object.name = delimitedPath.join([group, name]);
-        });
+        setComponentName(
+          ids,
+          name,
+          draft.sketch.document.sharedSwatches?.objects ?? [],
+        );
       });
     }
     case 'setSymbolName': {
@@ -398,17 +420,7 @@ export function themeReducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        const symbols = draft.sketch.pages.flatMap((p) =>
-          p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
-        );
-
-        symbols.forEach((object: Sketch.SymbolMaster) => {
-          if (!ids.includes(object.do_objectID)) return;
-
-          const group = delimitedPath.dirname(object.name);
-
-          object.name = delimitedPath.join([group, name]);
-        });
+        setComponentName(ids, name, getSymbols(draft));
       });
     }
     case 'setThemeStyle':
@@ -613,13 +625,7 @@ export function themeReducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        groupThemeComponents(
-          ids,
-          value,
-          draft.sketch.pages.flatMap((p) =>
-            p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
-          ),
-        );
+        groupThemeComponents(ids, value, getSymbols(draft));
         draft.selectedSymbolGroup = '';
       });
     }

@@ -102,7 +102,13 @@ const LayerIcon = memo(function LayerIcon({
   }
 });
 
-type MenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete' | 'addSymbol';
+type MenuItemType =
+  | 'duplicate'
+  | 'group'
+  | 'ungroup'
+  | 'delete'
+  | 'addSymbol'
+  | 'detachSymbol';
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -182,16 +188,23 @@ export default memo(function LayerList() {
     selectedObjects.length === 1 &&
     items.find((i) => i.id === selectedObjects[0])?.type === 'group';
 
+  const canDetach =
+    selectedObjects.length === 1 &&
+    items.find((i) => i.id === selectedObjects[0])?.type === 'symbolInstance';
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'addSymbol', title: 'Create Symbol' },
+      ...(canDetach
+        ? [{ value: 'detachSymbol' as const, title: 'Detach Symbol' }]
+        : []),
       { value: 'group', title: 'Group' },
       ...(canUngroup ? [{ value: 'ungroup' as const, title: 'Ungroup' }] : []),
       { value: 'duplicate', title: 'Duplicate' },
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
     ],
-    [canUngroup],
+    [canUngroup, canDetach],
   );
 
   const onSelectMenuItem = useCallback(
@@ -218,6 +231,10 @@ export default memo(function LayerList() {
 
           if (!name) return;
           dispatch('addSymbol', selectedObjects, name);
+          return;
+        }
+        case 'detachSymbol': {
+          dispatch('detachSymbol', selectedObjects);
           return;
         }
       }
@@ -259,7 +276,9 @@ export default memo(function LayerList() {
 
         const handleHoverChange = (hovered: boolean) => {
           highlightLayer(
-            hovered ? { id, precedence: 'aboveSelection', isMeasured:false } : undefined,
+            hovered
+              ? { id, precedence: 'aboveSelection', isMeasured: false }
+              : undefined,
           );
         };
 

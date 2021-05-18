@@ -100,6 +100,8 @@ export function applicationReducer(
     case 'groupLayer':
     case 'ungroupLayer':
     case 'addSymbol':
+    case 'detachSymbol':
+    case 'deleteSymbol':
       return layerReducer(state, action);
     case 'distributeLayers':
     case 'alignLayers': {
@@ -227,8 +229,8 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
-    currentTab: 'theme',
-    currentThemeTab: 'symbols',
+    currentTab: 'canvas',
+    currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],

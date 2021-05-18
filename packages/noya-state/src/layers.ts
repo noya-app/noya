@@ -50,6 +50,12 @@ export const isSymbolMaster = (
   return layer._class === 'symbolMaster';
 };
 
+export const isSymbolInstance = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.SymbolInstance => {
+  return layer._class === 'symbolInstance';
+};
+
 export const hasTextStyle = (
   layer: Sketch.Text,
 ): layer is Sketch.Text & { style: { textStyle: Sketch.TextStyle } } => {

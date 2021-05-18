@@ -7,7 +7,7 @@ import {
   useDeletable,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import CanvasViewer from '../../containers/CanvasViewer';
 
 const PREVIEW_SIZE = 60;
