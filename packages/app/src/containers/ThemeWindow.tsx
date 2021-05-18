@@ -7,6 +7,7 @@ import { memo, useCallback, useMemo } from 'react';
 import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 import TextStylesGrid from '../components/theme/TextStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
+import SymbolsGrid from '../components/theme/SymbolsGrid';
 import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
 
@@ -134,6 +135,24 @@ const TextStyles = memo(function TextStyles() {
   );
 });
 
+const Symbols = memo(function Symbols() {
+  const [state, dispatch] = useApplicationState();
+
+  const symbols = useShallowArray(useSelector(Selectors.getSymbols));
+  return (
+    <SymbolsGrid
+      symbols={symbols}
+      selectedSymbolsIds={state.selectedSymbolsIds}
+      onSelectSymbol={useCallback(
+        (id, type) => {
+          dispatch('selectSymbol', id, type);
+        },
+        [dispatch],
+      )}
+    />
+  );
+});
+
 export default memo(function ThemeWindow() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
@@ -146,7 +165,7 @@ export default memo(function ThemeWindow() {
       case 'layerStyles':
         return <ThemeStyles />;
       case 'symbols':
-        return <></>;
+        return <Symbols />;
     }
   }, [componentsTab]);
 

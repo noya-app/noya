@@ -4,6 +4,7 @@ import { useSelector } from '../contexts/ApplicationStateContext';
 import SwatchInspector from './SwatchesInspector';
 import ThemeTextStyleInspector from './ThemeTextStyleInspector';
 import ThemeStyleInspector from './ThemeStyleInspector';
+import ThemeSymbolsInspector from './ThemeSymbolsInspector';
 
 export default memo(function ThemeInspector() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
@@ -16,6 +17,8 @@ export default memo(function ThemeInspector() {
         return <ThemeTextStyleInspector />;
       case 'layerStyles':
         return <ThemeStyleInspector />;
+      case 'symbols':
+        return <ThemeSymbolsInspector />;
     }
     return null;
   }, [tab]);

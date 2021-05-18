@@ -62,3 +62,25 @@ export function groupThemeComponents<
 
   return array;
 }
+
+export const getSymbols = (state: ApplicationState): Sketch.SymbolMaster[] => {
+  const symbols: Sketch.SymbolMaster[] = [];
+
+  state.sketch.pages.forEach((p) =>
+    symbols.push(
+      ...p.layers.flatMap((l) => (l._class === 'symbolMaster' ? [l] : [])),
+    ),
+  );
+
+  return symbols;
+};
+
+export const getSelectedSymbols = (
+  state: ApplicationState,
+): Sketch.SymbolMaster[] => {
+  const symbols = getSymbols(state);
+
+  return symbols.filter((symbol) =>
+    state.selectedSymbolsIds.includes(symbol.do_objectID),
+  );
+};

@@ -29,6 +29,11 @@ export type ThemeAction =
       id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
+  | [
+      type: `selectSymbol`,
+      id: string | string[] | undefined,
+      selectionType?: SelectionType,
+    ]
   | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
   | [
       type: 'setSwatchOpacity',
@@ -48,11 +53,8 @@ export type ThemeAction =
       style: Sketch.Style | undefined,
     ]
   | [type: `duplicate${ComponentsElements}`, id: string[]]
-  | [
-      type: `set${ComponentsElements}Name`,
-      swatchId: string | string[],
-      name: string,
-    ]
+  | [type: `set${ComponentsElements}Name`, id: string | string[], name: string]
+  | [type: `setSymbolName`, id: string | string[], name: string]
   | [type: `remove${ComponentsElements}`]
   | [type: `setSelected${ComponentsElements}Group`, groupId: string]
   | [
@@ -304,6 +306,13 @@ export function themeReducer(
         updateSelection(draft.selectedTextStyleIds, id, selectionType);
       });
     }
+    case 'selectSymbol': {
+      const [, id, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedSymbolsIds, id, selectionType);
+      });
+    }
     case 'setSwatchColor': {
       const [, id, color] = action;
 
@@ -377,6 +386,33 @@ export function themeReducer(
             : draft.sketch.document.layerStyles?.objects ?? [];
 
         array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
+          if (!ids.includes(object.do_objectID)) return;
+
+          const group = delimitedPath.dirname(object.name);
+
+          object.name = delimitedPath.join([group, name]);
+        });
+      });
+    }
+    case 'setSymbolName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const symbols: Sketch.SymbolMaster[] = [];
+
+        draft.sketch.pages.forEach((p) =>
+          symbols.push(
+            ...p.layers.flatMap((l) =>
+              l._class === 'symbolMaster' && ids.includes(l.do_objectID)
+                ? [l]
+                : [],
+            ),
+          ),
+        );
+
+        symbols.forEach((object: Sketch.SymbolMaster) => {
           if (!ids.includes(object.do_objectID)) return;
 
           const group = delimitedPath.dirname(object.name);

@@ -44,6 +44,7 @@ export type ApplicationState = {
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedTextStyleIds: string[];
+  selectedSymbolsIds: string[];
   selectedSwatchGroup: string;
   selectedTextStyleGroup: string;
   selectedThemeStyleGroup: string;
@@ -233,6 +234,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
     selectedTextStyleIds: [],
+    selectedSymbolsIds: [],
     selectedSwatchGroup: '',
     selectedThemeStyleGroup: '',
     selectedTextStyleGroup: '',
