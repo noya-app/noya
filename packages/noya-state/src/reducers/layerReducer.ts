@@ -17,6 +17,7 @@ import {
   addSiblingLayer,
   getSymbols,
   getSymbolsInstaces,
+  getCurrentSymbolPageIndex,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -124,6 +125,23 @@ const unGroup = (
   );
 
   draft.selectedObjects = [parent.do_objectID];
+};
+
+const detachSymbolInstances = (
+  draft: Draft<ApplicationState>,
+  symbolId: string,
+) => {
+  getSymbolsInstaces(draft, symbolId).forEach((layer) => {
+    const { instance, pageIndex } = layer;
+
+    const page = draft.sketch.pages[pageIndex];
+    const indexPath = Layers.findAllIndexPaths(
+      page,
+      (layer) => instance.do_objectID === layer.do_objectID,
+    )[0];
+
+    unGroup(page, indexPath, draft);
+  });
 };
 
 export function layerReducer(
@@ -253,28 +271,17 @@ export function layerReducer(
       });
     }
     case 'deleteSymbol': {
-      const [, id] = action;
-      //const page = getCurrentPage(state);
-      const ids = typeof id === 'string' ? [id] : id;
+      const [, symbolId] = action;
 
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
+      const ids = state.selectedSymbolsIds[0];
+      const pageIndex = getCurrentSymbolPageIndex(state, symbolId);
+      const page = state.sketch.pages[pageIndex];
       const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
         ids.includes(layer.do_objectID),
       );
 
       return produce(state, (draft) => {
-        getSymbolsInstaces(draft, id).forEach((layer) => {
-          const { instance, pageIndex } = layer;
-          const page = draft.sketch.pages[pageIndex];
-          const indexPath = Layers.findAllIndexPaths(
-            page,
-            (layer) => instance.do_objectID === layer.do_objectID,
-          )[0];
-
-          unGroup(page, indexPath, draft);
-        });
-
+        detachSymbolInstances(draft, symbolId);
         deleteLayers(indexPaths, draft.sketch.pages[pageIndex]);
       });
     }

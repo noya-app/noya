@@ -10,21 +10,24 @@ interface Props {
   symbols: Sketch.SymbolMaster[];
   selectedSymbolsIds: string[];
   onGroupSymbol: (id: string[], name?: string) => void;
+  onDeleteSymbol: (id: string) => void;
   onSelectSymbol: (id?: string, selectionType?: SelectionType) => void;
 }
 
 export default memo(function SymbolsGrid({
   symbols,
   selectedSymbolsIds,
+  onDeleteSymbol,
   onGroupSymbol,
   onSelectSymbol,
 }: Props) {
   const { basename } = delimitedPath;
 
   const handleSelectMenuItem = useCallback(
-    (value: ThemeMenuItemType) => {
+    (value: ThemeMenuItemType, symbolId: string) => {
       switch (value) {
         case 'delete':
+          onDeleteSymbol(symbolId);
           break;
         case 'group': {
           const groupName = prompt('Group Name');
@@ -40,7 +43,7 @@ export default memo(function SymbolsGrid({
           break;
       }
     },
-    [onGroupSymbol, onSelectSymbol, selectedSymbolsIds],
+    [onGroupSymbol, onDeleteSymbol, onSelectSymbol, selectedSymbolsIds],
   );
 
   const groups = useMemo(() => {
@@ -71,7 +74,9 @@ export default memo(function SymbolsGrid({
                 key={item.do_objectID}
                 title={basename(item.name)}
                 menuItems={menuItems}
-                onSelectMenuItem={handleSelectMenuItem}
+                onSelectMenuItem={(value) =>
+                  handleSelectMenuItem(value, item.symbolID)
+                }
                 onContextMenu={() => handleOnContextMenu(item.do_objectID)}
                 selected={selectedSymbolsIds.includes(item.do_objectID)}
                 onClick={(event: React.MouseEvent) =>
