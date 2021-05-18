@@ -122,9 +122,11 @@ export default function SwatchesToolbar() {
         </TabsContainer>
         <RightContainer>
           <Spacer.Horizontal size={24} />
-          <Button id="add-component" onClick={addComponent}>
-            <PlusIcon />
-          </Button>
+          {componentsTab !== 'symbols' && (
+            <Button id="add-component" onClick={addComponent}>
+              <PlusIcon />
+            </Button>
+          )}
           <Spacer.Horizontal size={4} />
           <Button id="remove-component" onClick={removeComponent}>
             <TrashIcon />
