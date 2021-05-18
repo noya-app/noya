@@ -67,6 +67,8 @@ export const makeGetPageLayers = (
 };
 
 export const deleteLayers = (layers: IndexPath[], page: Sketch.Page) => {
+  // We delete in reverse so that the indexPaths remain accurate even
+  // after some layers are deleted.
   const reversed = [...layers].reverse();
 
   reversed.forEach((indexPath) => {
@@ -77,4 +79,17 @@ export const deleteLayers = (layers: IndexPath[], page: Sketch.Page) => {
     ) as Layers.ParentLayer;
     parent.layers.splice(childIndex, 1);
   });
+};
+
+export const getParentLayer = (page: Sketch.AnyLayer, indexPath: IndexPath) =>
+  Layers.access(page, indexPath.slice(0, -1)) as Layers.ParentLayer;
+
+export const addSiblingLayer = (
+  page: Sketch.AnyLayer,
+  indexPath: IndexPath,
+  layer: Exclude<Sketch.AnyLayer, { _class: 'page' }>,
+) => {
+  const parent = getParentLayer(page, indexPath);
+
+  parent.layers.splice(indexPath[indexPath.length - 1], 0, layer);
 };

@@ -12,7 +12,9 @@ import {
   getCurrentPageIndex,
   getSymbolsPageIndex,
   getLayerTransformAtIndexPath,
-  getLayerIndexPathsExcludingDescendants,
+  getIndexPathsForGroup,
+  getParentLayer,
+  addSiblingLayer,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -28,28 +30,6 @@ export type LayerAction =
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
     ];
-
-const getParentLayer = (page: Sketch.AnyLayer, indexPath: IndexPath) =>
-  Layers.access(page, indexPath.slice(0, -1)) as Layers.ParentLayer;
-
-const addSiblingLayer = (
-  page: Sketch.AnyLayer,
-  indexPath: IndexPath,
-  layer: Layers.ChildLayer,
-) => {
-  const parent = getParentLayer(page, indexPath);
-
-  parent.layers.splice(indexPath[indexPath.length - 1], 0, layer);
-};
-
-const getIndexPathsForGroup = (state: ApplicationState, ids: string[]) => {
-  return getLayerIndexPathsExcludingDescendants(
-    state,
-    ids,
-  ).filter((indexPath) =>
-    Layers.isChildLayer(Layers.access(getCurrentPage(state), indexPath)),
-  );
-};
 
 const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   model: T,
@@ -144,10 +124,7 @@ export function layerReducer(
       const indexPaths = getIndexPathsForGroup(state, ids);
 
       const group = createGroup(Models.group, page, ids, name, indexPaths);
-      if (!group) {
-        console.info('[groupLayer] Selected layers not found');
-        return state;
-      }
+      if (!group) return state;
 
       // Fire we remove selected layers, then we insert the group layer
       return produce(state, (draft) => {
@@ -218,10 +195,7 @@ export function layerReducer(
         indexPaths,
       );
 
-      if (!symbolMasters) {
-        console.info('[groupLayer] Selected layers not found');
-        return state;
-      }
+      if (!symbolMasters) return state;
 
       symbolMasters.symbolID = uuid();
       const symbolInstance = produce(Models.symbolInstance, (draft) => {
