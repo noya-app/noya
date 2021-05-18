@@ -58,7 +58,6 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   name: string,
   indexPaths: IndexPath[],
 ): T | undefined => {
-  const lastIndexPath = indexPaths[0];
   const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
     clickThroughGroups: true,
     includeHiddenLayers: true,
@@ -69,7 +68,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
     return undefined;
   }
 
-  const newParentTransform = getLayerTransformAtIndexPath(page, lastIndexPath);
+  const newParentTransform = getLayerTransformAtIndexPath(page, indexPaths[0]);
   const groupFrame = transformRect(boundingRect, newParentTransform.invert());
   const newGroupTransform = AffineTransform.multiply(
     newParentTransform,
