@@ -67,7 +67,9 @@ export const makeGetPageLayers = (
 };
 
 export const deleteLayers = (layers: IndexPath[], page: Sketch.Page) => {
-  layers.forEach((indexPath) => {
+  const reversed = [...layers].reverse();
+
+  reversed.forEach((indexPath) => {
     const childIndex = indexPath[indexPath.length - 1];
     const parent = Layers.access(
       page,
