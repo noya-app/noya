@@ -26,6 +26,10 @@ export interface Props {
   width: DimensionValue;
   height: DimensionValue;
   rotation: DimensionValue;
+  onSetX: (value: number, mode: SetNumberMode) => void;
+  onSetY: (value: number, mode: SetNumberMode) => void;
+  onSetWidth: (value: number, mode: SetNumberMode) => void;
+  onSetHeight: (value: number, mode: SetNumberMode) => void;
   onSetRotation: (value: number, mode: SetNumberMode) => void;
 }
 
@@ -35,6 +39,10 @@ export default function DimensionsInspector({
   width,
   height,
   rotation,
+  onSetX,
+  onSetY,
+  onSetWidth,
+  onSetHeight,
   onSetRotation,
 }: Props) {
   const iconColor = useTheme().colors.icon;
@@ -46,7 +54,18 @@ export default function DimensionsInspector({
           <InputField.NumberInput
             value={x}
             placeholder={x === undefined ? 'multi' : undefined}
-            onSubmit={() => {}}
+            onNudge={useCallback(
+              (value: number) => {
+                onSetX(value, 'adjust');
+              },
+              [onSetX],
+            )}
+            onSubmit={useCallback(
+              (value) => {
+                onSetX(value, 'replace');
+              },
+              [onSetX],
+            )}
           />
           <InputField.Label>X</InputField.Label>
         </InputField.Root>
@@ -55,7 +74,18 @@ export default function DimensionsInspector({
           <InputField.NumberInput
             value={y}
             placeholder={y === undefined ? 'multi' : undefined}
-            onSubmit={() => {}}
+            onNudge={useCallback(
+              (value: number) => {
+                onSetY(value, 'adjust');
+              },
+              [onSetY],
+            )}
+            onSubmit={useCallback(
+              (value) => {
+                onSetY(value, 'replace');
+              },
+              [onSetY],
+            )}
           />
           <InputField.Label>Y</InputField.Label>
         </InputField.Root>
@@ -86,7 +116,18 @@ export default function DimensionsInspector({
           <InputField.NumberInput
             value={width}
             placeholder={width === undefined ? 'multi' : undefined}
-            onSubmit={() => {}}
+            onNudge={useCallback(
+              (value: number) => {
+                onSetWidth(value, 'adjust');
+              },
+              [onSetWidth],
+            )}
+            onSubmit={useCallback(
+              (value) => {
+                onSetWidth(value, 'replace');
+              },
+              [onSetWidth],
+            )}
           />
           <InputField.Label>W</InputField.Label>
         </InputField.Root>
@@ -95,7 +136,18 @@ export default function DimensionsInspector({
           <InputField.NumberInput
             value={height}
             placeholder={height === undefined ? 'multi' : undefined}
-            onSubmit={() => {}}
+            onNudge={useCallback(
+              (value: number) => {
+                onSetHeight(value, 'adjust');
+              },
+              [onSetHeight],
+            )}
+            onSubmit={useCallback(
+              (value) => {
+                onSetHeight(value, 'replace');
+              },
+              [onSetHeight],
+            )}
           />
           <InputField.Label>H</InputField.Label>
         </InputField.Root>

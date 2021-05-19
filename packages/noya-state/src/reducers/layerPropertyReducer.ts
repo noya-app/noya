@@ -14,6 +14,10 @@ import { SetNumberMode } from './styleReducer';
 export type LayerPropertyAction =
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
+  | [type: 'setLayerX', rotation: number, mode?: SetNumberMode]
+  | [type: 'setLayerY', rotation: number, mode?: SetNumberMode]
+  | [type: 'setLayerWidth', rotation: number, mode?: SetNumberMode]
+  | [type: 'setLayerHeight', rotation: number, mode?: SetNumberMode]
   | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode];
 
@@ -88,6 +92,42 @@ export function layerPropertyReducer(
           const newValue = mode === 'replace' ? amount : rotation + amount;
 
           layer.rotation = newValue * getLayerRotationMultiplier(layer);
+        });
+      });
+    }
+    case 'setLayerX':
+    case 'setLayerY': {
+      const [type, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const property = type === 'setLayerX' ? ('x' as const) : ('y' as const);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          const value = layer.frame[property];
+
+          layer.frame[property] = mode === 'replace' ? amount : value + amount;
+        });
+      });
+    }
+    case 'setLayerWidth':
+    case 'setLayerHeight': {
+      const [type, amount, mode = 'replace'] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      const property =
+        type === 'setLayerWidth' ? ('width' as const) : ('height' as const);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          const value = layer.frame[property];
+
+          layer.frame[property] = Math.max(
+            mode === 'replace' ? amount : value + amount,
+            0.5,
+          );
         });
       });
     }

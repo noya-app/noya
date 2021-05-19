@@ -91,6 +91,10 @@ export function applicationReducer(
     case 'setLayerVisible':
     case 'setExpandedInLayerList':
     case 'setFixedRadius':
+    case 'setLayerX':
+    case 'setLayerY':
+    case 'setLayerWidth':
+    case 'setLayerHeight':
     case 'setLayerRotation':
       return layerPropertyReducer(state, action);
     case 'deleteLayer':

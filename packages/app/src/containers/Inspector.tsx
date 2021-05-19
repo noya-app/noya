@@ -38,6 +38,34 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
+  const handleSetX = useCallback(
+    (value: number, mode: SetNumberMode) => {
+      dispatch('setLayerX', value, mode);
+    },
+    [dispatch],
+  );
+
+  const handleSetY = useCallback(
+    (value: number, mode: SetNumberMode) => {
+      dispatch('setLayerY', value, mode);
+    },
+    [dispatch],
+  );
+
+  const handleSetWidth = useCallback(
+    (value: number, mode: SetNumberMode) => {
+      dispatch('setLayerWidth', value, mode);
+    },
+    [dispatch],
+  );
+
+  const handleSetHeight = useCallback(
+    (value: number, mode: SetNumberMode) => {
+      dispatch('setLayerHeight', value, mode);
+    },
+    [dispatch],
+  );
+
   const elements = useMemo(() => {
     const dimensionsInspectorProps =
       selectedLayers.length === 1
@@ -62,6 +90,10 @@ export default memo(function Inspector() {
         <DimensionsInspector
           {...dimensionsInspectorProps}
           onSetRotation={handleSetRotation}
+          onSetX={handleSetX}
+          onSetY={handleSetY}
+          onSetWidth={handleSetWidth}
+          onSetHeight={handleSetHeight}
         />
         <Spacer.Vertical size={10} />
       </Fragment>,
@@ -78,6 +110,10 @@ export default memo(function Inspector() {
     return withSeparatorElements(views, <Divider />);
   }, [
     selectedLayers,
+    handleSetX,
+    handleSetY,
+    handleSetWidth,
+    handleSetHeight,
     handleSetRotation,
     hasFixedRadiusLayers,
     hasContextSettingsLayers,
