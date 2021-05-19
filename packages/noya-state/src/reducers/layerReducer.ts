@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import produce, { Draft } from 'immer';
+import produce from 'immer';
 import { AffineTransform, transformRect } from 'noya-geometry';
 import { uuid } from 'noya-renderer';
 import { IndexPath } from 'tree-visit';
@@ -16,8 +16,9 @@ import {
   getParentLayer,
   addSiblingLayer,
   getSymbols,
-  getSymbolsInstaces,
-  getCurrentSymbolPageIndex,
+  getSymbolsInstacesIndexPaths,
+  findPageLayerIndexPaths,
+  getSelectedSymbols,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -29,7 +30,7 @@ export type LayerAction =
   | [type: 'ungroupLayer', layerId: string | string[]]
   | [type: 'addSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
-  | [type: 'deleteSymbol', symbolId: string]
+  | [type: 'deleteSymbol', ids: string[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -96,52 +97,46 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   });
 };
 
-const unGroup = (
-  page: Sketch.Page,
-  indexPath: IndexPath,
-  draft: Draft<ApplicationState>,
-) => {
-  const parent = getParentLayer(page, indexPath.slice(0, -1));
-  const index = indexPath[indexPath.length - 1];
-  const element = parent.layers[index] as Sketch.Group | Sketch.SymbolInstance;
-
-  const layers =
-    element._class === 'group'
-      ? element
-      : getSymbols(draft).filter((s) => s.symbolID === element.symbolID)[0];
-
-  parent.layers.splice(index, 1);
-  parent.layers.push(
-    ...layers.layers.map((l) =>
-      produce(l, (l) => {
-        l.do_objectID = uuid();
-        l.frame = {
-          ...l.frame,
-          x: l.frame.x + element.frame.x,
-          y: l.frame.y + element.frame.y,
-        };
-      }),
-    ),
+const unGroup = (parent: Layers.ParentLayer, indexPath: IndexPath) => {
+  const groupIndex = indexPath[indexPath.length - 1];
+  const group = parent.layers[groupIndex] as Sketch.Group;
+  return group.layers.map((l) =>
+    produce(l, (l) => {
+      l.frame = {
+        ...l.frame,
+        x: l.frame.x + group.frame.x,
+        y: l.frame.y + group.frame.y,
+      };
+    }),
   );
-
-  draft.selectedObjects = [parent.do_objectID];
 };
 
-const detachSymbolInstances = (
-  draft: Draft<ApplicationState>,
-  symbolId: string,
+const symbolToGroup = (
+  page: Sketch.Page,
+  state: ApplicationState,
+  parent: Layers.ParentLayer,
+  indexPath: IndexPath,
 ) => {
-  getSymbolsInstaces(draft, symbolId).forEach((layer) => {
-    const { instance, pageIndex } = layer;
+  const index = indexPath[indexPath.length - 1];
+  const element = parent.layers[index] as Sketch.SymbolInstance;
 
-    const page = draft.sketch.pages[pageIndex];
-    const indexPath = Layers.findAllIndexPaths(
-      page,
-      (layer) => instance.do_objectID === layer.do_objectID,
-    )[0];
+  const symbol = getSymbols(state).filter(
+    (s) => s.symbolID === element.symbolID,
+  )[0];
 
-    unGroup(page, indexPath, draft);
+  const group = produce(Models.group, (group) => {
+    group.do_objectID = uuid();
+    group.name = element.name;
+    group.frame = element.frame;
+    group.layers = symbol.layers.map((l) =>
+      produce(l, (l) => {
+        l.do_objectID = uuid();
+      }),
+    );
   });
+
+  deleteLayers([indexPath], page);
+  addSiblingLayer(page, indexPath, group);
 };
 
 export function layerReducer(
@@ -188,19 +183,29 @@ export function layerReducer(
         draft.selectedObjects = [group.do_objectID];
       });
     }
-    case 'ungroupLayer': {
+    case 'ungroupLayer':
+    case 'detachSymbol': {
       const [, id] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
-      const indexPath = Layers.findAllIndexPaths(page, (layer) =>
-        ids.includes(layer.do_objectID),
-      )[0];
+      const indexPaths = getIndexPathsForGroup(state, ids)[0];
 
       return produce(state, (draft) => {
-        unGroup(draft.sketch.pages[pageIndex], indexPath, draft);
+        const parent = getParentLayer(page, indexPaths);
+        const pages = draft.sketch.pages[pageIndex];
+
+        if (action[0] === 'ungroupLayer') {
+          const layers = unGroup(parent, indexPaths);
+          deleteLayers([indexPaths], pages);
+          addSiblingLayer(pages, indexPaths, layers);
+        } else {
+          symbolToGroup(pages, state, parent, indexPaths);
+        }
+
+        draft.selectedObjects = [parent.do_objectID];
       });
     }
     case 'selectLayer': {
@@ -256,33 +261,35 @@ export function layerReducer(
         draft.selectedObjects = [symbolInstance.do_objectID];
       });
     }
-    case 'detachSymbol': {
-      const [, id] = action;
-      const ids = typeof id === 'string' ? [id] : id;
-
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-      const indexPath = Layers.findAllIndexPaths(page, (layer) =>
-        ids.includes(layer.do_objectID),
-      )[0];
-
-      return produce(state, (draft) => {
-        unGroup(draft.sketch.pages[pageIndex], indexPath, draft);
-      });
-    }
     case 'deleteSymbol': {
-      const [, symbolId] = action;
+      const [, id] = action;
 
-      const ids = state.selectedSymbolsIds[0];
-      const pageIndex = getCurrentSymbolPageIndex(state, symbolId);
-      const page = state.sketch.pages[pageIndex];
-      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+      const ids = typeof id === 'string' ? [id] : id;
+      const indexPaths = findPageLayerIndexPaths(state, (layer) =>
         ids.includes(layer.do_objectID),
       );
 
+      const symbolsInstancesIndexPaths = getSelectedSymbols(
+        state,
+      ).flatMap((symbol) =>
+        getSymbolsInstacesIndexPaths(state, symbol.symbolID),
+      );
+
       return produce(state, (draft) => {
-        detachSymbolInstances(draft, symbolId);
-        deleteLayers(indexPaths, draft.sketch.pages[pageIndex]);
+        symbolsInstancesIndexPaths.forEach((element) => {
+          const { indexPaths, pageIndex } = element;
+          indexPaths.forEach((indexPath) => {
+            const parent = getParentLayer(
+              state.sketch.pages[pageIndex],
+              indexPath,
+            );
+            const pages = draft.sketch.pages[pageIndex];
+            symbolToGroup(pages, state, parent, indexPath);
+          });
+        });
+        indexPaths.forEach((i) =>
+          deleteLayers(i.indexPaths, draft.sketch.pages[i.pageIndex]),
+        );
       });
     }
     default:

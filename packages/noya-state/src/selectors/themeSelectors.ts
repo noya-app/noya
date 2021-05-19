@@ -3,6 +3,7 @@ import { delimitedPath } from 'noya-utils';
 import { Layers } from '..';
 import { Draft } from 'immer';
 import { ApplicationState } from '../reducers/applicationReducer';
+import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
 
 export type ComponentsTypes =
   | Sketch.Swatch
@@ -105,14 +106,24 @@ export const getSelectedSymbols = (
   );
 };
 
-export const getSymbolsInstaces = (
-  state: Draft<ApplicationState>,
+export const getSymbolsInstacesIndexPaths = (
+  state: ApplicationState,
   symbolMasterId: string,
-): { instance: Sketch.SymbolInstance; pageIndex: number }[] => {
+): LayerIndexPaths[] =>
+  findPageLayerIndexPaths(
+    state,
+    (layer) =>
+      Layers.isSymbolInstance(layer) && layer.symbolID === symbolMasterId,
+  ).filter((l) => l.indexPaths.length);
+
+export const getSymbolsInstacesIds = (
+  state: ApplicationState,
+  symbolMasterId: string,
+): string[] => {
   return state.sketch.pages.flatMap((p, index) =>
     p.layers.flatMap((l) =>
       Layers.isSymbolInstance(l) && l.symbolID === symbolMasterId
-        ? [{ instance: l, pageIndex: index }]
+        ? [l.do_objectID]
         : [],
     ),
   );

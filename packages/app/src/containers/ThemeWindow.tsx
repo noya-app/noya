@@ -162,7 +162,7 @@ const Symbols = memo(function Symbols() {
         [dispatch],
       )}
       onDeleteSymbol={useCallback(
-        (id: string) => dispatch('deleteSymbol', id),
+        (id: string[]) => dispatch('deleteSymbol', id),
         [dispatch],
       )}
     />
