@@ -37,7 +37,7 @@ export type InteractionAction =
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
-  | [type: 'maybeMove', origin: Point]
+  | [type: 'maybeMove', origin: Point, pageSnapshot: Sketch.Page]
   | [type: 'hoverHandle', direction: CompassDirection]
   | [
       type: 'maybeScale',
@@ -71,7 +71,7 @@ export type InteractionState =
       origin: Point;
       current: Point;
     }
-  | { type: 'maybeMove'; origin: Point }
+  | { type: 'maybeMove'; origin: Point; pageSnapshot: Sketch.Page }
   | { type: 'hoverHandle'; direction: CompassDirection }
   | {
       type: 'maybeScale';
@@ -79,7 +79,7 @@ export type InteractionState =
       direction: CompassDirection;
       pageSnapshot: Sketch.Page;
     }
-  | { type: 'moving'; previous: Point; next: Point }
+  | { type: 'moving'; origin: Point; current: Point; pageSnapshot: Sketch.Page }
   | {
       type: 'scaling';
       origin: Point;
@@ -173,9 +173,9 @@ export function interactionReducer(
       });
     }
     case 'maybeMove': {
-      const [, origin] = action;
+      const [, origin, pageSnapshot] = action;
 
-      return { type: action[0], origin };
+      return { type: action[0], origin, pageSnapshot };
     }
     case 'maybeScale': {
       const [, origin, direction, pageSnapshot] = action;
@@ -196,8 +196,9 @@ export function interactionReducer(
 
       return {
         type: 'moving',
-        previous: state.origin,
-        next: point,
+        origin: state.origin,
+        current: point,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'startScaling': {
@@ -224,8 +225,9 @@ export function interactionReducer(
 
       return {
         type: 'moving',
-        previous: state.next,
-        next: point,
+        origin: state.origin,
+        current: point,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'updateScaling': {
