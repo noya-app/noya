@@ -13,7 +13,7 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
 } from '../selectors/selectors';
 import { Point } from '../types';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+import { ApplicationState } from './applicationReducer';
 import {
   CompassDirection,
   InteractionAction,
@@ -33,7 +33,8 @@ export type CanvasAction =
       // of the current page). Maybe there's a better way? This still seems
       // better than moving the whole reducer up into the parent.
       action:
-        | Exclude<InteractionAction, ['maybeScale', ...any[]]>
+        | Exclude<InteractionAction, ['maybeMove' | 'maybeScale', ...any[]]>
+        | [type: 'maybeMove', origin: Point]
         | [type: 'maybeScale', origin: Point, direction: CompassDirection],
     ];
 
@@ -101,26 +102,32 @@ export function canvasReducer(
 
       const interactionState = interactionReducer(
         state.interactionState,
-        action[1][0] === 'maybeScale' ? [...action[1], page] : action[1],
+        action[1][0] === 'maybeScale' || action[1][0] === 'maybeMove'
+          ? [...action[1], page]
+          : action[1],
       );
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
 
         switch (interactionState.type) {
           case 'moving': {
-            const { previous, next } = interactionState;
+            const { origin, current, pageSnapshot } = interactionState;
 
             const delta = {
-              x: next.x - previous.x,
-              y: next.y - previous.y,
+              x: current.x - origin.x,
+              y: current.y - origin.y,
             };
 
-            accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-              (layer) => {
-                layer.frame.x += delta.x;
-                layer.frame.y += delta.y;
-              },
-            );
+            layerIndexPaths.forEach((indexPath) => {
+              const initialRect = Layers.access(pageSnapshot, indexPath).frame;
+              const layer = Layers.access(
+                draft.sketch.pages[pageIndex],
+                indexPath,
+              );
+
+              layer.frame.x = initialRect.x + delta.x;
+              layer.frame.y = initialRect.y + delta.y;
+            });
 
             break;
           }
