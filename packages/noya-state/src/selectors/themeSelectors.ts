@@ -4,6 +4,7 @@ import { Layers } from '..';
 import { Draft } from 'immer';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
+import { getCurrentTab } from './workspaceSelectors';
 
 export type ComponentsTypes =
   | Sketch.Swatch
@@ -101,9 +102,12 @@ export const getSelectedSymbols = (
 ): Sketch.SymbolMaster[] => {
   const symbols = getSymbols(state);
 
-  return symbols.filter((symbol) =>
-    state.selectedSymbolsIds.includes(symbol.do_objectID),
-  );
+  const filter =
+    getCurrentTab(state) === 'canvas'
+      ? state.selectedObjects
+      : state.selectedSymbolsIds;
+
+  return symbols.filter((symbol) => filter.includes(symbol.do_objectID));
 };
 
 export const getSymbolsInstacesIndexPaths = (
