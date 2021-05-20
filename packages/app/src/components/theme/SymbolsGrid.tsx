@@ -4,6 +4,7 @@ import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import { ThemeMenuItemType, menuItems } from './menuItems';
+import Symbol from './Symbol';
 import { createThemeGroups } from '../../utils/themeTree';
 
 interface Props {
@@ -83,7 +84,9 @@ export default memo(function SymbolsGrid({
                     event.shiftKey ? 'intersection' : 'replace',
                   )
                 }
-              ></GridView.Item>
+              >
+                <Symbol layer={item} />
+              </GridView.Item>
             ))}
           </GridView.Section>
         </Fragment>

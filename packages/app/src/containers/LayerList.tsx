@@ -1,8 +1,10 @@
 import {
-  BoxModelIcon,
   CircleIcon,
+  Component1Icon,
+  ComponentInstanceIcon,
   EyeClosedIcon,
   EyeOpenIcon,
+  FrameIcon,
   GroupIcon,
   ImageIcon,
   SquareIcon,
@@ -20,6 +22,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
 import {
   useApplicationState,
@@ -77,11 +80,20 @@ function flattenLayerList(
 const LayerIcon = memo(function LayerIcon({
   type,
   selected,
+  variant,
 }: {
   type: LayerType;
   selected: boolean;
+  variant?: 'primary';
 }) {
-  const color = selected ? 'rgb(220, 220, 220)' : 'rgb(139, 139, 139)';
+  const colors = useTheme().colors;
+
+  const color =
+    variant && !selected
+      ? colors[variant]
+      : selected
+      ? colors.iconSelected
+      : colors.icon;
 
   switch (type) {
     case 'rectangle':
@@ -91,8 +103,11 @@ const LayerIcon = memo(function LayerIcon({
     case 'text':
       return <TextIcon color={color} />;
     case 'artboard':
+      return <FrameIcon color={color} />;
     case 'symbolMaster':
-      return <BoxModelIcon color={color} />;
+      return <Component1Icon color={color} />;
+    case 'symbolInstance':
+      return <ComponentInstanceIcon color={color} />;
     case 'group':
       return <GroupIcon color={color} />;
     case 'bitmap':
@@ -294,6 +309,11 @@ export default memo(function LayerList() {
           dispatch('selectLayer', id);
         };
 
+        const isSymbolClass =
+          type === 'symbolInstance' || type === 'symbolMaster';
+        const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
+        const isGroupClass = isArtboardClass || type === 'group';
+
         return (
           <LayerRow
             menuItems={menuItems}
@@ -307,13 +327,15 @@ export default memo(function LayerList() {
             onClick={handleClick}
             onHoverChange={handleHoverChange}
             onChangeVisible={handleChangeVisible}
-            icon={<LayerIcon type={type} selected={selected} />}
-            isSectionHeader={type === 'artboard' || type === 'symbolMaster'}
-            expanded={
-              type === 'artboard' || type === 'symbolMaster' || type === 'group'
-                ? expanded
-                : undefined
+            icon={
+              <LayerIcon
+                type={type}
+                selected={selected}
+                variant={isSymbolClass ? 'primary' : undefined}
+              />
             }
+            isSectionHeader={isArtboardClass}
+            expanded={isGroupClass ? expanded : undefined}
             onClickChevron={handleClickChevron}
           />
         );

@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { Size } from 'noya-geometry';
+import { center, Size } from 'noya-geometry';
 import { uuid } from 'noya-renderer';
 import SketchLayer from 'noya-renderer/src/components/layers/SketchLayer';
 import { Models } from 'noya-state';
@@ -20,10 +20,7 @@ function RCKStylePreview({ style, size }: { style: Sketch.Style; size: Size }) {
       draft.fixedRadius = 6;
       draft.frame = {
         ...draft.frame,
-        x: (size.width - PREVIEW_SIZE) / 2,
-        y: (size.height - PREVIEW_SIZE) / 2,
-        width: PREVIEW_SIZE,
-        height: PREVIEW_SIZE,
+        ...center({ width: PREVIEW_SIZE, height: PREVIEW_SIZE }, size),
       };
       draft.style = style;
     });
