@@ -1,5 +1,5 @@
 import * as Primitives from 'noya-renderer/src/primitives';
-import { ApplicationState } from '../index';
+import { ApplicationState, Layers } from '../index';
 import type { Point } from '../types';
 
 export type EncodedPageMetadata = {
@@ -47,4 +47,17 @@ export const getCurrentPageMetadata = (
     zoomValue: meta.zoomValue,
     scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
   };
+};
+
+export const getCurrentSymbolPageIndex = (
+  state: ApplicationState,
+  symbolID: string,
+) => {
+  const pageIndex = state.sketch.pages.findIndex((page) =>
+    page.layers.some(
+      (l) => Layers.isSymbolMaster(l) && l.symbolID === symbolID,
+    ),
+  );
+
+  return pageIndex;
 };

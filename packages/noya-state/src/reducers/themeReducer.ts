@@ -8,7 +8,9 @@ import {
   findPageLayerIndexPaths,
   getCurrentPageIndex,
   getSelectedLayerIndexPaths,
+  getSymbols,
   groupThemeComponents,
+  setComponentName,
   visitLayerColors,
   visitStyleColors,
 } from '../selectors/selectors';
@@ -22,14 +24,18 @@ import { SetNumberMode } from './styleReducer';
 
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
 
+export type ComponentsTypes =
+  | Sketch.Swatch
+  | Sketch.SharedStyle
+  | Sketch.SymbolMaster;
+
 export type ThemeAction =
   | [type: 'setThemeTab', value: ThemeTab]
   | [
-      type: `select${ComponentsElements}`,
+      type: `select${ComponentsElements | 'Symbol'}`,
       id: string | string[] | undefined,
       selectionType?: SelectionType,
     ]
-  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
   | [
       type: 'setSwatchOpacity',
       swatchId: string | string[],
@@ -49,19 +55,20 @@ export type ThemeAction =
     ]
   | [type: `duplicate${ComponentsElements}`, id: string[]]
   | [
-      type: `set${ComponentsElements}Name`,
-      swatchId: string | string[],
+      type: `set${ComponentsElements | 'Symbol'}Name`,
+      id: string | string[],
       name: string,
     ]
   | [type: `remove${ComponentsElements}`]
-  | [type: `setSelected${ComponentsElements}Group`, groupId: string]
+  | [type: `setSelected${ComponentsElements | 'Symbol'}Group`, groupId: string]
   | [
-      type: `group${ComponentsElements}`,
+      type: `group${ComponentsElements | 'Symbol'}`,
       id: string | string[],
       name: string | undefined,
     ]
   | [type: 'setThemeStyle', sharedStyleId?: string]
-  | [type: 'setTextStyle', sharedStyleId?: string];
+  | [type: 'setTextStyle', sharedStyleId?: string]
+  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color];
 
 export function themeReducer(
   state: ApplicationState,
@@ -304,6 +311,13 @@ export function themeReducer(
         updateSelection(draft.selectedTextStyleIds, id, selectionType);
       });
     }
+    case 'selectSymbol': {
+      const [, id, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedSymbolsIds, id, selectionType);
+      });
+    }
     case 'setSwatchColor': {
       const [, id, color] = action;
 
@@ -361,28 +375,52 @@ export function themeReducer(
         });
       });
     }
-    case 'setThemeStyleName':
-    case 'setTextStyleName':
+    case 'setThemeStyleName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        setComponentName(
+          ids,
+          name,
+          draft.sketch.document.layerStyles?.objects ?? [],
+        );
+      });
+    }
+    case 'setTextStyleName': {
+      const [, id, name] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        setComponentName(
+          ids,
+          name,
+          draft.sketch.document.layerTextStyles?.objects,
+        );
+      });
+    }
     case 'setSwatchName': {
       const [, id, name] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
       return produce(state, (draft) => {
-        const array =
-          action[0] === 'setSwatchName'
-            ? draft.sketch.document.sharedSwatches?.objects ?? []
-            : action[0] === 'setTextStyleName'
-            ? draft.sketch.document.layerTextStyles?.objects ?? []
-            : draft.sketch.document.layerStyles?.objects ?? [];
+        setComponentName(
+          ids,
+          name,
+          draft.sketch.document.sharedSwatches?.objects ?? [],
+        );
+      });
+    }
+    case 'setSymbolName': {
+      const [, id, name] = action;
 
-        array.forEach((object: Sketch.Swatch | Sketch.SharedStyle) => {
-          if (!ids.includes(object.do_objectID)) return;
+      const ids = typeof id === 'string' ? [id] : id;
 
-          const group = delimitedPath.dirname(object.name);
-
-          object.name = delimitedPath.join([group, name]);
-        });
+      return produce(state, (draft) => {
+        setComponentName(ids, name, getSymbols(draft));
       });
     }
     case 'setThemeStyle':
@@ -536,6 +574,12 @@ export function themeReducer(
         draft.selectedTextStyleGroup = id;
       });
     }
+    case 'setSelectedSymbolGroup': {
+      const [, id] = action;
+      return produce(state, (draft) => {
+        draft.selectedSymbolGroup = id;
+      });
+    }
     case 'groupSwatch': {
       const [, id, value] = action;
       const ids = typeof id === 'string' ? [id] : id;
@@ -574,6 +618,15 @@ export function themeReducer(
           draft.sketch.document.layerStyles?.objects ?? [],
         );
         draft.selectedTextStyleGroup = '';
+      });
+    }
+    case 'groupSymbol': {
+      const [, id, value] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        groupThemeComponents(ids, value, getSymbols(draft));
+        draft.selectedSymbolGroup = '';
       });
     }
     default:

@@ -84,12 +84,14 @@ export const deleteLayers = (layers: IndexPath[], page: Sketch.Page) => {
 export const getParentLayer = (page: Sketch.AnyLayer, indexPath: IndexPath) =>
   Layers.access(page, indexPath.slice(0, -1)) as Layers.ParentLayer;
 
-export const addSiblingLayer = (
+export const addSiblingLayer = <
+  T extends Exclude<Sketch.AnyLayer, { _class: 'page' }>
+>(
   page: Sketch.AnyLayer,
   indexPath: IndexPath,
-  layer: Exclude<Sketch.AnyLayer, { _class: 'page' }>,
+  layer: T | T[],
 ) => {
   const parent = getParentLayer(page, indexPath);
-
-  parent.layers.splice(indexPath[indexPath.length - 1], 0, layer);
+  const l = layer instanceof Array ? layer : [layer];
+  parent.layers.splice(indexPath[indexPath.length - 1], 0, ...l);
 };

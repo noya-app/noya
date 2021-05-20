@@ -7,6 +7,7 @@ import { memo, useCallback, useMemo } from 'react';
 import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 import TextStylesGrid from '../components/theme/TextStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
+import SymbolsGrid from '../components/theme/SymbolsGrid';
 import useShallowArray from '../hooks/useShallowArray';
 import styled from 'styled-components';
 
@@ -101,7 +102,7 @@ const TextStyles = memo(function TextStyles() {
 
   const selectedGroup = state.selectedTextStyleGroup;
   const filterText = useMemo(
-    () => textStyles.filter((swatch) => swatch.name.startsWith(selectedGroup)),
+    () => textStyles.filter((item) => item.name.startsWith(selectedGroup)),
     [textStyles, selectedGroup],
   );
 
@@ -134,6 +135,40 @@ const TextStyles = memo(function TextStyles() {
   );
 });
 
+const Symbols = memo(function Symbols() {
+  const [state, dispatch] = useApplicationState();
+
+  const symbols = useShallowArray(useSelector(Selectors.getSymbols));
+  const selectedGroup = state.selectedSymbolGroup;
+  const filterSymbols = useMemo(
+    () => symbols.filter((item) => item.name.startsWith(selectedGroup)),
+    [symbols, selectedGroup],
+  );
+
+  return (
+    <SymbolsGrid
+      symbols={filterSymbols}
+      selectedSymbolsIds={state.selectedSymbolsIds}
+      onSelectSymbol={useCallback(
+        (id, type) => {
+          dispatch('selectSymbol', id, type);
+        },
+        [dispatch],
+      )}
+      onGroupSymbol={useCallback(
+        (id: string[], name?: string) => {
+          dispatch('groupSymbol', id, name);
+        },
+        [dispatch],
+      )}
+      onDeleteSymbol={useCallback(
+        (id: string[]) => dispatch('deleteSymbol', id),
+        [dispatch],
+      )}
+    />
+  );
+});
+
 export default memo(function ThemeWindow() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
@@ -146,7 +181,7 @@ export default memo(function ThemeWindow() {
       case 'layerStyles':
         return <ThemeStyles />;
       case 'symbols':
-        return <></>;
+        return <Symbols />;
     }
   }, [componentsTab]);
 

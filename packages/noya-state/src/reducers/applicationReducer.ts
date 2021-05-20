@@ -44,9 +44,11 @@ export type ApplicationState = {
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedTextStyleIds: string[];
+  selectedSymbolsIds: string[];
   selectedSwatchGroup: string;
   selectedTextStyleGroup: string;
   selectedThemeStyleGroup: string;
+  selectedSymbolGroup: string;
   sketch: SketchFile;
 };
 
@@ -102,6 +104,8 @@ export function applicationReducer(
     case 'groupLayer':
     case 'ungroupLayer':
     case 'addSymbol':
+    case 'detachSymbol':
+    case 'deleteSymbol':
       return layerReducer(state, action);
     case 'distributeLayers':
     case 'alignLayers': {
@@ -237,9 +241,11 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
     selectedTextStyleIds: [],
+    selectedSymbolsIds: [],
     selectedSwatchGroup: '',
     selectedThemeStyleGroup: '',
     selectedTextStyleGroup: '',
+    selectedSymbolGroup: '',
     sketch,
   };
 }

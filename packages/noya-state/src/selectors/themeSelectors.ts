@@ -1,6 +1,15 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { delimitedPath } from 'noya-utils';
+import { Layers } from '..';
+import { Draft } from 'immer';
 import { ApplicationState } from '../reducers/applicationReducer';
+import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
+import { getCurrentTab } from './workspaceSelectors';
+
+export type ComponentsTypes =
+  | Sketch.Swatch
+  | Sketch.SharedStyle
+  | Sketch.SymbolMaster;
 
 export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
@@ -48,9 +57,11 @@ export const getSelectedThemeTextStyles = (
   );
 };
 
-export function groupThemeComponents<
-  T extends Sketch.Swatch | Sketch.SharedStyle
->(currentIds: string[], groupName: string | undefined, array: T[]) {
+export function groupThemeComponents<T extends ComponentsTypes>(
+  currentIds: string[],
+  groupName: string | undefined,
+  array: T[],
+) {
   array.forEach((object: T) => {
     if (!currentIds.includes(object.do_objectID)) return;
     const prevGroup = groupName ? delimitedPath.dirname(object.name) : '';
@@ -62,3 +73,60 @@ export function groupThemeComponents<
 
   return array;
 }
+
+export function setComponentName<T extends ComponentsTypes>(
+  ids: string[],
+  name: string,
+  array: T[],
+) {
+  array.forEach((object: ComponentsTypes) => {
+    if (!ids.includes(object.do_objectID)) return;
+
+    const group = delimitedPath.dirname(object.name);
+    object.name = delimitedPath.join([group, name]);
+  });
+}
+
+export const getSymbols = (
+  state: Draft<ApplicationState>,
+): Sketch.SymbolMaster[] => {
+  return state.sketch.pages.flatMap((p) =>
+    p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
+  );
+};
+
+export const getSelectedSymbols = (
+  state: ApplicationState,
+): Sketch.SymbolMaster[] => {
+  const symbols = getSymbols(state);
+
+  const filter =
+    getCurrentTab(state) === 'canvas'
+      ? state.selectedObjects
+      : state.selectedSymbolsIds;
+
+  return symbols.filter((symbol) => filter.includes(symbol.do_objectID));
+};
+
+export const getSymbolsInstancesIndexPaths = (
+  state: ApplicationState,
+  symbolMasterId: string,
+): LayerIndexPaths[] =>
+  findPageLayerIndexPaths(
+    state,
+    (layer) =>
+      Layers.isSymbolInstance(layer) && layer.symbolID === symbolMasterId,
+  ).filter((l) => l.indexPaths.length);
+
+export const getSymbolsInstancesIds = (
+  state: ApplicationState,
+  symbolMasterId: string,
+): string[] => {
+  return state.sketch.pages.flatMap((p, index) =>
+    p.layers.flatMap((l) =>
+      Layers.isSymbolInstance(l) && l.symbolID === symbolMasterId
+        ? [l.do_objectID]
+        : [],
+    ),
+  );
+};
