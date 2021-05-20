@@ -85,8 +85,6 @@ export function setComponentName<T extends ComponentsTypes>(
     const group = delimitedPath.dirname(object.name);
     object.name = delimitedPath.join([group, name]);
   });
-
-  return array;
 }
 
 export const getSymbols = (
@@ -110,7 +108,7 @@ export const getSelectedSymbols = (
   return symbols.filter((symbol) => filter.includes(symbol.do_objectID));
 };
 
-export const getSymbolsInstacesIndexPaths = (
+export const getSymbolsInstancesIndexPaths = (
   state: ApplicationState,
   symbolMasterId: string,
 ): LayerIndexPaths[] =>
@@ -120,7 +118,7 @@ export const getSymbolsInstacesIndexPaths = (
       Layers.isSymbolInstance(layer) && layer.symbolID === symbolMasterId,
   ).filter((l) => l.indexPaths.length);
 
-export const getSymbolsInstacesIds = (
+export const getSymbolsInstancesIds = (
   state: ApplicationState,
   symbolMasterId: string,
 ): string[] => {

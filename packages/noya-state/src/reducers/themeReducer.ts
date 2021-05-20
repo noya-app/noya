@@ -384,7 +384,7 @@ export function themeReducer(
         setComponentName(
           ids,
           name,
-          draft.sketch.document.layerTextStyles?.objects ?? [],
+          draft.sketch.document.layerStyles?.objects ?? [],
         );
       });
     }

@@ -16,7 +16,7 @@ import {
   getParentLayer,
   addSiblingLayer,
   getSymbols,
-  getSymbolsInstacesIndexPaths,
+  getSymbolsInstancesIndexPaths,
   findPageLayerIndexPaths,
   getSelectedSymbols,
   LayerIndexPaths,
@@ -140,7 +140,7 @@ const symbolToGroup = (
   addSiblingLayer(page, indexPath, group);
 };
 
-const detacthSymbolIntances = (
+const detachSymbolIntances = (
   pages: Sketch.Page[],
   state: ApplicationState,
   symbolsInstancesIndexPaths: LayerIndexPaths[],
@@ -161,30 +161,31 @@ export function layerReducer(
   action: LayerAction,
 ): ApplicationState {
   switch (action[0]) {
-    case 'deleteLayer': {
+    case 'deleteLayer':
+    case 'deleteSymbol': {
       const [, id] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
-      const indexPaths = Layers.findAllIndexPaths(page, (layer) =>
+      const indexPaths = findPageLayerIndexPaths(state, (layer) =>
         ids.includes(layer.do_objectID),
       );
 
       const symbolsInstancesIndexPaths = getSelectedSymbols(
         state,
       ).flatMap((symbol) =>
-        getSymbolsInstacesIndexPaths(state, symbol.symbolID),
+        getSymbolsInstancesIndexPaths(state, symbol.symbolID),
       );
 
       return produce(state, (draft) => {
-        detacthSymbolIntances(
+        detachSymbolIntances(
           draft.sketch.pages,
           state,
           symbolsInstancesIndexPaths,
         );
-        deleteLayers(indexPaths, draft.sketch.pages[pageIndex]);
+        indexPaths.forEach((i) =>
+          deleteLayers(i.indexPaths, draft.sketch.pages[i.pageIndex]),
+        );
       });
     }
     case 'groupLayer': {
@@ -285,31 +286,6 @@ export function layerReducer(
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
 
         draft.selectedObjects = [symbolInstance.do_objectID];
-      });
-    }
-    case 'deleteSymbol': {
-      const [, id] = action;
-
-      const ids = typeof id === 'string' ? [id] : id;
-      const indexPaths = findPageLayerIndexPaths(state, (layer) =>
-        ids.includes(layer.do_objectID),
-      );
-
-      const symbolsInstancesIndexPaths = getSelectedSymbols(
-        state,
-      ).flatMap((symbol) =>
-        getSymbolsInstacesIndexPaths(state, symbol.symbolID),
-      );
-
-      return produce(state, (draft) => {
-        detacthSymbolIntances(
-          draft.sketch.pages,
-          state,
-          symbolsInstancesIndexPaths,
-        );
-        indexPaths.forEach((i) =>
-          deleteLayers(i.indexPaths, draft.sketch.pages[i.pageIndex]),
-        );
       });
     }
     default:
