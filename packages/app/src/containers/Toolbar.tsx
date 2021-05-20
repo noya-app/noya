@@ -17,7 +17,7 @@ import {
 } from '../contexts/ApplicationStateContext';
 
 const Container = styled.header(({ theme }) => ({
-  height: `${theme.sizes.toolbar.height}px`,
+  minHeight: `${theme.sizes.toolbar.height}px`,
   display: 'flex',
   borderBottom: `1px solid ${theme.colors.dividerStrong}`,
   alignItems: 'center',

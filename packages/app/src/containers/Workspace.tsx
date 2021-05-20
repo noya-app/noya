@@ -97,7 +97,7 @@ const CanvasTab = memo(function CanvasTab() {
   );
 });
 
-const ComponentsTab = memo(function ComponentsTab() {
+const ThemeTab = memo(function ThemeTab() {
   return (
     <>
       <LeftSidebar>
@@ -139,7 +139,7 @@ export default function Workspace() {
   useKeyboardShortcuts();
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-      {currentTab === 'canvas' ? <CanvasTab /> : <ComponentsTab />}
+      {currentTab === 'canvas' ? <CanvasTab /> : <ThemeTab />}
     </ThemeProvider>
   );
 }
