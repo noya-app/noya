@@ -1,8 +1,10 @@
 import {
-  BoxModelIcon,
   CircleIcon,
+  Component1Icon,
+  ComponentInstanceIcon,
   EyeClosedIcon,
   EyeOpenIcon,
+  FrameIcon,
   GroupIcon,
   ImageIcon,
   SquareIcon,
@@ -20,6 +22,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
 import {
   useApplicationState,
@@ -77,11 +80,20 @@ function flattenLayerList(
 const LayerIcon = memo(function LayerIcon({
   type,
   selected,
+  variant,
 }: {
   type: LayerType;
   selected: boolean;
+  variant?: 'primary';
 }) {
-  const color = selected ? 'rgb(220, 220, 220)' : 'rgb(139, 139, 139)';
+  const colors = useTheme().colors;
+
+  const color =
+    variant && !selected
+      ? colors[variant]
+      : selected
+      ? colors.iconSelected
+      : colors.icon;
 
   switch (type) {
     case 'rectangle':
@@ -91,8 +103,11 @@ const LayerIcon = memo(function LayerIcon({
     case 'text':
       return <TextIcon color={color} />;
     case 'artboard':
+      return <FrameIcon color={color} />;
     case 'symbolMaster':
-      return <BoxModelIcon color={color} />;
+      return <Component1Icon color={color} />;
+    case 'symbolInstance':
+      return <ComponentInstanceIcon color={color} />;
     case 'group':
       return <GroupIcon color={color} />;
     case 'bitmap':
@@ -107,7 +122,7 @@ type MenuItemType =
   | 'group'
   | 'ungroup'
   | 'delete'
-  | 'addSymbol'
+  | 'createSymbol'
   | 'detachSymbol';
 
 const LayerRow = memo(
@@ -192,9 +207,34 @@ export default memo(function LayerList() {
     selectedObjects.length === 1 &&
     items.find((i) => i.id === selectedObjects[0])?.type === 'symbolInstance';
 
+  const canBeSymbol = useCallback((): number => {
+    const selectedItems = items.filter((i) => selectedObjects.includes(i.id));
+
+    if (
+      selectedItems.length === 0 ||
+      selectedItems.some((l) => l.type === 'symbolMaster')
+    )
+      return 0;
+
+    if (
+      selectedItems[0].type === 'artboard' &&
+      selectedItems.every((l) => l.type === 'artboard')
+    )
+      return 1;
+    if (
+      selectedItems[0].type !== 'artboard' &&
+      selectedItems.every((l) => l.type !== 'artboard')
+    )
+      return 2;
+
+    return 0;
+  }, [items, selectedObjects]);
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
-      { value: 'addSymbol', title: 'Create Symbol' },
+      ...(canBeSymbol() !== 0
+        ? [{ value: 'createSymbol' as const, title: 'Create Symbol' }]
+        : []),
       ...(canDetach
         ? [{ value: 'detachSymbol' as const, title: 'Detach Symbol' }]
         : []),
@@ -204,7 +244,7 @@ export default memo(function LayerList() {
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
     ],
-    [canUngroup, canDetach],
+    [canUngroup, canDetach, canBeSymbol],
   );
 
   const onSelectMenuItem = useCallback(
@@ -226,11 +266,11 @@ export default memo(function LayerList() {
         case 'ungroup':
           dispatch('ungroupLayer', selectedObjects);
           return;
-        case 'addSymbol': {
-          const name = prompt('New Symbol Name');
+        case 'createSymbol': {
+          const name = canBeSymbol() === 2 ? prompt('New Symbol Name') : ' ';
 
           if (!name) return;
-          dispatch('addSymbol', selectedObjects, name);
+          dispatch('createSymbol', selectedObjects, name);
           return;
         }
         case 'detachSymbol': {
@@ -239,7 +279,7 @@ export default memo(function LayerList() {
         }
       }
     },
-    [dispatch, selectedObjects],
+    [dispatch, selectedObjects, canBeSymbol],
   );
 
   const layerElements = useMemo(() => {
@@ -294,6 +334,11 @@ export default memo(function LayerList() {
           dispatch('selectLayer', id);
         };
 
+        const isSymbolClass =
+          type === 'symbolInstance' || type === 'symbolMaster';
+        const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
+        const isGroupClass = isArtboardClass || type === 'group';
+
         return (
           <LayerRow
             menuItems={menuItems}
@@ -307,13 +352,15 @@ export default memo(function LayerList() {
             onClick={handleClick}
             onHoverChange={handleHoverChange}
             onChangeVisible={handleChangeVisible}
-            icon={<LayerIcon type={type} selected={selected} />}
-            isSectionHeader={type === 'artboard' || type === 'symbolMaster'}
-            expanded={
-              type === 'artboard' || type === 'symbolMaster' || type === 'group'
-                ? expanded
-                : undefined
+            icon={
+              <LayerIcon
+                type={type}
+                selected={selected}
+                variant={isSymbolClass ? 'primary' : undefined}
+              />
             }
+            isSectionHeader={isArtboardClass}
+            expanded={isGroupClass ? expanded : undefined}
             onClickChevron={handleClickChevron}
           />
         );

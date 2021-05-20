@@ -56,6 +56,7 @@ export const colors = {
     border: '#BBB',
   },
   icon: 'rgb(139, 139, 139)',
+  iconSelected: 'rgb(220, 220, 220)',
 };
 
 export const fonts = {
