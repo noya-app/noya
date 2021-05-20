@@ -42,7 +42,8 @@ const ItemContainer = styled.div<{ selected: boolean }>(
     justifyContent: 'center',
     borderRadius: '12px',
     cursor: 'pointer',
-    border: `2px ${selected ? 'solid' : 'none'} rgb(132,63,255)`,
+    border: `2px solid ${selected ? theme.colors.primary : 'transparent'}`,
+    overflow: 'hidden',
   }),
 );
 

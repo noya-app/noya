@@ -1,6 +1,6 @@
 import {
-  BoxModelIcon,
   CircleIcon,
+  FrameIcon,
   MoveIcon,
   RulerHorizontalIcon,
   SquareIcon,
@@ -52,7 +52,7 @@ export default function Toolbar() {
             }
           }}
         >
-          <BoxModelIcon />
+          <FrameIcon />
         </Button>
         <Spacer.Horizontal size={itemSeparatorSize} />
         <Button
@@ -129,9 +129,11 @@ export default function Toolbar() {
         >
           <RulerHorizontalIcon />
         </Button>
+        <Spacer.Horizontal size={40} />
         <Button id="undo" disabled={undoDisabled} onClick={undo}>
           Undo
         </Button>
+        <Spacer.Horizontal size={itemSeparatorSize} />
         <Button id="redo" disabled={redoDisabled} onClick={redo}>
           Redo
         </Button>

@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { sketchColorToRgba } from 'noya-designsystem';
-import { Size } from 'noya-geometry';
+import { center, Size } from 'noya-geometry';
 import { uuid } from 'noya-renderer';
 import SketchLayer from 'noya-renderer/src/components/layers/SketchLayer';
 import { useTextLayerParagraph } from 'noya-renderer/src/components/layers/SketchText';
@@ -73,10 +73,7 @@ function RCKTextStylePreview({
       ...layer,
       frame: {
         ...layer.frame,
-        x: (size.width - width) / 2,
-        y: (size.height - height) / 2,
-        width,
-        height,
+        ...center({ width, height }, size),
       },
     };
   }, [layer, paragraph, size]);

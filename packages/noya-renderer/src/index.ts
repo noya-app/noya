@@ -3,6 +3,9 @@ import { v4 as uuid } from 'uuid';
 import { Context } from './context';
 import * as Primitives from './primitives';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
+export { default as SketchLayer } from './components/layers/SketchLayer';
+export { default as SketchArtboard } from './components/layers/SketchArtboard';
+export { default as SketchGroup } from './components/layers/SketchGroup';
 
 export type { Context };
 export { uuid, Primitives };

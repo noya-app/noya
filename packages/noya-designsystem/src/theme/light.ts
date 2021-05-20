@@ -13,7 +13,6 @@ export const colors = {
   dividerStrong: 'rgba(0, 0, 0, 0.09)',
   primary: 'rgb(132, 63, 255)',
   primaryDark: 'rgb(116, 36, 255)',
-  // primary: 'rgb(59, 108, 212)',
   neutralBackground: 'rgb(222,223,232)',
   inputBackground: 'rgb(240, 240, 242)',
   codeBackground: 'rgb(250, 250, 250)',
@@ -56,6 +55,7 @@ export const colors = {
     border: '#BBB',
   },
   icon: 'rgb(139, 139, 139)',
+  iconSelected: 'rgb(220, 220, 220)',
 };
 
 export const fonts = {
