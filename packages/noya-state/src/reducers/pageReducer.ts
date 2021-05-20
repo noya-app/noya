@@ -80,14 +80,26 @@ export function pageReducer(
         const user = draft.sketch.user;
         const page = pages[pageIndex];
 
+        const mappedSymbolIDs: Record<string, string> = {};
+
+        page.layers.filter(Layers.isSymbolMaster).forEach((symbolMaster) => {
+          mappedSymbolIDs[symbolMaster.symbolID] = uuid();
+        });
+
         const duplicatePage = produce(page, (page) => {
           page.name = `${page.name} Copy`;
 
           Layers.visit(page, (layer) => {
             layer.do_objectID = uuid();
-
             if (layer.style) layer.style.do_objectID = uuid();
-            if (layer._class === 'symbolMaster') layer.symbolID = uuid();
+
+            if (
+              layer._class === 'symbolMaster' ||
+              (layer._class === 'symbolInstance' &&
+                layer.symbolID in mappedSymbolIDs)
+            ) {
+              layer.symbolID = mappedSymbolIDs[layer.symbolID];
+            }
           });
 
           return page;

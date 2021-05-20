@@ -369,10 +369,8 @@ export function layerReducer(
                   layer.symbolID = uuid();
                   layer.frame = {
                     ...layer.frame,
-                    ...{
-                      x: layer.frame.x + layer.frame.width + 25,
-                      y: layer.frame.y,
-                    },
+                    x: layer.frame.x + layer.frame.width + 25,
+                    y: layer.frame.y,
                   };
                 }
                 layer.do_objectID = uuid();
