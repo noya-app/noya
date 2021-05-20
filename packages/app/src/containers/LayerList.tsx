@@ -214,7 +214,7 @@ export default memo(function LayerList() {
           dispatch('deleteLayer', selectedObjects);
           return;
         case 'duplicate':
-          // TODO: Handle duplicate
+          dispatch('duplicateLayer', selectedObjects);
           return;
         case 'group': {
           const name = prompt('New group Name');

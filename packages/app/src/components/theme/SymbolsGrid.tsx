@@ -11,6 +11,7 @@ interface Props {
   selectedSymbolsIds: string[];
   onGroupSymbol: (id: string[], name?: string) => void;
   onDeleteSymbol: (id: string[]) => void;
+  onDuplicateSymbol: (id: string[]) => void;
   onSelectSymbol: (id?: string, selectionType?: SelectionType) => void;
 }
 
@@ -20,6 +21,7 @@ export default memo(function SymbolsGrid({
   onDeleteSymbol,
   onGroupSymbol,
   onSelectSymbol,
+  onDuplicateSymbol,
 }: Props) {
   const { basename } = delimitedPath;
 
@@ -40,10 +42,17 @@ export default memo(function SymbolsGrid({
           onSelectSymbol();
           break;
         case 'duplicate':
+          onDuplicateSymbol(selectedSymbolsIds);
           break;
       }
     },
-    [onGroupSymbol, onDeleteSymbol, onSelectSymbol, selectedSymbolsIds],
+    [
+      onGroupSymbol,
+      onDeleteSymbol,
+      onSelectSymbol,
+      onDuplicateSymbol,
+      selectedSymbolsIds,
+    ],
   );
 
   const groups = useMemo(() => {

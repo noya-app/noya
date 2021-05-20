@@ -165,6 +165,10 @@ const Symbols = memo(function Symbols() {
         (id: string[]) => dispatch('deleteSymbol', id),
         [dispatch],
       )}
+      onDuplicateSymbol={useCallback(
+        (id: string[]) => dispatch('duplicateLayer', id),
+        [dispatch],
+      )}
     />
   );
 });

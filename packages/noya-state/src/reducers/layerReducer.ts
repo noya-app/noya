@@ -32,6 +32,7 @@ export type LayerAction =
   | [type: 'addSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
+  | [type: 'duplicateLayer', ids: string[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -140,7 +141,7 @@ const symbolToGroup = (
   addSiblingLayer(page, indexPath, group);
 };
 
-const detachSymbolIntances = (
+export const detachSymbolIntances = (
   pages: Sketch.Page[],
   state: ApplicationState,
   symbolsInstancesIndexPaths: LayerIndexPaths[],
@@ -286,6 +287,48 @@ export function layerReducer(
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
 
         draft.selectedObjects = [symbolInstance.do_objectID];
+      });
+    }
+    case 'duplicateLayer': {
+      const [, id] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const pages = state.sketch.pages;
+      const pagesIndexPaths = findPageLayerIndexPaths(state, (layer) =>
+        ids.includes(layer.do_objectID),
+      ).reverse();
+
+      return produce(state, (draft) => {
+        pagesIndexPaths.forEach((pagesIndexPath) => {
+          const { indexPaths, pageIndex } = pagesIndexPath;
+          const page = pages[pageIndex];
+          const draftPage = draft.sketch.pages[pageIndex];
+
+          indexPaths.forEach((indexPath) => {
+            const layer = Layers.access(page, indexPath);
+            const elem = produce(layer, (layer) => {
+              layer.name = layer.name + ' Copy';
+
+              Layers.visit(layer, (layer) => {
+                if (layer.style) layer.style.do_objectID = uuid();
+                if (layer._class === 'symbolMaster') {
+                  layer.symbolID = uuid();
+                  layer.frame = {
+                    ...layer.frame,
+                    ...{
+                      x: layer.frame.x + layer.frame.width + 25,
+                      y: layer.frame.y,
+                    },
+                  };
+                }
+                layer.do_objectID = uuid();
+              });
+            }) as Exclude<Sketch.AnyLayer, { _class: 'page' }>;
+
+            addSiblingLayer(draftPage, indexPath, elem);
+          });
+        });
       });
     }
     default:

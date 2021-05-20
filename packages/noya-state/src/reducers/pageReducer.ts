@@ -3,9 +3,14 @@ import produce from 'immer';
 import { uuid } from 'noya-renderer';
 import * as Layers from '../layers';
 import * as Models from '../models';
-import { getCurrentPage, getCurrentPageIndex } from '../selectors/selectors';
+import {
+  getCurrentPage,
+  getCurrentPageIndex,
+  getSymbolsInstancesIndexPaths,
+} from '../selectors/selectors';
 import { UUID } from '../types';
 import { ApplicationState } from './applicationReducer';
+import { detachSymbolIntances } from './layerReducer';
 
 export type PageAction =
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
@@ -80,7 +85,9 @@ export function pageReducer(
 
           Layers.visit(page, (layer) => {
             layer.do_objectID = uuid();
+
             if (layer.style) layer.style.do_objectID = uuid();
+            if (layer._class === 'symbolMaster') layer.symbolID = uuid();
           });
 
           return page;
@@ -99,12 +106,22 @@ export function pageReducer(
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
 
+      const symbolsIds = page.layers.flatMap((layer) =>
+        layer._class === 'symbolMaster' ? [layer.symbolID] : [],
+      );
+
+      const symbolsInstancesIndexPaths = symbolsIds.flatMap((ids) =>
+        getSymbolsInstancesIndexPaths(state, ids),
+      );
+
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
         const user = draft.sketch.user;
 
         delete user[page.do_objectID];
         pages.splice(pageIndex, 1);
+
+        detachSymbolIntances(pages, state, symbolsInstancesIndexPaths);
 
         const newIndex = Math.max(pageIndex - 1, 0);
         draft.selectedPage = pages[newIndex].do_objectID;
