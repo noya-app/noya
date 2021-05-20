@@ -168,28 +168,6 @@ export const detachSymbolIntances = (
   });
 };
 
-const artboardToSymbol = (
-  page: Sketch.Page,
-  state: ApplicationState,
-  indexPath: IndexPath,
-) => {
-  const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
-  const ids = artboard.layers.flatMap((l: Sketch.AnyLayer) => l.do_objectID);
-
-  const indexPaths = getIndexPathsForGroup(state, ids);
-
-  const symbolMaster = createGroup(
-    Models.symbolMaster,
-    page,
-    [...ids, artboard.do_objectID],
-    artboard.name,
-    indexPaths,
-    artboard.frame,
-  );
-
-  return symbolMaster;
-};
-
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
@@ -286,18 +264,18 @@ export function layerReducer(
       const indexPathsArtboards = getIndexofArboardLayers(state, ids);
 
       if (indexPathsArtboards.length > 0) {
-        const symbolMasters = indexPathsArtboards.flatMap(
-          (indexPath: IndexPath) => artboardToSymbol(page, state, indexPath),
-        );
-
         return produce(state, (draft) => {
           const pages = draft.sketch.pages;
 
           deleteLayers(indexPathsArtboards, pages[pageIndex]);
-          indexPathsArtboards.forEach((indexPath: IndexPath, index: number) => {
-            const symbolMaster = symbolMasters[index];
-            if (!symbolMaster) return; //handle undefined better
+          indexPathsArtboards.forEach((indexPath: IndexPath) => {
+            const artboard = Layers.access(page, indexPath);
+            const symbolMaster = {
+              ...Models.symbolMaster,
+              ...artboard,
+            } as Sketch.SymbolMaster;
 
+            symbolMaster._class = 'symbolMaster';
             symbolMaster.symbolID = uuid();
             addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
           });
