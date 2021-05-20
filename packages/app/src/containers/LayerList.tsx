@@ -122,7 +122,7 @@ type MenuItemType =
   | 'group'
   | 'ungroup'
   | 'delete'
-  | 'addSymbol'
+  | 'createSymbol'
   | 'detachSymbol';
 
 const LayerRow = memo(
@@ -207,9 +207,34 @@ export default memo(function LayerList() {
     selectedObjects.length === 1 &&
     items.find((i) => i.id === selectedObjects[0])?.type === 'symbolInstance';
 
+  const canBeSymbol = useCallback((): number => {
+    const selectedItems = items.filter((i) => selectedObjects.includes(i.id));
+
+    if (
+      selectedItems.length === 0 ||
+      selectedItems.some((l) => l.type === 'symbolMaster')
+    )
+      return 0;
+
+    if (
+      selectedItems[0].type === 'artboard' &&
+      selectedItems.every((l) => l.type === 'artboard')
+    )
+      return 1;
+    if (
+      selectedItems[0].type !== 'artboard' &&
+      selectedItems.every((l) => l.type !== 'artboard')
+    )
+      return 2;
+
+    return 0;
+  }, [items, selectedObjects]);
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
-      { value: 'addSymbol', title: 'Create Symbol' },
+      ...(canBeSymbol() !== 0
+        ? [{ value: 'createSymbol' as const, title: 'Create Symbol' }]
+        : []),
       ...(canDetach
         ? [{ value: 'detachSymbol' as const, title: 'Detach Symbol' }]
         : []),
@@ -219,7 +244,7 @@ export default memo(function LayerList() {
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
     ],
-    [canUngroup, canDetach],
+    [canUngroup, canDetach, canBeSymbol],
   );
 
   const onSelectMenuItem = useCallback(
@@ -241,11 +266,11 @@ export default memo(function LayerList() {
         case 'ungroup':
           dispatch('ungroupLayer', selectedObjects);
           return;
-        case 'addSymbol': {
-          const name = prompt('New Symbol Name');
+        case 'createSymbol': {
+          const name = canBeSymbol() === 2 ? prompt('New Symbol Name') : ' ';
 
           if (!name) return;
-          dispatch('addSymbol', selectedObjects, name);
+          dispatch('createSymbol', selectedObjects, name);
           return;
         }
         case 'detachSymbol': {
@@ -254,7 +279,7 @@ export default memo(function LayerList() {
         }
       }
     },
-    [dispatch, selectedObjects],
+    [dispatch, selectedObjects, canBeSymbol],
   );
 
   const layerElements = useMemo(() => {

@@ -20,7 +20,9 @@ import {
   findPageLayerIndexPaths,
   getSelectedSymbols,
   LayerIndexPaths,
+  getIndexofArboardLayers,
 } from '../selectors/selectors';
+import { Rect } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
@@ -29,7 +31,7 @@ export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayer', layerId: string | string[], name: string]
   | [type: 'ungroupLayer', layerId: string | string[]]
-  | [type: 'addSymbol', layerId: string | string[], name: string]
+  | [type: 'createSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
   | [type: 'duplicateLayer', ids: string[]]
@@ -45,6 +47,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   ids: string[],
   name: string,
   indexPaths: IndexPath[],
+  frame?: Rect,
 ): T | undefined => {
   const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
     clickThroughGroups: true,
@@ -56,12 +59,20 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
     return undefined;
   }
 
-  const newParentTransform = getLayerTransformAtIndexPath(page, indexPaths[0]);
-  const groupFrame = transformRect(boundingRect, newParentTransform.invert());
-  const newGroupTransform = AffineTransform.multiply(
-    newParentTransform,
-    AffineTransform.translation(groupFrame.x, groupFrame.y),
-  );
+  const newParentTransform = frame
+    ? undefined
+    : getLayerTransformAtIndexPath(page, indexPaths[0]);
+
+  const groupFrame = newParentTransform
+    ? transformRect(boundingRect, newParentTransform.invert())
+    : (frame as Rect);
+
+  const newGroupTransform = newParentTransform
+    ? AffineTransform.multiply(
+        newParentTransform,
+        AffineTransform.translation(groupFrame.x, groupFrame.y),
+      )
+    : AffineTransform.translation(groupFrame.x, groupFrame.y);
 
   return produce(model, (draft) => {
     draft.do_objectID = uuid();
@@ -157,6 +168,28 @@ export const detachSymbolIntances = (
   });
 };
 
+const artboardToSymbol = (
+  page: Sketch.Page,
+  state: ApplicationState,
+  indexPath: IndexPath,
+) => {
+  const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
+  const ids = artboard.layers.flatMap((l: Sketch.AnyLayer) => l.do_objectID);
+
+  const indexPaths = getIndexPathsForGroup(state, ids);
+
+  const symbolMaster = createGroup(
+    Models.symbolMaster,
+    page,
+    [...ids, artboard.do_objectID],
+    artboard.name,
+    indexPaths,
+    artboard.frame,
+  );
+
+  return symbolMaster;
+};
+
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
@@ -243,16 +276,36 @@ export function layerReducer(
         updateSelection(draft.selectedObjects, id, selectionType);
       });
     }
-    case 'addSymbol': {
+    case 'createSymbol': {
       const [, id, name] = action;
       const ids = typeof id === 'string' ? [id] : id;
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
+
+      const indexPathsArtboards = getIndexofArboardLayers(state, ids);
+
+      if (indexPathsArtboards.length > 0) {
+        const symbolMasters = indexPathsArtboards.flatMap(
+          (indexPath: IndexPath) => artboardToSymbol(page, state, indexPath),
+        );
+
+        return produce(state, (draft) => {
+          const pages = draft.sketch.pages;
+
+          deleteLayers(indexPathsArtboards, pages[pageIndex]);
+          indexPathsArtboards.forEach((indexPath: IndexPath, index: number) => {
+            const symbolMaster = symbolMasters[index];
+            if (!symbolMaster) return; //handle undefined better
+
+            symbolMaster.symbolID = uuid();
+            addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
+          });
+        });
+      }
+
       const symbolsPageIndex = getSymbolsPageIndex(state);
-
       const indexPaths = getIndexPathsForGroup(state, ids);
-
       const symbolMasters = createGroup(
         Models.symbolMaster,
         page,
