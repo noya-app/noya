@@ -330,7 +330,7 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            CanvasKit,
+            // CanvasKit,
             state,
             insets,
             createRect(origin, current),
@@ -377,7 +377,11 @@ export default memo(function Canvas() {
           if (highlightedLayer?.id !== layer?.do_objectID) {
             highlightLayer(
               layer
-                ? { id: layer.do_objectID, precedence: 'belowSelection', isMeasured: event.altKey}
+                ? {
+                    id: layer.do_objectID,
+                    precedence: 'belowSelection',
+                    isMeasured: event.altKey,
+                  }
                 : undefined,
             );
           }
@@ -441,7 +445,7 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            CanvasKit,
+            // CanvasKit,
             state,
             insets,
             createRect(origin, current),
@@ -484,7 +488,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, insets],
+    [offsetEventPoint, state, dispatch, insets],
   );
 
   const handleDirection =

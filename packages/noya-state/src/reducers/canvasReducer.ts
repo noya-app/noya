@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { AffineTransform, normalizeRect } from 'noya-geometry';
+import { AffineTransform, normalizeRect, createRect } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
@@ -19,6 +19,81 @@ import {
   InteractionAction,
   interactionReducer,
 } from './interactionReducer';
+import {getLayersInRect} from '../selectors/geometrySelectors';
+import { createBounds } from 'noya-geometry';
+
+/* Finding all visibile layers */
+function getAxisValues(rectBounds: any, axis: string){
+  let axisBounds:any = {};
+  for(const prop in rectBounds){
+    if(prop.indexOf(axis) > -1){
+      axisBounds[prop] = rectBounds[prop] 
+    } 
+  }
+  return axisBounds;
+}
+
+function getVisibleLayersAxisValues(state:any, pageSnapshot:any){
+  //  const { canvasInsets } = state;
+  //  const { origin, current } = state.interactionState;
+  
+   //TODO: get the measurements of the canvas
+   const layers = getLayersInRect(
+    state,
+    {
+      left: 100,
+      right: 100,
+    },
+    createRect({x: 0, y:0}, {x: 1000, y:1000}),
+    {
+      clickThroughGroups: false,
+      includeHiddenLayers: false,
+    },
+  );
+  
+    const yValues:any = [];
+    const xValues:any = [];
+    layers.forEach(function(layer){
+      const rect = getBoundingRect(
+      pageSnapshot,
+      AffineTransform.identity,
+      [layer.do_objectID],
+    )
+    if(rect){
+      const rectBounds:any = createBounds(rect);
+       yValues.push({layer_id: layer.do_objectID, bounds: getAxisValues(rectBounds, 'Y')})
+       xValues.push({layer_id: layer.do_objectID, bounds: getAxisValues(rectBounds, 'X')})
+    }
+  })
+   return yValues;
+}
+
+function getSelectedLayerAxisValues(layer_id:string, pageSnapshot:any){
+  const selectedRect = getBoundingRect(
+    pageSnapshot,
+    AffineTransform.identity,
+    [layer_id],
+  )
+  const ySelectedValues:any = [];
+  const xSelectedValues:any = [];
+
+  if(selectedRect){
+    const rectBounds:any = createBounds(selectedRect);
+    ySelectedValues.push({layer_id: layer_id, bounds: getAxisValues(rectBounds, 'Y')})
+    xSelectedValues.push({layer_id: layer_id, bounds: getAxisValues(rectBounds, 'X')})
+  }
+
+  return ySelectedValues;
+}
+
+function getVisibleAndSelectedLayerAxisPairs(selectedAxisValues:any[], visibleLayersAxisValues:any[]){
+  // const results = visibleLayersAxisValues
+  //   .filter((visibleLayer) => visibleLayer.layer_id !== selectedAxisValues[0].layer_id)
+  //   .map(visibleLayer => {
+  //     return [selectedAxisValues[0].bounds.minY, visibleLayer.bounds.minY]
+  //   })
+    //console.log('results', results)
+}
 
 export type CanvasAction =
   | [
@@ -112,6 +187,7 @@ export function canvasReducer(
         switch (interactionState.type) {
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
+            const layers = getVisibleLayersAxisValues(state, pageSnapshot);
 
             const delta = {
               x: current.x - origin.x,
@@ -124,6 +200,8 @@ export function canvasReducer(
                 draft.sketch.pages[pageIndex],
                 indexPath,
               );
+              const selectionValues = getSelectedLayerAxisValues(layer.do_objectID, pageSnapshot);
+              getVisibleAndSelectedLayerAxisPairs(selectionValues, layers)
 
               layer.frame.x = initialRect.x + delta.x;
               layer.frame.y = initialRect.y + delta.y;
