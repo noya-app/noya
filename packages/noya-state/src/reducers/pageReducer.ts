@@ -94,8 +94,8 @@ export function pageReducer(
             if (layer.style) layer.style.do_objectID = uuid();
 
             if (
-              layer._class === 'symbolMaster' ||
-              (layer._class === 'symbolInstance' &&
+              Layers.isSymbolMaster(layer) ||
+              (Layers.isSymbolInstance(layer) &&
                 layer.symbolID in mappedSymbolIDs)
             ) {
               layer.symbolID = mappedSymbolIDs[layer.symbolID];
@@ -119,7 +119,7 @@ export function pageReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       const symbolsIds = page.layers.flatMap((layer) =>
-        layer._class === 'symbolMaster' ? [layer.symbolID] : [],
+        Layers.isSymbolMaster(layer) ? [layer.symbolID] : [],
       );
 
       const symbolsInstancesIndexPaths = symbolsIds.flatMap((ids) =>

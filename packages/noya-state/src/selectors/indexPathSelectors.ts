@@ -79,8 +79,10 @@ export const getIndexPathsOfArtboardLayers = (
   state: ApplicationState,
   ids: string[],
 ) => {
-  return getLayerIndexPathsExcludingDescendants(state, ids).filter(
-    (indexPath) =>
-      Layers.access(getCurrentPage(state), indexPath)._class === 'artboard',
+  return getLayerIndexPathsExcludingDescendants(
+    state,
+    ids,
+  ).filter((indexPath) =>
+    Layers.isArtboard(Layers.access(getCurrentPage(state), indexPath)),
   );
 };

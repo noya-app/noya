@@ -21,7 +21,7 @@ import {
   getLayerTransformAtIndexPath,
   getSymbolsInstancesIndexPaths,
   getIndexPathsOfArtboardLayers,
-  getLeftMostLayerPoint,
+  getRightMostLayerBounds,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -161,6 +161,19 @@ export const detachSymbolIntances = (
   });
 };
 
+const createSymbolInstance = (
+  symbolMaster: Sketch.SymbolMaster,
+  frame?: Sketch.Rect,
+) => {
+  return produce(Models.symbolInstance, (draft) => {
+    draft.do_objectID = uuid();
+    draft.name = symbolMaster.name;
+    draft.frame = frame ? frame : symbolMaster.frame;
+    if (draft.style) draft.style.do_objectID = uuid();
+    draft.symbolID = symbolMaster.symbolID;
+  });
+};
+
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
@@ -253,7 +266,6 @@ export function layerReducer(
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
-
       const indexPathsArtboards = getIndexPathsOfArtboardLayers(state, ids);
 
       if (indexPathsArtboards.length > 0) {
@@ -261,6 +273,7 @@ export function layerReducer(
           const pages = draft.sketch.pages;
 
           deleteLayers(indexPathsArtboards, pages[pageIndex]);
+          draft.selectedObjects = [];
           indexPathsArtboards.forEach((indexPath: IndexPath) => {
             const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
             const symbolMaster = {
@@ -271,6 +284,10 @@ export function layerReducer(
             };
 
             addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
+            draft.selectedObjects = [
+              ...draft.selectedObjects,
+              symbolMaster.do_objectID,
+            ];
           });
         });
       }
@@ -292,7 +309,7 @@ export function layerReducer(
       const symbolsPage = state.sketch.pages[symbolsPageIndex];
 
       const rect = symbolsPage
-        ? getLeftMostLayerPoint(symbolsPage)
+        ? getRightMostLayerBounds(symbolsPage)
         : { maxX: 0, minY: 25 };
 
       symbolMasters.frame.x = rect.maxX + 100;
@@ -308,15 +325,10 @@ export function layerReducer(
             ? createPage(pages, draft.sketch.user, 'Symbols')
             : pages[symbolsPageIndex];
 
-        const symbolInstance = produce(Models.symbolInstance, (draft) => {
-          draft.do_objectID = uuid();
-          draft.name = name;
-          draft.frame = originalFrame;
-          draft.style = produce(Models.style, (s) => {
-            s.do_objectID = uuid();
-          });
-          draft.symbolID = symbolMasters.symbolID;
-        });
+        const symbolInstance = createSymbolInstance(
+          symbolMasters,
+          originalFrame,
+        );
 
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
         addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
@@ -364,6 +376,7 @@ export function layerReducer(
         });
       });
     }
+
     default:
       return state;
   }

@@ -213,10 +213,8 @@ export default memo(function LayerList() {
     return (
       selectedItems.length >= 1 &&
       !selectedItems.some((l) => l.type === 'symbolMaster') &&
-      ((selectedItems[0].type === 'artboard' &&
-        selectedItems.every((l) => l.type === 'artboard')) ||
-        (selectedItems[0].type !== 'artboard' &&
-          selectedItems.every((l) => l.type !== 'artboard')))
+      (selectedItems.every((l) => l.type === 'artboard') ||
+        selectedItems.every((l) => l.type !== 'artboard'))
     );
   }, [items, selectedObjects]);
 

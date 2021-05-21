@@ -97,7 +97,7 @@ export const addSiblingLayer = <
   parent.layers.splice(indexPath[indexPath.length - 1], 0, ...l);
 };
 
-export const getLeftMostLayerPoint = (page: Sketch.Page) => {
+export const getRightMostLayerBounds = (page: Sketch.Page) => {
   const layer = page.layers.sort((a, b) => {
     const aBounds = createBounds(a.frame);
     const bBounds = createBounds(b.frame);

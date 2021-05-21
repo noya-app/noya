@@ -50,6 +50,12 @@ export const isSymbolMaster = (
   return layer._class === 'symbolMaster';
 };
 
+export const isArtboard = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.Artboard => {
+  return layer._class === 'artboard';
+};
+
 export const isSymbolInstance = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolInstance => {
