@@ -99,13 +99,14 @@ export function applicationReducer(
     case 'setLayerHeight':
     case 'setLayerRotation':
       return layerPropertyReducer(state, action);
+    case 'groupLayer':
     case 'deleteLayer':
     case 'selectLayer':
-    case 'groupLayer':
     case 'ungroupLayer':
-    case 'addSymbol':
+    case 'createSymbol':
     case 'detachSymbol':
     case 'deleteSymbol':
+    case 'duplicateLayer':
       return layerReducer(state, action);
     case 'distributeLayers':
     case 'alignLayers': {

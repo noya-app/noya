@@ -6,20 +6,22 @@ import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
+  getSymbols,
   deleteLayers,
   getCurrentPage,
+  getParentLayer,
   getBoundingRect,
+  addSiblingLayer,
+  LayerIndexPaths,
+  getSelectedSymbols,
   getCurrentPageIndex,
   getSymbolsPageIndex,
-  getLayerTransformAtIndexPath,
   getIndexPathsForGroup,
-  getParentLayer,
-  addSiblingLayer,
-  getSymbols,
-  getSymbolsInstancesIndexPaths,
   findPageLayerIndexPaths,
-  getSelectedSymbols,
-  LayerIndexPaths,
+  getLayerTransformAtIndexPath,
+  getSymbolsInstancesIndexPaths,
+  getIndexPathsOfArtboardLayers,
+  getRightMostLayerBounds,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -29,9 +31,10 @@ export type LayerAction =
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayer', layerId: string | string[], name: string]
   | [type: 'ungroupLayer', layerId: string | string[]]
-  | [type: 'addSymbol', layerId: string | string[], name: string]
+  | [type: 'createSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
+  | [type: 'duplicateLayer', ids: string[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -56,7 +59,9 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   }
 
   const newParentTransform = getLayerTransformAtIndexPath(page, indexPaths[0]);
+
   const groupFrame = transformRect(boundingRect, newParentTransform.invert());
+
   const newGroupTransform = AffineTransform.multiply(
     newParentTransform,
     AffineTransform.translation(groupFrame.x, groupFrame.y),
@@ -140,7 +145,7 @@ const symbolToGroup = (
   addSiblingLayer(page, indexPath, group);
 };
 
-const detachSymbolIntances = (
+export const detachSymbolIntances = (
   pages: Sketch.Page[],
   state: ApplicationState,
   symbolsInstancesIndexPaths: LayerIndexPaths[],
@@ -153,6 +158,19 @@ const detachSymbolIntances = (
       const parent = getParentLayer(page, indexPath);
       symbolToGroup(page, state, parent, indexPath);
     });
+  });
+};
+
+const createSymbolInstance = (
+  symbolMaster: Sketch.SymbolMaster,
+  frame?: Sketch.Rect,
+) => {
+  return produce(Models.symbolInstance, (draft) => {
+    draft.do_objectID = uuid();
+    draft.name = symbolMaster.name;
+    draft.frame = frame ? frame : symbolMaster.frame;
+    if (draft.style) draft.style.do_objectID = uuid();
+    draft.symbolID = symbolMaster.symbolID;
   });
 };
 
@@ -242,16 +260,40 @@ export function layerReducer(
         updateSelection(draft.selectedObjects, id, selectionType);
       });
     }
-    case 'addSymbol': {
+    case 'createSymbol': {
       const [, id, name] = action;
       const ids = typeof id === 'string' ? [id] : id;
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
+      const indexPathsArtboards = getIndexPathsOfArtboardLayers(state, ids);
+
+      if (indexPathsArtboards.length > 0) {
+        return produce(state, (draft) => {
+          const pages = draft.sketch.pages;
+
+          deleteLayers(indexPathsArtboards, pages[pageIndex]);
+          draft.selectedObjects = [];
+          indexPathsArtboards.forEach((indexPath: IndexPath) => {
+            const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
+            const symbolMaster = {
+              ...Models.symbolMaster,
+              ...artboard,
+              _class: 'symbolMaster' as const,
+              symbolID: uuid(),
+            };
+
+            addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
+            draft.selectedObjects = [
+              ...draft.selectedObjects,
+              symbolMaster.do_objectID,
+            ];
+          });
+        });
+      }
+
       const symbolsPageIndex = getSymbolsPageIndex(state);
-
       const indexPaths = getIndexPathsForGroup(state, ids);
-
       const symbolMasters = createGroup(
         Models.symbolMaster,
         page,
@@ -261,33 +303,80 @@ export function layerReducer(
       );
 
       if (!symbolMasters) return state;
-
       symbolMasters.symbolID = uuid();
-      const symbolInstance = produce(Models.symbolInstance, (draft) => {
-        draft.do_objectID = uuid();
-        draft.name = name;
-        draft.frame = symbolMasters.frame;
-        draft.style = produce(Models.style, (s) => {
-          s.do_objectID = uuid();
-        });
-        draft.symbolID = symbolMasters.symbolID;
-      });
+
+      const originalFrame = { ...symbolMasters.frame };
+      const symbolsPage = state.sketch.pages[symbolsPageIndex];
+
+      const rect = symbolsPage
+        ? getRightMostLayerBounds(symbolsPage)
+        : { maxX: 0, minY: 25 };
+
+      symbolMasters.frame.x = rect.maxX + 100;
+      symbolMasters.frame.y = rect.minY;
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
 
         deleteLayers(indexPaths, pages[pageIndex]);
-        addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
         const symbolsPage =
           symbolsPageIndex === -1
             ? createPage(pages, draft.sketch.user, 'Symbols')
             : pages[symbolsPageIndex];
+
+        const symbolInstance = createSymbolInstance(
+          symbolMasters,
+          originalFrame,
+        );
+
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
+        addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
         draft.selectedObjects = [symbolInstance.do_objectID];
       });
     }
+    case 'duplicateLayer': {
+      const [, id] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const pages = state.sketch.pages;
+      const pagesIndexPaths = findPageLayerIndexPaths(state, (layer) =>
+        ids.includes(layer.do_objectID),
+      ).reverse();
+
+      return produce(state, (draft) => {
+        pagesIndexPaths.forEach((pagesIndexPath) => {
+          const { indexPaths, pageIndex } = pagesIndexPath;
+          const page = pages[pageIndex];
+          const draftPage = draft.sketch.pages[pageIndex];
+
+          indexPaths.forEach((indexPath) => {
+            const layer = Layers.access(page, indexPath);
+            const elem = produce(layer, (layer) => {
+              layer.name = layer.name + ' Copy';
+
+              Layers.visit(layer, (layer) => {
+                if (layer.style) layer.style.do_objectID = uuid();
+                if (Layers.isSymbolMaster(layer)) {
+                  layer.symbolID = uuid();
+                  layer.frame = {
+                    ...layer.frame,
+                    x: layer.frame.x + layer.frame.width + 25,
+                    y: layer.frame.y,
+                  };
+                }
+                layer.do_objectID = uuid();
+              });
+            }) as Exclude<Sketch.AnyLayer, { _class: 'page' }>;
+
+            addSiblingLayer(draftPage, indexPath, elem);
+          });
+        });
+      });
+    }
+
     default:
       return state;
   }

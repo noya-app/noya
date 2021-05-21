@@ -4,6 +4,7 @@ import type { UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
+import { createBounds } from 'noya-geometry';
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -94,4 +95,15 @@ export const addSiblingLayer = <
   const parent = getParentLayer(page, indexPath);
   const l = layer instanceof Array ? layer : [layer];
   parent.layers.splice(indexPath[indexPath.length - 1], 0, ...l);
+};
+
+export const getRightMostLayerBounds = (page: Sketch.Page) => {
+  const layer = page.layers.sort((a, b) => {
+    const aBounds = createBounds(a.frame);
+    const bBounds = createBounds(b.frame);
+
+    return bBounds.maxX - aBounds.maxX;
+  })[0];
+
+  return createBounds(layer.frame);
 };

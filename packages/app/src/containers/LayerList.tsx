@@ -122,7 +122,7 @@ type MenuItemType =
   | 'group'
   | 'ungroup'
   | 'delete'
-  | 'addSymbol'
+  | 'createSymbol'
   | 'detachSymbol';
 
 const LayerRow = memo(
@@ -207,9 +207,25 @@ export default memo(function LayerList() {
     selectedObjects.length === 1 &&
     items.find((i) => i.id === selectedObjects[0])?.type === 'symbolInstance';
 
+  const canBeSymbol = useMemo(() => {
+    const selectedItems = items.filter((i) => selectedObjects.includes(i.id));
+
+    return (
+      selectedItems.length >= 1 &&
+      !selectedItems.some((l) => l.type === 'symbolMaster') &&
+      (selectedItems.every((l) => l.type === 'artboard') ||
+        selectedItems.every((l) => l.type !== 'artboard'))
+    );
+  }, [items, selectedObjects]);
+
+  const shouldAskForSymbolName =
+    items.find((i) => i.id === selectedObjects[0])?.type !== 'artboard';
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
-      { value: 'addSymbol', title: 'Create Symbol' },
+      ...(canBeSymbol
+        ? [{ value: 'createSymbol' as const, title: 'Create Symbol' }]
+        : []),
       ...(canDetach
         ? [{ value: 'detachSymbol' as const, title: 'Detach Symbol' }]
         : []),
@@ -219,7 +235,7 @@ export default memo(function LayerList() {
       ContextMenu.SEPARATOR_ITEM,
       { value: 'delete', title: 'Delete' },
     ],
-    [canUngroup, canDetach],
+    [canUngroup, canDetach, canBeSymbol],
   );
 
   const onSelectMenuItem = useCallback(
@@ -229,7 +245,7 @@ export default memo(function LayerList() {
           dispatch('deleteLayer', selectedObjects);
           return;
         case 'duplicate':
-          // TODO: Handle duplicate
+          dispatch('duplicateLayer', selectedObjects);
           return;
         case 'group': {
           const name = prompt('New group Name');
@@ -241,11 +257,11 @@ export default memo(function LayerList() {
         case 'ungroup':
           dispatch('ungroupLayer', selectedObjects);
           return;
-        case 'addSymbol': {
-          const name = prompt('New Symbol Name');
+        case 'createSymbol': {
+          const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';
 
           if (!name) return;
-          dispatch('addSymbol', selectedObjects, name);
+          dispatch('createSymbol', selectedObjects, name);
           return;
         }
         case 'detachSymbol': {
@@ -254,7 +270,7 @@ export default memo(function LayerList() {
         }
       }
     },
-    [dispatch, selectedObjects],
+    [dispatch, selectedObjects, shouldAskForSymbolName],
   );
 
   const layerElements = useMemo(() => {

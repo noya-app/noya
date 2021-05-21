@@ -74,3 +74,15 @@ export const getIndexPathsForGroup = (
     Layers.isChildLayer(Layers.access(getCurrentPage(state), indexPath)),
   );
 };
+
+export const getIndexPathsOfArtboardLayers = (
+  state: ApplicationState,
+  ids: string[],
+) => {
+  return getLayerIndexPathsExcludingDescendants(
+    state,
+    ids,
+  ).filter((indexPath) =>
+    Layers.isArtboard(Layers.access(getCurrentPage(state), indexPath)),
+  );
+};
