@@ -281,7 +281,6 @@ export function layerReducer(
           });
         });
       }
-
       const symbolsPageIndex = getSymbolsPageIndex(state);
       const indexPaths = getIndexPathsForGroup(state, ids);
       const symbolMasters = createGroup(
@@ -294,28 +293,38 @@ export function layerReducer(
 
       if (!symbolMasters) return state;
 
+      //Position the
       symbolMasters.symbolID = uuid();
-      const symbolInstance = produce(Models.symbolInstance, (draft) => {
-        draft.do_objectID = uuid();
-        draft.name = name;
-        draft.frame = symbolMasters.frame;
-        draft.style = produce(Models.style, (s) => {
-          s.do_objectID = uuid();
-        });
-        draft.symbolID = symbolMasters.symbolID;
-      });
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
 
         deleteLayers(indexPaths, pages[pageIndex]);
-        addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
         const symbolsPage =
           symbolsPageIndex === -1
             ? createPage(pages, draft.sketch.user, 'Symbols')
             : pages[symbolsPageIndex];
+
+        const symbolInstance = produce(Models.symbolInstance, (draft) => {
+          draft.do_objectID = uuid();
+          draft.name = name;
+          draft.frame = symbolMasters.frame;
+          draft.style = produce(Models.style, (s) => {
+            s.do_objectID = uuid();
+          });
+          draft.symbolID = symbolMasters.symbolID;
+        });
+
+        const { scrollOrigin } = draft.sketch.user[symbolsPage.do_objectID];
+
+        symbolMasters.frame = {
+          ...symbolMasters.frame,
+          x: -scrollOrigin.x + 100,
+          y: -scrollOrigin.y + 100,
+        };
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
+        addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
         draft.selectedObjects = [symbolInstance.do_objectID];
       });
