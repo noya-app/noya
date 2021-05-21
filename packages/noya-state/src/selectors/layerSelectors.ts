@@ -4,6 +4,7 @@ import type { UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
+import { createBounds } from 'noya-geometry';
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -94,4 +95,21 @@ export const addSiblingLayer = <
   const parent = getParentLayer(page, indexPath);
   const l = layer instanceof Array ? layer : [layer];
   parent.layers.splice(indexPath[indexPath.length - 1], 0, ...l);
+};
+
+export const getLeftMostLayer = (page: Sketch.Page) => {
+  const bounds = {
+    x: 0,
+    y: 0,
+  };
+
+  page.layers.forEach((l) => {
+    const rect = createBounds(l.frame);
+    if (rect.maxX < bounds.x) return;
+
+    bounds.x = rect.maxX;
+    bounds.y = rect.minY;
+  });
+
+  return bounds;
 };

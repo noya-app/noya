@@ -6,23 +6,23 @@ import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
+  getSymbols,
   deleteLayers,
   getCurrentPage,
+  getParentLayer,
   getBoundingRect,
+  addSiblingLayer,
+  LayerIndexPaths,
+  getSelectedSymbols,
   getCurrentPageIndex,
   getSymbolsPageIndex,
-  getLayerTransformAtIndexPath,
   getIndexPathsForGroup,
-  getParentLayer,
-  addSiblingLayer,
-  getSymbols,
-  getSymbolsInstancesIndexPaths,
-  findPageLayerIndexPaths,
-  getSelectedSymbols,
-  LayerIndexPaths,
   getIndexofArboardLayers,
+  findPageLayerIndexPaths,
+  getLayerTransformAtIndexPath,
+  getSymbolsInstancesIndexPaths,
+  getLeftMostLayer,
 } from '../selectors/selectors';
-import { Rect } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
@@ -47,7 +47,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   ids: string[],
   name: string,
   indexPaths: IndexPath[],
-  frame?: Rect,
+  symbolsPage?: Sketch.Page,
 ): T | undefined => {
   const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
     clickThroughGroups: true,
@@ -59,20 +59,25 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
     return undefined;
   }
 
-  const newParentTransform = frame
-    ? undefined
-    : getLayerTransformAtIndexPath(page, indexPaths[0]);
+  const newParentTransform = getLayerTransformAtIndexPath(page, indexPaths[0]);
 
-  const groupFrame = newParentTransform
-    ? transformRect(boundingRect, newParentTransform.invert())
-    : (frame as Rect);
+  const groupFrame = transformRect(boundingRect, newParentTransform.invert());
 
-  const newGroupTransform = newParentTransform
-    ? AffineTransform.multiply(
-        newParentTransform,
-        AffineTransform.translation(groupFrame.x, groupFrame.y),
-      )
-    : AffineTransform.translation(groupFrame.x, groupFrame.y);
+  const newGroupTransform = AffineTransform.multiply(
+    newParentTransform,
+    AffineTransform.translation(groupFrame.x, groupFrame.y),
+  );
+
+  if (model._class === 'symbolMaster') {
+    if (!symbolsPage) {
+      groupFrame.x = 25;
+      groupFrame.y = 25;
+    } else {
+      const rect = getLeftMostLayer(symbolsPage);
+      groupFrame.x = rect.x + 50;
+      groupFrame.y = rect.y;
+    }
+  }
 
   return produce(model, (draft) => {
     draft.do_objectID = uuid();
@@ -281,6 +286,7 @@ export function layerReducer(
           });
         });
       }
+
       const symbolsPageIndex = getSymbolsPageIndex(state);
       const indexPaths = getIndexPathsForGroup(state, ids);
       const symbolMasters = createGroup(
@@ -289,11 +295,10 @@ export function layerReducer(
         ids,
         name,
         indexPaths,
+        state.sketch.pages[symbolsPageIndex],
       );
 
       if (!symbolMasters) return state;
-
-      //Position the
       symbolMasters.symbolID = uuid();
 
       return produce(state, (draft) => {
@@ -316,13 +321,6 @@ export function layerReducer(
           draft.symbolID = symbolMasters.symbolID;
         });
 
-        const { scrollOrigin } = draft.sketch.user[symbolsPage.do_objectID];
-
-        symbolMasters.frame = {
-          ...symbolMasters.frame,
-          x: -scrollOrigin.x + 100,
-          y: -scrollOrigin.y + 100,
-        };
         symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
         addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
