@@ -75,7 +75,7 @@ export const getIndexPathsForGroup = (
   );
 };
 
-export const getIndexofArboardLayers = (
+export const getIndexPathsOfArtboardLayers = (
   state: ApplicationState,
   ids: string[],
 ) => {

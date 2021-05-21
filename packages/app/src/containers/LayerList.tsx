@@ -207,32 +207,25 @@ export default memo(function LayerList() {
     selectedObjects.length === 1 &&
     items.find((i) => i.id === selectedObjects[0])?.type === 'symbolInstance';
 
-  const canBeSymbol = useCallback((): number => {
+  const canBeSymbol = useMemo(() => {
     const selectedItems = items.filter((i) => selectedObjects.includes(i.id));
 
-    if (
-      selectedItems.length === 0 ||
-      selectedItems.some((l) => l.type === 'symbolMaster')
-    )
-      return 0;
-
-    if (
-      selectedItems[0].type === 'artboard' &&
-      selectedItems.every((l) => l.type === 'artboard')
-    )
-      return 1;
-    if (
-      selectedItems[0].type !== 'artboard' &&
-      selectedItems.every((l) => l.type !== 'artboard')
-    )
-      return 2;
-
-    return 0;
+    return (
+      selectedItems.length >= 1 &&
+      !selectedItems.some((l) => l.type === 'symbolMaster') &&
+      ((selectedItems[0].type === 'artboard' &&
+        selectedItems.every((l) => l.type === 'artboard')) ||
+        (selectedItems[0].type !== 'artboard' &&
+          selectedItems.every((l) => l.type !== 'artboard')))
+    );
   }, [items, selectedObjects]);
+
+  const shouldAskForSymbolName =
+    items.find((i) => i.id === selectedObjects[0])?.type !== 'artboard';
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
-      ...(canBeSymbol() !== 0
+      ...(canBeSymbol
         ? [{ value: 'createSymbol' as const, title: 'Create Symbol' }]
         : []),
       ...(canDetach
@@ -267,7 +260,7 @@ export default memo(function LayerList() {
           dispatch('ungroupLayer', selectedObjects);
           return;
         case 'createSymbol': {
-          const name = canBeSymbol() === 2 ? prompt('New Symbol Name') : ' ';
+          const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';
 
           if (!name) return;
           dispatch('createSymbol', selectedObjects, name);
@@ -279,7 +272,7 @@ export default memo(function LayerList() {
         }
       }
     },
-    [dispatch, selectedObjects, canBeSymbol],
+    [dispatch, selectedObjects, shouldAskForSymbolName],
   );
 
   const layerElements = useMemo(() => {

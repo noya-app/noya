@@ -98,19 +98,12 @@ export const addSiblingLayer = <
 };
 
 export const getLeftMostLayerPoint = (page: Sketch.Page) => {
-  const point = {
-    x: 0,
-    y: 0,
-  };
+  const layer = page.layers.sort((a, b) => {
+    const aBounds = createBounds(a.frame);
+    const bBounds = createBounds(b.frame);
 
-  if (!page) return point;
-  page.layers.forEach((l) => {
-    const rect = createBounds(l.frame);
-    if (rect.maxX < point.x) return;
+    return bBounds.maxX - aBounds.maxX;
+  })[0];
 
-    point.x = rect.maxX;
-    point.y = rect.minY;
-  });
-
-  return point;
+  return createBounds(layer.frame);
 };

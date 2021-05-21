@@ -17,10 +17,10 @@ import {
   getCurrentPageIndex,
   getSymbolsPageIndex,
   getIndexPathsForGroup,
-  getIndexofArboardLayers,
   findPageLayerIndexPaths,
   getLayerTransformAtIndexPath,
   getSymbolsInstancesIndexPaths,
+  getIndexPathsOfArtboardLayers,
   getLeftMostLayerPoint,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
@@ -254,7 +254,7 @@ export function layerReducer(
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
 
-      const indexPathsArtboards = getIndexofArboardLayers(state, ids);
+      const indexPathsArtboards = getIndexPathsOfArtboardLayers(state, ids);
 
       if (indexPathsArtboards.length > 0) {
         return produce(state, (draft) => {
@@ -262,14 +262,14 @@ export function layerReducer(
 
           deleteLayers(indexPathsArtboards, pages[pageIndex]);
           indexPathsArtboards.forEach((indexPath: IndexPath) => {
-            const artboard = Layers.access(page, indexPath);
+            const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
             const symbolMaster = {
               ...Models.symbolMaster,
               ...artboard,
-            } as Sketch.SymbolMaster;
+              _class: 'symbolMaster' as const,
+              symbolID: uuid(),
+            };
 
-            symbolMaster._class = 'symbolMaster';
-            symbolMaster.symbolID = uuid();
             addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
           });
         });
@@ -288,12 +288,15 @@ export function layerReducer(
       if (!symbolMasters) return state;
       symbolMasters.symbolID = uuid();
 
-      const prevFrame = { ...symbolMasters.frame };
+      const originalFrame = { ...symbolMasters.frame };
       const symbolsPage = state.sketch.pages[symbolsPageIndex];
 
-      const rect = getLeftMostLayerPoint(symbolsPage);
-      symbolMasters.frame.x = rect.x + 100;
-      symbolMasters.frame.y = rect.y;
+      const rect = symbolsPage
+        ? getLeftMostLayerPoint(symbolsPage)
+        : { maxX: 0, minY: 25 };
+
+      symbolMasters.frame.x = rect.maxX + 100;
+      symbolMasters.frame.y = rect.minY;
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
@@ -308,7 +311,7 @@ export function layerReducer(
         const symbolInstance = produce(Models.symbolInstance, (draft) => {
           draft.do_objectID = uuid();
           draft.name = name;
-          draft.frame = prevFrame;
+          draft.frame = originalFrame;
           draft.style = produce(Models.style, (s) => {
             s.do_objectID = uuid();
           });
