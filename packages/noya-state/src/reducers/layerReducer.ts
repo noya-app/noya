@@ -359,7 +359,7 @@ export function layerReducer(
 
               Layers.visit(layer, (layer) => {
                 if (layer.style) layer.style.do_objectID = uuid();
-                if (layer._class === 'symbolMaster') {
+                if (Layers.isSymbolMaster(layer)) {
                   layer.symbolID = uuid();
                   layer.frame = {
                     ...layer.frame,
