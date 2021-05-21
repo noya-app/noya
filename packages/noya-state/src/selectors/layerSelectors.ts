@@ -97,19 +97,20 @@ export const addSiblingLayer = <
   parent.layers.splice(indexPath[indexPath.length - 1], 0, ...l);
 };
 
-export const getLeftMostLayer = (page: Sketch.Page) => {
-  const bounds = {
+export const getLeftMostLayerPoint = (page: Sketch.Page) => {
+  const point = {
     x: 0,
     y: 0,
   };
 
+  if (!page) return point;
   page.layers.forEach((l) => {
     const rect = createBounds(l.frame);
-    if (rect.maxX < bounds.x) return;
+    if (rect.maxX < point.x) return;
 
-    bounds.x = rect.maxX;
-    bounds.y = rect.minY;
+    point.x = rect.maxX;
+    point.y = rect.minY;
   });
 
-  return bounds;
+  return point;
 };

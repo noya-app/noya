@@ -21,7 +21,7 @@ import {
   findPageLayerIndexPaths,
   getLayerTransformAtIndexPath,
   getSymbolsInstancesIndexPaths,
-  getLeftMostLayer,
+  getLeftMostLayerPoint,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -47,7 +47,6 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   ids: string[],
   name: string,
   indexPaths: IndexPath[],
-  symbolsPage?: Sketch.Page,
 ): T | undefined => {
   const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
     clickThroughGroups: true,
@@ -67,17 +66,6 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
     newParentTransform,
     AffineTransform.translation(groupFrame.x, groupFrame.y),
   );
-
-  if (model._class === 'symbolMaster') {
-    if (!symbolsPage) {
-      groupFrame.x = 25;
-      groupFrame.y = 25;
-    } else {
-      const rect = getLeftMostLayer(symbolsPage);
-      groupFrame.x = rect.x + 50;
-      groupFrame.y = rect.y;
-    }
-  }
 
   return produce(model, (draft) => {
     draft.do_objectID = uuid();
@@ -295,11 +283,17 @@ export function layerReducer(
         ids,
         name,
         indexPaths,
-        state.sketch.pages[symbolsPageIndex],
       );
 
       if (!symbolMasters) return state;
       symbolMasters.symbolID = uuid();
+
+      const prevFrame = { ...symbolMasters.frame };
+      const symbolsPage = state.sketch.pages[symbolsPageIndex];
+
+      const rect = getLeftMostLayerPoint(symbolsPage);
+      symbolMasters.frame.x = rect.x + 100;
+      symbolMasters.frame.y = rect.y;
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
@@ -314,7 +308,7 @@ export function layerReducer(
         const symbolInstance = produce(Models.symbolInstance, (draft) => {
           draft.do_objectID = uuid();
           draft.name = name;
-          draft.frame = symbolMasters.frame;
+          draft.frame = prevFrame;
           draft.style = produce(Models.style, (s) => {
             s.do_objectID = uuid();
           });
