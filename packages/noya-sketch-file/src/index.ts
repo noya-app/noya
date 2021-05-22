@@ -61,25 +61,29 @@ export async function encode(decoded: SketchFile): Promise<ArrayBuffer> {
 
   const zip = new JSZip();
 
-  zip.file('document.json', JSON.stringify(document));
+  // We set the `document.pages` array before encoding. The app may not
+  // maintain this array properly, since once the pages are in-memory, we don't
+  // need to access it anymore. So we generate a new valid array here.
+  const normalizedDocument: Sketch.Document = {
+    ...document,
+    pages: pages.map((page) => ({
+      _class: 'MSJSONFileReference',
+      _ref_class: 'MSImmutablePage',
+      _ref: `pages/${page.do_objectID}`,
+    })),
+  };
+
+  zip.file('document.json', JSON.stringify(normalizedDocument));
   zip.file('meta.json', JSON.stringify(meta));
   zip.file('user.json', JSON.stringify(user));
 
-  const pagesZip = zip.folder('pages')!;
-
   pages.forEach((page) => {
-    pagesZip.file(`${page.do_objectID}.json`, JSON.stringify(page));
+    zip.file(`pages/${page.do_objectID}.json`, JSON.stringify(page));
   });
 
-  const imageEntries = Object.entries(images);
-
-  if (imageEntries.length > 0) {
-    const imagesZip = zip.folder('images')!;
-
-    imageEntries.forEach(([name, data]) => {
-      imagesZip.file(name.replace('images/', ''), data);
-    });
-  }
+  Object.entries(images).forEach(([name, data]) => {
+    zip.file(name, data);
+  });
 
   return zip.generateAsync({
     type: 'arraybuffer',
