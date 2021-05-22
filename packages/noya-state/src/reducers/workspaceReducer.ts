@@ -1,6 +1,6 @@
+import type { FileSystemHandle } from 'browser-fs-access';
 import produce from 'immer';
 import { SketchFile } from 'noya-sketch-file';
-import type { FileSystemHandle } from 'browser-fs-access';
 import {
   createInitialHistoryState,
   HistoryAction,
@@ -35,6 +35,7 @@ export type WorkspaceState = {
 };
 
 export type WorkspaceAction =
+  | [type: 'setFile', value: SketchFile, fileHandle?: FileSystemHandle]
   | [type: 'setFileHandle', value?: FileSystemHandle]
   | [
       type: 'setCanvasSize',
@@ -50,6 +51,14 @@ export function workspaceReducer(
   action: WorkspaceAction,
 ): WorkspaceState {
   switch (action[0]) {
+    case 'setFile': {
+      const [, sketchFile, fileHandle] = action;
+
+      return produce(state, (draft) => {
+        draft.fileHandle = fileHandle;
+        draft.history = createInitialHistoryState(sketchFile);
+      });
+    }
     case 'setFileHandle': {
       const [, value] = action;
 

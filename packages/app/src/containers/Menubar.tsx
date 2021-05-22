@@ -36,10 +36,10 @@ const Row = styled.div(({ theme }) => ({
   flexDirection: 'row',
 }));
 
-type MenuItemType = 'open' | 'save' | 'saveAs';
+type MenuItemType = 'new' | 'open' | 'save' | 'saveAs';
 
 export default function Menubar() {
-  const { fileHandle, setFileHandle } = useWorkspace();
+  const { fileHandle, setFileHandle, setFile, setNewFile } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const currentTab = useSelector(Selectors.getCurrentTab);
 
@@ -52,6 +52,7 @@ export default function Menubar() {
 
   const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
     () => [
+      { value: 'new', title: 'File: New' },
       { value: 'open', title: 'File: Open' },
       { value: 'save', title: 'File: Save' },
       { value: 'saveAs', title: 'File: Save As...' },
@@ -62,6 +63,10 @@ export default function Menubar() {
   const onSelectMenuItem = useCallback(
     async (value: MenuItemType) => {
       switch (value) {
+        case 'new': {
+          setNewFile();
+          return;
+        }
         case 'open': {
           const file = await fileOpen({
             extensions: ['.sketch'],
@@ -72,8 +77,7 @@ export default function Menubar() {
 
           const sketch = await decode(data);
 
-          dispatch('setFile', sketch);
-          setFileHandle(file.handle);
+          setFile(sketch, file.handle);
           return;
         }
         case 'save':
@@ -96,7 +100,7 @@ export default function Menubar() {
         }
       }
     },
-    [dispatch, fileHandle, setFileHandle, state.sketch],
+    [fileHandle, setFile, setFileHandle, setNewFile, state.sketch],
   );
 
   return useMemo(
