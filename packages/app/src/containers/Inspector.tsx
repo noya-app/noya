@@ -19,6 +19,7 @@ import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
+import SymbolInspector from './SymbolInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -83,6 +84,12 @@ export default memo(function Inspector() {
 
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
+    const hasSymbolMaster = selectedLayers.some((l) =>
+      Layers.isSymbolMaster(l),
+    );
+    const hasOneSymbolMaster =
+      selectedLayers.length === 1 &&
+      selectedLayers.every((l) => Layers.isSymbolMaster(l));
 
     const views = [
       <Fragment key="layout">
@@ -99,8 +106,9 @@ export default memo(function Inspector() {
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
       hasAllTextLayer && <ThemeTextInspector />,
-      !hasTextLayer && <LayerThemeInspector />,
+      !hasTextLayer && !hasSymbolMaster && <LayerThemeInspector />,
       hasTextLayer && <TextStyleInspector />,
+      hasOneSymbolMaster && <SymbolInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       selectedLayers.length === 1 && <FillInspector />,
       selectedLayers.length === 1 && <BorderInspector />,
