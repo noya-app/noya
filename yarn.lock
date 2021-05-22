@@ -3088,10 +3088,10 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@sketch-hq/sketch-file-format-ts@^5.2.2":
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/@sketch-hq/sketch-file-format-ts/-/sketch-file-format-ts-5.2.2.tgz#a4ac5c2240aa6cfe742fe6330ff0e77c7cf3ccbb"
-  integrity sha512-DWadC1LtBo7gvFNwO62DSjEP0pIgzYOl3V2ZPUHcg0vbxgZ2zIl3F14US2F2ya8r6CfIYtjOwjDTxsLmebz7GQ==
+"@sketch-hq/sketch-file-format-ts@^6.0.3":
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/@sketch-hq/sketch-file-format-ts/-/sketch-file-format-ts-6.0.3.tgz#a4f6d12cd8ccfdaa16ac3ab3f6b612e9371c33e4"
+  integrity sha512-sHBYb2EqJVHGSso8/IH2PrTT+zbORAU/6jR8tezZfpWi5vVUYz0TiXJKIXxBwi2NiT40klW6Ek7muoD4eo+Jaw==
 
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"

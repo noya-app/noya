@@ -1,9 +1,11 @@
 import { FileSystemHandle } from 'browser-fs-access';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
+import { SketchFile } from 'noya-sketch-file';
 import {
   Action,
   ApplicationState,
   LayerHighlight,
+  Models,
   WorkspaceAction,
   WorkspaceState,
 } from 'noya-state';
@@ -84,35 +86,70 @@ export const useWorkspace = () => {
     preferences,
   } = state;
 
+  const setNewFile = useCallback(() => {
+    dispatch(['setFile', Models.createSketchFile()]);
+  }, [dispatch]);
+
+  const setFile = useCallback(
+    (sketchFile: SketchFile, fileHandle?: FileSystemHandle) => {
+      dispatch(['setFile', sketchFile, fileHandle]);
+    },
+    [dispatch],
+  );
+
+  const setFileHandle = useCallback(
+    (fileHandle?: FileSystemHandle) => {
+      dispatch(['setFileHandle', fileHandle]);
+    },
+    [dispatch],
+  );
+
+  const setCanvasSize = useCallback(
+    (
+      size: { width: number; height: number },
+      insets: { left: number; right: number },
+    ) => {
+      dispatch(['setCanvasSize', size, insets]);
+    },
+    [dispatch],
+  );
+
+  const setShowRulers = useCallback(
+    (value: boolean) => dispatch(['setShowRulers', value]),
+    [dispatch],
+  );
+
+  const highlightLayer = useCallback(
+    (highlight?: LayerHighlight) => dispatch(['highlightLayer', highlight]),
+    [dispatch],
+  );
+
   return useMemo(
     () => ({
-      setFileHandle: (fileHandle?: FileSystemHandle) => {
-        dispatch(['setFileHandle', fileHandle]);
-      },
-      setCanvasSize: (
-        size: { width: number; height: number },
-        insets: { left: number; right: number },
-      ) => {
-        // console.log('scs', size, insets);
-        dispatch(['setCanvasSize', size, insets]);
-      },
-      setShowRulers: (value: boolean) => dispatch(['setShowRulers', value]),
-      highlightLayer: (highlight?: LayerHighlight) =>
-        dispatch(['highlightLayer', highlight]),
-
+      canvasInsets,
+      canvasSize,
       fileHandle,
       highlightedLayer,
-      canvasSize,
-      canvasInsets,
+      highlightLayer,
       preferences,
+      setCanvasSize,
+      setFile,
+      setFileHandle,
+      setNewFile,
+      setShowRulers,
     }),
     [
       canvasInsets,
       canvasSize,
-      dispatch,
       fileHandle,
       highlightedLayer,
+      highlightLayer,
       preferences,
+      setCanvasSize,
+      setFile,
+      setFileHandle,
+      setNewFile,
+      setShowRulers,
     ],
   );
 };
