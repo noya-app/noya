@@ -53,6 +53,7 @@ export type ApplicationState = {
 };
 
 export type Action =
+  | [type: 'setFile', value: SketchFile]
   | [type: 'setTab', value: WorkspaceTab]
   | PageAction
   | CanvasAction
@@ -68,6 +69,11 @@ export function applicationReducer(
   action: Action,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setFile': {
+      const [, value] = action;
+
+      return createInitialState(value);
+    }
     case 'setTab': {
       const [, value] = action;
 
