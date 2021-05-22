@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import {
   useApplicationState,
   useSelector,
+  useWorkspace,
 } from '../contexts/ApplicationStateContext';
 
 const Container = styled.header(({ theme }) => ({
@@ -35,9 +36,10 @@ const Row = styled.div(({ theme }) => ({
   flexDirection: 'row',
 }));
 
-type MenuItemType = 'open' | 'save';
+type MenuItemType = 'open' | 'save' | 'saveAs';
 
 export default function Menubar() {
+  const { fileHandle, setFileHandle } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const currentTab = useSelector(Selectors.getCurrentTab);
 
@@ -50,8 +52,9 @@ export default function Menubar() {
 
   const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
     () => [
-      { value: 'open', title: 'Open File' },
-      { value: 'save', title: 'Save File' },
+      { value: 'open', title: 'File: Open' },
+      { value: 'save', title: 'File: Save' },
+      { value: 'saveAs', title: 'File: Save As...' },
     ],
     [],
   );
@@ -70,24 +73,30 @@ export default function Menubar() {
           const sketch = await decode(data);
 
           dispatch('setFile', sketch);
+          setFileHandle(file.handle);
           return;
         }
-        case 'save': {
+        case 'save':
+        case 'saveAs': {
           const data = await encode(state.sketch);
 
-          const buffer = new Blob([data], { type: 'application/zip' });
+          const blob = new Blob([data], { type: 'application/zip' });
 
-          await fileSave(
-            buffer,
-            { fileName: 'Test', extensions: ['.sketch'] },
-            undefined,
+          const fileName = fileHandle?.name ?? 'Untitled.sketch';
+
+          const newFileHandle = await fileSave(
+            blob,
+            { fileName, extensions: ['.sketch'] },
+            value === 'save' ? fileHandle : undefined,
             false,
           );
+
+          setFileHandle(newFileHandle);
           return;
         }
       }
     },
-    [dispatch, state.sketch],
+    [dispatch, fileHandle, setFileHandle, state.sketch],
   );
 
   return useMemo(
