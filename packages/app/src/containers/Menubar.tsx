@@ -80,13 +80,13 @@ export default function Menubar() {
         case 'saveAs': {
           const data = await encode(state.sketch);
 
-          const blob = new Blob([data], { type: 'application/zip' });
-
-          const fileName = fileHandle?.name ?? 'Untitled.sketch';
+          const file = new File([data], fileHandle?.name ?? 'Untitled.sketch', {
+            type: 'application/zip',
+          });
 
           const newFileHandle = await fileSave(
-            blob,
-            { fileName, extensions: ['.sketch'] },
+            file,
+            { fileName: file.name, extensions: ['.sketch'] },
             value === 'save' ? fileHandle : undefined,
             false,
           );
