@@ -1,7 +1,6 @@
-import styled from 'styled-components';
-import * as ContextMenu from '@radix-ui/react-context-menu';
 import { memo, ReactNode } from 'react';
-import { Slot } from '@radix-ui/react-slot';
+import styled from 'styled-components';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { SEPARATOR_ITEM, MenuItem, styles } from './internal/Menu';
 
 export type { MenuItem };
@@ -11,20 +10,20 @@ export { SEPARATOR_ITEM };
  * Separator
  * ------------------------------------------------------------------------- */
 
-const SeparatorElement = styled(ContextMenu.Separator)(styles.separatorStyle);
+const SeparatorElement = styled(DropdownMenu.Separator)(styles.separatorStyle);
 
 /* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
 
-const ItemElement = styled(ContextMenu.Item)(styles.itemStyle);
+const ItemElement = styled(DropdownMenu.Item)(styles.itemStyle);
 
-interface ContextMenuItemProps {
+interface DropdownMenuItemProps {
   children: ReactNode;
   onSelect: () => void;
 }
 
-function ContextMenuItem({ children, onSelect }: ContextMenuItemProps) {
+function DropdownMenuItem({ children, onSelect }: DropdownMenuItemProps) {
   return <ItemElement onSelect={onSelect}>{children}</ItemElement>;
 }
 
@@ -32,7 +31,7 @@ function ContextMenuItem({ children, onSelect }: ContextMenuItemProps) {
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootElement = styled(ContextMenu.Content)(styles.contentStyle);
+const RootElement = styled(DropdownMenu.Content)(styles.contentStyle);
 
 interface Props<T extends string> {
   children: ReactNode;
@@ -40,31 +39,32 @@ interface Props<T extends string> {
   onSelect?: (value: T) => void;
 }
 
+// Using a Slot for the menu currently doesn't work with custom elements,
+// so we use a span. Check for fixes in library updates in the future.
 function ContextMenuRoot<T extends string>({
   items,
   children,
   onSelect,
 }: Props<T>) {
   return (
-    <ContextMenu.Root>
-      <ContextMenu.Trigger as={Slot}>{children}</ContextMenu.Trigger>
-      <RootElement>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger as={'span'}>{children}</DropdownMenu.Trigger>
+      <RootElement sideOffset={4}>
         {items.map((item, index) =>
           item === SEPARATOR_ITEM ? (
             <SeparatorElement key={index} />
           ) : (
-            <ContextMenuItem
+            <DropdownMenuItem
               key={item.value}
               onSelect={() => onSelect?.(item.value)}
             >
               {item.title}
-            </ContextMenuItem>
+            </DropdownMenuItem>
           ),
         )}
       </RootElement>
-    </ContextMenu.Root>
+    </DropdownMenu.Root>
   );
 }
 
-export const Item = memo(ContextMenuItem);
 export const Root = memo(ContextMenuRoot);
