@@ -1,3 +1,4 @@
+import { FileSystemHandle } from 'browser-fs-access';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 import {
   Action,
@@ -75,10 +76,19 @@ export const useApplicationState = (): [ApplicationState, Dispatcher] => {
 export const useWorkspace = () => {
   const [state, dispatch] = useRawApplicationState();
 
-  const { highlightedLayer, canvasSize, canvasInsets, preferences } = state;
+  const {
+    fileHandle,
+    highlightedLayer,
+    canvasSize,
+    canvasInsets,
+    preferences,
+  } = state;
 
   return useMemo(
     () => ({
+      setFileHandle: (fileHandle?: FileSystemHandle) => {
+        dispatch(['setFileHandle', fileHandle]);
+      },
       setCanvasSize: (
         size: { width: number; height: number },
         insets: { left: number; right: number },
@@ -90,12 +100,20 @@ export const useWorkspace = () => {
       highlightLayer: (highlight?: LayerHighlight) =>
         dispatch(['highlightLayer', highlight]),
 
+      fileHandle,
       highlightedLayer,
       canvasSize,
       canvasInsets,
       preferences,
     }),
-    [canvasInsets, canvasSize, dispatch, highlightedLayer, preferences],
+    [
+      canvasInsets,
+      canvasSize,
+      dispatch,
+      fileHandle,
+      highlightedLayer,
+      preferences,
+    ],
   );
 };
 

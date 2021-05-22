@@ -1,4 +1,4 @@
-import { parse, SketchFile } from 'noya-sketch-file';
+import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
   WorkspaceAction,
@@ -15,7 +15,10 @@ import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
 
 export default function App() {
-  const sketchFile = useResource<ArrayBuffer>('/Demo.sketch', 'arrayBuffer');
+  const sketchFileData = useResource<ArrayBuffer>(
+    '/Demo.sketch',
+    'arrayBuffer',
+  );
 
   const [state, dispatch] = useReducer(
     (
@@ -45,10 +48,10 @@ export default function App() {
   );
 
   useEffect(() => {
-    parse(sketchFile).then((parsed) => {
+    decode(sketchFileData).then((parsed) => {
       dispatch({ type: 'set', value: parsed });
     });
-  }, [sketchFile]);
+  }, [sketchFileData]);
 
   const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });

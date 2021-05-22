@@ -1,4 +1,4 @@
-import { memo, ReactNode } from 'react';
+import { ForwardedRef, forwardRef, memo, ReactNode } from 'react';
 import styled from 'styled-components';
 import { Tooltip } from '..';
 
@@ -57,17 +57,21 @@ interface ButtonRootProps {
   onClick?: () => void;
 }
 
-function Button({
-  id,
-  tooltip,
-  active = false,
-  disabled = false,
-  onClick,
-  children,
-}: ButtonRootProps) {
+const Button = forwardRef(function Button(
+  {
+    id,
+    tooltip,
+    active = false,
+    disabled = false,
+    onClick,
+    children,
+  }: ButtonRootProps,
+  forwardedRef: ForwardedRef<HTMLButtonElement>,
+) {
   const buttonElement = (
     <ButtonElement
       id={id}
+      ref={forwardedRef}
       active={active}
       disabled={disabled}
       onClick={onClick}
@@ -81,6 +85,6 @@ function Button({
   ) : (
     buttonElement
   );
-}
+});
 
 export default memo(Button);

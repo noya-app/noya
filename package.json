@@ -54,5 +54,10 @@
       "npx prettier --write",
       "npx eslint --fix --max-warnings 0"
     ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!browser-fs-access)"
+    ]
   }
 }
