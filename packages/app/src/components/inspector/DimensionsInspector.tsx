@@ -7,19 +7,6 @@ import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 
 export type DimensionValue = number | undefined;
 
-export interface Props {
-  x: DimensionValue;
-  y: DimensionValue;
-  width: DimensionValue;
-  height: DimensionValue;
-  rotation: DimensionValue;
-  onSetX: (value: number, mode: SetNumberMode) => void;
-  onSetY: (value: number, mode: SetNumberMode) => void;
-  onSetWidth: (value: number, mode: SetNumberMode) => void;
-  onSetHeight: (value: number, mode: SetNumberMode) => void;
-  onSetRotation: (value: number, mode: SetNumberMode) => void;
-}
-
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
@@ -63,6 +50,19 @@ const DimensionInput = memo(function InputX({
     </InputField.Root>
   );
 });
+
+export interface Props {
+  x: DimensionValue;
+  y: DimensionValue;
+  width: DimensionValue;
+  height: DimensionValue;
+  rotation: DimensionValue;
+  onSetX: (value: number, mode: SetNumberMode) => void;
+  onSetY: (value: number, mode: SetNumberMode) => void;
+  onSetWidth: (value: number, mode: SetNumberMode) => void;
+  onSetHeight: (value: number, mode: SetNumberMode) => void;
+  onSetRotation: (value: number, mode: SetNumberMode) => void;
+}
 
 export default function DimensionsInspector({
   x,

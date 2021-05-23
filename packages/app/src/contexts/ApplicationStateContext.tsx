@@ -17,7 +17,9 @@ export type FlatDispatcher = (...args: WorkspaceAction) => void;
 
 const StateContext = createContext<WorkspaceState | undefined>(undefined);
 
-const DispatchContext = createContext<Dispatcher | undefined>(undefined);
+const noop = () => {};
+
+const DispatchContext = createContext<Dispatcher>(noop);
 
 /**
  * We provide `state` and `dispatch` as separate contexts, to reducer re-rendering
@@ -29,12 +31,12 @@ export const StateProvider = memo(function StateProvider({
   children,
 }: {
   state: WorkspaceState;
-  dispatch: Dispatcher;
+  dispatch?: Dispatcher;
   children?: ReactNode;
 }) {
   return (
     <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>
+      <DispatchContext.Provider value={dispatch ?? noop}>
         {children}
       </DispatchContext.Provider>
     </StateContext.Provider>
@@ -57,24 +59,11 @@ export const useWorkspaceState = (): WorkspaceState => {
 };
 
 /**
- * This should only be used to propagate state between React reconcilers
- */
-export const useRawDispatch = (): Dispatcher => {
-  const dispatch = useContext(DispatchContext);
-
-  if (!dispatch) {
-    throw new Error(`Missing DispatchContext.Provider`);
-  }
-
-  return dispatch;
-};
-
-/**
  * Components should use this to update the application's state. The dispatch
  * function is referentially stable, so won't cause unnecessary re-renders.
  */
 export const useDispatch = (): FlatDispatcher => {
-  const dispatch = useRawDispatch();
+  const dispatch = useContext(DispatchContext);
 
   const blurTrigger = useGlobalInputBlurTrigger();
 
@@ -116,8 +105,8 @@ export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
  * Get a snapshot of the current state wrapped in a ref. The ref is set during
  * the `useLayoutEffect` phase of the React lifecycle.
  *
- * We do this to avoid excessively re-render components that need to access
- * the state in event handlers.
+ * We do this to avoid excessively re-rendering components that need to access
+ * the entire state in event handlers.
  */
 export const useGetStateSnapshot = (): (() => ApplicationState) => {
   const state = useWorkspaceState();

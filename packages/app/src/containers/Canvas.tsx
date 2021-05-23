@@ -1,9 +1,8 @@
 import type { Surface } from 'canvaskit-wasm';
-import { render, unmount } from 'noya-react-canvaskit';
-import { uuid } from 'noya-renderer';
 import { createRect } from 'noya-geometry';
-import { CompassDirection, Point, ShapeType } from 'noya-state';
-import { Selectors } from 'noya-state';
+import { render, unmount } from 'noya-react-canvaskit';
+import { SketchFileRenderer, uuid } from 'noya-renderer';
+import { CompassDirection, Point, Selectors, ShapeType } from 'noya-state';
 import {
   CSSProperties,
   memo,
@@ -17,14 +16,12 @@ import styled, { ThemeProvider, useTheme } from 'styled-components';
 import {
   StateProvider,
   useApplicationState,
-  useWorkspaceState,
   useSelector,
-  useRawDispatch,
+  useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
-import { useWorkspace } from '../hooks/useWorkspace';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import { SketchFileRenderer } from 'noya-renderer';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -76,7 +73,6 @@ export default memo(function Canvas() {
     sizes: { sidebarWidth },
   } = theme;
   const workspaceState = useWorkspaceState();
-  const rawDispatch = useRawDispatch();
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -169,7 +165,7 @@ export default memo(function Canvas() {
     try {
       render(
         <ThemeProvider theme={theme}>
-          <StateProvider state={workspaceState} dispatch={rawDispatch}>
+          <StateProvider state={workspaceState}>
             <SketchFileRenderer />
           </StateProvider>
         </ThemeProvider>,
@@ -183,7 +179,7 @@ export default memo(function Canvas() {
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, state, containerSize, workspaceState, theme, rawDispatch]);
+  }, [CanvasKit, state, containerSize, workspaceState, theme]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {

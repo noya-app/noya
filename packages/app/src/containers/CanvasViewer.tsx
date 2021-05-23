@@ -39,9 +39,7 @@ function renderImageFromCanvas(
   return new Promise((resolve) => {
     const root = (
       <ThemeProvider theme={theme}>
-        <StateProvider state={state} dispatch={() => {}}>
-          {renderContent()}
-        </StateProvider>
+        <StateProvider state={state}>{renderContent()}</StateProvider>
       </ThemeProvider>
     );
 
