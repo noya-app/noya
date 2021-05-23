@@ -5,14 +5,37 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import Workspace from './containers/Workspace';
-import {
-  ApplicationStateContextValue,
-  ApplicationStateProvider,
-} from './contexts/ApplicationStateContext';
+import { StateProvider } from './contexts/ApplicationStateContext';
 import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
+
+type Action =
+  | { type: 'set'; value: SketchFile }
+  | { type: 'update'; value: WorkspaceAction };
+
+function reducer(
+  state: PromiseState<WorkspaceState>,
+  action: Action,
+): PromiseState<WorkspaceState> {
+  switch (action.type) {
+    case 'set':
+      return {
+        type: 'success',
+        value: createInitialWorkspaceState(action.value),
+      };
+    case 'update':
+      if (state.type === 'success') {
+        return {
+          type: 'success',
+          value: workspaceReducer(state.value, action.value),
+        };
+      } else {
+        return state;
+      }
+  }
+}
 
 export default function App() {
   const sketchFileData = useResource<ArrayBuffer>(
@@ -20,32 +43,7 @@ export default function App() {
     'arrayBuffer',
   );
 
-  const [state, dispatch] = useReducer(
-    (
-      state: PromiseState<WorkspaceState>,
-      action:
-        | { type: 'set'; value: SketchFile }
-        | { type: 'update'; value: WorkspaceAction },
-    ): PromiseState<WorkspaceState> => {
-      switch (action.type) {
-        case 'set':
-          return {
-            type: 'success',
-            value: createInitialWorkspaceState(action.value),
-          };
-        case 'update':
-          if (state.type === 'success') {
-            return {
-              type: 'success',
-              value: workspaceReducer(state.value, action.value),
-            };
-          } else {
-            return state;
-          }
-      }
-    },
-    { type: 'pending' },
-  );
+  const [state, dispatch] = useReducer(reducer, { type: 'pending' });
 
   useEffect(() => {
     decode(sketchFileData).then((parsed) => {
@@ -57,17 +55,11 @@ export default function App() {
     dispatch({ type: 'update', value: action });
   }, []);
 
-  const contextValue: ApplicationStateContextValue | undefined = useMemo(
-    () =>
-      state.type === 'success' ? [state.value, handleDispatch] : undefined,
-    [state, handleDispatch],
-  );
-
-  if (!contextValue) return null;
+  if (state.type !== 'success') return null;
 
   return (
-    <ApplicationStateProvider value={contextValue}>
+    <StateProvider state={state.value} dispatch={handleDispatch}>
       <Workspace />
-    </ApplicationStateProvider>
+    </StateProvider>
   );
 }

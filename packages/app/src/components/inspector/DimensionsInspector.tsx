@@ -1,6 +1,6 @@
 import { Button, InputField, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
 import FlipVerticalIcon from '../icons/FlipVerticalIcon';
@@ -19,6 +19,37 @@ const FlipButtonContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
 }));
+
+const DimensionInput = memo(function InputX({
+  value,
+  onSetValue,
+  label,
+}: {
+  value: DimensionValue;
+  onSetValue: (value: number, mode: SetNumberMode) => void;
+  label: string;
+}) {
+  const handleNudgeValue = useCallback(
+    (value: number) => onSetValue(value, 'adjust'),
+    [onSetValue],
+  );
+
+  const handleSetValue = useCallback((value) => onSetValue(value, 'replace'), [
+    onSetValue,
+  ]);
+
+  return (
+    <InputField.Root>
+      <InputField.NumberInput
+        value={value}
+        placeholder={value === undefined ? 'multi' : undefined}
+        onNudge={handleNudgeValue}
+        onSubmit={handleSetValue}
+      />
+      <InputField.Label>{label}</InputField.Label>
+    </InputField.Root>
+  );
+});
 
 export interface Props {
   x: DimensionValue;
@@ -47,128 +78,37 @@ export default function DimensionsInspector({
 }: Props) {
   const iconColor = useTheme().colors.icon;
 
+  const flipButtonElements = useMemo(
+    () => (
+      <FlipButtonContainer>
+        <Button id="flip-horizontal" tooltip="Flip horizontally">
+          <FlipHorizontalIcon color={iconColor} />
+        </Button>
+        <Spacer.Horizontal />
+        <Button id="flip-vertical" tooltip="Flip vertically">
+          <FlipVerticalIcon color={iconColor} />
+        </Button>
+      </FlipButtonContainer>
+    ),
+    [iconColor],
+  );
+
   return (
     <>
       <Row>
-        <InputField.Root>
-          <InputField.NumberInput
-            value={x}
-            placeholder={x === undefined ? 'multi' : undefined}
-            onNudge={useCallback(
-              (value: number) => {
-                onSetX(value, 'adjust');
-              },
-              [onSetX],
-            )}
-            onSubmit={useCallback(
-              (value) => {
-                onSetX(value, 'replace');
-              },
-              [onSetX],
-            )}
-          />
-          <InputField.Label>X</InputField.Label>
-        </InputField.Root>
+        <DimensionInput value={x} onSetValue={onSetX} label="X" />
         <Spacer.Horizontal size={16} />
-        <InputField.Root>
-          <InputField.NumberInput
-            value={y}
-            placeholder={y === undefined ? 'multi' : undefined}
-            onNudge={useCallback(
-              (value: number) => {
-                onSetY(value, 'adjust');
-              },
-              [onSetY],
-            )}
-            onSubmit={useCallback(
-              (value) => {
-                onSetY(value, 'replace');
-              },
-              [onSetY],
-            )}
-          />
-          <InputField.Label>Y</InputField.Label>
-        </InputField.Root>
+        <DimensionInput value={y} onSetValue={onSetY} label="Y" />
         <Spacer.Horizontal size={16} />
-        <InputField.Root>
-          <InputField.NumberInput
-            value={rotation}
-            placeholder={rotation === undefined ? 'multi' : undefined}
-            onNudge={useCallback(
-              (value: number) => {
-                onSetRotation(value, 'adjust');
-              },
-              [onSetRotation],
-            )}
-            onSubmit={useCallback(
-              (value) => {
-                onSetRotation(value, 'replace');
-              },
-              [onSetRotation],
-            )}
-          />
-          <InputField.Label>°</InputField.Label>
-        </InputField.Root>
+        <DimensionInput value={rotation} onSetValue={onSetRotation} label="°" />
       </Row>
       <Spacer.Vertical size={10} />
       <Row>
-        <InputField.Root>
-          <InputField.NumberInput
-            value={width}
-            placeholder={width === undefined ? 'multi' : undefined}
-            onNudge={useCallback(
-              (value: number) => {
-                onSetWidth(value, 'adjust');
-              },
-              [onSetWidth],
-            )}
-            onSubmit={useCallback(
-              (value) => {
-                onSetWidth(value, 'replace');
-              },
-              [onSetWidth],
-            )}
-          />
-          <InputField.Label>W</InputField.Label>
-        </InputField.Root>
+        <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
         <Spacer.Horizontal size={16} />
-        <InputField.Root>
-          <InputField.NumberInput
-            value={height}
-            placeholder={height === undefined ? 'multi' : undefined}
-            onNudge={useCallback(
-              (value: number) => {
-                onSetHeight(value, 'adjust');
-              },
-              [onSetHeight],
-            )}
-            onSubmit={useCallback(
-              (value) => {
-                onSetHeight(value, 'replace');
-              },
-              [onSetHeight],
-            )}
-          />
-          <InputField.Label>H</InputField.Label>
-        </InputField.Root>
+        <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
         <Spacer.Horizontal size={16} />
-        <FlipButtonContainer>
-          <Button
-            id="flip-horizontal"
-            tooltip="Flip horizontally"
-            onClick={useCallback(() => {}, [])}
-          >
-            <FlipHorizontalIcon color={iconColor} />
-          </Button>
-          <Spacer.Horizontal />
-          <Button
-            id="flip-vertical"
-            tooltip="Flip vertically"
-            onClick={useCallback(() => {}, [])}
-          >
-            <FlipVerticalIcon color={iconColor} />
-          </Button>
-        </FlipButtonContainer>
+        {flipButtonElements}
       </Row>
     </>
   );

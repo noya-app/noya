@@ -27,8 +27,8 @@ import { visit } from 'tree-visit';
 import {
   useApplicationState,
   useSelector,
-  useWorkspace,
 } from '../contexts/ApplicationStateContext';
+import { useWorkspace } from '../hooks/useWorkspace';
 import useDeepArray from '../hooks/useDeepArray';
 import useShallowArray from '../hooks/useShallowArray';
 

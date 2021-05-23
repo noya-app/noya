@@ -5,38 +5,32 @@ import {
   ResetIcon,
   UpdateIcon,
 } from '@radix-ui/react-icons';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Button, Select, Spacer } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
+import getMultiValue from '../utils/getMultiValue';
 
 const NO_LAYER_STYLE = 'none';
 
-export default memo(function LayerThemeInspector() {
-  const [, dispatch] = useApplicationState();
+interface Props {
+  style?: Sketch.Style;
+  sharedStyleId?: string;
+  sharedStyles: Sketch.SharedStyle[];
+}
+
+const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
+  style,
+  sharedStyleId,
+  sharedStyles,
+}: Props) {
+  const dispatch = useDispatch();
 
   const iconColor = useTheme().colors.icon;
-
-  const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
-  const selectedLayers = useShallowArray(
-    useSelector(Selectors.getSelectedLayers),
-  );
-
-  const selectedLayerStyleId = useMemo(
-    () =>
-      !selectedLayers.every(
-        (v) => v.sharedStyleID === selectedLayers[0].sharedStyleID,
-      )
-        ? undefined
-        : selectedLayers[0].sharedStyleID,
-    [selectedLayers],
-  );
 
   const layerStyleOptions = useMemo(
     () => [NO_LAYER_STYLE, ...sharedStyles.map((style) => style.do_objectID)],
@@ -59,102 +53,117 @@ export default memo(function LayerThemeInspector() {
   );
 
   const onAdd = useCallback(() => {
-    const styleName = prompt('New Style Layout Name');
+    const name = prompt('New style name');
 
-    if (!styleName) return;
-    dispatch('addThemeStyle', styleName, selectedLayers[0].style);
-  }, [selectedLayers, dispatch]);
+    if (!name) return;
+
+    dispatch('addThemeStyle', name, style);
+  }, [dispatch, style]);
 
   const onRename = useCallback(() => {
-    if (!selectedLayerStyleId) return;
+    if (!sharedStyleId) return;
 
-    const newName = prompt('Rename Layout style');
+    const name = prompt('Rename style');
 
-    if (!newName) return;
-    dispatch('setThemeStyleName', selectedLayerStyleId, newName);
-  }, [selectedLayerStyleId, dispatch]);
+    if (!name) return;
+
+    dispatch('setThemeStyleName', sharedStyleId, name);
+  }, [sharedStyleId, dispatch]);
 
   const onDetach = useCallback(() => dispatch('setThemeStyle'), [dispatch]);
 
   const onUpdate = useCallback(() => {
-    if (!selectedLayerStyleId) return;
+    if (!sharedStyleId) return;
 
-    dispatch('updateThemeStyle', selectedLayerStyleId, selectedLayers[0].style);
-  }, [selectedLayerStyleId, selectedLayers, dispatch]);
+    dispatch('updateThemeStyle', sharedStyleId, style);
+  }, [sharedStyleId, dispatch, style]);
 
   const onReset = useCallback(() => {
-    const style = sharedStyles.find(
-      (s) => s.do_objectID === selectedLayerStyleId,
-    );
+    const style = sharedStyles.find((s) => s.do_objectID === sharedStyleId);
 
-    if (selectedLayerStyleId && style) {
-      dispatch('setThemeStyle', selectedLayerStyleId);
-    }
-  }, [selectedLayerStyleId, sharedStyles, dispatch]);
+    if (!sharedStyleId || !style) return;
+
+    dispatch('setThemeStyle', sharedStyleId);
+  }, [sharedStyleId, sharedStyles, dispatch]);
 
   return (
-    <>
-      <InspectorPrimitives.Section>
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Theme</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <Spacer.Vertical size={10} />
-        <InspectorPrimitives.Row>
-          <Select
-            id="theme-layer-style"
-            value={selectedLayerStyleId || NO_LAYER_STYLE}
-            options={layerStyleOptions}
-            getTitle={getLayerStyleTitle}
-            onChange={onSelect}
-          />
-        </InspectorPrimitives.Row>
-        <Spacer.Vertical size={10} />
-        <InspectorPrimitives.Row>
-          <Button
-            id="create-layer-style"
-            tooltip="Create theme style from layer"
-            onClick={onAdd}
-          >
-            <PlusIcon color={iconColor} />
-          </Button>
-          <Spacer.Horizontal size={10} />
-          <Button
-            id="update-layer-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Update theme style to match layer"
-            onClick={onUpdate}
-          >
-            <UpdateIcon color={iconColor} />
-          </Button>
-          <Spacer.Horizontal size={10} />
-          <Button
-            id="detach-layer-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Detach style from theme"
-            onClick={onDetach}
-          >
-            <LinkBreak2Icon color={iconColor} />
-          </Button>
-          <Spacer.Horizontal size={10} />
-          <Button
-            id="rename-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Rename theme style"
-            onClick={onRename}
-          >
-            <CursorTextIcon color={iconColor} />
-          </Button>
-          <Spacer.Horizontal size={10} />
-          <Button
-            id="reset-style"
-            disabled={selectedLayerStyleId === undefined}
-            tooltip="Reset layer style to theme style"
-            onClick={onReset}
-          >
-            <ResetIcon color={iconColor} />
-          </Button>
-        </InspectorPrimitives.Row>
-      </InspectorPrimitives.Section>
-    </>
+    <InspectorPrimitives.Section>
+      <InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.Title>Theme</InspectorPrimitives.Title>
+      </InspectorPrimitives.SectionHeader>
+      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.Row>
+        <Select
+          id="theme-layer-style"
+          value={sharedStyleId || NO_LAYER_STYLE}
+          options={layerStyleOptions}
+          getTitle={getLayerStyleTitle}
+          onChange={onSelect}
+        />
+      </InspectorPrimitives.Row>
+      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.Row>
+        <Button
+          id="create-layer-style"
+          tooltip="Create theme style from layer"
+          onClick={onAdd}
+        >
+          <PlusIcon color={iconColor} />
+        </Button>
+        <Spacer.Horizontal size={10} />
+        <Button
+          id="update-layer-style"
+          disabled={sharedStyleId === undefined}
+          tooltip="Update theme style to match layer"
+          onClick={onUpdate}
+        >
+          <UpdateIcon color={iconColor} />
+        </Button>
+        <Spacer.Horizontal size={10} />
+        <Button
+          id="detach-layer-style"
+          disabled={sharedStyleId === undefined}
+          tooltip="Detach style from theme"
+          onClick={onDetach}
+        >
+          <LinkBreak2Icon color={iconColor} />
+        </Button>
+        <Spacer.Horizontal size={10} />
+        <Button
+          id="rename-style"
+          disabled={sharedStyleId === undefined}
+          tooltip="Rename theme style"
+          onClick={onRename}
+        >
+          <CursorTextIcon color={iconColor} />
+        </Button>
+        <Spacer.Horizontal size={10} />
+        <Button
+          id="reset-style"
+          disabled={sharedStyleId === undefined}
+          tooltip="Reset layer style to theme style"
+          onClick={onReset}
+        >
+          <ResetIcon color={iconColor} />
+        </Button>
+      </InspectorPrimitives.Row>
+    </InspectorPrimitives.Section>
   );
 });
+
+export default function LayerThemeInspector() {
+  const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const sharedStyleId = useMemo(
+    () => getMultiValue(selectedLayers.map((layer) => layer.sharedStyleID)),
+    [selectedLayers],
+  );
+
+  return (
+    <LayerThemeInspectorContent
+      style={selectedLayers[0]?.style}
+      sharedStyleId={sharedStyleId}
+      sharedStyles={sharedStyles}
+    />
+  );
+}

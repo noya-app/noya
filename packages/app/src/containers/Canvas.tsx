@@ -1,9 +1,8 @@
 import type { Surface } from 'canvaskit-wasm';
-import { render, unmount } from 'noya-react-canvaskit';
-import { uuid } from 'noya-renderer';
 import { createRect } from 'noya-geometry';
-import { CompassDirection, Point, ShapeType } from 'noya-state';
-import { Selectors } from 'noya-state';
+import { render, unmount } from 'noya-react-canvaskit';
+import { SketchFileRenderer, uuid } from 'noya-renderer';
+import { CompassDirection, Point, Selectors, ShapeType } from 'noya-state';
 import {
   CSSProperties,
   memo,
@@ -12,22 +11,23 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import {
-  ApplicationStateProvider,
+  StateProvider,
   useApplicationState,
-  useRawApplicationState,
   useSelector,
-  useWorkspace,
+  useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import { SketchFileRenderer } from 'noya-renderer';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
     flush(): void;
+    _id: number;
   }
 }
 
@@ -74,12 +74,12 @@ export default memo(function Canvas() {
   const {
     sizes: { sidebarWidth },
   } = theme;
-  const rawApplicationState = useRawApplicationState();
+  const workspaceState = useWorkspaceState();
   const [state, dispatch] = useApplicationState();
+  const [surface, setSurface] = useState<Surface | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
-  const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
@@ -126,22 +126,18 @@ export default memo(function Canvas() {
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
-    if (!canvasElement) return;
+    if (!canvasElement || !containerSize) return;
 
     const surface = CanvasKit.MakeCanvasSurface(canvasElement);
 
     if (!surface) {
-      surfaceRef.current = null;
-
       console.warn('failed to create surface');
-      return;
     }
 
-    surfaceRef.current = surface;
+    setSurface(surface);
 
     return () => {
-      surfaceRef.current?.delete();
-      surfaceRef.current = null;
+      surface?.delete();
     };
   }, [CanvasKit, containerSize]);
 
@@ -150,38 +146,26 @@ export default memo(function Canvas() {
   // With `useEffect`, the updates are batched and potentially delayed, which
   // makes continuous events like modifying a color unusably slow.
   useLayoutEffect(() => {
-    if (
-      !surfaceRef.current ||
-      surfaceRef.current.isDeleted() ||
-      !containerSize
-    ) {
-      return;
-    }
-
-    const surface = surfaceRef.current;
-    const context = {
-      CanvasKit,
-      canvas: surface.getCanvas(),
-    };
+    if (!surface || surface.isDeleted() || !containerSize) return;
 
     try {
       render(
         <ThemeProvider theme={theme}>
-          <ApplicationStateProvider value={rawApplicationState}>
+          <StateProvider state={workspaceState}>
             <SketchFileRenderer />
-          </ApplicationStateProvider>
+          </StateProvider>
         </ThemeProvider>,
         surface,
-        context,
+        CanvasKit,
       );
 
       return () => {
-        unmount(surface, context);
+        unmount(surface);
       };
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, state, containerSize, rawApplicationState, theme]);
+  }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -377,7 +361,11 @@ export default memo(function Canvas() {
           if (highlightedLayer?.id !== layer?.do_objectID) {
             highlightLayer(
               layer
-                ? { id: layer.do_objectID, precedence: 'belowSelection', isMeasured: event.altKey}
+                ? {
+                    id: layer.do_objectID,
+                    precedence: 'belowSelection',
+                    isMeasured: event.altKey,
+                  }
                 : undefined,
             );
           }
