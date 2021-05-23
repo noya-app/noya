@@ -10,11 +10,9 @@ import { Spacer } from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
 import { useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import {
-  useApplicationState,
-  useHistory,
-  useWorkspace,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState } from '../contexts/ApplicationStateContext';
+import { useWorkspace } from '../hooks/useWorkspace';
+import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,

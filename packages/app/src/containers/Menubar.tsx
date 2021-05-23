@@ -3,7 +3,7 @@ import {
   StackIcon,
   TokensIcon,
 } from '@radix-ui/react-icons';
-import { fileOpen, fileSave } from 'browser-fs-access';
+import { fileOpen, fileSave, FileSystemHandle } from 'browser-fs-access';
 import {
   Button,
   ContextMenu,
@@ -12,14 +12,15 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { decode, encode } from 'noya-sketch-file';
-import { Selectors, WorkspaceTab } from 'noya-state';
-import { useCallback, useMemo } from 'react';
+import { ApplicationState, Selectors, WorkspaceTab } from 'noya-state';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
-  useApplicationState,
+  useDispatch,
+  useGetStateSnapshot,
   useSelector,
-  useWorkspace,
 } from '../contexts/ApplicationStateContext';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
@@ -38,10 +39,18 @@ const Row = styled.div(({ theme }) => ({
 
 type MenuItemType = 'new' | 'open' | 'save' | 'saveAs';
 
-export default function Menubar() {
-  const { fileHandle, setFileHandle, setFile, setNewFile } = useWorkspace();
-  const [state, dispatch] = useApplicationState();
-  const currentTab = useSelector(Selectors.getCurrentTab);
+interface Props {
+  currentTab: WorkspaceTab;
+  fileHandle?: FileSystemHandle;
+  getStateSnapshot: () => ApplicationState;
+}
+
+const MenubarContent = memo(function MenubarContent({
+  currentTab,
+  fileHandle,
+  getStateSnapshot,
+}: Props) {
+  const dispatch = useDispatch();
 
   const handleChangeTab = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +73,7 @@ export default function Menubar() {
     async (value: MenuItemType) => {
       switch (value) {
         case 'new': {
-          setNewFile();
+          dispatch('newFile');
           return;
         }
         case 'open': {
@@ -77,12 +86,12 @@ export default function Menubar() {
 
           const sketch = await decode(data);
 
-          setFile(sketch, file.handle);
+          dispatch('setFile', sketch, file.handle);
           return;
         }
         case 'save':
         case 'saveAs': {
-          const data = await encode(state.sketch);
+          const data = await encode(getStateSnapshot().sketch);
 
           const file = new File([data], fileHandle?.name ?? 'Untitled.sketch', {
             type: 'application/zip',
@@ -95,40 +104,51 @@ export default function Menubar() {
             false,
           );
 
-          setFileHandle(newFileHandle);
+          dispatch('setFileHandle', newFileHandle);
           return;
         }
       }
     },
-    [fileHandle, setFile, setFileHandle, setNewFile, state.sketch],
+    [dispatch, fileHandle, getStateSnapshot],
   );
 
-  return useMemo(
-    () => (
-      <Container>
-        <Spacer.Horizontal size={8} />
-        <Row>
-          <DropdownMenu.Root<MenuItemType>
-            items={menuItems}
-            onSelect={onSelectMenuItem}
-          >
-            <Button id="menu">
-              <HamburgerMenuIcon />
-            </Button>
-          </DropdownMenu.Root>
-          <Spacer.Horizontal />
-          <RadioGroup.Root value={currentTab} onValueChange={handleChangeTab}>
-            <RadioGroup.Item value="canvas" tooltip="Canvas">
-              <StackIcon />
-            </RadioGroup.Item>
-            <RadioGroup.Item value="theme" tooltip="Theme">
-              <TokensIcon />
-            </RadioGroup.Item>
-          </RadioGroup.Root>
-        </Row>
-        <Spacer.Horizontal size={8} />
-      </Container>
-    ),
-    [currentTab, handleChangeTab, menuItems, onSelectMenuItem],
+  return (
+    <Container>
+      <Spacer.Horizontal size={8} />
+      <Row>
+        <DropdownMenu.Root<MenuItemType>
+          items={menuItems}
+          onSelect={onSelectMenuItem}
+        >
+          <Button id="menu">
+            <HamburgerMenuIcon />
+          </Button>
+        </DropdownMenu.Root>
+        <Spacer.Horizontal />
+        <RadioGroup.Root value={currentTab} onValueChange={handleChangeTab}>
+          <RadioGroup.Item value="canvas" tooltip="Canvas">
+            <StackIcon />
+          </RadioGroup.Item>
+          <RadioGroup.Item value="theme" tooltip="Theme">
+            <TokensIcon />
+          </RadioGroup.Item>
+        </RadioGroup.Root>
+      </Row>
+      <Spacer.Horizontal size={8} />
+    </Container>
+  );
+});
+
+export default function Menubar() {
+  const { fileHandle } = useWorkspace();
+  const getStateSnapshot = useGetStateSnapshot();
+  const currentTab = useSelector(Selectors.getCurrentTab);
+
+  return (
+    <MenubarContent
+      currentTab={currentTab}
+      fileHandle={fileHandle}
+      getStateSnapshot={getStateSnapshot}
+    />
   );
 }

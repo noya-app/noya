@@ -1,6 +1,7 @@
 import type { CanvasKit } from 'canvaskit-wasm';
 import { Theme } from 'noya-designsystem';
 import { render, unmount } from 'noya-react-canvaskit';
+import { WorkspaceState } from 'noya-state';
 import React, {
   memo,
   ReactNode,
@@ -10,9 +11,8 @@ import React, {
 } from 'react';
 import { ThemeProvider, useTheme } from 'styled-components';
 import {
-  ApplicationStateContextValue,
-  ApplicationStateProvider,
-  useRawApplicationState,
+  StateProvider,
+  useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 
@@ -21,7 +21,7 @@ function renderImageFromCanvas(
   width: number,
   height: number,
   theme: Theme,
-  state: ApplicationStateContextValue,
+  state: WorkspaceState,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
   const surface = CanvasKit.MakeSurface(width, height);
@@ -39,9 +39,9 @@ function renderImageFromCanvas(
   return new Promise((resolve) => {
     const root = (
       <ThemeProvider theme={theme}>
-        <ApplicationStateProvider value={state}>
+        <StateProvider state={state} dispatch={() => {}}>
           {renderContent()}
-        </ApplicationStateProvider>
+        </StateProvider>
       </ThemeProvider>
     );
 
@@ -78,7 +78,7 @@ export default memo(function CanvasViewer({
   renderContent,
 }: Props) {
   const CanvasKit = useCanvasKit();
-  const rawApplicationState = useRawApplicationState();
+  const rawApplicationState = useWorkspaceState();
   const theme = useTheme();
   const [imageData, setImageData] = useState<ImageData | undefined>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

@@ -15,12 +15,13 @@ import {
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import {
-  ApplicationStateProvider,
+  StateProvider,
   useApplicationState,
-  useRawApplicationState,
+  useWorkspaceState,
   useSelector,
-  useWorkspace,
+  useRawDispatch,
 } from '../contexts/ApplicationStateContext';
+import { useWorkspace } from '../hooks/useWorkspace';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
 import { SketchFileRenderer } from 'noya-renderer';
@@ -74,7 +75,8 @@ export default memo(function Canvas() {
   const {
     sizes: { sidebarWidth },
   } = theme;
-  const rawApplicationState = useRawApplicationState();
+  const workspaceState = useWorkspaceState();
+  const rawDispatch = useRawDispatch();
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -167,9 +169,9 @@ export default memo(function Canvas() {
     try {
       render(
         <ThemeProvider theme={theme}>
-          <ApplicationStateProvider value={rawApplicationState}>
+          <StateProvider state={workspaceState} dispatch={rawDispatch}>
             <SketchFileRenderer />
-          </ApplicationStateProvider>
+          </StateProvider>
         </ThemeProvider>,
         surface,
         context,
@@ -181,7 +183,7 @@ export default memo(function Canvas() {
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, state, containerSize, rawApplicationState, theme]);
+  }, [CanvasKit, state, containerSize, workspaceState, theme, rawDispatch]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -377,7 +379,11 @@ export default memo(function Canvas() {
           if (highlightedLayer?.id !== layer?.do_objectID) {
             highlightLayer(
               layer
-                ? { id: layer.do_objectID, precedence: 'belowSelection', isMeasured: event.altKey}
+                ? {
+                    id: layer.do_objectID,
+                    precedence: 'belowSelection',
+                    isMeasured: event.altKey,
+                  }
                 : undefined,
             );
           }

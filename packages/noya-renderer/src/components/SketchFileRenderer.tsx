@@ -1,7 +1,5 @@
-import {
-  useApplicationState,
-  useWorkspace,
-} from 'app/src/contexts/ApplicationStateContext';
+import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
+import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit-wasm';
 import { AffineTransform, createRect, insetRect } from 'noya-geometry';
 import {

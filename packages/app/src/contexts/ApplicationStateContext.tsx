@@ -1,42 +1,98 @@
-import { FileSystemHandle } from 'browser-fs-access';
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
-import { SketchFile } from 'noya-sketch-file';
+import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
 import {
-  Action,
-  ApplicationState,
-  LayerHighlight,
-  Models,
-  WorkspaceAction,
-  WorkspaceState,
-} from 'noya-state';
-import { createContext, useCallback, useContext, useMemo } from 'react';
+  createContext,
+  memo,
+  ReactNode,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 
-export type ApplicationStateContextValue = [
-  WorkspaceState,
-  (action: WorkspaceAction) => void,
-];
+export type Dispatcher = (action: WorkspaceAction) => void;
 
-const ApplicationStateContext = createContext<
-  ApplicationStateContextValue | undefined
->(undefined);
+export type FlatDispatcher = (...args: WorkspaceAction) => void;
 
-export const ApplicationStateProvider = ApplicationStateContext.Provider;
+const StateContext = createContext<WorkspaceState | undefined>(undefined);
 
-type Dispatcher = (...args: Action) => void;
+const DispatchContext = createContext<Dispatcher | undefined>(undefined);
+
+/**
+ * We provide `state` and `dispatch` as separate contexts, to reducer re-rendering
+ * for components that only need `dispatch`.
+ */
+export const StateProvider = memo(function StateProvider({
+  state,
+  dispatch,
+  children,
+}: {
+  state: WorkspaceState;
+  dispatch: Dispatcher;
+  children?: ReactNode;
+}) {
+  return (
+    <StateContext.Provider value={state}>
+      <DispatchContext.Provider value={dispatch}>
+        {children}
+      </DispatchContext.Provider>
+    </StateContext.Provider>
+  );
+});
 
 /**
  * This should only be used to propagate state between React reconcilers
  */
-export const useRawApplicationState = (): ApplicationStateContextValue => {
-  const value = useContext(ApplicationStateContext);
+export const useWorkspaceState = (): WorkspaceState => {
+  const value = useContext(StateContext);
 
   // If this happens, we'll conditionally call hooks afterward
   // TODO: Is there a better solution?
   if (!value) {
-    throw new Error(`Missing ApplicationStateProvider`);
+    throw new Error(`Missing StateProvider`);
   }
 
   return value;
+};
+
+/**
+ * This should only be used to propagate state between React reconcilers
+ */
+export const useRawDispatch = (): Dispatcher => {
+  const dispatch = useContext(DispatchContext);
+
+  if (!dispatch) {
+    throw new Error(`Missing DispatchContext.Provider`);
+  }
+
+  return dispatch;
+};
+
+/**
+ * This should only be used to propagate state between React reconcilers
+ */
+export const useDispatch = (): FlatDispatcher => {
+  const dispatch = useRawDispatch();
+
+  const blurTrigger = useGlobalInputBlurTrigger();
+
+  // Simplify the dispatch function by flattening our action tuple
+  return useCallback(
+    (...args: WorkspaceAction) => {
+      // When changing selection, trigger any pending updates in input fields
+      if (
+        args[0] === 'selectLayer' ||
+        args[0] === 'selectPage' ||
+        args[0] === 'setTab'
+      ) {
+        blurTrigger();
+      }
+
+      dispatch(args);
+    },
+    [dispatch, blurTrigger],
+  );
 };
 
 /**
@@ -45,128 +101,33 @@ export const useRawApplicationState = (): ApplicationStateContextValue => {
  * Only "container" components should use this, while "presentational" components
  * should instead be passed their data via props.
  */
-export const useApplicationState = (): [ApplicationState, Dispatcher] => {
-  const value = useRawApplicationState();
-  const trigger = useGlobalInputBlurTrigger();
+export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
+  const state = useWorkspaceState();
+  const dispatch = useDispatch();
 
-  const [state, dispatch] = value;
-
-  // Simplify the dispatch function by flattening our Action tuple
-  const wrappedDispatch: Dispatcher = useCallback(
-    (...args: Action) => {
-      // When changing selection, trigger any pending updates in input fields
-      if (
-        args[0] === 'selectLayer' ||
-        args[0] === 'selectPage' ||
-        args[0] === 'setTab'
-      ) {
-        trigger();
-      }
-
-      dispatch(args);
-    },
-    [dispatch, trigger],
-  );
-
-  const wrapped: [ApplicationState, Dispatcher] = useMemo(() => {
-    return [state.history.present, wrappedDispatch];
-  }, [state.history.present, wrappedDispatch]);
-
-  return wrapped;
+  return useMemo(() => [state.history.present, dispatch], [
+    state.history.present,
+    dispatch,
+  ]);
 };
 
-export const useWorkspace = () => {
-  const [state, dispatch] = useRawApplicationState();
+/**
+ * Get a snapshot of the current state wrapped in a ref. The ref is set during
+ * the `useLayoutEffect` phase of the React lifecycle.
+ *
+ * We do this to avoid excessively re-render components that need to access
+ * the state in event handlers.
+ */
+export const useGetStateSnapshot = (): (() => ApplicationState) => {
+  const state = useWorkspaceState();
 
-  const {
-    fileHandle,
-    highlightedLayer,
-    canvasSize,
-    canvasInsets,
-    preferences,
-  } = state;
+  const stateSnapshot = useRef<WorkspaceState>(state);
 
-  const setNewFile = useCallback(() => {
-    dispatch(['setFile', Models.createSketchFile()]);
-  }, [dispatch]);
+  useLayoutEffect(() => {
+    stateSnapshot.current = state;
+  }, [state]);
 
-  const setFile = useCallback(
-    (sketchFile: SketchFile, fileHandle?: FileSystemHandle) => {
-      dispatch(['setFile', sketchFile, fileHandle]);
-    },
-    [dispatch],
-  );
-
-  const setFileHandle = useCallback(
-    (fileHandle?: FileSystemHandle) => {
-      dispatch(['setFileHandle', fileHandle]);
-    },
-    [dispatch],
-  );
-
-  const setCanvasSize = useCallback(
-    (
-      size: { width: number; height: number },
-      insets: { left: number; right: number },
-    ) => {
-      dispatch(['setCanvasSize', size, insets]);
-    },
-    [dispatch],
-  );
-
-  const setShowRulers = useCallback(
-    (value: boolean) => dispatch(['setShowRulers', value]),
-    [dispatch],
-  );
-
-  const highlightLayer = useCallback(
-    (highlight?: LayerHighlight) => dispatch(['highlightLayer', highlight]),
-    [dispatch],
-  );
-
-  return useMemo(
-    () => ({
-      canvasInsets,
-      canvasSize,
-      fileHandle,
-      highlightedLayer,
-      highlightLayer,
-      preferences,
-      setCanvasSize,
-      setFile,
-      setFileHandle,
-      setNewFile,
-      setShowRulers,
-    }),
-    [
-      canvasInsets,
-      canvasSize,
-      fileHandle,
-      highlightedLayer,
-      highlightLayer,
-      preferences,
-      setCanvasSize,
-      setFile,
-      setFileHandle,
-      setNewFile,
-      setShowRulers,
-    ],
-  );
-};
-
-export const useHistory = () => {
-  const [state, dispatch] = useRawApplicationState();
-  const redoDisabled = state.history.future.length === 0;
-  const undoDisabled = state.history.past.length === 0;
-  return useMemo(
-    () => ({
-      redo: () => dispatch(['redo']),
-      undo: () => dispatch(['undo']),
-      redoDisabled,
-      undoDisabled,
-    }),
-    [dispatch, redoDisabled, undoDisabled],
-  );
+  return useCallback(() => stateSnapshot.current.history.present, []);
 };
 
 export function useSelector<Projection>(
