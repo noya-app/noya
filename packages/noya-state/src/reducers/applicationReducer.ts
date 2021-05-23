@@ -36,6 +36,7 @@ export type WorkspaceTab = 'canvas' | 'theme';
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 export type ApplicationState = {
+  canvasVisibleAndSelectedLayerAxisPairs: any[] | undefined;
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
@@ -233,6 +234,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
+    canvasVisibleAndSelectedLayerAxisPairs: undefined,
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),

@@ -209,6 +209,54 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
+  const smartSnapGuides = useMemo(() => {
+    if (
+      state.interactionState.type !== 'moving' ||
+      !boundingRect ||
+      !state.canvasVisibleAndSelectedLayerAxisPairs
+    ) {
+      return;
+    }
+
+    let closestLayerDistance: number | null = null;
+    let closestLayerID: string = '';
+
+    state.canvasVisibleAndSelectedLayerAxisPairs.forEach(function (layer: any) {
+      const difference = Math.abs(layer.boundPair[0] - layer.boundPair[1]);
+      if (!closestLayerDistance) {
+        closestLayerDistance = difference;
+        closestLayerID = layer.visibleLayer_id;
+      } else if (closestLayerDistance && closestLayerDistance > difference) {
+        closestLayerDistance = difference;
+        closestLayerID = layer.visibleLayer_id;
+      }
+    });
+
+    const layerToSnapBoundingRect = getBoundingRect(
+      page,
+      AffineTransform.identity,
+      [closestLayerID],
+      {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+      },
+    );
+
+    return (
+      layerToSnapBoundingRect && (
+        <DistanceLabelAndPath
+          selectedRect={boundingRect}
+          highlightedRect={layerToSnapBoundingRect}
+        />
+      )
+    );
+  }, [
+    page,
+    boundingRect,
+    state.interactionState.type,
+    state.canvasVisibleAndSelectedLayerAxisPairs,
+  ]);
+
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
@@ -256,6 +304,7 @@ export default memo(function SketchFileRenderer() {
           <Polyline key={index} points={points} paint={selectionPaint} />
         ))}
         {highlightedSketchLayer}
+        {smartSnapGuides}
         {distanceLabelAndPathBetweenSketchLayers}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
