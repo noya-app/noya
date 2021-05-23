@@ -148,11 +148,6 @@ export default memo(function Canvas() {
   useLayoutEffect(() => {
     if (!surface || surface.isDeleted() || !containerSize) return;
 
-    const context = {
-      CanvasKit,
-      canvas: surface.getCanvas(),
-    };
-
     try {
       render(
         <ThemeProvider theme={theme}>
@@ -161,11 +156,11 @@ export default memo(function Canvas() {
           </StateProvider>
         </ThemeProvider>,
         surface,
-        context,
+        CanvasKit,
       );
 
       return () => {
-        unmount(surface, context);
+        unmount(surface);
       };
     } catch (e) {
       console.warn('rendering error', e);

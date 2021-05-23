@@ -31,11 +31,6 @@ function renderImageFromCanvas(
     return Promise.resolve(undefined);
   }
 
-  const context = {
-    CanvasKit,
-    canvas: surface.getCanvas(),
-  };
-
   return new Promise((resolve) => {
     const root = (
       <ThemeProvider theme={theme}>
@@ -43,7 +38,7 @@ function renderImageFromCanvas(
       </ThemeProvider>
     );
 
-    render(root, surface, context, () => {
+    render(root, surface, CanvasKit, () => {
       const image = surface.makeImageSnapshot();
 
       const colorSpace = image.getColorSpace();
@@ -55,7 +50,7 @@ function renderImageFromCanvas(
 
       colorSpace.delete();
 
-      unmount(surface, context, () => {
+      unmount(surface, () => {
         resolve(bytes);
 
         surface.delete();
