@@ -11,6 +11,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import {
@@ -26,6 +27,7 @@ import { useWorkspace } from '../hooks/useWorkspace';
 declare module 'canvaskit-wasm' {
   interface Surface {
     flush(): void;
+    _id: number;
   }
 }
 
@@ -74,10 +76,10 @@ export default memo(function Canvas() {
   } = theme;
   const workspaceState = useWorkspaceState();
   const [state, dispatch] = useApplicationState();
+  const [surface, setSurface] = useState<Surface | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
-  const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
@@ -124,22 +126,18 @@ export default memo(function Canvas() {
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
-    if (!canvasElement) return;
+    if (!canvasElement || !containerSize) return;
 
     const surface = CanvasKit.MakeCanvasSurface(canvasElement);
 
     if (!surface) {
-      surfaceRef.current = null;
-
       console.warn('failed to create surface');
-      return;
     }
 
-    surfaceRef.current = surface;
+    setSurface(surface);
 
     return () => {
-      surfaceRef.current?.delete();
-      surfaceRef.current = null;
+      surface?.delete();
     };
   }, [CanvasKit, containerSize]);
 
@@ -148,15 +146,8 @@ export default memo(function Canvas() {
   // With `useEffect`, the updates are batched and potentially delayed, which
   // makes continuous events like modifying a color unusably slow.
   useLayoutEffect(() => {
-    if (
-      !surfaceRef.current ||
-      surfaceRef.current.isDeleted() ||
-      !containerSize
-    ) {
-      return;
-    }
+    if (!surface || surface.isDeleted() || !containerSize) return;
 
-    const surface = surfaceRef.current;
     const context = {
       CanvasKit,
       canvas: surface.getCanvas(),
@@ -179,7 +170,7 @@ export default memo(function Canvas() {
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, state, containerSize, workspaceState, theme]);
+  }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
