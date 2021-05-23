@@ -8,11 +8,15 @@ import {
 } from '@radix-ui/react-icons';
 import { Spacer } from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
-import { useMemo } from 'react';
+import { InteractionType } from 'noya-state';
+import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
-import { useWorkspace } from '../hooks/useWorkspace';
+import {
+  useApplicationState,
+  useDispatch,
+} from '../contexts/ApplicationStateContext';
 import { useHistory } from '../hooks/useHistory';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
@@ -23,131 +27,187 @@ const Container = styled.header(({ theme }) => ({
   color: theme.colors.textMuted,
 }));
 
+interface Props {
+  interactionType: InteractionType;
+  setShowRulers: (value: boolean) => void;
+  showRulers: boolean;
+  redoDisabled: boolean;
+  undoDisabled: boolean;
+}
+
+const ToolbarContent = memo(function ToolbarContent({
+  interactionType,
+  setShowRulers,
+  showRulers,
+  redoDisabled,
+  undoDisabled,
+}: Props) {
+  const dispatch = useDispatch();
+  const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
+
+  const isInsertArtboard = interactionType === 'insertArtboard';
+  const isInsertRectangle = interactionType === 'insertRectangle';
+  const isInsertOval = interactionType === 'insertOval';
+  const isInsertText = interactionType === 'insertText';
+  const isPanning =
+    interactionType === 'panMode' ||
+    interactionType === 'maybePan' ||
+    interactionType === 'panning';
+
+  return (
+    <Container>
+      <Spacer.Horizontal size={8} />
+      <Button
+        id="tool-artboard"
+        tooltip="Insert an artboard"
+        active={isInsertArtboard}
+        onClick={useCallback(() => {
+          if (isInsertArtboard) {
+            dispatch('interaction', ['reset']);
+          } else {
+            dispatch('interaction', ['insertArtboard']);
+          }
+        }, [dispatch, isInsertArtboard])}
+      >
+        {useMemo(
+          () => (
+            <FrameIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Button
+        id="tool-rectangle"
+        tooltip="Insert a rectangle"
+        active={isInsertRectangle}
+        onClick={useCallback(() => {
+          if (isInsertRectangle) {
+            dispatch('interaction', ['reset']);
+          } else {
+            dispatch('interaction', ['insertRectangle']);
+          }
+        }, [isInsertRectangle, dispatch])}
+      >
+        {useMemo(
+          () => (
+            <SquareIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Button
+        id="tool-oval"
+        tooltip="Insert an oval"
+        active={isInsertOval}
+        onClick={useCallback(() => {
+          if (isInsertOval) {
+            dispatch('interaction', ['reset']);
+          } else {
+            dispatch('interaction', ['insertOval']);
+          }
+        }, [isInsertOval, dispatch])}
+      >
+        {useMemo(
+          () => (
+            <CircleIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Button
+        id="tool-text"
+        tooltip="Insert text"
+        active={isInsertText}
+        onClick={useCallback(() => {
+          if (isInsertText) {
+            dispatch('interaction', ['reset']);
+          } else {
+            dispatch('interaction', ['insertText']);
+          }
+        }, [isInsertText, dispatch])}
+      >
+        {useMemo(
+          () => (
+            <TextIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Button
+        id="tool-move"
+        tooltip="Move the canvas"
+        active={isPanning}
+        onClick={useCallback(() => {
+          if (isPanning) {
+            dispatch('interaction', ['reset']);
+          } else {
+            dispatch('interaction', ['enablePanMode']);
+          }
+        }, [isPanning, dispatch])}
+      >
+        {useMemo(
+          () => (
+            <MoveIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={40} />
+      <Button
+        id="tool-rulers"
+        tooltip="Show rulers"
+        active={showRulers}
+        onClick={useCallback(() => {
+          setShowRulers(!showRulers);
+        }, [setShowRulers, showRulers])}
+      >
+        {useMemo(
+          () => (
+            <RulerHorizontalIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={40} />
+      <Button
+        id="undo"
+        disabled={undoDisabled}
+        onClick={useCallback(() => dispatch('undo'), [dispatch])}
+      >
+        Undo
+      </Button>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Button
+        id="redo"
+        disabled={redoDisabled}
+        onClick={useCallback(() => dispatch('redo'), [dispatch])}
+      >
+        Redo
+      </Button>
+      <Spacer.Horizontal size={8} />
+    </Container>
+  );
+});
+
 export default function Toolbar() {
-  const [state, dispatch] = useApplicationState();
+  const [state] = useApplicationState();
   const {
     setShowRulers,
     preferences: { showRulers },
   } = useWorkspace();
-  const { redo, redoDisabled, undo, undoDisabled } = useHistory();
-  const { interactionState } = state;
-  const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
-  const interactionType = interactionState.type;
+  const { redoDisabled, undoDisabled } = useHistory();
 
-  return useMemo(
-    () => (
-      <Container>
-        <Spacer.Horizontal size={8} />
-        <Button
-          id="tool-artboard"
-          tooltip="Insert an artboard"
-          active={interactionType === 'insertArtboard'}
-          onClick={() => {
-            if (interactionType === 'insertArtboard') {
-              dispatch('interaction', ['reset']);
-            } else {
-              dispatch('interaction', ['insertArtboard']);
-            }
-          }}
-        >
-          <FrameIcon />
-        </Button>
-        <Spacer.Horizontal size={itemSeparatorSize} />
-        <Button
-          id="tool-rectangle"
-          tooltip="Insert a rectangle"
-          active={interactionType === 'insertRectangle'}
-          onClick={() => {
-            if (interactionType === 'insertRectangle') {
-              dispatch('interaction', ['reset']);
-            } else {
-              dispatch('interaction', ['insertRectangle']);
-            }
-          }}
-        >
-          <SquareIcon />
-        </Button>
-        <Spacer.Horizontal size={itemSeparatorSize} />
-        <Button
-          id="tool-oval"
-          tooltip="Insert an oval"
-          active={interactionType === 'insertOval'}
-          onClick={() => {
-            if (interactionType === 'insertOval') {
-              dispatch('interaction', ['reset']);
-            } else {
-              dispatch('interaction', ['insertOval']);
-            }
-          }}
-        >
-          <CircleIcon />
-        </Button>
-        <Spacer.Horizontal size={itemSeparatorSize} />
-        <Button
-          id="tool-text"
-          tooltip="Insert text"
-          active={interactionType === 'insertText'}
-          onClick={() => {
-            if (interactionType === 'insertText') {
-              dispatch('interaction', ['reset']);
-            } else {
-              dispatch('interaction', ['insertText']);
-            }
-          }}
-        >
-          <TextIcon />
-        </Button>
-        <Spacer.Horizontal size={itemSeparatorSize} />
-        <Button
-          id="tool-move"
-          tooltip="Move the canvas"
-          active={
-            interactionType === 'panMode' ||
-            interactionType === 'maybePan' ||
-            interactionType === 'panning'
-          }
-          onClick={() => {
-            if (interactionType === 'panMode') {
-              dispatch('interaction', ['reset']);
-            } else {
-              dispatch('interaction', ['enablePanMode']);
-            }
-          }}
-        >
-          <MoveIcon />
-        </Button>
-        <Spacer.Horizontal size={40} />
-        <Button
-          id="tool-rulers"
-          tooltip="Show rulers"
-          active={showRulers}
-          onClick={() => {
-            setShowRulers(!showRulers);
-          }}
-        >
-          <RulerHorizontalIcon />
-        </Button>
-        <Spacer.Horizontal size={40} />
-        <Button id="undo" disabled={undoDisabled} onClick={undo}>
-          Undo
-        </Button>
-        <Spacer.Horizontal size={itemSeparatorSize} />
-        <Button id="redo" disabled={redoDisabled} onClick={redo}>
-          Redo
-        </Button>
-        <Spacer.Horizontal size={8} />
-      </Container>
-    ),
-    [
-      dispatch,
-      interactionType,
-      itemSeparatorSize,
-      redo,
-      redoDisabled,
-      setShowRulers,
-      showRulers,
-      undo,
-      undoDisabled,
-    ],
+  return (
+    <ToolbarContent
+      interactionType={state.interactionState.type}
+      setShowRulers={setShowRulers}
+      showRulers={showRulers}
+      redoDisabled={redoDisabled}
+      undoDisabled={undoDisabled}
+    />
   );
 }

@@ -91,6 +91,8 @@ export type InteractionState =
   | { type: 'maybePan'; origin: Point }
   | { type: 'panning'; previous: Point; next: Point };
 
+export type InteractionType = InteractionState['type'];
+
 function createLayer(
   shapeType: ShapeType,
 ): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {

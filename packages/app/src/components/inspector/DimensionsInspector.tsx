@@ -106,7 +106,7 @@ export default function DimensionsInspector({
       <Row>
         <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
         <Spacer.Horizontal size={16} />
-        <DimensionInput value={width} onSetValue={onSetHeight} label="H" />
+        <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
         <Spacer.Horizontal size={16} />
         {flipButtonElements}
       </Row>

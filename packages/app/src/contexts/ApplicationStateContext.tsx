@@ -70,7 +70,8 @@ export const useRawDispatch = (): Dispatcher => {
 };
 
 /**
- * This should only be used to propagate state between React reconcilers
+ * Components should use this to update the application's state. The dispatch
+ * function is referentially stable, so won't cause unnecessary re-renders.
  */
 export const useDispatch = (): FlatDispatcher => {
   const dispatch = useRawDispatch();
