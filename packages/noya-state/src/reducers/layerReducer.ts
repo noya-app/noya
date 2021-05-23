@@ -6,22 +6,22 @@ import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
-  getSymbols,
-  deleteLayers,
-  getCurrentPage,
-  getParentLayer,
-  getBoundingRect,
   addSiblingLayer,
-  LayerIndexPaths,
-  getSelectedSymbols,
-  getCurrentPageIndex,
-  getSymbolsPageIndex,
-  getIndexPathsForGroup,
+  deleteLayers,
   findPageLayerIndexPaths,
-  getLayerTransformAtIndexPath,
-  getSymbolsInstancesIndexPaths,
+  getBoundingRect,
+  getCurrentPage,
+  getCurrentPageIndex,
+  getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
+  getLayerTransformAtIndexPath,
+  getParentLayer,
   getRightMostLayerBounds,
+  getSelectedSymbols,
+  getSymbols,
+  getSymbolsInstancesIndexPaths,
+  getSymbolsPageIndex,
+  LayerIndexPaths,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -39,7 +39,8 @@ export type LayerAction =
       type: 'selectLayer',
       layerId: string | string[] | undefined,
       selectionType?: SelectionType,
-    ];
+    ]
+  | [type: 'selectAllLayers'];
 
 const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   model: T,
@@ -258,6 +259,14 @@ export function layerReducer(
 
       return produce(state, (draft) => {
         updateSelection(draft.selectedObjects, id, selectionType);
+      });
+    }
+    case 'selectAllLayers': {
+      const page = getCurrentPage(state);
+      const ids = page.layers.map((layer) => layer.do_objectID);
+
+      return produce(state, (draft) => {
+        updateSelection(draft.selectedObjects, ids, 'replace');
       });
     }
     case 'createSymbol': {

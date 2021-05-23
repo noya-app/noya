@@ -1,4 +1,5 @@
 import type { Surface } from 'canvaskit-wasm';
+import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
 import { render, unmount } from 'noya-react-canvaskit';
 import { SketchFileRenderer, uuid } from 'noya-renderer';
@@ -23,6 +24,7 @@ import {
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
+import * as MouseEvent from '../utils/mouseEvent';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
@@ -68,6 +70,8 @@ const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
   left,
   zIndex: -1,
 }));
+
+type MenuItemType = 'selectAll' | 'delete';
 
 export default memo(function Canvas() {
   const theme = useTheme();
@@ -167,10 +171,55 @@ export default memo(function Canvas() {
     }
   }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
 
+  const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
+    () =>
+      state.selectedObjects.length > 0
+        ? [{ value: 'delete', title: 'Delete' }]
+        : [{ value: 'selectAll', title: 'Select All' }],
+    [state.selectedObjects.length],
+  );
+
+  const handleSelectMenuItem = useCallback(
+    (value: MenuItemType) => {
+      switch (value) {
+        case 'selectAll':
+          dispatch('selectAllLayers');
+          break;
+        case 'delete':
+          dispatch('deleteLayer', state.selectedObjects);
+          break;
+      }
+    },
+    [dispatch, state.selectedObjects],
+  );
+
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
+
+      if (MouseEvent.isRightButtonClicked(event)) {
+        const layer = Selectors.getLayerAtPoint(
+          CanvasKit,
+          state,
+          insets,
+          rawPoint,
+          {
+            clickThroughGroups: event.metaKey,
+            includeHiddenLayers: false,
+          },
+        );
+
+        if (!layer) {
+          dispatch('selectLayer', undefined);
+        } else if (!state.selectedObjects.includes(layer.do_objectID)) {
+          dispatch('selectLayer', layer.do_objectID);
+        }
+
+        return;
+      }
+
+      if (!MouseEvent.isLeftButtonClicked(event)) return;
 
       switch (state.interactionState.type) {
         case 'insertArtboard':
@@ -507,19 +556,21 @@ export default memo(function Canvas() {
   }, [state.interactionState.type, handleDirection]);
 
   return (
-    <Container
-      ref={containerRef}
-      cursor={cursor}
-      onPointerDown={handleMouseDown}
-      onPointerMove={handleMouseMove}
-      onPointerUp={handleMouseUp}
-    >
-      <CanvasComponent
-        ref={canvasRef}
-        left={-insets.left}
-        width={0}
-        height={0}
-      />
-    </Container>
+    <ContextMenu.Root items={menuItems} onSelect={handleSelectMenuItem}>
+      <Container
+        ref={containerRef}
+        cursor={cursor}
+        onPointerDown={handleMouseDown}
+        onPointerMove={handleMouseMove}
+        onPointerUp={handleMouseUp}
+      >
+        <CanvasComponent
+          ref={canvasRef}
+          left={-insets.left}
+          width={0}
+          height={0}
+        />
+      </Container>
+    </ContextMenu.Root>
   );
 });
