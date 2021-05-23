@@ -1,9 +1,12 @@
 import { PlusIcon } from '@radix-ui/react-icons';
 import { Button, ListView, Spacer } from 'noya-designsystem';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
+import {
+  useApplicationState,
+  useDispatch,
+} from '../contexts/ApplicationStateContext';
 import useDeepArray from '../hooks/useDeepArray';
 
 const Container = styled.div(({ theme }) => ({
@@ -27,26 +30,28 @@ const Header = styled.div(({ theme }) => ({
 
 type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
-export default function PageList() {
-  const [state, dispatch] = useApplicationState();
+interface Props {
+  selectedPageId: string;
+  pageInfo: { do_objectID: string; name: string }[];
+  canDelete: boolean;
+}
 
-  const pageInfo = useDeepArray(
-    state.sketch.pages.map((page) => ({
-      do_objectID: page.do_objectID,
-      name: page.name,
-    })),
-  );
+const PageListContent = memo(function PageListContent({
+  selectedPageId,
+  pageInfo,
+  canDelete,
+}: Props) {
+  const dispatch = useDispatch();
 
-  const moreThanOnePage = state.sketch.pages.length > 1;
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'duplicate', title: 'Duplicate Page' },
       { value: 'rename', title: 'Rename Page' },
-      ...(moreThanOnePage
+      ...(canDelete
         ? [{ value: 'delete' as MenuItemType, title: 'Delete Page' }]
         : []),
     ],
-    [moreThanOnePage],
+    [canDelete],
   );
 
   const handleSelectMenuItem = useCallback(
@@ -81,7 +86,7 @@ export default function PageList() {
       <ListView.Row<MenuItemType>
         id={page.do_objectID}
         key={page.do_objectID}
-        selected={state.selectedPage === page.do_objectID}
+        selected={selectedPageId === page.do_objectID}
         onClick={() => {
           dispatch('interaction', ['reset']);
           dispatch('selectPage', page.do_objectID);
@@ -96,7 +101,7 @@ export default function PageList() {
         {page.name}
       </ListView.Row>
     ));
-  }, [pageInfo, state.selectedPage, menuItems, handleSelectMenuItem, dispatch]);
+  }, [pageInfo, selectedPageId, menuItems, handleSelectMenuItem, dispatch]);
 
   return (
     <Container>
@@ -119,5 +124,24 @@ export default function PageList() {
         {pageElements}
       </ListView.Root>
     </Container>
+  );
+});
+
+export default function PageList() {
+  const [state] = useApplicationState();
+
+  const pageInfo = useDeepArray(
+    state.sketch.pages.map((page) => ({
+      do_objectID: page.do_objectID,
+      name: page.name,
+    })),
+  );
+
+  return (
+    <PageListContent
+      selectedPageId={state.selectedPage}
+      pageInfo={pageInfo}
+      canDelete={state.sketch.pages.length > 1}
+    />
   );
 }
