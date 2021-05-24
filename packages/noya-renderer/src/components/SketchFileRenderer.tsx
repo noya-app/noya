@@ -28,6 +28,7 @@ import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import HoverOutline from './HoverOutline';
 import DistanceLabelAndPath from './DistanceLabelAndPath';
+import SmartSnapLines from './SmartSnapLines';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import { HorizontalRuler } from './Rulers';
@@ -213,25 +214,68 @@ export default memo(function SketchFileRenderer() {
     if (
       state.interactionState.type !== 'moving' ||
       !boundingRect ||
-      !state.canvasVisibleAndSelectedLayerAxisPairs
+      !state.canvasVisibleAndSelectedLayerAxisPairs ||
+      !state.interactionState.current.y
     ) {
       return;
     }
 
     let closestLayerDistance: number | null = null;
     let closestLayerID: string = '';
+    let setSelectedBounds;
+    let setVisibleBounds;
 
-    state.canvasVisibleAndSelectedLayerAxisPairs.forEach(function (layer: any) {
-      const difference = Math.abs(layer.boundPair[0] - layer.boundPair[1]);
-      if (!closestLayerDistance) {
-        closestLayerDistance = difference;
-        closestLayerID = layer.visibleLayer_id;
-      } else if (closestLayerDistance && closestLayerDistance > difference) {
-        closestLayerDistance = difference;
-        closestLayerID = layer.visibleLayer_id;
-      }
+    const current = state.interactionState.current.y;
+    // console.log(
+    //   'state.interactionState.current.y',
+    //   state.interactionState.current.y,
+    // );
+
+    //Find the closest layer to measure the distance
+    state.canvasVisibleAndSelectedLayerAxisPairs.forEach(function (pairs) {
+      pairs.forEach(function (pair: {
+        selectedBounds: number;
+        visibleBounds: number;
+        visibleLayer_id: string[];
+      }) {
+        if (
+          // pair.selectedBounds > pair.visibleBounds - 6 &&
+          // pair.selectedBounds < pair.visibleBounds + 6
+          current > pair.visibleBounds - 6 &&
+          current < pair.visibleBounds + 6
+        ) {
+          // console.log('NO HIT', pair.selectedBounds, pair.visibleBounds);
+          // return;
+
+          //console.log('HIT', pair.selectedBounds, pair.visibleBounds);
+          // console.log(
+          //   'pair.selectedBounds',
+          //   pair.selectedBounds,
+          //   'pair.visibleBounds',
+          //   pair.visibleBounds,
+          // );
+
+          const difference = Math.abs(pair.selectedBounds - pair.visibleBounds);
+          if (!closestLayerDistance) {
+            closestLayerDistance = difference;
+            closestLayerID = pair.visibleLayer_id[0];
+            setSelectedBounds = current; //pair.selectedBounds;
+            setVisibleBounds = pair.visibleBounds;
+          } else if (
+            closestLayerDistance &&
+            closestLayerDistance > difference
+          ) {
+            closestLayerDistance = difference;
+            closestLayerID = pair.visibleLayer_id[0];
+            setSelectedBounds = current; //pair.selectedBounds;
+            setVisibleBounds = pair.visibleBounds;
+          }
+        } else {
+          //console.log('NO HIT');
+        }
+      });
     });
-
+    // console.log('closestLayerID', closestLayerID);
     const layerToSnapBoundingRect = getBoundingRect(
       page,
       AffineTransform.identity,
@@ -243,8 +287,12 @@ export default memo(function SketchFileRenderer() {
     );
 
     return (
+      setVisibleBounds &&
+      setSelectedBounds &&
       layerToSnapBoundingRect && (
-        <DistanceLabelAndPath
+        <SmartSnapLines
+          selectedBounds={setSelectedBounds}
+          visibleBounds={setVisibleBounds}
           selectedRect={boundingRect}
           highlightedRect={layerToSnapBoundingRect}
         />
@@ -253,7 +301,7 @@ export default memo(function SketchFileRenderer() {
   }, [
     page,
     boundingRect,
-    state.interactionState.type,
+    state.interactionState,
     state.canvasVisibleAndSelectedLayerAxisPairs,
   ]);
 

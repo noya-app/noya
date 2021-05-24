@@ -31,10 +31,12 @@ import { getLayersInRect } from '../selectors/geometrySelectors';
 // } from './workspaceReducer';
 
 function getAxisValues(rectBounds: any, axis: string) {
-  let axisBounds: any = {};
+  //let axisBounds: any = {};
+  let axisBounds: any = [];
   for (const prop in rectBounds) {
     if (prop.indexOf(axis) > -1) {
-      axisBounds[prop] = rectBounds[prop];
+      // axisBounds[prop] = rectBounds[prop];
+      axisBounds.push(rectBounds[prop]);
     }
   }
   return axisBounds;
@@ -67,11 +69,11 @@ function getVisibleLayersAxisValues(state: any, pageSnapshot: any) {
     if (rect) {
       const rectBounds: any = createBounds(rect);
       yValues.push({
-        layer_id: layer.do_objectID,
+        layer_id: [layer.do_objectID],
         bounds: getAxisValues(rectBounds, 'Y'),
       });
       xValues.push({
-        layer_id: layer.do_objectID,
+        layer_id: [layer.do_objectID],
         bounds: getAxisValues(rectBounds, 'X'),
       });
     }
@@ -89,11 +91,11 @@ function getSelectedLayerAxisValues(layer_id: string, pageSnapshot: any) {
   if (selectedRect) {
     const rectBounds: any = createBounds(selectedRect);
     ySelectedValues.push({
-      layer_id: layer_id,
+      layer_id: [layer_id],
       bounds: getAxisValues(rectBounds, 'Y'),
     });
     xSelectedValues.push({
-      layer_id: layer_id,
+      layer_id: [layer_id],
       bounds: getAxisValues(rectBounds, 'X'),
     });
   }
@@ -101,26 +103,53 @@ function getSelectedLayerAxisValues(layer_id: string, pageSnapshot: any) {
   return ySelectedValues;
 }
 
+type BoundsObj = {
+  selectedBounds: [];
+  visibleBounds: [];
+  visibleLayer_id: string[];
+};
+
+function allCombinations(obj: BoundsObj) {
+  let combos: {}[] = [{}];
+  Object.entries(obj).forEach(([key, values]) => {
+    let all: {}[] = [];
+    values.forEach((value: number | string) => {
+      combos.forEach((combo: {}) => {
+        all.push({ ...combo, [key]: value });
+      });
+    });
+    combos = all;
+  });
+  return combos;
+}
+
 function getVisibleAndSelectedLayerAxisPairs(
   selectedAxisValues: any[],
   visibleLayersAxisValues: any[],
+  state: any,
 ) {
-  const array = [];
+  if (!state.interactionState.current) {
+    return;
+  }
+
+  //Find all values of interest
+  let testingObj: BoundsObj = {
+    selectedBounds: selectedAxisValues[0].bounds,
+    visibleBounds: [],
+    visibleLayer_id: [''],
+  };
+
   const results = visibleLayersAxisValues
     .filter(
       (visibleLayer) =>
-        visibleLayer.layer_id !== selectedAxisValues[0].layer_id,
+        visibleLayer.layer_id[0] !== selectedAxisValues[0].layer_id[0],
     )
     .map((visibleLayer) => {
-      return {
-        visibleLayer_id: visibleLayer.layer_id,
-        boundPair: [
-          selectedAxisValues[0].bounds.minY,
-          visibleLayer.bounds.minY,
-        ],
-      };
+      testingObj.visibleBounds = visibleLayer.bounds;
+      testingObj.visibleLayer_id = [visibleLayer.layer_id];
+      return allCombinations(testingObj);
     });
-  array.push(results);
+
   return results;
 }
 
@@ -241,6 +270,7 @@ export function canvasReducer(
             draft.canvasVisibleAndSelectedLayerAxisPairs = getVisibleAndSelectedLayerAxisPairs(
               selectionValues,
               layers,
+              state,
             );
 
             break;
