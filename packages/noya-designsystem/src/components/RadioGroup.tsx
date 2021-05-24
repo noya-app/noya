@@ -70,11 +70,12 @@ interface Props {
   value: string;
   tooltip?: ReactNode;
   children: ReactNode;
+  disabled?: boolean;
 }
 
-function RadioItem({ value, tooltip, children }: Props) {
+function RadioItem({ value, tooltip, children, disabled = false }: Props) {
   const itemElement = (
-    <StyledItem value={value}>
+    <StyledItem value={value} disabled={disabled}>
       {children}
       <IndicatorContainer>
         <StyledIndicator>{children}</StyledIndicator>

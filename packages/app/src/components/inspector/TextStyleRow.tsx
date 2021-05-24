@@ -130,7 +130,6 @@ export default memo(function TextStyleRow({
             placeholder={fontSize ? '' : 'multiple'}
             value={fontSize}
             onSubmit={onChangeFontSize}
-            onNudge={() => {}}
           />
           <InputField.Label>px</InputField.Label>
         </InputField.Root>

@@ -1,11 +1,15 @@
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import SymbolSourceRow from '../components/inspector/SymbolSourceRow';
+import SymbolLayoutRow from '../components/inspector/SymbolLayoutRow';
+
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
+import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
+import { Divider } from 'noya-designsystem';
 
 export default memo(function SymbolInspector() {
   const [, dispatch] = useApplicationState();
@@ -14,7 +18,7 @@ export default memo(function SymbolInspector() {
     useSelector(Selectors.getSelectedSymbols),
   )[0];
 
-  return (
+  const elements = [
     <SymbolSourceRow
       resizesContent={selectedSymbol.resizesContent}
       hasBackgroundColor={selectedSymbol.hasBackgroundColor}
@@ -55,6 +59,30 @@ export default memo(function SymbolInspector() {
         },
         [dispatch],
       )}
-    />
-  );
+    />,
+    <SymbolLayoutRow
+      groupLayout={selectedSymbol.groupLayout}
+      setGroupLayout={useCallback(
+        (value) => {
+          dispatch('setGroupLayout', value !== '' ? value : undefined);
+        },
+        [dispatch],
+      )}
+      setLayoutAnchor={useCallback(
+        (value) => {
+          dispatch('setLayoutAnchor', value);
+        },
+        [dispatch],
+      )}
+      setMinWidth={useCallback(
+        (value) => {
+          dispatch('setMinWidth', value);
+        },
+        [dispatch],
+      )}
+    />,
+    <></>,
+  ];
+
+  return <>{withSeparatorElements(elements, <Divider />)}</>;
 });
