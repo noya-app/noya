@@ -29,13 +29,14 @@ export default memo(function ThemeSymbolsInspector() {
   );
 
   if (selectedSymbols.length === 0) return null;
+  const showSymbolsInspector = selectedSymbols.length === 1;
 
   const elements = [
     <NameInspector
       names={selectedSymbols.map((v) => delimitedPath.basename(v.name))}
       onNameChange={handleNameChange}
     />,
-    <SymbolMasterInspector />,
+    showSymbolsInspector && <SymbolMasterInspector />,
   ];
 
   return <>{withSeparatorElements(elements, <Divider />)}</>;
