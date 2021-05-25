@@ -8,6 +8,7 @@ import {
 import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from '../utils/withSeparatorElements';
 import NameInspector from '../components/inspector/NameInspector';
+import SymbolMasterInspector from './SymbolMasterInspector';
 import { delimitedPath } from 'noya-utils';
 
 export default memo(function ThemeSymbolsInspector() {
@@ -28,12 +29,14 @@ export default memo(function ThemeSymbolsInspector() {
   );
 
   if (selectedSymbols.length === 0) return null;
+  const showSymbolsInspector = selectedSymbols.length === 1;
 
   const elements = [
     <NameInspector
       names={selectedSymbols.map((v) => delimitedPath.basename(v.name))}
       onNameChange={handleNameChange}
     />,
+    showSymbolsInspector && <SymbolMasterInspector />,
   ];
 
   return <>{withSeparatorElements(elements, <Divider />)}</>;

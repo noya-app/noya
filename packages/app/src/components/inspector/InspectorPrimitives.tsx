@@ -29,3 +29,7 @@ export const Row = styled.div(({ theme }) => ({
 export const Checkbox = styled.input(({ theme }) => ({
   margin: 0,
 }));
+
+export const Text = styled.span(({ theme }) => ({
+  ...theme.textStyles.small,
+}));

@@ -98,11 +98,5 @@
   "allowsOverrides": true,
   "includeBackgroundColorInInstance": false,
   "symbolID": "72550C6F-D8E9-4288-B755-F384B309073B",
-  "overrideProperties": [
-    {
-      "_class": "MSImmutableOverrideProperty",
-      "canOverride": true,
-      "overrideName": "B426F901-2A72-40D9-BA81-958E4E2A4420_stringValue"
-    }
-  ]
+  "overrideProperties": []
 }
