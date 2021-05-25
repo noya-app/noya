@@ -2,6 +2,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import SymbolSourceRow from '../components/inspector/SymbolSourceRow';
 import SymbolLayoutRow from '../components/inspector/SymbolLayoutRow';
+import SymbolOverrideRow from '../components/inspector/SymbolOverrideRow';
 
 import {
   useApplicationState,
@@ -77,6 +78,15 @@ export default memo(function SymbolInspector() {
       setMinWidth={useCallback(
         (value) => {
           dispatch('setMinWidth', value);
+        },
+        [dispatch],
+      )}
+    />,
+    <SymbolOverrideRow
+      allowsOverrides={selectedSymbol.allowsOverrides}
+      setAllowOverride={useCallback(
+        (value) => {
+          dispatch('setAllowsOverride', value);
         },
         [dispatch],
       )}
