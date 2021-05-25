@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { GroupLayouts, SetNumberMode } from '..';
 import { getSelectedSymbols } from '../selectors/themeSelectors';
 import { ApplicationState } from './applicationReducer';
 
@@ -12,7 +13,7 @@ export type SymbolsAction =
   | [type: 'setLayoutAxis', value: Sketch.InferredLayoutAxis | undefined]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
-  | [type: 'setMinWidth', amount: number, type: 'replace' | 'adjust']
+  | [type: 'setMinWidth', amount: number, type: SetNumberMode]
   | [type: 'setAllowsOverrides', value: boolean];
 export function symbolsReducer(
   state: ApplicationState,
@@ -87,8 +88,7 @@ export function symbolsReducer(
                   axis: value,
                   layoutAnchor:
                     symbol.groupLayout &&
-                    symbol.groupLayout._class ===
-                      'MSImmutableInferredGroupLayout'
+                    GroupLayouts.isInferredLayout(symbol.groupLayout)
                       ? symbol.groupLayout.layoutAnchor
                       : Sketch.InferredLayoutAnchor.Min,
                 };
@@ -104,7 +104,7 @@ export function symbolsReducer(
         symbols.forEach((symbol) => {
           if (
             !symbol.groupLayout ||
-            symbol.groupLayout._class === 'MSImmutableFreeformGroupLayout'
+            !GroupLayouts.isInferredLayout(symbol.groupLayout)
           )
             return;
 
@@ -121,11 +121,11 @@ export function symbolsReducer(
         symbols.forEach((symbol) => {
           if (
             !symbol.groupLayout ||
-            symbol.groupLayout._class === 'MSImmutableFreeformGroupLayout'
+            !GroupLayouts.isInferredLayout(symbol.groupLayout)
           )
             return;
 
-          const value = symbol.groupLayout.minSize ?? 0;
+          const value = symbol.groupLayout.minSize || 0;
           symbol.groupLayout.minSize =
             type === 'replace' ? amount : value + amount;
         });

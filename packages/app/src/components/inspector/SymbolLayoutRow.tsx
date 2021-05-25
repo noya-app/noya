@@ -15,7 +15,7 @@ import {
   InputField,
   LabeledElementView,
 } from 'noya-designsystem';
-import { Layers } from 'noya-state';
+import { GroupLayouts, SetNumberMode } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -23,7 +23,7 @@ interface Props {
   groupLayout?: Sketch.FreeformGroupLayout | Sketch.InferredGroupLayout;
   setLayoutAxis: (value: Sketch.InferredLayoutAxis | undefined) => void;
   setLayoutAnchor: (value: Sketch.InferredLayoutAnchor) => void;
-  setMinWidth: (value: number, mode: 'replace' | 'adjust') => void;
+  setMinWidth: (value: number, mode: SetNumberMode) => void;
 }
 
 export default memo(function SymbolInspector({
@@ -33,14 +33,16 @@ export default memo(function SymbolInspector({
   setLayoutAnchor,
 }: Props) {
   const inferredLayout =
-    groupLayout && Layers.isInferredLayout(groupLayout)
+    groupLayout && GroupLayouts.isInferredLayout(groupLayout)
       ? groupLayout
       : undefined;
 
-  const layoutAxis = inferredLayout?.axis;
+  const layoutAxis =
+    inferredLayout?.axis ?? Sketch.InferredLayoutAxis.Horizontal;
+
   const layoutAnchor = inferredLayout?.layoutAnchor;
   const minWidth = inferredLayout?.minSize;
-  const isAnchorDisabled = layoutAxis === undefined;
+  const isAnchorDisabled = inferredLayout === undefined;
 
   const renderLabel = useCallback(({ id }) => {
     switch (id) {
@@ -77,7 +79,7 @@ export default memo(function SymbolInspector({
       <Spacer.Vertical size={4} />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
-          value={layoutAxis?.toString() ?? 'none'}
+          value={isAnchorDisabled ? 'none' : layoutAxis?.toString()}
           onValueChange={useCallback(
             (event) =>
               setLayoutAxis(
@@ -107,7 +109,7 @@ export default memo(function SymbolInspector({
         <LabeledElementView renderLabel={renderLabel}>
           <RadioGroup.Root
             id={`${layoutAxis}-${layoutAnchor}`}
-            value={layoutAnchor?.toString() ?? 'none'}
+            value={isAnchorDisabled ? undefined : layoutAnchor?.toString()}
             onValueChange={useCallback(
               (event) => setLayoutAnchor(parseInt(event.target.value)),
               [setLayoutAnchor],
