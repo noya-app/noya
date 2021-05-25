@@ -1,13 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Spacer } from 'noya-designsystem';
 import { memo } from 'react';
-import styled from 'styled-components';
 import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
-
-const Checkbox = styled.input(({ theme }) => ({
-  margin: 0,
-}));
 
 interface Props {
   resizesContent: boolean;
@@ -39,7 +34,7 @@ export default memo(function SymbolInspector({
       <InspectorPrimitives.Title>Symbol Source</InspectorPrimitives.Title>
       <Spacer.Vertical size={4} />
       <InspectorPrimitives.Row>
-        <Checkbox
+        <InspectorPrimitives.Checkbox
           type="checkbox"
           checked={resizesContent}
           onChange={(evt) => setAdjustContentOnResize(evt.target.checked)}
@@ -50,7 +45,7 @@ export default memo(function SymbolInspector({
         </InspectorPrimitives.Text>
       </InspectorPrimitives.Row>
       <InspectorPrimitives.Row>
-        <Checkbox
+        <InspectorPrimitives.Checkbox
           type="checkbox"
           checked={hasBackgroundColor}
           onChange={(evt) => setHasBackgroundColor(evt.target.checked)}
@@ -68,7 +63,7 @@ export default memo(function SymbolInspector({
         <>
           <InspectorPrimitives.Row>
             <Spacer.Horizontal size={12} />
-            <Checkbox
+            <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={includeBackgroundColorInExport}
               onChange={(evt) => setIncludeBgInExport(evt.target.checked)}
@@ -80,7 +75,7 @@ export default memo(function SymbolInspector({
           </InspectorPrimitives.Row>
           <InspectorPrimitives.Row>
             <Spacer.Horizontal size={12} />
-            <Checkbox
+            <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={includeBackgroundColorInInstance}
               onChange={(evt) => setIncludeBgInInstances(evt.target.checked)}
