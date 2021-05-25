@@ -13,7 +13,8 @@ export type SymbolsAction =
   | [type: 'setGroupLayout', value: Sketch.InferredLayoutAxis | undefined]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
-  | [type: 'setMinWidth', value: number];
+  | [type: 'setMinWidth', value: number]
+  | [type: 'setAllowsOverride', value: boolean];
 export function symbolsReducer(
   state: ApplicationState,
   action: SymbolsAction,
@@ -152,6 +153,20 @@ export function symbolsReducer(
           return;
 
         symbol.groupLayout.minSize = value;
+      });
+    }
+    case 'setAllowsOverride': {
+      const [, value] = action;
+      const filter =
+        getCurrentTab(state) === 'canvas'
+          ? state.selectedObjects
+          : state.selectedSymbolsIds;
+
+      return produce(state, (draft) => {
+        const symbol = getSymbols(draft).filter((symbol) =>
+          filter.includes(symbol.do_objectID),
+        )[0];
+        symbol.allowsOverrides = value;
       });
     }
     default:

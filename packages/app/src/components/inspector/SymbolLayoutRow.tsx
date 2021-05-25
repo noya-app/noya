@@ -13,6 +13,7 @@ import {
   RadioGroup,
   Spacer,
   InputField,
+  LabeledElementView,
 } from 'noya-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
@@ -49,25 +50,22 @@ export default memo(function SymbolInspector({
       ? undefined
       : groupLayout.minSize;
 
-  const renderLabel = useCallback((axis, anchor) => {
-    if (axis === '' || anchor === '') return null;
-
-    const value = axis * 2 + anchor + (axis ? 1 : 0);
-    switch (value) {
-      case 0:
+  const renderLabel = useCallback(({ id }) => {
+    switch (id) {
+      case '0-0':
         return <Label.Label>Left to Right</Label.Label>;
-      case 1:
+      case '0-1':
         return <Label.Label>Center</Label.Label>;
-      case 2:
+      case '0-2':
         return <Label.Label>Right to Left</Label.Label>;
-      case 3:
+      case '1-0':
         return <Label.Label>Top to Bottom</Label.Label>;
-      case 4:
+      case '1-1':
         return <Label.Label>Middle</Label.Label>;
-      case 5:
+      case '1-2':
         return <Label.Label>Bottom to Top</Label.Label>;
       default:
-        return null;
+        return <Label.Label></Label.Label>;
     }
   }, []);
 
@@ -98,54 +96,51 @@ export default memo(function SymbolInspector({
       <Spacer.Vertical size={6} />
 
       <InspectorPrimitives.Row>
-        <RadioGroup.Root
-          value={layoutAnchor.toString()}
-          onValueChange={(event) =>
-            setLayoutAnchor(parseInt(event.target.value))
-          }
-        >
-          <RadioGroup.Item
-            value={Sketch.InferredLayoutAnchor.Min.toString()}
-            disabled={layoutValue === ''}
+        <LabeledElementView renderLabel={renderLabel}>
+          <RadioGroup.Root
+            id={`${layoutValue}-${layoutAnchor}`}
+            value={layoutAnchor.toString()}
+            onValueChange={(event) =>
+              setLayoutAnchor(parseInt(event.target.value))
+            }
           >
-            {layoutValue === '' ||
-            layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
-              <PinRightIcon />
-            ) : (
-              <PinBottomIcon />
-            )}
-          </RadioGroup.Item>
-          <RadioGroup.Item
-            disabled={layoutValue === ''}
-            value={Sketch.InferredLayoutAnchor.Middle.toString()}
-          >
-            {layoutValue === '' ||
-            layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
-              <SpaceEvenlyHorizontallyIcon />
-            ) : (
-              <SpaceEvenlyVerticallyIcon />
-            )}
-          </RadioGroup.Item>
-          <RadioGroup.Item
-            disabled={layoutValue === ''}
-            value={Sketch.InferredLayoutAnchor.Max.toString()}
-          >
-            {layoutValue === '' ||
-            layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
-              <PinLeftIcon />
-            ) : (
-              <PinTopIcon />
-            )}
-          </RadioGroup.Item>
-        </RadioGroup.Root>
+            <RadioGroup.Item
+              value={Sketch.InferredLayoutAnchor.Min.toString()}
+              disabled={layoutValue === ''}
+            >
+              {layoutValue === '' ||
+              layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
+                <PinRightIcon />
+              ) : (
+                <PinBottomIcon />
+              )}
+            </RadioGroup.Item>
+            <RadioGroup.Item
+              disabled={layoutValue === ''}
+              value={Sketch.InferredLayoutAnchor.Middle.toString()}
+            >
+              {layoutValue === '' ||
+              layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
+                <SpaceEvenlyHorizontallyIcon />
+              ) : (
+                <SpaceEvenlyVerticallyIcon />
+              )}
+            </RadioGroup.Item>
+            <RadioGroup.Item
+              disabled={layoutValue === ''}
+              value={Sketch.InferredLayoutAnchor.Max.toString()}
+            >
+              {layoutValue === '' ||
+              layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
+                <PinLeftIcon />
+              ) : (
+                <PinTopIcon />
+              )}
+            </RadioGroup.Item>
+          </RadioGroup.Root>
+        </LabeledElementView>
       </InspectorPrimitives.Row>
       <Spacer.Vertical size={6} />
-
-      <InspectorPrimitives.Row>
-        {/* FIX TO NOT USE SPACER */}
-        <Spacer.Horizontal size={80} />
-        {renderLabel(layoutValue, layoutAnchor)}
-      </InspectorPrimitives.Row>
       {groupLayout && groupLayout._class === 'MSImmutableInferredGroupLayout' && (
         <>
           <Spacer.Vertical size={6} />
