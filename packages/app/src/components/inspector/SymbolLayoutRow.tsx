@@ -109,7 +109,7 @@ export default memo(function SymbolInspector({
         <LabeledElementView renderLabel={renderLabel}>
           <RadioGroup.Root
             id={`${layoutAxis}-${layoutAnchor}`}
-            value={isAnchorDisabled ? undefined : layoutAnchor?.toString()}
+            value={isAnchorDisabled ? '' : layoutAnchor?.toString()}
             onValueChange={useCallback(
               (event) => setLayoutAnchor(parseInt(event.target.value)),
               [setLayoutAnchor],
