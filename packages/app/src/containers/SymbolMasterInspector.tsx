@@ -83,7 +83,9 @@ export default memo(function SymbolInspector() {
       )}
     />,
     <SymbolOverrideRow
+      layers={selectedSymbol.layers}
       allowsOverrides={selectedSymbol.allowsOverrides}
+      overrideProperties={selectedSymbol.overrideProperties}
       setAllowsOverrides={useCallback(
         (value) => {
           dispatch('setAllowsOverrides', value);

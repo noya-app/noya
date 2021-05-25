@@ -146,6 +146,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   selected?: boolean;
   disabled?: boolean;
   sortable?: boolean;
+  scrollable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
@@ -241,15 +242,17 @@ const ListViewRow = forwardRef(function ListViewRow<
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.ul(({ theme }) => ({
-  ...listReset,
-  flex: '1 0 0',
-  display: 'flex',
-  flexDirection: 'column',
-  flexWrap: 'nowrap',
-  color: theme.colors.textMuted,
-  overflowY: 'auto',
-}));
+const RootContainer = styled.ul<{ scrollable?: boolean }>(
+  ({ theme, scrollable = false }) => ({
+    ...listReset,
+    flex: '1 0 0',
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'nowrap',
+    color: theme.colors.textMuted,
+    overflowY: scrollable ? 'auto' : 'visible',
+  }),
+);
 
 interface ListViewRootProps {
   children?: ReactNode;
