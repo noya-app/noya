@@ -215,10 +215,10 @@ export function applicationReducer(
     case 'setBackgroundColor':
     case 'setIncludeBackgroundColorInExport':
     case 'setIncludeBackgroundColorInInstance':
-    case 'setGroupLayout':
+    case 'setLayoutAxis':
     case 'setLayoutAnchor':
     case 'setMinWidth':
-    case 'setAllowsOverride':
+    case 'setAllowsOverrides':
       return symbolsReducer(state, action);
     default:
       return themeReducer(state, action);

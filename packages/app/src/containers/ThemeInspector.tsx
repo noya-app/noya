@@ -19,8 +19,9 @@ export default memo(function ThemeInspector() {
         return <ThemeStyleInspector />;
       case 'symbols':
         return <ThemeSymbolsInspector />;
+      default:
+        return null;
     }
-    return null;
   }, [tab]);
 
   return <>{element}</>;

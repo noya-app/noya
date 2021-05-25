@@ -1,7 +1,10 @@
+import { Draft } from 'immer';
 import { ApplicationState } from '../index';
 import { ThemeTab, WorkspaceTab } from '../reducers/applicationReducer';
 
-export const getCurrentTab = (state: ApplicationState): WorkspaceTab => {
+export const getCurrentTab = (
+  state: ApplicationState | Draft<ApplicationState>,
+): WorkspaceTab => {
   return state.currentTab;
 };
 

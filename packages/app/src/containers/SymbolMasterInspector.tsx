@@ -48,13 +48,13 @@ export default memo(function SymbolInspector() {
         },
         [dispatch],
       )}
-      setIncludeBgInInstances={useCallback(
+      setIncludeBackgroundInInstances={useCallback(
         (value) => {
           dispatch('setIncludeBackgroundColorInInstance', value);
         },
         [dispatch],
       )}
-      setIncludeBgInExport={useCallback(
+      setIncludeBackgroundInExport={useCallback(
         (value) => {
           dispatch('setIncludeBackgroundColorInExport', value);
         },
@@ -63,9 +63,9 @@ export default memo(function SymbolInspector() {
     />,
     <SymbolLayoutRow
       groupLayout={selectedSymbol.groupLayout}
-      setGroupLayout={useCallback(
+      setLayoutAxis={useCallback(
         (value) => {
-          dispatch('setGroupLayout', value !== '' ? value : undefined);
+          dispatch('setLayoutAxis', value);
         },
         [dispatch],
       )}
@@ -76,17 +76,17 @@ export default memo(function SymbolInspector() {
         [dispatch],
       )}
       setMinWidth={useCallback(
-        (value) => {
-          dispatch('setMinWidth', value);
+        (value, mode) => {
+          dispatch('setMinWidth', value, mode);
         },
         [dispatch],
       )}
     />,
     <SymbolOverrideRow
       allowsOverrides={selectedSymbol.allowsOverrides}
-      setAllowOverride={useCallback(
+      setAllowsOverrides={useCallback(
         (value) => {
-          dispatch('setAllowsOverride', value);
+          dispatch('setAllowsOverrides', value);
         },
         [dispatch],
       )}

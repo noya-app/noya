@@ -68,6 +68,12 @@ export const isSymbolInstance = (
   return layer._class === 'symbolInstance';
 };
 
+export const isInferredLayout = (
+  groupLayout: Sketch.FreeformGroupLayout | Sketch.InferredGroupLayout,
+): groupLayout is Sketch.InferredGroupLayout => {
+  return groupLayout._class === 'MSImmutableInferredGroupLayout';
+};
+
 export const hasTextStyle = (
   layer: Sketch.Text,
 ): layer is Sketch.Text & { style: { textStyle: Sketch.TextStyle } } => {

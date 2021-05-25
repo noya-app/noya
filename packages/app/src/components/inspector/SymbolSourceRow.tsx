@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Spacer } from 'noya-designsystem';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -13,8 +13,8 @@ interface Props {
   setAdjustContentOnResize: (value: boolean) => void;
   setHasBackgroundColor: (value: boolean) => void;
   setBackgroundColor: (value: Sketch.Color) => void;
-  setIncludeBgInExport: (value: boolean) => void;
-  setIncludeBgInInstances: (value: boolean) => void;
+  setIncludeBackgroundInExport: (value: boolean) => void;
+  setIncludeBackgroundInInstances: (value: boolean) => void;
 }
 
 export default memo(function SymbolInspector({
@@ -26,9 +26,19 @@ export default memo(function SymbolInspector({
   setAdjustContentOnResize,
   setHasBackgroundColor,
   setBackgroundColor,
-  setIncludeBgInExport,
-  setIncludeBgInInstances,
+  setIncludeBackgroundInExport,
+  setIncludeBackgroundInInstances,
 }: Props) {
+  const setIncludeBackgroundInExportCallback = useCallback(
+    (evt) => setIncludeBackgroundInExport(evt.target.checked),
+    [setIncludeBackgroundInExport],
+  );
+
+  const setIncludeBackgroundInInstancesCallback = useCallback(
+    (evt) => setIncludeBackgroundInInstances(evt.target.checked),
+    [setIncludeBackgroundInInstances],
+  );
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Title>Symbol Source</InspectorPrimitives.Title>
@@ -37,7 +47,10 @@ export default memo(function SymbolInspector({
         <InspectorPrimitives.Checkbox
           type="checkbox"
           checked={resizesContent}
-          onChange={(evt) => setAdjustContentOnResize(evt.target.checked)}
+          onChange={useCallback(
+            (evt) => setAdjustContentOnResize(evt.target.checked),
+            [setAdjustContentOnResize],
+          )}
         />
         <Spacer.Horizontal size={8} />
         <InspectorPrimitives.Text>
@@ -48,7 +61,10 @@ export default memo(function SymbolInspector({
         <InspectorPrimitives.Checkbox
           type="checkbox"
           checked={hasBackgroundColor}
-          onChange={(evt) => setHasBackgroundColor(evt.target.checked)}
+          onChange={useCallback(
+            (evt) => setHasBackgroundColor(evt.target.checked),
+            [setHasBackgroundColor],
+          )}
         />
         <Spacer.Horizontal size={8} />
         <InspectorPrimitives.Text>Background color</InspectorPrimitives.Text>
@@ -66,7 +82,7 @@ export default memo(function SymbolInspector({
             <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={includeBackgroundColorInExport}
-              onChange={(evt) => setIncludeBgInExport(evt.target.checked)}
+              onChange={setIncludeBackgroundInExportCallback}
             />
             <Spacer.Horizontal size={8} />
             <InspectorPrimitives.Text>
@@ -78,7 +94,7 @@ export default memo(function SymbolInspector({
             <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={includeBackgroundColorInInstance}
-              onChange={(evt) => setIncludeBgInInstances(evt.target.checked)}
+              onChange={setIncludeBackgroundInInstancesCallback}
             />
             <Spacer.Horizontal size={8} />
             <InspectorPrimitives.Text>

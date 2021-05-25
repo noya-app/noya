@@ -15,40 +15,32 @@ import {
   InputField,
   LabeledElementView,
 } from 'noya-designsystem';
-import { memo, useCallback, useMemo } from 'react';
+import { Layers } from 'noya-state';
+import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
   groupLayout?: Sketch.FreeformGroupLayout | Sketch.InferredGroupLayout;
-  setGroupLayout: (value: Sketch.InferredLayoutAxis | '') => void;
+  setLayoutAxis: (value: Sketch.InferredLayoutAxis | undefined) => void;
   setLayoutAnchor: (value: Sketch.InferredLayoutAnchor) => void;
-  setMinWidth: (value: number) => void;
+  setMinWidth: (value: number, mode: 'replace' | 'adjust') => void;
 }
 
 export default memo(function SymbolInspector({
   groupLayout,
   setMinWidth,
-  setGroupLayout,
+  setLayoutAxis,
   setLayoutAnchor,
 }: Props) {
-  const layoutValue = useMemo(() => {
-    return !groupLayout ||
-      groupLayout._class === 'MSImmutableFreeformGroupLayout'
-      ? ''
-      : groupLayout.axis;
-  }, [groupLayout]);
+  const inferredLayout =
+    groupLayout && Layers.isInferredLayout(groupLayout)
+      ? groupLayout
+      : undefined;
 
-  const layoutAnchor = useMemo(() => {
-    return !groupLayout ||
-      groupLayout?._class === 'MSImmutableFreeformGroupLayout'
-      ? ''
-      : groupLayout.layoutAnchor;
-  }, [groupLayout]);
-
-  const minWidth =
-    !groupLayout || groupLayout?._class === 'MSImmutableFreeformGroupLayout'
-      ? undefined
-      : groupLayout.minSize;
+  const layoutAxis = inferredLayout?.axis;
+  const layoutAnchor = inferredLayout?.layoutAnchor;
+  const minWidth = inferredLayout?.minSize;
+  const isAnchorDisabled = layoutAxis === undefined;
 
   const renderLabel = useCallback(({ id }) => {
     switch (id) {
@@ -69,18 +61,34 @@ export default memo(function SymbolInspector({
     }
   }, []);
 
+  const handleNudgeMinWidth = useCallback(
+    (value: number) => setMinWidth(value, 'adjust'),
+    [setMinWidth],
+  );
+
+  const handleSetMinWidth = useCallback(
+    (value) => setMinWidth(value, 'replace'),
+    [setMinWidth],
+  );
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Title>Layout</InspectorPrimitives.Title>
       <Spacer.Vertical size={4} />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
-          value={layoutValue.toString()}
-          onValueChange={(event) =>
-            setGroupLayout(parseInt(event.target.value))
-          }
+          value={layoutAxis?.toString() ?? 'none'}
+          onValueChange={useCallback(
+            (event) =>
+              setLayoutAxis(
+                event.target.value === 'none'
+                  ? undefined
+                  : parseInt(event.target.value),
+              ),
+            [setLayoutAxis],
+          )}
         >
-          <RadioGroup.Item value={''}>None</RadioGroup.Item>
+          <RadioGroup.Item value={'none'}>None</RadioGroup.Item>
           <RadioGroup.Item
             value={Sketch.InferredLayoutAxis.Horizontal.toString()}
           >
@@ -98,40 +106,41 @@ export default memo(function SymbolInspector({
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
           <RadioGroup.Root
-            id={`${layoutValue}-${layoutAnchor}`}
-            value={layoutAnchor.toString()}
-            onValueChange={(event) =>
-              setLayoutAnchor(parseInt(event.target.value))
-            }
+            id={`${layoutAxis}-${layoutAnchor}`}
+            value={layoutAnchor?.toString() ?? 'none'}
+            onValueChange={useCallback(
+              (event) => setLayoutAnchor(parseInt(event.target.value)),
+              [setLayoutAnchor],
+            )}
           >
             <RadioGroup.Item
               value={Sketch.InferredLayoutAnchor.Min.toString()}
-              disabled={layoutValue === ''}
+              disabled={isAnchorDisabled}
             >
-              {layoutValue === '' ||
-              layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
+              {isAnchorDisabled ||
+              layoutAxis === Sketch.InferredLayoutAxis.Horizontal ? (
                 <PinRightIcon />
               ) : (
                 <PinBottomIcon />
               )}
             </RadioGroup.Item>
             <RadioGroup.Item
-              disabled={layoutValue === ''}
+              disabled={isAnchorDisabled}
               value={Sketch.InferredLayoutAnchor.Middle.toString()}
             >
-              {layoutValue === '' ||
-              layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
+              {isAnchorDisabled ||
+              layoutAxis === Sketch.InferredLayoutAxis.Horizontal ? (
                 <SpaceEvenlyHorizontallyIcon />
               ) : (
                 <SpaceEvenlyVerticallyIcon />
               )}
             </RadioGroup.Item>
             <RadioGroup.Item
-              disabled={layoutValue === ''}
+              disabled={isAnchorDisabled}
               value={Sketch.InferredLayoutAnchor.Max.toString()}
             >
-              {layoutValue === '' ||
-              layoutValue === Sketch.InferredLayoutAxis.Horizontal ? (
+              {isAnchorDisabled ||
+              layoutAxis === Sketch.InferredLayoutAxis.Horizontal ? (
                 <PinLeftIcon />
               ) : (
                 <PinTopIcon />
@@ -141,7 +150,7 @@ export default memo(function SymbolInspector({
         </LabeledElementView>
       </InspectorPrimitives.Row>
       <Spacer.Vertical size={6} />
-      {groupLayout && groupLayout._class === 'MSImmutableInferredGroupLayout' && (
+      {!isAnchorDisabled && (
         <>
           <Spacer.Vertical size={6} />
           <Divider />
@@ -153,8 +162,8 @@ export default memo(function SymbolInspector({
               <InputField.NumberInput
                 placeholder={'None'}
                 value={minWidth}
-                onSubmit={setMinWidth}
-                onNudge={() => {}}
+                onSubmit={handleSetMinWidth}
+                onNudge={handleNudgeMinWidth}
               />
             </InputField.Root>
           </InspectorPrimitives.Row>

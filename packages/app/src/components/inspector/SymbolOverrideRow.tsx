@@ -1,15 +1,15 @@
 import { Spacer } from 'noya-designsystem';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
   allowsOverrides: boolean;
-  setAllowOverride: (value: boolean) => void;
+  setAllowsOverrides: (value: boolean) => void;
 }
 
 export default memo(function SymbolInspector({
   allowsOverrides,
-  setAllowOverride,
+  setAllowsOverrides,
 }: Props) {
   return (
     <InspectorPrimitives.Section>
@@ -19,7 +19,10 @@ export default memo(function SymbolInspector({
         <InspectorPrimitives.Checkbox
           type="checkbox"
           checked={allowsOverrides}
-          onChange={(evt) => setAllowOverride(evt.target.checked)}
+          onChange={useCallback(
+            (evt) => setAllowsOverrides(evt.target.checked),
+            [setAllowsOverrides],
+          )}
         />
         <Spacer.Horizontal size={8} />
         <InspectorPrimitives.Text>Allow Overrides</InspectorPrimitives.Text>
