@@ -77,7 +77,7 @@ function flattenLayerList(
   return flattened;
 }
 
-const LayerIcon = memo(function LayerIcon({
+export const LayerIcon = memo(function LayerIcon({
   type,
   selected,
   variant,
