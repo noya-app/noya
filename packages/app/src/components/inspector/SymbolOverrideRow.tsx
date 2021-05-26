@@ -8,13 +8,15 @@ import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
   symbolMaster: Sketch.SymbolMaster;
-  setAllowsOverrides: (value: boolean) => void;
+  onSetAllowsOverrides: (value: boolean) => void;
+  onSetOverrideProperty: (overrideName: string, value: boolean) => void;
 }
 
 function getOverrideElements(
   state: ApplicationState,
   symbolMaster: Sketch.SymbolMaster,
   idPath: string[],
+  onSetOverrideProperty: (overrideName: string, value: boolean) => void,
 ): ReactNode[] {
   const depth = idPath.length;
 
@@ -47,21 +49,23 @@ function getOverrideElements(
           state,
           symbolMaster,
           nestedIdPath,
+          onSetOverrideProperty,
         );
 
         const symbolIdOverrideName = key + '_symbolID';
 
         return [
           titleRow,
-          <TreeView.Row
-            key={symbolIdOverrideName}
-            depth={depth + 1}
-            onClick={() => {}}
-          >
+          <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
             <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={true}
-              onChange={(evt) => {}}
+              onChange={(event) =>
+                onSetOverrideProperty(
+                  symbolIdOverrideName,
+                  event.target.checked,
+                )
+              }
             />
             <Spacer.Horizontal size={6} />
             <TreeView.RowTitle>Symbol</TreeView.RowTitle>
@@ -75,29 +79,31 @@ function getOverrideElements(
 
         return [
           titleRow,
-          <TreeView.Row
-            key={stringValueOverrideName}
-            depth={depth + 1}
-            onClick={() => {}}
-          >
+          <TreeView.Row key={stringValueOverrideName} depth={depth + 1}>
             <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={true}
-              onChange={(evt) => {}}
+              onChange={(event) =>
+                onSetOverrideProperty(
+                  stringValueOverrideName,
+                  event.target.checked,
+                )
+              }
             />
             <Spacer.Horizontal size={6} />
             <TreeView.RowTitle>Text Value</TreeView.RowTitle>
           </TreeView.Row>,
           layer.sharedStyleID && (
-            <TreeView.Row
-              key={textStyleOverrideName}
-              depth={depth + 1}
-              onClick={() => {}}
-            >
+            <TreeView.Row key={textStyleOverrideName} depth={depth + 1}>
               <InspectorPrimitives.Checkbox
                 type="checkbox"
                 checked={true}
-                onChange={(evt) => {}}
+                onChange={(event) =>
+                  onSetOverrideProperty(
+                    textStyleOverrideName,
+                    event.target.checked,
+                  )
+                }
               />
               <Spacer.Horizontal size={6} />
               <TreeView.RowTitle>Text Style</TreeView.RowTitle>
@@ -112,15 +118,16 @@ function getOverrideElements(
           ? [
               titleRow,
               layer.sharedStyleID && (
-                <TreeView.Row
-                  key={layerStyleOverrideName}
-                  depth={depth + 1}
-                  onClick={() => {}}
-                >
+                <TreeView.Row key={layerStyleOverrideName} depth={depth + 1}>
                   <InspectorPrimitives.Checkbox
                     type="checkbox"
                     checked={true}
-                    onChange={(evt) => {}}
+                    onChange={(event) =>
+                      onSetOverrideProperty(
+                        layerStyleOverrideName,
+                        event.target.checked,
+                      )
+                    }
                   />
                   <Spacer.Horizontal size={6} />
                   <TreeView.RowTitle>Text Style</TreeView.RowTitle>
@@ -135,11 +142,17 @@ function getOverrideElements(
 
 export default memo(function SymbolInspector({
   symbolMaster,
-  setAllowsOverrides,
+  onSetAllowsOverrides,
+  onSetOverrideProperty,
 }: Props) {
   const [state] = useApplicationState();
 
-  const overrideElements = getOverrideElements(state, symbolMaster, []);
+  const overrideElements = getOverrideElements(
+    state,
+    symbolMaster,
+    [],
+    onSetOverrideProperty,
+  );
 
   return (
     <>
@@ -151,8 +164,8 @@ export default memo(function SymbolInspector({
             type="checkbox"
             checked={symbolMaster.allowsOverrides}
             onChange={useCallback(
-              (evt) => setAllowsOverrides(evt.target.checked),
-              [setAllowsOverrides],
+              (event) => onSetAllowsOverrides(event.target.checked),
+              [onSetAllowsOverrides],
             )}
           />
           <Spacer.Horizontal size={8} />
