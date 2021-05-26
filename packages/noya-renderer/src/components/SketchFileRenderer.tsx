@@ -210,7 +210,7 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
-  const smartSnapGuides = useMemo(() => {
+  const smartSnapGuidesX = useMemo(() => {
     if (
       state.interactionState.type !== 'moving' ||
       !boundingRect ||
@@ -225,57 +225,41 @@ export default memo(function SketchFileRenderer() {
     let setSelectedBounds;
     let setVisibleBounds;
 
-    const current = state.interactionState.current.y;
-    // console.log(
-    //   'state.interactionState.current.y',
-    //   state.interactionState.current.y,
-    // );
-
     //Find the closest layer to measure the distance
-    state.canvasVisibleAndSelectedLayerAxisPairs.forEach(function (pairs) {
+    state.canvasVisibleAndSelectedLayerAxisPairs.xBounds.forEach(function (
+      pairs: [],
+    ) {
       pairs.forEach(function (pair: {
         selectedBounds: number;
         visibleBounds: number;
         visibleLayer_id: string[];
       }) {
         if (
-          // pair.selectedBounds > pair.visibleBounds - 6 &&
-          // pair.selectedBounds < pair.visibleBounds + 6
-          current > pair.visibleBounds - 6 &&
-          current < pair.visibleBounds + 6
+          !(
+            pair.selectedBounds + 6 >= pair.visibleBounds &&
+            pair.selectedBounds - 6 <= pair.visibleBounds
+          )
         ) {
-          // console.log('NO HIT', pair.selectedBounds, pair.visibleBounds);
-          // return;
+          return;
+        }
+        const difference = Math.abs(pair.selectedBounds - pair.visibleBounds);
 
-          //console.log('HIT', pair.selectedBounds, pair.visibleBounds);
-          // console.log(
-          //   'pair.selectedBounds',
-          //   pair.selectedBounds,
-          //   'pair.visibleBounds',
-          //   pair.visibleBounds,
-          // );
+        if (!closestLayerDistance) {
+          closestLayerDistance = difference;
+          closestLayerID = pair.visibleLayer_id[0];
 
-          const difference = Math.abs(pair.selectedBounds - pair.visibleBounds);
-          if (!closestLayerDistance) {
-            closestLayerDistance = difference;
-            closestLayerID = pair.visibleLayer_id[0];
-            setSelectedBounds = current; //pair.selectedBounds;
-            setVisibleBounds = pair.visibleBounds;
-          } else if (
-            closestLayerDistance &&
-            closestLayerDistance > difference
-          ) {
-            closestLayerDistance = difference;
-            closestLayerID = pair.visibleLayer_id[0];
-            setSelectedBounds = current; //pair.selectedBounds;
-            setVisibleBounds = pair.visibleBounds;
-          }
-        } else {
-          //console.log('NO HIT');
+          setSelectedBounds = pair.selectedBounds;
+          setVisibleBounds = pair.visibleBounds;
+        } else if (closestLayerDistance && closestLayerDistance > difference) {
+          closestLayerDistance = difference;
+          closestLayerID = pair.visibleLayer_id[0];
+
+          setSelectedBounds = pair.selectedBounds;
+          setVisibleBounds = pair.visibleBounds;
         }
       });
     });
-    // console.log('closestLayerID', closestLayerID);
+
     const layerToSnapBoundingRect = getBoundingRect(
       page,
       AffineTransform.identity,
@@ -295,6 +279,86 @@ export default memo(function SketchFileRenderer() {
           visibleBounds={setVisibleBounds}
           selectedRect={boundingRect}
           highlightedRect={layerToSnapBoundingRect}
+        />
+      )
+    );
+  }, [
+    page,
+    boundingRect,
+    state.interactionState,
+    state.canvasVisibleAndSelectedLayerAxisPairs,
+  ]);
+
+  const smartSnapGuidesY = useMemo(() => {
+    if (
+      state.interactionState.type !== 'moving' ||
+      !boundingRect ||
+      !state.canvasVisibleAndSelectedLayerAxisPairs ||
+      !state.interactionState.current.y
+    ) {
+      return;
+    }
+
+    let closestLayerDistance: number | null = null;
+    let closestLayerID: string = '';
+    let setSelectedBounds;
+    let setVisibleBounds;
+
+    //Find the closest layer to measure the distance
+    state.canvasVisibleAndSelectedLayerAxisPairs.yBounds.forEach(function (
+      pairs: [],
+    ) {
+      pairs.forEach(function (pair: {
+        selectedBounds: number;
+        visibleBounds: number;
+        visibleLayer_id: string[];
+      }) {
+        if (
+          !(
+            pair.selectedBounds + 6 >= pair.visibleBounds &&
+            pair.selectedBounds - 6 <= pair.visibleBounds
+          )
+        ) {
+          return;
+        }
+        const difference = Math.abs(pair.selectedBounds - pair.visibleBounds);
+
+        if (!closestLayerDistance) {
+          closestLayerDistance = difference;
+          closestLayerID = pair.visibleLayer_id[0];
+
+          setSelectedBounds = pair.selectedBounds;
+          setVisibleBounds = pair.visibleBounds;
+        } else if (closestLayerDistance && closestLayerDistance > difference) {
+          closestLayerDistance = difference;
+          closestLayerID = pair.visibleLayer_id[0];
+
+          setSelectedBounds = pair.selectedBounds;
+          setVisibleBounds = pair.visibleBounds;
+        }
+      });
+    });
+
+    const layerToSnapBoundingRect = getBoundingRect(
+      page,
+      AffineTransform.identity,
+      [closestLayerID],
+      {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+      },
+    );
+
+    return (
+      setVisibleBounds &&
+      setSelectedBounds &&
+      layerToSnapBoundingRect && (
+        <SmartSnapLines
+          selectedBounds={setSelectedBounds}
+          visibleBounds={setVisibleBounds}
+          selectedRect={boundingRect}
+          highlightedRect={layerToSnapBoundingRect}
+          pointsToUse="use"
         />
       )
     );
@@ -352,7 +416,8 @@ export default memo(function SketchFileRenderer() {
           <Polyline key={index} points={points} paint={selectionPaint} />
         ))}
         {highlightedSketchLayer}
-        {smartSnapGuides}
+        {smartSnapGuidesX}
+        {smartSnapGuidesY}
         {distanceLabelAndPathBetweenSketchLayers}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />

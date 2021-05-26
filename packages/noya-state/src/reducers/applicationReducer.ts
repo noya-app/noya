@@ -35,8 +35,13 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
+type SmartSnapPairs = {
+  xBounds: [];
+  yBounds: [];
+};
+
 export type ApplicationState = {
-  canvasVisibleAndSelectedLayerAxisPairs: any[] | undefined;
+  canvasVisibleAndSelectedLayerAxisPairs: SmartSnapPairs | undefined;
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;

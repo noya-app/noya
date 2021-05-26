@@ -60,47 +60,39 @@ function getVisibleLayersAxisValues(state: any, pageSnapshot: any) {
     },
   );
 
-  const yValues: any = [];
-  const xValues: any = [];
+  const values: any = [];
   layers.forEach(function (layer) {
     const rect = getBoundingRect(pageSnapshot, AffineTransform.identity, [
       layer.do_objectID,
     ]);
     if (rect) {
       const rectBounds: any = createBounds(rect);
-      yValues.push({
+      values.push({
         layer_id: [layer.do_objectID],
-        bounds: getAxisValues(rectBounds, 'Y'),
-      });
-      xValues.push({
-        layer_id: [layer.do_objectID],
-        bounds: getAxisValues(rectBounds, 'X'),
+        y: getAxisValues(rectBounds, 'Y'),
+        x: getAxisValues(rectBounds, 'X'),
       });
     }
   });
-  return yValues;
+  return values;
 }
 
 function getSelectedLayerAxisValues(layer_id: string, pageSnapshot: any) {
   const selectedRect = getBoundingRect(pageSnapshot, AffineTransform.identity, [
     layer_id,
   ]);
-  const ySelectedValues: any = [];
-  const xSelectedValues: any = [];
 
+  const selectedValues: any = [];
   if (selectedRect) {
     const rectBounds: any = createBounds(selectedRect);
-    ySelectedValues.push({
+    selectedValues.push({
       layer_id: [layer_id],
-      bounds: getAxisValues(rectBounds, 'Y'),
+      y: getAxisValues(rectBounds, 'Y'),
+      x: getAxisValues(rectBounds, 'X'),
     });
-    xSelectedValues.push({
-      layer_id: [layer_id],
-      bounds: getAxisValues(rectBounds, 'X'),
-    });
+    //console.log('rectBounds for Selected', rectBounds)
   }
-
-  return ySelectedValues;
+  return selectedValues;
 }
 
 type BoundsObj = {
@@ -127,25 +119,25 @@ function getVisibleAndSelectedLayerAxisPairs(
   selectedAxisValues: any[],
   visibleLayersAxisValues: any[],
   state: any,
-) {
-  if (!state.interactionState.current) {
-    return;
-  }
+  axis: string,
+): any {
+  // if (!state.interactionState.current) {
+  //   return;
+  // }
 
-  //Find all values of interest
   let testingObj: BoundsObj = {
-    selectedBounds: selectedAxisValues[0].bounds,
+    selectedBounds: selectedAxisValues[0][axis],
     visibleBounds: [],
     visibleLayer_id: [''],
   };
 
-  const results = visibleLayersAxisValues
+  let results = visibleLayersAxisValues
     .filter(
       (visibleLayer) =>
         visibleLayer.layer_id[0] !== selectedAxisValues[0].layer_id[0],
     )
     .map((visibleLayer) => {
-      testingObj.visibleBounds = visibleLayer.bounds;
+      testingObj.visibleBounds = visibleLayer[axis];
       testingObj.visibleLayer_id = [visibleLayer.layer_id];
       return allCombinations(testingObj);
     });
@@ -246,6 +238,7 @@ export function canvasReducer(
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
             const layers = getVisibleLayersAxisValues(state, pageSnapshot);
+            let selectionValues;
 
             const delta = {
               x: current.x - origin.x,
@@ -261,18 +254,29 @@ export function canvasReducer(
 
               layer.frame.x = initialRect.x + delta.x;
               layer.frame.y = initialRect.y + delta.y;
+
+              selectionValues = getSelectedLayerAxisValues(
+                draft.selectedObjects[0],
+                layer,
+              );
             });
 
-            const selectionValues = getSelectedLayerAxisValues(
-              draft.selectedObjects[0],
-              pageSnapshot,
-            );
-            draft.canvasVisibleAndSelectedLayerAxisPairs = getVisibleAndSelectedLayerAxisPairs(
-              selectionValues,
-              layers,
-              state,
-            );
-
+            if (selectionValues) {
+              draft.canvasVisibleAndSelectedLayerAxisPairs = {
+                xBounds: getVisibleAndSelectedLayerAxisPairs(
+                  selectionValues,
+                  layers,
+                  state,
+                  'x',
+                ),
+                yBounds: getVisibleAndSelectedLayerAxisPairs(
+                  selectionValues,
+                  layers,
+                  state,
+                  'y',
+                ),
+              };
+            }
             break;
           }
           case 'scaling': {

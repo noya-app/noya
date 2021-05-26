@@ -6,11 +6,13 @@ export default function SmartSnapLines({
   visibleBounds,
   selectedRect,
   highlightedRect,
+  pointsToUse,
 }: {
   selectedBounds: number;
   visibleBounds: number;
   selectedRect: Rect;
   highlightedRect: Rect;
+  pointsToUse?: string;
 }) {
   const highlightedBoundsRect = createBounds(highlightedRect);
   const selectedBoundsRect = createBounds(selectedRect);
@@ -23,14 +25,23 @@ export default function SmartSnapLines({
     style: CanvasKit.PaintStyle.Stroke,
   });
 
-  const points = [
+  const pointsY = [
     { x: selectedBoundsRect.minX, y: selectedBounds },
-    { x: highlightedBoundsRect.maxX, y: visibleBounds },
+    { x: highlightedBoundsRect.maxX, y: selectedBounds },
+  ];
+
+  const pointsX = [
+    { x: selectedBounds, y: selectedBoundsRect.minY },
+    { x: selectedBounds, y: highlightedBoundsRect.maxY },
   ];
 
   return (
     <>
-      <Polyline paint={measurementGuidePaint} points={points} />
+      <Polyline
+        paint={measurementGuidePaint}
+        points={pointsToUse ? pointsY : pointsX}
+      />
+      {/* <Polyline paint={measurementGuidePaint} points={pointsY} /> */}
     </>
   );
 }
