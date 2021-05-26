@@ -90,9 +90,12 @@ export default memo(function SymbolMasterInspector() {
         },
         [dispatch],
       )}
-      onSetOverrideProperty={useCallback((overrideName, value) => {
-        alert(`Set ${overrideName} to ${value}`);
-      }, [])}
+      onSetOverrideProperty={useCallback(
+        (overrideName, value) => {
+          dispatch('onSetOverrideProperty', overrideName, value);
+        },
+        [dispatch],
+      )}
     />,
   ];
 

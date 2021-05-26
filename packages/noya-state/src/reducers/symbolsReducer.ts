@@ -14,7 +14,9 @@ export type SymbolsAction =
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
   | [type: 'setMinWidth', amount: number, type: SetNumberMode]
-  | [type: 'setAllowsOverrides', value: boolean];
+  | [type: 'setAllowsOverrides', value: boolean]
+  | [type: 'onSetOverrideProperty', overrideName: string, value: boolean];
+
 export function symbolsReducer(
   state: ApplicationState,
   action: SymbolsAction,
@@ -139,6 +141,29 @@ export function symbolsReducer(
 
         symbols.forEach((symbol) => {
           symbol.allowsOverrides = value;
+        });
+      });
+    }
+    case 'onSetOverrideProperty': {
+      const [, name, value] = action;
+
+      return produce(state, (draft) => {
+        const symbols = getSelectedSymbols(draft);
+
+        symbols.forEach((symbol) => {
+          const override = symbol.overrideProperties.find(
+            (property) => property.overrideName === name,
+          );
+
+          if (!override) {
+            symbol.overrideProperties.push({
+              _class: 'MSImmutableOverrideProperty',
+              overrideName: name,
+              canOverride: value,
+            });
+            return;
+          }
+          override.canOverride = value;
         });
       });
     }
