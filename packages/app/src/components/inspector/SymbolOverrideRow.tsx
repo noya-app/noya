@@ -45,12 +45,14 @@ function getOverrideElements(
 
         if (!symbolMaster) return [];
 
-        const nestedOverrides = getOverrideElements(
-          state,
-          symbolMaster,
-          nestedIdPath,
-          onSetOverrideProperty,
-        );
+        const nestedOverrides = symbolMaster.allowsOverrides
+          ? getOverrideElements(
+              state,
+              symbolMaster,
+              nestedIdPath,
+              onSetOverrideProperty,
+            )
+          : [];
 
         const symbolIdOverrideName = key + '_symbolID';
 
