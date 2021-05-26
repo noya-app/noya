@@ -77,13 +77,13 @@ function flattenLayerList(
   return flattened;
 }
 
-const LayerIcon = memo(function LayerIcon({
+export const LayerIcon = memo(function LayerIcon({
   type,
   selected,
   variant,
 }: {
   type: LayerType;
-  selected: boolean;
+  selected?: boolean;
   variant?: 'primary';
 }) {
   const colors = useTheme().colors;

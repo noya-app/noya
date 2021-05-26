@@ -12,7 +12,7 @@ import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Divider } from 'noya-designsystem';
 
-export default memo(function SymbolInspector() {
+export default memo(function SymbolMasterInspector() {
   const [, dispatch] = useApplicationState();
 
   const selectedSymbol = useShallowArray(
@@ -83,10 +83,16 @@ export default memo(function SymbolInspector() {
       )}
     />,
     <SymbolOverrideRow
-      allowsOverrides={selectedSymbol.allowsOverrides}
-      setAllowsOverrides={useCallback(
+      symbolMaster={selectedSymbol}
+      onSetAllowsOverrides={useCallback(
         (value) => {
           dispatch('setAllowsOverrides', value);
+        },
+        [dispatch],
+      )}
+      onSetOverrideProperty={useCallback(
+        (overrideName, value) => {
+          dispatch('onSetOverrideProperty', overrideName, value);
         },
         [dispatch],
       )}

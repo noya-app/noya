@@ -219,6 +219,7 @@ export function applicationReducer(
     case 'setLayoutAnchor':
     case 'setMinWidth':
     case 'setAllowsOverrides':
+    case 'onSetOverrideProperty':
       return symbolsReducer(state, action);
     default:
       return themeReducer(state, action);

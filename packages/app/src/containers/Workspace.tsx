@@ -44,6 +44,7 @@ const RightSidebar = styled.div(({ theme }) => ({
   color: theme.colors.textMuted,
   WebkitBackdropFilter: 'blur(10px)',
   backdropFilter: 'blur(10px)',
+  overflowY: 'auto',
 }));
 
 const MainView = styled.main(({ theme }) => ({
@@ -55,6 +56,13 @@ const MainView = styled.main(({ theme }) => ({
 const ContentArea = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
+}));
+
+const ScrollArea = styled.div(({ theme }) => ({
+  flex: '1 1 0px',
+  display: 'flex',
+  overflowY: 'auto',
+  flexDirection: 'column',
 }));
 
 const FilterContainer = styled.div(({ theme }) => ({
@@ -93,7 +101,9 @@ const CanvasTab = memo(function CanvasTab() {
         <ContentArea>
           <Canvas />
           <RightSidebar>
-            <Inspector />
+            <ScrollArea>
+              <Inspector />
+            </ScrollArea>
           </RightSidebar>
         </ContentArea>
       </MainView>
@@ -114,7 +124,9 @@ const ThemeTab = memo(function ThemeTab() {
         <ContentArea>
           <ThemeWindow />
           <RightSidebar>
-            <ThemeInspector />
+            <ScrollArea>
+              <ThemeInspector />
+            </ScrollArea>
           </RightSidebar>
         </ContentArea>
       </MainView>
