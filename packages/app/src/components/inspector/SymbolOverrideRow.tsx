@@ -18,7 +18,7 @@ function getOverrideElements(
 ): ReactNode[] {
   const depth = idPath.length;
 
-  return symbolMaster.layers.flatMap((layer): ReactNode[] => {
+  return [...symbolMaster.layers].reverse().flatMap((layer): ReactNode[] => {
     const nestedIdPath = [...idPath, layer.do_objectID];
     const key = nestedIdPath.join('/');
 
@@ -34,7 +34,7 @@ function getOverrideElements(
     );
 
     switch (layer._class) {
-      case 'symbolInstance':
+      case 'symbolInstance': {
         const symbolMaster = Layers.findInArray(
           state.sketch.pages,
           (child) =>
@@ -49,12 +49,34 @@ function getOverrideElements(
           nestedIdPath,
         );
 
-        return nestedOverrides.length > 0 ? [titleRow, ...nestedOverrides] : [];
-      case 'text':
+        const symbolIdOverrideName = key + '_symbolID';
+
         return [
           titleRow,
           <TreeView.Row
-            key={key + ' text value'}
+            key={symbolIdOverrideName}
+            depth={depth + 1}
+            onClick={() => {}}
+          >
+            <InspectorPrimitives.Checkbox
+              type="checkbox"
+              checked={true}
+              onChange={(evt) => {}}
+            />
+            <Spacer.Horizontal size={6} />
+            <TreeView.RowTitle>Symbol</TreeView.RowTitle>
+          </TreeView.Row>,
+          ...nestedOverrides,
+        ];
+      }
+      case 'text': {
+        const stringValueOverrideName = key + '_stringValue';
+        const textStyleOverrideName = key + '_textStyle';
+
+        return [
+          titleRow,
+          <TreeView.Row
+            key={stringValueOverrideName}
             depth={depth + 1}
             onClick={() => {}}
           >
@@ -68,7 +90,7 @@ function getOverrideElements(
           </TreeView.Row>,
           layer.sharedStyleID && (
             <TreeView.Row
-              key={key + ' text style'}
+              key={textStyleOverrideName}
               depth={depth + 1}
               onClick={() => {}}
             >
@@ -82,13 +104,16 @@ function getOverrideElements(
             </TreeView.Row>
           ),
         ];
-      default:
+      }
+      default: {
+        const layerStyleOverrideName = key + '_layerStyle';
+
         return layer.sharedStyleID
           ? [
               titleRow,
               layer.sharedStyleID && (
                 <TreeView.Row
-                  key={key + ' style'}
+                  key={layerStyleOverrideName}
                   depth={depth + 1}
                   onClick={() => {}}
                 >
@@ -103,6 +128,7 @@ function getOverrideElements(
               ),
             ]
           : [];
+      }
     }
   });
 }
@@ -112,6 +138,8 @@ export default memo(function SymbolInspector({
   setAllowsOverrides,
 }: Props) {
   const [state] = useApplicationState();
+
+  const overrideElements = getOverrideElements(state, symbolMaster, []);
 
   return (
     <>
@@ -132,9 +160,7 @@ export default memo(function SymbolInspector({
         </InspectorPrimitives.Row>
       </InspectorPrimitives.Section>
       <Spacer.Vertical size={6} />
-      <TreeView.Root>
-        {getOverrideElements(state, symbolMaster, [])}
-      </TreeView.Root>
+      <TreeView.Root>{overrideElements}</TreeView.Root>
     </>
   );
 });
