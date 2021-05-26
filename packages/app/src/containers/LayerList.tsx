@@ -83,7 +83,7 @@ export const LayerIcon = memo(function LayerIcon({
   variant,
 }: {
   type: LayerType;
-  selected: boolean;
+  selected?: boolean;
   variant?: 'primary';
 }) {
   const colors = useTheme().colors;

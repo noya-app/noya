@@ -29,7 +29,7 @@ function getOverrideElements(
         key={key + ' title'}
         isSectionHeader
         depth={depth}
-        icon={<LayerIcon type={layer._class} selected={false} />}
+        icon={<LayerIcon type={layer._class} />}
       >
         <TreeView.RowTitle>{layer.name}</TreeView.RowTitle>
       </TreeView.Row>
@@ -109,6 +109,24 @@ function getOverrideElements(
               <TreeView.RowTitle>Text Style</TreeView.RowTitle>
             </TreeView.Row>
           ),
+        ];
+      }
+      case 'bitmap': {
+        const imageOverrideName = key + '_image';
+
+        return [
+          titleRow,
+          <TreeView.Row key={imageOverrideName} depth={depth + 1}>
+            <InspectorPrimitives.Checkbox
+              type="checkbox"
+              checked={true}
+              onChange={(event) =>
+                onSetOverrideProperty(imageOverrideName, event.target.checked)
+              }
+            />
+            <Spacer.Horizontal size={6} />
+            <TreeView.RowTitle>Image</TreeView.RowTitle>
+          </TreeView.Row>,
         ];
       }
       default: {
