@@ -21,8 +21,13 @@ export default memo(function SymbolMasterInspector() {
   );
 
   const onSetOverrideValue = useCallback(
-    (overrideName: string, value: string) =>
-      dispatch('setOverrideTextValue', overrideName, value),
+    (overrideName: string, value: string) => {
+      const [, type] = overrideName.split('_');
+
+      if (type === 'symbolID')
+        dispatch('setOverrideSymbolId', overrideName, value);
+      else dispatch('setOverrideTextValue', overrideName, value);
+    },
     [dispatch],
   );
 

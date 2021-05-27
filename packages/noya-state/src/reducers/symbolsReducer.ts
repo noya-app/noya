@@ -227,11 +227,28 @@ export function symbolsReducer(
             (property) => property.overrideName === name,
           );
 
+          if (action[0] === 'setOverrideSymbolId' && index !== -1) {
+            const symbolMaster = getSymbols(state).find(
+              (symbol) => symbol.symbolID === value,
+            );
+
+            if (!symbolMaster) return;
+            const elements = symbol.overrideValues[index].overrideName.split(
+              '/',
+            );
+            elements.shift();
+
+            symbol.overrideValues[index].overrideName =
+              symbolMaster + '/' + elements.join('/');
+            symbol.overrideValues[index].value = value;
+            return;
+          }
+
           switch (value) {
             case '': {
               if (index === -1) return;
               symbol.overrideValues.splice(index, 1);
-              break;
+              return;
             }
             default:
               if (index === -1) {
