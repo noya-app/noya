@@ -26,16 +26,15 @@ import {
 } from './interactionReducer';
 import { getLayersInRect } from '../selectors/geometrySelectors';
 // import {
+//   workspaceReducer
 //   WorkspaceAction,
 //   WorkspaceState,
 // } from './workspaceReducer';
 
 function getAxisValues(rectBounds: any, axis: string) {
-  //let axisBounds: any = {};
   let axisBounds: any = [];
   for (const prop in rectBounds) {
     if (prop.indexOf(axis) > -1) {
-      // axisBounds[prop] = rectBounds[prop];
       axisBounds.push(rectBounds[prop]);
     }
   }
@@ -90,7 +89,6 @@ function getSelectedLayerAxisValues(layer_id: string, pageSnapshot: any) {
       y: getAxisValues(rectBounds, 'Y'),
       x: getAxisValues(rectBounds, 'X'),
     });
-    //console.log('rectBounds for Selected', rectBounds)
   }
   return selectedValues;
 }
@@ -118,13 +116,8 @@ function allCombinations(obj: BoundsObj) {
 function getVisibleAndSelectedLayerAxisPairs(
   selectedAxisValues: any[],
   visibleLayersAxisValues: any[],
-  state: any,
   axis: string,
 ): any {
-  // if (!state.interactionState.current) {
-  //   return;
-  // }
-
   let testingObj: BoundsObj = {
     selectedBounds: selectedAxisValues[0][axis],
     visibleBounds: [],
@@ -266,13 +259,11 @@ export function canvasReducer(
                 xBounds: getVisibleAndSelectedLayerAxisPairs(
                   selectionValues,
                   layers,
-                  state,
                   'x',
                 ),
                 yBounds: getVisibleAndSelectedLayerAxisPairs(
                   selectionValues,
                   layers,
-                  state,
                   'y',
                 ),
               };

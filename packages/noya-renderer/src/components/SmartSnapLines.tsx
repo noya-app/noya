@@ -1,22 +1,13 @@
-import { createBounds, Rect } from 'noya-geometry';
+import { createBounds } from 'noya-geometry';
 import { Polyline, usePaint, useReactCanvasKit } from 'noya-react-canvaskit';
 
 export default function SmartSnapLines({
-  selectedBounds,
-  visibleBounds,
-  selectedRect,
-  highlightedRect,
+  matches,
   pointsToUse,
 }: {
-  selectedBounds: number;
-  visibleBounds: number;
-  selectedRect: Rect;
-  highlightedRect: Rect;
+  matches: any[];
   pointsToUse?: string;
 }) {
-  const highlightedBoundsRect = createBounds(highlightedRect);
-  const selectedBoundsRect = createBounds(selectedRect);
-
   const { CanvasKit } = useReactCanvasKit();
 
   const measurementGuidePaint = usePaint({
@@ -25,23 +16,34 @@ export default function SmartSnapLines({
     style: CanvasKit.PaintStyle.Stroke,
   });
 
-  const pointsY = [
-    { x: selectedBoundsRect.minX, y: selectedBounds },
-    { x: highlightedBoundsRect.maxX, y: selectedBounds },
-  ];
+  function getPointsY(match: any) {
+    const highlightedBoundsRect = createBounds(match.layerToSnapBoundingRect);
+    const selectedBoundsRect = createBounds(match.selectedRect);
+    return [
+      { x: selectedBoundsRect.minX, y: match.setSelectedBounds },
+      { x: highlightedBoundsRect.maxX, y: match.setSelectedBounds },
+    ];
+  }
 
-  const pointsX = [
-    { x: selectedBounds, y: selectedBoundsRect.minY },
-    { x: selectedBounds, y: highlightedBoundsRect.maxY },
-  ];
-
+  function getPointsX(match: any) {
+    const highlightedBoundsRect = createBounds(match.layerToSnapBoundingRect);
+    const selectedBoundsRect = createBounds(match.selectedRect);
+    return [
+      { x: match.setSelectedBounds, y: selectedBoundsRect.minY },
+      { x: match.setSelectedBounds, y: highlightedBoundsRect.maxY },
+    ];
+  }
   return (
     <>
-      <Polyline
-        paint={measurementGuidePaint}
-        points={pointsToUse ? pointsY : pointsX}
-      />
-      {/* <Polyline paint={measurementGuidePaint} points={pointsY} /> */}
+      {matches.map((match, index) => {
+        return (
+          <Polyline
+            paint={measurementGuidePaint}
+            points={pointsToUse ? getPointsY(match) : getPointsX(match)}
+            key={index}
+          />
+        );
+      })}
     </>
   );
 }
