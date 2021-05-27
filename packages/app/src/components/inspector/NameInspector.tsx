@@ -20,7 +20,7 @@ export default memo(function NameInspector({ names, onNameChange }: Props) {
       <InspectorPrimitives.Title>Name</InspectorPrimitives.Title>
       <Spacer.Vertical size={4} />
       <InspectorPrimitives.Row>
-        <InputField.Root id={'colorName'}>
+        <InputField.Root>
           <InputField.Input
             value={name || ''}
             placeholder={name === undefined ? 'Multiple' : ''}

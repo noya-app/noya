@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import SymbolSelectorRow from '../components/inspector/SymbolSelectorRow';
+import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
 import { Divider } from 'noya-designsystem';
 
 export default memo(function SymbolMasterInspector() {
@@ -13,6 +14,11 @@ export default memo(function SymbolMasterInspector() {
   const selectedSymbolIntance = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   )[0] as Sketch.SymbolInstance;
+
+  const symbolMaster = useShallowArray(useSelector(Selectors.getSymbols)).find(
+    (symbol: Sketch.SymbolMaster) =>
+      symbol.symbolID === selectedSymbolIntance.symbolID,
+  );
 
   const elements = [
     <SymbolSelectorRow
@@ -31,6 +37,10 @@ export default memo(function SymbolMasterInspector() {
         () => dispatch('goToSymbolSource', selectedSymbolIntance.symbolID),
         [dispatch, selectedSymbolIntance.symbolID],
       )}
+    />,
+    <SymbolInstanceOverridesRow
+      symbolInstance={selectedSymbolIntance}
+      symbolMaster={symbolMaster}
     />,
   ];
 

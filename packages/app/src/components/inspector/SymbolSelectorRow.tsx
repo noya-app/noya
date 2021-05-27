@@ -29,7 +29,7 @@ export default memo(function SymbolSelectorRow({
     [symbols],
   );
 
-  const getLayerStyleTitle = useCallback(
+  const getSymbolMasterTitle = useCallback(
     (id) => symbols.find((symbol) => symbol.symbolID === id)!.name,
     [symbols],
   );
@@ -45,7 +45,7 @@ export default memo(function SymbolSelectorRow({
           id="symbol-instance-source"
           value={symbolId}
           options={symbolSourceOptions}
-          getTitle={getLayerStyleTitle}
+          getTitle={getSymbolMasterTitle}
           onChange={onSelect}
         />
       </InspectorPrimitives.Row>

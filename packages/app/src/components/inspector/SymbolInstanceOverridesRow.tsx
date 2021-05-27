@@ -1,21 +1,123 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Spacer, TreeView } from 'noya-designsystem';
+import { InputField, Spacer, TreeView, Select } from 'noya-designsystem';
 import { ApplicationState, Layers, Overrides } from 'noya-state';
-import { memo, ReactNode, useCallback } from 'react';
-import { LayerIcon } from '../../containers/LayerList';
+import {
+  getSharedStyles,
+  getSharedTextStyles,
+  getSymbols,
+} from 'noya-state/src/selectors/themeSelectors';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
+const NO_STYLE = 'none';
+
 interface Props {
-  symbolMaster: Sketch.SymbolMaster;
-  onSetAllowsOverrides: (value: boolean) => void;
-  onSetOverrideProperty: (overrideName: string, value: boolean) => void;
+  symbolInstance: Sketch.SymbolInstance;
+  symbolMaster?: Sketch.SymbolMaster;
+  onSetAllowsOverrides?: (value: boolean) => void;
 }
+
+type Selectors = {
+  symbols: Sketch.SymbolMaster[];
+  textStyles: Sketch.SharedStyle[];
+  themeStyles: Sketch.SharedStyle[];
+};
+
+const ThemeStyleSelector = ({
+  themeStyles,
+  sharedStyleID,
+}: {
+  themeStyles: Sketch.SharedStyle[];
+  sharedStyleID: string;
+}) => {
+  const themeStylesOptions = useMemo(
+    () => [NO_STYLE, ...themeStyles.map((style) => style.do_objectID)],
+    [themeStyles],
+  );
+
+  const getThemeStylesTitle = useCallback(
+    (id) =>
+      id === NO_STYLE
+        ? 'No Layer Style'
+        : themeStyles.find((style) => style.do_objectID === id)!.name,
+    [themeStyles],
+  );
+
+  return (
+    <Select
+      id="theme-style-selector"
+      value={sharedStyleID}
+      options={themeStylesOptions}
+      getTitle={getThemeStylesTitle}
+      onChange={() => {}}
+    />
+  );
+};
+
+const TextStyleSelector = ({
+  textStyles,
+  sharedStyleID,
+}: {
+  textStyles: Sketch.SharedStyle[];
+  sharedStyleID: string;
+}) => {
+  const textStylesOptions = useMemo(
+    () => [NO_STYLE, ...textStyles.map((style) => style.do_objectID)],
+    [textStyles],
+  );
+
+  const getTextStylesTitle = useCallback(
+    (id) =>
+      id === NO_STYLE
+        ? 'No Layer Style'
+        : textStyles.find((style) => style.do_objectID === id)!.name,
+    [textStyles],
+  );
+  return (
+    <Select
+      id="text-style-selector"
+      value={sharedStyleID}
+      options={textStylesOptions}
+      getTitle={getTextStylesTitle}
+      onChange={() => {}}
+    />
+  );
+};
+
+const SymbolMasterSelector = ({
+  symbols,
+  symbolId,
+}: {
+  symbols: Sketch.SymbolMaster[];
+  symbolId: string;
+}) => {
+  const symbolSourceOptions = useMemo(
+    () => symbols.map((symbol) => symbol.symbolID),
+    [symbols],
+  );
+
+  const getSymbolMasterTitle = useCallback(
+    (id) => symbols.find((symbol) => symbol.symbolID === id)!.name,
+    [symbols],
+  );
+  return (
+    <Select
+      id="symbol-instance-source"
+      value={symbolId}
+      options={symbolSourceOptions}
+      getTitle={getSymbolMasterTitle}
+      onChange={() => {}}
+    />
+  );
+};
 
 function getOverrideElements(
   state: ApplicationState,
   symbolMaster: Sketch.SymbolMaster,
   idPath: string[],
+  selectors: Selectors,
+  overrideValues: Sketch.OverrideValue[],
   overrideProperties: Sketch.OverrideProperty[],
   onSetOverrideProperty: (overrideName: string, value: boolean) => void,
 ): ReactNode[] {
@@ -32,18 +134,26 @@ function getOverrideElements(
       })?.canOverride ?? true;
 
     const titleRow = (
-      <TreeView.Row
-        key={key + ' title'}
-        isSectionHeader
-        depth={depth}
-        icon={<LayerIcon type={layer._class} />}
-      >
+      <TreeView.Row key={key + ' title'} isSectionHeader depth={depth}>
         <TreeView.RowTitle>{layer.name}</TreeView.RowTitle>
       </TreeView.Row>
     );
 
+    const overrideValue = (propertyType: Overrides.PropertyType) => {
+      const value = overrideValues.find(({ overrideName }) => {
+        const [idPathString, type] = overrideName.split('_');
+        return idPathString === key && type === propertyType;
+      })?.value;
+
+      if (!value) return undefined;
+
+      return Overrides.getLayerOverride(layer, propertyType, value);
+    };
+
     switch (layer._class) {
       case 'symbolInstance': {
+        if (!canOverrideProperty('symbolID')) return [null];
+
         const symbolMaster = Layers.findInArray(
           state.sketch.pages,
           (child) =>
@@ -57,6 +167,8 @@ function getOverrideElements(
               state,
               symbolMaster,
               nestedIdPath,
+              selectors,
+              overrideValues,
               overrideProperties,
               onSetOverrideProperty,
             )
@@ -67,18 +179,10 @@ function getOverrideElements(
         return [
           titleRow,
           <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
-            <InspectorPrimitives.Checkbox
-              type="checkbox"
-              checked={canOverrideProperty('symbolID')}
-              onChange={(event) =>
-                onSetOverrideProperty(
-                  symbolIdOverrideName,
-                  event.target.checked,
-                )
-              }
+            <SymbolMasterSelector
+              symbols={selectors.symbols}
+              symbolId={symbolMaster.symbolID}
             />
-            <Spacer.Horizontal size={6} />
-            <TreeView.RowTitle>Symbol</TreeView.RowTitle>
           </TreeView.Row>,
           ...nestedOverrides,
         ];
@@ -88,35 +192,29 @@ function getOverrideElements(
         const textStyleOverrideName = key + '_textStyle';
 
         return [
-          titleRow,
-          <TreeView.Row key={stringValueOverrideName} depth={depth + 1}>
-            <InspectorPrimitives.Checkbox
-              type="checkbox"
-              checked={canOverrideProperty('stringValue')}
-              onChange={(event) =>
-                onSetOverrideProperty(
-                  stringValueOverrideName,
-                  event.target.checked,
-                )
-              }
-            />
-            <Spacer.Horizontal size={6} />
-            <TreeView.RowTitle>Text Value</TreeView.RowTitle>
-          </TreeView.Row>,
-          layer.sharedStyleID && (
+          (canOverrideProperty('stringValue') ||
+            (layer.sharedStyleID && canOverrideProperty('textStyle'))) &&
+            titleRow,
+          canOverrideProperty('stringValue') && (
+            <TreeView.Row key={stringValueOverrideName} depth={depth + 1}>
+              <InputField.Root>
+                <InputField.Input
+                  value={(overrideValue('stringValue')?.value as string) ?? ''}
+                  placeholder={layer.name}
+                  onChange={() => {}}
+                />
+              </InputField.Root>
+            </TreeView.Row>
+          ),
+          layer.sharedStyleID && canOverrideProperty('textStyle') && (
             <TreeView.Row key={textStyleOverrideName} depth={depth + 1}>
-              <InspectorPrimitives.Checkbox
-                type="checkbox"
-                checked={canOverrideProperty('textStyle')}
-                onChange={(event) =>
-                  onSetOverrideProperty(
-                    textStyleOverrideName,
-                    event.target.checked,
-                  )
+              <TextStyleSelector
+                textStyles={selectors.textStyles}
+                sharedStyleID={
+                  (overrideValue('textStyle')?.value as string) ??
+                  layer.sharedStyleID
                 }
               />
-              <Spacer.Horizontal size={6} />
-              <TreeView.RowTitle>Text Style</TreeView.RowTitle>
             </TreeView.Row>
           ),
         ];
@@ -124,41 +222,37 @@ function getOverrideElements(
       case 'bitmap': {
         const imageOverrideName = key + '_image';
 
+        if (!canOverrideProperty('image')) return [null];
         return [
           titleRow,
           <TreeView.Row key={imageOverrideName} depth={depth + 1}>
-            <InspectorPrimitives.Checkbox
-              type="checkbox"
-              checked={canOverrideProperty('image')}
-              onChange={(event) =>
-                onSetOverrideProperty(imageOverrideName, event.target.checked)
-              }
-            />
-            <Spacer.Horizontal size={6} />
-            <TreeView.RowTitle>Image</TreeView.RowTitle>
+            <InputField.Root>
+              <InputField.Input
+                value={''}
+                placeholder={''}
+                onChange={() => {}}
+              />
+            </InputField.Root>
           </TreeView.Row>,
         ];
       }
       default: {
         const layerStyleOverrideName = key + '_layerStyle';
 
+        if (!canOverrideProperty('layerStyle')) return [null];
+
         return layer.sharedStyleID
           ? [
               titleRow,
               layer.sharedStyleID && (
                 <TreeView.Row key={layerStyleOverrideName} depth={depth + 1}>
-                  <InspectorPrimitives.Checkbox
-                    type="checkbox"
-                    checked={canOverrideProperty('layerStyle')}
-                    onChange={(event) =>
-                      onSetOverrideProperty(
-                        layerStyleOverrideName,
-                        event.target.checked,
-                      )
+                  <ThemeStyleSelector
+                    themeStyles={selectors.themeStyles}
+                    sharedStyleID={
+                      (overrideValue('layerStyle')?.value as string) ??
+                      layer.sharedStyleID
                     }
                   />
-                  <Spacer.Horizontal size={6} />
-                  <TreeView.RowTitle>Layer Style</TreeView.RowTitle>
                 </TreeView.Row>
               ),
             ]
@@ -169,37 +263,33 @@ function getOverrideElements(
 }
 
 export default memo(function SymbolInspector({
+  symbolInstance,
   symbolMaster,
   onSetAllowsOverrides,
-  onSetOverrideProperty,
 }: Props) {
   const [state] = useApplicationState();
+
+  const themeStyles = getSharedStyles(state);
+  const textStyles = getSharedTextStyles(state);
+  const symbols = getSymbols(state);
+
+  const selectors = { themeStyles, textStyles, symbols };
+  if (!symbolMaster) return null;
 
   const overrideElements = getOverrideElements(
     state,
     symbolMaster,
     [],
+    selectors,
+    symbolInstance.overrideValues,
     symbolMaster.overrideProperties,
-    onSetOverrideProperty,
+    () => {},
   );
 
   return (
     <>
       <InspectorPrimitives.Section>
-        <InspectorPrimitives.Title>Manage Overrides</InspectorPrimitives.Title>
-        <Spacer.Vertical size={2} />
-        <InspectorPrimitives.Row>
-          <InspectorPrimitives.Checkbox
-            type="checkbox"
-            checked={symbolMaster.allowsOverrides}
-            onChange={useCallback(
-              (event) => onSetAllowsOverrides(event.target.checked),
-              [onSetAllowsOverrides],
-            )}
-          />
-          <Spacer.Horizontal size={8} />
-          <InspectorPrimitives.Text>Allow Overrides</InspectorPrimitives.Text>
-        </InspectorPrimitives.Row>
+        <InspectorPrimitives.Title>Overrides</InspectorPrimitives.Title>
       </InspectorPrimitives.Section>
       <Spacer.Vertical size={6} />
       <TreeView.Root>{overrideElements}</TreeView.Root>
