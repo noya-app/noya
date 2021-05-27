@@ -1,7 +1,9 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import {
   AffineTransform,
   normalizeRect,
+  rectsIntersect,
   createRect,
   createBounds,
 } from 'noya-geometry';
@@ -198,7 +200,24 @@ export function canvasReducer(
         const layer = draft.interactionState.value;
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
-          draft.sketch.pages[pageIndex].layers.push(layer);
+          // Check if the layer intersects any artboards or symbolMasters.
+          // If so, we'll insert the layer within
+          const parent = draft.sketch.pages[pageIndex].layers
+            .filter(
+              (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+                Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+            )
+            .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
+
+          if (parent && Layers.isChildLayer(layer)) {
+            layer.frame.x -= parent.frame.x;
+            layer.frame.y -= parent.frame.y;
+
+            parent.layers.push(layer);
+          } else {
+            draft.sketch.pages[pageIndex].layers.push(layer);
+          }
+
           draft.selectedObjects = [layer.do_objectID];
         }
 

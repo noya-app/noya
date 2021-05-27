@@ -1,7 +1,7 @@
 // Some snippets adapted from udevbe/react-canvaskit (MIT License)
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
-import { Surface } from 'canvaskit-wasm';
+import { CanvasKit, Surface } from 'canvaskit-wasm';
 import { fontManager } from 'noya-renderer';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
@@ -370,11 +370,13 @@ canvaskitReconciler.injectIntoDevTools({
   rendererPackageName: 'react-canvaskit', // package name
 });
 
+type ExtendedSurface = Surface & { _container: any };
+
 function getContainerForSurface(
   surface: Surface,
   context: ReactCanvasKitContext,
 ) {
-  let extendedSurface = surface as Surface & { _container: any };
+  let extendedSurface = surface as ExtendedSurface;
 
   if (!extendedSurface._container) {
     const root: RootComponent = { surface, context, children: [] };
@@ -389,9 +391,14 @@ function getContainerForSurface(
 export function render(
   element: ReactNode,
   surface: Surface,
-  context: ReactCanvasKitContext,
+  CanvasKit: CanvasKit,
   callback?: () => void,
 ) {
+  const context = {
+    CanvasKit,
+    canvas: surface.getCanvas(),
+  };
+
   const container = getContainerForSurface(surface, context);
 
   canvaskitReconciler.updateContainer(
@@ -406,12 +413,8 @@ export function render(
   );
 }
 
-export function unmount(
-  surface: Surface,
-  context: ReactCanvasKitContext,
-  callback?: () => void,
-) {
-  const container = getContainerForSurface(surface, context);
+export function unmount(surface: Surface, callback?: () => void) {
+  const container = (surface as ExtendedSurface)._container;
 
   canvaskitReconciler.updateContainer(null, container, null, () => {
     callback?.();

@@ -28,6 +28,7 @@ import { PageAction, pageReducer } from './pageReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
+import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 
 export type { SetNumberMode };
 
@@ -67,7 +68,8 @@ export type Action =
   | AlignmentAction
   | StyleAction
   | TextStyleAction
-  | ThemeAction;
+  | ThemeAction
+  | SymbolsAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -105,13 +107,15 @@ export function applicationReducer(
     case 'setLayerHeight':
     case 'setLayerRotation':
       return layerPropertyReducer(state, action);
+    case 'groupLayer':
     case 'deleteLayer':
     case 'selectLayer':
-    case 'groupLayer':
+    case 'selectAllLayers':
     case 'ungroupLayer':
-    case 'addSymbol':
+    case 'createSymbol':
     case 'detachSymbol':
     case 'deleteSymbol':
+    case 'duplicateLayer':
       return layerReducer(state, action);
     case 'distributeLayers':
     case 'alignLayers': {
@@ -212,6 +216,17 @@ export function applicationReducer(
     case 'setTextDecoration':
     case 'setTextTransform':
       return textStyleReducer(state, action);
+    case 'setAdjustContentOnResize':
+    case 'setHasBackgroundColor':
+    case 'setBackgroundColor':
+    case 'setIncludeBackgroundColorInExport':
+    case 'setIncludeBackgroundColorInInstance':
+    case 'setLayoutAxis':
+    case 'setLayoutAnchor':
+    case 'setMinWidth':
+    case 'setAllowsOverrides':
+    case 'onSetOverrideProperty':
+      return symbolsReducer(state, action);
     default:
       return themeReducer(state, action);
   }

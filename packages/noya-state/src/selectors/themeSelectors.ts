@@ -96,7 +96,7 @@ export const getSymbols = (
 };
 
 export const getSelectedSymbols = (
-  state: ApplicationState,
+  state: ApplicationState | Draft<ApplicationState>,
 ): Sketch.SymbolMaster[] => {
   const symbols = getSymbols(state);
 

@@ -1,4 +1,4 @@
-export default function getMultiValue<T>(values: T[]): boolean {
+export default function getMultiValueEvery<T>(values: T[]): boolean {
   if (values.length === 0) return true;
 
   const first = values[0];

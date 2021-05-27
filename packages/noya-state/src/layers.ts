@@ -40,6 +40,12 @@ export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {
   return layer._class === 'text';
 };
 
+export const isBitmapLayer = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.Bitmap => {
+  return layer._class === 'bitmap';
+};
+
 export const isGroup = (layer: Sketch.AnyLayer): layer is Sketch.Group => {
   return layer._class === 'group';
 };
@@ -48,6 +54,12 @@ export const isSymbolMaster = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolMaster => {
   return layer._class === 'symbolMaster';
+};
+
+export const isArtboard = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.Artboard => {
+  return layer._class === 'artboard';
 };
 
 export const isSymbolInstance = (

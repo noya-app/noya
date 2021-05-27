@@ -35,6 +35,7 @@ export * as RadioGroup from './components/RadioGroup';
 export * as Spacer from './components/Spacer';
 export { default as Tooltip } from './components/Tooltip';
 export * as ContextMenu from './components/ContextMenu';
+export * as DropdownMenu from './components/DropdownMenu';
 
 // Contexts
 export * from './contexts/GlobalInputBlurContext';

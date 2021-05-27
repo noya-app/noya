@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import getMultiValue from '../utils/getMultiValue';
+import getMultiValueEvery from '../utils/getMultiValueEvery';
 
 type EncodedAttribute = Sketch.TextStyle['encodedAttributes'] | undefined;
 
@@ -27,13 +27,13 @@ function getTextFontSize(
   encodedAttributes: EncodedAttribute,
   attributes: Sketch.StringAttribute[],
 ) {
-  return getMultiValue<number | undefined>(
+  return getMultiValueEvery<number | undefined>(
     encodedAttributesArray.map(
       (encodedAttribute) =>
         encodedAttribute?.MSAttributedStringFontAttribute.attributes.size,
     ),
   ) &&
-    getMultiValue<number | undefined>(
+    getMultiValueEvery<number | undefined>(
       attributes.map(
         (a) => a.attributes.MSAttributedStringFontAttribute.attributes.size,
       ),
@@ -47,12 +47,12 @@ function getTextLineHeight(
   paragraphStyle: Sketch.ParagraphStyle | undefined,
   attributes: Sketch.StringAttribute[],
 ) {
-  return getMultiValue<number | undefined>(
+  return getMultiValueEvery<number | undefined>(
     encodedAttributesArray.map(
       (encodedAttribute) => encodedAttribute?.paragraphStyle?.maximumLineHeight,
     ),
   ) &&
-    getMultiValue<number | undefined>(
+    getMultiValueEvery<number | undefined>(
       attributes.map((a) => a.attributes.paragraphStyle?.maximumLineHeight),
     )
     ? paragraphStyle?.maximumLineHeight ?? 22
@@ -64,12 +64,12 @@ function getHorizontalAlignment(
   paragraphStyle: Sketch.ParagraphStyle | undefined,
   attributes: Sketch.StringAttribute[],
 ) {
-  return getMultiValue<Sketch.TextHorizontalAlignment | undefined>(
+  return getMultiValueEvery<Sketch.TextHorizontalAlignment | undefined>(
     encodedAttributesArray.map(
       (encodedAttribute) => encodedAttribute?.paragraphStyle?.alignment,
     ),
   ) &&
-    getMultiValue<Sketch.TextHorizontalAlignment | undefined>(
+    getMultiValueEvery<Sketch.TextHorizontalAlignment | undefined>(
       attributes.map((a) => a.attributes.paragraphStyle?.alignment),
     )
     ? paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left
@@ -80,7 +80,7 @@ function getTextTransformation(
   encodedAttributesArray: EncodedAttribute[],
   encodedAttributes: Sketch.TextStyle['encodedAttributes'] | undefined,
 ) {
-  return getMultiValue<Sketch.TextTransform | undefined>(
+  return getMultiValueEvery<Sketch.TextTransform | undefined>(
     encodedAttributesArray.map(
       (encodedAttribute) =>
         encodedAttribute?.MSAttributedStringTextTransformAttribute,
@@ -104,10 +104,10 @@ function getTextLetterSpacing(
   encodedAttributes: EncodedAttribute,
   attributes: Sketch.StringAttribute[],
 ) {
-  return getMultiValue<number | undefined>(
+  return getMultiValueEvery<number | undefined>(
     encodedAttributesArray.map((encodedAttribute) => encodedAttribute?.kerning),
   ) &&
-    getMultiValue<number | undefined>(
+    getMultiValueEvery<number | undefined>(
       attributes.map((a) => a.attributes.kerning),
     )
     ? encodedAttributes?.kerning || 0
@@ -119,12 +119,12 @@ function getTextParagraphSpacing(
   paragraphStyle: Sketch.ParagraphStyle | undefined,
   attributes: Sketch.StringAttribute[],
 ) {
-  return getMultiValue<number | undefined>(
+  return getMultiValueEvery<number | undefined>(
     encodedAttributesArray.map(
       (encodedAttribute) => encodedAttribute?.paragraphStyle?.paragraphSpacing,
     ),
   ) &&
-    getMultiValue<number | undefined>(
+    getMultiValueEvery<number | undefined>(
       attributes.map((a) => a.attributes.paragraphStyle?.paragraphSpacing),
     )
     ? paragraphStyle?.paragraphSpacing || 0
@@ -135,7 +135,7 @@ function getTextVerticalAlignment(
   encodedAttributesArray: EncodedAttribute[],
   encodedAttributes: EncodedAttribute | undefined,
 ) {
-  return getMultiValue<number | undefined>(
+  return getMultiValueEvery<number | undefined>(
     encodedAttributesArray.map(
       (encodedAttribute) => encodedAttribute?.textStyleVerticalAlignmentKey,
     ),
@@ -146,7 +146,7 @@ function getTextVerticalAlignment(
 }
 
 function getTextAlignment(layers: Sketch.Text[]) {
-  return getMultiValue<Sketch.TextBehaviour | undefined>(
+  return getMultiValueEvery<Sketch.TextBehaviour | undefined>(
     layers.map((l: Sketch.Text) => l?.textBehaviour),
   )
     ? layers[0]?.textBehaviour ?? 0

@@ -205,7 +205,7 @@ const SketchBorder = memo(function SketchBorder({
 });
 
 interface Props {
-  layer: Sketch.Rectangle | Sketch.Oval;
+  layer: Sketch.Rectangle | Sketch.Oval | Sketch.ShapePath;
 }
 
 export default memo(function SketchShape({ layer }: Props) {

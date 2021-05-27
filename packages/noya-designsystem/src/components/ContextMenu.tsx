@@ -2,39 +2,22 @@ import styled from 'styled-components';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import { memo, ReactNode } from 'react';
 import { Slot } from '@radix-ui/react-slot';
+import { SEPARATOR_ITEM, MenuItem, styles } from './internal/Menu';
 
-export const SEPARATOR_ITEM = 'separator';
+export type { MenuItem };
+export { SEPARATOR_ITEM };
 
-const StyledSeparator = styled(ContextMenu.Separator)(({ theme }) => ({
-  height: '1px',
-  backgroundColor: theme.colors.divider,
-  margin: '4px 8px',
-}));
+/* ----------------------------------------------------------------------------
+ * Separator
+ * ------------------------------------------------------------------------- */
+
+const SeparatorElement = styled(ContextMenu.Separator)(styles.separatorStyle);
 
 /* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
 
-const ItemElement = styled(ContextMenu.Item)(({ theme, disabled }) => ({
-  ...theme.textStyles.small,
-  fontWeight: 500,
-  fontSize: '0.8rem',
-  flex: '0 0 auto',
-  userSelect: 'none',
-  cursor: 'pointer',
-  borderRadius: '3px',
-  padding: '2px 8px',
-  ...(disabled && {
-    color: theme.colors.textDisabled,
-  }),
-  '&:focus': {
-    outline: 'none',
-    color: 'white',
-    backgroundColor: theme.colors.primary,
-  },
-  display: 'flex',
-  alignItems: 'center',
-}));
+const ItemElement = styled(ContextMenu.Item)(styles.itemStyle);
 
 interface ContextMenuItemProps {
   children: ReactNode;
@@ -49,18 +32,7 @@ function ContextMenuItem({ children, onSelect }: ContextMenuItemProps) {
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootElement = styled(ContextMenu.Content)(({ theme }) => ({
-  borderRadius: 4,
-  backgroundColor: theme.colors.popover.background,
-  color: theme.colors.text,
-  boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
-  padding: '4px',
-  border: `1px solid ${theme.colors.divider}`,
-}));
-
-export type MenuItem<T extends string> =
-  | typeof SEPARATOR_ITEM
-  | { value: T; title: string };
+const RootElement = styled(ContextMenu.Content)(styles.contentStyle);
 
 interface Props<T extends string> {
   children: ReactNode;
@@ -79,7 +51,7 @@ function ContextMenuRoot<T extends string>({
       <RootElement>
         {items.map((item, index) =>
           item === SEPARATOR_ITEM ? (
-            <StyledSeparator key={index} />
+            <SeparatorElement key={index} />
           ) : (
             <ContextMenuItem
               key={item.value}

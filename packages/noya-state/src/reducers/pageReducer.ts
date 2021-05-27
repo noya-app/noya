@@ -3,9 +3,14 @@ import produce from 'immer';
 import { uuid } from 'noya-renderer';
 import * as Layers from '../layers';
 import * as Models from '../models';
-import { getCurrentPage, getCurrentPageIndex } from '../selectors/selectors';
+import {
+  getCurrentPage,
+  getCurrentPageIndex,
+  getSymbolsInstancesIndexPaths,
+} from '../selectors/selectors';
 import { UUID } from '../types';
 import { ApplicationState } from './applicationReducer';
+import { detachSymbolIntances } from './layerReducer';
 
 export type PageAction =
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
@@ -75,12 +80,26 @@ export function pageReducer(
         const user = draft.sketch.user;
         const page = pages[pageIndex];
 
+        const mappedSymbolIDs: Record<string, string> = {};
+
+        page.layers.filter(Layers.isSymbolMaster).forEach((symbolMaster) => {
+          mappedSymbolIDs[symbolMaster.symbolID] = uuid();
+        });
+
         const duplicatePage = produce(page, (page) => {
           page.name = `${page.name} Copy`;
 
           Layers.visit(page, (layer) => {
             layer.do_objectID = uuid();
             if (layer.style) layer.style.do_objectID = uuid();
+
+            if (
+              Layers.isSymbolMaster(layer) ||
+              (Layers.isSymbolInstance(layer) &&
+                layer.symbolID in mappedSymbolIDs)
+            ) {
+              layer.symbolID = mappedSymbolIDs[layer.symbolID];
+            }
           });
 
           return page;
@@ -99,12 +118,22 @@ export function pageReducer(
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
 
+      const symbolsIds = page.layers.flatMap((layer) =>
+        Layers.isSymbolMaster(layer) ? [layer.symbolID] : [],
+      );
+
+      const symbolsInstancesIndexPaths = symbolsIds.flatMap((ids) =>
+        getSymbolsInstancesIndexPaths(state, ids),
+      );
+
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
         const user = draft.sketch.user;
 
         delete user[page.do_objectID];
         pages.splice(pageIndex, 1);
+
+        detachSymbolIntances(pages, state, symbolsInstancesIndexPaths);
 
         const newIndex = Math.max(pageIndex - 1, 0);
         draft.selectedPage = pages[newIndex].do_objectID;

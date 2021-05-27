@@ -1,9 +1,9 @@
 import type { Surface } from 'canvaskit-wasm';
-import { render, unmount } from 'noya-react-canvaskit';
-import { uuid } from 'noya-renderer';
+import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
-import { CompassDirection, Point, ShapeType } from 'noya-state';
-import { Selectors } from 'noya-state';
+import { render, unmount } from 'noya-react-canvaskit';
+import { SketchFileRenderer, uuid } from 'noya-renderer';
+import { CompassDirection, Point, Selectors, ShapeType } from 'noya-state';
 import {
   CSSProperties,
   memo,
@@ -12,22 +12,24 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import {
-  ApplicationStateProvider,
+  StateProvider,
   useApplicationState,
-  useRawApplicationState,
   useSelector,
-  useWorkspace,
+  useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
-import { SketchFileRenderer } from 'noya-renderer';
+import { useWorkspace } from '../hooks/useWorkspace';
+import * as MouseEvent from '../utils/mouseEvent';
 
 declare module 'canvaskit-wasm' {
   interface Surface {
     flush(): void;
+    _id: number;
   }
 }
 
@@ -69,17 +71,19 @@ const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
   zIndex: -1,
 }));
 
+type MenuItemType = 'selectAll' | 'delete';
+
 export default memo(function Canvas() {
   const theme = useTheme();
   const {
     sizes: { sidebarWidth },
   } = theme;
-  const rawApplicationState = useRawApplicationState();
+  const workspaceState = useWorkspaceState();
   const [state, dispatch] = useApplicationState();
+  const [surface, setSurface] = useState<Surface | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
-  const surfaceRef = useRef<Surface | null>(null);
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
@@ -126,22 +130,18 @@ export default memo(function Canvas() {
   useEffect(() => {
     const canvasElement = canvasRef.current;
 
-    if (!canvasElement) return;
+    if (!canvasElement || !containerSize) return;
 
     const surface = CanvasKit.MakeCanvasSurface(canvasElement);
 
     if (!surface) {
-      surfaceRef.current = null;
-
       console.warn('failed to create surface');
-      return;
     }
 
-    surfaceRef.current = surface;
+    setSurface(surface);
 
     return () => {
-      surfaceRef.current?.delete();
-      surfaceRef.current = null;
+      surface?.delete();
     };
   }, [CanvasKit, containerSize]);
 
@@ -150,43 +150,76 @@ export default memo(function Canvas() {
   // With `useEffect`, the updates are batched and potentially delayed, which
   // makes continuous events like modifying a color unusably slow.
   useLayoutEffect(() => {
-    if (
-      !surfaceRef.current ||
-      surfaceRef.current.isDeleted() ||
-      !containerSize
-    ) {
-      return;
-    }
-
-    const surface = surfaceRef.current;
-    const context = {
-      CanvasKit,
-      canvas: surface.getCanvas(),
-    };
+    if (!surface || surface.isDeleted() || !containerSize) return;
 
     try {
       render(
         <ThemeProvider theme={theme}>
-          <ApplicationStateProvider value={rawApplicationState}>
+          <StateProvider state={workspaceState}>
             <SketchFileRenderer />
-          </ApplicationStateProvider>
+          </StateProvider>
         </ThemeProvider>,
         surface,
-        context,
+        CanvasKit,
       );
 
       return () => {
-        unmount(surface, context);
+        unmount(surface);
       };
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, state, containerSize, rawApplicationState, theme]);
+  }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
+
+  const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
+    () =>
+      state.selectedObjects.length > 0
+        ? [{ value: 'delete', title: 'Delete' }]
+        : [{ value: 'selectAll', title: 'Select All' }],
+    [state.selectedObjects.length],
+  );
+
+  const handleSelectMenuItem = useCallback(
+    (value: MenuItemType) => {
+      switch (value) {
+        case 'selectAll':
+          dispatch('selectAllLayers');
+          break;
+        case 'delete':
+          dispatch('deleteLayer', state.selectedObjects);
+          break;
+      }
+    },
+    [dispatch, state.selectedObjects],
+  );
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
+
+      if (MouseEvent.isRightButtonClicked(event)) {
+        const layer = Selectors.getLayerAtPoint(
+          CanvasKit,
+          state,
+          insets,
+          rawPoint,
+          {
+            clickThroughGroups: event.metaKey,
+            includeHiddenLayers: false,
+          },
+        );
+
+        if (!layer) {
+          dispatch('selectLayer', undefined);
+        } else if (!state.selectedObjects.includes(layer.do_objectID)) {
+          dispatch('selectLayer', layer.do_objectID);
+        }
+
+        return;
+      }
+
+      if (!MouseEvent.isLeftButtonClicked(event)) return;
 
       switch (state.interactionState.type) {
         case 'insertArtboard':
@@ -523,19 +556,21 @@ export default memo(function Canvas() {
   }, [state.interactionState.type, handleDirection]);
 
   return (
-    <Container
-      ref={containerRef}
-      cursor={cursor}
-      onPointerDown={handleMouseDown}
-      onPointerMove={handleMouseMove}
-      onPointerUp={handleMouseUp}
-    >
-      <CanvasComponent
-        ref={canvasRef}
-        left={-insets.left}
-        width={0}
-        height={0}
-      />
-    </Container>
+    <ContextMenu.Root items={menuItems} onSelect={handleSelectMenuItem}>
+      <Container
+        ref={containerRef}
+        cursor={cursor}
+        onPointerDown={handleMouseDown}
+        onPointerMove={handleMouseMove}
+        onPointerUp={handleMouseUp}
+      >
+        <CanvasComponent
+          ref={canvasRef}
+          left={-insets.left}
+          width={0}
+          height={0}
+        />
+      </Container>
+    </ContextMenu.Root>
   );
 });

@@ -1,5 +1,7 @@
+import type { FileSystemHandle } from 'browser-fs-access';
 import produce from 'immer';
 import { SketchFile } from 'noya-sketch-file';
+import { Models } from '..';
 import {
   createInitialHistoryState,
   HistoryAction,
@@ -23,6 +25,7 @@ export type CanvasInsets = { left: number; right: number };
  * want an "undo" action to change the user's preferences.
  */
 export type WorkspaceState = {
+  fileHandle?: FileSystemHandle;
   history: HistoryState;
   highlightedLayer?: LayerHighlight;
   canvasSize: { width: number; height: number };
@@ -33,6 +36,9 @@ export type WorkspaceState = {
 };
 
 export type WorkspaceAction =
+  | [type: 'newFile']
+  | [type: 'setFile', value: SketchFile, fileHandle?: FileSystemHandle]
+  | [type: 'setFileHandle', value?: FileSystemHandle]
   | [
       type: 'setCanvasSize',
       size: { width: number; height: number },
@@ -47,6 +53,27 @@ export function workspaceReducer(
   action: WorkspaceAction,
 ): WorkspaceState {
   switch (action[0]) {
+    case 'newFile': {
+      return produce(state, (draft) => {
+        draft.fileHandle = undefined;
+        draft.history = createInitialHistoryState(Models.createSketchFile());
+      });
+    }
+    case 'setFile': {
+      const [, sketchFile, fileHandle] = action;
+
+      return produce(state, (draft) => {
+        draft.fileHandle = fileHandle;
+        draft.history = createInitialHistoryState(sketchFile);
+      });
+    }
+    case 'setFileHandle': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.fileHandle = value;
+      });
+    }
     case 'setCanvasSize': {
       const [, size, insets] = action;
 
@@ -73,7 +100,7 @@ export function workspaceReducer(
     }
     case 'highlightLayer': {
       const [, highlight] = action;
-      
+
       return produce(state, (draft) => {
         draft.highlightedLayer = highlight ? { ...highlight } : undefined;
       });

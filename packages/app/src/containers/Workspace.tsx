@@ -1,22 +1,26 @@
-import { InputField, Divider, Spacer } from 'noya-designsystem';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { darkTheme, lightTheme } from 'noya-designsystem';
+import {
+  darkTheme,
+  Divider,
+  InputField,
+  lightTheme,
+  Spacer,
+} from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useEffect, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useHistory, useSelector } from '../contexts/ApplicationStateContext';
+import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
-import Toolbar from './Toolbar';
-import ThemeToolbar from './ThemeToolbar';
 import ThemeGroups from './ThemeGroups';
-import ThemeWindow from './ThemeWindow';
-
 import ThemeInspector from './ThemeInspector';
+import ThemeToolbar from './ThemeToolbar';
+import ThemeWindow from './ThemeWindow';
+import Toolbar from './Toolbar';
 
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
@@ -40,6 +44,7 @@ const RightSidebar = styled.div(({ theme }) => ({
   color: theme.colors.textMuted,
   WebkitBackdropFilter: 'blur(10px)',
   backdropFilter: 'blur(10px)',
+  overflowY: 'auto',
 }));
 
 const MainView = styled.main(({ theme }) => ({
@@ -51,6 +56,13 @@ const MainView = styled.main(({ theme }) => ({
 const ContentArea = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
+}));
+
+const ScrollArea = styled.div(({ theme }) => ({
+  flex: '1 1 0px',
+  display: 'flex',
+  overflowY: 'auto',
+  flexDirection: 'column',
 }));
 
 const FilterContainer = styled.div(({ theme }) => ({
@@ -89,7 +101,9 @@ const CanvasTab = memo(function CanvasTab() {
         <ContentArea>
           <Canvas />
           <RightSidebar>
-            <Inspector />
+            <ScrollArea>
+              <Inspector />
+            </ScrollArea>
           </RightSidebar>
         </ContentArea>
       </MainView>
@@ -110,7 +124,9 @@ const ThemeTab = memo(function ThemeTab() {
         <ContentArea>
           <ThemeWindow />
           <RightSidebar>
-            <ThemeInspector />
+            <ScrollArea>
+              <ThemeInspector />
+            </ScrollArea>
           </RightSidebar>
         </ContentArea>
       </MainView>
@@ -119,24 +135,33 @@ const ThemeTab = memo(function ThemeTab() {
 });
 
 function useKeyboardShortcuts() {
-  const { redo, undo } = useHistory();
+  const dispatch = useDispatch();
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'z') {
-        event.shiftKey ? redo() : undo();
+        if (event.shiftKey) {
+          dispatch('redo');
+        } else {
+          dispatch('undo');
+        }
       }
     }
+
     document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [redo, undo]);
+  }, [dispatch]);
 }
 
 export default function Workspace() {
   const colorScheme = useSystemColorScheme();
   const currentTab = useSelector(Selectors.getCurrentTab);
+
   useKeyboardShortcuts();
+
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       {currentTab === 'canvas' ? <CanvasTab /> : <ThemeTab />}

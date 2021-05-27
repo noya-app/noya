@@ -35,6 +35,7 @@ export default memo(function SketchLayer({ layer }: Props) {
       break;
     case 'rectangle':
     case 'oval':
+    case 'shapePath':
       element = <SketchShape layer={layer} />;
       break;
     case 'symbolInstance':

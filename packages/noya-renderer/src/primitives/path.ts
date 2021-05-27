@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit, Path, PathOp } from 'canvaskit-wasm';
 import { distance } from 'noya-geometry';
 import { Point } from 'noya-state';
-import { zip } from 'noya-utils';
+import { windowsOf } from 'noya-utils';
 import { parsePoint } from '../primitives';
 
 /**
@@ -71,11 +71,7 @@ export function path(
     curveTo: curvePoint.curveFrom,
   }));
 
-  const pairs = zip(
-    [...curvePoints.slice(-1), ...curvePoints.slice(0, -1)],
-    curvePoints,
-    [...curvePoints.slice(1), ...curvePoints.slice(0, 1)],
-  );
+  const pairs = windowsOf(curvePoints, 3, true);
 
   const path = new CanvasKit.Path();
 

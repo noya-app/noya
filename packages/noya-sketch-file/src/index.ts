@@ -31,8 +31,8 @@ export type SketchFile = {
   images: FileMap;
 };
 
-export async function parse(source: ArrayBuffer): Promise<SketchFile> {
-  const zip = await JSZip.loadAsync(source);
+export async function decode(encoded: ArrayBuffer): Promise<SketchFile> {
+  const zip = await JSZip.loadAsync(encoded);
 
   const [document, meta, user, images] = await Promise.all([
     readEntry<Sketch.Document>(zip, 'document.json'),
@@ -54,4 +54,39 @@ export async function parse(source: ArrayBuffer): Promise<SketchFile> {
     pages,
     images,
   };
+}
+
+export async function encode(decoded: SketchFile): Promise<ArrayBuffer> {
+  const { document, meta, user, pages, images } = decoded;
+
+  const zip = new JSZip();
+
+  // We set the `document.pages` array before encoding. The app may not
+  // maintain this array properly, since once the pages are in-memory, we don't
+  // need to access it anymore. So we generate a new valid array here.
+  const normalizedDocument: Sketch.Document = {
+    ...document,
+    pages: pages.map((page) => ({
+      _class: 'MSJSONFileReference',
+      _ref_class: 'MSImmutablePage',
+      _ref: `pages/${page.do_objectID}`,
+    })),
+  };
+
+  zip.file('document.json', JSON.stringify(normalizedDocument));
+  zip.file('meta.json', JSON.stringify(meta));
+  zip.file('user.json', JSON.stringify(user));
+
+  pages.forEach((page) => {
+    zip.file(`pages/${page.do_objectID}.json`, JSON.stringify(page));
+  });
+
+  Object.entries(images).forEach(([name, data]) => {
+    zip.file(name, data);
+  });
+
+  return zip.generateAsync({
+    type: 'arraybuffer',
+    mimeType: 'application/zip',
+  });
 }
