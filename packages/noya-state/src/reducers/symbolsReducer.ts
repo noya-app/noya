@@ -1,7 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { GroupLayouts, SetNumberMode } from '..';
-import { getSelectedSymbols } from '../selectors/themeSelectors';
+import { getSelectedLayers } from '../selectors/layerSelectors';
+import { getSelectedSymbols, getSymbols } from '../selectors/themeSelectors';
 import { ApplicationState } from './applicationReducer';
 
 export type SymbolsAction =
@@ -15,7 +16,9 @@ export type SymbolsAction =
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
   | [type: 'setMinWidth', amount: number, type: SetNumberMode]
   | [type: 'setAllowsOverrides', value: boolean]
-  | [type: 'onSetOverrideProperty', overrideName: string, value: boolean];
+  | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
+  | [type: 'setInstanceSymbolSource', symbolId: string]
+  | [type: 'goToSymbolSource', symbolId: string];
 
 export function symbolsReducer(
   state: ApplicationState,
@@ -165,6 +168,46 @@ export function symbolsReducer(
           }
           override.canOverride = value;
         });
+      });
+    }
+    case 'setInstanceSymbolSource': {
+      const [, symbolId] = action;
+
+      const symbolMaster = getSymbols(state).find(
+        (symbol) => symbol.symbolID === symbolId,
+      );
+
+      return produce(state, (draft) => {
+        const symbols = getSelectedLayers(draft) as Sketch.SymbolInstance[];
+
+        if (!symbolMaster) return;
+        symbols.forEach((symbol) => {
+          symbol.frame = {
+            ...symbol.frame,
+            width: symbolMaster.frame.width,
+            height: symbolMaster.frame.height,
+          };
+          symbol.symbolID = symbolId;
+        });
+      });
+    }
+    case 'goToSymbolSource': {
+      const [, symbolId] = action;
+
+      const symbolMaster = getSymbols(state).find(
+        (symbol) => symbol.symbolID === symbolId,
+      );
+
+      return produce(state, (draft) => {
+        if (!symbolMaster) return;
+
+        const page = draft.sketch.pages.find((p) =>
+          p.layers.some((l) => l.do_objectID === symbolMaster.do_objectID),
+        );
+        if (!page) return;
+
+        draft.selectedPage = page.do_objectID;
+        draft.selectedObjects = [symbolMaster.do_objectID];
       });
     }
     default:

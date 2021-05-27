@@ -1,0 +1,38 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Selectors } from 'noya-state';
+import { memo, useCallback } from 'react';
+import { useSelector, useDispatch } from '../contexts/ApplicationStateContext';
+import useShallowArray from '../hooks/useShallowArray';
+import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
+import SymbolSelectorRow from '../components/inspector/SymbolSelectorRow';
+import { Divider } from 'noya-designsystem';
+
+export default memo(function SymbolMasterInspector() {
+  const dispatch = useDispatch();
+
+  const selectedSymbolIntance = useShallowArray(
+    useSelector(Selectors.getSelectedLayers),
+  )[0] as Sketch.SymbolInstance;
+
+  const elements = [
+    <SymbolSelectorRow
+      symbolId={selectedSymbolIntance.symbolID}
+      onSelect={useCallback(
+        (value) => {
+          dispatch('setInstanceSymbolSource', value);
+        },
+        [dispatch],
+      )}
+      onDetach={useCallback(
+        () => dispatch('detachSymbol', selectedSymbolIntance.do_objectID),
+        [dispatch, selectedSymbolIntance.do_objectID],
+      )}
+      onEditSource={useCallback(
+        () => dispatch('goToSymbolSource', selectedSymbolIntance.symbolID),
+        [dispatch, selectedSymbolIntance.symbolID],
+      )}
+    />,
+  ];
+
+  return <>{withSeparatorElements(elements, <Divider />)}</>;
+});

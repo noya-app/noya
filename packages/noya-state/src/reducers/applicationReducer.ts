@@ -220,6 +220,8 @@ export function applicationReducer(
     case 'setMinWidth':
     case 'setAllowsOverrides':
     case 'onSetOverrideProperty':
+    case 'setInstanceSymbolSource':
+    case 'goToSymbolSource':
       return symbolsReducer(state, action);
     default:
       return themeReducer(state, action);

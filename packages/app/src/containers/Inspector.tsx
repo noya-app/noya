@@ -20,6 +20,7 @@ import ShadowInspector from './ShadowInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
+import SymbolInstanceInspector from './SymbolInstanceInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -87,7 +88,26 @@ export default memo(function Inspector() {
     const hasSymbolMaster = selectedLayers.some((l) =>
       Layers.isSymbolMaster(l),
     );
+    const hasSymbolInstace = selectedLayers.some((l) =>
+      Layers.isSymbolInstance(l),
+    );
     const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
+    const hasOneSymbolInstace = selectedLayers.length === 1 && hasSymbolInstace;
+
+    const styleViews = [
+      selectedLayers.length === 1 && <FillInspector />,
+      selectedLayers.length === 1 && <BorderInspector />,
+    ];
+
+    const SpecialInspectors = [
+      !hasTextLayer && !hasSymbolMaster && !hasOneSymbolInstace && (
+        <LayerThemeInspector />
+      ),
+      hasAllTextLayer && <ThemeTextInspector />,
+      hasTextLayer && <TextStyleInspector />,
+      hasOneSymbolMaster && <SymbolMasterInspector />,
+      hasOneSymbolInstace && <SymbolInstanceInspector />,
+    ];
 
     const views = [
       <Fragment key="layout">
@@ -103,13 +123,9 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
-      hasAllTextLayer && <ThemeTextInspector />,
-      !hasTextLayer && !hasSymbolMaster && <LayerThemeInspector />,
-      hasTextLayer && <TextStyleInspector />,
-      hasOneSymbolMaster && <SymbolMasterInspector />,
+      SpecialInspectors,
       hasContextSettingsLayers && <OpacityInspector />,
-      selectedLayers.length === 1 && <FillInspector />,
-      selectedLayers.length === 1 && <BorderInspector />,
+      !hasSymbolInstace && styleViews,
       selectedLayers.length === 1 && <ShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);
 

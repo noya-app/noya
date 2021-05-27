@@ -5,6 +5,7 @@ import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 import { createBounds } from 'noya-geometry';
+import { Draft } from 'immer';
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -26,7 +27,9 @@ export const getSelectedTextLayers = (
   );
 };
 
-export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
+export const getSelectedLayers = (
+  state: ApplicationState | Draft<ApplicationState>,
+): PageLayer[] => {
   const page = getCurrentPage(state);
 
   return Layers.findAll(page, (layer) =>

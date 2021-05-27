@@ -17,7 +17,7 @@ interface Props {
   setIncludeBackgroundInInstances: (value: boolean) => void;
 }
 
-export default memo(function SymbolInspector({
+export default memo(function SymbolSourceRow({
   resizesContent,
   backgroundColor,
   hasBackgroundColor,
