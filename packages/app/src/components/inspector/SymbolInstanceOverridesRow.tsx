@@ -1,5 +1,12 @@
+import { ResetIcon } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { InputField, Spacer, TreeView, Select } from 'noya-designsystem';
+import {
+  InputField,
+  Spacer,
+  TreeView,
+  Select,
+  Button,
+} from 'noya-designsystem';
 import { ApplicationState, Layers, Overrides } from 'noya-state';
 import {
   getSharedStyles,
@@ -10,12 +17,14 @@ import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
-const NO_STYLE = '';
+const NO_STYLE = 'none';
 
 interface Props {
-  overrideValues: Sketch.OverrideValue[];
+  canOverride: boolean;
   symbolMaster: Sketch.SymbolMaster;
+  overrideValues: Sketch.OverrideValue[];
   onSetOverrideValue: (overrideName: string, value: string) => void;
+  onResetOverrideValue: () => void;
 }
 
 type Selectors = {
@@ -122,13 +131,12 @@ function getOverrideElements(
   state: ApplicationState,
   symbolMaster: Sketch.SymbolMaster,
   idPath: string[],
+  depth: number,
   selectors: Selectors,
   overrideValues: Sketch.OverrideValue[],
   overrideProperties: Sketch.OverrideProperty[],
   onSetOverrideValue: (overrideName: string, value: string) => void,
 ): ReactNode[] {
-  const depth = idPath.length;
-
   return [...symbolMaster.layers].reverse().flatMap((layer): ReactNode[] => {
     const nestedIdPath = [...idPath, layer.do_objectID];
     const key = nestedIdPath.join('/');
@@ -157,8 +165,6 @@ function getOverrideElements(
 
     switch (layer._class) {
       case 'symbolInstance': {
-        if (!canOverrideProperty('symbolID')) return [null];
-
         const symbolMaster = Layers.findInArray(
           state.sketch.pages,
           (child) =>
@@ -172,6 +178,7 @@ function getOverrideElements(
               state,
               symbolMaster,
               nestedIdPath,
+              depth + (canOverrideProperty('symbolID') ? 1 : 0),
               selectors,
               overrideValues,
               overrideProperties,
@@ -182,19 +189,21 @@ function getOverrideElements(
         const symbolIdOverrideName = key + '_symbolID';
 
         return [
-          titleRow,
-          <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
-            <SymbolMasterSelector
-              symbols={selectors.symbols}
-              symbolId={
-                (overrideValue('symbolID')?.value as string) ??
-                symbolMaster.symbolID
-              }
-              onChange={(value) =>
-                onSetOverrideValue(symbolIdOverrideName, value)
-              }
-            />
-          </TreeView.Row>,
+          canOverrideProperty('symbolID') && titleRow,
+          canOverrideProperty('symbolID') && (
+            <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
+              <SymbolMasterSelector
+                symbols={selectors.symbols}
+                symbolId={
+                  (overrideValue('symbolID')?.value as string) ??
+                  symbolMaster.symbolID
+                }
+                onChange={(value) =>
+                  onSetOverrideValue(symbolIdOverrideName, value)
+                }
+              />
+            </TreeView.Row>
+          ),
           ...nestedOverrides,
         ];
       }
@@ -281,9 +290,11 @@ function getOverrideElements(
   });
 }
 
-export default memo(function SymbolInspector({
+export default memo(function SymbolInstanceOverridesRow({
+  canOverride,
   overrideValues,
   symbolMaster,
+  onResetOverrideValue,
   onSetOverrideValue,
 }: Props) {
   const [state] = useApplicationState();
@@ -297,18 +308,29 @@ export default memo(function SymbolInspector({
     state,
     symbolMaster,
     [],
+    0,
     selectors,
     overrideValues,
     symbolMaster.overrideProperties,
     onSetOverrideValue,
   );
+
   return (
     <>
       <InspectorPrimitives.Section>
-        <InspectorPrimitives.Title>Overrides</InspectorPrimitives.Title>
+        <InspectorPrimitives.Row space={true}>
+          <InspectorPrimitives.Title>Overrides</InspectorPrimitives.Title>
+          <Button
+            id="reset-symbol-sverrides"
+            tooltip="Reset Overrides"
+            onClick={onResetOverrideValue}
+          >
+            <ResetIcon />
+          </Button>
+        </InspectorPrimitives.Row>
       </InspectorPrimitives.Section>
       <Spacer.Vertical size={6} />
-      <TreeView.Root>{overrideElements}</TreeView.Root>
+      {canOverride && <TreeView.Root>{overrideElements}</TreeView.Root>}
     </>
   );
 });

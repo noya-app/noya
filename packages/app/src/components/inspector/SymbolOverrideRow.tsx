@@ -168,7 +168,7 @@ function getOverrideElements(
   });
 }
 
-export default memo(function SymbolInspector({
+export default memo(function SymbolOverrideRow({
   symbolMaster,
   onSetAllowsOverrides,
   onSetOverrideProperty,

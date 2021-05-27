@@ -26,10 +26,19 @@ export default memo(function SymbolMasterInspector() {
 
       if (type === 'symbolID')
         dispatch('setOverrideSymbolId', overrideName, value);
-      else dispatch('setOverrideTextValue', overrideName, value);
+      else
+        dispatch(
+          'setOverrideTextValue',
+          overrideName,
+          value === '' || value === 'none' ? undefined : value,
+        );
     },
     [dispatch],
   );
+
+  const onResetOverrideValue = useCallback(() => {
+    dispatch('setOverrideTextValue');
+  }, [dispatch]);
 
   const elements = [
     <SymbolSelectorRow
@@ -51,9 +60,11 @@ export default memo(function SymbolMasterInspector() {
     />,
     symbolMaster && (
       <SymbolInstanceOverridesRow
+        canOverride={symbolMaster.allowsOverrides}
         overrideValues={selectedSymbolIntance.overrideValues}
         symbolMaster={symbolMaster}
         onSetOverrideValue={onSetOverrideValue}
+        onResetOverrideValue={onResetOverrideValue}
       />
     ),
   ];

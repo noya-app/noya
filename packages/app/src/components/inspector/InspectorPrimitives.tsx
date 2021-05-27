@@ -19,12 +19,15 @@ export const Title = styled.div(({ theme }) => ({
   userSelect: 'none',
 }));
 
-export const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+export const Row = styled.div<{ space?: boolean }>(
+  ({ theme, space = false }) => ({
+    flex: '1',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: space ? 'space-between' : 'normal',
+    alignItems: 'center',
+  }),
+);
 
 export const Checkbox = styled.input(({ theme }) => ({
   margin: 0,

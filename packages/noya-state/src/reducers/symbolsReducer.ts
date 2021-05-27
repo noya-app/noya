@@ -19,10 +19,11 @@ export type SymbolsAction =
   | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
   | [type: 'setInstanceSymbolSource', symbolId: string]
   | [type: 'goToSymbolSource', overrideName: string]
-  | [type: 'setOverrideTextValue', overrideName: string, value: string]
-  | [type: 'setOverrideTextStyle', overrideName: string, value: string]
-  | [type: 'setOverrideSymbolId', overrideName: string, value: string]
-  | [type: 'setOverrideThemeStyle', overrideName: string, value: string];
+  | [type: 'setOverrideTextValue', overrideName?: string, value?: string]
+  | [type: 'setOverrideTextStyle', overrideName?: string, value?: string]
+  | [type: 'setOverrideSymbolId', overrideName?: string, value?: string]
+  | [type: 'setOverrideThemeStyle', overrideName?: string, value?: string];
+
 export function symbolsReducer(
   state: ApplicationState,
   action: SymbolsAction,
@@ -223,44 +224,30 @@ export function symbolsReducer(
         const symbols = getSelectedLayers(draft) as Sketch.SymbolInstance[];
 
         symbols.forEach((symbol) => {
+          if (!name) {
+            symbol.overrideValues = [];
+            return;
+          }
+
           const index = symbol.overrideValues.findIndex(
             (property) => property.overrideName === name,
           );
 
-          if (action[0] === 'setOverrideSymbolId' && index !== -1) {
-            const symbolMaster = getSymbols(state).find(
-              (symbol) => symbol.symbolID === value,
-            );
-
-            if (!symbolMaster) return;
-            const elements = symbol.overrideValues[index].overrideName.split(
-              '/',
-            );
-            elements.shift();
-
-            symbol.overrideValues[index].overrideName =
-              symbolMaster + '/' + elements.join('/');
-            symbol.overrideValues[index].value = value;
+          if (value === undefined) {
+            if (index !== -1) symbol.overrideValues.splice(index, 1);
             return;
           }
 
-          switch (value) {
-            case '': {
-              if (index === -1) return;
-              symbol.overrideValues.splice(index, 1);
-              return;
-            }
-            default:
-              if (index === -1) {
-                symbol.overrideValues.push({
-                  _class: 'overrideValue',
-                  overrideName: name,
-                  value: value,
-                });
-                return;
-              }
-              symbol.overrideValues[index].value = value;
+          if (index === -1) {
+            symbol.overrideValues.push({
+              _class: 'overrideValue',
+              overrideName: name,
+              value: value,
+            });
+            return;
           }
+
+          symbol.overrideValues[index].value = value;
         });
       });
     }
