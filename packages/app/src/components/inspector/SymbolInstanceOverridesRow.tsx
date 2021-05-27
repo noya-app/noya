@@ -168,7 +168,9 @@ function getOverrideElements(
         const symbolMaster = Layers.findInArray(
           state.sketch.pages,
           (child) =>
-            Layers.isSymbolMaster(child) && layer.symbolID === child.symbolID,
+            Layers.isSymbolMaster(child) &&
+            ((overrideValue('symbolID')?.value as string) ?? layer.symbolID) ===
+              child.symbolID,
         ) as Sketch.SymbolMaster | undefined;
 
         if (!symbolMaster) return [];
@@ -194,10 +196,7 @@ function getOverrideElements(
             <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
               <SymbolMasterSelector
                 symbols={selectors.symbols}
-                symbolId={
-                  (overrideValue('symbolID')?.value as string) ??
-                  symbolMaster.symbolID
-                }
+                symbolId={symbolMaster.symbolID}
                 onChange={(value) =>
                   onSetOverrideValue(symbolIdOverrideName, value)
                 }
