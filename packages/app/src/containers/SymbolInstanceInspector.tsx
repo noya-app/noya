@@ -20,6 +20,12 @@ export default memo(function SymbolMasterInspector() {
       symbol.symbolID === selectedSymbolIntance.symbolID,
   );
 
+  const onSetOverrideValue = useCallback(
+    (overrideName: string, value: string) =>
+      dispatch('setOverrideTextValue', overrideName, value),
+    [dispatch],
+  );
+
   const elements = [
     <SymbolSelectorRow
       symbolId={selectedSymbolIntance.symbolID}
@@ -38,10 +44,13 @@ export default memo(function SymbolMasterInspector() {
         [dispatch, selectedSymbolIntance.symbolID],
       )}
     />,
-    <SymbolInstanceOverridesRow
-      symbolInstance={selectedSymbolIntance}
-      symbolMaster={symbolMaster}
-    />,
+    symbolMaster && (
+      <SymbolInstanceOverridesRow
+        overrideValues={selectedSymbolIntance.overrideValues}
+        symbolMaster={symbolMaster}
+        onSetOverrideValue={onSetOverrideValue}
+      />
+    ),
   ];
 
   return <>{withSeparatorElements(elements, <Divider />)}</>;

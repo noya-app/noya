@@ -10,12 +10,12 @@ import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
-const NO_STYLE = 'none';
+const NO_STYLE = '';
 
 interface Props {
-  symbolInstance: Sketch.SymbolInstance;
-  symbolMaster?: Sketch.SymbolMaster;
-  onSetAllowsOverrides?: (value: boolean) => void;
+  overrideValues: Sketch.OverrideValue[];
+  symbolMaster: Sketch.SymbolMaster;
+  onSetOverrideValue: (overrideName: string, value: string) => void;
 }
 
 type Selectors = {
@@ -27,9 +27,11 @@ type Selectors = {
 const ThemeStyleSelector = ({
   themeStyles,
   sharedStyleID,
+  onChange,
 }: {
   themeStyles: Sketch.SharedStyle[];
   sharedStyleID: string;
+  onChange: (value: string) => void;
 }) => {
   const themeStylesOptions = useMemo(
     () => [NO_STYLE, ...themeStyles.map((style) => style.do_objectID)],
@@ -50,7 +52,7 @@ const ThemeStyleSelector = ({
       value={sharedStyleID}
       options={themeStylesOptions}
       getTitle={getThemeStylesTitle}
-      onChange={() => {}}
+      onChange={onChange}
     />
   );
 };
@@ -58,9 +60,11 @@ const ThemeStyleSelector = ({
 const TextStyleSelector = ({
   textStyles,
   sharedStyleID,
+  onChange,
 }: {
   textStyles: Sketch.SharedStyle[];
   sharedStyleID: string;
+  onChange: (value: string) => void;
 }) => {
   const textStylesOptions = useMemo(
     () => [NO_STYLE, ...textStyles.map((style) => style.do_objectID)],
@@ -80,7 +84,7 @@ const TextStyleSelector = ({
       value={sharedStyleID}
       options={textStylesOptions}
       getTitle={getTextStylesTitle}
-      onChange={() => {}}
+      onChange={onChange}
     />
   );
 };
@@ -88,9 +92,11 @@ const TextStyleSelector = ({
 const SymbolMasterSelector = ({
   symbols,
   symbolId,
+  onChange,
 }: {
   symbols: Sketch.SymbolMaster[];
   symbolId: string;
+  onChange: (value: string) => void;
 }) => {
   const symbolSourceOptions = useMemo(
     () => symbols.map((symbol) => symbol.symbolID),
@@ -107,7 +113,7 @@ const SymbolMasterSelector = ({
       value={symbolId}
       options={symbolSourceOptions}
       getTitle={getSymbolMasterTitle}
-      onChange={() => {}}
+      onChange={onChange}
     />
   );
 };
@@ -119,7 +125,7 @@ function getOverrideElements(
   selectors: Selectors,
   overrideValues: Sketch.OverrideValue[],
   overrideProperties: Sketch.OverrideProperty[],
-  onSetOverrideProperty: (overrideName: string, value: boolean) => void,
+  onSetOverrideValue: (overrideName: string, value: string) => void,
 ): ReactNode[] {
   const depth = idPath.length;
 
@@ -146,7 +152,6 @@ function getOverrideElements(
       })?.value;
 
       if (!value) return undefined;
-
       return Overrides.getLayerOverride(layer, propertyType, value);
     };
 
@@ -170,7 +175,7 @@ function getOverrideElements(
               selectors,
               overrideValues,
               overrideProperties,
-              onSetOverrideProperty,
+              onSetOverrideValue,
             )
           : [];
 
@@ -181,7 +186,13 @@ function getOverrideElements(
           <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
             <SymbolMasterSelector
               symbols={selectors.symbols}
-              symbolId={symbolMaster.symbolID}
+              symbolId={
+                (overrideValue('symbolID')?.value as string) ??
+                symbolMaster.symbolID
+              }
+              onChange={(value) =>
+                onSetOverrideValue(symbolIdOverrideName, value)
+              }
             />
           </TreeView.Row>,
           ...nestedOverrides,
@@ -201,7 +212,9 @@ function getOverrideElements(
                 <InputField.Input
                   value={(overrideValue('stringValue')?.value as string) ?? ''}
                   placeholder={layer.name}
-                  onChange={() => {}}
+                  onChange={(value) =>
+                    onSetOverrideValue(stringValueOverrideName, value)
+                  }
                 />
               </InputField.Root>
             </TreeView.Row>
@@ -213,6 +226,9 @@ function getOverrideElements(
                 sharedStyleID={
                   (overrideValue('textStyle')?.value as string) ??
                   layer.sharedStyleID
+                }
+                onChange={(value) =>
+                  onSetOverrideValue(textStyleOverrideName, value)
                 }
               />
             </TreeView.Row>
@@ -252,6 +268,9 @@ function getOverrideElements(
                       (overrideValue('layerStyle')?.value as string) ??
                       layer.sharedStyleID
                     }
+                    onChange={(value) =>
+                      onSetOverrideValue(layerStyleOverrideName, value)
+                    }
                   />
                 </TreeView.Row>
               ),
@@ -263,9 +282,9 @@ function getOverrideElements(
 }
 
 export default memo(function SymbolInspector({
-  symbolInstance,
+  overrideValues,
   symbolMaster,
-  onSetAllowsOverrides,
+  onSetOverrideValue,
 }: Props) {
   const [state] = useApplicationState();
 
@@ -274,18 +293,15 @@ export default memo(function SymbolInspector({
   const symbols = getSymbols(state);
 
   const selectors = { themeStyles, textStyles, symbols };
-  if (!symbolMaster) return null;
-
   const overrideElements = getOverrideElements(
     state,
     symbolMaster,
     [],
     selectors,
-    symbolInstance.overrideValues,
+    overrideValues,
     symbolMaster.overrideProperties,
-    () => {},
+    onSetOverrideValue,
   );
-
   return (
     <>
       <InspectorPrimitives.Section>

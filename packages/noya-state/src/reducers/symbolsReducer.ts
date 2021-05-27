@@ -18,8 +18,11 @@ export type SymbolsAction =
   | [type: 'setAllowsOverrides', value: boolean]
   | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
   | [type: 'setInstanceSymbolSource', symbolId: string]
-  | [type: 'goToSymbolSource', symbolId: string];
-
+  | [type: 'goToSymbolSource', overrideName: string]
+  | [type: 'setOverrideTextValue', overrideName: string, value: string]
+  | [type: 'setOverrideTextStyle', overrideName: string, value: string]
+  | [type: 'setOverrideSymbolId', overrideName: string, value: string]
+  | [type: 'setOverrideThemeStyle', overrideName: string, value: string];
 export function symbolsReducer(
   state: ApplicationState,
   action: SymbolsAction,
@@ -208,6 +211,40 @@ export function symbolsReducer(
 
         draft.selectedPage = page.do_objectID;
         draft.selectedObjects = [symbolMaster.do_objectID];
+      });
+    }
+    case 'setOverrideTextValue':
+    case 'setOverrideTextStyle':
+    case 'setOverrideSymbolId':
+    case 'setOverrideThemeStyle': {
+      const [, name, value] = action;
+
+      return produce(state, (draft) => {
+        const symbols = getSelectedLayers(draft) as Sketch.SymbolInstance[];
+
+        symbols.forEach((symbol) => {
+          const index = symbol.overrideValues.findIndex(
+            (property) => property.overrideName === name,
+          );
+
+          switch (value) {
+            case '': {
+              if (index === -1) return;
+              symbol.overrideValues.splice(index, 1);
+              break;
+            }
+            default:
+              if (index === -1) {
+                symbol.overrideValues.push({
+                  _class: 'overrideValue',
+                  overrideName: name,
+                  value: value,
+                });
+                return;
+              }
+              symbol.overrideValues[index].value = value;
+          }
+        });
       });
     }
     default:
