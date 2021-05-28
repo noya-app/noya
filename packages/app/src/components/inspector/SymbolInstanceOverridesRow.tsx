@@ -153,14 +153,18 @@ function getOverrideElements(
       </TreeView.Row>
     );
 
-    const overrideValue = (propertyType: Overrides.PropertyType) => {
+    const getOverrideValue = <T extends Overrides.PropertyType>(
+      propertyType: T,
+    ) => {
       const value = overrideValues.find(({ overrideName }) => {
         const [idPathString, type] = overrideName.split('_');
         return idPathString === key && type === propertyType;
       })?.value;
 
-      if (!value) return undefined;
-      return Overrides.getLayerOverride(layer, propertyType, value);
+      return value !== undefined &&
+        Overrides.isValidProperty(propertyType, value)
+        ? value
+        : undefined;
     };
 
     switch (layer._class) {
@@ -169,8 +173,7 @@ function getOverrideElements(
           state.sketch.pages,
           (child) =>
             Layers.isSymbolMaster(child) &&
-            ((overrideValue('symbolID')?.value as string) ?? layer.symbolID) ===
-              child.symbolID,
+            (getOverrideValue('symbolID') ?? layer.symbolID) === child.symbolID,
         ) as Sketch.SymbolMaster | undefined;
 
         if (!symbolMaster) return [];
@@ -218,7 +221,7 @@ function getOverrideElements(
             <TreeView.Row key={stringValueOverrideName} depth={depth + 1}>
               <InputField.Root>
                 <InputField.Input
-                  value={(overrideValue('stringValue')?.value as string) ?? ''}
+                  value={getOverrideValue('stringValue') ?? ''}
                   placeholder={layer.name}
                   onChange={(value) =>
                     onSetOverrideValue(stringValueOverrideName, value)
@@ -232,8 +235,7 @@ function getOverrideElements(
               <TextStyleSelector
                 textStyles={selectors.textStyles}
                 sharedStyleID={
-                  (overrideValue('textStyle')?.value as string) ??
-                  layer.sharedStyleID
+                  getOverrideValue('textStyle') ?? layer.sharedStyleID
                 }
                 onChange={(value) =>
                   onSetOverrideValue(textStyleOverrideName, value)
@@ -273,8 +275,7 @@ function getOverrideElements(
                   <ThemeStyleSelector
                     themeStyles={selectors.themeStyles}
                     sharedStyleID={
-                      (overrideValue('layerStyle')?.value as string) ??
-                      layer.sharedStyleID
+                      getOverrideValue('layerStyle') ?? layer.sharedStyleID
                     }
                     onChange={(value) =>
                       onSetOverrideValue(layerStyleOverrideName, value)
