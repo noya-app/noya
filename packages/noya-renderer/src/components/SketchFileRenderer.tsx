@@ -1,7 +1,12 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit-wasm';
-import { AffineTransform, createRect, insetRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  createRect,
+  insetRect,
+} from 'noya-geometry';
 import {
   Group,
   Polyline,
@@ -24,9 +29,9 @@ import {
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
-import HoverOutline from './HoverOutline';
 import DistanceLabelAndPath from './DistanceLabelAndPath';
-import SmartSnapLines from './SmartSnapLines';
+import { ALL_DIRECTIONS, getGuides } from './guides';
+import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import { HorizontalRuler } from './Rulers';
@@ -198,23 +203,37 @@ export default memo(function SketchFileRenderer() {
       },
     );
 
-    return (
-      highlightedBoundingRect && (
-        <DistanceLabelAndPath
-          selectedRect={boundingRect}
-          highlightedRect={highlightedBoundingRect}
-        />
-      )
-    );
+    if (!highlightedBoundingRect) {
+      return;
+    }
+
+    const highlightedBounds = createBounds(highlightedBoundingRect);
+    const selectedBounds = createBounds(boundingRect);
+    const axes = ['x', 'y'];
+
+    const guides = ALL_DIRECTIONS.filter(([, axis]) =>
+      axes.includes(axis),
+    ).flatMap(([direction, axis]) => {
+      const result = getGuides(
+        direction,
+        axis,
+        selectedBounds,
+        highlightedBounds,
+      );
+
+      return result ? [result] : [];
+    });
+
+    return highlightedBoundingRect && <DistanceLabelAndPath guides={guides} />;
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
   type SmartSnapObj = {
-    closestLayerID: string;
+    closestLayerId: string;
     setSelectedBounds: number;
     setVisibleBounds: number;
-    layerToSnapBoundingRect: Rect | undefined;
-    selectedRect: Rect | undefined;
+    guides: any[];
   };
+
   const smartSnapGuidesX = useMemo(() => {
     if (
       state.interactionState.type !== 'moving' ||
@@ -225,88 +244,69 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    let closestLayerDistance: number | null = null;
     let matches: SmartSnapObj[] = [];
 
     state.canvasVisibleAndSelectedLayerAxisPairs.xBounds.forEach(function (
-      pairs: [],
+      pairs,
     ) {
-      pairs.forEach(function (pair: {
-        selectedBounds: number;
-        visibleBounds: number;
-        visibleLayer_id: string[];
-      }) {
-        if (
-          !(
-            pair.selectedBounds >= pair.visibleBounds &&
-            pair.selectedBounds <= pair.visibleBounds
-          )
-        ) {
+      pairs.forEach(function (pair) {
+        if (pair.selectedLayerValues !== pair.visibleLayerValues) {
           return;
         }
-        const difference = Math.abs(pair.selectedBounds - pair.visibleBounds);
 
-        if (!closestLayerDistance) {
-          closestLayerDistance = difference;
-
-          const match: SmartSnapObj = {
-            closestLayerID: pair.visibleLayer_id[0],
-            setSelectedBounds: pair.selectedBounds,
-            setVisibleBounds: pair.visibleBounds,
-            layerToSnapBoundingRect: undefined,
-            selectedRect: boundingRect,
-          };
-          matches.push(match);
-        } else if (closestLayerDistance && closestLayerDistance > difference) {
-          matches = [];
-          closestLayerDistance = difference;
-
-          const match: SmartSnapObj = {
-            closestLayerID: pair.visibleLayer_id[0],
-            setSelectedBounds: pair.selectedBounds,
-            setVisibleBounds: pair.visibleBounds,
-            layerToSnapBoundingRect: undefined,
-            selectedRect: boundingRect,
-          };
-          matches.push(match);
-        } else if (
-          closestLayerDistance &&
-          closestLayerDistance === difference
-        ) {
-          const match: SmartSnapObj = {
-            closestLayerID: pair.visibleLayer_id[0],
-            setSelectedBounds: pair.selectedBounds,
-            setVisibleBounds: pair.visibleBounds,
-            layerToSnapBoundingRect: undefined,
-            selectedRect: boundingRect,
-          };
-          matches.push(match);
-        }
+        const match: SmartSnapObj = {
+          closestLayerId: pair.visibleLayerId,
+          setSelectedBounds: pair.selectedLayerValues,
+          setVisibleBounds: pair.visibleLayerValues,
+          guides: [],
+        };
+        matches.push(match);
       });
     });
-    matches.map((match) => {
-      return (match.layerToSnapBoundingRect = getBoundingRect(
+
+    const selectedBounds = createBounds(boundingRect);
+    const axes = ['y'];
+
+    matches.forEach((match) => {
+      const layerToSnapBoundingRect = getBoundingRect(
         page,
         AffineTransform.identity,
-        [match.closestLayerID],
+        [match.closestLayerId],
         {
           clickThroughGroups: true,
           includeHiddenLayers: true,
         },
-      ));
+      );
+      if (!layerToSnapBoundingRect) {
+        return [];
+      }
+
+      const highlightedBounds = createBounds(layerToSnapBoundingRect);
+
+      match.guides = ALL_DIRECTIONS.filter(([, axis]) =>
+        axes.includes(axis),
+      ).flatMap(([direction, axis]) => {
+        const result = getGuides(
+          direction,
+          axis,
+          selectedBounds,
+          highlightedBounds,
+          match.setSelectedBounds,
+        );
+
+        return result ? [result] : [];
+      });
     });
-    // console.log('matches', matches);
+
     return (
       <>
         {matches.map((match, index) => {
           return (
-            match.layerToSnapBoundingRect && (
-              <DistanceLabelAndPath
-                selectedRect={boundingRect}
-                highlightedRect={match.layerToSnapBoundingRect}
-                key={index}
-              />
-            )
+            <DistanceLabelAndPath
+              guides={match.guides}
+              showSnap={true}
+              key={index}
+            />
           );
         })}
       </>
@@ -328,80 +328,71 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    let closestLayerDistance: number | null = null;
     let matches: SmartSnapObj[] = [];
 
     state.canvasVisibleAndSelectedLayerAxisPairs.yBounds.forEach(function (
-      pairs: [],
+      pairs,
     ) {
-      pairs.forEach(function (pair: {
-        selectedBounds: number;
-        visibleBounds: number;
-        visibleLayer_id: string[];
-      }) {
-        if (
-          !(
-            pair.selectedBounds >= pair.visibleBounds &&
-            pair.selectedBounds <= pair.visibleBounds
-          )
-        ) {
+      pairs.forEach(function (pair) {
+        if (pair.selectedLayerValues !== pair.visibleLayerValues) {
           return;
         }
-        const difference = Math.abs(pair.selectedBounds - pair.visibleBounds);
 
-        if (!closestLayerDistance) {
-          closestLayerDistance = difference;
-
-          const match: SmartSnapObj = {
-            closestLayerID: pair.visibleLayer_id[0],
-            setSelectedBounds: pair.selectedBounds,
-            setVisibleBounds: pair.visibleBounds,
-            layerToSnapBoundingRect: undefined,
-            selectedRect: boundingRect,
-          };
-          matches.push(match);
-        } else if (closestLayerDistance && closestLayerDistance > difference) {
-          matches = [];
-          closestLayerDistance = difference;
-
-          const match: SmartSnapObj = {
-            closestLayerID: pair.visibleLayer_id[0],
-            setSelectedBounds: pair.selectedBounds,
-            setVisibleBounds: pair.visibleBounds,
-            layerToSnapBoundingRect: undefined,
-            selectedRect: boundingRect,
-          };
-          matches.push(match);
-        } else if (
-          closestLayerDistance &&
-          closestLayerDistance === difference
-        ) {
-          const match: SmartSnapObj = {
-            closestLayerID: pair.visibleLayer_id[0],
-            setSelectedBounds: pair.selectedBounds,
-            setVisibleBounds: pair.visibleBounds,
-            layerToSnapBoundingRect: undefined,
-            selectedRect: boundingRect,
-          };
-          matches.push(match);
-        }
+        const match: SmartSnapObj = {
+          closestLayerId: pair.visibleLayerId,
+          setSelectedBounds: pair.selectedLayerValues,
+          setVisibleBounds: pair.visibleLayerValues,
+          guides: [],
+        };
+        matches.push(match);
       });
     });
-    matches.map((match) => {
-      return (match.layerToSnapBoundingRect = getBoundingRect(
+
+    const selectedBounds = createBounds(boundingRect);
+    const axes = ['x'];
+
+    matches.forEach((match) => {
+      const layerToSnapBoundingRect = getBoundingRect(
         page,
         AffineTransform.identity,
-        [match.closestLayerID],
+        [match.closestLayerId],
         {
           clickThroughGroups: true,
           includeHiddenLayers: true,
         },
-      ));
+      );
+      if (!layerToSnapBoundingRect) {
+        return [];
+      }
+
+      const highlightedBounds = createBounds(layerToSnapBoundingRect);
+
+      match.guides = ALL_DIRECTIONS.filter(([, axis]) =>
+        axes.includes(axis),
+      ).flatMap(([direction, axis]) => {
+        const result = getGuides(
+          direction,
+          axis,
+          selectedBounds,
+          highlightedBounds,
+          match.setSelectedBounds,
+        );
+
+        return result ? [result] : [];
+      });
     });
 
     return (
       <>
-        <SmartSnapLines matches={matches} pointsToUse="y" />
+        {matches.map((match, index) => {
+          return (
+            <DistanceLabelAndPath
+              guides={match.guides}
+              showSnap={true}
+              key={index}
+            />
+          );
+        })}
       </>
     );
   }, [

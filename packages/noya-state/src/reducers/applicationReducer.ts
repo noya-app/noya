@@ -13,7 +13,7 @@ import {
   getSelectedLayerIndexPaths,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
-import { CanvasAction, canvasReducer } from './canvasReducer';
+import { CanvasAction, canvasReducer, CombinationValue } from './canvasReducer';
 import {
   createInitialInteractionState,
   interactionReducer,
@@ -26,9 +26,9 @@ import {
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
+import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 
 export type { SetNumberMode };
 
@@ -37,8 +37,8 @@ export type WorkspaceTab = 'canvas' | 'theme';
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 type SmartSnapPairs = {
-  xBounds: [];
-  yBounds: [];
+  xBounds: CombinationValue[][];
+  yBounds: CombinationValue[][];
 };
 
 export type ApplicationState = {

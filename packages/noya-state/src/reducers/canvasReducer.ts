@@ -6,6 +6,8 @@ import {
   rectsIntersect,
   createRect,
   createBounds,
+  Size,
+  Bounds,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
@@ -25,27 +27,27 @@ import {
   CompassDirection,
   InteractionAction,
   interactionReducer,
+  InteractionState,
 } from './interactionReducer';
 import { getLayersInRect } from '../selectors/geometrySelectors';
-// import {
-//   workspaceReducer
-//   WorkspaceAction,
-//   WorkspaceState,
-// } from './workspaceReducer';
+import { Axis } from 'noya-renderer/src/components/guides';
 
-function getAxisValues(rectBounds: any, axis: string) {
-  let axisBounds: any = [];
+function getAxisValues(rectBounds: Bounds, axis: string): number[] {
+  let axisBounds: number[] = [];
   for (const prop in rectBounds) {
     if (prop.indexOf(axis) > -1) {
-      axisBounds.push(rectBounds[prop]);
+      axisBounds.push(rectBounds[prop as keyof Bounds]);
     }
   }
   return axisBounds;
 }
 
-function getVisibleLayersAxisValues(state: any, pageSnapshot: any) {
+function getVisibleLayersAxisValues(
+  state: ApplicationState,
+  interactionState: Extract<InteractionState, { type: 'moving' }>,
+) {
   //  const { canvasInsets } = state;
-  //  const { origin, current } = state.interactionState;
+  const { pageSnapshot } = interactionState;
 
   //TODO: get the measurements of the canvas
   const layers = getLayersInRect(
@@ -60,16 +62,15 @@ function getVisibleLayersAxisValues(state: any, pageSnapshot: any) {
       includeHiddenLayers: false,
     },
   );
-
-  const values: any = [];
+  const values: SelectedValueObj[] = [];
   layers.forEach(function (layer) {
     const rect = getBoundingRect(pageSnapshot, AffineTransform.identity, [
       layer.do_objectID,
     ]);
     if (rect) {
-      const rectBounds: any = createBounds(rect);
+      const rectBounds = createBounds(rect);
       values.push({
-        layer_id: [layer.do_objectID],
+        layer_id: layer.do_objectID,
         y: getAxisValues(rectBounds, 'Y'),
         x: getAxisValues(rectBounds, 'X'),
       });
@@ -78,16 +79,22 @@ function getVisibleLayersAxisValues(state: any, pageSnapshot: any) {
   return values;
 }
 
-function getSelectedLayerAxisValues(layer_id: string, pageSnapshot: any) {
-  const selectedRect = getBoundingRect(pageSnapshot, AffineTransform.identity, [
+type SelectedValueObj = {
+  layer_id: string;
+  y: number[];
+  x: number[];
+};
+
+function getSelectedLayerAxisValues(layer_id: string, layer: Sketch.AnyLayer) {
+  const selectedRect = getBoundingRect(layer, AffineTransform.identity, [
     layer_id,
   ]);
 
-  const selectedValues: any = [];
+  const selectedValues: SelectedValueObj[] = [];
   if (selectedRect) {
-    const rectBounds: any = createBounds(selectedRect);
+    const rectBounds = createBounds(selectedRect);
     selectedValues.push({
-      layer_id: [layer_id],
+      layer_id: layer_id,
       y: getAxisValues(rectBounds, 'Y'),
       x: getAxisValues(rectBounds, 'X'),
     });
@@ -95,45 +102,51 @@ function getSelectedLayerAxisValues(layer_id: string, pageSnapshot: any) {
   return selectedValues;
 }
 
-type BoundsObj = {
-  selectedBounds: [];
-  visibleBounds: [];
-  visibleLayer_id: string[];
+export type BoundsObj = {
+  selectedLayerValues: number[];
+  visibleLayerValues: number[];
+  visibleLayerId: string;
+};
+
+export type CombinationValue = {
+  selectedLayerValues: number;
+  visibleLayerValues: number;
+  visibleLayerId: string;
 };
 
 function allCombinations(obj: BoundsObj) {
-  let combos: {}[] = [{}];
-  Object.entries(obj).forEach(([key, values]) => {
-    let all: {}[] = [];
-    values.forEach((value: number | string) => {
-      combos.forEach((combo: {}) => {
-        all.push({ ...combo, [key]: value });
+  let combos: CombinationValue[] = [];
+  obj.selectedLayerValues.forEach((selectedLayerValue) => {
+    obj.visibleLayerValues.forEach((visibleLayerValue) => {
+      combos.push({
+        selectedLayerValues: selectedLayerValue,
+        visibleLayerValues: visibleLayerValue,
+        visibleLayerId: obj.visibleLayerId,
       });
     });
-    combos = all;
   });
   return combos;
 }
 
 function getVisibleAndSelectedLayerAxisPairs(
-  selectedAxisValues: any[],
-  visibleLayersAxisValues: any[],
-  axis: string,
-): any {
+  selectedAxisValues: SelectedValueObj[],
+  visibleLayersAxisValues: SelectedValueObj[],
+  axis: Axis,
+) {
   let testingObj: BoundsObj = {
-    selectedBounds: selectedAxisValues[0][axis],
-    visibleBounds: [],
-    visibleLayer_id: [''],
+    selectedLayerValues: selectedAxisValues[0][axis],
+    visibleLayerValues: [],
+    visibleLayerId: '',
   };
 
   let results = visibleLayersAxisValues
     .filter(
       (visibleLayer) =>
-        visibleLayer.layer_id[0] !== selectedAxisValues[0].layer_id[0],
+        visibleLayer.layer_id !== selectedAxisValues[0].layer_id,
     )
     .map((visibleLayer) => {
-      testingObj.visibleBounds = visibleLayer[axis];
-      testingObj.visibleLayer_id = [visibleLayer.layer_id];
+      testingObj.visibleLayerValues = visibleLayer[axis];
+      testingObj.visibleLayerId = visibleLayer.layer_id;
       return allCombinations(testingObj);
     });
 
@@ -154,8 +167,13 @@ export type CanvasAction =
       // better than moving the whole reducer up into the parent.
       action:
         | Exclude<InteractionAction, ['maybeMove' | 'maybeScale', ...any[]]>
-        | [type: 'maybeMove', origin: Point]
-        | [type: 'maybeScale', origin: Point, direction: CompassDirection],
+        | [type: 'maybeMove', origin: Point, canvasSize: Size]
+        | [
+            type: 'maybeScale',
+            origin: Point,
+            direction: CompassDirection,
+            canvasSize: Size,
+          ],
     ];
 
 export function canvasReducer(
@@ -249,8 +267,8 @@ export function canvasReducer(
         switch (interactionState.type) {
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
-            const layers = getVisibleLayersAxisValues(state, pageSnapshot);
-            let selectionValues;
+            const layers = getVisibleLayersAxisValues(state, interactionState);
+            let selectionValues: SelectedValueObj[] = [];
 
             const delta = {
               x: current.x - origin.x,
@@ -264,13 +282,42 @@ export function canvasReducer(
                 indexPath,
               );
 
-              layer.frame.x = initialRect.x + delta.x;
-              layer.frame.y = initialRect.y + delta.y;
-
               selectionValues = getSelectedLayerAxisValues(
                 draft.selectedObjects[0],
                 layer,
               );
+
+              const pairs = getVisibleAndSelectedLayerAxisPairs(
+                selectionValues,
+                layers,
+                'x',
+              );
+
+              let snapDistance;
+              pairs[0].forEach(function (pair: any) {
+                const distance = Math.abs(
+                  pair.selectedBounds - pair.visibleBounds,
+                );
+                if (distance > 6) {
+                  return;
+                }
+                // snapDistance = pair.visibleBounds;
+                // debugger;
+
+                const matchingLayer = layers.find((layer) => {
+                  return layer.layer_id === pair.visibleLayer_id;
+                });
+
+                snapDistance = matchingLayer?.x[0];
+              });
+
+              if (snapDistance) {
+                layer.frame.x = snapDistance;
+              } else {
+                layer.frame.x = initialRect.x + delta.x;
+              }
+
+              layer.frame.y = initialRect.y + delta.y;
             });
 
             if (selectionValues) {
