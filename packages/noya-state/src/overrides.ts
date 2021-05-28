@@ -89,3 +89,31 @@ export function getLayerOverride(
     }
   }
 }
+
+export function canOverrideProperty(
+  overrideProperties: Sketch.OverrideProperty[],
+  propertyType: PropertyType,
+  key: string,
+) {
+  return (
+    overrideProperties.find(({ overrideName }) => {
+      const [idPathString, type] = overrideName.split('_');
+      return idPathString === key && type === propertyType;
+    })?.canOverride ?? true
+  );
+}
+
+export function getOverrideValue<T extends PropertyType>(
+  overrideValues: Sketch.OverrideValue[],
+  propertyType: T,
+  key: string,
+) {
+  const value = overrideValues.find(({ overrideName }) => {
+    const [idPathString, type] = overrideName.split('_');
+    return idPathString === key && type === propertyType;
+  })?.value;
+
+  return value !== undefined && isValidProperty(propertyType, value)
+    ? value
+    : undefined;
+}

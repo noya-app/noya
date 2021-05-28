@@ -11,13 +11,13 @@ import { Divider } from 'noya-designsystem';
 export default memo(function SymbolMasterInspector() {
   const dispatch = useDispatch();
 
-  const selectedSymbolIntance = useShallowArray(
+  const selectedSymbolInstance = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   )[0] as Sketch.SymbolInstance;
 
   const symbolMaster = useShallowArray(useSelector(Selectors.getSymbols)).find(
     (symbol: Sketch.SymbolMaster) =>
-      symbol.symbolID === selectedSymbolIntance.symbolID,
+      symbol.symbolID === selectedSymbolInstance.symbolID,
   );
 
   const onSetOverrideValue = useCallback(
@@ -42,7 +42,7 @@ export default memo(function SymbolMasterInspector() {
 
   const elements = [
     <SymbolSelectorRow
-      symbolId={selectedSymbolIntance.symbolID}
+      symbolId={selectedSymbolInstance.symbolID}
       onSelect={useCallback(
         (value) => {
           dispatch('setInstanceSymbolSource', value);
@@ -50,18 +50,17 @@ export default memo(function SymbolMasterInspector() {
         [dispatch],
       )}
       onDetach={useCallback(
-        () => dispatch('detachSymbol', selectedSymbolIntance.do_objectID),
-        [dispatch, selectedSymbolIntance.do_objectID],
+        () => dispatch('detachSymbol', selectedSymbolInstance.do_objectID),
+        [dispatch, selectedSymbolInstance.do_objectID],
       )}
       onEditSource={useCallback(
-        () => dispatch('goToSymbolSource', selectedSymbolIntance.symbolID),
-        [dispatch, selectedSymbolIntance.symbolID],
+        () => dispatch('goToSymbolSource', selectedSymbolInstance.symbolID),
+        [dispatch, selectedSymbolInstance.symbolID],
       )}
     />,
     symbolMaster && (
       <SymbolInstanceOverridesRow
-        canOverride={symbolMaster.allowsOverrides}
-        overrideValues={selectedSymbolIntance.overrideValues}
+        overrideValues={selectedSymbolInstance.overrideValues}
         symbolMaster={symbolMaster}
         onSetOverrideValue={onSetOverrideValue}
         onResetOverrideValue={onResetOverrideValue}

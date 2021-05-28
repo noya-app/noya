@@ -2,7 +2,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import SymbolSourceRow from '../components/inspector/SymbolSourceRow';
 import SymbolLayoutRow from '../components/inspector/SymbolLayoutRow';
-import SymbolOverrideRow from '../components/inspector/SymbolOverrideRow';
+import SymbolMasterOverrideRow from '../components/inspector/SymbolMasterOverrideRow';
 import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
@@ -78,7 +78,7 @@ export default memo(function SymbolMasterInspector() {
         [dispatch],
       )}
     />,
-    <SymbolOverrideRow
+    <SymbolMasterOverrideRow
       symbolMaster={selectedSymbol}
       onSetAllowsOverrides={useCallback(
         (value) => {

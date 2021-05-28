@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { GroupLayouts, SetNumberMode } from '..';
+import { GroupLayouts, Layers, SetNumberMode } from '..';
 import { getSelectedLayers } from '../selectors/layerSelectors';
 import { getSelectedSymbols, getSymbols } from '../selectors/themeSelectors';
 import { ApplicationState } from './applicationReducer';
@@ -182,7 +182,9 @@ export function symbolsReducer(
       );
 
       return produce(state, (draft) => {
-        const symbols = getSelectedLayers(draft) as Sketch.SymbolInstance[];
+        const symbols = getSelectedLayers(draft).filter(
+          Layers.isSymbolInstance,
+        );
 
         if (!symbolMaster) return;
         symbols.forEach((symbol) => {
@@ -221,7 +223,9 @@ export function symbolsReducer(
       const [, name, value] = action;
 
       return produce(state, (draft) => {
-        const symbols = getSelectedLayers(draft) as Sketch.SymbolInstance[];
+        const symbols = getSelectedLayers(draft).filter(
+          Layers.isSymbolInstance,
+        );
 
         symbols.forEach((symbol) => {
           if (!name) {
@@ -229,25 +233,23 @@ export function symbolsReducer(
             return;
           }
 
-          const index = symbol.overrideValues.findIndex(
+          const overrideValueIndex = symbol.overrideValues.findIndex(
             (property) => property.overrideName === name,
           );
 
-          if (value === undefined) {
-            if (index !== -1) symbol.overrideValues.splice(index, 1);
-            return;
+          if (overrideValueIndex === -1) {
+            if (value === undefined)
+              symbol.overrideValues.splice(overrideValueIndex, 1);
+            else {
+              symbol.overrideValues.push({
+                _class: 'overrideValue',
+                overrideName: name,
+                value: value,
+              });
+            }
+          } else if (value !== undefined) {
+            symbol.overrideValues[overrideValueIndex].value = value;
           }
-
-          if (index === -1) {
-            symbol.overrideValues.push({
-              _class: 'overrideValue',
-              overrideName: name,
-              value: value,
-            });
-            return;
-          }
-
-          symbol.overrideValues[index].value = value;
         });
       });
     }

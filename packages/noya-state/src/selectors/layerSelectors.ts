@@ -28,7 +28,7 @@ export const getSelectedTextLayers = (
 };
 
 export const getSelectedLayers = (
-  state: ApplicationState | Draft<ApplicationState>,
+  state: Draft<ApplicationState>,
 ): PageLayer[] => {
   const page = getCurrentPage(state);
 
@@ -110,3 +110,13 @@ export const getRightMostLayerBounds = (page: Sketch.Page) => {
 
   return createBounds(layer.frame);
 };
+
+export function findSymbolMaster<T extends Sketch.SymbolMaster | undefined>(
+  state: ApplicationState,
+  symbolID: string,
+): T {
+  return Layers.findInArray(
+    state.sketch.pages,
+    (child) => Layers.isSymbolMaster(child) && symbolID === child.symbolID,
+  ) as T;
+}

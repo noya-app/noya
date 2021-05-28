@@ -88,26 +88,12 @@ export default memo(function Inspector() {
     const hasSymbolMaster = selectedLayers.some((l) =>
       Layers.isSymbolMaster(l),
     );
-    const hasSymbolInstace = selectedLayers.some((l) =>
+    const hasSymbolInstance = selectedLayers.some((l) =>
       Layers.isSymbolInstance(l),
     );
     const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
-    const hasOneSymbolInstace = selectedLayers.length === 1 && hasSymbolInstace;
-
-    const styleViews = [
-      selectedLayers.length === 1 && <FillInspector />,
-      selectedLayers.length === 1 && <BorderInspector />,
-    ];
-
-    const SpecialInspectors = [
-      !hasTextLayer && !hasSymbolMaster && !hasOneSymbolInstace && (
-        <LayerThemeInspector />
-      ),
-      hasAllTextLayer && <ThemeTextInspector />,
-      hasTextLayer && <TextStyleInspector />,
-      hasOneSymbolMaster && <SymbolMasterInspector />,
-      hasOneSymbolInstace && <SymbolInstanceInspector />,
-    ];
+    const hasOneSymbolInstance =
+      selectedLayers.length === 1 && hasSymbolInstance;
 
     const views = [
       <Fragment key="layout">
@@ -123,9 +109,16 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
-      SpecialInspectors,
       hasContextSettingsLayers && <OpacityInspector />,
-      !hasSymbolInstace && styleViews,
+      !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
+        <LayerThemeInspector />
+      ),
+      hasAllTextLayer && <ThemeTextInspector />,
+      hasTextLayer && <TextStyleInspector />,
+      hasOneSymbolMaster && <SymbolMasterInspector />,
+      hasOneSymbolInstance && <SymbolInstanceInspector />,
+      !hasSymbolInstance && selectedLayers.length === 1 && <FillInspector />,
+      !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
       selectedLayers.length === 1 && <ShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
