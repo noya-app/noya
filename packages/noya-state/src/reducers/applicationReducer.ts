@@ -222,10 +222,7 @@ export function applicationReducer(
     case 'onSetOverrideProperty':
     case 'setInstanceSymbolSource':
     case 'goToSymbolSource':
-    case 'setOverrideTextValue':
-    case 'setOverrideTextStyle':
-    case 'setOverrideSymbolId':
-    case 'setOverrideThemeStyle':
+    case 'setOverrideValue':
       return symbolsReducer(state, action);
     default:
       return themeReducer(state, action);

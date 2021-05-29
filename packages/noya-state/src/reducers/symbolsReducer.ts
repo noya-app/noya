@@ -19,10 +19,7 @@ export type SymbolsAction =
   | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
   | [type: 'setInstanceSymbolSource', symbolId: string]
   | [type: 'goToSymbolSource', overrideName: string]
-  | [type: 'setOverrideTextValue', overrideName?: string, value?: string]
-  | [type: 'setOverrideTextStyle', overrideName?: string, value?: string]
-  | [type: 'setOverrideSymbolId', overrideName?: string, value?: string]
-  | [type: 'setOverrideThemeStyle', overrideName?: string, value?: string];
+  | [type: 'setOverrideValue', overrideName?: string, value?: string];
 
 export function symbolsReducer(
   state: ApplicationState,
@@ -216,10 +213,7 @@ export function symbolsReducer(
         draft.selectedObjects = [symbolMaster.do_objectID];
       });
     }
-    case 'setOverrideTextValue':
-    case 'setOverrideTextStyle':
-    case 'setOverrideSymbolId':
-    case 'setOverrideThemeStyle': {
+    case 'setOverrideValue': {
       const [, name, value] = action;
 
       return produce(state, (draft) => {

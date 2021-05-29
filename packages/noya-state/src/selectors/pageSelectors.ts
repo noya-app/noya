@@ -13,9 +13,7 @@ export type PageMetadata = {
   scrollOrigin: Point;
 };
 
-export const getCurrentPageIndex = (
-  state: ApplicationState | Draft<ApplicationState>,
-) => {
+export const getCurrentPageIndex = (state: Draft<ApplicationState>) => {
   const pageIndex = state.sketch.pages.findIndex(
     (page) => page.do_objectID === state.selectedPage,
   );
@@ -35,9 +33,7 @@ export const getSymbolsPageIndex = (state: ApplicationState) => {
   return pageIndex;
 };
 
-export const getCurrentPage = (
-  state: ApplicationState | Draft<ApplicationState>,
-) => {
+export const getCurrentPage = (state: Draft<ApplicationState>) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
 

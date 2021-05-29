@@ -24,12 +24,6 @@ interface Props {
   onResetOverrideValue: () => void;
 }
 
-type Selectors = {
-  symbols: Sketch.SymbolMaster[];
-  textStyles: Sketch.SharedStyle[];
-  themeStyles: Sketch.SharedStyle[];
-};
-
 const ThemeStyleSelector = ({
   themeStyles,
   sharedStyleID,
@@ -127,7 +121,6 @@ function getOverrideElements(
   symbolMaster: Sketch.SymbolMaster,
   idPath: string[],
   depth: number,
-  selectors: Selectors,
   overrideValues: Sketch.OverrideValue[],
   overrideProperties: Sketch.OverrideProperty[],
   onSetOverrideValue: (overrideName: string, value: string) => void,
@@ -161,7 +154,6 @@ function getOverrideElements(
                 symbolMaster,
                 nestedIdPath,
                 depth + (canOverride('symbolID') ? 1 : 0),
-                selectors,
                 overrideValues,
                 overrideProperties,
                 onSetOverrideValue,
@@ -175,7 +167,7 @@ function getOverrideElements(
           canOverride('symbolID') && (
             <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
               <SymbolMasterSelector
-                symbols={selectors.symbols}
+                symbols={getSymbols(state)}
                 symbolId={symbolID}
                 onChange={(value) =>
                   onSetOverrideValue(symbolIdOverrideName, value)
@@ -216,7 +208,7 @@ function getOverrideElements(
           layer.sharedStyleID && canOverride('textStyle') && (
             <TreeView.Row key={textStyleOverrideName} depth={depth + 1}>
               <TextStyleSelector
-                textStyles={selectors.textStyles}
+                textStyles={getSharedTextStyles(state)}
                 sharedStyleID={
                   Overrides.getOverrideValue(
                     overrideValues,
@@ -260,7 +252,7 @@ function getOverrideElements(
               layer.sharedStyleID && (
                 <TreeView.Row key={layerStyleOverrideName} depth={depth + 1}>
                   <ThemeStyleSelector
-                    themeStyles={selectors.themeStyles}
+                    themeStyles={getSharedStyles(state)}
                     sharedStyleID={
                       Overrides.getOverrideValue(
                         overrideValues,
@@ -289,17 +281,11 @@ export default memo(function SymbolInstanceOverridesRow({
 }: Props) {
   const [state] = useApplicationState();
 
-  const themeStyles = getSharedStyles(state);
-  const textStyles = getSharedTextStyles(state);
-  const symbols = getSymbols(state);
-
-  const selectors = { themeStyles, textStyles, symbols };
   const overrideElements = getOverrideElements(
     state,
     symbolMaster,
     [],
     0,
-    selectors,
     overrideValues,
     symbolMaster.overrideProperties,
     onSetOverrideValue,

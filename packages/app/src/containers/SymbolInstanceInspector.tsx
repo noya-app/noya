@@ -22,22 +22,17 @@ export default memo(function SymbolMasterInspector() {
 
   const onSetOverrideValue = useCallback(
     (overrideName: string, value: string) => {
-      const [, type] = overrideName.split('_');
-
-      if (type === 'symbolID')
-        dispatch('setOverrideSymbolId', overrideName, value);
-      else
-        dispatch(
-          'setOverrideTextValue',
-          overrideName,
-          value === '' || value === 'none' ? undefined : value,
-        );
+      dispatch(
+        'setOverrideValue',
+        overrideName,
+        value === '' || value === 'none' ? undefined : value,
+      );
     },
     [dispatch],
   );
 
   const onResetOverrideValue = useCallback(() => {
-    dispatch('setOverrideTextValue');
+    dispatch('setOverrideValue');
   }, [dispatch]);
 
   const elements = [
