@@ -117,7 +117,9 @@ export default memo(function Inspector() {
       hasTextLayer && <TextStyleInspector />,
       hasOneSymbolMaster && <SymbolMasterInspector />,
       hasOneSymbolInstance && <SymbolInstanceInspector />,
-      !hasSymbolInstance && selectedLayers.length === 1 && <FillInspector />,
+      !hasSymbolInstance && selectedLayers.length === 1 && (
+        <FillInspector title={'Fills'} allowMoreThanOne={true} />
+      ),
       !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
       selectedLayers.length === 1 && <ShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);

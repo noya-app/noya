@@ -39,7 +39,7 @@ export default memo(function ThemeStyleInspector() {
       onNameChange={handleNameChange}
     />,
     <OpacityInspector />,
-    <FillInspector />,
+    <FillInspector title={'Fills'} allowMoreThanOne={true} />,
     <BorderInspector />,
     <ShadowInspector />,
   ];

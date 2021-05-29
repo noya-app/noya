@@ -10,11 +10,11 @@ import {
 import useShallowArray from '../hooks/useShallowArray';
 
 export default memo(function FillInspector({
-  title = 'Fill',
-  allowMoreThanOne = true,
+  title,
+  allowMoreThanOne,
 }: {
-  title?: string;
-  allowMoreThanOne?: boolean;
+  title: string;
+  allowMoreThanOne: boolean;
 }) {
   const [, dispatch] = useApplicationState();
 
