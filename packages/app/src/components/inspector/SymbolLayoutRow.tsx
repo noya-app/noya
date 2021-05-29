@@ -26,7 +26,7 @@ interface Props {
   setMinWidth: (value: number, mode: SetNumberMode) => void;
 }
 
-export default memo(function SymbolInspector({
+export default memo(function SymbolLayoutRow({
   groupLayout,
   setMinWidth,
   setLayoutAxis,

@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Spacer, TreeView } from 'noya-designsystem';
-import { ApplicationState, Layers, Overrides } from 'noya-state';
+import { ApplicationState, Overrides } from 'noya-state';
+import { findSymbolMaster } from 'noya-state/src/selectors/layerSelectors';
 import { memo, ReactNode, useCallback } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
@@ -25,11 +26,8 @@ function getOverrideElements(
     const nestedIdPath = [...idPath, layer.do_objectID];
     const key = nestedIdPath.join('/');
 
-    const canOverrideProperty = (propertyType: Overrides.PropertyType) =>
-      overrideProperties.find((property) => {
-        const [idPathString, type] = property.overrideName.split('_');
-        return idPathString === key && type === propertyType;
-      })?.canOverride ?? true;
+    const canOverride = (propertyType: Overrides.PropertyType) =>
+      Overrides.canOverrideProperty(overrideProperties, propertyType, key);
 
     const titleRow = (
       <TreeView.Row
@@ -44,12 +42,7 @@ function getOverrideElements(
 
     switch (layer._class) {
       case 'symbolInstance': {
-        const symbolMaster = Layers.findInArray(
-          state.sketch.pages,
-          (child) =>
-            Layers.isSymbolMaster(child) && layer.symbolID === child.symbolID,
-        ) as Sketch.SymbolMaster | undefined;
-
+        const symbolMaster = findSymbolMaster(state, layer.symbolID);
         if (!symbolMaster) return [];
 
         const nestedOverrides = symbolMaster.allowsOverrides
@@ -69,7 +62,7 @@ function getOverrideElements(
           <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
             <InspectorPrimitives.Checkbox
               type="checkbox"
-              checked={canOverrideProperty('symbolID')}
+              checked={canOverride('symbolID')}
               onChange={(event) =>
                 onSetOverrideProperty(
                   symbolIdOverrideName,
@@ -92,7 +85,7 @@ function getOverrideElements(
           <TreeView.Row key={stringValueOverrideName} depth={depth + 1}>
             <InspectorPrimitives.Checkbox
               type="checkbox"
-              checked={canOverrideProperty('stringValue')}
+              checked={canOverride('stringValue')}
               onChange={(event) =>
                 onSetOverrideProperty(
                   stringValueOverrideName,
@@ -107,7 +100,7 @@ function getOverrideElements(
             <TreeView.Row key={textStyleOverrideName} depth={depth + 1}>
               <InspectorPrimitives.Checkbox
                 type="checkbox"
-                checked={canOverrideProperty('textStyle')}
+                checked={canOverride('textStyle')}
                 onChange={(event) =>
                   onSetOverrideProperty(
                     textStyleOverrideName,
@@ -129,7 +122,7 @@ function getOverrideElements(
           <TreeView.Row key={imageOverrideName} depth={depth + 1}>
             <InspectorPrimitives.Checkbox
               type="checkbox"
-              checked={canOverrideProperty('image')}
+              checked={canOverride('image')}
               onChange={(event) =>
                 onSetOverrideProperty(imageOverrideName, event.target.checked)
               }
@@ -149,7 +142,7 @@ function getOverrideElements(
                 <TreeView.Row key={layerStyleOverrideName} depth={depth + 1}>
                   <InspectorPrimitives.Checkbox
                     type="checkbox"
-                    checked={canOverrideProperty('layerStyle')}
+                    checked={canOverride('layerStyle')}
                     onChange={(event) =>
                       onSetOverrideProperty(
                         layerStyleOverrideName,
@@ -168,7 +161,7 @@ function getOverrideElements(
   });
 }
 
-export default memo(function SymbolInspector({
+export default memo(function SymbolMasterOverrideRow({
   symbolMaster,
   onSetAllowsOverrides,
   onSetOverrideProperty,

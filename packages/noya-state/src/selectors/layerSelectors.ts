@@ -5,6 +5,7 @@ import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 import { createBounds } from 'noya-geometry';
+import { Draft } from 'immer';
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -26,7 +27,9 @@ export const getSelectedTextLayers = (
   );
 };
 
-export const getSelectedLayers = (state: ApplicationState): PageLayer[] => {
+export const getSelectedLayers = (
+  state: Draft<ApplicationState>,
+): PageLayer[] => {
   const page = getCurrentPage(state);
 
   return Layers.findAll(page, (layer) =>
@@ -107,3 +110,13 @@ export const getRightMostLayerBounds = (page: Sketch.Page) => {
 
   return createBounds(layer.frame);
 };
+
+export function findSymbolMaster<T extends Sketch.SymbolMaster | undefined>(
+  state: ApplicationState,
+  symbolID: string,
+): T {
+  return Layers.findInArray(
+    state.sketch.pages,
+    (child) => Layers.isSymbolMaster(child) && symbolID === child.symbolID,
+  ) as T;
+}

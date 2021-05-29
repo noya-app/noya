@@ -5,6 +5,7 @@ type Props = {
   id?: string;
   style?: any;
   className?: string;
+  disabled?: boolean;
   value: string;
   placeholder?: string;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -19,6 +20,7 @@ function ControlledTextInput({
   style,
   className,
   placeholder,
+  disabled = false,
   onKeyDown,
   value,
   onChange,
@@ -43,6 +45,7 @@ function ControlledTextInput({
       style={style}
       className={className}
       type="text"
+      disabled={disabled}
       value={value}
       placeholder={placeholder}
       onKeyDown={handleKeyDown}

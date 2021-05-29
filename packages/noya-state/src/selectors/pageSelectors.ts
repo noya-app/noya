@@ -1,3 +1,4 @@
+import { Draft } from 'immer';
 import * as Primitives from 'noya-renderer/src/primitives';
 import { ApplicationState, Layers } from '../index';
 import type { Point } from '../types';
@@ -12,7 +13,7 @@ export type PageMetadata = {
   scrollOrigin: Point;
 };
 
-export const getCurrentPageIndex = (state: ApplicationState) => {
+export const getCurrentPageIndex = (state: Draft<ApplicationState>) => {
   const pageIndex = state.sketch.pages.findIndex(
     (page) => page.do_objectID === state.selectedPage,
   );
@@ -32,7 +33,7 @@ export const getSymbolsPageIndex = (state: ApplicationState) => {
   return pageIndex;
 };
 
-export const getCurrentPage = (state: ApplicationState) => {
+export const getCurrentPage = (state: Draft<ApplicationState>) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
 

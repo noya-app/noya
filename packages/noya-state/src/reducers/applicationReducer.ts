@@ -220,13 +220,16 @@ export function applicationReducer(
     case 'setMinWidth':
     case 'setAllowsOverrides':
     case 'onSetOverrideProperty':
+    case 'setInstanceSymbolSource':
+    case 'goToSymbolSource':
+    case 'setOverrideValue':
       return symbolsReducer(state, action);
     default:
       return themeReducer(state, action);
   }
 }
 
-/**
+/*
  * Get an array of all layers using as few lookups as possible on the state tree.
  *
  * Immer will duplicate any objects we access within a produce method, so we

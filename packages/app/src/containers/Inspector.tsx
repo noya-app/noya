@@ -20,6 +20,7 @@ import ShadowInspector from './ShadowInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
+import SymbolInstanceInspector from './SymbolInstanceInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -87,7 +88,12 @@ export default memo(function Inspector() {
     const hasSymbolMaster = selectedLayers.some((l) =>
       Layers.isSymbolMaster(l),
     );
+    const hasSymbolInstance = selectedLayers.some((l) =>
+      Layers.isSymbolInstance(l),
+    );
     const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
+    const hasOneSymbolInstance =
+      selectedLayers.length === 1 && hasSymbolInstance;
 
     const views = [
       <Fragment key="layout">
@@ -103,13 +109,16 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
+      hasContextSettingsLayers && <OpacityInspector />,
+      !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
+        <LayerThemeInspector />
+      ),
       hasAllTextLayer && <ThemeTextInspector />,
-      !hasTextLayer && !hasSymbolMaster && <LayerThemeInspector />,
       hasTextLayer && <TextStyleInspector />,
       hasOneSymbolMaster && <SymbolMasterInspector />,
-      hasContextSettingsLayers && <OpacityInspector />,
-      selectedLayers.length === 1 && <FillInspector />,
-      selectedLayers.length === 1 && <BorderInspector />,
+      hasOneSymbolInstance && <SymbolInstanceInspector />,
+      !hasSymbolInstance && selectedLayers.length === 1 && <FillInspector />,
+      !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
       selectedLayers.length === 1 && <ShadowInspector />,
     ].filter((element): element is JSX.Element => !!element);
 

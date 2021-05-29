@@ -51,7 +51,7 @@ export default memo(function ThemeTextInspector() {
   const getLayerStyleTitle = useCallback(
     (id) =>
       id === NO_TEXT_STYLE
-        ? 'No Layer Style'
+        ? 'No Text Style'
         : sharedTextStyles.find((style) => style.do_objectID === id)!.name,
     [sharedTextStyles],
   );
