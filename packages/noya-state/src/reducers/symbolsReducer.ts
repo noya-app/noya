@@ -234,9 +234,9 @@ export function symbolsReducer(
           if (overrideValueIndex !== -1) {
             if (value === undefined) {
               symbol.overrideValues.splice(overrideValueIndex, 1);
-            } else
-              symbol.overrideValues[overrideValueIndex].value =
-                value === 'none' ? '' : value;
+            } else {
+              symbol.overrideValues[overrideValueIndex].value = value;
+            }
           } else if (value !== undefined) {
             symbol.overrideValues.push({
               _class: 'overrideValue',
