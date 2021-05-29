@@ -368,6 +368,7 @@ export default memo(function LayerList() {
 
   return (
     <TreeView.Root
+      scrollable
       onClick={useCallback(() => dispatch('selectLayer', undefined), [
         dispatch,
       ])}

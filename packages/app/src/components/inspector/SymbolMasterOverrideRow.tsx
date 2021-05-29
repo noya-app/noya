@@ -194,8 +194,7 @@ export default memo(function SymbolMasterOverrideRow({
           <InspectorPrimitives.Text>Allow Overrides</InspectorPrimitives.Text>
         </InspectorPrimitives.Row>
       </InspectorPrimitives.Section>
-      <Spacer.Vertical size={6} />
-      <TreeView.Root>{overrideElements}</TreeView.Root>
+      <TreeView.Root expandable={false}>{overrideElements}</TreeView.Root>
     </>
   );
 });

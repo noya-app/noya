@@ -15,6 +15,7 @@ import {
   findSymbolMaster,
 } from 'noya-state/src/selectors/selectors';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { LayerIcon } from '../../containers/LayerList';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import * as InspectorPrimitives from './InspectorPrimitives';
 interface Props {
@@ -133,7 +134,12 @@ function getOverrideElements(
       Overrides.canOverrideProperty(overrideProperties, propertyType, key);
 
     const titleRow = (
-      <TreeView.Row key={key + ' title'} isSectionHeader depth={depth}>
+      <TreeView.Row
+        key={key + ' title'}
+        isSectionHeader
+        depth={depth}
+        icon={<LayerIcon type={layer._class} />}
+      >
         <TreeView.RowTitle>{layer.name}</TreeView.RowTitle>
       </TreeView.Row>
     );
@@ -307,9 +313,8 @@ export default memo(function SymbolInstanceOverridesRow({
           </Button>
         </InspectorPrimitives.Row>
       </InspectorPrimitives.Section>
-      <Spacer.Vertical size={6} />
       {symbolMaster.allowsOverrides && (
-        <TreeView.Root>{overrideElements}</TreeView.Root>
+        <TreeView.Root expandable={false}>{overrideElements}</TreeView.Root>
       )}
     </>
   );

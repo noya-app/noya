@@ -35,12 +35,14 @@ type ListRowContextValue = {
   position: ListRowPosition;
   selectedPosition: ListRowPosition;
   sortable: boolean;
+  expandable: boolean;
 };
 
-const ListRowContext = createContext<ListRowContextValue>({
+export const ListRowContext = createContext<ListRowContextValue>({
   position: 'only',
   selectedPosition: 'only',
   sortable: false,
+  expandable: true,
 });
 
 /* ----------------------------------------------------------------------------
@@ -242,9 +244,9 @@ const ListViewRow = forwardRef(function ListViewRow<
  * ------------------------------------------------------------------------- */
 
 const RootContainer = styled.ul<{ scrollable?: boolean }>(
-  ({ theme, scrollable = false }) => ({
+  ({ theme, scrollable }) => ({
     ...listReset,
-    flex: '1 0 0',
+    flex: scrollable ? '1 0 0' : '0 0 auto',
     display: 'flex',
     flexDirection: 'column',
     flexWrap: 'nowrap',
@@ -257,6 +259,8 @@ interface ListViewRootProps {
   children?: ReactNode;
   onClick?: () => void;
   sortable?: boolean;
+  scrollable?: boolean;
+  expandable?: boolean;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
 }
 
@@ -264,6 +268,8 @@ function ListViewRoot({
   onClick,
   children,
   sortable = false,
+  scrollable = false,
+  expandable = true,
   onMoveItem,
 }: ListViewRootProps) {
   const handleClick = useCallback(
@@ -322,6 +328,7 @@ function ListViewRoot({
       position,
       selectedPosition,
       sortable,
+      expandable,
     };
 
     return (
@@ -338,7 +345,7 @@ function ListViewRoot({
   }
 
   return (
-    <RootContainer onClick={handleClick}>
+    <RootContainer onClick={handleClick} scrollable={scrollable}>
       {sortable ? (
         <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
           {mappedChildren}

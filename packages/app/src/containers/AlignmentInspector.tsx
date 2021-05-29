@@ -14,10 +14,9 @@ import { useApplicationState } from '../contexts/ApplicationStateContext';
 
 const AlignmentInspectorContainer = styled.div(({ theme }) => ({
   display: 'flex',
-  height: '35px',
+  minHeight: '35px',
   alignItems: 'center',
   justifyContent: 'space-evenly',
-  // background: theme.colors.divider,
   color: 'rgb(139, 139, 139)',
 }));
 
