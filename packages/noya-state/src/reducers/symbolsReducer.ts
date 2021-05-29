@@ -231,18 +231,18 @@ export function symbolsReducer(
             (property) => property.overrideName === name,
           );
 
-          if (overrideValueIndex === -1) {
-            if (value === undefined)
+          if (overrideValueIndex !== -1) {
+            if (value === undefined) {
               symbol.overrideValues.splice(overrideValueIndex, 1);
-            else {
-              symbol.overrideValues.push({
-                _class: 'overrideValue',
-                overrideName: name,
-                value: value,
-              });
+            } else {
+              symbol.overrideValues[overrideValueIndex].value = value;
             }
           } else if (value !== undefined) {
-            symbol.overrideValues[overrideValueIndex].value = value;
+            symbol.overrideValues.push({
+              _class: 'overrideValue',
+              overrideName: name,
+              value: value,
+            });
           }
         });
       });
