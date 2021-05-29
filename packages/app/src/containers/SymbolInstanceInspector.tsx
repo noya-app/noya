@@ -25,7 +25,7 @@ export default memo(function SymbolMasterInspector() {
       dispatch(
         'setOverrideValue',
         overrideName,
-        value === '' || value === 'none' ? undefined : value,
+        value === '' ? undefined : value,
       );
     },
     [dispatch],
