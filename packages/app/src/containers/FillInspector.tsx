@@ -9,7 +9,13 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 
-export default memo(function FillInspector() {
+export default memo(function FillInspector({
+  title = 'Fill',
+  allowMoreThanOne = true,
+}: {
+  title?: string;
+  allowMoreThanOne?: boolean;
+}) {
   const [, dispatch] = useApplicationState();
 
   const selectedStyles = useShallowArray(
@@ -24,11 +30,14 @@ export default memo(function FillInspector() {
 
   return (
     <ArrayController<FileFormat.Fill>
-      title="Fills"
-      id="fills"
-      key="fills"
+      title={title}
+      id={title}
+      key={title}
       value={firstFill}
-      onClickPlus={useCallback(() => dispatch('addNewFill'), [dispatch])}
+      onClickPlus={useCallback(
+        () => (!allowMoreThanOne && firstFill[0] ? [] : dispatch('addNewFill')),
+        [dispatch, allowMoreThanOne, firstFill],
+      )}
       onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
         dispatch,
       ])}

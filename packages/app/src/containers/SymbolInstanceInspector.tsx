@@ -7,6 +7,7 @@ import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElem
 import SymbolSelectorRow from '../components/inspector/SymbolSelectorRow';
 import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
 import { Divider } from 'noya-designsystem';
+import FillInspector from './FillInspector';
 
 export default memo(function SymbolMasterInspector() {
   const dispatch = useDispatch();
@@ -53,6 +54,7 @@ export default memo(function SymbolMasterInspector() {
         [dispatch, selectedSymbolInstance.symbolID],
       )}
     />,
+    <FillInspector title={'Tint'} allowMoreThanOne={false} />,
     symbolMaster && (
       <SymbolInstanceOverridesRow
         overrideValues={selectedSymbolInstance.overrideValues}
