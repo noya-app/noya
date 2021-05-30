@@ -280,7 +280,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
 
             break;
           case 'Group': {
-            const { transform, opacity, clip } = element.props;
+            const { transform, opacity, clip, colorFilter } = element.props;
 
             const saveCount = canvas.getSaveCount();
 
@@ -298,11 +298,22 @@ const hostConfig: ReactCanvasKitHostConfig = {
               canvas.concat(transform);
             }
 
-            if (opacity < 1) {
-              const opacityPaint = new CanvasKit.Paint();
-              opacityPaint.setAlphaf(opacity);
+            // If we need to apply effects to the group as a whole, we need
+            // to draw the elements on a separate bitmap using `saveLayer`
+            const needsLayer = opacity < 1 || colorFilter;
 
-              canvas.saveLayer(opacityPaint);
+            if (needsLayer) {
+              const layerPaint = new CanvasKit.Paint();
+
+              if (opacity < 1) {
+                layerPaint.setAlphaf(opacity);
+              }
+
+              if (colorFilter) {
+                layerPaint.setColorFilter(colorFilter);
+              }
+
+              canvas.saveLayer(layerPaint);
             }
 
             element._elements.forEach(draw);

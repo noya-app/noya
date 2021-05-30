@@ -2,11 +2,34 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { AffineTransform } from 'noya-geometry';
-import { Group, Rect, useFill, useReactCanvasKit } from 'noya-react-canvaskit';
+import {
+  Group,
+  Rect,
+  useDeletable,
+  useFill,
+  useReactCanvasKit,
+} from 'noya-react-canvaskit';
 import { Layers, Overrides, PageLayer } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Primitives } from '../..';
 import SketchGroup from './SketchGroup';
+
+function useTintColorFilter(tintColor: Sketch.Color | undefined) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const colorFilter = useMemo(() => {
+    return tintColor
+      ? CanvasKit.ColorFilter.MakeBlend(
+          Primitives.color(CanvasKit, tintColor),
+          CanvasKit.BlendMode.SrcIn,
+        )
+      : undefined;
+  }, [CanvasKit, tintColor]);
+
+  useDeletable(colorFilter);
+
+  return colorFilter;
+}
 
 interface SymbolProps {
   layer: Sketch.SymbolInstance;
@@ -128,8 +151,13 @@ const Symbol = memo(function Symbol({
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 
+  const firstFill = layer.style?.fills?.[0];
+  const tintColor =
+    firstFill && firstFill.isEnabled ? firstFill.color : undefined;
+  const colorFilter = useTintColorFilter(tintColor);
+
   return (
-    <Group transform={transform} opacity={opacity}>
+    <Group transform={transform} opacity={opacity} colorFilter={colorFilter}>
       {overriddenSymbolMaster.includeBackgroundColorInInstance && (
         <Rect paint={fill} rect={rect} />
       )}

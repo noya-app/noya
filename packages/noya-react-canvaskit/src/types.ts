@@ -7,6 +7,7 @@ import {
   Path,
   Rect,
   Surface,
+  ColorFilter,
 } from 'canvaskit-wasm';
 import { ReactNode } from 'react';
 import { ReactCanvasKitContext } from './contexts/ReactCanvasKitContext';
@@ -63,6 +64,7 @@ export interface GroupComponentProps {
   opacity: number;
   children: ReactNode;
   clip?: ClipProps;
+  colorFilter?: ColorFilter;
 }
 
 interface GroupComponent {
