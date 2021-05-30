@@ -139,7 +139,7 @@ export const LayerIcon = memo(function LayerIcon({
   }
 });
 
-function isValidMaskType(type: LayerType): boolean {
+function isValidClippingMaskType(type: LayerType): boolean {
   switch (type) {
     case 'bitmap':
     case 'oval':
@@ -286,7 +286,9 @@ export default memo(function LayerList() {
     [items, selectedObjects],
   );
 
-  const canBeMask = selectedItems.every((item) => isValidMaskType(item.type));
+  const canBeMask = selectedItems.every((item) =>
+    isValidClippingMaskType(item.type),
+  );
   const canBeMaskChainBreaker = selectedItems.every((item) =>
     isValidMaskChainBreakerType(item.type),
   );
