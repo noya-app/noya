@@ -6,5 +6,6 @@ export * from './clamp';
 export * from './sum';
 export * from './windowsOf';
 export * from './sortBy';
+export * from './chunkBy';
 export * from './getIncrementedName';
 export * as delimitedPath from './delimitedPath';

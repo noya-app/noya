@@ -13,6 +13,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.popover.background = 'rgb(40,40,40)';
   colors.listView.raisedBackground = 'rgba(255,255,255,0.1)';
   colors.slider.background = '#BBB';
+  colors.mask = 'rgb(102,187,106)';
 });
 export const textStyles = lightTheme.textStyles;
 export const fonts = lightTheme.fonts;

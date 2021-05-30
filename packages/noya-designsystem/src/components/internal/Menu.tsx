@@ -5,7 +5,7 @@ export const SEPARATOR_ITEM = 'separator';
 
 export type MenuItem<T extends string> =
   | typeof SEPARATOR_ITEM
-  | { value: T; title: string };
+  | { value: T; title: string; checked?: boolean };
 
 export const styles = {
   separatorStyle: ({ theme }: { theme: Theme }): CSSObject => ({
