@@ -90,11 +90,17 @@ function InputFieldInput(props: TextInputProps) {
   const { labelPosition, labelSize } = useContext(InputFieldContext);
 
   return (
-    <InputElement
-      labelPosition={labelPosition}
-      labelSize={labelSize}
-      {...props}
-    />
+    <>
+      <InputElement
+        labelPosition={labelPosition}
+        labelSize={labelSize}
+        {...props}
+      />
+      <datalist id="info">
+        {props.list &&
+          props.list.map((item, key) => <option key={key} value={item} />)}
+      </datalist>
+    </>
   );
 }
 

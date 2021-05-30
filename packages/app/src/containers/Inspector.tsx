@@ -21,6 +21,7 @@ import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
+import ExportInspector from './ExportInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -122,6 +123,7 @@ export default memo(function Inspector() {
       ),
       !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
       selectedLayers.length === 1 && <ShadowInspector />,
+      selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
     return withSeparatorElements(views, <Divider />);

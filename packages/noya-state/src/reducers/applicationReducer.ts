@@ -29,6 +29,7 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
+import { ExportAction, exportReducer } from './exportReducer';
 
 export type { SetNumberMode };
 
@@ -63,7 +64,8 @@ export type Action =
   | StyleAction
   | TextStyleAction
   | ThemeAction
-  | SymbolsAction;
+  | SymbolsAction
+  | ExportAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -224,6 +226,12 @@ export function applicationReducer(
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);
+    case 'setScale':
+    case 'setName':
+    case 'setFileFormat':
+    case 'setNamingScheme':
+    case 'addExportFormat':
+      return exportReducer(state, action);
     default:
       return themeReducer(state, action);
   }
