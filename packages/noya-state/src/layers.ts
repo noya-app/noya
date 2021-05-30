@@ -177,7 +177,10 @@ export function getFixedRadius(layer: Sketch.AnyLayer): number {
   return layer._class === 'rectangle' ? layer.fixedRadius : 0;
 }
 
-export function isMasked(parent: ParentLayer, reversedChildIndex: number) {
+export function isWithinMaskChain(
+  parent: ParentLayer,
+  reversedChildIndex: number,
+) {
   const childLayers = [...parent.layers].reverse();
 
   const layer = childLayers[reversedChildIndex];

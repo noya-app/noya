@@ -19,7 +19,9 @@ export type LayerPropertyAction =
   | [type: 'setLayerWidth', rotation: number, mode?: SetNumberMode]
   | [type: 'setLayerHeight', rotation: number, mode?: SetNumberMode]
   | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
-  | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode];
+  | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
+  | [type: 'setHasClippingMask', value: boolean]
+  | [type: 'setShouldBreakMaskChain', value: boolean];
 
 export function layerPropertyReducer(
   state: ApplicationState,
@@ -128,6 +130,28 @@ export function layerPropertyReducer(
             mode === 'replace' ? amount : value + amount,
             0.5,
           );
+        });
+      });
+    }
+    case 'setHasClippingMask': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.hasClippingMask = value;
+        });
+      });
+    }
+    case 'setShouldBreakMaskChain': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.shouldBreakMaskChain = value;
         });
       });
     }

@@ -72,14 +72,8 @@ export default memo(function SketchGroup({ layer }: Props) {
     (a, b) => !b.hasClippingMask && !b.shouldBreakMaskChain,
   );
 
-  const elements = maskChains.map((chain, index) => {
-    // If the first layer in the first chain is a mask, we don't render
-    // the layer itself, we only use it as a mask. We render every other
-    // layer, including masks.
-    const renderableLayers =
-      index === 0 && chain[0].hasClippingMask ? chain.slice(1) : chain;
-
-    const chainElements = renderableLayers.map((child) => (
+  const elements = maskChains.map((chain) => {
+    const chainElements = chain.map((child) => (
       <SketchLayer key={child.do_objectID} layer={child} />
     ));
 
