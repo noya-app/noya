@@ -251,7 +251,12 @@ export function canvasReducer(
               y: next.y - previous.y,
             };
 
-            const meta: EncodedPageMetadata = draft.sketch.user[currentPageId];
+            const meta: EncodedPageMetadata = draft.sketch.user[
+              currentPageId
+            ] ?? {
+              zoomValue: 1,
+              scrollOrigin: '{100,100}',
+            };
 
             const parsed = Primitives.parsePoint(meta.scrollOrigin);
 

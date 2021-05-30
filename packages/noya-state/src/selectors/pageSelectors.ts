@@ -44,10 +44,15 @@ export const getCurrentPageMetadata = (
 
   const meta: EncodedPageMetadata = state.sketch.user[currentPage.do_objectID];
 
-  return {
-    zoomValue: meta.zoomValue,
-    scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
-  };
+  return meta
+    ? {
+        zoomValue: meta.zoomValue,
+        scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
+      }
+    : {
+        zoomValue: 1,
+        scrollOrigin: { x: 100, y: 100 },
+      };
 };
 
 export const getCurrentSymbolPageIndex = (
