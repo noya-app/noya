@@ -1,4 +1,5 @@
 import {
+  ArrowDownIcon,
   CircleIcon,
   Component1Icon,
   ComponentInstanceIcon,
@@ -28,9 +29,9 @@ import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import { useWorkspace } from '../hooks/useWorkspace';
 import useDeepArray from '../hooks/useDeepArray';
 import useShallowArray from '../hooks/useShallowArray';
+import { useWorkspace } from '../hooks/useWorkspace';
 
 type LayerType = PageLayer['_class'];
 
@@ -42,6 +43,7 @@ type LayerListItem = {
   expanded: boolean;
   selected: boolean;
   visible: boolean;
+  isMasked: boolean;
 };
 
 function flattenLayerList(
@@ -61,6 +63,13 @@ function flattenLayerList(
     onEnter(layer, indexPath) {
       if (layer._class === 'page') return;
 
+      const currentIndex = indexPath[indexPath.length - 1];
+
+      const parent = Layers.accessReversed(
+        page,
+        indexPath.slice(0, -1),
+      ) as Layers.ParentLayer;
+
       flattened.push({
         type: layer._class,
         id: layer.do_objectID,
@@ -70,6 +79,7 @@ function flattenLayerList(
           layer.layerListExpandedType === Sketch.LayerListExpanded.Expanded,
         selected: selectedObjects.includes(layer.do_objectID),
         visible: layer.isVisible,
+        isMasked: Layers.isMasked(parent, currentIndex),
       });
     },
   });
@@ -131,6 +141,7 @@ const LayerRow = memo(
       name,
       selected,
       visible,
+      isMasked,
       onHoverChange,
       onChangeVisible,
       ...props
@@ -138,6 +149,7 @@ const LayerRow = memo(
       name: string;
       selected: boolean;
       visible: boolean;
+      isMasked: boolean;
       onChangeVisible: (visible: boolean) => void;
     },
     forwardedRef: ForwardedRef<HTMLLIElement>,
@@ -275,7 +287,10 @@ export default memo(function LayerList() {
 
   const layerElements = useMemo(() => {
     return items.map(
-      ({ id, name, depth, type, expanded, selected, visible }, index) => {
+      (
+        { id, name, depth, type, expanded, selected, visible, isMasked },
+        index,
+      ) => {
         const handleClick = (info: TreeView.TreeViewClickInfo) => {
           const { metaKey, shiftKey } = info;
 
@@ -338,17 +353,26 @@ export default memo(function LayerList() {
             key={id}
             name={name}
             visible={visible}
+            isMasked={isMasked}
             depth={depth}
             selected={selected}
             onClick={handleClick}
             onHoverChange={handleHoverChange}
             onChangeVisible={handleChangeVisible}
             icon={
-              <LayerIcon
-                type={type}
-                selected={selected}
-                variant={isSymbolClass ? 'primary' : undefined}
-              />
+              <>
+                {isMasked && (
+                  <>
+                    <ArrowDownIcon />
+                    <Spacer.Horizontal size={4} />
+                  </>
+                )}
+                <LayerIcon
+                  type={type}
+                  selected={selected}
+                  variant={isSymbolClass ? 'primary' : undefined}
+                />
+              </>
             }
             isSectionHeader={isArtboardClass}
             expanded={isGroupClass ? expanded : undefined}
