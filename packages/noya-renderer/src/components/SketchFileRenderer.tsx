@@ -247,21 +247,19 @@ export default memo(function SketchFileRenderer() {
     let matches: SmartSnapObj[] = [];
 
     state.canvasVisibleAndSelectedLayerAxisPairs.xBounds.forEach(function (
-      pairs,
+      pair,
     ) {
-      pairs.forEach(function (pair) {
-        if (pair.selectedLayerValues !== pair.visibleLayerValues) {
-          return;
-        }
+      if (pair.selectedLayerValue !== pair.visibleLayerValue) {
+        return;
+      }
 
-        const match: SmartSnapObj = {
-          closestLayerId: pair.visibleLayerId,
-          setSelectedBounds: pair.selectedLayerValues,
-          setVisibleBounds: pair.visibleLayerValues,
-          guides: [],
-        };
-        matches.push(match);
-      });
+      const match: SmartSnapObj = {
+        closestLayerId: pair.visibleLayerId,
+        setSelectedBounds: pair.selectedLayerValue,
+        setVisibleBounds: pair.visibleLayerValue,
+        guides: [],
+      };
+      matches.push(match);
     });
 
     const selectedBounds = createBounds(boundingRect);
@@ -331,21 +329,19 @@ export default memo(function SketchFileRenderer() {
     let matches: SmartSnapObj[] = [];
 
     state.canvasVisibleAndSelectedLayerAxisPairs.yBounds.forEach(function (
-      pairs,
+      pair,
     ) {
-      pairs.forEach(function (pair) {
-        if (pair.selectedLayerValues !== pair.visibleLayerValues) {
-          return;
-        }
+      if (pair.selectedLayerValue !== pair.visibleLayerValue) {
+        return;
+      }
 
-        const match: SmartSnapObj = {
-          closestLayerId: pair.visibleLayerId,
-          setSelectedBounds: pair.selectedLayerValues,
-          setVisibleBounds: pair.visibleLayerValues,
-          guides: [],
-        };
-        matches.push(match);
-      });
+      const match: SmartSnapObj = {
+        closestLayerId: pair.visibleLayerId,
+        setSelectedBounds: pair.selectedLayerValue,
+        setVisibleBounds: pair.visibleLayerValue,
+        guides: [],
+      };
+      matches.push(match);
     });
 
     const selectedBounds = createBounds(boundingRect);

@@ -37,8 +37,8 @@ export type WorkspaceTab = 'canvas' | 'theme';
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 type SmartSnapPairs = {
-  xBounds: CombinationValue[][];
-  yBounds: CombinationValue[][];
+  xBounds: CombinationValue[];
+  yBounds: CombinationValue[];
 };
 
 export type ApplicationState = {
@@ -57,6 +57,7 @@ export type ApplicationState = {
   selectedThemeStyleGroup: string;
   selectedSymbolGroup: string;
   sketch: SketchFile;
+  TEST: boolean;
 };
 
 export type Action =
@@ -269,5 +270,6 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedTextStyleGroup: '',
     selectedSymbolGroup: '',
     sketch,
+    TEST: false,
   };
 }
