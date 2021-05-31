@@ -11,6 +11,7 @@ import {
   getCurrentPageIndex,
   getCurrentTab,
   getSelectedLayerIndexPaths,
+  getSelectedLayers,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -226,13 +227,19 @@ export function applicationReducer(
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);
-    case 'setScale':
-    case 'setName':
-    case 'setFileFormat':
-    case 'setNamingScheme':
+    case 'setExportScale':
+    case 'setExportName':
+    case 'setExportFileFormat':
+    case 'setExportNamingScheme':
     case 'addExportFormat':
     case 'deleteExportFormat':
-      return exportReducer(state, action);
+      return produce(state, (draft) => {
+        const layers = getSelectedLayers(draft);
+
+        layers.forEach((layer) => {
+          layer.exportOptions = exportReducer(layer.exportOptions, action);
+        });
+      });
     default:
       return themeReducer(state, action);
   }

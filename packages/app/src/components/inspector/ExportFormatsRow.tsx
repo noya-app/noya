@@ -1,5 +1,5 @@
-import { Cross1Icon } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Cross1Icon } from '@radix-ui/react-icons';
 import {
   InputField,
   Select,
@@ -8,8 +8,9 @@ import {
   Label,
 } from 'noya-designsystem';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { ExportOptions } from 'noya-state';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -20,8 +21,9 @@ const Row = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  exportFormat: Sketch.ExportFormat;
   last: boolean;
+  frame: Sketch.Rect;
+  exportFormat: Sketch.ExportFormat;
   onDelete: () => void;
   onChangeScale: (amount: string) => void;
   onChangeName: (name: string) => void;
@@ -32,6 +34,7 @@ interface Props {
 export default memo(function ExportFormatsRow({
   id,
   last,
+  frame,
   exportFormat,
   onDelete,
   onChangeScale,
@@ -40,13 +43,20 @@ export default memo(function ExportFormatsRow({
   onChangeNamingScheme,
 }: Props) {
   const fileFormatOptions = Object.values(Sketch.ExportFileFormat);
-  const scale =
-    exportFormat.scale.toString() +
-    (exportFormat.visibleScaleType
-      ? exportFormat.visibleScaleType === Sketch.VisibleScaleType.Height
-        ? 'h'
-        : 'w'
-      : 'x');
+  const { scale, absoluteSize, visibleScaleType } = exportFormat;
+
+  const scaleString = useMemo(() => {
+    const scaleValue =
+      visibleScaleType === Sketch.VisibleScaleType.Scale ? scale : absoluteSize;
+
+    const visibleScaleLetter =
+      visibleScaleType !== Sketch.VisibleScaleType.Scale
+        ? visibleScaleType === Sketch.VisibleScaleType.Height
+          ? 'h'
+          : 'w'
+        : 'x';
+    return scaleValue + visibleScaleLetter;
+  }, [scale, absoluteSize, visibleScaleType]);
 
   const scaleInputId = `${id}-size`;
   const namingSchemeInputId = `${id}-`;
@@ -69,32 +79,26 @@ export default memo(function ExportFormatsRow({
   );
 
   const canChangeScale =
-    exportFormat.fileFormat === Sketch.ExportFileFormat.JPG ||
-    exportFormat.fileFormat === Sketch.ExportFileFormat.PNG;
+    exportFormat.fileFormat !== Sketch.ExportFileFormat.SVG;
 
   const isPrefix =
-    exportFormat.namingScheme ===
-    Sketch.ExportFormatNamingScheme.Prefix.valueOf();
+    exportFormat.namingScheme === Sketch.ExportFormatNamingScheme.Prefix;
 
   const elements = [
     <InputField.Root id={scaleInputId} size={55}>
       <InputField.Input
         disabled={!canChangeScale}
-        placeholder={canChangeScale ? '' : scale}
-        value={canChangeScale ? scale : ''}
+        value={scaleString}
         onSubmit={useCallback(
           (value, reset) => {
-            if (
-              isNaN(parseFloat(value)) &&
-              isNaN(parseFloat(value.slice(-1)))
-            ) {
+            if (!ExportOptions.parseScale(value, frame)) {
               reset();
               return;
             }
 
             onChangeScale(value);
           },
-          [onChangeScale],
+          [onChangeScale, frame],
         )}
       />
     </InputField.Root>,
@@ -110,9 +114,16 @@ export default memo(function ExportFormatsRow({
       />
       <InputField.DropdownMenu
         list={[
-          { value: Sketch.ExportFormatNamingScheme.Prefix, title: 'Prefix' },
-          { value: Sketch.ExportFormatNamingScheme.Suffix, title: 'Suffix' },
+          {
+            value: Sketch.ExportFormatNamingScheme.Prefix.toString(),
+            title: 'Prefix',
+          },
+          {
+            value: Sketch.ExportFormatNamingScheme.Suffix.toString(),
+            title: 'Suffix',
+          },
         ]}
+        buttonId={`${id}-nameingScheme-button`}
         onSumbitList={useCallback(
           (value: string) => onChangeNamingScheme(parseInt(value)),
           [onChangeNamingScheme],
@@ -125,7 +136,7 @@ export default memo(function ExportFormatsRow({
         id={'fileFormat-select'}
         value={exportFormat.fileFormat}
         options={fileFormatOptions}
-        getTitle={(id) => id.toUpperCase()}
+        getTitle={useCallback((id) => id.toUpperCase(), [])}
         onChange={onChangeFileFormat}
       />
     </InputField.Root>,

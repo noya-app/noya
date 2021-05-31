@@ -22,7 +22,7 @@ const ButtonElement = styled.button<{
   borderRadius: '4px',
   paddingTop: '4px',
   paddingRight: variant === 'thin' ? '1px' : '6px',
-  paddingBottom: '4px',
+  paddingBottom: variant === 'thin' ? '0px' : '4px',
   paddingLeft: variant === 'thin' ? '1px' : '6px',
   background: active ? theme.colors.primary : theme.colors.inputBackground,
   color: active ? 'white' : theme.colors.text,

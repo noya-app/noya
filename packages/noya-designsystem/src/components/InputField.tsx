@@ -15,16 +15,19 @@ import handleNudge from '../utils/handleNudge';
 import TextInput, { TextInputProps } from './internal/TextInput';
 import { DropdownMenu as NoyaDropdownMenu } from 'noya-designsystem';
 import Button from './Button';
+import { MenuItem } from './ContextMenu';
 
 type LabelPosition = 'start' | 'end';
 
 const InputFieldContext = createContext<{
   labelPosition: LabelPosition;
   labelSize: number;
+  hasLabel: boolean;
   hasDropdown: boolean;
 }>({
   labelPosition: 'end',
   labelSize: 6,
+  hasLabel: false,
   hasDropdown: false,
 });
 
@@ -81,24 +84,20 @@ const DropdownContainer = styled.span(({ theme }) => ({
 }));
 
 interface InputFieldDropdownProps {
-  list: { value: number; title: string }[];
+  list: MenuItem<string>[];
+  buttonId: string;
   onSumbitList: (value: string) => void;
 }
 
 function InputFieldDropdownMenu({
   list,
+  buttonId,
   onSumbitList,
 }: InputFieldDropdownProps) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu.Root<string>
-        items={list.map((e) => ({
-          value: e.value.toString(),
-          title: e.title,
-        }))}
-        onSelect={onSumbitList}
-      >
-        <Button id={'a'} variant="thin">
+      <NoyaDropdownMenu.Root<string> items={list} onSelect={onSumbitList}>
+        <Button id={buttonId} variant="thin">
           <CaretDownIcon />
         </Button>
       </NoyaDropdownMenu.Root>
@@ -113,37 +112,52 @@ function InputFieldDropdownMenu({
 const InputElement = styled(TextInput)<{
   labelPosition: LabelPosition;
   labelSize: number;
+  hasLabel: boolean;
   hasDropdown: boolean;
   textAlign?: Property.TextAlign;
-}>(({ theme, labelPosition, labelSize, hasDropdown, textAlign }) => ({
-  ...theme.textStyles.small,
-  color: theme.colors.text,
-  width: '0px', // Reset intrinsic width
-  flex: '1 1 0px',
-  position: 'relative',
-  border: '0',
-  outline: 'none',
-  minWidth: '0',
-  textAlign: textAlign ?? 'left',
-  alignSelf: 'stretch',
-  borderRadius: '4px',
-  paddingTop: '4px',
-  paddingBottom: '4px',
-  paddingLeft: labelPosition === 'start' ? `${6 + labelSize + 6}px` : '6px',
-  paddingRight:
-    labelPosition === 'start'
-      ? '6px'
-      : `${6 + labelSize + 6 + (hasDropdown ? 11 : 0)}px`,
-  background: theme.colors.inputBackground,
-  '&:focus': {
-    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
-  },
-}));
+  disabled?: boolean;
+}>(
+  ({
+    theme,
+    labelPosition,
+    labelSize,
+    hasDropdown,
+    textAlign,
+    disabled,
+    hasLabel,
+  }) => ({
+    ...theme.textStyles.small,
+    color: disabled ? theme.colors.textDisabled : theme.colors.text,
+    width: '0px', // Reset intrinsic width
+    flex: '1 1 0px',
+    position: 'relative',
+    border: '0',
+    outline: 'none',
+    minWidth: '0',
+    textAlign: textAlign ?? 'left',
+    alignSelf: 'stretch',
+    borderRadius: '4px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    paddingLeft:
+      labelPosition === 'start'
+        ? `${6 + (hasLabel ? labelSize : 0) + 6}px`
+        : '6px',
+    paddingRight:
+      labelPosition === 'start'
+        ? '6px'
+        : `${6 + (hasLabel ? labelSize + 6 : 0) + (hasDropdown ? 11 : 0)}px`,
+    background: theme.colors.inputBackground,
+    '&:focus': {
+      boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+    },
+  }),
+);
 
 function InputFieldInput(
   props: TextInputProps & { textAlign?: Property.TextAlign },
 ) {
-  const { labelPosition, labelSize, hasDropdown } = useContext(
+  const { labelPosition, labelSize, hasDropdown, hasLabel } = useContext(
     InputFieldContext,
   );
 
@@ -151,7 +165,9 @@ function InputFieldInput(
     <InputElement
       labelPosition={labelPosition}
       labelSize={labelSize}
+      hasLabel={hasLabel}
       hasDropdown={hasDropdown}
+      disabled={props.disabled}
       {...props}
     />
   );
@@ -264,9 +280,12 @@ function InputFieldRoot({
     (child) => isValidElement(child) && child.type === DropdownMenu,
   );
 
+  const hasLabel = Children.toArray(children).some(
+    (child) => isValidElement(child) && child.type === Label,
+  );
   const contextValue = useMemo(
-    () => ({ labelPosition, labelSize, hasDropdown }),
-    [labelPosition, labelSize, hasDropdown],
+    () => ({ labelPosition, labelSize, hasDropdown, hasLabel }),
+    [labelPosition, labelSize, hasDropdown, hasLabel],
   );
 
   return (

@@ -2,7 +2,6 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useSelector, useDispatch } from '../contexts/ApplicationStateContext';
-import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Divider } from 'noya-designsystem';
 import type FileFormat from '@sketch-hq/sketch-file-format-ts';
@@ -14,19 +13,46 @@ export default memo(function ExportInspector() {
   const title = 'Exports';
   const dispatch = useDispatch();
 
-  const selectedLayer = useShallowArray(
-    useSelector(Selectors.getSelectedLayers),
+  const selectedLayer = useSelector(
+    Selectors.getSelectedLayers,
   )[0] as Sketch.SymbolInstance;
 
-  const symbolMaster = useShallowArray(useSelector(Selectors.getSymbols)).find(
+  const symbolMaster = useSelector(Selectors.getSymbols).find(
     (symbol: Sketch.SymbolMaster) => symbol.symbolID === selectedLayer.symbolID,
   );
 
   const exportFormats = selectedLayer.exportOptions.exportFormats;
-  /**
-   *
-   * TODO > allow to change prefix and suffi
-   */
+
+  const onChangeScale = useCallback(
+    (value, index) => {
+      dispatch('setExportScale', index, value, selectedLayer.frame);
+    },
+    [dispatch, selectedLayer.frame],
+  );
+  const onChangeName = useCallback(
+    (value, index) => {
+      dispatch('setExportName', index, value);
+    },
+    [dispatch],
+  );
+  const onChangeFileFormat = useCallback(
+    (value, index) => {
+      dispatch('setExportFileFormat', index, value);
+    },
+    [dispatch],
+  );
+  const onChangeNamingScheme = useCallback(
+    (value, index) => {
+      dispatch('setExportNamingScheme', index, value);
+    },
+    [dispatch],
+  );
+  const onDelete = useCallback(
+    (index) => {
+      dispatch('deleteExportFormat', index);
+    },
+    [dispatch],
+  );
 
   const elements = [
     <ArrayController<FileFormat.ExportFormat>
@@ -42,22 +68,13 @@ export default memo(function ExportInspector() {
         <ExportFormatsRow
           id={`exportFormat-${index}}`}
           last={index === exportFormats.length - 1}
+          frame={selectedLayer.frame}
           exportFormat={item}
-          onChangeScale={(value) => {
-            dispatch('setScale', index, value);
-          }}
-          onChangeName={(value) => {
-            dispatch('setName', index, value);
-          }}
-          onChangeFileFormat={(value) => {
-            dispatch('setFileFormat', index, value);
-          }}
-          onChangeNamingScheme={(value) => {
-            dispatch('setNamingScheme', index, value);
-          }}
-          onDelete={() => {
-            dispatch('deleteExportFormat', index);
-          }}
+          onChangeScale={(value) => onChangeScale(value, index)}
+          onChangeName={(value) => onChangeName(value, index)}
+          onChangeFileFormat={(value) => onChangeFileFormat(value, index)}
+          onChangeNamingScheme={(value) => onChangeNamingScheme(value, index)}
+          onDelete={() => onDelete(index)}
         />
       )}
     </ArrayController>,
