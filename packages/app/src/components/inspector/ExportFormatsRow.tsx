@@ -100,15 +100,15 @@ export default memo(function ExportFormatsRow({
     </InputField.Root>,
     <InputField.Root
       id={namingSchemeInputId}
-      labelPosition={isPrefix ? 'start' : 'end'}
-      hasDropDown={true}
+      labelPosition={isPrefix ? 'end' : 'start'}
     >
       <InputField.Input
         value={exportFormat.name}
         placeholder={isPrefix ? 'Prefix' : 'Suffix'}
         onSubmit={onChangeName}
+        textAlign={isPrefix ? 'end' : 'start'}
       />
-      <InputField.DropDown
+      <InputField.DropdownMenu
         list={[
           { value: Sketch.ExportFormatNamingScheme.Prefix, title: 'Prefix' },
           { value: Sketch.ExportFormatNamingScheme.Suffix, title: 'Suffix' },
