@@ -1,3 +1,4 @@
+import { CaretDownIcon } from '@radix-ui/react-icons';
 import {
   createContext,
   memo,
@@ -9,15 +10,19 @@ import {
 import styled from 'styled-components';
 import handleNudge from '../utils/handleNudge';
 import TextInput, { TextInputProps } from './internal/TextInput';
+import { DropdownMenu } from 'noya-designsystem';
+import Button from './Button';
 
 type LabelPosition = 'start' | 'end';
 
 const InputFieldContext = createContext<{
   labelPosition: LabelPosition;
   labelSize: number;
+  hasDropDown: boolean;
 }>({
   labelPosition: 'end',
   labelSize: 6,
+  hasDropDown: false,
 });
 
 /* ----------------------------------------------------------------------------
@@ -41,7 +46,7 @@ const LabelContainer = styled.label<{ labelPosition: LabelPosition }>(
     userSelect: 'none',
     ...(labelPosition === 'start'
       ? { justifyContent: 'flex-start', paddingLeft: '6px' }
-      : { justifyContent: 'flex-end', paddingRight: '6px' }),
+      : { justifyContent: 'flex-end', paddingRight: '22px' }),
   }),
 );
 
@@ -58,13 +63,46 @@ function InputFieldLabel({ children = false }: InputFieldLabelProps) {
 }
 
 /* ----------------------------------------------------------------------------
+ * DropDow
+ * ------------------------------------------------------------------------- */
+
+const DropDownContainer = styled.label(({ theme }) => ({
+  position: 'absolute',
+  right: 0,
+}));
+
+interface InputFieldDropDownProps {
+  list: { value: number; title: string }[];
+  onSumbitList: (value: string) => void;
+}
+
+function InputFieldDropDown({ list, onSumbitList }: InputFieldDropDownProps) {
+  return (
+    <DropDownContainer>
+      <DropdownMenu.Root<string>
+        items={list.map((e) => ({
+          value: e.value.toString(),
+          title: e.title,
+        }))}
+        onSelect={onSumbitList}
+      >
+        <Button id={'a'}>
+          <CaretDownIcon />
+        </Button>
+      </DropdownMenu.Root>
+    </DropDownContainer>
+  );
+}
+
+/* ----------------------------------------------------------------------------
  * Input
  * ------------------------------------------------------------------------- */
 
 const InputElement = styled(TextInput)<{
   labelPosition: LabelPosition;
   labelSize: number;
-}>(({ theme, labelPosition, labelSize }) => ({
+  hasDropDown: boolean;
+}>(({ theme, labelPosition, labelSize, hasDropDown }) => ({
   ...theme.textStyles.small,
   color: theme.colors.text,
   width: '0px', // Reset intrinsic width
@@ -79,7 +117,10 @@ const InputElement = styled(TextInput)<{
   paddingTop: '4px',
   paddingBottom: '4px',
   paddingLeft: labelPosition === 'start' ? `${6 + labelSize + 6}px` : '6px',
-  paddingRight: labelPosition === 'start' ? '6px' : `${6 + labelSize + 6}px`,
+  paddingRight:
+    labelPosition === 'start'
+      ? '6px'
+      : `${6 + labelSize + 6 + (hasDropDown ? 6 : 0)}px`,
   background: theme.colors.inputBackground,
   '&:focus': {
     boxShadow: `0 0 0 2px ${theme.colors.primary}`,
@@ -87,20 +128,17 @@ const InputElement = styled(TextInput)<{
 }));
 
 function InputFieldInput(props: TextInputProps) {
-  const { labelPosition, labelSize } = useContext(InputFieldContext);
+  const { labelPosition, labelSize, hasDropDown } = useContext(
+    InputFieldContext,
+  );
 
   return (
-    <>
-      <InputElement
-        labelPosition={labelPosition}
-        labelSize={labelSize}
-        {...props}
-      />
-      <datalist id="info">
-        {props.list &&
-          props.list.map((item, key) => <option key={key} value={item} />)}
-      </datalist>
-    </>
+    <InputElement
+      labelPosition={labelPosition}
+      labelSize={labelSize}
+      hasDropDown={hasDropDown}
+      {...props}
+    />
   );
 }
 
@@ -197,6 +235,7 @@ interface InputFieldRootProps {
   size?: number;
   labelPosition?: LabelPosition;
   labelSize?: number;
+  hasDropDown?: boolean;
 }
 
 function InputFieldRoot({
@@ -205,11 +244,12 @@ function InputFieldRoot({
   size,
   labelPosition = 'end',
   labelSize = 6,
+  hasDropDown = false,
 }: InputFieldRootProps) {
-  const contextValue = useMemo(() => ({ labelPosition, labelSize }), [
-    labelPosition,
-    labelSize,
-  ]);
+  const contextValue = useMemo(
+    () => ({ labelPosition, labelSize, hasDropDown }),
+    [labelPosition, labelSize, hasDropDown],
+  );
 
   return (
     <InputFieldContext.Provider value={contextValue}>
@@ -223,4 +263,5 @@ function InputFieldRoot({
 export const Input = memo(InputFieldInput);
 export const NumberInput = memo(InputFieldNumberInput);
 export const Label = memo(InputFieldLabel);
+export const DropDown = memo(InputFieldDropDown);
 export const Root = memo(InputFieldRoot);

@@ -12,7 +12,8 @@ export type ExportAction =
       index: number,
       value: Sketch.ExportFormatNamingScheme,
     ]
-  | [type: 'addExportFormat'];
+  | [type: 'addExportFormat']
+  | [type: 'deleteExportFormat', index: number];
 
 export function exportReducer(
   state: ApplicationState,
@@ -25,17 +26,50 @@ export function exportReducer(
       return produce(state, (draft) => {
         const layers = getSelectedLayers(draft);
 
-        const number = parseFloat(value.replace('x', ''));
-        layers.forEach(
-          (layer) => (layer.exportOptions.exportFormats[index].scale = number),
-        );
+        const number = isNaN(parseFloat(value))
+          ? parseFloat(value.slice(0, -1))
+          : parseFloat(value);
+
+        const visibleScale =
+          value.slice(-1) === 'w'
+            ? Sketch.VisibleScaleType.Width
+            : value.slice(-1) === 'h'
+            ? Sketch.VisibleScaleType.Height
+            : Sketch.VisibleScaleType.Scale;
+
+        layers.forEach((layer) => {
+          layer.exportOptions.exportFormats[index].scale = number;
+          layer.exportOptions.exportFormats[
+            index
+          ].visibleScaleType = visibleScale;
+        });
       });
     }
     case 'addExportFormat': {
       return produce(state, (draft) => {
         const layers = getSelectedLayers(draft);
 
-        layers.forEach((layer) => layer.exportOptions.exportFormats.push());
+        layers.forEach((layer) =>
+          layer.exportOptions.exportFormats.push({
+            _class: 'exportFormat',
+            name: '',
+            absoluteSize: 0,
+            fileFormat: Sketch.ExportFileFormat.PNG,
+            visibleScaleType: Sketch.VisibleScaleType.Scale,
+            scale: 1,
+          }),
+        );
+      });
+    }
+    case 'deleteExportFormat': {
+      const [, index] = action;
+
+      return produce(state, (draft) => {
+        const layers = getSelectedLayers(draft);
+
+        layers.forEach((layer) =>
+          layer.exportOptions.exportFormats.splice(index, 1),
+        );
       });
     }
     case 'setName': {

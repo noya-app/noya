@@ -231,6 +231,7 @@ export function applicationReducer(
     case 'setFileFormat':
     case 'setNamingScheme':
     case 'addExportFormat':
+    case 'deleteExportFormat':
       return exportReducer(state, action);
     default:
       return themeReducer(state, action);
