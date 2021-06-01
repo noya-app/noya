@@ -1,25 +1,22 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 
-type ExportScale = {
+export type ExportScale = {
   scale: number;
   absoluteSize: number;
   visibleScaleType: Sketch.VisibleScaleType;
 };
 
-export function parseScale(
-  scaleText: string,
-  rect: Sketch.Rect,
-): ExportScale | undefined {
+export function parseScale(scaleText: string): ExportScale | undefined {
   const scaleValue = isNaN(parseFloat(scaleText))
     ? parseFloat(scaleText.slice(0, -1))
     : parseFloat(scaleText);
 
-  if (isNaN(scaleValue)) return undefined;
+  if (isNaN(scaleValue) && scaleValue > 0) return undefined;
 
   const visibleScaleType =
-    scaleText.slice(-1) === 'w'
+    scaleText[scaleText.length - 1] === 'w'
       ? Sketch.VisibleScaleType.Width
-      : scaleText.slice(-1) === 'h'
+      : scaleText[scaleText.length - 1] === 'h'
       ? Sketch.VisibleScaleType.Height
       : Sketch.VisibleScaleType.Scale;
 
@@ -29,10 +26,15 @@ export function parseScale(
   const scale =
     visibleScaleType === Sketch.VisibleScaleType.Scale
       ? scaleValue
-      : absoluteSize /
-        (visibleScaleType === Sketch.VisibleScaleType.Width
-          ? rect.width
-          : rect.height);
+      : absoluteSize;
 
   return { scale, absoluteSize, visibleScaleType };
+}
+
+export function getScaleUnits(visibleScaleType: Sketch.VisibleScaleType) {
+  return visibleScaleType !== Sketch.VisibleScaleType.Scale
+    ? visibleScaleType === Sketch.VisibleScaleType.Height
+      ? 'h'
+      : 'w'
+    : 'x';
 }

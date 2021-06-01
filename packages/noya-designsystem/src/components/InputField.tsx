@@ -83,20 +83,20 @@ const DropdownContainer = styled.span(({ theme }) => ({
   right: 0,
 }));
 
-interface InputFieldDropdownProps {
-  list: MenuItem<string>[];
+interface InputFieldDropdownProps<T extends string> {
+  list: MenuItem<T>[];
   buttonId: string;
-  onSumbitList: (value: string) => void;
+  onSelect: (value: T) => void;
 }
 
-function InputFieldDropdownMenu({
+function InputFieldDropdownMenu<T extends string>({
   list,
   buttonId,
-  onSumbitList,
-}: InputFieldDropdownProps) {
+  onSelect,
+}: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu.Root<string> items={list} onSelect={onSumbitList}>
+      <NoyaDropdownMenu.Root<T> items={list} onSelect={onSelect}>
         <Button id={buttonId} variant="thin">
           <CaretDownIcon />
         </Button>
@@ -140,9 +140,7 @@ const InputElement = styled(TextInput)<{
     paddingTop: '4px',
     paddingBottom: '4px',
     paddingLeft:
-      labelPosition === 'start'
-        ? `${6 + (hasLabel ? labelSize : 0) + 6}px`
-        : '6px',
+      hasLabel && labelPosition === 'start' ? `${6 + labelSize + 6}px` : '6px',
     paddingRight:
       labelPosition === 'start'
         ? '6px'
@@ -276,13 +274,15 @@ function InputFieldRoot({
   labelPosition = 'end',
   labelSize = 6,
 }: InputFieldRootProps) {
-  const hasDropdown = Children.toArray(children).some(
+  const childrenArray = Children.toArray(children);
+
+  const hasDropdown = childrenArray.some(
     (child) => isValidElement(child) && child.type === DropdownMenu,
   );
-
-  const hasLabel = Children.toArray(children).some(
+  const hasLabel = childrenArray.some(
     (child) => isValidElement(child) && child.type === Label,
   );
+
   const contextValue = useMemo(
     () => ({ labelPosition, labelSize, hasDropdown, hasLabel }),
     [labelPosition, labelSize, hasDropdown, hasLabel],

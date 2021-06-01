@@ -23,37 +23,6 @@ export default memo(function ExportInspector() {
 
   const exportFormats = selectedLayer.exportOptions.exportFormats;
 
-  const onChangeScale = useCallback(
-    (value, index) => {
-      dispatch('setExportScale', index, value, selectedLayer.frame);
-    },
-    [dispatch, selectedLayer.frame],
-  );
-  const onChangeName = useCallback(
-    (value, index) => {
-      dispatch('setExportName', index, value);
-    },
-    [dispatch],
-  );
-  const onChangeFileFormat = useCallback(
-    (value, index) => {
-      dispatch('setExportFileFormat', index, value);
-    },
-    [dispatch],
-  );
-  const onChangeNamingScheme = useCallback(
-    (value, index) => {
-      dispatch('setExportNamingScheme', index, value);
-    },
-    [dispatch],
-  );
-  const onDelete = useCallback(
-    (index) => {
-      dispatch('deleteExportFormat', index);
-    },
-    [dispatch],
-  );
-
   const elements = [
     <ArrayController<FileFormat.ExportFormat>
       title={title}
@@ -64,18 +33,28 @@ export default memo(function ExportInspector() {
         dispatch('addExportFormat');
       }, [dispatch])}
     >
-      {({ item, index }: { item: FileFormat.ExportFormat; index: number }) => (
-        <ExportFormatsRow
-          id={`exportFormat-${index}}`}
-          last={index === exportFormats.length - 1}
-          frame={selectedLayer.frame}
-          exportFormat={item}
-          onChangeScale={(value) => onChangeScale(value, index)}
-          onChangeName={(value) => onChangeName(value, index)}
-          onChangeFileFormat={(value) => onChangeFileFormat(value, index)}
-          onChangeNamingScheme={(value) => onChangeNamingScheme(value, index)}
-          onDelete={() => onDelete(index)}
-        />
+      {useCallback(
+        ({ item, index }: { item: FileFormat.ExportFormat; index: number }) => (
+          <ExportFormatsRow
+            id={`exportFormat-${index}}`}
+            last={index === exportFormats.length - 1}
+            exportFormat={item}
+            onChangeScale={(value) => {
+              dispatch('setExportScale', index, value);
+            }}
+            onChangeName={(value) => {
+              dispatch('setExportName', index, value);
+            }}
+            onChangeFileFormat={(value) => {
+              dispatch('setExportFileFormat', index, value);
+            }}
+            onChangeNamingScheme={(value) => {
+              dispatch('setExportNamingScheme', index, value);
+            }}
+            onDelete={() => dispatch('deleteExportFormat', index)}
+          />
+        ),
+        [exportFormats.length, dispatch],
       )}
     </ArrayController>,
     symbolMaster && <ExportPreviewRow layer={symbolMaster} />,

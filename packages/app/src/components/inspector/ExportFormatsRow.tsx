@@ -22,19 +22,17 @@ const Row = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   last: boolean;
-  frame: Sketch.Rect;
   exportFormat: Sketch.ExportFormat;
   onDelete: () => void;
-  onChangeScale: (amount: string) => void;
+  onChangeScale: (value: ExportOptions.ExportScale) => void;
   onChangeName: (name: string) => void;
-  onChangeFileFormat: (amount: Sketch.ExportFileFormat) => void;
-  onChangeNamingScheme: (amount: Sketch.ExportFormatNamingScheme) => void;
+  onChangeFileFormat: (value: Sketch.ExportFileFormat) => void;
+  onChangeNamingScheme: (value: Sketch.ExportFormatNamingScheme) => void;
 }
 
 export default memo(function ExportFormatsRow({
   id,
   last,
-  frame,
   exportFormat,
   onDelete,
   onChangeScale,
@@ -45,18 +43,10 @@ export default memo(function ExportFormatsRow({
   const fileFormatOptions = Object.values(Sketch.ExportFileFormat);
   const { scale, absoluteSize, visibleScaleType } = exportFormat;
 
-  const scaleString = useMemo(() => {
-    const scaleValue =
-      visibleScaleType === Sketch.VisibleScaleType.Scale ? scale : absoluteSize;
-
-    const visibleScaleLetter =
-      visibleScaleType !== Sketch.VisibleScaleType.Scale
-        ? visibleScaleType === Sketch.VisibleScaleType.Height
-          ? 'h'
-          : 'w'
-        : 'x';
-    return scaleValue + visibleScaleLetter;
-  }, [scale, absoluteSize, visibleScaleType]);
+  const scaleString =
+    (visibleScaleType === Sketch.VisibleScaleType.Scale
+      ? scale
+      : absoluteSize) + ExportOptions.getScaleUnits(visibleScaleType);
 
   const scaleInputId = `${id}-size`;
   const namingSchemeInputId = `${id}-`;
@@ -91,14 +81,15 @@ export default memo(function ExportFormatsRow({
         value={scaleString}
         onSubmit={useCallback(
           (value, reset) => {
-            if (!ExportOptions.parseScale(value, frame)) {
+            const parseScale = ExportOptions.parseScale(value);
+            if (!parseScale) {
               reset();
               return;
             }
 
-            onChangeScale(value);
+            onChangeScale(parseScale);
           },
-          [onChangeScale, frame],
+          [onChangeScale],
         )}
       />
     </InputField.Root>,
@@ -113,18 +104,21 @@ export default memo(function ExportFormatsRow({
         textAlign={isPrefix ? 'end' : 'start'}
       />
       <InputField.DropdownMenu
-        list={[
-          {
-            value: Sketch.ExportFormatNamingScheme.Prefix.toString(),
-            title: 'Prefix',
-          },
-          {
-            value: Sketch.ExportFormatNamingScheme.Suffix.toString(),
-            title: 'Suffix',
-          },
-        ]}
+        list={useMemo(
+          () => [
+            {
+              value: Sketch.ExportFormatNamingScheme.Prefix.toString(),
+              title: 'Prefix',
+            },
+            {
+              value: Sketch.ExportFormatNamingScheme.Suffix.toString(),
+              title: 'Suffix',
+            },
+          ],
+          [],
+        )}
         buttonId={`${id}-nameingScheme-button`}
-        onSumbitList={useCallback(
+        onSelect={useCallback(
           (value: string) => onChangeNamingScheme(parseInt(value)),
           [onChangeNamingScheme],
         )}

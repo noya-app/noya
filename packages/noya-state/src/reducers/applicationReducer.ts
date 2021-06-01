@@ -11,7 +11,6 @@ import {
   getCurrentPageIndex,
   getCurrentTab,
   getSelectedLayerIndexPaths,
-  getSelectedLayers,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -233,11 +232,24 @@ export function applicationReducer(
     case 'setExportNamingScheme':
     case 'addExportFormat':
     case 'deleteExportFormat':
-      return produce(state, (draft) => {
-        const layers = getSelectedLayers(draft);
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-        layers.forEach((layer) => {
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           layer.exportOptions = exportReducer(layer.exportOptions, action);
+          if (action[0] === 'setExportScale') {
+            const [, index, value] = action;
+
+            const { absoluteSize, visibleScaleType } = value;
+            if (visibleScaleType === Sketch.VisibleScaleType.Scale) return;
+
+            layer.exportOptions.exportFormats[index].scale =
+              absoluteSize /
+              (visibleScaleType === Sketch.VisibleScaleType.Width
+                ? layer.frame.width
+                : layer.frame.height);
+          }
         });
       });
     default:
