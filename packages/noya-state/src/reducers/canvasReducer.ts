@@ -266,14 +266,7 @@ export function canvasReducer(
 
             if (draft.TEST) return;
 
-            let layerLeftPos: number | undefined = undefined;
-            let layerTopPos: number | undefined = undefined;
-
-            // console.log('top of equation', { layerLeftPos, layerTopPos });
-
             const { origin, current, pageSnapshot } = interactionState;
-
-            // console.log({ interactionState });
 
             const visibleLayersInfo = getVisibleLayersAxisValues(
               state,
@@ -296,14 +289,17 @@ export function canvasReducer(
               'x',
             );
 
+            let matchingLayerInfo: SelectedValueObj | undefined;
+            //let offset = 0;
+
             for (let pair of pairs) {
               const distance = Math.abs(
                 pair.selectedLayerValue - pair.visibleLayerValue,
               );
 
-              if (distance < 6) continue;
+              if (distance > 6) continue;
 
-              const matchingLayerInfo = visibleLayersInfo.find((layer) => {
+              matchingLayerInfo = visibleLayersInfo.find((layer) => {
                 return layer.layerId === pair.visibleLayerId;
               });
 
@@ -311,25 +307,6 @@ export function canvasReducer(
                 console.warn('No layer match');
                 continue;
               }
-
-              // let offset = 0;
-
-              //targ == pair
-              //activeOnj == xValues
-
-              if (Math.abs(selectedBounds.maxX - matchingLayerInfo.x[0]) < 6) {
-                layerLeftPos = matchingLayerInfo.x[0] - 142;
-              }
-              if (Math.abs(selectedBounds.minX - matchingLayerInfo.x[2]) < 6) {
-                layerLeftPos = matchingLayerInfo.x[0] + 158;
-              }
-              if (Math.abs(selectedBounds.maxY - matchingLayerInfo.y[0]) < 6) {
-                layerTopPos = matchingLayerInfo.y[0] - 91;
-              }
-              if (Math.abs(matchingLayerInfo.y[2] - selectedBounds.minY) < 6) {
-                layerTopPos = matchingLayerInfo.y[0] + 123;
-              }
-              // console.log({ layerLeftPos }, { layerTopPos });
 
               // if (xValues[0] === pair.selectedLayerValue) {
               //   console.log('selection minX');
@@ -350,14 +327,12 @@ export function canvasReducer(
               //   delta.x = matchingLayerInfo.x[1] + offset;
               // } else {
               //   console.log('match maxX');
-              //   delta.x = matchingLayerInfo.x[2] + offset;
+              //   delta.x = matchingLayerInfo.x[0] + offset;
               // }
 
               // const snapDelta =
               //   pair.selectedLayerValue - pair.visibleLayerValue;
-              // delta.x -= snapDelta;
-
-              // delta.x -= 100;
+              // // delta.x = offset;
 
               break;
             }
@@ -369,45 +344,8 @@ export function canvasReducer(
                 indexPath,
               );
 
-              // console.log('current x', { current });
-              // console.log('layerLeftPos', layerLeftPos);
-
-              // console.log(
-              //   'Math.abs(current.x - layerLeftPos)',
-              //   layerLeftPos ? Math.abs(current.x - layerLeftPos) : '',
-              // );
-              // console.log('bottom of equation', { delta });
-
-              // console.log({ layerLeftPos });
-              // console.log({ layerTopPos });
-
-              if (layerLeftPos) {
-                layer.frame.x = layerLeftPos;
-                layerLeftPos = undefined;
-              } else {
-                layer.frame.x = initialRect.x + delta.x;
-              }
-              if (layerTopPos) {
-                layer.frame.y = layerTopPos;
-                layerTopPos = undefined;
-              } else {
-                layer.frame.y = initialRect.y + delta.y;
-              }
-
-              // layer.frame.x = initialRect.x + delta.x;
-              // layer.frame.y = initialRect.y + delta.y;
-
-              // console.log(layer.do_objectID, visibleLayersInfo);
-              // });
-
-              //   // if (snapDistance !== undefined) {
-              //   //   console.log({ snapDistance });
-              //   //   layer.frame.x = snapDistance;
-              //   // } else {
-              //   layer.frame.x = initialRect.x + delta.x;
-              //   // }
-
-              //   layer.frame.y = initialRect.y + delta.y;
+              layer.frame.x = initialRect.x + delta.x;
+              layer.frame.y = initialRect.y + delta.y;
             });
 
             draft.canvasVisibleAndSelectedLayerAxisPairs = {
