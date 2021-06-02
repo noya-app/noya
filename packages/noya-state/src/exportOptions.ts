@@ -6,12 +6,17 @@ export type ExportScale = {
   visibleScaleType: Sketch.VisibleScaleType;
 };
 
-export function parseScale(scaleText: string): ExportScale | undefined {
-  const scaleValue = isNaN(parseFloat(scaleText))
+export type ExportSize = {
+  size: number;
+  visibleScaleType: Sketch.VisibleScaleType;
+};
+
+export function parseScale(scaleText: string): ExportSize | undefined {
+  const size = isNaN(parseFloat(scaleText))
     ? parseFloat(scaleText.slice(0, -1))
     : parseFloat(scaleText);
 
-  if (isNaN(scaleValue) && scaleValue > 0) return undefined;
+  if (isNaN(size) && size > 0) return undefined;
 
   const visibleScaleType =
     scaleText[scaleText.length - 1] === 'w'
@@ -20,21 +25,16 @@ export function parseScale(scaleText: string): ExportScale | undefined {
       ? Sketch.VisibleScaleType.Height
       : Sketch.VisibleScaleType.Scale;
 
-  const absoluteSize =
-    visibleScaleType === Sketch.VisibleScaleType.Scale ? 0 : scaleValue;
-
-  const scale =
-    visibleScaleType === Sketch.VisibleScaleType.Scale
-      ? scaleValue
-      : absoluteSize;
-
-  return { scale, absoluteSize, visibleScaleType };
+  return { size, visibleScaleType };
 }
 
 export function getScaleUnits(visibleScaleType: Sketch.VisibleScaleType) {
-  return visibleScaleType !== Sketch.VisibleScaleType.Scale
-    ? visibleScaleType === Sketch.VisibleScaleType.Height
-      ? 'h'
-      : 'w'
-    : 'x';
+  switch (visibleScaleType) {
+    case Sketch.VisibleScaleType.Scale:
+      return 'x';
+    case Sketch.VisibleScaleType.Height:
+      return 'h';
+    case Sketch.VisibleScaleType.Width:
+      return 'w';
+  }
 }

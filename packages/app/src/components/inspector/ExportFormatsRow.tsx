@@ -24,7 +24,7 @@ interface Props {
   last: boolean;
   exportFormat: Sketch.ExportFormat;
   onDelete: () => void;
-  onChangeScale: (value: ExportOptions.ExportScale) => void;
+  onChangeScale: (value: ExportOptions.ExportSize) => void;
   onChangeName: (name: string) => void;
   onChangeFileFormat: (value: Sketch.ExportFileFormat) => void;
   onChangeNamingScheme: (value: Sketch.ExportFormatNamingScheme) => void;
@@ -104,7 +104,7 @@ export default memo(function ExportFormatsRow({
         textAlign={isPrefix ? 'end' : 'start'}
       />
       <InputField.DropdownMenu
-        list={useMemo(
+        items={useMemo(
           () => [
             {
               value: Sketch.ExportFormatNamingScheme.Prefix.toString(),

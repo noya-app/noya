@@ -237,19 +237,11 @@ export function applicationReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          layer.exportOptions = exportReducer(layer.exportOptions, action);
-          if (action[0] === 'setExportScale') {
-            const [, index, value] = action;
-
-            const { absoluteSize, visibleScaleType } = value;
-            if (visibleScaleType === Sketch.VisibleScaleType.Scale) return;
-
-            layer.exportOptions.exportFormats[index].scale =
-              absoluteSize /
-              (visibleScaleType === Sketch.VisibleScaleType.Width
-                ? layer.frame.width
-                : layer.frame.height);
-          }
+          layer.exportOptions = exportReducer(
+            layer.exportOptions,
+            action,
+            layer.frame,
+          );
         });
       });
     default:

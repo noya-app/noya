@@ -84,19 +84,19 @@ const DropdownContainer = styled.span(({ theme }) => ({
 }));
 
 interface InputFieldDropdownProps<T extends string> {
-  list: MenuItem<T>[];
+  items: MenuItem<T>[];
   buttonId: string;
   onSelect: (value: T) => void;
 }
 
 function InputFieldDropdownMenu<T extends string>({
-  list,
+  items,
   buttonId,
   onSelect,
 }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu.Root<T> items={list} onSelect={onSelect}>
+      <NoyaDropdownMenu.Root<T> items={items} onSelect={onSelect}>
         <Button id={buttonId} variant="thin">
           <CaretDownIcon />
         </Button>
@@ -142,7 +142,7 @@ const InputElement = styled(TextInput)<{
     paddingLeft:
       hasLabel && labelPosition === 'start' ? `${6 + labelSize + 6}px` : '6px',
     paddingRight:
-      labelPosition === 'start'
+      (!hasLabel || !hasDropdown) && labelPosition === 'end'
         ? '6px'
         : `${6 + (hasLabel ? labelSize + 6 : 0) + (hasDropdown ? 11 : 0)}px`,
     background: theme.colors.inputBackground,
