@@ -2,17 +2,19 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import {
   AffineTransform,
+  Bounds,
+  createBounds,
+  createRect,
   normalizeRect,
   rectsIntersect,
-  createRect,
-  createBounds,
   Size,
-  Bounds,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
+import { Axis } from 'noya-renderer/src/components/guides';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
+import { getLayersInRect } from '../selectors/geometrySelectors';
 import {
   EncodedPageMetadata,
   getBoundingRect,
@@ -29,20 +31,17 @@ import {
   interactionReducer,
   InteractionState,
 } from './interactionReducer';
-import {
-  getLayersInRect,
-  getSelectedRect,
-} from '../selectors/geometrySelectors';
-import { Axis } from 'noya-renderer/src/components/guides';
 
 function getAxisValues(
   rectBounds: Bounds,
   axis: Axis,
 ): [number, number, number] {
   if (axis === 'x') {
-    return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
+    return [rectBounds.minX] as any;
+    // return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
   } else {
-    return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
+    return [] as any;
+    // return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
   }
 }
 
@@ -247,26 +246,30 @@ export function canvasReducer(
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
-      const selectedRect = getSelectedRect(state);
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' || action[1][0] === 'maybeMove'
           ? [...action[1], page]
           : action[1],
       );
+
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
 
         switch (interactionState.type) {
           case 'moving': {
+            const { origin, current, pageSnapshot } = interactionState;
+
+            const selectedRect = getBoundingRect(
+              pageSnapshot,
+              AffineTransform.identity,
+              layerIds,
+            );
+
             if (!selectedRect) {
               console.info('No selected rect');
               return;
             }
-
-            if (draft.TEST) return;
-
-            const { origin, current, pageSnapshot } = interactionState;
 
             const visibleLayersInfo = getVisibleLayersAxisValues(
               state,
@@ -277,6 +280,9 @@ export function canvasReducer(
               x: current.x - origin.x,
               y: current.y - origin.y,
             };
+
+            // Simulate where the selection rect would be, assuming no snapping
+            selectedRect.x += delta.x;
 
             const selectedBounds = createBounds(selectedRect);
 
@@ -330,9 +336,12 @@ export function canvasReducer(
               //   delta.x = matchingLayerInfo.x[0] + offset;
               // }
 
-              // const snapDelta =
-              //   pair.selectedLayerValue - pair.visibleLayerValue;
-              // // delta.x = offset;
+              const snapDelta =
+                pair.selectedLayerValue - pair.visibleLayerValue;
+
+              // console.log(pair, snapDelta);
+
+              delta.x -= snapDelta;
 
               break;
             }
