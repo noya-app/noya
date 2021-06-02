@@ -140,11 +140,12 @@ const InputElement = styled(TextInput)<{
     paddingTop: '4px',
     paddingBottom: '4px',
     paddingLeft:
-      hasLabel && labelPosition === 'start' ? `${6 + labelSize + 6}px` : '6px',
+      6 + (hasLabel && labelPosition === 'start' ? 6 + labelSize : 0) + 'px',
     paddingRight:
-      (!hasLabel || !hasDropdown) && labelPosition === 'end'
-        ? '6px'
-        : `${6 + (hasLabel ? labelSize + 6 : 0) + (hasDropdown ? 11 : 0)}px`,
+      6 +
+      (hasLabel && labelPosition === 'end' ? 6 + labelSize : 0) +
+      (hasDropdown ? 11 : 0) +
+      'px',
     background: theme.colors.inputBackground,
     '&:focus': {
       boxShadow: `0 0 0 2px ${theme.colors.primary}`,

@@ -16,7 +16,7 @@ export function parseScale(scaleText: string): ExportSize | undefined {
     ? parseFloat(scaleText.slice(0, -1))
     : parseFloat(scaleText);
 
-  if (isNaN(size) && size > 0) return undefined;
+  if (isNaN(size) || size <= 0) return undefined;
 
   const visibleScaleType =
     scaleText[scaleText.length - 1] === 'w'
