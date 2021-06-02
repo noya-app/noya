@@ -27,10 +27,12 @@ export function exportReducer(
         const { size, visibleScaleType } = value;
 
         draft.exportFormats[index].scale =
-          size /
-          (visibleScaleType === Sketch.VisibleScaleType.Width
-            ? frame.width
-            : frame.height);
+          visibleScaleType === Sketch.VisibleScaleType.Scale
+            ? size
+            : size /
+              (visibleScaleType === Sketch.VisibleScaleType.Width
+                ? frame.width
+                : frame.height);
 
         draft.exportFormats[index].absoluteSize =
           visibleScaleType === Sketch.VisibleScaleType.Scale ? 0 : size;
