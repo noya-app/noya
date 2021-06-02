@@ -37,11 +37,11 @@ function getAxisValues(
   axis: Axis,
 ): [number, number, number] {
   if (axis === 'x') {
-    return [rectBounds.minX] as any;
-    // return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
+    // return [rectBounds.minX] as any;
+    return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
   } else {
-    return [] as any;
-    // return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
+    // return [] as any;
+    return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
   }
 }
 
@@ -283,22 +283,28 @@ export function canvasReducer(
 
             // Simulate where the selection rect would be, assuming no snapping
             selectedRect.x += delta.x;
+            selectedRect.y += delta.y;
 
             const selectedBounds = createBounds(selectedRect);
 
             const xValues = getAxisValues(selectedBounds, 'x');
             const yValues = getAxisValues(selectedBounds, 'y');
 
-            const pairs = getVisibleAndSelectedLayerAxisPairs(
+            const xPairs = getVisibleAndSelectedLayerAxisPairs(
               xValues,
               visibleLayersInfo,
               'x',
             );
 
-            let matchingLayerInfo: SelectedValueObj | undefined;
-            //let offset = 0;
+            const yPairs = getVisibleAndSelectedLayerAxisPairs(
+              yValues,
+              visibleLayersInfo,
+              'y',
+            );
 
-            for (let pair of pairs) {
+            let matchingLayerInfo: SelectedValueObj | undefined;
+
+            for (let pair of yPairs) {
               const distance = Math.abs(
                 pair.selectedLayerValue - pair.visibleLayerValue,
               );
@@ -314,35 +320,33 @@ export function canvasReducer(
                 continue;
               }
 
-              // if (xValues[0] === pair.selectedLayerValue) {
-              //   console.log('selection minX');
-              //   offset = 0;
-              // } else if (xValues[1] === pair.selectedLayerValue) {
-              //   console.log('selection midX');
-              //   offset = xValues[1] - xValues[0];
-              // } else {
-              //   console.log('selection maxX');
-              //   offset = xValues[2] - xValues[0];
-              // }
+              const snapDelta =
+                pair.selectedLayerValue - pair.visibleLayerValue;
 
-              // if (matchingLayerInfo.x[0] === pair.selectedLayerValue) {
-              //   console.log('match minX');
-              //   delta.x = matchingLayerInfo.x[0] + offset;
-              // } else if (matchingLayerInfo.x[1] === pair.selectedLayerValue) {
-              //   console.log('match midX');
-              //   delta.x = matchingLayerInfo.x[1] + offset;
-              // } else {
-              //   console.log('match maxX');
-              //   delta.x = matchingLayerInfo.x[0] + offset;
-              // }
+              delta.y -= snapDelta;
+              break;
+            }
+
+            for (let pair of xPairs) {
+              const distance = Math.abs(
+                pair.selectedLayerValue - pair.visibleLayerValue,
+              );
+
+              if (distance > 6) continue;
+
+              matchingLayerInfo = visibleLayersInfo.find((layer) => {
+                return layer.layerId === pair.visibleLayerId;
+              });
+
+              if (!matchingLayerInfo) {
+                console.warn('No layer match');
+                continue;
+              }
 
               const snapDelta =
                 pair.selectedLayerValue - pair.visibleLayerValue;
 
-              // console.log(pair, snapDelta);
-
               delta.x -= snapDelta;
-
               break;
             }
 

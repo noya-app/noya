@@ -249,13 +249,17 @@ export default memo(function SketchFileRenderer() {
     state.canvasVisibleAndSelectedLayerAxisPairs.xBounds.forEach(function (
       pair,
     ) {
-      if (pair.selectedLayerValue !== pair.visibleLayerValue) {
-        return;
-      }
+      const distance = Math.abs(
+        pair.selectedLayerValue - pair.visibleLayerValue,
+      );
+
+      if (distance > 6) return;
+
+      const snapDistance = pair.selectedLayerValue - pair.visibleLayerValue;
 
       const match: SmartSnapObj = {
         closestLayerId: pair.visibleLayerId,
-        setSelectedBounds: pair.selectedLayerValue,
+        setSelectedBounds: pair.selectedLayerValue - snapDistance,
         setVisibleBounds: pair.visibleLayerValue,
         guides: [],
       };
@@ -331,13 +335,17 @@ export default memo(function SketchFileRenderer() {
     state.canvasVisibleAndSelectedLayerAxisPairs.yBounds.forEach(function (
       pair,
     ) {
-      if (pair.selectedLayerValue !== pair.visibleLayerValue) {
-        return;
-      }
+      const distance = Math.abs(
+        pair.selectedLayerValue - pair.visibleLayerValue,
+      );
+
+      if (distance > 6) return;
+
+      const snapDistance = pair.selectedLayerValue - pair.visibleLayerValue;
 
       const match: SmartSnapObj = {
         closestLayerId: pair.visibleLayerId,
-        setSelectedBounds: pair.selectedLayerValue,
+        setSelectedBounds: pair.selectedLayerValue - snapDistance,
         setVisibleBounds: pair.visibleLayerValue,
         guides: [],
       };
@@ -377,7 +385,6 @@ export default memo(function SketchFileRenderer() {
         return result ? [result] : [];
       });
     });
-
     return (
       <>
         {matches.map((match, index) => {
