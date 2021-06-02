@@ -3,7 +3,7 @@ import produce from 'immer';
 import { AffineTransform, resizeIfLarger, Size } from 'noya-geometry';
 import { Group } from 'noya-react-canvaskit';
 import { SketchGroup } from 'noya-renderer';
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import CanvasGridItem from './CanvasGridItem';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 
 const PADDING = 10;
 
-function RCKSymbolPreview({
+export function RCKSymbolPreview({
   layer,
   size,
 }: {

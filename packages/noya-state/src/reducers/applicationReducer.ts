@@ -29,6 +29,7 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
+import { ExportAction, exportReducer } from './exportReducer';
 
 export type { SetNumberMode };
 
@@ -63,7 +64,8 @@ export type Action =
   | StyleAction
   | TextStyleAction
   | ThemeAction
-  | SymbolsAction;
+  | SymbolsAction
+  | ExportAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -226,6 +228,24 @@ export function applicationReducer(
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);
+    case 'setExportScale':
+    case 'setExportName':
+    case 'setExportFileFormat':
+    case 'setExportNamingScheme':
+    case 'addExportFormat':
+    case 'deleteExportFormat':
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.exportOptions = exportReducer(
+            layer.exportOptions,
+            action,
+            layer.frame,
+          );
+        });
+      });
     default:
       return themeReducer(state, action);
   }
