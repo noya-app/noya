@@ -249,17 +249,11 @@ export default memo(function SketchFileRenderer() {
     state.canvasVisibleAndSelectedLayerAxisPairs.xBounds.forEach(function (
       pair,
     ) {
-      const distance = Math.abs(
-        pair.selectedLayerValue - pair.visibleLayerValue,
-      );
-
-      if (distance > 6) return;
-
-      const snapDistance = pair.selectedLayerValue - pair.visibleLayerValue;
+      if (pair.selectedLayerValue !== pair.visibleLayerValue) return;
 
       const match: SmartSnapObj = {
         closestLayerId: pair.visibleLayerId,
-        setSelectedBounds: pair.selectedLayerValue - snapDistance,
+        setSelectedBounds: pair.selectedLayerValue,
         setVisibleBounds: pair.visibleLayerValue,
         guides: [],
       };
@@ -335,17 +329,13 @@ export default memo(function SketchFileRenderer() {
     state.canvasVisibleAndSelectedLayerAxisPairs.yBounds.forEach(function (
       pair,
     ) {
-      const distance = Math.abs(
-        pair.selectedLayerValue - pair.visibleLayerValue,
-      );
-
-      if (distance > 6) return;
-
-      const snapDistance = pair.selectedLayerValue - pair.visibleLayerValue;
+      if (pair.selectedLayerValue !== pair.visibleLayerValue) {
+        return;
+      }
 
       const match: SmartSnapObj = {
         closestLayerId: pair.visibleLayerId,
-        setSelectedBounds: pair.selectedLayerValue - snapDistance,
+        setSelectedBounds: pair.selectedLayerValue,
         setVisibleBounds: pair.visibleLayerValue,
         guides: [],
       };

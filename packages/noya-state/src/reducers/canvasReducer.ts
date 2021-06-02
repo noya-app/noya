@@ -89,22 +89,6 @@ type SelectedValueObj = {
   x: [number, number, number];
 };
 
-// function getSelectedLayerAxisValues(layer_id: string, layer: Sketch.AnyLayer) {
-//   const selectedRect = getBoundingRect(layer, AffineTransform.identity, [
-//     layer_id,
-//   ]);
-
-//   if (!selectedRect) return;
-
-//   const rectBounds = createBounds(selectedRect);
-
-//   return {
-//     layerId: layer_id,
-//     y: getAxisValues(rectBounds, 'y'),
-//     x: getAxisValues(rectBounds, 'x'),
-//   };
-// }
-
 export type BoundsObj = {
   selectedLayerValues: [number, number, number];
   visibleLayerValues: [number, number, number];
@@ -302,23 +286,12 @@ export function canvasReducer(
               'y',
             );
 
-            let matchingLayerInfo: SelectedValueObj | undefined;
-
             for (let pair of yPairs) {
               const distance = Math.abs(
                 pair.selectedLayerValue - pair.visibleLayerValue,
               );
 
               if (distance > 6) continue;
-
-              matchingLayerInfo = visibleLayersInfo.find((layer) => {
-                return layer.layerId === pair.visibleLayerId;
-              });
-
-              if (!matchingLayerInfo) {
-                console.warn('No layer match');
-                continue;
-              }
 
               const snapDelta =
                 pair.selectedLayerValue - pair.visibleLayerValue;
@@ -333,15 +306,6 @@ export function canvasReducer(
               );
 
               if (distance > 6) continue;
-
-              matchingLayerInfo = visibleLayersInfo.find((layer) => {
-                return layer.layerId === pair.visibleLayerId;
-              });
-
-              if (!matchingLayerInfo) {
-                console.warn('No layer match');
-                continue;
-              }
 
               const snapDelta =
                 pair.selectedLayerValue - pair.visibleLayerValue;
@@ -361,14 +325,26 @@ export function canvasReducer(
               layer.frame.y = initialRect.y + delta.y;
             });
 
+            const selectedRectAfter = getBoundingRect(
+              page,
+              AffineTransform.identity,
+              layerIds,
+            );
+
+            if (!selectedRectAfter) {
+              return;
+            }
+
+            const selectedBoundsAfter = createBounds(selectedRectAfter);
+
             draft.canvasVisibleAndSelectedLayerAxisPairs = {
               xBounds: getVisibleAndSelectedLayerAxisPairs(
-                xValues,
+                getAxisValues(selectedBoundsAfter, 'x'),
                 visibleLayersInfo,
                 'x',
               ),
               yBounds: getVisibleAndSelectedLayerAxisPairs(
-                yValues,
+                getAxisValues(selectedBoundsAfter, 'y'),
                 visibleLayersInfo,
                 'y',
               ),
