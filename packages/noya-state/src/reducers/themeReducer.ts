@@ -42,11 +42,11 @@ export type ThemeAction =
       alpha: number,
       mode?: SetNumberMode,
     ]
+  | [type: `addSwatch`, name?: string, color?: Sketch.Color, id?: string]
   | [
-      type: `add${ComponentsElements}`,
+      type: `add${Exclude<ComponentsElements, 'Swatch'>}`,
       name?: string,
-      style?: Sketch.Style | Sketch.Color,
-      id?: string,
+      style?: Sketch.Style,
     ]
   | [
       type: 'updateThemeStyle',
@@ -92,8 +92,6 @@ export function themeReducer(
       const currentTab = state.currentTab;
 
       return produce(state, (draft) => {
-        if (color && color._class === 'style') return;
-
         const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
           do_objectID: uuid(),
@@ -135,8 +133,6 @@ export function themeReducer(
       const currentTab = state.currentTab;
 
       return produce(state, (draft) => {
-        if (style && style._class === 'color') return;
-
         const textStyles = draft.sketch.document.layerTextStyles ?? {
           _class: 'sharedTextStyleContainer',
           do_objectID: uuid(),
@@ -179,8 +175,6 @@ export function themeReducer(
 
       const currentTab = state.currentTab;
       return produce(state, (draft) => {
-        if (style && style._class === 'color') return;
-
         const layerStyles = draft.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
           do_objectID: uuid(),

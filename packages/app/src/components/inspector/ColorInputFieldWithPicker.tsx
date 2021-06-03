@@ -35,6 +35,8 @@ const StyledArrow = styled(Popover.Arrow)(({ theme }) => ({
 
 const PaddedSection = styled.section({
   padding: '10px',
+  display: 'flex',
+  flexDirection: 'column',
 });
 
 const Row = styled.div(({ theme }) => ({
@@ -161,6 +163,25 @@ export default memo(function ColorInputFieldWithPicker({
     value.swatchID &&
     sharedSwatches.some((e) => e.do_objectID === value.swatchID);
 
+  const detachThemeColor = useCallback(() => {
+    onChange({
+      ...value,
+      swatchID: undefined,
+    });
+  }, [onChange, value]);
+
+  const createThemeColor = useCallback(() => {
+    const swatchName = prompt('New Swatch Name');
+    if (!swatchName) return;
+
+    const id = uuid();
+    onChange({
+      ...value,
+      swatchID: id,
+    });
+    dispatch('addSwatch', swatchName, value, id);
+  }, [onChange, dispatch, value]);
+
   return (
     <Popover.Root>
       <Popover.Trigger as={Slot}>
@@ -174,25 +195,15 @@ export default memo(function ColorInputFieldWithPicker({
             onChangeColor={onChange}
           />
           <Spacer.Vertical size={12} />
-          <Button
-            id={'handle-theme-color'}
-            full={true}
-            onClick={useCallback(() => {
-              const id = uuid();
-              onChange({
-                ...value,
-                swatchID: isSwatch ? undefined : id,
-              });
-              if (isSwatch) return;
-
-              const swatchName = prompt('New Swatch Name');
-              if (!swatchName) return;
-
-              dispatch('addSwatch', swatchName, value, id);
-            }, [onChange, isSwatch, dispatch, value])}
-          >
-            {isSwatch ? 'Detach Theme Color' : 'Create Theme Color'}
-          </Button>
+          {isSwatch ? (
+            <Button id={'detach-theme-color'} onClick={detachThemeColor}>
+              Detach Theme Color
+            </Button>
+          ) : (
+            <Button id={'crete-theme-color'} onClick={createThemeColor}>
+              Create Theme Color
+            </Button>
+          )}
         </PaddedSection>
         <Divider />
         <PaddedSection>
