@@ -6,7 +6,6 @@ import {
   Group,
   Path,
   useDeletable,
-  useFill,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
@@ -15,6 +14,7 @@ import { Primitives } from 'noya-renderer';
 import { Layers } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { getStrokedPath } from '../../primitives/path';
+import SketchBorder from '../effects/SketchBorder';
 
 /**
  * CanvasKit draws gradients in absolute coordinates, while Sketch draws them
@@ -173,35 +173,6 @@ const SketchFillShadow = memo(function SketchFillShadow({
       <SketchShadow shadow={shadow} path={strokedPath} />
     </Group>
   );
-});
-
-const SketchBorder = memo(function SketchBorder({
-  path,
-  border,
-}: {
-  path: CanvasKit.Path;
-  border: Sketch.Border;
-}) {
-  const { CanvasKit } = useReactCanvasKit();
-
-  const paint = useFill({
-    color: Primitives.color(CanvasKit, border.color),
-  });
-
-  const strokedPath = useMemo(
-    () =>
-      Primitives.getStrokedBorderPath(
-        CanvasKit,
-        path,
-        border.thickness,
-        border.position,
-      ),
-    [CanvasKit, border.position, border.thickness, path],
-  );
-
-  useDeletable(strokedPath);
-
-  return <Path path={strokedPath} paint={paint} />;
 });
 
 interface Props {
