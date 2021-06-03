@@ -46,6 +46,7 @@ export type ThemeAction =
       type: `add${ComponentsElements}`,
       name?: string,
       style?: Sketch.Style | Sketch.Color,
+      id?: string,
     ]
   | [
       type: 'updateThemeStyle',
@@ -87,7 +88,7 @@ export function themeReducer(
       });
     }
     case 'addSwatch': {
-      const [, name, color] = action;
+      const [, name, color, id] = action;
       const currentTab = state.currentTab;
 
       return produce(state, (draft) => {
@@ -111,7 +112,7 @@ export function themeReducer(
 
         const swatch: Sketch.Swatch = {
           _class: 'swatch',
-          do_objectID: uuid(),
+          do_objectID: id ?? uuid(),
           name: delimitedPath.join([
             draft.selectedSwatchGroup,
             name || 'New Theme Color',
@@ -124,12 +125,6 @@ export function themeReducer(
 
         if (currentTab === 'theme') {
           draft.selectedSwatchIds = [swatch.do_objectID];
-        } else {
-          /*accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
-              layer.sharedStyleID = sharedStyle.do_objectID;
-            },
-          );*/
         }
       });
     }

@@ -17,6 +17,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
+import { uuid } from 'noya-renderer';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -152,7 +153,6 @@ export default memo(function ColorInputFieldWithPicker({
   const values = useMemo(() => [value], [value]);
 
   const [state, dispatch] = useApplicationState();
-
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
   const sharedSwatches = Selectors.getSharedSwatches(state);
@@ -178,18 +178,17 @@ export default memo(function ColorInputFieldWithPicker({
             id={'handle-theme-color'}
             full={true}
             onClick={useCallback(() => {
-              if (isSwatch) {
-                onChange({
-                  ...value,
-                  swatchID: undefined,
-                });
-                return;
-              }
+              const id = uuid();
+              onChange({
+                ...value,
+                swatchID: isSwatch ? undefined : id,
+              });
+              if (isSwatch) return;
 
-              const swatchName = prompt('Swatch Name');
+              const swatchName = prompt('New Swatch Name');
               if (!swatchName) return;
 
-              dispatch('addSwatch', swatchName, value);
+              dispatch('addSwatch', swatchName, value, id);
             }, [onChange, isSwatch, dispatch, value])}
           >
             {isSwatch ? 'Detach Theme Color' : 'Create Theme Color'}
