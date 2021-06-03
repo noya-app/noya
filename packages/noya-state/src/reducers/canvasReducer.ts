@@ -46,6 +46,7 @@ function getAxisValues(
 }
 
 function getVisibleLayersAxisValues(
+  selectedLayerIds: string[],
   state: ApplicationState,
   interactionState: Extract<InteractionState, { type: 'moving' }>,
 ) {
@@ -53,28 +54,53 @@ function getVisibleLayersAxisValues(
   // const { pageSnapshot } = interactionState;
   const page = getCurrentPage(state);
 
-  //TODO: get the measurements of the canvas
-  const layers = getLayersInRect(
+  const allVisibleLayers = getLayersInRect(
     state,
     {
-      left: 100,
-      right: 100,
+      left: 0,
+      right: 0,
     },
     createRect({ x: 0, y: 0 }, { x: 1000, y: 1000 }),
     {
-      clickThroughGroups: false,
-      includeHiddenLayers: false,
+      clickThroughGroups: true,
+      includeHiddenLayers: true,
+      includeArtboardLayers: true,
     },
   );
+  let layerIsInArtboard = false;
+  let artboardLayers: any[] = [];
+
+  allVisibleLayers
+    .filter((layer) => layer._class === 'artboard')
+    //TODO : why does it not recognize artboard.layers ?
+    .forEach(function (artboard: any) {
+      if (artboard.layers.length === 0) {
+        return;
+      }
+      const result = artboard.layers.filter(
+        (artboardLayer: any) =>
+          artboardLayer.do_objectID === selectedLayerIds[0],
+      );
+      if (result.length > 0) {
+        layerIsInArtboard = true;
+        artboard.layers.forEach(function (layer: any) {
+          artboardLayers.push(layer);
+        });
+        artboardLayers.push(artboard);
+      }
+    });
+
   const values: SelectedValueObj[] = [];
-  layers.forEach(function (layer) {
+  const layers = layerIsInArtboard ? artboardLayers : allVisibleLayers;
+
+  layers.forEach(function (visibleLayer) {
     const rect = getBoundingRect(page, AffineTransform.identity, [
-      layer.do_objectID,
+      visibleLayer.do_objectID,
     ]);
     if (rect) {
       const rectBounds = createBounds(rect);
       values.push({
-        layerId: layer.do_objectID,
+        layerId: visibleLayer.do_objectID,
         y: getAxisValues(rectBounds, 'y'),
         x: getAxisValues(rectBounds, 'x'),
       });
@@ -256,6 +282,7 @@ export function canvasReducer(
             }
 
             const visibleLayersInfo = getVisibleLayersAxisValues(
+              layerIds,
               state,
               interactionState,
             ).filter((info) => !layerIds.includes(info.layerId));

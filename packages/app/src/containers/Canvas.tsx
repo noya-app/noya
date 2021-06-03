@@ -216,6 +216,7 @@ export default memo(function Canvas() {
           {
             clickThroughGroups: event.metaKey,
             includeHiddenLayers: false,
+            includeArtboardLayers: false,
           },
         );
 
@@ -278,6 +279,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -384,6 +386,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -416,6 +419,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -499,6 +503,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 

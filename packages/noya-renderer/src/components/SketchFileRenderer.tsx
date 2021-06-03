@@ -160,6 +160,7 @@ export default memo(function SketchFileRenderer() {
       getBoundingRect(page, AffineTransform.identity, state.selectedObjects, {
         clickThroughGroups: true,
         includeHiddenLayers: true,
+        includeArtboardLayers: false,
       }),
     [page, state.selectedObjects],
   );
@@ -170,6 +171,7 @@ export default memo(function SketchFileRenderer() {
         getBoundingPoints(page, AffineTransform.identity, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
+          includeArtboardLayers: false,
         }),
       ),
     [page, state.selectedObjects],
@@ -200,6 +202,7 @@ export default memo(function SketchFileRenderer() {
       {
         clickThroughGroups: true,
         includeHiddenLayers: true,
+        includeArtboardLayers: false,
       },
     );
 
@@ -271,6 +274,7 @@ export default memo(function SketchFileRenderer() {
         {
           clickThroughGroups: true,
           includeHiddenLayers: true,
+          includeArtboardLayers: false,
         },
       );
       if (!layerToSnapBoundingRect) {
@@ -353,6 +357,7 @@ export default memo(function SketchFileRenderer() {
         {
           clickThroughGroups: true,
           includeHiddenLayers: true,
+          includeArtboardLayers: false,
         },
       );
       if (!layerToSnapBoundingRect) {
