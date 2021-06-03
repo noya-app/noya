@@ -18,8 +18,7 @@ const init: typeof CanvasKitInit = require('canvaskit-wasm/bin/canvaskit.js');
 export async function load() {
   const [CanvasKit, fontBuffer] = await Promise.all([
     init({
-      locateFile: (file: string) =>
-        'https://unpkg.com/canvaskit-wasm@0.25.0/bin/' + file,
+      locateFile: (file: string) => '/wasm/' + file,
     }),
     fetch(
       'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
