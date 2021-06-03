@@ -181,10 +181,10 @@ export default memo(function ColorInputFieldWithPicker({
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
   const values = useMemo(() => {
-    if (value._class === 'pattern')
+    if (value._class !== 'color')
       //change to show preview of gradient :thinking_emoji:
       return [];
-    return [value._class === 'gradient' ? value.stops[0].color : value];
+    return [value];
   }, [value]);
 
   const selectedColor = values[0];
