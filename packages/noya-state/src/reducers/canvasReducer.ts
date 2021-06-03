@@ -51,7 +51,7 @@ function getVisibleLayersAxisValues(
   interactionState: Extract<InteractionState, { type: 'moving' }>,
 ) {
   //  const { canvasInsets } = state;
-  // const { pageSnapshot } = interactionState;
+  //const { pageSnapshot } = interactionState;
   const page = getCurrentPage(state);
 
   const allVisibleLayers = getLayersInRect(
@@ -62,8 +62,8 @@ function getVisibleLayersAxisValues(
     },
     createRect({ x: 0, y: 0 }, { x: 1000, y: 1000 }),
     {
-      clickThroughGroups: true,
-      includeHiddenLayers: true,
+      clickThroughGroups: false,
+      includeHiddenLayers: false,
       includeArtboardLayers: true,
     },
   );
@@ -71,7 +71,7 @@ function getVisibleLayersAxisValues(
   let artboardLayers: any[] = [];
 
   allVisibleLayers
-    .filter((layer) => layer._class === 'artboard')
+    .filter((layer) => layer._class === 'artboard' || layer._class === 'group')
     //TODO : why does it not recognize artboard.layers ?
     .forEach(function (artboard: any) {
       if (artboard.layers.length === 0) {
@@ -94,9 +94,16 @@ function getVisibleLayersAxisValues(
   const layers = layerIsInArtboard ? artboardLayers : allVisibleLayers;
 
   layers.forEach(function (visibleLayer) {
-    const rect = getBoundingRect(page, AffineTransform.identity, [
-      visibleLayer.do_objectID,
-    ]);
+    const rect = getBoundingRect(
+      page,
+      AffineTransform.identity,
+      [visibleLayer.do_objectID],
+      {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+        includeArtboardLayers: false,
+      },
+    );
     if (rect) {
       const rectBounds = createBounds(rect);
       values.push({
@@ -256,6 +263,7 @@ export function canvasReducer(
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
+
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' || action[1][0] === 'maybeMove'
@@ -274,6 +282,11 @@ export function canvasReducer(
               pageSnapshot,
               AffineTransform.identity,
               layerIds,
+              {
+                clickThroughGroups: true,
+                includeHiddenLayers: false,
+                includeArtboardLayers: false,
+              },
             );
 
             if (!selectedRect) {
@@ -281,16 +294,16 @@ export function canvasReducer(
               return;
             }
 
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
             const visibleLayersInfo = getVisibleLayersAxisValues(
               layerIds,
               state,
               interactionState,
             ).filter((info) => !layerIds.includes(info.layerId));
-
-            const delta = {
-              x: current.x - origin.x,
-              y: current.y - origin.y,
-            };
 
             // Simulate where the selection rect would be, assuming no snapping
             selectedRect.x += delta.x;
@@ -356,6 +369,11 @@ export function canvasReducer(
               page,
               AffineTransform.identity,
               layerIds,
+              {
+                clickThroughGroups: true,
+                includeHiddenLayers: false,
+                includeArtboardLayers: false,
+              },
             );
 
             if (!selectedRectAfter) {
