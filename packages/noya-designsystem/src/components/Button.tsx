@@ -11,8 +11,7 @@ type ButtonVariant = 'normal' | 'thin';
 const ButtonElement = styled.button<{
   active: boolean;
   variant: ButtonVariant;
-  full: boolean;
-}>(({ theme, active, disabled, variant, full }) => ({
+}>(({ theme, active, disabled, variant }) => ({
   ...theme.textStyles.small,
   flex: '0 0 auto',
   position: 'relative',
@@ -26,7 +25,6 @@ const ButtonElement = styled.button<{
   paddingBottom: variant === 'thin' ? '0px' : '4px',
   paddingLeft: variant === 'thin' ? '1px' : '6px',
   background: active ? theme.colors.primary : theme.colors.inputBackground,
-  width: full ? '100%' : 'auto',
   color: active ? 'white' : theme.colors.text,
   opacity: disabled ? 0.25 : 1,
   '&:focus': {
@@ -74,7 +72,6 @@ const Button = forwardRef(function Button(
     tooltip,
     active = false,
     disabled = false,
-    full = false,
     variant = 'normal',
     onClick,
     children,
@@ -84,7 +81,6 @@ const Button = forwardRef(function Button(
   const buttonElement = (
     <ButtonElement
       id={id}
-      full={full}
       ref={forwardedRef}
       active={active}
       disabled={disabled}
