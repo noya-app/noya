@@ -42,7 +42,11 @@ export type ThemeAction =
       alpha: number,
       mode?: SetNumberMode,
     ]
-  | [type: `add${ComponentsElements}`, name?: string, style?: Sketch.Style]
+  | [
+      type: `add${ComponentsElements}`,
+      name?: string,
+      style?: Sketch.Style | Sketch.Color,
+    ]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
@@ -83,34 +87,50 @@ export function themeReducer(
       });
     }
     case 'addSwatch': {
+      const [, name, color] = action;
+      const currentTab = state.currentTab;
+
       return produce(state, (draft) => {
+        if (color && color._class === 'style') return;
+
         const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
           do_objectID: uuid(),
           objects: [],
         };
 
-        const swatchColor: Sketch.Color = {
-          _class: 'color',
-          alpha: 1,
-          red: 0,
-          green: 0,
-          blue: 0,
-        };
+        const swatchColor: Sketch.Color = color
+          ? color
+          : {
+              _class: 'color',
+              alpha: 1,
+              red: 0,
+              green: 0,
+              blue: 0,
+            };
 
         const swatch: Sketch.Swatch = {
           _class: 'swatch',
           do_objectID: uuid(),
           name: delimitedPath.join([
             draft.selectedSwatchGroup,
-            'New Theme Color',
+            name || 'New Theme Color',
           ]),
           value: swatchColor,
         };
 
         sharedSwatches.objects.push(swatch);
         draft.sketch.document.sharedSwatches = sharedSwatches;
-        draft.selectedSwatchIds = [swatch.do_objectID];
+
+        if (currentTab === 'theme') {
+          draft.selectedSwatchIds = [swatch.do_objectID];
+        } else {
+          /*accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
+            (layer) => {
+              layer.sharedStyleID = sharedStyle.do_objectID;
+            },
+          );*/
+        }
       });
     }
     case 'addTextStyle': {
@@ -120,6 +140,8 @@ export function themeReducer(
       const currentTab = state.currentTab;
 
       return produce(state, (draft) => {
+        if (style && style._class === 'color') return;
+
         const textStyles = draft.sketch.document.layerTextStyles ?? {
           _class: 'sharedTextStyleContainer',
           do_objectID: uuid(),
@@ -133,6 +155,7 @@ export function themeReducer(
             draft.selectedTextStyleGroup,
             name || 'New Text Style',
           ]),
+
           value: produce(style || Models.textStyle, (style) => {
             style.do_objectID = uuid();
             return style;
@@ -161,6 +184,8 @@ export function themeReducer(
 
       const currentTab = state.currentTab;
       return produce(state, (draft) => {
+        if (style && style._class === 'color') return;
+
         const layerStyles = draft.sketch.document.layerStyles ?? {
           _class: 'sharedStyleContainer',
           do_objectID: uuid(),

@@ -11,6 +11,7 @@ import {
   Spacer,
   sketchColorToRgbaString,
   ListView,
+  Button,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo, useState } from 'react';
@@ -150,11 +151,15 @@ export default memo(function ColorInputFieldWithPicker({
   // inspector rows may also take arrays
   const values = useMemo(() => [value], [value]);
 
-  const [state] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
 
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
   const sharedSwatches = Selectors.getSharedSwatches(state);
+
+  const isSwatch =
+    value.swatchID &&
+    sharedSwatches.some((e) => e.do_objectID === value.swatchID);
 
   return (
     <Popover.Root>
@@ -168,6 +173,27 @@ export default memo(function ColorInputFieldWithPicker({
             colors={values}
             onChangeColor={onChange}
           />
+          <Spacer.Vertical size={12} />
+          <Button
+            id={'handle-theme-color'}
+            full={true}
+            onClick={useCallback(() => {
+              if (isSwatch) {
+                onChange({
+                  ...value,
+                  swatchID: undefined,
+                });
+                return;
+              }
+
+              const swatchName = prompt('Swatch Name');
+              if (!swatchName) return;
+
+              dispatch('addSwatch', swatchName, value);
+            }, [onChange, isSwatch, dispatch, value])}
+          >
+            {isSwatch ? 'Detach Theme Color' : 'Create Theme Color'}
+          </Button>
         </PaddedSection>
         <Divider />
         <PaddedSection>
