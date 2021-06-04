@@ -22,7 +22,7 @@ import {
 import {
   findSmallestSnappingDistance,
   getAxisValues,
-  getVisibleAndSelectedLayerAxisPairs,
+  getSnappingPairs,
   getPossibleSnapLayers,
   getLayerAxisPairs,
 } from '../snapping';
@@ -193,17 +193,9 @@ export function canvasReducer(
             const xValues = getAxisValues(selectedBounds, 'x');
             const yValues = getAxisValues(selectedBounds, 'y');
 
-            const xPairs = getVisibleAndSelectedLayerAxisPairs(
-              xValues,
-              visibleLayersInfo,
-              'x',
-            );
+            const xPairs = getSnappingPairs(xValues, visibleLayersInfo, 'x');
 
-            const yPairs = getVisibleAndSelectedLayerAxisPairs(
-              yValues,
-              visibleLayersInfo,
-              'y',
-            );
+            const yPairs = getSnappingPairs(yValues, visibleLayersInfo, 'y');
 
             delta.y -= findSmallestSnappingDistance(yPairs);
             delta.x -= findSmallestSnappingDistance(xPairs);
@@ -235,12 +227,12 @@ export function canvasReducer(
             const selectedBoundsAfter = createBounds(selectedRectAfter);
 
             draft.possibleSnapGuides = {
-              x: getVisibleAndSelectedLayerAxisPairs(
+              x: getSnappingPairs(
                 getAxisValues(selectedBoundsAfter, 'x'),
                 visibleLayersInfo,
                 'x',
               ),
-              y: getVisibleAndSelectedLayerAxisPairs(
+              y: getSnappingPairs(
                 getAxisValues(selectedBoundsAfter, 'y'),
                 visibleLayersInfo,
                 'y',

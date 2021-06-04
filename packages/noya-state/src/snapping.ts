@@ -118,11 +118,11 @@ export function getLayerAxisPairs(
   });
 }
 
-export function findSmallestSnappingDistance(values: CombinationValue[]) {
-  const getDelta = (pair: CombinationValue) =>
+export function findSmallestSnappingDistance(values: SnappingPair[]) {
+  const getDelta = (pair: SnappingPair) =>
     pair.selectedLayerValue - pair.visibleLayerValue;
 
-  const getDistance = (pair: CombinationValue) => Math.abs(getDelta(pair));
+  const getDistance = (pair: SnappingPair) => Math.abs(getDelta(pair));
 
   const distances = values
     .filter((pair) => getDistance(pair) <= 6)
@@ -137,42 +137,24 @@ type SelectedValueObj = {
   x: [number, number, number];
 };
 
-export type BoundsObj = {
-  selectedLayerValues: [number, number, number];
-  visibleLayerValues: [number, number, number];
-  visibleLayerId: string;
-};
-
-export type CombinationValue = {
+export type SnappingPair = {
   selectedLayerValue: number;
   visibleLayerValue: number;
   visibleLayerId: string;
 };
 
-export function allCombinations(obj: BoundsObj) {
-  let combos: CombinationValue[] = [];
-  obj.selectedLayerValues.forEach((selectedLayerValue) => {
-    obj.visibleLayerValues.forEach((visibleLayerValue) => {
-      combos.push({
-        selectedLayerValue: selectedLayerValue,
-        visibleLayerValue: visibleLayerValue,
-        visibleLayerId: obj.visibleLayerId,
-      });
-    });
-  });
-  return combos;
-}
-
-export function getVisibleAndSelectedLayerAxisPairs(
+export function getSnappingPairs(
   selectedAxisValues: [number, number, number],
   visibleLayersAxisValues: SelectedValueObj[],
   axis: Axis,
-) {
-  return visibleLayersAxisValues.flatMap((visibleLayer) =>
-    allCombinations({
-      visibleLayerValues: visibleLayer[axis],
-      selectedLayerValues: selectedAxisValues,
-      visibleLayerId: visibleLayer.layerId,
-    }),
+): SnappingPair[] {
+  return visibleLayersAxisValues.flatMap((axisValues) =>
+    selectedAxisValues.flatMap((selectedLayerValue) =>
+      axisValues[axis].map((visibleLayerValue) => ({
+        selectedLayerValue: selectedLayerValue,
+        visibleLayerValue: visibleLayerValue,
+        visibleLayerId: axisValues.layerId,
+      })),
+    ),
   );
 }

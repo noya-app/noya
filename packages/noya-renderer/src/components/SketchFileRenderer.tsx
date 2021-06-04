@@ -18,7 +18,7 @@ import {
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
-import { CombinationValue } from 'noya-state/src/snapping';
+import { SnappingPair } from 'noya-state/src/snapping';
 import {
   getBoundingPoints,
   getBoundingRect,
@@ -240,7 +240,7 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    const possibleGuides: [Axis, CombinationValue[]][] = [
+    const possibleGuides: [Axis, SnappingPair[]][] = [
       ['x', state.possibleSnapGuides.x],
       ['y', state.possibleSnapGuides.y],
     ];

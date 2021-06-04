@@ -30,7 +30,7 @@ import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 import { ExportAction, exportReducer } from './exportReducer';
-import { CombinationValue } from '../snapping';
+import { SnappingPair } from '../snapping';
 
 export type { SetNumberMode };
 
@@ -39,8 +39,8 @@ export type WorkspaceTab = 'canvas' | 'theme';
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 type SmartSnapPairs = {
-  x: CombinationValue[];
-  y: CombinationValue[];
+  x: SnappingPair[];
+  y: SnappingPair[];
 };
 
 export type ApplicationState = {
