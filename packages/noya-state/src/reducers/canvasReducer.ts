@@ -179,7 +179,7 @@ export function canvasReducer(
               // Ensure we don't snap to the selected layer itself
               .filter((layer) => !layerIds.includes(layer.do_objectID));
 
-            const visibleLayersInfo = getLayerAxisPairs(
+            const snappingLayerInfos = getLayerAxisPairs(
               page,
               possibleSnapLayers,
             );
@@ -193,9 +193,8 @@ export function canvasReducer(
             const xValues = getAxisValues(selectedBounds, 'x');
             const yValues = getAxisValues(selectedBounds, 'y');
 
-            const xPairs = getSnappingPairs(xValues, visibleLayersInfo, 'x');
-
-            const yPairs = getSnappingPairs(yValues, visibleLayersInfo, 'y');
+            const xPairs = getSnappingPairs(xValues, snappingLayerInfos, 'x');
+            const yPairs = getSnappingPairs(yValues, snappingLayerInfos, 'y');
 
             delta.y -= findSmallestSnappingDistance(yPairs);
             delta.x -= findSmallestSnappingDistance(xPairs);
@@ -210,34 +209,6 @@ export function canvasReducer(
               layer.frame.x = initialRect.x + delta.x;
               layer.frame.y = initialRect.y + delta.y;
             });
-
-            const selectedRectAfter = getBoundingRect(
-              draft.sketch.pages[pageIndex],
-              AffineTransform.identity,
-              layerIds,
-              {
-                clickThroughGroups: true,
-                includeHiddenLayers: false,
-                includeArtboardLayers: false,
-              },
-            );
-
-            if (!selectedRectAfter) return;
-
-            const selectedBoundsAfter = createBounds(selectedRectAfter);
-
-            draft.possibleSnapGuides = {
-              x: getSnappingPairs(
-                getAxisValues(selectedBoundsAfter, 'x'),
-                visibleLayersInfo,
-                'x',
-              ),
-              y: getSnappingPairs(
-                getAxisValues(selectedBoundsAfter, 'y'),
-                visibleLayersInfo,
-                'y',
-              ),
-            };
 
             break;
           }

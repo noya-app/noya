@@ -14,6 +14,7 @@ import {
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
+import { ExportAction, exportReducer } from './exportReducer';
 import {
   createInitialInteractionState,
   interactionReducer,
@@ -29,8 +30,6 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import { ExportAction, exportReducer } from './exportReducer';
-import { SnappingPair } from '../snapping';
 
 export type { SetNumberMode };
 
@@ -38,13 +37,7 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
-type SmartSnapPairs = {
-  x: SnappingPair[];
-  y: SnappingPair[];
-};
-
 export type ApplicationState = {
-  possibleSnapGuides: SmartSnapPairs | undefined;
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
@@ -280,7 +273,6 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
-    possibleSnapGuides: undefined,
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),

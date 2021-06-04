@@ -18,7 +18,13 @@ import {
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
-import { SnappingPair } from 'noya-state/src/snapping';
+import {
+  getAxisValues,
+  getLayerAxisPairs,
+  getPossibleSnapLayers,
+  getSnappingPairs,
+  SnappingPair,
+} from 'noya-state/src/snapping';
 import {
   getBoundingPoints,
   getBoundingRect,
@@ -26,6 +32,7 @@ import {
   getCurrentPage,
   getLayerTransformAtIndexPath,
   getScreenTransform,
+  getSelectedLayerIndexPathsExcludingDescendants,
 } from 'noya-state/src/selectors/selectors';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -232,17 +239,39 @@ export default memo(function SketchFileRenderer() {
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
   const smartSnapGuides = useMemo(() => {
-    if (
-      state.interactionState.type !== 'moving' ||
-      !boundingRect ||
-      !state.possibleSnapGuides
-    ) {
-      return;
-    }
+    if (state.interactionState.type !== 'moving' || !boundingRect) return;
+
+    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+      state,
+    );
+
+    const possibleSnapLayers = getPossibleSnapLayers(
+      layerIndexPaths,
+      state,
+      state.interactionState,
+    )
+      // Ensure we don't snap to the selected layer itself
+      .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
+
+    const snappingLayerInfos = getLayerAxisPairs(page, possibleSnapLayers);
+
+    const bounds = createBounds(boundingRect);
+
+    const xPairs = getSnappingPairs(
+      getAxisValues(bounds, 'x'),
+      snappingLayerInfos,
+      'x',
+    );
+
+    const yPairs = getSnappingPairs(
+      getAxisValues(bounds, 'y'),
+      snappingLayerInfos,
+      'y',
+    );
 
     const possibleGuides: [Axis, SnappingPair[]][] = [
-      ['x', state.possibleSnapGuides.x],
-      ['y', state.possibleSnapGuides.y],
+      ['x', xPairs],
+      ['y', yPairs],
     ];
 
     const allMatches = possibleGuides.map(([axis, combinationValue]) => {
@@ -317,7 +346,7 @@ export default memo(function SketchFileRenderer() {
         })}
       </>
     );
-  }, [page, boundingRect, state.interactionState, state.possibleSnapGuides]);
+  }, [state, boundingRect, page]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (

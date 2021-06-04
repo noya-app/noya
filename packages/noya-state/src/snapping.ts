@@ -91,7 +91,7 @@ export function getPossibleSnapLayers(
 export function getLayerAxisPairs(
   page: Sketch.Page,
   layers: Sketch.AnyLayer[],
-): SelectedValueObj[] {
+): SnappingLayerInfo[] {
   return layers.flatMap((layer) => {
     const rect = getBoundingRect(
       page,
@@ -131,7 +131,7 @@ export function findSmallestSnappingDistance(values: SnappingPair[]) {
   return distances.length > 0 ? getDelta(distances[0]) : 0;
 }
 
-type SelectedValueObj = {
+type SnappingLayerInfo = {
   layerId: string;
   y: [number, number, number];
   x: [number, number, number];
@@ -145,7 +145,7 @@ export type SnappingPair = {
 
 export function getSnappingPairs(
   selectedAxisValues: [number, number, number],
-  visibleLayersAxisValues: SelectedValueObj[],
+  visibleLayersAxisValues: SnappingLayerInfo[],
   axis: Axis,
 ): SnappingPair[] {
   return visibleLayersAxisValues.flatMap((axisValues) =>
