@@ -29,14 +29,35 @@ export default memo(function SketchBitmap({ layer }: Props) {
   if (!layer.style) return null;
 
   const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
+  const shadows = (layer.style.shadows ?? []).filter((x) => x.isEnabled);
+
+  const imageElement = (
+    <Image
+      rect={Primitives.rect(CanvasKit, layer.frame)}
+      image={ref}
+      paint={paint}
+    />
+  );
 
   const element = (
     <>
-      <Image
-        rect={Primitives.rect(CanvasKit, layer.frame)}
-        image={ref}
-        paint={paint}
-      />
+      {shadows.map((shadow, index) => {
+        const imageFilter = CanvasKit.ImageFilter.MakeDropShadowOnly(
+          shadow.offsetX,
+          shadow.offsetY,
+          shadow.blurRadius / 2,
+          shadow.blurRadius / 2,
+          Primitives.color(CanvasKit, shadow.color),
+          null,
+        );
+
+        return (
+          <Group key={`shadow-${index}`} imageFilter={imageFilter}>
+            {imageElement}
+          </Group>
+        );
+      })}
+      {imageElement}
       {borders.map((border, index) => (
         <SketchBorder key={`border-${index}`} path={path} border={border} />
       ))}
@@ -44,7 +65,7 @@ export default memo(function SketchBitmap({ layer }: Props) {
   );
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
-  const needsGroup = opacity < 1;
+  const needsGroup = opacity < 1 || shadows.length > 0;
 
   return needsGroup ? <Group opacity={opacity}>{element}</Group> : element;
 });
