@@ -96,14 +96,9 @@ export default memo(function Canvas() {
     [sidebarWidth],
   );
 
-  const canvasSize = useMemo(() => {
-    return containerSize
-      ? {
-          width: containerSize.width + insets.left + insets.right,
-          height: containerSize.height,
-        }
-      : { width: 0, height: 0 };
-  }, [containerSize, insets]);
+  const canvasSize = useMemo(() => containerSize ?? { width: 0, height: 0 }, [
+    containerSize,
+  ]);
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current document's offset from the origin

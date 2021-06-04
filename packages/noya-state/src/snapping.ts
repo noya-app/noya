@@ -1,15 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import {
-  AffineTransform,
-  Bounds,
-  createBounds,
-  createRect,
-} from 'noya-geometry';
+import { AffineTransform, Bounds, createBounds } from 'noya-geometry';
 import { Axis } from 'noya-renderer/src/components/guides';
-import { getLayersInRect } from './selectors/geometrySelectors';
-import { getBoundingRect, getCurrentPage } from './selectors/selectors';
 import { ApplicationState } from './reducers/applicationReducer';
 import { InteractionState } from './reducers/interactionReducer';
+import { getLayersInRect } from './selectors/geometrySelectors';
+import { getBoundingRect, getCurrentPage } from './selectors/selectors';
 
 export function getAxisValues(
   rectBounds: Bounds,
@@ -35,17 +30,15 @@ export function getVisibleLayersAxisValues(
 
   const allVisibleLayers = getLayersInRect(
     state,
-    {
-      left: 0,
-      right: 0,
-    },
-    createRect({ x: canvasSize.width, y: 0 }, { x: 0, y: canvasSize.height }),
+    { left: 0, right: 0 },
+    { x: 0, y: 0, width: canvasSize.width, height: canvasSize.height },
     {
       clickThroughGroups: false,
       includeHiddenLayers: false,
       includeArtboardLayers: true,
     },
   );
+
   let isLayerInGroup = false;
   let groupLayers: Sketch.AnyLayer[] = [];
 
