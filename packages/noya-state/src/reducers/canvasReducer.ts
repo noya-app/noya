@@ -68,21 +68,25 @@ function getVisibleLayersAxisValues(
     },
   );
   let isLayerInGroup = false;
-  let groupLayers: any[] = [];
+  let groupLayers: Sketch.AnyLayer[] = [];
 
   allVisibleLayers
-    .filter((layer) => layer._class === 'artboard' || layer._class === 'group')
-    //TODO: why does TS not recognize group.layers ?
-    .forEach(function (group: any) {
+    .filter(
+      (layer): layer is Sketch.Group | Sketch.Artboard =>
+        layer._class === 'artboard' || layer._class === 'group',
+    )
+    .forEach((group) => {
       if (group.layers.length === 0) {
         return;
       }
+
       const result = group.layers.filter(
-        (groupLayer: any) => groupLayer.do_objectID === selectedLayerIds[0],
+        (groupLayer) => groupLayer.do_objectID === selectedLayerIds[0],
       );
+
       if (result.length > 0) {
         isLayerInGroup = true;
-        group.layers.forEach(function (layer: any) {
+        group.layers.forEach((layer) => {
           groupLayers.push(layer);
         });
         groupLayers.push(group);

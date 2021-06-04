@@ -32,13 +32,20 @@ function getAxisProperties(
   }
 }
 
+export type Guides = {
+  extension: Point[];
+  measurement: Point[];
+  distanceMeasurement: DistanceMeasurementProps;
+  snap: Point[];
+};
+
 export function getGuides(
   mainDirection: Direction,
   mainAxis: Axis,
   selected: Bounds,
   highlighted: Bounds,
   commonBound?: number,
-) {
+): Guides | undefined {
   const m = mainAxis;
   const c = mainAxis === 'x' ? 'y' : 'x';
 

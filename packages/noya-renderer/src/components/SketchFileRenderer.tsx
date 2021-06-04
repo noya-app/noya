@@ -1,12 +1,12 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
+import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,
   createBounds,
   createRect,
   insetRect,
 } from 'noya-geometry';
-import * as CanvasKit from 'canvaskit';
 import {
   Group,
   Polyline,
@@ -18,6 +18,7 @@ import {
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
+import { CombinationValue } from 'noya-state/src/reducers/canvasReducer';
 import {
   getBoundingPoints,
   getBoundingRect,
@@ -30,7 +31,7 @@ import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import DistanceLabelAndPath from './DistanceLabelAndPath';
-import { ALL_DIRECTIONS, getGuides } from './guides';
+import { ALL_DIRECTIONS, Axis, getGuides } from './guides';
 import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
@@ -230,13 +231,6 @@ export default memo(function SketchFileRenderer() {
     return highlightedBoundingRect && <DistanceLabelAndPath guides={guides} />;
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
-  type SmartSnapObj = {
-    closestLayerId: string;
-    setSelectedBounds: number;
-    setVisibleBounds: number;
-    guides: any[];
-  };
-
   const smartSnapGuides = useMemo(() => {
     if (
       state.interactionState.type !== 'moving' ||
@@ -246,88 +240,75 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    const allMatches = Object.entries(state.possibleSnapGuides).map(
-      ([key, value]) => {
-        let matches: SmartSnapObj[] = [];
+    const possibleGuides: [Axis, CombinationValue[]][] = [
+      ['x', state.possibleSnapGuides.x],
+      ['y', state.possibleSnapGuides.y],
+    ];
 
-        value.forEach(function (pair) {
-          if (pair.selectedLayerValue !== pair.visibleLayerValue) return;
-          const match: SmartSnapObj = {
-            closestLayerId: pair.visibleLayerId,
-            setSelectedBounds: pair.selectedLayerValue,
-            setVisibleBounds: pair.visibleLayerValue,
-            guides: [],
-          };
+    const allMatches = possibleGuides.map(([axis, combinationValue]) => {
+      const selectedBounds = createBounds(boundingRect);
 
-          matches.push(match);
-        });
-
-        const selectedBounds = createBounds(boundingRect);
-        const axes = key === 'y' ? ['x'] : ['y'];
-
-        matches.forEach((match) => {
+      const matches = combinationValue
+        .filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue)
+        .map((pair) => {
           const layerToSnapBoundingRect = getBoundingRect(
             page,
             AffineTransform.identity,
-            [match.closestLayerId],
+            [pair.visibleLayerId],
             {
               clickThroughGroups: true,
-              includeHiddenLayers: true,
+              includeHiddenLayers: false,
               includeArtboardLayers: false,
             },
           );
-          if (!layerToSnapBoundingRect) {
-            return [];
-          }
+
+          if (!layerToSnapBoundingRect) return [];
 
           const highlightedBounds = createBounds(layerToSnapBoundingRect);
 
-          match.guides = ALL_DIRECTIONS.filter(([, axis]) =>
-            axes.includes(axis),
+          return ALL_DIRECTIONS.filter(
+            ([, directionAxis]) => directionAxis !== axis,
           ).flatMap(([direction, axis]) => {
             const result = getGuides(
               direction,
               axis,
               selectedBounds,
               highlightedBounds,
-              match.setSelectedBounds,
+              pair.visibleLayerValue,
             );
 
             return result ? [result] : [];
           });
         });
 
-        let smallestDistance: number | undefined = undefined;
-        matches.forEach(function (match) {
-          if (match.guides.length === 0) return;
-          if (!smallestDistance) {
-            smallestDistance = match.guides[0].distanceMeasurement.distance;
-          } else if (
-            smallestDistance > match.guides[0].distanceMeasurement.distance
-          ) {
-            smallestDistance = match.guides[0].distanceMeasurement.distance;
-          }
-        });
+      let smallestDistance: number | undefined = undefined;
+      matches.forEach((guides) => {
+        if (guides.length === 0) return;
+        if (!smallestDistance) {
+          smallestDistance = guides[0].distanceMeasurement.distance;
+        } else if (smallestDistance > guides[0].distanceMeasurement.distance) {
+          smallestDistance = guides[0].distanceMeasurement.distance;
+        }
+      });
 
-        matches.forEach(function (match) {
-          if (match.guides.length === 0) return;
-          if (
-            match.guides[0].distanceMeasurement.distance !== smallestDistance
-          ) {
-            match.guides[0].distanceMeasurement = null;
-          }
-        });
+      matches.forEach((guides) => {
+        if (guides.length === 0) return;
+        if (guides[0].distanceMeasurement.distance !== smallestDistance) {
+          // TODO: Put this back!!!
+          // match.guides[0].distanceMeasurement = null;
+        }
+      });
 
-        return matches;
-      },
-    );
+      return matches;
+    });
+
     return (
       <>
         {allMatches.map((matches) => {
-          return matches.map((match, index) => {
+          return matches.map((guides, index) => {
             return (
               <DistanceLabelAndPath
-                guides={match.guides}
+                guides={guides}
                 showSnap={true}
                 key={index}
               />
