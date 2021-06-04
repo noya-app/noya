@@ -42,7 +42,12 @@ export type ThemeAction =
       alpha: number,
       mode?: SetNumberMode,
     ]
-  | [type: `add${ComponentsElements}`, name?: string, style?: Sketch.Style]
+  | [type: `addSwatch`, name?: string, color?: Sketch.Color, id?: string]
+  | [
+      type: `add${Exclude<ComponentsElements, 'Swatch'>}`,
+      name?: string,
+      style?: Sketch.Style,
+    ]
   | [
       type: 'updateThemeStyle',
       sharedStyleId: string,
@@ -83,6 +88,9 @@ export function themeReducer(
       });
     }
     case 'addSwatch': {
+      const [, name, color, id] = action;
+      const currentTab = state.currentTab;
+
       return produce(state, (draft) => {
         const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
@@ -90,27 +98,32 @@ export function themeReducer(
           objects: [],
         };
 
-        const swatchColor: Sketch.Color = {
-          _class: 'color',
-          alpha: 1,
-          red: 0,
-          green: 0,
-          blue: 0,
-        };
+        const swatchColor: Sketch.Color = color
+          ? color
+          : {
+              _class: 'color',
+              alpha: 1,
+              red: 0,
+              green: 0,
+              blue: 0,
+            };
 
         const swatch: Sketch.Swatch = {
           _class: 'swatch',
-          do_objectID: uuid(),
+          do_objectID: id ?? uuid(),
           name: delimitedPath.join([
             draft.selectedSwatchGroup,
-            'New Theme Color',
+            name || 'New Theme Color',
           ]),
           value: swatchColor,
         };
 
         sharedSwatches.objects.push(swatch);
         draft.sketch.document.sharedSwatches = sharedSwatches;
-        draft.selectedSwatchIds = [swatch.do_objectID];
+
+        if (currentTab === 'theme') {
+          draft.selectedSwatchIds = [swatch.do_objectID];
+        }
       });
     }
     case 'addTextStyle': {
@@ -133,6 +146,7 @@ export function themeReducer(
             draft.selectedTextStyleGroup,
             name || 'New Text Style',
           ]),
+
           value: produce(style || Models.textStyle, (style) => {
             style.do_objectID = uuid();
             return style;
@@ -494,6 +508,16 @@ export function themeReducer(
     case 'removeSwatch': {
       const ids = state.selectedSwatchIds;
 
+      const layerIndexPathsWithSwatchId = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.style !== undefined &&
+          layer.style.fills !== undefined &&
+          layer.style.fills.some(
+            (f) => f.color.swatchID && ids.includes(f.color.swatchID),
+          ),
+      );
+
       return produce(state, (draft) => {
         const sharedSwatches = draft.sketch.document.sharedSwatches;
 
@@ -505,6 +529,19 @@ export function themeReducer(
         sharedSwatches.objects = filterSwatches;
 
         draft.sketch.document.sharedSwatches = sharedSwatches;
+
+        layerIndexPathsWithSwatchId.forEach((layerPath) =>
+          accessPageLayers(
+            draft,
+            layerPath.pageIndex,
+            layerPath.indexPaths,
+          ).forEach((layer) => {
+            layer.style?.fills?.forEach((f) => {
+              if (f.color.swatchID && ids.includes(f.color.swatchID))
+                delete f.color.swatchID;
+            });
+          }),
+        );
       });
     }
     case 'removeTextStyle': {

@@ -1,12 +1,12 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
-import * as CanvasKit from 'canvaskit-wasm';
 import {
   AffineTransform,
   createBounds,
   createRect,
   insetRect,
 } from 'noya-geometry';
+import * as CanvasKit from 'canvaskit';
 import {
   Group,
   Polyline,

@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import * as CanvasKit from 'canvaskit-wasm';
+import * as CanvasKit from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,

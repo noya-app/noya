@@ -2,18 +2,14 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import SymbolSourceRow from '../components/inspector/SymbolSourceRow';
 import SymbolLayoutRow from '../components/inspector/SymbolLayoutRow';
-import SymbolOverrideRow from '../components/inspector/SymbolOverrideRow';
-
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import SymbolMasterOverrideRow from '../components/inspector/SymbolMasterOverrideRow';
+import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Divider } from 'noya-designsystem';
 
 export default memo(function SymbolMasterInspector() {
-  const [, dispatch] = useApplicationState();
+  const dispatch = useDispatch();
 
   const selectedSymbol = useShallowArray(
     useSelector(Selectors.getSelectedSymbols),
@@ -82,7 +78,7 @@ export default memo(function SymbolMasterInspector() {
         [dispatch],
       )}
     />,
-    <SymbolOverrideRow
+    <SymbolMasterOverrideRow
       symbolMaster={selectedSymbol}
       onSetAllowsOverrides={useCallback(
         (value) => {

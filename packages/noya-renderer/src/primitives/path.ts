@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, Path, PathOp } from 'canvaskit-wasm';
+import { CanvasKit, Path, PathOp } from 'canvaskit';
 import { distance } from 'noya-geometry';
 import { Point } from 'noya-state';
 import { windowsOf } from 'noya-utils';

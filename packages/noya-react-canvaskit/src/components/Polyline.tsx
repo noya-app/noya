@@ -1,4 +1,4 @@
-import { CanvasKit, Paint, Path } from 'canvaskit-wasm';
+import { CanvasKit, Paint, Path } from 'canvaskit';
 import { Point } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';

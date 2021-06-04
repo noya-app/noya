@@ -1,4 +1,4 @@
-import { Paint } from 'canvaskit-wasm';
+import { Paint } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';

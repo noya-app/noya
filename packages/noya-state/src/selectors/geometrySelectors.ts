@@ -1,5 +1,5 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { CanvasKit } from 'canvaskit-wasm';
+import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
   createRectFromBounds,

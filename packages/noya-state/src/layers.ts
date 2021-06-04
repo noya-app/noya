@@ -159,6 +159,7 @@ export function findInArray(
 
 export const {
   visit: visitReversed,
+  access: accessReversed,
   accessPath: accessPathReversed,
 } = withOptions<Sketch.AnyLayer>({
   getChildren: getChildrenReversed,
@@ -174,4 +175,30 @@ export {
 
 export function getFixedRadius(layer: Sketch.AnyLayer): number {
   return layer._class === 'rectangle' ? layer.fixedRadius : 0;
+}
+
+export function isWithinMaskChain(
+  parent: ParentLayer,
+  reversedChildIndex: number,
+) {
+  const childLayers = [...parent.layers].reverse();
+
+  const layer = childLayers[reversedChildIndex];
+
+  const remainingSiblings = childLayers.slice(reversedChildIndex + 1);
+
+  let isMasked = false;
+
+  if (!layer.shouldBreakMaskChain) {
+    for (let sibling of remainingSiblings) {
+      if (sibling.hasClippingMask) {
+        isMasked = true;
+        break;
+      } else if (sibling.shouldBreakMaskChain) {
+        break;
+      }
+    }
+  }
+
+  return isMasked;
 }

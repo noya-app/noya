@@ -11,11 +11,13 @@ import {
   Spacer,
   sketchColorToRgbaString,
   ListView,
+  Button,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
+import { uuid } from 'noya-renderer';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -33,6 +35,8 @@ const StyledArrow = styled(Popover.Arrow)(({ theme }) => ({
 
 const PaddedSection = styled.section({
   padding: '10px',
+  display: 'flex',
+  flexDirection: 'column',
 });
 
 const Row = styled.div(({ theme }) => ({
@@ -150,11 +154,33 @@ export default memo(function ColorInputFieldWithPicker({
   // inspector rows may also take arrays
   const values = useMemo(() => [value], [value]);
 
-  const [state] = useApplicationState();
-
+  const [state, dispatch] = useApplicationState();
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
   const sharedSwatches = Selectors.getSharedSwatches(state);
+
+  const isSwatch =
+    value.swatchID &&
+    sharedSwatches.some((e) => e.do_objectID === value.swatchID);
+
+  const detachThemeColor = useCallback(() => {
+    onChange({
+      ...value,
+      swatchID: undefined,
+    });
+  }, [onChange, value]);
+
+  const createThemeColor = useCallback(() => {
+    const swatchName = prompt('New Swatch Name');
+    if (!swatchName) return;
+
+    const id = uuid();
+    onChange({
+      ...value,
+      swatchID: id,
+    });
+    dispatch('addSwatch', swatchName, value, id);
+  }, [onChange, dispatch, value]);
 
   return (
     <Popover.Root>
@@ -168,6 +194,16 @@ export default memo(function ColorInputFieldWithPicker({
             colors={values}
             onChangeColor={onChange}
           />
+          <Spacer.Vertical size={12} />
+          {isSwatch ? (
+            <Button id={'detach-theme-color'} onClick={detachThemeColor}>
+              Detach Theme Color
+            </Button>
+          ) : (
+            <Button id={'crete-theme-color'} onClick={createThemeColor}>
+              Create Theme Color
+            </Button>
+          )}
         </PaddedSection>
         <Divider />
         <PaddedSection>

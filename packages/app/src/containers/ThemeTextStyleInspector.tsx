@@ -41,7 +41,7 @@ export default memo(function ThemeTextStyleInspector() {
     />,
     <TextStyleInspector />,
     <OpacityInspector />,
-    <FillInspector />,
+    <FillInspector title={'Fills'} allowMoreThanOne={true} />,
     <BorderInspector />,
     <ShadowInspector />,
   ];

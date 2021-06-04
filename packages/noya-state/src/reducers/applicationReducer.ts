@@ -29,6 +29,7 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
+import { ExportAction, exportReducer } from './exportReducer';
 
 export type { SetNumberMode };
 
@@ -69,7 +70,8 @@ export type Action =
   | StyleAction
   | TextStyleAction
   | ThemeAction
-  | SymbolsAction;
+  | SymbolsAction
+  | ExportAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -106,6 +108,8 @@ export function applicationReducer(
     case 'setLayerWidth':
     case 'setLayerHeight':
     case 'setLayerRotation':
+    case 'setHasClippingMask':
+    case 'setShouldBreakMaskChain':
       return layerPropertyReducer(state, action);
     case 'groupLayer':
     case 'deleteLayer':
@@ -226,13 +230,34 @@ export function applicationReducer(
     case 'setMinWidth':
     case 'setAllowsOverrides':
     case 'onSetOverrideProperty':
+    case 'setInstanceSymbolSource':
+    case 'goToSymbolSource':
+    case 'setOverrideValue':
       return symbolsReducer(state, action);
+    case 'setExportScale':
+    case 'setExportName':
+    case 'setExportFileFormat':
+    case 'setExportNamingScheme':
+    case 'addExportFormat':
+    case 'deleteExportFormat':
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.exportOptions = exportReducer(
+            layer.exportOptions,
+            action,
+            layer.frame,
+          );
+        });
+      });
     default:
       return themeReducer(state, action);
   }
 }
 
-/**
+/*
  * Get an array of all layers using as few lookups as possible on the state tree.
  *
  * Immer will duplicate any objects we access within a produce method, so we

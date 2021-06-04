@@ -4,7 +4,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom/extend-expect';
 
-import { CanvasKit, CanvasKitInit } from 'canvaskit-wasm';
+import { CanvasKit, CanvasKitInit } from 'canvaskit';
 import { VirtualConsole } from 'jsdom';
 import path from 'path';
 
@@ -17,18 +17,17 @@ declare global {
   }
 }
 
-const initCanvasKit: typeof CanvasKitInit = require('canvaskit-wasm/bin/canvaskit.js');
-
 global.loadCanvasKit = async () => {
   const pathToWasm = path.join(
     __dirname,
     '..',
-    'node_modules',
-    'canvaskit-wasm',
-    'bin',
+    'packages',
+    'app',
+    'public',
+    'wasm',
   );
 
-  return await initCanvasKit({
+  return await CanvasKitInit({
     locateFile: (file: string) => path.join(pathToWasm, file),
   });
 };

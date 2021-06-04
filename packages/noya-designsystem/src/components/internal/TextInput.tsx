@@ -5,6 +5,7 @@ type Props = {
   id?: string;
   style?: any;
   className?: string;
+  disabled?: boolean;
   value: string;
   placeholder?: string;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -19,6 +20,7 @@ function ControlledTextInput({
   style,
   className,
   placeholder,
+  disabled,
   onKeyDown,
   value,
   onChange,
@@ -43,11 +45,12 @@ function ControlledTextInput({
       style={style}
       className={className}
       type="text"
+      disabled={disabled ?? false}
       value={value}
       placeholder={placeholder}
       onKeyDown={handleKeyDown}
       onChange={handleChange}
-    ></input>
+    />
   );
 }
 
@@ -62,6 +65,7 @@ function SubmittableTextInput({
   placeholder,
   onKeyDown,
   value,
+  disabled,
   onSubmit,
 }: SubmittableProps) {
   const [internalValue, setInternalValue] = useState('');
@@ -123,6 +127,7 @@ function SubmittableTextInput({
       style={style}
       className={className}
       type="text"
+      disabled={disabled ?? false}
       value={internalValue}
       placeholder={placeholder}
       onKeyDown={handleKeyDown}

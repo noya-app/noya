@@ -1,4 +1,4 @@
-import { Color } from 'canvaskit-wasm';
+import { Color } from 'canvaskit';
 import { useMemo } from 'react';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useStable4ElementArray from './useStable4ElementArray';
