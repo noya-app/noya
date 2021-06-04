@@ -74,7 +74,6 @@ function visitLayersReversed(
 }
 
 export function getLayersInRect(
-  //CanvasKit: CanvasKit,
   state: ApplicationState,
   insets: CanvasInsets,
   rect: Rect,

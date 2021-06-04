@@ -67,31 +67,30 @@ function getVisibleLayersAxisValues(
       includeArtboardLayers: true,
     },
   );
-  let layerIsInArtboard = false;
-  let artboardLayers: any[] = [];
+  let isLayerInGroup = false;
+  let groupLayers: any[] = [];
 
   allVisibleLayers
     .filter((layer) => layer._class === 'artboard' || layer._class === 'group')
-    //TODO : why does TS not recognize artboard.layers ?
-    .forEach(function (artboard: any) {
-      if (artboard.layers.length === 0) {
+    //TODO: why does TS not recognize group.layers ?
+    .forEach(function (group: any) {
+      if (group.layers.length === 0) {
         return;
       }
-      const result = artboard.layers.filter(
-        (artboardLayer: any) =>
-          artboardLayer.do_objectID === selectedLayerIds[0],
+      const result = group.layers.filter(
+        (groupLayer: any) => groupLayer.do_objectID === selectedLayerIds[0],
       );
       if (result.length > 0) {
-        layerIsInArtboard = true;
-        artboard.layers.forEach(function (layer: any) {
-          artboardLayers.push(layer);
+        isLayerInGroup = true;
+        group.layers.forEach(function (layer: any) {
+          groupLayers.push(layer);
         });
-        artboardLayers.push(artboard);
+        groupLayers.push(group);
       }
     });
 
   const values: SelectedValueObj[] = [];
-  const layers = layerIsInArtboard ? artboardLayers : allVisibleLayers;
+  const layers = isLayerInGroup ? groupLayers : allVisibleLayers;
 
   layers.forEach(function (visibleLayer) {
     const rect = getBoundingRect(

@@ -386,7 +386,6 @@ export default memo(function SketchFileRenderer() {
         ))}
         {highlightedSketchLayer}
         {smartSnapGuides}
-        {/* {smartSnapGuidesY} */}
         {distanceLabelAndPathBetweenSketchLayers}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
