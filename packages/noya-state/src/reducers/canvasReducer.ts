@@ -50,8 +50,8 @@ function getVisibleLayersAxisValues(
   state: ApplicationState,
   interactionState: Extract<InteractionState, { type: 'moving' }>,
 ) {
-  //  const { canvasInsets } = state;
-  //const { pageSnapshot } = interactionState;
+  const { canvasSize } = interactionState;
+
   const page = getCurrentPage(state);
 
   const allVisibleLayers = getLayersInRect(
@@ -60,7 +60,7 @@ function getVisibleLayersAxisValues(
       left: 0,
       right: 0,
     },
-    createRect({ x: 0, y: 0 }, { x: 1000, y: 1000 }),
+    createRect({ x: canvasSize.width, y: 0 }, { x: 0, y: canvasSize.height }),
     {
       clickThroughGroups: false,
       includeHiddenLayers: false,
@@ -72,7 +72,7 @@ function getVisibleLayersAxisValues(
 
   allVisibleLayers
     .filter((layer) => layer._class === 'artboard' || layer._class === 'group')
-    //TODO : why does it not recognize artboard.layers ?
+    //TODO : why does TS not recognize artboard.layers ?
     .forEach(function (artboard: any) {
       if (artboard.layers.length === 0) {
         return;
@@ -114,6 +114,25 @@ function getVisibleLayersAxisValues(
     }
   });
   return values;
+}
+
+function findSmallestSnappingDistance(values: CombinationValue[]) {
+  let allDistances = [];
+  for (let pair of values) {
+    const distance = Math.abs(pair.selectedLayerValue - pair.visibleLayerValue);
+
+    if (distance > 6) continue;
+
+    const snapDelta = pair.selectedLayerValue - pair.visibleLayerValue;
+
+    allDistances.push(snapDelta);
+  }
+
+  if (allDistances.length > 0) {
+    return Math.min(...allDistances);
+  } else {
+    return 0;
+  }
 }
 
 type SelectedValueObj = {
@@ -325,41 +344,9 @@ export function canvasReducer(
               visibleLayersInfo,
               'y',
             );
-            let allDistances = [];
-            for (let pair of yPairs) {
-              const distance = Math.abs(
-                pair.selectedLayerValue - pair.visibleLayerValue,
-              );
 
-              if (distance > 6) continue;
-
-              const snapDelta =
-                pair.selectedLayerValue - pair.visibleLayerValue;
-
-              allDistances.push(snapDelta);
-            }
-
-            if (allDistances.length > 0) {
-              delta.y -= Math.min(...allDistances);
-            }
-
-            allDistances = [];
-            for (let pair of xPairs) {
-              const distance = Math.abs(
-                pair.selectedLayerValue - pair.visibleLayerValue,
-              );
-
-              if (distance > 6) continue;
-
-              const snapDelta =
-                pair.selectedLayerValue - pair.visibleLayerValue;
-
-              allDistances.push(snapDelta);
-            }
-
-            if (allDistances.length > 0) {
-              delta.x -= Math.min(...allDistances);
-            }
+            delta.y -= findSmallestSnappingDistance(yPairs);
+            delta.x -= findSmallestSnappingDistance(xPairs);
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;
@@ -389,13 +376,13 @@ export function canvasReducer(
 
             const selectedBoundsAfter = createBounds(selectedRectAfter);
 
-            draft.canvasVisibleAndSelectedLayerAxisPairs = {
-              xBounds: getVisibleAndSelectedLayerAxisPairs(
+            draft.possibleSnapGuides = {
+              x: getVisibleAndSelectedLayerAxisPairs(
                 getAxisValues(selectedBoundsAfter, 'x'),
                 visibleLayersInfo,
                 'x',
               ),
-              yBounds: getVisibleAndSelectedLayerAxisPairs(
+              y: getVisibleAndSelectedLayerAxisPairs(
                 getAxisValues(selectedBoundsAfter, 'y'),
                 visibleLayersInfo,
                 'y',

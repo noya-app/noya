@@ -37,12 +37,12 @@ export type WorkspaceTab = 'canvas' | 'theme';
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 type SmartSnapPairs = {
-  xBounds: CombinationValue[];
-  yBounds: CombinationValue[];
+  x: CombinationValue[];
+  y: CombinationValue[];
 };
 
 export type ApplicationState = {
-  canvasVisibleAndSelectedLayerAxisPairs: SmartSnapPairs | undefined;
+  possibleSnapGuides: SmartSnapPairs | undefined;
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
@@ -57,7 +57,6 @@ export type ApplicationState = {
   selectedThemeStyleGroup: string;
   selectedSymbolGroup: string;
   sketch: SketchFile;
-  TEST: boolean;
 };
 
 export type Action =
@@ -255,7 +254,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   }
 
   return {
-    canvasVisibleAndSelectedLayerAxisPairs: undefined,
+    possibleSnapGuides: undefined,
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),
@@ -270,6 +269,5 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedTextStyleGroup: '',
     selectedSymbolGroup: '',
     sketch,
-    TEST: false,
   };
 }
