@@ -178,7 +178,7 @@ export default memo(function SketchFileRenderer() {
     [page, state.selectedObjects],
   );
 
-  const distanceLabelAndPathBetweenSketchLayers = useMemo(() => {
+  const quickMeasureGuides = useMemo(() => {
     if (
       !highlightedLayer ||
       !highlightedLayer.isMeasured ||
@@ -367,7 +367,7 @@ export default memo(function SketchFileRenderer() {
         ))}
         {highlightedSketchLayer}
         {smartSnapGuides}
-        {distanceLabelAndPathBetweenSketchLayers}
+        {quickMeasureGuides}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
         )}

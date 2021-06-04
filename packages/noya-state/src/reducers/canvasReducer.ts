@@ -363,7 +363,7 @@ export function canvasReducer(
             });
 
             const selectedRectAfter = getBoundingRect(
-              page,
+              draft.sketch.pages[pageIndex],
               AffineTransform.identity,
               layerIds,
               {
@@ -373,9 +373,7 @@ export function canvasReducer(
               },
             );
 
-            if (!selectedRectAfter) {
-              return;
-            }
+            if (!selectedRectAfter) return;
 
             const selectedBoundsAfter = createBounds(selectedRectAfter);
 
