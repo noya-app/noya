@@ -72,7 +72,7 @@ type Guides = {
   extension: Point[];
   measurement: Point[];
   snap: Point[];
-  distanceMeasurement: DistanceMeasurementProps;
+  distanceMeasurement?: DistanceMeasurementProps;
 };
 
 export default function DistanceLabelAndPath({
@@ -101,6 +101,7 @@ export default function DistanceLabelAndPath({
     strokeWidth: 1,
     style: CanvasKit.PaintStyle.Stroke,
   });
+
   const extensionGuides = guides.map((line) => line.extension);
   const measurementGuides = guides.map((line) => line.measurement);
   const snapGuides = guides.map((line) => line.snap);
@@ -122,13 +123,16 @@ export default function DistanceLabelAndPath({
         snapGuides.map((points, index) => (
           <Polyline key={index} paint={snapGuidePaint} points={points} />
         ))}
-      {distanceMeasurements.map((item, index) => (
-        <DistanceMeasurement
-          key={index}
-          bounds={item.bounds}
-          distance={item.distance}
-        />
-      ))}
+      {distanceMeasurements.map(
+        (line, index) =>
+          line && (
+            <DistanceMeasurement
+              key={index}
+              bounds={line.bounds}
+              distance={line.distance}
+            />
+          ),
+      )}
     </>
   );
 }

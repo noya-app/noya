@@ -325,7 +325,7 @@ export function canvasReducer(
               visibleLayersInfo,
               'y',
             );
-
+            let allDistances = [];
             for (let pair of yPairs) {
               const distance = Math.abs(
                 pair.selectedLayerValue - pair.visibleLayerValue,
@@ -336,10 +336,14 @@ export function canvasReducer(
               const snapDelta =
                 pair.selectedLayerValue - pair.visibleLayerValue;
 
-              delta.y -= snapDelta;
-              break;
+              allDistances.push(snapDelta);
             }
 
+            if (allDistances.length > 0) {
+              delta.y -= Math.min(...allDistances);
+            }
+
+            allDistances = [];
             for (let pair of xPairs) {
               const distance = Math.abs(
                 pair.selectedLayerValue - pair.visibleLayerValue,
@@ -350,8 +354,11 @@ export function canvasReducer(
               const snapDelta =
                 pair.selectedLayerValue - pair.visibleLayerValue;
 
-              delta.x -= snapDelta;
-              break;
+              allDistances.push(snapDelta);
+            }
+
+            if (allDistances.length > 0) {
+              delta.x -= Math.min(...allDistances);
             }
 
             layerIndexPaths.forEach((indexPath) => {

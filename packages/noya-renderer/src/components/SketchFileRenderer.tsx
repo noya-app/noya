@@ -380,6 +380,24 @@ export default memo(function SketchFileRenderer() {
         return result ? [result] : [];
       });
     });
+
+    let smallestDistance: number | undefined = undefined;
+    matches.forEach(function (match) {
+      if (!smallestDistance) {
+        smallestDistance = match.guides[0].distanceMeasurement.distance;
+      } else if (
+        smallestDistance > match.guides[0].distanceMeasurement.distance
+      ) {
+        smallestDistance = match.guides[0].distanceMeasurement.distance;
+      }
+    });
+
+    matches.forEach(function (match) {
+      if (match.guides[0].distanceMeasurement.distance !== smallestDistance) {
+        match.guides[0].distanceMeasurement = null;
+      }
+    });
+
     return (
       <>
         {matches.map((match, index) => {
