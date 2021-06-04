@@ -3169,6 +3169,19 @@ export interface FontMgrFactory {
  */
 export interface ImageFilterFactory {
     /**
+     *  Create a filter that draws a drop shadow under the input content. This filter produces an
+     *  image that includes the inputs' content.
+     *  @param dx       The X offset of the shadow.
+     *  @param dy       The Y offset of the shadow.
+     *  @param sigmaX   The blur radius for the shadow, along the X axis.
+     *  @param sigmaY   The blur radius for the shadow, along the Y axis.
+     *  @param color    The color of the drop shadow.
+     *  @param input    The input filter, or will use the source bitmap if this is null.
+     */
+    MakeDropShadow(dx: number, dy: number, sigmaX: number, sigmaY: number, 
+                   color: InputColor, input: ImageFilter | null): ImageFilter;
+
+    /**
      * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
      * is used when the blur kernel goes outside the input image.
      *
