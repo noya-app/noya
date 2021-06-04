@@ -18,7 +18,7 @@ import {
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
-import { CombinationValue } from 'noya-state/src/reducers/canvasReducer';
+import { CombinationValue } from 'noya-state/src/snapping';
 import {
   getBoundingPoints,
   getBoundingRect,

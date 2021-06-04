@@ -13,7 +13,7 @@ import {
   getSelectedLayerIndexPaths,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
-import { CanvasAction, canvasReducer, CombinationValue } from './canvasReducer';
+import { CanvasAction, canvasReducer } from './canvasReducer';
 import {
   createInitialInteractionState,
   interactionReducer,
@@ -30,6 +30,7 @@ import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 import { ExportAction, exportReducer } from './exportReducer';
+import { CombinationValue } from '../snapping';
 
 export type { SetNumberMode };
 
