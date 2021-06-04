@@ -379,7 +379,6 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            // CanvasKit,
             state,
             insets,
             createRect(origin, current),
@@ -496,7 +495,6 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            // CanvasKit,
             state,
             insets,
             createRect(origin, current),
