@@ -23,7 +23,8 @@ import {
   findSmallestSnappingDistance,
   getAxisValues,
   getVisibleAndSelectedLayerAxisPairs,
-  getVisibleLayersAxisValues,
+  getPossibleSnapLayers,
+  getLayerAxisPairs,
 } from '../snapping';
 import { Point } from '../types';
 import { ApplicationState } from './applicationReducer';
@@ -170,11 +171,18 @@ export function canvasReducer(
               y: current.y - origin.y,
             };
 
-            const visibleLayersInfo = getVisibleLayersAxisValues(
-              layerIds,
+            const possibleSnapLayers = getPossibleSnapLayers(
+              layerIndexPaths,
               state,
               interactionState,
-            ).filter((info) => !layerIds.includes(info.layerId));
+            )
+              // Ensure we don't snap to the selected layer itself
+              .filter((layer) => !layerIds.includes(layer.do_objectID));
+
+            const visibleLayersInfo = getLayerAxisPairs(
+              page,
+              possibleSnapLayers,
+            );
 
             // Simulate where the selection rect would be, assuming no snapping
             selectedRect.x += delta.x;

@@ -1,6 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { AffineTransform, Bounds, createBounds } from 'noya-geometry';
 import { Axis } from 'noya-renderer/src/components/guides';
+import { isDeepEqual } from 'noya-utils';
+import { IndexPath } from 'tree-visit';
+import { Layers } from '.';
+import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
 import { InteractionState } from './reducers/interactionReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
@@ -19,8 +23,8 @@ export function getAxisValues(
   }
 }
 
-export function getVisibleLayersAxisValues(
-  selectedLayerIds: string[],
+export function getPossibleSnapLayers(
+  selectedIndexPaths: IndexPath[],
   state: ApplicationState,
   interactionState: Extract<InteractionState, { type: 'moving' }>,
 ) {
@@ -39,56 +43,79 @@ export function getVisibleLayersAxisValues(
     },
   );
 
-  let isLayerInGroup = false;
+  // Step 1: Are all selected ids in the same artboard?
+  const inSameArtboard =
+    Layers.isSymbolMasterOrArtboard(page.layers[selectedIndexPaths[0][0]]) &&
+    selectedIndexPaths.every((indexPath) => indexPath.length > 1) &&
+    selectedIndexPaths.every(
+      (indexPath) => indexPath[0] === selectedIndexPaths[0][0],
+    );
+
+  // Step 2: Do all selected ids have the same parent?
+  const sharedParentIndex = selectedIndexPaths[0].slice(0, -1);
+  const inSameParent = selectedIndexPaths.every((indexPath) =>
+    isDeepEqual(indexPath.slice(0, -1), sharedParentIndex),
+  );
+
+  // console.log('same artboard', inSameArtboard);
+  // console.log('same parent', inSameParent);
+
+  // TODO: Make sure these layers are visible
   let groupLayers: Sketch.AnyLayer[] = [];
 
-  allVisibleLayers
-    .filter(
-      (layer): layer is Sketch.Group | Sketch.Artboard =>
-        layer._class === 'artboard' || layer._class === 'group',
-    )
-    .forEach((group) => {
-      if (group.layers.length === 0) {
-        return;
-      }
+  if (inSameArtboard) {
+    const artboard = page.layers[selectedIndexPaths[0][0]] as Sketch.Artboard;
 
-      const result = group.layers.filter(
-        (groupLayer) => groupLayer.do_objectID === selectedLayerIds[0],
-      );
+    groupLayers.push(artboard);
 
-      if (result.length > 0) {
-        isLayerInGroup = true;
-        group.layers.forEach((layer) => {
-          groupLayers.push(layer);
-        });
-        groupLayers.push(group);
-      }
-    });
+    if (!inSameParent) {
+      groupLayers.push(...artboard.layers);
+    }
+  }
 
-  const values: SelectedValueObj[] = [];
-  const layers = isLayerInGroup ? groupLayers : allVisibleLayers;
+  if (inSameParent) {
+    const parent = Layers.access(
+      page,
+      selectedIndexPaths[0].slice(0, -1),
+    ) as ParentLayer;
 
-  layers.forEach(function (visibleLayer) {
+    groupLayers.push(...parent.layers);
+  }
+
+  const visibleLayers =
+    inSameArtboard || inSameParent ? groupLayers : allVisibleLayers;
+
+  return visibleLayers;
+}
+
+export function getLayerAxisPairs(
+  page: Sketch.Page,
+  layers: Sketch.AnyLayer[],
+): SelectedValueObj[] {
+  return layers.flatMap((layer) => {
     const rect = getBoundingRect(
       page,
       AffineTransform.identity,
-      [visibleLayer.do_objectID],
+      [layer.do_objectID],
       {
         clickThroughGroups: true,
-        includeHiddenLayers: true,
+        includeHiddenLayers: false,
         includeArtboardLayers: false,
       },
     );
-    if (rect) {
-      const rectBounds = createBounds(rect);
-      values.push({
-        layerId: visibleLayer.do_objectID,
-        y: getAxisValues(rectBounds, 'y'),
-        x: getAxisValues(rectBounds, 'x'),
-      });
-    }
+
+    if (!rect) return [];
+
+    const bounds = createBounds(rect);
+
+    return [
+      {
+        layerId: layer.do_objectID,
+        y: getAxisValues(bounds, 'y'),
+        x: getAxisValues(bounds, 'x'),
+      },
+    ];
   });
-  return values;
 }
 
 export function findSmallestSnappingDistance(values: CombinationValue[]) {
