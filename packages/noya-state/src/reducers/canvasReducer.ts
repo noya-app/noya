@@ -120,22 +120,16 @@ function getVisibleLayersAxisValues(
 }
 
 function findSmallestSnappingDistance(values: CombinationValue[]) {
-  let allDistances = [];
-  for (let pair of values) {
-    const distance = Math.abs(pair.selectedLayerValue - pair.visibleLayerValue);
+  const getDelta = (pair: CombinationValue) =>
+    pair.selectedLayerValue - pair.visibleLayerValue;
 
-    if (distance > 6) continue;
+  const getDistance = (pair: CombinationValue) => Math.abs(getDelta(pair));
 
-    const snapDelta = pair.selectedLayerValue - pair.visibleLayerValue;
+  const distances = values
+    .filter((pair) => getDistance(pair) <= 6)
+    .sort((a, b) => getDistance(a) - getDistance(b));
 
-    allDistances.push(snapDelta);
-  }
-
-  if (allDistances.length > 0) {
-    return Math.min(...allDistances);
-  } else {
-    return 0;
-  }
+  return distances.length > 0 ? getDelta(distances[0]) : 0;
 }
 
 type SelectedValueObj = {
