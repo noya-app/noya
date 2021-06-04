@@ -1,4 +1,4 @@
-import { Canvas, CanvasKit } from 'canvaskit-wasm';
+import { Canvas, CanvasKit } from 'canvaskit';
 import { ApplicationState } from 'noya-state';
 
 export interface Context {

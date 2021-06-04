@@ -8,7 +8,7 @@ import {
   Rect,
   Surface,
   ColorFilter,
-} from 'canvaskit-wasm';
+} from 'canvaskit';
 import { ReactNode } from 'react';
 import { ReactCanvasKitContext } from './contexts/ReactCanvasKitContext';
 

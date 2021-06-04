@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Paint } from 'canvaskit-wasm';
+import { Paint } from 'canvaskit';
 import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { Selectors, Layers } from 'noya-state';

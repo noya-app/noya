@@ -1,7 +1,7 @@
 // Some snippets adapted from udevbe/react-canvaskit (MIT License)
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
-import { CanvasKit, Surface } from 'canvaskit-wasm';
+import { CanvasKit, Surface } from 'canvaskit';
 import { fontManager } from 'noya-renderer';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';

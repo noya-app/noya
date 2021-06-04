@@ -1,4 +1,4 @@
-import { Paint } from 'canvaskit-wasm';
+import { Paint } from 'canvaskit';
 import { useMemo } from 'react';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import { ColorParameters } from './useColor';

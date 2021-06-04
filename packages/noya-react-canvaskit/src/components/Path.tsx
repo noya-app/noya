@@ -1,4 +1,4 @@
-import { Paint, Path } from 'canvaskit-wasm';
+import { Paint, Path } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
 import { PathComponentProps } from '../types';

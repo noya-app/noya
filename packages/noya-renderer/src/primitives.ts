@@ -1,11 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type {
-  CanvasKit,
-  Paint,
-  Path,
-  TextAlign,
-  TextStyle,
-} from 'canvaskit-wasm';
+import type { CanvasKit, Paint, Path, TextAlign, TextStyle } from 'canvaskit';
 import { distance } from 'noya-geometry';
 import {
   CompassDirection,

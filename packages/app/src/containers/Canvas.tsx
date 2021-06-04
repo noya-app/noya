@@ -1,4 +1,4 @@
-import type { Surface } from 'canvaskit-wasm';
+import type { Surface } from 'canvaskit';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
 import { render, unmount } from 'noya-react-canvaskit';
@@ -26,7 +26,7 @@ import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
 
-declare module 'canvaskit-wasm' {
+declare module 'canvaskit' {
   interface Surface {
     flush(): void;
     _id: number;

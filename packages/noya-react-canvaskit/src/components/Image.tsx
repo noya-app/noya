@@ -1,5 +1,5 @@
 import memoize from 'noya-state/src/utils/memoize';
-import { CanvasKit, Paint, Image } from 'canvaskit-wasm';
+import { CanvasKit, Paint, Image } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';
