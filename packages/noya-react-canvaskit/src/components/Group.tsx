@@ -1,4 +1,4 @@
-import { ColorFilter } from 'canvaskit-wasm';
+import { ColorFilter } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { createElement, memo, ReactNode, useMemo } from 'react';
 import { ClipProps, GroupComponentProps } from '../types';

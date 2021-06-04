@@ -1,4 +1,4 @@
-import type { FontMgr } from 'canvaskit-wasm';
+import type { FontMgr } from 'canvaskit';
 import { v4 as uuid } from 'uuid';
 import { CanvasKitInit } from 'canvaskit';
 import { Context } from './context';

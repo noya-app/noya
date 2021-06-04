@@ -1,4 +1,4 @@
-import { CanvasKit } from 'canvaskit-wasm';
+import { CanvasKit } from 'canvaskit';
 import { VirtualConsole } from 'jsdom';
 import { color, fill, rect } from '../primitives';
 

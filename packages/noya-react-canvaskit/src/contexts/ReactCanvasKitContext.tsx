@@ -1,4 +1,4 @@
-import { Canvas, CanvasKit } from 'canvaskit-wasm';
+import { Canvas, CanvasKit } from 'canvaskit';
 import { createContext, useContext } from 'react';
 
 export interface ReactCanvasKitContext {

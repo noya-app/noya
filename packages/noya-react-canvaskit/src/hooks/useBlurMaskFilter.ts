@@ -1,4 +1,4 @@
-import { BlurStyle, MaskFilter } from 'canvaskit-wasm';
+import { BlurStyle, MaskFilter } from 'canvaskit';
 import { useMemo } from 'react';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useDeletable from './useDeletable';

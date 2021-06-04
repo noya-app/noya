@@ -1,4 +1,4 @@
-import { Rect } from 'canvaskit-wasm';
+import { Rect } from 'canvaskit';
 import useStable4ElementArray from './useStable4ElementArray';
 
 export type RectParameters = Float32Array;

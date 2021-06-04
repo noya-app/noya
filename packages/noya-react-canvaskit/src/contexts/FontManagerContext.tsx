@@ -1,4 +1,4 @@
-import { FontMgr } from 'canvaskit-wasm';
+import { FontMgr } from 'canvaskit';
 import { createContext, useContext } from 'react';
 
 const FontManagerContext = createContext<FontMgr | undefined>(undefined);
