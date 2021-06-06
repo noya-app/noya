@@ -11,7 +11,10 @@ import {
 import React, { useMemo } from 'react';
 import { DistanceMeasurementProps } from './guides';
 
-function DistanceMeasurement({ distance, bounds }: DistanceMeasurementProps) {
+function DistanceMeasurement({
+  distance,
+  midpoint: bounds,
+}: DistanceMeasurementProps) {
   const { CanvasKit } = useReactCanvasKit();
   const fontManager = useFontManager();
   const paragraph = useMemo(() => {
@@ -95,7 +98,7 @@ export default function MeasurementGuide({
     <>
       <Polyline paint={measurementGuidePaint} points={measurement} />
       <DistanceMeasurement
-        bounds={distanceMeasurement.bounds}
+        midpoint={distanceMeasurement.midpoint}
         distance={distanceMeasurement.distance}
       />
     </>

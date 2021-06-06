@@ -41,7 +41,14 @@ import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import AlignmentGuides from './AlignmentGuides';
 import ExtensionGuide from './ExtensionGuide';
-import { ALL_DIRECTIONS, Axis, getAxisProperties, getGuides } from './guides';
+import {
+  ALL_DIRECTIONS,
+  Axis,
+  getAxisProperties,
+  getGuides,
+  X_DIRECTIONS,
+  Y_DIRECTIONS,
+} from './guides';
 import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
@@ -222,11 +229,8 @@ export default memo(function SketchFileRenderer() {
 
     const highlightedBounds = createBounds(highlightedBoundingRect);
     const selectedBounds = createBounds(boundingRect);
-    const axes = ['x', 'y'];
 
-    const guides = ALL_DIRECTIONS.filter(([, axis]) =>
-      axes.includes(axis),
-    ).flatMap(([direction, axis]) => {
+    const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
       const result = getGuides(
         direction,
         axis,
@@ -309,15 +313,14 @@ export default memo(function SketchFileRenderer() {
 
           const highlightedBounds = createBounds(layerToSnapBoundingRect);
 
-          const guides = ALL_DIRECTIONS.filter(
-            ([, directionAxis]) => axis !== directionAxis,
-          ).flatMap(([direction, axis]) => {
+          const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
+
+          const guides = directions.flatMap(([direction, axis]) => {
             const result = getGuides(
               direction,
               axis,
               selectedBounds,
               highlightedBounds,
-              pair.visibleLayerValue,
             );
 
             return result ? [result] : [];

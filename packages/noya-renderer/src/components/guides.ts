@@ -2,22 +2,23 @@ import { Bounds, distance, Point } from 'noya-geometry';
 
 export type DistanceMeasurementProps = {
   distance: number;
-  bounds: Point;
+  midpoint: Point;
 };
 
 type BoundsKey = keyof Bounds;
 export type Axis = 'x' | 'y';
-type Direction = '+' | '-';
+export type Direction = '+' | '-';
+type AxisDirectionPair = [Direction, Axis];
 
-export const X_DIRECTIONS = [
+export const X_DIRECTIONS: AxisDirectionPair[] = [
   ['+', 'x'],
   ['-', 'x'],
-] as const;
-export const Y_DIRECTIONS = [
+];
+export const Y_DIRECTIONS: AxisDirectionPair[] = [
   ['+', 'y'],
   ['-', 'y'],
-] as const;
-export const ALL_DIRECTIONS = [...X_DIRECTIONS, ...Y_DIRECTIONS] as const;
+];
+export const ALL_DIRECTIONS = [...X_DIRECTIONS, ...Y_DIRECTIONS];
 
 export function getAxisProperties(
   axis: Axis,
@@ -39,7 +40,6 @@ export type Guides = {
   extension: Point[];
   measurement: Point[];
   distanceMeasurement: DistanceMeasurementProps;
-  snap: Point[];
 };
 
 export function getGuides(
@@ -47,7 +47,6 @@ export function getGuides(
   mainAxis: Axis,
   selected: Bounds,
   highlighted: Bounds,
-  commonBound?: number,
 ): Guides | undefined {
   const m = mainAxis;
   const c = mainAxis === 'x' ? 'y' : 'x';
@@ -83,11 +82,6 @@ export function getGuides(
     { [m]: edge, [c]: selected[midC] } as Point,
   ];
 
-  const snap = [
-    { [m]: selected[maxM], [c]: commonBound } as Point,
-    { [m]: highlighted[minM], [c]: commonBound } as Point,
-  ];
-
   const itemDistance = distance(
     { [m]: selected[minM], [c]: selected[midC] } as Point,
     { [m]: edge, [c]: selected[midC] } as Point,
@@ -95,8 +89,11 @@ export function getGuides(
 
   const distanceMeasurement: DistanceMeasurementProps = {
     distance: itemDistance,
-    bounds: { [m]: (selected[minM] + edge) / 2, [c]: selected[midC] } as Point,
+    midpoint: {
+      [m]: (selected[minM] + edge) / 2,
+      [c]: selected[midC],
+    } as Point,
   };
 
-  return { extension, measurement, distanceMeasurement, snap };
+  return { extension, measurement, distanceMeasurement };
 }
