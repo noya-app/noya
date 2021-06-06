@@ -1,7 +1,14 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
-import { AffineTransform, createRect, insetRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  Bounds,
+  createBounds,
+  createRect,
+  insetRect,
+  Point,
+} from 'noya-geometry';
 import {
   Group,
   Polyline,
@@ -20,14 +27,33 @@ import {
   getCurrentPage,
   getLayerTransformAtIndexPath,
   getScreenTransform,
+  getSelectedLayerIndexPathsExcludingDescendants,
 } from 'noya-state/src/selectors/selectors';
+import {
+  getAxisValues,
+  getLayerAxisInfo,
+  getPossibleSnapLayers,
+  getSnappingPairs,
+  SnappingPair,
+} from 'noya-state/src/snapping';
+import { groupBy } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
+import AlignmentGuides from './AlignmentGuides';
+import ExtensionGuide from './ExtensionGuide';
+import {
+  ALL_DIRECTIONS,
+  Axis,
+  getAxisProperties,
+  getGuides,
+  X_DIRECTIONS,
+  Y_DIRECTIONS,
+} from './guides';
 import HoverOutline from './HoverOutline';
-import DistanceLabelAndPath from './DistanceLabelAndPath';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
+import MeasurementGuide from './MeasurementGuide';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -154,6 +180,7 @@ export default memo(function SketchFileRenderer() {
       getBoundingRect(page, AffineTransform.identity, state.selectedObjects, {
         clickThroughGroups: true,
         includeHiddenLayers: true,
+        includeArtboardLayers: false,
       }),
     [page, state.selectedObjects],
   );
@@ -164,12 +191,13 @@ export default memo(function SketchFileRenderer() {
         getBoundingPoints(page, AffineTransform.identity, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
+          includeArtboardLayers: false,
         }),
       ),
     [page, state.selectedObjects],
   );
 
-  const distanceLabelAndPathBetweenSketchLayers = useMemo(() => {
+  const quickMeasureGuides = useMemo(() => {
     if (
       !highlightedLayer ||
       !highlightedLayer.isMeasured ||
@@ -194,18 +222,197 @@ export default memo(function SketchFileRenderer() {
       {
         clickThroughGroups: true,
         includeHiddenLayers: true,
+        includeArtboardLayers: false,
+      },
+    );
+
+    if (!highlightedBoundingRect) return;
+
+    const highlightedBounds = createBounds(highlightedBoundingRect);
+    const selectedBounds = createBounds(boundingRect);
+
+    const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
+      const result = getGuides(
+        direction,
+        axis,
+        selectedBounds,
+        highlightedBounds,
+      );
+
+      return result ? [result] : [];
+    });
+
+    return (
+      <>
+        {guides.map((guide, index) => (
+          <ExtensionGuide key={index} points={guide.extension} />
+        ))}
+        {guides.map((guide, index) => (
+          <MeasurementGuide
+            key={index}
+            distanceMeasurement={guide.distanceMeasurement!}
+            measurement={guide.measurement}
+          />
+        ))}
+      </>
+    );
+  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+
+  const smartSnapGuides = useMemo(() => {
+    if (state.interactionState.type !== 'moving' || !boundingRect) return;
+
+    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+      state,
+    );
+
+    const possibleSnapLayers = getPossibleSnapLayers(
+      state,
+      layerIndexPaths,
+      state.interactionState.canvasSize,
+    )
+      // Ensure we don't snap to the selected layer itself
+      .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
+
+    const snappingLayerInfos = getLayerAxisInfo(page, possibleSnapLayers);
+
+    const bounds = createBounds(boundingRect);
+    const selectedBounds = createBounds(boundingRect);
+
+    const xPairs = getSnappingPairs(
+      getAxisValues(bounds, 'x'),
+      snappingLayerInfos,
+      'x',
+    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
+
+    const yPairs = getSnappingPairs(
+      getAxisValues(bounds, 'y'),
+      snappingLayerInfos,
+      'y',
+    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
+
+    const axisSnappingPairs: [Axis, SnappingPair[]][] = [
+      ['x', xPairs],
+      ['y', yPairs],
+    ];
+
+    const layerBoundsMap: Record<string, Bounds> = {};
+
+    [...xPairs, ...yPairs]
+      .map((pair) => pair.visibleLayerId)
+      .forEach((layerId) => {
+        if (layerId in layerBoundsMap) return;
+
+        const layerToSnapBoundingRect = getBoundingRect(
+          page,
+          AffineTransform.identity,
+          [layerId],
+          {
+            clickThroughGroups: true,
+            includeHiddenLayers: false,
+            includeArtboardLayers: false,
+          },
+        );
+
+        if (!layerToSnapBoundingRect) return;
+
+        layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
+      });
+
+    const nearestLayerMeasurements = axisSnappingPairs.map(
+      ([axis, snappingPairs]) => {
+        const measurements = snappingPairs
+          .flatMap((pair) => {
+            const visibleLayerBounds = layerBoundsMap[pair.visibleLayerId];
+
+            const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
+
+            const guides = directions.flatMap(([direction, axis]) => {
+              const result = getGuides(
+                direction,
+                axis,
+                selectedBounds,
+                visibleLayerBounds,
+              );
+
+              return result ? [result] : [];
+            });
+
+            return [
+              {
+                pair,
+                guides,
+                distance: Math.min(
+                  ...guides.map((guide) => guide.distanceMeasurement.distance),
+                ),
+              },
+            ];
+          })
+          .sort((a, b) => a.distance - b.distance);
+
+        return measurements.length > 0 ? measurements[0] : undefined;
+      },
+    );
+
+    const alignmentGuides = axisSnappingPairs.flatMap(
+      ([axis, snappingPairs]) => {
+        const groupedPairs = groupBy(
+          snappingPairs,
+          (value) => value.selectedLayerValue,
+        );
+
+        return Object.values(groupedPairs).map((pairs): Point[] => {
+          const visibleLayerBounds = pairs.map(
+            ({ visibleLayerId }) => layerBoundsMap[visibleLayerId],
+          );
+
+          const m = axis;
+          const c = axis === 'x' ? 'y' : 'x';
+
+          const [minC, , maxC] = getAxisProperties(c, '+');
+
+          return [
+            {
+              [m]: pairs[0].visibleLayerValue,
+              [c]: Math.min(
+                selectedBounds[minC],
+                ...visibleLayerBounds.map((bounds) => bounds[minC]),
+              ),
+            } as Point,
+            {
+              [m]: pairs[0].visibleLayerValue,
+              [c]: Math.max(
+                selectedBounds[maxC],
+                ...visibleLayerBounds.map((bounds) => bounds[maxC]),
+              ),
+            } as Point,
+          ];
+        });
       },
     );
 
     return (
-      highlightedBoundingRect && (
-        <DistanceLabelAndPath
-          selectedRect={boundingRect}
-          highlightedRect={highlightedBoundingRect}
-        />
-      )
+      <>
+        {nearestLayerMeasurements.map(
+          (layerMeasurement) =>
+            layerMeasurement && (
+              <>
+                {layerMeasurement.guides.map((guide, index) => (
+                  <ExtensionGuide key={index} points={guide.extension} />
+                ))}
+                {layerMeasurement.guides.map((guide, index) => (
+                  <MeasurementGuide
+                    key={index}
+                    distanceMeasurement={guide.distanceMeasurement!}
+                    measurement={guide.measurement}
+                  />
+                ))}
+              </>
+            ),
+        )}
+        <AlignmentGuides lines={alignmentGuides} />
+      </>
     );
-  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+  }, [state, boundingRect, page]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
@@ -254,7 +461,8 @@ export default memo(function SketchFileRenderer() {
           <Polyline key={index} points={points} paint={selectionPaint} />
         ))}
         {highlightedSketchLayer}
-        {distanceLabelAndPathBetweenSketchLayers}
+        {smartSnapGuides}
+        {quickMeasureGuides}
         {boundingRect && (
           <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
         )}

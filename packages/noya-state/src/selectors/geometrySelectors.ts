@@ -29,6 +29,7 @@ import {
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
   clickThroughGroups: boolean;
+  includeArtboardLayers: boolean;
 };
 
 function shouldClickThrough(
@@ -36,8 +37,8 @@ function shouldClickThrough(
   options: LayerTraversalOptions,
 ) {
   return (
-    layer._class === 'artboard' ||
     layer._class === 'symbolMaster' ||
+    (layer._class === 'artboard' && !options.includeArtboardLayers) ||
     (layer._class === 'group' &&
       (layer.hasClickThrough || options.clickThroughGroups))
   );
@@ -73,7 +74,6 @@ function visitLayersReversed(
 }
 
 export function getLayersInRect(
-  CanvasKit: CanvasKit,
   state: ApplicationState,
   insets: CanvasInsets,
   rect: Rect,
@@ -82,6 +82,7 @@ export function getLayersInRect(
   const options = traversalOptions ?? {
     clickThroughGroups: false,
     includeHiddenLayers: false,
+    includeArtboardLayers: false,
   };
 
   const page = getCurrentPage(state);
@@ -128,6 +129,7 @@ export function getLayerAtPoint(
   const options = traversalOptions ?? {
     clickThroughGroups: false,
     includeHiddenLayers: false,
+    includeArtboardLayers: false,
   };
 
   // TODO: check if we're clicking the title of an artboard
@@ -193,6 +195,7 @@ export function getBoundingRect(
   options = options ?? {
     clickThroughGroups: false,
     includeHiddenLayers: false,
+    includeArtboardLayers: false,
   };
 
   let bounds = {
@@ -237,6 +240,7 @@ export function getBoundingPoints(
   options = options ?? {
     clickThroughGroups: false,
     includeHiddenLayers: false,
+    includeArtboardLayers: false,
   };
 
   let points: Point[] = [];

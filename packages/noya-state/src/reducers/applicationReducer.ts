@@ -14,6 +14,7 @@ import {
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
+import { ExportAction, exportReducer } from './exportReducer';
 import {
   createInitialInteractionState,
   interactionReducer,
@@ -26,10 +27,9 @@ import {
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
+import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import { SymbolsAction, symbolsReducer } from './symbolsReducer';
-import { ExportAction, exportReducer } from './exportReducer';
 
 export type { SetNumberMode };
 

@@ -62,6 +62,12 @@ export const isArtboard = (
   return layer._class === 'artboard';
 };
 
+export const isSymbolMasterOrArtboard = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.SymbolMaster | Sketch.Artboard => {
+  return isSymbolMaster(layer) || isArtboard(layer);
+};
+
 export const isSymbolInstance = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolInstance => {

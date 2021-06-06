@@ -96,6 +96,10 @@ export default memo(function Canvas() {
     [sidebarWidth],
   );
 
+  const canvasSize = useMemo(() => containerSize ?? { width: 0, height: 0 }, [
+    containerSize,
+  ]);
+
   // Event coordinates are relative to (0,0), but we want them to include
   // the current document's offset from the origin
   const offsetEventPoint = useCallback(
@@ -207,6 +211,7 @@ export default memo(function Canvas() {
           {
             clickThroughGroups: event.metaKey,
             includeHiddenLayers: false,
+            includeArtboardLayers: false,
           },
         );
 
@@ -250,7 +255,12 @@ export default memo(function Canvas() {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction) {
-              dispatch('interaction', ['maybeScale', point, direction]);
+              dispatch('interaction', [
+                'maybeScale',
+                point,
+                direction,
+                canvasSize,
+              ]);
 
               return;
             }
@@ -264,6 +274,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -280,7 +291,7 @@ export default memo(function Canvas() {
               );
             }
 
-            dispatch('interaction', ['maybeMove', point]);
+            dispatch('interaction', ['maybeMove', point, canvasSize]);
           } else {
             dispatch('selectLayer', undefined);
 
@@ -290,7 +301,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, insets],
+    [offsetEventPoint, state, CanvasKit, insets, dispatch, canvasSize],
   );
 
   const handleMouseMove = useCallback(
@@ -363,13 +374,13 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            CanvasKit,
             state,
             insets,
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -402,6 +413,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -478,13 +490,13 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            CanvasKit,
             state,
             insets,
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -521,7 +533,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, insets],
+    [offsetEventPoint, state, dispatch, insets],
   );
 
   const handleDirection =
