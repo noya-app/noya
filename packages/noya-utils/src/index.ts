@@ -7,5 +7,6 @@ export * from './sum';
 export * from './windowsOf';
 export * from './sortBy';
 export * from './chunkBy';
+export * from './groupBy';
 export * from './getIncrementedName';
 export * as delimitedPath from './delimitedPath';

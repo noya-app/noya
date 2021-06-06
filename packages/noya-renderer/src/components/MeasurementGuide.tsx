@@ -68,20 +68,15 @@ function DistanceMeasurement({ distance, bounds }: DistanceMeasurementProps) {
   );
 }
 
-type Guides = {
-  extension: Point[];
+interface Props {
   measurement: Point[];
-  snap: Point[];
-  distanceMeasurement?: DistanceMeasurementProps;
-};
+  distanceMeasurement: DistanceMeasurementProps;
+}
 
-export default function DistanceLabelAndPath({
-  guides,
-  showSnap,
-}: {
-  guides: Guides[];
-  showSnap?: boolean;
-}) {
+export default function MeasurementGuide({
+  measurement,
+  distanceMeasurement,
+}: Props) {
   const { CanvasKit } = useReactCanvasKit();
 
   const extensionGuidePaint = new CanvasKit.Paint();
@@ -96,43 +91,13 @@ export default function DistanceLabelAndPath({
     style: CanvasKit.PaintStyle.Stroke,
   });
 
-  const snapGuidePaint = usePaint({
-    color: CanvasKit.Color4f(0.52, 0.248, 1.0),
-    strokeWidth: 1,
-    style: CanvasKit.PaintStyle.Stroke,
-  });
-
-  const extensionGuides = guides.map((line) => line.extension);
-  const measurementGuides = guides.map((line) => line.measurement);
-  const snapGuides = guides.map((line) => line.snap);
-  const distanceMeasurements = guides.map((line) => line.distanceMeasurement);
-
   return (
     <>
-      {extensionGuides.map((points, index) => (
-        <Polyline key={index} paint={extensionGuidePaint} points={points} />
-      ))}
-      {measurementGuides.map((explicitPoints, index) => (
-        <Polyline
-          key={index}
-          paint={measurementGuidePaint}
-          points={explicitPoints}
-        />
-      ))}
-      {showSnap &&
-        snapGuides.map((points, index) => (
-          <Polyline key={index} paint={snapGuidePaint} points={points} />
-        ))}
-      {distanceMeasurements.map(
-        (line, index) =>
-          line && (
-            <DistanceMeasurement
-              key={index}
-              bounds={line.bounds}
-              distance={line.distance}
-            />
-          ),
-      )}
+      <Polyline paint={measurementGuidePaint} points={measurement} />
+      <DistanceMeasurement
+        bounds={distanceMeasurement.bounds}
+        distance={distanceMeasurement.distance}
+      />
     </>
   );
 }

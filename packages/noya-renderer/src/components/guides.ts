@@ -9,14 +9,17 @@ type BoundsKey = keyof Bounds;
 export type Axis = 'x' | 'y';
 type Direction = '+' | '-';
 
-export const ALL_DIRECTIONS = [
+export const X_DIRECTIONS = [
   ['+', 'x'],
   ['-', 'x'],
+] as const;
+export const Y_DIRECTIONS = [
   ['+', 'y'],
   ['-', 'y'],
 ] as const;
+export const ALL_DIRECTIONS = [...X_DIRECTIONS, ...Y_DIRECTIONS] as const;
 
-function getAxisProperties(
+export function getAxisProperties(
   axis: Axis,
   direction: Direction,
 ): [BoundsKey, BoundsKey, BoundsKey] {

@@ -6,6 +6,7 @@ import {
   createBounds,
   createRect,
   insetRect,
+  Point,
 } from 'noya-geometry';
 import {
   Group,
@@ -19,13 +20,6 @@ import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath } from 'noya-state/src/layers';
 import {
-  getAxisValues,
-  getLayerAxisPairs,
-  getPossibleSnapLayers,
-  getSnappingPairs,
-  SnappingPair,
-} from 'noya-state/src/snapping';
-import {
   getBoundingPoints,
   getBoundingRect,
   getCanvasTransform,
@@ -34,14 +28,24 @@ import {
   getScreenTransform,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from 'noya-state/src/selectors/selectors';
+import {
+  getAxisValues,
+  getLayerAxisPairs,
+  getPossibleSnapLayers,
+  getSnappingPairs,
+  SnappingPair,
+} from 'noya-state/src/snapping';
+import { groupBy } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
-import DistanceLabelAndPath from './DistanceLabelAndPath';
-import { ALL_DIRECTIONS, Axis, getGuides } from './guides';
+import AlignmentGuides from './AlignmentGuides';
+import ExtensionGuide from './ExtensionGuide';
+import { ALL_DIRECTIONS, Axis, getAxisProperties, getGuides } from './guides';
 import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
+import MeasurementGuide from './MeasurementGuide';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -214,9 +218,7 @@ export default memo(function SketchFileRenderer() {
       },
     );
 
-    if (!highlightedBoundingRect) {
-      return;
-    }
+    if (!highlightedBoundingRect) return;
 
     const highlightedBounds = createBounds(highlightedBoundingRect);
     const selectedBounds = createBounds(boundingRect);
@@ -235,7 +237,20 @@ export default memo(function SketchFileRenderer() {
       return result ? [result] : [];
     });
 
-    return highlightedBoundingRect && <DistanceLabelAndPath guides={guides} />;
+    return (
+      <>
+        {guides.map((guide, index) => (
+          <ExtensionGuide key={index} points={guide.extension} />
+        ))}
+        {guides.map((guide, index) => (
+          <MeasurementGuide
+            key={index}
+            distanceMeasurement={guide.distanceMeasurement!}
+            measurement={guide.measurement}
+          />
+        ))}
+      </>
+    );
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
   const smartSnapGuides = useMemo(() => {
@@ -256,6 +271,7 @@ export default memo(function SketchFileRenderer() {
     const snappingLayerInfos = getLayerAxisPairs(page, possibleSnapLayers);
 
     const bounds = createBounds(boundingRect);
+    const selectedBounds = createBounds(boundingRect);
 
     const xPairs = getSnappingPairs(
       getAxisValues(bounds, 'x'),
@@ -274,12 +290,10 @@ export default memo(function SketchFileRenderer() {
       ['y', yPairs],
     ];
 
-    const allMatches = possibleGuides.map(([axis, combinationValue]) => {
-      const selectedBounds = createBounds(boundingRect);
-
-      const matches = combinationValue
+    const distances = possibleGuides.map(([axis, snappingPairs]) => {
+      return snappingPairs
         .filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue)
-        .map((pair) => {
+        .flatMap((pair) => {
           const layerToSnapBoundingRect = getBoundingRect(
             page,
             AffineTransform.identity,
@@ -295,8 +309,8 @@ export default memo(function SketchFileRenderer() {
 
           const highlightedBounds = createBounds(layerToSnapBoundingRect);
 
-          return ALL_DIRECTIONS.filter(
-            ([, directionAxis]) => directionAxis !== axis,
+          const guides = ALL_DIRECTIONS.filter(
+            ([, directionAxis]) => axis !== directionAxis,
           ).flatMap(([direction, axis]) => {
             const result = getGuides(
               direction,
@@ -308,24 +322,67 @@ export default memo(function SketchFileRenderer() {
 
             return result ? [result] : [];
           });
+
+          return [
+            {
+              pair,
+              guides,
+              distance: guides.map(
+                (guide) => guide.distanceMeasurement.distance,
+              )[0],
+            },
+          ];
+        })
+        .sort((a, b) => a.distance - b.distance);
+    });
+
+    const alignmentGuides = possibleGuides.flatMap(([axis, snappingPairs]) => {
+      const groupedPairs: Record<number, SnappingPair[]> = groupBy(
+        snappingPairs.filter(
+          (pair) => pair.selectedLayerValue === pair.visibleLayerValue,
+        ),
+        (value) => value.selectedLayerValue,
+      );
+
+      const matches: Point[][] = Object.values(groupedPairs).map((pairs) => {
+        const visibleLayerBounds = pairs.flatMap(({ visibleLayerId }) => {
+          const rect = getBoundingRect(
+            page,
+            AffineTransform.identity,
+            [visibleLayerId],
+            {
+              clickThroughGroups: true,
+              includeHiddenLayers: false,
+              includeArtboardLayers: false,
+            },
+          );
+
+          if (!rect) return [];
+
+          return createBounds(rect);
         });
 
-      let smallestDistance: number | undefined = undefined;
-      matches.forEach((guides) => {
-        if (guides.length === 0) return;
-        if (!smallestDistance) {
-          smallestDistance = guides[0].distanceMeasurement.distance;
-        } else if (smallestDistance > guides[0].distanceMeasurement.distance) {
-          smallestDistance = guides[0].distanceMeasurement.distance;
-        }
-      });
+        const m = axis;
+        const c = axis === 'x' ? 'y' : 'x';
 
-      matches.forEach((guides) => {
-        if (guides.length === 0) return;
-        if (guides[0].distanceMeasurement.distance !== smallestDistance) {
-          // TODO: Put this back!!!
-          // match.guides[0].distanceMeasurement = null;
-        }
+        const [minC, , maxC] = getAxisProperties(c, '+');
+
+        return [
+          {
+            [m]: pairs[0].visibleLayerValue,
+            [c]: Math.min(
+              selectedBounds[minC],
+              ...visibleLayerBounds.map((bounds) => bounds[minC]),
+            ),
+          } as Point,
+          {
+            [m]: pairs[0].visibleLayerValue,
+            [c]: Math.max(
+              selectedBounds[maxC],
+              ...visibleLayerBounds.map((bounds) => bounds[maxC]),
+            ),
+          } as Point,
+        ];
       });
 
       return matches;
@@ -333,17 +390,24 @@ export default memo(function SketchFileRenderer() {
 
     return (
       <>
-        {allMatches.map((matches) => {
-          return matches.map((guides, index) => {
-            return (
-              <DistanceLabelAndPath
-                guides={guides}
-                showSnap={true}
-                key={index}
-              />
-            );
-          });
-        })}
+        {distances.map(
+          (distance) =>
+            distance.length > 0 && (
+              <>
+                {distance[0].guides.map((guide, index) => (
+                  <ExtensionGuide key={index} points={guide.extension} />
+                ))}
+                {distance[0].guides.map((guide, index) => (
+                  <MeasurementGuide
+                    key={index}
+                    distanceMeasurement={guide.distanceMeasurement!}
+                    measurement={guide.measurement}
+                  />
+                ))}
+              </>
+            ),
+        )}
+        <AlignmentGuides lines={alignmentGuides} />
       </>
     );
   }, [state, boundingRect, page]);
