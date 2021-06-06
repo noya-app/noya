@@ -14,10 +14,8 @@ export function getAxisValues(
   axis: Axis,
 ): [number, number, number] {
   if (axis === 'x') {
-    // return [rectBounds.minX] as any;
     return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
   } else {
-    // return [] as any;
     return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
   }
 }
