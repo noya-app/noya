@@ -47,6 +47,7 @@ import {
   Axis,
   getAxisProperties,
   getGuides,
+  Guides,
   X_DIRECTIONS,
   Y_DIRECTIONS,
 } from './guides';
@@ -318,15 +319,20 @@ export default memo(function SketchFileRenderer() {
         layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
       });
 
-    const nearestLayerMeasurements = axisSnappingPairs.map(
+    const nearestLayerGuides = axisSnappingPairs.map(
       ([axis, snappingPairs]) => {
-        const measurements = snappingPairs
-          .flatMap((pair) => {
+        const getMinGuideDistance = (guides: Guides[]) =>
+          Math.min(
+            ...guides.map((guide) => guide.distanceMeasurement.distance),
+          );
+
+        const guides = snappingPairs
+          .map((pair) => {
             const visibleLayerBounds = layerBoundsMap[pair.visibleLayerId];
 
             const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
 
-            const guides = directions.flatMap(([direction, axis]) => {
+            return directions.flatMap(([direction, axis]) => {
               const result = getGuides(
                 direction,
                 axis,
@@ -336,20 +342,10 @@ export default memo(function SketchFileRenderer() {
 
               return result ? [result] : [];
             });
-
-            return [
-              {
-                pair,
-                guides,
-                distance: Math.min(
-                  ...guides.map((guide) => guide.distanceMeasurement.distance),
-                ),
-              },
-            ];
           })
-          .sort((a, b) => a.distance - b.distance);
+          .sort((a, b) => getMinGuideDistance(a) - getMinGuideDistance(b));
 
-        return measurements.length > 0 ? measurements[0] : undefined;
+        return guides.length > 0 ? guides[0] : undefined;
       },
     );
 
@@ -392,14 +388,15 @@ export default memo(function SketchFileRenderer() {
 
     return (
       <>
-        {nearestLayerMeasurements.map(
-          (layerMeasurement) =>
-            layerMeasurement && (
+        <AlignmentGuides lines={alignmentGuides} />
+        {nearestLayerGuides.map(
+          (guides) =>
+            guides && (
               <>
-                {layerMeasurement.guides.map((guide, index) => (
+                {guides.map((guide, index) => (
                   <ExtensionGuide key={index} points={guide.extension} />
                 ))}
-                {layerMeasurement.guides.map((guide, index) => (
+                {guides.map((guide, index) => (
                   <MeasurementGuide
                     key={index}
                     distanceMeasurement={guide.distanceMeasurement!}
@@ -409,7 +406,6 @@ export default memo(function SketchFileRenderer() {
               </>
             ),
         )}
-        <AlignmentGuides lines={alignmentGuides} />
       </>
     );
   }, [state, boundingRect, page]);
