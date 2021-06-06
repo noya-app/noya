@@ -1,5 +1,6 @@
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { Spacer } from 'noya-designsystem';
+import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { memo, ReactNode, useCallback } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
@@ -70,6 +71,7 @@ interface ArrayControllerProps<Item> {
   id: string;
   value: Item[];
   title: ReactNode;
+  showTrashIfEnabled?: boolean;
   onDeleteItem?: (index: number) => void;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onChangeCheckbox: (index: number, checked: boolean) => void;
@@ -87,6 +89,7 @@ function ArrayController<Item extends BaseArrayItem>({
   id,
   value,
   title,
+  showTrashIfEnabled = false,
   getKey,
   onDeleteItem,
   onMoveItem,
@@ -124,16 +127,22 @@ function ArrayController<Item extends BaseArrayItem>({
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Title>{title}</Title>
           <Spacer.Horizontal />
-          {onClickTrash && value.some((item) => !item.isEnabled) && (
-            <span onClick={onClickTrash}>
-              <TrashIcon color="rgb(139,139,139)" />
-            </span>
-          )}
-          <Spacer.Horizontal size={12} />
-          {onClickPlus && (
-            <span onClick={onClickPlus}>
-              <PlusIcon color="rgb(139,139,139)" />
-            </span>
+          {withSeparatorElements(
+            [
+              onClickTrash &&
+                (showTrashIfEnabled ||
+                  value.some((item) => !item.isEnabled)) && (
+                  <span onClick={onClickTrash}>
+                    <TrashIcon color="rgb(139,139,139)" />
+                  </span>
+                ),
+              onClickPlus && (
+                <span onClick={onClickPlus}>
+                  <PlusIcon color="rgb(139,139,139)" />
+                </span>
+              ),
+            ],
+            <Spacer.Horizontal size={12} />,
           )}
         </div>
         <Droppable droppableId={id}>

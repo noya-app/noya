@@ -22,6 +22,7 @@ import ThemeTextInspector from './ThemeTextInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import ExportInspector from './ExportInspector';
+import ColorControlsInspector from './ColorControlsInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -84,6 +85,9 @@ export default memo(function Inspector() {
             rotation: undefined,
           };
 
+    const onlyBitmapLayers = selectedLayers.every((l) =>
+      Layers.isBitmapLayer(l),
+    );
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
     const hasSymbolMaster = selectedLayers.some((l) =>
@@ -123,6 +127,7 @@ export default memo(function Inspector() {
       ),
       !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
       selectedLayers.length === 1 && <ShadowInspector />,
+      onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
