@@ -1,12 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, Bounds, createBounds } from 'noya-geometry';
+import { AffineTransform, Bounds, createBounds, Size } from 'noya-geometry';
 import { Axis } from 'noya-renderer/src/components/guides';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';
 import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
-import { InteractionState } from './reducers/interactionReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
 import { getBoundingRect, getCurrentPage } from './selectors/selectors';
 
@@ -24,12 +23,10 @@ export function getAxisValues(
 }
 
 export function getPossibleSnapLayers(
-  selectedIndexPaths: IndexPath[],
   state: ApplicationState,
-  interactionState: Extract<InteractionState, { type: 'moving' }>,
+  selectedIndexPaths: IndexPath[],
+  canvasSize: Size,
 ) {
-  const { canvasSize } = interactionState;
-
   const page = getCurrentPage(state);
 
   const allVisibleLayers = getLayersInRect(
@@ -43,7 +40,7 @@ export function getPossibleSnapLayers(
     },
   );
 
-  // Step 1: Are all selected ids in the same artboard?
+  // Are all selected ids in the same artboard?
   const inSameArtboard =
     Layers.isSymbolMasterOrArtboard(page.layers[selectedIndexPaths[0][0]]) &&
     selectedIndexPaths.every((indexPath) => indexPath.length > 1) &&
@@ -51,14 +48,11 @@ export function getPossibleSnapLayers(
       (indexPath) => indexPath[0] === selectedIndexPaths[0][0],
     );
 
-  // Step 2: Do all selected ids have the same parent?
+  // Do all selected ids have the same parent?
   const sharedParentIndex = selectedIndexPaths[0].slice(0, -1);
   const inSameParent = selectedIndexPaths.every((indexPath) =>
     isDeepEqual(indexPath.slice(0, -1), sharedParentIndex),
   );
-
-  // console.log('same artboard', inSameArtboard);
-  // console.log('same parent', inSameParent);
 
   // TODO: Make sure these layers are visible
   let groupLayers: Sketch.AnyLayer[] = [];
@@ -88,7 +82,7 @@ export function getPossibleSnapLayers(
   return visibleLayers;
 }
 
-export function getLayerAxisPairs(
+export function getLayerAxisInfo(
   page: Sketch.Page,
   layers: Sketch.AnyLayer[],
 ): SnappingLayerInfo[] {

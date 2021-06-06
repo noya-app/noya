@@ -3,6 +3,7 @@ import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,
+  Bounds,
   createBounds,
   createRect,
   insetRect,
@@ -30,7 +31,7 @@ import {
 } from 'noya-state/src/selectors/selectors';
 import {
   getAxisValues,
-  getLayerAxisPairs,
+  getLayerAxisInfo,
   getPossibleSnapLayers,
   getSnappingPairs,
   SnappingPair,
@@ -265,14 +266,14 @@ export default memo(function SketchFileRenderer() {
     );
 
     const possibleSnapLayers = getPossibleSnapLayers(
-      layerIndexPaths,
       state,
-      state.interactionState,
+      layerIndexPaths,
+      state.interactionState.canvasSize,
     )
       // Ensure we don't snap to the selected layer itself
       .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
 
-    const snappingLayerInfos = getLayerAxisPairs(page, possibleSnapLayers);
+    const snappingLayerInfos = getLayerAxisInfo(page, possibleSnapLayers);
 
     const bounds = createBounds(boundingRect);
     const selectedBounds = createBounds(boundingRect);
@@ -281,126 +282,124 @@ export default memo(function SketchFileRenderer() {
       getAxisValues(bounds, 'x'),
       snappingLayerInfos,
       'x',
-    );
+    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
 
     const yPairs = getSnappingPairs(
       getAxisValues(bounds, 'y'),
       snappingLayerInfos,
       'y',
-    );
+    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
 
-    const possibleGuides: [Axis, SnappingPair[]][] = [
+    const axisSnappingPairs: [Axis, SnappingPair[]][] = [
       ['x', xPairs],
       ['y', yPairs],
     ];
 
-    const distances = possibleGuides.map(([axis, snappingPairs]) => {
-      return snappingPairs
-        .filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue)
-        .flatMap((pair) => {
-          const layerToSnapBoundingRect = getBoundingRect(
-            page,
-            AffineTransform.identity,
-            [pair.visibleLayerId],
-            {
-              clickThroughGroups: true,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
+    const layerBoundsMap: Record<string, Bounds> = {};
+
+    [...xPairs, ...yPairs]
+      .map((pair) => pair.visibleLayerId)
+      .forEach((layerId) => {
+        if (layerId in layerBoundsMap) return;
+
+        const layerToSnapBoundingRect = getBoundingRect(
+          page,
+          AffineTransform.identity,
+          [layerId],
+          {
+            clickThroughGroups: true,
+            includeHiddenLayers: false,
+            includeArtboardLayers: false,
+          },
+        );
+
+        if (!layerToSnapBoundingRect) return;
+
+        layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
+      });
+
+    const nearestLayerMeasurements = axisSnappingPairs.map(
+      ([axis, snappingPairs]) => {
+        const measurements = snappingPairs
+          .flatMap((pair) => {
+            const visibleLayerBounds = layerBoundsMap[pair.visibleLayerId];
+
+            const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
+
+            const guides = directions.flatMap(([direction, axis]) => {
+              const result = getGuides(
+                direction,
+                axis,
+                selectedBounds,
+                visibleLayerBounds,
+              );
+
+              return result ? [result] : [];
+            });
+
+            return [
+              {
+                pair,
+                guides,
+                distance: Math.min(
+                  ...guides.map((guide) => guide.distanceMeasurement.distance),
+                ),
+              },
+            ];
+          })
+          .sort((a, b) => a.distance - b.distance);
+
+        return measurements.length > 0 ? measurements[0] : undefined;
+      },
+    );
+
+    const alignmentGuides = axisSnappingPairs.flatMap(
+      ([axis, snappingPairs]) => {
+        const groupedPairs = groupBy(
+          snappingPairs,
+          (value) => value.selectedLayerValue,
+        );
+
+        return Object.values(groupedPairs).map((pairs): Point[] => {
+          const visibleLayerBounds = pairs.map(
+            ({ visibleLayerId }) => layerBoundsMap[visibleLayerId],
           );
 
-          if (!layerToSnapBoundingRect) return [];
+          const m = axis;
+          const c = axis === 'x' ? 'y' : 'x';
 
-          const highlightedBounds = createBounds(layerToSnapBoundingRect);
-
-          const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
-
-          const guides = directions.flatMap(([direction, axis]) => {
-            const result = getGuides(
-              direction,
-              axis,
-              selectedBounds,
-              highlightedBounds,
-            );
-
-            return result ? [result] : [];
-          });
+          const [minC, , maxC] = getAxisProperties(c, '+');
 
           return [
             {
-              pair,
-              guides,
-              distance: guides.map(
-                (guide) => guide.distanceMeasurement.distance,
-              )[0],
-            },
-          ];
-        })
-        .sort((a, b) => a.distance - b.distance);
-    });
-
-    const alignmentGuides = possibleGuides.flatMap(([axis, snappingPairs]) => {
-      const groupedPairs: Record<number, SnappingPair[]> = groupBy(
-        snappingPairs.filter(
-          (pair) => pair.selectedLayerValue === pair.visibleLayerValue,
-        ),
-        (value) => value.selectedLayerValue,
-      );
-
-      const matches: Point[][] = Object.values(groupedPairs).map((pairs) => {
-        const visibleLayerBounds = pairs.flatMap(({ visibleLayerId }) => {
-          const rect = getBoundingRect(
-            page,
-            AffineTransform.identity,
-            [visibleLayerId],
+              [m]: pairs[0].visibleLayerValue,
+              [c]: Math.min(
+                selectedBounds[minC],
+                ...visibleLayerBounds.map((bounds) => bounds[minC]),
+              ),
+            } as Point,
             {
-              clickThroughGroups: true,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
-          );
-
-          if (!rect) return [];
-
-          return createBounds(rect);
+              [m]: pairs[0].visibleLayerValue,
+              [c]: Math.max(
+                selectedBounds[maxC],
+                ...visibleLayerBounds.map((bounds) => bounds[maxC]),
+              ),
+            } as Point,
+          ];
         });
-
-        const m = axis;
-        const c = axis === 'x' ? 'y' : 'x';
-
-        const [minC, , maxC] = getAxisProperties(c, '+');
-
-        return [
-          {
-            [m]: pairs[0].visibleLayerValue,
-            [c]: Math.min(
-              selectedBounds[minC],
-              ...visibleLayerBounds.map((bounds) => bounds[minC]),
-            ),
-          } as Point,
-          {
-            [m]: pairs[0].visibleLayerValue,
-            [c]: Math.max(
-              selectedBounds[maxC],
-              ...visibleLayerBounds.map((bounds) => bounds[maxC]),
-            ),
-          } as Point,
-        ];
-      });
-
-      return matches;
-    });
+      },
+    );
 
     return (
       <>
-        {distances.map(
-          (distance) =>
-            distance.length > 0 && (
+        {nearestLayerMeasurements.map(
+          (layerMeasurement) =>
+            layerMeasurement && (
               <>
-                {distance[0].guides.map((guide, index) => (
+                {layerMeasurement.guides.map((guide, index) => (
                   <ExtensionGuide key={index} points={guide.extension} />
                 ))}
-                {distance[0].guides.map((guide, index) => (
+                {layerMeasurement.guides.map((guide, index) => (
                   <MeasurementGuide
                     key={index}
                     distanceMeasurement={guide.distanceMeasurement!}

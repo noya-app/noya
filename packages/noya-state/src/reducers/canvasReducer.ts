@@ -24,7 +24,7 @@ import {
   getAxisValues,
   getSnappingPairs,
   getPossibleSnapLayers,
-  getLayerAxisPairs,
+  getLayerAxisInfo,
 } from '../snapping';
 import { Point } from '../types';
 import { ApplicationState } from './applicationReducer';
@@ -172,14 +172,14 @@ export function canvasReducer(
             };
 
             const possibleSnapLayers = getPossibleSnapLayers(
-              layerIndexPaths,
               state,
-              interactionState,
+              layerIndexPaths,
+              interactionState.canvasSize,
             )
               // Ensure we don't snap to the selected layer itself
               .filter((layer) => !layerIds.includes(layer.do_objectID));
 
-            const snappingLayerInfos = getLayerAxisPairs(
+            const snappingLayerInfos = getLayerAxisInfo(
               page,
               possibleSnapLayers,
             );
