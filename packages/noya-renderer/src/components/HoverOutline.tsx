@@ -1,30 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
-import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
+import { Group, Path, Rect } from 'noya-react-canvaskit';
 import { Selectors } from 'noya-state';
 import { ReactNode, useMemo } from 'react';
-
-function useLayerPath(layer: Sketch.Rectangle | Sketch.Oval) {
-  const { CanvasKit } = useReactCanvasKit();
-
-  return useMemo(() => {
-    const path = Primitives.path(CanvasKit, layer.points, layer.frame);
-
-    path.setFillType(CanvasKit.FillType.EvenOdd);
-
-    return path;
-  }, [CanvasKit, layer]);
-}
-
-function useLayerFrameRect(layer: Sketch.AnyLayer) {
-  const { CanvasKit } = useReactCanvasKit();
-
-  return useMemo(() => {
-    return Primitives.rect(CanvasKit, layer.frame);
-  }, [CanvasKit, layer]);
-}
+import useLayerFrameRect from '../hooks/useLayerFrameRect';
+import useLayerPath from '../hooks/useLayerPath';
 
 interface HoverOutlinePathProps {
   layer: Sketch.Rectangle | Sketch.Oval;

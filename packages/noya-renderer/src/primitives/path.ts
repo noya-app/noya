@@ -53,22 +53,36 @@ function getStep(
   return { step, drawSegment: true };
 }
 
-export function path(
-  CanvasKit: CanvasKit,
+export function normalizeCurvePoints(
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
-): Path {
+) {
   const { x, y, width, height } = frame;
 
   const scalePoint = (point: Point) => {
     return { x: x + point.x * width, y: y + point.y * height };
   };
 
-  const curvePoints = [...points].map((curvePoint) => ({
-    ...curvePoint,
-    curveFrom: curvePoint.curveTo,
-    curveTo: curvePoint.curveFrom,
-  }));
+  return [...points]
+    .map((curvePoint) => ({
+      ...curvePoint,
+      curveFrom: scalePoint(parsePoint(curvePoint.curveFrom)),
+      curveTo: scalePoint(parsePoint(curvePoint.curveTo)),
+      point: scalePoint(parsePoint(curvePoint.point)),
+    }))
+    .map((curvePoint) => ({
+      ...curvePoint,
+      curveFrom: curvePoint.curveTo,
+      curveTo: curvePoint.curveFrom,
+    }));
+}
+
+export function path(
+  CanvasKit: CanvasKit,
+  points: Sketch.CurvePoint[],
+  frame: Sketch.Rect,
+): Path {
+  const curvePoints = normalizeCurvePoints(points, frame);
 
   const pairs = windowsOf(curvePoints, 3, true);
 
@@ -77,9 +91,9 @@ export function path(
   // Move to the starting point
   if (pairs[pairs.length - 1]) {
     const [prev, current, next] = pairs[pairs.length - 1];
-    const currentPoint = scalePoint(parsePoint(current.point));
-    const nextPoint = scalePoint(parsePoint(next.point));
-    const prevPoint = scalePoint(parsePoint(prev.point));
+    const currentPoint = current.point;
+    const nextPoint = next.point;
+    const prevPoint = prev.point;
 
     if (next.curveMode === Sketch.CurveMode.Straight) {
       const radius = getCornerRadius(
@@ -100,11 +114,11 @@ export function path(
   pairs.forEach((pair) => {
     const [prev, current, next] = pair;
 
-    const currentPoint = scalePoint(parsePoint(current.point));
-    const currentCurveTo = scalePoint(parsePoint(current.curveTo));
-    const nextCurveFrom = scalePoint(parsePoint(next.curveFrom));
-    const nextPoint = scalePoint(parsePoint(next.point));
-    const prevPoint = scalePoint(parsePoint(prev.point));
+    const currentPoint = current.point;
+    const currentCurveTo = current.curveTo;
+    const nextCurveFrom = next.curveFrom;
+    const nextPoint = next.point;
+    const prevPoint = prev.point;
 
     if (next.curveMode === Sketch.CurveMode.Straight) {
       const radius = getCornerRadius(

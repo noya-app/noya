@@ -112,7 +112,7 @@ export default memo(function Inspector() {
         />
         <Spacer.Vertical size={10} />
       </Fragment>,
-      hasFixedRadiusLayers && <RadiusInspector />,
+      hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
       isEditingPath && <PointControlsInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (

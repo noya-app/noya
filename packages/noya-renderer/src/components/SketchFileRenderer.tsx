@@ -16,6 +16,7 @@ import {
   useColorFill,
   usePaint,
   useReactCanvasKit,
+  useStroke,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
@@ -41,6 +42,7 @@ import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import AlignmentGuides from './AlignmentGuides';
+import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
 import {
   ALL_DIRECTIONS,
@@ -150,6 +152,7 @@ export default memo(function SketchFileRenderer() {
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
+  const isEditingPath = state.interactionState.type === 'editPath';
 
   const canvasRect = useMemo(
     () =>
@@ -161,18 +164,17 @@ export default memo(function SketchFileRenderer() {
       ),
     [CanvasKit, canvasInsets.left, canvasSize.height, canvasSize.width],
   );
-  const backgroundColor = useTheme().colors.canvas.background;
+  const {
+    canvas: { background: backgroundColor, dragHandleStroke },
+  } = useTheme().colors;
   const backgroundFill = useColorFill(backgroundColor);
 
-  const selectionPaint = usePaint({
-    style: CanvasKit.PaintStyle.Stroke,
-    color: CanvasKit.Color(180, 180, 180, 0.5),
-    strokeWidth: 1,
+  const selectionPaint = useStroke({
+    color: dragHandleStroke,
   });
 
-  const highlightPaint = usePaint({
+  const highlightPaint = useStroke({
     color: CanvasKit.Color(132, 63, 255, 1),
-    style: CanvasKit.PaintStyle.Stroke,
     strokeWidth: 2,
   });
 
@@ -448,28 +450,74 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
+  const editablePaths = useMemo(() => {
+    if (!isEditingPath) return;
+
+    const layerIndexPaths = Layers.findAllIndexPaths(
+      page,
+      (layer) => layer.do_objectID in state.selectedPointLists,
+    );
+
+    return (
+      <>
+        {layerIndexPaths.map((indexPath) => {
+          const layer = Layers.access(page, indexPath);
+
+          if (!Layers.isPointsLayer(layer)) return null;
+
+          const layerTransform = getLayerTransformAtIndexPath(
+            page,
+            indexPath,
+            AffineTransform.identity,
+          );
+
+          return (
+            <EditablePath
+              key={layer.do_objectID}
+              transform={layerTransform}
+              layer={layer}
+              selectedIndexes={state.selectedPointLists[layer.do_objectID]}
+            />
+          );
+        })}
+      </>
+    );
+  }, [isEditingPath, page, state.selectedPointLists]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {boundingRect && (
-          <BoundingRect rect={boundingRect} selectionPaint={selectionPaint} />
-        )}
-        {boundingPoints.map((points, index) => (
-          <Polyline key={index} points={points} paint={selectionPaint} />
-        ))}
-        {highlightedSketchLayer}
-        {smartSnapGuides}
-        {quickMeasureGuides}
-        {boundingRect && (
-          <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
-        )}
-        {state.interactionState.type === 'drawing' && (
-          <SketchLayer
-            key={state.interactionState.value.do_objectID}
-            layer={state.interactionState.value}
-          />
+        {isEditingPath ? (
+          editablePaths
+        ) : (
+          <>
+            {boundingRect && (
+              <BoundingRect
+                rect={boundingRect}
+                selectionPaint={selectionPaint}
+              />
+            )}
+            {boundingPoints.map((points, index) => (
+              <Polyline key={index} points={points} paint={selectionPaint} />
+            ))}
+            {!isEditingPath && highlightedSketchLayer}
+            {smartSnapGuides}
+            {quickMeasureGuides}
+            {boundingRect && (
+              <DragHandles
+                rect={boundingRect}
+                selectionPaint={selectionPaint}
+              />
+            )}
+            {state.interactionState.type === 'drawing' && (
+              <SketchLayer
+                key={state.interactionState.value.do_objectID}
+                layer={state.interactionState.value}
+              />
+            )}
+          </>
         )}
       </Group>
       <Group transform={screenTransform}>
