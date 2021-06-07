@@ -243,25 +243,6 @@ export default memo(function ColorInputFieldWithPicker({
     [value],
   );
 
-  const detachThemeColor = useCallback(() => {
-    onChange({
-      ...value,
-      swatchID: undefined,
-    });
-  }, [onChange, value]);
-
-  const createThemeColor = useCallback(() => {
-    const swatchName = prompt('New Swatch Name');
-    if (!swatchName) return;
-
-    const id = uuid();
-    onChange({
-      ...value,
-      swatchID: id,
-    });
-    dispatch('addSwatch', swatchName, value, id);
-  }, [onChange, dispatch, value]);
-
   return (
     <Popover.Root>
       <Popover.Trigger as={Slot}>
