@@ -159,12 +159,7 @@ export function getLayerAtPoint(
       case 'oval': {
         const pathPoint = transform.invert().applyTo(screenPoint);
 
-        const path = Primitives.path(
-          CanvasKit,
-          layer.points,
-          layer.frame,
-          Layers.getFixedRadius(layer),
-        );
+        const path = Primitives.path(CanvasKit, layer.points, layer.frame);
 
         if (!path.contains(pathPoint.x, pathPoint.y)) return;
 

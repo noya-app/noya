@@ -1,21 +1,16 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
+import { AffineTransform } from 'noya-geometry';
 import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { Selectors, Layers } from 'noya-state';
-import { AffineTransform } from 'noya-geometry';
+import { Selectors } from 'noya-state';
 import { ReactNode, useMemo } from 'react';
 
 function useLayerPath(layer: Sketch.Rectangle | Sketch.Oval) {
   const { CanvasKit } = useReactCanvasKit();
 
   return useMemo(() => {
-    const path = Primitives.path(
-      CanvasKit,
-      layer.points,
-      layer.frame,
-      Layers.getFixedRadius(layer),
-    );
+    const path = Primitives.path(CanvasKit, layer.points, layer.frame);
 
     path.setFillType(CanvasKit.FillType.EvenOdd);
 

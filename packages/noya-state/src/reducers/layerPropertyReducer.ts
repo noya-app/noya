@@ -80,6 +80,9 @@ export function layerPropertyReducer(
             mode === 'replace' ? amount : layer.fixedRadius + amount;
 
           layer.fixedRadius = Math.max(0, newValue);
+          layer.points.forEach((point) => {
+            point.cornerRadius = newValue;
+          });
         });
       });
     }

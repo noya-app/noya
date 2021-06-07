@@ -28,12 +28,7 @@ const SketchMask = memo(function SketchGroup({
   const maskPath = useMemo(() => {
     if (!layer || !('points' in layer)) return;
 
-    const path = Primitives.path(
-      CanvasKit,
-      layer.points,
-      layer.frame,
-      'fixedRadius' in layer ? layer.fixedRadius : 0,
-    );
+    const path = Primitives.path(CanvasKit, layer.points, layer.frame);
 
     return path;
   }, [CanvasKit, layer]);

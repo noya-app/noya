@@ -14,14 +14,13 @@ import getMultiNumberValue from '../utils/getMultiNumberValue';
 import getMultiValue from '../utils/getMultiValue';
 
 const CURVE_MODE_OPTIONS = [
-  'None' as const,
   'Straight' as const,
   'Mirrored' as const,
   'Asymmetric' as const,
   'Disconnected' as const,
 ];
 
-type CurveModeOption = typeof CURVE_MODE_OPTIONS[0];
+type CurveModeOption = typeof CURVE_MODE_OPTIONS[0] | 'None';
 
 function getCurveMode(value: CurveModeOption): Sketch.CurveMode {
   switch (value) {
@@ -69,12 +68,12 @@ export default memo(function PointControlsInspector() {
   );
 
   const handleSubmitRadius = useCallback(
-    (value: number) => dispatch('setFixedRadius', value, 'replace'),
+    (value: number) => dispatch('setPointCornerRadius', value, 'replace'),
     [dispatch],
   );
 
   const handleNudgeRadius = useCallback(
-    (value: number) => dispatch('setFixedRadius', value, 'adjust'),
+    (value: number) => dispatch('setPointCornerRadius', value, 'adjust'),
     [dispatch],
   );
 
@@ -108,7 +107,7 @@ export default memo(function PointControlsInspector() {
               onChange={(value) => {
                 if (value === 'None') return;
                 const curveMode = getCurveMode(value);
-                console.info(curveMode);
+                dispatch('setPointCurveMode', curveMode);
               }}
             />
             <Spacer.Horizontal size={10} />

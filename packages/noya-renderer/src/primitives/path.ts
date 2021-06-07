@@ -57,7 +57,6 @@ export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
-  fixedRadius: number,
 ): Path {
   const { x, y, width, height } = frame;
 
@@ -87,7 +86,7 @@ export function path(
         prevPoint,
         currentPoint,
         nextPoint,
-        fixedRadius,
+        current.cornerRadius,
       );
 
       const { step } = getStep(currentPoint, nextPoint, radius);
@@ -112,12 +111,12 @@ export function path(
         prevPoint,
         currentPoint,
         nextPoint,
-        fixedRadius,
+        current.cornerRadius,
       );
 
       const { step, drawSegment } = getStep(currentPoint, nextPoint, radius);
 
-      if (fixedRadius > 0) {
+      if (current.cornerRadius > 0) {
         path.arcToTangent(
           currentPoint.x,
           currentPoint.y,

@@ -26,6 +26,7 @@ import {
 } from './layerPropertyReducer';
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
+import { PointAction, pointReducer } from './pointReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
@@ -66,7 +67,8 @@ export type Action =
   | TextStyleAction
   | ThemeAction
   | SymbolsAction
-  | ExportAction;
+  | ExportAction
+  | PointAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -247,6 +249,9 @@ export function applicationReducer(
           );
         });
       });
+    case 'setPointCurveMode':
+    case 'setPointCornerRadius':
+      return pointReducer(state, action);
     default:
       return themeReducer(state, action);
   }
