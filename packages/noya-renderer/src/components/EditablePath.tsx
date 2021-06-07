@@ -4,6 +4,7 @@ import { AffineTransform, Point } from 'noya-geometry';
 import {
   Group,
   Path,
+  Polyline,
   useFill,
   useReactCanvasKit,
   useStroke,
@@ -12,7 +13,6 @@ import { Primitives } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
 import { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import useLayerPath from '../hooks/useLayerPath';
 
 const POINT_SIZE = 8;
 
@@ -42,15 +42,6 @@ function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
       <Path path={path} paint={stroke} />
     </>
   );
-}
-
-interface PathOutlineProps {
-  layer: Layers.PointsLayer;
-  paint: Paint;
-}
-
-function PathOutline({ layer, paint }: PathOutlineProps) {
-  return <Path path={useLayerPath(layer)} paint={paint} />;
 }
 
 interface Props {
@@ -87,21 +78,20 @@ export default function EditablePath({
 
   if (!Layers.isPointsLayer(layer)) return null;
 
-  const curvePoints = Primitives.normalizeCurvePoints(
-    layer.points,
-    layer.frame,
+  const points = Primitives.normalizeCurvePoints(layer.points, layer.frame).map(
+    (curvePoint) => curvePoint.point,
   );
 
   return (
     <Group transform={localTransform}>
-      <PathOutline layer={layer} paint={stroke} />
-      {curvePoints.map((curvePoint, index) => {
+      <Polyline points={points} paint={stroke} />
+      {points.map((point, index) => {
         const isSelected = selectedIndexes.includes(index);
 
         return (
           <EditablePathPoint
             key={index}
-            point={curvePoint.point}
+            point={point}
             fill={isSelected ? selectedFill : fill}
             stroke={isSelected ? selectedStroke : stroke}
           />
