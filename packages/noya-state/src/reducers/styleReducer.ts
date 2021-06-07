@@ -39,7 +39,16 @@ export type StyleAction =
     ]
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
-  | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color];
+  | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
+  | [type: `setFillType`, index: number, value: Sketch.FillType]
+  | [
+      type: `setGradientColor`,
+      fillIndex: number,
+      gradientIndex: number,
+      position: number,
+      value: Sketch.Color,
+    ]
+  | [type: `setGradientType`, fillIndex: number, value: Sketch.GradientType];
 
 export function styleReducer(
   state: Sketch.Style,
@@ -278,6 +287,53 @@ export function styleReducer(
         if (!draft.borders || !draft.borders[index]) return;
 
         draft.borders[index].position = position;
+      });
+    }
+    case 'setFillType': {
+      const [, index, type] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+        draft.fills[index].fillType = type;
+
+        if (!draft.fills[index].gradient) {
+          draft.fills[index].gradient = Models.fill.gradient;
+        }
+      });
+    }
+    case 'setGradientColor': {
+      const [, fillIndex, gradientIndex, position, color] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[fillIndex]) return;
+        if (!draft.fills[fillIndex].gradient) return;
+
+        if (gradientIndex !== -1) {
+          draft.fills[fillIndex].gradient.stops[
+            gradientIndex
+          ].position = position;
+          draft.fills[fillIndex].gradient.stops[gradientIndex].color = color;
+        } else {
+          draft.fills[fillIndex].gradient.stops.push({
+            _class: 'gradientStop',
+            color,
+            position,
+          });
+        }
+
+        draft.fills[fillIndex].gradient.stops.sort(
+          (a, b) => a.position - b.position,
+        );
+      });
+    }
+    case 'setGradientType': {
+      const [, fillIndex, value] = action;
+
+      return produce(state, (draft) => {
+        if (draft.fills && draft.fills[fillIndex]) {
+          if (draft.fills[fillIndex].gradient)
+            draft.fills[fillIndex].gradient.gradientType = value;
+        }
       });
     }
     default:
