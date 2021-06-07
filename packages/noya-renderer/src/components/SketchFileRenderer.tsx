@@ -390,15 +390,18 @@ export default memo(function SketchFileRenderer() {
       <>
         <AlignmentGuides lines={alignmentGuides} />
         {nearestLayerGuides.map(
-          (guides) =>
+          (guides, i) =>
             guides && (
               <>
-                {guides.map((guide, index) => (
-                  <ExtensionGuide key={index} points={guide.extension} />
+                {guides.map((guide, j) => (
+                  <ExtensionGuide
+                    key={`extension-${i}-${j}`}
+                    points={guide.extension}
+                  />
                 ))}
-                {guides.map((guide, index) => (
+                {guides.map((guide, j) => (
                   <MeasurementGuide
-                    key={index}
+                    key={`measurement-${i}-${j}`}
                     distanceMeasurement={guide.distanceMeasurement!}
                     measurement={guide.measurement}
                   />

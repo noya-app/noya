@@ -22,6 +22,7 @@ import ThemeTextInspector from './ThemeTextInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import ExportInspector from './ExportInspector';
+import PointControlsInspector from './PointControlsInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -69,6 +70,8 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
+  const isEditingPath = state.interactionState.type === 'editPath';
+
   const elements = useMemo(() => {
     const dimensionsInspectorProps =
       selectedLayers.length === 1
@@ -110,6 +113,7 @@ export default memo(function Inspector() {
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && <RadiusInspector />,
+      isEditingPath && <PointControlsInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
         <LayerThemeInspector />
@@ -129,12 +133,13 @@ export default memo(function Inspector() {
     return withSeparatorElements(views, <Divider />);
   }, [
     selectedLayers,
+    handleSetRotation,
     handleSetX,
     handleSetY,
     handleSetWidth,
     handleSetHeight,
-    handleSetRotation,
     hasFixedRadiusLayers,
+    isEditingPath,
     hasContextSettingsLayers,
   ]);
 

@@ -15,6 +15,8 @@ export type ChildLayer = Exclude<
   { _class: 'artboard' | 'symbolMaster' | 'page' }
 >;
 
+export type PointsLayer = Extract<Sketch.AnyLayer, { points: any }>;
+
 export const isParentLayer = (layer: Sketch.AnyLayer): layer is ParentLayer => {
   switch (layer._class) {
     case 'artboard':
@@ -34,6 +36,10 @@ export const isChildLayer = (layer: Sketch.AnyLayer): layer is ChildLayer => {
     layer._class !== 'symbolMaster' &&
     layer._class !== 'page'
   );
+};
+
+export const isPointsLayer = (layer: Sketch.AnyLayer): layer is PointsLayer => {
+  return 'points' in layer;
 };
 
 export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {

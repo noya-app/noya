@@ -43,6 +43,7 @@ export type ApplicationState = {
   interactionState: InteractionState;
   selectedPage: string;
   selectedObjects: string[];
+  selectedPointLists: Record<string, number[]>;
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedTextStyleIds: string[];
@@ -278,6 +279,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
+    selectedPointLists: {},
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
     selectedTextStyleIds: [],
