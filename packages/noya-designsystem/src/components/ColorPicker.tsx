@@ -23,10 +23,15 @@ const colorModel: ColorModel<RgbaColor> = {
 
 interface Props {
   value: Sketch.Color;
+  gradients?: Sketch.GradientStop[];
   onChange: (color: Sketch.Color) => void;
 }
 
-export default memo(function ColorPicker({ value, onChange }: Props) {
+export default memo(function ColorPicker({
+  value,
+  gradients,
+  onChange,
+}: Props) {
   const rgbaColor: RgbaColor = useMemo(() => sketchColorToRgba(value), [value]);
 
   const handleChange = useCallback(
