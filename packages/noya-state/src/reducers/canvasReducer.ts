@@ -147,6 +147,15 @@ export function canvasReducer(
         draft.interactionState = interactionState;
 
         switch (interactionState.type) {
+          case 'editPath': {
+            const layer = Layers.access(page, layerIndexPaths[0]);
+
+            if (!Layers.isPointsLayer(layer)) break;
+
+            draft.selectedPointLists = { [layer.do_objectID]: [0] };
+
+            break;
+          }
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
 

@@ -12,16 +12,18 @@ import withSeparatorElements from '../utils/withSeparatorElements';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
+import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
 import LayerThemeInspector from './LayerThemeInspector';
 import OpacityInspector from './OpacityInspector';
+import PointControlsInspector from './PointControlsInspector';
+import PointCoordinatesInspector from './PointCoordinatesInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
+import SymbolInstanceInspector from './SymbolInstanceInspector';
+import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
-import SymbolMasterInspector from './SymbolMasterInspector';
-import SymbolInstanceInspector from './SymbolInstanceInspector';
-import ExportInspector from './ExportInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -69,6 +71,8 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
+  const isEditingPath = state.interactionState.type === 'editPath';
+
   const elements = useMemo(() => {
     const dimensionsInspectorProps =
       selectedLayers.length === 1
@@ -99,17 +103,22 @@ export default memo(function Inspector() {
     const views = [
       <Fragment key="layout">
         <AlignmentInspector />
-        <DimensionsInspector
-          {...dimensionsInspectorProps}
-          onSetRotation={handleSetRotation}
-          onSetX={handleSetX}
-          onSetY={handleSetY}
-          onSetWidth={handleSetWidth}
-          onSetHeight={handleSetHeight}
-        />
+        {isEditingPath ? (
+          <PointCoordinatesInspector />
+        ) : (
+          <DimensionsInspector
+            {...dimensionsInspectorProps}
+            onSetRotation={handleSetRotation}
+            onSetX={handleSetX}
+            onSetY={handleSetY}
+            onSetWidth={handleSetWidth}
+            onSetHeight={handleSetHeight}
+          />
+        )}
         <Spacer.Vertical size={10} />
       </Fragment>,
-      hasFixedRadiusLayers && <RadiusInspector />,
+      hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
+      isEditingPath && <PointControlsInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
         <LayerThemeInspector />
@@ -129,12 +138,13 @@ export default memo(function Inspector() {
     return withSeparatorElements(views, <Divider />);
   }, [
     selectedLayers,
+    handleSetRotation,
     handleSetX,
     handleSetY,
     handleSetWidth,
     handleSetHeight,
-    handleSetRotation,
     hasFixedRadiusLayers,
+    isEditingPath,
     hasContextSettingsLayers,
   ]);
 

@@ -11,11 +11,13 @@ import Button from 'noya-designsystem/src/components/Button';
 import { InteractionType } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import PointModeIcon from '../components/icons/PointModeIcon';
 import {
   useApplicationState,
   useDispatch,
 } from '../contexts/ApplicationStateContext';
 import { useHistory } from '../hooks/useHistory';
+import useShallowArray from '../hooks/useShallowArray';
 import { useWorkspace } from '../hooks/useWorkspace';
 
 const Container = styled.header(({ theme }) => ({
@@ -33,6 +35,7 @@ interface Props {
   showRulers: boolean;
   redoDisabled: boolean;
   undoDisabled: boolean;
+  selectedLayerIds: string[];
 }
 
 const ToolbarContent = memo(function ToolbarContent({
@@ -41,6 +44,7 @@ const ToolbarContent = memo(function ToolbarContent({
   showRulers,
   redoDisabled,
   undoDisabled,
+  selectedLayerIds,
 }: Props) {
   const dispatch = useDispatch();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
@@ -49,6 +53,7 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertRectangle = interactionType === 'insertRectangle';
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
+  const isEditingPath = interactionType === 'editPath';
   const isPanning =
     interactionType === 'panMode' ||
     interactionType === 'maybePan' ||
@@ -158,6 +163,27 @@ const ToolbarContent = memo(function ToolbarContent({
       </Button>
       <Spacer.Horizontal size={40} />
       <Button
+        id="edit-path"
+        tooltip="Edit path"
+        active={isEditingPath}
+        disabled={selectedLayerIds.length === 0}
+        onClick={useCallback(() => {
+          if (!isEditingPath) {
+            dispatch('interaction', ['editPath', selectedLayerIds]);
+          } else {
+            dispatch('interaction', ['reset']);
+          }
+        }, [isEditingPath, dispatch, selectedLayerIds])}
+      >
+        {useMemo(
+          () => (
+            <PointModeIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={40} />
+      <Button
         id="tool-rulers"
         tooltip="Show rulers"
         active={showRulers}
@@ -200,6 +226,7 @@ export default function Toolbar() {
     preferences: { showRulers },
   } = useWorkspace();
   const { redoDisabled, undoDisabled } = useHistory();
+  const selectedLayerIds = useShallowArray(state.selectedObjects);
 
   return (
     <ToolbarContent
@@ -208,6 +235,7 @@ export default function Toolbar() {
       showRulers={showRulers}
       redoDisabled={redoDisabled}
       undoDisabled={undoDisabled}
+      selectedLayerIds={selectedLayerIds}
     />
   );
 }

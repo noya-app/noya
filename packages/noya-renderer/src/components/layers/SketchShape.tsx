@@ -12,7 +12,6 @@ import {
 } from 'noya-react-canvaskit';
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
 import { Primitives } from 'noya-renderer';
-import { Layers } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { getStrokedPath } from '../../primitives/path';
 
@@ -211,12 +210,7 @@ interface Props {
 export default memo(function SketchShape({ layer }: Props) {
   const { CanvasKit } = useReactCanvasKit();
 
-  const path = Primitives.path(
-    CanvasKit,
-    layer.points,
-    layer.frame,
-    Layers.getFixedRadius(layer),
-  );
+  const path = Primitives.path(CanvasKit, layer.points, layer.frame);
 
   path.setFillType(CanvasKit.FillType.EvenOdd);
 

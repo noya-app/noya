@@ -26,6 +26,7 @@ import {
 } from './layerPropertyReducer';
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
+import { PointAction, pointReducer } from './pointReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
@@ -43,6 +44,7 @@ export type ApplicationState = {
   interactionState: InteractionState;
   selectedPage: string;
   selectedObjects: string[];
+  selectedPointLists: Record<string, number[]>;
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedTextStyleIds: string[];
@@ -65,7 +67,8 @@ export type Action =
   | TextStyleAction
   | ThemeAction
   | SymbolsAction
-  | ExportAction;
+  | ExportAction
+  | PointAction;
 
 export function applicationReducer(
   state: ApplicationState,
@@ -246,6 +249,11 @@ export function applicationReducer(
           );
         });
       });
+    case 'setPointCurveMode':
+    case 'setPointCornerRadius':
+    case 'setPointX':
+    case 'setPointY':
+      return pointReducer(state, action);
     default:
       return themeReducer(state, action);
   }
@@ -278,6 +286,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     interactionState: createInitialInteractionState(),
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
+    selectedPointLists: {},
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
     selectedTextStyleIds: [],
