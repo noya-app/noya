@@ -3,12 +3,13 @@ import { Paint } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { Group, Path, Rect } from 'noya-react-canvaskit';
 import { Selectors } from 'noya-state';
+import { PointsLayer } from 'noya-state/src/layers';
 import { ReactNode, useMemo } from 'react';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
 
 interface HoverOutlinePathProps {
-  layer: Sketch.Rectangle | Sketch.Oval;
+  layer: PointsLayer;
   paint: Paint;
 }
 
@@ -53,6 +54,10 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
       element = <HoverOutlineRect layer={layer} paint={paint} />;
       break;
     }
+    case 'triangle':
+    case 'star':
+    case 'polygon':
+    case 'shapePath':
     case 'rectangle':
     case 'oval': {
       element = <HoverOutlinePath layer={layer} paint={paint} />;

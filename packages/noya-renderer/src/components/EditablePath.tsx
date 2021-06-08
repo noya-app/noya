@@ -78,8 +78,8 @@ export default function EditablePath({
 
   if (!Layers.isPointsLayer(layer)) return null;
 
-  const points = Primitives.normalizeCurvePoints(layer.points, layer.frame).map(
-    (curvePoint) => curvePoint.point,
+  const points = layer.points.map(
+    (point) => Primitives.parseCurvePoint(point, layer.frame).point,
   );
 
   return (

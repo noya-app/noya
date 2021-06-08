@@ -92,36 +92,34 @@ export default memo(function PointControlsInspector() {
   }, []);
 
   return (
-    <>
-      <InspectorPrimitives.Section>
-        <InspectorPrimitives.SectionHeader>
-          <InspectorPrimitives.Title>Point Controls</InspectorPrimitives.Title>
-        </InspectorPrimitives.SectionHeader>
-        <Spacer.Vertical size={4} />
-        <InspectorPrimitives.Row>
-          <LabeledElementView renderLabel={renderLabel}>
-            <Select
-              id={pointTypeId}
-              value={getCurveModeString(curveMode) ?? 'None'}
-              options={CURVE_MODE_OPTIONS}
-              onChange={(value) => {
-                if (value === 'None') return;
-                const curveMode = getCurveMode(value);
-                dispatch('setPointCurveMode', curveMode);
-              }}
+    <InspectorPrimitives.Section>
+      <InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.Title>Point Controls</InspectorPrimitives.Title>
+      </InspectorPrimitives.SectionHeader>
+      <Spacer.Vertical size={4} />
+      <InspectorPrimitives.Row>
+        <LabeledElementView renderLabel={renderLabel}>
+          <Select
+            id={pointTypeId}
+            value={getCurveModeString(curveMode) ?? 'None'}
+            options={CURVE_MODE_OPTIONS}
+            onChange={(value) => {
+              if (value === 'None') return;
+              const curveMode = getCurveMode(value);
+              dispatch('setPointCurveMode', curveMode);
+            }}
+          />
+          <Spacer.Horizontal size={10} />
+          <InputField.Root id={pointRadiusInputId} size={50}>
+            <InputField.NumberInput
+              value={cornerRadius}
+              placeholder={cornerRadius === undefined ? 'multi' : undefined}
+              onSubmit={handleSubmitRadius}
+              onNudge={handleNudgeRadius}
             />
-            <Spacer.Horizontal size={10} />
-            <InputField.Root id={pointRadiusInputId} size={50}>
-              <InputField.NumberInput
-                value={cornerRadius}
-                placeholder={cornerRadius === undefined ? 'multi' : undefined}
-                onSubmit={handleSubmitRadius}
-                onNudge={handleNudgeRadius}
-              />
-            </InputField.Root>
-          </LabeledElementView>
-        </InspectorPrimitives.Row>
-      </InspectorPrimitives.Section>
-    </>
+          </InputField.Root>
+        </LabeledElementView>
+      </InspectorPrimitives.Row>
+    </InspectorPrimitives.Section>
   );
 });

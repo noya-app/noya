@@ -251,6 +251,8 @@ export function applicationReducer(
       });
     case 'setPointCurveMode':
     case 'setPointCornerRadius':
+    case 'setPointX':
+    case 'setPointY':
       return pointReducer(state, action);
     default:
       return themeReducer(state, action);

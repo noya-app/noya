@@ -287,3 +287,28 @@ export const getSelectedRect = (state: ApplicationState): Rect => {
   );
   return getBoundingRect(page, AffineTransform.identity, layerIds)!;
 };
+
+export function getBoundingRectMap(
+  rootLayer: Sketch.AnyLayer,
+  layerIds: string[],
+  options: LayerTraversalOptions,
+) {
+  const rectMap: Record<string, Rect> = {};
+
+  layerIds.forEach((layerId) => {
+    if (layerId in rectMap) return;
+
+    const rect = getBoundingRect(
+      rootLayer,
+      AffineTransform.identity,
+      [layerId],
+      options,
+    );
+
+    if (!rect) return;
+
+    rectMap[layerId] = rect;
+  });
+
+  return rectMap;
+}

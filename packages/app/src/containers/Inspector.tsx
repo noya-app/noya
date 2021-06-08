@@ -12,17 +12,18 @@ import withSeparatorElements from '../utils/withSeparatorElements';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
+import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
 import LayerThemeInspector from './LayerThemeInspector';
 import OpacityInspector from './OpacityInspector';
+import PointControlsInspector from './PointControlsInspector';
+import PointCoordinatesInspector from './PointCoordinatesInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
+import SymbolInstanceInspector from './SymbolInstanceInspector';
+import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
-import SymbolMasterInspector from './SymbolMasterInspector';
-import SymbolInstanceInspector from './SymbolInstanceInspector';
-import ExportInspector from './ExportInspector';
-import PointControlsInspector from './PointControlsInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -102,14 +103,18 @@ export default memo(function Inspector() {
     const views = [
       <Fragment key="layout">
         <AlignmentInspector />
-        <DimensionsInspector
-          {...dimensionsInspectorProps}
-          onSetRotation={handleSetRotation}
-          onSetX={handleSetX}
-          onSetY={handleSetY}
-          onSetWidth={handleSetWidth}
-          onSetHeight={handleSetHeight}
-        />
+        {isEditingPath ? (
+          <PointCoordinatesInspector />
+        ) : (
+          <DimensionsInspector
+            {...dimensionsInspectorProps}
+            onSetRotation={handleSetRotation}
+            onSetX={handleSetX}
+            onSetY={handleSetY}
+            onSetWidth={handleSetWidth}
+            onSetHeight={handleSetHeight}
+          />
+        )}
         <Spacer.Vertical size={10} />
       </Fragment>,
       hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,

@@ -1,9 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit, Path, PathOp } from 'canvaskit';
-import { distance } from 'noya-geometry';
+import { distance, Rect } from 'noya-geometry';
 import { Point } from 'noya-state';
 import { windowsOf } from 'noya-utils';
-import { parsePoint } from '../primitives';
+import { parsePoint, stringifyPoint } from '../primitives';
 
 /**
  * The radius of an edge should be less than half the length of that edge
@@ -53,36 +53,56 @@ function getStep(
   return { step, drawSegment: true };
 }
 
-export function normalizeCurvePoints(
-  points: Sketch.CurvePoint[],
-  frame: Sketch.Rect,
-) {
-  const { x, y, width, height } = frame;
+export type ParsedCurvePoint = Omit<
+  Sketch.CurvePoint,
+  'curveFrom' | 'curveTo' | 'point'
+> & {
+  curveFrom: Point;
+  curveTo: Point;
+  point: Point;
+};
 
-  const scalePoint = (point: Point) => {
-    return { x: x + point.x * width, y: y + point.y * height };
+export function scalePoint(point: Point, { x, y, width, height }: Rect): Point {
+  return { x: x + point.x * width, y: y + point.y * height };
+}
+
+export function unscalePoint(
+  point: Point,
+  { x, y, width, height }: Rect,
+): Point {
+  return { x: (point.x - x) / width, y: (point.y - y) / height };
+}
+
+export function parseCurvePoint(
+  curvePoint: Sketch.CurvePoint,
+  frame: Rect,
+): ParsedCurvePoint {
+  return {
+    ...curvePoint,
+    curveFrom: scalePoint(parsePoint(curvePoint.curveTo), frame),
+    curveTo: scalePoint(parsePoint(curvePoint.curveFrom), frame),
+    point: scalePoint(parsePoint(curvePoint.point), frame),
   };
+}
 
-  return [...points]
-    .map((curvePoint) => ({
-      ...curvePoint,
-      curveFrom: scalePoint(parsePoint(curvePoint.curveFrom)),
-      curveTo: scalePoint(parsePoint(curvePoint.curveTo)),
-      point: scalePoint(parsePoint(curvePoint.point)),
-    }))
-    .map((curvePoint) => ({
-      ...curvePoint,
-      curveFrom: curvePoint.curveTo,
-      curveTo: curvePoint.curveFrom,
-    }));
+export function unparseCurvePoint(
+  curvePoint: ParsedCurvePoint,
+  frame: Rect,
+): Sketch.CurvePoint {
+  return {
+    ...curvePoint,
+    curveFrom: stringifyPoint(unscalePoint(curvePoint.curveTo, frame)),
+    curveTo: stringifyPoint(unscalePoint(curvePoint.curveFrom, frame)),
+    point: stringifyPoint(unscalePoint(curvePoint.point, frame)),
+  };
 }
 
 export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
-  frame: Sketch.Rect,
+  frame: Rect,
 ): Path {
-  const curvePoints = normalizeCurvePoints(points, frame);
+  const curvePoints = points.map((point) => parseCurvePoint(point, frame));
 
   const pairs = windowsOf(curvePoints, 3, true);
 
