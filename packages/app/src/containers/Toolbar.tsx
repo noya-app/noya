@@ -2,7 +2,6 @@ import {
   CircleIcon,
   FrameIcon,
   MoveIcon,
-  RadiobuttonIcon,
   RulerHorizontalIcon,
   SquareIcon,
   TextIcon,
@@ -12,6 +11,7 @@ import Button from 'noya-designsystem/src/components/Button';
 import { InteractionType } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import PointModeIcon from '../components/icons/PointModeIcon';
 import {
   useApplicationState,
   useDispatch,
@@ -166,6 +166,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="edit-path"
         tooltip="Edit path"
         active={isEditingPath}
+        disabled={selectedLayerIds.length === 0}
         onClick={useCallback(() => {
           if (!isEditingPath) {
             dispatch('interaction', ['editPath', selectedLayerIds]);
@@ -176,7 +177,7 @@ const ToolbarContent = memo(function ToolbarContent({
       >
         {useMemo(
           () => (
-            <RadiobuttonIcon />
+            <PointModeIcon />
           ),
           [],
         )}
