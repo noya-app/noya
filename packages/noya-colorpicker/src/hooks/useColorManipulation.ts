@@ -43,15 +43,20 @@ export function useColorManipulation<T extends AnyColor>(
       )
     ) {
       cache.current = { hsva, color: newColor };
-      onChangeCallback(newColor);
+      onChangeCallback(
+        newColor
+      );
     }
   }, [hsva, colorModel, onChangeCallback]);
 
   // Merge the current HSVA color object with updated params.
   // For example, when a child component sends `h` or `s` only
-  const handleChange = useCallback((params: Partial<HsvaColor>) => {
-    updateHsva((current) => Object.assign({}, current, params));
-  }, []);
+  const handleChange = useCallback(
+    (params: Partial<HsvaColor>) => {
+      updateHsva((current) => Object.assign({}, current, params));
+    },
+    [],
+  );
 
   return [hsva, handleChange];
 }
