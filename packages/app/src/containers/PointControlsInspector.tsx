@@ -103,11 +103,14 @@ export default memo(function PointControlsInspector() {
             id={pointTypeId}
             value={getCurveModeString(curveMode) ?? 'None'}
             options={CURVE_MODE_OPTIONS}
-            onChange={(value) => {
-              if (value === 'None') return;
-              const curveMode = getCurveMode(value);
-              dispatch('setPointCurveMode', curveMode);
-            }}
+            onChange={useCallback(
+              (value: CurveModeOption) => {
+                if (value === 'None') return;
+
+                dispatch('setPointCurveMode', getCurveMode(value));
+              },
+              [dispatch],
+            )}
           />
           <Spacer.Horizontal size={10} />
           <InputField.Root id={pointRadiusInputId} size={50}>

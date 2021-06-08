@@ -5,6 +5,7 @@ import {
   Group,
   Path,
   Polyline,
+  useDeletable,
   useFill,
   useReactCanvasKit,
   useStroke,
@@ -25,16 +26,22 @@ interface EditablePathPointProps {
 function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
   const { CanvasKit } = useReactCanvasKit();
 
-  const path = new CanvasKit.Path();
+  const path = useMemo(() => {
+    const path = new CanvasKit.Path();
 
-  path.addOval(
-    CanvasKit.XYWHRect(
-      point.x - POINT_SIZE / 2,
-      point.y - POINT_SIZE / 2,
-      POINT_SIZE,
-      POINT_SIZE,
-    ),
-  );
+    path.addOval(
+      CanvasKit.XYWHRect(
+        point.x - POINT_SIZE / 2,
+        point.y - POINT_SIZE / 2,
+        POINT_SIZE,
+        POINT_SIZE,
+      ),
+    );
+
+    return path;
+  }, [CanvasKit, point.x, point.y]);
+
+  useDeletable(path);
 
   return (
     <>

@@ -28,6 +28,7 @@ import {
   getCurrentPage,
   getLayerTransformAtIndexPath,
   getScreenTransform,
+  getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from 'noya-state/src/selectors/selectors';
 import {
@@ -453,36 +454,31 @@ export default memo(function SketchFileRenderer() {
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
 
-    const layerIndexPaths = Layers.findAllIndexPaths(
-      page,
-      (layer) => layer.do_objectID in state.selectedPointLists,
-    );
+    const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
 
     return (
       <>
-        {layerIndexPaths.map((indexPath) => {
+        {selectedLayerIndexPaths.map((indexPath) => {
           const layer = Layers.access(page, indexPath);
 
           if (!Layers.isPointsLayer(layer)) return null;
 
-          const layerTransform = getLayerTransformAtIndexPath(
-            page,
-            indexPath,
-            AffineTransform.identity,
-          );
+          const layerTransform = getLayerTransformAtIndexPath(page, indexPath);
 
           return (
             <EditablePath
               key={layer.do_objectID}
               transform={layerTransform}
               layer={layer}
-              selectedIndexes={state.selectedPointLists[layer.do_objectID]}
+              selectedIndexes={
+                state.selectedPointLists[layer.do_objectID] ?? []
+              }
             />
           );
         })}
       </>
     );
-  }, [isEditingPath, page, state.selectedPointLists]);
+  }, [isEditingPath, page, state]);
 
   return (
     <>
