@@ -1,7 +1,7 @@
 import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import {
   ColorInputField,
@@ -72,11 +72,24 @@ const GridSmall = styled.div({
 });
 
 type SwatchLayout = 'list' | 'grid';
+type FillOption =
+  | 'Solid Color'
+  | 'Linear Gradient'
+  | 'Radial Gradient'
+  | 'Angular Gradient'
+  | 'Pattern Fill';
 
 interface Props {
   id?: string;
-  value: Sketch.Color;
+  value: Sketch.Color | Sketch.Gradient;
   onChange: (color: Sketch.Color) => void;
+  onChangeType?: (type: Sketch.FillType) => void;
+  onChangeGradientColor?: (
+    color: Sketch.Color,
+    index: number,
+    position: number,
+  ) => void;
+  onChangeGradientType?: (type: Sketch.GradientType) => void;
 }
 
 interface SwatchesProps {
@@ -149,26 +162,40 @@ export default memo(function ColorInputFieldWithPicker({
   id,
   value,
   onChange,
+  onChangeType,
+  onChangeGradientColor,
+  onChangeGradientType,
 }: Props) {
   // TODO: The value prop here can be an array, and other
   // inspector rows may also take arrays
-  const values = useMemo(() => [value], [value]);
 
   const [state, dispatch] = useApplicationState();
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
+  const values = useMemo(() => {
+    if (value._class === 'gradient')
+      //change to show preview of gradient :thinking_emoji:
+      return [value.stops[0].color];
+    return [value];
+  }, [value]);
+
+  const selectedColor = values[0];
+
   const sharedSwatches = Selectors.getSharedSwatches(state);
 
-  const isSwatch =
-    value.swatchID &&
-    sharedSwatches.some((e) => e.do_objectID === value.swatchID);
+  const isSwatch = useMemo(
+    () =>
+      selectedColor.swatchID &&
+      sharedSwatches.some((e) => e.do_objectID === selectedColor.swatchID),
+    [selectedColor, sharedSwatches],
+  );
 
   const detachThemeColor = useCallback(() => {
     onChange({
-      ...value,
+      ...selectedColor,
       swatchID: undefined,
     });
-  }, [onChange, value]);
+  }, [onChange, selectedColor]);
 
   const createThemeColor = useCallback(() => {
     const swatchName = prompt('New Swatch Name');
@@ -176,23 +203,84 @@ export default memo(function ColorInputFieldWithPicker({
 
     const id = uuid();
     onChange({
-      ...value,
+      ...selectedColor,
       swatchID: id,
     });
-    dispatch('addSwatch', swatchName, value, id);
-  }, [onChange, dispatch, value]);
+    dispatch('addSwatch', swatchName, selectedColor, id);
+  }, [onChange, dispatch, selectedColor]);
+
+  const options: FillOption[] = useMemo(
+    () => [
+      'Solid Color',
+      'Linear Gradient',
+      'Radial Gradient',
+      'Angular Gradient',
+      'Pattern Fill',
+    ],
+    [],
+  );
+
+  const fillOption = useMemo(
+    () =>
+      value._class === 'color'
+        ? 'Solid Color'
+        : value._class !== 'gradient'
+        ? 'Pattern Fill'
+        : (`${
+            Sketch.GradientType[
+              value._class === 'gradient' ? value.gradientType : 0
+            ]
+          } Gradient` as FillOption),
+    [value],
+  );
 
   return (
     <Popover.Root>
       <Popover.Trigger as={Slot}>
-        <ColorInputField id={id} value={value} />
+        <ColorInputField
+          id={id}
+          value={value._class === 'gradient' ? value : values[0]}
+        />
       </Popover.Trigger>
       <Content side="bottom" align="center">
+        <PaddedSection>
+          <Row>
+            <Select
+              id="fill-options"
+              value={fillOption}
+              options={options}
+              onChange={useCallback(
+                (value: FillOption) => {
+                  if (onChangeType)
+                    onChangeType(
+                      value.endsWith('Gradient')
+                        ? Sketch.FillType.Gradient
+                        : value === 'Pattern Fill'
+                        ? Sketch.FillType.Pattern
+                        : Sketch.FillType.Color,
+                    );
+                  if (value.endsWith('Gradient') && onChangeGradientType)
+                    onChangeGradientType(
+                      value === 'Linear Gradient'
+                        ? Sketch.GradientType.Linear
+                        : value === 'Radial Gradient'
+                        ? Sketch.GradientType.Radial
+                        : Sketch.GradientType.Angular,
+                    );
+                },
+                [onChangeType, onChangeGradientType],
+              )}
+            />
+          </Row>
+        </PaddedSection>
         <PaddedSection>
           <ColorInspector
             id={`${id}-panel`}
             colors={values}
+            gradient={value._class === 'gradient' ? value : undefined}
+            //isGradient={fillOption.endsWith('Gradient')}
             onChangeColor={onChange}
+            onChangeGradientColor={onChangeGradientColor}
           />
           <Spacer.Vertical size={12} />
           {isSwatch ? (
@@ -210,20 +298,18 @@ export default memo(function ColorInputFieldWithPicker({
           <Row>
             <Select
               id="colors-category"
-              options={useMemo(() => ['Theme colors'], [])}
+              options={['Theme colors']}
               value="Theme colors"
-              onChange={useCallback(() => {}, [])}
+              onChange={() => {}}
             />
             <Spacer.Horizontal size={8} />
             <RadioGroupContainer>
               <RadioGroup.Root
                 id={'colors-layout'}
                 value={swatchLayout}
-                onValueChange={useCallback(
-                  (event: React.ChangeEvent<HTMLInputElement>) =>
-                    setSwatchLayout(event.target.value as SwatchLayout),
-                  [],
-                )}
+                onValueChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setSwatchLayout(event.target.value as SwatchLayout)
+                }
               >
                 <RadioGroup.Item value="grid" tooltip="Grid">
                   <GridIcon />
@@ -238,13 +324,13 @@ export default memo(function ColorInputFieldWithPicker({
         <PaddedSection>
           {swatchLayout === 'grid' ? (
             <SwatchesGrid
-              selectedSwatchId={value.swatchID}
+              selectedSwatchId={selectedColor.swatchID}
               swatches={sharedSwatches}
               onSelectSwatch={onChange}
             />
           ) : (
             <SwatchesList
-              selectedSwatchId={value.swatchID}
+              selectedSwatchId={selectedColor.swatchID}
               swatches={sharedSwatches}
               onSelectSwatch={onChange}
             />

@@ -28,7 +28,13 @@ export interface HsvaColor extends HsvColor {
   a: number;
 }
 
-export type ObjectColor = RgbColor | HslColor | HsvColor | RgbaColor | HslaColor | HsvaColor;
+export type ObjectColor =
+  | RgbColor
+  | HslColor
+  | HsvColor
+  | RgbaColor
+  | HslaColor
+  | HsvaColor;
 
 export type AnyColor = string | ObjectColor;
 
@@ -42,5 +48,9 @@ export interface ColorModel<T extends AnyColor> {
 export interface ColorPickerBaseProps<T extends AnyColor> {
   className: string;
   color: T;
-  onChange: (newColor: T) => void;
+  onChange: (newColor: T, index?: number, position?: number) => void;
+  selectedGradient: {
+    index?: number;
+    position?: number;
+  };
 }

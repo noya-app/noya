@@ -320,10 +320,6 @@ export function styleReducer(
             position,
           });
         }
-
-        draft.fills[fillIndex].gradient.stops.sort(
-          (a, b) => a.position - b.position,
-        );
       });
     }
     case 'setGradientType': {

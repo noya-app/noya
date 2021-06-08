@@ -27,7 +27,7 @@ const Column = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   colors: Sketch.Color[];
-
+  gradient?: Sketch.Gradient;
   /**
    * The only required change handler is `onChangeColor`. However, to handle
    * more granular changes specially, e.g. nudging opacity, you can pass other
@@ -36,14 +36,25 @@ interface Props {
   onChangeColor: (color: Sketch.Color) => void;
   onChangeOpacity?: (amount: number) => void;
   onNudgeOpacity?: (amount: number) => void;
+  onChangeGradientColor?: (
+    color: Sketch.Color,
+    index: number,
+    position: number,
+  ) => void;
 }
 
 export default memo(function ColorInspector({
   id,
   colors,
+  gradient,
   onChangeColor,
   onChangeOpacity,
   onNudgeOpacity,
+  onChangeGradientColor = (
+    color: Sketch.Color,
+    index: number,
+    position: number,
+  ) => {},
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
@@ -106,7 +117,11 @@ export default memo(function ColorInspector({
 
   return (
     <Column>
-      <ColorPicker value={firstColor} onChange={onChangeColor} />
+      <ColorPicker
+        value={firstColor}
+        gradients={gradient ? gradient.stops : undefined}
+        onChange={gradient ? onChangeGradientColor : onChangeColor}
+      />
       <Spacer.Vertical size={10} />
       <Row id={id}>
         <LabeledElementView renderLabel={renderLabel}>

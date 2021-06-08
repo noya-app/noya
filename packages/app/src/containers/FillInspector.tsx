@@ -1,4 +1,4 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
+import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
@@ -27,7 +27,6 @@ export default memo(function FillInspector({
   ]);
   // TODO: Modify all fills
   const firstFill = useMemo(() => fills[0] || [], [fills]);
-
   return (
     <ArrayController<FileFormat.Fill>
       title={title}
@@ -66,8 +65,32 @@ export default memo(function FillInspector({
         }) => (
           <FillRow
             id={`fill-${index}`}
-            color={item.color}
+            color={
+              item.fillType === 1
+                ? item.gradient
+                : item.fillType === 0
+                ? item.color
+                : {
+                    _class: 'pattern',
+                    image: item.image,
+                    patternFillType: item.patternFillType,
+                    patternTileScale: item.patternTileScale,
+                  }
+            }
             prefix={checkbox}
+            onChangeType={(value) => dispatch('setFillType', index, value)}
+            onChangeGradientColor={(value, gradientIndex, position) =>
+              dispatch(
+                'setGradientColor',
+                index,
+                gradientIndex,
+                position,
+                value,
+              )
+            }
+            onChangeGradientType={(value) =>
+              dispatch('setGradientType', index, value)
+            }
             onChangeOpacity={(value) =>
               dispatch('setFillOpacity', index, value)
             }
@@ -77,6 +100,7 @@ export default memo(function FillInspector({
             onChangeColor={(value) => dispatch('setFillColor', index, value)}
           />
         ),
+
         [dispatch],
       )}
     </ArrayController>

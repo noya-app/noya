@@ -3,6 +3,7 @@ import {
   InputField,
   Label,
   LabeledElementView,
+  Select,
   sketchColorToHex,
   Spacer,
 } from 'noya-designsystem';
@@ -17,26 +18,44 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
+type Pattern = {
+  _class: 'pattern';
+  image?: Sketch.FileRef | Sketch.DataRef;
+  patternFillType: Sketch.PatternFillType;
+  patternTileScale: number;
+};
+
 interface Props {
   id: string;
-  color: Sketch.Color;
+  color: Sketch.Color | Sketch.Gradient | Pattern;
   onChangeColor: (color: Sketch.Color) => void;
+  onChangeType: (type: Sketch.FillType) => void;
+  onChangeGradientColor: (
+    color: Sketch.Color,
+    index: number,
+    position: number,
+  ) => void;
+  onChangeGradientType: (type: Sketch.GradientType) => void;
   onChangeOpacity: (amount: number) => void;
   onNudgeOpacity: (amount: number) => void;
   prefix?: ReactNode;
 }
 
-export default memo(function FillRow({
+export default memo(function ColorFillRow({
   id,
   color,
   onChangeColor,
+  onChangeType,
   onChangeOpacity,
   onNudgeOpacity,
+  onChangeGradientColor,
+  onChangeGradientType,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
+  const gradientTypeId = `${id}-gradient-type`;
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -47,11 +66,13 @@ export default memo(function FillRow({
           return <Label.Label>Hex</Label.Label>;
         case opacityInputId:
           return <Label.Label>Opacity</Label.Label>;
+        case gradientTypeId:
+          return <Label.Label>Type</Label.Label>;
         default:
           return null;
       }
     },
-    [colorInputId, hexInputId, opacityInputId],
+    [colorInputId, hexInputId, opacityInputId, gradientTypeId],
   );
 
   const handleSubmitOpacity = useCallback(
@@ -68,6 +89,8 @@ export default memo(function FillRow({
     [onNudgeOpacity],
   );
 
+  if (color._class === 'pattern') return <></>;
+
   return (
     <Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
@@ -77,24 +100,49 @@ export default memo(function FillRow({
           id={colorInputId}
           value={color}
           onChange={onChangeColor}
+          onChangeType={onChangeType}
+          onChangeGradientColor={onChangeGradientColor}
+          onChangeGradientType={onChangeGradientType}
         />
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={hexInputId} labelPosition="start">
-          <InputField.Input
-            value={sketchColorToHex(color).replace('#', '')}
-            onSubmit={() => {}}
-          />
-          <InputField.Label>#</InputField.Label>
-        </InputField.Root>
+        {color._class === 'color' ? (
+          <InputField.Root id={hexInputId} labelPosition="start">
+            <InputField.Input
+              value={sketchColorToHex(color).replace('#', '')}
+              onSubmit={() => {}}
+            />
+            <InputField.Label>#</InputField.Label>
+          </InputField.Root>
+        ) : (
+          <InputField.Root id={gradientTypeId}>
+            <Select
+              id={''}
+              value={'Linear'}
+              options={['Linear', 'Angular', 'Radial']}
+              onChange={() => {}}
+            />
+          </InputField.Root>
+        )}
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={opacityInputId} size={50}>
-          <InputField.NumberInput
-            value={Math.round(color.alpha * 100)}
-            onSubmit={handleSubmitOpacity}
-            onNudge={handleNudgeOpacity}
-          />
-          <InputField.Label>%</InputField.Label>
-        </InputField.Root>
+        {color._class === 'color' ? (
+          <InputField.Root id={opacityInputId} size={50}>
+            <InputField.NumberInput
+              value={Math.round(color.alpha * 100)}
+              onSubmit={handleSubmitOpacity}
+              onNudge={handleNudgeOpacity}
+            />
+            <InputField.Label>%</InputField.Label>
+          </InputField.Root>
+        ) : (
+          <InputField.Root id={opacityInputId} size={50}>
+            <InputField.NumberInput
+              value={Math.round(100)}
+              onSubmit={handleSubmitOpacity}
+              onNudge={handleNudgeOpacity}
+            />
+            <InputField.Label>%</InputField.Label>
+          </InputField.Root>
+        )}
       </LabeledElementView>
     </Row>
   );
