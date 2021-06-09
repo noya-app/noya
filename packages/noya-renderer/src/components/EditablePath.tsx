@@ -51,6 +51,47 @@ function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
   );
 }
 
+interface EditableControlPointProps {
+  point: Point;
+  controlPoint: Point;
+  fill: Paint;
+  stroke: Paint;
+}
+
+function ControlPathPoint({
+  point,
+  controlPoint,
+  fill,
+  stroke,
+}: EditableControlPointProps) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const path = useMemo(() => {
+    const path = new CanvasKit.Path();
+
+    path.addRect(
+      CanvasKit.XYWHRect(
+        controlPoint.x - POINT_SIZE / 2 + 2,
+        controlPoint.y - POINT_SIZE / 2 + 2,
+        POINT_SIZE / 2,
+        POINT_SIZE / 2,
+      ),
+    );
+
+    return path;
+  }, [CanvasKit, controlPoint.x, controlPoint.y]);
+  useDeletable(path);
+  const points = [point, controlPoint];
+
+  return (
+    <>
+      <Polyline points={points} paint={stroke} />
+      <Path path={path} paint={fill} />
+      <Path path={path} paint={stroke} />
+    </>
+  );
+}
+
 interface Props {
   layer: Sketch.AnyLayer;
   transform: AffineTransform;
@@ -85,13 +126,16 @@ export default function EditablePath({
 
   if (!Layers.isPointsLayer(layer)) return null;
 
-  const points = layer.points.map(
-    (point) => Primitives.parseCurvePoint(point, layer.frame).point,
+  const parsedCurvePoints = layer.points.map((point) =>
+    Primitives.parseCurvePoint(point, layer.frame),
   );
+
+  const points = parsedCurvePoints.map((point) => point.point);
 
   return (
     <Group transform={localTransform}>
       <Polyline points={points} paint={stroke} />
+
       {points.map((point, index) => {
         const isSelected = selectedIndexes.includes(index);
 
@@ -101,6 +145,36 @@ export default function EditablePath({
             point={point}
             fill={isSelected ? selectedFill : fill}
             stroke={isSelected ? selectedStroke : stroke}
+          />
+        );
+      })}
+
+      {parsedCurvePoints.map((points, index) => {
+        if (points.curveMode === 1) {
+          return null;
+        }
+        return (
+          <ControlPathPoint
+            key={index}
+            point={points.point}
+            controlPoint={points.curveFrom}
+            fill={fill}
+            stroke={stroke}
+          />
+        );
+      })}
+
+      {parsedCurvePoints.map((points, index) => {
+        if (points.curveMode === 1) {
+          return null;
+        }
+        return (
+          <ControlPathPoint
+            key={index}
+            point={points.point}
+            controlPoint={points.curveTo}
+            fill={fill}
+            stroke={stroke}
           />
         );
       })}
