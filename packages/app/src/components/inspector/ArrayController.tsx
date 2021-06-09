@@ -74,7 +74,7 @@ interface ArrayControllerProps<Item> {
   showTrashIfEnabled?: boolean;
   onDeleteItem?: (index: number) => void;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
-  onChangeCheckbox: (index: number, checked: boolean) => void;
+  onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
   getKey?: (item: Item) => string | number;
@@ -157,7 +157,7 @@ function ArrayController<Item extends BaseArrayItem>({
                   {renderItem({
                     item,
                     index,
-                    checkbox: (
+                    checkbox: onChangeCheckbox ? (
                       <Checkbox
                         type="checkbox"
                         checked={value[index].isEnabled}
@@ -165,7 +165,7 @@ function ArrayController<Item extends BaseArrayItem>({
                           onChangeCheckbox(index, event.target.checked);
                         }}
                       />
-                    ),
+                    ) : null,
                   })}
                 </ArrayElement>
               ))}

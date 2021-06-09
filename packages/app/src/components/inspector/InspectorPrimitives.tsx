@@ -1,3 +1,4 @@
+import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
 
 export const Section = styled.div(({ theme }) => ({
@@ -24,6 +25,13 @@ export const Row = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
+  position: 'relative',
+}));
+
+export const Column = styled.div(({ theme }) => ({
+  flex: '1',
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 export const Checkbox = styled.input(({ theme }) => ({
@@ -33,3 +41,25 @@ export const Checkbox = styled.input(({ theme }) => ({
 export const Text = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
 }));
+
+const RowLabel = styled.span(({ theme }) => ({
+  ...theme.textStyles.small,
+  marginBottom: '-4px',
+}));
+
+export const LabeledRow = memo(function LabeledRow({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <Row>
+      <Column>
+        <RowLabel>{label}</RowLabel>
+        <Row>{children}</Row>
+      </Column>
+    </Row>
+  );
+});

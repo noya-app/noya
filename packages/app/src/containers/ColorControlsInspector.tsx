@@ -1,5 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
+import { interpolate, InterpolateOptions } from 'noya-utils';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
@@ -9,6 +10,37 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
+
+function makeInterpolator(options: InterpolateOptions) {
+  return {
+    toDisplay: (value: number) => Math.round(interpolate(options)(value)),
+    fromDisplay: (value: number) =>
+      interpolate({
+        inputRange: options.outputRange,
+        outputRange: options.inputRange,
+      })(value),
+  };
+}
+
+const hueInterpolator = makeInterpolator({
+  inputRange: [-Math.PI, Math.PI],
+  outputRange: [-100, 100],
+});
+
+const saturationInterpolator = makeInterpolator({
+  inputRange: [0, 2],
+  outputRange: [-100, 100],
+});
+
+const brightnessInterpolator = makeInterpolator({
+  inputRange: [-1, 1],
+  outputRange: [-100, 100],
+});
+
+const contrastInterpolator = makeInterpolator({
+  inputRange: [0, 1, 4],
+  outputRange: [-100, 0, 100],
+});
 
 export default memo(function ColorControlsInspector() {
   const [, dispatch] = useApplicationState();
@@ -42,11 +74,13 @@ export default memo(function ColorControlsInspector() {
   const title = 'Color Adjust';
 
   const handleClickPlus = useCallback(() => {
-    dispatch('addNewFill');
+    dispatch('setColorControlsEnabled', true);
   }, [dispatch]);
-  const handleClickTrash = useCallback(() => dispatch('deleteDisabledFills'), [
-    dispatch,
-  ]);
+
+  const handleClickTrash = useCallback(
+    () => dispatch('setColorControlsEnabled', false),
+    [dispatch],
+  );
 
   return (
     <ArrayController<Sketch.ColorControls>
@@ -65,10 +99,6 @@ export default memo(function ColorControlsInspector() {
           dispatch('moveFill', sourceIndex, destinationIndex),
         [dispatch],
       )}
-      onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setFillEnabled', index, checked),
-        [dispatch],
-      )}
     >
       {useCallback(
         ({
@@ -82,14 +112,60 @@ export default memo(function ColorControlsInspector() {
         }) => (
           <ColorControlsRow
             id={`fill-${index}`}
-            hue={hue}
-            saturation={saturation}
-            brightness={brightness}
-            contrast={contrast}
-            onChangeHue={(value, mode) => dispatch('setHue', value, mode)}
-            onChangeSaturation={() => {}}
-            onChangeBrightness={() => {}}
-            onChangeContrast={() => {}}
+            hue={hue !== undefined ? hueInterpolator.toDisplay(hue) : undefined}
+            onChangeHue={(value, mode) =>
+              dispatch('setHue', hueInterpolator.fromDisplay(value), mode)
+            }
+            saturation={
+              saturation !== undefined
+                ? saturationInterpolator.toDisplay(saturation)
+                : undefined
+            }
+            onChangeSaturation={(value, mode) =>
+              dispatch(
+                'setSaturation',
+                mode === 'adjust'
+                  ? value / 100
+                  : saturationInterpolator.fromDisplay(value),
+                mode,
+              )
+            }
+            brightness={
+              brightness !== undefined
+                ? brightnessInterpolator.toDisplay(brightness)
+                : undefined
+            }
+            onChangeBrightness={(value, mode) =>
+              dispatch(
+                'setBrightness',
+                brightnessInterpolator.fromDisplay(value),
+                mode,
+              )
+            }
+            contrast={
+              contrast !== undefined
+                ? contrastInterpolator.toDisplay(contrast)
+                : undefined
+            }
+            onChangeContrast={(value, mode) => {
+              if (contrast !== undefined && mode === 'adjust') {
+                const displayValue = contrastInterpolator.toDisplay(contrast);
+                const newValue = contrastInterpolator.fromDisplay(
+                  displayValue + value,
+                );
+                const delta = newValue - contrast;
+
+                return dispatch('setContrast', delta, mode);
+              }
+
+              return dispatch(
+                'setContrast',
+                mode === 'adjust'
+                  ? value / 100
+                  : contrastInterpolator.fromDisplay(value),
+                mode,
+              );
+            }}
           />
         ),
         [brightness, contrast, dispatch, hue, saturation],

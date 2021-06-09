@@ -145,7 +145,11 @@ export function applicationReducer(
     case 'setShadowBlur':
     case 'setBorderPosition':
     case 'setShadowSpread':
-    case 'setHue': {
+    case 'setColorControlsEnabled':
+    case 'setHue':
+    case 'setSaturation':
+    case 'setBrightness':
+    case 'setContrast': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);

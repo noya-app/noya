@@ -285,7 +285,11 @@ export function styleReducer(
         draft.borders[index].position = position;
       });
     }
+    case 'setColorControlsEnabled':
     case 'setHue':
+    case 'setSaturation':
+    case 'setBrightness':
+    case 'setContrast':
       return produce(state, (draft) => {
         draft.colorControls = colorControlsReducer(draft.colorControls, action);
       });
