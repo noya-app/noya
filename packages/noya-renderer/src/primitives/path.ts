@@ -53,7 +53,7 @@ function getStep(
   return { step, drawSegment: true };
 }
 
-export type ParsedCurvePoint = Omit<
+export type DecodedCurvePoint = Omit<
   Sketch.CurvePoint,
   'curveFrom' | 'curveTo' | 'point'
 > & {
@@ -73,10 +73,10 @@ export function unscalePoint(
   return { x: (point.x - x) / width, y: (point.y - y) / height };
 }
 
-export function parseCurvePoint(
+export function decodeCurvePoint(
   curvePoint: Sketch.CurvePoint,
   frame: Rect,
-): ParsedCurvePoint {
+): DecodedCurvePoint {
   return {
     ...curvePoint,
     curveFrom: scalePoint(parsePoint(curvePoint.curveTo), frame),
@@ -85,8 +85,8 @@ export function parseCurvePoint(
   };
 }
 
-export function unparseCurvePoint(
-  curvePoint: ParsedCurvePoint,
+export function encodeCurvePoint(
+  curvePoint: DecodedCurvePoint,
   frame: Rect,
 ): Sketch.CurvePoint {
   return {
@@ -102,7 +102,7 @@ export function path(
   points: Sketch.CurvePoint[],
   frame: Rect,
 ): Path {
-  const curvePoints = points.map((point) => parseCurvePoint(point, frame));
+  const curvePoints = points.map((point) => decodeCurvePoint(point, frame));
 
   const pairs = windowsOf(curvePoints, 3, true);
 

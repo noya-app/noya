@@ -1,6 +1,6 @@
 import {
-  parseCurvePoint,
-  ParsedCurvePoint,
+  decodeCurvePoint,
+  DecodedCurvePoint,
 } from 'noya-renderer/src/primitives';
 import { ApplicationState, Layers } from '../index';
 import { visit } from '../layers';
@@ -9,7 +9,7 @@ import { getBoundingRectMap } from './selectors';
 
 export const getSelectedPoints = (
   state: ApplicationState,
-): ParsedCurvePoint[] => {
+): DecodedCurvePoint[] => {
   const page = getCurrentPage(state);
   const boundingRects = getBoundingRectMap(
     getCurrentPage(state),
@@ -21,7 +21,7 @@ export const getSelectedPoints = (
     },
   );
 
-  const points: ParsedCurvePoint[] = [];
+  const points: DecodedCurvePoint[] = [];
 
   visit(page, (layer) => {
     const boundingRect = boundingRects[layer.do_objectID];
@@ -41,11 +41,11 @@ export const getSelectedPoints = (
 
     if (selectedPoints.length === 0) return;
 
-    const parsedPoints = selectedPoints.map((point) =>
-      parseCurvePoint(point, boundingRect),
+    const decodedPoints = selectedPoints.map((point) =>
+      decodeCurvePoint(point, boundingRect),
     );
 
-    points.push(...parsedPoints);
+    points.push(...decodedPoints);
   });
 
   return points;

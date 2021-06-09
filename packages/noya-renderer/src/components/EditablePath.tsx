@@ -15,7 +15,7 @@ import { Layers, Selectors } from 'noya-state';
 import { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
-const POINT_SIZE = 8;
+const POINT_RADIUS = 4;
 
 interface EditablePathPointProps {
   point: Point;
@@ -31,10 +31,10 @@ function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
 
     path.addOval(
       CanvasKit.XYWHRect(
-        point.x - POINT_SIZE / 2,
-        point.y - POINT_SIZE / 2,
-        POINT_SIZE,
-        POINT_SIZE,
+        point.x - POINT_RADIUS,
+        point.y - POINT_RADIUS,
+        POINT_RADIUS * 2,
+        POINT_RADIUS * 2,
       ),
     );
 
@@ -86,7 +86,7 @@ export default function EditablePath({
   if (!Layers.isPointsLayer(layer)) return null;
 
   const points = layer.points.map(
-    (point) => Primitives.parseCurvePoint(point, layer.frame).point,
+    (point) => Primitives.decodeCurvePoint(point, layer.frame).point,
   );
 
   return (

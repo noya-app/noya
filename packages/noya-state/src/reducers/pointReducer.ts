@@ -2,8 +2,8 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { createRectFromBounds } from 'noya-geometry';
 import {
-  parseCurvePoint,
-  unparseCurvePoint,
+  decodeCurvePoint,
+  encodeCurvePoint,
 } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import {
@@ -72,43 +72,44 @@ export function pointReducer(
           layer.points
             .filter((_, index) => pointList.includes(index))
             .forEach((curvePoint) => {
-              const parsedPoint = parseCurvePoint(curvePoint, boundingRect);
+              const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
 
               (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
                 const newValue =
-                  mode === 'replace' ? amount : parsedPoint[key][axis] + amount;
+                  mode === 'replace'
+                    ? amount
+                    : decodedPoint[key][axis] + amount;
 
-                parsedPoint[key] = {
-                  ...parsedPoint[key],
+                decodedPoint[key] = {
+                  ...decodedPoint[key],
                   [axis]: newValue,
                 };
               });
 
-              const unparsedPoint = unparseCurvePoint(
-                parsedPoint,
-                boundingRect,
-              );
+              const encodedPoint = encodeCurvePoint(decodedPoint, boundingRect);
 
-              curvePoint.point = unparsedPoint.point;
+              curvePoint.point = encodedPoint.point;
+              curvePoint.curveFrom = encodedPoint.curveFrom;
+              curvePoint.curveTo = encodedPoint.curveTo;
             });
 
-          const parsedPoints = layer.points.map((curvePoint) =>
-            parseCurvePoint(curvePoint, boundingRect),
+          const decodedPoints = layer.points.map((curvePoint) =>
+            decodeCurvePoint(curvePoint, boundingRect),
           );
 
           // Determine the new bounds of the updated points
           const newBounds = {
             minX: Math.min(
-              ...parsedPoints.map((curvePoint) => curvePoint.point.x),
+              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
             ),
             maxX: Math.max(
-              ...parsedPoints.map((curvePoint) => curvePoint.point.x),
+              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
             ),
             minY: Math.min(
-              ...parsedPoints.map((curvePoint) => curvePoint.point.y),
+              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
             ),
             maxY: Math.max(
-              ...parsedPoints.map((curvePoint) => curvePoint.point.y),
+              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
             ),
           };
 
@@ -118,11 +119,11 @@ export function pointReducer(
           };
 
           // Transform back to the range [0, 1], using the new bounds
-          const unparsedPoints = parsedPoints.map((parsedCurvePoint) =>
-            unparseCurvePoint(parsedCurvePoint, layer.frame),
+          const encodedPoints = decodedPoints.map((decodedCurvePoint) =>
+            encodeCurvePoint(decodedCurvePoint, layer.frame),
           );
 
-          layer.points = unparsedPoints;
+          layer.points = encodedPoints;
         });
       });
     }
