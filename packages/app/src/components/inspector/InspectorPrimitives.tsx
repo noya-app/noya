@@ -25,7 +25,6 @@ export const Row = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  position: 'relative',
 }));
 
 export const Column = styled.div(({ theme }) => ({

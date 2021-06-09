@@ -39,7 +39,7 @@ function reducer(
 
 export default function App() {
   const sketchFileData = useResource<ArrayBuffer>(
-    '/Image.sketch',
+    '/Demo.sketch',
     'arrayBuffer',
   );
 
