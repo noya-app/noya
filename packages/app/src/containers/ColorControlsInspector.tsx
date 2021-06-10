@@ -13,12 +13,12 @@ import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 function makeInterpolator(options: InterpolateOptions) {
   return {
-    toDisplay: (value: number) => Math.round(interpolate(options)(value)),
+    toDisplay: (value: number) => Math.round(interpolate(value, options)),
     fromDisplay: (value: number) =>
-      interpolate({
+      interpolate(value, {
         inputRange: options.outputRange,
         outputRange: options.inputRange,
-      })(value),
+      }),
   };
 }
 

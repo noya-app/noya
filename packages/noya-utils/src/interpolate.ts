@@ -24,10 +24,10 @@ export type InterpolateOptions = {
   outputRange: number[];
 };
 
-function makeInterpolator({
-  inputRange,
-  outputRange,
-}: InterpolateOptions): (value: number) => number {
+export function interpolate(
+  value: number,
+  { inputRange, outputRange }: InterpolateOptions,
+): number {
   if (inputRange.length !== outputRange.length) {
     throw new Error(
       'interpolate(): `inputRange` and `outputRange` must have the same length',
@@ -52,33 +52,16 @@ function makeInterpolator({
     );
   }
 
-  return (value: number): number => {
-    const index = findLastIndex(inputRange, (number) => value > number);
+  const index = findLastIndex(inputRange, (number) => value > number);
 
-    if (index === -1) {
-      return outputRange[0];
-    } else if (index === inputRange.length - 1) {
-      return outputRange[index];
-    } else {
-      const t =
-        (value - inputRange[index]) /
-        (inputRange[index + 1] - inputRange[index]);
-
-      return lerp(outputRange[index], outputRange[index + 1], t);
-    }
-  };
-}
-
-export function interpolate(value: number, options: InterpolateOptions): number;
-export function interpolate(
-  options: InterpolateOptions,
-): (value: number) => number;
-export function interpolate(
-  ...params: [number, InterpolateOptions] | [InterpolateOptions]
-): number | ((value: number) => number) {
-  if (params.length === 1) {
-    return makeInterpolator(params[0]);
+  if (index === -1) {
+    return outputRange[0];
+  } else if (index === inputRange.length - 1) {
+    return outputRange[index];
   } else {
-    return makeInterpolator(params[1])(params[0]);
+    const t =
+      (value - inputRange[index]) / (inputRange[index + 1] - inputRange[index]);
+
+    return lerp(outputRange[index], outputRange[index + 1], t);
   }
 }
