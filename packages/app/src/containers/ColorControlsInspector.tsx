@@ -71,8 +71,6 @@ export default memo(function ColorControlsInspector() {
     colorControls.map((control) => control.contrast),
   );
 
-  const title = 'Color Adjust';
-
   const handleClickPlus = useCallback(() => {
     dispatch('setColorControlsEnabled', true);
   }, [dispatch]);
@@ -84,11 +82,10 @@ export default memo(function ColorControlsInspector() {
 
   return (
     <ArrayController<Sketch.ColorControls>
-      title={title}
-      id={title}
-      key={title}
+      title="Color Adjust"
+      id="color-adjust"
       value={firstColorControls}
-      showTrashIfEnabled
+      alwaysShowTrashIcon
       onClickPlus={isEnabled ? undefined : handleClickPlus}
       onClickTrash={isEnabled ? handleClickTrash : undefined}
       onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
