@@ -1,7 +1,7 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Selectors } from 'noya-state';
+import { Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
 import {
@@ -58,18 +58,40 @@ export default memo(function ColorControlsInspector() {
     () => (colorControls[0].isEnabled ? [colorControls[0]] : []),
     [colorControls],
   );
+
   const isEnabled = firstColorControls[0]?.isEnabled ?? false;
 
   const hue = getMultiNumberValue(colorControls.map((control) => control.hue));
+
   const saturation = getMultiNumberValue(
     colorControls.map((control) => control.saturation),
   );
+
   const brightness = getMultiNumberValue(
     colorControls.map((control) => control.brightness),
   );
+
   const contrast = getMultiNumberValue(
     colorControls.map((control) => control.contrast),
   );
+
+  const interpolatedHue =
+    hue !== undefined ? hueInterpolator.toDisplay(hue) : undefined;
+
+  const interpolatedSaturation =
+    saturation !== undefined
+      ? saturationInterpolator.toDisplay(saturation)
+      : undefined;
+
+  const interpolatedBrightness =
+    brightness !== undefined
+      ? brightnessInterpolator.toDisplay(brightness)
+      : undefined;
+
+  const interpolatedContrast =
+    contrast !== undefined
+      ? contrastInterpolator.toDisplay(contrast)
+      : undefined;
 
   const handleClickPlus = useCallback(() => {
     dispatch('setColorControlsEnabled', true);
@@ -78,6 +100,55 @@ export default memo(function ColorControlsInspector() {
   const handleClickTrash = useCallback(
     () => dispatch('setColorControlsEnabled', false),
     [dispatch],
+  );
+
+  const handleChangeHue = useCallback(
+    (value: number, mode: SetNumberMode) =>
+      dispatch('setHue', hueInterpolator.fromDisplay(value), mode),
+    [dispatch],
+  );
+
+  const handleChangeSaturation = useCallback(
+    (value: number, mode: SetNumberMode) =>
+      dispatch(
+        'setSaturation',
+        mode === 'adjust'
+          ? value / 100
+          : saturationInterpolator.fromDisplay(value),
+        mode,
+      ),
+    [dispatch],
+  );
+
+  const handleChangeBrightness = useCallback(
+    (value: number, mode: SetNumberMode) =>
+      dispatch(
+        'setBrightness',
+        brightnessInterpolator.fromDisplay(value),
+        mode,
+      ),
+    [dispatch],
+  );
+
+  const handleChangeContrast = useCallback(
+    (value: number, mode: SetNumberMode) => {
+      if (contrast !== undefined && mode === 'adjust') {
+        const displayValue = contrastInterpolator.toDisplay(contrast);
+        const newValue = contrastInterpolator.fromDisplay(displayValue + value);
+        const delta = newValue - contrast;
+
+        return dispatch('setContrast', delta, mode);
+      }
+
+      return dispatch(
+        'setContrast',
+        mode === 'adjust'
+          ? value / 100
+          : contrastInterpolator.fromDisplay(value),
+        mode,
+      );
+    },
+    [contrast, dispatch],
   );
 
   return (
@@ -98,74 +169,29 @@ export default memo(function ColorControlsInspector() {
       )}
     >
       {useCallback(
-        ({
-          item,
-          index,
-          checkbox,
-        }: {
-          item: Sketch.ColorControls;
-          index: number;
-          checkbox: ReactNode;
-        }) => (
+        () => (
           <ColorControlsRow
-            id={`fill-${index}`}
-            hue={hue !== undefined ? hueInterpolator.toDisplay(hue) : undefined}
-            onChangeHue={(value, mode) =>
-              dispatch('setHue', hueInterpolator.fromDisplay(value), mode)
-            }
-            saturation={
-              saturation !== undefined
-                ? saturationInterpolator.toDisplay(saturation)
-                : undefined
-            }
-            onChangeSaturation={(value, mode) =>
-              dispatch(
-                'setSaturation',
-                mode === 'adjust'
-                  ? value / 100
-                  : saturationInterpolator.fromDisplay(value),
-                mode,
-              )
-            }
-            brightness={
-              brightness !== undefined
-                ? brightnessInterpolator.toDisplay(brightness)
-                : undefined
-            }
-            onChangeBrightness={(value, mode) =>
-              dispatch(
-                'setBrightness',
-                brightnessInterpolator.fromDisplay(value),
-                mode,
-              )
-            }
-            contrast={
-              contrast !== undefined
-                ? contrastInterpolator.toDisplay(contrast)
-                : undefined
-            }
-            onChangeContrast={(value, mode) => {
-              if (contrast !== undefined && mode === 'adjust') {
-                const displayValue = contrastInterpolator.toDisplay(contrast);
-                const newValue = contrastInterpolator.fromDisplay(
-                  displayValue + value,
-                );
-                const delta = newValue - contrast;
-
-                return dispatch('setContrast', delta, mode);
-              }
-
-              return dispatch(
-                'setContrast',
-                mode === 'adjust'
-                  ? value / 100
-                  : contrastInterpolator.fromDisplay(value),
-                mode,
-              );
-            }}
+            id={'color-controls'}
+            hue={interpolatedHue}
+            saturation={interpolatedSaturation}
+            brightness={interpolatedBrightness}
+            contrast={interpolatedContrast}
+            onChangeHue={handleChangeHue}
+            onChangeSaturation={handleChangeSaturation}
+            onChangeBrightness={handleChangeBrightness}
+            onChangeContrast={handleChangeContrast}
           />
         ),
-        [brightness, contrast, dispatch, hue, saturation],
+        [
+          handleChangeBrightness,
+          handleChangeContrast,
+          handleChangeHue,
+          handleChangeSaturation,
+          interpolatedBrightness,
+          interpolatedContrast,
+          interpolatedHue,
+          interpolatedSaturation,
+        ],
       )}
     </ArrayController>
   );

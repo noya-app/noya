@@ -43,7 +43,7 @@ export const Text = styled.span(({ theme }) => ({
 
 const RowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
-  marginBottom: '-4px',
+  marginBottom: '-6px',
 }));
 
 export const LabeledRow = memo(function LabeledRow({
