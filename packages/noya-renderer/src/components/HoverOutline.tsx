@@ -1,38 +1,15 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
-import { Group, Path, Rect, useReactCanvasKit } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
-import { Selectors, Layers } from 'noya-state';
 import { AffineTransform } from 'noya-geometry';
+import { Group, Path, Rect } from 'noya-react-canvaskit';
+import { Selectors } from 'noya-state';
+import { PointsLayer } from 'noya-state/src/layers';
 import { ReactNode, useMemo } from 'react';
-
-function useLayerPath(layer: Sketch.Rectangle | Sketch.Oval) {
-  const { CanvasKit } = useReactCanvasKit();
-
-  return useMemo(() => {
-    const path = Primitives.path(
-      CanvasKit,
-      layer.points,
-      layer.frame,
-      Layers.getFixedRadius(layer),
-    );
-
-    path.setFillType(CanvasKit.FillType.EvenOdd);
-
-    return path;
-  }, [CanvasKit, layer]);
-}
-
-function useLayerFrameRect(layer: Sketch.AnyLayer) {
-  const { CanvasKit } = useReactCanvasKit();
-
-  return useMemo(() => {
-    return Primitives.rect(CanvasKit, layer.frame);
-  }, [CanvasKit, layer]);
-}
+import useLayerFrameRect from '../hooks/useLayerFrameRect';
+import useLayerPath from '../hooks/useLayerPath';
 
 interface HoverOutlinePathProps {
-  layer: Sketch.Rectangle | Sketch.Oval;
+  layer: PointsLayer;
   paint: Paint;
 }
 
@@ -77,6 +54,10 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
       element = <HoverOutlineRect layer={layer} paint={paint} />;
       break;
     }
+    case 'triangle':
+    case 'star':
+    case 'polygon':
+    case 'shapePath':
     case 'rectangle':
     case 'oval': {
       element = <HoverOutlinePath layer={layer} paint={paint} />;

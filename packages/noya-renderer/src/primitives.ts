@@ -199,9 +199,8 @@ export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
-  fixedRadius: number,
 ): Path {
-  return PathUtils.path(CanvasKit, points, frame, fixedRadius);
+  return PathUtils.path(CanvasKit, points, frame);
 }
 
 export function textHorizontalAlignment(

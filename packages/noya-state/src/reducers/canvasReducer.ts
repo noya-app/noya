@@ -1,6 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { AffineTransform, normalizeRect, rectsIntersect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  normalizeRect,
+  rectsIntersect,
+  Size,
+} from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
 import { resizeRect } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
@@ -13,6 +19,13 @@ import {
   getCurrentPageMetadata,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from '../selectors/selectors';
+import {
+  findSmallestSnappingDistance,
+  getAxisValues,
+  getSnappingPairs,
+  getPossibleSnapLayers,
+  getLayerAxisInfo,
+} from '../snapping';
 import { Point } from '../types';
 import { ApplicationState } from './applicationReducer';
 import {
@@ -35,8 +48,13 @@ export type CanvasAction =
       // better than moving the whole reducer up into the parent.
       action:
         | Exclude<InteractionAction, ['maybeMove' | 'maybeScale', ...any[]]>
-        | [type: 'maybeMove', origin: Point]
-        | [type: 'maybeScale', origin: Point, direction: CompassDirection],
+        | [type: 'maybeMove', origin: Point, canvasSize: Size]
+        | [
+            type: 'maybeScale',
+            origin: Point,
+            direction: CompassDirection,
+            canvasSize: Size,
+          ],
     ];
 
 export function canvasReducer(
@@ -124,17 +142,71 @@ export function canvasReducer(
           ? [...action[1], page]
           : action[1],
       );
+
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
 
         switch (interactionState.type) {
+          case 'editPath': {
+            const layer = Layers.access(page, layerIndexPaths[0]);
+
+            if (!Layers.isPointsLayer(layer)) break;
+
+            draft.selectedPointLists = { [layer.do_objectID]: [0] };
+
+            break;
+          }
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
+
+            const selectedRect = getBoundingRect(
+              pageSnapshot,
+              AffineTransform.identity,
+              layerIds,
+              {
+                clickThroughGroups: true,
+                includeHiddenLayers: false,
+                includeArtboardLayers: false,
+              },
+            );
+
+            if (!selectedRect) {
+              console.info('No selected rect');
+              return;
+            }
 
             const delta = {
               x: current.x - origin.x,
               y: current.y - origin.y,
             };
+
+            const possibleSnapLayers = getPossibleSnapLayers(
+              state,
+              layerIndexPaths,
+              interactionState.canvasSize,
+            )
+              // Ensure we don't snap to the selected layer itself
+              .filter((layer) => !layerIds.includes(layer.do_objectID));
+
+            const snappingLayerInfos = getLayerAxisInfo(
+              page,
+              possibleSnapLayers,
+            );
+
+            // Simulate where the selection rect would be, assuming no snapping
+            selectedRect.x += delta.x;
+            selectedRect.y += delta.y;
+
+            const selectedBounds = createBounds(selectedRect);
+
+            const xValues = getAxisValues(selectedBounds, 'x');
+            const yValues = getAxisValues(selectedBounds, 'y');
+
+            const xPairs = getSnappingPairs(xValues, snappingLayerInfos, 'x');
+            const yPairs = getSnappingPairs(yValues, snappingLayerInfos, 'y');
+
+            delta.y -= findSmallestSnappingDistance(yPairs);
+            delta.x -= findSmallestSnappingDistance(xPairs);
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;

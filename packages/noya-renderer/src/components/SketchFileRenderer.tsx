@@ -1,7 +1,14 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
-import { AffineTransform, createRect, insetRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  Bounds,
+  createBounds,
+  createRect,
+  insetRect,
+  Point,
+} from 'noya-geometry';
 import {
   Group,
   Polyline,
@@ -9,6 +16,7 @@ import {
   useColorFill,
   usePaint,
   useReactCanvasKit,
+  useStroke,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
@@ -20,14 +28,36 @@ import {
   getCurrentPage,
   getLayerTransformAtIndexPath,
   getScreenTransform,
+  getSelectedLayerIndexPaths,
+  getSelectedLayerIndexPathsExcludingDescendants,
 } from 'noya-state/src/selectors/selectors';
+import {
+  getAxisValues,
+  getLayerAxisInfo,
+  getPossibleSnapLayers,
+  getSnappingPairs,
+  SnappingPair,
+} from 'noya-state/src/snapping';
+import { groupBy } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
+import AlignmentGuides from './AlignmentGuides';
+import EditablePath from './EditablePath';
+import ExtensionGuide from './ExtensionGuide';
+import {
+  ALL_DIRECTIONS,
+  Axis,
+  getAxisProperties,
+  getGuides,
+  Guides,
+  X_DIRECTIONS,
+  Y_DIRECTIONS,
+} from './guides';
 import HoverOutline from './HoverOutline';
-import DistanceLabelAndPath from './DistanceLabelAndPath';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
+import MeasurementGuide from './MeasurementGuide';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -123,6 +153,7 @@ export default memo(function SketchFileRenderer() {
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
+  const isEditingPath = state.interactionState.type === 'editPath';
 
   const canvasRect = useMemo(
     () =>
@@ -134,18 +165,17 @@ export default memo(function SketchFileRenderer() {
       ),
     [CanvasKit, canvasInsets.left, canvasSize.height, canvasSize.width],
   );
-  const backgroundColor = useTheme().colors.canvas.background;
+  const {
+    canvas: { background: backgroundColor, dragHandleStroke },
+  } = useTheme().colors;
   const backgroundFill = useColorFill(backgroundColor);
 
-  const selectionPaint = usePaint({
-    style: CanvasKit.PaintStyle.Stroke,
-    color: CanvasKit.Color(180, 180, 180, 0.5),
-    strokeWidth: 1,
+  const selectionPaint = useStroke({
+    color: dragHandleStroke,
   });
 
-  const highlightPaint = usePaint({
+  const highlightPaint = useStroke({
     color: CanvasKit.Color(132, 63, 255, 1),
-    style: CanvasKit.PaintStyle.Stroke,
     strokeWidth: 2,
   });
 
@@ -154,6 +184,7 @@ export default memo(function SketchFileRenderer() {
       getBoundingRect(page, AffineTransform.identity, state.selectedObjects, {
         clickThroughGroups: true,
         includeHiddenLayers: true,
+        includeArtboardLayers: false,
       }),
     [page, state.selectedObjects],
   );
@@ -164,12 +195,13 @@ export default memo(function SketchFileRenderer() {
         getBoundingPoints(page, AffineTransform.identity, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
+          includeArtboardLayers: false,
         }),
       ),
     [page, state.selectedObjects],
   );
 
-  const distanceLabelAndPathBetweenSketchLayers = useMemo(() => {
+  const quickMeasureGuides = useMemo(() => {
     if (
       !highlightedLayer ||
       !highlightedLayer.isMeasured ||
@@ -194,18 +226,195 @@ export default memo(function SketchFileRenderer() {
       {
         clickThroughGroups: true,
         includeHiddenLayers: true,
+        includeArtboardLayers: false,
+      },
+    );
+
+    if (!highlightedBoundingRect) return;
+
+    const highlightedBounds = createBounds(highlightedBoundingRect);
+    const selectedBounds = createBounds(boundingRect);
+
+    const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
+      const result = getGuides(
+        direction,
+        axis,
+        selectedBounds,
+        highlightedBounds,
+      );
+
+      return result ? [result] : [];
+    });
+
+    return (
+      <>
+        {guides.map((guide, index) => (
+          <ExtensionGuide key={index} points={guide.extension} />
+        ))}
+        {guides.map((guide, index) => (
+          <MeasurementGuide
+            key={index}
+            distanceMeasurement={guide.distanceMeasurement!}
+            measurement={guide.measurement}
+          />
+        ))}
+      </>
+    );
+  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+
+  const smartSnapGuides = useMemo(() => {
+    if (state.interactionState.type !== 'moving' || !boundingRect) return;
+
+    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+      state,
+    );
+
+    const possibleSnapLayers = getPossibleSnapLayers(
+      state,
+      layerIndexPaths,
+      state.interactionState.canvasSize,
+    )
+      // Ensure we don't snap to the selected layer itself
+      .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
+
+    const snappingLayerInfos = getLayerAxisInfo(page, possibleSnapLayers);
+
+    const bounds = createBounds(boundingRect);
+    const selectedBounds = createBounds(boundingRect);
+
+    const xPairs = getSnappingPairs(
+      getAxisValues(bounds, 'x'),
+      snappingLayerInfos,
+      'x',
+    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
+
+    const yPairs = getSnappingPairs(
+      getAxisValues(bounds, 'y'),
+      snappingLayerInfos,
+      'y',
+    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
+
+    const axisSnappingPairs: [Axis, SnappingPair[]][] = [
+      ['x', xPairs],
+      ['y', yPairs],
+    ];
+
+    const layerBoundsMap: Record<string, Bounds> = {};
+
+    [...xPairs, ...yPairs]
+      .map((pair) => pair.visibleLayerId)
+      .forEach((layerId) => {
+        if (layerId in layerBoundsMap) return;
+
+        const layerToSnapBoundingRect = getBoundingRect(
+          page,
+          AffineTransform.identity,
+          [layerId],
+          {
+            clickThroughGroups: true,
+            includeHiddenLayers: false,
+            includeArtboardLayers: false,
+          },
+        );
+
+        if (!layerToSnapBoundingRect) return;
+
+        layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
+      });
+
+    const nearestLayerGuides = axisSnappingPairs.map(
+      ([axis, snappingPairs]) => {
+        const getMinGuideDistance = (guides: Guides[]) =>
+          Math.min(
+            ...guides.map((guide) => guide.distanceMeasurement.distance),
+          );
+
+        const guides = snappingPairs
+          .map((pair) => {
+            const visibleLayerBounds = layerBoundsMap[pair.visibleLayerId];
+
+            const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
+
+            return directions.flatMap(([direction, axis]) => {
+              const result = getGuides(
+                direction,
+                axis,
+                selectedBounds,
+                visibleLayerBounds,
+              );
+
+              return result ? [result] : [];
+            });
+          })
+          .sort((a, b) => getMinGuideDistance(a) - getMinGuideDistance(b));
+
+        return guides.length > 0 ? guides[0] : undefined;
+      },
+    );
+
+    const alignmentGuides = axisSnappingPairs.flatMap(
+      ([axis, snappingPairs]) => {
+        const groupedPairs = groupBy(
+          snappingPairs,
+          (value) => value.selectedLayerValue,
+        );
+
+        return Object.values(groupedPairs).map((pairs): Point[] => {
+          const visibleLayerBounds = pairs.map(
+            ({ visibleLayerId }) => layerBoundsMap[visibleLayerId],
+          );
+
+          const m = axis;
+          const c = axis === 'x' ? 'y' : 'x';
+
+          const [minC, , maxC] = getAxisProperties(c, '+');
+
+          return [
+            {
+              [m]: pairs[0].visibleLayerValue,
+              [c]: Math.min(
+                selectedBounds[minC],
+                ...visibleLayerBounds.map((bounds) => bounds[minC]),
+              ),
+            } as Point,
+            {
+              [m]: pairs[0].visibleLayerValue,
+              [c]: Math.max(
+                selectedBounds[maxC],
+                ...visibleLayerBounds.map((bounds) => bounds[maxC]),
+              ),
+            } as Point,
+          ];
+        });
       },
     );
 
     return (
-      highlightedBoundingRect && (
-        <DistanceLabelAndPath
-          selectedRect={boundingRect}
-          highlightedRect={highlightedBoundingRect}
-        />
-      )
+      <>
+        <AlignmentGuides lines={alignmentGuides} />
+        {nearestLayerGuides.map(
+          (guides, i) =>
+            guides && (
+              <>
+                {guides.map((guide, j) => (
+                  <ExtensionGuide
+                    key={`extension-${i}-${j}`}
+                    points={guide.extension}
+                  />
+                ))}
+                {guides.map((guide, j) => (
+                  <MeasurementGuide
+                    key={`measurement-${i}-${j}`}
+                    distanceMeasurement={guide.distanceMeasurement!}
+                    measurement={guide.measurement}
+                  />
+                ))}
+              </>
+            ),
+        )}
+      </>
     );
-  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+  }, [state, boundingRect, page]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
@@ -242,27 +451,69 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
+  const editablePaths = useMemo(() => {
+    if (!isEditingPath) return;
+
+    const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
+
+    return (
+      <>
+        {selectedLayerIndexPaths.map((indexPath) => {
+          const layer = Layers.access(page, indexPath);
+
+          if (!Layers.isPointsLayer(layer)) return null;
+
+          const layerTransform = getLayerTransformAtIndexPath(page, indexPath);
+
+          return (
+            <EditablePath
+              key={layer.do_objectID}
+              transform={layerTransform}
+              layer={layer}
+              selectedIndexes={
+                state.selectedPointLists[layer.do_objectID] ?? []
+              }
+            />
+          );
+        })}
+      </>
+    );
+  }, [isEditingPath, page, state]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {boundingRect && (
-          <BoundingRect rect={boundingRect} selectionPaint={selectionPaint} />
-        )}
-        {boundingPoints.map((points, index) => (
-          <Polyline key={index} points={points} paint={selectionPaint} />
-        ))}
-        {highlightedSketchLayer}
-        {distanceLabelAndPathBetweenSketchLayers}
-        {boundingRect && (
-          <DragHandles rect={boundingRect} selectionPaint={selectionPaint} />
-        )}
-        {state.interactionState.type === 'drawing' && (
-          <SketchLayer
-            key={state.interactionState.value.do_objectID}
-            layer={state.interactionState.value}
-          />
+        {isEditingPath ? (
+          editablePaths
+        ) : (
+          <>
+            {boundingRect && (
+              <BoundingRect
+                rect={boundingRect}
+                selectionPaint={selectionPaint}
+              />
+            )}
+            {boundingPoints.map((points, index) => (
+              <Polyline key={index} points={points} paint={selectionPaint} />
+            ))}
+            {!isEditingPath && highlightedSketchLayer}
+            {smartSnapGuides}
+            {quickMeasureGuides}
+            {boundingRect && (
+              <DragHandles
+                rect={boundingRect}
+                selectionPaint={selectionPaint}
+              />
+            )}
+            {state.interactionState.type === 'drawing' && (
+              <SketchLayer
+                key={state.interactionState.value.do_objectID}
+                layer={state.interactionState.value}
+              />
+            )}
+          </>
         )}
       </Group>
       <Group transform={screenTransform}>
