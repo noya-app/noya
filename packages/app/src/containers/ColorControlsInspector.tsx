@@ -156,6 +156,7 @@ export default memo(function ColorControlsInspector() {
       title="Color Adjust"
       id="color-adjust"
       value={firstColorControls}
+      isDraggable={false}
       alwaysShowTrashIcon
       onClickPlus={isEnabled ? undefined : handleClickPlus}
       onClickTrash={isEnabled ? handleClickTrash : undefined}

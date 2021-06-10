@@ -49,6 +49,11 @@ const ArrayElement = memo(function ArrayElement({
  * Root
  * ------------------------------------------------------------------------- */
 
+const TitleRow = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+});
+
 const Title = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
   fontWeight: 'bold',
@@ -71,7 +76,8 @@ interface ArrayControllerProps<Item> {
   id: string;
   value: Item[];
   title: ReactNode;
-  showTrashIfEnabled?: boolean;
+  isDraggable?: boolean;
+  alwaysShowTrashIcon?: boolean;
   onDeleteItem?: (index: number) => void;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onChangeCheckbox?: (index: number, checked: boolean) => void;
@@ -89,7 +95,8 @@ function ArrayController<Item extends BaseArrayItem>({
   id,
   value,
   title,
-  showTrashIfEnabled = false,
+  isDraggable = true,
+  alwaysShowTrashIcon = false,
   getKey,
   onDeleteItem,
   onMoveItem,
@@ -121,30 +128,41 @@ function ArrayController<Item extends BaseArrayItem>({
     [onDeleteItem, onMoveItem],
   );
 
-  return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <ArrayControllerContainer>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Title>{title}</Title>
-          <Spacer.Horizontal />
-          {withSeparatorElements(
-            [
-              onClickTrash &&
-                (showTrashIfEnabled ||
-                  value.some((item) => !item.isEnabled)) && (
-                  <span onClick={onClickTrash}>
-                    <TrashIcon color="rgb(139,139,139)" />
-                  </span>
-                ),
-              onClickPlus && (
-                <span onClick={onClickPlus}>
-                  <PlusIcon color="rgb(139,139,139)" />
+  const getCheckboxElement = (index: number) =>
+    onChangeCheckbox ? (
+      <Checkbox
+        type="checkbox"
+        checked={value[index].isEnabled}
+        onChange={(event) => {
+          onChangeCheckbox(index, event.target.checked);
+        }}
+      />
+    ) : null;
+
+  const arrayController = (
+    <ArrayControllerContainer>
+      <TitleRow>
+        <Title>{title}</Title>
+        <Spacer.Horizontal />
+        {withSeparatorElements(
+          [
+            onClickTrash &&
+              (alwaysShowTrashIcon ||
+                value.some((item) => !item.isEnabled)) && (
+                <span onClick={onClickTrash}>
+                  <TrashIcon color="rgb(139,139,139)" />
                 </span>
               ),
-            ],
-            <Spacer.Horizontal size={12} />,
-          )}
-        </div>
+            onClickPlus && (
+              <span onClick={onClickPlus}>
+                <PlusIcon color="rgb(139,139,139)" />
+              </span>
+            ),
+          ],
+          <Spacer.Horizontal size={12} />,
+        )}
+      </TitleRow>
+      {isDraggable ? (
         <Droppable droppableId={id}>
           {(provided) => (
             <div ref={provided.innerRef} {...provided.droppableProps}>
@@ -157,15 +175,7 @@ function ArrayController<Item extends BaseArrayItem>({
                   {renderItem({
                     item,
                     index,
-                    checkbox: onChangeCheckbox ? (
-                      <Checkbox
-                        type="checkbox"
-                        checked={value[index].isEnabled}
-                        onChange={(event) => {
-                          onChangeCheckbox(index, event.target.checked);
-                        }}
-                      />
-                    ) : null,
+                    checkbox: getCheckboxElement(index),
                   })}
                 </ArrayElement>
               ))}
@@ -173,8 +183,22 @@ function ArrayController<Item extends BaseArrayItem>({
             </div>
           )}
         </Droppable>
-      </ArrayControllerContainer>
+      ) : (
+        value.map((item, index) => (
+          <ElementRow key={getKey?.(item) ?? index}>
+            {renderItem({ item, index, checkbox: getCheckboxElement(index) })}
+          </ElementRow>
+        ))
+      )}
+    </ArrayControllerContainer>
+  );
+
+  return isDraggable ? (
+    <DragDropContext onDragEnd={handleDragEnd}>
+      {arrayController}
     </DragDropContext>
+  ) : (
+    arrayController
   );
 }
 
