@@ -16,7 +16,7 @@ import { Layers, Selectors } from 'noya-state';
 import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
-const POINT_SIZE = 8;
+const POINT_RADIUS = 4;
 
 interface EditablePathPointProps {
   point: Point;
@@ -32,10 +32,10 @@ function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
 
     path.addOval(
       CanvasKit.XYWHRect(
-        point.x - POINT_SIZE / 2,
-        point.y - POINT_SIZE / 2,
-        POINT_SIZE,
-        POINT_SIZE,
+        point.x - POINT_RADIUS,
+        point.y - POINT_RADIUS,
+        POINT_RADIUS * 2,
+        POINT_RADIUS * 2,
       ),
     );
 
@@ -64,10 +64,10 @@ function EditablePathControlPoint({
   const { CanvasKit } = useReactCanvasKit();
 
   const rect = Primitives.rect(CanvasKit, {
-    x: point.x - POINT_SIZE / 2 + 2,
-    y: point.y - POINT_SIZE / 2 + 2,
-    width: POINT_SIZE / 2,
-    height: POINT_SIZE / 2,
+    x: point.x - POINT_RADIUS + 2,
+    y: point.y - POINT_RADIUS + 2,
+    width: POINT_RADIUS,
+    height: POINT_RADIUS,
   });
 
   return <Rect rect={rect} paint={fill}></Rect>;
@@ -107,12 +107,12 @@ export default function EditablePath({
 
   if (!Layers.isPointsLayer(layer)) return null;
 
-  const parsedCurvePoints = layer.points.map((point) =>
-    Primitives.parseCurvePoint(point, layer.frame),
+  const decodeCurvePoints = layer.points.map((point) =>
+    Primitives.decodeCurvePoint(point, layer.frame),
   );
 
-  const points = parsedCurvePoints.map((point) => point.point);
-  const controlPoints = parsedCurvePoints.filter(
+  const points = decodeCurvePoints.map((point) => point.point);
+  const controlPoints = decodeCurvePoints.filter(
     (point) => point.curveMode !== 1,
   );
 
