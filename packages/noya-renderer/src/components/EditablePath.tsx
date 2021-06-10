@@ -5,6 +5,7 @@ import {
   Group,
   Path,
   Polyline,
+  Rect,
   useDeletable,
   useFill,
   useReactCanvasKit,
@@ -12,10 +13,11 @@ import {
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
-import { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
 const POINT_RADIUS = 4;
+const CONTROL_POINT_SIZE = 2;
 
 interface EditablePathPointProps {
   point: Point;
@@ -49,6 +51,27 @@ function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
       <Path path={path} paint={stroke} />
     </>
   );
+}
+
+interface EditablePathControlPointProps {
+  point: Point;
+  fill: Paint;
+}
+
+function EditablePathControlPoint({
+  point,
+  fill,
+}: EditablePathControlPointProps) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const rect = Primitives.rect(CanvasKit, {
+    x: point.x - CONTROL_POINT_SIZE,
+    y: point.y - CONTROL_POINT_SIZE,
+    width: CONTROL_POINT_SIZE * 2,
+    height: CONTROL_POINT_SIZE * 2,
+  });
+
+  return <Rect rect={rect} paint={fill}></Rect>;
 }
 
 interface Props {
@@ -85,13 +108,39 @@ export default function EditablePath({
 
   if (!Layers.isPointsLayer(layer)) return null;
 
-  const points = layer.points.map(
-    (point) => Primitives.decodeCurvePoint(point, layer.frame).point,
+  const decodeCurvePoints = layer.points.map((point) =>
+    Primitives.decodeCurvePoint(point, layer.frame),
+  );
+
+  const points = decodeCurvePoints.map((point) => point.point);
+  const controlPoints = decodeCurvePoints.filter(
+    (point) => point.curveMode !== 1,
   );
 
   return (
     <Group transform={localTransform}>
       <Polyline points={points} paint={stroke} />
+
+      {controlPoints.map((point, index) => {
+        const points = [point.point, point.curveFrom];
+        return (
+          <Fragment key={index}>
+            <Polyline points={points} paint={stroke} />
+            <EditablePathControlPoint point={point.curveFrom} fill={fill} />
+          </Fragment>
+        );
+      })}
+
+      {controlPoints.map((point, index) => {
+        const points = [point.point, point.curveTo];
+        return (
+          <Fragment key={index}>
+            <Polyline points={points} paint={stroke} />
+            <EditablePathControlPoint point={point.curveTo} fill={fill} />
+          </Fragment>
+        );
+      })}
+
       {points.map((point, index) => {
         const isSelected = selectedIndexes.includes(index);
 
