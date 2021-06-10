@@ -17,6 +17,7 @@ import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
 const POINT_RADIUS = 4;
+const CONTROL_POINT_SIZE = 2;
 
 interface EditablePathPointProps {
   point: Point;
@@ -64,10 +65,10 @@ function EditablePathControlPoint({
   const { CanvasKit } = useReactCanvasKit();
 
   const rect = Primitives.rect(CanvasKit, {
-    x: point.x - POINT_RADIUS + 2,
-    y: point.y - POINT_RADIUS + 2,
-    width: POINT_RADIUS,
-    height: POINT_RADIUS,
+    x: point.x - CONTROL_POINT_SIZE,
+    y: point.y - CONTROL_POINT_SIZE,
+    width: CONTROL_POINT_SIZE * 2,
+    height: CONTROL_POINT_SIZE * 2,
   });
 
   return <Rect rect={rect} paint={fill}></Rect>;
