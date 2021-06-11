@@ -5,6 +5,7 @@ import Gradient from './components/Gradient';
 import Pointer from './components/Pointer';
 import HexColorInput from './components/HexColorInput';
 import ColorPicker from './components/ColorPicker';
+import GradientPicker from './components/GradientPicker';
 
 export { Alpha, Hue, Gradient, Pointer, HexColorInput, Saturation, ColorPicker };
 

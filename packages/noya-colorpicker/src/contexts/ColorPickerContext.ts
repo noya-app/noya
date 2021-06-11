@@ -3,15 +3,7 @@ import { HsvaColor } from '../types';
 
 type ColorPickerContextValue = [
   hsva: HsvaColor,
-  onChange: (
-    color: Partial<HsvaColor>,
-    index?: number,
-    position?: number,
-  ) => void,
-  selectedGradient: {
-    index?: number;
-    position?: number;
-  },
+  onChange: (color: Partial<HsvaColor>) => void,
 ];
 
 const ColorPickerContext = createContext<ColorPickerContextValue | undefined>(

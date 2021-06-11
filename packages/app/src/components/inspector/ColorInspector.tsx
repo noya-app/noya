@@ -7,6 +7,7 @@ import {
   sketchColorToHex,
   Spacer,
 } from 'noya-designsystem';
+import GradientPicker from 'noya-designsystem/src/components/GradientPicker';
 import { clamp } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -35,11 +36,10 @@ interface Props {
   onChangeColor: (color: Sketch.Color) => void;
   onChangeOpacity?: (amount: number) => void;
   onNudgeOpacity?: (amount: number) => void;
-  onChangeGradientColor?: (
-    color: Sketch.Color,
-    index: number,
-    position: number,
-  ) => void;
+  onChangeGradientColor?: (color: Sketch.Color, index: number) => void;
+  onChangeGradientType?: (type: Sketch.GradientType) => void;
+  onChangeGradientPosition?: (index: number, position: number) => void;
+  onAddGradientStop?: (color: Sketch.Color, position: number) => void;
 }
 
 export default memo(function ColorInspector({

@@ -116,6 +116,7 @@ const InteractiveBase = ({
       // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
       onMoveChange(true);
       onMoveCallback(getRelativePosition(container.current!, event));
+      onMoveChange(true);
 
       isDragging.current = true;
     },
