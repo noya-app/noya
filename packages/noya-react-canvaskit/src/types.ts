@@ -8,6 +8,7 @@ import {
   Rect,
   Surface,
   ColorFilter,
+  ImageFilter,
 } from 'canvaskit';
 import { ReactNode } from 'react';
 import { ReactCanvasKitContext } from './contexts/ReactCanvasKitContext';
@@ -65,6 +66,7 @@ export interface GroupComponentProps {
   children: ReactNode;
   clip?: ClipProps;
   colorFilter?: ColorFilter;
+  imageFilter?: ImageFilter;
 }
 
 interface GroupComponent {
