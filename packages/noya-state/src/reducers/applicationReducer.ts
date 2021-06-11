@@ -147,7 +147,9 @@ export function applicationReducer(
     case 'setShadowSpread':
     case 'setFillType':
     case 'setGradientColor':
-    case 'setGradientType': {
+    case 'setGradientPosition':
+    case 'setGradientType':
+    case 'addGradientStop': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
