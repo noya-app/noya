@@ -38,7 +38,7 @@ export default memo(function Pointer({
     <Container
       style={style}
       selected={selected}
-      onClick={onClick}
+      onMouseEnter={onClick}
       onTouchStart={onClick}
       onMouseDown={onClick}
     />

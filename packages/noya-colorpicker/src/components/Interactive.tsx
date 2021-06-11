@@ -52,8 +52,8 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
   const isDragging = useRef(false);
-  const onMoveCallback = useEventCallback<Interaction>(onMove);
-  const onKeyCallback = useEventCallback<Interaction>(onKey);
+  const onMoveCallback = useEventCallback(onMove);
+  const onKeyCallback = useEventCallback(onKey);
 
   // Prevent mobile browsers from handling mouse events (conflicting with touch ones).
   // If we detected a touch interaction before, we prefer reacting to touch events only.

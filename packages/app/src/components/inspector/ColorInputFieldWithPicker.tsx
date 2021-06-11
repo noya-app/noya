@@ -18,6 +18,7 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
 import { uuid } from 'noya-renderer';
+import GradientInputField from 'noya-designsystem/src/components/GradientInputField';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -84,12 +85,10 @@ interface Props {
   value: Sketch.Color | Sketch.Gradient;
   onChange: (color: Sketch.Color) => void;
   onChangeType?: (type: Sketch.FillType) => void;
-  onChangeGradientColor?: (
-    color: Sketch.Color,
-    index: number,
-    position: number,
-  ) => void;
+  onChangeGradientColor?: (color: Sketch.Color, index: number) => void;
   onChangeGradientType?: (type: Sketch.GradientType) => void;
+  onChangeGradientPosition?: (index: number, position: number) => void;
+  onAddGradientStop?: (color: Sketch.Color, position: number) => void;
 }
 
 interface SwatchesProps {
@@ -164,6 +163,8 @@ export default memo(function ColorInputFieldWithPicker({
   onChange,
   onChangeType,
   onChangeGradientColor,
+  onChangeGradientPosition,
+  onAddGradientStop,
   onChangeGradientType,
 }: Props) {
   // TODO: The value prop here can be an array, and other
@@ -237,10 +238,11 @@ export default memo(function ColorInputFieldWithPicker({
   return (
     <Popover.Root>
       <Popover.Trigger as={Slot}>
-        <ColorInputField
-          id={id}
-          value={value._class === 'gradient' ? value : values[0]}
-        />
+        {value._class === 'color' ? (
+          <ColorInputField id={id} value={values[0]} />
+        ) : (
+          <GradientInputField id={id} value={value} />
+        )}
       </Popover.Trigger>
       <Content side="bottom" align="center">
         <PaddedSection>
@@ -278,9 +280,10 @@ export default memo(function ColorInputFieldWithPicker({
             id={`${id}-panel`}
             colors={values}
             gradient={value._class === 'gradient' ? value : undefined}
-            //isGradient={fillOption.endsWith('Gradient')}
             onChangeColor={onChange}
             onChangeGradientColor={onChangeGradientColor}
+            onChangeGradientPosition={onChangeGradientPosition}
+            onAddGradientStop={onAddGradientStop}
           />
           <Spacer.Vertical size={12} />
           {isSwatch ? (

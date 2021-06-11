@@ -48,9 +48,20 @@ export interface ColorModel<T extends AnyColor> {
 export interface ColorPickerBaseProps<T extends AnyColor> {
   className: string;
   color: T;
-  onChange: (newColor: T, index?: number, position?: number) => void;
+  onChange: (newColor: T, index?: number) => void;
   selectedGradient: {
     index?: number;
     position?: number;
   };
+}
+
+export interface GradientPickerBaseProps<T extends AnyColor> {
+  color: T;
+  selectedGradient: {
+    index: number;
+    position: number;
+  };
+  onChangeColor: (newColor: T, index: number) => void;
+  onChangePosition: (position: number, index: number) => void;
+  onAdd: (newColor: T, position: number) => void;
 }

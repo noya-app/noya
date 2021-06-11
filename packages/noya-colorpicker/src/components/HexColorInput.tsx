@@ -21,10 +21,8 @@ export default memo(function HexColorInput(
 ): JSX.Element {
   const { color = '', onChange, onBlur, ...rest } = props;
   const [value, setValue] = useState(() => escape(color));
-  const onChangeCallback = useEventCallback<string>(onChange);
-  const onBlurCallback = useEventCallback<React.FocusEvent<HTMLInputElement>>(
-    onBlur,
-  );
+  const onChangeCallback = useEventCallback<[string]>(onChange);
+  const onBlurCallback = useEventCallback(onBlur);
 
   // Trigger `onChange` handler only if the input value is a valid HEX-color
   const handleChange = useCallback(
