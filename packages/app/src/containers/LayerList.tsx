@@ -15,8 +15,7 @@ import {
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { createSectionedMenu, Spacer, TreeView } from 'noya-designsystem';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { Spacer, TreeView } from 'noya-designsystem';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import React, {
@@ -34,6 +33,7 @@ import {
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useDeepArray from '../hooks/useDeepArray';
+import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 import useShallowArray from '../hooks/useShallowArray';
 import { useWorkspace } from '../hooks/useWorkspace';
 
@@ -144,68 +144,6 @@ export const LayerIcon = memo(function LayerIcon({
   }
 });
 
-function isValidClippingMaskType(type: LayerType): boolean {
-  switch (type) {
-    case 'bitmap':
-    case 'oval':
-    case 'polygon':
-    case 'rectangle':
-    case 'shapeGroup':
-    case 'shapePath':
-    case 'star':
-    case 'triangle':
-      return true;
-    case 'artboard':
-    case 'group':
-    case 'MSImmutableHotspotLayer':
-    case 'slice':
-    case 'symbolInstance':
-    case 'symbolMaster':
-    case 'text':
-      return false;
-    default:
-      throw new Error('Exhaustive switch');
-  }
-}
-
-function isValidMaskChainBreakerType(type: LayerType): boolean {
-  switch (type) {
-    case 'bitmap':
-    case 'group':
-    case 'oval':
-    case 'polygon':
-    case 'rectangle':
-    case 'shapeGroup':
-    case 'shapePath':
-    case 'star':
-    case 'symbolInstance':
-    case 'text':
-    case 'triangle':
-      return true;
-    case 'artboard':
-    case 'MSImmutableHotspotLayer':
-    case 'slice':
-    case 'symbolMaster':
-      return false;
-    default:
-      throw new Error('Exhaustive switch');
-  }
-}
-
-type MenuItemType =
-  | 'duplicate'
-  | 'group'
-  | 'ungroup'
-  | 'delete'
-  | 'createSymbol'
-  | 'detachSymbol'
-  | 'useAsMask'
-  | 'ignoreMasks'
-  | 'lock'
-  | 'unlock'
-  | 'hide'
-  | 'show';
-
 const LayerRow = memo(
   forwardRef(function LayerRow(
     {
@@ -218,7 +156,7 @@ const LayerRow = memo(
       onChangeIsLocked,
       isLocked,
       ...props
-    }: TreeView.TreeRowProps<MenuItemType> & {
+    }: TreeView.TreeRowProps<LayerMenuItemType> & {
       name: string;
       selected: boolean;
       visible: boolean;
@@ -272,7 +210,7 @@ const LayerRow = memo(
     );
 
     return (
-      <TreeView.Row<MenuItemType>
+      <TreeView.Row<LayerMenuItemType>
         ref={forwardedRef}
         onHoverChange={handleHoverChange}
         selected={selected}
@@ -308,175 +246,13 @@ const LayerRow = memo(
 export default memo(function LayerList() {
   const [state, dispatch] = useApplicationState();
   const page = useSelector(Selectors.getCurrentPage);
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+
   const { highlightLayer } = useWorkspace();
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
-  const canUngroup =
-    selectedObjects.length === 1 &&
-    items.find((i) => i.id === selectedObjects[0])?.type === 'group';
-
-  const canDetach =
-    selectedObjects.length === 1 &&
-    items.find((i) => i.id === selectedObjects[0])?.type === 'symbolInstance';
-
-  const selectedItems = useMemo(
-    () => items.filter((i) => selectedObjects.includes(i.id)),
-    [items, selectedObjects],
-  );
-
-  const canBeMask = selectedItems.every((item) =>
-    isValidClippingMaskType(item.type),
-  );
-  const canBeMaskChainBreaker = selectedItems.every((item) =>
-    isValidMaskChainBreakerType(item.type),
-  );
-
-  const canBeSymbol = useMemo(() => {
-    return (
-      selectedItems.length >= 1 &&
-      !selectedItems.some((l) => l.type === 'symbolMaster') &&
-      (selectedItems.every((l) => l.type === 'artboard') ||
-        selectedItems.every((l) => l.type !== 'artboard'))
-    );
-  }, [selectedItems]);
-
-  const shouldAskForSymbolName =
-    items.find((i) => i.id === selectedObjects[0])?.type !== 'artboard';
-
-  const newUseAsMaskValue = !selectedItems.every(
-    (item) => item.hasClippingMask,
-  );
-
-  const newIgnoreMasksValue = !selectedItems.every(
-    (item) => item.shouldBreakMaskChain,
-  );
-
-  const canUnlock = selectedItems.some((item) => item.isLocked);
-  const canLock =
-    !canUnlock &&
-    selectedItems.every(
-      (item) => !(item.type === 'artboard' || item.type === 'symbolMaster'),
-    );
-
-  const canShow = selectedItems.some((item) => !item.visible);
-
-  const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () =>
-      createSectionedMenu(
-        [
-          canBeSymbol && {
-            value: 'createSymbol',
-            title: 'Create Symbol',
-          },
-          canDetach && {
-            value: 'detachSymbol',
-            title: 'Detach Symbol',
-          },
-        ],
-        [
-          { value: 'group', title: 'Group' },
-          canUngroup && { value: 'ungroup', title: 'Ungroup' },
-        ],
-        [{ value: 'duplicate', title: 'Duplicate' }],
-        [{ value: 'delete', title: 'Delete' }],
-        [
-          canUnlock && { value: 'unlock', title: 'Unlock' },
-          canLock && { value: 'lock', title: 'Lock' },
-          canShow && { value: 'show', title: 'Show' },
-          !canShow && { value: 'hide', title: 'Hide' },
-        ],
-        [
-          canBeMask && {
-            value: 'useAsMask',
-            title: 'Use as mask',
-            checked: !newUseAsMaskValue,
-          },
-          canBeMaskChainBreaker && {
-            value: 'ignoreMasks',
-            title: 'Ignore masks',
-            checked: !newIgnoreMasksValue,
-          },
-        ],
-      ),
-    [
-      canBeMask,
-      canBeMaskChainBreaker,
-      canBeSymbol,
-      canDetach,
-      canLock,
-      canShow,
-      canUngroup,
-      canUnlock,
-      newIgnoreMasksValue,
-      newUseAsMaskValue,
-    ],
-  );
-
-  const onSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
-      switch (value) {
-        case 'delete':
-          dispatch('deleteLayer', selectedObjects);
-          return;
-        case 'duplicate':
-          dispatch('duplicateLayer', selectedObjects);
-          return;
-        case 'group': {
-          const name = prompt('New group Name');
-
-          if (!name) return;
-          dispatch('groupLayer', selectedObjects, name);
-          return;
-        }
-        case 'ungroup':
-          dispatch('ungroupLayer', selectedObjects);
-          return;
-        case 'createSymbol': {
-          const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';
-
-          if (!name) return;
-          dispatch('createSymbol', selectedObjects, name);
-          return;
-        }
-        case 'detachSymbol': {
-          dispatch('detachSymbol', selectedObjects);
-          return;
-        }
-        case 'useAsMask': {
-          dispatch('setHasClippingMask', newUseAsMaskValue);
-          return;
-        }
-        case 'ignoreMasks': {
-          dispatch('setShouldBreakMaskChain', newIgnoreMasksValue);
-          return;
-        }
-        case 'lock': {
-          dispatch('setLayerIsLocked', selectedObjects, true);
-          return;
-        }
-        case 'unlock': {
-          dispatch('setLayerIsLocked', selectedObjects, false);
-          return;
-        }
-        case 'show': {
-          dispatch('setLayerVisible', selectedObjects, true);
-          return;
-        }
-        case 'hide': {
-          dispatch('setLayerVisible', selectedObjects, false);
-          return;
-        }
-      }
-    },
-    [
-      dispatch,
-      newIgnoreMasksValue,
-      newUseAsMaskValue,
-      selectedObjects,
-      shouldAskForSymbolName,
-    ],
-  );
+  const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
   const layerElements = useMemo(() => {
     return items.map(
