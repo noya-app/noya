@@ -8,13 +8,16 @@ import {
   FrameIcon,
   GroupIcon,
   ImageIcon,
+  LockClosedIcon,
+  LockOpen1Icon,
   MaskOnIcon,
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu, Spacer, TreeView } from 'noya-designsystem';
+import { createSectionedMenu, Spacer, TreeView } from 'noya-designsystem';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import React, {
   ForwardedRef,
@@ -54,6 +57,7 @@ type LayerListItem = {
   hasClippingMask: boolean;
   shouldBreakMaskChain: boolean;
   isWithinMaskChain: boolean;
+  isLocked: boolean;
 };
 
 function flattenLayerList(
@@ -92,6 +96,7 @@ function flattenLayerList(
         hasClippingMask: layer.hasClippingMask ?? false,
         shouldBreakMaskChain: layer.shouldBreakMaskChain,
         isWithinMaskChain: Layers.isWithinMaskChain(parent, currentIndex),
+        isLocked: layer.isLocked,
       });
     },
   });
@@ -195,7 +200,11 @@ type MenuItemType =
   | 'createSymbol'
   | 'detachSymbol'
   | 'useAsMask'
-  | 'ignoreMasks';
+  | 'ignoreMasks'
+  | 'lock'
+  | 'unlock'
+  | 'hide'
+  | 'show';
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -206,13 +215,17 @@ const LayerRow = memo(
       isWithinMaskChain,
       onHoverChange,
       onChangeVisible,
+      onChangeIsLocked,
+      isLocked,
       ...props
     }: TreeView.TreeRowProps<MenuItemType> & {
       name: string;
       selected: boolean;
       visible: boolean;
       isWithinMaskChain: boolean;
+      isLocked: boolean;
       onChangeVisible: (visible: boolean) => void;
+      onChangeIsLocked: (isLocked: boolean) => void;
     },
     forwardedRef: ForwardedRef<HTMLLIElement>,
   ) {
@@ -242,6 +255,22 @@ const LayerRow = memo(
       [onChangeVisible],
     );
 
+    const handleSetLocked = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onChangeIsLocked(true);
+      },
+      [onChangeIsLocked],
+    );
+
+    const handleSetUnlocked = useCallback(
+      (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onChangeIsLocked(false);
+      },
+      [onChangeIsLocked],
+    );
+
     return (
       <TreeView.Row<MenuItemType>
         ref={forwardedRef}
@@ -250,16 +279,26 @@ const LayerRow = memo(
         disabled={!visible}
         {...props}
       >
-        <TreeView.RowTitle>{name}</TreeView.RowTitle>
-        {(hovered || !visible) && (
-          <>
-            <Spacer.Horizontal size={4} />
-            {visible ? (
-              <EyeOpenIcon onClick={handleSetHidden} />
-            ) : (
-              <EyeClosedIcon onClick={handleSetVisible} />
-            )}
-          </>
+        {withSeparatorElements(
+          [
+            <TreeView.RowTitle>{name}</TreeView.RowTitle>,
+            (hovered || isLocked) &&
+              (isLocked ? (
+                <LockClosedIcon onClick={handleSetUnlocked} />
+              ) : (
+                <LockOpen1Icon onClick={handleSetLocked} />
+              )),
+            hovered || !visible ? (
+              visible ? (
+                <EyeOpenIcon onClick={handleSetHidden} />
+              ) : (
+                <EyeClosedIcon onClick={handleSetVisible} />
+              )
+            ) : isLocked ? (
+              <Spacer.Horizontal size={15} />
+            ) : null,
+          ],
+          <Spacer.Horizontal size={6} />,
         )}
       </TreeView.Row>
     );
@@ -313,47 +352,62 @@ export default memo(function LayerList() {
     (item) => item.shouldBreakMaskChain,
   );
 
+  const canUnlock = selectedItems.some((item) => item.isLocked);
+  const canLock =
+    !canUnlock &&
+    selectedItems.every(
+      (item) => !(item.type === 'artboard' || item.type === 'symbolMaster'),
+    );
+
+  const canShow = selectedItems.some((item) => !item.visible);
+
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [
-      ...(canBeSymbol
-        ? [{ value: 'createSymbol' as const, title: 'Create Symbol' }]
-        : []),
-      ...(canDetach
-        ? [{ value: 'detachSymbol' as const, title: 'Detach Symbol' }]
-        : []),
-      { value: 'group', title: 'Group' },
-      ...(canUngroup ? [{ value: 'ungroup' as const, title: 'Ungroup' }] : []),
-      { value: 'duplicate', title: 'Duplicate' },
-      ContextMenu.SEPARATOR_ITEM,
-      { value: 'delete', title: 'Delete' },
-      ...(canBeMask || canBeMaskChainBreaker
-        ? ([ContextMenu.SEPARATOR_ITEM] as const)
-        : []),
-      ...(canBeMask
-        ? [
-            {
-              value: 'useAsMask' as const,
-              title: 'Use as mask',
-              checked: !newUseAsMaskValue,
-            },
-          ]
-        : []),
-      ...(canBeMaskChainBreaker
-        ? [
-            {
-              value: 'ignoreMasks' as const,
-              title: 'Ignore masks',
-              checked: !newIgnoreMasksValue,
-            },
-          ]
-        : []),
-    ],
+    () =>
+      createSectionedMenu(
+        [
+          canBeSymbol && {
+            value: 'createSymbol',
+            title: 'Create Symbol',
+          },
+          canDetach && {
+            value: 'detachSymbol',
+            title: 'Detach Symbol',
+          },
+        ],
+        [
+          { value: 'group', title: 'Group' },
+          canUngroup && { value: 'ungroup', title: 'Ungroup' },
+        ],
+        [{ value: 'duplicate', title: 'Duplicate' }],
+        [{ value: 'delete', title: 'Delete' }],
+        [
+          canUnlock && { value: 'unlock', title: 'Unlock' },
+          canLock && { value: 'lock', title: 'Lock' },
+          canShow && { value: 'show', title: 'Show' },
+          !canShow && { value: 'hide', title: 'Hide' },
+        ],
+        [
+          canBeMask && {
+            value: 'useAsMask',
+            title: 'Use as mask',
+            checked: !newUseAsMaskValue,
+          },
+          canBeMaskChainBreaker && {
+            value: 'ignoreMasks',
+            title: 'Ignore masks',
+            checked: !newIgnoreMasksValue,
+          },
+        ],
+      ),
     [
       canBeMask,
       canBeMaskChainBreaker,
       canBeSymbol,
       canDetach,
+      canLock,
+      canShow,
       canUngroup,
+      canUnlock,
       newIgnoreMasksValue,
       newUseAsMaskValue,
     ],
@@ -397,6 +451,22 @@ export default memo(function LayerList() {
           dispatch('setShouldBreakMaskChain', newIgnoreMasksValue);
           return;
         }
+        case 'lock': {
+          dispatch('setLayerIsLocked', selectedObjects, true);
+          return;
+        }
+        case 'unlock': {
+          dispatch('setLayerIsLocked', selectedObjects, false);
+          return;
+        }
+        case 'show': {
+          dispatch('setLayerVisible', selectedObjects, true);
+          return;
+        }
+        case 'hide': {
+          dispatch('setLayerVisible', selectedObjects, false);
+          return;
+        }
       }
     },
     [
@@ -421,6 +491,7 @@ export default memo(function LayerList() {
           visible,
           isWithinMaskChain,
           hasClippingMask,
+          isLocked,
         },
         index,
       ) => {
@@ -467,6 +538,9 @@ export default memo(function LayerList() {
         const handleChangeVisible = (value: boolean) =>
           dispatch('setLayerVisible', id, value);
 
+        const handleChangeIsLocked = (value: boolean) =>
+          dispatch('setLayerIsLocked', id, value);
+
         const handleContextMenu = () => {
           if (selected) return;
 
@@ -487,11 +561,13 @@ export default memo(function LayerList() {
             name={name}
             visible={visible}
             isWithinMaskChain={isWithinMaskChain}
+            isLocked={isLocked}
             depth={depth}
             selected={selected}
             onClick={handleClick}
             onHoverChange={handleHoverChange}
             onChangeVisible={handleChangeVisible}
+            onChangeIsLocked={handleChangeIsLocked}
             icon={
               <IconContainer>
                 {hasClippingMask ? (
