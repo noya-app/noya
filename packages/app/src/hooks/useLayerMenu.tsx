@@ -24,7 +24,7 @@ function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
     case 'text':
       return false;
     default:
-      throw new Error('Exhaustive switch');
+      throw new Error(`Exhaustive switch: ${type}`);
   }
 }
 
@@ -48,11 +48,12 @@ function isValidMaskChainBreakerType(type: Sketch.AnyLayer['_class']): boolean {
     case 'symbolMaster':
       return false;
     default:
-      throw new Error('Exhaustive switch');
+      throw new Error(`Exhaustive switch: ${type}`);
   }
 }
 
 export type LayerMenuItemType =
+  | 'selectAll'
   | 'duplicate'
   | 'group'
   | 'ungroup'
@@ -79,6 +80,8 @@ export default function useLayerMenu(layers: ILayer[]) {
   const dispatch = useDispatch();
   const selectedObjects = layers.map((layer) => layer.do_objectID);
 
+  const hasSelectedLayers = layers.length > 0;
+
   const canUngroup = layers.length === 1 && layers[0]._class === 'group';
 
   const canDetach =
@@ -101,7 +104,8 @@ export default function useLayerMenu(layers: ILayer[]) {
     );
   }, [layers]);
 
-  const shouldAskForSymbolName = layers[0]._class !== 'artboard';
+  const shouldAskForSymbolName =
+    layers.length > 1 && layers[0]._class !== 'artboard';
 
   const newUseAsMaskValue = !layers.every((item) => item.hasClippingMask);
 
@@ -121,42 +125,44 @@ export default function useLayerMenu(layers: ILayer[]) {
 
   const menuItems: MenuItem<LayerMenuItemType>[] = useMemo(
     () =>
-      createSectionedMenu(
-        [
-          canBeSymbol && {
-            value: 'createSymbol',
-            title: 'Create Symbol',
-          },
-          canDetach && {
-            value: 'detachSymbol',
-            title: 'Detach Symbol',
-          },
-        ],
-        [
-          { value: 'group', title: 'Group' },
-          canUngroup && { value: 'ungroup', title: 'Ungroup' },
-        ],
-        [{ value: 'duplicate', title: 'Duplicate' }],
-        [{ value: 'delete', title: 'Delete' }],
-        [
-          canUnlock && { value: 'unlock', title: 'Unlock' },
-          canLock && { value: 'lock', title: 'Lock' },
-          canShow && { value: 'show', title: 'Show' },
-          !canShow && { value: 'hide', title: 'Hide' },
-        ],
-        [
-          canBeMask && {
-            value: 'useAsMask',
-            title: 'Use as mask',
-            checked: !newUseAsMaskValue,
-          },
-          canBeMaskChainBreaker && {
-            value: 'ignoreMasks',
-            title: 'Ignore masks',
-            checked: !newIgnoreMasksValue,
-          },
-        ],
-      ),
+      hasSelectedLayers
+        ? createSectionedMenu(
+            [
+              canBeSymbol && {
+                value: 'createSymbol',
+                title: 'Create Symbol',
+              },
+              canDetach && {
+                value: 'detachSymbol',
+                title: 'Detach Symbol',
+              },
+            ],
+            [
+              { value: 'group', title: 'Group' },
+              canUngroup && { value: 'ungroup', title: 'Ungroup' },
+            ],
+            [{ value: 'duplicate', title: 'Duplicate' }],
+            [{ value: 'delete', title: 'Delete' }],
+            [
+              canUnlock && { value: 'unlock', title: 'Unlock' },
+              canLock && { value: 'lock', title: 'Lock' },
+              canShow && { value: 'show', title: 'Show' },
+              !canShow && { value: 'hide', title: 'Hide' },
+            ],
+            [
+              canBeMask && {
+                value: 'useAsMask',
+                title: 'Use as mask',
+                checked: !newUseAsMaskValue,
+              },
+              canBeMaskChainBreaker && {
+                value: 'ignoreMasks',
+                title: 'Ignore masks',
+                checked: !newIgnoreMasksValue,
+              },
+            ],
+          )
+        : [{ value: 'selectAll', title: 'Select All' }],
     [
       canBeMask,
       canBeMaskChainBreaker,
@@ -166,6 +172,7 @@ export default function useLayerMenu(layers: ILayer[]) {
       canShow,
       canUngroup,
       canUnlock,
+      hasSelectedLayers,
       newIgnoreMasksValue,
       newUseAsMaskValue,
     ],
@@ -174,6 +181,9 @@ export default function useLayerMenu(layers: ILayer[]) {
   const onSelectMenuItem = useCallback(
     (value: LayerMenuItemType) => {
       switch (value) {
+        case 'selectAll':
+          dispatch('selectAllLayers');
+          return;
         case 'delete':
           dispatch('deleteLayer', selectedObjects);
           return;

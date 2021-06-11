@@ -252,7 +252,9 @@ export function layerReducer(
           symbolToGroup(pages, state, parent, indexPaths);
         }
 
-        draft.selectedObjects = [parent.do_objectID];
+        if (parent._class !== 'page') {
+          draft.selectedObjects = [parent.do_objectID];
+        }
       });
     }
     case 'selectLayer': {

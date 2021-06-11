@@ -22,6 +22,7 @@ import {
   useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
+import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
@@ -70,8 +71,6 @@ const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
   left,
   zIndex: -1,
 }));
-
-type MenuItemType = 'selectAll' | 'delete';
 
 export default memo(function Canvas() {
   const theme = useTheme();
@@ -175,27 +174,8 @@ export default memo(function Canvas() {
     }
   }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
 
-  const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
-    () =>
-      state.selectedObjects.length > 0
-        ? [{ value: 'delete', title: 'Delete' }]
-        : [{ value: 'selectAll', title: 'Select All' }],
-    [state.selectedObjects.length],
-  );
-
-  const handleSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
-      switch (value) {
-        case 'selectAll':
-          dispatch('selectAllLayers');
-          break;
-        case 'delete':
-          dispatch('deleteLayer', state.selectedObjects);
-          break;
-      }
-    },
-    [dispatch, state.selectedObjects],
-  );
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -568,7 +548,7 @@ export default memo(function Canvas() {
   }, [state.interactionState.type, handleDirection]);
 
   return (
-    <ContextMenu.Root items={menuItems} onSelect={handleSelectMenuItem}>
+    <ContextMenu.Root items={menuItems} onSelect={onSelectMenuItem}>
       <Container
         ref={containerRef}
         cursor={cursor}
