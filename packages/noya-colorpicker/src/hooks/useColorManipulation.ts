@@ -43,6 +43,7 @@ export function useColorManipulation<T extends AnyColor>(
       )
     ) {
       cache.current = { hsva, color: newColor };
+      onChangeCallback(newColor);
     }
   }, [hsva, colorModel, onChangeCallback]);
 

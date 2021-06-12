@@ -24,11 +24,7 @@ const Container = styled.div(() => ({
   zIndex: 2,
 }));
 
-export default memo(function HueBase({
-  isGradient = false,
-}: {
-  isGradient?: boolean;
-}) {
+export default memo(function HueBase() {
   const [{ h: hue }, onChange] = useColorPicker();
 
   const handleMove = (interaction: Interaction) => {

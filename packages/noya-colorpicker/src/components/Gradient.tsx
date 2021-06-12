@@ -3,7 +3,7 @@ import { sketchColorToRgba } from 'noya-designsystem';
 import { getGradientBackground } from 'noya-designsystem/src/utils/getGradientBackground';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-import { useGradientPicker } from '../contexts/GradientPickerContext';
+import { useColorPicker } from '../contexts/ColorPickerContext';
 import { RgbaColor } from '../types';
 import { rgbaToHsva } from '../utils/convert';
 import { Interaction, Interactive } from './GradientSlider';
@@ -92,10 +92,18 @@ function computeAt(stops: PositionHsva[], pos: number, max: RgbaColor) {
 
 export default memo(function Gradient({
   gradients,
+  selectedStop,
+  onSelectStop,
+  onChangePosition,
+  onAdd,
 }: {
   gradients: Sketch.GradientStop[];
+  selectedStop: number;
+  onSelectStop: (index: number) => void;
+  onChangePosition: (position: number) => void;
+  onAdd: (value: RgbaColor, position: number) => void;
 }) {
-  const [, onChange, selectedStop] = useGradientPicker();
+  const [, onChange] = useColorPicker();
 
   const [moving, setMoving] = useState(false);
   const handleMove = (interaction: Interaction) => {
@@ -105,11 +113,9 @@ export default memo(function Gradient({
     }));
 
     const color = computeAt(posi, interaction.left, RGBA_MAX);
-    const findIndex = gradients.findIndex(
-      (g) => g.position === selectedStop.position,
-    );
 
-    onChange(rgbaToHsva(color), findIndex, interaction.left);
+    onChange(rgbaToHsva(color));
+    onChangePosition(interaction.left);
   };
 
   const handleKey = (offset: Interaction) => {
@@ -128,7 +134,7 @@ export default memo(function Gradient({
 
     const color = computeAt(posi, interaction.left, RGBA_MAX);
 
-    onChange(rgbaToHsva(color), undefined, interaction.left);
+    onAdd(color, interaction.left);
   };
 
   const isOnPoint = (interaction: Interaction) => {
@@ -154,15 +160,12 @@ export default memo(function Gradient({
         {gradients.map((g, index) => (
           <Pointer
             key={`gradients-point-${index}`}
-            selected={index === selectedStop.index}
+            selected={index === selectedStop}
             left={g.position}
             onClick={() => {
-              if (!moving)
-                onChange(
-                  rgbaToHsva(sketchColorToRgba(g.color)),
-                  index,
-                  g.position,
-                );
+              if (moving) return;
+              onSelectStop(index);
+              onChange(rgbaToHsva(sketchColorToRgba(g.color)));
             }}
           />
         ))}

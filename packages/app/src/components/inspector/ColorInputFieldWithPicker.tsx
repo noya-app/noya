@@ -17,6 +17,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
+import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
 import GradientInputField from 'noya-designsystem/src/components/GradientInputField';
 
@@ -276,15 +277,21 @@ export default memo(function ColorInputFieldWithPicker({
           </Row>
         </PaddedSection>
         <PaddedSection>
-          <ColorInspector
-            id={`${id}-panel`}
-            colors={values}
-            gradient={value._class === 'gradient' ? value : undefined}
-            onChangeColor={onChange}
-            onChangeGradientColor={onChangeGradientColor}
-            onChangeGradientPosition={onChangeGradientPosition}
-            onAddGradientStop={onAddGradientStop}
-          />
+          {value._class === 'color' ? (
+            <ColorInspector
+              id={`${id}-color-inspector`}
+              colors={values}
+              onChangeColor={onChange}
+            />
+          ) : (
+            <GradientInspector
+              id={`${id}-gradient-inspector`}
+              gradient={value.stops}
+              onChangeColor={onChangeGradientColor}
+              onChangePosition={onChangeGradientPosition}
+              onAddStop={onAddGradientStop}
+            />
+          )}
           <Spacer.Vertical size={12} />
           {isSwatch ? (
             <Button id={'detach-theme-color'} onClick={detachThemeColor}>

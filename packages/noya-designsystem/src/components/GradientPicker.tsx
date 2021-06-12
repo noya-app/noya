@@ -1,9 +1,11 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
+  Alpha,
   ColorModel,
-  GradientPicker as NoyaGradientPicker,
+  ColorPicker as NoyaColorPicker,
   equalColorObjects,
   hsvaToRgba,
+  Hue,
   RgbaColor,
   rgbaToHsva,
   Saturation,
@@ -22,29 +24,26 @@ const colorModel: ColorModel<RgbaColor> = {
 
 interface Props {
   value: Sketch.GradientStop[];
-  onChangeColor: (color: Sketch.Color, index: number) => void;
-  onChangePosition: (index: number, position: number) => void;
+  selectedStop: number;
+  onChangeColor: (color: Sketch.Color) => void;
+  onChangePosition: (position: number) => void;
   onAdd: (color: Sketch.Color, position: number) => void;
+  onSelectStop: (index: number) => void;
 }
 
 export default memo(function GradientPicker({
   value,
+  selectedStop,
   onChangeColor,
   onChangePosition,
   onAdd,
+  onSelectStop,
 }: Props) {
   const handleChangeColor = useCallback(
-    (value: RgbaColor, index: number) => {
-      onChangeColor(rgbaToSketchColor(value), index ?? 0);
+    (value: RgbaColor) => {
+      onChangeColor(rgbaToSketchColor(value));
     },
     [onChangeColor],
-  );
-
-  const handleChangePosition = useCallback(
-    (value: number, index: number) => {
-      onChangePosition(value, index);
-    },
-    [onChangePosition],
   );
 
   const handleAddGradientStop = useCallback(
@@ -55,17 +54,24 @@ export default memo(function GradientPicker({
   );
 
   return (
-    <NoyaGradientPicker
+    <NoyaColorPicker
       colorModel={colorModel}
       color={colorModel.defaultColor}
-      onChangeColor={handleChangeColor}
-      onChangePosition={handleChangePosition}
-      onAdd={handleAddGradientStop}
+      onChange={handleChangeColor}
     >
-      <Gradient gradients={value} />
+      <Gradient
+        gradients={value}
+        selectedStop={selectedStop}
+        onSelectStop={onSelectStop}
+        onChangePosition={onChangePosition}
+        onAdd={handleAddGradientStop}
+      />
+      <Spacer.Vertical size={10} />
+      <Saturation />
       <Spacer.Vertical size={12} />
-      <Saturation isGradient={true} />
-      <Spacer.Vertical size={12} />
-    </NoyaGradientPicker>
+      <Hue />
+      <Spacer.Vertical size={5} />
+      <Alpha />
+    </NoyaColorPicker>
   );
 });

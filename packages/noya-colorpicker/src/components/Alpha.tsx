@@ -22,11 +22,7 @@ const Container = styled.div<{ colorFrom: string; colorTo: string }>(
   }),
 );
 
-export default memo(function Alpha({
-  isGradient = false,
-}: {
-  isGradient?: boolean;
-}): JSX.Element {
+export default memo(function Alpha(): JSX.Element {
   const [hsva, onChange] = useColorPicker();
 
   const handleMove = (interaction: Interaction) => {
