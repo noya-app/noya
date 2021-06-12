@@ -81,16 +81,20 @@ export function pointReducer(
             const decodedPoint = decodeCurvePoint(point, boundingRect);
             if (isPointInRange(decodedPoint.point, rawPoint)) {
               if (pointList.indexOf(index) > -1) {
-                pointList.splice(pointList.indexOf(index), 1);
-              } else {
                 mode === 'replace'
                   ? (draft.selectedPointLists = {
-                      [layer.do_objectID]: [index],
+                      [layer.do_objectID]: [],
                     })
-                  : (draft.selectedPointLists = {
-                      [layer.do_objectID]: [...pointList, index],
-                    });
+                  : pointList.splice(pointList.indexOf(index), 1);
+                return;
               }
+              mode === 'replace'
+                ? (draft.selectedPointLists = {
+                    [layer.do_objectID]: [index],
+                  })
+                : (draft.selectedPointLists = {
+                    [layer.do_objectID]: [...pointList, index],
+                  });
             }
           });
         });

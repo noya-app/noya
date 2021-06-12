@@ -250,7 +250,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'editPath': {
-          if (event.shiftKey) {
+          if (event.shiftKey || event.metaKey) {
             dispatch('selectPoint', point, 'adjust');
           } else {
             dispatch('selectPoint', point, 'replace');
