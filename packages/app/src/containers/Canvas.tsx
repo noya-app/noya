@@ -249,6 +249,14 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
+        case 'editPath': {
+          if (event.shiftKey) {
+            dispatch('selectPoint', point, 'adjust');
+          } else {
+            dispatch('selectPoint', point, 'replace');
+          }
+          break;
+        }
         case 'hoverHandle':
         case 'none': {
           if (state.selectedObjects.length > 0) {
