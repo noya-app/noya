@@ -220,12 +220,11 @@ const LayerRow = memo(
         {withSeparatorElements(
           [
             <TreeView.RowTitle>{name}</TreeView.RowTitle>,
-            (hovered || isLocked) &&
-              (isLocked ? (
-                <LockClosedIcon onClick={handleSetUnlocked} />
-              ) : (
-                <LockOpen1Icon onClick={handleSetLocked} />
-              )),
+            isLocked ? (
+              <LockClosedIcon onClick={handleSetUnlocked} />
+            ) : hovered ? (
+              <LockOpen1Icon onClick={handleSetLocked} />
+            ) : null,
             !visible ? (
               <EyeClosedIcon onClick={handleSetVisible} />
             ) : hovered ? (
