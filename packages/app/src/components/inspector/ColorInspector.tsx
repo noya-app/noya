@@ -35,11 +35,6 @@ interface Props {
   onChangeColor: (color: Sketch.Color) => void;
   onChangeOpacity?: (amount: number) => void;
   onNudgeOpacity?: (amount: number) => void;
-  onChangeGradientColor?: (
-    color: Sketch.Color,
-    index: number,
-    position: number,
-  ) => void;
 }
 
 export default memo(function ColorInspector({
