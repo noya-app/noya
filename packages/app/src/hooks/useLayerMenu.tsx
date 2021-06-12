@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { createSectionedMenu } from 'noya-designsystem';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { Layers } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from '../contexts/ApplicationStateContext';
 
@@ -67,45 +68,35 @@ export type LayerMenuItemType =
   | 'hide'
   | 'show';
 
-interface ILayer {
-  _class: Sketch.AnyLayer['_class'];
-  do_objectID: string;
-  hasClippingMask?: boolean;
-  shouldBreakMaskChain: boolean;
-  isLocked: boolean;
-  isVisible: boolean;
-}
-
-export default function useLayerMenu(layers: ILayer[]) {
+export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
   const dispatch = useDispatch();
   const selectedObjects = layers.map((layer) => layer.do_objectID);
 
   const hasSelectedLayers = layers.length > 0;
 
-  const canUngroup = layers.length === 1 && layers[0]._class === 'group';
+  const canUngroup = layers.length === 1 && Layers.isGroup(layers[0]);
 
-  const canDetach =
-    layers.length === 1 && layers[0]._class === 'symbolInstance';
+  const canDetach = layers.length === 1 && Layers.isSymbolInstance(layers[0]);
 
-  const canBeMask = layers.every((item) =>
-    isValidClippingMaskType(item._class),
+  const canBeMask = layers.every((layer) =>
+    isValidClippingMaskType(layer._class),
   );
 
-  const canBeMaskChainBreaker = layers.every((item) =>
-    isValidMaskChainBreakerType(item._class),
+  const canBeMaskChainBreaker = layers.every((layer) =>
+    isValidMaskChainBreakerType(layer._class),
   );
 
   const canBeSymbol = useMemo(() => {
     return (
       layers.length >= 1 &&
-      !layers.some((l) => l._class === 'symbolMaster') &&
-      (layers.every((l) => l._class === 'artboard') ||
-        layers.every((l) => l._class !== 'artboard'))
+      !layers.some(Layers.isSymbolMaster) &&
+      (layers.every(Layers.isArtboard) ||
+        layers.every((item) => !Layers.isArtboard(item)))
     );
   }, [layers]);
 
   const shouldAskForSymbolName =
-    layers.length > 1 && layers[0]._class !== 'artboard';
+    layers.length > 1 && !Layers.isArtboard(layers[0]);
 
   const newUseAsMaskValue = !layers.every((item) => item.hasClippingMask);
 
@@ -113,13 +104,11 @@ export default function useLayerMenu(layers: ILayer[]) {
     (item) => item.shouldBreakMaskChain,
   );
 
-  const canUnlock = layers.some((item) => item.isLocked);
+  const canUnlock = layers.some((layer) => layer.isLocked);
 
   const canLock =
     !canUnlock &&
-    layers.every(
-      (item) => !(item._class === 'artboard' || item._class === 'symbolMaster'),
-    );
+    layers.every((layer) => !Layers.isSymbolMasterOrArtboard(layer));
 
   const canShow = layers.some((item) => !item.isVisible);
 
@@ -191,9 +180,10 @@ export default function useLayerMenu(layers: ILayer[]) {
           dispatch('duplicateLayer', selectedObjects);
           return;
         case 'group': {
-          const name = prompt('New group Name');
+          const name = prompt('New Group Name');
 
           if (!name) return;
+
           dispatch('groupLayer', selectedObjects, name);
           return;
         }
