@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { useGradientPicker } from '../contexts/GradientPickerContext';
+import { useColorPicker } from '../contexts/ColorPickerContext';
 import { clamp } from '../utils/clamp';
 import { hsvaToHslString } from '../utils/convert';
 import { round } from '../utils/round';
@@ -23,12 +23,8 @@ const Container = styled.div<{ backgroundColor: string }>(
   }),
 );
 
-export default memo(function SaturationBase({
-  isGradient = false,
-}: {
-  isGradient?: boolean;
-}) {
-  const [hsva, onChange] = useGradientPicker();
+export default memo(function SaturationBase() {
+  const [hsva, onChange] = useColorPicker();
 
   const handleMove = (interaction: Interaction) => {
     onChange({
