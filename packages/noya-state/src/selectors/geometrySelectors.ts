@@ -52,7 +52,7 @@ function visitLayersReversed(
 ) {
   visitReversed(rootLayer, {
     onEnter: (layer, indexPath) => {
-      if (layer._class === 'page') return;
+      if (Layers.isPageLayer(layer)) return;
 
       if (!layer.isVisible && !options.includeHiddenLayers) return SKIP;
 

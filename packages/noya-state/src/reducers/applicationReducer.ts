@@ -98,6 +98,7 @@ export function applicationReducer(
     case 'interaction':
       return canvasReducer(state, action);
     case 'setLayerVisible':
+    case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
     case 'setFixedRadius':
     case 'setLayerX':

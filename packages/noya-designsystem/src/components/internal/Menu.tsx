@@ -3,9 +3,15 @@ import { Theme } from '../../theme';
 
 export const SEPARATOR_ITEM = 'separator';
 
+export type RegularMenuItem<T extends string> = {
+  value: T;
+  title: string;
+  checked?: boolean;
+};
+
 export type MenuItem<T extends string> =
   | typeof SEPARATOR_ITEM
-  | { value: T; title: string; checked?: boolean };
+  | RegularMenuItem<T>;
 
 export const styles = {
   separatorStyle: ({ theme }: { theme: Theme }): CSSObject => ({
