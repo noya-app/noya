@@ -4,6 +4,7 @@ import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import { Layers } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from '../contexts/ApplicationStateContext';
+import useShallowArray from './useShallowArray';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -70,7 +71,6 @@ export type LayerMenuItemType =
 
 export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
   const dispatch = useDispatch();
-  const selectedObjects = layers.map((layer) => layer.do_objectID);
 
   const hasSelectedLayers = layers.length > 0;
 
@@ -167,6 +167,10 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
     ],
   );
 
+  const selectedLayerIds = useShallowArray(
+    layers.map((layer) => layer.do_objectID),
+  );
+
   const onSelectMenuItem = useCallback(
     (value: LayerMenuItemType) => {
       switch (value) {
@@ -174,31 +178,31 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           dispatch('selectAllLayers');
           return;
         case 'delete':
-          dispatch('deleteLayer', selectedObjects);
+          dispatch('deleteLayer', selectedLayerIds);
           return;
         case 'duplicate':
-          dispatch('duplicateLayer', selectedObjects);
+          dispatch('duplicateLayer', selectedLayerIds);
           return;
         case 'group': {
           const name = prompt('New Group Name');
 
           if (!name) return;
 
-          dispatch('groupLayer', selectedObjects, name);
+          dispatch('groupLayer', selectedLayerIds, name);
           return;
         }
         case 'ungroup':
-          dispatch('ungroupLayer', selectedObjects);
+          dispatch('ungroupLayer', selectedLayerIds);
           return;
         case 'createSymbol': {
           const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';
 
           if (!name) return;
-          dispatch('createSymbol', selectedObjects, name);
+          dispatch('createSymbol', selectedLayerIds, name);
           return;
         }
         case 'detachSymbol': {
-          dispatch('detachSymbol', selectedObjects);
+          dispatch('detachSymbol', selectedLayerIds);
           return;
         }
         case 'useAsMask': {
@@ -210,19 +214,19 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           return;
         }
         case 'lock': {
-          dispatch('setLayerIsLocked', selectedObjects, true);
+          dispatch('setLayerIsLocked', selectedLayerIds, true);
           return;
         }
         case 'unlock': {
-          dispatch('setLayerIsLocked', selectedObjects, false);
+          dispatch('setLayerIsLocked', selectedLayerIds, false);
           return;
         }
         case 'show': {
-          dispatch('setLayerVisible', selectedObjects, true);
+          dispatch('setLayerVisible', selectedLayerIds, true);
           return;
         }
         case 'hide': {
-          dispatch('setLayerVisible', selectedObjects, false);
+          dispatch('setLayerVisible', selectedLayerIds, false);
           return;
         }
       }
@@ -231,7 +235,7 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
       dispatch,
       newIgnoreMasksValue,
       newUseAsMaskValue,
-      selectedObjects,
+      selectedLayerIds,
       shouldAskForSymbolName,
     ],
   );

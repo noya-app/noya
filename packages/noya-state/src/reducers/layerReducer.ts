@@ -252,7 +252,7 @@ export function layerReducer(
           symbolToGroup(pages, state, parent, indexPaths);
         }
 
-        if (parent._class !== 'page') {
+        if (!Layers.isPageLayer(parent)) {
           draft.selectedObjects = [parent.do_objectID];
         }
       });

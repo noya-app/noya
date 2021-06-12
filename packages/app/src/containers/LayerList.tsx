@@ -75,7 +75,7 @@ function flattenLayerList(
       return Layers.getChildren(layer).slice().reverse();
     },
     onEnter(layer, indexPath) {
-      if (layer._class === 'page') return;
+      if (Layers.isPageLayer(layer)) return;
 
       const currentIndex = indexPath[indexPath.length - 1];
 
@@ -226,12 +226,10 @@ const LayerRow = memo(
               ) : (
                 <LockOpen1Icon onClick={handleSetLocked} />
               )),
-            hovered || !visible ? (
-              visible ? (
-                <EyeOpenIcon onClick={handleSetHidden} />
-              ) : (
-                <EyeClosedIcon onClick={handleSetVisible} />
-              )
+            !visible ? (
+              <EyeClosedIcon onClick={handleSetVisible} />
+            ) : hovered ? (
+              <EyeOpenIcon onClick={handleSetHidden} />
             ) : isLocked ? (
               <Spacer.Horizontal size={15} />
             ) : null,
