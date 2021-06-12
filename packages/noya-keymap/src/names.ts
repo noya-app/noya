@@ -30,10 +30,14 @@ export interface KeyModifiers {
   shiftKey: boolean;
 }
 
-export function modifiers(name: string, event: KeyModifiers, shift: boolean) {
+export function prependModifiers(
+  name: string,
+  event: KeyModifiers,
+  useShift: boolean,
+) {
   if (event.altKey) name = 'Alt-' + name;
   if (event.ctrlKey) name = 'Ctrl-' + name;
   if (event.metaKey) name = 'Meta-' + name;
-  if (shift !== false && event.shiftKey) name = 'Shift-' + name;
+  if (useShift !== false && event.shiftKey) name = 'Shift-' + name;
   return name;
 }

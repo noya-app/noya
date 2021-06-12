@@ -1,8 +1,8 @@
-import { modifiers, normalizeKeyName } from '..';
+import { prependModifiers, normalizeKeyName } from '../names';
 
 test('determines key name', () => {
   expect(
-    modifiers(
+    prependModifiers(
       'Enter',
       {
         altKey: false,
@@ -10,12 +10,12 @@ test('determines key name', () => {
         metaKey: false,
         shiftKey: false,
       },
-      false,
+      true,
     ),
   ).toEqual('Enter');
 
   expect(
-    modifiers(
+    prependModifiers(
       'Enter',
       {
         altKey: true,
@@ -23,12 +23,12 @@ test('determines key name', () => {
         metaKey: false,
         shiftKey: false,
       },
-      false,
+      true,
     ),
   ).toEqual('Ctrl-Alt-Enter');
 
   expect(
-    modifiers(
+    prependModifiers(
       'Enter',
       {
         altKey: false,
@@ -41,7 +41,7 @@ test('determines key name', () => {
   ).toEqual('Shift-Enter');
 
   expect(
-    modifiers(
+    prependModifiers(
       'Enter',
       {
         altKey: false,
@@ -56,4 +56,6 @@ test('determines key name', () => {
 
 test('normalizes key name', () => {
   expect(normalizeKeyName('cmd-shift-d', 'mac')).toEqual('Shift-Meta-d');
+  expect(normalizeKeyName(' ', 'mac')).toEqual(' ');
+  expect(normalizeKeyName('Space', 'mac')).toEqual(' ');
 });
