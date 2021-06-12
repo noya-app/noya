@@ -125,9 +125,14 @@ export default memo(function ColorInspector({
   const handleAddStop = useCallback(
     (color: Sketch.Color, position: number) => {
       onAddStop(color, position);
-      setSelectedStopIndex(gradient.length);
+
+      let index = 0;
+      gradient.forEach((g, i) => {
+        index = g.position < position ? i : index;
+      });
+      setSelectedStopIndex(index);
     },
-    [gradient.length, onAddStop, setSelectedStopIndex],
+    [gradient, onAddStop, setSelectedStopIndex],
   );
 
   return (

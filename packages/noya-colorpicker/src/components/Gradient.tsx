@@ -127,12 +127,12 @@ export default memo(function Gradient({
     // Saturation and brightness always fit into [0, 100] range
     if (moving) return;
 
-    const posi = gradients.map((g, index) => ({
+    const gradient = gradients.map((g, index) => ({
       color: sketchColorToRgba(g.color),
       pos: index === 0 ? 0 : index === 1 ? 1 : g.position,
     }));
 
-    const color = computeAt(posi, interaction.left, RGBA_MAX);
+    const color = computeAt(gradient, interaction.left, RGBA_MAX);
 
     onAdd(color, interaction.left);
   };
