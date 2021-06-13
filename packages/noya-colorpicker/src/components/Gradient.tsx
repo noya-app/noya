@@ -1,10 +1,15 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import { sketchColorToRgba } from 'noya-designsystem';
 import { getGradientBackground } from 'noya-designsystem/src/utils/getGradientBackground';
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useColorPicker } from '../contexts/ColorPickerContext';
+import { rgbaToHsva } from '../utils/convert';
+import { colorAt, RGBA_MAX } from '../utils/colorAt';
+import { RgbaColor } from '../types';
 import { Interaction, Interactive } from './GradientSlider';
 import Pointer from './Pointer';
+
 
 const Container = styled.div<{ background: string }>(({ background }) => ({
   position: 'relative' as any,
@@ -17,24 +22,22 @@ const Container = styled.div<{ background: string }>(({ background }) => ({
 
 export default memo(function Gradient({
   gradients,
+  selectedStop,
+  onSelectStop,
+  onChangePosition,
+  onAdd,
 }: {
   gradients: Sketch.GradientStop[];
+  selectedStop: number;
+  onSelectStop: (index: number) => void;
+  onChangePosition: (position: number) => void;
+  onAdd: (value: RgbaColor, position: number) => void;
 }) {
   const [, onChange] = useColorPicker();
-
-  const [selectedPosition, setSelectedPosition] = useState(0);
+  const [moving, setMoving] = useState(false);
 
   const handleMove = (interaction: Interaction) => {
-    //This is not right yet
-    onChange(
-      {
-        h: 360 * interaction.left,
-        s: interaction.left * 100,
-        v: 100 - interaction.top * 100,
-      },
-      selectedPosition,
-      interaction.left,
-    );
+    onChangePosition(interaction.left);
   };
 
   const handleKey = (offset: Interaction) => {
@@ -42,17 +45,44 @@ export default memo(function Gradient({
     //console.log('press');
   };
 
-  const background = getGradientBackground(gradients);
+  const handleClick = (interaction: Interaction) => {
+    if (moving) return;
 
+    const gradient = gradients.map((g, index) => ({
+      color: sketchColorToRgba(g.color),
+      pos: index === 0 ? 0 : index === 1 ? 1 : g.position,
+    }));
+
+    const color = colorAt(gradient, interaction.left, RGBA_MAX);
+
+    onAdd(color, interaction.left);
+  };
+
+  const isOnPoint = (interaction: Interaction) =>
+    interaction.left > gradients[selectedStop].position - 0.03 &&
+    interaction.left < gradients[selectedStop].position + 0.03;
+
+  const background = useMemo(() => getGradientBackground(gradients), [gradients]);
   return (
     <Container background={background}>
-      <Interactive onMove={handleMove} onKey={handleKey} aria-label="Gradient">
+      <Interactive
+        onMove={handleMove}
+        onKey={handleKey}
+        onMoveChange={(moving: boolean) => setMoving(moving)}
+        onClick={handleClick}
+        isOnPoint={isOnPoint}
+        aria-label="Gradient"
+      >
         {gradients.map((g, index) => (
           <Pointer
             key={`gradients-point-${index}`}
-            selected={index === selectedPosition}
+            selected={index === selectedStop}
             left={g.position}
-            onClick={() => setSelectedPosition(index)}
+            onClick={() => {
+              if (moving || index === selectedStop) return;
+              onSelectStop(index);
+              onChange(rgbaToHsva(sketchColorToRgba(g.color)));
+            }}
           />
         ))}
       </Interactive>

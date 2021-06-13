@@ -17,6 +17,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
+import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
@@ -79,17 +80,22 @@ type FillOption =
   | 'Angular Gradient'
   | 'Pattern Fill';
 
+export type SketchPattern = {
+  _class: 'pattern';
+  image?: Sketch.FileRef | Sketch.DataRef;
+  patternFillType: Sketch.PatternFillType;
+  patternTileScale: number;
+};
+
 interface Props {
   id?: string;
-  value: Sketch.Color | Sketch.Gradient;
+  value: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChange: (color: Sketch.Color) => void;
   onChangeType?: (type: Sketch.FillType) => void;
-  onChangeGradientColor?: (
-    color: Sketch.Color,
-    index: number,
-    position: number,
-  ) => void;
+  onChangeGradientColor?: (color: Sketch.Color, index: number) => void;
   onChangeGradientType?: (type: Sketch.GradientType) => void;
+  onChangeGradientPosition?: (index: number, position: number) => void;
+  onAddGradientStop?: (color: Sketch.Color, position: number) => void;
 }
 
 interface SwatchesProps {
@@ -164,6 +170,8 @@ export default memo(function ColorInputFieldWithPicker({
   onChange,
   onChangeType,
   onChangeGradientColor,
+  onChangeGradientPosition,
+  onAddGradientStop,
   onChangeGradientType,
 }: Props) {
   // TODO: The value prop here can be an array, and other
@@ -173,10 +181,10 @@ export default memo(function ColorInputFieldWithPicker({
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
   const values = useMemo(() => {
-    if (value._class === 'gradient')
+    if (value._class === 'pattern')
       //change to show preview of gradient :thinking_emoji:
-      return [value.stops[0].color];
-    return [value];
+      return [];
+    return [value._class === 'gradient' ? value.stops[0].color : value];
   }, [value]);
 
   const selectedColor = values[0];
@@ -185,6 +193,7 @@ export default memo(function ColorInputFieldWithPicker({
 
   const isSwatch = useMemo(
     () =>
+      selectedColor &&
       selectedColor.swatchID &&
       sharedSwatches.some((e) => e.do_objectID === selectedColor.swatchID),
     [selectedColor, sharedSwatches],
@@ -239,7 +248,7 @@ export default memo(function ColorInputFieldWithPicker({
       <Popover.Trigger as={Slot}>
         <ColorInputField
           id={id}
-          value={value._class === 'gradient' ? value : values[0]}
+          value={value._class === 'color' ? values[0] : value}
         />
       </Popover.Trigger>
       <Content side="bottom" align="center">
@@ -274,14 +283,23 @@ export default memo(function ColorInputFieldWithPicker({
           </Row>
         </PaddedSection>
         <PaddedSection>
-          <ColorInspector
-            id={`${id}-panel`}
-            colors={values}
-            gradient={value._class === 'gradient' ? value : undefined}
-            //isGradient={fillOption.endsWith('Gradient')}
-            onChangeColor={onChange}
-            onChangeGradientColor={onChangeGradientColor}
-          />
+          {value._class === 'color' ? (
+            <ColorInspector
+              id={`${id}-color-inspector`}
+              colors={values}
+              onChangeColor={onChange}
+            />
+          ) : value._class === 'gradient' ? (
+            <GradientInspector
+              id={`${id}-gradient-inspector`}
+              gradient={value.stops}
+              onChangeColor={onChangeGradientColor}
+              onChangePosition={onChangeGradientPosition}
+              onAddStop={onAddGradientStop}
+            />
+          ) : (
+            <></>
+          )}
           <Spacer.Vertical size={12} />
           {isSwatch ? (
             <Button id={'detach-theme-color'} onClick={detachThemeColor}>
@@ -322,18 +340,22 @@ export default memo(function ColorInputFieldWithPicker({
           </Row>
         </PaddedSection>
         <PaddedSection>
-          {swatchLayout === 'grid' ? (
-            <SwatchesGrid
-              selectedSwatchId={selectedColor.swatchID}
-              swatches={sharedSwatches}
-              onSelectSwatch={onChange}
-            />
+          {value._class !== 'pattern' ? (
+            swatchLayout === 'grid' ? (
+              <SwatchesGrid
+                selectedSwatchId={selectedColor.swatchID}
+                swatches={sharedSwatches}
+                onSelectSwatch={onChange}
+              />
+            ) : (
+              <SwatchesList
+                selectedSwatchId={selectedColor.swatchID}
+                swatches={sharedSwatches}
+                onSelectSwatch={onChange}
+              />
+            )
           ) : (
-            <SwatchesList
-              selectedSwatchId={selectedColor.swatchID}
-              swatches={sharedSwatches}
-              onSelectSwatch={onChange}
-            />
+            <>A</>
           )}
         </PaddedSection>
         <StyledArrow />

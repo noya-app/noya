@@ -44,16 +44,27 @@ const getRelativePosition = (
 
 interface Props {
   onMove: (interaction: Interaction) => void;
+  onMoveChange: (moving: boolean) => void;
+  onClick: (interaction: Interaction) => void;
   onKey: (offset: Interaction) => void;
+  isOnPoint: (interaction: Interaction) => boolean;
   children: React.ReactNode;
 }
 
-const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
+const InteractiveBase = ({
+  onMove,
+  onKey,
+  onClick,
+  onMoveChange,
+  isOnPoint,
+  ...rest
+}: Props) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
   const isDragging = useRef(false);
-  const onMoveCallback = useEventCallback<Interaction>(onMove);
-  const onKeyCallback = useEventCallback<Interaction>(onKey);
+  const onMoveCallback = useEventCallback(onMove);
+  const onKeyCallback = useEventCallback(onKey);
+  const onClickCallback = useEventCallback(onClick);
 
   // Prevent mobile browsers from handling mouse events (conflicting with touch ones).
   // If we detected a touch interaction before, we prefer reacting to touch events only.
@@ -97,13 +108,18 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
 
       if (!isValid(event)) return;
 
+      if (!isOnPoint(getRelativePosition(container.current!, event))) {
+        onClickCallback(getRelativePosition(container.current!, event));
+        return;
+      }
       // The node/ref must actually exist when user start an interaction.
       // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
+      onMoveChange(true);
       onMoveCallback(getRelativePosition(container.current!, event));
 
       isDragging.current = true;
     },
-    [onMoveCallback],
+    [onMoveChange, onMoveCallback, onClickCallback, isOnPoint],
   );
 
   const handleKeyDown = useCallback(
@@ -125,25 +141,28 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
     [onKeyCallback],
   );
 
-  const handleMoveEnd = useCallback((event: MouseEvent | TouchEvent) => {
-    // console.log('is dragging?', isDragging.current);
+  const handleMoveEnd = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      // console.log('is dragging?', isDragging.current);
 
-    if (!isDragging.current) return;
+      if (!isDragging.current) return;
+      onMoveChange(false);
 
-    // console.log('handle end');
+      // console.log('handle end');
 
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    event.stopPropagation();
-
-    isDragging.current = false;
-  }, []);
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+      isDragging.current = false;
+    },
+    [onMoveChange],
+  );
 
   const toggleDocumentEvents = useCallback(
     (state) => {
       // console.log(state ? 'add' : 'remove', 'events');
-
       // add or remove additional pointer event listeners
+
       const toggleEvent = state
         ? window.addEventListener
         : window.removeEventListener;

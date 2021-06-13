@@ -27,6 +27,7 @@ export { default as Slider } from './components/Slider';
 export * as TreeView from './components/TreeView';
 export { default as Divider } from './components/Divider';
 export { default as ColorPicker } from './components/ColorPicker';
+export { default as GradientPicker } from './components/GradientPicker';
 export * as ListView from './components/ListView';
 export * as GridView from './components/GridView';
 export * as Sortable from './components/Sortable';

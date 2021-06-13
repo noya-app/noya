@@ -1,6 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  ColorPicker,
+  GradientPicker,
   InputField,
   Label,
   LabeledElementView,
@@ -8,7 +8,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { clamp } from 'noya-utils';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 const Row = styled.div(({ theme }) => ({
@@ -26,38 +26,37 @@ const Column = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  colors: Sketch.Color[];
+  gradient: Sketch.GradientStop[];
   /**
    * The only required change handler is `onChangeColor`. However, to handle
    * more granular changes specially, e.g. nudging opacity, you can pass other
    * handlers.
    */
-  onChangeColor: (color: Sketch.Color) => void;
   onChangeOpacity?: (amount: number) => void;
   onNudgeOpacity?: (amount: number) => void;
+  onChangeColor?: (color: Sketch.Color, index: number) => void;
+  onChangePosition?: (index: number, position: number) => void;
+  onAddStop?: (color: Sketch.Color, position: number) => void;
 }
 
 export default memo(function ColorInspector({
   id,
-  colors,
-  onChangeColor,
+  gradient,
   onChangeOpacity,
   onNudgeOpacity,
+  onChangeColor = (color: Sketch.Color, index: number) => {},
+  onChangePosition = (position: number, index: number) => {},
+  onAddStop = (color: Sketch.Color, position: number) => {},
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
 
-  const firstColor = colors[0];
-  const firstColorHex = sketchColorToHex(firstColor);
-  const hexValue = useMemo(
-    () =>
-      colors.length > 1 &&
-      !colors.every((v) => sketchColorToHex(v) === firstColorHex)
-        ? undefined
-        : firstColorHex.slice(1),
-    [firstColorHex, colors],
-  );
+  const [selectedStopIndex, setSelectedStopIndex] = useState(0);
+
+  const selectedcolor = gradient[selectedStopIndex].color;
+  const selectedColorHex = sketchColorToHex(selectedcolor);
+  const hexValue = useMemo(() => selectedColorHex.slice(1), [selectedColorHex]);
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -80,13 +79,16 @@ export default memo(function ColorInspector({
       if (onChangeOpacity) {
         onChangeOpacity(opacity / 100);
       } else {
-        onChangeColor({
-          ...firstColor,
-          alpha: clamp(opacity / 100, 0, 1),
-        });
+        onChangeColor(
+          {
+            ...selectedcolor,
+            alpha: clamp(opacity / 100, 0, 1),
+          },
+          selectedStopIndex,
+        );
       }
     },
-    [onChangeOpacity, onChangeColor, firstColor],
+    [selectedcolor, selectedStopIndex, onChangeOpacity, onChangeColor],
   );
 
   const handleNudgeOpacity = useCallback(
@@ -94,18 +96,58 @@ export default memo(function ColorInspector({
       if (onNudgeOpacity) {
         onNudgeOpacity(amount / 100);
       } else {
-        onChangeColor({
-          ...firstColor,
-          alpha: clamp(firstColor.alpha + amount / 100, 0, 1),
-        });
+        onChangeColor(
+          {
+            ...selectedcolor,
+            alpha: clamp(selectedcolor.alpha + amount / 100, 0, 1),
+          },
+          selectedStopIndex,
+        );
       }
     },
-    [firstColor, onChangeColor, onNudgeOpacity],
+    [selectedcolor, selectedStopIndex, onChangeColor, onNudgeOpacity],
+  );
+
+  const handleChangeColor = useCallback(
+    (color: Sketch.Color) => {
+      onChangeColor(color, selectedStopIndex);
+    },
+    [selectedStopIndex, onChangeColor],
+  );
+
+  const handleChangePosition = useCallback(
+    (position: number) => {
+      onChangePosition(position, selectedStopIndex);
+    },
+    [selectedStopIndex, onChangePosition],
+  );
+
+  const handleAddStop = useCallback(
+    (color: Sketch.Color, position: number) => {
+      onAddStop(color, position);
+
+      let index = 0;
+      gradient.forEach((g, i) => {
+        index = g.position < position ? i : index;
+      });
+      setSelectedStopIndex(index);
+    },
+    [gradient, onAddStop, setSelectedStopIndex],
   );
 
   return (
     <Column>
-      <ColorPicker value={firstColor} onChange={onChangeColor} />
+      <GradientPicker
+        value={gradient}
+        selectedStop={selectedStopIndex}
+        onChangeColor={handleChangeColor}
+        onChangePosition={handleChangePosition}
+        onAdd={handleAddStop}
+        onSelectStop={useCallback(
+          (index: number) => setSelectedStopIndex(index),
+          [setSelectedStopIndex],
+        )}
+      />
       <Spacer.Vertical size={10} />
       <Row id={id}>
         <LabeledElementView renderLabel={renderLabel}>
@@ -121,7 +163,7 @@ export default memo(function ColorInspector({
           <Spacer.Horizontal size={8} />
           <InputField.Root id={opacityInputId} size={50}>
             <InputField.NumberInput
-              value={Math.round(firstColor.alpha * 100)}
+              value={Math.round(selectedcolor.alpha * 100)}
               onSubmit={handleSubmitOpacity}
               onNudge={handleNudgeOpacity}
             />

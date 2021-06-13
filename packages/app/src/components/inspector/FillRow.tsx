@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   InputField,
   Label,
@@ -7,9 +7,11 @@ import {
   sketchColorToHex,
   Spacer,
 } from 'noya-designsystem';
-import { memo, ReactNode, useCallback } from 'react';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import ColorInputFieldWithPicker, {
+  SketchPattern,
+} from './ColorInputFieldWithPicker';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -18,23 +20,14 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-type Pattern = {
-  _class: 'pattern';
-  image?: Sketch.FileRef | Sketch.DataRef;
-  patternFillType: Sketch.PatternFillType;
-  patternTileScale: number;
-};
-
 interface Props {
   id: string;
-  color: Sketch.Color | Sketch.Gradient | Pattern;
+  color: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChangeColor: (color: Sketch.Color) => void;
   onChangeType: (type: Sketch.FillType) => void;
-  onChangeGradientColor: (
-    color: Sketch.Color,
-    index: number,
-    position: number,
-  ) => void;
+  onChangeGradientColor: (color: Sketch.Color, index: number) => void;
+  onChangeGradientPosition: (index: number, position: number) => void;
+  onAddGradientStop: (color: Sketch.Color, position: number) => void;
   onChangeGradientType: (type: Sketch.GradientType) => void;
   onChangeOpacity: (amount: number) => void;
   onNudgeOpacity: (amount: number) => void;
@@ -49,6 +42,8 @@ export default memo(function ColorFillRow({
   onChangeOpacity,
   onNudgeOpacity,
   onChangeGradientColor,
+  onChangeGradientPosition,
+  onAddGradientStop,
   onChangeGradientType,
   prefix,
 }: Props) {
@@ -89,7 +84,24 @@ export default memo(function ColorFillRow({
     [onNudgeOpacity],
   );
 
-  if (color._class === 'pattern') return <></>;
+  const gradientTypeOptions = useMemo(
+    () => [
+      Sketch.GradientType.Linear.toString(),
+      Sketch.GradientType.Angular.toString(),
+      Sketch.GradientType.Radial.toString(),
+    ],
+    [],
+  );
+
+  const getGradientTypeTitle = useCallback(
+    (id: string) => Sketch.GradientType[parseInt(id)],
+    [],
+  );
+
+  const handleSelectGradientType = useCallback(
+    (value: string) => onChangeGradientType(parseInt(value)),
+    [onChangeGradientType],
+  );
 
   return (
     <Row id={id}>
@@ -102,6 +114,8 @@ export default memo(function ColorFillRow({
           onChange={onChangeColor}
           onChangeType={onChangeType}
           onChangeGradientColor={onChangeGradientColor}
+          onChangeGradientPosition={onChangeGradientPosition}
+          onAddGradientStop={onAddGradientStop}
           onChangeGradientType={onChangeGradientType}
         />
         <Spacer.Horizontal size={8} />
@@ -113,14 +127,19 @@ export default memo(function ColorFillRow({
             />
             <InputField.Label>#</InputField.Label>
           </InputField.Root>
-        ) : (
+        ) : color._class === 'gradient' ? (
           <InputField.Root id={gradientTypeId}>
             <Select
-              id={''}
-              value={'Linear'}
-              options={['Linear', 'Angular', 'Radial']}
-              onChange={() => {}}
+              id={'gradient-type-selector'}
+              value={color.gradientType.toString()}
+              options={gradientTypeOptions}
+              getTitle={getGradientTypeTitle}
+              onChange={handleSelectGradientType}
             />
+          </InputField.Root>
+        ) : (
+          <InputField.Root id={gradientTypeId} labelPosition="start">
+            <InputField.Input value={'Pattern'} onSubmit={() => {}} />
           </InputField.Root>
         )}
         <Spacer.Horizontal size={8} />

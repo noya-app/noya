@@ -10,7 +10,6 @@ import {
   rgbaToHsva,
   Saturation,
 } from 'noya-colorpicker';
-import Gradient from 'noya-colorpicker/src/components/Gradient';
 import { memo, useCallback, useMemo } from 'react';
 import * as Spacer from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
@@ -24,22 +23,15 @@ const colorModel: ColorModel<RgbaColor> = {
 
 interface Props {
   value: Sketch.Color;
-  gradients?: Sketch.GradientStop[];
-  onChange:
-    | ((color: Sketch.Color) => void)
-    | ((color: Sketch.Color, index: number, position: number) => void);
+  onChange: (color: Sketch.Color) => void;
 }
 
-export default memo(function ColorPicker({
-  value,
-  gradients,
-  onChange,
-}: Props) {
+export default memo(function ColorPicker({ value, onChange }: Props) {
   const rgbaColor: RgbaColor = useMemo(() => sketchColorToRgba(value), [value]);
 
   const handleChange = useCallback(
-    (value: RgbaColor, index?: number, position?: number) => {
-      onChange(rgbaToSketchColor(value), index ?? 0, position ?? 0.5);
+    (value: RgbaColor) => {
+      onChange(rgbaToSketchColor(value));
     },
     [onChange],
   );
@@ -50,7 +42,6 @@ export default memo(function ColorPicker({
       color={rgbaColor}
       onChange={handleChange}
     >
-      {gradients && <Gradient gradients={gradients} />}
       <Spacer.Vertical size={12} />
       <Saturation />
       <Spacer.Vertical size={12} />
