@@ -20,12 +20,14 @@ export type PointAction =
   | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
   | [type: 'selectPoint', point: Point, mode: SetNumberMode];
 
+const POINT_RADIUS = 4;
+
 function isPointInRange(point: Point, rawPoint: Point): boolean {
   if (
-    point.x >= rawPoint.x - 4 &&
-    point.x <= rawPoint.x + 4 &&
-    point.y >= rawPoint.y - 4 &&
-    point.y <= rawPoint.y + 4
+    point.x >= rawPoint.x - POINT_RADIUS &&
+    point.x <= rawPoint.x + POINT_RADIUS &&
+    point.y >= rawPoint.y - POINT_RADIUS &&
+    point.y <= rawPoint.y + POINT_RADIUS
   ) {
     return true;
   }

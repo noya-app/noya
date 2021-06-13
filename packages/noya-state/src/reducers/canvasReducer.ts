@@ -152,6 +152,7 @@ export function canvasReducer(
 
             if (!Layers.isPointsLayer(layer)) break;
 
+            //Selects the first point in the first selected layer
             layerIds.forEach(function (layer, index) {
               draft.selectedPointLists[layer] = index === 0 ? [0] : [];
             });
