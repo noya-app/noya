@@ -250,11 +250,10 @@ export default memo(function Canvas() {
           break;
         }
         case 'editPath': {
-          if (event.shiftKey || event.metaKey) {
-            dispatch('selectPoint', point, 'adjust');
-          } else {
-            dispatch('selectPoint', point, 'replace');
-          }
+          event.shiftKey || event.metaKey
+            ? dispatch('selectPoint', point, 'adjust')
+            : dispatch('selectPoint', point, 'replace');
+
           break;
         }
         case 'hoverHandle':

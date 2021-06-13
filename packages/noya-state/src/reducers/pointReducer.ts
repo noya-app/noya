@@ -60,7 +60,7 @@ export function pointReducer(
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
       const boundingRects = getBoundingRectMap(
         getCurrentPage(state),
-        Object.keys(state.selectedPointLists),
+        state.selectedObjects,
         {
           clickThroughGroups: true,
           includeArtboardLayers: false,
@@ -74,27 +74,29 @@ export function pointReducer(
           const layer = Layers.access(page, indexPath);
           const pointList = draft.selectedPointLists[layer.do_objectID];
           const boundingRect = boundingRects[layer.do_objectID];
-
-          if (!Layers.isPointsLayer(layer) || !pointList) return;
+          if (!Layers.isPointsLayer(layer)) return;
 
           layer.points.forEach((point, index) => {
             const decodedPoint = decodeCurvePoint(point, boundingRect);
-            if (isPointInRange(decodedPoint.point, rawPoint)) {
+            if (isPointInRange(decodedPoint.point, rawPoint) || !pointList) {
               if (pointList.indexOf(index) > -1) {
                 mode === 'replace'
-                  ? (draft.selectedPointLists = {
-                      [layer.do_objectID]: [],
-                    })
+                  ? Object.keys(draft.selectedPointLists).forEach(
+                      (layerId) => (draft.selectedPointLists[layerId] = []),
+                    )
                   : pointList.splice(pointList.indexOf(index), 1);
                 return;
               }
               mode === 'replace'
-                ? (draft.selectedPointLists = {
-                    [layer.do_objectID]: [index],
-                  })
-                : (draft.selectedPointLists = {
-                    [layer.do_objectID]: [...pointList, index],
-                  });
+                ? Object.keys(draft.selectedPointLists).forEach((layerId) =>
+                    layerId === layer.do_objectID
+                      ? (draft.selectedPointLists[layer.do_objectID] = [index])
+                      : (draft.selectedPointLists[layerId] = []),
+                  )
+                : (draft.selectedPointLists[layer.do_objectID] = [
+                    ...pointList,
+                    index,
+                  ]);
             }
           });
         });

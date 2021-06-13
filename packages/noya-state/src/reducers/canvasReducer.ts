@@ -152,7 +152,9 @@ export function canvasReducer(
 
             if (!Layers.isPointsLayer(layer)) break;
 
-            draft.selectedPointLists = { [layer.do_objectID]: [0] };
+            layerIds.forEach(function (layer, index) {
+              draft.selectedPointLists[layer] = index === 0 ? [0] : [];
+            });
 
             break;
           }
