@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { createKeyMap, KeyCommand } from './keyMap';
+import { createKeyMap } from './keyMap';
 import { getCurrentPlatform } from './platform';
-import { getEventShortcutNames, PlatformShortcutKey } from './shortcuts';
+import { getEventShortcutNames } from './shortcuts';
 
 type KeyEventName = 'keydown' | 'keyup' | 'keypress';
 
+type KeyMapDefinition = Parameters<typeof createKeyMap>[0];
+
+export function useKeyboardShortcuts(shortcuts: KeyMapDefinition): void;
 export function useKeyboardShortcuts(
-  shortcuts: Parameters<typeof createKeyMap>[0],
-  eventName: KeyEventName = 'keydown',
+  eventName: KeyEventName,
+  shortcuts: KeyMapDefinition,
+): void;
+export function useKeyboardShortcuts(
+  ...args: [KeyMapDefinition] | [KeyEventName, KeyMapDefinition]
 ) {
+  const [eventName, shortcuts] =
+    args.length === 1 ? (['keydown', args[0]] as const) : args;
+
   const platformName = getCurrentPlatform(navigator);
 
   const keyMap = useMemo(() => createKeyMap(shortcuts, platformName), [
@@ -48,24 +57,4 @@ export function useKeyboardShortcuts(
       document.removeEventListener(eventName, handler, true);
     };
   }, [eventName, platformName]);
-}
-
-export function useKeyboardShortcut(
-  shortcutKey: string | PlatformShortcutKey,
-  command: KeyCommand,
-): void;
-export function useKeyboardShortcut(
-  shortcutKey: string | PlatformShortcutKey,
-  eventName: KeyEventName,
-  command: KeyCommand,
-): void;
-export function useKeyboardShortcut(
-  ...args:
-    | [string | PlatformShortcutKey, KeyCommand]
-    | [string | PlatformShortcutKey, KeyEventName, KeyCommand]
-) {
-  const [key, eventName, command] =
-    args.length === 2 ? ([args[0], 'keypress', args[1]] as const) : args;
-
-  return useKeyboardShortcuts([[key, command]], eventName);
 }

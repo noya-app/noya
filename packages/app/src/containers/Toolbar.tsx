@@ -11,6 +11,7 @@ import Button from 'noya-designsystem/src/components/Button';
 import { InteractionType } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import PointModeIcon from '../components/icons/PointModeIcon';
 import {
   useApplicationState,
@@ -59,6 +60,75 @@ const ToolbarContent = memo(function ToolbarContent({
     interactionType === 'maybePan' ||
     interactionType === 'panning';
 
+  const handleInsertArtboard = useCallback(() => {
+    if (isInsertArtboard) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insertArtboard']);
+    }
+  }, [dispatch, isInsertArtboard]);
+
+  const handleInsertRectangle = useCallback(() => {
+    if (isInsertRectangle) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insertRectangle']);
+    }
+  }, [isInsertRectangle, dispatch]);
+
+  const handleInsertOval = useCallback(() => {
+    if (isInsertOval) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insertOval']);
+    }
+  }, [isInsertOval, dispatch]);
+
+  const handleInsertText = useCallback(() => {
+    if (isInsertText) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insertText']);
+    }
+  }, [isInsertText, dispatch]);
+
+  const handleEnablePanMode = useCallback(() => {
+    if (isPanning) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['enablePanMode']);
+    }
+  }, [isPanning, dispatch]);
+
+  const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
+
+  const handleRedo = useCallback(() => dispatch('redo'), [dispatch]);
+
+  useKeyboardShortcuts({
+    a: handleInsertArtboard,
+    r: handleInsertRectangle,
+    o: handleInsertOval,
+    t: handleInsertText,
+    'Mod-z': handleUndo,
+    'Mod-Shift-z': handleRedo,
+  });
+
+  useKeyboardShortcuts('keydown', {
+    Space: () => {
+      if (interactionType !== 'none') return;
+
+      dispatch('interaction', ['enablePanMode']);
+    },
+  });
+
+  useKeyboardShortcuts('keyup', {
+    Space: () => {
+      if (!isPanning) return;
+
+      dispatch('interaction', ['reset']);
+    },
+  });
+
   return (
     <Container>
       <Spacer.Horizontal size={8} />
@@ -66,13 +136,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="tool-artboard"
         tooltip="Insert an artboard"
         active={isInsertArtboard}
-        onClick={useCallback(() => {
-          if (isInsertArtboard) {
-            dispatch('interaction', ['reset']);
-          } else {
-            dispatch('interaction', ['insertArtboard']);
-          }
-        }, [dispatch, isInsertArtboard])}
+        onClick={handleInsertArtboard}
       >
         {useMemo(
           () => (
@@ -86,13 +150,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="tool-rectangle"
         tooltip="Insert a rectangle"
         active={isInsertRectangle}
-        onClick={useCallback(() => {
-          if (isInsertRectangle) {
-            dispatch('interaction', ['reset']);
-          } else {
-            dispatch('interaction', ['insertRectangle']);
-          }
-        }, [isInsertRectangle, dispatch])}
+        onClick={handleInsertRectangle}
       >
         {useMemo(
           () => (
@@ -106,13 +164,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="tool-oval"
         tooltip="Insert an oval"
         active={isInsertOval}
-        onClick={useCallback(() => {
-          if (isInsertOval) {
-            dispatch('interaction', ['reset']);
-          } else {
-            dispatch('interaction', ['insertOval']);
-          }
-        }, [isInsertOval, dispatch])}
+        onClick={handleInsertOval}
       >
         {useMemo(
           () => (
@@ -126,13 +178,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="tool-text"
         tooltip="Insert text"
         active={isInsertText}
-        onClick={useCallback(() => {
-          if (isInsertText) {
-            dispatch('interaction', ['reset']);
-          } else {
-            dispatch('interaction', ['insertText']);
-          }
-        }, [isInsertText, dispatch])}
+        onClick={handleInsertText}
       >
         {useMemo(
           () => (
@@ -146,13 +192,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="tool-move"
         tooltip="Move the canvas"
         active={isPanning}
-        onClick={useCallback(() => {
-          if (isPanning) {
-            dispatch('interaction', ['reset']);
-          } else {
-            dispatch('interaction', ['enablePanMode']);
-          }
-        }, [isPanning, dispatch])}
+        onClick={handleEnablePanMode}
       >
         {useMemo(
           () => (
@@ -199,19 +239,11 @@ const ToolbarContent = memo(function ToolbarContent({
         )}
       </Button>
       <Spacer.Horizontal size={40} />
-      <Button
-        id="undo"
-        disabled={undoDisabled}
-        onClick={useCallback(() => dispatch('undo'), [dispatch])}
-      >
+      <Button id="undo" disabled={undoDisabled} onClick={handleUndo}>
         Undo
       </Button>
       <Spacer.Horizontal size={itemSeparatorSize} />
-      <Button
-        id="redo"
-        disabled={redoDisabled}
-        onClick={useCallback(() => dispatch('redo'), [dispatch])}
-      >
+      <Button id="redo" disabled={redoDisabled} onClick={handleRedo}>
         Redo
       </Button>
       <Spacer.Horizontal size={8} />

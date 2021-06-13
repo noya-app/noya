@@ -1,11 +1,11 @@
 import {
   getEventShortcutNames,
   getPlatformShortcutName,
-  PlatformShortcutKey,
+  PlatformKeyboardShortcut,
 } from '../shortcuts';
 
 test('picks a shortcut key for the given platform', () => {
-  const shortcut: PlatformShortcutKey = {
+  const shortcut: PlatformKeyboardShortcut = {
     key: 'k',
     mac: 'm',
     win: 'w',
@@ -18,7 +18,7 @@ test('picks a shortcut key for the given platform', () => {
 });
 
 test('supports platform-specific commands', () => {
-  const shortcut: PlatformShortcutKey = {
+  const shortcut: PlatformKeyboardShortcut = {
     mac: 'm',
   };
 
