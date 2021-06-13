@@ -148,12 +148,17 @@ export function canvasReducer(
 
         switch (interactionState.type) {
           case 'editPath': {
-            const layer = Layers.access(page, layerIndexPaths[0]);
+            const selectedLayers: string[] = [];
 
-            if (!Layers.isPointsLayer(layer)) break;
+            layerIndexPaths.forEach((layerIndex) => {
+              const layer = Layers.access(page, layerIndex);
+              if (Layers.isPointsLayer(layer)) {
+                selectedLayers.push(layer.do_objectID);
+              }
+            });
 
-            //Selects the first point in the first selected layer
-            layerIds.forEach(function (layer, index) {
+            //Selects the first point in the first selected layer and initializes a point list for each selected layer
+            selectedLayers.forEach(function (layer, index) {
               draft.selectedPointLists[layer] = index === 0 ? [0] : [];
             });
 
