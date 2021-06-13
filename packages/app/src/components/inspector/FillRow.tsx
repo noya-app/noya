@@ -20,16 +20,9 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-type Pattern = {
-  _class: 'pattern';
-  image?: Sketch.FileRef | Sketch.DataRef;
-  patternFillType: Sketch.PatternFillType;
-  patternTileScale: number;
-};
-
 interface Props {
   id: string;
-  value: Sketch.Color | Sketch.Gradient | Pattern;
+  value: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChangeColor: (color: Sketch.Color) => void;
   onChangeFillType: (type: Sketch.FillType) => void;
   onChangeGradientColor: (color: Sketch.Color, index: number) => void;

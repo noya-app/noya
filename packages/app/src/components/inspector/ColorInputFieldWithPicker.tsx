@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
-import GradientInputField from 'noya-designsystem/src/components/GradientInputField';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
