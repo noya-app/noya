@@ -12,10 +12,9 @@ import {
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
+import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-
-const POINT_RADIUS = 4;
 
 interface EditablePathPointProps {
   point: Point;

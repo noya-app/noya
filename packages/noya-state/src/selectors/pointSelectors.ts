@@ -1,3 +1,4 @@
+import { Point } from 'noya-geometry';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -6,6 +7,20 @@ import { ApplicationState, Layers } from '../index';
 import { visit } from '../layers';
 import { getCurrentPage } from './pageSelectors';
 import { getBoundingRectMap } from './selectors';
+
+export const POINT_RADIUS = 4;
+
+export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
+  if (
+    point.x >= rawPoint.x - POINT_RADIUS &&
+    point.x <= rawPoint.x + POINT_RADIUS &&
+    point.y >= rawPoint.y - POINT_RADIUS &&
+    point.y <= rawPoint.y + POINT_RADIUS
+  ) {
+    return true;
+  }
+  return false;
+};
 
 export const getSelectedPoints = (
   state: ApplicationState,

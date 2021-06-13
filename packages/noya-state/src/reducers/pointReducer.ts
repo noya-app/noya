@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { SelectedPoint } from 'app/src/containers/Canvas';
 import produce from 'immer';
-import { createRectFromBounds, Point } from 'noya-geometry';
+import { createRectFromBounds } from 'noya-geometry';
 import {
   decodeCurvePoint,
   encodeCurvePoint,
@@ -12,27 +13,18 @@ import {
   getCurrentPageIndex,
   getSelectedLayerIndexPaths,
 } from '../selectors/selectors';
+import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState, SetNumberMode } from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
-  | [type: 'selectPoint', point: Point, mode: SetNumberMode];
-
-const POINT_RADIUS = 4;
-
-function isPointInRange(point: Point, rawPoint: Point): boolean {
-  if (
-    point.x >= rawPoint.x - POINT_RADIUS &&
-    point.x <= rawPoint.x + POINT_RADIUS &&
-    point.y >= rawPoint.y - POINT_RADIUS &&
-    point.y <= rawPoint.y + POINT_RADIUS
-  ) {
-    return true;
-  }
-  return false;
-}
+  | [
+      type: 'selectPoint',
+      selectedPoint: SelectedPoint | undefined,
+      selectionType?: SelectionType,
+    ];
 
 export function pointReducer(
   state: ApplicationState,
@@ -57,51 +49,20 @@ export function pointReducer(
       });
     }
     case 'selectPoint': {
-      const [, rawPoint, mode] = action;
-      const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
-      const boundingRects = getBoundingRectMap(
-        getCurrentPage(state),
-        state.selectedObjects,
-        {
-          clickThroughGroups: true,
-          includeArtboardLayers: false,
-          includeHiddenLayers: false,
-        },
-      );
+      const [, selectedPoint, selectionType] = action;
 
       return produce(state, (draft) => {
-        layerIndexPaths.forEach((indexPath) => {
-          const page = draft.sketch.pages[pageIndex];
-          const layer = Layers.access(page, indexPath);
-          const pointList = draft.selectedPointLists[layer.do_objectID];
-          const boundingRect = boundingRects[layer.do_objectID];
-          if (!Layers.isPointsLayer(layer)) return;
+        for (let layerId in draft.selectedPointLists) {
+          const currentIds = draft.selectedPointLists[layerId];
 
-          layer.points.forEach((point, index) => {
-            const decodedPoint = decodeCurvePoint(point, boundingRect);
-            if (isPointInRange(decodedPoint.point, rawPoint) || !pointList) {
-              if (pointList.indexOf(index) > -1) {
-                mode === 'replace'
-                  ? Object.keys(draft.selectedPointLists).forEach(
-                      (layerId) => (draft.selectedPointLists[layerId] = []),
-                    )
-                  : pointList.splice(pointList.indexOf(index), 1);
-                return;
-              }
-              mode === 'replace'
-                ? Object.keys(draft.selectedPointLists).forEach((layerId) =>
-                    layerId === layer.do_objectID
-                      ? (draft.selectedPointLists[layer.do_objectID] = [index])
-                      : (draft.selectedPointLists[layerId] = []),
-                  )
-                : (draft.selectedPointLists[layer.do_objectID] = [
-                    ...pointList,
-                    index,
-                  ]);
-            }
-          });
-        });
+          if (!selectionType || !selectedPoint) return;
+
+          if (selectedPoint[0] === layerId) {
+            updateSelection(currentIds, selectedPoint[1], selectionType);
+          } else {
+            updateSelection(currentIds, undefined, selectionType);
+          }
+        }
       });
     }
     case 'setPointX':
