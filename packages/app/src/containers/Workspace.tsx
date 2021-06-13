@@ -7,9 +7,9 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
+import { useSelector } from '../contexts/ApplicationStateContext';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
@@ -134,33 +134,9 @@ const ThemeTab = memo(function ThemeTab() {
   );
 });
 
-function useKeyboardShortcuts() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'z') {
-        if (event.shiftKey) {
-          dispatch('redo');
-        } else {
-          dispatch('undo');
-        }
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [dispatch]);
-}
-
 export default function Workspace() {
   const colorScheme = useSystemColorScheme();
   const currentTab = useSelector(Selectors.getCurrentTab);
-
-  useKeyboardShortcuts();
 
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>

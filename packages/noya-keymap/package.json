@@ -1,0 +1,9 @@
+{
+  "name": "noya-keymap",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "w3c-keyname": "^2.2.4"
+  }
+}
