@@ -40,7 +40,6 @@ export default memo(function Pointer({
       selected={selected}
       onMouseEnter={onClick}
       onTouchStart={onClick}
-      onMouseDown={onClick}
     />
   );
 });

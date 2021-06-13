@@ -117,7 +117,7 @@ export default memo(function ColorInspector({
 
   const handleChangePosition = useCallback(
     (position: number) => {
-      onChangePosition(selectedStopIndex, position);
+      onChangePosition(position, selectedStopIndex);
     },
     [selectedStopIndex, onChangePosition],
   );

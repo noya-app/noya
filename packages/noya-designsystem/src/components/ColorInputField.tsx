@@ -2,6 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ForwardedRef, forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { sketchColorToRgbaString } from '../utils/sketchColor';
+import { getGradientBackground } from '../utils/getGradientBackground';
 
 const Container = styled.button<{ background: string }>(
   ({ theme, background }) => ({
@@ -17,16 +18,31 @@ const Container = styled.button<{ background: string }>(
   }),
 );
 
+export type SketchPattern = {
+  _class: 'pattern';
+  image?: Sketch.FileRef | Sketch.DataRef;
+  patternFillType: Sketch.PatternFillType;
+  patternTileScale: number;
+};
+
 interface Props {
   id?: string;
-  value: Sketch.Color;
+  value: Sketch.Color | Sketch.Gradient | SketchPattern;
 }
 
 export default forwardRef(function ColorInputField(
   { id, value, ...rest }: Props,
   ref: ForwardedRef<HTMLButtonElement>,
 ) {
-  const background = useMemo(() => sketchColorToRgbaString(value), [value]);
+  const background = useMemo(
+    () =>
+      value._class === 'color'
+        ? sketchColorToRgbaString(value)
+        : value._class === 'gradient'
+        ? getGradientBackground(value.stops, value.gradientType)
+        : 'rgba(200,200,200,0.8)',
+    [value],
+  );
 
   return <Container ref={ref} background={background} id={id} {...rest} />;
 });

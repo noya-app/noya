@@ -19,7 +19,6 @@ import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
-import GradientInputField from 'noya-designsystem/src/components/GradientInputField';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -81,9 +80,16 @@ type FillOption =
   | 'Angular Gradient'
   | 'Pattern Fill';
 
+export type SketchPattern = {
+  _class: 'pattern';
+  image?: Sketch.FileRef | Sketch.DataRef;
+  patternFillType: Sketch.PatternFillType;
+  patternTileScale: number;
+};
+
 interface Props {
   id?: string;
-  value: Sketch.Color | Sketch.Gradient;
+  value: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChange: (color: Sketch.Color) => void;
   onChangeType?: (type: Sketch.FillType) => void;
   onChangeGradientColor?: (color: Sketch.Color, index: number) => void;
@@ -175,10 +181,10 @@ export default memo(function ColorInputFieldWithPicker({
   const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
 
   const values = useMemo(() => {
-    if (value._class === 'gradient')
+    if (value._class === 'pattern')
       //change to show preview of gradient :thinking_emoji:
-      return [value.stops[0].color];
-    return [value];
+      return [];
+    return [value._class === 'gradient' ? value.stops[0].color : value];
   }, [value]);
 
   const selectedColor = values[0];
@@ -187,6 +193,7 @@ export default memo(function ColorInputFieldWithPicker({
 
   const isSwatch = useMemo(
     () =>
+      selectedColor &&
       selectedColor.swatchID &&
       sharedSwatches.some((e) => e.do_objectID === selectedColor.swatchID),
     [selectedColor, sharedSwatches],
@@ -239,11 +246,10 @@ export default memo(function ColorInputFieldWithPicker({
   return (
     <Popover.Root>
       <Popover.Trigger as={Slot}>
-        {value._class === 'color' ? (
-          <ColorInputField id={id} value={values[0]} />
-        ) : (
-          <GradientInputField id={id} value={value} />
-        )}
+        <ColorInputField
+          id={id}
+          value={value._class === 'color' ? values[0] : value}
+        />
       </Popover.Trigger>
       <Content side="bottom" align="center">
         <PaddedSection>
@@ -283,7 +289,7 @@ export default memo(function ColorInputFieldWithPicker({
               colors={values}
               onChangeColor={onChange}
             />
-          ) : (
+          ) : value._class === 'gradient' ? (
             <GradientInspector
               id={`${id}-gradient-inspector`}
               gradient={value.stops}
@@ -291,6 +297,8 @@ export default memo(function ColorInputFieldWithPicker({
               onChangePosition={onChangeGradientPosition}
               onAddStop={onAddGradientStop}
             />
+          ) : (
+            <></>
           )}
           <Spacer.Vertical size={12} />
           {isSwatch ? (
@@ -332,18 +340,22 @@ export default memo(function ColorInputFieldWithPicker({
           </Row>
         </PaddedSection>
         <PaddedSection>
-          {swatchLayout === 'grid' ? (
-            <SwatchesGrid
-              selectedSwatchId={selectedColor.swatchID}
-              swatches={sharedSwatches}
-              onSelectSwatch={onChange}
-            />
+          {value._class !== 'pattern' ? (
+            swatchLayout === 'grid' ? (
+              <SwatchesGrid
+                selectedSwatchId={selectedColor.swatchID}
+                swatches={sharedSwatches}
+                onSelectSwatch={onChange}
+              />
+            ) : (
+              <SwatchesList
+                selectedSwatchId={selectedColor.swatchID}
+                swatches={sharedSwatches}
+                onSelectSwatch={onChange}
+              />
+            )
           ) : (
-            <SwatchesList
-              selectedSwatchId={selectedColor.swatchID}
-              swatches={sharedSwatches}
-              onSelectSwatch={onChange}
-            />
+            <>A</>
           )}
         </PaddedSection>
         <StyledArrow />

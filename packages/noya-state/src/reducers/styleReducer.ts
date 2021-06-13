@@ -329,7 +329,6 @@ export function styleReducer(
     }
     case 'setGradientPosition': {
       const [, fillIndex, stopIndex, position] = action;
-
       return produce(state, (draft) => {
         if (
           !draft.fills ||
@@ -338,8 +337,11 @@ export function styleReducer(
           !draft.fills[fillIndex].gradient.stops[stopIndex]
         )
           return;
-
         draft.fills[fillIndex].gradient.stops[stopIndex].position = position;
+        /*TODO >>> Sort the stops by position
+         draft.fills[fillIndex].gradient.stops.sort(
+          (a, b) => a.position - b.position,
+        );  */
       });
     }
     case 'addGradientStop': {

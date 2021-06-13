@@ -54,8 +54,8 @@ interface Props {
 const InteractiveBase = ({
   onMove,
   onKey,
-  onMoveChange,
   onClick,
+  onMoveChange,
   isOnPoint,
   ...rest
 }: Props) => {
@@ -114,12 +114,12 @@ const InteractiveBase = ({
       }
       // The node/ref must actually exist when user start an interaction.
       // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
-      onMoveCallback(getRelativePosition(container.current!, event));
       onMoveChange(true);
+      onMoveCallback(getRelativePosition(container.current!, event));
 
       isDragging.current = true;
     },
-    [onMoveCallback, onMoveChange, onClickCallback, isOnPoint],
+    [onMoveChange, onMoveCallback, onClickCallback, isOnPoint],
   );
 
   const handleKeyDown = useCallback(
@@ -146,13 +146,13 @@ const InteractiveBase = ({
       // console.log('is dragging?', isDragging.current);
 
       if (!isDragging.current) return;
+      onMoveChange(false);
 
       // console.log('handle end');
 
       event.preventDefault();
       event.stopImmediatePropagation();
       event.stopPropagation();
-      onMoveChange(false);
       isDragging.current = false;
     },
     [onMoveChange],
@@ -161,8 +161,8 @@ const InteractiveBase = ({
   const toggleDocumentEvents = useCallback(
     (state) => {
       // console.log(state ? 'add' : 'remove', 'events');
-
       // add or remove additional pointer event listeners
+
       const toggleEvent = state
         ? window.addEventListener
         : window.removeEventListener;

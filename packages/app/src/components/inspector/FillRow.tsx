@@ -9,7 +9,9 @@ import {
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import ColorInputFieldWithPicker, {
+  SketchPattern,
+} from './ColorInputFieldWithPicker';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -18,16 +20,9 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-type Pattern = {
-  _class: 'pattern';
-  image?: Sketch.FileRef | Sketch.DataRef;
-  patternFillType: Sketch.PatternFillType;
-  patternTileScale: number;
-};
-
 interface Props {
   id: string;
-  color: Sketch.Color | Sketch.Gradient | Pattern;
+  color: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChangeColor: (color: Sketch.Color) => void;
   onChangeType: (type: Sketch.FillType) => void;
   onChangeGradientColor: (color: Sketch.Color, index: number) => void;
@@ -108,8 +103,6 @@ export default memo(function ColorFillRow({
     [onChangeGradientType],
   );
 
-  if (color._class === 'pattern') return <></>;
-
   return (
     <Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
@@ -134,7 +127,7 @@ export default memo(function ColorFillRow({
             />
             <InputField.Label>#</InputField.Label>
           </InputField.Root>
-        ) : (
+        ) : color._class === 'gradient' ? (
           <InputField.Root id={gradientTypeId}>
             <Select
               id={'gradient-type-selector'}
@@ -143,6 +136,10 @@ export default memo(function ColorFillRow({
               getTitle={getGradientTypeTitle}
               onChange={handleSelectGradientType}
             />
+          </InputField.Root>
+        ) : (
+          <InputField.Root id={gradientTypeId} labelPosition="start">
+            <InputField.Input value={'Pattern'} onSubmit={() => {}} />
           </InputField.Root>
         )}
         <Spacer.Horizontal size={8} />
