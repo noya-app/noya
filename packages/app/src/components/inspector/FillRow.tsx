@@ -22,9 +22,9 @@ const Row = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  color: Sketch.Color | Sketch.Gradient | SketchPattern;
+  value: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChangeColor: (color: Sketch.Color) => void;
-  onChangeType: (type: Sketch.FillType) => void;
+  onChangeFillType: (type: Sketch.FillType) => void;
   onChangeGradientColor: (color: Sketch.Color, index: number) => void;
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
@@ -36,11 +36,11 @@ interface Props {
 
 export default memo(function ColorFillRow({
   id,
-  color,
+  value,
   onChangeColor,
-  onChangeType,
   onChangeOpacity,
   onNudgeOpacity,
+  onChangeFillType,
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
@@ -110,28 +110,28 @@ export default memo(function ColorFillRow({
         {prefix && <Spacer.Horizontal size={8} />}
         <ColorInputFieldWithPicker
           id={colorInputId}
-          value={color}
+          value={value}
           onChange={onChangeColor}
-          onChangeType={onChangeType}
+          onChangeType={onChangeFillType}
           onChangeGradientColor={onChangeGradientColor}
           onChangeGradientPosition={onChangeGradientPosition}
           onAddGradientStop={onAddGradientStop}
           onChangeGradientType={onChangeGradientType}
         />
         <Spacer.Horizontal size={8} />
-        {color._class === 'color' ? (
+        {value._class === 'color' ? (
           <InputField.Root id={hexInputId} labelPosition="start">
             <InputField.Input
-              value={sketchColorToHex(color).replace('#', '')}
+              value={sketchColorToHex(value).replace('#', '')}
               onSubmit={() => {}}
             />
             <InputField.Label>#</InputField.Label>
           </InputField.Root>
-        ) : color._class === 'gradient' ? (
+        ) : value._class === 'gradient' ? (
           <InputField.Root id={gradientTypeId}>
             <Select
               id={'gradient-type-selector'}
-              value={color.gradientType.toString()}
+              value={value.gradientType.toString()}
               options={gradientTypeOptions}
               getTitle={getGradientTypeTitle}
               onChange={handleSelectGradientType}
@@ -143,10 +143,10 @@ export default memo(function ColorFillRow({
           </InputField.Root>
         )}
         <Spacer.Horizontal size={8} />
-        {color._class === 'color' ? (
+        {value._class === 'color' ? (
           <InputField.Root id={opacityInputId} size={50}>
             <InputField.NumberInput
-              value={Math.round(color.alpha * 100)}
+              value={Math.round(value.alpha * 100)}
               onSubmit={handleSubmitOpacity}
               onNudge={handleNudgeOpacity}
             />

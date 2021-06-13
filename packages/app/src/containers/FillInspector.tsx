@@ -65,7 +65,7 @@ export default memo(function FillInspector({
         }) => (
           <FillRow
             id={`fill-${index}`}
-            color={
+            value={
               item.fillType === 1
                 ? item.gradient
                 : item.fillType === 0
@@ -78,18 +78,20 @@ export default memo(function FillInspector({
                   }
             }
             prefix={checkbox}
-            onChangeType={(value) => dispatch('setFillType', index, value)}
+            onChangeFillType={(value) =>
+              dispatch('setFillFillType', index, value)
+            }
             onChangeGradientColor={(value, stopIndex) =>
-              dispatch('setGradientColor', index, stopIndex, value)
+              dispatch('setFillGradientColor', index, stopIndex, value)
             }
             onChangeGradientPosition={(value, stopIndex) => {
-              dispatch('setGradientPosition', index, stopIndex, value);
+              dispatch('setFillGradientPosition', index, stopIndex, value);
             }}
             onAddGradientStop={(color, position) =>
-              dispatch('addGradientStop', index, color, position)
+              dispatch('addFillGradientStop', index, color, position)
             }
             onChangeGradientType={(value) =>
-              dispatch('setGradientType', index, value)
+              dispatch('setFillGradientType', index, value)
             }
             onChangeOpacity={(value) =>
               dispatch('setFillOpacity', index, value)
