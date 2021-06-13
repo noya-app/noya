@@ -57,7 +57,7 @@ export default memo(function BorderInspector() {
         }) => (
           <BorderRow
             id={`border-${index}`}
-            color={item.color}
+            value={item.fillType === 1 ? item.gradient : item.color}
             prefix={checkbox}
             width={item.thickness}
             position={item.position}
@@ -71,6 +71,21 @@ export default memo(function BorderInspector() {
             onChangePosition={(value) => {
               dispatch('setBorderPosition', index, value);
             }}
+            onChangeFillType={(value) =>
+              dispatch('setBorderFillType', index, value)
+            }
+            onChangeGradientColor={(value, stopIndex) =>
+              dispatch('setBorderGradientColor', index, stopIndex, value)
+            }
+            onChangeGradientPosition={(value, stopIndex) => {
+              dispatch('setBorderGradientPosition', index, stopIndex, value);
+            }}
+            onAddGradientStop={(color, position) =>
+              dispatch('addBorderGradientStop', index, color, position)
+            }
+            onChangeGradientType={(value) =>
+              dispatch('setBorderGradientType', index, value)
+            }
           />
         ),
         [dispatch],
