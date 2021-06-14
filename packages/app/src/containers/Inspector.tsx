@@ -12,6 +12,7 @@ import withSeparatorElements from '../utils/withSeparatorElements';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
+import ColorControlsInspector from './ColorControlsInspector';
 import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
 import LayerThemeInspector from './LayerThemeInspector';
@@ -88,6 +89,9 @@ export default memo(function Inspector() {
             rotation: undefined,
           };
 
+    const onlyBitmapLayers = selectedLayers.every((l) =>
+      Layers.isBitmapLayer(l),
+    );
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
     const hasSymbolMaster = selectedLayers.some((l) =>
@@ -132,6 +136,7 @@ export default memo(function Inspector() {
       ),
       !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
       selectedLayers.length === 1 && <ShadowInspector />,
+      onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
 

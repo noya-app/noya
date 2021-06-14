@@ -9,4 +9,5 @@ export * from './sortBy';
 export * from './chunkBy';
 export * from './groupBy';
 export * from './getIncrementedName';
+export * from './interpolate';
 export * as delimitedPath from './delimitedPath';

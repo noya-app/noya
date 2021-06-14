@@ -18,9 +18,9 @@ import { SelectionType, updateSelection } from '../utils/selection';
 import {
   accessPageLayers,
   ApplicationState,
+  SetNumberMode,
   ThemeTab,
 } from './applicationReducer';
-import { SetNumberMode } from './styleReducer';
 
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
 

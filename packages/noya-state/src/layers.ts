@@ -42,6 +42,10 @@ export const isPointsLayer = (layer: Sketch.AnyLayer): layer is PointsLayer => {
   return 'points' in layer;
 };
 
+export const isPageLayer = (layer: Sketch.AnyLayer): layer is Sketch.Page => {
+  return layer._class === 'page';
+};
+
 export const isTextLayer = (layer: Sketch.AnyLayer): layer is Sketch.Text => {
   return layer._class === 'text';
 };
