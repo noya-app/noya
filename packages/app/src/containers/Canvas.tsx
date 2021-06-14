@@ -4,8 +4,16 @@ import { createRect } from 'noya-geometry';
 import { render, unmount } from 'noya-react-canvaskit';
 import { SketchFileRenderer, uuid } from 'noya-renderer';
 import { decodeCurvePoint } from 'noya-renderer/src/primitives';
-import { CompassDirection, Point, Selectors, ShapeType } from 'noya-state';
+import {
+  CompassDirection,
+  Layers,
+  Point,
+  Selectors,
+  ShapeType,
+} from 'noya-state';
+import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
 import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
+import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
 import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
 import { isPointInRange } from 'noya-state/src/selectors/pointSelectors';
 import {
@@ -29,8 +37,6 @@ import useCanvasKit from '../hooks/useCanvasKit';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
-
-export type SelectedPoint = [layerId: string, index: number];
 
 declare module 'canvaskit' {
   interface Surface {
@@ -256,17 +262,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'editPath': {
-          const layer: any = Selectors.getLayerAtPoint(
-            CanvasKit,
-            state,
-            insets,
-            rawPoint,
-            {
-              clickThroughGroups: false,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
-          );
+          let selectedPoint: SelectedPoint | undefined = undefined;
           const boundingRects = getBoundingRectMap(
             getCurrentPage(state),
             state.selectedObjects,
@@ -276,42 +272,35 @@ export default memo(function Canvas() {
               includeHiddenLayers: false,
             },
           );
-
-          if (!layer) return;
-
-          const boundingRect = boundingRects[layer.do_objectID];
-          //Why dose TS not recognize layer.points?
-          let selectedPoint: SelectedPoint | undefined = undefined;
-          layer.points.forEach((layer_point: any, index: number) => {
-            const decodedPoint = decodeCurvePoint(layer_point, boundingRect);
-            if (isPointInRange(decodedPoint.point, point)) {
-              selectedPoint = [layer.do_objectID, index];
-            }
-          });
-
+          getSelectedLayers(state)
+            .filter(Layers.isPointsLayer)
+            .forEach((layer) => {
+              const boundingRect = boundingRects[layer.do_objectID];
+              layer.points.forEach((layer_point, index) => {
+                const decodedPoint = decodeCurvePoint(
+                  layer_point,
+                  boundingRect,
+                );
+                if (isPointInRange(decodedPoint.point, point)) {
+                  selectedPoint = [layer.do_objectID, index];
+                }
+              });
+            });
           if (selectedPoint) {
-            if (
-              state.selectedPointLists[layer.do_objectID]?.includes(
-                selectedPoint[1],
-              )
-            ) {
-              // If shift is held and more than 1 point is selected
-              if (
-                event.shiftKey &&
-                Object.values(state.selectedPointLists).flat().length !== 1
-              ) {
-                dispatch('selectPoint', selectedPoint, 'difference');
-              } else {
-                dispatch('selectPoint', selectedPoint, 'replace');
-              }
-            } else {
-              dispatch(
-                'selectPoint',
-                selectedPoint,
-                event.shiftKey ? 'intersection' : 'replace',
-              );
-            }
-          } else {
+            const alreadySelected = state.selectedPointLists[
+              selectedPoint[0]
+            ]?.includes(selectedPoint[1]);
+
+            dispatch(
+              'selectPoint',
+              selectedPoint,
+              event.shiftKey || event.metaKey
+                ? alreadySelected
+                  ? 'difference'
+                  : 'intersection'
+                : 'replace',
+            );
+          } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
           }
 

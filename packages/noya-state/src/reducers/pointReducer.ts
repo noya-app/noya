@@ -1,5 +1,4 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { SelectedPoint } from 'app/src/containers/Canvas';
 import produce from 'immer';
 import { createRectFromBounds } from 'noya-geometry';
 import {
@@ -26,6 +25,8 @@ export type PointAction =
       selectionType?: SelectionType,
     ];
 
+export type SelectedPoint = [layerId: string, index: number];
+
 export function pointReducer(
   state: ApplicationState,
   action: PointAction,
@@ -49,19 +50,18 @@ export function pointReducer(
       });
     }
     case 'selectPoint': {
-      const [, selectedPoint, selectionType] = action;
+      const [, selectedPoint, selectionType = 'replace'] = action;
 
       return produce(state, (draft) => {
         for (let layerId in draft.selectedPointLists) {
           const currentIds = draft.selectedPointLists[layerId];
-
-          if (!selectionType || !selectedPoint) return;
-
-          if (selectedPoint[0] === layerId) {
-            updateSelection(currentIds, selectedPoint[1], selectionType);
-          } else {
-            updateSelection(currentIds, undefined, selectionType);
-          }
+          updateSelection(
+            currentIds,
+            selectedPoint && selectedPoint[0] === layerId
+              ? selectedPoint[1]
+              : undefined,
+            selectionType,
+          );
         }
       });
     }
