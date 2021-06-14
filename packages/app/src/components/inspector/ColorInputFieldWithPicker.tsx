@@ -9,8 +9,6 @@ import {
   RadioGroup,
   Select,
   Spacer,
-  sketchColorToRgbaString,
-  ListView,
   Button,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
@@ -19,6 +17,7 @@ import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
+import ColorPickerSwatches from './ColorPickerSwatches';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -53,25 +52,6 @@ const RadioGroupContainer = styled.div({
   alignItems: 'stretch',
 });
 
-const Square = styled.div<{ color: string; selected?: boolean }>(
-  ({ theme, color, selected = false }) => ({
-    height: '25px',
-    width: '25px',
-    backgroundColor: color,
-    border: `2px solid ${
-      selected ? 'rgb(132,63,255)' : theme.colors.popover.background
-    } `,
-    borderRadius: '4px',
-    cursor: 'pointer',
-  }),
-);
-
-const GridSmall = styled.div({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, 25px)',
-  gap: '5px',
-});
-
 type SwatchLayout = 'list' | 'grid';
 type FillOption =
   | 'Solid Color'
@@ -97,72 +77,6 @@ interface Props {
   onChangeGradientPosition?: (index: number, position: number) => void;
   onAddGradientStop?: (color: Sketch.Color, position: number) => void;
 }
-
-interface SwatchesProps {
-  selectedSwatchId?: string;
-  swatches: Sketch.Swatch[];
-  onSelectSwatch: (color: Sketch.Color) => void;
-}
-
-const SwatchesList = memo(function SwatchesList({
-  selectedSwatchId,
-  swatches,
-  onSelectSwatch,
-}: SwatchesProps) {
-  return (
-    <ListView.Root>
-      {swatches.map((item) => {
-        const colorString = sketchColorToRgbaString(item.value);
-
-        return (
-          <ListView.Row
-            id={item.do_objectID}
-            key={item.do_objectID}
-            selected={selectedSwatchId === item.do_objectID}
-            onClick={() => {
-              onSelectSwatch({
-                ...item.value,
-                swatchID: item.do_objectID,
-              });
-            }}
-          >
-            <Square color={colorString} />
-            <Spacer.Horizontal size={8} />
-            {item.name}
-          </ListView.Row>
-        );
-      })}
-    </ListView.Root>
-  );
-});
-
-const SwatchesGrid = memo(function SwatchesGrid({
-  selectedSwatchId,
-  swatches,
-  onSelectSwatch,
-}: SwatchesProps) {
-  return (
-    <GridSmall>
-      {swatches.map((item) => {
-        const colorString = sketchColorToRgbaString(item.value);
-
-        return (
-          <Square
-            key={item.do_objectID}
-            color={colorString}
-            selected={selectedSwatchId === item.do_objectID}
-            onClick={() => {
-              onSelectSwatch({
-                ...item.value,
-                swatchID: item.do_objectID,
-              });
-            }}
-          />
-        );
-      })}
-    </GridSmall>
-  );
-});
 
 export default memo(function ColorInputFieldWithPicker({
   id,
@@ -229,19 +143,18 @@ export default memo(function ColorInputFieldWithPicker({
     [],
   );
 
-  const fillOption = useMemo(
-    () =>
-      value._class === 'color'
-        ? 'Solid Color'
-        : value._class !== 'gradient'
-        ? 'Pattern Fill'
-        : (`${
-            Sketch.GradientType[
-              value._class === 'gradient' ? value.gradientType : 0
-            ]
-          } Gradient` as FillOption),
-    [value],
-  );
+  const fillOption = useMemo(() => {
+    switch (value._class) {
+      case 'color':
+        return 'Solid Color';
+      case 'pattern':
+        return 'Pattern Fill';
+      case 'gradient':
+        return `${
+          Sketch.GradientType[value.gradientType]
+        } Gradient` as FillOption;
+    }
+  }, [value]);
 
   return (
     <Popover.Root>
@@ -339,25 +252,14 @@ export default memo(function ColorInputFieldWithPicker({
             </RadioGroupContainer>
           </Row>
         </PaddedSection>
-        <PaddedSection>
-          {value._class !== 'pattern' ? (
-            swatchLayout === 'grid' ? (
-              <SwatchesGrid
-                selectedSwatchId={selectedColor.swatchID}
-                swatches={sharedSwatches}
-                onSelectSwatch={onChange}
-              />
-            ) : (
-              <SwatchesList
-                selectedSwatchId={selectedColor.swatchID}
-                swatches={sharedSwatches}
-                onSelectSwatch={onChange}
-              />
-            )
-          ) : (
-            <>A</>
-          )}
-        </PaddedSection>
+        {value._class === 'color' && (
+          <ColorPickerSwatches
+            swatchID={selectedColor.swatchID}
+            swatchLayout={swatchLayout}
+            sharedSwatches={sharedSwatches}
+            onChange={onChange}
+          />
+        )}
         <StyledArrow />
       </Content>
     </Popover.Root>

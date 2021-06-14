@@ -9,7 +9,7 @@ import Pointer from './Pointer';
 
 const Container = styled.div<{ colorFrom: string; colorTo: string }>(
   ({ colorFrom, colorTo }) => ({
-    position: 'relative' as any,
+    position: 'relative',
     height: '8px',
     borderRadius: '8px',
     boxShadow: '0 0 0 1px rgba(0,0,0,0.2) inset',

@@ -34,15 +34,16 @@ export default forwardRef(function ColorInputField(
   { id, value, ...rest }: Props,
   ref: ForwardedRef<HTMLButtonElement>,
 ) {
-  const background = useMemo(
-    () =>
-      value._class === 'color'
-        ? sketchColorToRgbaString(value)
-        : value._class === 'gradient'
-        ? getGradientBackground(value.stops, value.gradientType)
-        : 'rgba(200,200,200,0.8)',
-    [value],
-  );
+  const background = useMemo(() => {
+    switch (value._class) {
+      case 'color':
+        return sketchColorToRgbaString(value);
+      case 'gradient':
+        return getGradientBackground(value.stops, value.gradientType);
+      case 'pattern':
+        return 'rgba(200,200,200,0.8)';
+    }
+  }, [value]);
 
   return <Container ref={ref} background={background} id={id} {...rest} />;
 });

@@ -66,9 +66,9 @@ export default memo(function FillInspector({
           <FillRow
             id={`fill-${index}`}
             value={
-              item.fillType === 1
+              item.fillType === FileFormat.FillType.Gradient
                 ? item.gradient
-                : item.fillType === 0
+                : item.fillType === FileFormat.FillType.Color
                 ? item.color
                 : {
                     _class: 'pattern',

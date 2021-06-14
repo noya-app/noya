@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { GradientAction, gradientReducer } from './gradientReducer';
 import * as Models from '../models';
 
 export type SetNumberMode = 'replace' | 'adjust';
@@ -45,29 +46,7 @@ export type StyleAction =
       index: number,
       value: Sketch.FillType,
     ]
-  | [
-      type: `set${Exclude<StyleElementType, 'Shadow'>}GradientColor`,
-      fillIndex: number,
-      gradientIndex: number,
-      value: Sketch.Color,
-    ]
-  | [
-      type: `set${Exclude<StyleElementType, 'Shadow'>}GradientPosition`,
-      fillIndex: number,
-      gradientIndex: number,
-      value: number,
-    ]
-  | [
-      type: `add${Exclude<StyleElementType, 'Shadow'>}GradientStop`,
-      fillIndex: number,
-      color: Sketch.Color,
-      position: number,
-    ]
-  | [
-      type: `set${Exclude<StyleElementType, 'Shadow'>}GradientType`,
-      fillIndex: number,
-      value: Sketch.GradientType,
-    ];
+  | GradientAction;
 
 export function styleReducer(
   state: Sketch.Style,
@@ -308,95 +287,54 @@ export function styleReducer(
         draft.borders[index].position = position;
       });
     }
-    case 'setFillFillType':
+    case 'setFillFillType': {
+      const [, index, type] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+        draft.fills[index].fillType = type;
+
+        if (!draft.fills[index].gradient) {
+          draft.fills[index].gradient = Models.fill.gradient;
+        }
+      });
+    }
     case 'setBorderFillType': {
       const [, index, type] = action;
-
-      const category = action[0] === 'setFillFillType' ? 'fills' : 'borders';
-
       return produce(state, (draft) => {
-        if (!draft[category] || !draft[category]![index]) return;
-        draft[category]![index].fillType = type;
+        if (!draft.borders || !draft.borders![index]) return;
+        draft.borders[index].fillType = type;
 
-        if (!draft[category]![index].gradient) {
-          draft[category]![index].gradient = Models.fill.gradient;
+        if (!draft.borders[index].gradient) {
+          draft.borders[index].gradient = Models.fill.gradient;
         }
       });
     }
     case 'setFillGradientColor':
-    case 'setBorderGradientColor': {
-      const [, index, stopIndex, color] = action;
-      const category =
-        action[0] === 'setFillGradientColor' ? 'fills' : 'borders';
-
-      return produce(state, (draft) => {
-        if (
-          !draft[category] ||
-          !draft[category]![index] ||
-          !draft[category]![index].gradient ||
-          !draft[category]![index].gradient.stops[stopIndex]
-        )
-          return;
-
-        draft[category]![index].gradient.stops[stopIndex].color = color;
-      });
-    }
     case 'setFillGradientPosition':
-    case 'setBorderGradientPosition': {
-      const [, index, stopIndex, position] = action;
-      const category =
-        action[0] === 'setFillGradientPosition' ? 'fills' : 'borders';
-
-      return produce(state, (draft) => {
-        if (
-          !draft[category] ||
-          !draft[category]![index] ||
-          !draft[category]![index].gradient ||
-          !draft[category]![index].gradient.stops[stopIndex]
-        )
-          return;
-        draft[category]![index].gradient.stops[stopIndex].position = position;
-        /*TODO >>> Sort the stops by position
-         draft.fills[fillIndex].gradient.stops.sort(
-          (a, b) => a.position - b.position,
-        );  */
-      });
-    }
-    case 'addFillGradientStop':
-    case 'addBorderGradientStop': {
-      const [, index, color, position] = action;
-      const category =
-        action[0] === 'addFillGradientStop' ? 'fills' : 'borders';
-
-      return produce(state, (draft) => {
-        if (
-          !draft[category] ||
-          !draft[category]![index] ||
-          !draft[category]![index].gradient
-        )
-          return;
-
-        draft[category]![index].gradient.stops.push({
-          _class: 'gradientStop',
-          color,
-          position,
-        });
-      });
-    }
     case 'setFillGradientType':
-    case 'setBorderGradientType': {
-      const [, index, value] = action;
-      const category =
-        action[0] === 'setFillGradientType' ? 'fills' : 'borders';
-
+    case 'addFillGradientStop': {
+      const [, index] = action;
       return produce(state, (draft) => {
-        if (
-          !draft[category] ||
-          !draft[category]![index] ||
-          !draft[category]![index].gradient
-        )
-          return;
-        draft[category]![index].gradient.gradientType = value;
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].gradient = gradientReducer(
+          draft.fills[index].gradient,
+          action,
+        );
+      });
+    }
+    case 'setBorderGradientColor':
+    case 'setBorderGradientPosition':
+    case 'setBorderGradientType':
+    case 'addBorderGradientStop': {
+      const [, index] = action;
+      return produce(state, (draft) => {
+        if (!draft.borders || !draft.borders[index]) return;
+
+        draft.borders[index].gradient = gradientReducer(
+          draft.borders[index].gradient,
+          action,
+        );
       });
     }
     default:
