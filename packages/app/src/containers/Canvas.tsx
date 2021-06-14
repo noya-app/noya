@@ -256,11 +256,8 @@ export default memo(function Canvas() {
             .filter(Layers.isPointsLayer)
             .forEach((layer) => {
               const boundingRect = boundingRects[layer.do_objectID];
-              layer.points.forEach((layer_point, index) => {
-                const decodedPoint = decodeCurvePoint(
-                  layer_point,
-                  boundingRect,
-                );
+              layer.points.forEach((curvePoint, index) => {
+                const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
                 if (isPointInRange(decodedPoint.point, point)) {
                   selectedPoint = [layer.do_objectID, index];
                 }
