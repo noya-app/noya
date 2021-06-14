@@ -12,12 +12,20 @@ import {
   getCurrentPageIndex,
   getSelectedLayerIndexPaths,
 } from '../selectors/selectors';
+import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState, SetNumberMode } from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
-  | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode];
+  | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
+  | [
+      type: 'selectPoint',
+      selectedPoint: SelectedPoint | undefined,
+      selectionType?: SelectionType,
+    ];
+
+export type SelectedPoint = [layerId: string, index: number];
 
 export function pointReducer(
   state: ApplicationState,
@@ -39,6 +47,22 @@ export function pointReducer(
           mode === 'replace' ? amount : curvePoint.cornerRadius + amount;
 
         curvePoint.cornerRadius = Math.max(0, newValue);
+      });
+    }
+    case 'selectPoint': {
+      const [, selectedPoint, selectionType = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        for (let layerId in draft.selectedPointLists) {
+          const currentIds = draft.selectedPointLists[layerId];
+          updateSelection(
+            currentIds,
+            selectedPoint && selectedPoint[0] === layerId
+              ? selectedPoint[1]
+              : undefined,
+            selectionType,
+          );
+        }
       });
     }
     case 'setPointX':
@@ -73,7 +97,6 @@ export function pointReducer(
             .filter((_, index) => pointList.includes(index))
             .forEach((curvePoint) => {
               const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
-
               (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
                 const newValue =
                   mode === 'replace'

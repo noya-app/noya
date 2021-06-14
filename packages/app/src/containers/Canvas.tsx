@@ -3,7 +3,19 @@ import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
 import { render, unmount } from 'noya-react-canvaskit';
 import { SketchFileRenderer, uuid } from 'noya-renderer';
-import { CompassDirection, Point, Selectors, ShapeType } from 'noya-state';
+import { decodeCurvePoint } from 'noya-renderer/src/primitives';
+import {
+  CompassDirection,
+  Layers,
+  Point,
+  Selectors,
+  ShapeType,
+} from 'noya-state';
+import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
+import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
+import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
+import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
+import { isPointInRange } from 'noya-state/src/selectors/pointSelectors';
 import {
   CSSProperties,
   memo,
@@ -227,6 +239,48 @@ export default memo(function Canvas() {
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
+          break;
+        }
+        case 'editPath': {
+          let selectedPoint: SelectedPoint | undefined = undefined;
+          const boundingRects = getBoundingRectMap(
+            getCurrentPage(state),
+            state.selectedObjects,
+            {
+              clickThroughGroups: true,
+              includeArtboardLayers: false,
+              includeHiddenLayers: false,
+            },
+          );
+          getSelectedLayers(state)
+            .filter(Layers.isPointsLayer)
+            .forEach((layer) => {
+              const boundingRect = boundingRects[layer.do_objectID];
+              layer.points.forEach((curvePoint, index) => {
+                const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+                if (isPointInRange(decodedPoint.point, point)) {
+                  selectedPoint = [layer.do_objectID, index];
+                }
+              });
+            });
+          if (selectedPoint) {
+            const alreadySelected = state.selectedPointLists[
+              selectedPoint[0]
+            ]?.includes(selectedPoint[1]);
+
+            dispatch(
+              'selectPoint',
+              selectedPoint,
+              event.shiftKey || event.metaKey
+                ? alreadySelected
+                  ? 'difference'
+                  : 'intersection'
+                : 'replace',
+            );
+          } else if (!(event.shiftKey || event.metaKey)) {
+            dispatch('selectPoint', undefined);
+          }
+
           break;
         }
         case 'hoverHandle':

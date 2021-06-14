@@ -13,10 +13,10 @@ import {
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
-import React, { Fragment, useMemo } from 'react';
+import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import { useTheme } from 'styled-components';
+import React, { Fragment, useMemo } from 'react';
 
-const POINT_RADIUS = 4;
 const CONTROL_POINT_SIZE = 2;
 
 interface EditablePathPointProps {

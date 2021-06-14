@@ -259,6 +259,7 @@ export function applicationReducer(
     case 'setPointCornerRadius':
     case 'setPointX':
     case 'setPointY':
+    case 'selectPoint':
       return pointReducer(state, action);
     default:
       return themeReducer(state, action);
