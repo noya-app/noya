@@ -27,19 +27,15 @@ const Column = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   gradient: Sketch.GradientStop[];
-  /**
-   * The only required change handler is `onChangeColor`. However, to handle
-   * more granular changes specially, e.g. nudging opacity, you can pass other
-   * handlers.
-   */
+  onChangeColor?: (color: Sketch.Color, index: number) => void;
   onChangeOpacity?: (amount: number) => void;
   onNudgeOpacity?: (amount: number) => void;
-  onChangeColor?: (color: Sketch.Color, index: number) => void;
   onChangePosition?: (index: number, position: number) => void;
   onAddStop?: (color: Sketch.Color, position: number) => void;
+  onDeleteStop?: (index: number) => void;
 }
 
-export default memo(function ColorInspector({
+export default memo(function GradientInspector({
   id,
   gradient,
   onChangeOpacity,
@@ -47,6 +43,7 @@ export default memo(function ColorInspector({
   onChangeColor = (color: Sketch.Color, index: number) => {},
   onChangePosition = (position: number, index: number) => {},
   onAddStop = (color: Sketch.Color, position: number) => {},
+  onDeleteStop = (index: number) => {},
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
@@ -125,15 +122,17 @@ export default memo(function ColorInspector({
   const handleAddStop = useCallback(
     (color: Sketch.Color, position: number) => {
       onAddStop(color, position);
-
-      let index = 0;
-      gradient.forEach((g, i) => {
-        index = g.position < position ? i : index;
-      });
-      setSelectedStopIndex(index);
+      setSelectedStopIndex(gradient.length);
     },
     [gradient, onAddStop, setSelectedStopIndex],
   );
+
+  const handleDeleteStop = useCallback(() => {
+    if (gradient.length === 2) return;
+
+    onDeleteStop(selectedStopIndex);
+    setSelectedStopIndex(selectedStopIndex - 1 > 0 ? 0 : selectedStopIndex - 1);
+  }, [gradient, selectedStopIndex, onDeleteStop, setSelectedStopIndex]);
 
   return (
     <Column>
@@ -147,6 +146,7 @@ export default memo(function ColorInspector({
           (index: number) => setSelectedStopIndex(index),
           [setSelectedStopIndex],
         )}
+        onDelete={handleDeleteStop}
       />
       <Spacer.Vertical size={10} />
       <Row id={id}>

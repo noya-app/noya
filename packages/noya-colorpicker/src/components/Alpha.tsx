@@ -29,8 +29,9 @@ export default memo(function Alpha(): JSX.Element {
     onChange({ a: interaction.left });
   };
 
-  const handleKey = (offset: Interaction) => {
+  const handleKey = (offset?: Interaction) => {
     // Alpha always fit into [0, 1] range
+    if (!offset) return;
     onChange({ a: clamp(hsva.a + offset.left) });
   };
 

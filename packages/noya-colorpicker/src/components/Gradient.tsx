@@ -1,13 +1,12 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { sketchColorToRgba } from 'noya-designsystem';
 import { getGradientBackground } from 'noya-designsystem/src/utils/getGradientBackground';
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { colorAt, RGBA_MAX } from '../utils/colorAt';
 import { RgbaColor } from '../types';
-import { Interaction, Interactive } from './GradientSlider';
+import { Interaction, Interactive } from './Interactive';
 import Pointer from './Pointer';
-
 
 const Container = styled.div<{ background: string }>(({ background }) => ({
   position: 'relative',
@@ -24,26 +23,32 @@ export default memo(function Gradient({
   onSelectStop,
   onChangePosition,
   onAdd,
+  onDelete,
 }: {
   gradients: Sketch.GradientStop[];
   selectedStop: number;
   onSelectStop: (index: number) => void;
   onChangePosition: (position: number) => void;
   onAdd: (value: RgbaColor, position: number) => void;
+  onDelete: () => void;
 }) {
-  const [moving, setMoving] = useState(false);
-
   const handleMove = (interaction: Interaction) => {
     onChangePosition(interaction.left);
   };
 
-  const handleKey = (offset: Interaction) => {
+  const handleKey = (offset?: Interaction) => {
+    if (!offset) {
+      onDelete();
+    }
     // Hue measured in degrees of the color circle ranging from 0 to 360
     //console.log('press');
   };
 
-  const handleClick = (interaction: Interaction) => {
-    if (moving) return;
+  const handleClick = (interaction: Interaction | number) => {
+    if (typeof interaction === 'number') {
+      onSelectStop(interaction);
+      return;
+    }
 
     const gradient = gradients.map((g, index) => ({
       color: sketchColorToRgba(g.color),
@@ -55,30 +60,24 @@ export default memo(function Gradient({
     onAdd(color, interaction.left);
   };
 
-  const isOnPoint = (interaction: Interaction) =>
-    interaction.left > gradients[selectedStop].position - 0.03 &&
-    interaction.left < gradients[selectedStop].position + 0.03;
-
-  const background = useMemo(() => getGradientBackground(gradients), [gradients]);
+  const background = useMemo(() => getGradientBackground(gradients), [
+    gradients,
+  ]);
   return (
     <Container background={background}>
       <Interactive
         onMove={handleMove}
         onKey={handleKey}
-        onMoveChange={(moving: boolean) => setMoving(moving)}
         onClick={handleClick}
-        isOnPoint={isOnPoint}
         aria-label="Gradient"
       >
         {gradients.map((g, index) => (
           <Pointer
             key={`gradients-point-${index}`}
+            index={index}
             selected={index === selectedStop}
+            onClick={() => onSelectStop(index)}
             left={g.position}
-            onClick={() => {
-              if (moving || index === selectedStop) return;
-              onSelectStop(index);
-            }}
           />
         ))}
       </Interactive>

@@ -76,6 +76,7 @@ interface Props {
   onChangeGradientType?: (type: Sketch.GradientType) => void;
   onChangeGradientPosition?: (index: number, position: number) => void;
   onAddGradientStop?: (color: Sketch.Color, position: number) => void;
+  onDeleteGradientStop?: (index: number) => void;
 }
 
 export default memo(function ColorInputFieldWithPicker({
@@ -86,6 +87,7 @@ export default memo(function ColorInputFieldWithPicker({
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
+  onDeleteGradientStop,
   onChangeGradientType,
 }: Props) {
   // TODO: The value prop here can be an array, and other
@@ -209,6 +211,7 @@ export default memo(function ColorInputFieldWithPicker({
               onChangeColor={onChangeGradientColor}
               onChangePosition={onChangeGradientPosition}
               onAddStop={onAddGradientStop}
+              onDeleteStop={onDeleteGradientStop}
             />
           ) : (
             <></>

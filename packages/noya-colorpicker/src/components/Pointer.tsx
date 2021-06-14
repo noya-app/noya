@@ -16,13 +16,14 @@ const Container = styled.div<{ selected: boolean }>(({ theme, selected }) => ({
 interface Props {
   top?: number;
   left: number;
+  index?: number;
   selected?: boolean;
   onClick?: () => void;
 }
 
 export default memo(function Pointer({
-  left,
   top = 0.5,
+  left,
   selected = false,
   onClick,
 }: Props): JSX.Element {
@@ -36,10 +37,10 @@ export default memo(function Pointer({
 
   return (
     <Container
+      className={`pointer ${left}`}
       style={style}
+      onClick={onClick}
       selected={selected}
-      onMouseEnter={onClick}
-      onTouchStart={onClick}
     />
   );
 });

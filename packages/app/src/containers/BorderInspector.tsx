@@ -87,6 +87,9 @@ export default memo(function BorderInspector() {
             onAddGradientStop={(color, position) =>
               dispatch('addBorderGradientStop', index, color, position)
             }
+            onDeleteGradientStop={(value) =>
+              dispatch('deleteBorderGradientStop', index, value)
+            }
             onChangeGradientType={(value) =>
               dispatch('setBorderGradientType', index, value)
             }

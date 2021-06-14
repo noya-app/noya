@@ -44,16 +44,18 @@ const getRelativePosition = (
 
 interface Props {
   onMove: (interaction: Interaction) => void;
-  onKey: (offset: Interaction) => void;
+  onKey: (offset?: Interaction) => void;
+  onClick?: (interaction: Interaction | number) => void;
   children: React.ReactNode;
 }
 
-const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
+const InteractiveBase = ({ onMove, onKey, onClick, ...rest }: Props) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
   const isDragging = useRef(false);
   const onMoveCallback = useEventCallback(onMove);
   const onKeyCallback = useEventCallback(onKey);
+  const onClickCallback = useEventCallback(onClick);
 
   // Prevent mobile browsers from handling mouse events (conflicting with touch ones).
   // If we detected a touch interaction before, we prefer reacting to touch events only.
@@ -97,19 +99,35 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
 
       if (!isValid(event)) return;
 
-      // The node/ref must actually exist when user start an interaction.
-      // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
-      onMoveCallback(getRelativePosition(container.current!, event));
+      if (onClick) {
+        if (
+          event.target instanceof HTMLElement &&
+          !event.target.classList.contains('pointer')
+        ) {
+          onClickCallback(getRelativePosition(container.current!, event));
+          return;
+        }
+
+        if (event.target instanceof HTMLElement) {
+          //is this correct?
+          event.target.click();
+        }
+      } else {
+        // The node/ref must actually exist when user start an interaction.
+        // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
+        onMoveCallback(getRelativePosition(container.current!, event));
+      }
 
       isDragging.current = true;
     },
-    [onMoveCallback],
+    [onMoveCallback, onClickCallback, onClick],
   );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       const keyCode = event.which || event.keyCode;
 
+      if (keyCode === 46) onKeyCallback();
       // Ignore all keys except arrow ones
       if (keyCode < 37 || keyCode > 40) return;
       // Do not scroll page by arrow keys when document is focused on the element

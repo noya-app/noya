@@ -28,6 +28,7 @@ interface Props {
   onChangeGradientColor: (color: Sketch.Color, index: number) => void;
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
+  onDeleteGradientStop: (index: number) => void;
   onChangeGradientType: (type: Sketch.GradientType) => void;
   onChangeOpacity: (amount: number) => void;
   onNudgeOpacity: (amount: number) => void;
@@ -44,6 +45,7 @@ export default memo(function ColorFillRow({
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
+  onDeleteGradientStop,
   onChangeGradientType,
   prefix,
 }: Props) {
@@ -117,6 +119,7 @@ export default memo(function ColorFillRow({
           onChangeGradientPosition={onChangeGradientPosition}
           onAddGradientStop={onAddGradientStop}
           onChangeGradientType={onChangeGradientType}
+          onDeleteGradientStop={onDeleteGradientStop}
         />
         <Spacer.Horizontal size={8} />
         {value._class === 'color' ? (

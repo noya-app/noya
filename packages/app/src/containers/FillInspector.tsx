@@ -90,6 +90,9 @@ export default memo(function FillInspector({
             onAddGradientStop={(color, position) =>
               dispatch('addFillGradientStop', index, color, position)
             }
+            onDeleteGradientStop={(value) =>
+              dispatch('deleteFillGradientStop', index, value)
+            }
             onChangeGradientType={(value) =>
               dispatch('setFillGradientType', index, value)
             }

@@ -151,10 +151,12 @@ export function applicationReducer(
     case 'setFillGradientPosition':
     case 'setFillGradientType':
     case 'addFillGradientStop':
+    case 'deleteFillGradientStop':
     case 'setBorderGradientColor':
     case 'setBorderGradientPosition':
     case 'setBorderGradientType':
-    case 'addBorderGradientStop': {
+    case 'addBorderGradientStop':
+    case 'deleteBorderGradientStop': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);

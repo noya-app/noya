@@ -57,6 +57,8 @@ interface Props {
   onChangeGradientColor: (color: Sketch.Color, index: number) => void;
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
+  onDeleteGradientStop: (index: number) => void;
+
   onChangeGradientType: (type: Sketch.GradientType) => void;
   onNudgeWidth: (amount: number) => void;
   prefix?: ReactNode;
@@ -75,6 +77,7 @@ export default memo(function BorderRow({
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
+  onDeleteGradientStop,
   onChangeGradientType,
   prefix,
 }: Props) {
@@ -126,6 +129,7 @@ export default memo(function BorderRow({
           onChangeGradientPosition={onChangeGradientPosition}
           onAddGradientStop={onAddGradientStop}
           onChangeGradientType={onChangeGradientType}
+          onDeleteGradientStop={onDeleteGradientStop}
         />
         <Spacer.Horizontal size={8} />
         <RadioGroup.Root

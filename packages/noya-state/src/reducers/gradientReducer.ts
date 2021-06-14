@@ -28,6 +28,11 @@ export type GradientAction =
       position: number,
     ]
   | [
+      type: `delete${StyleElementType}GradientStop`,
+      index: number,
+      stopIndex: number,
+    ]
+  | [
       type: `set${StyleElementType}GradientType`,
       index: number,
       value: Sketch.GradientType,
@@ -82,6 +87,15 @@ export function gradientReducer(
       return produce(state, (draft) => {
         if (!draft) return;
         draft.gradientType = value;
+      });
+    }
+    case 'deleteFillGradientStop':
+    case 'deleteBorderGradientStop': {
+      const [, , index] = action;
+
+      return produce(state, (draft) => {
+        if (!draft) return;
+        draft.stops.splice(index, 1);
       });
     }
     default:

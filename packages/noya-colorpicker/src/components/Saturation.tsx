@@ -33,8 +33,9 @@ export default memo(function SaturationBase() {
     });
   };
 
-  const handleKey = (offset: Interaction) => {
+  const handleKey = (offset?: Interaction) => {
     // Saturation and brightness always fit into [0, 100] range
+    if (!offset) return;
     onChange({
       s: clamp(hsva.s + offset.left * 100, 0, 100),
       v: clamp(hsva.v - offset.top * 100, 0, 100),

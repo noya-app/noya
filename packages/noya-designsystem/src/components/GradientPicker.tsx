@@ -28,6 +28,7 @@ interface Props {
   onChangeColor: (color: Sketch.Color) => void;
   onChangePosition: (position: number) => void;
   onAdd: (color: Sketch.Color, position: number) => void;
+  onDelete: () => void;
   onSelectStop: (index: number) => void;
 }
 
@@ -37,6 +38,7 @@ export default memo(function GradientPicker({
   onChangeColor,
   onChangePosition,
   onAdd,
+  onDelete,
   onSelectStop,
 }: Props) {
   const handleChangeColor = useCallback(
@@ -65,6 +67,7 @@ export default memo(function GradientPicker({
         onSelectStop={onSelectStop}
         onChangePosition={onChangePosition}
         onAdd={handleAddGradientStop}
+        onDelete={onDelete}
       />
       <Spacer.Vertical size={10} />
       <Saturation />
