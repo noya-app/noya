@@ -1,18 +1,10 @@
-import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
-import {
-  ColorInputField,
-  Divider,
-  RadioGroup,
-  Select,
-  Spacer,
-  Button,
-} from 'noya-designsystem';
+import { ColorInputField, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
@@ -34,7 +26,7 @@ const StyledArrow = styled(Popover.Arrow)(({ theme }) => ({
 }));
 
 const PaddedSection = styled.section({
-  padding: '10px',
+  padding: '7px 10px',
   display: 'flex',
   flexDirection: 'column',
 });
@@ -46,13 +38,6 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'stretch',
 }));
 
-const RadioGroupContainer = styled.div({
-  flex: '0 0 50px',
-  display: 'flex',
-  alignItems: 'stretch',
-});
-
-type SwatchLayout = 'list' | 'grid';
 type FillOption =
   | 'Solid Color'
   | 'Linear Gradient'
@@ -92,28 +77,15 @@ export default memo(function ColorInputFieldWithPicker({
 }: Props) {
   // TODO: The value prop here can be an array, and other
   // inspector rows may also take arrays
-
   const [state, dispatch] = useApplicationState();
-  const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
+  const sharedSwatches = Selectors.getSharedSwatches(state);
 
   const values = useMemo(() => {
-    if (value._class !== 'color')
-      //change to show preview of gradient :thinking_emoji:
-      return [];
+    if (value._class !== 'color') return [];
     return [value];
   }, [value]);
 
   const selectedColor = values[0];
-
-  const sharedSwatches = Selectors.getSharedSwatches(state);
-
-  const isSwatch = useMemo(
-    () =>
-      selectedColor &&
-      selectedColor.swatchID &&
-      sharedSwatches.some((e) => e.do_objectID === selectedColor.swatchID),
-    [selectedColor, sharedSwatches],
-  );
 
   const detachThemeColor = useCallback(() => {
     onChange({
@@ -183,6 +155,7 @@ export default memo(function ColorInputFieldWithPicker({
                         ? Sketch.FillType.Pattern
                         : Sketch.FillType.Color,
                     );
+
                   if (value.endsWith('Gradient') && onChangeGradientType)
                     onChangeGradientType(
                       value === 'Linear Gradient'
@@ -216,51 +189,14 @@ export default memo(function ColorInputFieldWithPicker({
           ) : (
             <></>
           )}
-          <Spacer.Vertical size={12} />
-          {isSwatch ? (
-            <Button id={'detach-theme-color'} onClick={detachThemeColor}>
-              Detach Theme Color
-            </Button>
-          ) : (
-            <Button id={'crete-theme-color'} onClick={createThemeColor}>
-              Create Theme Color
-            </Button>
-          )}
-        </PaddedSection>
-        <Divider />
-        <PaddedSection>
-          <Row>
-            <Select
-              id="colors-category"
-              options={['Theme colors']}
-              value="Theme colors"
-              onChange={() => {}}
-            />
-            <Spacer.Horizontal size={8} />
-            <RadioGroupContainer>
-              <RadioGroup.Root
-                id={'colors-layout'}
-                value={swatchLayout}
-                onValueChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setSwatchLayout(event.target.value as SwatchLayout)
-                }
-              >
-                <RadioGroup.Item value="grid" tooltip="Grid">
-                  <GridIcon />
-                </RadioGroup.Item>
-                <RadioGroup.Item value="list" tooltip="List">
-                  <RowsIcon />
-                </RadioGroup.Item>
-              </RadioGroup.Root>
-            </RadioGroupContainer>
-          </Row>
         </PaddedSection>
         {value._class === 'color' && (
           <ColorPickerSwatches
             swatchID={selectedColor.swatchID}
-            swatchLayout={swatchLayout}
             sharedSwatches={sharedSwatches}
             onChange={onChange}
+            onCreate={createThemeColor}
+            onDetach={detachThemeColor}
           />
         )}
         <StyledArrow />

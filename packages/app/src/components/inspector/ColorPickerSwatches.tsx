@@ -1,10 +1,19 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Spacer, sketchColorToRgbaString, ListView } from 'noya-designsystem';
-import { memo } from 'react';
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
+import {
+  Spacer,
+  RadioGroup,
+  Select,
+  sketchColorToRgbaString,
+  ListView,
+  Button,
+  Divider,
+} from 'noya-designsystem';
+import { memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 const PaddedSection = styled.section({
-  padding: '10px',
+  padding: '8px 10px',
   display: 'flex',
   flexDirection: 'column',
 });
@@ -27,6 +36,21 @@ const GridSmall = styled.div({
   gridTemplateColumns: 'repeat(auto-fill, 25px)',
   gap: '5px',
 });
+
+const Row = styled.div(({ theme }) => ({
+  flex: '1',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'stretch',
+}));
+
+const RadioGroupContainer = styled.div({
+  flex: '0 0 50px',
+  display: 'flex',
+  alignItems: 'stretch',
+});
+
+type SwatchLayout = 'list' | 'grid';
 
 interface SwatchesProps {
   selectedSwatchId?: string;
@@ -96,32 +120,84 @@ const SwatchesGrid = memo(function SwatchesGrid({
 
 interface Props {
   swatchID?: string;
-  swatchLayout: 'grid' | 'list';
   sharedSwatches: Sketch.Swatch[];
   onChange: (color: Sketch.Color) => void;
+  onCreate: () => void;
+  onDetach: () => void;
 }
 
 export default memo(function ColorPickerSwatches({
   swatchID,
-  swatchLayout,
   sharedSwatches,
   onChange,
+  onCreate,
+  onDetach,
 }: Props) {
+  const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
+
+  const isSwatch = useMemo(
+    () =>
+      swatchID !== undefined &&
+      sharedSwatches.some((e) => e.do_objectID === swatchID),
+    [swatchID, sharedSwatches],
+  );
+
   return (
-    <PaddedSection>
-      {swatchLayout === 'grid' ? (
-        <SwatchesGrid
-          selectedSwatchId={swatchID}
-          swatches={sharedSwatches}
-          onSelectSwatch={onChange}
-        />
-      ) : (
-        <SwatchesList
-          selectedSwatchId={swatchID}
-          swatches={sharedSwatches}
-          onSelectSwatch={onChange}
-        />
-      )}
-    </PaddedSection>
+    <>
+      <PaddedSection>
+        {isSwatch ? (
+          <Button id={'detach-theme-color'} onClick={onDetach}>
+            Detach Theme Color
+          </Button>
+        ) : (
+          <Button id={'crete-theme-color'} onClick={onCreate}>
+            Create Theme Color
+          </Button>
+        )}
+      </PaddedSection>
+      <Divider />
+      <PaddedSection>
+        <Row>
+          <Select
+            id="colors-category"
+            options={['Theme colors']}
+            value="Theme colors"
+            onChange={() => {}}
+          />
+          <Spacer.Horizontal size={8} />
+          <RadioGroupContainer>
+            <RadioGroup.Root
+              id={'colors-layout'}
+              value={swatchLayout}
+              onValueChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setSwatchLayout(event.target.value as SwatchLayout)
+              }
+            >
+              <RadioGroup.Item value="grid" tooltip="Grid">
+                <GridIcon />
+              </RadioGroup.Item>
+              <RadioGroup.Item value="list" tooltip="List">
+                <RowsIcon />
+              </RadioGroup.Item>
+            </RadioGroup.Root>
+          </RadioGroupContainer>
+        </Row>
+      </PaddedSection>
+      <PaddedSection>
+        {swatchLayout === 'grid' ? (
+          <SwatchesGrid
+            selectedSwatchId={swatchID}
+            swatches={sharedSwatches}
+            onSelectSwatch={onChange}
+          />
+        ) : (
+          <SwatchesList
+            selectedSwatchId={swatchID}
+            swatches={sharedSwatches}
+            onSelectSwatch={onChange}
+          />
+        )}
+      </PaddedSection>
+    </>
   );
 });

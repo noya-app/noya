@@ -3,7 +3,8 @@ import { sketchColorToRgbaString } from '..';
 
 export function getGradientBackground(
   value: Sketch.GradientStop[],
-  type?: Sketch.GradientType,
+  type: Sketch.GradientType,
+  direction: 'vertical' | 'horizontal' | number,
 ) {
   if (type === Sketch.GradientType.Angular) {
     const color = [...value]
@@ -22,7 +23,13 @@ export function getGradientBackground(
   const position =
     type === Sketch.GradientType.Radial
       ? 'radial-gradient(circle'
-      : `linear-gradient(${type !== undefined ? 0 : 90}deg`;
+      : `linear-gradient(${
+          typeof direction === 'number'
+            ? direction
+            : direction === 'vertical'
+            ? 180
+            : 90
+        }deg`;
 
   return `${position}, ${color})`;
 }

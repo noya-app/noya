@@ -39,7 +39,11 @@ export default forwardRef(function ColorInputField(
       case 'color':
         return sketchColorToRgbaString(value);
       case 'gradient':
-        return getGradientBackground(value.stops, value.gradientType);
+        return getGradientBackground(
+          value.stops,
+          value.gradientType,
+          'vertical',
+        );
       case 'pattern':
         return 'rgba(200,200,200,0.8)';
     }

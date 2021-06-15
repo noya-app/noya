@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { sketchColorToRgba } from 'noya-designsystem';
 import { getGradientBackground } from 'noya-designsystem/src/utils/getGradientBackground';
 import React, { memo, useMemo } from 'react';
@@ -60,9 +60,15 @@ export default memo(function Gradient({
     onAdd(color, interaction.left);
   };
 
-  const background = useMemo(() => getGradientBackground(gradients), [
-    gradients,
-  ]);
+  const background = useMemo(
+    () =>
+      getGradientBackground(
+        gradients,
+        Sketch.GradientType.Linear,
+        'horizontal',
+      ),
+    [gradients],
+  );
   return (
     <Container background={background}>
       <Interactive
