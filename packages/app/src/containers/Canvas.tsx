@@ -8,6 +8,7 @@ import {
   CompassDirection,
   Layers,
   Point,
+  SelectedControlPoint,
   Selectors,
   ShapeType,
 } from 'noya-state';
@@ -243,6 +244,8 @@ export default memo(function Canvas() {
         }
         case 'editPath': {
           let selectedPoint: SelectedPoint | undefined = undefined;
+          let selectedControlPoint: SelectedControlPoint | undefined;
+
           const boundingRects = getBoundingRectMap(
             getCurrentPage(state),
             state.selectedObjects,
@@ -258,16 +261,29 @@ export default memo(function Canvas() {
               const boundingRect = boundingRects[layer.do_objectID];
               layer.points.forEach((curvePoint, index) => {
                 const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+
                 if (isPointInRange(decodedPoint.point, point)) {
                   selectedPoint = [layer.do_objectID, index];
+                } else if (isPointInRange(decodedPoint.curveTo, point)) {
+                  selectedControlPoint = {
+                    layerId: layer.do_objectID,
+                    pointIndex: index,
+                    controlPointType: 'curveTo',
+                  };
+                } else if (isPointInRange(decodedPoint.curveFrom, point)) {
+                  selectedControlPoint = {
+                    layerId: layer.do_objectID,
+                    pointIndex: index,
+                    controlPointType: 'curveFrom',
+                  };
                 }
               });
             });
+
           if (selectedPoint) {
             const alreadySelected = state.selectedPointLists[
               selectedPoint[0]
             ]?.includes(selectedPoint[1]);
-
             dispatch(
               'selectPoint',
               selectedPoint,
@@ -276,6 +292,13 @@ export default memo(function Canvas() {
                   ? 'difference'
                   : 'intersection'
                 : 'replace',
+            );
+          } else if (selectedControlPoint) {
+            dispatch(
+              'selectControlPoint',
+              selectedControlPoint.layerId,
+              selectedControlPoint.pointIndex,
+              selectedControlPoint.controlPointType,
             );
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
