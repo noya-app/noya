@@ -52,6 +52,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
     clickThroughGroups: true,
     includeHiddenLayers: true,
+    includeArtboardLayers: false,
   });
 
   if (!boundingRect) {
@@ -251,7 +252,9 @@ export function layerReducer(
           symbolToGroup(pages, state, parent, indexPaths);
         }
 
-        draft.selectedObjects = [parent.do_objectID];
+        if (!Layers.isPageLayer(parent)) {
+          draft.selectedObjects = [parent.do_objectID];
+        }
       });
     }
     case 'selectLayer': {

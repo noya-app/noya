@@ -1,11 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type {
-  CanvasKit,
-  Paint,
-  Path,
-  TextAlign,
-  TextStyle,
-} from 'canvaskit-wasm';
+import type { CanvasKit, Paint, Path, TextAlign, TextStyle } from 'canvaskit';
 import { distance } from 'noya-geometry';
 import {
   CompassDirection,
@@ -205,9 +199,8 @@ export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
-  fixedRadius: number,
 ): Path {
-  return PathUtils.path(CanvasKit, points, frame, fixedRadius);
+  return PathUtils.path(CanvasKit, points, frame);
 }
 
 export function textHorizontalAlignment(

@@ -1,4 +1,4 @@
-import { Paint, PaintStyle, MaskFilter } from 'canvaskit-wasm';
+import { Paint, PaintStyle, MaskFilter } from 'canvaskit';
 import { useMemo } from 'react';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useColor, { ColorParameters } from './useColor';

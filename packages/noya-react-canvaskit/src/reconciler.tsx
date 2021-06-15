@@ -1,7 +1,7 @@
 // Some snippets adapted from udevbe/react-canvaskit (MIT License)
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
-import { CanvasKit, Surface } from 'canvaskit-wasm';
+import { CanvasKit, Surface } from 'canvaskit';
 import { fontManager } from 'noya-renderer';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
@@ -280,7 +280,13 @@ const hostConfig: ReactCanvasKitHostConfig = {
 
             break;
           case 'Group': {
-            const { transform, opacity, clip, colorFilter } = element.props;
+            const {
+              transform,
+              opacity,
+              clip,
+              colorFilter,
+              imageFilter,
+            } = element.props;
 
             const saveCount = canvas.getSaveCount();
 
@@ -300,7 +306,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
 
             // If we need to apply effects to the group as a whole, we need
             // to draw the elements on a separate bitmap using `saveLayer`
-            const needsLayer = opacity < 1 || colorFilter;
+            const needsLayer = opacity < 1 || colorFilter || imageFilter;
 
             if (needsLayer) {
               const layerPaint = new CanvasKit.Paint();
@@ -311,6 +317,10 @@ const hostConfig: ReactCanvasKitHostConfig = {
 
               if (colorFilter) {
                 layerPaint.setColorFilter(colorFilter);
+              }
+
+              if (imageFilter) {
+                layerPaint.setImageFilter(imageFilter);
               }
 
               canvas.saveLayer(layerPaint);

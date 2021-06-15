@@ -2,6 +2,10 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { GradientAction, gradientReducer } from './gradientReducer';
 import * as Models from '../models';
+import {
+  ColorControlsAction,
+  colorControlsReducer,
+} from './colorControlsReducer';
 
 export type SetNumberMode = 'replace' | 'adjust';
 
@@ -46,7 +50,8 @@ export type StyleAction =
       index: number,
       value: Sketch.FillType,
     ]
-  | GradientAction;
+  | GradientAction
+  | ColorControlsAction;
 
 export function styleReducer(
   state: Sketch.Style,
@@ -339,6 +344,14 @@ export function styleReducer(
         );
       });
     }
+    case 'setColorControlsEnabled':
+    case 'setHue':
+    case 'setSaturation':
+    case 'setBrightness':
+    case 'setContrast':
+      return produce(state, (draft) => {
+        draft.colorControls = colorControlsReducer(draft.colorControls, action);
+      });
     default:
       return state;
   }

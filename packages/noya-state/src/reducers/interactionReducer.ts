@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { createRect } from 'noya-geometry';
+import { createRect, Size } from 'noya-geometry';
 import type { PageLayer } from '..';
 import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
@@ -33,16 +33,23 @@ export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
 export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
+  | [type: 'editPath', layerIds: string[]]
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
-  | [type: 'maybeMove', origin: Point, pageSnapshot: Sketch.Page]
+  | [
+      type: 'maybeMove',
+      origin: Point,
+      canvasSize: Size,
+      pageSnapshot: Sketch.Page,
+    ]
   | [type: 'hoverHandle', direction: CompassDirection]
   | [
       type: 'maybeScale',
       origin: Point,
       direction: CompassDirection,
+      canvasSize: Size,
       pageSnapshot: Sketch.Page,
     ]
   | [type: 'maybePan', origin: Point]
@@ -62,6 +69,10 @@ export type InteractionState =
       type: `insert${Capitalize<ShapeType>}`;
     }
   | {
+      type: 'editPath';
+      layerIds: string[];
+    }
+  | {
       type: 'drawing';
       origin: Point;
       value: PageLayer;
@@ -71,20 +82,33 @@ export type InteractionState =
       origin: Point;
       current: Point;
     }
-  | { type: 'maybeMove'; origin: Point; pageSnapshot: Sketch.Page }
+  | {
+      type: 'maybeMove';
+      origin: Point;
+      canvasSize: Size;
+      pageSnapshot: Sketch.Page;
+    }
   | { type: 'hoverHandle'; direction: CompassDirection }
   | {
       type: 'maybeScale';
       origin: Point;
       direction: CompassDirection;
+      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
-  | { type: 'moving'; origin: Point; current: Point; pageSnapshot: Sketch.Page }
+  | {
+      type: 'moving';
+      origin: Point;
+      current: Point;
+      canvasSize: Size;
+      pageSnapshot: Sketch.Page;
+    }
   | {
       type: 'scaling';
       origin: Point;
       current: Point;
       direction: CompassDirection;
+      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | { type: 'panMode' }
@@ -113,6 +137,10 @@ export function interactionReducer(
   action: InteractionAction,
 ): InteractionState {
   switch (action[0]) {
+    case 'editPath':
+      const [type, layerIds] = action;
+
+      return { type, layerIds };
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
@@ -175,17 +203,18 @@ export function interactionReducer(
       });
     }
     case 'maybeMove': {
-      const [, origin, pageSnapshot] = action;
+      const [, origin, canvasSize, pageSnapshot] = action;
 
-      return { type: action[0], origin, pageSnapshot };
+      return { type: action[0], origin, canvasSize, pageSnapshot };
     }
     case 'maybeScale': {
-      const [, origin, direction, pageSnapshot] = action;
+      const [, origin, direction, canvasSize, pageSnapshot] = action;
 
       return {
         type: action[0],
         origin,
         direction,
+        canvasSize,
         pageSnapshot,
       };
     }
@@ -200,6 +229,7 @@ export function interactionReducer(
         type: 'moving',
         origin: state.origin,
         current: point,
+        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }
@@ -215,6 +245,7 @@ export function interactionReducer(
         origin: state.origin,
         current: point,
         direction: state.direction,
+        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }
@@ -229,6 +260,7 @@ export function interactionReducer(
         type: 'moving',
         origin: state.origin,
         current: point,
+        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }
@@ -244,6 +276,7 @@ export function interactionReducer(
         origin: state.origin,
         current: point,
         direction: state.direction,
+        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }

@@ -18,9 +18,9 @@ import { SelectionType, updateSelection } from '../utils/selection';
 import {
   accessPageLayers,
   ApplicationState,
+  SetNumberMode,
   ThemeTab,
 } from './applicationReducer';
-import { SetNumberMode } from './styleReducer';
 
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
 
@@ -508,6 +508,16 @@ export function themeReducer(
     case 'removeSwatch': {
       const ids = state.selectedSwatchIds;
 
+      const layerIndexPathsWithSwatchId = findPageLayerIndexPaths(
+        state,
+        (layer) =>
+          layer.style !== undefined &&
+          layer.style.fills !== undefined &&
+          layer.style.fills.some(
+            (f) => f.color.swatchID && ids.includes(f.color.swatchID),
+          ),
+      );
+
       return produce(state, (draft) => {
         const sharedSwatches = draft.sketch.document.sharedSwatches;
 
@@ -519,6 +529,19 @@ export function themeReducer(
         sharedSwatches.objects = filterSwatches;
 
         draft.sketch.document.sharedSwatches = sharedSwatches;
+
+        layerIndexPathsWithSwatchId.forEach((layerPath) =>
+          accessPageLayers(
+            draft,
+            layerPath.pageIndex,
+            layerPath.indexPaths,
+          ).forEach((layer) => {
+            layer.style?.fills?.forEach((f) => {
+              if (f.color.swatchID && ids.includes(f.color.swatchID))
+                delete f.color.swatchID;
+            });
+          }),
+        );
       });
     }
     case 'removeTextStyle': {

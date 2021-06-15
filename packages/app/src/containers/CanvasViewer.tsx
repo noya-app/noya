@@ -1,4 +1,4 @@
-import type { CanvasKit } from 'canvaskit-wasm';
+import type { CanvasKit } from 'canvaskit';
 import { Theme } from 'noya-designsystem';
 import { render, unmount } from 'noya-react-canvaskit';
 import { WorkspaceState } from 'noya-state';

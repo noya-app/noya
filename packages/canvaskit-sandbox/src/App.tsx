@@ -1,4 +1,4 @@
-import type { CanvasKit } from 'canvaskit-wasm';
+import type { CanvasKit } from 'canvaskit';
 import { load } from 'noya-renderer';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 

@@ -22,3 +22,7 @@ export { default as usePaint } from './hooks/usePaint';
 export { default as useStableColor } from './hooks/useStable4ElementArray';
 export { default as useRect } from './hooks/useRect';
 export * from './hooks/useFill';
+export * from './hooks/useStroke';
+
+// Utils
+export { default as makePath } from './utils/makePath';

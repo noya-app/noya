@@ -1,4 +1,4 @@
-import { ColorFilter } from 'canvaskit-wasm';
+import { ColorFilter, ImageFilter } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { createElement, memo, ReactNode, useMemo } from 'react';
 import { ClipProps, GroupComponentProps } from '../types';
@@ -9,6 +9,7 @@ interface GroupProps {
   children?: ReactNode;
   clip?: ClipProps;
   colorFilter?: ColorFilter;
+  imageFilter?: ImageFilter;
 }
 
 export default memo(function Group(props: GroupProps) {
@@ -24,8 +25,16 @@ export default memo(function Group(props: GroupProps) {
       opacity: props.opacity ?? 1,
       clip: props.clip,
       colorFilter: props.colorFilter,
+      imageFilter: props.imageFilter,
     }),
-    [transform, props.children, props.opacity, props.clip, props.colorFilter],
+    [
+      transform,
+      props.children,
+      props.opacity,
+      props.clip,
+      props.colorFilter,
+      props.imageFilter,
+    ],
   );
 
   return createElement('Group', elementProps);

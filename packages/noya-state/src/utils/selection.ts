@@ -1,12 +1,12 @@
 export type SelectionType = 'replace' | 'intersection' | 'difference';
 
-export function updateSelection(
-  currentIds: string[],
-  newIds: string | string[] | undefined,
+export function updateSelection<T extends string | number>(
+  currentIds: T[],
+  newIds: T | T[] | undefined,
   selectionType: SelectionType,
 ) {
   const ids =
-    newIds === undefined ? [] : typeof newIds === 'string' ? [newIds] : newIds;
+    newIds === undefined ? [] : Array.isArray(newIds) ? newIds : [newIds];
 
   switch (selectionType) {
     case 'intersection':

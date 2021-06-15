@@ -1,9 +1,21 @@
-import type { Surface } from 'canvaskit-wasm';
+import type { Surface } from 'canvaskit';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
 import { render, unmount } from 'noya-react-canvaskit';
 import { SketchFileRenderer, uuid } from 'noya-renderer';
-import { CompassDirection, Point, Selectors, ShapeType } from 'noya-state';
+import { decodeCurvePoint } from 'noya-renderer/src/primitives';
+import {
+  CompassDirection,
+  Layers,
+  Point,
+  Selectors,
+  ShapeType,
+} from 'noya-state';
+import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
+import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
+import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
+import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
+import { isPointInRange } from 'noya-state/src/selectors/pointSelectors';
 import {
   CSSProperties,
   memo,
@@ -22,11 +34,12 @@ import {
   useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
+import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
 
-declare module 'canvaskit-wasm' {
+declare module 'canvaskit' {
   interface Surface {
     flush(): void;
     _id: number;
@@ -71,8 +84,6 @@ const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
   zIndex: -1,
 }));
 
-type MenuItemType = 'selectAll' | 'delete';
-
 export default memo(function Canvas() {
   const theme = useTheme();
   const {
@@ -95,6 +106,10 @@ export default memo(function Canvas() {
     }),
     [sidebarWidth],
   );
+
+  const canvasSize = useMemo(() => containerSize ?? { width: 0, height: 0 }, [
+    containerSize,
+  ]);
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current document's offset from the origin
@@ -171,27 +186,8 @@ export default memo(function Canvas() {
     }
   }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
 
-  const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
-    () =>
-      state.selectedObjects.length > 0
-        ? [{ value: 'delete', title: 'Delete' }]
-        : [{ value: 'selectAll', title: 'Select All' }],
-    [state.selectedObjects.length],
-  );
-
-  const handleSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
-      switch (value) {
-        case 'selectAll':
-          dispatch('selectAllLayers');
-          break;
-        case 'delete':
-          dispatch('deleteLayer', state.selectedObjects);
-          break;
-      }
-    },
-    [dispatch, state.selectedObjects],
-  );
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -207,6 +203,7 @@ export default memo(function Canvas() {
           {
             clickThroughGroups: event.metaKey,
             includeHiddenLayers: false,
+            includeArtboardLayers: false,
           },
         );
 
@@ -244,13 +241,60 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
+        case 'editPath': {
+          let selectedPoint: SelectedPoint | undefined = undefined;
+          const boundingRects = getBoundingRectMap(
+            getCurrentPage(state),
+            state.selectedObjects,
+            {
+              clickThroughGroups: true,
+              includeArtboardLayers: false,
+              includeHiddenLayers: false,
+            },
+          );
+          getSelectedLayers(state)
+            .filter(Layers.isPointsLayer)
+            .forEach((layer) => {
+              const boundingRect = boundingRects[layer.do_objectID];
+              layer.points.forEach((curvePoint, index) => {
+                const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+                if (isPointInRange(decodedPoint.point, point)) {
+                  selectedPoint = [layer.do_objectID, index];
+                }
+              });
+            });
+          if (selectedPoint) {
+            const alreadySelected = state.selectedPointLists[
+              selectedPoint[0]
+            ]?.includes(selectedPoint[1]);
+
+            dispatch(
+              'selectPoint',
+              selectedPoint,
+              event.shiftKey || event.metaKey
+                ? alreadySelected
+                  ? 'difference'
+                  : 'intersection'
+                : 'replace',
+            );
+          } else if (!(event.shiftKey || event.metaKey)) {
+            dispatch('selectPoint', undefined);
+          }
+
+          break;
+        }
         case 'hoverHandle':
         case 'none': {
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction) {
-              dispatch('interaction', ['maybeScale', point, direction]);
+              dispatch('interaction', [
+                'maybeScale',
+                point,
+                direction,
+                canvasSize,
+              ]);
 
               return;
             }
@@ -264,6 +308,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -280,7 +325,7 @@ export default memo(function Canvas() {
               );
             }
 
-            dispatch('interaction', ['maybeMove', point]);
+            dispatch('interaction', ['maybeMove', point, canvasSize]);
           } else {
             dispatch('selectLayer', undefined);
 
@@ -290,7 +335,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, insets],
+    [offsetEventPoint, state, CanvasKit, insets, dispatch, canvasSize],
   );
 
   const handleMouseMove = useCallback(
@@ -363,13 +408,13 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            CanvasKit,
             state,
             insets,
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -402,6 +447,7 @@ export default memo(function Canvas() {
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -478,13 +524,13 @@ export default memo(function Canvas() {
           const { origin, current } = state.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            CanvasKit,
             state,
             insets,
             createRect(origin, current),
             {
               clickThroughGroups: event.metaKey,
               includeHiddenLayers: false,
+              includeArtboardLayers: false,
             },
           );
 
@@ -521,7 +567,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, insets],
+    [offsetEventPoint, state, dispatch, insets],
   );
 
   const handleDirection =
@@ -556,7 +602,7 @@ export default memo(function Canvas() {
   }, [state.interactionState.type, handleDirection]);
 
   return (
-    <ContextMenu.Root items={menuItems} onSelect={handleSelectMenuItem}>
+    <ContextMenu.Root items={menuItems} onSelect={onSelectMenuItem}>
       <Container
         ref={containerRef}
         cursor={cursor}

@@ -13,6 +13,7 @@ import { SetNumberMode } from './styleReducer';
 
 export type LayerPropertyAction =
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
+  | [type: 'setLayerIsLocked', layerId: string | string[], isLocked: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
   | [type: 'setLayerX', rotation: number, mode?: SetNumberMode]
   | [type: 'setLayerY', rotation: number, mode?: SetNumberMode]
@@ -28,8 +29,11 @@ export function layerPropertyReducer(
   action: LayerPropertyAction,
 ): ApplicationState {
   switch (action[0]) {
-    case 'setLayerVisible': {
-      const [, id, visible] = action;
+    case 'setLayerVisible':
+    case 'setLayerIsLocked': {
+      const [type, id, value] = action;
+      const propertyName =
+        type === 'setLayerVisible' ? 'isVisible' : 'isLocked';
 
       const ids = typeof id === 'string' ? [id] : id;
 
@@ -43,7 +47,7 @@ export function layerPropertyReducer(
         const layers = accessPageLayers(draft, pageIndex, indexPaths);
 
         layers.forEach((layer) => {
-          layer.isVisible = visible;
+          layer[propertyName] = value;
         });
       });
     }
@@ -80,6 +84,9 @@ export function layerPropertyReducer(
             mode === 'replace' ? amount : layer.fixedRadius + amount;
 
           layer.fixedRadius = Math.max(0, newValue);
+          layer.points.forEach((point) => {
+            point.cornerRadius = newValue;
+          });
         });
       });
     }

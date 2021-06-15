@@ -1,5 +1,6 @@
-import type { CanvasKitInit, FontMgr } from 'canvaskit-wasm';
+import type { FontMgr } from 'canvaskit';
 import { v4 as uuid } from 'uuid';
+import { CanvasKitInit } from 'canvaskit';
 import { Context } from './context';
 import * as Primitives from './primitives';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
@@ -13,13 +14,10 @@ export type SimpleTextDecoration = Primitives.SimpleTextDecoration;
 
 export let fontManager: FontMgr;
 
-const init: typeof CanvasKitInit = require('canvaskit-wasm/bin/canvaskit.js');
-
 export async function load() {
   const [CanvasKit, fontBuffer] = await Promise.all([
-    init({
-      locateFile: (file: string) =>
-        'https://unpkg.com/canvaskit-wasm@0.25.0/bin/' + file,
+    CanvasKitInit({
+      locateFile: (file: string) => '/wasm/' + file,
     }),
     fetch(
       'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
