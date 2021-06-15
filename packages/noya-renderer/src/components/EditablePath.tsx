@@ -78,7 +78,7 @@ interface Props {
   layer: Sketch.AnyLayer;
   transform: AffineTransform;
   selectedIndexes: number[];
-  selectedControlPoint: SelectedControlPoint | undefined;
+  selectedControlPoint?: SelectedControlPoint;
 }
 
 export default function EditablePath({
@@ -121,41 +121,35 @@ export default function EditablePath({
       <Polyline points={points} paint={stroke} />
 
       {decodeCurvePoints.map((point, index) => {
+        if (point.curveMode === Sketch.CurveMode.Straight) return null;
         const points = [point.point, point.curveFrom];
         const isSelected =
           selectedControlPoint?.pointIndex === index &&
           selectedControlPoint.controlPointType === 'curveFrom';
         return (
           <Fragment key={index}>
-            {point.curveMode !== 1 && (
-              <>
-                <Polyline points={points} paint={stroke} />
-                <EditablePathControlPoint
-                  point={point.curveFrom}
-                  fill={isSelected ? selectedFill : fill}
-                />
-              </>
-            )}
+            <Polyline points={points} paint={stroke} />
+            <EditablePathControlPoint
+              point={point.curveFrom}
+              fill={isSelected ? selectedFill : fill}
+            />
           </Fragment>
         );
       })}
 
       {decodeCurvePoints.map((point, index) => {
+        if (point.curveMode === Sketch.CurveMode.Straight) return null;
         const points = [point.point, point.curveTo];
         const isSelected =
           selectedControlPoint?.pointIndex === index &&
           selectedControlPoint.controlPointType === 'curveTo';
         return (
           <Fragment key={index}>
-            {point.curveMode !== 1 && (
-              <>
-                <Polyline points={points} paint={stroke} />
-                <EditablePathControlPoint
-                  point={point.curveTo}
-                  fill={isSelected ? selectedFill : fill}
-                />
-              </>
-            )}
+            <Polyline points={points} paint={stroke} />
+            <EditablePathControlPoint
+              point={point.curveTo}
+              fill={isSelected ? selectedFill : fill}
+            />
           </Fragment>
         );
       })}

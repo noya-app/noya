@@ -81,9 +81,9 @@ export function pointReducer(
         }
 
         draft.selectedControlPoint = {
-          layerId: layerId,
-          pointIndex: pointIndex,
-          controlPointType: controlPointType,
+          layerId,
+          pointIndex,
+          controlPointType,
         };
       });
     }

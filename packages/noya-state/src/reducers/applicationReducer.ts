@@ -40,11 +40,11 @@ export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
 export type controlPointType = 'curveFrom' | 'curveTo';
 
-export interface SelectedControlPoint {
+export type SelectedControlPoint = {
   layerId: string;
   pointIndex: number;
   controlPointType: controlPointType;
-}
+};
 
 export type ApplicationState = {
   currentTab: WorkspaceTab;
@@ -53,7 +53,7 @@ export type ApplicationState = {
   selectedPage: string;
   selectedObjects: string[];
   selectedPointLists: Record<string, number[]>;
-  selectedControlPoint: SelectedControlPoint | undefined;
+  selectedControlPoint?: SelectedControlPoint;
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedTextStyleIds: string[];
