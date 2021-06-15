@@ -23,6 +23,12 @@ export type PointAction =
       type: 'selectPoint',
       selectedPoint: SelectedPoint | undefined,
       selectionType?: SelectionType,
+    ]
+  | [
+      type: 'selectControlPoint',
+      layerId: string,
+      pointIndex: number,
+      controlPointType: 'curveFrom' | 'curveTo',
     ];
 
 export type SelectedPoint = [layerId: string, index: number];
@@ -53,6 +59,7 @@ export function pointReducer(
       const [, selectedPoint, selectionType = 'replace'] = action;
 
       return produce(state, (draft) => {
+        draft.selectedControlPoint = undefined;
         for (let layerId in draft.selectedPointLists) {
           const currentIds = draft.selectedPointLists[layerId];
           updateSelection(
@@ -63,6 +70,21 @@ export function pointReducer(
             selectionType,
           );
         }
+      });
+    }
+    case 'selectControlPoint': {
+      const [, layerId, pointIndex, controlPointType] = action;
+
+      return produce(state, (draft) => {
+        for (let layerId in draft.selectedPointLists) {
+          draft.selectedPointLists[layerId] = [];
+        }
+
+        draft.selectedControlPoint = {
+          layerId: layerId,
+          pointIndex: pointIndex,
+          controlPointType: controlPointType,
+        };
       });
     }
     case 'setPointX':

@@ -12,7 +12,7 @@ import {
   useStroke,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
-import { Layers, Selectors } from 'noya-state';
+import { Layers, SelectedControlPoint, Selectors } from 'noya-state';
 import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import { useTheme } from 'styled-components';
 import React, { Fragment, useMemo } from 'react';
@@ -78,12 +78,14 @@ interface Props {
   layer: Sketch.AnyLayer;
   transform: AffineTransform;
   selectedIndexes: number[];
+  selectedControlPoint: SelectedControlPoint | undefined;
 }
 
 export default function EditablePath({
   layer,
   transform,
   selectedIndexes,
+  selectedControlPoint,
 }: Props) {
   const { CanvasKit } = useReactCanvasKit();
   const {
@@ -123,20 +125,32 @@ export default function EditablePath({
 
       {controlPoints.map((point, index) => {
         const points = [point.point, point.curveFrom];
+        const isSelected =
+          selectedControlPoint?.pointIndex === index &&
+          selectedControlPoint.controlPointType === 'curveFrom';
         return (
           <Fragment key={index}>
             <Polyline points={points} paint={stroke} />
-            <EditablePathControlPoint point={point.curveFrom} fill={fill} />
+            <EditablePathControlPoint
+              point={point.curveFrom}
+              fill={isSelected ? selectedFill : fill}
+            />
           </Fragment>
         );
       })}
 
       {controlPoints.map((point, index) => {
         const points = [point.point, point.curveTo];
+        const isSelected =
+          selectedControlPoint?.pointIndex === index &&
+          selectedControlPoint.controlPointType === 'curveTo';
         return (
           <Fragment key={index}>
             <Polyline points={points} paint={stroke} />
-            <EditablePathControlPoint point={point.curveTo} fill={fill} />
+            <EditablePathControlPoint
+              point={point.curveTo}
+              fill={isSelected ? selectedFill : fill}
+            />
           </Fragment>
         );
       })}

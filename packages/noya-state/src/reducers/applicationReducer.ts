@@ -38,6 +38,14 @@ export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 
+export type controlPointType = 'curveFrom' | 'curveTo';
+
+export interface SelectedControlPoint {
+  layerId: string;
+  pointIndex: number;
+  controlPointType: controlPointType;
+}
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -45,6 +53,7 @@ export type ApplicationState = {
   selectedPage: string;
   selectedObjects: string[];
   selectedPointLists: Record<string, number[]>;
+  selectedControlPoint: SelectedControlPoint | undefined;
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
   selectedTextStyleIds: string[];
@@ -260,6 +269,7 @@ export function applicationReducer(
     case 'setPointX':
     case 'setPointY':
     case 'selectPoint':
+    case 'selectControlPoint':
       return pointReducer(state, action);
     default:
       return themeReducer(state, action);
@@ -294,6 +304,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     selectedPointLists: {},
+    selectedControlPoint: undefined,
     selectedSwatchIds: [],
     selectedLayerStyleIds: [],
     selectedTextStyleIds: [],

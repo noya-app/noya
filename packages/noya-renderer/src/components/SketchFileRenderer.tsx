@@ -453,9 +453,7 @@ export default memo(function SketchFileRenderer() {
 
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
-
     const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
-
     return (
       <>
         {selectedLayerIndexPaths.map((indexPath) => {
@@ -473,6 +471,7 @@ export default memo(function SketchFileRenderer() {
               selectedIndexes={
                 state.selectedPointLists[layer.do_objectID] ?? []
               }
+              selectedControlPoint={state.selectedControlPoint}
             />
           );
         })}

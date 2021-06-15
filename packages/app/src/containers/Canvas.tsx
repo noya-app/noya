@@ -243,6 +243,7 @@ export default memo(function Canvas() {
         }
         case 'editPath': {
           let selectedPoint: SelectedPoint | undefined = undefined;
+          let hasContolPoint = false;
           const boundingRects = getBoundingRectMap(
             getCurrentPage(state),
             state.selectedObjects,
@@ -260,6 +261,22 @@ export default memo(function Canvas() {
                 const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
                 if (isPointInRange(decodedPoint.point, point)) {
                   selectedPoint = [layer.do_objectID, index];
+                } else if (isPointInRange(decodedPoint.curveTo, point)) {
+                  hasContolPoint = true;
+                  dispatch(
+                    'selectControlPoint',
+                    layer.do_objectID,
+                    index,
+                    'curveTo',
+                  );
+                } else if (isPointInRange(decodedPoint.curveFrom, point)) {
+                  hasContolPoint = true;
+                  dispatch(
+                    'selectControlPoint',
+                    layer.do_objectID,
+                    index,
+                    'curveFrom',
+                  );
                 }
               });
             });
@@ -277,7 +294,7 @@ export default memo(function Canvas() {
                   : 'intersection'
                 : 'replace',
             );
-          } else if (!(event.shiftKey || event.metaKey)) {
+          } else if (!(event.shiftKey || event.metaKey) && !hasContolPoint) {
             dispatch('selectPoint', undefined);
           }
 
