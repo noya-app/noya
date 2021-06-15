@@ -8,6 +8,7 @@ import {
   CompassDirection,
   Layers,
   Point,
+  SelectedControlPoint,
   Selectors,
   ShapeType,
 } from 'noya-state';
@@ -243,7 +244,7 @@ export default memo(function Canvas() {
         }
         case 'editPath': {
           let selectedPoint: SelectedPoint | undefined = undefined;
-          let selectedControlPoint: any = undefined;
+          let selectedControlPoint: SelectedControlPoint | undefined;
 
           const boundingRects = getBoundingRectMap(
             getCurrentPage(state),
@@ -263,8 +264,7 @@ export default memo(function Canvas() {
 
                 if (isPointInRange(decodedPoint.point, point)) {
                   selectedPoint = [layer.do_objectID, index];
-                }
-                if (isPointInRange(decodedPoint.curveTo, point)) {
+                } else if (isPointInRange(decodedPoint.curveTo, point)) {
                   selectedControlPoint = {
                     layerId: layer.do_objectID,
                     pointIndex: index,
