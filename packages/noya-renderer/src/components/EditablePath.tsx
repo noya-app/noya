@@ -115,42 +115,47 @@ export default function EditablePath({
   );
 
   const points = decodeCurvePoints.map((point) => point.point);
-  const controlPoints = decodeCurvePoints.filter(
-    (point) => point.curveMode !== 1,
-  );
 
   return (
     <Group transform={localTransform}>
       <Polyline points={points} paint={stroke} />
 
-      {controlPoints.map((point, index) => {
+      {decodeCurvePoints.map((point, index) => {
         const points = [point.point, point.curveFrom];
         const isSelected =
           selectedControlPoint?.pointIndex === index &&
           selectedControlPoint.controlPointType === 'curveFrom';
         return (
           <Fragment key={index}>
-            <Polyline points={points} paint={stroke} />
-            <EditablePathControlPoint
-              point={point.curveFrom}
-              fill={isSelected ? selectedFill : fill}
-            />
+            {point.curveMode !== 1 && (
+              <>
+                <Polyline points={points} paint={stroke} />
+                <EditablePathControlPoint
+                  point={point.curveFrom}
+                  fill={isSelected ? selectedFill : fill}
+                />
+              </>
+            )}
           </Fragment>
         );
       })}
 
-      {controlPoints.map((point, index) => {
+      {decodeCurvePoints.map((point, index) => {
         const points = [point.point, point.curveTo];
         const isSelected =
           selectedControlPoint?.pointIndex === index &&
           selectedControlPoint.controlPointType === 'curveTo';
         return (
           <Fragment key={index}>
-            <Polyline points={points} paint={stroke} />
-            <EditablePathControlPoint
-              point={point.curveTo}
-              fill={isSelected ? selectedFill : fill}
-            />
+            {point.curveMode !== 1 && (
+              <>
+                <Polyline points={points} paint={stroke} />
+                <EditablePathControlPoint
+                  point={point.curveTo}
+                  fill={isSelected ? selectedFill : fill}
+                />
+              </>
+            )}
           </Fragment>
         );
       })}
