@@ -1,7 +1,7 @@
 import { windowsOf } from './windowsOf';
 
 function isIncreasing(values: number[]) {
-  return windowsOf(values, 2).every(([a, b]) => a < b);
+  return windowsOf(values, 2).every(([a, b]) => a <= b);
 }
 
 function lerp(a: number, b: number, t: number) {

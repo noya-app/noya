@@ -3,8 +3,8 @@ import { sketchColorToRgba } from 'noya-designsystem';
 import { getGradientBackground } from 'noya-designsystem/src/utils/getGradientBackground';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
-import { colorAt, RGBA_MAX } from '../utils/colorAt';
 import { RgbaColor } from '../types';
+import { interpolateRgba } from '../utils/interpolateRgba';
 import { Interaction, Interactive } from './Interactive';
 import Pointer from './Pointer';
 
@@ -52,10 +52,10 @@ export default memo(function Gradient({
 
     const gradient = gradients.map((g, index) => ({
       color: sketchColorToRgba(g.color),
-      pos: index === 0 ? 0 : index === 1 ? 1 : g.position,
+      position: index === 0 ? 0 : index === 1 ? 1 : g.position,
     }));
 
-    const color = colorAt(gradient, interaction.left, RGBA_MAX);
+    const color = interpolateRgba(gradient, interaction.left);
 
     onAdd(color, interaction.left);
   };
