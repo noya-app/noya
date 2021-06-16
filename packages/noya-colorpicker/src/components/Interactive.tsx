@@ -46,16 +46,26 @@ interface Props {
   onMove: (interaction: Interaction) => void;
   onKey: (offset?: Interaction) => void;
   onClick?: (interaction: Interaction | number) => void;
+  onDelete?: () => void;
+  onClickPointer?: (index: number) => void;
   children: React.ReactNode;
 }
 
-const InteractiveBase = ({ onMove, onKey, onClick, ...rest }: Props) => {
+const InteractiveBase = ({
+  onMove,
+  onKey,
+  onClick,
+  onDelete,
+  onClickPointer,
+  ...rest
+}: Props) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
   const isDragging = useRef(false);
   const onMoveCallback = useEventCallback(onMove);
   const onKeyCallback = useEventCallback(onKey);
   const onClickCallback = useEventCallback(onClick);
+  const onClickPointerCallback = useEventCallback(onClickPointer);
 
   // Prevent mobile browsers from handling mouse events (conflicting with touch ones).
   // If we detected a touch interaction before, we prefer reacting to touch events only.
@@ -107,10 +117,8 @@ const InteractiveBase = ({ onMove, onKey, onClick, ...rest }: Props) => {
           onClickCallback(getRelativePosition(container.current!, event));
           return;
         }
-
-        if (event.target instanceof HTMLElement) {
-          //is this correct?
-          event.target.click();
+        if (onClickPointer && event.target instanceof HTMLElement) {
+          onClickPointerCallback(Number(event.target.dataset.index));
         }
       } else {
         // The node/ref must actually exist when user start an interaction.
@@ -120,14 +128,20 @@ const InteractiveBase = ({ onMove, onKey, onClick, ...rest }: Props) => {
 
       isDragging.current = true;
     },
-    [onMoveCallback, onClickCallback, onClick],
+    [
+      onMoveCallback,
+      onClickCallback,
+      onClickPointer,
+      onClickPointerCallback,
+      onClick,
+    ],
   );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       const keyCode = event.which || event.keyCode;
 
-      if (keyCode === 46) onKeyCallback();
+      if (onDelete && keyCode === 46) onDelete();
       // Ignore all keys except arrow ones
       if (keyCode < 37 || keyCode > 40) return;
       // Do not scroll page by arrow keys when document is focused on the element
@@ -140,7 +154,7 @@ const InteractiveBase = ({ onMove, onKey, onClick, ...rest }: Props) => {
         top: keyCode === 40 ? 0.05 : keyCode === 38 ? -0.05 : 0,
       });
     },
-    [onKeyCallback],
+    [onKeyCallback, onDelete],
   );
 
   const handleMoveEnd = useCallback((event: MouseEvent | TouchEvent) => {

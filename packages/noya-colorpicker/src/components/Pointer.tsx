@@ -24,6 +24,7 @@ interface Props {
 export default memo(function Pointer({
   top = 0.5,
   left,
+  index,
   selected = false,
   onClick,
 }: Props): JSX.Element {
@@ -37,7 +38,8 @@ export default memo(function Pointer({
 
   return (
     <Container
-      className={`pointer ${left}`}
+      data-index={index}
+      className={'pointer'}
       style={style}
       onClick={onClick}
       selected={selected}

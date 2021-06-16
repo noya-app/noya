@@ -1,34 +1,32 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { sketchColorToRgbaString } from '..';
 
+const getRGBAColor = (value: Sketch.GradientStop[], num: 100 | 360) =>
+  [...value]
+    .sort((a, b) => a.position - b.position)
+    .map(
+      (g) =>
+        `${sketchColorToRgbaString(g.color)} ${g.position * num}${
+          num === 100 ? '%' : 'deg'
+        }`,
+    )
+    .join(', \n');
+
 export function getGradientBackground(
   value: Sketch.GradientStop[],
   type: Sketch.GradientType,
-  direction: 'vertical' | 'horizontal' | number,
+  direction?: number,
 ) {
   if (type === Sketch.GradientType.Angular) {
-    const color = [...value]
-      .sort((a, b) => a.position - b.position)
-      .map((g) => `${sketchColorToRgbaString(g.color)} ${g.position * 360}deg`)
-      .join(', \n');
-
-    return `conic-gradient(${color})`;
+    return `conic-gradient(${getRGBAColor(value, 360)})`;
   }
 
-  const color = [...value]
-    .sort((a, b) => a.position - b.position)
-    .map((g) => `${sketchColorToRgbaString(g.color)} ${g.position * 100}%`)
-    .join(', \n');
-
+  const color = getRGBAColor(value, 100);
   const position =
     type === Sketch.GradientType.Radial
       ? 'radial-gradient(circle'
       : `linear-gradient(${
-          typeof direction === 'number'
-            ? direction
-            : direction === 'vertical'
-            ? 180
-            : 90
+          typeof direction !== undefined ? direction : 180
         }deg`;
 
   return `${position}, ${color})`;

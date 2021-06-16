@@ -61,12 +61,7 @@ export default memo(function Gradient({
   };
 
   const background = useMemo(
-    () =>
-      getGradientBackground(
-        gradients,
-        Sketch.GradientType.Linear,
-        'horizontal',
-      ),
+    () => getGradientBackground(gradients, Sketch.GradientType.Linear, 90),
     [gradients],
   );
   return (
@@ -75,14 +70,15 @@ export default memo(function Gradient({
         onMove={handleMove}
         onKey={handleKey}
         onClick={handleClick}
+        onDelete={onDelete}
+        onClickPointer={onSelectStop}
         aria-label="Gradient"
       >
         {gradients.map((g, index) => (
           <Pointer
-            key={`gradients-point-${index}`}
             index={index}
+            key={`gradients-point-${index}`}
             selected={index === selectedStop}
-            onClick={() => onSelectStop(index)}
             left={g.position}
           />
         ))}
