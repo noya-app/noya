@@ -1,5 +1,5 @@
 import { SetNumberMode } from 'noya-state';
-import { getSelectedPoints } from 'noya-state/src/selectors/pointSelectors';
+import { getSelectedControlPoint } from 'noya-state/src/selectors/pointSelectors';
 import React, { memo, useCallback } from 'react';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
@@ -14,23 +14,29 @@ export default memo(function ControlPointCoordinatesInspector() {
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointX', value, mode);
+      dispatch('setControlPointX', value, mode);
     },
     [dispatch],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointY', value, mode);
+      dispatch('setControlPointY', value, mode);
     },
     [dispatch],
   );
 
-  const selectedPoints = getSelectedPoints(state).map(
-    (curvePoint) => curvePoint.point,
-  );
-  const pointX = getMultiNumberValue(selectedPoints.map((point) => point.x));
-  const pointY = getMultiNumberValue(selectedPoints.map((point) => point.y));
+  const selectedControlPoint = getSelectedControlPoint(state);
+  if (!selectedControlPoint || !state.selectedControlPoint) {
+    return;
+  }
+
+  const pointX = getMultiNumberValue([
+    selectedControlPoint[state.selectedControlPoint.controlPointType].x,
+  ]);
+  const pointY = getMultiNumberValue([
+    selectedControlPoint[state.selectedControlPoint.controlPointType].y,
+  ]);
 
   return (
     <CoordinatesInspector

@@ -20,6 +20,11 @@ export type PointAction =
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
   | [
+      type: 'setControlPointX' | 'setControlPointY',
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
       type: 'selectPoint',
       selectedPoint: SelectedPoint | undefined,
       selectionType?: SelectionType,
@@ -171,6 +176,10 @@ export function pointReducer(
           layer.points = encodedPoints;
         });
       });
+    }
+    case 'setControlPointX':
+    case 'setControlPointY': {
+      return produce(state, (draft) => {});
     }
     default:
       return state;

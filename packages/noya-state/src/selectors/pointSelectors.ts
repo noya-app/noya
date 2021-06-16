@@ -57,3 +57,49 @@ export const getSelectedPoints = (
 
   return points;
 };
+
+export const getSelectedControlPoint = (
+  state: ApplicationState,
+): DecodedCurvePoint | undefined => {
+  if (!state.selectedControlPoint) {
+    return undefined;
+  }
+
+  const page = getCurrentPage(state);
+  const boundingRects = getBoundingRectMap(
+    getCurrentPage(state),
+    [state.selectedControlPoint.layerId],
+    {
+      clickThroughGroups: true,
+      includeArtboardLayers: false,
+      includeHiddenLayers: false,
+    },
+  );
+
+  let point: DecodedCurvePoint | undefined;
+
+  visit(page, (layer) => {
+    const boundingRect = boundingRects[layer.do_objectID];
+    const pointList = [state.selectedControlPoint?.pointIndex];
+
+    if (
+      !boundingRect ||
+      !pointList ||
+      pointList.length === 0 ||
+      !Layers.isPointsLayer(layer)
+    )
+      return;
+
+    const selectedPoints = layer.points.filter((_, index) =>
+      pointList.includes(index),
+    );
+
+    if (selectedPoints.length === 0) return;
+
+    const decodedPoints = decodeCurvePoint(selectedPoints[0], boundingRect);
+
+    point = decodedPoints;
+  });
+
+  return point;
+};
