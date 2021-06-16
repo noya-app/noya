@@ -19,6 +19,7 @@ import LayerThemeInspector from './LayerThemeInspector';
 import OpacityInspector from './OpacityInspector';
 import PointControlsInspector from './PointControlsInspector';
 import PointCoordinatesInspector from './PointCoordinatesInspector';
+import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
@@ -73,6 +74,8 @@ export default memo(function Inspector() {
   );
 
   const isEditingPath = state.interactionState.type === 'editPath';
+  const isEditingControlPoint =
+    state.interactionState.type === 'editPath' && state.selectedControlPoint;
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps =
@@ -108,7 +111,11 @@ export default memo(function Inspector() {
       <Fragment key="layout">
         <AlignmentInspector />
         {isEditingPath ? (
-          <PointCoordinatesInspector />
+          isEditingControlPoint ? (
+            <ControlPointCoordinatesInspector />
+          ) : (
+            <PointCoordinatesInspector />
+          )
         ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
@@ -143,13 +150,14 @@ export default memo(function Inspector() {
     return withSeparatorElements(views, <Divider />);
   }, [
     selectedLayers,
+    isEditingPath,
+    isEditingControlPoint,
     handleSetRotation,
     handleSetX,
     handleSetY,
     handleSetWidth,
     handleSetHeight,
     hasFixedRadiusLayers,
-    isEditingPath,
     hasContextSettingsLayers,
   ]);
 
