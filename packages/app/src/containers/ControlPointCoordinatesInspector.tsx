@@ -14,16 +14,26 @@ export default memo(function ControlPointCoordinatesInspector() {
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setControlPointX', value, mode);
+      dispatch(
+        'setControlPointX',
+        value,
+        state.selectedControlPoint?.controlPointType,
+        mode,
+      );
     },
-    [dispatch],
+    [dispatch, state.selectedControlPoint?.controlPointType],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setControlPointY', value, mode);
+      dispatch(
+        'setControlPointY',
+        value,
+        state.selectedControlPoint?.controlPointType,
+        mode,
+      );
     },
-    [dispatch],
+    [dispatch, state.selectedControlPoint?.controlPointType],
   );
 
   const selectedControlPoint = getSelectedControlPoint(state);

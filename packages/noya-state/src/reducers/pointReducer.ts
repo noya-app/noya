@@ -13,7 +13,11 @@ import {
   getSelectedLayerIndexPaths,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState, SetNumberMode } from './applicationReducer';
+import {
+  ApplicationState,
+  controlPointType,
+  SetNumberMode,
+} from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
@@ -22,6 +26,7 @@ export type PointAction =
   | [
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
+      controlPointType: controlPointType | undefined,
       mode?: SetNumberMode,
     ]
   | [
@@ -179,7 +184,94 @@ export function pointReducer(
     }
     case 'setControlPointX':
     case 'setControlPointY': {
-      return produce(state, (draft) => {});
+      if (!state.selectedControlPoint) return state;
+      const [type, amount, controlPointType, mode] = action;
+      const axis = type === 'setControlPointX' ? 'x' : 'y';
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const boundingRects = getBoundingRectMap(
+        getCurrentPage(state),
+        [state.selectedControlPoint?.layerId],
+        {
+          clickThroughGroups: true,
+          includeArtboardLayers: false,
+          includeHiddenLayers: false,
+        },
+      );
+
+      return produce(state, (draft) => {
+        layerIndexPaths.forEach((indexPath) => {
+          const page = draft.sketch.pages[pageIndex];
+          const layer = Layers.access(page, indexPath);
+          const pointList = [state.selectedControlPoint?.pointIndex];
+          const boundingRect = boundingRects[layer.do_objectID];
+
+          if (!Layers.isPointsLayer(layer) || !pointList || !boundingRect)
+            return;
+
+          // Update all points by first transforming to the canvas's coordinate system
+          layer.points
+            .filter((_, index) => pointList.includes(index))
+            .forEach((curvePoint) => {
+              const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+              (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
+                const newValue =
+                  mode === 'replace'
+                    ? amount
+                    : decodedPoint[key][axis] + amount;
+
+                decodedPoint[key] = {
+                  ...decodedPoint[key],
+                  [axis]: newValue,
+                };
+              });
+
+              const encodedPoint = encodeCurvePoint(decodedPoint, boundingRect);
+
+              if (!controlPointType) return state;
+
+              //TODO: why are the controlPointTypes switched?
+              if (controlPointType === 'curveFrom') {
+                curvePoint.curveTo = encodedPoint.curveTo;
+              } else {
+                curvePoint.curveFrom = encodedPoint.curveFrom;
+              }
+            });
+
+          const decodedPoints = layer.points.map((curvePoint) =>
+            decodeCurvePoint(curvePoint, boundingRect),
+          );
+
+          // Determine the new bounds of the updated points
+          const newBounds = {
+            minX: Math.min(
+              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
+            ),
+            maxX: Math.max(
+              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
+            ),
+            minY: Math.min(
+              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
+            ),
+            maxY: Math.max(
+              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
+            ),
+          };
+
+          layer.frame = {
+            ...layer.frame,
+            ...createRectFromBounds(newBounds),
+          };
+
+          // Transform back to the range [0, 1], using the new bounds
+          const encodedPoints = decodedPoints.map((decodedCurvePoint) =>
+            encodeCurvePoint(decodedCurvePoint, layer.frame),
+          );
+
+          layer.points = encodedPoints;
+        });
+      });
     }
     default:
       return state;
