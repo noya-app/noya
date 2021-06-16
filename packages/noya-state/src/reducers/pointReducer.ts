@@ -18,6 +18,8 @@ import {
   controlPointType,
   SetNumberMode,
 } from './applicationReducer';
+// import { getStrokedPath } from 'noya-renderer/src/primitives/path';
+// import { useReactCanvasKit } from 'noya-react-canvaskit';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
@@ -238,6 +240,19 @@ export function pointReducer(
                 curvePoint.curveFrom = encodedPoint.curveFrom;
               }
             });
+
+          // TESTING COMPUTETIGHTBOUNDS
+          // const { CanvasKit } = useReactCanvasKit();
+          // const path = new CanvasKit.Path();
+
+          // path.addRect(CanvasKit.XYWHRect(100, 500, 400, 400));
+
+          // // const testing = getStrokedPath(
+          // //   CanvasKit,
+          // //   path,
+          // //   100,
+          // // ).computeTightBounds();
+          // // console.log({ testing });
 
           const decodedPoints = layer.points.map((curvePoint) =>
             decodeCurvePoint(curvePoint, boundingRect),
