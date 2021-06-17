@@ -1,6 +1,7 @@
 import { SetNumberMode } from 'noya-state';
 import { getSelectedControlPoint } from 'noya-state/src/selectors/pointSelectors';
 import React, { memo, useCallback } from 'react';
+import useCanvasKit from '../hooks/useCanvasKit';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
@@ -11,6 +12,7 @@ import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 export default memo(function ControlPointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();
+  const CanvasKit = useCanvasKit();
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
@@ -18,10 +20,11 @@ export default memo(function ControlPointCoordinatesInspector() {
         'setControlPointX',
         value,
         state.selectedControlPoint?.controlPointType,
+        CanvasKit,
         mode,
       );
     },
-    [dispatch, state.selectedControlPoint?.controlPointType],
+    [CanvasKit, dispatch, state.selectedControlPoint?.controlPointType],
   );
 
   const handleSetPointY = useCallback(
@@ -30,10 +33,11 @@ export default memo(function ControlPointCoordinatesInspector() {
         'setControlPointY',
         value,
         state.selectedControlPoint?.controlPointType,
+        CanvasKit,
         mode,
       );
     },
-    [dispatch, state.selectedControlPoint?.controlPointType],
+    [CanvasKit, dispatch, state.selectedControlPoint?.controlPointType],
   );
 
   const selectedControlPoint = getSelectedControlPoint(state);

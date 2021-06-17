@@ -1,10 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { createRectFromBounds } from 'noya-geometry';
+import { createRectFromBounds, Rect } from 'noya-geometry';
 import {
   decodeCurvePoint,
   encodeCurvePoint,
 } from 'noya-renderer/src/primitives';
+import { path } from 'noya-renderer/src/primitives/path';
 import * as Layers from '../layers';
 import {
   getBoundingRectMap,
@@ -18,8 +20,6 @@ import {
   controlPointType,
   SetNumberMode,
 } from './applicationReducer';
-// import { getStrokedPath } from 'noya-renderer/src/primitives/path';
-// import { useReactCanvasKit } from 'noya-react-canvaskit';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
@@ -29,6 +29,7 @@ export type PointAction =
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
       controlPointType: controlPointType | undefined,
+      canvasKit: CanvasKit,
       mode?: SetNumberMode,
     ]
   | [
@@ -187,7 +188,7 @@ export function pointReducer(
     case 'setControlPointX':
     case 'setControlPointY': {
       if (!state.selectedControlPoint) return state;
-      const [type, amount, controlPointType, mode] = action;
+      const [type, amount, controlPointType, CanvasKit, mode] = action;
       const axis = type === 'setControlPointX' ? 'x' : 'y';
 
       const pageIndex = getCurrentPageIndex(state);
@@ -241,42 +242,26 @@ export function pointReducer(
               }
             });
 
-          // TESTING COMPUTETIGHTBOUNDS
-          // const { CanvasKit } = useReactCanvasKit();
-          // const path = new CanvasKit.Path();
-
-          // path.addRect(CanvasKit.XYWHRect(100, 500, 400, 400));
-
-          // // const testing = getStrokedPath(
-          // //   CanvasKit,
-          // //   path,
-          // //   100,
-          // // ).computeTightBounds();
-          // // console.log({ testing });
-
           const decodedPoints = layer.points.map((curvePoint) =>
             decodeCurvePoint(curvePoint, boundingRect),
           );
 
-          // Determine the new bounds of the updated points
-          const newBounds = {
-            minX: Math.min(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
-            ),
-            maxX: Math.max(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
-            ),
-            minY: Math.min(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
-            ),
-            maxY: Math.max(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
-            ),
+          const layerPath = path(
+            CanvasKit,
+            layer.points,
+            layer.frame,
+          ).computeTightBounds();
+
+          const newRect: Rect = {
+            x: layerPath[0],
+            y: layerPath[1],
+            width: layerPath[2] - layerPath[0],
+            height: layerPath[3] - layerPath[1],
           };
 
           layer.frame = {
             ...layer.frame,
-            ...createRectFromBounds(newBounds),
+            ...newRect,
           };
 
           // Transform back to the range [0, 1], using the new bounds
