@@ -1,4 +1,4 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
+import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
@@ -27,7 +27,6 @@ export default memo(function FillInspector({
   ]);
   // TODO: Modify all fills
   const firstFill = useMemo(() => fills[0] || [], [fills]);
-
   return (
     <ArrayController<FileFormat.Fill>
       title={title}
@@ -66,8 +65,37 @@ export default memo(function FillInspector({
         }) => (
           <FillRow
             id={`fill-${index}`}
-            color={item.color}
+            value={
+              item.fillType === FileFormat.FillType.Gradient
+                ? item.gradient
+                : item.fillType === FileFormat.FillType.Color
+                ? item.color
+                : {
+                    _class: 'pattern',
+                    image: item.image,
+                    patternFillType: item.patternFillType,
+                    patternTileScale: item.patternTileScale,
+                  }
+            }
             prefix={checkbox}
+            onChangeFillType={(value) =>
+              dispatch('setFillFillType', index, value)
+            }
+            onChangeGradientColor={(value, stopIndex) =>
+              dispatch('setFillGradientColor', index, stopIndex, value)
+            }
+            onChangeGradientPosition={(value, stopIndex) => {
+              dispatch('setFillGradientPosition', index, stopIndex, value);
+            }}
+            onAddGradientStop={(color, position) =>
+              dispatch('addFillGradientStop', index, color, position)
+            }
+            onDeleteGradientStop={(value) =>
+              dispatch('deleteFillGradientStop', index, value)
+            }
+            onChangeGradientType={(value) =>
+              dispatch('setFillGradientType', index, value)
+            }
             onChangeOpacity={(value) =>
               dispatch('setFillOpacity', index, value)
             }
@@ -77,6 +105,7 @@ export default memo(function FillInspector({
             onChangeColor={(value) => dispatch('setFillColor', index, value)}
           />
         ),
+
         [dispatch],
       )}
     </ArrayController>

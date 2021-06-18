@@ -45,15 +45,27 @@ const getRelativePosition = (
 interface Props {
   onMove: (interaction: Interaction) => void;
   onKey: (offset: Interaction) => void;
+  onClick?: (interaction: Interaction | number) => void;
+  onDelete?: () => void;
+  onClickPointer?: (index: number) => void;
   children: React.ReactNode;
 }
 
-const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
+const InteractiveBase = ({
+  onMove,
+  onKey,
+  onClick,
+  onDelete,
+  onClickPointer,
+  ...rest
+}: Props) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
   const isDragging = useRef(false);
-  const onMoveCallback = useEventCallback<Interaction>(onMove);
-  const onKeyCallback = useEventCallback<Interaction>(onKey);
+  const onMoveCallback = useEventCallback(onMove);
+  const onKeyCallback = useEventCallback(onKey);
+  const onClickCallback = useEventCallback(onClick);
+  const onClickPointerCallback = useEventCallback(onClickPointer);
 
   // Prevent mobile browsers from handling mouse events (conflicting with touch ones).
   // If we detected a touch interaction before, we prefer reacting to touch events only.
@@ -97,19 +109,39 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
 
       if (!isValid(event)) return;
 
-      // The node/ref must actually exist when user start an interaction.
-      // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
-      onMoveCallback(getRelativePosition(container.current!, event));
+      if (onClick) {
+        if (
+          event.target instanceof HTMLElement &&
+          !event.target.classList.contains('pointer')
+        ) {
+          onClickCallback(getRelativePosition(container.current!, event));
+          return;
+        }
+        if (onClickPointer && event.target instanceof HTMLElement) {
+          onClickPointerCallback(Number(event.target.dataset.index));
+        }
+      } else {
+        // The node/ref must actually exist when user start an interaction.
+        // We won't suppress the ESLint warning though, as it should probably be something to be aware of.
+        onMoveCallback(getRelativePosition(container.current!, event));
+      }
 
       isDragging.current = true;
     },
-    [onMoveCallback],
+    [
+      onMoveCallback,
+      onClickCallback,
+      onClickPointer,
+      onClickPointerCallback,
+      onClick,
+    ],
   );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       const keyCode = event.which || event.keyCode;
 
+      if (onDelete && keyCode === 46) onDelete();
       // Ignore all keys except arrow ones
       if (keyCode < 37 || keyCode > 40) return;
       // Do not scroll page by arrow keys when document is focused on the element
@@ -122,7 +154,7 @@ const InteractiveBase = ({ onMove, onKey, ...rest }: Props) => {
         top: keyCode === 40 ? 0.05 : keyCode === 38 ? -0.05 : 0,
       });
     },
-    [onKeyCallback],
+    [onKeyCallback, onDelete],
   );
 
   const handleMoveEnd = useCallback((event: MouseEvent | TouchEvent) => {

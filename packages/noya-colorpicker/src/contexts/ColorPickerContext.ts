@@ -3,7 +3,9 @@ import { HsvaColor } from '../types';
 
 type ColorPickerContextValue = [
   hsva: HsvaColor,
-  onChange: (color: Partial<HsvaColor>) => void,
+  onChange: (
+    color: Partial<HsvaColor>,
+  ) => void,
 ];
 
 const ColorPickerContext = createContext<ColorPickerContextValue | undefined>(

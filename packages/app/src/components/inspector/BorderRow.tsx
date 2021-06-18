@@ -47,25 +47,38 @@ const Row = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  color: Sketch.Color;
+  value: Sketch.Color | Sketch.Gradient;
   width: DimensionValue;
   position: Sketch.BorderPosition;
   onChangeColor: (color: Sketch.Color) => void;
   onChangePosition: (value: Sketch.BorderPosition) => void;
   onChangeWidth: (amount: number) => void;
+  onChangeFillType: (type: Sketch.FillType) => void;
+  onChangeGradientColor: (color: Sketch.Color, index: number) => void;
+  onChangeGradientPosition: (index: number, position: number) => void;
+  onAddGradientStop: (color: Sketch.Color, position: number) => void;
+  onDeleteGradientStop: (index: number) => void;
+
+  onChangeGradientType: (type: Sketch.GradientType) => void;
   onNudgeWidth: (amount: number) => void;
   prefix?: ReactNode;
 }
 
 export default memo(function BorderRow({
   id,
-  color,
+  value,
   width,
   position,
   onChangeColor,
   onChangeWidth,
   onChangePosition,
   onNudgeWidth,
+  onChangeFillType,
+  onChangeGradientColor,
+  onChangeGradientPosition,
+  onAddGradientStop,
+  onDeleteGradientStop,
+  onChangeGradientType,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
@@ -109,8 +122,14 @@ export default memo(function BorderRow({
         {prefix && <Spacer.Horizontal size={8} />}
         <ColorInputFieldWithPicker
           id={colorInputId}
-          value={color}
+          value={value}
           onChange={onChangeColor}
+          onChangeType={onChangeFillType}
+          onChangeGradientColor={onChangeGradientColor}
+          onChangeGradientPosition={onChangeGradientPosition}
+          onAddGradientStop={onAddGradientStop}
+          onChangeGradientType={onChangeGradientType}
+          onDeleteGradientStop={onDeleteGradientStop}
         />
         <Spacer.Horizontal size={8} />
         <RadioGroup.Root

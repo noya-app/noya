@@ -9,7 +9,7 @@ import Pointer from './Pointer';
 
 const Container = styled.div<{ colorFrom: string; colorTo: string }>(
   ({ colorFrom, colorTo }) => ({
-    position: 'relative' as any,
+    position: 'relative',
     height: '8px',
     borderRadius: '8px',
     boxShadow: '0 0 0 1px rgba(0,0,0,0.2) inset',
@@ -29,8 +29,9 @@ export default memo(function Alpha(): JSX.Element {
     onChange({ a: interaction.left });
   };
 
-  const handleKey = (offset: Interaction) => {
+  const handleKey = (offset?: Interaction) => {
     // Alpha always fit into [0, 1] range
+    if (!offset) return;
     onChange({ a: clamp(hsva.a + offset.left) });
   };
 

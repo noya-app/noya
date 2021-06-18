@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { GradientAction, gradientReducer } from './gradientReducer';
 import * as Models from '../models';
 import {
   ColorControlsAction,
@@ -44,6 +45,12 @@ export type StyleAction =
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
+  | [
+      type: `set${Exclude<StyleElementType, 'Shadow'>}FillType`,
+      index: number,
+      value: Sketch.FillType,
+    ]
+  | GradientAction
   | ColorControlsAction;
 
 export function styleReducer(
@@ -283,6 +290,58 @@ export function styleReducer(
         if (!draft.borders || !draft.borders[index]) return;
 
         draft.borders[index].position = position;
+      });
+    }
+    case 'setFillFillType': {
+      const [, index, type] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+        draft.fills[index].fillType = type;
+
+        if (!draft.fills[index].gradient) {
+          draft.fills[index].gradient = Models.fill.gradient;
+        }
+      });
+    }
+    case 'setBorderFillType': {
+      const [, index, type] = action;
+      return produce(state, (draft) => {
+        if (!draft.borders || !draft.borders![index]) return;
+        draft.borders[index].fillType = type;
+
+        if (!draft.borders[index].gradient) {
+          draft.borders[index].gradient = Models.fill.gradient;
+        }
+      });
+    }
+    case 'setFillGradientColor':
+    case 'setFillGradientPosition':
+    case 'setFillGradientType':
+    case 'addFillGradientStop':
+    case 'deleteFillGradientStop': {
+      const [, index] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].gradient = gradientReducer(
+          draft.fills[index].gradient,
+          action,
+        );
+      });
+    }
+    case 'setBorderGradientColor':
+    case 'setBorderGradientPosition':
+    case 'setBorderGradientType':
+    case 'addBorderGradientStop':
+    case 'deleteBorderGradientStop': {
+      const [, index] = action;
+      return produce(state, (draft) => {
+        if (!draft.borders || !draft.borders[index]) return;
+
+        draft.borders[index].gradient = gradientReducer(
+          draft.borders[index].gradient,
+          action,
+        );
       });
     }
     case 'setColorControlsEnabled':

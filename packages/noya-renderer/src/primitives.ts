@@ -76,10 +76,12 @@ export function fill(
       let colors: Float32Array[] = [];
       let positions: number[] = [];
 
-      fill.gradient.stops.forEach((stop) => {
-        colors.push(color(CanvasKit, stop.color));
-        positions.push(stop.position);
-      });
+      [...fill.gradient.stops]
+        .sort((a, b) => a.position - b.position)
+        .forEach((stop) => {
+          colors.push(color(CanvasKit, stop.color));
+          positions.push(stop.position);
+        });
 
       const fromPoint = parsePoint(fill.gradient.from);
       const toPoint = parsePoint(fill.gradient.to);

@@ -27,7 +27,6 @@ const Column = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   colors: Sketch.Color[];
-
   /**
    * The only required change handler is `onChangeColor`. However, to handle
    * more granular changes specially, e.g. nudging opacity, you can pass other

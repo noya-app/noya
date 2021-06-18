@@ -158,6 +158,18 @@ export function applicationReducer(
     case 'setShadowBlur':
     case 'setBorderPosition':
     case 'setShadowSpread':
+    case 'setFillFillType':
+    case 'setBorderFillType':
+    case 'setFillGradientColor':
+    case 'setFillGradientPosition':
+    case 'setFillGradientType':
+    case 'addFillGradientStop':
+    case 'deleteFillGradientStop':
+    case 'setBorderGradientColor':
+    case 'setBorderGradientPosition':
+    case 'setBorderGradientType':
+    case 'addBorderGradientStop':
+    case 'deleteBorderGradientStop':
     case 'setColorControlsEnabled':
     case 'setHue':
     case 'setSaturation':

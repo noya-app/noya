@@ -1,4 +1,4 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
+import FileFormat from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
@@ -57,7 +57,11 @@ export default memo(function BorderInspector() {
         }) => (
           <BorderRow
             id={`border-${index}`}
-            color={item.color}
+            value={
+              item.fillType === FileFormat.FillType.Color
+                ? item.color
+                : item.gradient
+            }
             prefix={checkbox}
             width={item.thickness}
             position={item.position}
@@ -71,6 +75,24 @@ export default memo(function BorderInspector() {
             onChangePosition={(value) => {
               dispatch('setBorderPosition', index, value);
             }}
+            onChangeFillType={(value) =>
+              dispatch('setBorderFillType', index, value)
+            }
+            onChangeGradientColor={(value, stopIndex) =>
+              dispatch('setBorderGradientColor', index, stopIndex, value)
+            }
+            onChangeGradientPosition={(value, stopIndex) => {
+              dispatch('setBorderGradientPosition', index, stopIndex, value);
+            }}
+            onAddGradientStop={(color, position) =>
+              dispatch('addBorderGradientStop', index, color, position)
+            }
+            onDeleteGradientStop={(value) =>
+              dispatch('deleteBorderGradientStop', index, value)
+            }
+            onChangeGradientType={(value) =>
+              dispatch('setBorderGradientType', index, value)
+            }
           />
         ),
         [dispatch],
