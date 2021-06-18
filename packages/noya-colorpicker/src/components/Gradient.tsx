@@ -36,7 +36,7 @@ export default memo(function Gradient({
     onChangePosition(interaction.left);
   };
 
-  const handleKey = (offset?: Interaction) => {
+  const handleKey = (offset: Interaction) => {
     if (!offset) {
       onDelete();
     }
@@ -52,7 +52,7 @@ export default memo(function Gradient({
 
     const gradient = gradients.map((g, index) => ({
       color: sketchColorToRgba(g.color),
-      position: index === 0 ? 0 : index === 1 ? 1 : g.position,
+      position: g.position,
     }));
 
     const color = interpolateRgba(gradient, interaction.left);

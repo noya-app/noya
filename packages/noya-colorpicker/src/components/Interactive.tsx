@@ -44,7 +44,7 @@ const getRelativePosition = (
 
 interface Props {
   onMove: (interaction: Interaction) => void;
-  onKey: (offset?: Interaction) => void;
+  onKey: (offset: Interaction) => void;
   onClick?: (interaction: Interaction | number) => void;
   onDelete?: () => void;
   onClickPointer?: (index: number) => void;

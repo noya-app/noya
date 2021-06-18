@@ -62,7 +62,6 @@ interface ButtonRootProps {
   disabled?: boolean;
   variant?: ButtonVariant;
   tooltip?: ReactNode;
-  full?: boolean;
   onClick?: () => void;
 }
 
