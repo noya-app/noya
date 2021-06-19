@@ -163,8 +163,10 @@ export function applicationReducer(
     case 'setFillGradientColor':
     case 'setFillGradientPosition':
     case 'setFillGradientType':
+    case 'setFillGradientStops':
     case 'addFillGradientStop':
     case 'deleteFillGradientStop':
+    case 'setBorderGradientStops':
     case 'setBorderGradientColor':
     case 'setBorderGradientPosition':
     case 'setBorderGradientType':

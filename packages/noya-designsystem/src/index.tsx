@@ -44,3 +44,4 @@ export * from './contexts/GlobalInputBlurContext';
 // Utils
 export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
+export * from './utils/getGradientBackground';

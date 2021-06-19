@@ -51,6 +51,12 @@ export default memo(function GradientInspector({
 
   const [selectedStopIndex, setSelectedStopIndex] = useState(0);
 
+  /*TODO: Fix error when modifying the lenght of gradientsStops :thinking: 
+    update selectedStopIndex. Cases
+    - When changing with an asset
+    - When deleting certain stops.
+  */
+
   const selectedcolor = gradient[selectedStopIndex].color;
   const selectedColorHex = sketchColorToHex(selectedcolor);
   const hexValue = useMemo(() => selectedColorHex.slice(1), [selectedColorHex]);

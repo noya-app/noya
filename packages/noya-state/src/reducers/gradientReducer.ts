@@ -10,6 +10,11 @@ export type GradientAction =
       value: Sketch.FillType,
     ]
   | [
+      type: `set${StyleElementType}GradientStops`,
+      index: number,
+      value: Sketch.Gradient,
+    ]
+  | [
       type: `set${StyleElementType}GradientColor`,
       index: number,
       gradientIndex: number,
@@ -96,6 +101,15 @@ export function gradientReducer(
       return produce(state, (draft) => {
         if (!draft) return;
         draft.stops.splice(index, 1);
+      });
+    }
+    case 'setFillGradientStops':
+    case 'setBorderGradientStops': {
+      const [, , gradient] = action;
+
+      return produce(state, (draft) => {
+        if (!draft) return;
+        draft.stops = [...gradient.stops];
       });
     }
     default:
