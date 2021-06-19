@@ -223,27 +223,28 @@ export function pointReducer(
               const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
               if (!controlPointType) return state;
 
+              //TODO: Fix Asymmetric point values
+
               if (
                 (controlPointType === 'curveFrom' ||
                   controlPointType === 'curveTo') &&
                 (curveMode === 2 || curveMode === 3)
               ) {
-                const opositControlPoint =
+                const oppositeControlPoint =
                   controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
 
                 const delta = decodedPoint[controlPointType][axis] - amount;
 
                 const testing =
                   mode === 'replace'
-                    ? decodedPoint[opositControlPoint][axis] + delta
-                    : decodedPoint[opositControlPoint][axis] + amount * -1;
+                    ? decodedPoint[oppositeControlPoint][axis] + delta
+                    : decodedPoint[oppositeControlPoint][axis] + amount * -1;
 
-                decodedPoint[opositControlPoint] = {
-                  ...decodedPoint[opositControlPoint],
+                decodedPoint[oppositeControlPoint] = {
+                  ...decodedPoint[oppositeControlPoint],
                   [axis]: testing,
                 };
 
-                //For the control point
                 const testing2 =
                   mode === 'replace'
                     ? amount
