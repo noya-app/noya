@@ -42,6 +42,7 @@ export type PointAction =
       layerId: string,
       pointIndex: number,
       controlPointType: 'curveFrom' | 'curveTo',
+      curveMode: Sketch.CurveMode,
     ];
 
 export type SelectedPoint = [layerId: string, index: number];
@@ -86,7 +87,7 @@ export function pointReducer(
       });
     }
     case 'selectControlPoint': {
-      const [, layerId, pointIndex, controlPointType] = action;
+      const [, layerId, pointIndex, controlPointType, curveMode] = action;
 
       return produce(state, (draft) => {
         for (let layerId in draft.selectedPointLists) {
@@ -97,6 +98,7 @@ export function pointReducer(
           layerId,
           pointIndex,
           controlPointType,
+          curveMode,
         };
       });
     }
@@ -207,7 +209,8 @@ export function pointReducer(
         layerIndexPaths.forEach((indexPath) => {
           const page = draft.sketch.pages[pageIndex];
           const layer = Layers.access(page, indexPath);
-          const pointList = [state.selectedControlPoint?.pointIndex];
+          const pointList = [draft.selectedControlPoint?.pointIndex];
+          const curveMode = draft.selectedControlPoint?.curveMode;
           const boundingRect = boundingRects[layer.do_objectID];
 
           if (!Layers.isPointsLayer(layer) || !pointList || !boundingRect)
@@ -218,27 +221,64 @@ export function pointReducer(
             .filter((_, index) => pointList.includes(index))
             .forEach((curvePoint) => {
               const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
-              (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
+              if (!controlPointType) return state;
+
+              if (
+                (controlPointType === 'curveFrom' ||
+                  controlPointType === 'curveTo') &&
+                (curveMode === 2 || curveMode === 3)
+              ) {
+                const opositControlPoint =
+                  controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
+
+                const delta = decodedPoint[controlPointType][axis] - amount;
+
+                const testing =
+                  mode === 'replace'
+                    ? decodedPoint[opositControlPoint][axis] + delta
+                    : decodedPoint[opositControlPoint][axis] + amount * -1;
+
+                decodedPoint[opositControlPoint] = {
+                  ...decodedPoint[opositControlPoint],
+                  [axis]: testing,
+                };
+
+                //For the control point
+                const testing2 =
+                  mode === 'replace'
+                    ? amount
+                    : decodedPoint[controlPointType][axis] + amount;
+
+                decodedPoint[controlPointType] = {
+                  ...decodedPoint[controlPointType],
+                  [axis]: testing2,
+                };
+              } else {
                 const newValue =
                   mode === 'replace'
                     ? amount
-                    : decodedPoint[key][axis] + amount;
+                    : decodedPoint[controlPointType][axis] + amount;
 
-                decodedPoint[key] = {
-                  ...decodedPoint[key],
+                decodedPoint[controlPointType] = {
+                  ...decodedPoint[controlPointType],
                   [axis]: newValue,
                 };
-              });
+              }
 
               const encodedPoint = encodeCurvePoint(decodedPoint, boundingRect);
 
-              if (!controlPointType) return state;
-
               //TODO: why are the controlPointTypes switched?
+              //if curveMode === 2 or 3 update the adjacent control point
               if (controlPointType === 'curveFrom') {
                 curvePoint.curveTo = encodedPoint.curveTo;
+                if (curveMode === 2 || curveMode === 3) {
+                  curvePoint.curveFrom = encodedPoint.curveFrom;
+                }
               } else {
                 curvePoint.curveFrom = encodedPoint.curveFrom;
+                if (curveMode === 2 || curveMode === 3) {
+                  curvePoint.curveTo = encodedPoint.curveTo;
+                }
               }
             });
 

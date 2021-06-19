@@ -6,10 +6,6 @@ import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
 
-// TODO:  if the type of the point is Mirrored or Asymmetric,
-// then updating one control point also updates the opposite control point.
-// We should handle this both when changing coordinates and point type.
-
 export default memo(function ControlPointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();
   const CanvasKit = useCanvasKit();

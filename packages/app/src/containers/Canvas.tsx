@@ -269,12 +269,14 @@ export default memo(function Canvas() {
                     layerId: layer.do_objectID,
                     pointIndex: index,
                     controlPointType: 'curveTo',
+                    curveMode: decodedPoint.curveMode,
                   };
                 } else if (isPointInRange(decodedPoint.curveFrom, point)) {
                   selectedControlPoint = {
                     layerId: layer.do_objectID,
                     pointIndex: index,
                     controlPointType: 'curveFrom',
+                    curveMode: decodedPoint.curveMode,
                   };
                 }
               });
@@ -299,6 +301,7 @@ export default memo(function Canvas() {
               selectedControlPoint.layerId,
               selectedControlPoint.pointIndex,
               selectedControlPoint.controlPointType,
+              selectedControlPoint.curveMode,
             );
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
