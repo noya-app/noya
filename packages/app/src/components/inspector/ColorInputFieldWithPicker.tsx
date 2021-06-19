@@ -110,6 +110,15 @@ export default memo(function ColorInputFieldWithPicker({
     dispatch('addSwatch', swatchName, selectedColor, id);
   }, [onChange, dispatch, selectedColor]);
 
+  const createThemeGradient = useCallback(() => {
+    if (value._class !== 'gradient') return;
+
+    const gradientName = prompt('New Gradient Assets Name');
+    if (!gradientName) return;
+
+    dispatch('addGradientStyle', gradientName, value);
+  }, [dispatch, value]);
+
   const options: FillOption[] = useMemo(
     () => [
       'Solid Color',
@@ -204,8 +213,9 @@ export default memo(function ColorInputFieldWithPicker({
           />
         ) : value._class === 'gradient' ? (
           <ColorPickerGradient
+            gradientType={value.gradientType}
             gradientAssets={gradientAssets}
-            onCreate={() => {}}
+            onCreate={createThemeGradient}
             onChange={onChangeGradient}
           />
         ) : (

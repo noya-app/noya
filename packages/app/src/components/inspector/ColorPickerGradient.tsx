@@ -55,12 +55,14 @@ type SwatchLayout = 'list' | 'grid';
 interface SwatchesProps {
   selectedSwatchId?: string;
   gradients: Sketch.GradientAsset[];
+  gradientType: Sketch.GradientType;
   onSelectGradientAsset: (gradient: Sketch.Gradient) => void;
 }
 
 const SwatchesList = memo(function SwatchesList({
   selectedSwatchId,
   gradients,
+  gradientType,
   onSelectGradientAsset,
 }: SwatchesProps) {
   return (
@@ -68,7 +70,7 @@ const SwatchesList = memo(function SwatchesList({
       {gradients.map(({ do_objectID, gradient, name }) => {
         const colorString = getGradientBackground(
           gradient.stops,
-          gradient.gradientType,
+          gradientType,
           180,
         );
 
@@ -77,9 +79,7 @@ const SwatchesList = memo(function SwatchesList({
             id={do_objectID}
             key={do_objectID}
             selected={selectedSwatchId === do_objectID}
-            onClick={() => {
-              onSelectGradientAsset(gradient);
-            }}
+            onClick={() => onSelectGradientAsset(gradient)}
           >
             <Square color={colorString} />
             <Spacer.Horizontal size={8} />
@@ -94,6 +94,7 @@ const SwatchesList = memo(function SwatchesList({
 const SwatchesGrid = memo(function SwatchesGrid({
   selectedSwatchId,
   gradients,
+  gradientType,
   onSelectGradientAsset,
 }: SwatchesProps) {
   return (
@@ -101,7 +102,7 @@ const SwatchesGrid = memo(function SwatchesGrid({
       {gradients.map(({ do_objectID, gradient }) => {
         const colorString = getGradientBackground(
           gradient.stops,
-          gradient.gradientType,
+          gradientType,
           180,
         );
 
@@ -122,6 +123,7 @@ const SwatchesGrid = memo(function SwatchesGrid({
 
 interface Props {
   swatchID?: string;
+  gradientType: Sketch.GradientType;
   gradientAssets: Sketch.GradientAsset[];
   onChange?: (gradient: Sketch.Gradient) => void;
   onCreate: () => void;
@@ -129,6 +131,7 @@ interface Props {
 
 export default memo(function ColorPickerSwatches({
   swatchID,
+  gradientType,
   gradientAssets,
   onChange,
   onCreate,
@@ -177,12 +180,14 @@ export default memo(function ColorPickerSwatches({
           <SwatchesGrid
             selectedSwatchId={swatchID}
             gradients={gradientAssets}
+            gradientType={gradientType}
             onSelectGradientAsset={onChange}
           />
         ) : (
           <SwatchesList
             selectedSwatchId={swatchID}
             gradients={gradientAssets}
+            gradientType={gradientType}
             onSelectGradientAsset={onChange}
           />
         )}

@@ -43,6 +43,7 @@ export type ThemeAction =
       mode?: SetNumberMode,
     ]
   | [type: `addSwatch`, name?: string, color?: Sketch.Color, id?: string]
+  | [type: `addGradientStyle`, name: string, value: Sketch.Gradient]
   | [
       type: `add${Exclude<ComponentsElements, 'Swatch'>}`,
       name?: string,
@@ -664,6 +665,23 @@ export function themeReducer(
       return produce(state, (draft) => {
         groupThemeComponents(ids, value, getSymbols(draft));
         draft.selectedSymbolGroup = '';
+      });
+    }
+    case 'addGradientStyle': {
+      const [, name, value] = action;
+
+      return produce(state, (draft) => {
+        const assets = draft.sketch.document.assets;
+
+        const newAsset: Sketch.GradientAsset = {
+          _class: 'MSImmutableGradientAsset',
+          do_objectID: uuid(),
+          name: name,
+          gradient: value,
+        };
+
+        assets.gradientAssets.push(newAsset);
+        assets.gradients.push(value);
       });
     }
     default:
