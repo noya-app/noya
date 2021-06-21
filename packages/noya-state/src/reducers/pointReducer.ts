@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { createRectFromBounds, Rect } from 'noya-geometry';
+import { createRectFromBounds, distance, Rect } from 'noya-geometry';
 import {
   decodeCurvePoint,
   encodeCurvePoint,
@@ -46,6 +46,21 @@ export type PointAction =
     ];
 
 export type SelectedPoint = [layerId: string, index: number];
+
+// function findMissingValue(
+//   distance: number,
+//   centerPoint: Point,
+//   partial: number,
+// ) {
+//   let x = undefined;
+
+//   x =
+//     (Math.sqrt(Math.pow(distance, 2) - Math.pow(centerPoint.y - partial, 2)) -
+//       centerPoint.x) *
+//     -1;
+
+//   return x;
+// }
 
 export function pointReducer(
   state: ApplicationState,
@@ -223,61 +238,97 @@ export function pointReducer(
               const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
               if (!controlPointType) return state;
 
-              //TODO: Fix Asymmetric point values
+              const selectedControlPointValue =
+                mode === 'replace'
+                  ? amount
+                  : decodedPoint[controlPointType][axis] + amount;
+
+              const oppositeControlPoint =
+                controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
+
+              // const oppositAxis = axis === 'x' ? 'y' : 'x';
+
+              const delta = decodedPoint[controlPointType][axis] - amount;
+
+              const controlPointDistance = distance(
+                decodedPoint.point,
+                decodedPoint[oppositeControlPoint],
+              );
 
               if (
                 (controlPointType === 'curveFrom' ||
                   controlPointType === 'curveTo') &&
-                (curveMode === 2 || curveMode === 3)
+                curveMode === Sketch.CurveMode.Mirrored
               ) {
-                const oppositeControlPoint =
-                  controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
-
-                const delta = decodedPoint[controlPointType][axis] - amount;
-
-                const testing =
+                const oppositeControlPointValue =
                   mode === 'replace'
                     ? decodedPoint[oppositeControlPoint][axis] + delta
                     : decodedPoint[oppositeControlPoint][axis] + amount * -1;
 
                 decodedPoint[oppositeControlPoint] = {
                   ...decodedPoint[oppositeControlPoint],
-                  [axis]: testing,
+                  [axis]: oppositeControlPointValue,
                 };
-
-                const testing2 =
-                  mode === 'replace'
-                    ? amount
-                    : decodedPoint[controlPointType][axis] + amount;
 
                 decodedPoint[controlPointType] = {
                   ...decodedPoint[controlPointType],
-                  [axis]: testing2,
+                  [axis]: selectedControlPointValue,
+                };
+              } else if (
+                (controlPointType === 'curveFrom' ||
+                  controlPointType === 'curveTo') &&
+                curveMode === Sketch.CurveMode.Asymmetric
+              ) {
+                let theta = Math.atan2(
+                  decodedPoint[controlPointType].y - decodedPoint.point.y,
+                  decodedPoint[controlPointType].x - decodedPoint.point.x,
+                );
+
+                if (theta < 0) theta = Math.abs(theta);
+                else theta = 2 * Math.PI - theta;
+
+                const circlePoints = {
+                  x:
+                    controlPointDistance * Math.cos(theta * (180 / Math.PI)) +
+                    decodedPoint.point.x,
+                  y:
+                    controlPointDistance * Math.sin(theta * (180 / Math.PI)) +
+                    decodedPoint.point.y,
+                };
+
+                decodedPoint[oppositeControlPoint] = {
+                  ...circlePoints,
+                };
+
+                decodedPoint[controlPointType] = {
+                  ...decodedPoint[controlPointType],
+                  [axis]: selectedControlPointValue,
                 };
               } else {
-                const newValue =
-                  mode === 'replace'
-                    ? amount
-                    : decodedPoint[controlPointType][axis] + amount;
-
                 decodedPoint[controlPointType] = {
                   ...decodedPoint[controlPointType],
-                  [axis]: newValue,
+                  [axis]: selectedControlPointValue,
                 };
               }
 
               const encodedPoint = encodeCurvePoint(decodedPoint, boundingRect);
 
               //TODO: why are the controlPointTypes switched?
-              //if curveMode === 2 or 3 update the adjacent control point
+
               if (controlPointType === 'curveFrom') {
                 curvePoint.curveTo = encodedPoint.curveTo;
-                if (curveMode === 2 || curveMode === 3) {
+                if (
+                  curveMode === Sketch.CurveMode.Mirrored ||
+                  curveMode === Sketch.CurveMode.Asymmetric
+                ) {
                   curvePoint.curveFrom = encodedPoint.curveFrom;
                 }
               } else {
                 curvePoint.curveFrom = encodedPoint.curveFrom;
-                if (curveMode === 2 || curveMode === 3) {
+                if (
+                  curveMode === Sketch.CurveMode.Mirrored ||
+                  curveMode === Sketch.CurveMode.Asymmetric
+                ) {
                   curvePoint.curveTo = encodedPoint.curveTo;
                 }
               }
