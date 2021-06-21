@@ -10,7 +10,7 @@ import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
 import ColorPickerSwatches from './ColorPickerSwatches';
-import ColorPickerGradient from './ColorPickerGradient';
+import ColorPickerGradient from './ColorPickerGradients';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',

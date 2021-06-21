@@ -97,7 +97,7 @@ export default memo(function FillInspector({
               dispatch('setFillGradientType', index, value)
             }
             onChangeGradient={(value) =>
-              dispatch('setFillGradientStops', index, value)
+              dispatch('setFillGradient', index, value)
             }
             onChangeOpacity={(value) =>
               dispatch('setFillOpacity', index, value)

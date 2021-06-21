@@ -1,8 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
 import {
   Spacer,
-  RadioGroup,
   Select,
   sketchColorToRgbaString,
   ListView,
@@ -10,47 +8,14 @@ import {
   Divider,
 } from 'noya-designsystem';
 import { memo, useMemo, useState } from 'react';
-import styled from 'styled-components';
-
-export const PaddedSection = styled.section({
-  padding: '8px 10px',
-  display: 'flex',
-  flexDirection: 'column',
-});
-
-export const Square = styled.div<{ background: string; selected?: boolean }>(
-  ({ theme, background, selected = false }) => ({
-    height: '25px',
-    width: '25px',
-    background,
-    border: `2px solid ${
-      selected ? 'rgb(132,63,255)' : theme.colors.popover.background
-    } `,
-    borderRadius: '4px',
-    cursor: 'pointer',
-  }),
-);
-
-export const GridSmall = styled.div({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, 25px)',
-  gap: '5px',
-});
-
-export const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'stretch',
-}));
-
-export const RadioGroupContainer = styled.div({
-  flex: '0 0 50px',
-  display: 'flex',
-  alignItems: 'stretch',
-});
-
-type SwatchLayout = 'list' | 'grid';
+import {
+  PaddedSection,
+  GridSmall,
+  Row,
+  Square,
+  LayoutType,
+  LayoutPicker,
+} from './ColorPickerAssetGrid';
 
 interface SwatchesProps {
   selectedSwatchId?: string;
@@ -133,7 +98,7 @@ export default memo(function ColorPickerSwatches({
   onCreate,
   onDetach,
 }: Props) {
-  const [swatchLayout, setSwatchLayout] = useState<SwatchLayout>('grid');
+  const [swatchLayout, setSwatchLayout] = useState<LayoutType>('grid');
 
   const isSwatch = useMemo(
     () =>
@@ -165,22 +130,7 @@ export default memo(function ColorPickerSwatches({
             onChange={() => {}}
           />
           <Spacer.Horizontal size={8} />
-          <RadioGroupContainer>
-            <RadioGroup.Root
-              id={'colors-layout'}
-              value={swatchLayout}
-              onValueChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                setSwatchLayout(event.target.value as SwatchLayout)
-              }
-            >
-              <RadioGroup.Item value="grid" tooltip="Grid">
-                <GridIcon />
-              </RadioGroup.Item>
-              <RadioGroup.Item value="list" tooltip="List">
-                <RowsIcon />
-              </RadioGroup.Item>
-            </RadioGroup.Root>
-          </RadioGroupContainer>
+          <LayoutPicker layout={swatchLayout} setLayout={setSwatchLayout} />
         </Row>
       </PaddedSection>
       <PaddedSection>

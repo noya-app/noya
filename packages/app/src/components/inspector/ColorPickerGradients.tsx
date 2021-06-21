@@ -1,8 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
 import {
   Spacer,
-  RadioGroup,
   Select,
   ListView,
   Button,
@@ -16,9 +14,10 @@ import {
   PaddedSection,
   GridSmall,
   Row,
-  RadioGroupContainer,
   Square,
-} from './ColorPickerSwatches';
+  LayoutType,
+  LayoutPicker,
+} from './ColorPickerAssetGrid';
 
 export type MenuItemType = 'rename' | 'delete';
 
@@ -27,79 +26,77 @@ export const menuItems: MenuItem<MenuItemType>[] = [
   { value: 'delete', title: 'Delete' },
 ];
 
-type SwatchLayout = 'list' | 'grid';
-
 interface GridsProps {
   gradients: Sketch.GradientAsset[];
-  gradientType: Sketch.GradientType;
+  handleSelectMenuItem: (value: MenuItemType) => void;
   onSelectGradientAsset: (gradient: Sketch.Gradient) => void;
   setGradientId: (id: string) => void;
-  onContextMenu: (event?: React.MouseEvent) => void;
 }
 
-const SwatchesList = memo(function SwatchesList({
+const GradientsList = memo(function GradientsList({
   gradients,
-  gradientType,
-  onSelectGradientAsset,
   setGradientId,
-  onContextMenu,
+  handleSelectMenuItem,
+  onSelectGradientAsset,
 }: GridsProps) {
   return (
     <ListView.Root>
       {gradients.map(({ do_objectID, gradient, name }) => {
         const colorString = getGradientBackground(
           gradient.stops,
-          gradientType,
+          gradient.gradientType,
           180,
         );
-        const handleContextMenu = () => {
-          onContextMenu();
-          setGradientId(do_objectID);
-        };
 
         return (
-          <ListView.Row
-            id={do_objectID}
-            onContextMenu={handleContextMenu}
-            key={do_objectID}
-            onClick={() => onSelectGradientAsset(gradient)}
+          <ContextMenu.Root<MenuItemType>
+            items={menuItems}
+            onSelect={handleSelectMenuItem}
           >
-            <Square background={colorString} />
-            <Spacer.Horizontal size={8} />
-            {name}
-          </ListView.Row>
+            <ListView.Row
+              key={do_objectID}
+              id={do_objectID}
+              onContextMenu={() => setGradientId(do_objectID)}
+              onClick={() => onSelectGradientAsset(gradient)}
+            >
+              <Square background={colorString} />
+              <Spacer.Horizontal size={8} />
+              {name}
+            </ListView.Row>
+          </ContextMenu.Root>
         );
       })}
     </ListView.Root>
   );
 });
 
-const SwatchesGrid = memo(function SwatchesGrid({
+const GradientsGrid = memo(function GradientsGrid({
   gradients,
-  gradientType,
-  onSelectGradientAsset,
   setGradientId,
-  onContextMenu,
+  handleSelectMenuItem,
+  onSelectGradientAsset,
 }: GridsProps) {
   return (
     <GridSmall>
       {gradients.map(({ do_objectID, gradient }) => {
         const gridString = getGradientBackground(
           gradient.stops,
-          gradientType,
+          gradient.gradientType,
           180,
         );
 
         return (
-          <GridItem
-            key={do_objectID}
-            background={gridString}
-            handleClick={() => onSelectGradientAsset(gradient)}
-            onContextMenu={(event: React.MouseEvent) => {
-              setGradientId(do_objectID);
-              onContextMenu(event);
-            }}
-          />
+          <ContextMenu.Root<MenuItemType>
+            items={menuItems}
+            onSelect={handleSelectMenuItem}
+          >
+            <GridItem
+              key={do_objectID}
+              background={gridString}
+              handleClick={() => onSelectGradientAsset(gradient)}
+              onContextMenu={() => setGradientId(do_objectID)}
+            />
+          </ContextMenu.Root>
         );
       })}
     </GridSmall>
@@ -116,7 +113,7 @@ const GridItem = memo(
       }: {
         background: string;
         handleClick: () => void;
-        onContextMenu: (event: React.MouseEvent) => void;
+        onContextMenu: () => void;
       },
       forwardedRef: ForwardedRef<HTMLDivElement>,
     ) => (
@@ -131,7 +128,7 @@ const GridItem = memo(
 );
 
 interface Props {
-  gradientType: Sketch.GradientType;
+  gradientType?: Sketch.GradientType;
   gradientAssets: Sketch.GradientAsset[];
   onCreate: () => void;
   onChange?: (gradient: Sketch.Gradient) => void;
@@ -140,21 +137,20 @@ interface Props {
 }
 
 export default memo(function ColorPickerGradients({
-  gradientType,
   gradientAssets,
   onChange,
   onCreate,
   onRename,
   onDelete,
 }: Props) {
-  const [gradientLayout, setGradientLayout] = useState<SwatchLayout>('grid');
+  const [gradientLayout, setGradientLayout] = useState<LayoutType>('grid');
   const [gradientId, setGradientId] = useState('');
 
   const handleSelectMenuItem = useCallback(
     (value: MenuItemType) => {
       switch (value) {
         case 'rename': {
-          const name = prompt('New name?');
+          const name = prompt('New Gradient Name');
           if (!name) return;
           onRename(gradientId, name);
           break;
@@ -187,47 +183,25 @@ export default memo(function ColorPickerGradients({
             onChange={() => {}}
           />
           <Spacer.Horizontal size={8} />
-          <RadioGroupContainer>
-            <RadioGroup.Root
-              id={'gradients-layout'}
-              value={gradientLayout}
-              onValueChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                setGradientLayout(event.target.value as SwatchLayout)
-              }
-            >
-              <RadioGroup.Item value="grid" tooltip="Grid">
-                <GridIcon />
-              </RadioGroup.Item>
-              <RadioGroup.Item value="list" tooltip="List">
-                <RowsIcon />
-              </RadioGroup.Item>
-            </RadioGroup.Root>
-          </RadioGroupContainer>
+          <LayoutPicker layout={gradientLayout} setLayout={setGradientLayout} />
         </Row>
       </PaddedSection>
       <PaddedSection>
-        <ContextMenu.Root<MenuItemType>
-          items={menuItems}
-          onSelect={handleSelectMenuItem}
-        >
-          {gradientLayout === 'grid' ? (
-            <SwatchesGrid
-              gradients={gradientAssets}
-              gradientType={gradientType}
-              setGradientId={setGradientId}
-              onContextMenu={() => {}}
-              onSelectGradientAsset={onChange}
-            />
-          ) : (
-            <SwatchesList
-              gradients={gradientAssets}
-              gradientType={gradientType}
-              setGradientId={setGradientId}
-              onContextMenu={() => {}}
-              onSelectGradientAsset={onChange}
-            />
-          )}
-        </ContextMenu.Root>
+        {gradientLayout === 'grid' ? (
+          <GradientsGrid
+            gradients={gradientAssets}
+            setGradientId={setGradientId}
+            handleSelectMenuItem={handleSelectMenuItem}
+            onSelectGradientAsset={onChange}
+          />
+        ) : (
+          <GradientsList
+            gradients={gradientAssets}
+            setGradientId={setGradientId}
+            handleSelectMenuItem={handleSelectMenuItem}
+            onSelectGradientAsset={onChange}
+          />
+        )}
       </PaddedSection>
     </>
   );

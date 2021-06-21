@@ -319,7 +319,7 @@ export function styleReducer(
     case 'setFillGradientType':
     case 'addFillGradientStop':
     case 'deleteFillGradientStop':
-    case 'setFillGradientStops': {
+    case 'setFillGradient': {
       const [, index] = action;
       return produce(state, (draft) => {
         if (!draft.fills || !draft.fills[index]) return;
@@ -335,7 +335,7 @@ export function styleReducer(
     case 'setBorderGradientType':
     case 'addBorderGradientStop':
     case 'deleteBorderGradientStop':
-    case 'setBorderGradientStops': {
+    case 'setBorderGradient': {
       const [, index] = action;
       return produce(state, (draft) => {
         if (!draft.borders || !draft.borders[index]) return;

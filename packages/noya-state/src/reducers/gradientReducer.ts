@@ -10,7 +10,7 @@ export type GradientAction =
       value: Sketch.FillType,
     ]
   | [
-      type: `set${StyleElementType}GradientStops`,
+      type: `set${StyleElementType}Gradient`,
       index: number,
       value: Sketch.Gradient,
     ]
@@ -103,14 +103,18 @@ export function gradientReducer(
         draft.stops.splice(index, 1);
       });
     }
-    case 'setFillGradientStops':
-    case 'setBorderGradientStops': {
+    case 'setFillGradient':
+    case 'setBorderGradient': {
       const [, , gradient] = action;
 
       return produce(state, (draft) => {
         if (!draft) return;
 
         draft.stops = [...gradient.stops];
+        draft.gradientType = gradient.gradientType;
+        draft.elipseLength = gradient.elipseLength;
+        draft.from = gradient.from;
+        draft.to = gradient.to;
       });
     }
     default:
