@@ -116,8 +116,18 @@ export default memo(function ColorInputFieldWithPicker({
     const gradientName = prompt('New Gradient Assets Name');
     if (!gradientName) return;
 
-    dispatch('addGradientStyle', gradientName, value);
+    dispatch('addGradientAsset', gradientName, value);
   }, [dispatch, value]);
+
+  const onRemoveThemeGradient = useCallback(
+    (id: string) => dispatch('removeGradientAsset', id),
+    [dispatch],
+  );
+
+  const onRenameThemeGradient = useCallback(
+    (id: string, name: string) => dispatch('setGradientAssetName', id, name),
+    [dispatch],
+  );
 
   const options: FillOption[] = useMemo(
     () => [
@@ -217,6 +227,8 @@ export default memo(function ColorInputFieldWithPicker({
             gradientAssets={gradientAssets}
             onCreate={createThemeGradient}
             onChange={onChangeGradient}
+            onDelete={onRemoveThemeGradient}
+            onRename={onRenameThemeGradient}
           />
         ) : (
           <></>

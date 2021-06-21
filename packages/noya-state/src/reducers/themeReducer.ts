@@ -43,7 +43,7 @@ export type ThemeAction =
       mode?: SetNumberMode,
     ]
   | [type: `addSwatch`, name?: string, color?: Sketch.Color, id?: string]
-  | [type: `addGradientStyle`, name: string, value: Sketch.Gradient]
+  | [type: `addGradientAsset`, name: string, value: Sketch.Gradient]
   | [
       type: `add${Exclude<ComponentsElements, 'Swatch'>}`,
       name?: string,
@@ -61,11 +61,12 @@ export type ThemeAction =
     ]
   | [type: `duplicate${ComponentsElements}`, id: string[]]
   | [
-      type: `set${ComponentsElements | 'Symbol'}Name`,
+      type: `set${ComponentsElements | 'Symbol' | 'GradientAsset'}Name`,
       id: string | string[],
       name: string,
     ]
   | [type: `remove${ComponentsElements}`]
+  | [type: `removeGradientAsset`, id: string | string[]]
   | [type: `setSelected${ComponentsElements | 'Symbol'}Group`, groupId: string]
   | [
       type: `group${ComponentsElements | 'Symbol'}`,
@@ -667,7 +668,7 @@ export function themeReducer(
         draft.selectedSymbolGroup = '';
       });
     }
-    case 'addGradientStyle': {
+    case 'addGradientAsset': {
       const [, name, value] = action;
 
       return produce(state, (draft) => {
@@ -682,6 +683,31 @@ export function themeReducer(
 
         assets.gradientAssets.push(newAsset);
         assets.gradients.push(value);
+      });
+    }
+    case 'removeGradientAsset': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const assets = draft.sketch.document.assets;
+
+        assets.gradientAssets = assets.gradientAssets.filter((g, index) => {
+          assets.gradients.splice(index, 1);
+          return !ids.includes(g.do_objectID);
+        });
+      });
+    }
+    case 'setGradientAssetName': {
+      const [, id, name] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const gradientAssets = draft.sketch.document.assets.gradientAssets;
+
+        gradientAssets.forEach((g) => {
+          if (ids.includes(g.do_objectID)) g.name = name;
+        });
       });
     }
     default:

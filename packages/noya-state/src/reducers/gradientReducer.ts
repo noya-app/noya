@@ -109,6 +109,7 @@ export function gradientReducer(
 
       return produce(state, (draft) => {
         if (!draft) return;
+
         draft.stops = [...gradient.stops];
       });
     }

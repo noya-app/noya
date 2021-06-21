@@ -12,17 +12,17 @@ import {
 import { memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-const PaddedSection = styled.section({
+export const PaddedSection = styled.section({
   padding: '8px 10px',
   display: 'flex',
   flexDirection: 'column',
 });
 
-const Square = styled.div<{ color: string; selected?: boolean }>(
-  ({ theme, color, selected = false }) => ({
+export const Square = styled.div<{ background: string; selected?: boolean }>(
+  ({ theme, background, selected = false }) => ({
     height: '25px',
     width: '25px',
-    backgroundColor: color,
+    background,
     border: `2px solid ${
       selected ? 'rgb(132,63,255)' : theme.colors.popover.background
     } `,
@@ -31,20 +31,20 @@ const Square = styled.div<{ color: string; selected?: boolean }>(
   }),
 );
 
-const GridSmall = styled.div({
+export const GridSmall = styled.div({
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, 25px)',
   gap: '5px',
 });
 
-const Row = styled.div(({ theme }) => ({
+export const Row = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'stretch',
 }));
 
-const RadioGroupContainer = styled.div({
+export const RadioGroupContainer = styled.div({
   flex: '0 0 50px',
   display: 'flex',
   alignItems: 'stretch',
@@ -80,7 +80,7 @@ const SwatchesList = memo(function SwatchesList({
               });
             }}
           >
-            <Square color={colorString} />
+            <Square background={colorString} />
             <Spacer.Horizontal size={8} />
             {item.name}
           </ListView.Row>
@@ -103,7 +103,7 @@ const SwatchesGrid = memo(function SwatchesGrid({
         return (
           <Square
             key={item.do_objectID}
-            color={colorString}
+            background={colorString}
             selected={selectedSwatchId === item.do_objectID}
             onClick={() => {
               onSelectSwatch({
