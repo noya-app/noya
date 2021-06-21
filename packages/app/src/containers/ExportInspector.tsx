@@ -57,7 +57,9 @@ export default memo(function ExportInspector() {
         [exportFormats.length, dispatch],
       )}
     </ArrayController>,
-    symbolMaster && <ExportPreviewRow layer={symbolMaster} />,
+    exportFormats.length > 0 && symbolMaster && (
+      <ExportPreviewRow layer={symbolMaster} />
+    ),
   ];
 
   return <>{withSeparatorElements(elements, <Divider />)}</>;

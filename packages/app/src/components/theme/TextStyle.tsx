@@ -100,7 +100,7 @@ export default memo(function TextStyle({ name, style }: Props) {
 
   return (
     <CanvasGridItem
-      backgroundColor={backgroundColor}
+      background={backgroundColor}
       renderContent={(size) => (
         <RCKTextStylePreview name={name} style={style} size={size} />
       )}
