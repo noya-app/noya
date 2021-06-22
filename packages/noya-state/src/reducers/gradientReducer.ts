@@ -10,6 +10,11 @@ export type GradientAction =
       value: Sketch.FillType,
     ]
   | [
+      type: `set${StyleElementType}Gradient`,
+      index: number,
+      value: Sketch.Gradient,
+    ]
+  | [
       type: `set${StyleElementType}GradientColor`,
       index: number,
       gradientIndex: number,
@@ -97,6 +102,12 @@ export function gradientReducer(
         if (!draft) return;
         draft.stops.splice(index, 1);
       });
+    }
+    case 'setFillGradient':
+    case 'setBorderGradient': {
+      const [, , gradient] = action;
+
+      return gradient;
     }
     default:
       return state;

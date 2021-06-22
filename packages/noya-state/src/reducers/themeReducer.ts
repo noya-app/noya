@@ -43,6 +43,7 @@ export type ThemeAction =
       mode?: SetNumberMode,
     ]
   | [type: `addSwatch`, name?: string, color?: Sketch.Color, id?: string]
+  | [type: `addGradientAsset`, name: string, value: Sketch.Gradient]
   | [
       type: `add${Exclude<ComponentsElements, 'Swatch'>}`,
       name?: string,
@@ -60,11 +61,12 @@ export type ThemeAction =
     ]
   | [type: `duplicate${ComponentsElements}`, id: string[]]
   | [
-      type: `set${ComponentsElements | 'Symbol'}Name`,
+      type: `set${ComponentsElements | 'Symbol' | 'GradientAsset'}Name`,
       id: string | string[],
       name: string,
     ]
   | [type: `remove${ComponentsElements}`]
+  | [type: `removeGradientAsset`, id: string | string[]]
   | [type: `setSelected${ComponentsElements | 'Symbol'}Group`, groupId: string]
   | [
       type: `group${ComponentsElements | 'Symbol'}`,
@@ -664,6 +666,52 @@ export function themeReducer(
       return produce(state, (draft) => {
         groupThemeComponents(ids, value, getSymbols(draft));
         draft.selectedSymbolGroup = '';
+      });
+    }
+    case 'addGradientAsset': {
+      const [, name, value] = action;
+
+      return produce(state, (draft) => {
+        const assets = draft.sketch.document.assets;
+
+        const newAsset: Sketch.GradientAsset = {
+          _class: 'MSImmutableGradientAsset',
+          do_objectID: uuid(),
+          name: name,
+          gradient: value,
+        };
+
+        assets.gradientAssets.push(newAsset);
+        assets.gradients.push(value);
+      });
+    }
+    case 'removeGradientAsset': {
+      const [, id] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const assets = draft.sketch.document.assets;
+
+        const indexes = assets.gradientAssets.flatMap((g, index) =>
+          ids.includes(g.do_objectID) ? [index] : [],
+        );
+
+        indexes.reverse().forEach((index) => {
+          assets.gradients.splice(index, 1);
+          assets.gradientAssets.splice(index, 1);
+        });
+      });
+    }
+    case 'setGradientAssetName': {
+      const [, id, name] = action;
+      const ids = typeof id === 'string' ? [id] : id;
+
+      return produce(state, (draft) => {
+        const gradientAssets = draft.sketch.document.assets.gradientAssets;
+
+        gradientAssets.forEach((g) => {
+          if (ids.includes(g.do_objectID)) g.name = name;
+        });
       });
     }
     default:

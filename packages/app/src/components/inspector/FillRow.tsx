@@ -25,6 +25,7 @@ interface Props {
   value: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChangeColor: (color: Sketch.Color) => void;
   onChangeFillType: (type: Sketch.FillType) => void;
+  onChangeGradient: (gradient: Sketch.Gradient) => void;
   onChangeGradientColor: (color: Sketch.Color, index: number) => void;
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
@@ -42,6 +43,7 @@ export default memo(function ColorFillRow({
   onChangeOpacity,
   onNudgeOpacity,
   onChangeFillType,
+  onChangeGradient,
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
@@ -115,6 +117,7 @@ export default memo(function ColorFillRow({
           value={value}
           onChange={onChangeColor}
           onChangeType={onChangeFillType}
+          onChangeGradient={onChangeGradient}
           onChangeGradientColor={onChangeGradientColor}
           onChangeGradientPosition={onChangeGradientPosition}
           onAddGradientStop={onAddGradientStop}

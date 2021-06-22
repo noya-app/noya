@@ -93,6 +93,9 @@ export default memo(function BorderInspector() {
             onChangeGradientType={(value) =>
               dispatch('setBorderGradientType', index, value)
             }
+            onChangeGradient={(value) =>
+              dispatch('setBorderGradient', index, value)
+            }
           />
         ),
         [dispatch],

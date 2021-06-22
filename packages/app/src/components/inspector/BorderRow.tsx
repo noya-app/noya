@@ -58,7 +58,7 @@ interface Props {
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
   onDeleteGradientStop: (index: number) => void;
-
+  onChangeGradient: (gradient: Sketch.Gradient) => void;
   onChangeGradientType: (type: Sketch.GradientType) => void;
   onNudgeWidth: (amount: number) => void;
   prefix?: ReactNode;
@@ -74,6 +74,7 @@ export default memo(function BorderRow({
   onChangePosition,
   onNudgeWidth,
   onChangeFillType,
+  onChangeGradient,
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
@@ -125,6 +126,7 @@ export default memo(function BorderRow({
           value={value}
           onChange={onChangeColor}
           onChangeType={onChangeFillType}
+          onChangeGradient={onChangeGradient}
           onChangeGradientColor={onChangeGradientColor}
           onChangeGradientPosition={onChangeGradientPosition}
           onAddGradientStop={onAddGradientStop}

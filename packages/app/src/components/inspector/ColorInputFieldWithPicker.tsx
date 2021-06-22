@@ -10,6 +10,7 @@ import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
 import { uuid } from 'noya-renderer';
 import ColorPickerSwatches from './ColorPickerSwatches';
+import ColorPickerGradient from './ColorPickerGradients';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -57,6 +58,7 @@ interface Props {
   value: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChange: (color: Sketch.Color) => void;
   onChangeType?: (type: Sketch.FillType) => void;
+  onChangeGradient?: (type: Sketch.Gradient) => void;
   onChangeGradientColor?: (color: Sketch.Color, index: number) => void;
   onChangeGradientType?: (type: Sketch.GradientType) => void;
   onChangeGradientPosition?: (index: number, position: number) => void;
@@ -69,6 +71,7 @@ export default memo(function ColorInputFieldWithPicker({
   value,
   onChange,
   onChangeType,
+  onChangeGradient,
   onChangeGradientColor,
   onChangeGradientPosition,
   onAddGradientStop,
@@ -79,6 +82,7 @@ export default memo(function ColorInputFieldWithPicker({
   // inspector rows may also take arrays
   const [state, dispatch] = useApplicationState();
   const sharedSwatches = Selectors.getSharedSwatches(state);
+  const gradientAssets = Selectors.getGradientAssets(state);
 
   const values = useMemo(() => {
     if (value._class !== 'color') return [];
@@ -105,6 +109,25 @@ export default memo(function ColorInputFieldWithPicker({
     });
     dispatch('addSwatch', swatchName, selectedColor, id);
   }, [onChange, dispatch, selectedColor]);
+
+  const createThemeGradient = useCallback(() => {
+    if (value._class !== 'gradient') return;
+
+    const gradientName = prompt('New Gradient Assets Name');
+    if (!gradientName) return;
+
+    dispatch('addGradientAsset', gradientName, value);
+  }, [dispatch, value]);
+
+  const onRemoveThemeGradient = useCallback(
+    (id: string) => dispatch('removeGradientAsset', id),
+    [dispatch],
+  );
+
+  const onRenameThemeGradient = useCallback(
+    (id: string, name: string) => dispatch('setGradientAssetName', id, name),
+    [dispatch],
+  );
 
   const options: FillOption[] = useMemo(
     () => [
@@ -190,7 +213,7 @@ export default memo(function ColorInputFieldWithPicker({
             <></>
           )}
         </PaddedSection>
-        {value._class === 'color' && (
+        {value._class === 'color' ? (
           <ColorPickerSwatches
             swatchID={selectedColor.swatchID}
             sharedSwatches={sharedSwatches}
@@ -198,6 +221,17 @@ export default memo(function ColorInputFieldWithPicker({
             onCreate={createThemeColor}
             onDetach={detachThemeColor}
           />
+        ) : value._class === 'gradient' ? (
+          <ColorPickerGradient
+            gradientType={value.gradientType}
+            gradientAssets={gradientAssets}
+            onCreate={createThemeGradient}
+            onChange={onChangeGradient}
+            onDelete={onRemoveThemeGradient}
+            onRename={onRenameThemeGradient}
+          />
+        ) : (
+          <></>
         )}
         <StyledArrow />
       </Content>

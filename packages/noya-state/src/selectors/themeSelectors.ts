@@ -15,6 +15,12 @@ export const getSharedSwatches = (state: ApplicationState): Sketch.Swatch[] => {
   return state.sketch.document.sharedSwatches?.objects ?? [];
 };
 
+export const getGradientAssets = (
+  state: ApplicationState,
+): Sketch.GradientAsset[] => {
+  return state.sketch.document.assets.gradientAssets ?? [];
+};
+
 export const getSharedTextStyles = (
   state: ApplicationState,
 ): Sketch.SharedStyle[] => {
