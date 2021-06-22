@@ -107,15 +107,7 @@ export function gradientReducer(
     case 'setBorderGradient': {
       const [, , gradient] = action;
 
-      return produce(state, (draft) => {
-        if (!draft) return;
-
-        draft.stops = [...gradient.stops];
-        draft.gradientType = gradient.gradientType;
-        draft.elipseLength = gradient.elipseLength;
-        draft.from = gradient.from;
-        draft.to = gradient.to;
-      });
+      return gradient;
     }
     default:
       return state;

@@ -1,6 +1,7 @@
 import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
 import { RadioGroup } from 'noya-designsystem';
 import styled from 'styled-components';
+import { memo, useCallback } from 'react';
 
 export const PaddedSection = styled.section({
   padding: '8px 10px',
@@ -42,27 +43,31 @@ export const RadioGroupContainer = styled.div({
 
 export type LayoutType = 'list' | 'grid';
 
-export const LayoutPicker = ({
-  layout,
-  setLayout,
-}: {
-  layout: LayoutType;
-  setLayout: (value: LayoutType) => void;
-}) => (
-  <RadioGroupContainer>
-    <RadioGroup.Root
-      id={'layout'}
-      value={layout}
-      onValueChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-        setLayout(event.target.value as LayoutType)
-      }
-    >
-      <RadioGroup.Item value="grid" tooltip="Grid">
-        <GridIcon />
-      </RadioGroup.Item>
-      <RadioGroup.Item value="list" tooltip="List">
-        <RowsIcon />
-      </RadioGroup.Item>
-    </RadioGroup.Root>
-  </RadioGroupContainer>
+export const LayoutPicker = memo(
+  ({
+    layout,
+    setLayout,
+  }: {
+    layout: LayoutType;
+    setLayout: (value: LayoutType) => void;
+  }) => (
+    <RadioGroupContainer>
+      <RadioGroup.Root
+        id={'layout'}
+        value={layout}
+        onValueChange={useCallback(
+          (event: React.ChangeEvent<HTMLInputElement>) =>
+            setLayout(event.target.value as LayoutType),
+          [setLayout],
+        )}
+      >
+        <RadioGroup.Item value="grid" tooltip="Grid">
+          <GridIcon />
+        </RadioGroup.Item>
+        <RadioGroup.Item value="list" tooltip="List">
+          <RowsIcon />
+        </RadioGroup.Item>
+      </RadioGroup.Root>
+    </RadioGroupContainer>
+  ),
 );

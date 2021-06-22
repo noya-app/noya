@@ -692,9 +692,13 @@ export function themeReducer(
       return produce(state, (draft) => {
         const assets = draft.sketch.document.assets;
 
-        assets.gradientAssets = assets.gradientAssets.filter((g, index) => {
+        const indexes = assets.gradientAssets.flatMap((g, index) =>
+          ids.includes(g.do_objectID) ? [index] : [],
+        );
+
+        indexes.reverse().forEach((index) => {
           assets.gradients.splice(index, 1);
-          return !ids.includes(g.do_objectID);
+          assets.gradientAssets.splice(index, 1);
         });
       });
     }

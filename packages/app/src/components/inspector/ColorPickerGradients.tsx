@@ -8,7 +8,7 @@ import {
   ContextMenu,
   getGradientBackground,
 } from 'noya-designsystem';
-import React, { memo, useState, useCallback, ForwardedRef } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import {
   PaddedSection,
@@ -50,11 +50,11 @@ const GradientsList = memo(function GradientsList({
 
         return (
           <ContextMenu.Root<MenuItemType>
+            key={do_objectID}
             items={menuItems}
             onSelect={handleSelectMenuItem}
           >
             <ListView.Row
-              key={do_objectID}
               id={do_objectID}
               onContextMenu={() => setGradientId(do_objectID)}
               onClick={() => onSelectGradientAsset(gradient)}
@@ -87,14 +87,14 @@ const GradientsGrid = memo(function GradientsGrid({
 
         return (
           <ContextMenu.Root<MenuItemType>
+            key={do_objectID}
             items={menuItems}
             onSelect={handleSelectMenuItem}
           >
-            <GridItem
-              key={do_objectID}
+            <Square
               background={gridString}
-              handleClick={() => onSelectGradientAsset(gradient)}
               onContextMenu={() => setGradientId(do_objectID)}
+              onClick={() => onSelectGradientAsset(gradient)}
             />
           </ContextMenu.Root>
         );
@@ -102,30 +102,6 @@ const GradientsGrid = memo(function GradientsGrid({
     </GridSmall>
   );
 });
-
-const GridItem = memo(
-  React.forwardRef(
-    (
-      {
-        background,
-        handleClick,
-        onContextMenu,
-      }: {
-        background: string;
-        handleClick: () => void;
-        onContextMenu: () => void;
-      },
-      forwardedRef: ForwardedRef<HTMLDivElement>,
-    ) => (
-      <Square
-        ref={forwardedRef}
-        background={background}
-        onContextMenu={onContextMenu}
-        onClick={handleClick}
-      />
-    ),
-  ),
-);
 
 interface Props {
   gradientType?: Sketch.GradientType;
@@ -144,10 +120,11 @@ export default memo(function ColorPickerGradients({
   onDelete,
 }: Props) {
   const [gradientLayout, setGradientLayout] = useState<LayoutType>('grid');
-  const [gradientId, setGradientId] = useState('');
+  const [gradientId, setGradientId] = useState<string | undefined>(undefined);
 
   const handleSelectMenuItem = useCallback(
     (value: MenuItemType) => {
+      if (!gradientId) return;
       switch (value) {
         case 'rename': {
           const name = prompt('New Gradient Name');
