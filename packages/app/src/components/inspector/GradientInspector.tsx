@@ -51,13 +51,11 @@ export default memo(function GradientInspector({
 
   const [selectedStopIndex, setSelectedStopIndex] = useState(0);
 
-  /*TODO: Fix error when modifying the lenght of gradientsStops :thinking: 
-    update selectedStopIndex. Cases
-    - When changing with an asset
-    - When deleting certain stops.
-  */
+  const clampedSelectedStopIndex = !gradient[selectedStopIndex]
+    ? 0
+    : selectedStopIndex;
 
-  const selectedcolor = gradient[selectedStopIndex].color;
+  const selectedcolor = gradient[clampedSelectedStopIndex].color;
   const selectedColorHex = sketchColorToHex(selectedcolor);
   const hexValue = useMemo(() => selectedColorHex.slice(1), [selectedColorHex]);
 
@@ -87,11 +85,11 @@ export default memo(function GradientInspector({
             ...selectedcolor,
             alpha: clamp(opacity / 100, 0, 1),
           },
-          selectedStopIndex,
+          clampedSelectedStopIndex,
         );
       }
     },
-    [selectedcolor, selectedStopIndex, onChangeOpacity, onChangeColor],
+    [selectedcolor, clampedSelectedStopIndex, onChangeOpacity, onChangeColor],
   );
 
   const handleNudgeOpacity = useCallback(
@@ -104,25 +102,25 @@ export default memo(function GradientInspector({
             ...selectedcolor,
             alpha: clamp(selectedcolor.alpha + amount / 100, 0, 1),
           },
-          selectedStopIndex,
+          clampedSelectedStopIndex,
         );
       }
     },
-    [selectedcolor, selectedStopIndex, onChangeColor, onNudgeOpacity],
+    [selectedcolor, clampedSelectedStopIndex, onChangeColor, onNudgeOpacity],
   );
 
   const handleChangeColor = useCallback(
     (color: Sketch.Color) => {
-      onChangeColor(color, selectedStopIndex);
+      onChangeColor(color, clampedSelectedStopIndex);
     },
-    [selectedStopIndex, onChangeColor],
+    [clampedSelectedStopIndex, onChangeColor],
   );
 
   const handleChangePosition = useCallback(
     (position: number) => {
-      onChangePosition(position, selectedStopIndex);
+      onChangePosition(position, clampedSelectedStopIndex);
     },
-    [selectedStopIndex, onChangePosition],
+    [clampedSelectedStopIndex, onChangePosition],
   );
 
   const handleAddStop = useCallback(
@@ -136,15 +134,17 @@ export default memo(function GradientInspector({
   const handleDeleteStop = useCallback(() => {
     if (gradient.length === 2) return;
 
-    onDeleteStop(selectedStopIndex);
-    setSelectedStopIndex(selectedStopIndex - 1 > 0 ? 0 : selectedStopIndex - 1);
-  }, [gradient, selectedStopIndex, onDeleteStop, setSelectedStopIndex]);
+    onDeleteStop(clampedSelectedStopIndex);
+    setSelectedStopIndex(
+      clampedSelectedStopIndex - 1 > 0 ? 0 : clampedSelectedStopIndex - 1,
+    );
+  }, [gradient, clampedSelectedStopIndex, onDeleteStop, setSelectedStopIndex]);
 
   return (
     <Column>
       <GradientPicker
         value={gradient}
-        selectedStop={selectedStopIndex}
+        selectedStop={clampedSelectedStopIndex}
         onChangeColor={handleChangeColor}
         onChangePosition={handleChangePosition}
         onAdd={handleAddStop}
