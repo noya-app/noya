@@ -74,8 +74,7 @@ export default memo(function Inspector() {
   );
 
   const isEditingPath = state.interactionState.type === 'editPath';
-  const isEditingControlPoint =
-    state.interactionState.type === 'editPath' && state.selectedControlPoint;
+  const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps =

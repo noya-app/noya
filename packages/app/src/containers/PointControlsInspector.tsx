@@ -55,11 +55,14 @@ function getCurveModeString(value: Sketch.CurveMode): CurveModeOption {
 export default memo(function PointControlsInspector() {
   const [state, dispatch] = useApplicationState();
 
-  let points = Selectors.getSelectedPoints(state);
-  if (points.length === 0) {
-    const controlPoint = Selectors.getSelectedControlPoint(state);
-    controlPoint ? points.push(controlPoint) : (points = []);
-  }
+  const controlPoint = Selectors.getSelectedControlPoint(state);
+  const points = useMemo(() => {
+    const value = controlPoint
+      ? [controlPoint]
+      : Selectors.getSelectedPoints(state);
+
+    return value;
+  }, [controlPoint, state]);
 
   const curveMode = useMemo(() => {
     const value = getMultiValue(points.map((point) => point.curveMode));

@@ -14,13 +14,14 @@ export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
 
-export const getSelectedPoints = (
+const getSelectedPointsFromPointLists = (
   state: ApplicationState,
+  pointLists: Record<string, number[]>,
 ): DecodedCurvePoint[] => {
   const page = getCurrentPage(state);
   const boundingRects = getBoundingRectMap(
     getCurrentPage(state),
-    Object.keys(state.selectedPointLists),
+    Object.keys(pointLists),
     {
       clickThroughGroups: true,
       includeArtboardLayers: false,
@@ -32,7 +33,7 @@ export const getSelectedPoints = (
 
   visit(page, (layer) => {
     const boundingRect = boundingRects[layer.do_objectID];
-    const pointList = state.selectedPointLists[layer.do_objectID];
+    const pointList = pointLists[layer.do_objectID];
 
     if (
       !boundingRect ||
@@ -58,6 +59,16 @@ export const getSelectedPoints = (
   return points;
 };
 
+export const getSelectedPoints = (
+  state: ApplicationState,
+): DecodedCurvePoint[] => {
+  const selectedPoints = getSelectedPointsFromPointLists(
+    state,
+    state.selectedPointLists,
+  );
+  return selectedPoints;
+};
+
 export const getSelectedControlPoint = (
   state: ApplicationState,
 ): DecodedCurvePoint | undefined => {
@@ -65,41 +76,11 @@ export const getSelectedControlPoint = (
     return undefined;
   }
 
-  const page = getCurrentPage(state);
-  const boundingRects = getBoundingRectMap(
-    getCurrentPage(state),
-    [state.selectedControlPoint.layerId],
-    {
-      clickThroughGroups: true,
-      includeArtboardLayers: false,
-      includeHiddenLayers: false,
-    },
-  );
+  const controlPoint = getSelectedPointsFromPointLists(state, {
+    [state.selectedControlPoint.layerId]: [
+      state.selectedControlPoint.pointIndex,
+    ],
+  })[0];
 
-  let point: DecodedCurvePoint | undefined;
-
-  visit(page, (layer) => {
-    const boundingRect = boundingRects[layer.do_objectID];
-    const pointList = [state.selectedControlPoint?.pointIndex];
-
-    if (
-      !boundingRect ||
-      !pointList ||
-      pointList.length === 0 ||
-      !Layers.isPointsLayer(layer)
-    )
-      return;
-
-    const selectedPoints = layer.points.filter((_, index) =>
-      pointList.includes(index),
-    );
-
-    if (selectedPoints.length === 0) return;
-
-    const decodedPoints = decodeCurvePoint(selectedPoints[0], boundingRect);
-
-    point = decodedPoints;
-  });
-
-  return point;
+  return controlPoint;
 };

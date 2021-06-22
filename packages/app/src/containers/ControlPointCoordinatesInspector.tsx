@@ -12,28 +12,16 @@ export default memo(function ControlPointCoordinatesInspector() {
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch(
-        'setControlPointX',
-        value,
-        state.selectedControlPoint?.controlPointType,
-        CanvasKit,
-        mode,
-      );
+      dispatch('setControlPointX', value, CanvasKit, mode);
     },
-    [CanvasKit, dispatch, state.selectedControlPoint?.controlPointType],
+    [CanvasKit, dispatch],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch(
-        'setControlPointY',
-        value,
-        state.selectedControlPoint?.controlPointType,
-        CanvasKit,
-        mode,
-      );
+      dispatch('setControlPointY', value, CanvasKit, mode);
     },
-    [CanvasKit, dispatch, state.selectedControlPoint?.controlPointType],
+    [CanvasKit, dispatch],
   );
 
   const selectedControlPoint = getSelectedControlPoint(state);

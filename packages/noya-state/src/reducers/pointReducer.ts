@@ -15,11 +15,7 @@ import {
   getSelectedLayerIndexPaths,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import {
-  ApplicationState,
-  controlPointType,
-  SetNumberMode,
-} from './applicationReducer';
+import { ApplicationState, SetNumberMode } from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
@@ -28,7 +24,6 @@ export type PointAction =
   | [
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
-      controlPointType: controlPointType | undefined,
       canvasKit: CanvasKit,
       mode?: SetNumberMode,
     ]
@@ -190,14 +185,15 @@ export function pointReducer(
     case 'setControlPointX':
     case 'setControlPointY': {
       if (!state.selectedControlPoint) return state;
-      const [type, amount, controlPointType, CanvasKit, mode] = action;
+      const [type, amount, CanvasKit, mode] = action;
+      const controlPointType = state.selectedControlPoint.controlPointType;
       const axis = type === 'setControlPointX' ? 'x' : 'y';
 
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
       const boundingRects = getBoundingRectMap(
         getCurrentPage(state),
-        [state.selectedControlPoint?.layerId],
+        [state.selectedControlPoint.layerId],
         {
           clickThroughGroups: true,
           includeArtboardLayers: false,
@@ -209,16 +205,15 @@ export function pointReducer(
         layerIndexPaths.forEach((indexPath) => {
           const page = draft.sketch.pages[pageIndex];
           const layer = Layers.access(page, indexPath);
-          const pointList = [draft.selectedControlPoint?.pointIndex];
+          const pointList = draft.selectedControlPoint?.pointIndex;
           const curveMode = draft.selectedControlPoint?.curveMode;
           const boundingRect = boundingRects[layer.do_objectID];
 
-          if (!Layers.isPointsLayer(layer) || !pointList || !boundingRect)
-            return;
+          if (!Layers.isPointsLayer(layer) || !boundingRect) return;
 
           // Update all points by first transforming to the canvas's coordinate system
           layer.points
-            .filter((_, index) => pointList.includes(index))
+            .filter((_, index) => pointList === index)
             .forEach((curvePoint) => {
               const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
               if (!controlPointType) return state;
@@ -278,7 +273,7 @@ export function pointReducer(
                     decodedPoint[controlPointType].x - decodedPoint.point.x,
                   ) + Math.PI;
 
-                const circlePoints = {
+                const oppositeControlPointValue = {
                   x:
                     oppositeControlPointDistance * Math.cos(theta) +
                     decodedPoint.point.x,
@@ -288,7 +283,7 @@ export function pointReducer(
                 };
 
                 decodedPoint[oppositeControlPoint] = {
-                  ...circlePoints,
+                  ...oppositeControlPointValue,
                 };
               } else {
                 decodedPoint[controlPointType] = {
@@ -298,8 +293,6 @@ export function pointReducer(
               }
 
               const encodedPoint = encodeCurvePoint(decodedPoint, boundingRect);
-
-              //TODO: why are the controlPointTypes switched?
 
               if (controlPointType === 'curveFrom') {
                 curvePoint.curveTo = encodedPoint.curveTo;
@@ -324,17 +317,17 @@ export function pointReducer(
             decodeCurvePoint(curvePoint, boundingRect),
           );
 
-          const layerPath = path(
+          const [minX, minY, maxX, maxY] = path(
             CanvasKit,
             layer.points,
             layer.frame,
           ).computeTightBounds();
 
           const newRect: Rect = {
-            x: layerPath[0],
-            y: layerPath[1],
-            width: layerPath[2] - layerPath[0],
-            height: layerPath[3] - layerPath[1],
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
           };
 
           layer.frame = {
