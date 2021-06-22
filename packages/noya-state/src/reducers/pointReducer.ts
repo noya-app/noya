@@ -360,7 +360,9 @@ function visitSelectedDraftPoints(
     layerIndexPaths.forEach((indexPath) => {
       const page = draft.sketch.pages[pageIndex];
       const layer = Layers.access(page, indexPath);
-      const pointList = draft.selectedPointLists[layer.do_objectID];
+      const pointList = draft.selectedControlPoint
+        ? [draft.selectedControlPoint.pointIndex]
+        : draft.selectedPointLists[layer.do_objectID];
 
       if (!Layers.isPointsLayer(layer) || !pointList) return;
 
