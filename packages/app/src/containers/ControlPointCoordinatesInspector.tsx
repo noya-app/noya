@@ -36,10 +36,17 @@ export default memo(function ControlPointCoordinatesInspector() {
     selectedControlPoint[state.selectedControlPoint.controlPointType].y,
   ]);
 
+  function roundNumber(number: number, roundTo: number) {
+    return parseFloat(number.toFixed(roundTo));
+  }
+
+  const roundedPointX = pointX ? roundNumber(pointX, 2) : undefined;
+  const roundedPointY = pointY ? roundNumber(pointY, 2) : undefined;
+
   return (
     <CoordinatesInspector
-      x={pointX}
-      y={pointY}
+      x={roundedPointX}
+      y={roundedPointY}
       onSetX={handleSetPointX}
       onSetY={handleSetPointY}
     />
