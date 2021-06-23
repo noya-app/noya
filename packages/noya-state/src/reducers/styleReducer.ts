@@ -52,7 +52,11 @@ export type StyleAction =
     ]
   | [type: 'setPatternFillType', index: number, value: Sketch.PatternFillType]
   | [type: 'setPatternTileScale', index: number, value: number]
-  | [type: 'setFillImage', index: number, value: ArrayBuffer]
+  | [
+      type: 'setFillImage',
+      index: number,
+      value: Sketch.FileRef | Sketch.DataRef,
+    ]
   | GradientAction
   | ColorControlsAction;
 
@@ -371,6 +375,14 @@ export function styleReducer(
         if (!draft.fills || !draft.fills[index]) return;
 
         draft.fills[index].patternTileScale = value;
+      });
+    }
+    case 'setFillImage': {
+      const [, index, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].image = value;
       });
     }
     default:

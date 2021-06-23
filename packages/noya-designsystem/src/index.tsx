@@ -45,3 +45,4 @@ export * from './contexts/GlobalInputBlurContext';
 export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
+export * from './utils/sketchPattern';

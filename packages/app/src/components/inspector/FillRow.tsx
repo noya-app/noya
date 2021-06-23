@@ -6,12 +6,12 @@ import {
   Select,
   sketchColorToHex,
   Spacer,
+  SketchPattern,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import ColorInputFieldWithPicker, {
-  SketchPattern,
-} from './ColorInputFieldWithPicker';
+import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import { patternFillTypeOptions, PatternFillTypes } from './PatternInspector';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -35,7 +35,7 @@ interface Props {
   onNudgeOpacity: (amount: number) => void;
   onChangePatternFillType: (value: Sketch.PatternFillType) => void;
   onChangePatternTileScale: (amount: number) => void;
-  onChangeFillImage: (value: ArrayBuffer) => void;
+  onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
   prefix?: ReactNode;
 }
 
@@ -61,6 +61,7 @@ export default memo(function ColorFillRow({
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
   const gradientTypeId = `${id}-gradient-type`;
+  const patternSizeId = `${id}-pattern-type`;
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -73,11 +74,13 @@ export default memo(function ColorFillRow({
           return <Label.Label>Opacity</Label.Label>;
         case gradientTypeId:
           return <Label.Label>Type</Label.Label>;
+        case patternSizeId:
+          return <Label.Label>Size</Label.Label>;
         default:
           return null;
       }
     },
-    [colorInputId, hexInputId, opacityInputId, gradientTypeId],
+    [colorInputId, hexInputId, opacityInputId, gradientTypeId, patternSizeId],
   );
 
   const handleSubmitOpacity = useCallback(
@@ -111,6 +114,14 @@ export default memo(function ColorFillRow({
   const handleSelectGradientType = useCallback(
     (value: string) => onChangeGradientType(parseInt(value)),
     [onChangeGradientType],
+  );
+
+  const handleSelectPatternSize = useCallback(
+    (value: PatternFillTypes) => {
+      if (onChangePatternFillType)
+        onChangePatternFillType(Sketch.PatternFillType[value]);
+    },
+    [onChangePatternFillType],
   );
 
   return (
@@ -153,8 +164,17 @@ export default memo(function ColorFillRow({
             />
           </InputField.Root>
         ) : (
-          <InputField.Root id={gradientTypeId} labelPosition="start">
-            <InputField.Input value={'Pattern'} onSubmit={() => {}} />
+          <InputField.Root id={patternSizeId}>
+            <Select
+              id={'gradient-type-selector'}
+              value={
+                Sketch.PatternFillType[
+                  value.patternFillType
+                ] as PatternFillTypes
+              }
+              options={patternFillTypeOptions}
+              onChange={handleSelectPatternSize}
+            />
           </InputField.Root>
         )}
         <Spacer.Horizontal size={8} />
