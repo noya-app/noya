@@ -33,6 +33,9 @@ interface Props {
   onChangeGradientType: (type: Sketch.GradientType) => void;
   onChangeOpacity: (amount: number) => void;
   onNudgeOpacity: (amount: number) => void;
+  onChangePatternFillType: (value: Sketch.PatternFillType) => void;
+  onChangePatternTileScale: (amount: number) => void;
+  onChangeFillImage: (value: ArrayBuffer) => void;
   prefix?: ReactNode;
 }
 
@@ -49,6 +52,9 @@ export default memo(function ColorFillRow({
   onAddGradientStop,
   onDeleteGradientStop,
   onChangeGradientType,
+  onChangePatternFillType,
+  onChangePatternTileScale,
+  onChangeFillImage,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
@@ -123,6 +129,9 @@ export default memo(function ColorFillRow({
           onAddGradientStop={onAddGradientStop}
           onChangeGradientType={onChangeGradientType}
           onDeleteGradientStop={onDeleteGradientStop}
+          onChangePatternFillType={onChangePatternFillType}
+          onChangePatternTileScale={onChangePatternTileScale}
+          onChangeFillImage={onChangeFillImage}
         />
         <Spacer.Horizontal size={8} />
         {value._class === 'color' ? (

@@ -65,6 +65,9 @@ interface Props {
   onChangeGradientPosition?: (index: number, position: number) => void;
   onAddGradientStop?: (color: Sketch.Color, position: number) => void;
   onDeleteGradientStop?: (index: number) => void;
+  onChangePatternFillType?: (value: Sketch.PatternFillType) => void;
+  onChangePatternTileScale?: (amount: number) => void;
+  onChangeFillImage?: (value: ArrayBuffer) => void;
 }
 
 export default memo(function ColorInputFieldWithPicker({
@@ -78,6 +81,9 @@ export default memo(function ColorInputFieldWithPicker({
   onAddGradientStop,
   onDeleteGradientStop,
   onChangeGradientType,
+  onChangePatternFillType,
+  onChangePatternTileScale,
+  onChangeFillImage,
 }: Props) {
   // TODO: The value prop here can be an array, and other
   // inspector rows may also take arrays
@@ -211,7 +217,13 @@ export default memo(function ColorInputFieldWithPicker({
               onDeleteStop={onDeleteGradientStop}
             />
           ) : (
-            <PatternInspector id={`${id}-pattern-inspector`} pattern={value} />
+            <PatternInspector
+              id={`${id}-pattern-inspector`}
+              pattern={value}
+              onChangeImage={onChangeFillImage}
+              onChangeFillType={onChangePatternFillType}
+              onChangeTileScale={onChangePatternTileScale}
+            />
           )}
         </PaddedSection>
         {value._class === 'color' ? (

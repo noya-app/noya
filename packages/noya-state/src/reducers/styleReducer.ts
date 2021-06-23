@@ -50,6 +50,9 @@ export type StyleAction =
       index: number,
       value: Sketch.FillType,
     ]
+  | [type: 'setPatternFillType', index: number, value: Sketch.PatternFillType]
+  | [type: 'setPatternTileScale', index: number, value: number]
+  | [type: 'setFillImage', index: number, value: ArrayBuffer]
   | GradientAction
   | ColorControlsAction;
 
@@ -354,6 +357,22 @@ export function styleReducer(
       return produce(state, (draft) => {
         draft.colorControls = colorControlsReducer(draft.colorControls, action);
       });
+    case 'setPatternFillType': {
+      const [, index, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].patternFillType = value;
+      });
+    }
+    case 'setPatternTileScale': {
+      const [, index, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].patternTileScale = value;
+      });
+    }
     default:
       return state;
   }

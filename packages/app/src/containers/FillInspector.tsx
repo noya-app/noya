@@ -106,6 +106,15 @@ export default memo(function FillInspector({
               dispatch('setFillOpacity', index, value, 'adjust')
             }
             onChangeColor={(value) => dispatch('setFillColor', index, value)}
+            onChangeFillImage={(value) =>
+              dispatch('setFillImage', index, value)
+            }
+            onChangePatternFillType={(value) =>
+              dispatch('setPatternFillType', index, value)
+            }
+            onChangePatternTileScale={(value) =>
+              dispatch('setPatternTileScale', index, value)
+            }
           />
         ),
 
