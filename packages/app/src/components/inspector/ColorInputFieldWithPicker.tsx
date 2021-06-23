@@ -8,6 +8,7 @@ import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
+import PatternInspector from './PatternInspector';
 import { uuid } from 'noya-renderer';
 import ColorPickerSwatches from './ColorPickerSwatches';
 import ColorPickerGradient from './ColorPickerGradients';
@@ -210,7 +211,7 @@ export default memo(function ColorInputFieldWithPicker({
               onDeleteStop={onDeleteGradientStop}
             />
           ) : (
-            <></>
+            <PatternInspector id={`${id}-pattern-inspector`} pattern={value} />
           )}
         </PaddedSection>
         {value._class === 'color' ? (
