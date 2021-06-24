@@ -7,7 +7,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
@@ -61,11 +61,9 @@ export default memo(function PointControlsInspector() {
     ? [controlPoint]
     : Selectors.getSelectedPoints(state);
 
-  const curveMode = useMemo(() => {
-    const value = getMultiValue(points.map((point) => point.curveMode));
-
-    return value ?? Sketch.CurveMode.None;
-  }, [points]);
+  const curveMode =
+    getMultiValue(points.map((point) => point.curveMode)) ||
+    Sketch.CurveMode.None;
 
   const cornerRadius = getMultiNumberValue(
     points.map((point) => point.cornerRadius),

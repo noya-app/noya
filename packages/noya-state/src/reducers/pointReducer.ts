@@ -192,8 +192,6 @@ export function pointReducer(
         controlPointType,
       } = state.selectedControlPoint;
 
-      if (!controlPointType) return state;
-
       const axis = type === 'setControlPointX' ? 'x' : 'y';
 
       const pageIndex = getCurrentPageIndex(state);
