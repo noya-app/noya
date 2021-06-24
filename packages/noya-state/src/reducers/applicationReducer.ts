@@ -44,7 +44,6 @@ export type SelectedControlPoint = {
   layerId: string;
   pointIndex: number;
   controlPointType: controlPointType;
-  curveMode: Sketch.CurveMode;
 };
 
 export type ApplicationState = {

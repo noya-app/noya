@@ -37,7 +37,6 @@ export type PointAction =
       layerId: string,
       pointIndex: number,
       controlPointType: 'curveFrom' | 'curveTo',
-      curveMode: Sketch.CurveMode,
     ];
 
 export type SelectedPoint = [layerId: string, index: number];
@@ -82,7 +81,7 @@ export function pointReducer(
       });
     }
     case 'selectControlPoint': {
-      const [, layerId, pointIndex, controlPointType, curveMode] = action;
+      const [, layerId, pointIndex, controlPointType] = action;
 
       return produce(state, (draft) => {
         for (let layerId in draft.selectedPointLists) {
@@ -93,7 +92,6 @@ export function pointReducer(
           layerId,
           pointIndex,
           controlPointType,
-          curveMode,
         };
       });
     }
@@ -210,10 +208,11 @@ export function pointReducer(
         layerIndexPaths.forEach((indexPath) => {
           const page = draft.sketch.pages[pageIndex];
           const layer = Layers.access(page, indexPath);
-          const curveMode = draft.selectedControlPoint?.curveMode;
           const boundingRect = boundingRects[layer.do_objectID];
 
           if (!Layers.isPointsLayer(layer) || !boundingRect) return;
+
+          const curveMode = layer.points[pointIndex].curveMode;
 
           // Update all points by first transforming to the canvas's coordinate system
           const decodedPoints = layer.points

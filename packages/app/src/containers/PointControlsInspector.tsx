@@ -56,7 +56,6 @@ export default memo(function PointControlsInspector() {
   const [state, dispatch] = useApplicationState();
 
   const controlPoint = Selectors.getSelectedControlPoint(state);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const points = controlPoint
     ? [controlPoint]
     : Selectors.getSelectedPoints(state);
