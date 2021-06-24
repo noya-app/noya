@@ -56,13 +56,10 @@ export default memo(function PointControlsInspector() {
   const [state, dispatch] = useApplicationState();
 
   const controlPoint = Selectors.getSelectedControlPoint(state);
-  const points = useMemo(() => {
-    const value = controlPoint
-      ? [controlPoint]
-      : Selectors.getSelectedPoints(state);
-
-    return value;
-  }, [controlPoint, state]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const points = controlPoint
+    ? [controlPoint]
+    : Selectors.getSelectedPoints(state);
 
   const curveMode = useMemo(() => {
     const value = getMultiValue(points.map((point) => point.curveMode));
