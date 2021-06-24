@@ -215,82 +215,59 @@ export function pointReducer(
           const curveMode = layer.points[pointIndex].curveMode;
 
           // Update all points by first transforming to the canvas's coordinate system
-          const decodedPoints = layer.points
-            .map((curvePoint, index) => {
-              if (pointIndex !== index) {
-                return curvePoint;
-              }
-              const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+          const decodedPoints = layer.points.map((curvePoint) =>
+            decodeCurvePoint(curvePoint, boundingRect),
+          );
 
-              const selectedControlPointValue =
-                mode === 'replace'
-                  ? amount
-                  : decodedPoint[controlPointType][axis] + amount;
+          const decodedPoint = decodedPoints[pointIndex];
 
-              const oppositeControlPointType =
-                controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
+          const oppositeControlPointType =
+            controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
 
-              const delta =
-                decodedPoint[controlPointType][axis] -
-                selectedControlPointValue;
+          const controlPoint = decodedPoint[controlPointType];
+          const oppositeControlPoint = decodedPoint[oppositeControlPointType];
 
-              const oppositeControlPointDistance = distance(
-                decodedPoint.point,
-                decodedPoint[oppositeControlPointType],
-              );
-              switch (curveMode) {
-                case Sketch.CurveMode.Mirrored:
-                  decodedPoint[oppositeControlPointType][axis] += delta;
+          const selectedControlPointValue =
+            mode === 'replace' ? amount : controlPoint[axis] + amount;
 
-                  decodedPoint[controlPointType][
-                    axis
-                  ] = selectedControlPointValue;
-                  break;
-                case Sketch.CurveMode.Asymmetric:
-                  decodedPoint[controlPointType][
-                    axis
-                  ] = selectedControlPointValue;
+          const delta = controlPoint[axis] - selectedControlPointValue;
 
-                  let theta =
-                    Math.atan2(
-                      decodedPoint[controlPointType].y - decodedPoint.point.y,
-                      decodedPoint[controlPointType].x - decodedPoint.point.x,
-                    ) + Math.PI;
+          const oppositeControlPointDistance = distance(
+            decodedPoint.point,
+            oppositeControlPoint,
+          );
 
-                  const oppositeControlPointValue = {
-                    x:
-                      oppositeControlPointDistance * Math.cos(theta) +
-                      decodedPoint.point.x,
-                    y:
-                      oppositeControlPointDistance * Math.sin(theta) +
-                      decodedPoint.point.y,
-                  };
+          switch (curveMode) {
+            case Sketch.CurveMode.Mirrored:
+              controlPoint[axis] = selectedControlPointValue;
 
-                  decodedPoint[
-                    oppositeControlPointType
-                  ] = oppositeControlPointValue;
-                  break;
-                default:
-                  decodedPoint[controlPointType] = {
-                    ...decodedPoint[controlPointType],
-                    [axis]: selectedControlPointValue,
-                  };
-              }
+              oppositeControlPoint[axis] += delta;
+              break;
+            case Sketch.CurveMode.Asymmetric:
+              controlPoint[axis] = selectedControlPointValue;
 
-              const encodedPoint = encodeCurvePoint(decodedPoint, boundingRect);
+              let theta =
+                Math.atan2(
+                  controlPoint.y - decodedPoint.point.y,
+                  controlPoint.x - decodedPoint.point.x,
+                ) + Math.PI;
 
-              curvePoint[oppositeControlPointType] =
-                encodedPoint[oppositeControlPointType];
-              if (
-                curveMode === Sketch.CurveMode.Mirrored ||
-                curveMode === Sketch.CurveMode.Asymmetric
-              ) {
-                curvePoint[controlPointType] = encodedPoint[controlPointType];
-              }
+              const oppositeControlPointValue = {
+                x:
+                  oppositeControlPointDistance * Math.cos(theta) +
+                  decodedPoint.point.x,
+                y:
+                  oppositeControlPointDistance * Math.sin(theta) +
+                  decodedPoint.point.y,
+              };
 
-              return curvePoint;
-            })
-            .map((curvePoint) => decodeCurvePoint(curvePoint, boundingRect));
+              decodedPoint[
+                oppositeControlPointType
+              ] = oppositeControlPointValue;
+              break;
+            default:
+              controlPoint[axis] = selectedControlPointValue;
+          }
 
           const [minX, minY, maxX, maxY] = path(
             CanvasKit,

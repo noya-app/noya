@@ -76,11 +76,11 @@ export const getSelectedControlPoint = (
     return undefined;
   }
 
-  const controlPoint = getSelectedPointsFromPointLists(state, {
+  const controlPoints = getSelectedPointsFromPointLists(state, {
     [state.selectedControlPoint.layerId]: [
       state.selectedControlPoint.pointIndex,
     ],
-  })[0];
+  });
 
-  return controlPoint;
+  return controlPoints.length > 0 ? controlPoints[0] : undefined;
 };

@@ -5,6 +5,10 @@ import useCanvasKit from '../hooks/useCanvasKit';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 
+function roundNumber(number: number, roundTo: number) {
+  return parseFloat(number.toFixed(roundTo));
+}
+
 export default memo(function ControlPointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();
   const CanvasKit = useCanvasKit();
@@ -32,9 +36,6 @@ export default memo(function ControlPointCoordinatesInspector() {
     selectedControlPoint[state.selectedControlPoint.controlPointType].x;
   const pointY =
     selectedControlPoint[state.selectedControlPoint.controlPointType].y;
-  function roundNumber(number: number, roundTo: number) {
-    return parseFloat(number.toFixed(roundTo));
-  }
 
   const roundedPointX = pointX ? roundNumber(pointX, 2) : undefined;
   const roundedPointY = pointY ? roundNumber(pointY, 2) : undefined;
