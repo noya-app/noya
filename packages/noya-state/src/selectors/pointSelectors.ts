@@ -14,13 +14,14 @@ export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
 
-export const getSelectedPoints = (
+const getSelectedPointsFromPointLists = (
   state: ApplicationState,
+  pointLists: Record<string, number[]>,
 ): DecodedCurvePoint[] => {
   const page = getCurrentPage(state);
   const boundingRects = getBoundingRectMap(
     getCurrentPage(state),
-    Object.keys(state.selectedPointLists),
+    Object.keys(pointLists),
     {
       clickThroughGroups: true,
       includeArtboardLayers: false,
@@ -32,7 +33,7 @@ export const getSelectedPoints = (
 
   visit(page, (layer) => {
     const boundingRect = boundingRects[layer.do_objectID];
-    const pointList = state.selectedPointLists[layer.do_objectID];
+    const pointList = pointLists[layer.do_objectID];
 
     if (
       !boundingRect ||
@@ -56,4 +57,30 @@ export const getSelectedPoints = (
   });
 
   return points;
+};
+
+export const getSelectedPoints = (
+  state: ApplicationState,
+): DecodedCurvePoint[] => {
+  const selectedPoints = getSelectedPointsFromPointLists(
+    state,
+    state.selectedPointLists,
+  );
+  return selectedPoints;
+};
+
+export const getSelectedControlPoint = (
+  state: ApplicationState,
+): DecodedCurvePoint | undefined => {
+  if (!state.selectedControlPoint) {
+    return undefined;
+  }
+
+  const controlPoints = getSelectedPointsFromPointLists(state, {
+    [state.selectedControlPoint.layerId]: [
+      state.selectedControlPoint.pointIndex,
+    ],
+  });
+
+  return controlPoints.length > 0 ? controlPoints[0] : undefined;
 };

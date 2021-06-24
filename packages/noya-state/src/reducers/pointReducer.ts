@@ -1,10 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { createRectFromBounds } from 'noya-geometry';
+import { createRectFromBounds, distance, Rect } from 'noya-geometry';
 import {
   decodeCurvePoint,
   encodeCurvePoint,
 } from 'noya-renderer/src/primitives';
+import { path } from 'noya-renderer/src/primitives/path';
 import * as Layers from '../layers';
 import {
   getBoundingRectMap,
@@ -19,6 +21,12 @@ export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
+  | [
+      type: 'setControlPointX' | 'setControlPointY',
+      amount: number,
+      canvasKit: CanvasKit,
+      mode?: SetNumberMode,
+    ]
   | [
       type: 'selectPoint',
       selectedPoint: SelectedPoint | undefined,
@@ -172,6 +180,122 @@ export function pointReducer(
         });
       });
     }
+    case 'setControlPointX':
+    case 'setControlPointY': {
+      if (!state.selectedControlPoint) return state;
+      const [type, amount, CanvasKit, mode] = action;
+      const {
+        layerId,
+        pointIndex,
+        controlPointType,
+      } = state.selectedControlPoint;
+
+      const axis = type === 'setControlPointX' ? 'x' : 'y';
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const boundingRects = getBoundingRectMap(
+        getCurrentPage(state),
+        [layerId],
+        {
+          clickThroughGroups: true,
+          includeArtboardLayers: false,
+          includeHiddenLayers: false,
+        },
+      );
+
+      return produce(state, (draft) => {
+        layerIndexPaths.forEach((indexPath) => {
+          const page = draft.sketch.pages[pageIndex];
+          const layer = Layers.access(page, indexPath);
+          const boundingRect = boundingRects[layer.do_objectID];
+
+          if (!Layers.isPointsLayer(layer) || !boundingRect) return;
+
+          const curveMode = layer.points[pointIndex].curveMode;
+
+          // Update all points by first transforming to the canvas's coordinate system
+          const decodedPoints = layer.points.map((curvePoint) =>
+            decodeCurvePoint(curvePoint, boundingRect),
+          );
+
+          const decodedPoint = decodedPoints[pointIndex];
+
+          const oppositeControlPointType =
+            controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
+
+          const controlPoint = decodedPoint[controlPointType];
+          const oppositeControlPoint = decodedPoint[oppositeControlPointType];
+
+          const selectedControlPointValue =
+            mode === 'replace' ? amount : controlPoint[axis] + amount;
+
+          const delta = controlPoint[axis] - selectedControlPointValue;
+
+          const oppositeControlPointDistance = distance(
+            decodedPoint.point,
+            oppositeControlPoint,
+          );
+
+          switch (curveMode) {
+            case Sketch.CurveMode.Mirrored:
+              controlPoint[axis] = selectedControlPointValue;
+
+              oppositeControlPoint[axis] += delta;
+              break;
+            case Sketch.CurveMode.Asymmetric:
+              controlPoint[axis] = selectedControlPointValue;
+
+              let theta =
+                Math.atan2(
+                  controlPoint.y - decodedPoint.point.y,
+                  controlPoint.x - decodedPoint.point.x,
+                ) + Math.PI;
+
+              const oppositeControlPointValue = {
+                x:
+                  oppositeControlPointDistance * Math.cos(theta) +
+                  decodedPoint.point.x,
+                y:
+                  oppositeControlPointDistance * Math.sin(theta) +
+                  decodedPoint.point.y,
+              };
+
+              decodedPoint[
+                oppositeControlPointType
+              ] = oppositeControlPointValue;
+              break;
+            default:
+              controlPoint[axis] = selectedControlPointValue;
+          }
+
+          const [minX, minY, maxX, maxY] = path(
+            CanvasKit,
+            layer.points,
+            layer.frame,
+          ).computeTightBounds();
+
+          const newRect: Rect = {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
+          };
+
+          layer.frame = {
+            ...layer.frame,
+            ...newRect,
+          };
+
+          // Transform back to the range [0, 1], using the new bounds
+          const encodedPoints = decodedPoints.map((decodedCurvePoint) =>
+            encodeCurvePoint(decodedCurvePoint, layer.frame),
+          );
+
+          layer.points = encodedPoints;
+        });
+      });
+    }
     default:
       return state;
   }
@@ -188,7 +312,9 @@ function visitSelectedDraftPoints(
     layerIndexPaths.forEach((indexPath) => {
       const page = draft.sketch.pages[pageIndex];
       const layer = Layers.access(page, indexPath);
-      const pointList = draft.selectedPointLists[layer.do_objectID];
+      const pointList = draft.selectedControlPoint
+        ? [draft.selectedControlPoint.pointIndex]
+        : draft.selectedPointLists[layer.do_objectID];
 
       if (!Layers.isPointsLayer(layer) || !pointList) return;
 

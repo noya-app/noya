@@ -282,6 +282,8 @@ export function applicationReducer(
     case 'setPointCornerRadius':
     case 'setPointX':
     case 'setPointY':
+    case 'setControlPointX':
+    case 'setControlPointY':
     case 'selectPoint':
     case 'selectControlPoint':
       return pointReducer(state, action);
