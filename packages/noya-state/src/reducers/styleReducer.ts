@@ -51,12 +51,18 @@ export type StyleAction =
       value: Sketch.FillType,
     ]
   | [type: 'setPatternFillType', index: number, value: Sketch.PatternFillType]
-  | [type: 'setPatternTileScale', index: number, value: number]
+  | [
+      type: 'setPatternTileScale',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | [
       type: 'setFillImage',
       index: number,
       value: Sketch.FileRef | Sketch.DataRef,
     ]
+  | [type: 'setFillContextSettingsOpacity', index: number, amount: number]
   | GradientAction
   | ColorControlsAction;
 
@@ -308,6 +314,13 @@ export function styleReducer(
         if (!draft.fills[index].gradient) {
           draft.fills[index].gradient = Models.fill.gradient;
         }
+        if (!draft.fills[index].image) {
+          draft.fills[index].image = {
+            _class: 'MSJSONFileReference',
+            _ref: '',
+            _ref_class: 'MSImageData',
+          };
+        }
       });
     }
     case 'setBorderFillType': {
@@ -370,11 +383,16 @@ export function styleReducer(
       });
     }
     case 'setPatternTileScale': {
-      const [, index, value] = action;
+      const [, index, amount, mode = 'replace'] = action;
       return produce(state, (draft) => {
         if (!draft.fills || !draft.fills[index]) return;
 
-        draft.fills[index].patternTileScale = value;
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.fills[index].patternTileScale + amount;
+
+        draft.fills[index].patternTileScale = Math.max(0, newValue);
       });
     }
     case 'setFillImage': {
@@ -383,6 +401,14 @@ export function styleReducer(
         if (!draft.fills || !draft.fills[index]) return;
 
         draft.fills[index].image = value;
+      });
+    }
+    case 'setFillContextSettingsOpacity': {
+      const [, index, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].contextSettings.opacity = value;
       });
     }
     default:

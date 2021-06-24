@@ -179,7 +179,8 @@ export function applicationReducer(
     case 'setContrast':
     case 'setPatternFillType':
     case 'setPatternTileScale':
-    case 'setFillImage': {
+    case 'setFillImage':
+    case 'setFillContextSettingsOpacity': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);

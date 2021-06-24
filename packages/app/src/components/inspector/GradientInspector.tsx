@@ -28,8 +28,6 @@ interface Props {
   id: string;
   gradient: Sketch.GradientStop[];
   onChangeColor?: (color: Sketch.Color, index: number) => void;
-  onChangeOpacity?: (amount: number) => void;
-  onNudgeOpacity?: (amount: number) => void;
   onChangePosition?: (index: number, position: number) => void;
   onAddStop?: (color: Sketch.Color, position: number) => void;
   onDeleteStop?: (index: number) => void;
@@ -38,8 +36,6 @@ interface Props {
 export default memo(function GradientInspector({
   id,
   gradient,
-  onChangeOpacity,
-  onNudgeOpacity,
   onChangeColor = (color: Sketch.Color, index: number) => {},
   onChangePosition = (position: number, index: number) => {},
   onAddStop = (color: Sketch.Color, position: number) => {},
@@ -77,36 +73,28 @@ export default memo(function GradientInspector({
 
   const handleSubmitOpacity = useCallback(
     (opacity: number) => {
-      if (onChangeOpacity) {
-        onChangeOpacity(opacity / 100);
-      } else {
-        onChangeColor(
-          {
-            ...selectedcolor,
-            alpha: clamp(opacity / 100, 0, 1),
-          },
-          clampedSelectedStopIndex,
-        );
-      }
+      onChangeColor(
+        {
+          ...selectedcolor,
+          alpha: clamp(opacity / 100, 0, 1),
+        },
+        clampedSelectedStopIndex,
+      );
     },
-    [selectedcolor, clampedSelectedStopIndex, onChangeOpacity, onChangeColor],
+    [selectedcolor, clampedSelectedStopIndex, onChangeColor],
   );
 
   const handleNudgeOpacity = useCallback(
     (amount: number) => {
-      if (onNudgeOpacity) {
-        onNudgeOpacity(amount / 100);
-      } else {
-        onChangeColor(
-          {
-            ...selectedcolor,
-            alpha: clamp(selectedcolor.alpha + amount / 100, 0, 1),
-          },
-          clampedSelectedStopIndex,
-        );
-      }
+      onChangeColor(
+        {
+          ...selectedcolor,
+          alpha: clamp(selectedcolor.alpha + amount / 100, 0, 1),
+        },
+        clampedSelectedStopIndex,
+      );
     },
-    [selectedcolor, clampedSelectedStopIndex, onChangeColor, onNudgeOpacity],
+    [selectedcolor, clampedSelectedStopIndex, onChangeColor],
   );
 
   const handleChangeColor = useCallback(

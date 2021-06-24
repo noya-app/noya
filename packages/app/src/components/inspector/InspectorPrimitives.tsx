@@ -43,11 +43,13 @@ export const Text = styled.span(({ theme }) => ({
 
 const SliderRowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
+  color: theme.colors.textMuted,
   marginBottom: '-6px',
 }));
 
 const RowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
+  color: theme.colors.textMuted,
   marginBottom: '2px',
 }));
 

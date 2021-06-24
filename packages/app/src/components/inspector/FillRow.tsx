@@ -36,6 +36,7 @@ interface Props {
   onChangePatternFillType: (value: Sketch.PatternFillType) => void;
   onChangePatternTileScale: (amount: number) => void;
   onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
+  onChangeContextOpacity: (value: number) => void;
   prefix?: ReactNode;
 }
 
@@ -55,6 +56,7 @@ export default memo(function ColorFillRow({
   onChangePatternFillType,
   onChangePatternTileScale,
   onChangeFillImage,
+  onChangeContextOpacity,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
@@ -124,6 +126,10 @@ export default memo(function ColorFillRow({
     [onChangePatternFillType],
   );
 
+  /**?
+   *
+   * Join all the onChange ?? :thinking:
+   */
   return (
     <Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
@@ -143,6 +149,7 @@ export default memo(function ColorFillRow({
           onChangePatternFillType={onChangePatternFillType}
           onChangePatternTileScale={onChangePatternTileScale}
           onChangeFillImage={onChangeFillImage}
+          onChangeContextOpacity={onChangeContextOpacity}
         />
         <Spacer.Horizontal size={8} />
         {value._class === 'color' ? (

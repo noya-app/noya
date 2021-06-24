@@ -115,6 +115,9 @@ export default memo(function FillInspector({
             onChangePatternTileScale={(value) =>
               dispatch('setPatternTileScale', index, value)
             }
+            onChangeContextOpacity={(value) =>
+              dispatch('setFillContextSettingsOpacity', index, value)
+            }
           />
         ),
 

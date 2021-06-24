@@ -7,7 +7,7 @@ import {
 } from 'noya-designsystem';
 import { memo } from 'react';
 import { FileMap } from 'noya-sketch-file';
-import { PaddedSection, GridSmall, Row, Square } from './ColorPickerAssetGrid';
+import { PaddedSection, GridSmall, Row, Square } from './PickerAssetGrid';
 
 interface Props {
   fileImages: FileMap;

@@ -1,6 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { FileMap } from 'noya-sketch-file';
 
+export const imgFileExtensions = ['png', 'jpeg', 'webp'];
+export const mimeTypes = imgFileExtensions.map(
+  (e) => `image/${e === 'ico' ? 'x-icon' : e}`,
+);
+
 export type SketchPattern = {
   _class: 'pattern';
   image?: Sketch.FileRef | Sketch.DataRef;
@@ -41,14 +46,22 @@ export function getPatternBackground(
   images: FileMap,
   { image, patternFillType, patternTileScale }: SketchPattern,
 ) {
-  if (!image) return undefined;
-
   const backgroundSize =
     patternFillType === Sketch.PatternFillType.Fit
       ? 'contain'
       : patternFillType === Sketch.PatternFillType.Tile
       ? `${patternTileScale * 100}%`
+      : patternFillType === Sketch.PatternFillType.Fill
+      ? 'cover'
       : '100% 100%';
+
+  if (!image || !images[image._ref])
+    return {
+      background: `url(
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYI=A',
+      )`,
+      backgroundSize,
+    };
 
   const bytes = new Uint8Array(images[image._ref]);
 

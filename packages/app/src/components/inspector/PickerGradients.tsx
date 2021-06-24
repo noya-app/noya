@@ -17,7 +17,7 @@ import {
   Square,
   LayoutType,
   LayoutPicker,
-} from './ColorPickerAssetGrid';
+} from './PickerAssetGrid';
 
 export type MenuItemType = 'rename' | 'delete';
 
