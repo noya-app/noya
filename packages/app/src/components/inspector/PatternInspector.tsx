@@ -8,6 +8,7 @@ import {
   SketchPattern,
   imgFileExtensions,
   mimeTypes,
+  getPatternSize,
 } from 'noya-designsystem';
 import { memo, useCallback, useMemo, useState, DragEvent } from 'react';
 import styled from 'styled-components';
@@ -51,8 +52,8 @@ const Container = styled.div<{
   };
 });
 
-const UploadButton = styled.button<{ display: boolean }>(
-  ({ theme, display = false }) => ({
+const UploadButton = styled.button<{ show: boolean }>(
+  ({ theme, show = false }) => ({
     color: theme.colors.button.secondaryText,
     position: 'absolute',
     background: 'rgba(0, 0, 0, 0.75)',
@@ -63,7 +64,7 @@ const UploadButton = styled.button<{ display: boolean }>(
     width: '105px',
     borderRadius: '24px',
     border: 'none',
-    display: display ? 'block' : 'none',
+    display: show ? 'block' : 'none',
     zIndex: 1,
   }),
 );
@@ -99,6 +100,7 @@ export default memo(function PatternInspector({
   const [isDragOver, setIsDragOver] = useState(false);
 
   const patternType = pattern.patternFillType;
+  const isTile = patternType === Sketch.PatternFillType.Tile;
 
   const changeFillType = useCallback(
     (value: PatternFillTypes) => {
@@ -109,25 +111,27 @@ export default memo(function PatternInspector({
 
   const onSubmitTileScale = useCallback(
     (value: number) => {
-      const newValue = value > 200 ? 200 : value < 10 ? 10 : value;
-      onChangeTileScale?.(newValue / 100);
+      onChangeTileScale?.(value / 100);
     },
     [onChangeTileScale],
   );
 
   const onNudgeTileScale = useCallback(
     (value: number) => {
-      const newValue = value > 200 ? 200 : value < 10 ? 10 : value;
-      onChangeTileScale?.(newValue / 100);
+      onChangeTileScale?.(value / 100);
     },
     [onChangeTileScale],
   );
-  const isTile = patternType === Sketch.PatternFillType.Tile;
 
-  const value = useMemo(() => getPatternBackground(images, pattern), [
-    images,
-    pattern,
-  ]);
+  const background = useMemo(
+    () => getPatternBackground(images, pattern.image),
+    [images, pattern.image],
+  );
+
+  const backgroundSize = useMemo(
+    () => getPatternSize(pattern.patternFillType, pattern.patternTileScale),
+    [pattern.patternFillType, pattern.patternTileScale],
+  );
 
   const handleImageFile = useCallback(
     async (file: File) => {
@@ -179,9 +183,7 @@ export default memo(function PatternInspector({
     [handleImageFile],
   );
 
-  if (!value) return null;
-  const { background, backgroundSize } = value;
-
+  const scale = Math.round(pattern.patternTileScale * 100);
   return (
     <Column>
       <Container
@@ -196,7 +198,7 @@ export default memo(function PatternInspector({
         onMouseEnter={() => setShowButton(true)}
         onMouseLeave={() => setShowButton(false)}
       >
-        <UploadButton display={!isDragOver && showButton} onClick={openFile}>
+        <UploadButton show={!isDragOver && showButton} onClick={openFile}>
           Upload Image
         </UploadButton>
       </Container>
@@ -215,7 +217,7 @@ export default memo(function PatternInspector({
         <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
           <Slider
             id={`${id}-slider`}
-            value={pattern.patternTileScale * 100}
+            value={scale}
             onValueChange={onSubmitTileScale}
             min={10}
             max={200}
@@ -223,7 +225,7 @@ export default memo(function PatternInspector({
           <Spacer.Horizontal size={10} />
           <InputField.Root size={50}>
             <InputField.NumberInput
-              value={pattern.patternTileScale * 100}
+              value={scale}
               onSubmit={onSubmitTileScale}
               onNudge={onNudgeTileScale}
             />

@@ -28,7 +28,7 @@ interface Props {
   value: Sketch.Color | Sketch.Gradient | SketchPattern;
 }
 
-export default forwardRef(function ColorInputField(
+export default forwardRef(function FillInputField(
   { id, value, ...rest }: Props,
   ref: ForwardedRef<HTMLButtonElement>,
 ) {
@@ -41,8 +41,7 @@ export default forwardRef(function ColorInputField(
       case 'gradient':
         return getGradientBackground(value.stops, value.gradientType, 180);
       case 'pattern': {
-        const bg = getPatternBackground(state.sketch.images, value);
-        return bg ? bg.background : 'rgba(200,200,200,0.8)';
+        return getPatternBackground(state.sketch.images, value.image);
       }
     }
   }, [value, state.sketch.images]);

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import BorderCenterIcon from '../icons/BorderCenterIcon';
 import BorderInsideIcon from '../icons/BorderInsideIcon';
 import BorderOutsideIcon from '../icons/BorderOutsideIcon';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import { DimensionValue } from './DimensionsInspector';
 
 function toPositionString(position: Sketch.BorderPosition) {
@@ -121,7 +121,7 @@ export default memo(function BorderRow({
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputFieldWithPicker
+        <FillInputFieldWithPicker
           id={colorInputId}
           value={value}
           onChange={onChangeColor}

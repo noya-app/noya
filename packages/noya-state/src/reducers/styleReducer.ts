@@ -62,7 +62,12 @@ export type StyleAction =
       index: number,
       value: Sketch.FileRef | Sketch.DataRef,
     ]
-  | [type: 'setFillContextSettingsOpacity', index: number, amount: number]
+  | [
+      type: 'setFillContextSettingsOpacity',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | GradientAction
   | ColorControlsAction;
 
@@ -392,7 +397,10 @@ export function styleReducer(
             ? amount
             : draft.fills[index].patternTileScale + amount;
 
-        draft.fills[index].patternTileScale = Math.max(0, newValue);
+        draft.fills[index].patternTileScale = Math.min(
+          Math.max(0.1, newValue),
+          2,
+        );
       });
     }
     case 'setFillImage': {
@@ -404,11 +412,18 @@ export function styleReducer(
       });
     }
     case 'setFillContextSettingsOpacity': {
-      const [, index, value] = action;
+      const [, index, amount, mode = 'replace'] = action;
       return produce(state, (draft) => {
         if (!draft.fills || !draft.fills[index]) return;
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.fills[index].contextSettings.opacity + amount;
 
-        draft.fills[index].contextSettings.opacity = value;
+        draft.fills[index].contextSettings.opacity = Math.min(
+          Math.max(0, newValue),
+          1,
+        );
       });
     }
     default:

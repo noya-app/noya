@@ -44,29 +44,26 @@ function encodeImg(input: Uint8Array) {
 
 export function getPatternBackground(
   images: FileMap,
-  { image, patternFillType, patternTileScale }: SketchPattern,
+  image?: Sketch.FileRef | Sketch.DataRef,
 ) {
-  const backgroundSize =
-    patternFillType === Sketch.PatternFillType.Fit
-      ? 'contain'
-      : patternFillType === Sketch.PatternFillType.Tile
-      ? `${patternTileScale * 100}%`
-      : patternFillType === Sketch.PatternFillType.Fill
-      ? 'cover'
-      : '100% 100%';
-
   if (!image || !images[image._ref])
-    return {
-      background: `url(
+    return `url(
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYI=A',
-      )`,
-      backgroundSize,
-    };
+      )`;
 
   const bytes = new Uint8Array(images[image._ref]);
+  return `url('data:image/png;base64,${encodeImg(bytes)}')`;
+}
 
-  return {
-    background: `url('data:image/png;base64,${encodeImg(bytes)}')`,
-    backgroundSize,
-  };
+export function getPatternSize(
+  fillType: Sketch.PatternFillType,
+  tileScale: number,
+) {
+  return fillType === Sketch.PatternFillType.Fit
+    ? 'contain'
+    : fillType === Sketch.PatternFillType.Tile
+    ? `${tileScale * 100}%`
+    : fillType === Sketch.PatternFillType.Fill
+    ? 'cover'
+    : '100% 100%';
 }

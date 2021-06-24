@@ -7,7 +7,7 @@ import {
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -133,7 +133,7 @@ export default memo(function FillRow({
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputFieldWithPicker
+        <FillInputFieldWithPicker
           id={colorInputId}
           value={color}
           onChange={onChangeColor}

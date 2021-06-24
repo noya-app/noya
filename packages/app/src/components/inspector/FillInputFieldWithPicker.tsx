@@ -65,7 +65,6 @@ interface Props {
   onChangePatternFillType?: (value: Sketch.PatternFillType) => void;
   onChangePatternTileScale?: (amount: number) => void;
   onChangeFillImage?: (value: Sketch.FileRef | Sketch.DataRef) => void;
-  onChangeContextOpacity?: (value: number) => void;
 }
 
 interface PickersProps {
@@ -187,7 +186,6 @@ export default memo(function ColorInputFieldWithPicker({
   onChangePatternFillType,
   onChangePatternTileScale,
   onChangeFillImage,
-  onChangeContextOpacity,
 }: Props) {
   // TODO: The value prop here can be an array, and other
   // inspector rows may also take arrays

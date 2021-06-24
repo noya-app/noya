@@ -10,7 +10,7 @@ import {
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import { patternFillTypeOptions, PatternFillTypes } from './PatternInspector';
 
 const Row = styled.div(({ theme }) => ({
@@ -23,6 +23,7 @@ const Row = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   value: Sketch.Color | Sketch.Gradient | SketchPattern;
+  contextOpacity: number;
   onChangeColor: (color: Sketch.Color) => void;
   onChangeFillType: (type: Sketch.FillType) => void;
   onChangeGradient: (gradient: Sketch.Gradient) => void;
@@ -37,12 +38,14 @@ interface Props {
   onChangePatternTileScale: (amount: number) => void;
   onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
   onChangeContextOpacity: (value: number) => void;
+  onNudgeContextOpacity: (value: number) => void;
   prefix?: ReactNode;
 }
 
 export default memo(function ColorFillRow({
   id,
   value,
+  contextOpacity,
   onChangeColor,
   onChangeOpacity,
   onNudgeOpacity,
@@ -57,6 +60,7 @@ export default memo(function ColorFillRow({
   onChangePatternTileScale,
   onChangeFillImage,
   onChangeContextOpacity,
+  onNudgeContextOpacity,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
@@ -87,16 +91,18 @@ export default memo(function ColorFillRow({
 
   const handleSubmitOpacity = useCallback(
     (opacity: number) => {
-      onChangeOpacity(opacity / 100);
+      if (value._class === 'color') onChangeOpacity(opacity / 100);
+      else onChangeContextOpacity?.(opacity / 100);
     },
-    [onChangeOpacity],
+    [value, onChangeOpacity, onChangeContextOpacity],
   );
 
   const handleNudgeOpacity = useCallback(
     (amount: number) => {
-      onNudgeOpacity(amount / 100);
+      if (value._class === 'color') onNudgeOpacity(amount / 100);
+      else onNudgeContextOpacity?.(amount / 100);
     },
-    [onNudgeOpacity],
+    [value, onNudgeOpacity, onNudgeContextOpacity],
   );
 
   const gradientTypeOptions = useMemo(
@@ -135,7 +141,7 @@ export default memo(function ColorFillRow({
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputFieldWithPicker
+        <FillInputFieldWithPicker
           id={colorInputId}
           value={value}
           onChange={onChangeColor}
@@ -149,7 +155,6 @@ export default memo(function ColorFillRow({
           onChangePatternFillType={onChangePatternFillType}
           onChangePatternTileScale={onChangePatternTileScale}
           onChangeFillImage={onChangeFillImage}
-          onChangeContextOpacity={onChangeContextOpacity}
         />
         <Spacer.Horizontal size={8} />
         {value._class === 'color' ? (
@@ -185,25 +190,16 @@ export default memo(function ColorFillRow({
           </InputField.Root>
         )}
         <Spacer.Horizontal size={8} />
-        {value._class === 'color' ? (
-          <InputField.Root id={opacityInputId} size={50}>
-            <InputField.NumberInput
-              value={Math.round(value.alpha * 100)}
-              onSubmit={handleSubmitOpacity}
-              onNudge={handleNudgeOpacity}
-            />
-            <InputField.Label>%</InputField.Label>
-          </InputField.Root>
-        ) : (
-          <InputField.Root id={opacityInputId} size={50}>
-            <InputField.NumberInput
-              value={Math.round(100)}
-              onSubmit={handleSubmitOpacity}
-              onNudge={handleNudgeOpacity}
-            />
-            <InputField.Label>%</InputField.Label>
-          </InputField.Root>
-        )}
+        <InputField.Root id={opacityInputId} size={50}>
+          <InputField.NumberInput
+            value={Math.round(
+              (value._class === 'color' ? value.alpha : contextOpacity) * 100,
+            )}
+            onSubmit={handleSubmitOpacity}
+            onNudge={handleNudgeOpacity}
+          />
+          <InputField.Label>%</InputField.Label>
+        </InputField.Root>
       </LabeledElementView>
     </Row>
   );

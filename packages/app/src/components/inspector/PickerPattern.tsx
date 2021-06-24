@@ -5,7 +5,7 @@ import {
   Divider,
   getPatternBackground,
 } from 'noya-designsystem';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { FileMap } from 'noya-sketch-file';
 import { PaddedSection, GridSmall, Row, Square } from './PickerAssetGrid';
 
@@ -20,6 +20,24 @@ export default memo(function ColorPickerPattern({
   imageAssets,
   onChange,
 }: Props) {
+  const elements = useMemo(
+    () =>
+      imageAssets.map((item) => {
+        const value = getPatternBackground(fileImages, item);
+
+        if (!value) return null;
+
+        return (
+          <Square
+            key={item._ref}
+            background={value}
+            onClick={() => onChange?.(item)}
+          />
+        );
+      }),
+    [fileImages, imageAssets, onChange],
+  );
+
   return (
     <>
       <Divider />
@@ -35,26 +53,7 @@ export default memo(function ColorPickerPattern({
         </Row>
       </PaddedSection>
       <PaddedSection>
-        <GridSmall>
-          {imageAssets.map((item) => {
-            const value = getPatternBackground(fileImages, {
-              _class: 'pattern',
-              image: item,
-              patternFillType: 0,
-              patternTileScale: 0,
-            });
-
-            if (!value) return null;
-
-            return (
-              <Square
-                key={item._ref}
-                background={value.background}
-                onClick={() => onChange?.(item)}
-              />
-            );
-          })}
-        </GridSmall>
+        <GridSmall>{elements}</GridSmall>
       </PaddedSection>
     </>
   );
