@@ -6,11 +6,11 @@ import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElem
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
+import { LayerPreview } from 'noya-renderer';
 import ArrayController from '../components/inspector/ExportArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { RCKLayerPreview } from '../components/theme/Symbol';
 import {
   useDispatch,
   useGetWorkspaceStateSnapshot,
@@ -99,7 +99,7 @@ export default memo(function ExportInspector() {
                 theme,
                 getWorkspaceStateSnapshot(),
                 'png',
-                () => <RCKLayerPreview layer={selectedLayer} size={size} />,
+                () => <LayerPreview layer={selectedLayer} size={size} />,
               );
 
               if (!data) return;

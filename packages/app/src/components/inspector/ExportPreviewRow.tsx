@@ -1,8 +1,8 @@
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
 import { memo, useCallback } from 'react';
+import { LayerPreview } from 'noya-renderer';
 import { PageLayer } from '../../../../noya-state/src';
 import CanvasGridItem from '../theme/CanvasGridItem';
-import { RCKLayerPreview } from '../theme/Symbol';
 
 function createCheckerBackground(
   size: number,
@@ -50,7 +50,7 @@ export default memo(function ExportPreviewRow({ layer }: Props) {
         background={createCheckerBackground(7, 'rgba(255,255,255,0.1)')}
         renderContent={useCallback(
           (size) => (
-            <RCKLayerPreview layer={layer} size={size} />
+            <LayerPreview layer={layer} size={size} />
           ),
           [layer],
         )}
