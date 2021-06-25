@@ -50,7 +50,7 @@ export default memo(function ExportPreviewRow({ layer }: Props) {
         background={createCheckerBackground(7, 'rgba(255,255,255,0.1)')}
         renderContent={useCallback(
           (size) => (
-            <RCKLayerPreview layer={layer} size={size} padding={0} />
+            <RCKLayerPreview layer={layer} size={size} />
           ),
           [layer],
         )}

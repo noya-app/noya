@@ -18,7 +18,7 @@ interface Props {
 export function RCKLayerPreview({
   layer,
   size,
-  padding = 10,
+  padding = 0,
 }: {
   layer: PageLayer;
   size: Size;
@@ -86,7 +86,9 @@ export function RCKLayerPreview({
 export default memo(function Symbol({ layer }: Props) {
   return (
     <CanvasGridItem
-      renderContent={(size) => <RCKLayerPreview layer={layer} size={size} />}
+      renderContent={(size) => (
+        <RCKLayerPreview layer={layer} size={size} padding={10} />
+      )}
     />
   );
 });

@@ -21,7 +21,7 @@ import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
 
 async function saveFile(name: string, data: Uint8Array) {
   const file = new File([data], name, {
-    type: 'application/zip',
+    type: 'image/png',
   });
 
   await fileSave(
@@ -87,25 +87,24 @@ export default memo(function ExportInspector() {
           <Button
             id="export-selected"
             onClick={async () => {
-              const bytes = await renderImageFromCanvas(
+              const size = {
+                width: Math.ceil(selectedLayer.frame.width),
+                height: Math.ceil(selectedLayer.frame.height),
+              };
+
+              const data = await renderImageFromCanvas(
                 CanvasKit,
-                100,
-                100,
+                size.width,
+                size.height,
                 theme,
                 getWorkspaceStateSnapshot(),
                 'png',
-                () => (
-                  <RCKLayerPreview
-                    layer={selectedLayer}
-                    size={{ width: 100, height: 100 }}
-                    padding={0}
-                  />
-                ),
+                () => <RCKLayerPreview layer={selectedLayer} size={size} />,
               );
 
-              if (!bytes) return;
+              if (!data) return;
 
-              saveFile('test.png', bytes);
+              saveFile(`${selectedLayer.name}.png`, data);
             }}
           >
             Export Selected...
