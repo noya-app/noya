@@ -17,6 +17,7 @@ export const colors = {
   inputBackground: 'rgb(240, 240, 242)',
   codeBackground: 'rgb(250, 250, 250)',
   selectedBackground: 'rgb(242, 245, 250)',
+  transparentChecker: 'rgba(255,255,255,0.8)',
   banner: {
     top: 'rgb(222, 229, 255)',
     // bottom: 'rgb(238, 235, 255)',
