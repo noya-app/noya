@@ -6,7 +6,7 @@ import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElem
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import { LayerPreview } from 'noya-renderer';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import ArrayController from '../components/inspector/ExportArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
@@ -44,6 +44,28 @@ export default memo(function ExportInspector() {
   )[0] as Sketch.SymbolInstance;
 
   const exportFormats = selectedLayer.exportOptions.exportFormats;
+
+  // TODO: Handle export formats
+  const handleExport = useCallback(async () => {
+    const size = {
+      width: Math.ceil(selectedLayer.frame.width),
+      height: Math.ceil(selectedLayer.frame.height),
+    };
+
+    const data = await renderImageFromCanvas(
+      CanvasKit,
+      size.width,
+      size.height,
+      theme,
+      getWorkspaceStateSnapshot(),
+      'png',
+      () => <RCKLayerPreview layer={selectedLayer} size={size} />,
+    );
+
+    if (!data) return;
+
+    saveFile(`${selectedLayer.name}.png`, data);
+  }, [CanvasKit, getWorkspaceStateSnapshot, selectedLayer, theme]);
 
   const elements = [
     <ArrayController<FileFormat.ExportFormat>
@@ -84,29 +106,7 @@ export default memo(function ExportInspector() {
         <InspectorPrimitives.Section>
           <ExportPreviewRow layer={selectedLayer} />
           <Spacer.Vertical size={10} />
-          <Button
-            id="export-selected"
-            onClick={async () => {
-              const size = {
-                width: Math.ceil(selectedLayer.frame.width),
-                height: Math.ceil(selectedLayer.frame.height),
-              };
-
-              const data = await renderImageFromCanvas(
-                CanvasKit,
-                size.width,
-                size.height,
-                theme,
-                getWorkspaceStateSnapshot(),
-                'png',
-                () => <LayerPreview layer={selectedLayer} size={size} />,
-              );
-
-              if (!data) return;
-
-              saveFile(`${selectedLayer.name}.png`, data);
-            }}
-          >
+          <Button id="export-selected" onClick={handleExport}>
             Export Selected...
           </Button>
         </InspectorPrimitives.Section>

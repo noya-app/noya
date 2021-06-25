@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { LayerPreview } from 'noya-renderer';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { memo } from 'react';
 import CanvasGridItem from './CanvasGridItem';
 
@@ -11,7 +11,7 @@ export default memo(function Symbol({ layer }: Props) {
   return (
     <CanvasGridItem
       renderContent={(size) => (
-        <LayerPreview
+        <RCKLayerPreview
           layer={layer}
           size={size}
           padding={10}

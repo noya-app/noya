@@ -1,6 +1,6 @@
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
 import { memo, useCallback } from 'react';
-import { LayerPreview } from 'noya-renderer';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { PageLayer } from '../../../../noya-state/src';
 import CanvasGridItem from '../theme/CanvasGridItem';
 
@@ -16,7 +16,11 @@ export default memo(function ExportPreviewRow({ layer }: Props) {
       <CanvasGridItem
         renderContent={useCallback(
           (size) => (
-            <LayerPreview layer={layer} size={size} showCheckeredBackground />
+            <RCKLayerPreview
+              layer={layer}
+              size={size}
+              showCheckeredBackground
+            />
           ),
           [layer],
         )}
