@@ -28,6 +28,7 @@ import {
   useState,
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import {
   StateProvider,
   useApplicationState,
@@ -99,6 +100,34 @@ export default memo(function Canvas() {
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
+
+  const isEditingPath = state.interactionState.type === 'editPath';
+
+  const nudge = (axis: 'X' | 'Y', amount: number) => {
+    if (isEditingPath && state.selectedControlPoint) {
+      dispatch(`setControlPoint${axis}` as const, amount, CanvasKit, 'adjust');
+    } else {
+      dispatch(
+        isEditingPath
+          ? (`setPoint${axis}` as const)
+          : (`setLayer${axis}` as const),
+        amount,
+        'adjust',
+      );
+    }
+  };
+
+  useKeyboardShortcuts({
+    ArrowLeft: () => nudge('X', -1),
+    ArrowRight: () => nudge('X', 1),
+    ArrowUp: () => nudge('Y', -1),
+    ArrowDown: () => nudge('Y', 1),
+    'Shift-ArrowLeft': () => nudge('X', -10),
+    'Shift-ArrowRight': () => nudge('X', 10),
+    'Shift-ArrowUp': () => nudge('Y', -10),
+    'Shift-ArrowDown': () => nudge('Y', 10),
+    Backspace: () => dispatch('deleteLayer', state.selectedObjects),
+  });
 
   const insets = useMemo(
     () => ({
