@@ -11,12 +11,21 @@ export type ExportSize = {
   visibleScaleType: Sketch.VisibleScaleType;
 };
 
-export function parseScale(scaleText: string): ExportSize | undefined {
-  const size = isNaN(parseFloat(scaleText))
-    ? parseFloat(scaleText.slice(0, -1))
-    : parseFloat(scaleText);
+function parseFloatWithSuffix(value: string): number | undefined {
+  let parsed = parseFloat(value);
 
-  if (isNaN(size) || size <= 0) return undefined;
+  if (!isNaN(parsed)) return parsed;
+
+  // Remove the single-character suffix
+  parsed = parseFloat(value.slice(0, -1));
+
+  return isNaN(parsed) ? undefined : parsed;
+}
+
+export function parseScale(scaleText: string): ExportSize | undefined {
+  const size = parseFloatWithSuffix(scaleText);
+
+  if (size === undefined || size <= 0) return undefined;
 
   const visibleScaleType =
     scaleText[scaleText.length - 1] === 'w'

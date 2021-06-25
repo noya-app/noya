@@ -2,9 +2,10 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   ClipProps,
   Group,
-  Rect,
+  Rect as RCKRect,
   Text,
   useBlurMaskFilter,
+  useDeletable,
   useFontManager,
   usePaint,
   useReactCanvasKit,
@@ -12,23 +13,69 @@ import {
 import { Primitives } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { Rect } from '../../../../noya-geometry/src';
 import SketchGroup from './SketchGroup';
 
-interface Props {
-  layer: Sketch.Artboard | Sketch.SymbolMaster;
+interface ArtboardLabelProps {
+  text: string;
+  layerFrame: Rect;
   isSymbolMaster: boolean;
 }
 
-export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
+const ArtboardLabel = memo(function ArtboardLabel({
+  text,
+  layerFrame,
+  isSymbolMaster,
+}: ArtboardLabelProps) {
   const { CanvasKit } = useReactCanvasKit();
   const { colors } = useTheme();
   const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
   const fontManager = useFontManager();
 
-  const paint = usePaint({
-    color: CanvasKit.WHITE,
-    style: CanvasKit.PaintStyle.Fill,
+  const paragraph = useMemo(() => {
+    const paragraphStyle = new CanvasKit.ParagraphStyle({
+      textStyle: {
+        color: CanvasKit.parseColorString(textColor),
+        fontSize: 11,
+        fontFamilies: ['Roboto'],
+        letterSpacing: 0.2,
+      },
+    });
+
+    const builder = CanvasKit.ParagraphBuilder.Make(
+      paragraphStyle,
+      fontManager,
+    );
+    builder.addText(text);
+
+    const paragraph = builder.build();
+    paragraph.layout(10000);
+
+    builder.delete();
+
+    return paragraph;
+  }, [CanvasKit, fontManager, text, textColor]);
+
+  useDeletable(paragraph);
+
+  const labelRect = Primitives.rect(CanvasKit, {
+    x: layerFrame.x + 3,
+    y: layerFrame.y - paragraph.getHeight() - 3,
+    width: layerFrame.width,
+    height: layerFrame.height,
   });
+
+  return <Text rect={labelRect} paragraph={paragraph} />;
+});
+
+interface ArtboardBlurProps {
+  layerFrame: Rect;
+}
+
+const ArtboardBlur = memo(function ArtboardBlur({
+  layerFrame,
+}: ArtboardBlurProps) {
+  const { CanvasKit } = useReactCanvasKit();
 
   const maskFilter = useBlurMaskFilter({
     style: CanvasKit.BlurStyle.Normal,
@@ -43,11 +90,33 @@ export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
     maskFilter,
   });
 
-  const rect = Primitives.rect(CanvasKit, layer.frame);
   const blurRect = Primitives.rect(CanvasKit, {
-    ...layer.frame,
-    y: layer.frame.y + 1,
+    ...layerFrame,
+    y: layerFrame.y + 1,
   });
+
+  return <RCKRect rect={blurRect} paint={blur} />;
+});
+
+interface SketchArtboardContentProps {
+  layer: Sketch.Artboard | Sketch.SymbolMaster;
+  showBackground: boolean;
+}
+
+export const SketchArtboardContent = memo(function SketchArtboardContent({
+  layer,
+  showBackground,
+}: SketchArtboardContentProps) {
+  const { CanvasKit } = useReactCanvasKit();
+
+  const paint = usePaint({
+    color: layer.hasBackgroundColor
+      ? Primitives.color(CanvasKit, layer.backgroundColor)
+      : CanvasKit.WHITE,
+    style: CanvasKit.PaintStyle.Fill,
+  });
+
+  const rect = Primitives.rect(CanvasKit, layer.frame);
 
   const clip: ClipProps = useMemo(
     () => ({
@@ -57,43 +126,31 @@ export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
     [CanvasKit.ClipOp.Intersect, rect],
   );
 
-  const labelParagraph = useMemo(() => {
-    const paragraphStyle = new CanvasKit.ParagraphStyle({
-      textStyle: {
-        color: CanvasKit.parseColorString(textColor),
-        fontSize: 11,
-        fontFamilies: ['Roboto'],
-        letterSpacing: 0.2,
-      },
-    });
-
-    const builder = CanvasKit.ParagraphBuilder.Make(
-      paragraphStyle,
-      fontManager,
-    );
-    builder.addText(layer.name);
-
-    const paragraph = builder.build();
-    paragraph.layout(10000);
-
-    return paragraph;
-  }, [CanvasKit, fontManager, layer.name, textColor]);
-
-  const labelRect = Primitives.rect(CanvasKit, {
-    x: layer.frame.x + 3,
-    y: layer.frame.y - labelParagraph.getHeight() - 3,
-    width: layer.frame.width,
-    height: layer.frame.height,
-  });
-
   return (
     <>
-      <Text rect={labelRect} paragraph={labelParagraph} />
-      <Rect rect={blurRect} paint={blur} />
-      <Rect rect={rect} paint={paint} />
+      {showBackground && <RCKRect rect={rect} paint={paint} />}
       <Group clip={clip}>
         <SketchGroup layer={layer} />
       </Group>
+    </>
+  );
+});
+
+interface Props {
+  layer: Sketch.Artboard | Sketch.SymbolMaster;
+  isSymbolMaster: boolean;
+}
+
+export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
+  return (
+    <>
+      <ArtboardLabel
+        text={layer.name}
+        layerFrame={layer.frame}
+        isSymbolMaster={isSymbolMaster}
+      />
+      <ArtboardBlur layerFrame={layer.frame} />
+      <SketchArtboardContent layer={layer} showBackground={true} />
     </>
   );
 });
