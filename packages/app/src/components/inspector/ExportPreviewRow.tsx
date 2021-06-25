@@ -1,9 +1,8 @@
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { memo, useCallback } from 'react';
-import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
+import { PageLayer } from '../../../../noya-state/src';
 import CanvasGridItem from '../theme/CanvasGridItem';
-import { RCKSymbolPreview } from '../theme/Symbol';
+import { RCKLayerPreview } from '../theme/Symbol';
 
 function createCheckerBackground(
   size: number,
@@ -41,23 +40,21 @@ function createCheckerBackground(
 }
 
 interface Props {
-  layer: Sketch.SymbolMaster;
+  layer: PageLayer;
 }
 
 export default memo(function ExportPreviewRow({ layer }: Props) {
   return (
-    <InspectorPrimitives.Section>
-      <AspectRatio.Root>
-        <CanvasGridItem
-          background={createCheckerBackground(7, 'rgba(255,255,255,0.1)')}
-          renderContent={useCallback(
-            (size) => (
-              <RCKSymbolPreview layer={layer} size={size} />
-            ),
-            [layer],
-          )}
-        />
-      </AspectRatio.Root>
-    </InspectorPrimitives.Section>
+    <AspectRatio.Root>
+      <CanvasGridItem
+        background={createCheckerBackground(7, 'rgba(255,255,255,0.1)')}
+        renderContent={useCallback(
+          (size) => (
+            <RCKLayerPreview layer={layer} size={size} padding={0} />
+          ),
+          [layer],
+        )}
+      />
+    </AspectRatio.Root>
   );
 });

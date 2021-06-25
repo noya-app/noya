@@ -108,7 +108,7 @@ export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
  * We do this to avoid excessively re-rendering components that need to access
  * the entire state in event handlers.
  */
-export const useGetStateSnapshot = (): (() => ApplicationState) => {
+export const useGetWorkspaceStateSnapshot = (): (() => WorkspaceState) => {
   const state = useWorkspaceState();
 
   const stateSnapshot = useRef<WorkspaceState>(state);
@@ -117,7 +117,15 @@ export const useGetStateSnapshot = (): (() => ApplicationState) => {
     stateSnapshot.current = state;
   }, [state]);
 
-  return useCallback(() => stateSnapshot.current.history.present, []);
+  return useCallback(() => stateSnapshot.current, []);
+};
+
+export const useGetStateSnapshot = (): (() => ApplicationState) => {
+  const getWorkspaceStateSnapshot = useGetWorkspaceStateSnapshot();
+
+  return useCallback(() => getWorkspaceStateSnapshot().history.present, [
+    getWorkspaceStateSnapshot,
+  ]);
 };
 
 export function useSelector<Projection>(
