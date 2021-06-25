@@ -11,10 +11,11 @@ import {
   Rect as RCKRect,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
-import { Primitives, SketchGroup, SketchLayer } from 'noya-renderer';
+import { Primitives, SketchLayer } from 'noya-renderer';
 import { Layers, PageLayer } from 'noya-state';
 import { useMemo } from 'react';
 import useCheckeredFill from '../hooks/useCheckeredFill';
+import { SketchArtboardContent } from './layers/SketchArtboard';
 
 function CheckeredRect({ rect }: { rect: Rect }) {
   const paint = useCheckeredFill();
@@ -73,7 +74,12 @@ export default function LayerPreview({
       {showCheckeredBackground && <CheckeredRect rect={scaledRect} />}
       <Group transform={transform}>
         {Layers.isSymbolMasterOrArtboard(layer) ? (
-          <SketchGroup layer={layer} />
+          <SketchArtboardContent
+            layer={layer}
+            showBackground={
+              layer.hasBackgroundColor && layer.includeBackgroundColorInExport
+            }
+          />
         ) : (
           <SketchLayer layer={layer} />
         )}
