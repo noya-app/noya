@@ -11,7 +11,12 @@ export default memo(function Symbol({ layer }: Props) {
   return (
     <CanvasGridItem
       renderContent={(size) => (
-        <LayerPreview layer={layer} size={size} padding={10} />
+        <LayerPreview
+          layer={layer}
+          size={size}
+          padding={10}
+          scalingMode="down"
+        />
       )}
     />
   );

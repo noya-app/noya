@@ -1,6 +1,7 @@
 import {
   AffineTransform,
   createBounds,
+  resize,
   resizeIfLarger,
   Size,
 } from 'noya-geometry';
@@ -13,9 +14,15 @@ interface Props {
   layer: PageLayer;
   size: Size;
   padding?: number;
+  scalingMode?: 'upOrDown' | 'down';
 }
 
-export default function LayerPreview({ layer, size, padding = 0 }: Props) {
+export default function LayerPreview({
+  layer,
+  size,
+  padding = 0,
+  scalingMode = 'upOrDown',
+}: Props) {
   const transform = useMemo(() => {
     const bounds = createBounds(layer.frame);
 
@@ -26,15 +33,15 @@ export default function LayerPreview({ layer, size, padding = 0 }: Props) {
 
     const layerSize = { width: layer.frame.width, height: layer.frame.height };
 
-    const scaledRect = resizeIfLarger(layerSize, paddedSize);
+    const scaledRect =
+      scalingMode === 'down'
+        ? resizeIfLarger(layerSize, paddedSize)
+        : resize(layerSize, paddedSize);
 
-    // Scale down to fit, if needed
-    const scale = Math.min(
-      1,
-      Math.max(
-        scaledRect.width / layerSize.width,
-        scaledRect.height / layerSize.height,
-      ),
+    // Scale the largest side to fit, if needed
+    const scale = Math.max(
+      scaledRect.width / layerSize.width,
+      scaledRect.height / layerSize.height,
     );
 
     return AffineTransform.multiply(
@@ -44,7 +51,7 @@ export default function LayerPreview({ layer, size, padding = 0 }: Props) {
       // Translate to (0,0) before scaling, since scale is applied at the origin
       AffineTransform.translation(-bounds.midX, -bounds.midY),
     );
-  }, [layer.frame, size.width, size.height, padding]);
+  }, [layer.frame, size.width, size.height, padding, scalingMode]);
 
   return (
     <Group transform={transform}>
