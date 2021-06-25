@@ -6,6 +6,7 @@ import {
   ColorControlsAction,
   colorControlsReducer,
 } from './colorControlsReducer';
+import { clamp } from 'noya-utils';
 
 export type SetNumberMode = 'replace' | 'adjust';
 
@@ -236,7 +237,7 @@ export function styleReducer(
         const newValue =
           mode === 'replace' ? amount : draft.fills[index].color.alpha + amount;
 
-        draft.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
+        draft.fills[index].color.alpha = clamp(newValue, 0, 1);
       });
     }
     case 'setOpacity': {
@@ -248,7 +249,7 @@ export function styleReducer(
         const newValue =
           mode === 'replace' ? amount : draft.contextSettings.opacity + amount;
 
-        draft.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
+        draft.contextSettings.opacity = clamp(newValue, 0, 1);
       });
     }
     case 'setShadowX': {
@@ -316,10 +317,11 @@ export function styleReducer(
         if (!draft.fills || !draft.fills[index]) return;
         draft.fills[index].fillType = type;
 
-        if (!draft.fills[index].gradient) {
+        if (type === Sketch.FillType.Gradient && !draft.fills[index].gradient) {
           draft.fills[index].gradient = Models.fill.gradient;
         }
-        if (!draft.fills[index].image) {
+
+        if (type === Sketch.FillType.Pattern && !draft.fills[index].image) {
           draft.fills[index].image = {
             _class: 'MSJSONFileReference',
             _ref: '',
@@ -397,10 +399,7 @@ export function styleReducer(
             ? amount
             : draft.fills[index].patternTileScale + amount;
 
-        draft.fills[index].patternTileScale = Math.min(
-          Math.max(0.1, newValue),
-          2,
-        );
+        draft.fills[index].patternTileScale = clamp(newValue, 0.1, 2);
       });
     }
     case 'setFillImage': {
@@ -420,10 +419,7 @@ export function styleReducer(
             ? amount
             : draft.fills[index].contextSettings.opacity + amount;
 
-        draft.fills[index].contextSettings.opacity = Math.min(
-          Math.max(0, newValue),
-          1,
-        );
+        draft.fills[index].contextSettings.opacity = clamp(newValue, 0, 1);
       });
     }
     default:

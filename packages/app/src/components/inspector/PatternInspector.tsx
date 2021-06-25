@@ -6,9 +6,8 @@ import {
   InputField,
   getPatternBackground,
   SketchPattern,
-  imgFileExtensions,
-  mimeTypes,
   getPatternSize,
+  SUPPORTED_FILE_TYPES,
 } from 'noya-designsystem';
 import { memo, useCallback, useMemo, useState, DragEvent } from 'react';
 import styled from 'styled-components';
@@ -16,6 +15,8 @@ import * as InspectorPrimitives from './InspectorPrimitives';
 import { fileOpen } from 'browser-fs-access';
 import { uuid } from 'noya-renderer';
 import { FileMap } from 'noya-sketch-file';
+import { useHover } from 'noya-designsystem/src/hooks/useHover';
+import { useFileDropTarget } from '../../hooks/useFileDropTarget';
 
 const Column = styled.div(({ theme }) => ({
   flex: '1',
@@ -27,8 +28,8 @@ const Container = styled.div<{
   background: string;
   backgroundSize: string;
   repeat: boolean;
-  isDragOver: boolean;
-}>(({ theme, background, backgroundSize, repeat, isDragOver }) => {
+  isActive: boolean;
+}>(({ theme, background, backgroundSize, repeat, isActive }) => {
   const dragOverlayColor =
     theme.colors.primary.replace('rgb', 'rgba').slice(0, -1) + ',0.5)';
 
@@ -40,8 +41,8 @@ const Container = styled.div<{
     outline: 'none',
     borderRadius: '4px',
     minHeight: '150px',
-    background: (isDragOver ? `${gradientOverlay},` : '') + background,
-    border: (isDragOver ? '2px ' : '0px ') + theme.colors.primaryDark,
+    background: (isActive ? `${gradientOverlay},` : '') + background,
+    border: (isActive ? '2px ' : '0px ') + theme.colors.primaryDark,
     backgroundColor: 'white',
     backgroundPosition: 'center',
     backgroundRepeat: repeat ? 'auto' : 'no-repeat',
@@ -91,13 +92,15 @@ export default memo(function PatternInspector({
   id,
   images,
   pattern,
+  createImage,
   onChangeImage,
   onChangeFillType,
   onChangeTileScale,
-  createImage,
 }: Props) {
-  const [showButton, setShowButton] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [isHovering, onHoverChange] = useState(false);
+  const { hoverProps } = useHover({
+    onHoverChange,
+  });
 
   const patternType = pattern.patternFillType;
   const isTile = patternType === Sketch.PatternFillType.Tile;
@@ -135,9 +138,16 @@ export default memo(function PatternInspector({
 
   const handleImageFile = useCallback(
     async (file: File) => {
-      const data = await file.arrayBuffer();
+      const extension = SUPPORTED_FILE_TYPES[file.type];
 
-      const extension = file.type.split('/')[1];
+      if (!extension) {
+        alert(
+          `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
+        );
+        return;
+      }
+
+      const data = await file.arrayBuffer();
       const _ref = `images/${uuid()}.${extension}`;
 
       createImage(data, _ref);
@@ -152,53 +162,47 @@ export default memo(function PatternInspector({
 
   const openFile = useCallback(async () => {
     const file = await fileOpen({
-      extensions: imgFileExtensions.map((e) => `.${e}`),
-      mimeTypes: mimeTypes,
+      extensions: Object.values(SUPPORTED_FILE_TYPES).map((e) => '.' + e),
+      mimeTypes: Object.keys(SUPPORTED_FILE_TYPES),
     });
 
     handleImageFile(file);
   }, [handleImageFile]);
 
-  const handleDragEvent = useCallback((e: DragEvent, on?: boolean) => {
-    if (on) setIsDragOver(on);
-    e.preventDefault();
-    // Do something
-  }, []);
-
   const handleDropEvent = useCallback(
     async (e: DragEvent) => {
       e.preventDefault();
-      for (const item of e.dataTransfer.items) {
-        // Careful: `kind` will be 'file' for both file
-        // _and_ directory entries.
-        if (item.kind === 'file' && mimeTypes.includes(item.type)) {
-          const entry = await item.getAsFile();
+      for (const file of e.dataTransfer.items) {
+        if (file.kind === 'file') {
+          const entry = await file.getAsFile();
 
           if (!entry) return;
           handleImageFile(entry);
         }
       }
-      setIsDragOver(false);
     },
     [handleImageFile],
+  );
+
+  const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
+    handleDropEvent,
   );
 
   const scale = Math.round(pattern.patternTileScale * 100);
   return (
     <Column>
       <Container
-        onDragOver={handleDragEvent}
-        onDragEnter={(e: DragEvent) => handleDragEvent(e, true)}
-        onDragLeave={(e: DragEvent) => handleDragEvent(e, false)}
-        onDrop={handleDropEvent}
-        isDragOver={isDragOver}
+        {...dropTargetProps}
+        {...hoverProps}
+        isActive={isDropTargetActive}
         background={background}
         backgroundSize={backgroundSize}
         repeat={isTile}
-        onMouseEnter={() => setShowButton(true)}
-        onMouseLeave={() => setShowButton(false)}
       >
-        <UploadButton show={!isDragOver && showButton} onClick={openFile}>
+        <UploadButton
+          show={!isDropTargetActive && isHovering}
+          onClick={openFile}
+        >
           Upload Image
         </UploadButton>
       </Container>

@@ -1,12 +1,9 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import {
-  FlatDispatcher,
-  useApplicationState,
-} from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import { ColorInputField, Select, SketchPattern } from 'noya-designsystem';
-import { ApplicationState, Selectors } from 'noya-state';
+import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import ColorInspector from './ColorInspector';
@@ -68,7 +65,6 @@ interface Props {
 }
 
 interface PickersProps {
-  appState: [ApplicationState, FlatDispatcher];
   value: Sketch.Color | Sketch.Gradient | SketchPattern;
   selectedColor: Sketch.Color;
   onChange: (color: Sketch.Color) => void;
@@ -77,14 +73,13 @@ interface PickersProps {
 }
 
 const Picker = ({
-  appState,
   value,
   selectedColor,
   onChange,
   onChangeGradient,
   onChangeFillImage,
 }: PickersProps) => {
-  const [state, dispatch] = appState;
+  const [state, dispatch] = useApplicationState();
 
   const detachThemeColor = useCallback(() => {
     onChange({
@@ -299,7 +294,6 @@ export default memo(function ColorInputFieldWithPicker({
         </PaddedSection>
         <Picker
           value={value}
-          appState={[state, dispatch]}
           selectedColor={values[0]}
           onChange={onChange}
           onChangeGradient={onChangeGradient}

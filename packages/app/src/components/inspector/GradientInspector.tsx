@@ -28,6 +28,8 @@ interface Props {
   id: string;
   gradient: Sketch.GradientStop[];
   onChangeColor?: (color: Sketch.Color, index: number) => void;
+  onChangeOpacity?: (amount: number) => void;
+  onNudgeOpacity?: (amount: number) => void;
   onChangePosition?: (index: number, position: number) => void;
   onAddStop?: (color: Sketch.Color, position: number) => void;
   onDeleteStop?: (index: number) => void;
@@ -36,6 +38,8 @@ interface Props {
 export default memo(function GradientInspector({
   id,
   gradient,
+  onChangeOpacity,
+  onNudgeOpacity,
   onChangeColor = (color: Sketch.Color, index: number) => {},
   onChangePosition = (position: number, index: number) => {},
   onAddStop = (color: Sketch.Color, position: number) => {},
