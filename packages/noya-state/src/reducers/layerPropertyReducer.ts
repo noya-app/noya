@@ -21,6 +21,8 @@ export type LayerPropertyAction =
   | [type: 'setLayerHeight', rotation: number, mode?: SetNumberMode]
   | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
+  | [type: 'setIsFlippedVertical', value: boolean]
+  | [type: 'setIsFlippedHorizontal', value: boolean]
   | [type: 'setHasClippingMask', value: boolean]
   | [type: 'setShouldBreakMaskChain', value: boolean];
 
@@ -137,6 +139,28 @@ export function layerPropertyReducer(
             mode === 'replace' ? amount : value + amount,
             0.5,
           );
+        });
+      });
+    }
+    case 'setIsFlippedVertical': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.isFlippedVertical = value;
+        });
+      });
+    }
+    case 'setIsFlippedHorizontal': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.isFlippedHorizontal = value;
         });
       });
     }

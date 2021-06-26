@@ -1,6 +1,7 @@
 import { Group } from 'noya-react-canvaskit';
 import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
+import { AffineTransform, createBounds } from 'noya-geometry';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
@@ -43,14 +44,35 @@ export default memo(function SketchLayer({ layer }: Props) {
       break;
     default:
       console.info(layer._class, 'not handled');
-      return null;
+      element = <></>;
   }
 
+  let transforms: AffineTransform[] = [];
+
+  if (layer.isFlippedHorizontal || layer.isFlippedVertical) {
+    const bounds = createBounds(layer.frame);
+
+    transforms.push(
+      AffineTransform.multiply(
+        AffineTransform.translation(bounds.midX, bounds.midY),
+        AffineTransform.scale(
+          layer.isFlippedHorizontal ? -1 : 1,
+          layer.isFlippedVertical ? -1 : 1,
+        ),
+        AffineTransform.translation(-bounds.midX, -bounds.midY),
+      ),
+    );
+  }
+
+  // TODO: Investigate rotation appearing incorrect in inspector, e.g. rotate the image
+  // in the demo file to 45. The rotation in our inspector will be -45.
   if (layer.rotation % 360 !== 0) {
-    const rotation = Selectors.getLayerRotationTransform(layer);
-
-    return <Group transform={rotation}>{element}</Group>;
+    transforms.push(Selectors.getLayerRotationTransform(layer));
   }
 
-  return element;
+  return transforms.length > 0 ? (
+    <Group transform={AffineTransform.multiply(...transforms)}>{element}</Group>
+  ) : (
+    element
+  );
 });
