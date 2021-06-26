@@ -12,6 +12,11 @@ const StyledScrollArea = styled(RadixScrollArea.Root)({
 const StyledViewport = styled(RadixScrollArea.Viewport)({
   width: '100%',
   height: '100%',
+  // Override the `display: table` in the child, since this allows
+  // elements to expand beyond the width of the viewport.
+  '& > div': {
+    display: 'block !important',
+  },
 });
 
 const StyledScrollbar = styled(RadixScrollArea.Scrollbar)({
