@@ -1,4 +1,5 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
+import ScrollArea from './ScrollArea';
 import {
   Children,
   createContext,
@@ -251,7 +252,6 @@ const RootContainer = styled.ul<{ scrollable?: boolean }>(
     flexDirection: 'column',
     flexWrap: 'nowrap',
     color: theme.colors.textMuted,
-    overflowY: scrollable ? 'auto' : 'visible',
   }),
 );
 
@@ -344,15 +344,23 @@ function ListViewRoot({
     );
   }
 
+  const content = sortable ? (
+    <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
+      {mappedChildren}
+    </Sortable.Root>
+  ) : (
+    mappedChildren
+  );
+
+  const scrollableContent = scrollable ? (
+    <ScrollArea>{content}</ScrollArea>
+  ) : (
+    content
+  );
+
   return (
     <RootContainer onClick={handleClick} scrollable={scrollable}>
-      {sortable ? (
-        <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
-          {mappedChildren}
-        </Sortable.Root>
-      ) : (
-        mappedChildren
-      )}
+      {scrollableContent}
     </RootContainer>
   );
 }

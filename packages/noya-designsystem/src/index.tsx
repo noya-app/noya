@@ -37,6 +37,7 @@ export * as Spacer from './components/Spacer';
 export { default as Tooltip } from './components/Tooltip';
 export * as ContextMenu from './components/ContextMenu';
 export * as DropdownMenu from './components/DropdownMenu';
+export { default as ScrollArea } from './components/ScrollArea';
 
 // Contexts
 export * from './contexts/GlobalInputBlurContext';

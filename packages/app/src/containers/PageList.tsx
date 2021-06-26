@@ -113,7 +113,8 @@ const PageListContent = memo(function PageListContent({
         </Button>
       </Header>
       <ListView.Root
-        sortable={true}
+        sortable
+        scrollable
         onMoveItem={useCallback(
           (sourceIndex, destinationIndex) => {
             dispatch('movePage', sourceIndex, destinationIndex);
