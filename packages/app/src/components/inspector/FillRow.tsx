@@ -6,12 +6,12 @@ import {
   Select,
   sketchColorToHex,
   Spacer,
+  SketchPattern,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import ColorInputFieldWithPicker, {
-  SketchPattern,
-} from './ColorInputFieldWithPicker';
+import FillInputFieldWithPicker from './FillInputFieldWithPicker';
+import { patternFillTypeOptions, PatternFillTypes } from './PatternInspector';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -23,6 +23,7 @@ const Row = styled.div(({ theme }) => ({
 interface Props {
   id: string;
   value: Sketch.Color | Sketch.Gradient | SketchPattern;
+  contextOpacity: number;
   onChangeColor: (color: Sketch.Color) => void;
   onChangeFillType: (type: Sketch.FillType) => void;
   onChangeGradient: (gradient: Sketch.Gradient) => void;
@@ -33,12 +34,18 @@ interface Props {
   onChangeGradientType: (type: Sketch.GradientType) => void;
   onChangeOpacity: (amount: number) => void;
   onNudgeOpacity: (amount: number) => void;
+  onChangePatternFillType: (value: Sketch.PatternFillType) => void;
+  onChangePatternTileScale: (amount: number) => void;
+  onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
+  onChangeContextOpacity: (value: number) => void;
+  onNudgeContextOpacity: (value: number) => void;
   prefix?: ReactNode;
 }
 
 export default memo(function ColorFillRow({
   id,
   value,
+  contextOpacity,
   onChangeColor,
   onChangeOpacity,
   onNudgeOpacity,
@@ -49,12 +56,18 @@ export default memo(function ColorFillRow({
   onAddGradientStop,
   onDeleteGradientStop,
   onChangeGradientType,
+  onChangePatternFillType,
+  onChangePatternTileScale,
+  onChangeFillImage,
+  onChangeContextOpacity,
+  onNudgeContextOpacity,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
   const gradientTypeId = `${id}-gradient-type`;
+  const patternSizeId = `${id}-pattern-type`;
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -67,25 +80,29 @@ export default memo(function ColorFillRow({
           return <Label.Label>Opacity</Label.Label>;
         case gradientTypeId:
           return <Label.Label>Type</Label.Label>;
+        case patternSizeId:
+          return <Label.Label>Size</Label.Label>;
         default:
           return null;
       }
     },
-    [colorInputId, hexInputId, opacityInputId, gradientTypeId],
+    [colorInputId, hexInputId, opacityInputId, gradientTypeId, patternSizeId],
   );
 
   const handleSubmitOpacity = useCallback(
     (opacity: number) => {
-      onChangeOpacity(opacity / 100);
+      if (value._class === 'color') onChangeOpacity(opacity / 100);
+      else onChangeContextOpacity?.(opacity / 100);
     },
-    [onChangeOpacity],
+    [value, onChangeOpacity, onChangeContextOpacity],
   );
 
   const handleNudgeOpacity = useCallback(
     (amount: number) => {
-      onNudgeOpacity(amount / 100);
+      if (value._class === 'color') onNudgeOpacity(amount / 100);
+      else onNudgeContextOpacity?.(amount / 100);
     },
-    [onNudgeOpacity],
+    [value, onNudgeOpacity, onNudgeContextOpacity],
   );
 
   const gradientTypeOptions = useMemo(
@@ -107,12 +124,24 @@ export default memo(function ColorFillRow({
     [onChangeGradientType],
   );
 
+  const handleSelectPatternSize = useCallback(
+    (value: PatternFillTypes) => {
+      if (onChangePatternFillType)
+        onChangePatternFillType(Sketch.PatternFillType[value]);
+    },
+    [onChangePatternFillType],
+  );
+
+  /**?
+   *
+   * Join all the onChange ?? :thinking:
+   */
   return (
     <Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <ColorInputFieldWithPicker
+        <FillInputFieldWithPicker
           id={colorInputId}
           value={value}
           onChange={onChangeColor}
@@ -123,6 +152,9 @@ export default memo(function ColorFillRow({
           onAddGradientStop={onAddGradientStop}
           onChangeGradientType={onChangeGradientType}
           onDeleteGradientStop={onDeleteGradientStop}
+          onChangePatternFillType={onChangePatternFillType}
+          onChangePatternTileScale={onChangePatternTileScale}
+          onChangeFillImage={onChangeFillImage}
         />
         <Spacer.Horizontal size={8} />
         {value._class === 'color' ? (
@@ -144,30 +176,30 @@ export default memo(function ColorFillRow({
             />
           </InputField.Root>
         ) : (
-          <InputField.Root id={gradientTypeId} labelPosition="start">
-            <InputField.Input value={'Pattern'} onSubmit={() => {}} />
+          <InputField.Root id={patternSizeId}>
+            <Select
+              id={'gradient-type-selector'}
+              value={
+                Sketch.PatternFillType[
+                  value.patternFillType
+                ] as PatternFillTypes
+              }
+              options={patternFillTypeOptions}
+              onChange={handleSelectPatternSize}
+            />
           </InputField.Root>
         )}
         <Spacer.Horizontal size={8} />
-        {value._class === 'color' ? (
-          <InputField.Root id={opacityInputId} size={50}>
-            <InputField.NumberInput
-              value={Math.round(value.alpha * 100)}
-              onSubmit={handleSubmitOpacity}
-              onNudge={handleNudgeOpacity}
-            />
-            <InputField.Label>%</InputField.Label>
-          </InputField.Root>
-        ) : (
-          <InputField.Root id={opacityInputId} size={50}>
-            <InputField.NumberInput
-              value={Math.round(100)}
-              onSubmit={handleSubmitOpacity}
-              onNudge={handleNudgeOpacity}
-            />
-            <InputField.Label>%</InputField.Label>
-          </InputField.Root>
-        )}
+        <InputField.Root id={opacityInputId} size={50}>
+          <InputField.NumberInput
+            value={Math.round(
+              (value._class === 'color' ? value.alpha : contextOpacity) * 100,
+            )}
+            onSubmit={handleSubmitOpacity}
+            onNudge={handleNudgeOpacity}
+          />
+          <InputField.Label>%</InputField.Label>
+        </InputField.Root>
       </LabeledElementView>
     </Row>
   );

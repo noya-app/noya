@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Spacer } from 'noya-designsystem';
 import { memo, useCallback } from 'react';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
@@ -69,7 +69,7 @@ export default memo(function SymbolSourceRow({
         <Spacer.Horizontal size={8} />
         <InspectorPrimitives.Text>Background color</InspectorPrimitives.Text>
         <Spacer.Horizontal size={65} />
-        <ColorInputFieldWithPicker
+        <FillInputFieldWithPicker
           id={'colorInputId'}
           value={backgroundColor}
           onChange={setBackgroundColor}

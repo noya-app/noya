@@ -59,6 +59,8 @@ export const colors = {
   icon: 'rgb(139, 139, 139)',
   iconSelected: 'rgb(220, 220, 220)',
   mask: 'rgb(12,193,67)',
+  imageOverlay:
+    'linear-gradient(0deg, rgba(132, 63, 255,0.55), rgba(132, 63, 255,0.55))',
 };
 
 export const fonts = {

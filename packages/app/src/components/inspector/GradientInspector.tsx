@@ -106,7 +106,7 @@ export default memo(function GradientInspector({
         );
       }
     },
-    [selectedcolor, clampedSelectedStopIndex, onChangeColor, onNudgeOpacity],
+    [selectedcolor, clampedSelectedStopIndex, onNudgeOpacity, onChangeColor],
   );
 
   const handleChangeColor = useCallback(

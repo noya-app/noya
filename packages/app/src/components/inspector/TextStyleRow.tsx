@@ -7,7 +7,7 @@ import {
 } from 'noya-designsystem';
 import { Spacer } from 'noya-designsystem';
 import { useCallback, memo, useMemo } from 'react';
-import ColorInputFieldWithPicker from './ColorInputFieldWithPicker';
+import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextStyleRowProps {
@@ -162,7 +162,7 @@ export default memo(function TextStyleRow({
             onNudge={() => {}}
           />
           <Spacer.Horizontal size={8} />
-          <ColorInputFieldWithPicker
+          <FillInputFieldWithPicker
             id={'colorInputId'}
             value={fontColor}
             onChange={onChangeFontColor}

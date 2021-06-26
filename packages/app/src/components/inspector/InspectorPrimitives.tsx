@@ -41,9 +41,16 @@ export const Text = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
 }));
 
+const SliderRowLabel = styled.span(({ theme }) => ({
+  ...theme.textStyles.small,
+  color: theme.colors.textMuted,
+  marginBottom: '-6px',
+}));
+
 const RowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
-  marginBottom: '-6px',
+  color: theme.colors.textMuted,
+  marginBottom: '2px',
 }));
 
 export const LabeledRow = memo(function LabeledRow({
@@ -57,6 +64,23 @@ export const LabeledRow = memo(function LabeledRow({
     <Row>
       <Column>
         <RowLabel>{label}</RowLabel>
+        <Row>{children}</Row>
+      </Column>
+    </Row>
+  );
+});
+
+export const LabeledSliderRow = memo(function LabeledRow({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <Row>
+      <Column>
+        <SliderRowLabel>{label}</SliderRowLabel>
         <Row>{children}</Row>
       </Column>
     </Row>

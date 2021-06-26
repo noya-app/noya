@@ -21,6 +21,12 @@ export const getGradientAssets = (
   return state.sketch.document.assets.gradientAssets ?? [];
 };
 
+export const getImageAssets = (
+  state: ApplicationState,
+): (Sketch.FileRef | Sketch.DataRef)[] => {
+  return state.sketch.document.assets.images ?? [];
+};
+
 export const getSharedTextStyles = (
   state: ApplicationState,
 ): Sketch.SharedStyle[] => {
