@@ -2422,6 +2422,13 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/number/-/number-0.0.1.tgz#07be7d2712aa26ed810fa185dfbc73abf70af6be"
   integrity sha512-qkg9slhy28L8YFT12LpVg8YAHgzUfDtaiIU9cyPKOAsQwerx8BzzkBxAAn8rc9lb1Zi6hMpOrpt3CtOJ+o9b4g==
 
+"@radix-ui/number@0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@radix-ui/number/-/number-0.0.6.tgz#b99c5397592d4714f2addaac86879e3ed5136acd"
+  integrity sha512-4ezhe9dWl3mSrZ6EaYQE+OhOOT1+KW73FTbpaQmg8rD7RgArnmbSW7gLdWw9X9zq4zv+FGqcTqErxctiG3ZzRA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@radix-ui/popper@0.0.10":
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/@radix-ui/popper/-/popper-0.0.10.tgz#9f707d9cec8762423f81acaf8e650e40a554cb73"
@@ -2813,6 +2820,23 @@
     "@radix-ui/react-id" "0.0.1"
     "@radix-ui/react-use-controllable-state" "0.0.1"
 
+"@radix-ui/react-scroll-area@^0.0.15":
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-scroll-area/-/react-scroll-area-0.0.15.tgz#67c68b729b627c1e395d1d892aed983755a7a120"
+  integrity sha512-MA/S7pdhs53F1isdos8zT3M1QLIEaOer3D7wQev4DmLlynG7XWNdjeIQ1WIos/jiipeJH0KFlSjsEy+T1si4Bg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/number" "0.0.6"
+    "@radix-ui/primitive" "0.0.5"
+    "@radix-ui/react-compose-refs" "0.0.5"
+    "@radix-ui/react-context" "0.0.5"
+    "@radix-ui/react-polymorphic" "0.0.12"
+    "@radix-ui/react-presence" "0.0.14"
+    "@radix-ui/react-primitive" "0.0.14"
+    "@radix-ui/react-use-callback-ref" "0.0.5"
+    "@radix-ui/react-use-direction" "0.0.1"
+    "@radix-ui/react-use-layout-effect" "0.0.5"
+
 "@radix-ui/react-slider@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-slider/-/react-slider-0.0.6.tgz#30a1f50a49b1f62b86d578466fec19c23dd8f27c"
@@ -2907,6 +2931,13 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-use-callback-ref" "0.0.5"
+
+"@radix-ui/react-use-direction@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-use-direction/-/react-use-direction-0.0.1.tgz#9ac72eb6d9902ed505c8a34048981d94f9433e14"
+  integrity sha512-sU+tkP09uEI1m+YJAR1ZAZLVFY1h/JD+jLSSQt5Wo3b9SYrJA889i2hH1P3DNRyWbbbisweiEQdK3MWILhFCig==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
 
 "@radix-ui/react-use-escape-keydown@0.0.6":
   version "0.0.6"
