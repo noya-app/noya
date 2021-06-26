@@ -4,6 +4,7 @@ import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,
   Group,
+  Image,
   Path,
   useDeletable,
   usePaint,
@@ -12,6 +13,8 @@ import {
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
 import { Primitives } from 'noya-renderer';
 import { memo, useMemo } from 'react';
+import { useApplicationState } from '../../../../app/src/contexts/ApplicationStateContext';
+import { Rect } from '../../../../noya-state/src';
 import { getStrokedPath } from '../../primitives/path';
 import SketchBorder from '../effects/SketchBorder';
 
@@ -34,10 +37,14 @@ const SketchFill = memo(function SketchFill({
   path,
   fill,
   transform,
+  frame,
+  image,
 }: {
   path: CanvasKit.Path;
   fill: Sketch.Fill;
   transform: number[];
+  frame: Rect;
+  image?: ArrayBuffer;
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
@@ -50,7 +57,17 @@ const SketchFill = memo(function SketchFill({
 
   useDeletable(paint);
 
-  return <Path path={path} paint={paint} />;
+  if (fill.fillType !== Sketch.FillType.Pattern)
+    return <Path path={path} paint={paint} />;
+
+  if (image)
+    return (
+      <Image
+        image={image}
+        paint={paint}
+        rect={Primitives.rect(CanvasKit, frame)}
+      />
+    );
 });
 
 const SketchShadow = memo(function SketchShadow({
@@ -180,6 +197,7 @@ interface Props {
 
 export default memo(function SketchShape({ layer }: Props) {
   const { CanvasKit } = useReactCanvasKit();
+  const [state] = useApplicationState();
 
   const path = Primitives.path(CanvasKit, layer.points, layer.frame);
 
@@ -224,12 +242,14 @@ export default memo(function SketchShape({ layer }: Props) {
           />
         ),
       )}
-      {fills.map((fill, index) => (
+      {fills.reverse().map((fill, index) => (
         <SketchFill
           key={`fill-${index}`}
           fill={fill}
           path={path}
           transform={transform}
+          frame={layer.frame}
+          image={fill.image ? state.sketch.images[fill.image._ref] : undefined}
         />
       ))}
       {borders.map((border, index) => (

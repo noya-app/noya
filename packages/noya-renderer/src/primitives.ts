@@ -163,6 +163,8 @@ export function fill(
 
       break;
     }
+    case Sketch.FillType.Pattern:
+      return paint;
   }
 
   paint.setStyle(CanvasKit.PaintStyle.Fill);
