@@ -60,7 +60,8 @@ const ToolbarContent = memo(function ToolbarContent({
     interactionType === 'movingPoint' ||
     interactionType === 'maybeMoveControlPoint' ||
     interactionType === 'movingControlPoint' ||
-    interactionType === 'updateMovingPoint';
+    interactionType === 'updateMovingPoint' ||
+    interactionType === 'updateMovingControlPoint';
   const isPanning =
     interactionType === 'panMode' ||
     interactionType === 'maybePan' ||

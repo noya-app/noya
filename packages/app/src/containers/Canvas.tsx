@@ -412,9 +412,8 @@ export default memo(function Canvas() {
         case 'maybeMovePoint': {
           const { origin, selectedPoint } = state.interactionState;
           if (
-            (Math.abs(point.x - origin.x) > 2 ||
-              Math.abs(point.y - origin.y) > 2) &&
-            !event.shiftKey
+            Math.abs(point.x - origin.x) > 2 ||
+            Math.abs(point.y - origin.y) > 2
           ) {
             dispatch('interaction', [
               'movingPoint',
@@ -452,10 +451,24 @@ export default memo(function Canvas() {
             dispatch('interaction', [
               'movingControlPoint',
               origin,
-              // point,
+              point,
               selectedPoint,
             ]);
           }
+          event.preventDefault();
+
+          break;
+        }
+        case 'movingControlPoint': {
+          const { origin, selectedPoint } = state.interactionState;
+          dispatch('interaction', [
+            'updateMovingControlPoint',
+            origin,
+            point,
+            selectedPoint,
+          ]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
 
           break;
@@ -627,7 +640,8 @@ export default memo(function Canvas() {
           break;
         }
         case 'maybeMove':
-        case 'maybeScale': {
+        case 'maybeScale':
+        case 'movingControlPoint': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
@@ -651,6 +665,12 @@ export default memo(function Canvas() {
         case 'maybeMovePoint':
         case 'maybeMoveControlPoint': {
           if (event.shiftKey) {
+            // const { selectedPoint } = state.interactionState;
+            // console.log(Object.keys(state.selectedPointLists));
+            dispatch('interaction', [
+              'editPath',
+              Object.keys(state.selectedPointLists),
+            ]);
             return;
           }
           dispatch('interaction', ['reset']);
@@ -661,11 +681,12 @@ export default memo(function Canvas() {
         }
         case 'movingPoint': {
           if (event.shiftKey) {
+            const { selectedPoint } = state.interactionState;
+
+            dispatch('interaction', ['editPath', Object.keys(selectedPoint)]);
             return;
           }
-          //const { origin, selectedPoint } = state.interactionState;
 
-          // dispatch('interaction', ['editPath', Object.keys(selectedPoint)]);
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);

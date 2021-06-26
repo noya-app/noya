@@ -1,10 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import {
   AffineTransform,
   createBounds,
   createRectFromBounds,
+  distance,
   normalizeRect,
+  Rect,
   rectsIntersect,
   Size,
 } from 'noya-geometry';
@@ -14,6 +17,7 @@ import {
   encodeCurvePoint,
   resizeRect,
 } from 'noya-renderer/src/primitives';
+import { path } from '../../../noya-renderer/src/primitives/path';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -77,6 +81,7 @@ export type CanvasAction =
         | [
             type: 'movingControlPoint',
             origin: Point,
+            current: Point,
             selectedPoint: SelectedControlPoint,
           ],
     ];
@@ -84,6 +89,7 @@ export type CanvasAction =
 export function canvasReducer(
   state: ApplicationState,
   action: CanvasAction,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
     case 'insertArtboard': {
@@ -327,6 +333,138 @@ export function canvasReducer(
               layer.frame = {
                 ...layer.frame,
                 ...createRectFromBounds(newBounds),
+              };
+
+              // Transform back to the range [0, 1], using the new bounds
+              const encodedPoints = decodedPoints.map((decodedCurvePoint) =>
+                encodeCurvePoint(decodedCurvePoint, layer.frame),
+              );
+
+              layer.points = encodedPoints;
+            });
+
+            break;
+          }
+          case 'movingControlPoint': {
+            if (!state.selectedControlPoint) return state;
+            const { current, selectedPoint } = interactionState;
+
+            // const [a, b, c, d, canvasKit] = action;
+            const {
+              layerId,
+              pointIndex,
+              controlPointType,
+            } = state.selectedControlPoint;
+
+            //const axis = type === 'setControlPointX' ? 'x' : 'y';
+
+            //  const pageIndex = getCurrentPageIndex(state);
+            // const layerIndexPaths = getSelectedLayerIndexPaths(state);
+            const boundingRects = getBoundingRectMap(
+              getCurrentPage(state),
+              [layerId],
+              {
+                clickThroughGroups: true,
+                includeArtboardLayers: false,
+                includeHiddenLayers: false,
+              },
+            );
+
+            layerIndexPaths.forEach((indexPath) => {
+              const page = draft.sketch.pages[pageIndex];
+              const layer = Layers.access(page, indexPath);
+              const boundingRect = boundingRects[layer.do_objectID];
+
+              if (!Layers.isPointsLayer(layer) || !boundingRect) return;
+
+              const pointToMeasureFrom = decodeCurvePoint(
+                layer.points[selectedPoint.pointIndex],
+                boundingRect,
+              );
+              const delta = {
+                x: current.x - pointToMeasureFrom.point.x,
+                y: current.y - pointToMeasureFrom.point.y,
+              };
+
+              const curveMode = layer.points[pointIndex].curveMode;
+
+              // Update all points by first transforming to the canvas's coordinate system
+              const decodedPoints = layer.points.map((curvePoint) =>
+                decodeCurvePoint(curvePoint, boundingRect),
+              );
+
+              const decodedPoint = decodedPoints[pointIndex];
+
+              const oppositeControlPointType =
+                controlPointType === 'curveFrom' ? 'curveTo' : 'curveFrom';
+
+              const controlPoint = decodedPoint[controlPointType];
+              const oppositeControlPoint =
+                decodedPoint[oppositeControlPointType];
+
+              const selectedControlPointValueX = controlPoint.x + delta.x;
+              const selectedControlPointValueY = controlPoint.y + delta.y;
+
+              const deltaX = controlPoint.x - selectedControlPointValueX;
+              const deltaY = controlPoint.y - selectedControlPointValueY;
+
+              const oppositeControlPointDistance = distance(
+                decodedPoint.point,
+                oppositeControlPoint,
+              );
+
+              switch (curveMode) {
+                case Sketch.CurveMode.Mirrored:
+                  controlPoint.x = selectedControlPointValueX;
+                  controlPoint.y = selectedControlPointValueY;
+
+                  oppositeControlPoint.x += deltaX;
+                  oppositeControlPoint.y += deltaY;
+                  break;
+                case Sketch.CurveMode.Asymmetric:
+                  controlPoint.x = selectedControlPointValueX;
+                  controlPoint.y = selectedControlPointValueY;
+
+                  let theta =
+                    Math.atan2(
+                      controlPoint.y - decodedPoint.point.y,
+                      controlPoint.x - decodedPoint.point.x,
+                    ) + Math.PI;
+
+                  const oppositeControlPointValue = {
+                    x:
+                      oppositeControlPointDistance * Math.cos(theta) +
+                      decodedPoint.point.x,
+                    y:
+                      oppositeControlPointDistance * Math.sin(theta) +
+                      decodedPoint.point.y,
+                  };
+
+                  decodedPoint[
+                    oppositeControlPointType
+                  ] = oppositeControlPointValue;
+                  break;
+                default:
+                  controlPoint.x = selectedControlPointValueX;
+                  controlPoint.y = selectedControlPointValueY;
+              }
+
+              const [minX, minY, maxX, maxY] = path(
+                CanvasKit,
+                layer.points,
+                layer.frame,
+              ).computeTightBounds();
+
+              const newRect: Rect = {
+                x: minX,
+                y: minY,
+                width: maxX - minX,
+                height: maxY - minY,
+              };
+
+              layer.frame = {
+                ...layer.frame,
+                ...newRect,
               };
 
               // Transform back to the range [0, 1], using the new bounds

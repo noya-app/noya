@@ -5,9 +5,10 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
 import { StateProvider } from './contexts/ApplicationStateContext';
+import useCanvasKit from './hooks/useCanvasKit';
 import { useResource } from './hooks/useResource';
 import { PromiseState } from './utils/PromiseState';
 
@@ -15,32 +16,37 @@ type Action =
   | { type: 'set'; value: SketchFile }
   | { type: 'update'; value: WorkspaceAction };
 
-function reducer(
-  state: PromiseState<WorkspaceState>,
-  action: Action,
-): PromiseState<WorkspaceState> {
-  switch (action.type) {
-    case 'set':
-      return {
-        type: 'success',
-        value: createInitialWorkspaceState(action.value),
-      };
-    case 'update':
-      if (state.type === 'success') {
-        return {
-          type: 'success',
-          value: workspaceReducer(state.value, action.value),
-        };
-      } else {
-        return state;
-      }
-  }
-}
-
 export default function App() {
   const sketchFileData = useResource<ArrayBuffer>(
     '/Demo.sketch',
     'arrayBuffer',
+  );
+  const CanvasKit = useCanvasKit();
+
+  const reducer = useMemo(
+    () =>
+      function reducer(
+        state: PromiseState<WorkspaceState>,
+        action: Action,
+      ): PromiseState<WorkspaceState> {
+        switch (action.type) {
+          case 'set':
+            return {
+              type: 'success',
+              value: createInitialWorkspaceState(action.value),
+            };
+          case 'update':
+            if (state.type === 'success') {
+              return {
+                type: 'success',
+                value: workspaceReducer(state.value, action.value, CanvasKit),
+              };
+            } else {
+              return state;
+            }
+        }
+      },
+    [CanvasKit],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });

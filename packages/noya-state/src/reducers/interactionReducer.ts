@@ -81,8 +81,15 @@ export type InteractionAction =
       selectedPoint: SelectedPoint,
     ]
   | [
+      type: 'updateMovingControlPoint',
+      origin: Point,
+      current: Point,
+      selectedPoint: SelectedControlPoint,
+    ]
+  | [
       type: 'movingControlPoint',
       origin: Point,
+      current: Point,
       selectedPoint: SelectedControlPoint,
     ];
 
@@ -136,8 +143,15 @@ export type InteractionState =
       selectedPoint: SelectedPoint;
     }
   | {
+      type: 'updateMovingControlPoint';
+      origin: Point;
+      current: Point;
+      selectedPoint: SelectedControlPoint;
+    }
+  | {
       type: 'movingControlPoint';
       origin: Point;
+      current: Point;
       selectedPoint: SelectedControlPoint;
     }
   | { type: 'hoverHandle'; direction: CompassDirection }
@@ -315,8 +329,24 @@ export function interactionReducer(
         selectedPoint,
       };
     }
+    case 'updateMovingControlPoint': {
+      const [, origin, current, selectedPoint] = action;
+
+      if (state.type !== 'movingControlPoint') {
+        throw new Error(
+          'Bad interaction state - should be in `movingControlPoint`',
+        );
+      }
+
+      return {
+        type: 'movingControlPoint',
+        origin,
+        current,
+        selectedPoint,
+      };
+    }
     case 'movingControlPoint': {
-      const [type, origin, selectedPoint] = action;
+      const [type, origin, current, selectedPoint] = action;
       if (state.type !== 'maybeMoveControlPoint') {
         throw new Error(
           'Bad interaction state - should be in `maybeMoveControlPoint`',
@@ -325,6 +355,7 @@ export function interactionReducer(
       return {
         type,
         origin,
+        current,
         selectedPoint,
       };
     }

@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { uuid } from 'noya-renderer';
@@ -82,6 +83,7 @@ export type Action =
 export function applicationReducer(
   state: ApplicationState,
   action: Action,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
     case 'setTab': {
@@ -105,7 +107,7 @@ export function applicationReducer(
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'interaction':
-      return canvasReducer(state, action);
+      return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':

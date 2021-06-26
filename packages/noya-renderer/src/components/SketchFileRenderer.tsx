@@ -159,7 +159,8 @@ export default memo(function SketchFileRenderer() {
     state.interactionState.type === 'movingPoint' ||
     state.interactionState.type === 'maybeMoveControlPoint' ||
     state.interactionState.type === 'movingControlPoint' ||
-    state.interactionState.type === 'updateMovingPoint';
+    state.interactionState.type === 'updateMovingPoint' ||
+    state.interactionState.type === 'updateMovingControlPoint';
 
   const canvasRect = useMemo(
     () =>

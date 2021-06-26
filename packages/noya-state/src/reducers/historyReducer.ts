@@ -1,4 +1,5 @@
 import { SketchFile } from 'noya-sketch-file';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import {
   ApplicationState,
@@ -24,7 +25,11 @@ export type HistoryAction = [type: 'undo'] | [type: 'redo'] | Action;
 
 const FILE_CHANGED_TIMEOUT = 300;
 
-export function historyReducer(state: HistoryState, action: HistoryAction) {
+export function historyReducer(
+  state: HistoryState,
+  action: HistoryAction,
+  CanvasKit: CanvasKit,
+) {
   const currentState = state.present;
   switch (action[0]) {
     case 'undo':
@@ -56,7 +61,7 @@ export function historyReducer(state: HistoryState, action: HistoryAction) {
         });
       }
     default:
-      const nextState = applicationReducer(currentState, action);
+      const nextState = applicationReducer(currentState, action, CanvasKit);
       const mergableEntry = getMergableHistoryEntry(state, action[0]);
       const sketchFileChanged = currentState.sketch !== nextState.sketch;
       return produce(state, (draft) => {
