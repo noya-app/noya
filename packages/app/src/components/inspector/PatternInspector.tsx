@@ -29,29 +29,23 @@ const Container = styled.div<{
   backgroundSize: string;
   repeat: boolean;
   isActive: boolean;
-}>(({ theme, background, backgroundSize, repeat, isActive }) => {
-  const dragOverlayColor =
-    theme.colors.primary.replace('rgb', 'rgba').slice(0, -1) + ',0.5)';
-
-  const gradientOverlay = `linear-gradient(0deg, ${dragOverlayColor}, ${dragOverlayColor})`;
-  return {
-    display: 'flex',
-    flex: 1,
-    position: 'relative',
-    outline: 'none',
-    borderRadius: '4px',
-    minHeight: '150px',
-    background: (isActive ? `${gradientOverlay},` : '') + background,
-    border: (isActive ? '2px ' : '0px ') + theme.colors.primaryDark,
-    backgroundColor: 'white',
-    backgroundPosition: 'center',
-    backgroundRepeat: repeat ? 'auto' : 'no-repeat',
-    backgroundSize,
-    imageRendering: 'crisp-edges',
-    width: '100%',
-    justifyContent: 'center',
-  };
-});
+}>(({ theme, background, backgroundSize, repeat, isActive }) => ({
+  display: 'flex',
+  flex: 1,
+  position: 'relative',
+  outline: 'none',
+  borderRadius: '4px',
+  minHeight: '150px',
+  background: (isActive ? `${theme.colors.imageOverlay},` : '') + background,
+  border: (isActive ? '2px ' : '0px ') + theme.colors.primaryDark,
+  backgroundColor: 'white',
+  backgroundPosition: 'center',
+  backgroundRepeat: repeat ? 'auto' : 'no-repeat',
+  backgroundSize,
+  imageRendering: 'crisp-edges',
+  width: '100%',
+  justifyContent: 'center',
+}));
 
 const UploadButton = styled.button<{ show: boolean }>(
   ({ theme, show = false }) => ({
@@ -172,14 +166,14 @@ export default memo(function PatternInspector({
   const handleDropEvent = useCallback(
     async (e: DragEvent) => {
       e.preventDefault();
-      for (const file of e.dataTransfer.items) {
-        if (file.kind === 'file') {
-          const entry = await file.getAsFile();
+      const file = e.dataTransfer.files[0];
 
-          if (!entry) return;
-          handleImageFile(entry);
-        }
+      if (!file) {
+        alert('Unable to read file');
+        return;
       }
+
+      handleImageFile(file);
     },
     [handleImageFile],
   );
@@ -189,6 +183,7 @@ export default memo(function PatternInspector({
   );
 
   const scale = Math.round(pattern.patternTileScale * 100);
+
   return (
     <Column>
       <Container

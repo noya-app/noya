@@ -1,6 +1,6 @@
 import { useCallback, useState, DragEvent } from 'react';
 
-export function useFileDropTarget(dropEvent: (e: DragEvent) => Promise<void>) {
+export function useFileDropTarget(dropEvent: (e: DragEvent) => void) {
   const [isDropTargetActive, setIsDropTargetActive] = useState(false);
 
   const handleDragEvent = useCallback((e: DragEvent, on?: boolean) => {

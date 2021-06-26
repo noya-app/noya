@@ -77,28 +77,36 @@ export default memo(function GradientInspector({
 
   const handleSubmitOpacity = useCallback(
     (opacity: number) => {
-      onChangeColor(
-        {
-          ...selectedcolor,
-          alpha: clamp(opacity / 100, 0, 1),
-        },
-        clampedSelectedStopIndex,
-      );
+      if (onChangeOpacity) {
+        onChangeOpacity(opacity / 100);
+      } else {
+        onChangeColor(
+          {
+            ...selectedcolor,
+            alpha: clamp(opacity / 100, 0, 1),
+          },
+          clampedSelectedStopIndex,
+        );
+      }
     },
-    [selectedcolor, clampedSelectedStopIndex, onChangeColor],
+    [selectedcolor, clampedSelectedStopIndex, onChangeOpacity, onChangeColor],
   );
 
   const handleNudgeOpacity = useCallback(
     (amount: number) => {
-      onChangeColor(
-        {
-          ...selectedcolor,
-          alpha: clamp(selectedcolor.alpha + amount / 100, 0, 1),
-        },
-        clampedSelectedStopIndex,
-      );
+      if (onNudgeOpacity) {
+        onNudgeOpacity(amount / 100);
+      } else {
+        onChangeColor(
+          {
+            ...selectedcolor,
+            alpha: clamp(selectedcolor.alpha + amount / 100, 0, 1),
+          },
+          clampedSelectedStopIndex,
+        );
+      }
     },
-    [selectedcolor, clampedSelectedStopIndex, onChangeColor],
+    [selectedcolor, clampedSelectedStopIndex, onNudgeOpacity, onChangeColor],
   );
 
   const handleChangeColor = useCallback(
