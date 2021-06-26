@@ -4,6 +4,7 @@ import {
   Divider,
   InputField,
   lightTheme,
+  ScrollArea,
   Spacer,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
@@ -44,7 +45,6 @@ const RightSidebar = styled.div(({ theme }) => ({
   color: theme.colors.textMuted,
   WebkitBackdropFilter: 'blur(10px)',
   backdropFilter: 'blur(10px)',
-  overflowY: 'auto',
 }));
 
 const MainView = styled.main(({ theme }) => ({
@@ -56,13 +56,6 @@ const MainView = styled.main(({ theme }) => ({
 const ContentArea = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
-}));
-
-const ScrollArea = styled.div(({ theme }) => ({
-  flex: '1 1 0px',
-  display: 'flex',
-  overflowY: 'auto',
-  flexDirection: 'column',
 }));
 
 const FilterContainer = styled.div(({ theme }) => ({
