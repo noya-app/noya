@@ -2,6 +2,7 @@ import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
 
 export const Section = styled.div(({ theme }) => ({
+  flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'column',
   padding: '10px',

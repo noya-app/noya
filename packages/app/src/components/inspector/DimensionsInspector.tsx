@@ -8,6 +8,7 @@ import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 export type DimensionValue = number | undefined;
 
 const Row = styled.div(({ theme }) => ({
+  flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'row',
   paddingLeft: '10px',
