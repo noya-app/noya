@@ -26,6 +26,7 @@ import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
+import getMultiValue from '../utils/getMultiValue';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -73,6 +74,22 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
+  const handleSetIsFlippedHorizontal = useCallback(
+    (value: boolean) => dispatch('setIsFlippedHorizontal', value),
+    [dispatch],
+  );
+  const handleSetIsFlippedVertical = useCallback(
+    (value: boolean) => dispatch('setIsFlippedVertical', value),
+    [dispatch],
+  );
+
+  const isFlippedVertical =
+    getMultiValue(selectedLayers.map((layer) => layer.isFlippedVertical)) ??
+    false;
+  const isFlippedHorizontal =
+    getMultiValue(selectedLayers.map((layer) => layer.isFlippedHorizontal)) ??
+    false;
+
   const isEditingPath = state.interactionState.type === 'editPath';
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
@@ -118,11 +135,15 @@ export default memo(function Inspector() {
         ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
+            isFlippedHorizontal={isFlippedHorizontal}
+            isFlippedVertical={isFlippedVertical}
             onSetRotation={handleSetRotation}
             onSetX={handleSetX}
             onSetY={handleSetY}
             onSetWidth={handleSetWidth}
             onSetHeight={handleSetHeight}
+            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+            onSetIsFlippedVertical={handleSetIsFlippedVertical}
           />
         )}
         <Spacer.Vertical size={10} />
@@ -151,11 +172,15 @@ export default memo(function Inspector() {
     selectedLayers,
     isEditingPath,
     isEditingControlPoint,
+    isFlippedHorizontal,
+    isFlippedVertical,
     handleSetRotation,
     handleSetX,
     handleSetY,
     handleSetWidth,
     handleSetHeight,
+    handleSetIsFlippedHorizontal,
+    handleSetIsFlippedVertical,
     hasFixedRadiusLayers,
     hasContextSettingsLayers,
   ]);

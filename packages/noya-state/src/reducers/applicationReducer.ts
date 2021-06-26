@@ -115,6 +115,8 @@ export function applicationReducer(
     case 'setLayerWidth':
     case 'setLayerHeight':
     case 'setLayerRotation':
+    case 'setIsFlippedHorizontal':
+    case 'setIsFlippedVertical':
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
       return layerPropertyReducer(state, action);
