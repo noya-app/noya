@@ -73,7 +73,13 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
-  const isEditingPath = state.interactionState.type === 'editPath';
+  const isEditingPath =
+    state.interactionState.type === 'editPath' ||
+    state.interactionState.type === 'maybeMovePoint' ||
+    state.interactionState.type === 'movingPoint' ||
+    state.interactionState.type === 'maybeMoveControlPoint' ||
+    state.interactionState.type === 'movingControlPoint' ||
+    state.interactionState.type === 'updateMovingPoint';
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {

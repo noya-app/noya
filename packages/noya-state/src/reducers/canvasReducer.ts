@@ -3,17 +3,23 @@ import produce from 'immer';
 import {
   AffineTransform,
   createBounds,
+  createRectFromBounds,
   normalizeRect,
   rectsIntersect,
   Size,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
-import { resizeRect } from 'noya-renderer/src/primitives';
+import {
+  decodeCurvePoint,
+  encodeCurvePoint,
+  resizeRect,
+} from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
   EncodedPageMetadata,
   getBoundingRect,
+  getBoundingRectMap,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
@@ -27,12 +33,13 @@ import {
   getLayerAxisInfo,
 } from '../snapping';
 import { Point } from '../types';
-import { ApplicationState } from './applicationReducer';
+import { ApplicationState, SelectedControlPoint } from './applicationReducer';
 import {
   CompassDirection,
   InteractionAction,
   interactionReducer,
 } from './interactionReducer';
+import { SelectedPoint } from './pointReducer';
 
 export type CanvasAction =
   | [
@@ -47,13 +54,30 @@ export type CanvasAction =
       // of the current page). Maybe there's a better way? This still seems
       // better than moving the whole reducer up into the parent.
       action:
-        | Exclude<InteractionAction, ['maybeMove' | 'maybeScale', ...any[]]>
+        | Exclude<
+            InteractionAction,
+            [
+              'maybeMove' | 'maybeScale' | 'movingPoint' | 'movingControlPoint',
+              ...any[]
+            ]
+          >
         | [type: 'maybeMove', origin: Point, canvasSize: Size]
         | [
             type: 'maybeScale',
             origin: Point,
             direction: CompassDirection,
             canvasSize: Size,
+          ]
+        | [
+            type: 'movingPoint',
+            origin: Point,
+            current: Point,
+            selectedPoint: SelectedPoint,
+          ]
+        | [
+            type: 'movingControlPoint',
+            origin: Point,
+            selectedPoint: SelectedControlPoint,
           ],
     ];
 
@@ -219,6 +243,98 @@ export function canvasReducer(
 
               layer.frame.x = initialRect.x + delta.x;
               layer.frame.y = initialRect.y + delta.y;
+            });
+
+            break;
+          }
+          case 'movingPoint': {
+            const { current, selectedPoint } = interactionState;
+
+            const boundingRects = getBoundingRectMap(
+              getCurrentPage(state),
+              Object.keys(state.selectedPointLists),
+              {
+                clickThroughGroups: true,
+                includeArtboardLayers: false,
+                includeHiddenLayers: false,
+              },
+            );
+
+            layerIndexPaths.forEach((indexPath) => {
+              const page = draft.sketch.pages[pageIndex];
+              const layer = Layers.access(page, indexPath);
+              const pointList = state.selectedPointLists[layer.do_objectID];
+              const boundingRect = boundingRects[layer.do_objectID];
+
+              if (!Layers.isPointsLayer(layer) || !boundingRect) return;
+
+              const pointToMeasureFrom = decodeCurvePoint(
+                layer.points[selectedPoint[1]],
+                boundingRect,
+              );
+              const delta = {
+                x: current.x - pointToMeasureFrom.point.x,
+                y: current.y - pointToMeasureFrom.point.y,
+              };
+
+              // Update all points by first transforming to the canvas's coordinate system
+              layer.points
+                .filter((_, index) => pointList.includes(index))
+                .forEach((curvePoint) => {
+                  const decodedPoint = decodeCurvePoint(
+                    curvePoint,
+                    boundingRect,
+                  );
+                  (['point', 'curveFrom', 'curveTo'] as const).forEach(
+                    (key) => {
+                      decodedPoint[key] = {
+                        x: decodedPoint[key].x + delta.x,
+                        y: decodedPoint[key].y + delta.y,
+                      };
+                    },
+                  );
+
+                  const encodedPoint = encodeCurvePoint(
+                    decodedPoint,
+                    boundingRect,
+                  );
+
+                  curvePoint.point = encodedPoint.point;
+                  curvePoint.curveFrom = encodedPoint.curveFrom;
+                  curvePoint.curveTo = encodedPoint.curveTo;
+                });
+
+              const decodedPoints = layer.points.map((curvePoint) =>
+                decodeCurvePoint(curvePoint, boundingRect),
+              );
+
+              // Determine the new bounds of the updated points
+              const newBounds = {
+                minX: Math.min(
+                  ...decodedPoints.map((curvePoint) => curvePoint.point.x),
+                ),
+                maxX: Math.max(
+                  ...decodedPoints.map((curvePoint) => curvePoint.point.x),
+                ),
+                minY: Math.min(
+                  ...decodedPoints.map((curvePoint) => curvePoint.point.y),
+                ),
+                maxY: Math.max(
+                  ...decodedPoints.map((curvePoint) => curvePoint.point.y),
+                ),
+              };
+
+              layer.frame = {
+                ...layer.frame,
+                ...createRectFromBounds(newBounds),
+              };
+
+              // Transform back to the range [0, 1], using the new bounds
+              const encodedPoints = decodedPoints.map((decodedCurvePoint) =>
+                encodeCurvePoint(decodedCurvePoint, layer.frame),
+              );
+
+              layer.points = encodedPoints;
             });
 
             break;

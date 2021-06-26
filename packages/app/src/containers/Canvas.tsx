@@ -242,7 +242,11 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
-        case 'editPath': {
+        case 'editPath':
+        case 'movingControlPoint':
+        case 'movingPoint':
+        case 'maybeMoveControlPoint':
+        case 'maybeMovePoint': {
           let selectedPoint: SelectedPoint | undefined = undefined;
           let selectedControlPoint: SelectedControlPoint | undefined;
 
@@ -293,6 +297,7 @@ export default memo(function Canvas() {
                   : 'intersection'
                 : 'replace',
             );
+            dispatch('interaction', ['maybeMovePoint', point, selectedPoint]);
           } else if (selectedControlPoint) {
             dispatch(
               'selectControlPoint',
@@ -300,10 +305,14 @@ export default memo(function Canvas() {
               selectedControlPoint.pointIndex,
               selectedControlPoint.controlPointType,
             );
+            dispatch('interaction', [
+              'maybeMoveControlPoint',
+              point,
+              selectedControlPoint,
+            ]);
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
           }
-
           break;
         }
         case 'hoverHandle':
@@ -396,6 +405,57 @@ export default memo(function Canvas() {
           }
 
           containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
+          break;
+        }
+        case 'maybeMovePoint': {
+          const { origin, selectedPoint } = state.interactionState;
+          if (
+            (Math.abs(point.x - origin.x) > 2 ||
+              Math.abs(point.y - origin.y) > 2) &&
+            !event.shiftKey
+          ) {
+            dispatch('interaction', [
+              'movingPoint',
+              origin,
+              point,
+              selectedPoint,
+            ]);
+          }
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
+          break;
+        }
+        case 'movingPoint': {
+          const { origin, selectedPoint } = state.interactionState;
+          dispatch('interaction', [
+            'updateMovingPoint',
+            origin,
+            point,
+            selectedPoint,
+          ]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
+          break;
+        }
+        case 'maybeMoveControlPoint': {
+          const { origin, selectedPoint } = state.interactionState;
+
+          if (
+            Math.abs(point.x - origin.x) > 2 ||
+            Math.abs(point.y - origin.y) > 2
+          ) {
+            dispatch('interaction', [
+              'movingControlPoint',
+              origin,
+              // point,
+              selectedPoint,
+            ]);
+          }
           event.preventDefault();
 
           break;
@@ -586,6 +646,29 @@ export default memo(function Canvas() {
 
           containerRef.current?.releasePointerCapture(event.pointerId);
 
+          break;
+        }
+        case 'maybeMovePoint':
+        case 'maybeMoveControlPoint': {
+          if (event.shiftKey) {
+            return;
+          }
+          dispatch('interaction', ['reset']);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+
+          break;
+        }
+        case 'movingPoint': {
+          if (event.shiftKey) {
+            return;
+          }
+          //const { origin, selectedPoint } = state.interactionState;
+
+          // dispatch('interaction', ['editPath', Object.keys(selectedPoint)]);
+          dispatch('interaction', ['reset']);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
       }

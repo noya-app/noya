@@ -4,6 +4,8 @@ import { createRect, Size } from 'noya-geometry';
 import type { PageLayer } from '..';
 import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
+import { SelectedControlPoint } from './applicationReducer';
+import { SelectedPoint } from './pointReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -59,7 +61,30 @@ export type InteractionAction =
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
-  | [type: 'enablePanMode'];
+  | [type: 'enablePanMode']
+  | [type: 'maybeMovePoint', origin: Point, selectedPoint: SelectedPoint]
+  | [
+      type: 'maybeMoveControlPoint',
+      origin: Point,
+      selectedPoint: SelectedControlPoint,
+    ]
+  | [
+      type: 'movingPoint',
+      origin: Point,
+      current: Point,
+      selectedPoint: SelectedPoint,
+    ]
+  | [
+      type: 'updateMovingPoint',
+      origin: Point,
+      current: Point,
+      selectedPoint: SelectedPoint,
+    ]
+  | [
+      type: 'movingControlPoint',
+      origin: Point,
+      selectedPoint: SelectedControlPoint,
+    ];
 
 export type InteractionState =
   | {
@@ -87,6 +112,33 @@ export type InteractionState =
       origin: Point;
       canvasSize: Size;
       pageSnapshot: Sketch.Page;
+    }
+  | {
+      type: 'maybeMovePoint';
+      origin: Point;
+      selectedPoint: SelectedPoint;
+    }
+  | {
+      type: 'maybeMoveControlPoint';
+      origin: Point;
+      selectedPoint: SelectedControlPoint;
+    }
+  | {
+      type: 'movingPoint';
+      origin: Point;
+      current: Point;
+      selectedPoint: SelectedPoint;
+    }
+  | {
+      type: 'updateMovingPoint';
+      origin: Point;
+      current: Point;
+      selectedPoint: SelectedPoint;
+    }
+  | {
+      type: 'movingControlPoint';
+      origin: Point;
+      selectedPoint: SelectedControlPoint;
     }
   | { type: 'hoverHandle'; direction: CompassDirection }
   | {
@@ -216,6 +268,64 @@ export function interactionReducer(
         direction,
         canvasSize,
         pageSnapshot,
+      };
+    }
+    case 'maybeMovePoint': {
+      const [type, origin, selectedPoint] = action;
+      return {
+        type,
+        origin,
+        selectedPoint,
+      };
+    }
+    case 'maybeMoveControlPoint': {
+      const [type, origin, selectedPoint] = action;
+      return {
+        type,
+        origin,
+        selectedPoint,
+      };
+    }
+    case 'movingPoint': {
+      const [type, origin, current, selectedPoint] = action;
+      if (state.type !== 'maybeMovePoint') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeMovePoint`',
+        );
+      }
+
+      return {
+        type,
+        origin,
+        current,
+        selectedPoint,
+      };
+    }
+    case 'updateMovingPoint': {
+      const [, origin, current, selectedPoint] = action;
+
+      if (state.type !== 'movingPoint') {
+        throw new Error('Bad interaction state - should be in `movingPoint`');
+      }
+
+      return {
+        type: 'movingPoint',
+        origin,
+        current,
+        selectedPoint,
+      };
+    }
+    case 'movingControlPoint': {
+      const [type, origin, selectedPoint] = action;
+      if (state.type !== 'maybeMoveControlPoint') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeMoveControlPoint`',
+        );
+      }
+      return {
+        type,
+        origin,
+        selectedPoint,
       };
     }
     case 'startMoving': {

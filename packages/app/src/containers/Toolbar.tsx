@@ -54,7 +54,13 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertRectangle = interactionType === 'insertRectangle';
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
-  const isEditingPath = interactionType === 'editPath';
+  const isEditingPath =
+    interactionType === 'editPath' ||
+    interactionType === 'maybeMovePoint' ||
+    interactionType === 'movingPoint' ||
+    interactionType === 'maybeMoveControlPoint' ||
+    interactionType === 'movingControlPoint' ||
+    interactionType === 'updateMovingPoint';
   const isPanning =
     interactionType === 'panMode' ||
     interactionType === 'maybePan' ||
