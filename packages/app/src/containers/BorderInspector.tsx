@@ -1,4 +1,4 @@
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
@@ -23,7 +23,7 @@ export default memo(function BorderInspector() {
   const firstBorder = useMemo(() => borders[0] || [], [borders]);
 
   return (
-    <ArrayController<FileFormat.Border>
+    <ArrayController<Sketch.Border>
       title="Borders"
       id="borders"
       key="borders"
@@ -51,14 +51,14 @@ export default memo(function BorderInspector() {
           index,
           checkbox,
         }: {
-          item: FileFormat.Border;
+          item: Sketch.Border;
           index: number;
           checkbox: ReactNode;
         }) => (
           <BorderRow
             id={`border-${index}`}
             value={
-              item.fillType === FileFormat.FillType.Color
+              item.fillType === Sketch.FillType.Color
                 ? item.color
                 : item.gradient
             }
