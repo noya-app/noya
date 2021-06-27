@@ -1,13 +1,12 @@
-export function zip<A, B>(a: A[], b: B[]): [A, B][];
-export function zip<A, B, C>(a: A[], b: B[], c: C[]): [A, B, C][];
-export function zip<A, B, C, D>(a: A[], b: B[], c: C[], d: D[]): [A, B, C, D][];
+export function zip<A, B>(...arrays: [A[], B[]]): [A, B][];
+export function zip<A, B, C>(...arrays: [A[], B[], C[]]): [A, B, C][];
+export function zip<A, B, C, D>(
+  ...arrays: [A[], B[], C[], D[]]
+): [A, B, C, D][];
 export function zip<A, B, C, D, E>(
-  a: A[],
-  b: B[],
-  c: C[],
-  d: D[],
-  e: E[],
+  ...arrays: [A[], B[], C[], D[], E[]]
 ): [A, B, C, D, E][];
+export function zip<T>(...arrays: T[][]): T[][];
 
 /**
  * Make an array of tuples containing the nth element of each array.
@@ -29,4 +28,25 @@ export function zip(...arrays: unknown[][]): unknown[][] {
   }
 
   return result;
+}
+
+/**
+ * Make an array of tuples containing the nth element of each array.
+ *
+ * If input arrays are different lengths, the resulting array of tuples will
+ * have the same length as the longest input array, and any holes will
+ * be filled with `undefined`.
+ */
+export function zipLongest<T>(fillValue: T, ...arrays: T[][]): T[][] {
+  const length = Math.max(...arrays.map((array) => array.length));
+
+  const filledArrays = arrays.map((array) => {
+    const originalLength = array.length;
+    const copy = [...array];
+    copy.length = length;
+    copy.fill(fillValue, originalLength);
+    return copy;
+  });
+
+  return zip(...filledArrays);
 }

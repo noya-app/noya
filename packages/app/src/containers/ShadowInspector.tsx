@@ -1,32 +1,63 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { isDeepEqual, zipLongest } from 'noya-utils';
+import { memo, ReactNode, useCallback } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
+import getMultiValue from '../utils/getMultiValue';
+
+type EditableShadow = {
+  // isEnabled?: boolean;
+  isEnabled: boolean;
+  blurRadius?: number;
+  color?: Sketch.Color;
+  offsetX?: number;
+  offsetY?: number;
+  spread?: number;
+};
 
 export default memo(function ShadowInspector() {
-  const [, dispatch] = useApplicationState();
+  const dispatch = useDispatch();
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),
   );
-  const shadows = useShallowArray(
-    selectedStyles.map((style) => style?.shadows),
+  const layerShadowLists = useShallowArray(
+    selectedStyles.map((style) => style?.shadows ?? []),
   );
-  // TODO: Modify all shadows
-  const firstShadow = useMemo(() => shadows[0] || [], [shadows]);
+
+  const editableShadows: EditableShadow[] = zipLongest(
+    undefined,
+    ...layerShadowLists,
+  ).map((shadows) => {
+    const filtered = shadows.flatMap((shadow) => (shadow ? [shadow] : []));
+
+    return {
+      isEnabled:
+        getMultiValue(filtered.map((shadow) => shadow.isEnabled)) ?? true,
+      // isEnabled: getMultiValue(filtered.map((shadow) => shadow.isEnabled)),
+      blurRadius: getMultiNumberValue(
+        filtered.map((shadow) => shadow.blurRadius),
+      ),
+      color: getMultiValue(
+        filtered.map((shadow) => shadow.color),
+        isDeepEqual,
+      ),
+      offsetX: getMultiValue(filtered.map((shadow) => shadow.offsetX)),
+      offsetY: getMultiValue(filtered.map((shadow) => shadow.offsetY)),
+      spread: getMultiValue(filtered.map((shadow) => shadow.spread)),
+    };
+  });
 
   return (
-    <ArrayController<FileFormat.Shadow>
+    <ArrayController<EditableShadow>
       title="Shadows"
       id="shadows"
       key="shadows"
-      value={firstShadow}
+      value={editableShadows}
       onClickPlus={useCallback(() => dispatch('addNewShadow'), [dispatch])}
       onClickTrash={useCallback(() => dispatch('deleteDisabledShadows'), [
         dispatch,
@@ -50,7 +81,7 @@ export default memo(function ShadowInspector() {
           index,
           checkbox,
         }: {
-          item: FileFormat.Shadow;
+          item: EditableShadow;
           index: number;
           checkbox: ReactNode;
         }) => (
@@ -63,19 +94,13 @@ export default memo(function ShadowInspector() {
             spread={item.spread}
             prefix={checkbox}
             onChangeColor={(value) => dispatch('setShadowColor', index, value)}
-            onChangeX={(value) => dispatch('setShadowX', index, value)}
-            onNudgeX={(value) => dispatch('setShadowX', index, value, 'adjust')}
-            onChangeY={(value) => dispatch('setShadowY', index, value)}
-            onNudgeY={(value) => dispatch('setShadowY', index, value, 'adjust')}
-            onChangeBlur={(value) => dispatch('setShadowBlur', index, value)}
-            onNudgeBlur={(value) =>
-              dispatch('setShadowBlur', index, value, 'adjust')
+            onSetX={(value, mode) => dispatch('setShadowX', index, value, mode)}
+            onSetY={(value, mode) => dispatch('setShadowY', index, value, mode)}
+            onSetBlur={(value, mode) =>
+              dispatch('setShadowBlur', index, value, mode)
             }
-            onChangeSpread={(value) =>
-              dispatch('setShadowSpread', index, value)
-            }
-            onNudgeSpread={(value) =>
-              dispatch('setShadowSpread', index, value, 'adjust')
+            onSetSpread={(value, mode) =>
+              dispatch('setShadowSpread', index, value, mode)
             }
           />
         ),
