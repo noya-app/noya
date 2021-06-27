@@ -14,8 +14,9 @@ import {
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
-import * as ContextMenu from './ContextMenu';
+import ContextMenu from './ContextMenu';
 import * as Sortable from './Sortable';
+import { MenuItem } from './internal/Menu';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
@@ -153,7 +154,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
   isSectionHeader?: boolean;
-  menuItems?: ContextMenu.MenuItem<MenuItemType>[];
+  menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
 }
@@ -215,12 +216,12 @@ const ListViewRow = forwardRef(function ListViewRow<
 
     if (menuItems) {
       return (
-        <ContextMenu.Root<MenuItemType>
+        <ContextMenu<MenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
         >
           {element}
-        </ContextMenu.Root>
+        </ContextMenu>
       );
     }
 

@@ -13,9 +13,8 @@ import { Property } from 'csstype';
 import styled from 'styled-components';
 import handleNudge from '../utils/handleNudge';
 import TextInput, { TextInputProps } from './internal/TextInput';
-import { DropdownMenu as NoyaDropdownMenu } from 'noya-designsystem';
+import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
 import Button from './Button';
-import { MenuItem } from './ContextMenu';
 
 type LabelPosition = 'start' | 'end';
 
@@ -96,11 +95,11 @@ function InputFieldDropdownMenu<T extends string>({
 }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu.Root<T> items={items} onSelect={onSelect}>
+      <NoyaDropdownMenu<T> items={items} onSelect={onSelect}>
         <Button id={buttonId} variant="thin">
           <CaretDownIcon />
         </Button>
-      </NoyaDropdownMenu.Root>
+      </NoyaDropdownMenu>
     </DropdownContainer>
   );
 }

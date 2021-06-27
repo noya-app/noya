@@ -1,27 +1,28 @@
 import styled from 'styled-components';
-import * as ContextMenu from '@radix-ui/react-context-menu';
+import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { memo, ReactNode } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { SEPARATOR_ITEM, MenuItem, styles } from './internal/Menu';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Spacer } from '..';
 
-export type { MenuItem };
-export { SEPARATOR_ITEM };
-
 /* ----------------------------------------------------------------------------
  * Separator
  * ------------------------------------------------------------------------- */
 
-const SeparatorElement = styled(ContextMenu.Separator)(styles.separatorStyle);
+const SeparatorElement = styled(RadixContextMenu.Separator)(
+  styles.separatorStyle,
+);
 
 /* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
 
-const ItemElement = styled(ContextMenu.Item)(styles.itemStyle);
+const ItemElement = styled(RadixContextMenu.Item)(styles.itemStyle);
 
-const CheckboxItemElement = styled(ContextMenu.CheckboxItem)(styles.itemStyle);
+const CheckboxItemElement = styled(RadixContextMenu.CheckboxItem)(
+  styles.itemStyle,
+);
 
 interface ContextMenuItemProps {
   children: ReactNode;
@@ -33,7 +34,7 @@ interface ContextMenuItemProps {
 const CHECKBOX_WIDTH = 15;
 const CHECKBOX_RIGHT_INSET = 3;
 
-const StyledItemIndicator = styled(ContextMenu.ItemIndicator)({
+const StyledItemIndicator = styled(RadixContextMenu.ItemIndicator)({
   display: 'flex',
   alignItems: 'center',
   left: `-${CHECKBOX_WIDTH / 2}px`,
@@ -41,7 +42,7 @@ const StyledItemIndicator = styled(ContextMenu.ItemIndicator)({
   marginRight: `-${CHECKBOX_RIGHT_INSET}px`,
 });
 
-function ContextMenuItem({
+const ContextMenuItem = memo(function ContextMenuItem({
   indented,
   checked,
   children,
@@ -66,12 +67,13 @@ function ContextMenuItem({
       </ItemElement>
     );
   }
-}
+});
+
 /* ----------------------------------------------------------------------------
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootElement = styled(ContextMenu.Content)(styles.contentStyle);
+const RootElement = styled(RadixContextMenu.Content)(styles.contentStyle);
 
 interface Props<T extends string> {
   children: ReactNode;
@@ -89,8 +91,8 @@ function ContextMenuRoot<T extends string>({
   );
 
   return (
-    <ContextMenu.Root>
-      <ContextMenu.Trigger as={Slot}>{children}</ContextMenu.Trigger>
+    <RadixContextMenu.Root>
+      <RadixContextMenu.Trigger as={Slot}>{children}</RadixContextMenu.Trigger>
       <RootElement>
         {items.map((item, index) =>
           item === SEPARATOR_ITEM ? (
@@ -107,9 +109,8 @@ function ContextMenuRoot<T extends string>({
           ),
         )}
       </RootElement>
-    </ContextMenu.Root>
+    </RadixContextMenu.Root>
   );
 }
 
-export const Item = memo(ContextMenuItem);
-export const Root = memo(ContextMenuRoot);
+export default memo(ContextMenuRoot);
