@@ -123,6 +123,8 @@ export default memo(function Inspector() {
     const hasOneSymbolInstance =
       selectedLayers.length === 1 && hasSymbolInstance;
 
+    if (selectedLayers.length === 0) return null;
+
     const views = [
       <Fragment key="layout">
         <AlignmentInspector />
@@ -162,7 +164,7 @@ export default memo(function Inspector() {
         <FillInspector title={'Fills'} allowMoreThanOne={true} />
       ),
       !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
-      selectedLayers.length === 1 && <ShadowInspector />,
+      selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
@@ -188,8 +190,6 @@ export default memo(function Inspector() {
   if (state.interactionState.type === 'insertArtboard') {
     return <ArtboardSizeList />;
   }
-
-  if (selectedLayers.length === 0) return null;
 
   return <>{elements}</>;
 });
