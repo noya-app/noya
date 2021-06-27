@@ -288,7 +288,7 @@ export function applicationReducer(
     case 'setControlPointY':
     case 'selectPoint':
     case 'selectControlPoint':
-      return pointReducer(state, action);
+      return pointReducer(state, action, CanvasKit);
     default:
       return themeReducer(state, action);
   }

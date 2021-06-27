@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { createRectFromBounds, distance, Rect } from 'noya-geometry';
+import { distance, Rect } from 'noya-geometry';
 import {
   decodeCurvePoint,
   encodeCurvePoint,
@@ -24,7 +24,6 @@ export type PointAction =
   | [
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
-      canvasKit: CanvasKit,
       mode?: SetNumberMode,
     ]
   | [
@@ -44,6 +43,7 @@ export type SelectedPoint = [layerId: string, index: number];
 export function pointReducer(
   state: ApplicationState,
   action: PointAction,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
     case 'setPointCurveMode': {
@@ -151,24 +151,22 @@ export function pointReducer(
           );
 
           // Determine the new bounds of the updated points
-          const newBounds = {
-            minX: Math.min(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
-            ),
-            maxX: Math.max(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.x),
-            ),
-            minY: Math.min(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
-            ),
-            maxY: Math.max(
-              ...decodedPoints.map((curvePoint) => curvePoint.point.y),
-            ),
+          const [minX, minY, maxX, maxY] = path(
+            CanvasKit,
+            layer.points,
+            layer.frame,
+          ).computeTightBounds();
+
+          const newRect: Rect = {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY,
           };
 
           layer.frame = {
             ...layer.frame,
-            ...createRectFromBounds(newBounds),
+            ...newRect,
           };
 
           // Transform back to the range [0, 1], using the new bounds
@@ -183,7 +181,7 @@ export function pointReducer(
     case 'setControlPointX':
     case 'setControlPointY': {
       if (!state.selectedControlPoint) return state;
-      const [type, amount, CanvasKit, mode] = action;
+      const [type, amount, mode] = action;
       const {
         layerId,
         pointIndex,

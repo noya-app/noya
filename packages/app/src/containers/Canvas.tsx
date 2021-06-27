@@ -456,7 +456,7 @@ export default memo(function Canvas() {
             ]);
           }
           event.preventDefault();
-
+          containerRef.current?.setPointerCapture(event.pointerId);
           break;
         }
         case 'movingControlPoint': {
@@ -640,8 +640,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'maybeMove':
-        case 'maybeScale':
-        case 'movingControlPoint': {
+        case 'maybeScale': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
@@ -662,33 +661,30 @@ export default memo(function Canvas() {
 
           break;
         }
-        case 'maybeMovePoint':
-        case 'maybeMoveControlPoint': {
-          if (event.shiftKey) {
-            // const { selectedPoint } = state.interactionState;
-            // console.log(Object.keys(state.selectedPointLists));
-            dispatch('interaction', [
-              'editPath',
-              Object.keys(state.selectedPointLists),
-            ]);
-            return;
-          }
-          //dispatch('interaction', ['reset']);
 
-          // containerRef.current?.releasePointerCapture(event.pointerId);
+        case 'maybeMoveControlPoint':
+        case 'movingControlPoint': {
+          if (state.selectedControlPoint) {
+            dispatch(
+              'selectControlPoint',
+              state.selectedControlPoint.layerId,
+              state.selectedControlPoint.pointIndex,
+              state.selectedControlPoint.controlPointType,
+            );
+          }
+          dispatch('interaction', ['reset']);
+          containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
+        case 'maybeMovePoint':
         case 'movingPoint': {
           if (event.shiftKey) {
             const { selectedPoint } = state.interactionState;
-
-            dispatch('interaction', ['editPath', Object.keys(selectedPoint)]);
-            return;
+            dispatch('selectPoint', selectedPoint);
+          } else {
+            dispatch('interaction', ['reset']);
           }
-
-          dispatch('interaction', ['reset']);
-
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
