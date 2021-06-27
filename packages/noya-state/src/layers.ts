@@ -90,6 +90,29 @@ export const hasTextStyle = (
   return !!layer.style?.textStyle;
 };
 
+export const hasInspectableShadow = (layer: Sketch.AnyLayer): boolean => {
+  switch (layer._class) {
+    case 'bitmap':
+    case 'oval':
+    case 'polygon':
+    case 'rectangle':
+    case 'shapeGroup':
+    case 'star':
+    case 'triangle':
+    case 'group':
+    case 'symbolInstance':
+    case 'text':
+      return true;
+    case 'shapePath':
+    case 'page':
+    case 'artboard':
+    case 'MSImmutableHotspotLayer':
+    case 'slice':
+    case 'symbolMaster':
+      return false;
+  }
+};
+
 export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   return isParentLayer(layer) ? (layer.layers as T[]) : [];
 };

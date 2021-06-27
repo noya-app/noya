@@ -1,15 +1,16 @@
 import { Divider } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import { delimitedPath, isDeepEqual } from 'noya-utils';
+import { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import ColorInspector from '../components/inspector/ColorInspector';
+import NameInspector from '../components/inspector/NameInspector';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
-import NameInspector from '../components/inspector/NameInspector';
-import { delimitedPath } from 'noya-utils';
+import getMultiValue from '../utils/getMultiValue';
 
 const Container = styled.div(({ theme }) => ({
   display: 'flex',
@@ -24,9 +25,10 @@ export default memo(function SwatchesInspectors() {
     useSelector(Selectors.getSelectedSwatches),
   );
   const ids = state.selectedSwatchIds;
-  const colors = useMemo(() => selectedSwatches.map((swatch) => swatch.value), [
-    selectedSwatches,
-  ]);
+  const color = getMultiValue(
+    selectedSwatches.map((swatch) => swatch.value),
+    isDeepEqual,
+  );
 
   const handleNameChange = useCallback(
     (value: string) =>
@@ -38,14 +40,11 @@ export default memo(function SwatchesInspectors() {
     [dispatch, selectedSwatches],
   );
 
-  const handleChangeOpacity = useCallback(
-    (value) => dispatch('setSwatchOpacity', ids, value),
+  const handleSetOpacity = useCallback(
+    (value, mode) => dispatch('setSwatchOpacity', ids, value, mode),
     [dispatch, ids],
   );
-  const handleNudgeOpacity = useCallback(
-    (value) => dispatch('setSwatchOpacity', ids, value, 'adjust'),
-    [dispatch, ids],
-  );
+
   const handleChangeColor = useCallback(
     (value) => dispatch('setSwatchColor', ids, value),
     [dispatch, ids],
@@ -63,9 +62,8 @@ export default memo(function SwatchesInspectors() {
       <Container>
         <ColorInspector
           id={'color-swatch'}
-          colors={colors}
-          onChangeOpacity={handleChangeOpacity}
-          onNudgeOpacity={handleNudgeOpacity}
+          color={color}
+          onSetOpacity={handleSetOpacity}
           onChangeColor={handleChangeColor}
         />
       </Container>

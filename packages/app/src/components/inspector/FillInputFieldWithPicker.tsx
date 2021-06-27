@@ -50,7 +50,7 @@ type FillOption =
 
 interface Props {
   id?: string;
-  value: Sketch.Color | Sketch.Gradient | SketchPattern;
+  value?: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChange: (color: Sketch.Color) => void;
   onChangeType?: (type: Sketch.FillType) => void;
   onChangeGradient?: (type: Sketch.Gradient) => void;
@@ -65,8 +65,7 @@ interface Props {
 }
 
 interface PickersProps {
-  value: Sketch.Color | Sketch.Gradient | SketchPattern;
-  selectedColor: Sketch.Color;
+  value?: Sketch.Color | Sketch.Gradient | SketchPattern;
   onChange: (color: Sketch.Color) => void;
   onChangeGradient?: (type: Sketch.Gradient) => void;
   onChangeFillImage?: (value: Sketch.FileRef | Sketch.DataRef) => void;
@@ -74,7 +73,6 @@ interface PickersProps {
 
 const Picker = ({
   value,
-  selectedColor,
   onChange,
   onChangeGradient,
   onChangeFillImage,
@@ -82,26 +80,31 @@ const Picker = ({
   const [state, dispatch] = useApplicationState();
 
   const detachThemeColor = useCallback(() => {
+    if (!value || value._class !== 'color') return;
+
     onChange({
-      ...selectedColor,
+      ...value,
       swatchID: undefined,
     });
-  }, [onChange, selectedColor]);
+  }, [onChange, value]);
 
   const createThemeColor = useCallback(() => {
+    if (!value || value._class !== 'color') return;
+
     const swatchName = prompt('New Swatch Name');
+
     if (!swatchName) return;
 
     const id = uuid();
     onChange({
-      ...selectedColor,
+      ...value,
       swatchID: id,
     });
-    dispatch('addSwatch', swatchName, selectedColor, id);
-  }, [onChange, dispatch, selectedColor]);
+    dispatch('addSwatch', swatchName, value, id);
+  }, [onChange, dispatch, value]);
 
   const createThemeGradient = useCallback(() => {
-    if (value._class !== 'gradient') return;
+    if (!value || value._class !== 'gradient') return;
 
     const gradientName = prompt('New Gradient Assets Name');
     if (!gradientName) return;
@@ -120,11 +123,12 @@ const Picker = ({
   );
 
   const element = useMemo(() => {
-    switch (value._class) {
+    switch (value?._class) {
+      case undefined:
       case 'color':
         return (
           <ColorPickerSwatches
-            swatchID={selectedColor.swatchID}
+            swatchID={value?._class === 'color' ? value.swatchID : undefined}
             sharedSwatches={Selectors.getSharedSwatches(state)}
             onChange={onChange}
             onCreate={createThemeColor}
@@ -154,7 +158,6 @@ const Picker = ({
   }, [
     state,
     value,
-    selectedColor,
     onChange,
     onChangeGradient,
     createThemeColor,
@@ -164,6 +167,7 @@ const Picker = ({
     onRemoveThemeGradient,
     onRenameThemeGradient,
   ]);
+
   return <>{element} </>;
 };
 
@@ -182,14 +186,7 @@ export default memo(function ColorInputFieldWithPicker({
   onChangePatternTileScale,
   onChangeFillImage,
 }: Props) {
-  // TODO: The value prop here can be an array, and other
-  // inspector rows may also take arrays
   const [state, dispatch] = useApplicationState();
-
-  const values = useMemo(() => {
-    if (value._class !== 'color') return [];
-    return [value];
-  }, [value]);
 
   const createImage = useCallback(
     (data: ArrayBuffer, _ref: string) => {
@@ -210,6 +207,8 @@ export default memo(function ColorInputFieldWithPicker({
   );
 
   const fillOption = useMemo(() => {
+    if (!value) return 'Solid Color';
+
     switch (value._class) {
       case 'color':
         return 'Solid Color';
@@ -248,10 +247,7 @@ export default memo(function ColorInputFieldWithPicker({
   return (
     <Popover.Root>
       <Popover.Trigger as={Slot}>
-        <ColorInputField
-          id={id}
-          value={value._class === 'color' ? values[0] : value}
-        />
+        <ColorInputField id={id} value={value} />
       </Popover.Trigger>
       <Content side="bottom" align="center">
         <PaddedSection>
@@ -265,10 +261,10 @@ export default memo(function ColorInputFieldWithPicker({
           </Row>
         </PaddedSection>
         <PaddedSection>
-          {value._class === 'color' ? (
+          {!value || value._class === 'color' ? (
             <ColorInspector
               id={`${id}-color-inspector`}
-              colors={values}
+              color={value}
               onChangeColor={onChange}
             />
           ) : value._class === 'gradient' ? (
@@ -294,7 +290,6 @@ export default memo(function ColorInputFieldWithPicker({
         </PaddedSection>
         <Picker
           value={value}
-          selectedColor={values[0]}
           onChange={onChange}
           onChangeGradient={onChangeGradient}
           onChangeFillImage={onChangeFillImage}

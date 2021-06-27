@@ -1,9 +1,10 @@
-import { Button, InputField, Spacer } from 'noya-designsystem';
+import { Button, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
 import FlipVerticalIcon from '../icons/FlipVerticalIcon';
+import DimensionInput from './DimensionInput';
 
 export type DimensionValue = number | undefined;
 
@@ -20,37 +21,6 @@ const FlipButtonContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
 }));
-
-const DimensionInput = memo(function InputX({
-  value,
-  onSetValue,
-  label,
-}: {
-  value: DimensionValue;
-  onSetValue: (value: number, mode: SetNumberMode) => void;
-  label: string;
-}) {
-  const handleNudgeValue = useCallback(
-    (value: number) => onSetValue(value, 'adjust'),
-    [onSetValue],
-  );
-
-  const handleSetValue = useCallback((value) => onSetValue(value, 'replace'), [
-    onSetValue,
-  ]);
-
-  return (
-    <InputField.Root>
-      <InputField.NumberInput
-        value={value}
-        placeholder={value === undefined ? 'multi' : undefined}
-        onNudge={handleNudgeValue}
-        onSubmit={handleSetValue}
-      />
-      <InputField.Label>{label}</InputField.Label>
-    </InputField.Root>
-  );
-});
 
 export interface Props {
   x: DimensionValue;

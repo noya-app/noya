@@ -16,6 +16,7 @@ function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
     case 'star':
     case 'triangle':
       return true;
+    case 'page':
     case 'artboard':
     case 'group':
     case 'MSImmutableHotspotLayer':
@@ -24,8 +25,6 @@ function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
     case 'symbolMaster':
     case 'text':
       return false;
-    default:
-      throw new Error(`Exhaustive switch: ${type}`);
   }
 }
 
@@ -43,13 +42,12 @@ function isValidMaskChainBreakerType(type: Sketch.AnyLayer['_class']): boolean {
     case 'text':
     case 'triangle':
       return true;
+    case 'page':
     case 'artboard':
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
       return false;
-    default:
-      throw new Error(`Exhaustive switch: ${type}`);
   }
 }
 
