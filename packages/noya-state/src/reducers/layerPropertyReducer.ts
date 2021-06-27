@@ -102,7 +102,7 @@ export function layerPropertyReducer(
           const rotation = getLayerRotation(layer);
           const newValue = mode === 'replace' ? amount : rotation + amount;
 
-          layer.rotation = newValue * getLayerRotationMultiplier(layer);
+          layer.rotation = newValue * getLayerRotationMultiplier();
         });
       });
     }
