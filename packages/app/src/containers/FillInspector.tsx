@@ -1,4 +1,4 @@
-import FileFormat from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
@@ -28,7 +28,7 @@ export default memo(function FillInspector({
   // TODO: Modify all fills
   const firstFill = useMemo(() => fills[0] || [], [fills]);
   return (
-    <ArrayController<FileFormat.Fill>
+    <ArrayController<Sketch.Fill>
       title={title}
       id={title}
       key={title}
@@ -59,16 +59,16 @@ export default memo(function FillInspector({
           index,
           checkbox,
         }: {
-          item: FileFormat.Fill;
+          item: Sketch.Fill;
           index: number;
           checkbox: ReactNode;
         }) => (
           <FillRow
             id={`fill-${index}`}
             value={
-              item.fillType === FileFormat.FillType.Gradient
+              item.fillType === Sketch.FillType.Gradient
                 ? item.gradient
-                : item.fillType === FileFormat.FillType.Color
+                : item.fillType === Sketch.FillType.Color
                 ? item.color
                 : {
                     _class: 'pattern',

@@ -1,4 +1,3 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { fileSave } from 'browser-fs-access';
 import { Button, Divider, Spacer } from 'noya-designsystem';
@@ -68,7 +67,7 @@ export default memo(function ExportInspector() {
   }, [CanvasKit, getWorkspaceStateSnapshot, selectedLayer, theme]);
 
   const elements = [
-    <ArrayController<FileFormat.ExportFormat>
+    <ArrayController<Sketch.ExportFormat>
       title={title}
       id={title}
       key={title}
@@ -78,7 +77,7 @@ export default memo(function ExportInspector() {
       }, [dispatch])}
     >
       {useCallback(
-        ({ item, index }: { item: FileFormat.ExportFormat; index: number }) => (
+        ({ item, index }: { item: Sketch.ExportFormat; index: number }) => (
           <ExportFormatsRow
             id={`exportFormat-${index}}`}
             last={index === exportFormats.length - 1}
