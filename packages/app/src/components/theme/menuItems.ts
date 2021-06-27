@@ -1,5 +1,4 @@
-import { ContextMenu } from 'noya-designsystem';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
 
 export type ThemeMenuItemType = 'duplicate' | 'group' | 'ungroup' | 'delete';
 
@@ -7,6 +6,6 @@ export const menuItems: MenuItem<ThemeMenuItemType>[] = [
   { value: 'duplicate', title: 'Duplicate' },
   { value: 'group', title: 'Group' },
   { value: 'ungroup', title: 'Ungroup' },
-  ContextMenu.SEPARATOR_ITEM,
+  SEPARATOR_ITEM,
   { value: 'delete', title: 'Delete' },
 ];

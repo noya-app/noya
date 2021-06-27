@@ -6,14 +6,9 @@ import useRect, { RectParameters } from '../hooks/useRect';
 import { ImageComponentProps } from '../types';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 
-const decodeImage = memoize(
-  (
-    CanvasKit: CanvasKit,
-    data: ArrayBuffer,
-  ): ReturnType<CanvasKit['MakeImageFromEncoded']> => {
-    return CanvasKit.MakeImageFromEncoded(data);
-  },
-);
+const decodeImage = memoize((CanvasKit: CanvasKit, data: ArrayBuffer) => {
+  return CanvasKit.MakeImageFromEncoded(data);
+});
 
 interface ImageProps {
   image: Image | ArrayBuffer;

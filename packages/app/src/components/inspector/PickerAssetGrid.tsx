@@ -14,6 +14,8 @@ export const Square = styled.div<{ background: string; selected?: boolean }>(
     height: '25px',
     width: '25px',
     background,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
     border: `2px solid ${
       selected ? 'rgb(132,63,255)' : theme.colors.popover.background
     } `,

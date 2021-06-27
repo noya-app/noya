@@ -117,6 +117,8 @@ export function applicationReducer(
     case 'setLayerWidth':
     case 'setLayerHeight':
     case 'setLayerRotation':
+    case 'setIsFlippedHorizontal':
+    case 'setIsFlippedVertical':
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
       return layerPropertyReducer(state, action);
@@ -178,7 +180,11 @@ export function applicationReducer(
     case 'setHue':
     case 'setSaturation':
     case 'setBrightness':
-    case 'setContrast': {
+    case 'setContrast':
+    case 'setPatternFillType':
+    case 'setPatternTileScale':
+    case 'setFillImage':
+    case 'setFillContextSettingsOpacity': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);

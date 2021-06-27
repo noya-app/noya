@@ -6,6 +6,7 @@
     "@dnd-kit/core": "^1.0.1",
     "@dnd-kit/modifiers": "^1.0.1",
     "@dnd-kit/sortable": "^1.0.1",
+    "@radix-ui/react-aspect-ratio": "^0.0.14",
     "@radix-ui/react-icons": "^1.0.1",
     "browser-fs-access": "^0.17.2",
     "kiwi.js": "^1.1.2",

@@ -12,6 +12,7 @@ type BaseArrayItem = { isEnabled: boolean };
  * ------------------------------------------------------------------------- */
 
 const ElementRow = styled.div(({ theme }) => ({
+  flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
@@ -67,6 +68,7 @@ const Checkbox = styled.input(({ theme }) => ({
 }));
 
 const ArrayControllerContainer = styled.div(({ theme }) => ({
+  flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'column',
   padding: '10px',

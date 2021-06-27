@@ -21,7 +21,7 @@ export * as darkTheme from './theme/dark';
 export { default as Button } from './components/Button';
 export * as Label from './components/Label';
 export { default as Select } from './components/Select';
-export { default as ColorInputField } from './components/ColorInputField';
+export { default as ColorInputField } from './components/FillInputField';
 export { default as LabeledElementView } from './components/LabeledElementView';
 export { default as Slider } from './components/Slider';
 export * as TreeView from './components/TreeView';
@@ -35,8 +35,11 @@ export * as InputField from './components/InputField';
 export * as RadioGroup from './components/RadioGroup';
 export * as Spacer from './components/Spacer';
 export { default as Tooltip } from './components/Tooltip';
-export * as ContextMenu from './components/ContextMenu';
-export * as DropdownMenu from './components/DropdownMenu';
+export { default as ContextMenu } from './components/ContextMenu';
+export { default as DropdownMenu } from './components/DropdownMenu';
+export { default as ScrollArea } from './components/ScrollArea';
+export { SEPARATOR_ITEM } from './components/internal/Menu';
+export type { MenuItem } from './components/internal/Menu';
 
 // Contexts
 export * from './contexts/GlobalInputBlurContext';
@@ -45,3 +48,4 @@ export * from './contexts/GlobalInputBlurContext';
 export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
+export * from './utils/sketchPattern';

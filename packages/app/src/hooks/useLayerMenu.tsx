@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { createSectionedMenu } from 'noya-designsystem';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { createSectionedMenu, MenuItem } from 'noya-designsystem';
 import { Layers } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from '../contexts/ApplicationStateContext';

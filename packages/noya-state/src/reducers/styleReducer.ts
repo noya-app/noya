@@ -6,6 +6,7 @@ import {
   ColorControlsAction,
   colorControlsReducer,
 } from './colorControlsReducer';
+import { clamp } from 'noya-utils';
 
 export type SetNumberMode = 'replace' | 'adjust';
 
@@ -49,6 +50,24 @@ export type StyleAction =
       type: `set${Exclude<StyleElementType, 'Shadow'>}FillType`,
       index: number,
       value: Sketch.FillType,
+    ]
+  | [type: 'setPatternFillType', index: number, value: Sketch.PatternFillType]
+  | [
+      type: 'setPatternTileScale',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
+  | [
+      type: 'setFillImage',
+      index: number,
+      value: Sketch.FileRef | Sketch.DataRef,
+    ]
+  | [
+      type: 'setFillContextSettingsOpacity',
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
     ]
   | GradientAction
   | ColorControlsAction;
@@ -218,7 +237,7 @@ export function styleReducer(
         const newValue =
           mode === 'replace' ? amount : draft.fills[index].color.alpha + amount;
 
-        draft.fills[index].color.alpha = Math.min(Math.max(0, newValue), 1);
+        draft.fills[index].color.alpha = clamp(newValue, 0, 1);
       });
     }
     case 'setOpacity': {
@@ -230,7 +249,7 @@ export function styleReducer(
         const newValue =
           mode === 'replace' ? amount : draft.contextSettings.opacity + amount;
 
-        draft.contextSettings.opacity = Math.min(Math.max(0, newValue), 1);
+        draft.contextSettings.opacity = clamp(newValue, 0, 1);
       });
     }
     case 'setShadowX': {
@@ -298,8 +317,16 @@ export function styleReducer(
         if (!draft.fills || !draft.fills[index]) return;
         draft.fills[index].fillType = type;
 
-        if (!draft.fills[index].gradient) {
+        if (type === Sketch.FillType.Gradient && !draft.fills[index].gradient) {
           draft.fills[index].gradient = Models.fill.gradient;
+        }
+
+        if (type === Sketch.FillType.Pattern && !draft.fills[index].image) {
+          draft.fills[index].image = {
+            _class: 'MSJSONFileReference',
+            _ref: '',
+            _ref_class: 'MSImageData',
+          };
         }
       });
     }
@@ -354,6 +381,47 @@ export function styleReducer(
       return produce(state, (draft) => {
         draft.colorControls = colorControlsReducer(draft.colorControls, action);
       });
+    case 'setPatternFillType': {
+      const [, index, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].patternFillType = value;
+      });
+    }
+    case 'setPatternTileScale': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.fills[index].patternTileScale + amount;
+
+        draft.fills[index].patternTileScale = clamp(newValue, 0.1, 2);
+      });
+    }
+    case 'setFillImage': {
+      const [, index, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+
+        draft.fills[index].image = value;
+      });
+    }
+    case 'setFillContextSettingsOpacity': {
+      const [, index, amount, mode = 'replace'] = action;
+      return produce(state, (draft) => {
+        if (!draft.fills || !draft.fills[index]) return;
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.fills[index].contextSettings.opacity + amount;
+
+        draft.fills[index].contextSettings.opacity = clamp(newValue, 0, 1);
+      });
+    }
     default:
       return state;
   }

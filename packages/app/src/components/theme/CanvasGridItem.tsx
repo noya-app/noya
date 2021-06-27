@@ -4,15 +4,13 @@ import styled from 'styled-components';
 import CanvasViewer from '../../containers/CanvasViewer';
 import { useSize } from '../../hooks/useSize';
 
-const Container = styled.div<{ backgroundColor?: string }>(
-  ({ backgroundColor }) => ({
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    overflow: 'hidden',
-    ...(backgroundColor && { backgroundColor }),
-  }),
-);
+const Container = styled.div<{ background?: string }>(({ background }) => ({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+  ...(background && { background }),
+}));
 
 const Inner = styled.div({
   position: 'absolute',
@@ -24,12 +22,12 @@ const Inner = styled.div({
 
 interface Props {
   renderContent: (size: Size) => ReactNode;
-  backgroundColor?: string;
+  background?: string;
 }
 
 export default memo(function CanvasGridItem({
   renderContent,
-  backgroundColor,
+  background,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const size = useSize(containerRef);
@@ -39,7 +37,7 @@ export default memo(function CanvasGridItem({
   ]);
 
   return (
-    <Container ref={containerRef} backgroundColor={backgroundColor}>
+    <Container ref={containerRef} background={background}>
       <Inner>
         {size && (
           <CanvasViewer

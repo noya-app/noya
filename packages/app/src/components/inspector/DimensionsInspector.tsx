@@ -8,6 +8,7 @@ import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 export type DimensionValue = number | undefined;
 
 const Row = styled.div(({ theme }) => ({
+  flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'row',
   paddingLeft: '10px',
@@ -57,11 +58,15 @@ export interface Props {
   width: DimensionValue;
   height: DimensionValue;
   rotation: DimensionValue;
+  isFlippedVertical: boolean;
+  isFlippedHorizontal: boolean;
   onSetX: (value: number, mode: SetNumberMode) => void;
   onSetY: (value: number, mode: SetNumberMode) => void;
   onSetWidth: (value: number, mode: SetNumberMode) => void;
   onSetHeight: (value: number, mode: SetNumberMode) => void;
   onSetRotation: (value: number, mode: SetNumberMode) => void;
+  onSetIsFlippedVertical: (value: boolean) => void;
+  onSetIsFlippedHorizontal: (value: boolean) => void;
 }
 
 export default function DimensionsInspector({
@@ -70,27 +75,65 @@ export default function DimensionsInspector({
   width,
   height,
   rotation,
+  isFlippedVertical,
+  isFlippedHorizontal,
   onSetX,
   onSetY,
   onSetWidth,
   onSetHeight,
   onSetRotation,
+  onSetIsFlippedVertical,
+  onSetIsFlippedHorizontal,
 }: Props) {
-  const iconColor = useTheme().colors.icon;
+  const {
+    icon: iconColor,
+    iconSelected: iconSelectedColor,
+  } = useTheme().colors;
+
+  const handleSetIsFlippedVertical = useCallback(
+    () => onSetIsFlippedVertical(!isFlippedVertical),
+    [isFlippedVertical, onSetIsFlippedVertical],
+  );
+
+  const handleSetIsFlippedHorizontal = useCallback(
+    () => onSetIsFlippedHorizontal(!isFlippedHorizontal),
+    [isFlippedHorizontal, onSetIsFlippedHorizontal],
+  );
 
   const flipButtonElements = useMemo(
     () => (
       <FlipButtonContainer>
-        <Button id="flip-horizontal" tooltip="Flip horizontally">
-          <FlipHorizontalIcon color={iconColor} />
+        <Button
+          id="flip-horizontal"
+          tooltip="Flip horizontally"
+          onClick={handleSetIsFlippedHorizontal}
+          active={isFlippedHorizontal}
+        >
+          <FlipHorizontalIcon
+            color={isFlippedHorizontal ? iconSelectedColor : iconColor}
+          />
         </Button>
         <Spacer.Horizontal />
-        <Button id="flip-vertical" tooltip="Flip vertically">
-          <FlipVerticalIcon color={iconColor} />
+        <Button
+          id="flip-vertical"
+          tooltip="Flip vertically"
+          onClick={handleSetIsFlippedVertical}
+          active={isFlippedVertical}
+        >
+          <FlipVerticalIcon
+            color={isFlippedVertical ? iconSelectedColor : iconColor}
+          />
         </Button>
       </FlipButtonContainer>
     ),
-    [iconColor],
+    [
+      handleSetIsFlippedHorizontal,
+      handleSetIsFlippedVertical,
+      iconColor,
+      iconSelectedColor,
+      isFlippedHorizontal,
+      isFlippedVertical,
+    ],
   );
 
   return (

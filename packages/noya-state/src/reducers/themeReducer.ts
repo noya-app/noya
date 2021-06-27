@@ -75,7 +75,8 @@ export type ThemeAction =
     ]
   | [type: 'setThemeStyle', sharedStyleId?: string]
   | [type: 'setTextStyle', sharedStyleId?: string]
-  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color];
+  | [type: 'setSwatchColor', swatchId: string | string[], color: Sketch.Color]
+  | [type: 'addImage', image: ArrayBuffer, _ref: string];
 
 export function themeReducer(
   state: ApplicationState,
@@ -711,6 +712,18 @@ export function themeReducer(
 
         gradientAssets.forEach((g) => {
           if (ids.includes(g.do_objectID)) g.name = name;
+        });
+      });
+    }
+    case 'addImage': {
+      const [, file, _ref] = action;
+
+      return produce(state, (draft) => {
+        draft.sketch.images[_ref] = file;
+        draft.sketch.document.assets.images.push({
+          _class: 'MSJSONFileReference',
+          _ref: _ref,
+          _ref_class: 'MSImageData',
         });
       });
     }

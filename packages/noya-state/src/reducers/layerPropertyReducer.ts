@@ -15,12 +15,14 @@ export type LayerPropertyAction =
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setLayerIsLocked', layerId: string | string[], isLocked: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
-  | [type: 'setLayerX', rotation: number, mode?: SetNumberMode]
-  | [type: 'setLayerY', rotation: number, mode?: SetNumberMode]
-  | [type: 'setLayerWidth', rotation: number, mode?: SetNumberMode]
-  | [type: 'setLayerHeight', rotation: number, mode?: SetNumberMode]
-  | [type: 'setLayerRotation', rotation: number, mode?: SetNumberMode]
+  | [type: 'setLayerX', value: number, mode?: SetNumberMode]
+  | [type: 'setLayerY', value: number, mode?: SetNumberMode]
+  | [type: 'setLayerWidth', value: number, mode?: SetNumberMode]
+  | [type: 'setLayerHeight', value: number, mode?: SetNumberMode]
+  | [type: 'setLayerRotation', value: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
+  | [type: 'setIsFlippedVertical', value: boolean]
+  | [type: 'setIsFlippedHorizontal', value: boolean]
   | [type: 'setHasClippingMask', value: boolean]
   | [type: 'setShouldBreakMaskChain', value: boolean];
 
@@ -100,7 +102,7 @@ export function layerPropertyReducer(
           const rotation = getLayerRotation(layer);
           const newValue = mode === 'replace' ? amount : rotation + amount;
 
-          layer.rotation = newValue * getLayerRotationMultiplier(layer);
+          layer.rotation = newValue * getLayerRotationMultiplier();
         });
       });
     }
@@ -137,6 +139,28 @@ export function layerPropertyReducer(
             mode === 'replace' ? amount : value + amount,
             0.5,
           );
+        });
+      });
+    }
+    case 'setIsFlippedVertical': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.isFlippedVertical = value;
+        });
+      });
+    }
+    case 'setIsFlippedHorizontal': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.isFlippedHorizontal = value;
         });
       });
     }

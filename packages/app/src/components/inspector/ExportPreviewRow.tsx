@@ -1,26 +1,30 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { memo } from 'react';
+import * as AspectRatio from '@radix-ui/react-aspect-ratio';
+import { memo, useCallback } from 'react';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
+import { PageLayer } from '../../../../noya-state/src';
 import CanvasGridItem from '../theme/CanvasGridItem';
-import { RCKSymbolPreview } from '../theme/Symbol';
-import styled from 'styled-components';
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
 
 interface Props {
-  layer: Sketch.SymbolMaster;
+  layer: PageLayer;
 }
 
-export default memo(function NameInspector({ layer }: Props) {
+export default memo(function ExportPreviewRow({ layer }: Props) {
   return (
-    <Row>
+    <AspectRatio.Root
+      ratio={Math.max(1, layer.frame.width / layer.frame.height)}
+    >
       <CanvasGridItem
-        renderContent={(size) => <RCKSymbolPreview layer={layer} size={size} />}
+        renderContent={useCallback(
+          (size) => (
+            <RCKLayerPreview
+              layer={layer}
+              size={size}
+              showCheckeredBackground
+            />
+          ),
+          [layer],
+        )}
       />
-    </Row>
+    </AspectRatio.Root>
   );
 });

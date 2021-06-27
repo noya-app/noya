@@ -56,12 +56,34 @@ export function getLayerTransformAtIndexPathReversed(
   return path.reduce((result, layer) => getLayerTransform(result, layer), ctm);
 }
 
-export function getLayerRotationMultiplier(layer: Sketch.AnyLayer): number {
-  return layer._class === 'group' ? -1 : 1;
+export function getLayerRotationMultiplier(): number {
+  return -1;
+}
+
+/**
+ * Clamp rotation within the range [180, 360)
+ *
+ * -1801  => -1
+ * -181   =>  179
+ * -180   =>  180
+ * -179   => -179
+ *  45    =>  45
+ *  360   =>  0
+ *  3601  =>  1
+ */
+function clampRotation(rotation: number) {
+  if (rotation <= -180) {
+    // Round toward the positive direction
+    return rotation + 360 * Math.round(-rotation / 360);
+  } else if (rotation >= 360) {
+    return rotation - 360 * Math.floor(rotation / 360);
+  } else {
+    return rotation;
+  }
 }
 
 export function getLayerRotation(layer: Sketch.AnyLayer): number {
-  return layer.rotation * getLayerRotationMultiplier(layer);
+  return clampRotation(layer.rotation * getLayerRotationMultiplier());
 }
 
 export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {

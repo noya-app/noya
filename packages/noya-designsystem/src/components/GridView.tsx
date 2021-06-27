@@ -1,13 +1,13 @@
 import React, {
-  memo,
   ForwardedRef,
   forwardRef,
+  memo,
   ReactNode,
   useCallback,
 } from 'react';
 import styled from 'styled-components';
+import { ContextMenu, Divider, MenuItem, ScrollArea, Spacer } from '..';
 import withSeparatorElements from '../utils/withSeparatorElements';
-import { Spacer, ContextMenu, Divider } from '..';
 
 const Grid = styled.div(({ theme }) => ({
   color: theme.colors.text,
@@ -19,18 +19,10 @@ const Grid = styled.div(({ theme }) => ({
   padding: '20px',
 }));
 
-const ScrollArea = styled.div(({ theme }) => ({
-  flex: '1 1 0px', // Ignore the grid's intrinsic height
-  display: 'flex',
-  overflowY: 'auto',
-  flexDirection: 'column',
-}));
-
 const Container = styled.div(({ theme }) => ({
   flex: '1',
   display: 'flex',
   flexDirection: 'column',
-  overflowY: 'auto',
 }));
 
 const ItemContainer = styled.div<{ selected: boolean }>(
@@ -94,7 +86,7 @@ interface ItemProps<MenuItemType extends string = string> {
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
   children?: ReactNode;
-  menuItems?: ContextMenu.MenuItem<MenuItemType>[];
+  menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
 }
@@ -142,12 +134,9 @@ const GridViewItem = forwardRef(function GridViewItem<
 
   if (menuItems) {
     return (
-      <ContextMenu.Root<MenuItemType>
-        items={menuItems}
-        onSelect={onSelectMenuItem}
-      >
+      <ContextMenu<MenuItemType> items={menuItems} onSelect={onSelectMenuItem}>
         {element}
-      </ContextMenu.Root>
+      </ContextMenu>
     );
   }
 

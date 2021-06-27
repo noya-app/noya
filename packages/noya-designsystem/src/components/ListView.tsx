@@ -1,4 +1,5 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
+import ScrollArea from './ScrollArea';
 import {
   Children,
   createContext,
@@ -13,8 +14,9 @@ import {
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
-import * as ContextMenu from './ContextMenu';
+import ContextMenu from './ContextMenu';
 import * as Sortable from './Sortable';
+import { MenuItem } from './internal/Menu';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
@@ -152,7 +154,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
   isSectionHeader?: boolean;
-  menuItems?: ContextMenu.MenuItem<MenuItemType>[];
+  menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
 }
@@ -214,12 +216,12 @@ const ListViewRow = forwardRef(function ListViewRow<
 
     if (menuItems) {
       return (
-        <ContextMenu.Root<MenuItemType>
+        <ContextMenu<MenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
         >
           {element}
-        </ContextMenu.Root>
+        </ContextMenu>
       );
     }
 
@@ -251,7 +253,6 @@ const RootContainer = styled.ul<{ scrollable?: boolean }>(
     flexDirection: 'column',
     flexWrap: 'nowrap',
     color: theme.colors.textMuted,
-    overflowY: scrollable ? 'auto' : 'visible',
   }),
 );
 
@@ -344,15 +345,23 @@ function ListViewRoot({
     );
   }
 
+  const content = sortable ? (
+    <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
+      {mappedChildren}
+    </Sortable.Root>
+  ) : (
+    mappedChildren
+  );
+
+  const scrollableContent = scrollable ? (
+    <ScrollArea>{content}</ScrollArea>
+  ) : (
+    content
+  );
+
   return (
     <RootContainer onClick={handleClick} scrollable={scrollable}>
-      {sortable ? (
-        <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
-          {mappedChildren}
-        </Sortable.Root>
-      ) : (
-        mappedChildren
-      )}
+      {scrollableContent}
     </RootContainer>
   );
 }

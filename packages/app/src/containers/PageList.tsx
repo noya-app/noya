@@ -1,6 +1,5 @@
 import { PlusIcon } from '@radix-ui/react-icons';
-import { Button, ListView, Spacer } from 'noya-designsystem';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
+import { Button, ListView, MenuItem, Spacer } from 'noya-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
@@ -113,7 +112,8 @@ const PageListContent = memo(function PageListContent({
         </Button>
       </Header>
       <ListView.Root
-        sortable={true}
+        sortable
+        scrollable
         onMoveItem={useCallback(
           (sourceIndex, destinationIndex) => {
             dispatch('movePage', sourceIndex, destinationIndex);

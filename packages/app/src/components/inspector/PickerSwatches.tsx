@@ -15,7 +15,7 @@ import {
   Square,
   LayoutType,
   LayoutPicker,
-} from './ColorPickerAssetGrid';
+} from './PickerAssetGrid';
 
 interface SwatchesProps {
   selectedSwatchId?: string;

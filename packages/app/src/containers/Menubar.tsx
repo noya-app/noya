@@ -6,8 +6,8 @@ import {
 import { fileOpen, fileSave, FileSystemHandle } from 'browser-fs-access';
 import {
   Button,
-  ContextMenu,
   DropdownMenu,
+  MenuItem,
   RadioGroup,
   Spacer,
 } from 'noya-designsystem';
@@ -59,7 +59,7 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch],
   );
 
-  const menuItems: ContextMenu.MenuItem<MenuItemType>[] = useMemo(
+  const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'new', title: 'File: New' },
       { value: 'open', title: 'File: Open' },
@@ -116,14 +116,14 @@ const MenubarContent = memo(function MenubarContent({
     <Container>
       <Spacer.Horizontal size={8} />
       <Row>
-        <DropdownMenu.Root<MenuItemType>
+        <DropdownMenu<MenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
         >
           <Button id="menu">
             <HamburgerMenuIcon />
           </Button>
-        </DropdownMenu.Root>
+        </DropdownMenu>
         <Spacer.Horizontal />
         <RadioGroup.Root value={currentTab} onValueChange={handleChangeTab}>
           <RadioGroup.Item value="canvas" tooltip="Canvas">

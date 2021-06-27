@@ -77,6 +77,7 @@ export default memo(function FillInspector({
                     patternTileScale: item.patternTileScale,
                   }
             }
+            contextOpacity={item.contextSettings.opacity}
             prefix={checkbox}
             onChangeFillType={(value) =>
               dispatch('setFillFillType', index, value)
@@ -106,6 +107,21 @@ export default memo(function FillInspector({
               dispatch('setFillOpacity', index, value, 'adjust')
             }
             onChangeColor={(value) => dispatch('setFillColor', index, value)}
+            onChangeFillImage={(value) =>
+              dispatch('setFillImage', index, value)
+            }
+            onChangePatternFillType={(value) =>
+              dispatch('setPatternFillType', index, value)
+            }
+            onChangePatternTileScale={(value) =>
+              dispatch('setPatternTileScale', index, value)
+            }
+            onChangeContextOpacity={(value) =>
+              dispatch('setFillContextSettingsOpacity', index, value)
+            }
+            onNudgeContextOpacity={(value) =>
+              dispatch('setFillContextSettingsOpacity', index, value, 'adjust')
+            }
           />
         ),
 

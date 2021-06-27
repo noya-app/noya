@@ -1,7 +1,3 @@
-import type { CanvasKit } from 'canvaskit';
-import { Theme } from 'noya-designsystem';
-import { render, unmount } from 'noya-react-canvaskit';
-import { WorkspaceState } from 'noya-state';
 import React, {
   memo,
   ReactNode,
@@ -9,55 +5,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ThemeProvider, useTheme } from 'styled-components';
-import {
-  StateProvider,
-  useWorkspaceState,
-} from '../contexts/ApplicationStateContext';
+import { useTheme } from 'styled-components';
+import { useWorkspaceState } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
-
-function renderImageFromCanvas(
-  CanvasKit: CanvasKit,
-  width: number,
-  height: number,
-  theme: Theme,
-  state: WorkspaceState,
-  renderContent: () => ReactNode,
-): Promise<Uint8Array | undefined> {
-  const surface = CanvasKit.MakeSurface(width, height);
-
-  if (!surface) {
-    console.warn('failed to create surface');
-    return Promise.resolve(undefined);
-  }
-
-  return new Promise((resolve) => {
-    const root = (
-      <ThemeProvider theme={theme}>
-        <StateProvider state={state}>{renderContent()}</StateProvider>
-      </ThemeProvider>
-    );
-
-    render(root, surface, CanvasKit, () => {
-      const image = surface.makeImageSnapshot();
-
-      const colorSpace = image.getColorSpace();
-
-      const bytes = image.readPixels(0, 0, {
-        ...image.getImageInfo(),
-        colorSpace: image.getColorSpace(),
-      }) as Uint8Array;
-
-      colorSpace.delete();
-
-      unmount(surface, () => {
-        resolve(bytes);
-
-        surface.delete();
-      });
-    });
-  });
-}
+import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
 
 interface Props {
   width: number;
@@ -85,6 +36,7 @@ export default memo(function CanvasViewer({
       height,
       theme,
       rawApplicationState,
+      'bytes',
       renderContent,
     ).then((bytes) => {
       if (!valid || !bytes) return;

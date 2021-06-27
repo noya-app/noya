@@ -7,9 +7,9 @@ import {
   Divider,
   ContextMenu,
   getGradientBackground,
+  MenuItem,
 } from 'noya-designsystem';
 import { memo, useState, useCallback } from 'react';
-import { MenuItem } from 'noya-designsystem/src/components/ContextMenu';
 import {
   PaddedSection,
   GridSmall,
@@ -17,7 +17,7 @@ import {
   Square,
   LayoutType,
   LayoutPicker,
-} from './ColorPickerAssetGrid';
+} from './PickerAssetGrid';
 
 export type MenuItemType = 'rename' | 'delete';
 
@@ -49,7 +49,7 @@ const GradientsList = memo(function GradientsList({
         );
 
         return (
-          <ContextMenu.Root<MenuItemType>
+          <ContextMenu<MenuItemType>
             key={do_objectID}
             items={menuItems}
             onSelect={handleSelectMenuItem}
@@ -63,7 +63,7 @@ const GradientsList = memo(function GradientsList({
               <Spacer.Horizontal size={8} />
               {name}
             </ListView.Row>
-          </ContextMenu.Root>
+          </ContextMenu>
         );
       })}
     </ListView.Root>
@@ -86,7 +86,7 @@ const GradientsGrid = memo(function GradientsGrid({
         );
 
         return (
-          <ContextMenu.Root<MenuItemType>
+          <ContextMenu<MenuItemType>
             key={do_objectID}
             items={menuItems}
             onSelect={handleSelectMenuItem}
@@ -96,7 +96,7 @@ const GradientsGrid = memo(function GradientsGrid({
               onContextMenu={() => setGradientId(do_objectID)}
               onClick={() => onSelectGradientAsset(gradient)}
             />
-          </ContextMenu.Root>
+          </ContextMenu>
         );
       })}
     </GridSmall>
