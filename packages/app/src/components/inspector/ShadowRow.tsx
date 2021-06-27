@@ -76,9 +76,7 @@ export default memo(function FillRow({
         {prefix && <Spacer.Horizontal size={8} />}
         <FillInputFieldWithPicker
           id={colorInputId}
-          value={
-            color ?? { _class: 'color', alpha: 0, red: 0, green: 0, blue: 1 }
-          }
+          value={color}
           onChange={onChangeColor}
         />
         <Spacer.Horizontal size={8} />

@@ -49,7 +49,7 @@ const Container = styled.div<{
 
 const UploadButton = styled.button<{ show: boolean }>(
   ({ theme, show = false }) => ({
-    color: theme.colors.button.secondaryText,
+    color: 'white',
     position: 'absolute',
     background: 'rgba(0, 0, 0, 0.75)',
     cursor: 'pointer',
