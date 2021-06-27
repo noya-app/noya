@@ -3,9 +3,6 @@ import styled from 'styled-components';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { SEPARATOR_ITEM, MenuItem, styles } from './internal/Menu';
 
-export type { MenuItem };
-export { SEPARATOR_ITEM };
-
 /* ----------------------------------------------------------------------------
  * Separator
  * ------------------------------------------------------------------------- */
@@ -17,15 +14,6 @@ const SeparatorElement = styled(DropdownMenu.Separator)(styles.separatorStyle);
  * ------------------------------------------------------------------------- */
 
 const ItemElement = styled(DropdownMenu.Item)(styles.itemStyle);
-
-interface DropdownMenuItemProps {
-  children: ReactNode;
-  onSelect: () => void;
-}
-
-function DropdownMenuItem({ children, onSelect }: DropdownMenuItemProps) {
-  return <ItemElement onSelect={onSelect}>{children}</ItemElement>;
-}
 
 /* ----------------------------------------------------------------------------
  * Root
@@ -41,7 +29,7 @@ interface Props<T extends string> {
 
 // Using a Slot for the menu currently doesn't work with custom elements,
 // so we use a span. Check for fixes in library updates in the future.
-function ContextMenuRoot<T extends string>({
+function DropdownMenuRoot<T extends string>({
   items,
   children,
   onSelect,
@@ -54,12 +42,12 @@ function ContextMenuRoot<T extends string>({
           item === SEPARATOR_ITEM ? (
             <SeparatorElement key={index} />
           ) : (
-            <DropdownMenuItem
+            <ItemElement
               key={item.value}
               onSelect={() => onSelect?.(item.value)}
             >
               {item.title}
-            </DropdownMenuItem>
+            </ItemElement>
           ),
         )}
       </RootElement>
@@ -67,4 +55,4 @@ function ContextMenuRoot<T extends string>({
   );
 }
 
-export const Root = memo(ContextMenuRoot);
+export default memo(DropdownMenuRoot);

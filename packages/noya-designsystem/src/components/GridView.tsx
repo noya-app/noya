@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import styled from 'styled-components';
-import { ContextMenu, Divider, ScrollArea, Spacer } from '..';
+import { ContextMenu, Divider, MenuItem, ScrollArea, Spacer } from '..';
 import withSeparatorElements from '../utils/withSeparatorElements';
 
 const Grid = styled.div(({ theme }) => ({
@@ -86,7 +86,7 @@ interface ItemProps<MenuItemType extends string = string> {
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
   children?: ReactNode;
-  menuItems?: ContextMenu.MenuItem<MenuItemType>[];
+  menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
 }
@@ -134,12 +134,9 @@ const GridViewItem = forwardRef(function GridViewItem<
 
   if (menuItems) {
     return (
-      <ContextMenu.Root<MenuItemType>
-        items={menuItems}
-        onSelect={onSelectMenuItem}
-      >
+      <ContextMenu<MenuItemType> items={menuItems} onSelect={onSelectMenuItem}>
         {element}
-      </ContextMenu.Root>
+      </ContextMenu>
     );
   }
 

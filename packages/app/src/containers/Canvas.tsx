@@ -654,7 +654,7 @@ export default memo(function Canvas() {
   }, [state.interactionState.type, handleDirection]);
 
   return (
-    <ContextMenu.Root items={menuItems} onSelect={onSelectMenuItem}>
+    <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
       <Container
         ref={containerRef}
         cursor={cursor}
@@ -669,6 +669,6 @@ export default memo(function Canvas() {
           height={0}
         />
       </Container>
-    </ContextMenu.Root>
+    </ContextMenu>
   );
 });
