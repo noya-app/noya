@@ -165,6 +165,10 @@ export function canvasReducer(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
 
+      const layers = layerIndexPaths.map((indexPath) =>
+        Layers.access(page, indexPath),
+      );
+
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' || action[1][0] === 'maybeMove'
@@ -255,7 +259,7 @@ export function canvasReducer(
           }
           case 'movingPoint': {
             const { current, selectedPoint } = interactionState;
-
+            let delta = { x: 0, y: 0 };
             const boundingRects = getBoundingRectMap(
               getCurrentPage(state),
               Object.keys(state.selectedPointLists),
@@ -265,6 +269,22 @@ export function canvasReducer(
                 includeHiddenLayers: false,
               },
             );
+            //Find point to measure distance
+            layers.forEach((layer) => {
+              if (!Layers.isPointsLayer(layer)) return;
+              const boundingRect = boundingRects[layer.do_objectID];
+              if (layer.do_objectID === selectedPoint[0]) {
+                const pointToMeasure = decodeCurvePoint(
+                  layer.points[selectedPoint[1]],
+                  boundingRect,
+                );
+
+                delta = {
+                  x: current.x - pointToMeasure.point.x,
+                  y: current.y - pointToMeasure.point.y,
+                };
+              }
+            });
 
             layerIndexPaths.forEach((indexPath) => {
               const page = draft.sketch.pages[pageIndex];
@@ -273,15 +293,6 @@ export function canvasReducer(
               const boundingRect = boundingRects[layer.do_objectID];
 
               if (!Layers.isPointsLayer(layer) || !boundingRect) return;
-
-              const pointToMeasureFrom = decodeCurvePoint(
-                layer.points[selectedPoint[1]],
-                boundingRect,
-              );
-              const delta = {
-                x: current.x - pointToMeasureFrom.point.x,
-                y: current.y - pointToMeasureFrom.point.y,
-              };
 
               // Update all points by first transforming to the canvas's coordinate system
               layer.points
