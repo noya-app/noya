@@ -19,27 +19,7 @@ export const colors = {
   selectedBackground: 'rgb(242, 245, 250)',
   transparentChecker: 'rgba(255,255,255,0.8)',
   scrollbar: 'rgba(199,199,199,0.8)',
-  banner: {
-    top: 'rgb(222, 229, 255)',
-    // bottom: 'rgb(238, 235, 255)',
-    // top: 'rgba(244, 247, 252, 1)',
-    bottom: 'rgba(252, 252, 254, 1)',
-  },
-  title: {
-    get left() {
-      return colors.primary;
-    },
-    right: '#b9a2ff',
-    // right: '#93d8ff'
-  },
-  button: {
-    primaryText: 'white',
-    secondaryText: 'white',
-    get primaryBackground() {
-      return colors.primary;
-    },
-    secondaryBackground: 'rgb(160, 160, 160)',
-  },
+  placeholderDots: 'rgba(0,0,0,0.3)',
   listView: {
     raisedBackground: 'rgba(255,255,255,0.8)',
   },

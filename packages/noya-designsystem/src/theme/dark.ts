@@ -16,6 +16,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.mask = 'rgb(102,187,106)';
   colors.transparentChecker = 'rgba(255,255,255,0.3)';
   colors.scrollbar = 'rgba(199,199,199,0.2)';
+  colors.placeholderDots = 'rgba(255,255,255,0.3)';
 });
 export const textStyles = lightTheme.textStyles;
 export const fonts = lightTheme.fonts;

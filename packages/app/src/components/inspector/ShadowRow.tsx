@@ -1,12 +1,10 @@
-import type FileFormat from '@sketch-hq/sketch-file-format-ts';
-import {
-  InputField,
-  Label,
-  LabeledElementView,
-  Spacer,
-} from 'noya-designsystem';
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Label, LabeledElementView, Spacer } from 'noya-designsystem';
+import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
+import DimensionInput from './DimensionInput';
+import { DimensionValue } from './DimensionsInspector';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 
 const Row = styled.div(({ theme }) => ({
@@ -18,20 +16,16 @@ const Row = styled.div(({ theme }) => ({
 
 interface Props {
   id: string;
-  color: FileFormat.Color;
-  x: FileFormat.Shadow['offsetX'];
-  y: FileFormat.Shadow['offsetY'];
-  blur: FileFormat.Shadow['blurRadius'];
-  spread: FileFormat.Shadow['spread'];
-  onChangeColor: (color: FileFormat.Color) => void;
-  onChangeX: (amount: number) => void;
-  onChangeY: (amount: number) => void;
-  onChangeBlur: (amount: number) => void;
-  onChangeSpread: (amount: number) => void;
-  onNudgeX: (amount: number) => void;
-  onNudgeY: (amount: number) => void;
-  onNudgeBlur: (amount: number) => void;
-  onNudgeSpread: (amount: number) => void;
+  color?: Sketch.Color;
+  x: DimensionValue;
+  y: DimensionValue;
+  blur: DimensionValue;
+  spread: DimensionValue;
+  onChangeColor: (color: Sketch.Color) => void;
+  onSetX: (value: number, mode: SetNumberMode) => void;
+  onSetY: (value: number, mode: SetNumberMode) => void;
+  onSetBlur: (value: number, mode: SetNumberMode) => void;
+  onSetSpread: (value: number, mode: SetNumberMode) => void;
   prefix?: ReactNode;
 }
 
@@ -43,14 +37,10 @@ export default memo(function FillRow({
   blur,
   spread,
   onChangeColor,
-  onChangeX,
-  onChangeY,
-  onChangeBlur,
-  onChangeSpread,
-  onNudgeX,
-  onNudgeY,
-  onNudgeBlur,
-  onNudgeSpread,
+  onSetX,
+  onSetY,
+  onSetBlur,
+  onSetSpread,
   prefix,
 }: Props) {
   const colorInputId = `${id}-color`;
@@ -79,55 +69,6 @@ export default memo(function FillRow({
     [colorInputId, xInputId, yInputId, blurInputId, spreadInputId],
   );
 
-  const handleSubmitX = useCallback(
-    (x: number) => {
-      onChangeX(x);
-    },
-    [onChangeX],
-  );
-  const handleSubmitY = useCallback(
-    (y: number) => {
-      onChangeY(y);
-    },
-    [onChangeY],
-  );
-  const handleSubmitBlur = useCallback(
-    (blur: number) => {
-      onChangeBlur(blur);
-    },
-    [onChangeBlur],
-  );
-  const handleSubmitSpread = useCallback(
-    (spread: number) => {
-      onChangeSpread(spread);
-    },
-    [onChangeSpread],
-  );
-  const handleNudgeX = useCallback(
-    (x: number) => {
-      onNudgeX(x);
-    },
-    [onNudgeX],
-  );
-  const handleNudgeY = useCallback(
-    (y: number) => {
-      onNudgeY(y);
-    },
-    [onNudgeY],
-  );
-  const handleNudgeBlur = useCallback(
-    (blur: number) => {
-      onNudgeBlur(blur);
-    },
-    [onNudgeBlur],
-  );
-  const handleNudgeSpread = useCallback(
-    (spread: number) => {
-      onNudgeSpread(spread);
-    },
-    [onNudgeSpread],
-  );
-
   return (
     <Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
@@ -139,37 +80,33 @@ export default memo(function FillRow({
           onChange={onChangeColor}
         />
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={xInputId} size={50}>
-          <InputField.NumberInput
-            value={Math.round(x)}
-            onSubmit={handleSubmitX}
-            onNudge={handleNudgeX}
-          />
-        </InputField.Root>
+        <DimensionInput
+          id={xInputId}
+          size={50}
+          value={x !== undefined ? Math.round(x) : x}
+          onSetValue={onSetX}
+        />
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={yInputId} size={50}>
-          <InputField.NumberInput
-            value={Math.round(y)}
-            onSubmit={handleSubmitY}
-            onNudge={handleNudgeY}
-          />
-        </InputField.Root>
+        <DimensionInput
+          id={yInputId}
+          size={50}
+          value={y !== undefined ? Math.round(y) : y}
+          onSetValue={onSetY}
+        />
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={blurInputId} size={50}>
-          <InputField.NumberInput
-            value={Math.round(blur)}
-            onSubmit={handleSubmitBlur}
-            onNudge={handleNudgeBlur}
-          />
-        </InputField.Root>
+        <DimensionInput
+          id={blurInputId}
+          size={50}
+          value={blur !== undefined ? Math.round(blur) : blur}
+          onSetValue={onSetBlur}
+        />
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={spreadInputId} size={50}>
-          <InputField.NumberInput
-            value={Math.round(spread)}
-            onSubmit={handleSubmitSpread}
-            onNudge={handleNudgeSpread}
-          />
-        </InputField.Root>
+        <DimensionInput
+          id={spreadInputId}
+          size={50}
+          value={spread !== undefined ? Math.round(spread) : spread}
+          onSetValue={onSetSpread}
+        />
       </LabeledElementView>
     </Row>
   );

@@ -3,15 +3,21 @@ import { SetNumberMode } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { DimensionValue } from './DimensionsInspector';
 
+interface Props {
+  id?: string;
+  value: DimensionValue;
+  onSetValue: (value: number, mode: SetNumberMode) => void;
+  label?: string;
+  size?: number;
+}
+
 export default memo(function DimensionInput({
+  id,
   value,
   onSetValue,
   label,
-}: {
-  value: DimensionValue;
-  onSetValue: (value: number, mode: SetNumberMode) => void;
-  label: string;
-}) {
+  size,
+}: Props) {
   const handleNudgeValue = useCallback(
     (value: number) => onSetValue(value, 'adjust'),
     [onSetValue],
@@ -22,14 +28,14 @@ export default memo(function DimensionInput({
   ]);
 
   return (
-    <InputField.Root>
+    <InputField.Root id={id} size={size}>
       <InputField.NumberInput
         value={value}
         placeholder={value === undefined ? 'multi' : undefined}
         onNudge={handleNudgeValue}
         onSubmit={handleSetValue}
       />
-      <InputField.Label>{label}</InputField.Label>
+      {label && <InputField.Label>{label}</InputField.Label>}
     </InputField.Root>
   );
 });

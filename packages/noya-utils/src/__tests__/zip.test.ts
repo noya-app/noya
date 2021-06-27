@@ -1,6 +1,6 @@
-import { zip } from '../index';
+import { zip, zipLongest } from '../index';
 
-describe('arrays', () => {
+describe('zip', () => {
   test('2-tuple of same length', () => {
     const a = [1, 2, 3];
     const b = ['a', 'b', 'c'];
@@ -31,6 +31,30 @@ describe('arrays', () => {
     expect(zip(a, b)).toEqual([
       [1, 'a'],
       [2, 'b'],
+    ]);
+  });
+});
+
+describe('zipLongest', () => {
+  test('same length', () => {
+    const a = [1, 2, 3];
+    const b = [4, 5, 6];
+
+    expect(zipLongest(undefined, a, b)).toEqual([
+      [1, 4],
+      [2, 5],
+      [3, 6],
+    ]);
+  });
+
+  test('different lengths', () => {
+    const a = [1, 2, 3];
+    const b = [4];
+
+    expect(zipLongest(undefined, a, b)).toEqual([
+      [1, 4],
+      [2, undefined],
+      [3, undefined],
     ]);
   });
 });

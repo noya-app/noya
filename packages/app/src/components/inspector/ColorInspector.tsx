@@ -8,8 +8,10 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { clamp } from 'noya-utils';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback } from 'react';
 import styled from 'styled-components';
+import { SetNumberMode } from 'noya-state';
+import DimensionInput from './DimensionInput';
 
 const Row = styled.div(({ theme }) => ({
   flex: '1',
@@ -24,40 +26,37 @@ const Column = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
+const DEFAULT_SKETCH_COLOR: Sketch.Color = {
+  _class: 'color',
+  red: 0,
+  green: 0,
+  blue: 0,
+  alpha: 1,
+};
+
 interface Props {
   id: string;
-  colors: Sketch.Color[];
+  color?: Sketch.Color;
   /**
    * The only required change handler is `onChangeColor`. However, to handle
    * more granular changes specially, e.g. nudging opacity, you can pass other
    * handlers.
    */
   onChangeColor: (color: Sketch.Color) => void;
-  onChangeOpacity?: (amount: number) => void;
-  onNudgeOpacity?: (amount: number) => void;
+  onSetOpacity?: (value: number, mode: SetNumberMode) => void;
 }
 
 export default memo(function ColorInspector({
   id,
-  colors,
+  color,
   onChangeColor,
-  onChangeOpacity,
-  onNudgeOpacity,
+  onSetOpacity,
 }: Props) {
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
 
-  const firstColor = colors[0];
-  const firstColorHex = sketchColorToHex(firstColor);
-  const hexValue = useMemo(
-    () =>
-      colors.length > 1 &&
-      !colors.every((v) => sketchColorToHex(v) === firstColorHex)
-        ? undefined
-        : firstColorHex.slice(1),
-    [firstColorHex, colors],
-  );
+  const displayColor = color ?? DEFAULT_SKETCH_COLOR;
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -75,58 +74,46 @@ export default memo(function ColorInspector({
     [colorInputId, hexInputId, opacityInputId],
   );
 
-  const handleSubmitOpacity = useCallback(
-    (opacity: number) => {
-      if (onChangeOpacity) {
-        onChangeOpacity(opacity / 100);
+  const handleSetOpacity = useCallback(
+    (amount: number, mode: SetNumberMode) => {
+      if (onSetOpacity) {
+        onSetOpacity(amount / 100, mode);
       } else {
-        onChangeColor({
-          ...firstColor,
-          alpha: clamp(opacity / 100, 0, 1),
-        });
-      }
-    },
-    [onChangeOpacity, onChangeColor, firstColor],
-  );
+        const newValue =
+          mode === 'replace' ? amount : displayColor.alpha + amount;
 
-  const handleNudgeOpacity = useCallback(
-    (amount: number) => {
-      if (onNudgeOpacity) {
-        onNudgeOpacity(amount / 100);
-      } else {
         onChangeColor({
-          ...firstColor,
-          alpha: clamp(firstColor.alpha + amount / 100, 0, 1),
+          ...displayColor,
+          alpha: clamp(newValue / 100, 0, 1),
         });
       }
     },
-    [firstColor, onChangeColor, onNudgeOpacity],
+    [displayColor, onChangeColor, onSetOpacity],
   );
 
   return (
     <Column>
-      <ColorPicker value={firstColor} onChange={onChangeColor} />
+      <ColorPicker value={displayColor} onChange={onChangeColor} />
       <Spacer.Vertical size={10} />
       <Row id={id}>
         <LabeledElementView renderLabel={renderLabel}>
           <Spacer.Vertical size={8} />
           <InputField.Root id={hexInputId} labelPosition="start">
             <InputField.Input
-              value={hexValue ?? ''}
-              placeholder={hexValue ? '' : 'Multiple'}
+              value={color ? sketchColorToHex(displayColor).slice(1) : ''}
+              placeholder={color ? '' : 'multiple'}
               onSubmit={useCallback(() => {}, [])}
             />
             <InputField.Label>#</InputField.Label>
           </InputField.Root>
           <Spacer.Horizontal size={8} />
-          <InputField.Root id={opacityInputId} size={50}>
-            <InputField.NumberInput
-              value={Math.round(firstColor.alpha * 100)}
-              onSubmit={handleSubmitOpacity}
-              onNudge={handleNudgeOpacity}
-            />
-            <InputField.Label>%</InputField.Label>
-          </InputField.Root>
+          <DimensionInput
+            id={opacityInputId}
+            size={50}
+            label="%"
+            value={color ? Math.round(color.alpha * 100) : undefined}
+            onSetValue={handleSetOpacity}
+          />
         </LabeledElementView>
       </Row>
     </Column>
