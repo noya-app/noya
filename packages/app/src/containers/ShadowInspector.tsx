@@ -10,7 +10,7 @@ import getMultiNumberValue from '../utils/getMultiNumberValue';
 import getMultiValue from '../utils/getMultiValue';
 
 type EditableShadow = {
-  // isEnabled?: boolean;
+  // TODO: Indeterminate `isEnabled` state
   isEnabled: boolean;
   blurRadius?: number;
   color?: Sketch.Color;
@@ -38,7 +38,6 @@ export default memo(function ShadowInspector() {
     return {
       isEnabled:
         getMultiValue(filtered.map((shadow) => shadow.isEnabled)) ?? true,
-      // isEnabled: getMultiValue(filtered.map((shadow) => shadow.isEnabled)),
       blurRadius: getMultiNumberValue(
         filtered.map((shadow) => shadow.blurRadius),
       ),

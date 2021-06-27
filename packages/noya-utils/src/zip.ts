@@ -35,16 +35,16 @@ export function zip(...arrays: unknown[][]): unknown[][] {
  *
  * If input arrays are different lengths, the resulting array of tuples will
  * have the same length as the longest input array, and any holes will
- * be filled with `undefined`.
+ * be filled with `fillValue`.
  */
 export function zipLongest<T>(fillValue: T, ...arrays: T[][]): T[][] {
   const length = Math.max(...arrays.map((array) => array.length));
 
+  // Fill each array with `fillValue` up to the length of the largest array
   const filledArrays = arrays.map((array) => {
-    const originalLength = array.length;
     const copy = [...array];
     copy.length = length;
-    copy.fill(fillValue, originalLength);
+    copy.fill(fillValue, array.length);
     return copy;
   });
 
