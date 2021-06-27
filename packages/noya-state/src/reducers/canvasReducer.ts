@@ -4,7 +4,6 @@ import produce from 'immer';
 import {
   AffineTransform,
   createBounds,
-  createRectFromBounds,
   distance,
   normalizeRect,
   Rect,
@@ -315,24 +314,22 @@ export function canvasReducer(
               );
 
               // Determine the new bounds of the updated points
-              const newBounds = {
-                minX: Math.min(
-                  ...decodedPoints.map((curvePoint) => curvePoint.point.x),
-                ),
-                maxX: Math.max(
-                  ...decodedPoints.map((curvePoint) => curvePoint.point.x),
-                ),
-                minY: Math.min(
-                  ...decodedPoints.map((curvePoint) => curvePoint.point.y),
-                ),
-                maxY: Math.max(
-                  ...decodedPoints.map((curvePoint) => curvePoint.point.y),
-                ),
+              const [minX, minY, maxX, maxY] = path(
+                CanvasKit,
+                layer.points,
+                layer.frame,
+              ).computeTightBounds();
+
+              const newRect: Rect = {
+                x: minX,
+                y: minY,
+                width: maxX - minX,
+                height: maxY - minY,
               };
 
               layer.frame = {
                 ...layer.frame,
-                ...createRectFromBounds(newBounds),
+                ...newRect,
               };
 
               // Transform back to the range [0, 1], using the new bounds
@@ -349,17 +346,12 @@ export function canvasReducer(
             if (!state.selectedControlPoint) return state;
             const { current, selectedPoint } = interactionState;
 
-            // const [a, b, c, d, canvasKit] = action;
             const {
               layerId,
               pointIndex,
               controlPointType,
             } = state.selectedControlPoint;
 
-            //const axis = type === 'setControlPointX' ? 'x' : 'y';
-
-            //  const pageIndex = getCurrentPageIndex(state);
-            // const layerIndexPaths = getSelectedLayerIndexPaths(state);
             const boundingRects = getBoundingRectMap(
               getCurrentPage(state),
               [layerId],
@@ -382,8 +374,8 @@ export function canvasReducer(
                 boundingRect,
               );
               const delta = {
-                x: current.x - pointToMeasureFrom.point.x,
-                y: current.y - pointToMeasureFrom.point.y,
+                x: current.x - pointToMeasureFrom[controlPointType].x,
+                y: current.y - pointToMeasureFrom[controlPointType].y,
               };
 
               const curveMode = layer.points[pointIndex].curveMode;

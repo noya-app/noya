@@ -673,9 +673,9 @@ export default memo(function Canvas() {
             ]);
             return;
           }
-          dispatch('interaction', ['reset']);
+          //dispatch('interaction', ['reset']);
 
-          containerRef.current?.releasePointerCapture(event.pointerId);
+          // containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
