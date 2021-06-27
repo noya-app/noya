@@ -177,7 +177,8 @@ export function canvasReducer(
 
         switch (interactionState.type) {
           case 'editPath': {
-            //Selects the first point in the first selected layer and initializes a point list for each selected layer
+            if (action[1][0] === 'resetEditPath') break;
+
             layerIndexPaths.forEach((layerIndex, index) => {
               const layer = Layers.access(page, layerIndex);
               if (Layers.isPointsLayer(layer)) {

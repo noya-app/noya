@@ -216,11 +216,11 @@ const ToolbarContent = memo(function ToolbarContent({
         disabled={selectedLayerIds.length === 0}
         onClick={useCallback(() => {
           if (!isEditingPath) {
-            dispatch('interaction', ['editPath', selectedLayerIds]);
+            dispatch('interaction', ['editPath']);
           } else {
             dispatch('interaction', ['reset']);
           }
-        }, [isEditingPath, dispatch, selectedLayerIds])}
+        }, [isEditingPath, dispatch])}
       >
         {useMemo(
           () => (

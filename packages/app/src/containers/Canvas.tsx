@@ -701,26 +701,26 @@ export default memo(function Canvas() {
         case 'maybeMoveControlPoint':
         case 'movingControlPoint': {
           if (state.selectedControlPoint) {
-            dispatch(
-              'selectControlPoint',
-              state.selectedControlPoint.layerId,
-              state.selectedControlPoint.pointIndex,
-              state.selectedControlPoint.controlPointType,
-            );
+            dispatch('interaction', ['resetEditPath']);
+            // dispatch(
+            //   'selectControlPoint',
+            //   state.selectedControlPoint.layerId,
+            //   state.selectedControlPoint.pointIndex,
+            //   state.selectedControlPoint.controlPointType,
+            // );
           }
-          dispatch('interaction', ['reset']);
           containerRef.current?.releasePointerCapture(event.pointerId);
 
           break;
         }
         case 'maybeMovePoint':
         case 'movingPoint': {
-          if (event.shiftKey) {
-            const { selectedPoint } = state.interactionState;
-            dispatch('selectPoint', selectedPoint);
-          } else {
-            dispatch('interaction', ['reset']);
-          }
+          // if (event.shiftKey) {
+          //   const { selectedPoint } = state.interactionState;
+          //   dispatch('selectPoint', selectedPoint);
+          // } else {
+          dispatch('interaction', ['resetEditPath']);
+          // }
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
