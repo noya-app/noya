@@ -1,18 +1,18 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
 import { ColorInputField, Select, SketchPattern } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
 import PatternInspector from './PatternInspector';
-import { uuid } from 'noya-renderer';
+import PickerGradients from './PickerGradients';
+import PickerPatterns from './PickerPatterns';
 import ColorPickerSwatches from './PickerSwatches';
-import ColorPickerGradient from './PickerGradients';
-import ColorPickerPattern from './PickerPattern';
 
 const Content = styled(Popover.Content)(({ theme }) => ({
   width: '240px',
@@ -24,22 +24,11 @@ const Content = styled(Popover.Content)(({ theme }) => ({
   overflowY: 'auto',
 }));
 
-const StyledArrow = styled(Popover.Arrow)(({ theme }) => ({
-  fill: theme.colors.popover.background,
-}));
-
 const PaddedSection = styled.section({
   padding: '7px 10px',
   display: 'flex',
   flexDirection: 'column',
 });
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'stretch',
-}));
 
 type FillOption =
   | 'Solid Color'
@@ -48,69 +37,82 @@ type FillOption =
   | 'Angular Gradient'
   | 'Pattern Fill';
 
-interface Props {
-  id?: string;
-  value?: Sketch.Color | Sketch.Gradient | SketchPattern;
-  onChange: (color: Sketch.Color) => void;
-  onChangeType?: (type: Sketch.FillType) => void;
-  onChangeGradient?: (type: Sketch.Gradient) => void;
-  onChangeGradientColor?: (color: Sketch.Color, index: number) => void;
-  onChangeGradientType?: (type: Sketch.GradientType) => void;
-  onChangeGradientPosition?: (index: number, position: number) => void;
-  onAddGradientStop?: (color: Sketch.Color, position: number) => void;
-  onDeleteGradientStop?: (index: number) => void;
-  onChangePatternFillType?: (value: Sketch.PatternFillType) => void;
-  onChangePatternTileScale?: (amount: number) => void;
-  onChangeFillImage?: (value: Sketch.FileRef | Sketch.DataRef) => void;
-}
-
-interface PickersProps {
-  value?: Sketch.Color | Sketch.Gradient | SketchPattern;
-  onChange: (color: Sketch.Color) => void;
-  onChangeGradient?: (type: Sketch.Gradient) => void;
-  onChangeFillImage?: (value: Sketch.FileRef | Sketch.DataRef) => void;
-}
-
-const Picker = ({
-  value,
-  onChange,
-  onChangeGradient,
-  onChangeFillImage,
-}: PickersProps) => {
+function ColorFillPicker({
+  id,
+  color,
+  onChangeColor,
+}: ColorFillProps & { id?: string }) {
   const [state, dispatch] = useApplicationState();
 
+  const swatches = Selectors.getSharedSwatches(state);
+
+  const onChangeSwatch = useCallback(
+    (swatchID: string) => {
+      const swatch = swatches.find((swatch) => swatch.do_objectID === swatchID);
+
+      if (!swatch) return;
+
+      onChangeColor({ ...swatch.value, swatchID });
+    },
+    [onChangeColor, swatches],
+  );
+
   const detachThemeColor = useCallback(() => {
-    if (!value || value._class !== 'color') return;
+    if (!color) return;
 
-    onChange({
-      ...value,
-      swatchID: undefined,
-    });
-  }, [onChange, value]);
+    onChangeColor({ ...color, swatchID: undefined });
+  }, [onChangeColor, color]);
 
-  const createThemeColor = useCallback(() => {
-    if (!value || value._class !== 'color') return;
+  const createThemeColor = useCallback(
+    (swatchID: string, name: string) => {
+      if (!color) return;
 
-    const swatchName = prompt('New Swatch Name');
+      dispatch('addSwatch', name, color, swatchID);
+      onChangeColor({ ...color, swatchID });
+    },
+    [color, dispatch, onChangeColor],
+  );
 
-    if (!swatchName) return;
+  return (
+    <PaddedSection>
+      <ColorInspector
+        id={`${id}-color-inspector`}
+        color={color}
+        onChangeColor={onChangeColor}
+      />
+      <ColorPickerSwatches
+        selectedId={color ? color.swatchID : undefined}
+        swatches={swatches}
+        onChange={onChangeSwatch}
+        onCreate={createThemeColor}
+        onDetach={detachThemeColor}
+      />
+    </PaddedSection>
+  );
+}
 
-    const id = uuid();
-    onChange({
-      ...value,
-      swatchID: id,
-    });
-    dispatch('addSwatch', swatchName, value, id);
-  }, [onChange, dispatch, value]);
+function GradientFillPicker({
+  id,
+  gradient,
+  onChangeGradient,
+  onChangeGradientColor,
+  onChangeGradientPosition,
+  onAddGradientStop,
+  onDeleteGradientStop,
+}: Omit<GradientFillProps, 'onChangeGradientType'> & { id?: string }) {
+  const [state, dispatch] = useApplicationState();
+
+  const gradientAssets = Selectors.getGradientAssets(state);
 
   const createThemeGradient = useCallback(() => {
-    if (!value || value._class !== 'gradient') return;
+    if (!gradient) return;
 
     const gradientName = prompt('New Gradient Assets Name');
+
     if (!gradientName) return;
 
-    dispatch('addGradientAsset', gradientName, value);
-  }, [dispatch, value]);
+    dispatch('addGradientAsset', gradientName, gradient);
+  }, [dispatch, gradient]);
 
   const onRemoveThemeGradient = useCallback(
     (id: string) => dispatch('removeGradientAsset', id),
@@ -122,70 +124,34 @@ const Picker = ({
     [dispatch],
   );
 
-  const element = useMemo(() => {
-    switch (value?._class) {
-      case undefined:
-      case 'color':
-        return (
-          <ColorPickerSwatches
-            swatchID={value?._class === 'color' ? value.swatchID : undefined}
-            sharedSwatches={Selectors.getSharedSwatches(state)}
-            onChange={onChange}
-            onCreate={createThemeColor}
-            onDetach={detachThemeColor}
-          />
-        );
-      case 'gradient':
-        return (
-          <ColorPickerGradient
-            gradientType={value.gradientType}
-            gradientAssets={Selectors.getGradientAssets(state)}
-            onCreate={createThemeGradient}
-            onChange={onChangeGradient}
-            onDelete={onRemoveThemeGradient}
-            onRename={onRenameThemeGradient}
-          />
-        );
-      case 'pattern':
-        return (
-          <ColorPickerPattern
-            fileImages={state.sketch.images}
-            imageAssets={Selectors.getImageAssets(state)}
-            onChange={onChangeFillImage}
-          />
-        );
-    }
-  }, [
-    state,
-    value,
-    onChange,
-    onChangeGradient,
-    createThemeColor,
-    onChangeFillImage,
-    detachThemeColor,
-    createThemeGradient,
-    onRemoveThemeGradient,
-    onRenameThemeGradient,
-  ]);
+  return (
+    <PaddedSection>
+      <GradientInspector
+        id={`${id}-gradient-inspector`}
+        gradient={gradient.stops}
+        onChangeColor={onChangeGradientColor}
+        onChangePosition={onChangeGradientPosition}
+        onAddStop={onAddGradientStop}
+        onDeleteStop={onDeleteGradientStop}
+      />
+      <PickerGradients
+        gradientAssets={gradientAssets}
+        onCreate={createThemeGradient}
+        onChange={onChangeGradient}
+        onDelete={onRemoveThemeGradient}
+        onRename={onRenameThemeGradient}
+      />
+    </PaddedSection>
+  );
+}
 
-  return <>{element} </>;
-};
-
-export default memo(function ColorInputFieldWithPicker({
+function PatternFillPicker({
   id,
-  value,
-  onChange,
-  onChangeType,
-  onChangeGradient,
-  onChangeGradientColor,
-  onChangeGradientPosition,
-  onAddGradientStop,
-  onDeleteGradientStop,
-  onChangeGradientType,
+  pattern,
   onChangePatternFillType,
   onChangePatternTileScale,
   onChangeFillImage,
-}: Props) {
+}: PatternFillProps & { id?: string }) {
   const [state, dispatch] = useApplicationState();
 
   const createImage = useCallback(
@@ -195,54 +161,169 @@ export default memo(function ColorInputFieldWithPicker({
     [dispatch],
   );
 
-  const options: FillOption[] = useMemo(
-    () => [
-      'Solid Color',
-      'Linear Gradient',
-      'Radial Gradient',
-      'Angular Gradient',
-      'Pattern Fill',
-    ],
-    [],
+  return (
+    <PaddedSection>
+      <PatternInspector
+        id={`${id}-pattern-inspector`}
+        pattern={pattern}
+        images={state.sketch.images}
+        createImage={createImage}
+        onChangeImage={onChangeFillImage}
+        onChangeFillType={onChangePatternFillType}
+        onChangeTileScale={onChangePatternTileScale}
+      />
+      <PickerPatterns
+        fileImages={state.sketch.images}
+        imageAssets={Selectors.getImageAssets(state)}
+        onChange={onChangeFillImage}
+      />
+    </PaddedSection>
   );
+}
 
-  const fillOption = useMemo(() => {
-    if (!value) return 'Solid Color';
+const FILL_OPTIONS: FillOption[] = [
+  'Solid Color',
+  'Linear Gradient',
+  'Radial Gradient',
+  'Angular Gradient',
+  'Pattern Fill',
+];
 
-    switch (value._class) {
-      case 'color':
-        return 'Solid Color';
-      case 'pattern':
+interface FillOptionSelectProps {
+  fillType: Sketch.FillType;
+  gradientType: Sketch.GradientType;
+  onChangeType?: (type: Sketch.FillType) => void;
+  onChangeGradientType?: (type: Sketch.GradientType) => void;
+}
+
+function FillOptionSelect({
+  fillType,
+  gradientType,
+  onChangeType,
+  onChangeGradientType,
+}: FillOptionSelectProps) {
+  const value: FillOption = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Pattern:
         return 'Pattern Fill';
-      case 'gradient':
-        return `${
-          Sketch.GradientType[value.gradientType]
-        } Gradient` as FillOption;
+      case Sketch.FillType.Gradient:
+        const gradientTypeString = Sketch.GradientType[gradientType];
+        return `${gradientTypeString} Gradient` as FillOption;
+      case Sketch.FillType.Color:
+        return 'Solid Color';
     }
-  }, [value]);
+  }, [fillType, gradientType]);
 
-  const handleFillOptionChange = useCallback(
+  const handleChange = useCallback(
     (value: FillOption) => {
-      if (onChangeType)
-        onChangeType(
-          value.endsWith('Gradient')
-            ? Sketch.FillType.Gradient
-            : value === 'Pattern Fill'
-            ? Sketch.FillType.Pattern
-            : Sketch.FillType.Color,
-        );
+      if (!onChangeType) return;
 
-      if (value.endsWith('Gradient') && onChangeGradientType)
-        onChangeGradientType(
-          value === 'Linear Gradient'
-            ? Sketch.GradientType.Linear
-            : value === 'Radial Gradient'
-            ? Sketch.GradientType.Radial
-            : Sketch.GradientType.Angular,
-        );
+      switch (value) {
+        case 'Solid Color':
+          onChangeType(Sketch.FillType.Color);
+          break;
+        case 'Linear Gradient':
+        case 'Angular Gradient':
+        case 'Radial Gradient':
+          onChangeType(Sketch.FillType.Gradient);
+
+          onChangeGradientType?.(
+            value === 'Linear Gradient'
+              ? Sketch.GradientType.Linear
+              : value === 'Radial Gradient'
+              ? Sketch.GradientType.Radial
+              : Sketch.GradientType.Angular,
+          );
+          break;
+        case 'Pattern Fill':
+          onChangeType(Sketch.FillType.Pattern);
+          break;
+      }
     },
     [onChangeType, onChangeGradientType],
   );
+
+  return (
+    <Select
+      id="fill-options"
+      value={value}
+      options={FILL_OPTIONS}
+      onChange={handleChange}
+    />
+  );
+}
+
+export type ColorFillProps = {
+  color?: Sketch.Color;
+  onChangeColor: (color: Sketch.Color) => void;
+};
+
+export type GradientFillProps = {
+  gradient: Sketch.Gradient;
+  onChangeGradient: (type: Sketch.Gradient) => void;
+  onChangeGradientColor: (color: Sketch.Color, index: number) => void;
+  onChangeGradientType: (type: Sketch.GradientType) => void;
+  onChangeGradientPosition: (index: number, position: number) => void;
+  onAddGradientStop: (color: Sketch.Color, position: number) => void;
+  onDeleteGradientStop: (index: number) => void;
+};
+
+export type PatternFillProps = {
+  pattern: SketchPattern;
+  onChangePatternFillType: (value: Sketch.PatternFillType) => void;
+  onChangePatternTileScale: (amount: number) => void;
+  onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
+};
+
+interface Props {
+  id: string;
+  fillType?: Sketch.FillType;
+  onChangeType?: (type: Sketch.FillType) => void;
+  colorProps: ColorFillProps;
+  gradientProps?: GradientFillProps;
+  patternProps?: PatternFillProps;
+}
+
+export default memo(function FillInputFieldWithPicker({
+  id,
+  fillType,
+  onChangeType,
+  colorProps,
+  gradientProps,
+  patternProps,
+}: Props) {
+  const picker = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Gradient:
+        return gradientProps ? (
+          <GradientFillPicker id={id} {...gradientProps} />
+        ) : null;
+      case Sketch.FillType.Pattern:
+        return patternProps ? (
+          <PatternFillPicker id={id} {...patternProps} />
+        ) : null;
+      case Sketch.FillType.Color:
+      case undefined:
+        return <ColorFillPicker id={id} {...colorProps} />;
+    }
+  }, [id, fillType, colorProps, gradientProps, patternProps]);
+
+  const value = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Gradient:
+        return gradientProps?.gradient;
+      case Sketch.FillType.Pattern:
+        return patternProps?.pattern;
+      case Sketch.FillType.Color:
+      case undefined:
+        return colorProps.color;
+    }
+  }, [
+    fillType,
+    colorProps.color,
+    gradientProps?.gradient,
+    patternProps?.pattern,
+  ]);
 
   return (
     <Popover.Root>
@@ -251,50 +332,19 @@ export default memo(function ColorInputFieldWithPicker({
       </Popover.Trigger>
       <Content side="bottom" align="center">
         <PaddedSection>
-          <Row>
-            <Select
-              id="fill-options"
-              value={fillOption}
-              options={options}
-              onChange={handleFillOptionChange}
+          <InspectorPrimitives.Row>
+            <FillOptionSelect
+              fillType={fillType ?? Sketch.FillType.Color}
+              gradientType={
+                gradientProps?.gradient.gradientType ??
+                Sketch.GradientType.Linear
+              }
+              onChangeType={onChangeType}
+              onChangeGradientType={gradientProps?.onChangeGradientType}
             />
-          </Row>
+          </InspectorPrimitives.Row>
         </PaddedSection>
-        <PaddedSection>
-          {!value || value._class === 'color' ? (
-            <ColorInspector
-              id={`${id}-color-inspector`}
-              color={value}
-              onChangeColor={onChange}
-            />
-          ) : value._class === 'gradient' ? (
-            <GradientInspector
-              id={`${id}-gradient-inspector`}
-              gradient={value.stops}
-              onChangeColor={onChangeGradientColor}
-              onChangePosition={onChangeGradientPosition}
-              onAddStop={onAddGradientStop}
-              onDeleteStop={onDeleteGradientStop}
-            />
-          ) : (
-            <PatternInspector
-              id={`${id}-pattern-inspector`}
-              pattern={value}
-              images={state.sketch.images}
-              createImage={createImage}
-              onChangeImage={onChangeFillImage}
-              onChangeFillType={onChangePatternFillType}
-              onChangeTileScale={onChangePatternTileScale}
-            />
-          )}
-        </PaddedSection>
-        <Picker
-          value={value}
-          onChange={onChange}
-          onChangeGradient={onChangeGradient}
-          onChangeFillImage={onChangeFillImage}
-        />
-        <StyledArrow />
+        {picker}
       </Content>
     </Popover.Root>
   );

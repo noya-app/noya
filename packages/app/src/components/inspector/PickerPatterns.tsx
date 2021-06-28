@@ -15,7 +15,7 @@ interface Props {
   onChange?: (color: Sketch.FileRef | Sketch.DataRef) => void;
 }
 
-export default memo(function ColorPickerPattern({
+export default memo(function PickerPatterns({
   fileImages,
   imageAssets,
   onChange,

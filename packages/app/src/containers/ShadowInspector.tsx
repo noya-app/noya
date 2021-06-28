@@ -86,13 +86,11 @@ export default memo(function ShadowInspector() {
         }) => (
           <ShadowRow
             id={`shadow-${index}`}
-            color={item.color}
+            prefix={checkbox}
             x={item.offsetX}
             y={item.offsetY}
             blur={item.blurRadius}
             spread={item.spread}
-            prefix={checkbox}
-            onChangeColor={(value) => dispatch('setShadowColor', index, value)}
             onSetX={(value, mode) => dispatch('setShadowX', index, value, mode)}
             onSetY={(value, mode) => dispatch('setShadowY', index, value, mode)}
             onSetBlur={(value, mode) =>
@@ -101,6 +99,11 @@ export default memo(function ShadowInspector() {
             onSetSpread={(value, mode) =>
               dispatch('setShadowSpread', index, value, mode)
             }
+            colorProps={{
+              color: item.color,
+              onChangeColor: (value) =>
+                dispatch('setShadowColor', index, value),
+            }}
           />
         ),
         [dispatch],

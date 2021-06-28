@@ -18,12 +18,6 @@ import { FileMap } from 'noya-sketch-file';
 import { useHover } from 'noya-designsystem/src/hooks/useHover';
 import { useFileDropTarget } from '../../hooks/useFileDropTarget';
 
-const Column = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'column',
-}));
-
 const Container = styled.div<{
   background: string;
   backgroundSize: string;
@@ -47,30 +41,28 @@ const Container = styled.div<{
   justifyContent: 'center',
 }));
 
-const UploadButton = styled.button<{ show: boolean }>(
-  ({ theme, show = false }) => ({
-    color: 'white',
-    position: 'absolute',
-    background: 'rgba(0, 0, 0, 0.75)',
-    cursor: 'pointer',
-    userSelect: 'auto',
-    alignSelf: 'center',
-    height: '30px',
-    width: '105px',
-    borderRadius: '24px',
-    border: 'none',
-    display: show ? 'block' : 'none',
-    zIndex: 1,
-  }),
-);
+const UploadButton = styled.button<{ show: boolean }>(({ show = false }) => ({
+  color: 'white',
+  position: 'absolute',
+  background: 'rgba(0, 0, 0, 0.75)',
+  cursor: 'pointer',
+  userSelect: 'auto',
+  alignSelf: 'center',
+  height: '30px',
+  width: '105px',
+  borderRadius: '24px',
+  border: 'none',
+  display: show ? 'block' : 'none',
+  zIndex: 1,
+}));
 
 interface Props {
   id: string;
   images: FileMap;
   pattern: SketchPattern;
-  onChangeImage?: (image: Sketch.FileRef | Sketch.DataRef) => void;
-  onChangeFillType?: (amount: Sketch.PatternFillType) => void;
-  onChangeTileScale?: (amount: number) => void;
+  onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
+  onChangeFillType: (amount: Sketch.PatternFillType) => void;
+  onChangeTileScale: (amount: number) => void;
   createImage: (image: ArrayBuffer, _ref: string) => void;
 }
 
@@ -101,21 +93,21 @@ export default memo(function PatternInspector({
 
   const changeFillType = useCallback(
     (value: PatternFillTypes) => {
-      onChangeFillType?.(Sketch.PatternFillType[value]);
+      onChangeFillType(Sketch.PatternFillType[value]);
     },
     [onChangeFillType],
   );
 
   const onSubmitTileScale = useCallback(
     (value: number) => {
-      onChangeTileScale?.(value / 100);
+      onChangeTileScale(value / 100);
     },
     [onChangeTileScale],
   );
 
   const onNudgeTileScale = useCallback(
     (value: number) => {
-      onChangeTileScale?.(value / 100);
+      onChangeTileScale(value / 100);
     },
     [onChangeTileScale],
   );
@@ -145,7 +137,7 @@ export default memo(function PatternInspector({
       const _ref = `images/${uuid()}.${extension}`;
 
       createImage(data, _ref);
-      onChangeImage?.({
+      onChangeImage({
         _class: 'MSJSONFileReference',
         _ref: _ref,
         _ref_class: 'MSImageData',
@@ -185,7 +177,7 @@ export default memo(function PatternInspector({
   const scale = Math.round(pattern.patternTileScale * 100);
 
   return (
-    <Column>
+    <InspectorPrimitives.Column>
       <Container
         {...dropTargetProps}
         {...hoverProps}
@@ -232,6 +224,6 @@ export default memo(function PatternInspector({
           </InputField.Root>
         </InspectorPrimitives.LabeledSliderRow>
       )}
-    </Column>
+    </InspectorPrimitives.Column>
   );
 });

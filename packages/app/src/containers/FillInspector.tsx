@@ -65,63 +65,51 @@ export default memo(function FillInspector({
         }) => (
           <FillRow
             id={`fill-${index}`}
-            value={
-              item.fillType === Sketch.FillType.Gradient
-                ? item.gradient
-                : item.fillType === Sketch.FillType.Color
-                ? item.color
-                : {
-                    _class: 'pattern',
-                    image: item.image,
-                    patternFillType: item.patternFillType,
-                    patternTileScale: item.patternTileScale,
-                  }
-            }
-            contextOpacity={item.contextSettings.opacity}
             prefix={checkbox}
+            fillType={item.fillType}
+            contextOpacity={item.contextSettings.opacity}
+            onSetOpacity={(value, mode) =>
+              dispatch('setFillOpacity', index, value, mode)
+            }
+            onSetContextOpacity={(value, mode) =>
+              dispatch('setFillContextSettingsOpacity', index, value, mode)
+            }
             onChangeFillType={(value) =>
               dispatch('setFillFillType', index, value)
             }
-            onChangeGradientColor={(value, stopIndex) =>
-              dispatch('setFillGradientColor', index, stopIndex, value)
-            }
-            onChangeGradientPosition={(value, stopIndex) => {
-              dispatch('setFillGradientPosition', index, stopIndex, value);
+            colorProps={{
+              color: item.color,
+              onChangeColor: (value) => dispatch('setFillColor', index, value),
             }}
-            onAddGradientStop={(color, position) =>
-              dispatch('addFillGradientStop', index, color, position)
-            }
-            onDeleteGradientStop={(value) =>
-              dispatch('deleteFillGradientStop', index, value)
-            }
-            onChangeGradientType={(value) =>
-              dispatch('setFillGradientType', index, value)
-            }
-            onChangeGradient={(value) =>
-              dispatch('setFillGradient', index, value)
-            }
-            onChangeOpacity={(value) =>
-              dispatch('setFillOpacity', index, value)
-            }
-            onNudgeOpacity={(value) =>
-              dispatch('setFillOpacity', index, value, 'adjust')
-            }
-            onChangeColor={(value) => dispatch('setFillColor', index, value)}
-            onChangeFillImage={(value) =>
-              dispatch('setFillImage', index, value)
-            }
-            onChangePatternFillType={(value) =>
-              dispatch('setPatternFillType', index, value)
-            }
-            onChangePatternTileScale={(value) =>
-              dispatch('setPatternTileScale', index, value)
-            }
-            onChangeContextOpacity={(value) =>
-              dispatch('setFillContextSettingsOpacity', index, value)
-            }
-            onNudgeContextOpacity={(value) =>
-              dispatch('setFillContextSettingsOpacity', index, value, 'adjust')
-            }
+            gradientProps={{
+              gradient: item.gradient,
+              onChangeGradientColor: (value, stopIndex) =>
+                dispatch('setFillGradientColor', index, stopIndex, value),
+              onChangeGradientPosition: (value, stopIndex) =>
+                dispatch('setFillGradientPosition', index, stopIndex, value),
+              onAddGradientStop: (color, position) =>
+                dispatch('addFillGradientStop', index, color, position),
+              onDeleteGradientStop: (value) =>
+                dispatch('deleteFillGradientStop', index, value),
+              onChangeGradientType: (value) =>
+                dispatch('setFillGradientType', index, value),
+              onChangeGradient: (value) =>
+                dispatch('setFillGradient', index, value),
+            }}
+            patternProps={{
+              pattern: {
+                _class: 'pattern',
+                patternFillType: item.patternFillType,
+                patternTileScale: item.patternTileScale,
+                image: item.image,
+              },
+              onChangeFillImage: (value) =>
+                dispatch('setFillImage', index, value),
+              onChangePatternFillType: (value) =>
+                dispatch('setPatternFillType', index, value),
+              onChangePatternTileScale: (value) =>
+                dispatch('setPatternTileScale', index, value),
+            }}
           />
         ),
 

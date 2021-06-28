@@ -1,121 +1,113 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  Spacer,
-  Select,
-  sketchColorToRgbaString,
-  ListView,
   Button,
   Divider,
+  ListView,
+  Select,
+  sketchColorToRgbaString,
+  Spacer,
 } from 'noya-designsystem';
-import { memo, useMemo, useState } from 'react';
+import { uuid } from 'noya-renderer';
+import { memo, useCallback, useState } from 'react';
 import {
-  PaddedSection,
   GridSmall,
+  LayoutPicker,
+  LayoutType,
+  PaddedSection,
   Row,
   Square,
-  LayoutType,
-  LayoutPicker,
 } from './PickerAssetGrid';
 
 interface SwatchesProps {
-  selectedSwatchId?: string;
+  selectedId?: string;
   swatches: Sketch.Swatch[];
-  onSelectSwatch: (color: Sketch.Color) => void;
+  onSelect: (id: string) => void;
 }
 
 const SwatchesList = memo(function SwatchesList({
-  selectedSwatchId,
+  selectedId,
   swatches,
-  onSelectSwatch,
+  onSelect,
 }: SwatchesProps) {
   return (
     <ListView.Root>
-      {swatches.map((item) => {
-        const colorString = sketchColorToRgbaString(item.value);
-
-        return (
-          <ListView.Row
-            id={item.do_objectID}
-            key={item.do_objectID}
-            selected={selectedSwatchId === item.do_objectID}
-            onClick={() => {
-              onSelectSwatch({
-                ...item.value,
-                swatchID: item.do_objectID,
-              });
-            }}
-          >
-            <Square background={colorString} />
-            <Spacer.Horizontal size={8} />
-            {item.name}
-          </ListView.Row>
-        );
-      })}
+      {swatches.map((item) => (
+        <ListView.Row
+          id={item.do_objectID}
+          key={item.do_objectID}
+          selected={selectedId === item.do_objectID}
+          onClick={() => {
+            onSelect(item.do_objectID);
+          }}
+        >
+          <Square background={sketchColorToRgbaString(item.value)} />
+          <Spacer.Horizontal size={8} />
+          {item.name}
+        </ListView.Row>
+      ))}
     </ListView.Root>
   );
 });
 
 const SwatchesGrid = memo(function SwatchesGrid({
-  selectedSwatchId,
+  selectedId,
   swatches,
-  onSelectSwatch,
+  onSelect,
 }: SwatchesProps) {
   return (
     <GridSmall>
-      {swatches.map((item) => {
-        const colorString = sketchColorToRgbaString(item.value);
-
-        return (
-          <Square
-            key={item.do_objectID}
-            background={colorString}
-            selected={selectedSwatchId === item.do_objectID}
-            onClick={() => {
-              onSelectSwatch({
-                ...item.value,
-                swatchID: item.do_objectID,
-              });
-            }}
-          />
-        );
-      })}
+      {swatches.map((item) => (
+        <Square
+          key={item.do_objectID}
+          background={sketchColorToRgbaString(item.value)}
+          selected={selectedId === item.do_objectID}
+          onClick={() => {
+            onSelect(item.do_objectID);
+          }}
+        />
+      ))}
     </GridSmall>
   );
 });
 
 interface Props {
-  swatchID?: string;
-  sharedSwatches: Sketch.Swatch[];
-  onChange: (color: Sketch.Color) => void;
-  onCreate: () => void;
+  selectedId?: string;
+  swatches: Sketch.Swatch[];
+  onChange: (swatchID: string) => void;
+  onCreate: (swatchID: string, name: string) => void;
   onDetach: () => void;
 }
 
-export default memo(function ColorPickerSwatches({
-  swatchID,
-  sharedSwatches,
+export default memo(function PickerSwatches({
+  selectedId,
+  swatches,
   onChange,
   onCreate,
   onDetach,
 }: Props) {
   const [swatchLayout, setSwatchLayout] = useState<LayoutType>('grid');
 
-  const isSwatch = useMemo(
-    () =>
-      swatchID !== undefined &&
-      sharedSwatches.some((e) => e.do_objectID === swatchID),
-    [swatchID, sharedSwatches],
-  );
+  const isSwatch = swatches.some((e) => e.do_objectID === selectedId);
+
+  const handleCreate = useCallback(() => {
+    const swatchName = prompt('New Theme Color Name');
+
+    if (!swatchName) return;
+
+    const id = uuid();
+
+    onCreate(id, swatchName);
+  }, [onCreate]);
 
   return (
     <>
       <PaddedSection>
         {isSwatch ? (
-          <Button id={'detach-theme-color'} onClick={onDetach}>
+          <Button id="detach-theme-color" onClick={onDetach}>
             Detach Theme Color
           </Button>
         ) : (
-          <Button id={'crete-theme-color'} onClick={onCreate}>
+          <Button id="crete-theme-color" onClick={handleCreate}>
             Create Theme Color
           </Button>
         )}
@@ -136,15 +128,15 @@ export default memo(function ColorPickerSwatches({
       <PaddedSection>
         {swatchLayout === 'grid' ? (
           <SwatchesGrid
-            selectedSwatchId={swatchID}
-            swatches={sharedSwatches}
-            onSelectSwatch={onChange}
+            selectedId={selectedId}
+            swatches={swatches}
+            onSelect={onChange}
           />
         ) : (
           <SwatchesList
-            selectedSwatchId={swatchID}
-            swatches={sharedSwatches}
-            onSelectSwatch={onChange}
+            selectedId={selectedId}
+            swatches={swatches}
+            onSelect={onChange}
           />
         )}
       </PaddedSection>

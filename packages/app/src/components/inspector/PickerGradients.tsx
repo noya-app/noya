@@ -104,15 +104,14 @@ const GradientsGrid = memo(function GradientsGrid({
 });
 
 interface Props {
-  gradientType?: Sketch.GradientType;
   gradientAssets: Sketch.GradientAsset[];
   onCreate: () => void;
-  onChange?: (gradient: Sketch.Gradient) => void;
+  onChange: (gradient: Sketch.Gradient) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
 }
 
-export default memo(function ColorPickerGradients({
+export default memo(function PickerGradients({
   gradientAssets,
   onChange,
   onCreate,
@@ -140,8 +139,6 @@ export default memo(function ColorPickerGradients({
     },
     [gradientId, onRename, onDelete],
   );
-
-  if (!onChange) return null;
 
   return (
     <>

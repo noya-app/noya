@@ -1,47 +1,39 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Label, LabeledElementView, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
-import styled from 'styled-components';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';
-import FillInputFieldWithPicker from './FillInputFieldWithPicker';
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+import FillInputFieldWithPicker, {
+  ColorFillProps,
+} from './FillInputFieldWithPicker';
 
 interface Props {
   id: string;
-  color?: Sketch.Color;
+  prefix?: ReactNode;
   x: DimensionValue;
   y: DimensionValue;
   blur: DimensionValue;
   spread: DimensionValue;
-  onChangeColor: (color: Sketch.Color) => void;
   onSetX: (value: number, mode: SetNumberMode) => void;
   onSetY: (value: number, mode: SetNumberMode) => void;
   onSetBlur: (value: number, mode: SetNumberMode) => void;
   onSetSpread: (value: number, mode: SetNumberMode) => void;
-  prefix?: ReactNode;
+  colorProps: ColorFillProps;
 }
 
 export default memo(function FillRow({
   id,
-  color,
+  prefix,
   x,
   y,
   blur,
   spread,
-  onChangeColor,
   onSetX,
   onSetY,
   onSetBlur,
   onSetSpread,
-  prefix,
+  colorProps,
 }: Props) {
   const colorInputId = `${id}-color`;
   const xInputId = `${id}-x`;
@@ -70,15 +62,11 @@ export default memo(function FillRow({
   );
 
   return (
-    <Row id={id}>
+    <InspectorPrimitives.Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
-        <FillInputFieldWithPicker
-          id={colorInputId}
-          value={color}
-          onChange={onChangeColor}
-        />
+        <FillInputFieldWithPicker id={colorInputId} colorProps={colorProps} />
         <Spacer.Horizontal size={8} />
         <DimensionInput
           id={xInputId}
@@ -108,6 +96,6 @@ export default memo(function FillRow({
           onSetValue={onSetSpread}
         />
       </LabeledElementView>
-    </Row>
+    </InspectorPrimitives.Row>
   );
 });
