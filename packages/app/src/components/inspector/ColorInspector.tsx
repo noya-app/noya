@@ -7,24 +7,11 @@ import {
   sketchColorToHex,
   Spacer,
 } from 'noya-designsystem';
+import { SetNumberMode } from 'noya-state';
 import { clamp } from 'noya-utils';
 import { memo, useCallback } from 'react';
-import styled from 'styled-components';
-import { SetNumberMode } from 'noya-state';
 import DimensionInput from './DimensionInput';
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
-
-const Column = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'column',
-}));
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 const DEFAULT_SKETCH_COLOR: Sketch.Color = {
   _class: 'color',
@@ -92,30 +79,32 @@ export default memo(function ColorInspector({
   );
 
   return (
-    <Column>
-      <ColorPicker value={displayColor} onChange={onChangeColor} />
-      <Spacer.Vertical size={10} />
-      <Row id={id}>
-        <LabeledElementView renderLabel={renderLabel}>
-          <Spacer.Vertical size={8} />
-          <InputField.Root id={hexInputId} labelPosition="start">
-            <InputField.Input
-              value={color ? sketchColorToHex(displayColor).slice(1) : ''}
-              placeholder={color ? '' : 'multiple'}
-              onSubmit={useCallback(() => {}, [])}
+    <InspectorPrimitives.Section>
+      <InspectorPrimitives.Column>
+        <ColorPicker value={displayColor} onChange={onChangeColor} />
+        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.Row id={id}>
+          <LabeledElementView renderLabel={renderLabel}>
+            <Spacer.Vertical size={8} />
+            <InputField.Root id={hexInputId} labelPosition="start">
+              <InputField.Input
+                value={color ? sketchColorToHex(displayColor).slice(1) : ''}
+                placeholder={color ? '' : 'multiple'}
+                onSubmit={useCallback(() => {}, [])}
+              />
+              <InputField.Label>#</InputField.Label>
+            </InputField.Root>
+            <Spacer.Horizontal size={8} />
+            <DimensionInput
+              id={opacityInputId}
+              size={50}
+              label="%"
+              value={color ? Math.round(color.alpha * 100) : undefined}
+              onSetValue={handleSetOpacity}
             />
-            <InputField.Label>#</InputField.Label>
-          </InputField.Root>
-          <Spacer.Horizontal size={8} />
-          <DimensionInput
-            id={opacityInputId}
-            size={50}
-            label="%"
-            value={color ? Math.round(color.alpha * 100) : undefined}
-            onSetValue={handleSetOpacity}
-          />
-        </LabeledElementView>
-      </Row>
-    </Column>
+          </LabeledElementView>
+        </InspectorPrimitives.Row>
+      </InspectorPrimitives.Column>
+    </InspectorPrimitives.Section>
   );
 });

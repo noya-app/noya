@@ -2,6 +2,7 @@ import * as kiwi from 'kiwi.js';
 import {
   Children,
   createRef,
+  Fragment,
   isValidElement,
   memo,
   ReactNode,
@@ -41,6 +42,11 @@ export default memo(function LabeledElementView({
   renderLabel,
 }: ContainerProps) {
   const elementIds: string[] = Children.toArray(children)
+    .flatMap((child) =>
+      isValidElement(child) && child.type === Fragment
+        ? (child.props.children as ReactNode[])
+        : [child],
+    )
     .map((child) =>
       isValidElement(child) && 'id' in child.props ? child.props.id : null,
     )

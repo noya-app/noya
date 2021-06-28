@@ -2,7 +2,6 @@ import { Divider } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import { memo, useCallback } from 'react';
-import styled from 'styled-components';
 import ColorInspector from '../components/inspector/ColorInspector';
 import NameInspector from '../components/inspector/NameInspector';
 import {
@@ -11,12 +10,6 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiValue from '../utils/getMultiValue';
-
-const Container = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '10px',
-}));
 
 export default memo(function SwatchesInspectors() {
   const [state, dispatch] = useApplicationState();
@@ -59,14 +52,12 @@ export default memo(function SwatchesInspectors() {
         onNameChange={handleNameChange}
       />
       <Divider />
-      <Container>
-        <ColorInspector
-          id={'color-swatch'}
-          color={color}
-          onSetOpacity={handleSetOpacity}
-          onChangeColor={handleChangeColor}
-        />
-      </Container>
+      <ColorInspector
+        id={'color-swatch'}
+        color={color}
+        onSetOpacity={handleSetOpacity}
+        onChangeColor={handleChangeColor}
+      />
     </>
   );
 });

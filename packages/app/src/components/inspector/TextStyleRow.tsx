@@ -103,7 +103,6 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Text</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-
       <Spacer.Vertical size={10} />
       <InspectorPrimitives.Row>
         <Select
@@ -114,7 +113,6 @@ export default memo(function TextStyleRow({
           onChange={onChangeFontFamily}
         />
       </InspectorPrimitives.Row>
-
       <Spacer.Vertical size={6} />
       <InspectorPrimitives.Row>
         <Select
@@ -134,7 +132,6 @@ export default memo(function TextStyleRow({
           <InputField.Label>px</InputField.Label>
         </InputField.Root>
       </InspectorPrimitives.Row>
-
       <Spacer.Vertical size={6} />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
@@ -164,8 +161,13 @@ export default memo(function TextStyleRow({
           <Spacer.Horizontal size={8} />
           <FillInputFieldWithPicker
             id={'colorInputId'}
-            value={fontColor}
-            onChange={onChangeFontColor}
+            colorProps={useMemo(
+              () => ({
+                color: fontColor,
+                onChangeColor: onChangeFontColor,
+              }),
+              [fontColor, onChangeFontColor],
+            )}
           />
         </LabeledElementView>
       </InspectorPrimitives.Row>

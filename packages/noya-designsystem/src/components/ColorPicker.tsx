@@ -47,7 +47,6 @@ export default memo(function ColorPicker({
       color={rgbaColor}
       onChange={handleChange}
     >
-      <Spacer.Vertical size={12} />
       <Saturation />
       <Spacer.Vertical size={12} />
       <Hue />

@@ -1,18 +1,22 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  InputField,
   Label,
   LabeledElementView,
   RadioGroup,
   Spacer,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
-import styled from 'styled-components';
+import { SetNumberMode } from 'noya-state';
 import BorderCenterIcon from '../icons/BorderCenterIcon';
 import BorderInsideIcon from '../icons/BorderInsideIcon';
 import BorderOutsideIcon from '../icons/BorderOutsideIcon';
-import FillInputFieldWithPicker from './FillInputFieldWithPicker';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
+import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';
+import FillInputFieldWithPicker, {
+  ColorFillProps,
+  GradientFillProps,
+} from './FillInputFieldWithPicker';
 
 function toPositionString(position: Sketch.BorderPosition) {
   switch (position) {
@@ -38,49 +42,30 @@ function toPositionEnum(position: string): Sketch.BorderPosition {
   }
 }
 
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
-
 interface Props {
   id: string;
-  value: Sketch.Color | Sketch.Gradient;
+  prefix?: ReactNode;
+  fillType?: Sketch.FillType;
   width: DimensionValue;
   position: Sketch.BorderPosition;
-  onChangeColor: (color: Sketch.Color) => void;
+  onSetWidth: (amount: number, mode: SetNumberMode) => void;
   onChangePosition: (value: Sketch.BorderPosition) => void;
-  onChangeWidth: (amount: number) => void;
   onChangeFillType: (type: Sketch.FillType) => void;
-  onChangeGradientColor: (color: Sketch.Color, index: number) => void;
-  onChangeGradientPosition: (index: number, position: number) => void;
-  onAddGradientStop: (color: Sketch.Color, position: number) => void;
-  onDeleteGradientStop: (index: number) => void;
-  onChangeGradient: (gradient: Sketch.Gradient) => void;
-  onChangeGradientType: (type: Sketch.GradientType) => void;
-  onNudgeWidth: (amount: number) => void;
-  prefix?: ReactNode;
+  colorProps: ColorFillProps;
+  gradientProps: GradientFillProps;
 }
 
 export default memo(function BorderRow({
   id,
-  value,
+  prefix,
+  fillType,
   width,
   position,
-  onChangeColor,
-  onChangeWidth,
+  onSetWidth,
   onChangePosition,
-  onNudgeWidth,
   onChangeFillType,
-  onChangeGradient,
-  onChangeGradientColor,
-  onChangeGradientPosition,
-  onAddGradientStop,
-  onDeleteGradientStop,
-  onChangeGradientType,
-  prefix,
+  colorProps,
+  gradientProps,
 }: Props) {
   const colorInputId = `${id}-color`;
   const borderPositionId = `${id}-hex`;
@@ -102,13 +87,6 @@ export default memo(function BorderRow({
     [colorInputId, borderPositionId, widthInputId],
   );
 
-  const handleSubmitWidth = useCallback(
-    (value: number) => {
-      onChangeWidth(value);
-    },
-    [onChangeWidth],
-  );
-
   const handleChangePosition = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangePosition(toPositionEnum(event.target.value));
@@ -117,21 +95,16 @@ export default memo(function BorderRow({
   );
 
   return (
-    <Row>
+    <InspectorPrimitives.Row>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
         <FillInputFieldWithPicker
           id={colorInputId}
-          value={value}
-          onChange={onChangeColor}
+          fillType={fillType}
           onChangeType={onChangeFillType}
-          onChangeGradient={onChangeGradient}
-          onChangeGradientColor={onChangeGradientColor}
-          onChangeGradientPosition={onChangeGradientPosition}
-          onAddGradientStop={onAddGradientStop}
-          onChangeGradientType={onChangeGradientType}
-          onDeleteGradientStop={onDeleteGradientStop}
+          colorProps={colorProps}
+          gradientProps={gradientProps}
         />
         <Spacer.Horizontal size={8} />
         <RadioGroup.Root
@@ -150,15 +123,13 @@ export default memo(function BorderRow({
           </RadioGroup.Item>
         </RadioGroup.Root>
         <Spacer.Horizontal size={8} />
-        <InputField.Root id={widthInputId} size={50}>
-          <InputField.NumberInput
-            value={width}
-            onNudge={onNudgeWidth}
-            onSubmit={handleSubmitWidth}
-            placeholder={width === undefined ? 'multi' : ''}
-          />
-        </InputField.Root>
+        <DimensionInput
+          id={widthInputId}
+          size={50}
+          value={width}
+          onSetValue={onSetWidth}
+        />
       </LabeledElementView>
-    </Row>
+    </InspectorPrimitives.Row>
   );
 });
