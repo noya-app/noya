@@ -10,13 +10,12 @@ import {
   MenuItem,
 } from 'noya-designsystem';
 import { memo, useState, useCallback } from 'react';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {
-  PaddedSection,
   GridSmall,
-  Row,
   Square,
   LayoutType,
-  LayoutPicker,
+  LayoutRadioGroup,
 } from './PickerAssetGrid';
 
 export type MenuItemType = 'rename' | 'delete';
@@ -142,14 +141,14 @@ export default memo(function PickerGradients({
 
   return (
     <>
-      <PaddedSection>
-        <Button id={'crete-theme-gradient'} onClick={onCreate}>
+      <InspectorPrimitives.Section>
+        <Button id={'create-theme-gradient'} onClick={onCreate}>
           Create Theme Gradient
         </Button>
-      </PaddedSection>
+      </InspectorPrimitives.Section>
       <Divider />
-      <PaddedSection>
-        <Row>
+      <InspectorPrimitives.Section>
+        <InspectorPrimitives.Row>
           <Select
             id="gradient-category"
             options={['Document']}
@@ -157,26 +156,31 @@ export default memo(function PickerGradients({
             onChange={() => {}}
           />
           <Spacer.Horizontal size={8} />
-          <LayoutPicker layout={gradientLayout} setLayout={setGradientLayout} />
-        </Row>
-      </PaddedSection>
-      <PaddedSection>
-        {gradientLayout === 'grid' ? (
-          <GradientsGrid
-            gradients={gradientAssets}
-            setGradientId={setGradientId}
-            handleSelectMenuItem={handleSelectMenuItem}
-            onSelectGradientAsset={onChange}
+          <LayoutRadioGroup
+            layout={gradientLayout}
+            setLayout={setGradientLayout}
           />
-        ) : (
-          <GradientsList
-            gradients={gradientAssets}
-            setGradientId={setGradientId}
-            handleSelectMenuItem={handleSelectMenuItem}
-            onSelectGradientAsset={onChange}
-          />
-        )}
-      </PaddedSection>
+        </InspectorPrimitives.Row>
+      </InspectorPrimitives.Section>
+      {gradientAssets.length > 0 && (
+        <InspectorPrimitives.Section>
+          {gradientLayout === 'grid' ? (
+            <GradientsGrid
+              gradients={gradientAssets}
+              setGradientId={setGradientId}
+              handleSelectMenuItem={handleSelectMenuItem}
+              onSelectGradientAsset={onChange}
+            />
+          ) : (
+            <GradientsList
+              gradients={gradientAssets}
+              setGradientId={setGradientId}
+              handleSelectMenuItem={handleSelectMenuItem}
+              onSelectGradientAsset={onChange}
+            />
+          )}
+        </InspectorPrimitives.Section>
+      )}
     </>
   );
 });

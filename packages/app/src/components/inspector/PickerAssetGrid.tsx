@@ -3,12 +3,6 @@ import { RadioGroup } from 'noya-designsystem';
 import styled from 'styled-components';
 import { memo, useCallback } from 'react';
 
-export const PaddedSection = styled.section({
-  padding: '8px 10px',
-  display: 'flex',
-  flexDirection: 'column',
-});
-
 export const Square = styled.div<{ background: string; selected?: boolean }>(
   ({ theme, background, selected = false }) => ({
     height: '25px',
@@ -30,13 +24,6 @@ export const GridSmall = styled.div({
   gap: '5px',
 });
 
-export const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'stretch',
-}));
-
 export const RadioGroupContainer = styled.div({
   flex: '0 0 50px',
   display: 'flex',
@@ -45,7 +32,7 @@ export const RadioGroupContainer = styled.div({
 
 export type LayoutType = 'list' | 'grid';
 
-export const LayoutPicker = memo(
+export const LayoutRadioGroup = memo(
   ({
     layout,
     setLayout,

@@ -204,26 +204,28 @@ export default memo(function PatternInspector({
             onChange={changeFillType}
           />
         </InspectorPrimitives.LabeledRow>
-        <Spacer.Vertical size={10} />
         {isTile && (
-          <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
-            <Slider
-              id={`${id}-slider`}
-              value={scale}
-              onValueChange={onSubmitTileScale}
-              min={10}
-              max={200}
-            />
-            <Spacer.Horizontal size={10} />
-            <InputField.Root size={50}>
-              <InputField.NumberInput
+          <>
+            <Spacer.Vertical size={10} />
+            <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
+              <Slider
+                id={`${id}-slider`}
                 value={scale}
-                onSubmit={onSubmitTileScale}
-                onNudge={onNudgeTileScale}
+                onValueChange={onSubmitTileScale}
+                min={10}
+                max={200}
               />
-              <InputField.Label>{'%'}</InputField.Label>
-            </InputField.Root>
-          </InspectorPrimitives.LabeledSliderRow>
+              <Spacer.Horizontal size={10} />
+              <InputField.Root size={50}>
+                <InputField.NumberInput
+                  value={scale}
+                  onSubmit={onSubmitTileScale}
+                  onNudge={onNudgeTileScale}
+                />
+                <InputField.Label>{'%'}</InputField.Label>
+              </InputField.Root>
+            </InspectorPrimitives.LabeledSliderRow>
+          </>
         )}
       </InspectorPrimitives.Column>
     </InspectorPrimitives.Section>

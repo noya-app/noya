@@ -9,12 +9,11 @@ import {
 } from 'noya-designsystem';
 import { uuid } from 'noya-renderer';
 import { memo, useCallback, useState } from 'react';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {
   GridSmall,
-  LayoutPicker,
+  LayoutRadioGroup,
   LayoutType,
-  PaddedSection,
-  Row,
   Square,
 } from './PickerAssetGrid';
 
@@ -101,20 +100,20 @@ export default memo(function PickerSwatches({
 
   return (
     <>
-      <PaddedSection>
+      <InspectorPrimitives.Section>
         {isSwatch ? (
           <Button id="detach-theme-color" onClick={onDetach}>
             Detach Theme Color
           </Button>
         ) : (
-          <Button id="crete-theme-color" onClick={handleCreate}>
+          <Button id="create-theme-color" onClick={handleCreate}>
             Create Theme Color
           </Button>
         )}
-      </PaddedSection>
+      </InspectorPrimitives.Section>
       <Divider />
-      <PaddedSection>
-        <Row>
+      <InspectorPrimitives.Section>
+        <InspectorPrimitives.Row>
           <Select
             id="colors-category"
             options={['Theme colors']}
@@ -122,24 +121,26 @@ export default memo(function PickerSwatches({
             onChange={() => {}}
           />
           <Spacer.Horizontal size={8} />
-          <LayoutPicker layout={swatchLayout} setLayout={setSwatchLayout} />
-        </Row>
-      </PaddedSection>
-      <PaddedSection>
-        {swatchLayout === 'grid' ? (
-          <SwatchesGrid
-            selectedId={selectedId}
-            swatches={swatches}
-            onSelect={onChange}
-          />
-        ) : (
-          <SwatchesList
-            selectedId={selectedId}
-            swatches={swatches}
-            onSelect={onChange}
-          />
-        )}
-      </PaddedSection>
+          <LayoutRadioGroup layout={swatchLayout} setLayout={setSwatchLayout} />
+        </InspectorPrimitives.Row>
+      </InspectorPrimitives.Section>
+      {swatches.length > 0 && (
+        <InspectorPrimitives.Section>
+          {swatchLayout === 'grid' ? (
+            <SwatchesGrid
+              selectedId={selectedId}
+              swatches={swatches}
+              onSelect={onChange}
+            />
+          ) : (
+            <SwatchesList
+              selectedId={selectedId}
+              swatches={swatches}
+              onSelect={onChange}
+            />
+          )}
+        </InspectorPrimitives.Section>
+      )}
     </>
   );
 });
