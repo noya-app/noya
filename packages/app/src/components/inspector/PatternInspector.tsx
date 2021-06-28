@@ -177,53 +177,55 @@ export default memo(function PatternInspector({
   const scale = Math.round(pattern.patternTileScale * 100);
 
   return (
-    <InspectorPrimitives.Column>
-      <Container
-        {...dropTargetProps}
-        {...hoverProps}
-        isActive={isDropTargetActive}
-        background={background}
-        backgroundSize={backgroundSize}
-        repeat={isTile}
-      >
-        <UploadButton
-          show={!isDropTargetActive && isHovering}
-          onClick={openFile}
+    <InspectorPrimitives.Section>
+      <InspectorPrimitives.Column>
+        <Container
+          {...dropTargetProps}
+          {...hoverProps}
+          isActive={isDropTargetActive}
+          background={background}
+          backgroundSize={backgroundSize}
+          repeat={isTile}
         >
-          Upload Image
-        </UploadButton>
-      </Container>
-      <Spacer.Vertical size={10} />
-      <InspectorPrimitives.LabeledRow label={'Size'}>
+          <UploadButton
+            show={!isDropTargetActive && isHovering}
+            onClick={openFile}
+          >
+            Upload Image
+          </UploadButton>
+        </Container>
         <Spacer.Vertical size={10} />
-        <Select
-          id={`${id}-pattern-options`}
-          value={Sketch.PatternFillType[patternType] as PatternFillTypes}
-          options={patternFillTypeOptions}
-          onChange={changeFillType}
-        />
-      </InspectorPrimitives.LabeledRow>
-      <Spacer.Vertical size={10} />
-      {isTile && (
-        <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
-          <Slider
-            id={`${id}-slider`}
-            value={scale}
-            onValueChange={onSubmitTileScale}
-            min={10}
-            max={200}
+        <InspectorPrimitives.LabeledRow label={'Size'}>
+          <Spacer.Vertical size={10} />
+          <Select
+            id={`${id}-pattern-options`}
+            value={Sketch.PatternFillType[patternType] as PatternFillTypes}
+            options={patternFillTypeOptions}
+            onChange={changeFillType}
           />
-          <Spacer.Horizontal size={10} />
-          <InputField.Root size={50}>
-            <InputField.NumberInput
+        </InspectorPrimitives.LabeledRow>
+        <Spacer.Vertical size={10} />
+        {isTile && (
+          <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
+            <Slider
+              id={`${id}-slider`}
               value={scale}
-              onSubmit={onSubmitTileScale}
-              onNudge={onNudgeTileScale}
+              onValueChange={onSubmitTileScale}
+              min={10}
+              max={200}
             />
-            <InputField.Label>{'%'}</InputField.Label>
-          </InputField.Root>
-        </InspectorPrimitives.LabeledSliderRow>
-      )}
-    </InspectorPrimitives.Column>
+            <Spacer.Horizontal size={10} />
+            <InputField.Root size={50}>
+              <InputField.NumberInput
+                value={scale}
+                onSubmit={onSubmitTileScale}
+                onNudge={onNudgeTileScale}
+              />
+              <InputField.Label>{'%'}</InputField.Label>
+            </InputField.Root>
+          </InspectorPrimitives.LabeledSliderRow>
+        )}
+      </InspectorPrimitives.Column>
+    </InspectorPrimitives.Section>
   );
 });

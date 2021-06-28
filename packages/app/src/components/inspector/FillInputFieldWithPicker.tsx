@@ -1,7 +1,12 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ColorInputField, Select, SketchPattern } from 'noya-designsystem';
+import {
+  ColorInputField,
+  Divider,
+  Select,
+  SketchPattern,
+} from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -23,12 +28,6 @@ const Content = styled(Popover.Content)(({ theme }) => ({
   maxHeight: '600px',
   overflowY: 'auto',
 }));
-
-const PaddedSection = styled.section({
-  padding: '7px 10px',
-  display: 'flex',
-  flexDirection: 'column',
-});
 
 type FillOption =
   | 'Solid Color'
@@ -74,7 +73,7 @@ function ColorFillPicker({
   );
 
   return (
-    <PaddedSection>
+    <>
       <ColorInspector
         id={`${id}-color-inspector`}
         color={color}
@@ -87,7 +86,7 @@ function ColorFillPicker({
         onCreate={createThemeColor}
         onDetach={detachThemeColor}
       />
-    </PaddedSection>
+    </>
   );
 }
 
@@ -125,7 +124,7 @@ function GradientFillPicker({
   );
 
   return (
-    <PaddedSection>
+    <>
       <GradientInspector
         id={`${id}-gradient-inspector`}
         gradient={gradient.stops}
@@ -141,7 +140,7 @@ function GradientFillPicker({
         onDelete={onRemoveThemeGradient}
         onRename={onRenameThemeGradient}
       />
-    </PaddedSection>
+    </>
   );
 }
 
@@ -162,7 +161,7 @@ function PatternFillPicker({
   );
 
   return (
-    <PaddedSection>
+    <>
       <PatternInspector
         id={`${id}-pattern-inspector`}
         pattern={pattern}
@@ -177,23 +176,17 @@ function PatternFillPicker({
         imageAssets={Selectors.getImageAssets(state)}
         onChange={onChangeFillImage}
       />
-    </PaddedSection>
+    </>
   );
 }
-
-const FILL_OPTIONS: FillOption[] = [
-  'Solid Color',
-  'Linear Gradient',
-  'Radial Gradient',
-  'Angular Gradient',
-  'Pattern Fill',
-];
 
 interface FillOptionSelectProps {
   fillType: Sketch.FillType;
   gradientType: Sketch.GradientType;
   onChangeType?: (type: Sketch.FillType) => void;
   onChangeGradientType?: (type: Sketch.GradientType) => void;
+  supportsGradients: boolean;
+  supportsPatterns: boolean;
 }
 
 function FillOptionSelect({
@@ -201,7 +194,24 @@ function FillOptionSelect({
   gradientType,
   onChangeType,
   onChangeGradientType,
+  supportsGradients,
+  supportsPatterns,
 }: FillOptionSelectProps) {
+  const fillOptions: FillOption[] = useMemo(
+    () => [
+      'Solid Color' as const,
+      ...(supportsGradients
+        ? [
+            'Linear Gradient' as const,
+            'Radial Gradient' as const,
+            'Angular Gradient' as const,
+          ]
+        : []),
+      ...(supportsPatterns ? ['Pattern Fill' as const] : []),
+    ],
+    [supportsGradients, supportsPatterns],
+  );
+
   const value: FillOption = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Pattern:
@@ -247,7 +257,7 @@ function FillOptionSelect({
     <Select
       id="fill-options"
       value={value}
-      options={FILL_OPTIONS}
+      options={fillOptions}
       onChange={handleChange}
     />
   );
@@ -331,19 +341,26 @@ export default memo(function FillInputFieldWithPicker({
         <ColorInputField id={id} value={value} />
       </Popover.Trigger>
       <Content side="bottom" align="center">
-        <PaddedSection>
-          <InspectorPrimitives.Row>
-            <FillOptionSelect
-              fillType={fillType ?? Sketch.FillType.Color}
-              gradientType={
-                gradientProps?.gradient.gradientType ??
-                Sketch.GradientType.Linear
-              }
-              onChangeType={onChangeType}
-              onChangeGradientType={gradientProps?.onChangeGradientType}
-            />
-          </InspectorPrimitives.Row>
-        </PaddedSection>
+        {(gradientProps || patternProps) && (
+          <>
+            <InspectorPrimitives.Section>
+              <InspectorPrimitives.Row>
+                <FillOptionSelect
+                  supportsGradients={!!gradientProps}
+                  supportsPatterns={!!patternProps}
+                  fillType={fillType ?? Sketch.FillType.Color}
+                  gradientType={
+                    gradientProps?.gradient.gradientType ??
+                    Sketch.GradientType.Linear
+                  }
+                  onChangeType={onChangeType}
+                  onChangeGradientType={gradientProps?.onChangeGradientType}
+                />
+              </InspectorPrimitives.Row>
+            </InspectorPrimitives.Section>
+            <Divider />
+          </>
+        )}
         {picker}
       </Content>
     </Popover.Root>
