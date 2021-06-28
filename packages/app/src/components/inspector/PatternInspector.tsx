@@ -66,8 +66,9 @@ interface Props {
   createImage: (image: ArrayBuffer, _ref: string) => void;
 }
 
-export type PatternFillTypes = 'Stretch' | 'Fill' | 'Fit' | 'Tile';
-export const patternFillTypeOptions: PatternFillTypes[] = [
+export type PatternFillType = 'Stretch' | 'Fill' | 'Fit' | 'Tile';
+
+export const PATTERN_FILL_TYPE_OPTIONS: PatternFillType[] = [
   'Tile',
   'Fill',
   'Stretch',
@@ -92,7 +93,7 @@ export default memo(function PatternInspector({
   const isTile = patternType === Sketch.PatternFillType.Tile;
 
   const changeFillType = useCallback(
-    (value: PatternFillTypes) => {
+    (value: PatternFillType) => {
       onChangeFillType(Sketch.PatternFillType[value]);
     },
     [onChangeFillType],
@@ -199,8 +200,8 @@ export default memo(function PatternInspector({
           <Spacer.Vertical size={10} />
           <Select
             id={`${id}-pattern-options`}
-            value={Sketch.PatternFillType[patternType] as PatternFillTypes}
-            options={patternFillTypeOptions}
+            value={Sketch.PatternFillType[patternType] as PatternFillType}
+            options={PATTERN_FILL_TYPE_OPTIONS}
             onChange={changeFillType}
           />
         </InspectorPrimitives.LabeledRow>

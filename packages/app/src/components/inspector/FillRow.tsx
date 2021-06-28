@@ -17,7 +17,7 @@ import FillInputFieldWithPicker, {
   GradientFillProps,
   PatternFillProps,
 } from './FillInputFieldWithPicker';
-import { patternFillTypeOptions, PatternFillTypes } from './PatternInspector';
+import { PATTERN_FILL_TYPE_OPTIONS, PatternFillType } from './PatternInspector';
 
 const GRADIENT_TYPE_OPTIONS = [
   Sketch.GradientType.Linear.toString(),
@@ -52,17 +52,28 @@ export default memo(function FillRow({
   gradientProps,
   patternProps,
 }: Props) {
-  const colorInputId = `${id}-color`;
+  const fillInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
   const gradientTypeId = `${id}-gradient-type`;
   const patternSizeId = `${id}-pattern-type`;
 
+  const fillLabel = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Color:
+        return 'Color';
+      case Sketch.FillType.Gradient:
+        return 'Gradient';
+      case Sketch.FillType.Pattern:
+        return 'Image';
+    }
+  }, [fillType]);
+
   const renderLabel = useCallback(
     ({ id }) => {
       switch (id) {
-        case colorInputId:
-          return <Label.Label>Color</Label.Label>;
+        case fillInputId:
+          return <Label.Label>{fillLabel}</Label.Label>;
         case hexInputId:
           return <Label.Label>Hex</Label.Label>;
         case opacityInputId:
@@ -75,7 +86,14 @@ export default memo(function FillRow({
           return null;
       }
     },
-    [colorInputId, hexInputId, opacityInputId, gradientTypeId, patternSizeId],
+    [
+      fillInputId,
+      fillLabel,
+      hexInputId,
+      opacityInputId,
+      gradientTypeId,
+      patternSizeId,
+    ],
   );
 
   const handleSetOpacity = useCallback(
@@ -100,7 +118,7 @@ export default memo(function FillRow({
   );
 
   const handleSelectPatternSize = useCallback(
-    (value: PatternFillTypes) =>
+    (value: PatternFillType) =>
       patternProps.onChangePatternFillType(Sketch.PatternFillType[value]),
     [patternProps],
   );
@@ -139,15 +157,13 @@ export default memo(function FillRow({
       case Sketch.FillType.Gradient:
         return (
           <>
-            <InputField.Root id={gradientTypeId}>
-              <Select
-                id={`${id}-gradient-type-select`}
-                value={gradientProps.gradient.gradientType.toString()}
-                options={GRADIENT_TYPE_OPTIONS}
-                getTitle={getGradientTypeTitle}
-                onChange={handleSelectGradientType}
-              />
-            </InputField.Root>
+            <Select
+              id={gradientTypeId}
+              value={gradientProps.gradient.gradientType.toString()}
+              options={GRADIENT_TYPE_OPTIONS}
+              getTitle={getGradientTypeTitle}
+              onChange={handleSelectGradientType}
+            />
             <Spacer.Horizontal size={8} />
             <DimensionInput
               id={opacityInputId}
@@ -161,18 +177,16 @@ export default memo(function FillRow({
       case Sketch.FillType.Pattern:
         return (
           <>
-            <InputField.Root id={patternSizeId}>
-              <Select
-                id={`${id}-gradient-type-selector`}
-                value={
-                  Sketch.PatternFillType[
-                    patternProps.pattern.patternFillType
-                  ] as PatternFillTypes
-                }
-                options={patternFillTypeOptions}
-                onChange={handleSelectPatternSize}
-              />
-            </InputField.Root>
+            <Select
+              id={patternSizeId}
+              value={
+                Sketch.PatternFillType[
+                  patternProps.pattern.patternFillType
+                ] as PatternFillType
+              }
+              options={PATTERN_FILL_TYPE_OPTIONS}
+              onChange={handleSelectPatternSize}
+            />
             <Spacer.Horizontal size={8} />
             <DimensionInput
               id={opacityInputId}
@@ -196,7 +210,6 @@ export default memo(function FillRow({
     handleSetContextOpacity,
     handleSetOpacity,
     hexInputId,
-    id,
     opacityInputId,
     patternProps.pattern.patternFillType,
     patternSizeId,
@@ -208,7 +221,7 @@ export default memo(function FillRow({
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
         <FillInputFieldWithPicker
-          id={colorInputId}
+          id={fillInputId}
           fillType={fillType}
           onChangeType={onChangeFillType}
           colorProps={colorProps}
