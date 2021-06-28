@@ -57,45 +57,39 @@ export default memo(function BorderInspector() {
         }) => (
           <BorderRow
             id={`border-${index}`}
-            value={
-              item.fillType === Sketch.FillType.Color
-                ? item.color
-                : item.gradient
-            }
             prefix={checkbox}
+            fillType={item.fillType}
             width={item.thickness}
             position={item.position}
-            onNudgeWidth={(value) =>
-              dispatch('setBorderWidth', index, value, 'adjust')
+            onSetWidth={(value, mode) =>
+              dispatch('setBorderWidth', index, value, mode)
             }
-            onChangeWidth={(value) => dispatch('setBorderWidth', index, value)}
-            onChangeColor={(value) => {
-              dispatch('setBorderColor', index, value);
-            }}
             onChangePosition={(value) => {
               dispatch('setBorderPosition', index, value);
             }}
             onChangeFillType={(value) =>
               dispatch('setBorderFillType', index, value)
             }
-            onChangeGradientColor={(value, stopIndex) =>
-              dispatch('setBorderGradientColor', index, stopIndex, value)
-            }
-            onChangeGradientPosition={(value, stopIndex) => {
-              dispatch('setBorderGradientPosition', index, stopIndex, value);
+            colorProps={{
+              color: item.color,
+              onChangeColor: (value) =>
+                dispatch('setBorderColor', index, value),
             }}
-            onAddGradientStop={(color, position) =>
-              dispatch('addBorderGradientStop', index, color, position)
-            }
-            onDeleteGradientStop={(value) =>
-              dispatch('deleteBorderGradientStop', index, value)
-            }
-            onChangeGradientType={(value) =>
-              dispatch('setBorderGradientType', index, value)
-            }
-            onChangeGradient={(value) =>
-              dispatch('setBorderGradient', index, value)
-            }
+            gradientProps={{
+              gradient: item.gradient,
+              onChangeGradientColor: (value, stopIndex) =>
+                dispatch('setBorderGradientColor', index, stopIndex, value),
+              onChangeGradientPosition: (value, stopIndex) =>
+                dispatch('setBorderGradientPosition', index, stopIndex, value),
+              onAddGradientStop: (color, position) =>
+                dispatch('addBorderGradientStop', index, color, position),
+              onDeleteGradientStop: (value) =>
+                dispatch('deleteBorderGradientStop', index, value),
+              onChangeGradientType: (value) =>
+                dispatch('setBorderGradientType', index, value),
+              onChangeGradient: (value) =>
+                dispatch('setBorderGradient', index, value),
+            }}
           />
         ),
         [dispatch],

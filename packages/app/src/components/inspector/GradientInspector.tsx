@@ -9,20 +9,7 @@ import {
 } from 'noya-designsystem';
 import { clamp } from 'noya-utils';
 import { memo, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
-
-const Column = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'column',
-}));
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
   id: string;
@@ -141,42 +128,44 @@ export default memo(function GradientInspector({
   }, [gradient, clampedSelectedStopIndex, onDeleteStop, setSelectedStopIndex]);
 
   return (
-    <Column>
-      <GradientPicker
-        value={gradient}
-        selectedStop={clampedSelectedStopIndex}
-        onChangeColor={handleChangeColor}
-        onChangePosition={handleChangePosition}
-        onAdd={handleAddStop}
-        onSelectStop={useCallback(
-          (index: number) => setSelectedStopIndex(index),
-          [setSelectedStopIndex],
-        )}
-        onDelete={handleDeleteStop}
-      />
-      <Spacer.Vertical size={10} />
-      <Row id={id}>
-        <LabeledElementView renderLabel={renderLabel}>
-          <Spacer.Vertical size={8} />
-          <InputField.Root id={hexInputId} labelPosition="start">
-            <InputField.Input
-              value={hexValue ?? ''}
-              placeholder={hexValue ? '' : 'Multiple'}
-              onSubmit={useCallback(() => {}, [])}
-            />
-            <InputField.Label>#</InputField.Label>
-          </InputField.Root>
-          <Spacer.Horizontal size={8} />
-          <InputField.Root id={opacityInputId} size={50}>
-            <InputField.NumberInput
-              value={Math.round(selectedcolor.alpha * 100)}
-              onSubmit={handleSubmitOpacity}
-              onNudge={handleNudgeOpacity}
-            />
-            <InputField.Label>%</InputField.Label>
-          </InputField.Root>
-        </LabeledElementView>
-      </Row>
-    </Column>
+    <InspectorPrimitives.Section>
+      <InspectorPrimitives.Column>
+        <GradientPicker
+          value={gradient}
+          selectedStop={clampedSelectedStopIndex}
+          onChangeColor={handleChangeColor}
+          onChangePosition={handleChangePosition}
+          onAdd={handleAddStop}
+          onSelectStop={useCallback(
+            (index: number) => setSelectedStopIndex(index),
+            [setSelectedStopIndex],
+          )}
+          onDelete={handleDeleteStop}
+        />
+        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.Row id={id}>
+          <LabeledElementView renderLabel={renderLabel}>
+            <Spacer.Vertical size={8} />
+            <InputField.Root id={hexInputId} labelPosition="start">
+              <InputField.Input
+                value={hexValue ?? ''}
+                placeholder={hexValue ? '' : 'Multiple'}
+                onSubmit={useCallback(() => {}, [])}
+              />
+              <InputField.Label>#</InputField.Label>
+            </InputField.Root>
+            <Spacer.Horizontal size={8} />
+            <InputField.Root id={opacityInputId} size={50}>
+              <InputField.NumberInput
+                value={Math.round(selectedcolor.alpha * 100)}
+                onSubmit={handleSubmitOpacity}
+                onNudge={handleNudgeOpacity}
+              />
+              <InputField.Label>%</InputField.Label>
+            </InputField.Root>
+          </LabeledElementView>
+        </InspectorPrimitives.Row>
+      </InspectorPrimitives.Column>
+    </InspectorPrimitives.Section>
   );
 });

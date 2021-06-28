@@ -5,75 +5,75 @@ import {
   LabeledElementView,
   Select,
   sketchColorToHex,
-  Spacer,
   SketchPattern,
+  Spacer,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-import FillInputFieldWithPicker from './FillInputFieldWithPicker';
-import { patternFillTypeOptions, PatternFillTypes } from './PatternInspector';
+import { SetNumberMode } from '../../../../noya-state/src';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
+import DimensionInput from './DimensionInput';
+import FillInputFieldWithPicker, {
+  ColorFillProps,
+  GradientFillProps,
+  PatternFillProps,
+} from './FillInputFieldWithPicker';
+import { PATTERN_FILL_TYPE_OPTIONS, PatternFillType } from './PatternInspector';
 
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+const GRADIENT_TYPE_OPTIONS = [
+  Sketch.GradientType.Linear.toString(),
+  Sketch.GradientType.Angular.toString(),
+  Sketch.GradientType.Radial.toString(),
+];
 
 interface Props {
   id: string;
-  value: Sketch.Color | Sketch.Gradient | SketchPattern;
-  contextOpacity: number;
-  onChangeColor: (color: Sketch.Color) => void;
-  onChangeFillType: (type: Sketch.FillType) => void;
-  onChangeGradient: (gradient: Sketch.Gradient) => void;
-  onChangeGradientColor: (color: Sketch.Color, index: number) => void;
-  onChangeGradientPosition: (index: number, position: number) => void;
-  onAddGradientStop: (color: Sketch.Color, position: number) => void;
-  onDeleteGradientStop: (index: number) => void;
-  onChangeGradientType: (type: Sketch.GradientType) => void;
-  onChangeOpacity: (amount: number) => void;
-  onNudgeOpacity: (amount: number) => void;
-  onChangePatternFillType: (value: Sketch.PatternFillType) => void;
-  onChangePatternTileScale: (amount: number) => void;
-  onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
-  onChangeContextOpacity: (value: number) => void;
-  onNudgeContextOpacity: (value: number) => void;
   prefix?: ReactNode;
+  fillType?: Sketch.FillType;
+  gradient?: Sketch.Gradient;
+  pattern?: SketchPattern;
+  contextOpacity: number;
+  onChangeFillType: (type: Sketch.FillType) => void;
+  onSetOpacity: (amount: number, mode: SetNumberMode) => void;
+  onSetContextOpacity: (value: number, mode: SetNumberMode) => void;
+  colorProps: ColorFillProps;
+  gradientProps: GradientFillProps;
+  patternProps: PatternFillProps;
 }
 
-export default memo(function ColorFillRow({
+export default memo(function FillRow({
   id,
-  value,
-  contextOpacity,
-  onChangeColor,
-  onChangeOpacity,
-  onNudgeOpacity,
-  onChangeFillType,
-  onChangeGradient,
-  onChangeGradientColor,
-  onChangeGradientPosition,
-  onAddGradientStop,
-  onDeleteGradientStop,
-  onChangeGradientType,
-  onChangePatternFillType,
-  onChangePatternTileScale,
-  onChangeFillImage,
-  onChangeContextOpacity,
-  onNudgeContextOpacity,
   prefix,
+  fillType,
+  contextOpacity,
+  onSetOpacity,
+  onSetContextOpacity,
+  onChangeFillType,
+  colorProps,
+  gradientProps,
+  patternProps,
 }: Props) {
-  const colorInputId = `${id}-color`;
+  const fillInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
   const gradientTypeId = `${id}-gradient-type`;
   const patternSizeId = `${id}-pattern-type`;
 
+  const fillLabel = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Color:
+        return 'Color';
+      case Sketch.FillType.Gradient:
+        return 'Gradient';
+      case Sketch.FillType.Pattern:
+        return 'Image';
+    }
+  }, [fillType]);
+
   const renderLabel = useCallback(
     ({ id }) => {
       switch (id) {
-        case colorInputId:
-          return <Label.Label>Color</Label.Label>;
+        case fillInputId:
+          return <Label.Label>{fillLabel}</Label.Label>;
         case hexInputId:
           return <Label.Label>Hex</Label.Label>;
         case opacityInputId:
@@ -86,32 +86,25 @@ export default memo(function ColorFillRow({
           return null;
       }
     },
-    [colorInputId, hexInputId, opacityInputId, gradientTypeId, patternSizeId],
-  );
-
-  const handleSubmitOpacity = useCallback(
-    (opacity: number) => {
-      if (value._class === 'color') onChangeOpacity(opacity / 100);
-      else onChangeContextOpacity?.(opacity / 100);
-    },
-    [value, onChangeOpacity, onChangeContextOpacity],
-  );
-
-  const handleNudgeOpacity = useCallback(
-    (amount: number) => {
-      if (value._class === 'color') onNudgeOpacity(amount / 100);
-      else onNudgeContextOpacity?.(amount / 100);
-    },
-    [value, onNudgeOpacity, onNudgeContextOpacity],
-  );
-
-  const gradientTypeOptions = useMemo(
-    () => [
-      Sketch.GradientType.Linear.toString(),
-      Sketch.GradientType.Angular.toString(),
-      Sketch.GradientType.Radial.toString(),
+    [
+      fillInputId,
+      fillLabel,
+      hexInputId,
+      opacityInputId,
+      gradientTypeId,
+      patternSizeId,
     ],
-    [],
+  );
+
+  const handleSetOpacity = useCallback(
+    (amount: number, mode: SetNumberMode) => onSetOpacity(amount / 100, mode),
+    [onSetOpacity],
+  );
+
+  const handleSetContextOpacity = useCallback(
+    (amount: number, mode: SetNumberMode) =>
+      onSetContextOpacity(amount / 100, mode),
+    [onSetContextOpacity],
   );
 
   const getGradientTypeTitle = useCallback(
@@ -120,87 +113,124 @@ export default memo(function ColorFillRow({
   );
 
   const handleSelectGradientType = useCallback(
-    (value: string) => onChangeGradientType(parseInt(value)),
-    [onChangeGradientType],
+    (value: string) => gradientProps.onChangeGradientType(parseInt(value)),
+    [gradientProps],
   );
 
   const handleSelectPatternSize = useCallback(
-    (value: PatternFillTypes) => {
-      if (onChangePatternFillType)
-        onChangePatternFillType(Sketch.PatternFillType[value]);
-    },
-    [onChangePatternFillType],
+    (value: PatternFillType) =>
+      patternProps.onChangePatternFillType(Sketch.PatternFillType[value]),
+    [patternProps],
   );
 
-  /**?
-   *
-   * Join all the onChange ?? :thinking:
-   */
+  const fields = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Color:
+        return (
+          <>
+            <InputField.Root id={hexInputId} labelPosition="start">
+              <InputField.Input
+                value={
+                  colorProps.color
+                    ? sketchColorToHex(colorProps.color).replace('#', '')
+                    : ''
+                }
+                placeholder={colorProps.color ? undefined : 'multiple'}
+                onSubmit={() => {}}
+              />
+              <InputField.Label>#</InputField.Label>
+            </InputField.Root>
+            <Spacer.Horizontal size={8} />
+            <DimensionInput
+              id={opacityInputId}
+              size={50}
+              label="%"
+              value={
+                colorProps.color
+                  ? Math.round(colorProps.color.alpha * 100)
+                  : undefined
+              }
+              onSetValue={handleSetOpacity}
+            />
+          </>
+        );
+      case Sketch.FillType.Gradient:
+        return (
+          <>
+            <Select
+              id={gradientTypeId}
+              value={gradientProps.gradient.gradientType.toString()}
+              options={GRADIENT_TYPE_OPTIONS}
+              getTitle={getGradientTypeTitle}
+              onChange={handleSelectGradientType}
+            />
+            <Spacer.Horizontal size={8} />
+            <DimensionInput
+              id={opacityInputId}
+              size={50}
+              label="%"
+              value={Math.round(contextOpacity * 100)}
+              onSetValue={handleSetContextOpacity}
+            />
+          </>
+        );
+      case Sketch.FillType.Pattern:
+        return (
+          <>
+            <Select
+              id={patternSizeId}
+              value={
+                Sketch.PatternFillType[
+                  patternProps.pattern.patternFillType
+                ] as PatternFillType
+              }
+              options={PATTERN_FILL_TYPE_OPTIONS}
+              onChange={handleSelectPatternSize}
+            />
+            <Spacer.Horizontal size={8} />
+            <DimensionInput
+              id={opacityInputId}
+              size={50}
+              label="%"
+              value={Math.round(contextOpacity * 100)}
+              onSetValue={handleSetContextOpacity}
+            />
+          </>
+        );
+    }
+  }, [
+    colorProps.color,
+    contextOpacity,
+    fillType,
+    getGradientTypeTitle,
+    gradientProps.gradient.gradientType,
+    gradientTypeId,
+    handleSelectGradientType,
+    handleSelectPatternSize,
+    handleSetContextOpacity,
+    handleSetOpacity,
+    hexInputId,
+    opacityInputId,
+    patternProps.pattern.patternFillType,
+    patternSizeId,
+  ]);
+
   return (
-    <Row id={id}>
+    <InspectorPrimitives.Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
         {prefix && <Spacer.Horizontal size={8} />}
         <FillInputFieldWithPicker
-          id={colorInputId}
-          value={value}
-          onChange={onChangeColor}
+          id={fillInputId}
+          fillType={fillType}
           onChangeType={onChangeFillType}
-          onChangeGradient={onChangeGradient}
-          onChangeGradientColor={onChangeGradientColor}
-          onChangeGradientPosition={onChangeGradientPosition}
-          onAddGradientStop={onAddGradientStop}
-          onChangeGradientType={onChangeGradientType}
-          onDeleteGradientStop={onDeleteGradientStop}
-          onChangePatternFillType={onChangePatternFillType}
-          onChangePatternTileScale={onChangePatternTileScale}
-          onChangeFillImage={onChangeFillImage}
+          colorProps={colorProps}
+          gradientProps={gradientProps}
+          patternProps={patternProps}
         />
         <Spacer.Horizontal size={8} />
-        {value._class === 'color' ? (
-          <InputField.Root id={hexInputId} labelPosition="start">
-            <InputField.Input
-              value={sketchColorToHex(value).replace('#', '')}
-              onSubmit={() => {}}
-            />
-            <InputField.Label>#</InputField.Label>
-          </InputField.Root>
-        ) : value._class === 'gradient' ? (
-          <InputField.Root id={gradientTypeId}>
-            <Select
-              id={'gradient-type-selector'}
-              value={value.gradientType.toString()}
-              options={gradientTypeOptions}
-              getTitle={getGradientTypeTitle}
-              onChange={handleSelectGradientType}
-            />
-          </InputField.Root>
-        ) : (
-          <InputField.Root id={patternSizeId}>
-            <Select
-              id={'gradient-type-selector'}
-              value={
-                Sketch.PatternFillType[
-                  value.patternFillType
-                ] as PatternFillTypes
-              }
-              options={patternFillTypeOptions}
-              onChange={handleSelectPatternSize}
-            />
-          </InputField.Root>
-        )}
-        <Spacer.Horizontal size={8} />
-        <InputField.Root id={opacityInputId} size={50}>
-          <InputField.NumberInput
-            value={Math.round(
-              (value._class === 'color' ? value.alpha : contextOpacity) * 100,
-            )}
-            onSubmit={handleSubmitOpacity}
-            onNudge={handleNudgeOpacity}
-          />
-          <InputField.Label>%</InputField.Label>
-        </InputField.Root>
+        {fields}
       </LabeledElementView>
-    </Row>
+    </InspectorPrimitives.Row>
   );
 });

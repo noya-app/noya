@@ -18,12 +18,6 @@ import { FileMap } from 'noya-sketch-file';
 import { useHover } from 'noya-designsystem/src/hooks/useHover';
 import { useFileDropTarget } from '../../hooks/useFileDropTarget';
 
-const Column = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'column',
-}));
-
 const Container = styled.div<{
   background: string;
   backgroundSize: string;
@@ -47,35 +41,34 @@ const Container = styled.div<{
   justifyContent: 'center',
 }));
 
-const UploadButton = styled.button<{ show: boolean }>(
-  ({ theme, show = false }) => ({
-    color: 'white',
-    position: 'absolute',
-    background: 'rgba(0, 0, 0, 0.75)',
-    cursor: 'pointer',
-    userSelect: 'auto',
-    alignSelf: 'center',
-    height: '30px',
-    width: '105px',
-    borderRadius: '24px',
-    border: 'none',
-    display: show ? 'block' : 'none',
-    zIndex: 1,
-  }),
-);
+const UploadButton = styled.button<{ show: boolean }>(({ show = false }) => ({
+  color: 'white',
+  position: 'absolute',
+  background: 'rgba(0, 0, 0, 0.75)',
+  cursor: 'pointer',
+  userSelect: 'auto',
+  alignSelf: 'center',
+  height: '30px',
+  width: '105px',
+  borderRadius: '24px',
+  border: 'none',
+  display: show ? 'block' : 'none',
+  zIndex: 1,
+}));
 
 interface Props {
   id: string;
   images: FileMap;
   pattern: SketchPattern;
-  onChangeImage?: (image: Sketch.FileRef | Sketch.DataRef) => void;
-  onChangeFillType?: (amount: Sketch.PatternFillType) => void;
-  onChangeTileScale?: (amount: number) => void;
+  onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
+  onChangeFillType: (amount: Sketch.PatternFillType) => void;
+  onChangeTileScale: (amount: number) => void;
   createImage: (image: ArrayBuffer, _ref: string) => void;
 }
 
-export type PatternFillTypes = 'Stretch' | 'Fill' | 'Fit' | 'Tile';
-export const patternFillTypeOptions: PatternFillTypes[] = [
+export type PatternFillType = 'Stretch' | 'Fill' | 'Fit' | 'Tile';
+
+export const PATTERN_FILL_TYPE_OPTIONS: PatternFillType[] = [
   'Tile',
   'Fill',
   'Stretch',
@@ -100,22 +93,22 @@ export default memo(function PatternInspector({
   const isTile = patternType === Sketch.PatternFillType.Tile;
 
   const changeFillType = useCallback(
-    (value: PatternFillTypes) => {
-      onChangeFillType?.(Sketch.PatternFillType[value]);
+    (value: PatternFillType) => {
+      onChangeFillType(Sketch.PatternFillType[value]);
     },
     [onChangeFillType],
   );
 
   const onSubmitTileScale = useCallback(
     (value: number) => {
-      onChangeTileScale?.(value / 100);
+      onChangeTileScale(value / 100);
     },
     [onChangeTileScale],
   );
 
   const onNudgeTileScale = useCallback(
     (value: number) => {
-      onChangeTileScale?.(value / 100);
+      onChangeTileScale(value / 100);
     },
     [onChangeTileScale],
   );
@@ -145,7 +138,7 @@ export default memo(function PatternInspector({
       const _ref = `images/${uuid()}.${extension}`;
 
       createImage(data, _ref);
-      onChangeImage?.({
+      onChangeImage({
         _class: 'MSJSONFileReference',
         _ref: _ref,
         _ref_class: 'MSImageData',
@@ -185,53 +178,57 @@ export default memo(function PatternInspector({
   const scale = Math.round(pattern.patternTileScale * 100);
 
   return (
-    <Column>
-      <Container
-        {...dropTargetProps}
-        {...hoverProps}
-        isActive={isDropTargetActive}
-        background={background}
-        backgroundSize={backgroundSize}
-        repeat={isTile}
-      >
-        <UploadButton
-          show={!isDropTargetActive && isHovering}
-          onClick={openFile}
+    <InspectorPrimitives.Section>
+      <InspectorPrimitives.Column>
+        <Container
+          {...dropTargetProps}
+          {...hoverProps}
+          isActive={isDropTargetActive}
+          background={background}
+          backgroundSize={backgroundSize}
+          repeat={isTile}
         >
-          Upload Image
-        </UploadButton>
-      </Container>
-      <Spacer.Vertical size={10} />
-      <InspectorPrimitives.LabeledRow label={'Size'}>
+          <UploadButton
+            show={!isDropTargetActive && isHovering}
+            onClick={openFile}
+          >
+            Upload Image
+          </UploadButton>
+        </Container>
         <Spacer.Vertical size={10} />
-        <Select
-          id={`${id}-pattern-options`}
-          value={Sketch.PatternFillType[patternType] as PatternFillTypes}
-          options={patternFillTypeOptions}
-          onChange={changeFillType}
-        />
-      </InspectorPrimitives.LabeledRow>
-      <Spacer.Vertical size={10} />
-      {isTile && (
-        <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
-          <Slider
-            id={`${id}-slider`}
-            value={scale}
-            onValueChange={onSubmitTileScale}
-            min={10}
-            max={200}
+        <InspectorPrimitives.LabeledRow label={'Size'}>
+          <Spacer.Vertical size={10} />
+          <Select
+            id={`${id}-pattern-options`}
+            value={Sketch.PatternFillType[patternType] as PatternFillType}
+            options={PATTERN_FILL_TYPE_OPTIONS}
+            onChange={changeFillType}
           />
-          <Spacer.Horizontal size={10} />
-          <InputField.Root size={50}>
-            <InputField.NumberInput
-              value={scale}
-              onSubmit={onSubmitTileScale}
-              onNudge={onNudgeTileScale}
-            />
-            <InputField.Label>{'%'}</InputField.Label>
-          </InputField.Root>
-        </InspectorPrimitives.LabeledSliderRow>
-      )}
-    </Column>
+        </InspectorPrimitives.LabeledRow>
+        {isTile && (
+          <>
+            <Spacer.Vertical size={10} />
+            <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
+              <Slider
+                id={`${id}-slider`}
+                value={scale}
+                onValueChange={onSubmitTileScale}
+                min={10}
+                max={200}
+              />
+              <Spacer.Horizontal size={10} />
+              <InputField.Root size={50}>
+                <InputField.NumberInput
+                  value={scale}
+                  onSubmit={onSubmitTileScale}
+                  onNudge={onNudgeTileScale}
+                />
+                <InputField.Label>{'%'}</InputField.Label>
+              </InputField.Root>
+            </InspectorPrimitives.LabeledSliderRow>
+          </>
+        )}
+      </InspectorPrimitives.Column>
+    </InspectorPrimitives.Section>
   );
 });
