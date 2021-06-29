@@ -75,10 +75,7 @@ function getPoint(event: MouseEvent): Point {
 }
 
 function isMoving(point: Point, origin: Point): boolean {
-  if (Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2) {
-    return true;
-  }
-  return false;
+  return Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2;
 }
 const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   ({ cursor }) => ({
