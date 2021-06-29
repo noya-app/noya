@@ -38,6 +38,7 @@ export type { SetNumberMode };
 export type WorkspaceTab = 'canvas' | 'theme';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
+type ThemeSelection = { ids: string[]; groupName: string };
 
 export type controlPointType = 'curveFrom' | 'curveTo';
 
@@ -57,14 +58,7 @@ export type ApplicationState = {
   selectedObjects: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
-  selectedSwatchIds: string[];
-  selectedLayerStyleIds: string[];
-  selectedTextStyleIds: string[];
-  selectedSymbolsIds: string[];
-  selectedSwatchGroup: string;
-  selectedTextStyleGroup: string;
-  selectedThemeStyleGroup: string;
-  selectedSymbolGroup: string;
+  selectedTheme: Record<ThemeTab, ThemeSelection>;
   sketch: SketchFile;
 };
 
@@ -90,7 +84,6 @@ export function applicationReducer(
   switch (action[0]) {
     case 'setTab': {
       const [, value] = action;
-
       return produce(state, (draft) => {
         draft.currentTab = value;
         draft.interactionState = interactionReducer(draft.interactionState, [
@@ -201,7 +194,7 @@ export function applicationReducer(
           );
         });
       } else {
-        const ids = state.selectedLayerStyleIds;
+        const ids = state.selectedTheme.layerStyles.ids;
 
         const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
           state,
@@ -212,10 +205,7 @@ export function applicationReducer(
 
         const currentComponentsTab = getCurrentComponentsTab(state);
 
-        const selectedIds =
-          currentComponentsTab === 'layerStyles'
-            ? state.selectedLayerStyleIds
-            : state.selectedTextStyleIds;
+        const selectedIds = state.selectedTheme[currentComponentsTab].ids;
 
         return produce(state, (draft) => {
           const styles =
@@ -331,14 +321,12 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedPointLists: {},
     selectedControlPoint: undefined,
-    selectedSwatchIds: [],
-    selectedLayerStyleIds: [],
-    selectedTextStyleIds: [],
-    selectedSymbolsIds: [],
-    selectedSwatchGroup: '',
-    selectedThemeStyleGroup: '',
-    selectedTextStyleGroup: '',
-    selectedSymbolGroup: '',
+    selectedTheme: {
+      swatches: { ids: [], groupName: '' },
+      layerStyles: { ids: [], groupName: '' },
+      textStyles: { ids: [], groupName: '' },
+      symbols: { ids: [], groupName: '' },
+    },
     sketch,
   };
 }

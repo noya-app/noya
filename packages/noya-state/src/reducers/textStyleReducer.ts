@@ -47,7 +47,6 @@ export function textStyleReducer(
               switch (action[0]) {
                 case 'setTextVerticalAlignment': {
                   layer.style.textStyle.verticalAlignment = action[1];
-
                   break;
                 }
               }
@@ -67,7 +66,7 @@ export function textStyleReducer(
           );
         });
       } else {
-        const ids = state.selectedTextStyleIds;
+        const ids = state.selectedTheme.textStyles.ids;
 
         const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
           state,
@@ -144,7 +143,7 @@ export function textStyleReducer(
         });
       } else {
         return produce(state, (draft) => {
-          const ids = state.selectedTextStyleIds;
+          const ids = state.selectedTheme.textStyles.ids;
 
           const layerTextStyles =
             draft.sketch.document.layerTextStyles?.objects ?? [];
@@ -184,7 +183,7 @@ export function textStyleReducer(
         });
       } else {
         return produce(state, (draft) => {
-          const ids = state.selectedTextStyleIds;
+          const ids = state.selectedTheme.textStyles.ids;
 
           const layerTextStyles =
             draft.sketch.document.layerTextStyles?.objects ?? [];

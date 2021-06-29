@@ -19,7 +19,7 @@ const Container = styled.main(({ theme }) => ({
 
 const ThemeStyles = memo(function ThemeStyles() {
   const [state, dispatch] = useApplicationState();
-  const selectedGroup = state.selectedThemeStyleGroup;
+  const selectedGroup = state.selectedTheme.layerStyles.groupName;
 
   const sharedStyles = useShallowArray(useSelector(Selectors.getSharedStyles));
 
@@ -30,7 +30,7 @@ const ThemeStyles = memo(function ThemeStyles() {
   return (
     <ThemeStylesGrid
       sharedStyles={filterTheme}
-      selectedThemeStyleIds={state.selectedLayerStyleIds}
+      selectedThemeStyleIds={state.selectedTheme.layerStyles.ids}
       onGroupThemeStyle={useCallback(
         (id: string[], name?: string) => {
           dispatch('groupThemeStyle', id, name);
@@ -57,7 +57,7 @@ const ThemeStyles = memo(function ThemeStyles() {
 const Swatches = memo(function Swatches() {
   const [state, dispatch] = useApplicationState();
 
-  const selectedGroup = state.selectedSwatchGroup;
+  const selectedGroup = state.selectedTheme.swatches.groupName;
 
   const swatches = useShallowArray(useSelector(Selectors.getSharedSwatches));
 
@@ -69,7 +69,7 @@ const Swatches = memo(function Swatches() {
   return (
     <SwatchesGrid
       swatches={filterSwatches}
-      selectedSwatchIds={state.selectedSwatchIds}
+      selectedSwatchIds={state.selectedTheme.swatches.ids}
       onGroupSwatch={useCallback(
         (id: string[], name?: string) => {
           dispatch('groupSwatch', id, name);
@@ -100,7 +100,7 @@ const TextStyles = memo(function TextStyles() {
     useSelector(Selectors.getSharedTextStyles),
   );
 
-  const selectedGroup = state.selectedTextStyleGroup;
+  const selectedGroup = state.selectedTheme.textStyles.groupName;
   const filterText = useMemo(
     () => textStyles.filter((item) => item.name.startsWith(selectedGroup)),
     [textStyles, selectedGroup],
@@ -109,7 +109,7 @@ const TextStyles = memo(function TextStyles() {
   return (
     <TextStylesGrid
       sharedStyles={filterText}
-      selectedTextStyles={state.selectedTextStyleIds}
+      selectedTextStyles={state.selectedTheme.textStyles.ids}
       onGroupTextStyle={useCallback(
         (id: string[], name?: string) => {
           dispatch('groupTextStyle', id, name);
@@ -139,7 +139,7 @@ const Symbols = memo(function Symbols() {
   const [state, dispatch] = useApplicationState();
 
   const symbols = useShallowArray(useSelector(Selectors.getSymbols));
-  const selectedGroup = state.selectedSymbolGroup;
+  const selectedGroup = state.selectedTheme.symbols.groupName;
   const filterSymbols = useMemo(
     () => symbols.filter((item) => item.name.startsWith(selectedGroup)),
     [symbols, selectedGroup],
@@ -148,7 +148,7 @@ const Symbols = memo(function Symbols() {
   return (
     <SymbolsGrid
       symbols={filterSymbols}
-      selectedSymbolsIds={state.selectedSymbolsIds}
+      selectedSymbolsIds={state.selectedTheme.symbols.ids}
       onSelectSymbol={useCallback(
         (id, type) => {
           dispatch('selectSymbol', id, type);

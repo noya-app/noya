@@ -45,7 +45,7 @@ export const getSelectedSwatches = (
   const sharedSwatches = getSharedSwatches(state);
 
   return sharedSwatches.filter((swatch) =>
-    state.selectedSwatchIds.includes(swatch.do_objectID),
+    state.selectedTheme.swatches.ids.includes(swatch.do_objectID),
   );
 };
 
@@ -55,7 +55,7 @@ export const getSelectedLayerStyles = (
   const sharedStyles = getSharedStyles(state);
 
   return sharedStyles.filter((swatch) =>
-    state.selectedLayerStyleIds.includes(swatch.do_objectID),
+    state.selectedTheme.layerStyles.ids.includes(swatch.do_objectID),
   );
 };
 
@@ -65,7 +65,7 @@ export const getSelectedThemeTextStyles = (
   const sharedStyles = getSharedTextStyles(state);
 
   return sharedStyles.filter((swatch) =>
-    state.selectedTextStyleIds.includes(swatch.do_objectID),
+    state.selectedTheme.textStyles.ids.includes(swatch.do_objectID),
   );
 };
 
@@ -115,7 +115,7 @@ export const getSelectedSymbols = (
   const filter =
     getCurrentTab(state) === 'canvas'
       ? state.selectedObjects
-      : state.selectedSymbolsIds;
+      : state.selectedTheme.symbols.ids;
 
   return symbols.filter((symbol) => filter.includes(symbol.do_objectID));
 };
