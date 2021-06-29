@@ -63,15 +63,17 @@ export default memo(function ColorInspector({
 
   const handleSetOpacity = useCallback(
     (amount: number, mode: SetNumberMode) => {
+      const scaledAmount = amount / 100;
+
       if (onSetOpacity) {
-        onSetOpacity(amount / 100, mode);
+        onSetOpacity(scaledAmount, mode);
       } else {
         const newValue =
-          mode === 'replace' ? amount : displayColor.alpha + amount;
+          mode === 'replace' ? scaledAmount : displayColor.alpha + scaledAmount;
 
         onChangeColor({
           ...displayColor,
-          alpha: clamp(newValue / 100, 0, 1),
+          alpha: clamp(newValue, 0, 1),
         });
       }
     },
