@@ -277,6 +277,12 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
+        case 'createPath': {
+          // console.log(
+          //   'This is where we will want to drop points on the canvas',
+          // );
+          break;
+        }
         case 'editPath':
         case 'movingControlPoint':
         case 'movingPoint':
@@ -407,6 +413,12 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'createPath': {
+          // console.log(
+          //   'This is where we will draw a path if theres been a point dropped',
+          // );
+          break;
+        }
         case 'maybePan': {
           dispatch('interaction', ['startPanning', rawPoint]);
 
@@ -698,6 +710,8 @@ export default memo(function Canvas() {
       case 'insertRectangle':
       case 'insertText':
         return 'crosshair';
+      case 'createPath':
+        return 'copy';
       case 'maybeScale':
       case 'scaling':
       case 'hoverHandle':

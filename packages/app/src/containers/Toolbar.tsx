@@ -5,6 +5,7 @@ import {
   RulerHorizontalIcon,
   SquareIcon,
   TextIcon,
+  SewingPinIcon,
 } from '@radix-ui/react-icons';
 import { Spacer } from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
@@ -55,6 +56,7 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
+  const isCreatingPath = interactionType === 'createPath';
 
   const isPanning =
     interactionType === 'panMode' ||
@@ -203,6 +205,26 @@ const ToolbarContent = memo(function ToolbarContent({
         )}
       </Button>
       <Spacer.Horizontal size={40} />
+      <Button
+        id="create-path"
+        tooltip="Create path"
+        active={isCreatingPath}
+        onClick={useCallback(() => {
+          if (!isCreatingPath) {
+            dispatch('interaction', ['createPath']);
+          } else {
+            dispatch('interaction', ['reset']);
+          }
+        }, [isCreatingPath, dispatch])}
+      >
+        {useMemo(
+          () => (
+            <SewingPinIcon />
+          ),
+          [],
+        )}
+      </Button>
+      <Spacer.Horizontal size={10} />
       <Button
         id="edit-path"
         tooltip="Edit path"

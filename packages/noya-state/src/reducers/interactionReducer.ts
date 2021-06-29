@@ -34,6 +34,7 @@ export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
   | [type: 'editPath']
+  | [type: 'createPath']
   | [type: 'resetEditPath']
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
@@ -77,6 +78,9 @@ export type InteractionState =
     }
   | {
       type: 'editPath';
+    }
+  | {
+      type: 'createPath';
     }
   | {
       type: 'drawing';
@@ -168,6 +172,8 @@ export function interactionReducer(
     case 'editPath':
     case 'resetEditPath':
       return { type: 'editPath' };
+    case 'createPath':
+      return { type: 'createPath' };
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
