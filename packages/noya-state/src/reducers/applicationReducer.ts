@@ -58,7 +58,7 @@ export type ApplicationState = {
   selectedObjects: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
-  selectedTheme: Record<ThemeTab, ThemeSelection>;
+  selectedThemeTab: Record<ThemeTab, ThemeSelection>;
   sketch: SketchFile;
 };
 
@@ -194,7 +194,7 @@ export function applicationReducer(
           );
         });
       } else {
-        const ids = state.selectedTheme.layerStyles.ids;
+        const ids = state.selectedThemeTab.layerStyles.ids;
 
         const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
           state,
@@ -205,7 +205,7 @@ export function applicationReducer(
 
         const currentComponentsTab = getCurrentComponentsTab(state);
 
-        const selectedIds = state.selectedTheme[currentComponentsTab].ids;
+        const selectedIds = state.selectedThemeTab[currentComponentsTab].ids;
 
         return produce(state, (draft) => {
           const styles =
@@ -321,7 +321,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedPointLists: {},
     selectedControlPoint: undefined,
-    selectedTheme: {
+    selectedThemeTab: {
       swatches: { ids: [], groupName: '' },
       layerStyles: { ids: [], groupName: '' },
       textStyles: { ids: [], groupName: '' },

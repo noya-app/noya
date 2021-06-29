@@ -17,7 +17,7 @@ export default memo(function SwatchesInspectors() {
   const selectedSwatches = useShallowArray(
     useSelector(Selectors.getSelectedSwatches),
   );
-  const ids = state.selectedTheme.swatches.ids;
+  const ids = state.selectedThemeTab.swatches.ids;
   const color = getMultiValue(
     selectedSwatches.map((swatch) => swatch.value),
     isDeepEqual,

@@ -66,7 +66,7 @@ export function textStyleReducer(
           );
         });
       } else {
-        const ids = state.selectedTheme.textStyles.ids;
+        const ids = state.selectedThemeTab.textStyles.ids;
 
         const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
           state,
@@ -143,7 +143,7 @@ export function textStyleReducer(
         });
       } else {
         return produce(state, (draft) => {
-          const ids = state.selectedTheme.textStyles.ids;
+          const ids = state.selectedThemeTab.textStyles.ids;
 
           const layerTextStyles =
             draft.sketch.document.layerTextStyles?.objects ?? [];
@@ -183,7 +183,7 @@ export function textStyleReducer(
         });
       } else {
         return produce(state, (draft) => {
-          const ids = state.selectedTheme.textStyles.ids;
+          const ids = state.selectedThemeTab.textStyles.ids;
 
           const layerTextStyles =
             draft.sketch.document.layerTextStyles?.objects ?? [];

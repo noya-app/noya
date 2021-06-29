@@ -101,7 +101,7 @@ export function themeReducer(
           objects: [],
         };
 
-        const swatches = draft.selectedTheme.swatches;
+        const swatches = draft.selectedThemeTab.swatches;
         const swatchColor: Sketch.Color = color
           ? color
           : {
@@ -143,7 +143,7 @@ export function themeReducer(
           objects: [],
         };
 
-        const draftTextStyles = draft.selectedTheme.textStyles;
+        const draftTextStyles = draft.selectedThemeTab.textStyles;
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
@@ -186,7 +186,7 @@ export function themeReducer(
           objects: [],
         };
 
-        const draftLayerStyles = draft.selectedTheme.layerStyles;
+        const draftLayerStyles = draft.selectedThemeTab.layerStyles;
 
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
@@ -317,10 +317,10 @@ export function themeReducer(
     case 'selectSymbol': {
       const [, id, selectionType = 'replace'] = action;
 
-      const crrThemeTab = state.currentThemeTab;
+      const currentThemeTab = state.currentThemeTab;
       return produce(state, (draft) => {
         updateSelection(
-          draft.selectedTheme[crrThemeTab].ids,
+          draft.selectedThemeTab[currentThemeTab].ids,
           id,
           selectionType,
         );
@@ -500,7 +500,7 @@ export function themeReducer(
       });
     }
     case 'removeSwatch': {
-      const ids = state.selectedTheme.swatches.ids;
+      const ids = state.selectedThemeTab.swatches.ids;
 
       const layerIndexPathsWithSwatchId = findPageLayerIndexPaths(
         state,
@@ -539,7 +539,7 @@ export function themeReducer(
       });
     }
     case 'removeTextStyle': {
-      const ids = state.selectedTheme.textStyles.ids;
+      const ids = state.selectedThemeTab.textStyles.ids;
 
       return produce(state, (draft) => {
         const layerStyles = draft.sketch.document.layerTextStyles;
@@ -555,7 +555,7 @@ export function themeReducer(
       });
     }
     case 'removeThemeStyle': {
-      const ids = state.selectedTheme.layerStyles.ids;
+      const ids = state.selectedThemeTab.layerStyles.ids;
 
       const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
         state,
@@ -592,10 +592,10 @@ export function themeReducer(
     case 'setSelectedTextStyleGroup':
     case 'setSelectedSymbolGroup': {
       const [, id] = action;
-      const crrThemeTab = state.currentThemeTab;
+      const currentThemeTab = state.currentThemeTab;
 
       return produce(state, (draft) => {
-        draft.selectedTheme[crrThemeTab].groupName = id;
+        draft.selectedThemeTab[currentThemeTab].groupName = id;
       });
     }
     case 'groupSwatch': {
@@ -608,7 +608,7 @@ export function themeReducer(
           value,
           draft.sketch.document.sharedSwatches?.objects ?? [],
         );
-        draft.selectedTheme.swatches.groupName = '';
+        draft.selectedThemeTab.swatches.groupName = '';
       });
     }
     case 'groupTextStyle': {
@@ -622,7 +622,7 @@ export function themeReducer(
           draft.sketch.document.layerTextStyles.objects ?? [],
         );
 
-        draft.selectedTheme.textStyles.groupName = '';
+        draft.selectedThemeTab.textStyles.groupName = '';
       });
     }
     case 'groupThemeStyle': {
@@ -635,7 +635,7 @@ export function themeReducer(
           value,
           draft.sketch.document.layerStyles?.objects ?? [],
         );
-        draft.selectedTheme.layerStyles.groupName = '';
+        draft.selectedThemeTab.layerStyles.groupName = '';
       });
     }
     case 'groupSymbol': {
@@ -644,7 +644,7 @@ export function themeReducer(
 
       return produce(state, (draft) => {
         groupThemeComponents(ids, value, getSymbols(draft));
-        draft.selectedTheme.symbols.groupName = '';
+        draft.selectedThemeTab.symbols.groupName = '';
       });
     }
     case 'addGradientAsset': {
