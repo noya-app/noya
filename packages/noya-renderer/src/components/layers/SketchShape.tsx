@@ -4,7 +4,6 @@ import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,
   Group,
-  Image,
   Path,
   useDeletable,
   usePaint,
@@ -49,25 +48,14 @@ const SketchFill = memo(function SketchFill({
   const { CanvasKit } = useReactCanvasKit();
 
   // TODO: Delete internal gradient shaders on unmount
-  const paint = useMemo(() => Primitives.fill(CanvasKit, fill, transform), [
-    CanvasKit,
-    fill,
-    transform,
-  ]);
+  const paint = useMemo(
+    () => Primitives.fill(CanvasKit, fill, transform, frame, image),
+    [CanvasKit, fill, transform, frame, image],
+  );
 
   useDeletable(paint);
 
-  if (fill.fillType !== Sketch.FillType.Pattern)
-    return <Path path={path} paint={paint} />;
-
-  if (image)
-    return (
-      <Image
-        image={image}
-        paint={paint}
-        rect={Primitives.rect(CanvasKit, frame)}
-      />
-    );
+  return <Path path={path} paint={paint} />;
 });
 
 const SketchShadow = memo(function SketchShadow({
@@ -210,8 +198,10 @@ export default memo(function SketchShape({ layer }: Props) {
 
   if (!layer.style) return null;
 
-  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled).reverse();
-  const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
+  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled);
+  const borders = (layer.style.borders ?? [])
+    .filter((x) => x.isEnabled)
+    .reverse();
   const shadows = (layer.style.shadows ?? [])
     .filter((x) => x.isEnabled)
     .reverse();
@@ -242,7 +232,7 @@ export default memo(function SketchShape({ layer }: Props) {
           />
         ),
       )}
-      {fills.reverse().map((fill, index) => (
+      {fills.map((fill, index) => (
         <SketchFill
           key={`fill-${index}`}
           fill={fill}

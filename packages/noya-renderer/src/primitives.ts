@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit, Paint, Path, TextAlign, TextStyle } from 'canvaskit';
-import { distance } from 'noya-geometry';
+import { createBounds, distance, resize } from 'noya-geometry';
 import {
   CompassDirection,
   getCardinalDirections,
@@ -63,6 +63,8 @@ export function fill(
   CanvasKit: CanvasKit,
   fill: Sketch.Fill,
   localMatrix: Float32Array | number[],
+  layerFrame?: Rect,
+  image?: ArrayBuffer,
 ): Paint {
   const paint = new CanvasKit.Paint();
 
@@ -163,8 +165,120 @@ export function fill(
 
       break;
     }
-    case Sketch.FillType.Pattern:
-      return paint;
+    case Sketch.FillType.Pattern: {
+      if (!layerFrame || !image) break;
+      const canvasImage = CanvasKit.MakeImageFromEncoded(image);
+      if (!canvasImage) break;
+
+      switch (fill.patternFillType) {
+        case Sketch.PatternFillType.Tile: {
+          paint.setShader(
+            canvasImage.makeShaderCubic(
+              CanvasKit.TileMode.Repeat,
+              CanvasKit.TileMode.Repeat,
+              0,
+              0,
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+                CanvasKit.Matrix.scaled(
+                  fill.patternTileScale,
+                  fill.patternTileScale,
+                ),
+              ),
+            ),
+          );
+          break;
+        }
+        case Sketch.PatternFillType.Fit: {
+          const bounds = createBounds(layerFrame);
+          const scaledRect = resize(
+            {
+              ...layerFrame,
+              width: canvasImage.width(),
+              height: canvasImage.height(),
+            },
+            layerFrame,
+            'scaleAspectFit',
+          );
+
+          // Scale the largest side to fit, if needed
+          const scale = Math.max(
+            scaledRect.width / canvasImage.width(),
+            scaledRect.height / canvasImage.height(),
+          );
+
+          paint.setShader(
+            canvasImage.makeShaderCubic(
+              CanvasKit.TileMode.Decal,
+              CanvasKit.TileMode.Decal,
+              1,
+              1,
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(
+                  bounds.midX - scaledRect.width / 2,
+                  bounds.midY - scaledRect.height / 2,
+                ),
+                CanvasKit.Matrix.scaled(scale, scale),
+              ),
+            ),
+          );
+          break;
+        }
+        case Sketch.PatternFillType.Stretch: {
+          paint.setShader(
+            canvasImage.makeShaderCubic(
+              CanvasKit.TileMode.Clamp,
+              CanvasKit.TileMode.Clamp,
+              0,
+              0,
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+                CanvasKit.Matrix.scaled(
+                  layerFrame.width / canvasImage.width(),
+                  layerFrame.height / canvasImage.height(),
+                ),
+              ),
+            ),
+          );
+          break;
+        }
+        case Sketch.PatternFillType.Fill: {
+          const bounds = createBounds(layerFrame);
+          const scaledRect = resize(
+            {
+              ...layerFrame,
+              width: canvasImage.width(),
+              height: canvasImage.height(),
+            },
+            layerFrame,
+            'scaleAspectFill',
+          );
+
+          // Scale the largest side to fit, if needed
+          const scale = Math.max(
+            scaledRect.width / canvasImage.width(),
+            scaledRect.height / canvasImage.height(),
+          );
+
+          paint.setShader(
+            canvasImage.makeShaderCubic(
+              CanvasKit.TileMode.Decal,
+              CanvasKit.TileMode.Decal,
+              0,
+              0,
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(
+                  bounds.midX - scaledRect.width / 2,
+                  bounds.midY - scaledRect.height / 2,
+                ),
+                CanvasKit.Matrix.scaled(scale, scale),
+              ),
+            ),
+          );
+          break;
+        }
+      }
+    }
   }
 
   paint.setStyle(CanvasKit.PaintStyle.Fill);
