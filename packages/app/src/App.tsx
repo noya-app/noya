@@ -18,7 +18,7 @@ type Action =
 
 export default function App() {
   const sketchFileData = useResource<ArrayBuffer>(
-    '/ImageFills.sketch',
+    '/Demo.sketch',
     'arrayBuffer',
   );
   const CanvasKit = useCanvasKit();
