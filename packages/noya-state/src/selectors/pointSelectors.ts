@@ -27,6 +27,29 @@ export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
 
+const computeNewBoundingRect = (
+  CanvasKit: CanvasKit,
+  decodedPoints: DecodedCurvePoint[],
+  layer: PointsLayer,
+) => {
+  const [minX, minY, maxX, maxY] = path(
+    CanvasKit,
+    decodedPoints.map((decodedCurvePoint) =>
+      encodeCurvePoint(decodedCurvePoint, layer.frame),
+    ),
+    layer.frame,
+  ).computeTightBounds();
+
+  const newRect: Rect = {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+
+  return newRect;
+};
+
 const getSelectedPointsFromPointLists = (
   state: ApplicationState,
   pointLists: Record<string, number[]>,
@@ -160,27 +183,11 @@ export const moveSelectedPoints = (
         return decodedPoint;
       });
 
-    // Determine the new bounds of the updated points
-    const [minX, minY, maxX, maxY] = path(
-      CanvasKit,
-      decodedPoints.map((decodedCurvePoint) =>
-        encodeCurvePoint(decodedCurvePoint, layer.frame),
-      ),
-      layer.frame,
-    ).computeTightBounds();
-
-    const newRect: Rect = {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-    };
-
     const draftLayer = Layers.access(draftPage, indexPath) as PointsLayer;
 
     draftLayer.frame = {
       ...layer.frame,
-      ...newRect,
+      ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
     };
 
     // Transform back to the range [0, 1], using the new bounds
@@ -277,24 +284,11 @@ export const moveControlPoints = (
         controlPoint.y = selectedControlPointValueY;
     }
 
-    const [minX, minY, maxX, maxY] = path(
-      CanvasKit,
-      layer.points,
-      layer.frame,
-    ).computeTightBounds();
-
-    const newRect: Rect = {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY,
-    };
-
     const draftLayer = Layers.access(draftPage, indexPath) as PointsLayer;
 
     draftLayer.frame = {
       ...layer.frame,
-      ...newRect,
+      ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
     };
 
     // Transform back to the range [0, 1], using the new bounds

@@ -112,13 +112,12 @@ export function pointReducer(
     }
     case 'setControlPointX':
     case 'setControlPointY': {
-      if (!state.selectedControlPoint) return state;
       const [type, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
       return produce(state, (draft) => {
-        if (!draft.selectedControlPoint) return state;
+        if (!draft.selectedControlPoint) return;
         const delta =
           type === 'setControlPointX' ? { x: amount } : { y: amount };
 
