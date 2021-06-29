@@ -33,6 +33,8 @@ import {
   useRef,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
+import { useGesture } from 'react-use-gesture';
+import mergeProps from 'merge-props';
 import {
   useApplicationState,
   useSelector,
@@ -98,6 +100,17 @@ export default memo(function Canvas() {
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
+  const bind = useGesture({
+    onWheel: ({ movement: [x, y] }) => {
+      const rawPoint = { x, y };
+      dispatch('interaction', [
+        state.interactionState.type === 'maybePan'
+          ? 'updatePanning'
+          : 'maybePan',
+        rawPoint,
+      ]);
+    },
+  });
 
   const isEditingPath = getIsEditingPath(state.interactionState.type);
   const nudge = (axis: 'X' | 'Y', amount: number) => {
@@ -741,9 +754,11 @@ export default memo(function Canvas() {
       <Container
         ref={containerRef}
         cursor={cursor}
-        onPointerDown={handleMouseDown}
-        onPointerMove={handleMouseMove}
-        onPointerUp={handleMouseUp}
+        {...mergeProps(bind(), {
+          onPointerDown: handleMouseDown,
+          onPointerMove: handleMouseMove,
+          onPointerUp: handleMouseUp,
+        })}
       >
         <InsetContainer insets={insets}>
           {canvasSizeWithInsets && (
