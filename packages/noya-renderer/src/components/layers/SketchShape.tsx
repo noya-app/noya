@@ -12,6 +12,8 @@ import {
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
 import { Primitives } from 'noya-renderer';
 import { memo, useMemo } from 'react';
+import { useApplicationState } from '../../../../app/src/contexts/ApplicationStateContext';
+import { Rect } from '../../../../noya-state/src';
 import { getStrokedPath } from '../../primitives/path';
 import SketchBorder from '../effects/SketchBorder';
 
@@ -34,19 +36,22 @@ const SketchFill = memo(function SketchFill({
   path,
   fill,
   transform,
+  frame,
+  image,
 }: {
   path: CanvasKit.Path;
   fill: Sketch.Fill;
   transform: number[];
+  frame: Rect;
+  image?: ArrayBuffer;
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
   // TODO: Delete internal gradient shaders on unmount
-  const paint = useMemo(() => Primitives.fill(CanvasKit, fill, transform), [
-    CanvasKit,
-    fill,
-    transform,
-  ]);
+  const paint = useMemo(
+    () => Primitives.fill(CanvasKit, fill, transform, frame, image),
+    [CanvasKit, fill, transform, frame, image],
+  );
 
   useDeletable(paint);
 
@@ -180,6 +185,7 @@ interface Props {
 
 export default memo(function SketchShape({ layer }: Props) {
   const { CanvasKit } = useReactCanvasKit();
+  const [state] = useApplicationState();
 
   const path = Primitives.path(CanvasKit, layer.points, layer.frame);
 
@@ -192,8 +198,10 @@ export default memo(function SketchShape({ layer }: Props) {
 
   if (!layer.style) return null;
 
-  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled).reverse();
-  const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
+  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled);
+  const borders = (layer.style.borders ?? [])
+    .filter((x) => x.isEnabled)
+    .reverse();
   const shadows = (layer.style.shadows ?? [])
     .filter((x) => x.isEnabled)
     .reverse();
@@ -230,6 +238,8 @@ export default memo(function SketchShape({ layer }: Props) {
           fill={fill}
           path={path}
           transform={transform}
+          frame={layer.frame}
+          image={fill.image ? state.sketch.images[fill.image._ref] : undefined}
         />
       ))}
       {borders.map((border, index) => (
