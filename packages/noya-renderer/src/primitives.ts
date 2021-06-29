@@ -189,46 +189,11 @@ export function fill(
           );
           break;
         }
-        case Sketch.PatternFillType.Fit: {
-          const bounds = createBounds(layerFrame);
-          const scaledRect = resize(
-            {
-              ...layerFrame,
-              width: canvasImage.width(),
-              height: canvasImage.height(),
-            },
-            layerFrame,
-            'scaleAspectFit',
-          );
-
-          // Scale the largest side to fit, if needed
-          const scale = Math.max(
-            scaledRect.width / canvasImage.width(),
-            scaledRect.height / canvasImage.height(),
-          );
-
-          paint.setShader(
-            canvasImage.makeShaderCubic(
-              CanvasKit.TileMode.Decal,
-              CanvasKit.TileMode.Decal,
-              1,
-              1,
-              CanvasKit.Matrix.multiply(
-                CanvasKit.Matrix.translated(
-                  bounds.midX - scaledRect.width / 2,
-                  bounds.midY - scaledRect.height / 2,
-                ),
-                CanvasKit.Matrix.scaled(scale, scale),
-              ),
-            ),
-          );
-          break;
-        }
         case Sketch.PatternFillType.Stretch: {
           paint.setShader(
             canvasImage.makeShaderCubic(
-              CanvasKit.TileMode.Clamp,
-              CanvasKit.TileMode.Clamp,
+              CanvasKit.TileMode.Decal,
+              CanvasKit.TileMode.Decal,
               0,
               0,
               CanvasKit.Matrix.multiply(
@@ -242,6 +207,7 @@ export function fill(
           );
           break;
         }
+        case Sketch.PatternFillType.Fit:
         case Sketch.PatternFillType.Fill: {
           const bounds = createBounds(layerFrame);
           const scaledRect = resize(
@@ -251,7 +217,9 @@ export function fill(
               height: canvasImage.height(),
             },
             layerFrame,
-            'scaleAspectFill',
+            fill.patternFillType === Sketch.PatternFillType.Fit
+              ? 'scaleAspectFit'
+              : 'scaleAspectFill',
           );
 
           // Scale the largest side to fit, if needed
