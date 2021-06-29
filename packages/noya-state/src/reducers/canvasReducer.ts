@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import {
   AffineTransform,
@@ -18,13 +19,15 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getSelectedLayerIndexPathsExcludingDescendants,
+  moveControlPoints,
+  moveSelectedPoints,
 } from '../selectors/selectors';
 import {
   findSmallestSnappingDistance,
   getAxisValues,
-  getSnappingPairs,
-  getPossibleSnapLayers,
   getLayerAxisInfo,
+  getPossibleSnapLayers,
+  getSnappingPairs,
 } from '../snapping';
 import { Point } from '../types';
 import { ApplicationState } from './applicationReducer';
@@ -47,19 +50,33 @@ export type CanvasAction =
       // of the current page). Maybe there's a better way? This still seems
       // better than moving the whole reducer up into the parent.
       action:
-        | Exclude<InteractionAction, ['maybeMove' | 'maybeScale', ...any[]]>
+        | Exclude<
+            InteractionAction,
+            [
+              (
+                | 'maybeMove'
+                | 'maybeScale'
+                | 'maybeMovePoint'
+                | 'maybeMoveControlPoint'
+              ),
+              ...any[]
+            ]
+          >
         | [type: 'maybeMove', origin: Point, canvasSize: Size]
         | [
             type: 'maybeScale',
             origin: Point,
             direction: CompassDirection,
             canvasSize: Size,
-          ],
+          ]
+        | [type: 'maybeMovePoint', origin: Point]
+        | [type: 'maybeMoveControlPoint', origin: Point],
     ];
 
 export function canvasReducer(
   state: ApplicationState,
   action: CanvasAction,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
     case 'insertArtboard': {
@@ -138,7 +155,10 @@ export function canvasReducer(
 
       const interactionState = interactionReducer(
         state.interactionState,
-        action[1][0] === 'maybeScale' || action[1][0] === 'maybeMove'
+        action[1][0] === 'maybeScale' ||
+          action[1][0] === 'maybeMove' ||
+          action[1][0] === 'maybeMovePoint' ||
+          action[1][0] === 'maybeMoveControlPoint'
           ? [...action[1], page]
           : action[1],
       );
@@ -148,6 +168,8 @@ export function canvasReducer(
 
         switch (interactionState.type) {
           case 'editPath': {
+            if (action[1][0] === 'resetEditPath') break;
+
             //Selects the first point in the first selected layer and initializes a point list for each selected layer
             layerIndexPaths.forEach((layerIndex, index) => {
               const layer = Layers.access(page, layerIndex);
@@ -221,6 +243,46 @@ export function canvasReducer(
               layer.frame.y = initialRect.y + delta.y;
             });
 
+            break;
+          }
+          case 'movingPoint': {
+            const { current, origin, pageSnapshot } = interactionState;
+
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
+            moveSelectedPoints(
+              draft.selectedPointLists,
+              layerIndexPaths,
+              delta,
+              'adjust',
+              draft.sketch.pages[pageIndex],
+              pageSnapshot,
+              CanvasKit,
+            );
+
+            break;
+          }
+          case 'movingControlPoint': {
+            if (!draft.selectedControlPoint) return;
+            const { current, origin, pageSnapshot } = interactionState;
+
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
+            moveControlPoints(
+              draft.selectedControlPoint,
+              layerIndexPaths,
+              delta,
+              'adjust',
+              draft.sketch.pages[pageIndex],
+              pageSnapshot,
+              CanvasKit,
+            );
             break;
           }
           case 'scaling': {

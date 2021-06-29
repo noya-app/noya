@@ -16,7 +16,10 @@ import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
 import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
 import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
 import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
-import { isPointInRange } from 'noya-state/src/selectors/pointSelectors';
+import {
+  getIsEditingPath,
+  isPointInRange,
+} from 'noya-state/src/selectors/pointSelectors';
 import {
   CSSProperties,
   memo,
@@ -71,6 +74,9 @@ function getPoint(event: MouseEvent): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
+function isMoving(point: Point, origin: Point): boolean {
+  return Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2;
+}
 const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   ({ cursor }) => ({
     flex: '1',
@@ -101,11 +107,11 @@ export default memo(function Canvas() {
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
 
-  const isEditingPath = state.interactionState.type === 'editPath';
+  const isEditingPath = getIsEditingPath(state.interactionState.type);
 
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
-      dispatch(`setControlPoint${axis}` as const, amount, CanvasKit, 'adjust');
+      dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
     } else {
       dispatch(
         isEditingPath
@@ -271,7 +277,11 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
-        case 'editPath': {
+        case 'editPath':
+        case 'movingControlPoint':
+        case 'movingPoint':
+        case 'maybeMoveControlPoint':
+        case 'maybeMovePoint': {
           let selectedPoint: SelectedPoint | undefined = undefined;
           let selectedControlPoint: SelectedControlPoint | undefined;
 
@@ -322,6 +332,7 @@ export default memo(function Canvas() {
                   : 'intersection'
                 : 'replace',
             );
+            dispatch('interaction', ['maybeMovePoint', point]);
           } else if (selectedControlPoint) {
             dispatch(
               'selectControlPoint',
@@ -329,10 +340,10 @@ export default memo(function Canvas() {
               selectedControlPoint.pointIndex,
               selectedControlPoint.controlPointType,
             );
+            dispatch('interaction', ['maybeMoveControlPoint', point]);
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
           }
-
           break;
         }
         case 'hoverHandle':
@@ -412,10 +423,7 @@ export default memo(function Canvas() {
         case 'maybeScale': {
           const { origin } = state.interactionState;
 
-          if (
-            Math.abs(point.x - origin.x) > 2 ||
-            Math.abs(point.y - origin.y) > 2
-          ) {
+          if (isMoving(point, origin)) {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
                 ? 'startMoving'
@@ -423,6 +431,46 @@ export default memo(function Canvas() {
               point,
             ]);
           }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'maybeMovePoint': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingPoint', origin, point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'movingPoint': {
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingPoint', origin, point]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'maybeMoveControlPoint': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingControlPoint', origin, point]);
+          }
+
+          event.preventDefault();
+          containerRef.current?.setPointerCapture(event.pointerId);
+          break;
+        }
+        case 'movingControlPoint': {
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingControlPoint', origin, point]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
@@ -615,6 +663,15 @@ export default memo(function Canvas() {
 
           containerRef.current?.releasePointerCapture(event.pointerId);
 
+          break;
+        }
+
+        case 'maybeMoveControlPoint':
+        case 'movingControlPoint':
+        case 'maybeMovePoint':
+        case 'movingPoint': {
+          dispatch('interaction', ['resetEditPath']);
+          containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
       }

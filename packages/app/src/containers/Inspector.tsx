@@ -90,7 +90,8 @@ export default memo(function Inspector() {
     getMultiValue(selectedLayers.map((layer) => layer.isFlippedHorizontal)) ??
     false;
 
-  const isEditingPath = state.interactionState.type === 'editPath';
+  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
+
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {

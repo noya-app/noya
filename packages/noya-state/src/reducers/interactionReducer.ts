@@ -33,7 +33,8 @@ export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
 export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
-  | [type: 'editPath', layerIds: string[]]
+  | [type: 'editPath']
+  | [type: 'resetEditPath']
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
@@ -59,7 +60,13 @@ export type InteractionAction =
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
-  | [type: 'enablePanMode'];
+  | [type: 'enablePanMode']
+  | [type: 'maybeMovePoint', origin: Point, pageSnapshot: Sketch.Page]
+  | [type: 'maybeMoveControlPoint', origin: Point, pageSnapshot: Sketch.Page]
+  | [type: 'movingPoint', origin: Point, current: Point]
+  | [type: 'movingControlPoint', origin: Point, current: Point]
+  | [type: 'updateMovingPoint', origin: Point, current: Point]
+  | [type: 'updateMovingControlPoint', origin: Point, current: Point];
 
 export type InteractionState =
   | {
@@ -70,7 +77,6 @@ export type InteractionState =
     }
   | {
       type: 'editPath';
-      layerIds: string[];
     }
   | {
       type: 'drawing';
@@ -86,6 +92,28 @@ export type InteractionState =
       type: 'maybeMove';
       origin: Point;
       canvasSize: Size;
+      pageSnapshot: Sketch.Page;
+    }
+  | {
+      type: 'maybeMovePoint';
+      origin: Point;
+      pageSnapshot: Sketch.Page;
+    }
+  | {
+      type: 'maybeMoveControlPoint';
+      origin: Point;
+      pageSnapshot: Sketch.Page;
+    }
+  | {
+      type: 'movingPoint';
+      origin: Point;
+      current: Point;
+      pageSnapshot: Sketch.Page;
+    }
+  | {
+      type: 'movingControlPoint';
+      origin: Point;
+      current: Point;
       pageSnapshot: Sketch.Page;
     }
   | { type: 'hoverHandle'; direction: CompassDirection }
@@ -138,9 +166,8 @@ export function interactionReducer(
 ): InteractionState {
   switch (action[0]) {
     case 'editPath':
-      const [type, layerIds] = action;
-
-      return { type, layerIds };
+    case 'resetEditPath':
+      return { type: 'editPath' };
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
@@ -216,6 +243,86 @@ export function interactionReducer(
         direction,
         canvasSize,
         pageSnapshot,
+      };
+    }
+    case 'maybeMovePoint': {
+      const [type, origin, pageSnapshot] = action;
+
+      return {
+        type,
+        origin,
+        pageSnapshot,
+      };
+    }
+    case 'maybeMoveControlPoint': {
+      const [type, origin, pageSnapshot] = action;
+
+      return {
+        type,
+        origin,
+        pageSnapshot,
+      };
+    }
+    case 'movingPoint': {
+      const [type, origin, current] = action;
+
+      if (state.type !== 'maybeMovePoint') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeMovePoint`',
+        );
+      }
+
+      return {
+        type,
+        origin,
+        current,
+        pageSnapshot: state.pageSnapshot,
+      };
+    }
+    case 'updateMovingPoint': {
+      const [, origin, current] = action;
+
+      if (state.type !== 'movingPoint') {
+        throw new Error('Bad interaction state - should be in `movingPoint`');
+      }
+
+      return {
+        type: 'movingPoint',
+        origin,
+        current,
+        pageSnapshot: state.pageSnapshot,
+      };
+    }
+    case 'updateMovingControlPoint': {
+      const [, origin, current] = action;
+
+      if (state.type !== 'movingControlPoint') {
+        throw new Error(
+          'Bad interaction state - should be in `movingControlPoint`',
+        );
+      }
+
+      return {
+        type: 'movingControlPoint',
+        origin,
+        current,
+        pageSnapshot: state.pageSnapshot,
+      };
+    }
+    case 'movingControlPoint': {
+      const [type, origin, current] = action;
+
+      if (state.type !== 'maybeMoveControlPoint') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeMoveControlPoint`',
+        );
+      }
+
+      return {
+        type,
+        origin,
+        current,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'startMoving': {

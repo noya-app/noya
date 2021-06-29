@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { uuid } from 'noya-renderer';
@@ -46,13 +47,15 @@ export type SelectedControlPoint = {
   controlPointType: controlPointType;
 };
 
+export type SelectedPointLists = Record<string, number[]>;
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
   selectedPage: string;
   selectedObjects: string[];
-  selectedPointLists: Record<string, number[]>;
+  selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
@@ -82,6 +85,7 @@ export type Action =
 export function applicationReducer(
   state: ApplicationState,
   action: Action,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
     case 'setTab': {
@@ -105,7 +109,7 @@ export function applicationReducer(
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'interaction':
-      return canvasReducer(state, action);
+      return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
@@ -292,7 +296,7 @@ export function applicationReducer(
     case 'setControlPointY':
     case 'selectPoint':
     case 'selectControlPoint':
-      return pointReducer(state, action);
+      return pointReducer(state, action, CanvasKit);
     default:
       return themeReducer(state, action);
   }

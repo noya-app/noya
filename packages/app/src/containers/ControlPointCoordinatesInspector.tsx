@@ -1,7 +1,6 @@
 import { SetNumberMode } from 'noya-state';
 import { getSelectedControlPoint } from 'noya-state/src/selectors/pointSelectors';
 import React, { memo, useCallback } from 'react';
-import useCanvasKit from '../hooks/useCanvasKit';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
 
@@ -11,20 +10,19 @@ function roundNumber(number: number, roundTo: number) {
 
 export default memo(function ControlPointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();
-  const CanvasKit = useCanvasKit();
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setControlPointX', value, CanvasKit, mode);
+      dispatch('setControlPointX', value, mode);
     },
-    [CanvasKit, dispatch],
+    [dispatch],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setControlPointY', value, CanvasKit, mode);
+      dispatch('setControlPointY', value, mode);
     },
-    [CanvasKit, dispatch],
+    [dispatch],
   );
 
   const selectedControlPoint = getSelectedControlPoint(state);

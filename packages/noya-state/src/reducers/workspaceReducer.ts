@@ -1,4 +1,5 @@
 import type { FileSystemHandle } from 'browser-fs-access';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { SketchFile } from 'noya-sketch-file';
 import { Models } from '..';
@@ -51,6 +52,7 @@ export type WorkspaceAction =
 export function workspaceReducer(
   state: WorkspaceState,
   action: WorkspaceAction,
+  CanvasKit: CanvasKit,
 ): WorkspaceState {
   switch (action[0]) {
     case 'newFile': {
@@ -107,7 +109,7 @@ export function workspaceReducer(
     }
     default: {
       return produce(state, (draft) => {
-        draft.history = historyReducer(state.history, action);
+        draft.history = historyReducer(state.history, action, CanvasKit);
       });
     }
   }

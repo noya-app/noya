@@ -26,6 +26,7 @@ import {
   getBoundingRect,
   getCanvasTransform,
   getCurrentPage,
+  getIsEditingPath,
   getLayerTransformAtIndexPath,
   getScreenTransform,
   getSelectedLayerIndexPaths,
@@ -153,7 +154,7 @@ export default memo(function SketchFileRenderer() {
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
-  const isEditingPath = state.interactionState.type === 'editPath';
+  const isEditingPath = getIsEditingPath(state.interactionState.type);
 
   const canvasRect = useMemo(
     () =>
