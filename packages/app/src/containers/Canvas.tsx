@@ -16,7 +16,10 @@ import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
 import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
 import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
 import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
-import { isPointInRange } from 'noya-state/src/selectors/pointSelectors';
+import {
+  getIsEditingPath,
+  isPointInRange,
+} from 'noya-state/src/selectors/pointSelectors';
 import {
   CSSProperties,
   memo,
@@ -71,6 +74,12 @@ function getPoint(event: MouseEvent): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
+function isMoving(point: Point, origin: Point): boolean {
+  if (Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2) {
+    return true;
+  }
+  return false;
+}
 const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   ({ cursor }) => ({
     flex: '1',
@@ -101,14 +110,7 @@ export default memo(function Canvas() {
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
 
-  const isEditingPath =
-    state.interactionState.type === 'editPath' ||
-    state.interactionState.type === 'maybeMovePoint' ||
-    state.interactionState.type === 'movingPoint' ||
-    state.interactionState.type === 'maybeMoveControlPoint' ||
-    state.interactionState.type === 'movingControlPoint' ||
-    state.interactionState.type === 'updateMovingPoint' ||
-    state.interactionState.type === 'updateMovingControlPoint';
+  const isEditingPath = getIsEditingPath(state.interactionState.type);
 
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
@@ -333,7 +335,7 @@ export default memo(function Canvas() {
                   : 'intersection'
                 : 'replace',
             );
-            dispatch('interaction', ['maybeMovePoint', point, selectedPoint]);
+            dispatch('interaction', ['maybeMovePoint', point]);
           } else if (selectedControlPoint) {
             dispatch(
               'selectControlPoint',
@@ -341,11 +343,7 @@ export default memo(function Canvas() {
               selectedControlPoint.pointIndex,
               selectedControlPoint.controlPointType,
             );
-            dispatch('interaction', [
-              'maybeMoveControlPoint',
-              point,
-              selectedControlPoint,
-            ]);
+            dispatch('interaction', ['maybeMoveControlPoint', point]);
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
           }
@@ -428,10 +426,7 @@ export default memo(function Canvas() {
         case 'maybeScale': {
           const { origin } = state.interactionState;
 
-          if (
-            Math.abs(point.x - origin.x) > 2 ||
-            Math.abs(point.y - origin.y) > 2
-          ) {
+          if (isMoving(point, origin)) {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
                 ? 'startMoving'
@@ -442,67 +437,43 @@ export default memo(function Canvas() {
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
-
           break;
         }
         case 'maybeMovePoint': {
-          const { origin, selectedPoint } = state.interactionState;
-          if (
-            Math.abs(point.x - origin.x) > 2 ||
-            Math.abs(point.y - origin.y) > 2
-          ) {
-            dispatch('interaction', [
-              'movingPoint',
-              origin,
-              point,
-              selectedPoint,
-            ]);
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingPoint', origin, point]);
           }
+
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
-
           break;
         }
         case 'movingPoint': {
-          const { origin, selectedPoint } = state.interactionState;
-          dispatch('interaction', [
-            'updateMovingPoint',
-            origin,
-            point,
-            selectedPoint,
-          ]);
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingPoint', origin, point]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
-
           break;
         }
         case 'maybeMoveControlPoint': {
-          const { origin, selectedPoint } = state.interactionState;
+          const { origin } = state.interactionState;
 
-          if (
-            Math.abs(point.x - origin.x) > 2 ||
-            Math.abs(point.y - origin.y) > 2
-          ) {
-            dispatch('interaction', [
-              'movingControlPoint',
-              origin,
-              point,
-              selectedPoint,
-            ]);
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingControlPoint', origin, point]);
           }
+
           event.preventDefault();
           containerRef.current?.setPointerCapture(event.pointerId);
           break;
         }
         case 'movingControlPoint': {
-          const { origin, selectedPoint } = state.interactionState;
-          dispatch('interaction', [
-            'updateMovingControlPoint',
-            origin,
-            point,
-            selectedPoint,
-          ]);
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingControlPoint', origin, point]);
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();

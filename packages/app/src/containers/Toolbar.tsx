@@ -8,7 +8,7 @@ import {
 } from '@radix-ui/react-icons';
 import { Spacer } from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
-import { InteractionType } from 'noya-state';
+import { InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { useKeyboardShortcuts } from 'noya-keymap';
@@ -54,14 +54,8 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertRectangle = interactionType === 'insertRectangle';
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
-  const isEditingPath =
-    interactionType === 'editPath' ||
-    interactionType === 'maybeMovePoint' ||
-    interactionType === 'movingPoint' ||
-    interactionType === 'maybeMoveControlPoint' ||
-    interactionType === 'movingControlPoint' ||
-    interactionType === 'updateMovingPoint' ||
-    interactionType === 'updateMovingControlPoint';
+  const isEditingPath = Selectors.getIsEditingPath(interactionType);
+
   const isPanning =
     interactionType === 'panMode' ||
     interactionType === 'maybePan' ||

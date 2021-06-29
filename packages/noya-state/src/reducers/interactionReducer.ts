@@ -4,8 +4,6 @@ import { createRect, Size } from 'noya-geometry';
 import type { PageLayer } from '..';
 import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
-import { SelectedControlPoint } from './applicationReducer';
-import { SelectedPoint } from './pointReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -63,36 +61,12 @@ export type InteractionAction =
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
-  | [type: 'maybeMovePoint', origin: Point, selectedPoint: SelectedPoint]
-  | [
-      type: 'maybeMoveControlPoint',
-      origin: Point,
-      selectedPoint: SelectedControlPoint,
-    ]
-  | [
-      type: 'movingPoint',
-      origin: Point,
-      current: Point,
-      selectedPoint: SelectedPoint,
-    ]
-  | [
-      type: 'updateMovingPoint',
-      origin: Point,
-      current: Point,
-      selectedPoint: SelectedPoint,
-    ]
-  | [
-      type: 'updateMovingControlPoint',
-      origin: Point,
-      current: Point,
-      selectedPoint: SelectedControlPoint,
-    ]
-  | [
-      type: 'movingControlPoint',
-      origin: Point,
-      current: Point,
-      selectedPoint: SelectedControlPoint,
-    ];
+  | [type: 'maybeMovePoint', origin: Point, pageSnapshot: Sketch.Page]
+  | [type: 'maybeMoveControlPoint', origin: Point, pageSnapshot: Sketch.Page]
+  | [type: 'movingPoint', origin: Point, current: Point]
+  | [type: 'movingControlPoint', origin: Point, current: Point]
+  | [type: 'updateMovingPoint', origin: Point, current: Point]
+  | [type: 'updateMovingControlPoint', origin: Point, current: Point];
 
 export type InteractionState =
   | {
@@ -123,36 +97,24 @@ export type InteractionState =
   | {
       type: 'maybeMovePoint';
       origin: Point;
-      selectedPoint: SelectedPoint;
+      pageSnapshot: Sketch.Page;
     }
   | {
       type: 'maybeMoveControlPoint';
       origin: Point;
-      selectedPoint: SelectedControlPoint;
+      pageSnapshot: Sketch.Page;
     }
   | {
       type: 'movingPoint';
       origin: Point;
       current: Point;
-      selectedPoint: SelectedPoint;
-    }
-  | {
-      type: 'updateMovingPoint';
-      origin: Point;
-      current: Point;
-      selectedPoint: SelectedPoint;
-    }
-  | {
-      type: 'updateMovingControlPoint';
-      origin: Point;
-      current: Point;
-      selectedPoint: SelectedControlPoint;
+      pageSnapshot: Sketch.Page;
     }
   | {
       type: 'movingControlPoint';
       origin: Point;
       current: Point;
-      selectedPoint: SelectedControlPoint;
+      pageSnapshot: Sketch.Page;
     }
   | { type: 'hoverHandle'; direction: CompassDirection }
   | {
@@ -284,23 +246,26 @@ export function interactionReducer(
       };
     }
     case 'maybeMovePoint': {
-      const [type, origin, selectedPoint] = action;
+      const [type, origin, pageSnapshot] = action;
+
       return {
         type,
         origin,
-        selectedPoint,
+        pageSnapshot,
       };
     }
     case 'maybeMoveControlPoint': {
-      const [type, origin, selectedPoint] = action;
+      const [type, origin, pageSnapshot] = action;
+
       return {
         type,
         origin,
-        selectedPoint,
+        pageSnapshot,
       };
     }
     case 'movingPoint': {
-      const [type, origin, current, selectedPoint] = action;
+      const [type, origin, current] = action;
+
       if (state.type !== 'maybeMovePoint') {
         throw new Error(
           'Bad interaction state - should be in `maybeMovePoint`',
@@ -311,11 +276,11 @@ export function interactionReducer(
         type,
         origin,
         current,
-        selectedPoint,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'updateMovingPoint': {
-      const [, origin, current, selectedPoint] = action;
+      const [, origin, current] = action;
 
       if (state.type !== 'movingPoint') {
         throw new Error('Bad interaction state - should be in `movingPoint`');
@@ -325,11 +290,11 @@ export function interactionReducer(
         type: 'movingPoint',
         origin,
         current,
-        selectedPoint,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'updateMovingControlPoint': {
-      const [, origin, current, selectedPoint] = action;
+      const [, origin, current] = action;
 
       if (state.type !== 'movingControlPoint') {
         throw new Error(
@@ -341,21 +306,23 @@ export function interactionReducer(
         type: 'movingControlPoint',
         origin,
         current,
-        selectedPoint,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'movingControlPoint': {
-      const [type, origin, current, selectedPoint] = action;
+      const [type, origin, current] = action;
+
       if (state.type !== 'maybeMoveControlPoint') {
         throw new Error(
           'Bad interaction state - should be in `maybeMoveControlPoint`',
         );
       }
+
       return {
         type,
         origin,
         current,
-        selectedPoint,
+        pageSnapshot: state.pageSnapshot,
       };
     }
     case 'startMoving': {

@@ -47,13 +47,15 @@ export type SelectedControlPoint = {
   controlPointType: controlPointType;
 };
 
+export type SelectedPointLists = Record<string, number[]>;
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
   selectedPage: string;
   selectedObjects: string[];
-  selectedPointLists: Record<string, number[]>;
+  selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
   selectedSwatchIds: string[];
   selectedLayerStyleIds: string[];
