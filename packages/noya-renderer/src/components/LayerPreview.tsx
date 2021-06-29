@@ -53,21 +53,27 @@ export default function LayerPreview({
       ? resizeIfLarger(layerSize, paddedSize)
       : resize(layerSize, paddedSize);
 
-  // Scale the largest side to fit, if needed
-  const scale = Math.max(
-    scaledRect.width / layerSize.width,
-    scaledRect.height / layerSize.height,
-  );
-
   const transform = useMemo(() => {
     return AffineTransform.multiply(
       // Translate to the center of the size
       AffineTransform.translation(size.width / 2, size.height / 2),
-      AffineTransform.scale(scale),
+      AffineTransform.scale(
+        scaledRect.width / layerSize.width,
+        scaledRect.height / layerSize.height,
+      ),
       // Translate to (0,0) before scaling, since scale is applied at the origin
       AffineTransform.translation(-bounds.midX, -bounds.midY),
     );
-  }, [size.width, size.height, scale, bounds.midX, bounds.midY]);
+  }, [
+    size.width,
+    size.height,
+    scaledRect.width,
+    scaledRect.height,
+    layerSize.width,
+    layerSize.height,
+    bounds.midX,
+    bounds.midY,
+  ]);
 
   return (
     <>
