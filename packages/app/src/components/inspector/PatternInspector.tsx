@@ -17,6 +17,7 @@ import { uuid } from 'noya-renderer';
 import { FileMap } from 'noya-sketch-file';
 import { useHover } from 'noya-designsystem/src/hooks/useHover';
 import { useFileDropTarget } from '../../hooks/useFileDropTarget';
+import { useObjectURL } from '../../hooks/useObjectURL';
 
 const Container = styled.div<{
   background: string;
@@ -38,6 +39,7 @@ const Container = styled.div<{
   backgroundSize,
   imageRendering: 'crisp-edges',
   width: '100%',
+  transform: 'scale(0.999)',
   justifyContent: 'center',
 }));
 
@@ -113,9 +115,8 @@ export default memo(function PatternInspector({
     [onChangeTileScale],
   );
 
-  const background = useMemo(
-    () => getPatternBackground(images, pattern.image),
-    [images, pattern.image],
+  const backgroundUrl = useObjectURL(
+    getPatternBackground(images, pattern.image),
   );
 
   const backgroundSize = useMemo(
@@ -184,7 +185,7 @@ export default memo(function PatternInspector({
           {...dropTargetProps}
           {...hoverProps}
           isActive={isDropTargetActive}
-          background={background}
+          background={`url(${backgroundUrl})`}
           backgroundSize={backgroundSize}
           repeat={isTile}
         >

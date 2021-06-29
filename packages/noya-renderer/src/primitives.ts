@@ -170,6 +170,7 @@ export function fill(
         }
       }
 
+      paint.setAlphaf(fill.contextSettings.opacity);
       break;
     }
     case Sketch.FillType.Pattern: {
@@ -235,6 +236,7 @@ export function fill(
           break;
         }
       }
+      paint.setAlphaf(fill.contextSettings.opacity);
     }
   }
 

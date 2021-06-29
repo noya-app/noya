@@ -5,6 +5,7 @@ import { sketchColorToRgbaString } from '../utils/sketchColor';
 import { getGradientBackground } from '../utils/getGradientBackground';
 import { getPatternBackground, SketchPattern } from '../utils/sketchPattern';
 import { useApplicationState } from '../../../app/src/contexts/ApplicationStateContext';
+import { useObjectURL } from '../../../app/src/hooks/useObjectURL';
 
 const Container = styled.button<{
   background: string;
@@ -39,6 +40,13 @@ export default forwardRef(function FillInputField(
   const [state] = useApplicationState();
   const { inputBackground, placeholderDots } = useTheme().colors;
 
+  const backgroundPattern = useObjectURL(
+    getPatternBackground(
+      state.sketch.images,
+      value && value._class === 'pattern' ? value.image : undefined,
+    ),
+  );
+
   const background = useMemo(() => {
     if (!value)
       return [
@@ -54,13 +62,10 @@ export default forwardRef(function FillInputField(
       case 'gradient':
         return getGradientBackground(value.stops, value.gradientType, 180);
       case 'pattern': {
-        return `center / cover ${getPatternBackground(
-          state.sketch.images,
-          value.image,
-        )}`;
+        return `center / cover url(${backgroundPattern})`;
       }
     }
-  }, [value, placeholderDots, inputBackground, state.sketch.images]);
+  }, [value, placeholderDots, inputBackground, backgroundPattern]);
 
   return <Container ref={ref} background={background} id={id} {...rest} />;
 });

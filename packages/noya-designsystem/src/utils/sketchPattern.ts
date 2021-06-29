@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { FileMap } from 'noya-sketch-file';
-import { encodeImg } from './encodeImg';
 
 export const SUPPORTED_FILE_TYPES: { [key: string]: string } = {
   'image/png': 'png',
@@ -20,12 +19,9 @@ export function getPatternBackground(
   image?: Sketch.FileRef | Sketch.DataRef,
 ) {
   if (!image || !images[image._ref])
-    return `url(
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYI=A',
-      )`;
+    return `'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYI=A',`;
 
-  const bytes = new Uint8Array(images[image._ref]);
-  return `url('data:image/png;base64,${encodeImg(bytes)}')`;
+  return images[image._ref];
 }
 
 export function getPatternSize(

@@ -2,14 +2,28 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Divider, getPatternBackground, Select } from 'noya-designsystem';
 import { FileMap } from 'noya-sketch-file';
 import { memo } from 'react';
+import { useObjectURL } from '../../hooks/useObjectURL';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { GridSmall, Square } from './PickerAssetGrid';
 
 interface Props {
   fileImages: FileMap;
   imageAssets: (Sketch.FileRef | Sketch.DataRef)[];
-  onChange: (color: Sketch.FileRef | Sketch.DataRef) => void;
+  onChange: (file: Sketch.FileRef | Sketch.DataRef) => void;
 }
+
+const PatternSquare = memo(
+  ({
+    image,
+    onClick,
+  }: {
+    image: ArrayBuffer | string;
+    onClick: () => void;
+  }) => {
+    const backgroundUrl = useObjectURL(image);
+    return <Square background={`url(${backgroundUrl})`} onClick={onClick} />;
+  },
+);
 
 export default memo(function PickerPatterns({
   fileImages,
@@ -33,9 +47,9 @@ export default memo(function PickerPatterns({
         <InspectorPrimitives.Section>
           <GridSmall>
             {imageAssets.map((item) => (
-              <Square
+              <PatternSquare
                 key={item._ref}
-                background={getPatternBackground(fileImages, item)}
+                image={getPatternBackground(fileImages, item)}
                 onClick={() => onChange(item)}
               />
             ))}
