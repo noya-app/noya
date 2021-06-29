@@ -281,6 +281,7 @@ export default memo(function Canvas() {
           // console.log(
           //   'This is where we will want to drop points on the canvas',
           // );
+          dispatch('interaction', ['startDrawingPath', point]);
           break;
         }
         case 'editPath':
@@ -414,9 +415,11 @@ export default memo(function Canvas() {
 
       switch (state.interactionState.type) {
         case 'createPath': {
-          // console.log(
-          //   'This is where we will draw a path if theres been a point dropped',
-          // );
+          dispatch('interaction', ['startDrawingPath', point]);
+          break;
+        }
+        case 'startDrawingPath': {
+          dispatch('interaction', ['updateDrawingPath', point]);
           break;
         }
         case 'maybePan': {
@@ -711,6 +714,7 @@ export default memo(function Canvas() {
       case 'insertText':
         return 'crosshair';
       case 'createPath':
+      case 'startDrawingPath':
         return 'copy';
       case 'maybeScale':
       case 'scaling':

@@ -56,7 +56,8 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
-  const isCreatingPath = interactionType === 'createPath';
+  const isCreatingPath =
+    interactionType === 'createPath' || interactionType === 'startDrawingPath';
 
   const isPanning =
     interactionType === 'panMode' ||
@@ -224,7 +225,7 @@ const ToolbarContent = memo(function ToolbarContent({
           [],
         )}
       </Button>
-      <Spacer.Horizontal size={10} />
+      <Spacer.Horizontal size={itemSeparatorSize} />
       <Button
         id="edit-path"
         tooltip="Edit path"

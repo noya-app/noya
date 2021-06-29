@@ -59,6 +59,7 @@ import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import MeasurementGuide from './MeasurementGuide';
+import NewPathPoint from './NewPath';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -155,6 +156,7 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
   const isEditingPath = getIsEditingPath(state.interactionState.type);
+  const isCreatingPath = state.interactionState.type === 'startDrawingPath';
 
   const canvasRect = useMemo(
     () =>
@@ -480,6 +482,15 @@ export default memo(function SketchFileRenderer() {
     );
   }, [isEditingPath, page, state]);
 
+  const creatingPath = useMemo(() => {
+    if (!isCreatingPath) return;
+    if (state.interactionState.type === 'startDrawingPath') {
+      const { current } = state.interactionState;
+
+      return <NewPathPoint point={current} />;
+    }
+  }, [isCreatingPath, state.interactionState]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -499,6 +510,7 @@ export default memo(function SketchFileRenderer() {
               <Polyline key={index} points={points} paint={selectionPaint} />
             ))}
             {!isEditingPath && highlightedSketchLayer}
+            {isCreatingPath && creatingPath}
             {smartSnapGuides}
             {quickMeasureGuides}
             {boundingRect && (
