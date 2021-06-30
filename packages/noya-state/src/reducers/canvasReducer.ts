@@ -9,7 +9,11 @@ import {
   Size,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
-import { resizeRect } from 'noya-renderer/src/primitives';
+import {
+  decodeCurvePoint,
+  encodeCurvePoint,
+  resizeRect,
+} from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -179,6 +183,53 @@ export function canvasReducer(
               }
             });
             break;
+          }
+          case 'drawingShapePath': {
+            const { layer, point } = interactionState;
+            const parent = draft.sketch.pages[pageIndex].layers
+              .filter(
+                (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+                  Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+              )
+              .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
+
+            if (parent && Layers.isChildLayer(layer)) {
+              layer.frame.x -= parent.frame.x;
+              layer.frame.y -= parent.frame.y;
+
+              parent.layers.push(layer);
+            } else {
+              draft.sketch.pages[pageIndex].layers.push(layer);
+            }
+
+            const boundingRect = getBoundingRect(
+              draft.sketch.pages[pageIndex],
+              AffineTransform.identity,
+              [layer.do_objectID],
+              {
+                clickThroughGroups: true,
+                includeHiddenLayers: false,
+                includeArtboardLayers: false,
+              },
+            );
+
+            if (layer._class === 'shapePath' && boundingRect) {
+              const decodedPoint = decodeCurvePoint(
+                layer.points[0],
+                boundingRect,
+              );
+              // decodedPoint.curveFrom = {
+              //   x: 0,
+              //   y: 0,
+              // };
+              // decodedPoint.curveTo = {
+              //   x: 0,
+              //   y: 0,
+              // };
+              decodedPoint.point = point;
+              layer.points = [encodeCurvePoint(decodedPoint, layer.frame)];
+            }
+            return;
           }
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;

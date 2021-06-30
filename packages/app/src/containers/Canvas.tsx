@@ -279,8 +279,13 @@ export default memo(function Canvas() {
         }
         case 'startDrawingPath':
         case 'updateDrawingPath': {
-          //console.log({ state });
-          dispatch('interaction', ['addPathPoint', point]);
+          const id = uuid();
+          dispatch('interaction', [
+            'startDrawingShapePath',
+            'shapePath' as ShapeType,
+            id,
+            point,
+          ]);
           break;
         }
         case 'editPath':

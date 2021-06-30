@@ -491,6 +491,8 @@ export default memo(function SketchFileRenderer() {
     }
   }, [isCreatingPath, state.interactionState]);
 
+  // console.log(state.interactionState.type);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -517,6 +519,12 @@ export default memo(function SketchFileRenderer() {
               <DragHandles
                 rect={boundingRect}
                 selectionPaint={selectionPaint}
+              />
+            )}
+            {state.interactionState.type === 'drawingShapePath' && (
+              <SketchLayer
+                key={state.interactionState.layer.do_objectID}
+                layer={state.interactionState.layer}
               />
             )}
             {state.interactionState.type === 'drawing' && (
