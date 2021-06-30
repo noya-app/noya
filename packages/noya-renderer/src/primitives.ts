@@ -62,8 +62,7 @@ export function clearColor(CanvasKit: CanvasKit) {
 export function fill(
   CanvasKit: CanvasKit,
   fill: Sketch.Fill,
-  localMatrix: Float32Array | number[],
-  layerFrame?: Rect,
+  layerFrame: Rect,
   image?: ArrayBuffer,
 ): Paint {
   const paint = new CanvasKit.Paint();
@@ -88,6 +87,14 @@ export function fill(
       const fromPoint = parsePoint(fill.gradient.from);
       const toPoint = parsePoint(fill.gradient.to);
 
+      // CanvasKit draws gradients in absolute coordinates, while Sketch draws them
+      // relative to the layer's frame. This function returns a matrix that converts
+      // absolute coordinates into the range (0, 1).
+      const unitTransform = CanvasKit.Matrix.multiply(
+        CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+        CanvasKit.Matrix.scaled(layerFrame.width, layerFrame.height),
+      );
+
       switch (fill.gradient.gradientType) {
         case Sketch.GradientType.Linear: {
           paint.setShader(
@@ -97,7 +104,7 @@ export function fill(
               colors,
               positions,
               CanvasKit.TileMode.Clamp,
-              localMatrix,
+              unitTransform,
             ),
           );
           break;
@@ -110,7 +117,7 @@ export function fill(
               colors,
               positions,
               CanvasKit.TileMode.Clamp,
-              localMatrix,
+              unitTransform,
             ),
           );
           break;
@@ -143,10 +150,10 @@ export function fill(
           const matrix =
             rotationRadians > 0
               ? CanvasKit.Matrix.multiply(
-                  localMatrix,
+                  unitTransform,
                   CanvasKit.Matrix.rotated(rotationRadians, 0.5, 0.5),
                 )
-              : localMatrix;
+              : unitTransform;
 
           paint.setShader(
             CanvasKit.Shader.MakeSweepGradient(
@@ -189,24 +196,7 @@ export function fill(
           );
           break;
         }
-        case Sketch.PatternFillType.Stretch: {
-          paint.setShader(
-            canvasImage.makeShaderCubic(
-              CanvasKit.TileMode.Decal,
-              CanvasKit.TileMode.Decal,
-              0,
-              0,
-              CanvasKit.Matrix.multiply(
-                CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
-                CanvasKit.Matrix.scaled(
-                  layerFrame.width / canvasImage.width(),
-                  layerFrame.height / canvasImage.height(),
-                ),
-              ),
-            ),
-          );
-          break;
-        }
+        case Sketch.PatternFillType.Stretch:
         case Sketch.PatternFillType.Fit:
         case Sketch.PatternFillType.Fill: {
           const bounds = createBounds(layerFrame);
@@ -217,15 +207,11 @@ export function fill(
               height: canvasImage.height(),
             },
             layerFrame,
-            fill.patternFillType === Sketch.PatternFillType.Fit
+            fill.patternFillType === Sketch.PatternFillType.Stretch
+              ? 'scaleToFill'
+              : fill.patternFillType === Sketch.PatternFillType.Fit
               ? 'scaleAspectFit'
               : 'scaleAspectFill',
-          );
-
-          // Scale the largest side to fit, if needed
-          const scale = Math.max(
-            scaledRect.width / canvasImage.width(),
-            scaledRect.height / canvasImage.height(),
           );
 
           paint.setShader(
@@ -239,7 +225,10 @@ export function fill(
                   bounds.midX - scaledRect.width / 2,
                   bounds.midY - scaledRect.height / 2,
                 ),
-                CanvasKit.Matrix.scaled(scale, scale),
+                CanvasKit.Matrix.scaled(
+                  scaledRect.width / canvasImage.width(),
+                  scaledRect.height / canvasImage.height(),
+                ),
               ),
             ),
           );
@@ -285,8 +274,9 @@ export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
+  isClosed: boolean,
 ): Path {
-  return PathUtils.path(CanvasKit, points, frame);
+  return PathUtils.path(CanvasKit, points, frame, isClosed);
 }
 
 export function textHorizontalAlignment(

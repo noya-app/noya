@@ -91,7 +91,7 @@ const SwatchesGroup = memo(() => {
         (title: string) => dispatch('setSelectedSwatchGroup', title),
         [dispatch],
       )}
-      selectedGroup={state.selectedSwatchGroup}
+      selectedGroup={state.selectedThemeTab.swatches.groupName}
     />
   );
 });
@@ -108,7 +108,7 @@ const TextStylesGroup = memo(() => {
         (title: string) => dispatch('setSelectedTextStyleGroup', title),
         [dispatch],
       )}
-      selectedGroup={state.selectedTextStyleGroup}
+      selectedGroup={state.selectedThemeTab.textStyles.groupName}
     />
   );
 });
@@ -125,7 +125,7 @@ const ThemeStylesGroup = memo(() => {
         (title: string) => dispatch('setSelectedThemeStyleGroup', title),
         [dispatch],
       )}
-      selectedGroup={state.selectedThemeStyleGroup}
+      selectedGroup={state.selectedThemeTab.layerStyles.groupName}
     />
   );
 });
@@ -142,7 +142,7 @@ const SymbolsGroup = memo(() => {
         (title: string) => dispatch('setSelectedSymbolGroup', title),
         [dispatch],
       )}
-      selectedGroup={state.selectedSymbolGroup}
+      selectedGroup={state.selectedThemeTab.symbols.groupName}
     />
   );
 });

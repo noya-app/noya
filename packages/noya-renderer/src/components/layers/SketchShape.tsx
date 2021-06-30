@@ -17,41 +17,26 @@ import { Rect } from '../../../../noya-state/src';
 import { getStrokedPath } from '../../primitives/path';
 import SketchBorder from '../effects/SketchBorder';
 
-/**
- * CanvasKit draws gradients in absolute coordinates, while Sketch draws them
- * relative to the layer's frame. This function returns a matrix that converts
- * absolute coordinates into the range (0, 1).
- */
-export function getGradientTransformationMatrix(
-  CanvasKit: CanvasKit.CanvasKit,
-  rect: Sketch.Rect,
-): number[] {
-  return CanvasKit.Matrix.multiply(
-    CanvasKit.Matrix.translated(rect.x, rect.y),
-    CanvasKit.Matrix.scaled(rect.width, rect.height),
-  );
-}
-
 const SketchFill = memo(function SketchFill({
   path,
   fill,
-  transform,
   frame,
   image,
 }: {
   path: CanvasKit.Path;
   fill: Sketch.Fill;
-  transform: number[];
   frame: Rect;
   image?: ArrayBuffer;
 }) {
   const { CanvasKit } = useReactCanvasKit();
 
   // TODO: Delete internal gradient shaders on unmount
-  const paint = useMemo(
-    () => Primitives.fill(CanvasKit, fill, transform, frame, image),
-    [CanvasKit, fill, transform, frame, image],
-  );
+  const paint = useMemo(() => Primitives.fill(CanvasKit, fill, frame, image), [
+    CanvasKit,
+    fill,
+    frame,
+    image,
+  ]);
 
   useDeletable(paint);
 
@@ -187,14 +172,14 @@ export default memo(function SketchShape({ layer }: Props) {
   const { CanvasKit } = useReactCanvasKit();
   const [state] = useApplicationState();
 
-  const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+  const path = Primitives.path(
+    CanvasKit,
+    layer.points,
+    layer.frame,
+    layer.isClosed,
+  );
 
   path.setFillType(CanvasKit.FillType.EvenOdd);
-
-  const transform = useMemo(
-    () => getGradientTransformationMatrix(CanvasKit, layer.frame),
-    [CanvasKit, layer.frame],
-  );
 
   if (!layer.style) return null;
 
@@ -237,7 +222,6 @@ export default memo(function SketchShape({ layer }: Props) {
           key={`fill-${index}`}
           fill={fill}
           path={path}
-          transform={transform}
           frame={layer.frame}
           image={fill.image ? state.sketch.images[fill.image._ref] : undefined}
         />

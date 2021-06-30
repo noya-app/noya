@@ -40,6 +40,7 @@ test('converts rect', async () => {
 });
 
 test('converts fill', async () => {
+  const frame = { x: 0, y: 0, width: 100, height: 100 };
   const paint = fill(
     ck,
     {
@@ -94,7 +95,7 @@ test('converts fill', async () => {
       patternFillType: 1,
       patternTileScale: 1,
     },
-    ck.Matrix.identity(),
+    frame,
   );
   expect(paint.getColor()).toMatchSnapshot();
 });

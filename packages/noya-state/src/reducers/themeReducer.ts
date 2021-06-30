@@ -101,6 +101,7 @@ export function themeReducer(
           objects: [],
         };
 
+        const swatches = draft.selectedThemeTab.swatches;
         const swatchColor: Sketch.Color = color
           ? color
           : {
@@ -115,7 +116,7 @@ export function themeReducer(
           _class: 'swatch',
           do_objectID: id ?? uuid(),
           name: delimitedPath.join([
-            draft.selectedSwatchGroup,
+            swatches.groupName,
             name || 'New Theme Color',
           ]),
           value: swatchColor,
@@ -125,7 +126,7 @@ export function themeReducer(
         draft.sketch.document.sharedSwatches = sharedSwatches;
 
         if (currentTab === 'theme') {
-          draft.selectedSwatchIds = [swatch.do_objectID];
+          swatches.ids = [swatch.do_objectID];
         }
       });
     }
@@ -142,11 +143,12 @@ export function themeReducer(
           objects: [],
         };
 
+        const draftTextStyles = draft.selectedThemeTab.textStyles;
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
           name: delimitedPath.join([
-            draft.selectedTextStyleGroup,
+            draftTextStyles.groupName,
             name || 'New Text Style',
           ]),
 
@@ -160,7 +162,7 @@ export function themeReducer(
         draft.sketch.document.layerTextStyles = textStyles;
 
         if (currentTab === 'theme') {
-          draft.selectedLayerStyleIds = [sharedStyle.do_objectID];
+          draftTextStyles.ids = [sharedStyle.do_objectID];
         } else {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
@@ -184,11 +186,13 @@ export function themeReducer(
           objects: [],
         };
 
+        const draftLayerStyles = draft.selectedThemeTab.layerStyles;
+
         const sharedStyle: Sketch.SharedStyle = {
           _class: 'sharedStyle',
           do_objectID: uuid(),
           name: delimitedPath.join([
-            draft.selectedThemeStyleGroup,
+            draftLayerStyles.groupName,
             name || 'New Layer Style',
           ]),
           value: produce(style || Models.style, (style) => {
@@ -201,7 +205,7 @@ export function themeReducer(
         draft.sketch.document.layerStyles = layerStyles;
 
         if (currentTab === 'theme') {
-          draft.selectedLayerStyleIds = [sharedStyle.do_objectID];
+          draftLayerStyles.ids = [sharedStyle.do_objectID];
         } else {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
@@ -307,32 +311,19 @@ export function themeReducer(
         draft.sketch.document.layerTextStyles = textStyles;
       });
     }
-    case 'selectSwatch': {
-      const [, id, selectionType = 'replace'] = action;
-
-      return produce(state, (draft) => {
-        updateSelection(draft.selectedSwatchIds, id, selectionType);
-      });
-    }
-    case 'selectThemeStyle': {
-      const [, id, selectionType = 'replace'] = action;
-
-      return produce(state, (draft) => {
-        updateSelection(draft.selectedLayerStyleIds, id, selectionType);
-      });
-    }
-    case 'selectTextStyle': {
-      const [, id, selectionType = 'replace'] = action;
-
-      return produce(state, (draft) => {
-        updateSelection(draft.selectedTextStyleIds, id, selectionType);
-      });
-    }
+    case 'selectSwatch':
+    case 'selectThemeStyle':
+    case 'selectTextStyle':
     case 'selectSymbol': {
       const [, id, selectionType = 'replace'] = action;
 
+      const currentThemeTab = state.currentThemeTab;
       return produce(state, (draft) => {
-        updateSelection(draft.selectedSymbolsIds, id, selectionType);
+        updateSelection(
+          draft.selectedThemeTab[currentThemeTab].ids,
+          id,
+          selectionType,
+        );
       });
     }
     case 'setSwatchColor': {
@@ -509,7 +500,7 @@ export function themeReducer(
       });
     }
     case 'removeSwatch': {
-      const ids = state.selectedSwatchIds;
+      const ids = state.selectedThemeTab.swatches.ids;
 
       const layerIndexPathsWithSwatchId = findPageLayerIndexPaths(
         state,
@@ -548,7 +539,7 @@ export function themeReducer(
       });
     }
     case 'removeTextStyle': {
-      const ids = state.selectedTextStyleIds;
+      const ids = state.selectedThemeTab.textStyles.ids;
 
       return produce(state, (draft) => {
         const layerStyles = draft.sketch.document.layerTextStyles;
@@ -564,7 +555,7 @@ export function themeReducer(
       });
     }
     case 'removeThemeStyle': {
-      const ids = state.selectedLayerStyleIds;
+      const ids = state.selectedThemeTab.layerStyles.ids;
 
       const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
         state,
@@ -596,28 +587,15 @@ export function themeReducer(
         );
       });
     }
-    case 'setSelectedSwatchGroup': {
-      const [, id] = action;
-      return produce(state, (draft) => {
-        draft.selectedSwatchGroup = id;
-      });
-    }
-    case 'setSelectedThemeStyleGroup': {
-      const [, id] = action;
-      return produce(state, (draft) => {
-        draft.selectedThemeStyleGroup = id;
-      });
-    }
-    case 'setSelectedTextStyleGroup': {
-      const [, id] = action;
-      return produce(state, (draft) => {
-        draft.selectedTextStyleGroup = id;
-      });
-    }
+    case 'setSelectedSwatchGroup':
+    case 'setSelectedThemeStyleGroup':
+    case 'setSelectedTextStyleGroup':
     case 'setSelectedSymbolGroup': {
       const [, id] = action;
+      const currentThemeTab = state.currentThemeTab;
+
       return produce(state, (draft) => {
-        draft.selectedSymbolGroup = id;
+        draft.selectedThemeTab[currentThemeTab].groupName = id;
       });
     }
     case 'groupSwatch': {
@@ -630,7 +608,7 @@ export function themeReducer(
           value,
           draft.sketch.document.sharedSwatches?.objects ?? [],
         );
-        draft.selectedSwatchGroup = '';
+        draft.selectedThemeTab.swatches.groupName = '';
       });
     }
     case 'groupTextStyle': {
@@ -644,7 +622,7 @@ export function themeReducer(
           draft.sketch.document.layerTextStyles.objects ?? [],
         );
 
-        draft.selectedThemeStyleGroup = '';
+        draft.selectedThemeTab.textStyles.groupName = '';
       });
     }
     case 'groupThemeStyle': {
@@ -657,7 +635,7 @@ export function themeReducer(
           value,
           draft.sketch.document.layerStyles?.objects ?? [],
         );
-        draft.selectedTextStyleGroup = '';
+        draft.selectedThemeTab.layerStyles.groupName = '';
       });
     }
     case 'groupSymbol': {
@@ -666,7 +644,7 @@ export function themeReducer(
 
       return produce(state, (draft) => {
         groupThemeComponents(ids, value, getSymbols(draft));
-        draft.selectedSymbolGroup = '';
+        draft.selectedThemeTab.symbols.groupName = '';
       });
     }
     case 'addGradientAsset': {
