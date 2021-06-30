@@ -274,8 +274,9 @@ export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Sketch.Rect,
+  isClosed: boolean,
 ): Path {
-  return PathUtils.path(CanvasKit, points, frame);
+  return PathUtils.path(CanvasKit, points, frame, isClosed);
 }
 
 export function textHorizontalAlignment(

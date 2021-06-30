@@ -10,4 +10,5 @@ export * from './chunkBy';
 export * from './groupBy';
 export * from './getIncrementedName';
 export * from './interpolate';
+export * from './rotate';
 export * as delimitedPath from './delimitedPath';

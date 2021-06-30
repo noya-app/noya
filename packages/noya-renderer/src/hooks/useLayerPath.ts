@@ -7,7 +7,12 @@ export default function useLayerPath(layer: Layers.PointsLayer) {
   const { CanvasKit } = useReactCanvasKit();
 
   return useMemo(() => {
-    const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+    const path = Primitives.path(
+      CanvasKit,
+      layer.points,
+      layer.frame,
+      layer.isClosed,
+    );
 
     path.setFillType(CanvasKit.FillType.EvenOdd);
 

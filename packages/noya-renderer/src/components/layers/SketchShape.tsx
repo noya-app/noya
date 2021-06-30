@@ -172,7 +172,12 @@ export default memo(function SketchShape({ layer }: Props) {
   const { CanvasKit } = useReactCanvasKit();
   const [state] = useApplicationState();
 
-  const path = Primitives.path(CanvasKit, layer.points, layer.frame);
+  const path = Primitives.path(
+    CanvasKit,
+    layer.points,
+    layer.frame,
+    layer.isClosed,
+  );
 
   path.setFillType(CanvasKit.FillType.EvenOdd);
 

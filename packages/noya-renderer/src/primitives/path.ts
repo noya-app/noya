@@ -2,16 +2,16 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit, Path, PathOp } from 'canvaskit';
 import { distance, Rect } from 'noya-geometry';
 import { Point } from 'noya-state';
-import { windowsOf } from 'noya-utils';
+import { rotate, windowsOf, zip } from 'noya-utils';
 import { parsePoint, stringifyPoint } from '../primitives';
 
 /**
  * The radius of an edge should be less than half the length of that edge
  */
-function getEdgeRadius(a: Point, b: Point, fixedRadius: number): number {
+function getEdgeRadius(a: Point, b: Point, cornerRadius: number): number {
   const dist = distance(a, b);
 
-  return dist <= fixedRadius * 2 ? dist / 2 : fixedRadius;
+  return dist <= cornerRadius * 2 ? dist / 2 : cornerRadius;
 }
 
 /**
@@ -21,10 +21,10 @@ function getCornerRadius(
   before: Point,
   corner: Point,
   after: Point,
-  fixedRadius: number,
+  cornerRadius: number,
 ): number {
-  const beforeRadius = getEdgeRadius(corner, before, fixedRadius);
-  const afterRadius = getEdgeRadius(corner, after, fixedRadius);
+  const beforeRadius = getEdgeRadius(corner, before, cornerRadius);
+  const afterRadius = getEdgeRadius(corner, after, cornerRadius);
   return Math.min(beforeRadius, afterRadius);
 }
 
@@ -79,6 +79,8 @@ export function decodeCurvePoint(
 ): DecodedCurvePoint {
   return {
     ...curvePoint,
+    hasCurveFrom: curvePoint.hasCurveTo,
+    hasCurveTo: curvePoint.hasCurveFrom,
     curveFrom: scalePoint(parsePoint(curvePoint.curveTo), frame),
     curveTo: scalePoint(parsePoint(curvePoint.curveFrom), frame),
     point: scalePoint(parsePoint(curvePoint.point), frame),
@@ -91,95 +93,182 @@ export function encodeCurvePoint(
 ): Sketch.CurvePoint {
   return {
     ...curvePoint,
+    hasCurveFrom: curvePoint.hasCurveTo,
+    hasCurveTo: curvePoint.hasCurveFrom,
     curveFrom: stringifyPoint(unscalePoint(curvePoint.curveTo, frame)),
     curveTo: stringifyPoint(unscalePoint(curvePoint.curveFrom, frame)),
     point: stringifyPoint(unscalePoint(curvePoint.point, frame)),
   };
 }
 
+function curveTo(
+  path: Path,
+  current: DecodedCurvePoint,
+  next: DecodedCurvePoint,
+) {
+  const curveTo = current.hasCurveTo ? current.curveTo : current.point;
+  const curveFrom = next.hasCurveFrom ? next.curveFrom : next.point;
+  const nextPoint = next.point;
+
+  path.cubicTo(
+    curveTo.x,
+    curveTo.y,
+    curveFrom.x,
+    curveFrom.y,
+    nextPoint.x,
+    nextPoint.y,
+  );
+}
+
+function lineTo(path: Path, next: DecodedCurvePoint) {
+  const nextPoint = next.point;
+
+  path.lineTo(nextPoint.x, nextPoint.y);
+}
+
+function curveOrLineTo(
+  path: Path,
+  current: DecodedCurvePoint,
+  next: DecodedCurvePoint,
+) {
+  if (
+    current.curveMode === Sketch.CurveMode.Straight &&
+    next.curveMode === Sketch.CurveMode.Straight
+  ) {
+    lineTo(path, next);
+  } else {
+    curveTo(path, current, next);
+  }
+}
+
+type CurveInfo = {
+  radius: number;
+  step: Point;
+  drawSegment: boolean;
+};
+
+function stepToCurve(
+  path: Path,
+  current: DecodedCurvePoint,
+  curveInfo: CurveInfo,
+) {
+  const currentPoint = current.point;
+
+  const { radius, step } = curveInfo;
+
+  if (radius > 0) {
+    path.arcToTangent(
+      currentPoint.x,
+      currentPoint.y,
+      currentPoint.x + step.x,
+      currentPoint.y + step.y,
+      radius,
+    );
+  } else {
+    path.lineTo(currentPoint.x + step.x, currentPoint.y + step.y);
+  }
+}
+
 export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
   frame: Rect,
+  isClosed: boolean,
 ): Path {
-  const curvePoints = points.map((point) => decodeCurvePoint(point, frame));
-
-  const pairs = windowsOf(curvePoints, 3, true);
-
   const path = new CanvasKit.Path();
 
-  // Move to the starting point
-  if (pairs[pairs.length - 1]) {
-    const [prev, current, next] = pairs[pairs.length - 1];
-    const currentPoint = current.point;
-    const nextPoint = next.point;
-    const prevPoint = prev.point;
+  if (points.length < 2) return path;
 
-    if (next.curveMode === Sketch.CurveMode.Straight) {
-      const radius = getCornerRadius(
-        prevPoint,
-        currentPoint,
-        nextPoint,
-        current.cornerRadius,
-      );
+  const curvePoints = points.map((point) => decodeCurvePoint(point, frame));
 
-      const { step } = getStep(currentPoint, nextPoint, radius);
+  // Curves with only 2 points don't support corner radius, so we handle this
+  // case specially
+  if (curvePoints.length === 2) {
+    const [current, next] = curvePoints;
 
-      path.moveTo(currentPoint.x + step.x, currentPoint.y + step.y);
-    } else {
-      path.moveTo(nextPoint.x, nextPoint.y);
+    path.moveTo(current.point.x, current.point.y);
+
+    curveOrLineTo(path, current, next);
+
+    if (isClosed) {
+      curveOrLineTo(path, next, current);
+
+      path.close();
     }
+
+    return path;
   }
 
-  pairs.forEach((pair) => {
+  // Create an array of point tuples, [prev, current, next]
+  const pairs = rotate(windowsOf(curvePoints, 3, true), -1);
+
+  const curveInfoList: CurveInfo[] = pairs.map((pair) => {
     const [prev, current, next] = pair;
 
     const currentPoint = current.point;
-    const currentCurveTo = current.curveTo;
-    const nextCurveFrom = next.curveFrom;
     const nextPoint = next.point;
     const prevPoint = prev.point;
 
-    if (next.curveMode === Sketch.CurveMode.Straight) {
-      const radius = getCornerRadius(
-        prevPoint,
-        currentPoint,
-        nextPoint,
-        current.cornerRadius,
-      );
+    const radius = getCornerRadius(
+      prevPoint,
+      currentPoint,
+      nextPoint,
+      current.cornerRadius,
+    );
 
-      const { step, drawSegment } = getStep(currentPoint, nextPoint, radius);
+    const { step, drawSegment } = getStep(currentPoint, nextPoint, radius);
 
-      if (current.cornerRadius > 0) {
-        path.arcToTangent(
-          currentPoint.x,
-          currentPoint.y,
-          currentPoint.x + step.x,
-          currentPoint.y + step.y,
-          radius,
-        );
-      } else {
-        path.lineTo(currentPoint.x + step.x, currentPoint.y + step.y);
-      }
-
-      if (drawSegment) {
-        path.lineTo(nextPoint.x - step.x, nextPoint.y - step.y);
-      }
-    } else {
-      path.cubicTo(
-        currentCurveTo.x,
-        currentCurveTo.y,
-        nextCurveFrom.x,
-        nextCurveFrom.y,
-        nextPoint.x,
-        nextPoint.y,
-      );
-    }
+    return { radius, step, drawSegment };
   });
 
-  path.close();
+  zip(pairs, curveInfoList).forEach(([pair, curveInfo], index) => {
+    const [, current, next] = pair;
+    const isLast = index === pairs.length - 1;
 
-  // console.log(path.toCmds());
+    const currentPoint = current.point;
+    const nextPoint = next.point;
+
+    if (index === 0) {
+      const { step } = curveInfo;
+
+      path.moveTo(currentPoint.x + step.x, currentPoint.y + step.y);
+
+      if (next.curveMode !== Sketch.CurveMode.Straight) {
+        curveTo(path, current, next);
+      }
+    } else {
+      if (
+        // TODO: Handle one straight point with radius and one curve
+        current.curveMode === Sketch.CurveMode.Straight &&
+        next.curveMode === Sketch.CurveMode.Straight
+      ) {
+        stepToCurve(path, current, curveInfo);
+
+        const { step, drawSegment } = curveInfo;
+
+        if (drawSegment && (isClosed || !isLast)) {
+          path.lineTo(nextPoint.x - step.x, nextPoint.y - step.y);
+        }
+      } else if (isClosed || !isLast) {
+        curveTo(path, current, next);
+      }
+    }
+
+    if (isClosed && isLast) {
+      const [, current, next] = pairs[0];
+
+      // If we have a corner radius, draw the final curve
+      if (
+        current.curveMode === Sketch.CurveMode.Straight &&
+        next.curveMode === Sketch.CurveMode.Straight
+      ) {
+        stepToCurve(path, current, curveInfoList[0]);
+      }
+
+      // We need the path to be closed for line caps to draw correctly
+      path.close();
+    }
+  });
 
   return path;
 }
