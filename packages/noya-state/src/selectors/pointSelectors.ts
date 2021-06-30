@@ -38,6 +38,7 @@ const computeNewBoundingRect = (
       encodeCurvePoint(decodedCurvePoint, layer.frame),
     ),
     layer.frame,
+    layer.isClosed,
   ).computeTightBounds();
 
   const newRect: Rect = {
