@@ -39,7 +39,6 @@ const Container = styled.div<{
   backgroundSize,
   imageRendering: 'crisp-edges',
   width: '100%',
-  transform: 'scale(0.999)',
   justifyContent: 'center',
 }));
 
@@ -77,6 +76,109 @@ export const PATTERN_FILL_TYPE_OPTIONS: PatternFillType[] = [
   'Fit',
 ];
 
+interface PatternPreviewProps {
+  images: FileMap;
+
+  pattern: SketchPattern;
+  isTile: boolean;
+  onAddImage: (image: ArrayBuffer, _ref: string) => void;
+  onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
+}
+
+const PatternPreview = memo(
+  ({
+    images,
+    pattern,
+    isTile,
+    onAddImage,
+    onChangeImage,
+  }: PatternPreviewProps) => {
+    const [isHovering, onHoverChange] = useState(false);
+    const { hoverProps } = useHover({
+      onHoverChange,
+    });
+
+    const backgroundUrl = useObjectURL(
+      getPatternBackground(images, pattern.image),
+    );
+
+    const backgroundSize = useMemo(
+      () => getPatternSize(pattern.patternFillType, pattern.patternTileScale),
+      [pattern.patternFillType, pattern.patternTileScale],
+    );
+
+    const handleImageFile = useCallback(
+      async (file: File) => {
+        const extension = SUPPORTED_FILE_TYPES[file.type];
+
+        if (!extension) {
+          alert(
+            `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
+          );
+          return;
+        }
+
+        const data = await file.arrayBuffer();
+        const _ref = `images/${uuid()}.${extension}`;
+
+        onAddImage(data, _ref);
+        onChangeImage({
+          _class: 'MSJSONFileReference',
+          _ref: _ref,
+          _ref_class: 'MSImageData',
+        });
+      },
+      [onAddImage, onChangeImage],
+    );
+
+    const openFile = useCallback(async () => {
+      const file = await fileOpen({
+        extensions: Object.values(SUPPORTED_FILE_TYPES).map((e) => '.' + e),
+        mimeTypes: Object.keys(SUPPORTED_FILE_TYPES),
+      });
+
+      handleImageFile(file);
+    }, [handleImageFile]);
+
+    const handleDropEvent = useCallback(
+      async (e: DragEvent) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+
+        if (!file) {
+          alert('Unable to read file');
+          return;
+        }
+
+        handleImageFile(file);
+      },
+      [handleImageFile],
+    );
+
+    const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
+      handleDropEvent,
+    );
+
+    return (
+      <Container
+        {...dropTargetProps}
+        {...hoverProps}
+        isActive={isDropTargetActive}
+        background={`url(${backgroundUrl})`}
+        backgroundSize={backgroundSize}
+        repeat={isTile}
+      >
+        <UploadButton
+          show={!isDropTargetActive && isHovering}
+          onClick={openFile}
+        >
+          Upload Image
+        </UploadButton>
+      </Container>
+    );
+  },
+);
+
 export default memo(function PatternInspector({
   id,
   images,
@@ -86,14 +188,8 @@ export default memo(function PatternInspector({
   onChangeFillType,
   onChangeTileScale,
 }: Props) {
-  const [isHovering, onHoverChange] = useState(false);
-  const { hoverProps } = useHover({
-    onHoverChange,
-  });
-
   const patternType = pattern.patternFillType;
   const isTile = patternType === Sketch.PatternFillType.Tile;
-
   const changeFillType = useCallback(
     (value: PatternFillType) => {
       onChangeFillType(Sketch.PatternFillType[value]);
@@ -115,87 +211,18 @@ export default memo(function PatternInspector({
     [onChangeTileScale],
   );
 
-  const backgroundUrl = useObjectURL(
-    getPatternBackground(images, pattern.image),
-  );
-
-  const backgroundSize = useMemo(
-    () => getPatternSize(pattern.patternFillType, pattern.patternTileScale),
-    [pattern.patternFillType, pattern.patternTileScale],
-  );
-
-  const handleImageFile = useCallback(
-    async (file: File) => {
-      const extension = SUPPORTED_FILE_TYPES[file.type];
-
-      if (!extension) {
-        alert(
-          `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
-        );
-        return;
-      }
-
-      const data = await file.arrayBuffer();
-      const _ref = `images/${uuid()}.${extension}`;
-
-      createImage(data, _ref);
-      onChangeImage({
-        _class: 'MSJSONFileReference',
-        _ref: _ref,
-        _ref_class: 'MSImageData',
-      });
-    },
-    [createImage, onChangeImage],
-  );
-
-  const openFile = useCallback(async () => {
-    const file = await fileOpen({
-      extensions: Object.values(SUPPORTED_FILE_TYPES).map((e) => '.' + e),
-      mimeTypes: Object.keys(SUPPORTED_FILE_TYPES),
-    });
-
-    handleImageFile(file);
-  }, [handleImageFile]);
-
-  const handleDropEvent = useCallback(
-    async (e: DragEvent) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-
-      if (!file) {
-        alert('Unable to read file');
-        return;
-      }
-
-      handleImageFile(file);
-    },
-    [handleImageFile],
-  );
-
-  const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
-    handleDropEvent,
-  );
-
   const scale = Math.round(pattern.patternTileScale * 100);
 
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Column>
-        <Container
-          {...dropTargetProps}
-          {...hoverProps}
-          isActive={isDropTargetActive}
-          background={`url(${backgroundUrl})`}
-          backgroundSize={backgroundSize}
-          repeat={isTile}
-        >
-          <UploadButton
-            show={!isDropTargetActive && isHovering}
-            onClick={openFile}
-          >
-            Upload Image
-          </UploadButton>
-        </Container>
+        <PatternPreview
+          images={images}
+          pattern={pattern}
+          isTile={isTile}
+          onAddImage={createImage}
+          onChangeImage={onChangeImage}
+        />
         <Spacer.Vertical size={10} />
         <InspectorPrimitives.LabeledRow label={'Size'}>
           <Spacer.Vertical size={10} />

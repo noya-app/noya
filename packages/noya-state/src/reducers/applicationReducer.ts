@@ -5,6 +5,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { uuid } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { IndexPath } from 'tree-visit';
+import { CHECKERED_BACKGROUND_BYTES } from '../../../noya-renderer/src/hooks/useCheckeredFill';
 import * as Layers from '../layers';
 import {
   findPageLayerIndexPaths,
@@ -188,8 +189,17 @@ export function applicationReducer(
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
               if (!layer.style) return;
-
               layer.style = styleReducer(layer.style, action);
+
+              if (
+                action[0] === 'setFillFillType' &&
+                action[2] === Sketch.FillType.Pattern &&
+                layer.style.fills
+              ) {
+                const _ref = layer.style.fills[action[1]].image?._ref;
+                if (!_ref) return;
+                draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
+              }
             },
           );
         });
@@ -217,6 +227,16 @@ export function applicationReducer(
             if (!selectedIds.includes(style.do_objectID)) return;
 
             style.value = styleReducer(style.value, action);
+
+            if (
+              action[0] === 'setFillFillType' &&
+              action[2] === Sketch.FillType.Pattern &&
+              style.value.fills
+            ) {
+              const _ref = style.value.fills[action[1]].image?._ref;
+              if (!_ref) return;
+              draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
+            }
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(

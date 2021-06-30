@@ -24,7 +24,8 @@ export default memo(function FillInspector({
 
   const fills = useMemo(() => selectedStyles.map((style) => style?.fills), [
     selectedStyles,
-  ]);
+  ]).reverse();
+
   // TODO: Modify all fills
   const firstFill = useMemo(() => fills[0] || [], [fills]);
   return (

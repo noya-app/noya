@@ -7,6 +7,7 @@ import {
   Point,
   Rect,
 } from 'noya-state';
+import { CHECKERED_BACKGROUND_BYTES } from './hooks/useCheckeredFill';
 import * as PathUtils from './primitives/path';
 
 export * from './primitives/path';
@@ -173,71 +174,84 @@ export function fill(
       paint.setAlphaf(fill.contextSettings.opacity);
       break;
     }
-    case Sketch.FillType.Pattern: {
-      if (!layerFrame || !image) break;
-      const canvasImage = CanvasKit.MakeImageFromEncoded(image);
-      if (!canvasImage) break;
-
-      switch (fill.patternFillType) {
-        case Sketch.PatternFillType.Tile: {
-          paint.setShader(
-            canvasImage.makeShaderCubic(
-              CanvasKit.TileMode.Repeat,
-              CanvasKit.TileMode.Repeat,
-              0,
-              0,
-              CanvasKit.Matrix.multiply(
-                CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
-                CanvasKit.Matrix.scaled(
-                  fill.patternTileScale,
-                  fill.patternTileScale,
-                ),
-              ),
-            ),
-          );
+    case Sketch.FillType.Pattern:
+      {
+        if (!image) {
+          paint.setColor(clearColor(CanvasKit));
           break;
         }
-        case Sketch.PatternFillType.Stretch:
-        case Sketch.PatternFillType.Fit:
-        case Sketch.PatternFillType.Fill: {
-          const bounds = createBounds(layerFrame);
-          const scaledRect = resize(
-            {
-              ...layerFrame,
-              width: canvasImage.width(),
-              height: canvasImage.height(),
-            },
-            layerFrame,
-            fill.patternFillType === Sketch.PatternFillType.Stretch
-              ? 'scaleToFill'
-              : fill.patternFillType === Sketch.PatternFillType.Fit
-              ? 'scaleAspectFit'
-              : 'scaleAspectFill',
-          );
 
-          paint.setShader(
-            canvasImage.makeShaderCubic(
-              CanvasKit.TileMode.Decal,
-              CanvasKit.TileMode.Decal,
-              0,
-              0,
-              CanvasKit.Matrix.multiply(
-                CanvasKit.Matrix.translated(
-                  bounds.midX - scaledRect.width / 2,
-                  bounds.midY - scaledRect.height / 2,
-                ),
-                CanvasKit.Matrix.scaled(
-                  scaledRect.width / canvasImage.width(),
-                  scaledRect.height / canvasImage.height(),
+        let canvasImage = CanvasKit.MakeImageFromEncoded(image);
+        canvasImage = canvasImage
+          ? canvasImage
+          : CanvasKit.MakeImageFromEncoded(CHECKERED_BACKGROUND_BYTES);
+
+        if (!canvasImage) {
+          paint.setColor(clearColor(CanvasKit));
+          break;
+        }
+
+        switch (fill.patternFillType) {
+          case Sketch.PatternFillType.Tile: {
+            paint.setShader(
+              canvasImage.makeShaderCubic(
+                CanvasKit.TileMode.Repeat,
+                CanvasKit.TileMode.Repeat,
+                0,
+                0,
+                CanvasKit.Matrix.multiply(
+                  CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+                  CanvasKit.Matrix.scaled(
+                    fill.patternTileScale,
+                    fill.patternTileScale,
+                  ),
                 ),
               ),
-            ),
-          );
-          break;
+            );
+            break;
+          }
+          case Sketch.PatternFillType.Stretch:
+          case Sketch.PatternFillType.Fit:
+          case Sketch.PatternFillType.Fill: {
+            const bounds = createBounds(layerFrame);
+            const scaledRect = resize(
+              {
+                ...layerFrame,
+                width: canvasImage.width(),
+                height: canvasImage.height(),
+              },
+              layerFrame,
+              fill.patternFillType === Sketch.PatternFillType.Stretch
+                ? 'scaleToFill'
+                : fill.patternFillType === Sketch.PatternFillType.Fit
+                ? 'scaleAspectFit'
+                : 'scaleAspectFill',
+            );
+
+            paint.setShader(
+              canvasImage.makeShaderCubic(
+                CanvasKit.TileMode.Decal,
+                CanvasKit.TileMode.Decal,
+                0,
+                0,
+                CanvasKit.Matrix.multiply(
+                  CanvasKit.Matrix.translated(
+                    bounds.midX - scaledRect.width / 2,
+                    bounds.midY - scaledRect.height / 2,
+                  ),
+                  CanvasKit.Matrix.scaled(
+                    scaledRect.width / canvasImage.width(),
+                    scaledRect.height / canvasImage.height(),
+                  ),
+                ),
+              ),
+            );
+            break;
+          }
         }
       }
+
       paint.setAlphaf(fill.contextSettings.opacity);
-    }
   }
 
   paint.setStyle(CanvasKit.PaintStyle.Fill);

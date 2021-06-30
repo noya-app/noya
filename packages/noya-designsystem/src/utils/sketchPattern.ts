@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { FileMap } from 'noya-sketch-file';
+import { CHECKERED_BACKGROUND_BYTES } from 'noya-renderer/src/hooks/useCheckeredFill';
 
 export const SUPPORTED_FILE_TYPES: { [key: string]: string } = {
   'image/png': 'png',
@@ -18,8 +19,9 @@ export function getPatternBackground(
   images: FileMap,
   image?: Sketch.FileRef | Sketch.DataRef,
 ) {
-  if (!image || !images[image._ref])
-    return `'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYI=A',`;
+  if (!image) return new ArrayBuffer(0);
+
+  if (image._ref.includes('.pdf')) return CHECKERED_BACKGROUND_BYTES;
 
   return images[image._ref];
 }

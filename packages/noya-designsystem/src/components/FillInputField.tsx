@@ -33,6 +33,28 @@ interface Props {
   value?: Sketch.Color | Sketch.Gradient | SketchPattern;
 }
 
+/*interface PatternProps {
+  id?: string;
+  ref: ForwardedRef<HTMLButtonElement>;
+  image?: Sketch.FileRef | Sketch.DataRef;
+}
+
+const PatternContainter = memo(function PatterContainter({
+  id,
+  ref,
+  image,
+  ...rest
+}: PatternProps) {
+  const [state] = useApplicationState();
+  const backgroundPattern = useObjectURL(
+    getPatternBackground(state.sketch.images, image),
+  );
+
+  const background = `center / cover url(${backgroundPattern})`;
+
+  return <Container ref={ref} background={background} id={id} {...rest} />;
+});*/
+
 export default forwardRef(function FillInputField(
   { id, value, ...rest }: Props,
   ref: ForwardedRef<HTMLButtonElement>,

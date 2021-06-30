@@ -1,8 +1,7 @@
 import { useLayoutEffect, useMemo } from 'react';
 
-export function useObjectURL(object: string | ArrayBuffer | Uint8Array | Blob) {
+export function useObjectURL(object: ArrayBuffer | Uint8Array | Blob) {
   const objectURL = useMemo(() => {
-    if (typeof object === 'string') return object;
     if (object instanceof Blob) return URL.createObjectURL(object);
 
     const bytes =

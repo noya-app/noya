@@ -7,6 +7,7 @@ import {
   colorControlsReducer,
 } from './colorControlsReducer';
 import { clamp } from 'noya-utils';
+import { uuid } from 'noya-renderer/src';
 
 export type SetNumberMode = 'replace' | 'adjust';
 
@@ -324,7 +325,7 @@ export function styleReducer(
         if (type === Sketch.FillType.Pattern && !draft.fills[index].image) {
           draft.fills[index].image = {
             _class: 'MSJSONFileReference',
-            _ref: '',
+            _ref: `images/${uuid()}.png`,
             _ref_class: 'MSImageData',
           };
         }
