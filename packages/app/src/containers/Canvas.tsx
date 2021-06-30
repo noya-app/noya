@@ -277,11 +277,10 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
-        case 'createPath': {
-          // console.log(
-          //   'This is where we will want to drop points on the canvas',
-          // );
-          dispatch('interaction', ['startDrawingPath', point]);
+        case 'startDrawingPath':
+        case 'updateDrawingPath': {
+          //console.log({ state });
+          dispatch('interaction', ['addPathPoint', point]);
           break;
         }
         case 'editPath':

@@ -28,7 +28,12 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
+export type ShapeType =
+  | 'rectangle'
+  | 'oval'
+  | 'text'
+  | 'artboard'
+  | 'shapePath';
 
 export type InteractionAction =
   | ['reset']
@@ -37,6 +42,7 @@ export type InteractionAction =
   | [type: 'createPath']
   | [type: 'startDrawingPath', current: Point]
   | [type: 'updateDrawingPath', current: Point]
+  | [type: 'addPathPoint', current: Point]
   | [type: 'resetEditPath']
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
@@ -86,6 +92,14 @@ export type InteractionState =
     }
   | {
       type: 'startDrawingPath';
+      current: Point;
+    }
+  | {
+      type: 'updateDrawingPath';
+      current: Point;
+    }
+  | {
+      type: 'addPathPoint';
       current: Point;
     }
   | {
@@ -157,7 +171,12 @@ export type InteractionType = InteractionState['type'];
 
 function createLayer(
   shapeType: ShapeType,
-): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
+):
+  | Sketch.Oval
+  | Sketch.Rectangle
+  | Sketch.Text
+  | Sketch.Artboard
+  | Sketch.ShapePath {
   switch (shapeType) {
     case 'oval':
       return Models.oval;
@@ -167,6 +186,8 @@ function createLayer(
       return Models.text;
     case 'artboard':
       return Models.artboard;
+    case 'shapePath':
+      return Models.shapePath;
   }
 }
 
@@ -181,7 +202,6 @@ export function interactionReducer(
     case 'createPath': {
       return { type: 'createPath' };
     }
-
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
@@ -224,6 +244,14 @@ export function interactionReducer(
 
       return {
         type: 'startDrawingPath',
+        current,
+      };
+    }
+    case 'addPathPoint': {
+      const [type, current] = action;
+
+      return {
+        type,
         current,
       };
     }
