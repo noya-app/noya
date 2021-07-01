@@ -128,7 +128,8 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
     type === 'maybeMovePoint' ||
     type === 'movingPoint' ||
     type === 'maybeMoveControlPoint' ||
-    type === 'movingControlPoint'
+    type === 'movingControlPoint' ||
+    type === 'startDrawingPath'
   );
 };
 

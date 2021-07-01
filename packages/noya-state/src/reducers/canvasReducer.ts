@@ -201,6 +201,7 @@ export function canvasReducer(
             } else {
               draft.sketch.pages[pageIndex].layers.push(layer);
             }
+            draft.selectedObjects = [layer.do_objectID];
 
             const boundingRect = getBoundingRect(
               draft.sketch.pages[pageIndex],

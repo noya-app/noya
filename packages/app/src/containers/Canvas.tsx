@@ -418,6 +418,10 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'editPath': {
+          dispatch('interaction', ['startDrawingPath', point]);
+          break;
+        }
         case 'createPath': {
           dispatch('interaction', ['startDrawingPath', point]);
           break;
@@ -684,7 +688,10 @@ export default memo(function Canvas() {
 
           break;
         }
-
+        case 'drawingShapePath': {
+          dispatch('interaction', ['editPath']);
+          break;
+        }
         case 'maybeMoveControlPoint':
         case 'movingControlPoint':
         case 'maybeMovePoint':
@@ -719,6 +726,8 @@ export default memo(function Canvas() {
         return 'crosshair';
       case 'createPath':
       case 'startDrawingPath':
+      case 'drawingShapePath':
+      case 'editPath':
         return 'copy';
       case 'maybeScale':
       case 'scaling':

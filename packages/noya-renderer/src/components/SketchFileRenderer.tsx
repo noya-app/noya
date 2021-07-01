@@ -156,7 +156,6 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
   const isEditingPath = getIsEditingPath(state.interactionState.type);
-  const isCreatingPath = state.interactionState.type === 'startDrawingPath';
 
   const canvasRect = useMemo(
     () =>
@@ -459,7 +458,7 @@ export default memo(function SketchFileRenderer() {
     const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
     return (
       <>
-        {selectedLayerIndexPaths.map((indexPath) => {
+        {selectedLayerIndexPaths.map((indexPath, index) => {
           const layer = Layers.access(page, indexPath);
 
           if (!Layers.isPointsLayer(layer)) return null;
@@ -467,31 +466,31 @@ export default memo(function SketchFileRenderer() {
           const layerTransform = getLayerTransformAtIndexPath(page, indexPath);
 
           return (
-            <EditablePath
-              key={layer.do_objectID}
-              transform={layerTransform}
-              layer={layer}
-              selectedIndexes={
-                state.selectedPointLists[layer.do_objectID] ?? []
-              }
-              selectedControlPoint={state.selectedControlPoint}
-            />
+            <>
+              <EditablePath
+                key={layer.do_objectID}
+                transform={layerTransform}
+                layer={layer}
+                selectedIndexes={
+                  state.selectedPointLists[layer.do_objectID] ?? []
+                }
+                selectedControlPoint={state.selectedControlPoint}
+              />
+
+              {state.interactionState.type === 'startDrawingPath' &&
+                index === 0 && (
+                  <NewPathPoint
+                    point={state.interactionState.current}
+                    selectedPoints={state.selectedPointLists}
+                    layer={layer}
+                  />
+                )}
+            </>
           );
         })}
       </>
     );
   }, [isEditingPath, page, state]);
-
-  const creatingPath = useMemo(() => {
-    if (!isCreatingPath) return;
-    if (state.interactionState.type === 'startDrawingPath') {
-      const { current } = state.interactionState;
-
-      return <NewPathPoint point={current} />;
-    }
-  }, [isCreatingPath, state.interactionState]);
-
-  // console.log(state.interactionState.type);
 
   return (
     <>
@@ -512,7 +511,6 @@ export default memo(function SketchFileRenderer() {
               <Polyline key={index} points={points} paint={selectionPaint} />
             ))}
             {!isEditingPath && highlightedSketchLayer}
-            {isCreatingPath && creatingPath}
             {smartSnapGuides}
             {quickMeasureGuides}
             {boundingRect && (

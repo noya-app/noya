@@ -264,8 +264,8 @@ export function interactionReducer(
 
       let layer = produce(createLayer(shapeType), (layer) => {
         const test = {
-          x: point.x + 10,
-          y: point.y + 10,
+          x: point.x + 1,
+          y: point.y + 1,
         };
         layer.do_objectID = id;
         layer.frame = {
