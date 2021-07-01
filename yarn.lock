@@ -2449,7 +2449,7 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/primitive/-/primitive-0.0.1.tgz#402fe0e690d5ff970737689dbb5f24705d423889"
   integrity sha512-Z8R0kdAZui8eYTuGY5oQUA0SU4jYq43m4bZW6Dw0B35fUp+U3r+pCrkj0EADJAPv1UaKNskSv/lrfRdC7719Rg==
 
-"@radix-ui/primitive@0.0.5":
+"@radix-ui/primitive@0.0.5", "@radix-ui/primitive@^0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@radix-ui/primitive/-/primitive-0.0.5.tgz#8464fb4db04401bde72d36e27e05714080668d40"
   integrity sha512-VeL6A5LpKYRJhDDj5tCTnzP3zm+FnvybsAkgBHQ4LUPPBnqRdWLoyKpZhlwFze/z22QHINaTIcE9Z/fTcrUR1g==
@@ -9877,11 +9877,6 @@ merge-descriptors@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/merge-descriptors/-/merge-descriptors-1.0.1.tgz#b00aaa556dd8b44568150ec9d1b953f3f90cbb61"
   integrity sha1-sAqqVW3YtEVoFQ7J0blT8/kMu2E=
-
-merge-props@^5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/merge-props/-/merge-props-5.0.3.tgz#1c89c40f81b932ad66ea069b1b5f38deb0cd5247"
-  integrity sha512-TuntFuNELf4ZEMZEDM32hCpACQStDfeEMlN5R499gRQB4XUIaGuLrQhm+nRMDtPwCWEZ2a2KTGnTxfjK8B1zww==
 
 merge-stream@^2.0.0:
   version "2.0.0"

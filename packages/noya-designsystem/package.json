@@ -4,6 +4,7 @@
   "main": "src/index.tsx",
   "license": "UNLICENSED",
   "dependencies": {
+    "@radix-ui/primitive": "^0.0.5",
     "@radix-ui/react-compose-refs": "^0.0.5",
     "@radix-ui/react-context-menu": "^0.0.19",
     "@radix-ui/react-dropdown-menu": "^0.0.19",

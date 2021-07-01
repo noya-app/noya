@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu } from 'noya-designsystem';
+import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit, uuid } from 'noya-renderer';
@@ -32,9 +32,8 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import styled, { useTheme } from 'styled-components';
 import { useGesture } from 'react-use-gesture';
-import mergeProps from 'merge-props';
+import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
   useSelector,
@@ -754,7 +753,7 @@ export default memo(function Canvas() {
       <Container
         ref={containerRef}
         cursor={cursor}
-        {...mergeProps(bind(), {
+        {...mergeEventHandlers(bind(), {
           onPointerDown: handleMouseDown,
           onPointerMove: handleMouseMove,
           onPointerUp: handleMouseUp,
