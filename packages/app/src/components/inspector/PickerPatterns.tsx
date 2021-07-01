@@ -1,42 +1,41 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Divider, getPatternBackground, Select } from 'noya-designsystem';
-import { FileMap } from 'noya-sketch-file';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Divider, PatternPreviewBackground, Select } from 'noya-designsystem';
 import { memo, useCallback } from 'react';
-import { useObjectURL } from '../../hooks/useObjectURL';
+import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { GridSmall, Square } from './PickerAssetGrid';
-
-interface Props {
-  fileImages: FileMap;
-  imageAssets: (Sketch.FileRef | Sketch.DataRef)[];
-  onChange: (file: Sketch.FileRef | Sketch.DataRef) => void;
-}
 
 const PatternSquare = memo(
   ({
     item,
-    image,
     onClick,
   }: {
     item: Sketch.FileRef | Sketch.DataRef;
-    image: ArrayBuffer;
     onClick: (file: Sketch.FileRef | Sketch.DataRef) => void;
   }) => {
-    const backgroundUrl = useObjectURL(image);
+    const { inputBackground } = useTheme().colors;
+
     return (
       <Square
-        background={`url(${backgroundUrl})`}
+        background={inputBackground}
         onClick={useCallback(() => onClick(item), [item, onClick])}
-      />
+      >
+        <PatternPreviewBackground
+          imageRef={item}
+          fillType={Sketch.PatternFillType.Fit}
+          tileScale={1}
+        />
+      </Square>
     );
   },
 );
 
-export default memo(function PickerPatterns({
-  fileImages,
-  imageAssets,
-  onChange,
-}: Props) {
+interface Props {
+  imageAssets: (Sketch.FileRef | Sketch.DataRef)[];
+  onChange: (file: Sketch.FileRef | Sketch.DataRef) => void;
+}
+
+export default memo(function PickerPatterns({ imageAssets, onChange }: Props) {
   return (
     <>
       <Divider />
@@ -54,12 +53,7 @@ export default memo(function PickerPatterns({
         <InspectorPrimitives.Section>
           <GridSmall>
             {imageAssets.map((item) => (
-              <PatternSquare
-                key={item._ref}
-                item={item}
-                image={getPatternBackground(fileImages, item)}
-                onClick={onChange}
-              />
+              <PatternSquare key={item._ref} item={item} onClick={onChange} />
             ))}
           </GridSmall>
         </InspectorPrimitives.Section>

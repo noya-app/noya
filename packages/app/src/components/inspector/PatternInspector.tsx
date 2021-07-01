@@ -1,45 +1,44 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { fileOpen } from 'browser-fs-access';
 import {
-  Select,
-  Spacer,
-  Slider,
   InputField,
-  getPatternBackground,
+  PatternPreviewBackground,
+  Select,
   SketchPattern,
-  getPatternSize,
+  Slider,
+  Spacer,
   SUPPORTED_FILE_TYPES,
 } from 'noya-designsystem';
-import { memo, useCallback, useMemo, useState, DragEvent } from 'react';
-import styled from 'styled-components';
-import * as InspectorPrimitives from './InspectorPrimitives';
-import { fileOpen } from 'browser-fs-access';
+import { useHover } from 'noya-designsystem/src/hooks/useHover';
 import { uuid } from 'noya-renderer';
 import { FileMap } from 'noya-sketch-file';
-import { useHover } from 'noya-designsystem/src/hooks/useHover';
+import { DragEvent, memo, useCallback, useState } from 'react';
+import styled from 'styled-components';
 import { useFileDropTarget } from '../../hooks/useFileDropTarget';
-import { useObjectURL } from '../../hooks/useObjectURL';
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 const Container = styled.div<{
-  background: string;
-  backgroundSize: string;
-  repeat: boolean;
   isActive: boolean;
-}>(({ theme, background, backgroundSize, repeat, isActive }) => ({
+}>(({ theme, isActive }) => ({
   display: 'flex',
   flex: 1,
   position: 'relative',
   outline: 'none',
   borderRadius: '4px',
+  overflow: 'hidden',
   minHeight: '150px',
-  background: (isActive ? `${theme.colors.imageOverlay},` : '') + background,
   border: (isActive ? '2px ' : '0px ') + theme.colors.primaryDark,
   backgroundColor: 'white',
-  backgroundPosition: 'center',
-  backgroundRepeat: repeat ? 'auto' : 'no-repeat',
-  backgroundSize,
   imageRendering: 'crisp-edges',
   width: '100%',
   justifyContent: 'center',
+}));
+
+const DropTargetOverlay = styled.div(({ theme }) => ({
+  position: 'absolute',
+  inset: 0,
+  background: theme.colors.imageOverlay,
+  pointerEvents: 'none',
 }));
 
 const UploadButton = styled.button<{ show: boolean }>(({ show = false }) => ({
@@ -98,15 +97,6 @@ const PatternPreview = memo(
       onHoverChange,
     });
 
-    const backgroundUrl = useObjectURL(
-      getPatternBackground(images, pattern.image),
-    );
-
-    const backgroundSize = useMemo(
-      () => getPatternSize(pattern.patternFillType, pattern.patternTileScale),
-      [pattern.patternFillType, pattern.patternTileScale],
-    );
-
     const handleImageFile = useCallback(
       async (file: File) => {
         const extension = SUPPORTED_FILE_TYPES[file.type];
@@ -164,16 +154,21 @@ const PatternPreview = memo(
         {...dropTargetProps}
         {...hoverProps}
         isActive={isDropTargetActive}
-        background={`url(${backgroundUrl})`}
-        backgroundSize={backgroundSize}
-        repeat={isTile}
       >
+        {pattern.image && (
+          <PatternPreviewBackground
+            imageRef={pattern.image}
+            fillType={pattern.patternFillType}
+            tileScale={pattern.patternTileScale}
+          />
+        )}
         <UploadButton
           show={!isDropTargetActive && isHovering}
           onClick={openFile}
         >
           Upload Image
         </UploadButton>
+        {isDropTargetActive && <DropTargetOverlay />}
       </Container>
     );
   },

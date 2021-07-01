@@ -172,7 +172,6 @@ function PatternFillPicker({
         onChangeTileScale={onChangePatternTileScale}
       />
       <PickerPatterns
-        fileImages={state.sketch.images}
         imageAssets={Selectors.getImageAssets(state)}
         onChange={onChangeFillImage}
       />

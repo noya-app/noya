@@ -15,7 +15,8 @@ const dotsHorizontalSvg = (fillColor: string) => `
 
 const Background = styled.span<{ background: string }>(({ background }) => ({
   background,
-  flex: 1,
+  position: 'absolute',
+  inset: 0,
 }));
 
 const HorizontalDotsBackground = memo(function HorizontalDotsBackground() {
@@ -35,16 +36,48 @@ const HorizontalDotsBackground = memo(function HorizontalDotsBackground() {
   return <Background background={background} />;
 });
 
-const PatternPreviewBackground = memo(function PatternPreviewBackground({
+function getPatternSizeAndPosition(
+  fillType: Sketch.PatternFillType,
+  tileScale: number,
+) {
+  switch (fillType) {
+    case Sketch.PatternFillType.Fit:
+      return 'center / contain';
+    case Sketch.PatternFillType.Tile:
+      return `top left / ${tileScale * 100}%`;
+    case Sketch.PatternFillType.Fill:
+      return 'center / cover';
+    case Sketch.PatternFillType.Stretch:
+      return 'center / 100% 100%';
+  }
+}
+
+export const PatternPreviewBackground = memo(function PatternPreviewBackground({
+  fillType,
+  tileScale,
   imageRef,
 }: {
+  fillType: Sketch.PatternFillType;
+  tileScale: number;
   imageRef: Sketch.FileRef | Sketch.DataRef;
 }) {
   const [state] = useApplicationState();
 
   const url = useObjectURL(state.sketch.images[imageRef._ref]);
 
-  return <Background background={`center / cover url(${url})`} />;
+  const size = getPatternSizeAndPosition(fillType, tileScale);
+
+  const background = useMemo(
+    () =>
+      [
+        size,
+        `url(${url})`,
+        fillType === Sketch.PatternFillType.Tile ? 'repeat' : 'no-repeat',
+      ].join(' '),
+    [fillType, size, url],
+  );
+
+  return <Background background={background} />;
 });
 
 const ColorPreviewBackground = memo(function ColorPreviewBackground({
@@ -87,6 +120,12 @@ export const FillPreviewBackground = memo(function FillPreviewBackground({
     case 'pattern':
       if (!value.image) return null;
 
-      return <PatternPreviewBackground imageRef={value.image} />;
+      return (
+        <PatternPreviewBackground
+          fillType={value.patternFillType}
+          tileScale={value.patternTileScale}
+          imageRef={value.image}
+        />
+      );
   }
 });

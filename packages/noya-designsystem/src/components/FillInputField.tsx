@@ -17,8 +17,7 @@ const Container = styled.button(({ theme }) => ({
   '&:focus': {
     boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
   },
-  display: 'flex',
-  alignItems: 'stretch',
+  position: 'relative',
 }));
 
 interface Props {

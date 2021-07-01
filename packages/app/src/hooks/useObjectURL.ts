@@ -9,8 +9,10 @@ export function useObjectURL(object: ArrayBuffer | Uint8Array | Blob) {
 
     return URL.createObjectURL(new Blob([bytes]));
   }, [object]);
+
   useLayoutEffect(() => {
     return () => URL.revokeObjectURL(objectURL);
   }, [objectURL]);
+
   return objectURL;
 }
