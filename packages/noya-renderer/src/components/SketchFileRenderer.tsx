@@ -59,7 +59,7 @@ import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import MeasurementGuide from './MeasurementGuide';
-import NewPathPoint from './NewPath';
+import PseudoPathElements from './PseudoPathElements';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -456,6 +456,7 @@ export default memo(function SketchFileRenderer() {
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
     const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
+
     return (
       <>
         {selectedLayerIndexPaths.map((indexPath, index) => {
@@ -479,7 +480,8 @@ export default memo(function SketchFileRenderer() {
 
               {state.interactionState.type === 'startDrawingPath' &&
                 index === 0 && (
-                  <NewPathPoint
+                  <PseudoPathElements
+                    key={index}
                     point={state.interactionState.current}
                     selectedPoints={state.selectedPointLists}
                     layer={layer}
@@ -488,6 +490,14 @@ export default memo(function SketchFileRenderer() {
             </>
           );
         })}
+        {selectedLayerIndexPaths.length === 0 &&
+          state.interactionState.type === 'startDrawingPath' && (
+            <PseudoPathElements
+              point={state.interactionState.current}
+              selectedPoints={state.selectedPointLists}
+              layer={undefined}
+            />
+          )}
       </>
     );
   }, [isEditingPath, page, state]);

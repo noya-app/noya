@@ -17,10 +17,10 @@ import { PointsLayer } from '../../../noya-state/src/layers';
 interface EditablePathPointProps {
   point: Point;
   selectedPoints: SelectedPointLists;
-  layer: PointsLayer;
+  layer: PointsLayer | undefined;
 }
 
-export default function NewPathPoint({
+export default function PseudoPathElements({
   point,
   selectedPoints,
   layer,
@@ -46,17 +46,22 @@ export default function NewPathPoint({
     return path;
   }, [CanvasKit, point.x, point.y]);
 
-  const decodedPoint = Primitives.decodeCurvePoint(
-    layer.points[0],
-    layer.frame,
-  );
-  const points = [point, decodedPoint.point];
+  let points: Point[] = [];
+  if (layer) {
+    const decodedPoint = Primitives.decodeCurvePoint(
+      layer.points[layer.points.length - 1],
+      layer.frame,
+    );
+
+    points = [point, decodedPoint.point];
+  }
 
   useDeletable(path);
 
   return (
     <>
-      <Polyline points={points} paint={stroke} />
+      {layer && <Polyline points={points} paint={stroke} />}
+
       <Path path={path} paint={fill} />
       <Path path={path} paint={stroke} />
     </>

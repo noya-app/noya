@@ -1,12 +1,14 @@
 import type { Surface } from 'canvaskit';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { render, unmount } from 'noya-react-canvaskit';
 import { SketchFileRenderer, uuid } from 'noya-renderer';
 import { decodeCurvePoint } from 'noya-renderer/src/primitives';
 import {
   CompassDirection,
   Layers,
+  PageLayer,
   Point,
   SelectedControlPoint,
   Selectors,
@@ -31,7 +33,6 @@ import {
   useState,
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import {
   StateProvider,
   useApplicationState,
@@ -277,15 +278,32 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
-        case 'startDrawingPath':
-        case 'updateDrawingPath': {
-          const id = uuid();
-          dispatch('interaction', [
-            'startDrawingShapePath',
-            'shapePath' as ShapeType,
-            id,
-            point,
-          ]);
+        case 'startDrawingPath': {
+          if (state.selectedObjects.length === 0) {
+            const id = uuid();
+            dispatch('interaction', [
+              'startDrawingShapePath',
+              'shapePath' as ShapeType,
+              id,
+              point,
+            ]);
+          } else {
+            const page = getCurrentPage(state);
+            const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
+              state,
+            );
+            const layers = layerIndexPaths.map((indexPath) =>
+              Layers.access(page, indexPath),
+            );
+            if (layers[0].do_objectID === state.selectedObjects[0]) {
+              dispatch('interaction', [
+                'updateDrawingShapePath',
+                layers[0] as PageLayer,
+                point,
+              ]);
+            }
+          }
+
           break;
         }
         case 'editPath':
@@ -688,7 +706,8 @@ export default memo(function Canvas() {
 
           break;
         }
-        case 'drawingShapePath': {
+        case 'drawingShapePath':
+        case 'updateDrawingShapePath': {
           dispatch('interaction', ['editPath']);
           break;
         }

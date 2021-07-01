@@ -42,6 +42,7 @@ export type InteractionAction =
   | [type: 'createPath']
   | [type: 'startDrawingPath', current: Point]
   | [type: 'updateDrawingPath', current: Point]
+  | [type: 'updateDrawingShapePath', layer: PageLayer, point: Point]
   | [
       type: 'startDrawingShapePath',
       shapeType: ShapeType,
@@ -102,6 +103,11 @@ export type InteractionState =
   | {
       type: 'updateDrawingPath';
       current: Point;
+    }
+  | {
+      type: 'updateDrawingShapePath';
+      layer: PageLayer;
+      point: Point;
     }
   | {
       type: 'startDrawingShapePath';
@@ -259,11 +265,20 @@ export function interactionReducer(
         current,
       };
     }
+    case 'updateDrawingShapePath': {
+      const [type, layer, point] = action;
+
+      return {
+        type,
+        point,
+        layer,
+      };
+    }
     case 'startDrawingShapePath': {
       const [, shapeType, id, point] = action;
 
       let layer = produce(createLayer(shapeType), (layer) => {
-        const test = {
+        const minArea = {
           x: point.x + 1,
           y: point.y + 1,
         };
@@ -271,7 +286,7 @@ export function interactionReducer(
         layer.frame = {
           _class: 'rect',
           constrainProportions: false,
-          ...createRect(point, test),
+          ...createRect(point, minArea),
         };
       });
 

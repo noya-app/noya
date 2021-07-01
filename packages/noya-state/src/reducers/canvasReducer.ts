@@ -219,17 +219,37 @@ export function canvasReducer(
                 layer.points[0],
                 boundingRect,
               );
-              // decodedPoint.curveFrom = {
-              //   x: 0,
-              //   y: 0,
-              // };
-              // decodedPoint.curveTo = {
-              //   x: 0,
-              //   y: 0,
-              // };
               decodedPoint.point = point;
               layer.points = [encodeCurvePoint(decodedPoint, layer.frame)];
             }
+            return;
+          }
+          case 'updateDrawingShapePath': {
+            const { layer, point } = interactionState;
+
+            const boundingRect = getBoundingRect(
+              draft.sketch.pages[pageIndex],
+              AffineTransform.identity,
+              [layer.do_objectID],
+              {
+                clickThroughGroups: true,
+                includeHiddenLayers: false,
+                includeArtboardLayers: false,
+              },
+            );
+
+            if (layer._class === 'shapePath' && boundingRect) {
+              const firstPoint = decodeCurvePoint(
+                layer.points[0],
+                boundingRect,
+              );
+              const newPoint = { ...firstPoint };
+              encodeCurvePoint(firstPoint, layer.frame);
+
+              newPoint.point = point;
+              layer.points.push(encodeCurvePoint(newPoint, layer.frame));
+            }
+
             return;
           }
           case 'moving': {
