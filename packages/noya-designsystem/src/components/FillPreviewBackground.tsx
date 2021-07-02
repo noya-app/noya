@@ -1,8 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useApplicationState } from '../../../app/src/contexts/ApplicationStateContext';
 import { useObjectURL } from '../../../app/src/hooks/useObjectURL';
+import { useSketchImage } from '../../../noya-renderer/src/ImageCache';
 import { getGradientBackground } from '../utils/getGradientBackground';
 import { sketchColorToRgbaString } from '../utils/sketchColor';
 import { SketchPattern } from '../utils/sketchPattern';
@@ -61,9 +61,9 @@ export const PatternPreviewBackground = memo(function PatternPreviewBackground({
   tileScale: number;
   imageRef: Sketch.FileRef | Sketch.DataRef;
 }) {
-  const [state] = useApplicationState();
+  const image = useSketchImage(imageRef);
 
-  const url = useObjectURL(state.sketch.images[imageRef._ref]);
+  const url = useObjectURL(image);
 
   const size = getPatternSizeAndPosition(fillType, tileScale);
 

@@ -7,7 +7,6 @@ import {
   Point,
   Rect,
 } from 'noya-state';
-import { CHECKERED_BACKGROUND_BYTES } from './hooks/useCheckeredFill';
 import * as PathUtils from './primitives/path';
 
 export * from './primitives/path';
@@ -181,10 +180,7 @@ export function fill(
           break;
         }
 
-        let canvasImage = CanvasKit.MakeImageFromEncoded(image);
-        canvasImage = canvasImage
-          ? canvasImage
-          : CanvasKit.MakeImageFromEncoded(CHECKERED_BACKGROUND_BYTES);
+        const canvasImage = CanvasKit.MakeImageFromEncoded(image);
 
         if (!canvasImage) {
           paint.setColor(clearColor(CanvasKit));

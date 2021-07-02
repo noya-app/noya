@@ -21,6 +21,8 @@ type ImageCacheContextValue = [
 // We decode images using a global mutable cache since currently all React CanvasKit
 // elements re-render on every state change, so state/ref gets recreated. When we fix
 // that, we should move the cache into the Provider.
+//
+// TODO: Remove unused images so we don't run out of memory
 const globalImageCache: ImageCache = {};
 
 const ImageCacheContext = createContext<ImageCacheContextValue | undefined>(

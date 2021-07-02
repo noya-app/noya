@@ -4,6 +4,7 @@ export const SUPPORTED_FILE_TYPES: { [key: string]: string } = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
+  'application/pdf': 'pdf',
 };
 
 export type SketchPattern = {
