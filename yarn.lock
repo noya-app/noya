@@ -10959,6 +10959,11 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
+pdfjs-dist@^2.8.335:
+  version "2.8.335"
+  resolved "https://registry.yarnpkg.com/pdfjs-dist/-/pdfjs-dist-2.8.335.tgz#06f602174b746def57edc8681a0f93c4029c89a1"
+  integrity sha512-2IKw7wP1RnzzWJcpkeZwF+cKROFiQext+/WburB6cgKwt9zc8rOyDH7a3FepdcciSGs8SDs/AuWe8qVx+iI6pw==
+
 performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
