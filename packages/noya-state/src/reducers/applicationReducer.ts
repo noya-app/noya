@@ -197,7 +197,11 @@ export function applicationReducer(
                 layer.style.fills
               ) {
                 const _ref = layer.style.fills[action[1]].image?._ref;
-                if (!_ref) return;
+                if (
+                  !_ref ||
+                  draft.sketch.images[_ref] === CHECKERED_BACKGROUND_BYTES
+                )
+                  return;
                 draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
               }
             },
