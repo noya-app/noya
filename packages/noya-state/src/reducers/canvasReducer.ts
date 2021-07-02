@@ -172,7 +172,6 @@ export function canvasReducer(
 
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
-
         switch (interactionState.type) {
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
@@ -189,6 +188,7 @@ export function canvasReducer(
           }
           case 'drawingShapePath': {
             const { layer } = interactionState;
+            if (!layer) return;
             const parent = draft.sketch.pages[pageIndex].layers
               .filter(
                 (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
@@ -205,6 +205,10 @@ export function canvasReducer(
               draft.sketch.pages[pageIndex].layers.push(layer);
             }
             draft.selectedObjects = [layer.do_objectID];
+
+            for (let layerId in draft.selectedPointLists) {
+              draft.selectedPointLists[layerId] = [];
+            }
 
             const boundingRect = getBoundingRect(
               draft.sketch.pages[pageIndex],
@@ -236,10 +240,10 @@ export function canvasReducer(
           case 'updateDrawingShapePath': {
             const { point } = interactionState;
 
-            const layerId = Object.keys(draft.selectedPointLists)[0];
+            const layerId = draft.selectedObjects[0];
 
             if (!layerId) {
-              throw new Error('TEST');
+              throw new Error('NO LAYER SELECTED');
             }
 
             const layer = Layers.find(
@@ -282,9 +286,11 @@ export function canvasReducer(
                 ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
               };
 
-              layer.points = newDecodedPoints.map((decodedCurvePoint) =>
+              layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
                 encodeCurvePoint(decodedCurvePoint, layer.frame),
               );
+
+              draft.selectedPointLists[layerId] = [layer.points.length - 1];
             }
 
             return;

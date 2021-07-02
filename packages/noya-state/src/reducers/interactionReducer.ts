@@ -39,8 +39,7 @@ export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
   | [type: 'editPath']
-  | [type: 'startDrawingPath', current?: Point]
-  | [type: 'updateDrawingPath', current: Point]
+  | [type: 'drawingShapePath', current?: Point, layer?: PageLayer]
   | [type: 'updateDrawingShapePath', point: Point]
   | [
       type: 'startDrawingShapePath',
@@ -93,32 +92,18 @@ export type InteractionState =
       type: 'editPath';
     }
   | {
-      type: 'startDrawingPath';
+      type: 'drawingShapePath';
       current?: Point;
-    }
-  | {
-      type: 'updateDrawingPath';
-      current: Point;
+      layer?: PageLayer;
     }
   | {
       type: 'updateDrawingShapePath';
       point: Point;
     }
   | {
-      type: 'startDrawingShapePath';
-      shapeType: ShapeType;
-      id: UUID;
-      point: Point;
-    }
-  | {
       type: 'drawing';
       origin: Point;
       value: PageLayer;
-    }
-  | {
-      type: 'drawingShapePath';
-      point: Point;
-      layer: PageLayer;
     }
   | {
       type: 'marquee';
@@ -241,19 +226,11 @@ export function interactionReducer(
         draft.current = point;
       });
     }
-    case 'startDrawingPath': {
+    case 'drawingShapePath': {
       const [type, current] = action;
 
       return {
         type,
-        current,
-      };
-    }
-    case 'updateDrawingPath': {
-      const [, current] = action;
-
-      return {
-        type: 'startDrawingPath',
         current,
       };
     }
@@ -284,7 +261,7 @@ export function interactionReducer(
       return {
         type: 'drawingShapePath',
         layer,
-        point,
+        current: point,
       };
     }
 

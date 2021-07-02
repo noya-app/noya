@@ -277,7 +277,7 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
-        case 'startDrawingPath': {
+        case 'drawingShapePath': {
           if (state.selectedObjects.length === 0) {
             const id = uuid();
             dispatch('interaction', [
@@ -431,8 +431,8 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
-        case 'startDrawingPath': {
-          dispatch('interaction', ['startDrawingPath', point]);
+        case 'drawingShapePath': {
+          dispatch('interaction', ['drawingShapePath', point]);
           break;
         }
         case 'maybePan': {
@@ -693,10 +693,9 @@ export default memo(function Canvas() {
 
           break;
         }
-        case 'drawingShapePath':
         case 'updateDrawingShapePath': {
           dispatch('interaction', ['editPath']);
-          dispatch('interaction', ['startDrawingPath', point]);
+          dispatch('interaction', ['drawingShapePath', point]);
           break;
         }
         case 'maybeMoveControlPoint':
@@ -731,8 +730,8 @@ export default memo(function Canvas() {
       case 'insertRectangle':
       case 'insertText':
         return 'crosshair';
-      case 'startDrawingPath':
       case 'drawingShapePath':
+      case 'updateDrawingShapePath':
         return 'copy';
       case 'maybeScale':
       case 'scaling':

@@ -56,7 +56,7 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
-  const isCreatingPath = interactionType === 'startDrawingPath';
+  const isCreatingPath = interactionType === 'drawingShapePath';
 
   const isPanning =
     interactionType === 'panMode' ||
@@ -211,7 +211,7 @@ const ToolbarContent = memo(function ToolbarContent({
         active={isCreatingPath}
         onClick={useCallback(() => {
           if (!isCreatingPath) {
-            dispatch('interaction', ['startDrawingPath']);
+            dispatch('interaction', ['drawingShapePath']);
           } else {
             dispatch('interaction', ['reset']);
           }

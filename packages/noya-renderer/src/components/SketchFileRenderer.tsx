@@ -157,7 +157,8 @@ export default memo(function SketchFileRenderer() {
   const canvasTransform = getCanvasTransform(state, canvasInsets);
   const isEditingPath =
     getIsEditingPath(state.interactionState.type) ||
-    state.interactionState.type === 'startDrawingPath';
+    state.interactionState.type === 'drawingShapePath' ||
+    state.interactionState.type === 'updateDrawingShapePath';
 
   const canvasRect = useMemo(
     () =>
@@ -480,7 +481,7 @@ export default memo(function SketchFileRenderer() {
                 selectedControlPoint={state.selectedControlPoint}
               />
 
-              {state.interactionState.type === 'startDrawingPath' &&
+              {state.interactionState.type === 'drawingShapePath' &&
                 state.interactionState.current &&
                 index === 0 && (
                   <PseudoPathElements
@@ -494,7 +495,7 @@ export default memo(function SketchFileRenderer() {
           );
         })}
         {selectedLayerIndexPaths.length === 0 &&
-          state.interactionState.type === 'startDrawingPath' &&
+          state.interactionState.type === 'drawingShapePath' &&
           state.interactionState.current && (
             <PseudoPathElements
               point={state.interactionState.current}
@@ -533,12 +534,13 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {state.interactionState.type === 'drawingShapePath' && (
-              <SketchLayer
-                key={state.interactionState.layer.do_objectID}
-                layer={state.interactionState.layer}
-              />
-            )}
+            {state.interactionState.type === 'drawingShapePath' &&
+              state.interactionState.layer && (
+                <SketchLayer
+                  key={state.interactionState.layer.do_objectID}
+                  layer={state.interactionState.layer}
+                />
+              )}
             {state.interactionState.type === 'drawing' && (
               <SketchLayer
                 key={state.interactionState.value.do_objectID}
