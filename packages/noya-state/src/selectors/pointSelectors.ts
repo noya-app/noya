@@ -27,7 +27,7 @@ export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
 
-const computeNewBoundingRect = (
+export const computeNewBoundingRect = (
   CanvasKit: CanvasKit,
   decodedPoints: DecodedCurvePoint[],
   layer: PointsLayer,
@@ -128,8 +128,7 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
     type === 'maybeMovePoint' ||
     type === 'movingPoint' ||
     type === 'maybeMoveControlPoint' ||
-    type === 'movingControlPoint' ||
-    type === 'startDrawingPath'
+    type === 'movingControlPoint'
   );
 };
 

@@ -8,7 +8,6 @@ import { decodeCurvePoint } from 'noya-renderer/src/primitives';
 import {
   CompassDirection,
   Layers,
-  PageLayer,
   Point,
   SelectedControlPoint,
   Selectors,
@@ -283,7 +282,7 @@ export default memo(function Canvas() {
             const id = uuid();
             dispatch('interaction', [
               'startDrawingShapePath',
-              'shapePath' as ShapeType,
+              'shapePath',
               id,
               point,
             ]);
@@ -296,11 +295,7 @@ export default memo(function Canvas() {
               Layers.access(page, indexPath),
             );
             if (layers[0].do_objectID === state.selectedObjects[0]) {
-              dispatch('interaction', [
-                'updateDrawingShapePath',
-                layers[0] as PageLayer,
-                point,
-              ]);
+              dispatch('interaction', ['updateDrawingShapePath', point]);
             }
           }
 
@@ -436,16 +431,8 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
-        case 'editPath': {
-          dispatch('interaction', ['startDrawingPath', point]);
-          break;
-        }
-        case 'createPath': {
-          dispatch('interaction', ['startDrawingPath', point]);
-          break;
-        }
         case 'startDrawingPath': {
-          dispatch('interaction', ['updateDrawingPath', point]);
+          dispatch('interaction', ['startDrawingPath', point]);
           break;
         }
         case 'maybePan': {
@@ -709,6 +696,7 @@ export default memo(function Canvas() {
         case 'drawingShapePath':
         case 'updateDrawingShapePath': {
           dispatch('interaction', ['editPath']);
+          dispatch('interaction', ['startDrawingPath', point]);
           break;
         }
         case 'maybeMoveControlPoint':
@@ -743,10 +731,8 @@ export default memo(function Canvas() {
       case 'insertRectangle':
       case 'insertText':
         return 'crosshair';
-      case 'createPath':
       case 'startDrawingPath':
       case 'drawingShapePath':
-      case 'editPath':
         return 'copy';
       case 'maybeScale':
       case 'scaling':

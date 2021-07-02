@@ -39,10 +39,9 @@ export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
   | [type: 'editPath']
-  | [type: 'createPath']
-  | [type: 'startDrawingPath', current: Point]
+  | [type: 'startDrawingPath', current?: Point]
   | [type: 'updateDrawingPath', current: Point]
-  | [type: 'updateDrawingShapePath', layer: PageLayer, point: Point]
+  | [type: 'updateDrawingShapePath', point: Point]
   | [
       type: 'startDrawingShapePath',
       shapeType: ShapeType,
@@ -94,11 +93,8 @@ export type InteractionState =
       type: 'editPath';
     }
   | {
-      type: 'createPath';
-    }
-  | {
       type: 'startDrawingPath';
-      current: Point;
+      current?: Point;
     }
   | {
       type: 'updateDrawingPath';
@@ -106,7 +102,6 @@ export type InteractionState =
     }
   | {
       type: 'updateDrawingShapePath';
-      layer: PageLayer;
       point: Point;
     }
   | {
@@ -217,9 +212,6 @@ export function interactionReducer(
     case 'editPath':
     case 'resetEditPath':
       return { type: 'editPath' };
-    case 'createPath': {
-      return { type: 'createPath' };
-    }
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
@@ -266,12 +258,11 @@ export function interactionReducer(
       };
     }
     case 'updateDrawingShapePath': {
-      const [type, layer, point] = action;
+      const [type, point] = action;
 
       return {
         type,
         point,
-        layer,
       };
     }
     case 'startDrawingShapePath': {

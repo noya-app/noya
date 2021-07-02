@@ -155,7 +155,9 @@ export default memo(function SketchFileRenderer() {
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
-  const isEditingPath = getIsEditingPath(state.interactionState.type);
+  const isEditingPath =
+    getIsEditingPath(state.interactionState.type) ||
+    state.interactionState.type === 'startDrawingPath';
 
   const canvasRect = useMemo(
     () =>
@@ -479,6 +481,7 @@ export default memo(function SketchFileRenderer() {
               />
 
               {state.interactionState.type === 'startDrawingPath' &&
+                state.interactionState.current &&
                 index === 0 && (
                   <PseudoPathElements
                     key={index}
@@ -491,7 +494,8 @@ export default memo(function SketchFileRenderer() {
           );
         })}
         {selectedLayerIndexPaths.length === 0 &&
-          state.interactionState.type === 'startDrawingPath' && (
+          state.interactionState.type === 'startDrawingPath' &&
+          state.interactionState.current && (
             <PseudoPathElements
               point={state.interactionState.current}
               selectedPoints={state.selectedPointLists}

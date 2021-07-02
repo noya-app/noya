@@ -11,12 +11,15 @@ import {
 import { Primitives, uuid } from 'noya-renderer';
 import {
   decodeCurvePoint,
+  DecodedCurvePoint,
   encodeCurvePoint,
   resizeRect,
+  stringifyPoint,
 } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
+  computeNewBoundingRect,
   EncodedPageMetadata,
   getBoundingRect,
   getCurrentPage,
@@ -33,7 +36,7 @@ import {
   getPossibleSnapLayers,
   getSnappingPairs,
 } from '../snapping';
-import { Point } from '../types';
+import { PageLayer, Point } from '../types';
 import { ApplicationState } from './applicationReducer';
 import {
   CompassDirection,
@@ -185,7 +188,7 @@ export function canvasReducer(
             break;
           }
           case 'drawingShapePath': {
-            const { layer, point } = interactionState;
+            const { layer } = interactionState;
             const parent = draft.sketch.pages[pageIndex].layers
               .filter(
                 (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
@@ -215,22 +218,39 @@ export function canvasReducer(
             );
 
             if (layer._class === 'shapePath' && boundingRect) {
-              const decodedPoint = decodeCurvePoint(
-                layer.points[0],
-                boundingRect,
-              );
-              decodedPoint.point = point;
-              layer.points = [encodeCurvePoint(decodedPoint, layer.frame)];
+              const encodedPoint: Sketch.CurvePoint = {
+                _class: 'curvePoint',
+                cornerRadius: 0,
+                curveFrom: stringifyPoint({ x: 0, y: 0 }),
+                curveTo: stringifyPoint({ x: 0, y: 0 }),
+                hasCurveFrom: false,
+                hasCurveTo: false,
+                curveMode: Sketch.CurveMode.Straight,
+                point: stringifyPoint({ x: 0, y: 0 }),
+              };
+
+              layer.points = [encodedPoint];
             }
             return;
           }
           case 'updateDrawingShapePath': {
-            const { layer, point } = interactionState;
+            const { point } = interactionState;
+
+            const layerId = Object.keys(draft.selectedPointLists)[0];
+
+            if (!layerId) {
+              throw new Error('TEST');
+            }
+
+            const layer = Layers.find(
+              draft.sketch.pages[pageIndex],
+              (layer) => layer.do_objectID === layerId,
+            ) as PageLayer;
 
             const boundingRect = getBoundingRect(
               draft.sketch.pages[pageIndex],
               AffineTransform.identity,
-              [layer.do_objectID],
+              [layerId],
               {
                 clickThroughGroups: true,
                 includeHiddenLayers: false,
@@ -239,15 +259,32 @@ export function canvasReducer(
             );
 
             if (layer._class === 'shapePath' && boundingRect) {
-              const firstPoint = decodeCurvePoint(
-                layer.points[0],
-                boundingRect,
+              // Update all points by first transforming to the canvas's coordinate system
+              const decodedPoints = layer.points.map((curvePoint) =>
+                decodeCurvePoint(curvePoint, boundingRect),
               );
-              const newPoint = { ...firstPoint };
-              encodeCurvePoint(firstPoint, layer.frame);
 
-              newPoint.point = point;
-              layer.points.push(encodeCurvePoint(newPoint, layer.frame));
+              const decodedPoint: DecodedCurvePoint = {
+                _class: 'curvePoint',
+                cornerRadius: 0,
+                curveFrom: { x: 0, y: 0 },
+                curveTo: { x: 0, y: 0 },
+                hasCurveFrom: false,
+                hasCurveTo: false,
+                curveMode: Sketch.CurveMode.Straight,
+                point,
+              };
+
+              const newDecodedPoints = [...decodedPoints, decodedPoint];
+
+              layer.frame = {
+                ...layer.frame,
+                ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
+              };
+
+              layer.points = newDecodedPoints.map((decodedCurvePoint) =>
+                encodeCurvePoint(decodedCurvePoint, layer.frame),
+              );
             }
 
             return;
