@@ -189,21 +189,26 @@ export function applicationReducer(
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
               if (!layer.style) return;
-              layer.style = styleReducer(layer.style, action);
-
               if (
                 action[0] === 'setFillFillType' &&
                 action[2] === Sketch.FillType.Pattern &&
                 layer.style.fills
               ) {
-                const _ref = layer.style.fills[action[1]].image?._ref;
-                if (
-                  !_ref ||
-                  draft.sketch.images[_ref] === CHECKERED_BACKGROUND_BYTES
-                )
-                  return;
-                draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
+                const index = action[1];
+                const fills = layer.style.fills;
+
+                if (!fills[index].image) {
+                  const _ref = `images/${uuid()}.png`;
+                  fills[index].image = {
+                    _class: 'MSJSONFileReference',
+                    _ref: _ref,
+                    _ref_class: 'MSImageData',
+                  };
+                  draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
+                }
               }
+
+              layer.style = styleReducer(layer.style, action);
             },
           );
         });
