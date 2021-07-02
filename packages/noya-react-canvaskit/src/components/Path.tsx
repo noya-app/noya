@@ -1,11 +1,11 @@
 import { Paint, Path } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
-import usePaint, { PaintParameters } from '../hooks/usePaint';
+import usePaint from '../hooks/usePaint';
 import { PathComponentProps } from '../types';
 
 interface PathProps {
   path: Path;
-  paint: Paint | PaintParameters;
+  paint: Paint;
 }
 
 export default memo(function Path(props: PathProps) {

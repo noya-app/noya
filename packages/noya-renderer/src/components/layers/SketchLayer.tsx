@@ -1,4 +1,3 @@
-import { Group } from 'noya-react-canvaskit';
 import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
 import { AffineTransform, createBounds } from 'noya-geometry';
@@ -8,6 +7,7 @@ import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
 import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
+import { Group } from '../..';
 
 interface Props {
   layer: PageLayer;

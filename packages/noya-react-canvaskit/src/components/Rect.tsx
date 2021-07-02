@@ -1,12 +1,12 @@
 import { Paint } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
-import usePaint, { PaintParameters } from '../hooks/usePaint';
+import usePaint from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';
 import { RectComponentProps } from '../types';
 
 interface RectProps {
   rect: RectParameters;
-  paint: Paint | PaintParameters;
+  paint: Paint;
 }
 
 export default memo(function Rect(props: RectProps) {

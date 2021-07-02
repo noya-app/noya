@@ -1,10 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
-import { Group, Path, Rect } from 'noya-react-canvaskit';
 import { Selectors } from 'noya-state';
 import { PointsLayer } from 'noya-state/src/layers';
 import { ReactNode, useMemo } from 'react';
+import { Group, Path, Rect } from '..';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
 

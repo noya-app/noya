@@ -1,17 +1,17 @@
+import { CanvasKit, Paint } from 'canvaskit';
 import memoize from 'noya-state/src/utils/memoize';
-import { CanvasKit, Paint, Image } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
+import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';
 import { ImageComponentProps } from '../types';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 
 const decodeImage = memoize((CanvasKit: CanvasKit, data: ArrayBuffer) => {
   return CanvasKit.MakeImageFromEncoded(data);
 });
 
 interface ImageProps {
-  image: Image | ArrayBuffer;
+  image: ArrayBuffer;
   rect: RectParameters;
   paint: Paint | PaintParameters;
 }

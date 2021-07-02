@@ -10,9 +10,6 @@ import {
   Point,
 } from 'noya-geometry';
 import {
-  Group,
-  Polyline,
-  Rect as RCKRect,
   useColorFill,
   usePaint,
   useReactCanvasKit,
@@ -40,9 +37,10 @@ import {
   SnappingPair,
 } from 'noya-state/src/snapping';
 import { groupBy } from 'noya-utils';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
+import { Rect as RCKRect, Group, Polyline } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
@@ -396,7 +394,7 @@ export default memo(function SketchFileRenderer() {
         {nearestLayerGuides.map(
           (guides, i) =>
             guides && (
-              <>
+              <Fragment key={i}>
                 {guides.map((guide, j) => (
                   <ExtensionGuide
                     key={`extension-${i}-${j}`}
@@ -410,7 +408,7 @@ export default memo(function SketchFileRenderer() {
                     measurement={guide.measurement}
                   />
                 ))}
-              </>
+              </Fragment>
             ),
         )}
       </>

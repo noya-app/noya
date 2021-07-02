@@ -12,3 +12,10 @@ export type Bounds = {
   midY: number;
   maxY: number;
 };
+
+export type Insets = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};

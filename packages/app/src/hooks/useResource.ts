@@ -1,5 +1,5 @@
 import fetchData, { ResponseEncoding } from '../utils/fetchData';
-import { SuspendedValue } from '../utils/SuspendedValue';
+import { SuspendedValue } from 'noya-utils';
 
 export const resourceCache: { [key: string]: SuspendedValue<any> } = {};
 

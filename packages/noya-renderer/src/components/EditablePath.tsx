@@ -2,20 +2,16 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
 import { AffineTransform, Point } from 'noya-geometry';
 import {
-  Group,
-  Path,
-  Polyline,
-  Rect,
   useDeletable,
   useFill,
   useReactCanvasKit,
   useStroke,
 } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
+import { Group, Path, Polyline, Primitives, Rect } from 'noya-renderer';
 import { Layers, SelectedControlPoint, Selectors } from 'noya-state';
 import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
-import { useTheme } from 'styled-components';
 import React, { Fragment, useMemo } from 'react';
+import { useTheme } from 'styled-components';
 
 const CONTROL_POINT_SIZE = 2;
 
@@ -71,7 +67,7 @@ function EditablePathControlPoint({
     height: CONTROL_POINT_SIZE * 2,
   });
 
-  return <Rect rect={rect} paint={fill}></Rect>;
+  return <Rect rect={rect} paint={fill} />;
 }
 
 interface Props {

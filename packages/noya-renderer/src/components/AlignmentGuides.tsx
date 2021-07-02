@@ -1,6 +1,7 @@
 import { Point } from 'noya-geometry';
-import { Polyline, usePaint, useReactCanvasKit } from 'noya-react-canvaskit';
+import { usePaint, useReactCanvasKit } from 'noya-react-canvaskit';
 import React from 'react';
+import { Polyline } from '..';
 
 export default function AlignmentGuides({ lines }: { lines: Point[][] }) {
   const { CanvasKit } = useReactCanvasKit();

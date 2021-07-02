@@ -1,19 +1,16 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Rect } from 'noya-geometry';
 import {
   ClipProps,
-  Group,
-  Rect as RCKRect,
-  Text,
   useBlurMaskFilter,
   useDeletable,
   useFontManager,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
+import { Group, Primitives, Rect as RCKRect, Text } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Rect } from '../../../../noya-geometry/src';
 import SketchGroup from './SketchGroup';
 
 interface ArtboardLabelProps {
