@@ -179,9 +179,11 @@ export function canvasReducer(
             //Selects the first point in the first selected layer and initializes a point list for each selected layer
             layerIndexPaths.forEach((layerIndex, index) => {
               const layer = Layers.access(page, layerIndex);
-              if (Layers.isPointsLayer(layer)) {
-                draft.selectedPointLists[layer.do_objectID] =
-                  index === 0 ? [0] : [];
+              if (layer.do_objectID !== draft.selectedObjects[0]) {
+                if (Layers.isPointsLayer(layer)) {
+                  draft.selectedPointLists[layer.do_objectID] =
+                    index === 0 ? [0] : [];
+                }
               }
             });
             break;

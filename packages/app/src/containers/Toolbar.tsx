@@ -103,6 +103,14 @@ const ToolbarContent = memo(function ToolbarContent({
     }
   }, [isPanning, dispatch]);
 
+  const handleEnablePenTool = useCallback(() => {
+    if (isCreatingPath) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['drawingShapePath']);
+    }
+  }, [isCreatingPath, dispatch]);
+
   const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
 
   const handleRedo = useCallback(() => dispatch('redo'), [dispatch]);
@@ -112,6 +120,8 @@ const ToolbarContent = memo(function ToolbarContent({
     r: handleInsertRectangle,
     o: handleInsertOval,
     t: handleInsertText,
+    p: handleEnablePenTool,
+    v: handleEnablePenTool,
     'Mod-z': handleUndo,
     'Mod-Shift-z': handleRedo,
   });
@@ -209,13 +219,7 @@ const ToolbarContent = memo(function ToolbarContent({
         id="create-path"
         tooltip="Create path"
         active={isCreatingPath}
-        onClick={useCallback(() => {
-          if (!isCreatingPath) {
-            dispatch('interaction', ['drawingShapePath']);
-          } else {
-            dispatch('interaction', ['reset']);
-          }
-        }, [isCreatingPath, dispatch])}
+        onClick={handleEnablePenTool}
       >
         {useMemo(
           () => (
