@@ -5,6 +5,8 @@ import { Draft } from 'immer';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
 import { getCurrentTab } from './workspaceSelectors';
+import { uuid } from 'noya-renderer';
+import { CHECKERED_BACKGROUND_BYTES } from 'noya-renderer/src/hooks/useCheckeredFill';
 
 export type ComponentsTypes =
   | Sketch.Swatch
@@ -141,4 +143,20 @@ export const getSymbolsInstancesIds = (
         : [],
     ),
   );
+};
+
+export const setNewPatternFill = (
+  fills: Sketch.Fill[],
+  index: number,
+  draft: Draft<ApplicationState>,
+) => {
+  if (fills[index].image) return;
+
+  const _ref = `images/${uuid()}.png`;
+  fills[index].image = {
+    _class: 'MSJSONFileReference',
+    _ref: _ref,
+    _ref_class: 'MSImageData',
+  };
+  draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
 };

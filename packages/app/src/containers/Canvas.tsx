@@ -2,7 +2,7 @@ import type { Surface } from 'canvaskit';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
 import { render, unmount } from 'noya-react-canvaskit';
-import { SketchFileRenderer, uuid } from 'noya-renderer';
+import { SketchFileRenderer, uuid, ImageCacheProvider } from 'noya-renderer';
 import { decodeCurvePoint } from 'noya-renderer/src/primitives';
 import {
   CompassDirection,
@@ -207,7 +207,9 @@ export default memo(function Canvas() {
       render(
         <ThemeProvider theme={theme}>
           <StateProvider state={workspaceState}>
-            <SketchFileRenderer />
+            <ImageCacheProvider>
+              <SketchFileRenderer />
+            </ImageCacheProvider>
           </StateProvider>
         </ThemeProvider>,
         surface,

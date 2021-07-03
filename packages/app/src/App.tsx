@@ -6,6 +6,7 @@ import {
   WorkspaceState,
 } from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { ImageCacheProvider } from 'noya-renderer';
 import Workspace from './containers/Workspace';
 import { StateProvider } from './contexts/ApplicationStateContext';
 import useCanvasKit from './hooks/useCanvasKit';
@@ -65,7 +66,9 @@ export default function App() {
 
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
-      <Workspace />
+      <ImageCacheProvider>
+        <Workspace />
+      </ImageCacheProvider>
     </StateProvider>
   );
 }

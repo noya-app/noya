@@ -12,8 +12,8 @@ import {
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
 import { Primitives } from 'noya-renderer';
 import { memo, useMemo } from 'react';
-import { useApplicationState } from '../../../../app/src/contexts/ApplicationStateContext';
 import { Rect } from '../../../../noya-state/src';
+import { useSketchImage } from '../../ImageCache';
 import { getStrokedPath } from '../../primitives/path';
 import SketchBorder from '../effects/SketchBorder';
 
@@ -21,14 +21,14 @@ const SketchFill = memo(function SketchFill({
   path,
   fill,
   frame,
-  image,
 }: {
   path: CanvasKit.Path;
   fill: Sketch.Fill;
   frame: Rect;
-  image?: ArrayBuffer;
 }) {
   const { CanvasKit } = useReactCanvasKit();
+
+  const image = useSketchImage(fill.image);
 
   // TODO: Delete internal gradient shaders on unmount
   const paint = useMemo(() => Primitives.fill(CanvasKit, fill, frame, image), [
@@ -170,7 +170,6 @@ interface Props {
 
 export default memo(function SketchShape({ layer }: Props) {
   const { CanvasKit } = useReactCanvasKit();
-  const [state] = useApplicationState();
 
   const path = Primitives.path(
     CanvasKit,
@@ -223,7 +222,6 @@ export default memo(function SketchShape({ layer }: Props) {
           fill={fill}
           path={path}
           frame={layer.frame}
-          image={fill.image ? state.sketch.images[fill.image._ref] : undefined}
         />
       ))}
       {borders.map((border, index) => (

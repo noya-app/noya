@@ -320,14 +320,6 @@ export function styleReducer(
         if (type === Sketch.FillType.Gradient && !draft.fills[index].gradient) {
           draft.fills[index].gradient = Models.fill.gradient;
         }
-
-        if (type === Sketch.FillType.Pattern && !draft.fills[index].image) {
-          draft.fills[index].image = {
-            _class: 'MSJSONFileReference',
-            _ref: '',
-            _ref_class: 'MSImageData',
-          };
-        }
       });
     }
     case 'setBorderFillType': {

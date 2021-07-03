@@ -12,7 +12,7 @@ function decodeBase64(string: string) {
 }
 
 const CHECKERED_BACKGROUND = `iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYII=`;
-const CHECKERED_BACKGROUND_BYTES = decodeBase64(CHECKERED_BACKGROUND);
+export const CHECKERED_BACKGROUND_BYTES = decodeBase64(CHECKERED_BACKGROUND);
 
 export default function useCheckeredFill() {
   const { CanvasKit } = useReactCanvasKit();

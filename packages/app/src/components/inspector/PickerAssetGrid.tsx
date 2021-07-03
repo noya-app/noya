@@ -3,7 +3,7 @@ import { RadioGroup } from 'noya-designsystem';
 import styled from 'styled-components';
 import { memo, useCallback } from 'react';
 
-export const Square = styled.div<{ background: string; selected?: boolean }>(
+export const Square = styled.div<{ background?: string; selected?: boolean }>(
   ({ theme, background, selected = false }) => ({
     height: '25px',
     width: '25px',
@@ -15,6 +15,7 @@ export const Square = styled.div<{ background: string; selected?: boolean }>(
     } `,
     borderRadius: '4px',
     cursor: 'pointer',
+    position: 'relative',
   }),
 );
 

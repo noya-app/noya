@@ -1,21 +1,41 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Divider, getPatternBackground, Select } from 'noya-designsystem';
-import { FileMap } from 'noya-sketch-file';
-import { memo } from 'react';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Divider, PatternPreviewBackground, Select } from 'noya-designsystem';
+import { memo, useCallback } from 'react';
+import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { GridSmall, Square } from './PickerAssetGrid';
 
+const PatternSquare = memo(
+  ({
+    item,
+    onClick,
+  }: {
+    item: Sketch.FileRef | Sketch.DataRef;
+    onClick: (file: Sketch.FileRef | Sketch.DataRef) => void;
+  }) => {
+    const { inputBackground } = useTheme().colors;
+
+    return (
+      <Square
+        background={inputBackground}
+        onClick={useCallback(() => onClick(item), [item, onClick])}
+      >
+        <PatternPreviewBackground
+          imageRef={item}
+          fillType={Sketch.PatternFillType.Fit}
+          tileScale={1}
+        />
+      </Square>
+    );
+  },
+);
+
 interface Props {
-  fileImages: FileMap;
   imageAssets: (Sketch.FileRef | Sketch.DataRef)[];
-  onChange: (color: Sketch.FileRef | Sketch.DataRef) => void;
+  onChange: (file: Sketch.FileRef | Sketch.DataRef) => void;
 }
 
-export default memo(function PickerPatterns({
-  fileImages,
-  imageAssets,
-  onChange,
-}: Props) {
+export default memo(function PickerPatterns({ imageAssets, onChange }: Props) {
   return (
     <>
       <Divider />
@@ -33,11 +53,7 @@ export default memo(function PickerPatterns({
         <InspectorPrimitives.Section>
           <GridSmall>
             {imageAssets.map((item) => (
-              <Square
-                key={item._ref}
-                background={getPatternBackground(fileImages, item)}
-                onClick={() => onChange(item)}
-              />
+              <PatternSquare key={item._ref} item={item} onClick={onChange} />
             ))}
           </GridSmall>
         </InspectorPrimitives.Section>
