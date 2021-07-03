@@ -17,15 +17,20 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
+import JSZip from 'jszip';
 
-async function saveFile(name: string, data: Uint8Array) {
+async function saveFile(
+  name: string,
+  fileFormat: string,
+  data: Uint8Array | ArrayBuffer,
+) {
   const file = new File([data], name, {
-    type: 'image/png',
+    type: `${fileFormat === 'zip' ? 'application' : 'image'}/${fileFormat}`,
   });
 
   await fileSave(
     file,
-    { fileName: file.name, extensions: ['.png'] },
+    { fileName: file.name, extensions: [`.${fileFormat}`] },
     undefined,
     false,
   );
@@ -45,26 +50,117 @@ export default memo(function ExportInspector() {
   const exportFormats = selectedLayer.exportOptions.exportFormats;
 
   // TODO: Handle export formats
+  const handleFileFormat = useCallback(
+    async (exportFormat: Sketch.ExportFormat) => {
+      const {
+        scale,
+        absoluteSize,
+        fileFormat,
+        visibleScaleType,
+      } = exportFormat;
+
+      const adjustSize = {
+        width: Math.ceil(
+          visibleScaleType === Sketch.VisibleScaleType.Scale
+            ? selectedLayer.frame.width * scale
+            : visibleScaleType === Sketch.VisibleScaleType.Width
+            ? absoluteSize
+            : selectedLayer.frame.width,
+        ),
+        height: Math.ceil(
+          visibleScaleType === Sketch.VisibleScaleType.Scale
+            ? selectedLayer.frame.height * scale
+            : visibleScaleType === Sketch.VisibleScaleType.Height
+            ? absoluteSize
+            : selectedLayer.frame.height,
+        ),
+      };
+
+      const data = await renderImageFromCanvas(
+        CanvasKit,
+        adjustSize.width,
+        adjustSize.height,
+        theme,
+        getWorkspaceStateSnapshot(),
+        fileFormat,
+        () => <RCKLayerPreview layer={selectedLayer} size={adjustSize} />,
+      );
+      return data;
+    },
+    [CanvasKit, theme, selectedLayer, getWorkspaceStateSnapshot],
+  );
+
+  const setFileName = useCallback(
+    (exportFormat: Sketch.ExportFormat) => {
+      const {
+        scale,
+        name,
+        namingScheme,
+        fileFormat,
+        visibleScaleType,
+      } = exportFormat;
+
+      return `${!namingScheme && name ? `${name}.` : ''}${selectedLayer.name}${
+        scale !== 1
+          ? `@${scale}${
+              visibleScaleType === Sketch.VisibleScaleType.Height
+                ? 'h'
+                : visibleScaleType === Sketch.VisibleScaleType.Width
+                ? 'w'
+                : 'x'
+            }`
+          : ''
+      }${
+        namingScheme === Sketch.ExportFormatNamingScheme.Suffix
+          ? `.${name}`
+          : ''
+      }.${fileFormat}`;
+    },
+    [selectedLayer],
+  );
+
   const handleExport = useCallback(async () => {
-    const size = {
-      width: Math.ceil(selectedLayer.frame.width),
-      height: Math.ceil(selectedLayer.frame.height),
-    };
+    const handledExportFormat = ['png', 'jpg', 'webp'];
 
-    const data = await renderImageFromCanvas(
-      CanvasKit,
-      size.width,
-      size.height,
-      theme,
-      getWorkspaceStateSnapshot(),
-      'png',
-      () => <RCKLayerPreview layer={selectedLayer} size={size} />,
-    );
+    if (
+      !exportFormats
+        .map((e) => e.fileFormat)
+        .some((f) => handledExportFormat.includes(f))
+    ) {
+      alert('Export format not supported... yet');
+      return;
+    }
 
-    if (!data) return;
+    if (exportFormats.length === 1) {
+      const exportFormat = exportFormats[0];
+      const data = await handleFileFormat(exportFormat);
 
-    saveFile(`${selectedLayer.name}.png`, data);
-  }, [CanvasKit, getWorkspaceStateSnapshot, selectedLayer, theme]);
+      if (!data) return;
+      const fileName = setFileName(exportFormat);
+
+      saveFile(fileName, exportFormat.fileFormat, data);
+    } else {
+      const zip = new JSZip();
+
+      const files = exportFormats.map(async (exportFormat) => {
+        const data = await handleFileFormat(exportFormat);
+        if (!data) return;
+
+        zip.file(setFileName(exportFormat), data, {
+          base64: true,
+        });
+      });
+
+      Promise.allSettled(files).then(async () => {
+        const data = await zip.generateAsync({
+          type: 'arraybuffer',
+          mimeType: 'application/zip',
+        });
+
+        saveFile(`${selectedLayer.name}.zip`, 'zip', data);
+      });
+    }
+  }, [selectedLayer, exportFormats, setFileName, handleFileFormat]);
 
   const elements = [
     <ArrayController<Sketch.ExportFormat>
