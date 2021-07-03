@@ -5,7 +5,6 @@ import { WritableDraft } from 'immer/dist/internal';
 import { uuid } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { IndexPath } from 'tree-visit';
-import { CHECKERED_BACKGROUND_BYTES } from '../../../noya-renderer/src/hooks/useCheckeredFill';
 import * as Layers from '../layers';
 import {
   findPageLayerIndexPaths,
@@ -13,6 +12,7 @@ import {
   getCurrentPageIndex,
   getCurrentTab,
   getSelectedLayerIndexPaths,
+  setNewPaternFill,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -193,20 +193,8 @@ export function applicationReducer(
                 action[0] === 'setFillFillType' &&
                 action[2] === Sketch.FillType.Pattern &&
                 layer.style.fills
-              ) {
-                const index = action[1];
-                const fills = layer.style.fills;
-
-                if (!fills[index].image) {
-                  const _ref = `images/${uuid()}.png`;
-                  fills[index].image = {
-                    _class: 'MSJSONFileReference',
-                    _ref: _ref,
-                    _ref_class: 'MSImageData',
-                  };
-                  draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
-                }
-              }
+              )
+                setNewPaternFill(layer.style.fills, action[1], draft);
 
               layer.style = styleReducer(layer.style, action);
             },
@@ -241,11 +229,8 @@ export function applicationReducer(
               action[0] === 'setFillFillType' &&
               action[2] === Sketch.FillType.Pattern &&
               style.value.fills
-            ) {
-              const _ref = style.value.fills[action[1]].image?._ref;
-              if (!_ref) return;
-              draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
-            }
+            )
+              setNewPaternFill(style.value.fills, action[1], draft);
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(
