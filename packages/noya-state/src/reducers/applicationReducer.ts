@@ -12,7 +12,7 @@ import {
   getCurrentPageIndex,
   getCurrentTab,
   getSelectedLayerIndexPaths,
-  setNewPaternFill,
+  setNewPatternFill,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -194,7 +194,7 @@ export function applicationReducer(
                 action[2] === Sketch.FillType.Pattern &&
                 layer.style.fills
               )
-                setNewPaternFill(layer.style.fills, action[1], draft);
+                setNewPatternFill(layer.style.fills, action[1], draft);
 
               layer.style = styleReducer(layer.style, action);
             },
@@ -230,7 +230,7 @@ export function applicationReducer(
               action[2] === Sketch.FillType.Pattern &&
               style.value.fills
             )
-              setNewPaternFill(style.value.fills, action[1], draft);
+              setNewPatternFill(style.value.fills, action[1], draft);
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(

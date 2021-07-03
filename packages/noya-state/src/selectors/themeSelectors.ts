@@ -145,7 +145,7 @@ export const getSymbolsInstancesIds = (
   );
 };
 
-export const setNewPaternFill = (
+export const setNewPatternFill = (
   fills: Sketch.Fill[],
   index: number,
   draft: Draft<ApplicationState>,
