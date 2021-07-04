@@ -418,6 +418,10 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'editPath': {
+          dispatch('interaction', ['resetEditPath', point]);
+          break;
+        }
         case 'drawingShapePath': {
           dispatch('interaction', ['drawingShapePath', point]);
           break;

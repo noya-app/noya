@@ -20,12 +20,13 @@ import {
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
-import { findIndexPath } from 'noya-state/src/layers';
+import { findIndexPath, PointsLayer } from 'noya-state/src/layers';
 import {
   getBoundingPoints,
   getBoundingRect,
   getCanvasTransform,
   getCurrentPage,
+  getIndexPathOfOpenShapeLayer,
   getIsEditingPath,
   getLayerTransformAtIndexPath,
   getScreenTransform,
@@ -60,6 +61,7 @@ import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import MeasurementGuide from './MeasurementGuide';
 import PseudoPathElements from './PseudoPathElements';
+import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -455,6 +457,34 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
+  const pseudoElementIndexPath = getIndexPathOfOpenShapeLayer(state);
+
+  const pseudoElementLayer = pseudoElementIndexPath
+    ? (Layers.access(page, pseudoElementIndexPath) as PointsLayer)
+    : undefined;
+
+  const pseudoElements = useMemo(() => {
+    return (
+      <>
+        {state.interactionState.type === 'drawingShapePath' &&
+          state.interactionState.current && (
+            <PseudoPoint point={state.interactionState.current} />
+          )}
+        {pseudoElementLayer &&
+          state.interactionState.type === 'editPath' &&
+          state.interactionState.current && (
+            <>
+              <PseudoPathElements
+                point={state.interactionState.current}
+                layer={pseudoElementLayer}
+              />
+              <PseudoPoint point={state.interactionState.current} />
+            </>
+          )}
+      </>
+    );
+  }, [pseudoElementLayer, state.interactionState]);
+
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
     const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -469,39 +499,16 @@ export default memo(function SketchFileRenderer() {
           const layerTransform = getLayerTransformAtIndexPath(page, indexPath);
 
           return (
-            <>
-              <EditablePath
-                key={layer.do_objectID}
-                transform={layerTransform}
-                layer={layer}
-                selectedIndexes={
-                  state.selectedPointLists[layer.do_objectID] ?? []
-                }
-                selectedControlPoint={state.selectedControlPoint}
-              />
-
-              {state.interactionState.type === 'drawingShapePath' &&
-                state.interactionState.current &&
-                index === 0 && (
-                  <PseudoPathElements
-                    key={index}
-                    point={state.interactionState.current}
-                    selectedPoints={state.selectedPointLists}
-                    layer={layer}
-                  />
-                )}
-            </>
+            <EditablePath
+              key={layer.do_objectID}
+              transform={layerTransform}
+              layer={layer}
+              selectedIndexes={
+                state.selectedPointLists[layer.do_objectID] ?? []
+              }
+            />
           );
         })}
-        {selectedLayerIndexPaths.length === 0 &&
-          state.interactionState.type === 'drawingShapePath' &&
-          state.interactionState.current && (
-            <PseudoPathElements
-              point={state.interactionState.current}
-              selectedPoints={state.selectedPointLists}
-              layer={undefined}
-            />
-          )}
       </>
     );
   }, [isEditingPath, page, state]);
@@ -512,7 +519,10 @@ export default memo(function SketchFileRenderer() {
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
         {isEditingPath ? (
-          editablePaths
+          <>
+            {editablePaths}
+            {pseudoElements}
+          </>
         ) : (
           <>
             {boundingRect && (
@@ -533,13 +543,6 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {/* {state.interactionState.type === 'drawingShapePath' &&
-              state.interactionState.layer && (
-                <SketchLayer
-                  key={state.interactionState.layer.do_objectID}
-                  layer={state.interactionState.layer}
-                />
-              )} */}
             {state.interactionState.type === 'drawing' && (
               <SketchLayer
                 key={state.interactionState.value.do_objectID}
