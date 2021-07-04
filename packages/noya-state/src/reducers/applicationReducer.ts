@@ -101,6 +101,8 @@ export function applicationReducer(
     }
     case 'insertArtboard':
     case 'addDrawnLayer':
+    case 'addShapePathLayer':
+    case 'addPointToPath':
     case 'interaction':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':

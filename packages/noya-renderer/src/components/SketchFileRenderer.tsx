@@ -40,7 +40,7 @@ import {
   SnappingPair,
 } from 'noya-state/src/snapping';
 import { groupBy } from 'noya-utils';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getDragHandles } from '../canvas/selection';
 import AlignmentGuides from './AlignmentGuides';
@@ -157,8 +157,7 @@ export default memo(function SketchFileRenderer() {
   const canvasTransform = getCanvasTransform(state, canvasInsets);
   const isEditingPath =
     getIsEditingPath(state.interactionState.type) ||
-    state.interactionState.type === 'drawingShapePath' ||
-    state.interactionState.type === 'updateDrawingShapePath';
+    state.interactionState.type === 'drawingShapePath';
 
   const canvasRect = useMemo(
     () =>
@@ -400,7 +399,7 @@ export default memo(function SketchFileRenderer() {
         {nearestLayerGuides.map(
           (guides, i) =>
             guides && (
-              <>
+              <Fragment key={i}>
                 {guides.map((guide, j) => (
                   <ExtensionGuide
                     key={`extension-${i}-${j}`}
@@ -414,7 +413,7 @@ export default memo(function SketchFileRenderer() {
                     measurement={guide.measurement}
                   />
                 ))}
-              </>
+              </Fragment>
             ),
         )}
       </>
@@ -534,13 +533,13 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {state.interactionState.type === 'drawingShapePath' &&
+            {/* {state.interactionState.type === 'drawingShapePath' &&
               state.interactionState.layer && (
                 <SketchLayer
                   key={state.interactionState.layer.do_objectID}
                   layer={state.interactionState.layer}
                 />
-              )}
+              )} */}
             {state.interactionState.type === 'drawing' && (
               <SketchLayer
                 key={state.interactionState.value.do_objectID}

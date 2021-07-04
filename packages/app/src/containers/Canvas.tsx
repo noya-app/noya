@@ -278,27 +278,8 @@ export default memo(function Canvas() {
           break;
         }
         case 'drawingShapePath': {
-          if (state.selectedObjects.length === 0) {
-            const id = uuid();
-            dispatch('interaction', [
-              'startDrawingShapePath',
-              'shapePath',
-              id,
-              point,
-            ]);
-          } else {
-            const page = getCurrentPage(state);
-            const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
-              state,
-            );
-            const layers = layerIndexPaths.map((indexPath) =>
-              Layers.access(page, indexPath),
-            );
-            if (layers[0].do_objectID === state.selectedObjects[0]) {
-              dispatch('interaction', ['updateDrawingShapePath', point]);
-            }
-          }
-
+          dispatch('addShapePathLayer', point);
+          dispatch('interaction', ['editPath']);
           break;
         }
         case 'editPath':
@@ -343,6 +324,10 @@ export default memo(function Canvas() {
               });
             });
 
+          const indexPathOfOpenShapeLayer = Selectors.getIndexPathOfOpenShapeLayer(
+            state,
+          );
+
           if (selectedPoint) {
             const alreadySelected = state.selectedPointLists[
               selectedPoint[0]
@@ -365,6 +350,8 @@ export default memo(function Canvas() {
               selectedControlPoint.controlPointType,
             );
             dispatch('interaction', ['maybeMoveControlPoint', point]);
+          } else if (indexPathOfOpenShapeLayer) {
+            dispatch('addPointToPath', point);
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
           }
@@ -693,11 +680,6 @@ export default memo(function Canvas() {
 
           break;
         }
-        case 'updateDrawingShapePath': {
-          dispatch('interaction', ['editPath']);
-          dispatch('interaction', ['drawingShapePath', point]);
-          break;
-        }
         case 'maybeMoveControlPoint':
         case 'movingControlPoint':
         case 'maybeMovePoint':
@@ -731,7 +713,7 @@ export default memo(function Canvas() {
       case 'insertText':
         return 'crosshair';
       case 'drawingShapePath':
-      case 'updateDrawingShapePath':
+      case 'editPath': // TODO: Improve cursor
         return 'copy';
       case 'maybeScale':
       case 'scaling':

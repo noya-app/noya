@@ -39,14 +39,7 @@ export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
   | [type: 'editPath']
-  | [type: 'drawingShapePath', current?: Point, layer?: PageLayer]
-  | [type: 'updateDrawingShapePath', point: Point]
-  | [
-      type: 'startDrawingShapePath',
-      shapeType: ShapeType,
-      id: UUID,
-      point: Point,
-    ]
+  | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath']
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
@@ -94,11 +87,6 @@ export type InteractionState =
   | {
       type: 'drawingShapePath';
       current?: Point;
-      layer?: PageLayer;
-    }
-  | {
-      type: 'updateDrawingShapePath';
-      point: Point;
     }
   | {
       type: 'drawing';
@@ -234,37 +222,6 @@ export function interactionReducer(
         current,
       };
     }
-    case 'updateDrawingShapePath': {
-      const [type, point] = action;
-
-      return {
-        type,
-        point,
-      };
-    }
-    case 'startDrawingShapePath': {
-      const [, shapeType, id, point] = action;
-
-      let layer = produce(createLayer(shapeType), (layer) => {
-        const minArea = {
-          x: point.x + 1,
-          y: point.y + 1,
-        };
-        layer.do_objectID = id;
-        layer.frame = {
-          _class: 'rect',
-          constrainProportions: false,
-          ...createRect(point, minArea),
-        };
-      });
-
-      return {
-        type: 'drawingShapePath',
-        layer,
-        current: point,
-      };
-    }
-
     case 'startDrawing': {
       const [, shapeType, id, point] = action;
 
