@@ -1,3 +1,4 @@
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit, Image } from 'canvaskit';
 import { Theme } from 'noya-designsystem';
 import { render, unmount } from 'noya-react-canvaskit';
@@ -5,6 +6,7 @@ import { WorkspaceState } from 'noya-state';
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { StateProvider } from '../contexts/ApplicationStateContext';
+import { ImageCacheProvider } from 'noya-renderer';
 
 function readPixels(image: Image): Uint8Array | null {
   return image.readPixels(0, 0, {
@@ -19,7 +21,7 @@ export function renderImageFromCanvas(
   height: number,
   theme: Theme,
   state: WorkspaceState,
-  format: 'bytes' | 'png',
+  format: 'bytes' | Sketch.ExportFileFormat,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
   const surface = CanvasKit.MakeSurface(width, height);
@@ -32,7 +34,9 @@ export function renderImageFromCanvas(
   return new Promise((resolve) => {
     const root = (
       <ThemeProvider theme={theme}>
-        <StateProvider state={state}>{renderContent()}</StateProvider>
+        <ImageCacheProvider>
+          <StateProvider state={state}>{renderContent()}</StateProvider>
+        </ImageCacheProvider>
       </ThemeProvider>
     );
 
@@ -44,7 +48,14 @@ export function renderImageFromCanvas(
       const bytes =
         format === 'bytes'
           ? readPixels(image)
-          : image.encodeToBytes(CanvasKit.ImageFormat.PNG, 100);
+          : image.encodeToBytes(
+              format === 'png'
+                ? CanvasKit.ImageFormat.PNG
+                : format === 'jpg'
+                ? CanvasKit.ImageFormat.JPEG
+                : CanvasKit.ImageFormat.WEBP,
+              100,
+            );
 
       if (!bytes) {
         resolve(undefined);
