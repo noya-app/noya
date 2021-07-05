@@ -60,7 +60,7 @@ import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import MeasurementGuide from './MeasurementGuide';
-import PseudoPathElements from './PseudoPathElements';
+import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 
@@ -460,7 +460,7 @@ export default memo(function SketchFileRenderer() {
   const pseudoElementIndexPath = getIndexPathOfOpenShapeLayer(state);
 
   const pseudoElementLayer = pseudoElementIndexPath
-    ? (Layers.access(page, pseudoElementIndexPath) as PointsLayer)
+    ? (Layers.access(page, pseudoElementIndexPath.indexPath) as PointsLayer)
     : undefined;
 
   const pseudoElements = useMemo(() => {
@@ -470,12 +470,14 @@ export default memo(function SketchFileRenderer() {
           state.interactionState.current && (
             <PseudoPoint point={state.interactionState.current} />
           )}
-        {pseudoElementLayer &&
+        {pseudoElementIndexPath &&
+          pseudoElementLayer &&
           state.interactionState.type === 'editPath' &&
           state.interactionState.current && (
             <>
-              <PseudoPathElements
+              <PseudoPathLine
                 point={state.interactionState.current}
+                pointIndex={pseudoElementIndexPath.pointIndex}
                 layer={pseudoElementLayer}
               />
               <PseudoPoint point={state.interactionState.current} />
@@ -483,7 +485,7 @@ export default memo(function SketchFileRenderer() {
           )}
       </>
     );
-  }, [pseudoElementLayer, state.interactionState]);
+  }, [pseudoElementIndexPath, pseudoElementLayer, state.interactionState]);
 
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;

@@ -43,6 +43,7 @@ import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
+import { getCursorForEditPathMode } from 'noya-state/src/selectors/elementSelectors';
 
 declare module 'canvaskit' {
   interface Surface {
@@ -688,7 +689,7 @@ export default memo(function Canvas() {
         case 'movingControlPoint':
         case 'maybeMovePoint':
         case 'movingPoint': {
-          dispatch('interaction', ['resetEditPath']);
+          dispatch('interaction', ['resetEditPath', point]);
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
@@ -717,7 +718,6 @@ export default memo(function Canvas() {
       case 'insertText':
         return 'crosshair';
       case 'drawingShapePath':
-      case 'editPath': // TODO: Improve cursor
         return 'copy';
       case 'maybeScale':
       case 'scaling':
@@ -726,10 +726,22 @@ export default memo(function Canvas() {
           return getCursorForDirection(handleDirection);
         }
         return 'default';
+      case 'editPath': {
+        const { current } = state.interactionState;
+        const pointer = current
+          ? getCursorForEditPathMode(state, current)
+          : 'default';
+        return pointer;
+      }
+      case 'maybeMoveControlPoint':
+      case 'maybeMovePoint':
+      case 'movingControlPoint':
+      case 'movingPoint':
+        return 'move';
       default:
         return 'default';
     }
-  }, [state.interactionState.type, handleDirection]);
+  }, [state, handleDirection]);
 
   return (
     <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>

@@ -208,16 +208,16 @@ export function canvasReducer(
     case 'addPointToPath': {
       const [, point] = action;
 
-      const indexPath = getIndexPathOfOpenShapeLayer(state);
+      const pointIndexPath = getIndexPathOfOpenShapeLayer(state);
 
-      if (!indexPath) return state;
+      if (!pointIndexPath) return state;
 
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (draft) => {
         const layer = Layers.access(
           draft.sketch.pages[pageIndex],
-          indexPath,
+          pointIndexPath.indexPath,
         ) as Layers.PointsLayer;
 
         const boundingRect = getBoundingRect(

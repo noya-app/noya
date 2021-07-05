@@ -122,9 +122,14 @@ export const getSelectedControlPoint = (
   return controlPoints.length > 0 ? controlPoints[0] : undefined;
 };
 
+type PointIndexPath = {
+  indexPath: IndexPath;
+  pointIndex: number;
+};
+
 export function getIndexPathOfOpenShapeLayer(
   state: ApplicationState,
-): IndexPath | undefined {
+): PointIndexPath | undefined {
   // If multiple points are selected, we don't allow adding points to the path
   if (Object.values(state.selectedPointLists).flat().length !== 1) return;
 
@@ -153,7 +158,7 @@ export function getIndexPathOfOpenShapeLayer(
     // We can only add points if the first or last point is seleted
     (pointIndex === 0 || pointIndex === layer.points.length - 1)
   ) {
-    return indexPath;
+    return { indexPath, pointIndex };
   }
 }
 

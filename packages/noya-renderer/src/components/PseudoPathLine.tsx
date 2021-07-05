@@ -7,11 +7,13 @@ import { PointsLayer } from '../../../noya-state/src/layers';
 
 interface EditablePathPointProps {
   point: Point;
+  pointIndex: number;
   layer: PointsLayer | undefined;
 }
 
-export default function PseudoPathElements({
+export default function PseudoPathLine({
   point,
+  pointIndex,
   layer,
 }: EditablePathPointProps) {
   const { primary } = useTheme().colors;
@@ -22,7 +24,7 @@ export default function PseudoPathElements({
 
   if (layer) {
     const decodedPoint = Primitives.decodeCurvePoint(
-      layer.points[layer.points.length - 1],
+      layer.points[pointIndex],
       layer.frame,
     );
 
