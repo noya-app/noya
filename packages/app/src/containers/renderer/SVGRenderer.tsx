@@ -291,11 +291,9 @@ export default memo(function SVGRenderer({ size, insets }: Props) {
   const CanvasKit = useCanvasKit();
 
   const context = useMemo(() => {
-    const canvasElement = document.createElement('canvas');
-
     return {
       CanvasKit,
-      canvas: CanvasKit.MakeCanvasSurface(canvasElement)!.getCanvas(),
+      canvas: 0 as any, // TODO: Move to separate context
     };
   }, [CanvasKit]);
 

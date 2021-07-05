@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import type {
   AnimatedImage,
+  BlendMode,
+  BlurStyle,
   CanvasKit,
   Color,
+  ColorFilter,
   ColorInt,
   ColorIntArray,
   ColorSpace,
@@ -10,7 +14,9 @@ import type {
   EmulatedCanvas2D,
   GrDirectContext,
   Image,
+  ImageFilter,
   ImageInfo,
+  InputColor,
   InputFlattenedPointArray,
   InputMatrix,
   InputRect,
@@ -18,13 +24,20 @@ import type {
   IRect,
   MallocObj,
   ManagedSkottieAnimation,
+  MaskFilter,
+  Paint,
+  PaintStyle,
   Particles,
   Path,
+  PathEffect,
   Rect,
   RRect,
+  Shader,
   SkottieAnimation,
   SkPicture,
   SoundMap,
+  StrokeCap,
+  StrokeJoin,
   Surface,
   TonalColorsInput,
   TonalColorsOutput,
@@ -37,24 +50,24 @@ import type {
 
 import parseColor from 'color-parse';
 
-// class JSEmbindObject {
-//   _isDeleted = false;
-//   clone() {
-//     return this;
-//   }
-//   delete() {
-//     this._isDeleted = false;
-//   }
-//   deleteAfter() {
-//     throw new Error('Not implemented');
-//   }
-//   isAliasOf(other: any) {
-//     return this === other;
-//   }
-//   isDeleted() {
-//     return this._isDeleted;
-//   }
-// }
+class JSEmbindObject {
+  _isDeleted = false;
+  clone() {
+    return this;
+  }
+  delete() {
+    this._isDeleted = false;
+  }
+  deleteAfter() {
+    throw new Error('Not implemented');
+  }
+  isAliasOf(other: any) {
+    return this === other;
+  }
+  isDeleted() {
+    return this._isDeleted;
+  }
+}
 
 const Embind = {
   createEnumEntity(value: number): EmbindEnumEntity {
@@ -74,6 +87,151 @@ const Embind = {
     };
   },
 };
+
+type SerializableProperties<T> = {
+  [K in keyof T as T[K] extends Function ? never : K]: T[K];
+};
+
+class JSMaskFilter extends JSEmbindObject implements MaskFilter {
+  static MakeBlur(
+    style: BlurStyle,
+    sigma: number,
+    respectCTM: boolean,
+  ): MaskFilter {
+    return new JSMaskFilter();
+  }
+}
+
+class JSPaint extends JSEmbindObject implements Paint {
+  _antiAlias: boolean = true;
+  _alpha: number = 1;
+  _blendMode: BlendMode = SVGKit.BlendMode.Clear;
+  _color: Color = SVGKit.BLACK;
+  _strokeCap: StrokeCap = SVGKit.StrokeCap.Butt;
+  _strokeJoin: StrokeJoin = SVGKit.StrokeJoin.Bevel;
+  _strokeMiter: number = 0;
+  _strokeWidth: number = 0;
+  _style: PaintStyle = SVGKit.PaintStyle.Fill;
+
+  copy(): Paint {
+    const properties: SerializableProperties<JSPaint> = {
+      _isDeleted: this._isDeleted,
+      _antiAlias: this._antiAlias,
+      _alpha: this._alpha,
+      _blendMode: this._blendMode,
+      _color: this._color,
+      _strokeCap: this._strokeCap,
+      _strokeJoin: this._strokeJoin,
+      _strokeMiter: this._strokeMiter,
+      _strokeWidth: this._strokeWidth,
+      _style: this._style,
+    };
+
+    const copy = new JSPaint();
+
+    Object.assign(copy, properties);
+
+    return copy as any;
+  }
+
+  getBlendMode(): BlendMode {
+    return this._blendMode;
+  }
+
+  getColor(): Color {
+    return this._color;
+  }
+
+  getStrokeCap(): StrokeCap {
+    return this._strokeCap;
+  }
+
+  getStrokeJoin(): StrokeJoin {
+    return this._strokeJoin;
+  }
+
+  getStrokeMiter(): number {
+    return this._strokeMiter;
+  }
+
+  getStrokeWidth(): number {
+    return this._strokeWidth;
+  }
+
+  setAlphaf(alpha: number): void {
+    this._alpha = alpha;
+  }
+
+  setAntiAlias(aa: boolean): void {
+    this._antiAlias = aa;
+  }
+
+  setBlendMode(mode: BlendMode): void {
+    this._blendMode = mode;
+  }
+
+  setColor(color: InputColor, colorSpace?: ColorSpace): void {
+    // Ignore MallocObj
+    const typedColor = color as Float32Array | number[];
+
+    this._color =
+      typedColor instanceof Array ? new Float32Array(typedColor) : typedColor;
+  }
+
+  setColorComponents(
+    r: number,
+    g: number,
+    b: number,
+    a: number,
+    colorSpace?: ColorSpace,
+  ): void {
+    throw new Error('Not implemented');
+  }
+
+  setColorFilter(filter: ColorFilter): void {
+    console.info('setColorFilter() not implemented by SVGKit');
+  }
+
+  setColorInt(color: ColorInt, colorSpace?: ColorSpace): void {
+    throw new Error('Not implemented');
+  }
+
+  setImageFilter(filter: ImageFilter): void {
+    console.info('setImageFilter() not implemented by SVGKit');
+  }
+
+  setMaskFilter(filter: MaskFilter): void {
+    console.info('setMaskFilter() not implemented by SVGKit');
+  }
+
+  setPathEffect(effect: PathEffect): void {
+    console.info('setPathEffect() not implemented by SVGKit');
+  }
+
+  setShader(shader: Shader): void {
+    console.info('setShader() not implemented by SVGKit');
+  }
+
+  setStrokeCap(cap: StrokeCap): void {
+    this._strokeCap = cap;
+  }
+
+  setStrokeJoin(join: StrokeJoin): void {
+    this._strokeJoin = join;
+  }
+
+  setStrokeMiter(limit: number): void {
+    this._strokeMiter = limit;
+  }
+
+  setStrokeWidth(width: number): void {
+    this._strokeWidth = width;
+  }
+
+  setStyle(style: PaintStyle): void {
+    this._style = style;
+  }
+}
 
 const SVGKit: CanvasKit = {
   Color(r: number, g: number, b: number, a?: number): Color {
@@ -261,7 +419,7 @@ const SVGKit: CanvasKit = {
   ParagraphStyle: 0 as any,
   ContourMeasureIter: 0 as any,
   Font: 0 as any,
-  Paint: 0 as any,
+  Paint: JSPaint,
   Path: 0 as any,
   PictureRecorder: 0 as any,
   TextStyle: 0 as any,
@@ -269,9 +427,9 @@ const SVGKit: CanvasKit = {
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
   ParagraphBuilder: 0 as any,
   ColorFilter: 0 as any,
-  FontMgr: 0 as any,
+  FontMgr: 1 as any,
   ImageFilter: 0 as any,
-  MaskFilter: 0 as any,
+  MaskFilter: JSMaskFilter,
   PathEffect: 0 as any,
   RuntimeEffect: 0 as any,
   Shader: 0 as any,
@@ -478,7 +636,6 @@ export default SVGKit;
 // readonly ParagraphStyle: ParagraphStyleConstructor;
 // readonly ContourMeasureIter: ContourMeasureIterConstructor;
 // readonly Font: FontConstructor;
-// readonly Paint: DefaultConstructor<Paint>;
 // readonly Path: PathConstructorAndFactory;
 // readonly PictureRecorder: DefaultConstructor<PictureRecorder>;
 // readonly TextStyle: TextStyleConstructor;
@@ -488,7 +645,6 @@ export default SVGKit;
 // readonly ColorFilter: ColorFilterFactory;
 // readonly FontMgr: FontMgrFactory;
 // readonly ImageFilter: ImageFilterFactory;
-// readonly MaskFilter: MaskFilterFactory;
 // readonly PathEffect: PathEffectFactory;
 // readonly RuntimeEffect: RuntimeEffectFactory;
 // readonly Shader: ShaderFactory;
