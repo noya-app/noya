@@ -249,7 +249,10 @@ export function canvasReducer(
           point,
         };
 
-        const newDecodedPoints = [...decodedPoints, decodedPoint];
+        const newDecodedPoints =
+          pointIndexPath.pointIndex === 0
+            ? [decodedPoint, ...decodedPoints]
+            : [...decodedPoints, decodedPoint];
 
         layer.frame = {
           ...layer.frame,
@@ -260,7 +263,8 @@ export function canvasReducer(
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
 
-        draft.selectedPointLists[layer.do_objectID] = [layer.points.length - 1];
+        draft.selectedPointLists[layer.do_objectID] =
+          pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
 
         return;
       });
