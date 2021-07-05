@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import type {
+  AngleInDegrees,
+  AngleInRadians,
   AnimatedImage,
   BlendMode,
   BlurStyle,
@@ -12,6 +14,7 @@ import type {
   EmbindEnum,
   EmbindEnumEntity,
   EmulatedCanvas2D,
+  FillType,
   GrDirectContext,
   Image,
   ImageFilter,
@@ -20,6 +23,7 @@ import type {
   InputFlattenedPointArray,
   InputMatrix,
   InputRect,
+  InputRRect,
   InputVector3,
   IRect,
   MallocObj,
@@ -29,7 +33,10 @@ import type {
   PaintStyle,
   Particles,
   Path,
+  PathCommand,
   PathEffect,
+  PathOp,
+  Point,
   Rect,
   RRect,
   Shader,
@@ -38,14 +45,17 @@ import type {
   SoundMap,
   StrokeCap,
   StrokeJoin,
+  StrokeOpts,
   Surface,
   TonalColorsInput,
   TonalColorsOutput,
   TypedArrayConstructor,
+  VerbList,
   VertexMode,
   Vertices,
   WebGLContextHandle,
   WebGLOptions,
+  WeightList,
 } from 'canvaskit';
 
 import parseColor from 'color-parse';
@@ -427,7 +437,7 @@ const SVGKit: CanvasKit = {
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
   ParagraphBuilder: 0 as any,
   ColorFilter: 0 as any,
-  FontMgr: 1 as any,
+  FontMgr: {} as any,
   ImageFilter: 0 as any,
   MaskFilter: JSMaskFilter,
   PathEffect: 0 as any,
@@ -629,7 +639,233 @@ const SVGKit: CanvasKit = {
   LineThroughDecoration: 0x4,
 };
 
-export default SVGKit;
+export async function PathKitInit() {
+  const PathKitInit = require('pathkit-wasm/bin/pathkit.js');
+
+  return PathKitInit({
+    locateFile: (file: string) =>
+      `https://unpkg.com/pathkit-wasm@0.7.0/bin/${file}`,
+  });
+}
+
+export default async function loadSVGKit(PathKit?: any) {
+  PathKit = PathKit ?? (await PathKitInit());
+
+  class JSPath extends JSEmbindObject implements Path {
+    _path = new PathKit.NewPath();
+
+    addArc(
+      oval: InputRect,
+      startAngle: AngleInDegrees,
+      sweepAngle: AngleInDegrees,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): Path {
+      throw new Error('Not implemented');
+    }
+    addPath(...args: any[]): Path | null {
+      throw new Error('Not implemented');
+    }
+    addPoly(points: InputFlattenedPointArray, close: boolean): Path {
+      throw new Error('Not implemented');
+    }
+    addRect(rect: InputRect, isCCW?: boolean): Path {
+      throw new Error('Not implemented');
+    }
+    addRRect(rrect: InputRRect, isCCW?: boolean): Path {
+      throw new Error('Not implemented');
+    }
+    addVerbsPointsWeights(
+      verbs: VerbList,
+      points: InputFlattenedPointArray,
+      weights?: WeightList,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    arc(
+      x: number,
+      y: number,
+      radius: number,
+      startAngle: AngleInRadians,
+      endAngle: AngleInRadians,
+      isCCW?: boolean,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    arcToOval(
+      oval: InputRect,
+      startAngle: AngleInDegrees,
+      endAngle: AngleInDegrees,
+      forceMoveTo: boolean,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    arcToRotated(
+      rx: number,
+      ry: number,
+      xAxisRotate: AngleInDegrees,
+      useSmallArc: boolean,
+      isCCW: boolean,
+      x: number,
+      y: number,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    arcToTangent(
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      radius: number,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    close(): Path {
+      return this._path.close();
+    }
+    computeTightBounds(outputArray?: Rect): Rect {
+      const { fBottom, fLeft, fRight, fTop } = this._path.computeTightBounds();
+
+      return SVGKit.LTRBRect(fLeft, fTop, fRight, fBottom);
+    }
+    conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path {
+      throw new Error('Not implemented');
+    }
+    contains(x: number, y: number): boolean {
+      throw new Error('Not implemented');
+    }
+    copy(): Path {
+      throw new Error('Not implemented');
+    }
+    countPoints(): number {
+      throw new Error('Not implemented');
+    }
+    cubicTo(
+      cpx1: number,
+      cpy1: number,
+      cpx2: number,
+      cpy2: number,
+      x: number,
+      y: number,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    dash(on: number, off: number, phase: number): boolean {
+      throw new Error('Not implemented');
+    }
+    equals(other: Path): boolean {
+      throw new Error('Not implemented');
+    }
+    getBounds(outputArray?: Rect): Rect {
+      throw new Error('Not implemented');
+    }
+    getFillType(): FillType {
+      if (this._path.getFillType() === PathKit.FillType.WINDING) {
+        return SVGKit.FillType.Winding;
+      } else {
+        return SVGKit.FillType.EvenOdd;
+      }
+    }
+    getPoint(index: number, outputArray?: Point): Point {
+      throw new Error('Not implemented');
+    }
+    isEmpty(): boolean {
+      throw new Error('Not implemented');
+    }
+    isVolatile(): boolean {
+      throw new Error('Not implemented');
+    }
+    lineTo(x: number, y: number): Path {
+      return this._path.lineTo(x, y);
+    }
+    moveTo(x: number, y: number): Path {
+      return this._path.moveTo(x, y);
+    }
+    offset(dx: number, dy: number): Path {
+      throw new Error('Not implemented');
+    }
+    op(other: Path, op: PathOp): boolean {
+      throw new Error('Not implemented');
+    }
+    quadTo(x1: number, y1: number, x2: number, y2: number): Path {
+      return this._path.quadTo(x1, y1, x2, y2);
+    }
+    rArcTo(
+      rx: number,
+      ry: number,
+      xAxisRotate: AngleInDegrees,
+      useSmallArc: boolean,
+      isCCW: boolean,
+      dx: number,
+      dy: number,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    rConicTo(
+      dx1: number,
+      dy1: number,
+      dx2: number,
+      dy2: number,
+      w: number,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    rCubicTo(
+      cpx1: number,
+      cpy1: number,
+      cpx2: number,
+      cpy2: number,
+      x: number,
+      y: number,
+    ): Path {
+      throw new Error('Not implemented');
+    }
+    reset(): void {
+      throw new Error('Not implemented');
+    }
+    rewind(): void {
+      throw new Error('Not implemented');
+    }
+    rLineTo(x: number, y: number): Path {
+      throw new Error('Not implemented');
+    }
+    rMoveTo(x: number, y: number): Path {
+      throw new Error('Not implemented');
+    }
+    rQuadTo(x1: number, y1: number, x2: number, y2: number): Path {
+      throw new Error('Not implemented');
+    }
+    setFillType(fill: FillType): void {
+      throw new Error('Not implemented');
+    }
+    setIsVolatile(volatile: boolean): void {
+      throw new Error('Not implemented');
+    }
+    simplify(): boolean {
+      throw new Error('Not implemented');
+    }
+    stroke(opts?: StrokeOpts): Path | null {
+      throw new Error('Not implemented');
+    }
+    toCmds(): PathCommand[] {
+      return this._path.toCmds();
+    }
+    toSVGString(): string {
+      throw new Error('Not implemented');
+    }
+    transform(...args: any[]): Path {
+      throw new Error('Not implemented');
+    }
+    trim(startT: number, stopT: number, isComplement: boolean): Path | null {
+      throw new Error('Not implemented');
+    }
+  }
+
+  (SVGKit as any).Path = JSPath;
+
+  return SVGKit;
+}
 
 // Constructors, i.e. things made with `new CanvasKit.Foo()`;
 // readonly ImageData: ImageDataConstructor;

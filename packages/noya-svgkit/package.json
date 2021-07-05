@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "license": "UNLICENSED",
   "dependencies": {
-    "color-parse": "^1.4.2"
+    "color-parse": "^1.4.2",
+    "pathkit-wasm": "^0.7.0"
   }
 }
