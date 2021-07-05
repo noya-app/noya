@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { fileSave } from 'browser-fs-access';
 import { Button, Divider, Spacer } from 'noya-designsystem';
@@ -17,13 +18,9 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
-import JSZip from 'jszip';
+import { Size } from 'noya-geometry';
 
-async function saveFile(
-  name: string,
-  fileFormat: string,
-  data: Uint8Array | ArrayBuffer,
-) {
+async function saveFile(name: string, fileFormat: string, data: ArrayBuffer) {
   const file = new File([data], name, {
     type: `${fileFormat === 'zip' ? 'application' : 'image'}/${fileFormat}`,
   });
@@ -36,6 +33,22 @@ async function saveFile(
   );
 }
 
+function getExportSize(exportFormat: Sketch.ExportFormat, size: Size) {
+  const { scale, absoluteSize, visibleScaleType } = exportFormat;
+
+  switch (visibleScaleType) {
+    case Sketch.VisibleScaleType.Width:
+      return { width: absoluteSize, height: size.height };
+    case Sketch.VisibleScaleType.Scale:
+      return {
+        width: size.width * scale,
+        height: size.height * scale,
+      };
+    case Sketch.VisibleScaleType.Height:
+      return { width: size.width, height: absoluteSize };
+  }
+}
+
 export default memo(function ExportInspector() {
   const title = 'Exports';
   const dispatch = useDispatch();
@@ -46,44 +59,26 @@ export default memo(function ExportInspector() {
   const selectedLayer = useSelector(
     Selectors.getSelectedLayers,
   )[0] as Sketch.SymbolInstance;
-
+  // TODO: Handle export formats
   const exportFormats = selectedLayer.exportOptions.exportFormats;
 
-  // TODO: Handle export formats
   const handleFileFormat = useCallback(
     async (exportFormat: Sketch.ExportFormat) => {
-      const {
-        scale,
-        absoluteSize,
-        fileFormat,
-        visibleScaleType,
-      } = exportFormat;
-
-      const adjustSize = {
-        width: Math.ceil(
-          visibleScaleType === Sketch.VisibleScaleType.Scale
-            ? selectedLayer.frame.width * scale
-            : visibleScaleType === Sketch.VisibleScaleType.Width
-            ? absoluteSize
-            : selectedLayer.frame.width,
-        ),
-        height: Math.ceil(
-          visibleScaleType === Sketch.VisibleScaleType.Scale
-            ? selectedLayer.frame.height * scale
-            : visibleScaleType === Sketch.VisibleScaleType.Height
-            ? absoluteSize
-            : selectedLayer.frame.height,
-        ),
+      const size = {
+        width: selectedLayer.frame.width,
+        height: selectedLayer.frame.height,
       };
+
+      const exportSize = getExportSize(exportFormat, size);
 
       const data = await renderImageFromCanvas(
         CanvasKit,
-        adjustSize.width,
-        adjustSize.height,
+        exportSize.width,
+        exportSize.height,
         theme,
         getWorkspaceStateSnapshot(),
-        fileFormat,
-        () => <RCKLayerPreview layer={selectedLayer} size={adjustSize} />,
+        exportFormat.fileFormat,
+        () => <RCKLayerPreview layer={selectedLayer} size={exportSize} />,
       );
       return data;
     },
@@ -92,29 +87,12 @@ export default memo(function ExportInspector() {
 
   const setFileName = useCallback(
     (exportFormat: Sketch.ExportFormat) => {
-      const {
-        scale,
-        name,
-        namingScheme,
-        fileFormat,
-        visibleScaleType,
-      } = exportFormat;
+      const { name, namingScheme, fileFormat } = exportFormat;
 
-      return `${!namingScheme && name ? `${name}.` : ''}${selectedLayer.name}${
-        scale !== 1
-          ? `@${scale}${
-              visibleScaleType === Sketch.VisibleScaleType.Height
-                ? 'h'
-                : visibleScaleType === Sketch.VisibleScaleType.Width
-                ? 'w'
-                : 'x'
-            }`
-          : ''
-      }${
-        namingScheme === Sketch.ExportFormatNamingScheme.Suffix
-          ? `.${name}`
-          : ''
-      }.${fileFormat}`;
+      if (namingScheme === Sketch.ExportFormatNamingScheme.Suffix)
+        return `${selectedLayer.name}${name}.${fileFormat}`;
+
+      return `${name ? name : ''}${selectedLayer.name}.${fileFormat}`;
     },
     [selectedLayer],
   );
