@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit, Paint, Path, TextAlign, TextStyle } from 'canvaskit';
-import { createBounds, distance, resize } from 'noya-geometry';
+import { AffineTransform, createBounds, distance, resize } from 'noya-geometry';
 import {
   CompassDirection,
   getCardinalDirections,
@@ -90,9 +90,9 @@ export function fill(
       // CanvasKit draws gradients in absolute coordinates, while Sketch draws them
       // relative to the layer's frame. This function returns a matrix that converts
       // absolute coordinates into the range (0, 1).
-      const unitTransform = CanvasKit.Matrix.multiply(
-        CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
-        CanvasKit.Matrix.scaled(layerFrame.width, layerFrame.height),
+      const unitTransform = AffineTransform.multiply(
+        AffineTransform.translation(layerFrame.x, layerFrame.y),
+        AffineTransform.scale(layerFrame.width, layerFrame.height),
       );
 
       switch (fill.gradient.gradientType) {
@@ -104,7 +104,7 @@ export function fill(
               colors,
               positions,
               CanvasKit.TileMode.Clamp,
-              unitTransform,
+              unitTransform.float32Array,
             ),
           );
           break;
@@ -117,7 +117,7 @@ export function fill(
               colors,
               positions,
               CanvasKit.TileMode.Clamp,
-              unitTransform,
+              unitTransform.float32Array,
             ),
           );
           break;
@@ -149,9 +149,9 @@ export function fill(
 
           const matrix =
             rotationRadians > 0
-              ? CanvasKit.Matrix.multiply(
+              ? AffineTransform.multiply(
                   unitTransform,
-                  CanvasKit.Matrix.rotated(rotationRadians, 0.5, 0.5),
+                  AffineTransform.rotation(rotationRadians, 0.5, 0.5),
                 )
               : unitTransform;
 
@@ -162,7 +162,7 @@ export function fill(
               colors,
               positions,
               CanvasKit.TileMode.Clamp,
-              matrix,
+              matrix.float32Array,
             ),
           );
 

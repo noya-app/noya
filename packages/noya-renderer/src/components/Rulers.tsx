@@ -1,16 +1,14 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import {
-  Rect as RCKRect,
-  Text,
   useColorFill,
   useFontManager,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
-import { Point } from 'noya-state';
-import { Selectors } from 'noya-state';
+import { Point, Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { Text, Rect } from '..';
 
 function RulerLabel({ text, origin }: { text: string; origin: Point }) {
   const { CanvasKit } = useReactCanvasKit();
@@ -97,17 +95,14 @@ export function HorizontalRuler() {
 
   return (
     <>
-      <RCKRect rect={rulerRect} paint={backgroundPaint} />
-      <RCKRect rect={dividerRect} paint={dividerPaint} />
+      <Rect rect={rulerRect} paint={backgroundPaint} />
+      <Rect rect={dividerRect} paint={dividerPaint} />
       {marks.map((mark, index) => {
         const x = mark + scrollOrigin.x;
 
         return (
           <React.Fragment key={index}>
-            <RCKRect
-              rect={CanvasKit.XYWHRect(x, 0, 1, 25)}
-              paint={dividerPaint}
-            />
+            <Rect rect={CanvasKit.XYWHRect(x, 0, 1, 25)} paint={dividerPaint} />
             <RulerLabel
               origin={{ x: x + 5, y: 0 }}
               text={(mark - markOffset).toString()}

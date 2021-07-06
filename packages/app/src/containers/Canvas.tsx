@@ -1,9 +1,7 @@
-import type { Surface } from 'canvaskit';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { render, unmount } from 'noya-react-canvaskit';
-import { SketchFileRenderer, uuid, ImageCacheProvider } from 'noya-renderer';
+import { uuid } from 'noya-renderer';
 import { decodeCurvePoint } from 'noya-renderer/src/primitives';
 import {
   CompassDirection,
@@ -14,6 +12,7 @@ import {
   ShapeType,
 } from 'noya-state';
 import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
+import { getCursorForEditPathMode } from 'noya-state/src/selectors/elementSelectors';
 import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
 import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
 import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
@@ -25,32 +24,21 @@ import {
   CSSProperties,
   memo,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
-import styled, { ThemeProvider, useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import {
-  StateProvider,
   useApplicationState,
   useSelector,
-  useWorkspaceState,
 } from '../contexts/ApplicationStateContext';
 import useCanvasKit from '../hooks/useCanvasKit';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
-import { getCursorForEditPathMode } from 'noya-state/src/selectors/elementSelectors';
-
-declare module 'canvaskit' {
-  interface Surface {
-    flush(): void;
-    _id: number;
-  }
-}
+import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 
 function getCursorForDirection(
   direction: CompassDirection,
@@ -86,30 +74,19 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   }),
 );
 
-const CanvasComponent = styled.canvas<{ left: number }>(({ theme, left }) => ({
-  position: 'absolute',
-  top: 0,
-  left,
-  zIndex: -1,
-}));
-
 export default memo(function Canvas() {
   const theme = useTheme();
   const {
     sizes: { sidebarWidth },
   } = theme;
-  const workspaceState = useWorkspaceState();
   const [state, dispatch] = useApplicationState();
-  const [surface, setSurface] = useState<Surface | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
 
   const isEditingPath = getIsEditingPath(state.interactionState.type);
-
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
       dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
@@ -140,9 +117,18 @@ export default memo(function Canvas() {
     () => ({
       left: sidebarWidth,
       right: sidebarWidth,
+      top: 0,
+      bottom: 0,
     }),
     [sidebarWidth],
   );
+
+  // Update the canvas size whenever the window is resized
+  useLayoutEffect(() => {
+    if (!containerSize) return;
+
+    setCanvasSize(containerSize, insets);
+  }, [insets, setCanvasSize, containerSize]);
 
   const canvasSize = useMemo(() => containerSize ?? { width: 0, height: 0 }, [
     containerSize,
@@ -159,71 +145,6 @@ export default memo(function Canvas() {
     },
     [meta],
   );
-
-  // Update the canvas size whenever the window is resized
-  useEffect(() => {
-    const canvasElement = canvasRef.current;
-
-    if (!canvasElement || !containerSize) return;
-
-    canvasElement.width = containerSize.width + insets.left + insets.right;
-    canvasElement.height = containerSize.height;
-
-    setCanvasSize(
-      { width: containerSize.width, height: containerSize.height },
-      insets,
-    );
-  }, [dispatch, containerSize, insets, setCanvasSize]);
-
-  // Recreate the surface whenever the canvas resizes
-  //
-  // TODO: This should also be a layout effect so that it happens before the canvas is rendered.
-  // However, there seems to be a problem with the ordering of things when it's a layout effect.
-  useEffect(() => {
-    const canvasElement = canvasRef.current;
-
-    if (!canvasElement || !containerSize) return;
-
-    const surface = CanvasKit.MakeCanvasSurface(canvasElement);
-
-    if (!surface) {
-      console.warn('failed to create surface');
-    }
-
-    setSurface(surface);
-
-    return () => {
-      surface?.delete();
-    };
-  }, [CanvasKit, containerSize]);
-
-  // We use `useLayoutEffect` so that the canvas updates as soon as possible,
-  // even at the expense of the UI stuttering slightly.
-  // With `useEffect`, the updates are batched and potentially delayed, which
-  // makes continuous events like modifying a color unusably slow.
-  useLayoutEffect(() => {
-    if (!surface || surface.isDeleted() || !containerSize) return;
-
-    try {
-      render(
-        <ThemeProvider theme={theme}>
-          <StateProvider state={workspaceState}>
-            <ImageCacheProvider>
-              <SketchFileRenderer />
-            </ImageCacheProvider>
-          </StateProvider>
-        </ThemeProvider>,
-        surface,
-        CanvasKit,
-      );
-
-      return () => {
-        unmount(surface);
-      };
-    } catch (e) {
-      console.warn('rendering error', e);
-    }
-  }, [CanvasKit, state, containerSize, workspaceState, theme, surface]);
 
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
@@ -752,12 +673,9 @@ export default memo(function Canvas() {
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
       >
-        <CanvasComponent
-          ref={canvasRef}
-          left={-insets.left}
-          width={0}
-          height={0}
-        />
+        {containerSize && (
+          <CanvasKitRenderer size={containerSize} insets={insets} />
+        )}
       </Container>
     </ContextMenu>
   );

@@ -6,12 +6,8 @@ import {
   resizeIfLarger,
   Size,
 } from 'noya-geometry';
-import {
-  Group,
-  Rect as RCKRect,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
-import { Primitives, SketchLayer } from 'noya-renderer';
+import { useReactCanvasKit } from 'noya-react-canvaskit';
+import { Group, Primitives, Rect as RCKRect, SketchLayer } from 'noya-renderer';
 import { Layers, PageLayer } from 'noya-state';
 import { useMemo } from 'react';
 import useCheckeredFill from '../hooks/useCheckeredFill';

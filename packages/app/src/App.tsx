@@ -5,13 +5,13 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
+import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { ImageCacheProvider } from 'noya-renderer';
 import Workspace from './containers/Workspace';
 import { StateProvider } from './contexts/ApplicationStateContext';
 import useCanvasKit from './hooks/useCanvasKit';
 import { useResource } from './hooks/useResource';
-import { PromiseState } from './utils/PromiseState';
 
 type Action =
   | { type: 'set'; value: SketchFile }
