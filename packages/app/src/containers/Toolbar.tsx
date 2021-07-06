@@ -5,9 +5,10 @@ import {
   RulerHorizontalIcon,
   SquareIcon,
   TextIcon,
+  ChevronDownIcon,
   SewingPinIcon,
 } from '@radix-ui/react-icons';
-import { Spacer } from 'noya-designsystem';
+import { Spacer, DropdownMenu } from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
 import { InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
@@ -15,6 +16,7 @@ import styled, { useTheme } from 'styled-components';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import PointModeIcon from '../components/icons/PointModeIcon';
 import {
+  useSelector,
   useApplicationState,
   useDispatch,
 } from '../contexts/ApplicationStateContext';
@@ -29,6 +31,12 @@ const Container = styled.header(({ theme }) => ({
   alignItems: 'center',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
+}));
+
+const Row = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  minWidth: '50px',
 }));
 
 interface Props {
@@ -50,11 +58,16 @@ const ToolbarContent = memo(function ToolbarContent({
 }: Props) {
   const dispatch = useDispatch();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
+  const symbols = useSelector(Selectors.getSymbols).map((symbol) => ({
+    title: symbol.name,
+    value: symbol.symbolID,
+  }));
 
   const isInsertArtboard = interactionType === 'insertArtboard';
   const isInsertRectangle = interactionType === 'insertRectangle';
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
+  const isInsertSymbol = interactionType === 'insertArtboard';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
@@ -111,6 +124,16 @@ const ToolbarContent = memo(function ToolbarContent({
     }
   }, [isCreatingPath, dispatch]);
 
+  const handleInsertSymbol = useCallback(
+    (value: string) => {
+      if (isInsertSymbol) {
+        dispatch('interaction', ['reset']);
+      } else {
+        //dispatch('insertSymbol', value);
+      }
+    },
+    [dispatch, isInsertSymbol],
+  );
   const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
 
   const handleRedo = useCallback(() => dispatch('redo'), [dispatch]);
@@ -144,6 +167,23 @@ const ToolbarContent = memo(function ToolbarContent({
 
   return (
     <Container>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Row>
+        <DropdownMenu<string> items={symbols} onSelect={handleInsertSymbol}>
+          <Button id="insert-stymbol">
+            {useMemo(
+              () => (
+                <>
+                  Insert
+                  <Spacer.Horizontal size={8} />
+                  <ChevronDownIcon />
+                </>
+              ),
+              [],
+            )}
+          </Button>
+        </DropdownMenu>
+      </Row>
       <Spacer.Horizontal size={8} />
       <Button
         id="tool-artboard"
