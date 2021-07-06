@@ -63,7 +63,8 @@ export default memo(function PointControlsInspector() {
     (layer) => selectedLayerIds.includes(layer.do_objectID),
   ).filter((layer): layer is Layers.PointsLayer => Layers.isPointsLayer(layer));
 
-  const isClosed = getMultiValue(selectedLayers.map((layer) => layer.isClosed));
+  const isClosed =
+    getMultiValue(selectedLayers.map((layer) => layer.isClosed)) ?? true;
 
   const controlPoint = Selectors.getSelectedControlPoint(state);
   const points = controlPoint
@@ -139,7 +140,7 @@ export default memo(function PointControlsInspector() {
         <InspectorPrimitives.Column>
           <Button
             id="toggle-path-is-closed"
-            disabled={isClosed === undefined}
+            disabled={selectedLayers.length === 0}
             onClick={useCallback(() => {
               dispatch('setIsClosed', !isClosed);
             }, [dispatch, isClosed])}

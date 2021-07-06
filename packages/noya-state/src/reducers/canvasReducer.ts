@@ -296,6 +296,8 @@ export function canvasReducer(
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
 
+            draft.selectedPointLists = {};
+
             // Selects the first point in the first selected layer and initializes a point list for each selected layer
             layerIndexPaths.forEach((layerIndex, index) => {
               const layer = Layers.access(page, layerIndex);
