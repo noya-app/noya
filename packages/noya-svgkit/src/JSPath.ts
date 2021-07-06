@@ -18,8 +18,6 @@ import type {
 import { JSEmbindObject } from './Embind';
 import { SVGKit } from './SVGKit';
 
-const shared2DContext = document.createElement('canvas').getContext('2d')!;
-
 export function createJSPath(PathKit: any) {
   class JSPath extends JSEmbindObject implements Path {
     _path = new PathKit.NewPath();
@@ -103,12 +101,7 @@ export function createJSPath(PathKit: any) {
       throw new Error('Not implemented');
     }
     contains(x: number, y: number): boolean {
-      return shared2DContext.isPointInPath(
-        this._path.toPath2D(),
-        x,
-        y,
-        this._path.getFillTypeString(),
-      );
+      return this._path.contains(x, y);
     }
     copy(): JSPath {
       return JSPath.MakeFromCmds(this.toCmds())!;

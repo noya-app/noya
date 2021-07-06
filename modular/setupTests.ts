@@ -5,7 +5,7 @@
 import '@testing-library/jest-dom/extend-expect';
 
 import { CanvasKit, CanvasKitInit } from 'canvaskit';
-import { PathKitInit } from 'noya-svgkit';
+import { PathKitInit } from 'pathkit';
 import { VirtualConsole } from 'jsdom';
 import path from 'path';
 
@@ -19,21 +19,23 @@ declare global {
   }
 }
 
-global.loadCanvasKit = async () => {
-  const pathToWasm = path.join(
-    __dirname,
-    '..',
-    'packages',
-    'app',
-    'public',
-    'wasm',
-  );
+const pathToWasm = path.join(
+  __dirname,
+  '..',
+  'packages',
+  'app',
+  'public',
+  'wasm',
+);
 
+global.loadCanvasKit = async () => {
   return await CanvasKitInit({
     locateFile: (file: string) => path.join(pathToWasm, file),
   });
 };
 
 global.loadPathKit = async () => {
-  return await PathKitInit();
+  return await PathKitInit({
+    locateFile: (file: string) => path.join(pathToWasm, file),
+  });
 };
