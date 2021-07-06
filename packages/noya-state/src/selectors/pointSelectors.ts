@@ -27,7 +27,7 @@ export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
 
-const computeNewBoundingRect = (
+export const computeNewBoundingRect = (
   CanvasKit: CanvasKit,
   decodedPoints: DecodedCurvePoint[],
   layer: PointsLayer,
@@ -121,6 +121,46 @@ export const getSelectedControlPoint = (
 
   return controlPoints.length > 0 ? controlPoints[0] : undefined;
 };
+
+type PointIndexPath = {
+  indexPath: IndexPath;
+  pointIndex: number;
+};
+
+export function getIndexPathOfOpenShapeLayer(
+  state: ApplicationState,
+): PointIndexPath | undefined {
+  // If multiple points are selected, we don't allow adding points to the path
+  if (Object.values(state.selectedPointLists).flat().length !== 1) return;
+
+  // Find the selected [layerId, [pointIndex]] pair
+  const selectedPairs = Object.entries(state.selectedPointLists).filter(
+    ([_, value]) => value.length > 0,
+  );
+
+  const [[layerId, [pointIndex]]] = selectedPairs;
+
+  const page = getCurrentPage(state);
+
+  const indexPath = Layers.findIndexPath(
+    page,
+    (layer) => layer.do_objectID === layerId,
+  );
+
+  if (!indexPath) return;
+
+  const layer = Layers.access(page, indexPath);
+
+  if (
+    !!layer &&
+    Layers.isPointsLayer(layer) &&
+    !layer.isClosed &&
+    // We can only add points if the first or last point is seleted
+    (pointIndex === 0 || pointIndex === layer.points.length - 1)
+  ) {
+    return { indexPath, pointIndex };
+  }
+}
 
 export const getIsEditingPath = (type: InteractionState['type']): boolean => {
   return (
