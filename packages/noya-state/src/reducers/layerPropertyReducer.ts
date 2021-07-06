@@ -21,6 +21,7 @@ export type LayerPropertyAction =
   | [type: 'setLayerHeight', value: number, mode?: SetNumberMode]
   | [type: 'setLayerRotation', value: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
+  | [type: 'setIsClosed', value: boolean]
   | [type: 'setIsFlippedVertical', value: boolean]
   | [type: 'setIsFlippedHorizontal', value: boolean]
   | [type: 'setHasClippingMask', value: boolean]
@@ -139,6 +140,19 @@ export function layerPropertyReducer(
             mode === 'replace' ? amount : value + amount,
             0.5,
           );
+        });
+      });
+    }
+    case 'setIsClosed': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (!Layers.isPointsLayer(layer)) return;
+
+          layer.isClosed = value;
         });
       });
     }

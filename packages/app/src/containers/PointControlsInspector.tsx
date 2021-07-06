@@ -1,12 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
+  Button,
   InputField,
   Label,
   LabeledElementView,
   Select,
   Spacer,
 } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
+import { Layers, Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
@@ -54,6 +55,15 @@ function getCurveModeString(value: Sketch.CurveMode): CurveModeOption {
 
 export default memo(function PointControlsInspector() {
   const [state, dispatch] = useApplicationState();
+
+  const selectedLayerIds = Object.keys(state.selectedPointLists);
+
+  const selectedLayers = Layers.findAll(
+    Selectors.getCurrentPage(state),
+    (layer) => selectedLayerIds.includes(layer.do_objectID),
+  ).filter((layer): layer is Layers.PointsLayer => Layers.isPointsLayer(layer));
+
+  const isClosed = getMultiValue(selectedLayers.map((layer) => layer.isClosed));
 
   const controlPoint = Selectors.getSelectedControlPoint(state);
   const points = controlPoint
@@ -123,6 +133,20 @@ export default memo(function PointControlsInspector() {
             />
           </InputField.Root>
         </LabeledElementView>
+      </InspectorPrimitives.Row>
+      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.Row>
+        <InspectorPrimitives.Column>
+          <Button
+            id="toggle-path-is-closed"
+            disabled={isClosed === undefined}
+            onClick={useCallback(() => {
+              dispatch('setIsClosed', !isClosed);
+            }, [dispatch, isClosed])}
+          >
+            {isClosed ? 'Open Path' : 'Close Path'}
+          </Button>
+        </InspectorPrimitives.Column>
       </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>
   );
