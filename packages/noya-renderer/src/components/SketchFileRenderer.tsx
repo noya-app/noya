@@ -152,11 +152,12 @@ export default memo(function SketchFileRenderer() {
     highlightedLayer,
   } = useWorkspace();
   const [state] = useApplicationState();
+  const interactionState = state.interactionState;
   const { CanvasKit } = useReactCanvasKit();
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
-  const isEditingPath = getIsEditingPath(state.interactionState.type);
+  const isEditingPath = getIsEditingPath(interactionState.type);
 
   const canvasRect = useMemo(
     () =>
@@ -266,7 +267,7 @@ export default memo(function SketchFileRenderer() {
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
 
   const smartSnapGuides = useMemo(() => {
-    if (state.interactionState.type !== 'moving' || !boundingRect) return;
+    if (interactionState.type !== 'moving' || !boundingRect) return;
 
     const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
       state,
@@ -275,7 +276,7 @@ export default memo(function SketchFileRenderer() {
     const possibleSnapLayers = getPossibleSnapLayers(
       state,
       layerIndexPaths,
-      state.interactionState.canvasSize,
+      interactionState.canvasSize,
     )
       // Ensure we don't snap to the selected layer itself
       .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
@@ -417,7 +418,7 @@ export default memo(function SketchFileRenderer() {
         )}
       </>
     );
-  }, [state, boundingRect, page]);
+  }, [interactionState, boundingRect, state, page]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
@@ -455,14 +456,11 @@ export default memo(function SketchFileRenderer() {
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
   const penToolPseudoElements = useMemo(() => {
-    if (
-      state.interactionState.type !== 'drawingShapePath' ||
-      !state.interactionState.point
-    )
+    if (interactionState.type !== 'drawingShapePath' || !interactionState.point)
       return;
 
-    return <PseudoPoint point={state.interactionState.point} />;
-  }, [state.interactionState]);
+    return <PseudoPoint point={interactionState.point} />;
+  }, [interactionState]);
 
   // The `useMemo` is just for organization here, since we have `state` in the deps
   const editPathPseudoElements = useMemo(() => {
@@ -470,9 +468,9 @@ export default memo(function SketchFileRenderer() {
 
     if (
       !indexPath ||
-      state.interactionState.type !== 'editPath' ||
-      !state.interactionState.point ||
-      getPathElementAtPoint(state, state.interactionState.point)
+      interactionState.type !== 'editPath' ||
+      !interactionState.point ||
+      getPathElementAtPoint(state, interactionState.point)
     )
       return;
 
@@ -485,13 +483,13 @@ export default memo(function SketchFileRenderer() {
     return (
       <>
         <PseudoPathLine
-          point={state.interactionState.point}
+          point={interactionState.point}
           decodedCurvePoint={decodedCurvePoint}
         />
-        <PseudoPoint point={state.interactionState.point} />
+        <PseudoPoint point={interactionState.point} />
       </>
     );
-  }, [page, state]);
+  }, [interactionState, page, state]);
 
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
@@ -526,7 +524,7 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {state.interactionState.type === 'drawingShapePath' ? (
+        {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
         ) : isEditingPath ? (
           <>
@@ -553,18 +551,18 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {state.interactionState.type === 'drawing' && (
+            {interactionState.type === 'drawing' && (
               <SketchLayer
-                key={state.interactionState.value.do_objectID}
-                layer={state.interactionState.value}
+                key={interactionState.value.do_objectID}
+                layer={interactionState.value}
               />
             )}
           </>
         )}
       </Group>
       <Group transform={screenTransform}>
-        {state.interactionState.type === 'marquee' && (
-          <Marquee interactionState={state.interactionState} />
+        {interactionState.type === 'marquee' && (
+          <Marquee interactionState={interactionState} />
         )}
         {showRulers && <HorizontalRuler />}
       </Group>
