@@ -6,8 +6,13 @@ import {
   resizeIfLarger,
   Size,
 } from 'noya-geometry';
-import { useReactCanvasKit } from 'noya-react-canvaskit';
-import { Group, Primitives, Rect as RCKRect, SketchLayer } from 'noya-renderer';
+import {
+  Group,
+  Primitives,
+  Rect as RCKRect,
+  SketchLayer,
+  useCanvasKit,
+} from 'noya-renderer';
 import { Layers, PageLayer } from 'noya-state';
 import { useMemo } from 'react';
 import useCheckeredFill from '../hooks/useCheckeredFill';
@@ -15,7 +20,7 @@ import { SketchArtboardContent } from './layers/SketchArtboard';
 
 function CheckeredRect({ rect }: { rect: Rect }) {
   const paint = useCheckeredFill();
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   return <RCKRect paint={paint} rect={Primitives.rect(CanvasKit, rect)} />;
 }

@@ -1,17 +1,15 @@
 import {
   ClipOp,
+  ColorFilter,
   Image,
+  ImageFilter,
   Matrix3x3,
   Paint,
   Paragraph,
   Path,
   Rect,
-  Surface,
-  ColorFilter,
-  ImageFilter,
 } from 'canvaskit';
 import { ReactNode } from 'react';
-import { ReactCanvasKitContext } from './contexts/ReactCanvasKitContext';
 
 export interface RectComponentProps {
   rect: Rect;
@@ -89,9 +87,3 @@ export type ElementProps<K extends ElementType> = ElementInstance<K>['props'];
 
 export type AnyElementInstance = ElementInstance<ElementType>;
 export type AnyElementProps = ElementProps<ElementType>;
-
-export interface RootComponent {
-  context: ReactCanvasKitContext;
-  surface: Surface;
-  children: ElementInstance<ElementType>[];
-}

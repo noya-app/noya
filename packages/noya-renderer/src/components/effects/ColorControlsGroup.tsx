@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import { toDegrees } from 'noya-geometry';
-import { useReactCanvasKit } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { memo, ReactNode, useMemo } from 'react';
 import { Group } from '../..';
 import {
@@ -32,7 +32,7 @@ export default memo(function ColorControlsGroup({
   colorControls,
   children,
 }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const colorFilter = useMemo(() => {
     const { isEnabled, hue, saturation, brightness, contrast } = colorControls;

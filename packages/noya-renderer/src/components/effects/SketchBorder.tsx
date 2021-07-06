@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit-wasm';
-import { useDeletable, useFill, useReactCanvasKit } from 'noya-react-canvaskit';
-import { Path, Primitives } from 'noya-renderer';
+import { useDeletable, useFill } from 'noya-react-canvaskit';
+import { Path, Primitives, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 
 export default memo(function SketchBorder({
@@ -11,7 +11,7 @@ export default memo(function SketchBorder({
   path: CanvasKit.Path;
   border: Sketch.Border;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const paint = useFill({
     color: Primitives.color(CanvasKit, border.color),

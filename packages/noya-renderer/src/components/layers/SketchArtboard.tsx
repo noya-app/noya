@@ -6,9 +6,14 @@ import {
   useDeletable,
   useFontManager,
   usePaint,
-  useReactCanvasKit,
 } from 'noya-react-canvaskit';
-import { Group, Primitives, Rect as RCKRect, Text } from 'noya-renderer';
+import {
+  Group,
+  Primitives,
+  Rect as RCKRect,
+  Text,
+  useCanvasKit,
+} from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import SketchGroup from './SketchGroup';
@@ -24,7 +29,7 @@ const ArtboardLabel = memo(function ArtboardLabel({
   layerFrame,
   isSymbolMaster,
 }: ArtboardLabelProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const { colors } = useTheme();
   const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
   const fontManager = useFontManager();
@@ -72,7 +77,7 @@ interface ArtboardBlurProps {
 const ArtboardBlur = memo(function ArtboardBlur({
   layerFrame,
 }: ArtboardBlurProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const maskFilter = useBlurMaskFilter({
     style: CanvasKit.BlurStyle.Normal,
@@ -104,7 +109,7 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
   layer,
   showBackground,
 }: SketchArtboardContentProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const paint = usePaint({
     color: layer.hasBackgroundColor

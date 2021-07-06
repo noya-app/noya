@@ -1,12 +1,13 @@
-import JSZip from 'jszip';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { fileSave } from 'browser-fs-access';
+import JSZip from 'jszip';
 import { Button, Divider, Spacer } from 'noya-designsystem';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
+import { Size } from 'noya-geometry';
+import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import ArrayController from '../components/inspector/ExportArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
@@ -16,9 +17,7 @@ import {
   useGetWorkspaceStateSnapshot,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import useCanvasKit from '../hooks/useCanvasKit';
 import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
-import { Size } from 'noya-geometry';
 
 async function saveFile(name: string, fileFormat: string, data: ArrayBuffer) {
   const file = new File([data], name, {

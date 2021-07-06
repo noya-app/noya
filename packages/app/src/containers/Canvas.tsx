@@ -1,7 +1,7 @@
 import { ContextMenu } from 'noya-designsystem';
-import { createRect } from 'noya-geometry';
+import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { uuid } from 'noya-renderer';
+import { useCanvasKit, uuid } from 'noya-renderer';
 import { decodeCurvePoint } from 'noya-renderer/src/primitives';
 import {
   CompassDirection,
@@ -33,12 +33,20 @@ import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import useCanvasKit from '../hooks/useCanvasKit';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
+
+const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
+  position: 'absolute',
+  top: -insets.top,
+  bottom: -insets.bottom,
+  right: -insets.right,
+  left: -insets.left,
+  zIndex: -1,
+}));
 
 function getCursorForDirection(
   direction: CompassDirection,
@@ -135,9 +143,21 @@ export default memo(function Canvas() {
     setCanvasSize(containerSize, insets);
   }, [insets, setCanvasSize, containerSize]);
 
-  const canvasSize = useMemo(() => containerSize ?? { width: 0, height: 0 }, [
-    containerSize,
-  ]);
+  const visibleCanvasSize = useMemo(
+    () => containerSize ?? { width: 0, height: 0 },
+    [containerSize],
+  );
+
+  const canvasSizeWithInsets = useMemo(
+    () =>
+      containerSize && containerSize.width > 0 && containerSize.height > 0
+        ? {
+            width: containerSize.width + insets.left + insets.right,
+            height: containerSize.height,
+          }
+        : undefined,
+    [containerSize, insets.left, insets.right],
+  );
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current document's offset from the origin
@@ -299,7 +319,7 @@ export default memo(function Canvas() {
                 'maybeScale',
                 point,
                 direction,
-                canvasSize,
+                visibleCanvasSize,
               ]);
 
               return;
@@ -331,7 +351,7 @@ export default memo(function Canvas() {
               );
             }
 
-            dispatch('interaction', ['maybeMove', point, canvasSize]);
+            dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
           } else {
             dispatch('selectLayer', undefined);
 
@@ -341,7 +361,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, CanvasKit, insets, dispatch, canvasSize],
+    [offsetEventPoint, state, CanvasKit, insets, dispatch, visibleCanvasSize],
   );
 
   const handleMouseMove = useCallback(
@@ -683,9 +703,11 @@ export default memo(function Canvas() {
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
       >
-        {containerSize && (
-          <CanvasKitRenderer size={containerSize} insets={insets} />
-        )}
+        <InsetContainer insets={insets}>
+          {canvasSizeWithInsets && (
+            <CanvasKitRenderer size={canvasSizeWithInsets} />
+          )}
+        </InsetContainer>
       </Container>
     </ContextMenu>
   );

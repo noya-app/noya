@@ -1,24 +1,26 @@
 // Some snippets adapted from udevbe/react-canvaskit (MIT License)
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
-import { CanvasKit, Surface } from 'canvaskit';
+import { Canvas, CanvasKit, Surface } from 'canvaskit';
 import { fontManager } from 'noya-renderer';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
 import ReactReconciler from 'react-reconciler';
 import { FontManagerProvider } from './contexts/FontManagerContext';
 import {
-  ReactCanvasKitContext,
-  ReactCanvasKitProvider,
-} from './contexts/ReactCanvasKitContext';
-import {
   AnyElementInstance,
   AnyElementProps,
   ElementInstance,
   ElementType,
   ElementTypeMap,
-  RootComponent,
 } from './types';
+
+declare module 'canvaskit' {
+  interface Surface {
+    flush(): void;
+    _id: number;
+  }
+}
 
 export type PublicInstance = AnyElementInstance;
 
@@ -41,6 +43,17 @@ function createElementInstance<K extends keyof ElementTypeMap>(
   }
 
   return instance;
+}
+
+interface ReactCanvasKitContext {
+  CanvasKit: CanvasKit;
+  canvas: Canvas;
+}
+
+interface RootComponent {
+  context: ReactCanvasKitContext;
+  surface: Surface;
+  children: ElementInstance<ElementType>[];
 }
 
 interface ReactCanvasKitHostConfig
@@ -423,9 +436,7 @@ export function render(
   const container = getContainerForSurface(surface, context);
 
   canvaskitReconciler.updateContainer(
-    <ReactCanvasKitProvider value={context}>
-      <FontManagerProvider value={fontManager}>{element}</FontManagerProvider>
-    </ReactCanvasKitProvider>,
+    <FontManagerProvider value={fontManager}>{element}</FontManagerProvider>,
     container,
     null,
     () => {

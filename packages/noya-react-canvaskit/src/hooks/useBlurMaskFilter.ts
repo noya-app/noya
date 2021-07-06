@@ -1,6 +1,6 @@
 import { BlurStyle, MaskFilter } from 'canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useDeletable from './useDeletable';
 
 export type BlurMaskFilterParameters = {
@@ -12,7 +12,7 @@ export type BlurMaskFilterParameters = {
 export default function useBlurMaskFilter(
   parameters: BlurMaskFilterParameters,
 ): MaskFilter {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const maskFilter = useMemo(
     () =>

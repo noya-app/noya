@@ -9,13 +9,8 @@ import {
   insetRect,
   Point,
 } from 'noya-geometry';
-import {
-  useColorFill,
-  usePaint,
-  useReactCanvasKit,
-  useStroke,
-} from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
+import { useColorFill, usePaint, useStroke } from 'noya-react-canvaskit';
+import { Primitives, useCanvasKit } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
 import { findIndexPath, PointsLayer } from 'noya-state/src/layers';
 import {
@@ -42,7 +37,7 @@ import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { getDragHandles } from '../canvas/selection';
-import { Rect as RCKRect, Group, Polyline } from '../ComponentsContext';
+import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
@@ -70,7 +65,7 @@ const BoundingRect = memo(function BoundingRect({
   selectionPaint: CanvasKit.Paint;
   rect: Rect;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const alignedRect = useMemo(
     () => Primitives.rect(CanvasKit, insetRect(rect, 0.5, 0.5)),
@@ -87,7 +82,7 @@ const DragHandles = memo(function DragHandles({
   selectionPaint: CanvasKit.Paint;
   rect: Rect;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const dragHandlePaint = usePaint({
     color: CanvasKit.Color(255, 255, 255, 1),
@@ -119,7 +114,7 @@ const Marquee = memo(function Marquee({
 }: {
   interactionState: Extract<InteractionState, { type: 'marquee' }>;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const stroke = usePaint({
     color: CanvasKit.Color(220, 220, 220, 0.9),
@@ -153,7 +148,7 @@ export default memo(function SketchFileRenderer() {
   } = useWorkspace();
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);

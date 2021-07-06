@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useReactCanvasKit } from 'noya-react-canvaskit';
-import { Group, Primitives } from 'noya-renderer';
+import { Group, Primitives, useCanvasKit } from 'noya-renderer';
 import React, { memo, ReactNode, useMemo } from 'react';
 
 interface Props {
@@ -9,7 +8,7 @@ interface Props {
 }
 
 export default memo(function DropShadowGroup({ shadow, children }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const imageFilter = useMemo(
     () =>

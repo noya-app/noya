@@ -1,10 +1,9 @@
-import { useReactCanvasKit } from 'noya-react-canvaskit';
+import { Primitives, useCanvasKit } from 'noya-renderer';
 import { Layers } from 'noya-state';
 import { useMemo } from 'react';
-import { Primitives } from 'noya-renderer';
 
 export default function useLayerPath(layer: Layers.PointsLayer) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   return useMemo(() => {
     const path = Primitives.path(

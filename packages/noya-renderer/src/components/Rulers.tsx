@@ -1,17 +1,14 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
-import {
-  useColorFill,
-  useFontManager,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
+import { useColorFill, useFontManager } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { Point, Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Text, Rect } from '..';
+import { Rect, Text } from '..';
 
 function RulerLabel({ text, origin }: { text: string; origin: Point }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const textColor = useTheme().colors.textMuted;
   const fontManager = useFontManager();
 
@@ -70,7 +67,7 @@ function range(
 }
 
 export function HorizontalRuler() {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const backgroundColor = useTheme().colors.canvas.background;
 
   const [state] = useApplicationState();
