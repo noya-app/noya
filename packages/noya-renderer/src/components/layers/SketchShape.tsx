@@ -1,14 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
-import {
-  ClipProps,
-  useDeletable,
-  usePaint,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
+import { ClipProps, useDeletable, usePaint } from 'noya-react-canvaskit';
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
-import { Primitives, Path, Group } from 'noya-renderer';
+import { Group, Path, Primitives, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { Rect } from '../../../../noya-state/src';
 import { useSketchImage } from '../../ImageCache';
@@ -24,7 +19,7 @@ const SketchFill = memo(function SketchFill({
   fill: Sketch.Fill;
   frame: Rect;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const image = useSketchImage(fill.image);
 
@@ -48,7 +43,7 @@ const SketchShadow = memo(function SketchShadow({
   path: CanvasKit.Path;
   shadow: Sketch.Shadow;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const paintParameters: PaintParameters = useMemo(
     () => ({
@@ -91,7 +86,7 @@ const SketchBorderShadow = memo(function SketchBorderShadow({
   borderWidth: number;
   borderPosition: Sketch.BorderPosition;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const strokedPath = useMemo(
     () =>
@@ -120,7 +115,7 @@ const SketchFillShadow = memo(function SketchFillShadow({
   borderPosition: Sketch.BorderPosition;
   shouldClipPath: boolean;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   // Spread needs to be multiplied by 2 to match Sketch's behavior
   const additionalRadius =
@@ -167,7 +162,7 @@ interface Props {
 }
 
 export default memo(function SketchShape({ layer }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const path = Primitives.path(
     CanvasKit,

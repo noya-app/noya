@@ -1,10 +1,10 @@
 import { Paint } from 'canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import usePaint, { PaintParameters } from './usePaint';
 
 export function useStroke(parameters: Omit<PaintParameters, 'style'>): Paint {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const parametersWithStyle = useMemo(
     () => ({

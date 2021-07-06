@@ -2,7 +2,8 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import produce from 'immer';
 import { AffineTransform } from 'noya-geometry';
-import { useFill, useReactCanvasKit } from 'noya-react-canvaskit';
+import { useFill } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { Layers, Overrides, PageLayer } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Primitives, Rect } from '../..';
@@ -22,7 +23,7 @@ const Symbol = memo(function Symbol({
   layerStyles,
   layerTextStyles,
 }: SymbolProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const backgroundFillProperties = useMemo(
     () => ({

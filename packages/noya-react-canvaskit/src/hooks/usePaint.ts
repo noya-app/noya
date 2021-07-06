@@ -1,6 +1,6 @@
-import { Paint, PaintStyle, MaskFilter } from 'canvaskit';
+import { MaskFilter, Paint, PaintStyle } from 'canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useColor, { ColorParameters } from './useColor';
 import useDeletable from './useDeletable';
 
@@ -18,7 +18,7 @@ function isPaint(value: Paint | PaintParameters): value is Paint {
 }
 
 export default function usePaint(parameters: PaintParameters | Paint): Paint {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const maybePaintObject = isPaint(parameters) ? parameters : undefined;
   const maybeParameters = useStablePaintParameters(

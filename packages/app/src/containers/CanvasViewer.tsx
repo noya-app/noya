@@ -1,3 +1,4 @@
+import { useCanvasKit } from 'noya-renderer';
 import React, {
   memo,
   ReactNode,
@@ -7,7 +8,6 @@ import React, {
 } from 'react';
 import { useTheme } from 'styled-components';
 import { useWorkspaceState } from '../contexts/ApplicationStateContext';
-import useCanvasKit from '../hooks/useCanvasKit';
 import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
 
 interface Props {

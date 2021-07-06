@@ -1,10 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import {
-  useDeletable,
-  useFontManager,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
-import { Primitives, Text, Group } from 'noya-renderer';
+import { useDeletable, useFontManager } from 'noya-react-canvaskit';
+import { Group, Primitives, Text, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 
 interface Props {
@@ -44,7 +40,7 @@ function applyTextTransform(text: string, transform: Sketch.TextTransform) {
 }
 
 export function useTextLayerParagraph(layer: Sketch.Text) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
 
   const {
@@ -128,7 +124,7 @@ export function useTextLayerParagraph(layer: Sketch.Text) {
 }
 
 export default memo(function SketchText({ layer }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const paragraph = useTextLayerParagraph(layer);
 

@@ -1,11 +1,11 @@
 import { Paint } from 'canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import { ColorParameters } from './useColor';
 import usePaint, { PaintParameters } from './usePaint';
 
 export function useFill(parameters: Omit<PaintParameters, 'style'>): Paint {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const parametersWithStyle = useMemo(
     () => ({
@@ -19,7 +19,7 @@ export function useFill(parameters: Omit<PaintParameters, 'style'>): Paint {
 }
 
 export function useColorFill(color: ColorParameters): Paint {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const parametersWithStyle = useMemo(
     () => ({

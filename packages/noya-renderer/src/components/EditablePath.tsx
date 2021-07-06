@@ -1,13 +1,15 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
 import { AffineTransform, Point } from 'noya-geometry';
+import { useDeletable, useFill, useStroke } from 'noya-react-canvaskit';
 import {
-  useDeletable,
-  useFill,
-  useReactCanvasKit,
-  useStroke,
-} from 'noya-react-canvaskit';
-import { Group, Path, Polyline, Primitives, Rect } from 'noya-renderer';
+  Group,
+  Path,
+  Polyline,
+  Primitives,
+  Rect,
+  useCanvasKit,
+} from 'noya-renderer';
 import { Layers, SelectedControlPoint, Selectors } from 'noya-state';
 import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import React, { Fragment, useMemo } from 'react';
@@ -26,7 +28,7 @@ export function EditablePathPoint({
   fill,
   stroke,
 }: EditablePathPointProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const path = useMemo(() => {
     const path = new CanvasKit.Path();
@@ -62,7 +64,7 @@ function EditablePathControlPoint({
   point,
   fill,
 }: EditablePathControlPointProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const rect = Primitives.rect(CanvasKit, {
     x: point.x - CONTROL_POINT_SIZE,
@@ -87,7 +89,7 @@ export default function EditablePath({
   selectedIndexes,
   selectedControlPoint,
 }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const {
     canvas: { dragHandleStroke },
     primary,

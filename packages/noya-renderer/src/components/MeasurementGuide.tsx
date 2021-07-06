@@ -1,19 +1,15 @@
 import { Point } from 'noya-geometry';
-import {
-  useColorFill,
-  useFontManager,
-  usePaint,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
+import { useColorFill, useFontManager, usePaint } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import React, { useMemo } from 'react';
-import { Rect, Text, Polyline } from '..';
+import { Polyline, Rect, Text } from '..';
 import { DistanceMeasurementProps } from './guides';
 
 function DistanceMeasurement({
   distance,
   midpoint: bounds,
 }: DistanceMeasurementProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
@@ -78,7 +74,7 @@ export default function MeasurementGuide({
   measurement,
   distanceMeasurement,
 }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const extensionGuidePaint = new CanvasKit.Paint();
   extensionGuidePaint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));

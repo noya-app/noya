@@ -1,14 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { sketchColorToRgbaString } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
-import {
-  useColorFill,
-  useDeletable,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
+import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Path } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import CanvasViewer from '../../containers/CanvasViewer';
+import { useCanvasKit } from 'noya-renderer';
 
 const PREVIEW_SIZE = 60;
 
@@ -17,7 +14,7 @@ interface Props {
 }
 
 function RCKColorSwatch({ color, size }: { color: string; size: Size }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const fill = useColorFill(color);
 
   const path = useMemo(() => {

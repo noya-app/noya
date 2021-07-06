@@ -1,7 +1,7 @@
 import { CanvasKit, Paint } from 'canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import memoize from 'noya-state/src/utils/memoize';
 import { createElement, memo, useMemo } from 'react';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';
 import { ImageComponentProps } from '../types';
@@ -17,7 +17,7 @@ interface ImageProps {
 }
 
 export default memo(function Image(props: ImageProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const rect = useRect(props.rect);
   const paint = usePaint(props.paint);

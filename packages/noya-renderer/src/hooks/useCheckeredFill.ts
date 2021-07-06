@@ -1,4 +1,5 @@
-import { useDeletable, useReactCanvasKit } from 'noya-react-canvaskit';
+import { useDeletable } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
@@ -15,7 +16,7 @@ const CHECKERED_BACKGROUND = `iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABl
 export const CHECKERED_BACKGROUND_BYTES = decodeBase64(CHECKERED_BACKGROUND);
 
 export default function useCheckeredFill() {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const { transparentChecker } = useTheme().colors;
 
   const paint = useMemo(() => {

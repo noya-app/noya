@@ -1,5 +1,5 @@
 import { Point } from 'noya-geometry';
-import { useReactCanvasKit } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import React from 'react';
 import { Polyline } from '..';
 
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function ExtensionGuide({ points }: Props) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const paint = new CanvasKit.Paint();
   paint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));

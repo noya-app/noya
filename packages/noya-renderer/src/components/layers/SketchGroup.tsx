@@ -1,10 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { AffineTransform } from 'noya-geometry';
-import {
-  ClipProps,
-  useDeletable,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
+import { ClipProps, useDeletable } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { PageLayer } from 'noya-state';
 import { chunkBy } from 'noya-utils';
 import { memo, ReactNode, useMemo } from 'react';
@@ -22,7 +19,7 @@ const SketchMask = memo(function SketchGroup({
   layer: Sketch.AnyLayer;
   children: ReactNode;
 }) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const maskPath = useMemo(() => {
     if (!layer || !('points' in layer)) return;

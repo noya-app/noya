@@ -1,7 +1,7 @@
 import { Paint } from 'canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import { Point } from 'noya-state';
 import { memo, useMemo } from 'react';
-import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useDeletable from '../hooks/useDeletable';
 import usePaint from '../hooks/usePaint';
 import makePath from '../utils/makePath';
@@ -13,7 +13,7 @@ interface PolylineProps {
 }
 
 export default memo(function Polyline(props: PolylineProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const paint = usePaint(props.paint);
   const path = useMemo(() => makePath(CanvasKit, props.points), [
     CanvasKit,

@@ -1,5 +1,5 @@
 import type { CanvasKit } from 'canvaskit';
-import { load } from 'noya-renderer';
+import { load } from '..';
 import { SuspendedValue } from 'noya-utils';
 
 let suspendedCanvasKit = new SuspendedValue<CanvasKit>(load());

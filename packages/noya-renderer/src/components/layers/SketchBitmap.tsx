@@ -1,8 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { getRectCornerPoints } from 'noya-geometry';
-import { makePath, useReactCanvasKit } from 'noya-react-canvaskit';
-import { Group, Image, Primitives } from 'noya-renderer';
+import { makePath } from 'noya-react-canvaskit';
+import { Group, Image, Primitives, useCanvasKit } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
 import ColorControlsGroup from '../effects/ColorControlsGroup';
 import DropShadowGroup from '../effects/DropShadowGroup';
@@ -14,7 +14,7 @@ interface Props {
 
 export default memo(function SketchBitmap({ layer }: Props) {
   const [state] = useApplicationState();
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
 
   const ref = state.sketch.images[layer.image._ref];
   const paint = useMemo(() => new CanvasKit.Paint(), [CanvasKit]);

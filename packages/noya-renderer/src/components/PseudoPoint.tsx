@@ -1,5 +1,6 @@
 import { Point } from 'noya-geometry';
-import { useFill, useReactCanvasKit, useStroke } from 'noya-react-canvaskit';
+import { useFill, useStroke } from 'noya-react-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 import React from 'react';
 import { useTheme } from 'styled-components';
 import { EditablePathPoint } from './EditablePath';
@@ -9,7 +10,7 @@ interface PseudoPointProps {
 }
 
 export default function PseudoPoint({ point }: PseudoPointProps) {
-  const { CanvasKit } = useReactCanvasKit();
+  const CanvasKit = useCanvasKit();
   const { primary } = useTheme().colors;
 
   const fill = useFill({ color: CanvasKit.WHITE });

@@ -9,6 +9,7 @@ export { default as SketchGroup } from './components/layers/SketchGroup';
 export { default as SketchLayer } from './components/layers/SketchLayer';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
+export { default as useCanvasKit } from './hooks/useCanvasKit';
 export { ImageCacheProvider } from './ImageCache';
 export type { Context };
 export { uuid, Primitives };

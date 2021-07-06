@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { ImageCacheProvider } from 'noya-renderer';
 import Workspace from './containers/Workspace';
 import { StateProvider } from './contexts/ApplicationStateContext';
-import useCanvasKit from './hooks/useCanvasKit';
+import { useCanvasKit } from 'noya-renderer';
 import { useResource } from './hooks/useResource';
 
 type Action =
