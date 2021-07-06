@@ -9,9 +9,9 @@ import {
   insetRect,
   Point,
 } from 'noya-geometry';
-import { useColorFill, usePaint, useStroke } from 'noya-react-canvaskit';
+import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Primitives, useCanvasKit } from 'noya-renderer';
-import { InteractionState, Layers, Rect } from 'noya-state';
+import { Layers, Rect } from 'noya-state';
 import { findIndexPath, PointsLayer } from 'noya-state/src/layers';
 import {
   getBoundingPoints,
@@ -36,9 +36,9 @@ import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
-import { getDragHandles } from '../canvas/selection';
 import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
+import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
 import {
@@ -53,6 +53,7 @@ import {
 import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
+import Marquee from './Marquee';
 import MeasurementGuide from './MeasurementGuide';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
@@ -73,70 +74,6 @@ const BoundingRect = memo(function BoundingRect({
   );
 
   return <RCKRect rect={alignedRect} paint={selectionPaint} />;
-});
-
-const DragHandles = memo(function DragHandles({
-  selectionPaint,
-  rect,
-}: {
-  selectionPaint: CanvasKit.Paint;
-  rect: Rect;
-}) {
-  const CanvasKit = useCanvasKit();
-
-  const dragHandlePaint = usePaint({
-    color: CanvasKit.Color(255, 255, 255, 1),
-    style: CanvasKit.PaintStyle.Fill,
-  });
-
-  const dragHandles = getDragHandles(rect);
-
-  return (
-    <>
-      {dragHandles.map((handle) => (
-        <React.Fragment key={handle.compassDirection}>
-          <RCKRect
-            rect={Primitives.rect(CanvasKit, handle.rect)}
-            paint={dragHandlePaint}
-          />
-          <RCKRect
-            rect={Primitives.rect(CanvasKit, insetRect(handle.rect, 0.5, 0.5))}
-            paint={selectionPaint}
-          />
-        </React.Fragment>
-      ))}
-    </>
-  );
-});
-
-const Marquee = memo(function Marquee({
-  interactionState,
-}: {
-  interactionState: Extract<InteractionState, { type: 'marquee' }>;
-}) {
-  const CanvasKit = useCanvasKit();
-
-  const stroke = usePaint({
-    color: CanvasKit.Color(220, 220, 220, 0.9),
-    strokeWidth: 2,
-    style: CanvasKit.PaintStyle.Stroke,
-  });
-
-  const fill = usePaint({
-    color: CanvasKit.Color(255, 255, 255, 0.2),
-    style: CanvasKit.PaintStyle.Fill,
-  });
-
-  const { origin, current } = interactionState;
-
-  const rect = Primitives.rect(CanvasKit, createRect(origin, current));
-
-  return (
-    <>
-      <RCKRect rect={rect} paint={stroke} />
-      <RCKRect rect={rect} paint={fill} />
-    </>
-  );
 });
 
 export default memo(function SketchFileRenderer() {
@@ -557,7 +494,9 @@ export default memo(function SketchFileRenderer() {
       </Group>
       <Group transform={screenTransform}>
         {interactionState.type === 'marquee' && (
-          <Marquee interactionState={interactionState} />
+          <Marquee
+            rect={createRect(interactionState.origin, interactionState.current)}
+          />
         )}
         {showRulers && <HorizontalRuler />}
       </Group>
