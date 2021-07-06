@@ -12,7 +12,10 @@ import {
   ShapeType,
 } from 'noya-state';
 import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
-import { getCursorForEditPathMode } from 'noya-state/src/selectors/elementSelectors';
+import {
+  canClosePath,
+  getCursorForEditPathMode,
+} from 'noya-state/src/selectors/elementSelectors';
 import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
 import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
 import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
@@ -287,6 +290,11 @@ export default memo(function Canvas() {
                 : 'replace',
             );
             dispatch('interaction', ['maybeMovePoint', point]);
+            const canClose = canClosePath(state, {
+              type: 'point',
+              value: selectedPoint,
+            });
+            if (canClose) dispatch('setIsClosed', true);
           } else if (selectedControlPoint) {
             dispatch(
               'selectControlPoint',

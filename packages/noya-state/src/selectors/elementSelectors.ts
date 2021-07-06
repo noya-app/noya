@@ -21,12 +21,30 @@ type PathElement =
       value: SelectedControlPoint;
     };
 
+export function canClosePath(state: ApplicationState, element: PathElement) {
+  if (element.type === 'point') {
+    const [layerId, index] = element.value;
+
+    const layers = getSelectedLayers(state)
+      .filter(Layers.isPointsLayer)
+      .filter((layer) => layer.do_objectID === layerId);
+
+    return (
+      (index === layers[0].points.length - 1 || index === 0) &&
+      !layers[0].isClosed &&
+      !state.selectedPointLists[layerId].includes(index)
+    );
+  }
+  return false;
+}
+
 export const getCursorForEditPathMode = (
   state: ApplicationState,
   point: Point,
 ) => {
-  if (getPathElementAtPoint(state, point)) {
-    return 'move';
+  const elementAtPoint = getPathElementAtPoint(state, point);
+  if (elementAtPoint) {
+    return canClosePath(state, elementAtPoint) ? 'no-drop' : 'move';
   } else if (getIndexPathOfOpenShapeLayer(state)) {
     return 'crosshair';
   } else {
