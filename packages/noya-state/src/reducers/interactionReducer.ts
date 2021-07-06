@@ -219,11 +219,11 @@ export function interactionReducer(
       });
     }
     case 'drawingShapePath': {
-      const [type, current] = action;
+      const [type, point] = action;
 
       return {
         type,
-        point: current,
+        point,
       };
     }
     case 'startDrawing': {

@@ -720,7 +720,7 @@ export default memo(function Canvas() {
       case 'insertText':
         return 'crosshair';
       case 'drawingShapePath':
-        return 'copy';
+        return 'crosshair';
       case 'maybeScale':
       case 'scaling':
       case 'hoverHandle':
@@ -729,11 +729,9 @@ export default memo(function Canvas() {
         }
         return 'default';
       case 'editPath': {
-        const { point: current } = state.interactionState;
-        const pointer = current
-          ? getCursorForEditPathMode(state, current)
-          : 'default';
-        return pointer;
+        const { point } = state.interactionState;
+
+        return point ? getCursorForEditPathMode(state, point) : 'default';
       }
       case 'maybeMoveControlPoint':
       case 'maybeMovePoint':

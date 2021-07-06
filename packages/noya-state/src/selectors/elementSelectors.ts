@@ -25,12 +25,13 @@ export const getCursorForEditPathMode = (
   state: ApplicationState,
   point: Point,
 ) => {
-  const element = getPathElementAtPoint(state, point);
-  if (element) return 'move';
-  if (getIndexPathOfOpenShapeLayer(state)) {
-    return 'copy';
+  if (getPathElementAtPoint(state, point)) {
+    return 'move';
+  } else if (getIndexPathOfOpenShapeLayer(state)) {
+    return 'crosshair';
+  } else {
+    return 'default';
   }
-  return 'default';
 };
 
 export function getPathElementAtPoint(
