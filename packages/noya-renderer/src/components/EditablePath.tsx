@@ -25,7 +25,11 @@ interface EditablePathPointProps {
   stroke: Paint;
 }
 
-function EditablePathPoint({ point, fill, stroke }: EditablePathPointProps) {
+export function EditablePathPoint({
+  point,
+  fill,
+  stroke,
+}: EditablePathPointProps) {
   const { CanvasKit } = useReactCanvasKit();
 
   const path = useMemo(() => {

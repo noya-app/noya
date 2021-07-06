@@ -1,6 +1,7 @@
 import type { Surface } from 'canvaskit';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect } from 'noya-geometry';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { render, unmount } from 'noya-react-canvaskit';
 import { SketchFileRenderer, uuid, ImageCacheProvider } from 'noya-renderer';
 import { decodeCurvePoint } from 'noya-renderer/src/primitives';
@@ -31,7 +32,6 @@ import {
   useState,
 } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import {
   StateProvider,
   useApplicationState,
@@ -43,6 +43,7 @@ import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
+import { getCursorForEditPathMode } from 'noya-state/src/selectors/elementSelectors';
 
 declare module 'canvaskit' {
   interface Surface {
@@ -286,6 +287,11 @@ export default memo(function Canvas() {
           event.preventDefault();
           break;
         }
+        case 'drawingShapePath': {
+          dispatch('addShapePathLayer', point);
+          dispatch('interaction', ['editPath']);
+          break;
+        }
         case 'editPath':
         case 'movingControlPoint':
         case 'movingPoint':
@@ -328,6 +334,10 @@ export default memo(function Canvas() {
               });
             });
 
+          const indexPathOfOpenShapeLayer = Selectors.getIndexPathOfOpenShapeLayer(
+            state,
+          );
+
           if (selectedPoint) {
             const alreadySelected = state.selectedPointLists[
               selectedPoint[0]
@@ -350,6 +360,8 @@ export default memo(function Canvas() {
               selectedControlPoint.controlPointType,
             );
             dispatch('interaction', ['maybeMoveControlPoint', point]);
+          } else if (indexPathOfOpenShapeLayer) {
+            dispatch('addPointToPath', point);
           } else if (!(event.shiftKey || event.metaKey)) {
             dispatch('selectPoint', undefined);
           }
@@ -416,6 +428,14 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'editPath': {
+          dispatch('interaction', ['resetEditPath', point]);
+          break;
+        }
+        case 'drawingShapePath': {
+          dispatch('interaction', ['drawingShapePath', point]);
+          break;
+        }
         case 'maybePan': {
           dispatch('interaction', ['startPanning', rawPoint]);
 
@@ -674,12 +694,11 @@ export default memo(function Canvas() {
 
           break;
         }
-
         case 'maybeMoveControlPoint':
         case 'movingControlPoint':
         case 'maybeMovePoint':
         case 'movingPoint': {
-          dispatch('interaction', ['resetEditPath']);
+          dispatch('interaction', ['resetEditPath', point]);
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
@@ -708,7 +727,9 @@ export default memo(function Canvas() {
       case 'insertText':
         return getBackgroundImageCursor();
       case 'insertSymbol':
-        return 'default';
+        return 'crosshair';
+      case 'drawingShapePath':
+        return 'copy';
       case 'maybeScale':
       case 'scaling':
       case 'hoverHandle':
@@ -716,10 +737,22 @@ export default memo(function Canvas() {
           return getCursorForDirection(handleDirection);
         }
         return 'default';
+      case 'editPath': {
+        const { point: current } = state.interactionState;
+        const pointer = current
+          ? getCursorForEditPathMode(state, current)
+          : 'default';
+        return pointer;
+      }
+      case 'maybeMoveControlPoint':
+      case 'maybeMovePoint':
+      case 'movingControlPoint':
+      case 'movingPoint':
+        return 'move';
       default:
         return 'default';
     }
-  }, [state.interactionState.type, handleDirection]);
+  }, [state, handleDirection]);
 
   return (
     <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>

@@ -28,13 +28,20 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard' | 'symbol';
+export type ShapeType =
+  | 'rectangle'
+  | 'oval'
+  | 'text'
+  | 'artboard'
+  | 'symbol'
+  | 'shapePath';
 
 export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
-  | [type: 'editPath']
-  | [type: 'resetEditPath']
+  | [type: 'editPath', current?: Point]
+  | [type: 'drawingShapePath', current?: Point]
+  | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
@@ -81,6 +88,11 @@ export type InteractionState =
     }
   | {
       type: 'editPath';
+      point?: Point;
+    }
+  | {
+      type: 'drawingShapePath';
+      point?: Point;
     }
   | {
       type: 'drawing';
@@ -149,14 +161,15 @@ export type InteractionState =
 
 export type InteractionType = InteractionState['type'];
 
-function createLayer(
-  shapeType: ShapeType,
-):
+type CreateLayerReturnType =
   | Sketch.Oval
   | Sketch.Rectangle
   | Sketch.Text
   | Sketch.Artboard
-  | Sketch.SymbolInstance {
+  | Sketch.ShapePath
+  | Sketch.SymbolInstance;
+
+function createLayer(shapeType: ShapeType): CreateLayerReturnType {
   switch (shapeType) {
     case 'oval':
       return Models.oval;
@@ -168,6 +181,8 @@ function createLayer(
       return Models.artboard;
     case 'symbol':
       return Models.symbolInstance;
+    case 'shapePath':
+      return Models.shapePath;
   }
 }
 
@@ -177,8 +192,11 @@ export function interactionReducer(
 ): InteractionState {
   switch (action[0]) {
     case 'editPath':
-    case 'resetEditPath':
-      return { type: 'editPath' };
+    case 'resetEditPath': {
+      const [, point] = action;
+      return { type: 'editPath', point: point };
+    }
+
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
@@ -209,6 +227,14 @@ export function interactionReducer(
         draft.current = point;
       });
     }
+    case 'drawingShapePath': {
+      const [type, current] = action;
+
+      return {
+        type,
+        point: current,
+      };
+    }
     case 'startDrawing': {
       const [, shapeType, id, point] = action;
 
@@ -229,7 +255,6 @@ export function interactionReducer(
     }
     case 'updateDrawing': {
       if (state.type !== 'drawing') return state;
-
       const [, point] = action;
 
       const rect = createRect(state.origin, point);

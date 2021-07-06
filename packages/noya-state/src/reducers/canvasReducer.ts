@@ -4,20 +4,30 @@ import produce from 'immer';
 import {
   AffineTransform,
   createBounds,
+  createRect,
   normalizeRect,
+  rectContainsPoint,
   rectsIntersect,
   Size,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
-import { resizeRect } from 'noya-renderer/src/primitives';
+import {
+  decodeCurvePoint,
+  DecodedCurvePoint,
+  encodeCurvePoint,
+  resizeRect,
+  stringifyPoint,
+} from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
+  computeNewBoundingRect,
   EncodedPageMetadata,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
+  getIndexPathOfOpenShapeLayer,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
@@ -45,6 +55,8 @@ export type CanvasAction =
     ]
   | [type: 'insertSymbol', symbolId: UUID]
   | [type: 'addDrawnLayer']
+  | [type: 'addShapePathLayer', point: Point]
+  | [type: 'addPointToPath', point: Point]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -174,6 +186,121 @@ export function canvasReducer(
         draft.selectedObjects = [layer.do_objectID];
       });
     }
+    case 'addShapePathLayer': {
+      const [, point] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const parent = draft.sketch.pages[pageIndex].layers
+          .filter(
+            (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+              Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+          )
+          .find((artboard) => rectContainsPoint(artboard.frame, point));
+
+        const layer = produce(Models.shapePath, (layer) => {
+          const minArea = {
+            x: point.x + 1,
+            y: point.y + 1,
+          };
+          layer.do_objectID = uuid();
+          layer.frame = {
+            _class: 'rect',
+            constrainProportions: false,
+            ...createRect(point, minArea),
+          };
+        });
+
+        if (parent && Layers.isChildLayer(layer)) {
+          layer.frame.x -= parent.frame.x;
+          layer.frame.y -= parent.frame.y;
+
+          parent.layers.push(layer);
+        } else {
+          draft.sketch.pages[pageIndex].layers.push(layer);
+        }
+
+        const encodedPoint: Sketch.CurvePoint = {
+          _class: 'curvePoint',
+          cornerRadius: 0,
+          curveFrom: stringifyPoint({ x: 0, y: 0 }),
+          curveTo: stringifyPoint({ x: 0, y: 0 }),
+          hasCurveFrom: false,
+          hasCurveTo: false,
+          curveMode: Sketch.CurveMode.Straight,
+          point: stringifyPoint({ x: 0, y: 0 }),
+        };
+
+        layer.points = [encodedPoint];
+
+        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedPointLists = { [layer.do_objectID]: [0] };
+      });
+    }
+    case 'addPointToPath': {
+      const [, point] = action;
+
+      const pointIndexPath = getIndexPathOfOpenShapeLayer(state);
+
+      if (!pointIndexPath) return state;
+
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          pointIndexPath.indexPath,
+        );
+
+        const boundingRect = getBoundingRect(
+          draft.sketch.pages[pageIndex],
+          AffineTransform.identity,
+          [layer.do_objectID],
+          {
+            clickThroughGroups: true,
+            includeHiddenLayers: false,
+            includeArtboardLayers: false,
+          },
+        );
+
+        if (!boundingRect || !layer || !Layers.isPointsLayer(layer)) return;
+
+        // Update all points by first transforming to the canvas's coordinate system
+        const decodedPoints = layer.points.map((curvePoint) =>
+          decodeCurvePoint(curvePoint, boundingRect),
+        );
+
+        const decodedPoint: DecodedCurvePoint = {
+          _class: 'curvePoint',
+          cornerRadius: 0,
+          curveFrom: { x: 0, y: 0 },
+          curveTo: { x: 0, y: 0 },
+          hasCurveFrom: false,
+          hasCurveTo: false,
+          curveMode: Sketch.CurveMode.Straight,
+          point,
+        };
+
+        const newDecodedPoints =
+          pointIndexPath.pointIndex === 0
+            ? [decodedPoint, ...decodedPoints]
+            : [...decodedPoints, decodedPoint];
+
+        layer.frame = {
+          ...layer.frame,
+          ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
+        };
+
+        layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
+          encodeCurvePoint(decodedCurvePoint, layer.frame),
+        );
+
+        draft.selectedPointLists[layer.do_objectID] =
+          pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+
+        return;
+      });
+    }
     case 'interaction': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
@@ -197,14 +324,14 @@ export function canvasReducer(
 
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
-
         switch (interactionState.type) {
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
 
-            //Selects the first point in the first selected layer and initializes a point list for each selected layer
+            // Selects the first point in the first selected layer and initializes a point list for each selected layer
             layerIndexPaths.forEach((layerIndex, index) => {
               const layer = Layers.access(page, layerIndex);
+
               if (Layers.isPointsLayer(layer)) {
                 draft.selectedPointLists[layer.do_objectID] =
                   index === 0 ? [0] : [];

@@ -20,12 +20,13 @@ import {
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-renderer';
 import { InteractionState, Layers, Rect } from 'noya-state';
-import { findIndexPath } from 'noya-state/src/layers';
+import { findIndexPath, PointsLayer } from 'noya-state/src/layers';
 import {
   getBoundingPoints,
   getBoundingRect,
   getCanvasTransform,
   getCurrentPage,
+  getIndexPathOfOpenShapeLayer,
   getIsEditingPath,
   getLayerTransformAtIndexPath,
   getScreenTransform,
@@ -40,8 +41,9 @@ import {
   SnappingPair,
 } from 'noya-state/src/snapping';
 import { groupBy } from 'noya-utils';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { getDragHandles } from '../canvas/selection';
 import AlignmentGuides from './AlignmentGuides';
 import EditablePath from './EditablePath';
@@ -59,6 +61,8 @@ import HoverOutline from './HoverOutline';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import MeasurementGuide from './MeasurementGuide';
+import PseudoPathLine from './PseudoPathLine';
+import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 
 const BoundingRect = memo(function BoundingRect({
@@ -154,7 +158,9 @@ export default memo(function SketchFileRenderer() {
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
-  const isEditingPath = getIsEditingPath(state.interactionState.type);
+  const isEditingPath =
+    getIsEditingPath(state.interactionState.type) ||
+    state.interactionState.type === 'drawingShapePath';
 
   const canvasRect = useMemo(
     () =>
@@ -396,7 +402,7 @@ export default memo(function SketchFileRenderer() {
         {nearestLayerGuides.map(
           (guides, i) =>
             guides && (
-              <>
+              <Fragment key={i}>
                 {guides.map((guide, j) => (
                   <ExtensionGuide
                     key={`extension-${i}-${j}`}
@@ -410,7 +416,7 @@ export default memo(function SketchFileRenderer() {
                     measurement={guide.measurement}
                   />
                 ))}
-              </>
+              </Fragment>
             ),
         )}
       </>
@@ -452,12 +458,57 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
+  const pseudoElementIndexPath = getIndexPathOfOpenShapeLayer(state);
+  const elementAtPoint =
+    (state.interactionState.type === 'drawingShapePath' ||
+      state.interactionState.type === 'editPath') &&
+    state.interactionState.point
+      ? getPathElementAtPoint(state, state.interactionState.point)
+      : undefined;
+
+  const pseudoElementLayer =
+    pseudoElementIndexPath && !elementAtPoint
+      ? (Layers.access(page, pseudoElementIndexPath.indexPath) as PointsLayer)
+      : undefined;
+
+  const pseudoElements = useMemo(() => {
+    let decodedCurvePoint: Primitives.DecodedCurvePoint | undefined = undefined;
+
+    if (pseudoElementIndexPath && pseudoElementLayer) {
+      decodedCurvePoint = Primitives.decodeCurvePoint(
+        pseudoElementLayer.points[pseudoElementIndexPath.pointIndex],
+        pseudoElementLayer.frame,
+      );
+    }
+
+    return (
+      <>
+        {state.interactionState.type === 'drawingShapePath' &&
+          state.interactionState.point && (
+            <PseudoPoint point={state.interactionState.point} />
+          )}
+        {decodedCurvePoint &&
+          state.interactionState.type === 'editPath' &&
+          state.interactionState.point && (
+            <>
+              <PseudoPathLine
+                point={state.interactionState.point}
+                decodedCurvePoint={decodedCurvePoint}
+              />
+              <PseudoPoint point={state.interactionState.point} />
+            </>
+          )}
+      </>
+    );
+  }, [pseudoElementIndexPath, pseudoElementLayer, state.interactionState]);
+
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
     const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
+
     return (
       <>
-        {selectedLayerIndexPaths.map((indexPath) => {
+        {selectedLayerIndexPaths.map((indexPath, index) => {
           const layer = Layers.access(page, indexPath);
 
           if (!Layers.isPointsLayer(layer)) return null;
@@ -472,7 +523,6 @@ export default memo(function SketchFileRenderer() {
               selectedIndexes={
                 state.selectedPointLists[layer.do_objectID] ?? []
               }
-              selectedControlPoint={state.selectedControlPoint}
             />
           );
         })}
@@ -486,7 +536,10 @@ export default memo(function SketchFileRenderer() {
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
         {isEditingPath ? (
-          editablePaths
+          <>
+            {editablePaths}
+            {pseudoElements}
+          </>
         ) : (
           <>
             {boundingRect && (
