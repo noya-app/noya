@@ -158,9 +158,7 @@ export default memo(function SketchFileRenderer() {
   const page = getCurrentPage(state);
   const screenTransform = getScreenTransform(canvasInsets);
   const canvasTransform = getCanvasTransform(state, canvasInsets);
-  const isEditingPath =
-    getIsEditingPath(state.interactionState.type) ||
-    state.interactionState.type === 'drawingShapePath';
+  const isEditingPath = getIsEditingPath(state.interactionState.type);
 
   const canvasRect = useMemo(
     () =>
@@ -458,49 +456,44 @@ export default memo(function SketchFileRenderer() {
     );
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
-  const pseudoElementIndexPath = getIndexPathOfOpenShapeLayer(state);
-  const elementAtPoint =
-    (state.interactionState.type === 'drawingShapePath' ||
-      state.interactionState.type === 'editPath') &&
-    state.interactionState.point
-      ? getPathElementAtPoint(state, state.interactionState.point)
-      : undefined;
+  const penToolPseudoElements = useMemo(() => {
+    if (
+      state.interactionState.type !== 'drawingShapePath' ||
+      !state.interactionState.point
+    )
+      return;
 
-  const pseudoElementLayer =
-    pseudoElementIndexPath && !elementAtPoint
-      ? (Layers.access(page, pseudoElementIndexPath.indexPath) as PointsLayer)
-      : undefined;
+    return <PseudoPoint point={state.interactionState.point} />;
+  }, [state.interactionState]);
 
-  const pseudoElements = useMemo(() => {
-    let decodedCurvePoint: Primitives.DecodedCurvePoint | undefined = undefined;
+  // The `useMemo` is just for organization here, since we have `state` in the deps
+  const editPathPseudoElements = useMemo(() => {
+    const indexPath = getIndexPathOfOpenShapeLayer(state);
 
-    if (pseudoElementIndexPath && pseudoElementLayer) {
-      decodedCurvePoint = Primitives.decodeCurvePoint(
-        pseudoElementLayer.points[pseudoElementIndexPath.pointIndex],
-        pseudoElementLayer.frame,
-      );
-    }
+    if (
+      !indexPath ||
+      state.interactionState.type !== 'editPath' ||
+      !state.interactionState.point ||
+      getPathElementAtPoint(state, state.interactionState.point)
+    )
+      return;
+
+    const layer = Layers.access(page, indexPath.indexPath) as PointsLayer;
+    const decodedCurvePoint = Primitives.decodeCurvePoint(
+      layer.points[indexPath.pointIndex],
+      layer.frame,
+    );
 
     return (
       <>
-        {state.interactionState.type === 'drawingShapePath' &&
-          state.interactionState.point && (
-            <PseudoPoint point={state.interactionState.point} />
-          )}
-        {decodedCurvePoint &&
-          state.interactionState.type === 'editPath' &&
-          state.interactionState.point && (
-            <>
-              <PseudoPathLine
-                point={state.interactionState.point}
-                decodedCurvePoint={decodedCurvePoint}
-              />
-              <PseudoPoint point={state.interactionState.point} />
-            </>
-          )}
+        <PseudoPathLine
+          point={state.interactionState.point}
+          decodedCurvePoint={decodedCurvePoint}
+        />
+        <PseudoPoint point={state.interactionState.point} />
       </>
     );
-  }, [pseudoElementIndexPath, pseudoElementLayer, state.interactionState]);
+  }, [page, state]);
 
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
@@ -535,10 +528,12 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {isEditingPath ? (
+        {state.interactionState.type === 'drawingShapePath' ? (
+          penToolPseudoElements
+        ) : isEditingPath ? (
           <>
             {editablePaths}
-            {pseudoElements}
+            {editPathPseudoElements}
           </>
         ) : (
           <>
