@@ -14,6 +14,7 @@ import { Layers, SelectedControlPoint, Selectors } from 'noya-state';
 import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { PointsLayer } from 'noya-state/src/layers';
 
 const CONTROL_POINT_SIZE = 2;
 
@@ -76,6 +77,30 @@ function EditablePathControlPoint({
   return <Rect rect={rect} paint={fill} />;
 }
 
+interface EditablePathOutlineProps {
+  layer: PointsLayer;
+  stroke: Paint;
+}
+
+function EditablePathOutline({ layer, stroke }: EditablePathOutlineProps) {
+  const CanvasKit = useCanvasKit();
+
+  const path = useMemo(() => {
+    const path = Primitives.path(
+      CanvasKit,
+      layer.points,
+      layer.frame,
+      layer.isClosed,
+    );
+
+    path.setFillType(CanvasKit.FillType.EvenOdd);
+
+    return path;
+  }, [CanvasKit, layer.frame, layer.isClosed, layer.points]);
+
+  return <Path path={path} paint={stroke} />;
+}
+
 interface Props {
   layer: Sketch.AnyLayer;
   transform: AffineTransform;
@@ -120,8 +145,7 @@ export default function EditablePath({
 
   return (
     <Group transform={localTransform}>
-      <Polyline points={points} paint={stroke} />
-
+      <EditablePathOutline layer={layer} stroke={stroke} />
       {decodeCurvePoints.map((point, index) => {
         if (point.curveMode === Sketch.CurveMode.Straight) return null;
         const points = [point.point, point.curveFrom];
@@ -138,7 +162,6 @@ export default function EditablePath({
           </Fragment>
         );
       })}
-
       {decodeCurvePoints.map((point, index) => {
         if (point.curveMode === Sketch.CurveMode.Straight) return null;
         const points = [point.point, point.curveTo];
@@ -155,7 +178,6 @@ export default function EditablePath({
           </Fragment>
         );
       })}
-
       {points.map((point, index) => {
         const isSelected = selectedIndexes.includes(index);
 
