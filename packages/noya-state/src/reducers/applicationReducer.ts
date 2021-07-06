@@ -103,6 +103,7 @@ export function applicationReducer(
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'interaction':
+    case 'insertSymbol':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
     case 'setLayerIsLocked':

@@ -70,6 +70,10 @@ function getCursorForDirection(
   }
 }
 
+function getBackgroundImageCursor() {
+  return 'crosshair';
+}
+
 function getPoint(event: MouseEvent): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
@@ -270,6 +274,9 @@ export default memo(function Canvas() {
             point,
           ]);
 
+          break;
+        }
+        case 'insertSymbol': {
           break;
         }
         case 'panMode': {
@@ -699,7 +706,9 @@ export default memo(function Canvas() {
       case 'insertOval':
       case 'insertRectangle':
       case 'insertText':
-        return 'crosshair';
+        return getBackgroundImageCursor();
+      case 'insertSymbol':
+        return 'default';
       case 'maybeScale':
       case 'scaling':
       case 'hoverHandle':

@@ -19,6 +19,7 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSymbols,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
@@ -29,7 +30,7 @@ import {
   getPossibleSnapLayers,
   getSnappingPairs,
 } from '../snapping';
-import { Point } from '../types';
+import { Point, UUID } from '../types';
 import { ApplicationState } from './applicationReducer';
 import {
   CompassDirection,
@@ -42,6 +43,7 @@ export type CanvasAction =
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
     ]
+  | [type: 'insertSymbol', symbolId: UUID]
   | [type: 'addDrawnLayer']
   | [
       type: 'interaction',
@@ -140,6 +142,36 @@ export function canvasReducer(
         draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
+      });
+    }
+    case 'insertSymbol': {
+      const [, symbolId] = action;
+      const symbol = getSymbols(state).find(
+        (symbol) => symbol.symbolID === symbolId,
+      );
+
+      return produce(state, (draft) => {
+        if (!symbol) return;
+
+        const pageIndex = getCurrentPageIndex(state);
+        const { scrollOrigin } = getCurrentPageMetadata(state);
+
+        const layer = produce(Models.symbolInstance, (layer) => {
+          layer.name = symbol.name;
+          layer.do_objectID = uuid();
+          layer.frame = {
+            ...symbol.frame,
+            x: -scrollOrigin.x + 50,
+            y: -scrollOrigin.y + 50,
+          };
+          layer.symbolID = symbol.symbolID;
+        });
+
+        draft.sketch.pages[pageIndex].layers.push(layer);
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'reset',
+        ]);
+        draft.selectedObjects = [layer.do_objectID];
       });
     }
     case 'interaction': {

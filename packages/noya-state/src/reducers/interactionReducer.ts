@@ -28,7 +28,7 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
+export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard' | 'symbol';
 
 export type InteractionAction =
   | ['reset']
@@ -74,6 +74,10 @@ export type InteractionState =
     }
   | {
       type: `insert${Capitalize<ShapeType>}`;
+    }
+  | {
+      type: 'insertSymbol';
+      symbol: UUID;
     }
   | {
       type: 'editPath';
@@ -147,7 +151,12 @@ export type InteractionType = InteractionState['type'];
 
 function createLayer(
   shapeType: ShapeType,
-): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
+):
+  | Sketch.Oval
+  | Sketch.Rectangle
+  | Sketch.Text
+  | Sketch.Artboard
+  | Sketch.SymbolInstance {
   switch (shapeType) {
     case 'oval':
       return Models.oval;
@@ -157,6 +166,8 @@ function createLayer(
       return Models.text;
     case 'artboard':
       return Models.artboard;
+    case 'symbol':
+      return Models.symbolInstance;
   }
 }
 
@@ -171,7 +182,8 @@ export function interactionReducer(
     case 'insertArtboard':
     case 'insertOval':
     case 'insertRectangle':
-    case 'insertText': {
+    case 'insertText':
+    case 'insertSymbol': {
       return { type: action[0] };
     }
     case 'hoverHandle': {
