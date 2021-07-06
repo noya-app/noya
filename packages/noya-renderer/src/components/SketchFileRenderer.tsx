@@ -43,6 +43,7 @@ import {
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { getDragHandles } from '../canvas/selection';
 import AlignmentGuides from './AlignmentGuides';
 import EditablePath from './EditablePath';
@@ -458,29 +459,43 @@ export default memo(function SketchFileRenderer() {
   }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
 
   const pseudoElementIndexPath = getIndexPathOfOpenShapeLayer(state);
+  const elementAtPoint =
+    (state.interactionState.type === 'drawingShapePath' ||
+      state.interactionState.type === 'editPath') &&
+    state.interactionState.point
+      ? getPathElementAtPoint(state, state.interactionState.point)
+      : undefined;
 
-  const pseudoElementLayer = pseudoElementIndexPath
-    ? (Layers.access(page, pseudoElementIndexPath.indexPath) as PointsLayer)
-    : undefined;
+  const pseudoElementLayer =
+    pseudoElementIndexPath && !elementAtPoint
+      ? (Layers.access(page, pseudoElementIndexPath.indexPath) as PointsLayer)
+      : undefined;
 
   const pseudoElements = useMemo(() => {
+    let decodedCurvePoint: Primitives.DecodedCurvePoint | undefined = undefined;
+
+    if (pseudoElementIndexPath && pseudoElementLayer) {
+      decodedCurvePoint = Primitives.decodeCurvePoint(
+        pseudoElementLayer.points[pseudoElementIndexPath.pointIndex],
+        pseudoElementLayer.frame,
+      );
+    }
+
     return (
       <>
         {state.interactionState.type === 'drawingShapePath' &&
-          state.interactionState.current && (
-            <PseudoPoint point={state.interactionState.current} />
+          state.interactionState.point && (
+            <PseudoPoint point={state.interactionState.point} />
           )}
-        {pseudoElementIndexPath &&
-          pseudoElementLayer &&
+        {decodedCurvePoint &&
           state.interactionState.type === 'editPath' &&
-          state.interactionState.current && (
+          state.interactionState.point && (
             <>
               <PseudoPathLine
-                point={state.interactionState.current}
-                pointIndex={pseudoElementIndexPath.pointIndex}
-                layer={pseudoElementLayer}
+                point={state.interactionState.point}
+                decodedCurvePoint={decodedCurvePoint}
               />
-              <PseudoPoint point={state.interactionState.current} />
+              <PseudoPoint point={state.interactionState.point} />
             </>
           )}
       </>

@@ -218,7 +218,7 @@ export function canvasReducer(
         const layer = Layers.access(
           draft.sketch.pages[pageIndex],
           pointIndexPath.indexPath,
-        ) as Layers.PointsLayer;
+        );
 
         const boundingRect = getBoundingRect(
           draft.sketch.pages[pageIndex],

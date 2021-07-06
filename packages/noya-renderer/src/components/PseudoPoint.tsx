@@ -1,14 +1,8 @@
 import { Point } from 'noya-geometry';
-import {
-  Path,
-  useDeletable,
-  useFill,
-  useReactCanvasKit,
-  useStroke,
-} from 'noya-react-canvaskit';
-import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
-import React, { useMemo } from 'react';
+import { useFill, useReactCanvasKit, useStroke } from 'noya-react-canvaskit';
+import React from 'react';
 import { useTheme } from 'styled-components';
+import { EditablePathPoint } from './EditablePath';
 
 interface PseudoPointProps {
   point: Point;
@@ -21,27 +15,5 @@ export default function PseudoPoint({ point }: PseudoPointProps) {
   const fill = useFill({ color: CanvasKit.WHITE });
   const stroke = useStroke({ color: primary });
 
-  const path = useMemo(() => {
-    const path = new CanvasKit.Path();
-
-    path.addOval(
-      CanvasKit.XYWHRect(
-        point.x - POINT_RADIUS,
-        point.y - POINT_RADIUS,
-        POINT_RADIUS * 2,
-        POINT_RADIUS * 2,
-      ),
-    );
-
-    return path;
-  }, [CanvasKit, point.x, point.y]);
-
-  useDeletable(path);
-
-  return (
-    <>
-      <Path path={path} paint={fill} />
-      <Path path={path} paint={stroke} />
-    </>
-  );
+  return <EditablePathPoint point={point} fill={fill} stroke={stroke} />;
 }

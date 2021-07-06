@@ -83,11 +83,11 @@ export type InteractionState =
     }
   | {
       type: 'editPath';
-      current?: Point;
+      point?: Point;
     }
   | {
       type: 'drawingShapePath';
-      current?: Point;
+      point?: Point;
     }
   | {
       type: 'drawing';
@@ -186,7 +186,7 @@ export function interactionReducer(
     case 'editPath':
     case 'resetEditPath': {
       const [, point] = action;
-      return { type: 'editPath', current: point };
+      return { type: 'editPath', point: point };
     }
 
     case 'insertArtboard':
@@ -223,7 +223,7 @@ export function interactionReducer(
 
       return {
         type,
-        current,
+        point: current,
       };
     }
     case 'startDrawing': {

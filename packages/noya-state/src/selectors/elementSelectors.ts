@@ -30,10 +30,10 @@ export const getCursorForEditPathMode = (
   if (getIndexPathOfOpenShapeLayer(state)) {
     return 'copy';
   }
-  return 'defalut';
+  return 'default';
 };
 
-function getPathElementAtPoint(
+export function getPathElementAtPoint(
   state: ApplicationState,
   point: Point,
 ): PathElement | undefined {

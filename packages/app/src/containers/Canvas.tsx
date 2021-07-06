@@ -727,7 +727,7 @@ export default memo(function Canvas() {
         }
         return 'default';
       case 'editPath': {
-        const { current } = state.interactionState;
+        const { point: current } = state.interactionState;
         const pointer = current
           ? getCursorForEditPathMode(state, current)
           : 'default';
