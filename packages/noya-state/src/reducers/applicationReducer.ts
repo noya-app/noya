@@ -115,6 +115,7 @@ export function applicationReducer(
     case 'setLayerWidth':
     case 'setLayerHeight':
     case 'setLayerRotation':
+    case 'setIsClosed':
     case 'setIsFlippedHorizontal':
     case 'setIsFlippedVertical':
     case 'setHasClippingMask':

@@ -111,6 +111,7 @@ export default memo(function Canvas() {
     'Shift-ArrowUp': () => nudge('Y', -10),
     'Shift-ArrowDown': () => nudge('Y', 10),
     Backspace: () => dispatch('deleteLayer', state.selectedObjects),
+    Escape: () => dispatch('interaction', ['reset']),
   });
 
   const insets = useMemo(
@@ -277,7 +278,7 @@ export default memo(function Canvas() {
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
           } else if (!(event.shiftKey || event.metaKey)) {
-            dispatch('selectPoint', undefined);
+            dispatch('interaction', ['reset']);
           }
           break;
         }
