@@ -10,9 +10,6 @@ import {
   Point,
 } from 'noya-geometry';
 import {
-  Group,
-  Polyline,
-  Rect as RCKRect,
   useColorFill,
   usePaint,
   useReactCanvasKit,
@@ -45,6 +42,7 @@ import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { getDragHandles } from '../canvas/selection';
+import { Rect as RCKRect, Group, Polyline } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';

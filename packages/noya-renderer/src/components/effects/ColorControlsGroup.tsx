@@ -1,8 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import { toDegrees } from 'noya-geometry';
-import { Group, useReactCanvasKit } from 'noya-react-canvaskit';
+import { useReactCanvasKit } from 'noya-react-canvaskit';
 import { memo, ReactNode, useMemo } from 'react';
+import { Group } from '../..';
 import {
   getBrightnessMatrix,
   getContrastMatrix,

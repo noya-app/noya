@@ -3,14 +3,12 @@ import * as CanvasKit from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,
-  Group,
-  Path,
   useDeletable,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
-import { Primitives } from 'noya-renderer';
+import { Primitives, Path, Group } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { Rect } from '../../../../noya-state/src';
 import { useSketchImage } from '../../ImageCache';

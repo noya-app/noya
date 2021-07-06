@@ -18,7 +18,9 @@ export class AffineTransform implements Transformable {
   m11: number;
   m12: number;
 
-  constructor([m00, m01, m02, m10, m11, m12]: number[] = [0, 0, 0, 0, 0, 0]) {
+  constructor(
+    [m00, m01, m02, m10, m11, m12]: Iterable<number> = [0, 0, 0, 0, 0, 0],
+  ) {
     this.m00 = m00;
     this.m01 = m01;
     this.m02 = m02;

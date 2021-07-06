@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Group, useReactCanvasKit } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
+import { useReactCanvasKit } from 'noya-react-canvaskit';
+import { Group, Primitives } from 'noya-renderer';
 import React, { memo, ReactNode, useMemo } from 'react';
 
 interface Props {

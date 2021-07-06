@@ -2,14 +2,13 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { AffineTransform } from 'noya-geometry';
 import {
   ClipProps,
-  Group,
   useDeletable,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import { PageLayer } from 'noya-state';
 import { chunkBy } from 'noya-utils';
 import { memo, ReactNode, useMemo } from 'react';
-import { Primitives } from '../..';
+import { Group, Primitives } from '../..';
 import SketchLayer from './SketchLayer';
 
 interface Props {

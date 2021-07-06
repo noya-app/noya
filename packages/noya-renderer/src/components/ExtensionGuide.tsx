@@ -1,6 +1,7 @@
 import { Point } from 'noya-geometry';
-import { Polyline, useReactCanvasKit } from 'noya-react-canvaskit';
+import { useReactCanvasKit } from 'noya-react-canvaskit';
 import React from 'react';
+import { Polyline } from '..';
 
 interface Props {
   points: Point[];

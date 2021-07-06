@@ -1,3 +1,13 @@
+// Components
+import Rect from './components/Rect';
+import Path from './components/Path';
+import Group from './components/Group';
+import Image from './components/Image';
+import Text from './components/Text';
+import Polyline from './components/Polyline';
+
+export const Components = { Rect, Path, Group, Image, Text, Polyline };
+
 // Core
 export * from './types';
 export { render, unmount } from './reconciler';
@@ -5,14 +15,6 @@ export { render, unmount } from './reconciler';
 // Contexts
 export { useReactCanvasKit } from './contexts/ReactCanvasKitContext';
 export { useFontManager } from './contexts/FontManagerContext';
-
-// Components
-export { default as Rect } from './components/Rect';
-export { default as Path } from './components/Path';
-export { default as Group } from './components/Group';
-export { default as Image } from './components/Image';
-export { default as Text } from './components/Text';
-export { default as Polyline } from './components/Polyline';
 
 // Hooks
 export { default as useBlurMaskFilter } from './hooks/useBlurMaskFilter';
