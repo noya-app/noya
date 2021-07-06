@@ -183,6 +183,8 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
       return Models.symbolInstance;
     case 'shapePath':
       return Models.shapePath;
+    case 'symbol':
+      return Models.symbolInstance;
   }
 }
 

@@ -126,6 +126,7 @@ const ToolbarContent = memo(function ToolbarContent({
     },
     [dispatch, isInsertSymbol],
   );
+
   const handleEnablePenTool = useCallback(() => {
     if (isCreatingPath) {
       dispatch('interaction', ['reset']);
