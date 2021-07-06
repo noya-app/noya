@@ -1,10 +1,11 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit, Image } from 'canvaskit';
 import { Theme } from 'noya-designsystem';
-import { render, unmount } from 'noya-react-canvaskit';
+import { Components, render, unmount } from 'noya-react-canvaskit';
 import { WorkspaceState } from 'noya-state';
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
+import { ComponentsProvider } from 'noya-renderer';
 import { StateProvider } from '../contexts/ApplicationStateContext';
 import { ImageCacheProvider } from 'noya-renderer';
 
@@ -35,7 +36,11 @@ export function renderImageFromCanvas(
     const root = (
       <ThemeProvider theme={theme}>
         <ImageCacheProvider>
-          <StateProvider state={state}>{renderContent()}</StateProvider>
+          <StateProvider state={state}>
+            <ComponentsProvider value={Components}>
+              {renderContent()}
+            </ComponentsProvider>
+          </StateProvider>
         </ImageCacheProvider>
       </ThemeProvider>
     );

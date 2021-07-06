@@ -11,4 +11,10 @@ export * from './groupBy';
 export * from './getIncrementedName';
 export * from './interpolate';
 export * from './rotate';
+export * from './base64';
+export * from './fileType';
 export * as delimitedPath from './delimitedPath';
+
+// Consider moving these to a more React-specific package
+export * from './PromiseState';
+export * from './SuspendedValue';

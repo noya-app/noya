@@ -3,13 +3,13 @@ import { Point } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useReactCanvasKit } from '../contexts/ReactCanvasKitContext';
 import useDeletable from '../hooks/useDeletable';
-import usePaint, { PaintParameters } from '../hooks/usePaint';
+import usePaint from '../hooks/usePaint';
 import makePath from '../utils/makePath';
 import RCKPath from './Path';
 
 interface PolylineProps {
   points: Point[];
-  paint: Paint | PaintParameters;
+  paint: Paint;
 }
 
 export default memo(function Polyline(props: PolylineProps) {

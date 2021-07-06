@@ -2,11 +2,11 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { sketchColorToRgbaString } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import {
-  Path,
   useColorFill,
   useDeletable,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
+import { Path } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import CanvasViewer from '../../containers/CanvasViewer';
 

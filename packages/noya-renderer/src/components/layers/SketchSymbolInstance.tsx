@@ -1,13 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import produce from 'immer';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
+import produce from 'immer';
 import { AffineTransform } from 'noya-geometry';
-import { Group, Rect, useFill, useReactCanvasKit } from 'noya-react-canvaskit';
+import { useFill, useReactCanvasKit } from 'noya-react-canvaskit';
 import { Layers, Overrides, PageLayer } from 'noya-state';
 import { memo, useMemo } from 'react';
-import { Primitives } from '../..';
-import SketchGroup from './SketchGroup';
+import { Group, Primitives, Rect } from '../..';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
+import SketchGroup from './SketchGroup';
 
 interface SymbolProps {
   layer: Sketch.SymbolInstance;

@@ -1,13 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { getRectCornerPoints } from 'noya-geometry';
-import {
-  Group,
-  Image,
-  makePath,
-  useReactCanvasKit,
-} from 'noya-react-canvaskit';
-import { Primitives } from 'noya-renderer';
+import { makePath, useReactCanvasKit } from 'noya-react-canvaskit';
+import { Group, Image, Primitives } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
 import ColorControlsGroup from '../effects/ColorControlsGroup';
 import DropShadowGroup from '../effects/DropShadowGroup';

@@ -1,8 +1,8 @@
 import { Point } from 'noya-geometry';
-import { Polyline, useStroke } from 'noya-react-canvaskit';
+import { useStroke } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Primitives } from '..';
+import { Polyline, Primitives } from '..';
 
 interface EditablePathPointProps {
   point: Point;

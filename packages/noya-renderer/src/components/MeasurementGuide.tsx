@@ -1,14 +1,12 @@
 import { Point } from 'noya-geometry';
 import {
-  Polyline,
-  Rect as RCKRect,
-  Text,
   useColorFill,
   useFontManager,
   usePaint,
   useReactCanvasKit,
 } from 'noya-react-canvaskit';
 import React, { useMemo } from 'react';
+import { Rect, Text, Polyline } from '..';
 import { DistanceMeasurementProps } from './guides';
 
 function DistanceMeasurement({
@@ -65,7 +63,7 @@ function DistanceMeasurement({
 
   return (
     <>
-      <RCKRect rect={bgRect} paint={backgroundFill} />
+      <Rect rect={bgRect} paint={backgroundFill} />
       <Text rect={labelRect} paragraph={paragraph} />
     </>
   );
