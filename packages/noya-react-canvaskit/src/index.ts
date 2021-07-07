@@ -8,9 +8,6 @@ import Text from './components/Text';
 
 export const Components = { Rect, Path, Group, Image, Text, Polyline };
 
-// Core
-// Contexts
-export { useFontManager } from './contexts/FontManagerContext';
 // Hooks
 export { default as useBlurMaskFilter } from './hooks/useBlurMaskFilter';
 export { default as useColor } from './hooks/useColor';
@@ -22,5 +19,6 @@ export { default as useStableColor } from './hooks/useStable4ElementArray';
 export * from './hooks/useStroke';
 export { render, unmount } from './reconciler';
 export * from './types';
+
 // Utils
 export { default as makePath } from './utils/makePath';

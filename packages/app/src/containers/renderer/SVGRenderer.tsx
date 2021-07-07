@@ -1,7 +1,6 @@
 import { Paint } from 'canvaskit';
 import { AffineTransform, Size } from 'noya-geometry';
 import { ClipProps } from 'noya-react-canvaskit';
-import { FontManagerProvider } from 'noya-react-canvaskit/src/contexts/FontManagerContext';
 import {
   ComponentsContextValue,
   ComponentsProvider,
@@ -286,15 +285,12 @@ interface Props {
 
 export default memo(function SVGRenderer({ size }: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const fontMgr = useMemo(() => ({}), []); // TODO: Real font manager
 
   return (
     <SVGComponent ref={svgRef} width={size.width} height={size.height}>
       <DefinitionsProvider>
         <ComponentsProvider value={SVGComponents}>
-          <FontManagerProvider value={fontMgr as any}>
-            <SketchFileRenderer />
-          </FontManagerProvider>
+          <SketchFileRenderer />
         </ComponentsProvider>
       </DefinitionsProvider>
     </SVGComponent>

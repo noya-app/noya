@@ -1,7 +1,7 @@
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
-import { useColorFill, useFontManager } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { useColorFill } from 'noya-react-canvaskit';
+import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { Point, Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';

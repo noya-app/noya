@@ -7,6 +7,7 @@ import type {
   ColorIntArray,
   ColorSpace,
   EmulatedCanvas2D,
+  FontMgr,
   GrDirectContext,
   Image,
   ImageInfo,
@@ -261,7 +262,14 @@ export const SVGKit: CanvasKit = {
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
   ParagraphBuilder: JSParagraphBuilder,
   ColorFilter: 0 as any,
-  FontMgr: {} as any,
+  FontMgr: {
+    FromData(...buffers: ArrayBuffer[]): FontMgr | null {
+      return {} as FontMgr;
+    },
+    RefDefault(): FontMgr {
+      return {} as FontMgr;
+    },
+  },
   ImageFilter: 0 as any,
   MaskFilter: JSMaskFilter,
   PathEffect: JSPathEffect,

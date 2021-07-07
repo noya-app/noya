@@ -3,6 +3,7 @@ import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
   ComponentsProvider,
+  FontManagerProvider,
   ImageCacheProvider,
   SketchFileRenderer,
   useCanvasKit,
@@ -66,9 +67,11 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
         <ThemeProvider theme={theme}>
           <StateProvider state={workspaceState}>
             <ImageCacheProvider>
-              <ComponentsProvider value={Components}>
-                <SketchFileRenderer />
-              </ComponentsProvider>
+              <FontManagerProvider>
+                <ComponentsProvider value={Components}>
+                  <SketchFileRenderer />
+                </ComponentsProvider>
+              </FontManagerProvider>
             </ImageCacheProvider>
           </StateProvider>
         </ThemeProvider>,

@@ -7,7 +7,7 @@ import {
 } from 'noya-state';
 import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { ImageCacheProvider } from 'noya-renderer';
+import { FontManagerProvider, ImageCacheProvider } from 'noya-renderer';
 import Workspace from './containers/Workspace';
 import { StateProvider } from './contexts/ApplicationStateContext';
 import { useCanvasKit } from 'noya-renderer';
@@ -67,7 +67,9 @@ export default function App() {
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
       <ImageCacheProvider>
-        <Workspace />
+        <FontManagerProvider>
+          <Workspace />
+        </FontManagerProvider>
       </ImageCacheProvider>
     </StateProvider>
   );

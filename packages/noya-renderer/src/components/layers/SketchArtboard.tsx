@@ -4,7 +4,6 @@ import {
   ClipProps,
   useBlurMaskFilter,
   useDeletable,
-  useFontManager,
   usePaint,
 } from 'noya-react-canvaskit';
 import {
@@ -13,6 +12,7 @@ import {
   Rect as RCKRect,
   Text,
   useCanvasKit,
+  useFontManager,
 } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
