@@ -1,4 +1,27 @@
+import { invert } from '.';
 import { isEqualArray } from './internal/isEqual';
+
+const FILE_TYPE_TO_EXTENSION = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+  'image/svg+xml': 'svg',
+  'application/pdf': 'pdf',
+  'application/zip': 'zip',
+} as const;
+
+const FILE_EXTENSION_TO_TYPE = invert(FILE_TYPE_TO_EXTENSION);
+
+export type FileType = keyof typeof FILE_TYPE_TO_EXTENSION;
+export type FileExtension = typeof FILE_TYPE_TO_EXTENSION[FileType];
+
+export function getFileExtensionForType(type: FileType) {
+  return FILE_TYPE_TO_EXTENSION[type];
+}
+
+export function getFileTypeForExtension(type: FileExtension) {
+  return FILE_EXTENSION_TO_TYPE[type];
+}
 
 function startsWith(
   arrayBuffer: ArrayBuffer,
@@ -37,16 +60,9 @@ function isPDF(arrayBuffer: ArrayBuffer) {
   return startsWith(arrayBuffer, [37, 80, 68, 70]);
 }
 
-export const FILE_EXTENSION = {
-  'image/png': 'png',
-  'image/jpeg': 'jpg',
-  'image/webp': 'webp',
-  'application/pdf': 'pdf',
-} as const;
-
 export function detectFileType(
   arrayBuffer: ArrayBuffer,
-): keyof typeof FILE_EXTENSION | undefined {
+): keyof typeof FILE_TYPE_TO_EXTENSION | undefined {
   if (isPNG(arrayBuffer)) {
     return 'image/png';
   } else if (isJPG(arrayBuffer)) {

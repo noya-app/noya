@@ -19,7 +19,7 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
-const SUPPORTED_EXPORT_FORMAT_OPTIONS: Sketch.ExportFileFormat[] = [
+export const SUPPORTED_EXPORT_FORMAT_OPTIONS: Sketch.ExportFileFormat[] = [
   Sketch.ExportFileFormat.PNG,
   Sketch.ExportFileFormat.JPG,
   Sketch.ExportFileFormat.WEBP,

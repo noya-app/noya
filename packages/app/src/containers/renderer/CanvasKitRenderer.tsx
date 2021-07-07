@@ -2,6 +2,7 @@ import type { Surface } from 'canvaskit';
 import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
+  CanvasKitProvider,
   ComponentsProvider,
   FontManagerProvider,
   ImageCacheProvider,
@@ -64,17 +65,19 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
 
     try {
       render(
-        <ThemeProvider theme={theme}>
-          <StateProvider state={workspaceState}>
-            <ImageCacheProvider>
-              <FontManagerProvider>
-                <ComponentsProvider value={Components}>
-                  <SketchFileRenderer />
-                </ComponentsProvider>
-              </FontManagerProvider>
-            </ImageCacheProvider>
-          </StateProvider>
-        </ThemeProvider>,
+        <CanvasKitProvider>
+          <ThemeProvider theme={theme}>
+            <StateProvider state={workspaceState}>
+              <ImageCacheProvider>
+                <FontManagerProvider>
+                  <ComponentsProvider value={Components}>
+                    <SketchFileRenderer />
+                  </ComponentsProvider>
+                </FontManagerProvider>
+              </ImageCacheProvider>
+            </StateProvider>
+          </ThemeProvider>
+        </CanvasKitProvider>,
         surface,
         CanvasKit,
       );

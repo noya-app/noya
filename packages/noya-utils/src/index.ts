@@ -11,7 +11,9 @@ export * from './groupBy';
 export * from './getIncrementedName';
 export * from './interpolate';
 export * from './rotate';
+export * from './invert';
 export * from './base64';
+export * from './utf16';
 export * from './fileType';
 export * as delimitedPath from './delimitedPath';
 

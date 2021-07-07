@@ -7,7 +7,11 @@ import {
 } from 'noya-state';
 import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import { FontManagerProvider, ImageCacheProvider } from 'noya-renderer';
+import {
+  CanvasKitProvider,
+  FontManagerProvider,
+  ImageCacheProvider,
+} from 'noya-renderer';
 import Workspace from './containers/Workspace';
 import { StateProvider } from './contexts/ApplicationStateContext';
 import { useCanvasKit } from 'noya-renderer';
@@ -17,12 +21,13 @@ type Action =
   | { type: 'set'; value: SketchFile }
   | { type: 'update'; value: WorkspaceAction };
 
-export default function App() {
+function Contents() {
+  const CanvasKit = useCanvasKit();
+
   const sketchFileData = useResource<ArrayBuffer>(
     '/Demo.sketch',
     'arrayBuffer',
   );
-  const CanvasKit = useCanvasKit();
 
   const reducer = useMemo(
     () =>
@@ -72,5 +77,13 @@ export default function App() {
         </FontManagerProvider>
       </ImageCacheProvider>
     </StateProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <CanvasKitProvider>
+      <Contents />
+    </CanvasKitProvider>
   );
 }

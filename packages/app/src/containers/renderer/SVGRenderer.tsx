@@ -4,10 +4,9 @@ import { ClipProps } from 'noya-react-canvaskit';
 import {
   ComponentsContextValue,
   ComponentsProvider,
-  SketchFileRenderer,
   useCanvasKit,
 } from 'noya-renderer';
-import { Base64, detectFileType, FILE_EXTENSION } from 'noya-utils';
+import { Base64, detectFileType, getFileExtensionForType } from 'noya-utils';
 import {
   createContext,
   Fragment,
@@ -17,7 +16,6 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import styled from 'styled-components';
@@ -263,10 +261,12 @@ const Image: ComponentsContextValue['Image'] = memo(
 
       if (!fileType) return;
 
-      return `data:${FILE_EXTENSION[fileType]};base64,${Base64.encode(image)}`;
+      return `data:${getFileExtensionForType(fileType)};base64,${Base64.encode(
+        image,
+      )}`;
     }, [image]);
 
-    return <image {...getRectProps(rect)} fill="pink" href={encodedImage} />;
+    return <image {...getRectProps(rect)} href={encodedImage} />;
   },
 );
 
@@ -281,16 +281,19 @@ const SVGComponents = {
 
 interface Props {
   size: Size;
+  children: ReactNode;
 }
 
-export default memo(function SVGRenderer({ size }: Props) {
-  const svgRef = useRef<SVGSVGElement | null>(null);
-
+export default memo(function SVGRenderer({ size, children }: Props) {
   return (
-    <SVGComponent ref={svgRef} width={size.width} height={size.height}>
+    <SVGComponent
+      width={size.width}
+      height={size.height}
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <DefinitionsProvider>
         <ComponentsProvider value={SVGComponents}>
-          <SketchFileRenderer />
+          {children}
         </ComponentsProvider>
       </DefinitionsProvider>
     </SVGComponent>

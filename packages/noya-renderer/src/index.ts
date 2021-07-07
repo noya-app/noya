@@ -10,7 +10,7 @@ export { default as SketchLayer } from './components/layers/SketchLayer';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
 export * from './FontManagerContext';
-export { default as useCanvasKit } from './hooks/useCanvasKit';
+export * from './hooks/useCanvasKit';
 export { ImageCacheProvider } from './ImageCache';
 export type { Context };
 export { uuid, Primitives };

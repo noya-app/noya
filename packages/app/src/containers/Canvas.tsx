@@ -709,7 +709,9 @@ export default memo(function Canvas() {
       >
         <InsetContainer insets={insets}>
           {canvasSizeWithInsets && (
-            // <SVGRenderer size={canvasSizeWithInsets} />
+            // <SVGRenderer size={canvasSizeWithInsets}>
+            //   <SketchFileRenderer />
+            // </SVGRenderer>
             <CanvasKitRenderer size={canvasSizeWithInsets} />
           )}
         </InsetContainer>
