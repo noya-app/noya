@@ -15,8 +15,15 @@ import type {
   VerbList,
   WeightList,
 } from 'canvaskit';
+import {
+  createRectFromBounds,
+  getRectCornerPoints,
+  getRectEdgeMidPoints,
+} from 'noya-geometry';
 import { JSEmbindObject } from './Embind';
 import { SVGKit } from './SVGKit';
+
+const ROOT_2_OVER_2 = Math.sqrt(2) / 2;
 
 export function createJSPath(PathKit: any) {
   class JSPath extends JSEmbindObject implements Path {
@@ -29,8 +36,31 @@ export function createJSPath(PathKit: any) {
     ): Path {
       throw new Error('Not implemented');
     }
-    addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): Path {
-      throw new Error('Not implemented');
+    addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): JSPath {
+      const [minX, minY, maxX, maxY] = oval as Float32Array | number[];
+      const rect = createRectFromBounds({ minX, minY, maxX, maxY });
+
+      const rectPoints = getRectCornerPoints(rect);
+      const ovalPoints = getRectEdgeMidPoints(rect);
+
+      this.moveTo(
+        ovalPoints[ovalPoints.length - 1].x,
+        ovalPoints[ovalPoints.length - 1].y,
+      );
+
+      for (let i = 0; i < ovalPoints.length; i++) {
+        this.conicTo(
+          rectPoints[i].x,
+          rectPoints[i].y,
+          ovalPoints[i].x,
+          ovalPoints[i].y,
+          ROOT_2_OVER_2,
+        );
+      }
+
+      this.close();
+
+      return this;
     }
     addPath(...args: any[]): Path | null {
       throw new Error('Not implemented');
@@ -86,8 +116,9 @@ export function createJSPath(PathKit: any) {
       x2: number,
       y2: number,
       radius: number,
-    ): Path {
-      throw new Error('Not implemented');
+    ): JSPath {
+      this._path.arcTo(x1, y1, x2, y2, radius);
+      return this;
     }
     close(): Path {
       return this._path.close();
@@ -98,7 +129,7 @@ export function createJSPath(PathKit: any) {
       return SVGKit.LTRBRect(fLeft, fTop, fRight, fBottom);
     }
     conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path {
-      throw new Error('Not implemented');
+      return this._path.conicTo(x1, y1, x2, y2, w);
     }
     contains(x: number, y: number): boolean {
       return this._path.contains(x, y);
