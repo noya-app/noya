@@ -5,6 +5,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { uuid } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { IndexPath } from 'tree-visit';
+import { KeyModifiers } from 'noya-keymap';
 import * as Layers from '../layers';
 import {
   findPageLayerIndexPaths,
@@ -55,6 +56,7 @@ export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
+  keyModifiers: KeyModifiers;
   selectedPage: string;
   selectedObjects: string[];
   selectedPointLists: SelectedPointLists;
@@ -65,6 +67,7 @@ export type ApplicationState = {
 
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
+  | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -83,6 +86,11 @@ export function applicationReducer(
   CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setKeyModifier':
+      const [, name, value] = action;
+      return produce(state, (draft) => {
+        draft.keyModifiers[name] = value;
+      });
     case 'setTab': {
       const [, value] = action;
       return produce(state, (draft) => {
@@ -334,6 +342,12 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
     interactionState: createInitialInteractionState(),
+    keyModifiers: {
+      altKey: false,
+      ctrlKey: false,
+      metaKey: false,
+      shiftKey: false,
+    },
     selectedPage: sketch.pages[0].do_objectID,
     selectedObjects: [],
     selectedPointLists: {},

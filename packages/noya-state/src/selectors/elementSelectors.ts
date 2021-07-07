@@ -22,6 +22,8 @@ type PathElement =
     };
 
 export function canClosePath(state: ApplicationState, element: SelectedPoint) {
+  if (state.keyModifiers.shiftKey) return false;
+
   const [layerId, index] = element;
 
   const layer = Layers.find(
@@ -55,7 +57,7 @@ export const getCursorForEditPathMode = (
   if (elementAtPoint) {
     return elementAtPoint.type === 'point' &&
       canClosePath(state, elementAtPoint.value)
-      ? 'no-drop'
+      ? 'pointer'
       : 'move';
   } else if (getIndexPathOfOpenShapeLayer(state)) {
     return 'crosshair';

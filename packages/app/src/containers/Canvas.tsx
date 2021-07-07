@@ -123,6 +123,11 @@ export default memo(function Canvas() {
     'Shift-ArrowDown': () => nudge('Y', 10),
     Backspace: () => dispatch('deleteLayer', state.selectedObjects),
     Escape: () => dispatch('interaction', ['reset']),
+    Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
+  });
+
+  useKeyboardShortcuts('keyup', {
+    Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
   });
 
   const insets = useMemo(
@@ -230,11 +235,8 @@ export default memo(function Canvas() {
           dispatch('interaction', ['editPath']);
           break;
         }
-        case 'editPath':
-        case 'movingControlPoint':
-        case 'movingPoint':
-        case 'maybeMoveControlPoint':
-        case 'maybeMovePoint': {
+        case 'editPath': {
+          const { shiftKey } = state.keyModifiers;
           let selectedPoint: SelectedPoint | undefined = undefined;
           let selectedControlPoint: SelectedControlPoint | undefined;
 
@@ -247,6 +249,7 @@ export default memo(function Canvas() {
               includeHiddenLayers: false,
             },
           );
+
           getSelectedLayers(state)
             .filter(Layers.isPointsLayer)
             .forEach((layer) => {
@@ -277,21 +280,25 @@ export default memo(function Canvas() {
           );
 
           if (selectedPoint) {
-            const alreadySelected = state.selectedPointLists[
-              selectedPoint[0]
-            ]?.includes(selectedPoint[1]);
-            dispatch(
-              'selectPoint',
-              selectedPoint,
-              event.shiftKey || event.metaKey
-                ? alreadySelected
-                  ? 'difference'
-                  : 'intersection'
-                : 'replace',
-            );
-            dispatch('interaction', ['maybeMovePoint', point]);
-            const canClose = canClosePath(state, selectedPoint);
-            if (canClose && !event.shiftKey) dispatch('setIsClosed', true);
+            if (canClosePath(state, selectedPoint) && !shiftKey) {
+              dispatch('setIsClosed', true);
+              dispatch('selectPoint', selectedPoint);
+            } else {
+              const alreadySelected = state.selectedPointLists[
+                selectedPoint[0]
+              ]?.includes(selectedPoint[1]);
+
+              dispatch(
+                'selectPoint',
+                selectedPoint,
+                shiftKey || event.metaKey
+                  ? alreadySelected
+                    ? 'difference'
+                    : 'intersection'
+                  : 'replace',
+              );
+              dispatch('interaction', ['maybeMovePoint', point]);
+            }
           } else if (selectedControlPoint) {
             dispatch(
               'selectControlPoint',
@@ -302,7 +309,7 @@ export default memo(function Canvas() {
             dispatch('interaction', ['maybeMoveControlPoint', point]);
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
-          } else if (!(event.shiftKey || event.metaKey)) {
+          } else if (!(shiftKey || event.metaKey)) {
             dispatch('interaction', ['reset']);
           }
           break;
