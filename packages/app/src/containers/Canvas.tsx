@@ -290,11 +290,8 @@ export default memo(function Canvas() {
                 : 'replace',
             );
             dispatch('interaction', ['maybeMovePoint', point]);
-            const canClose = canClosePath(state, {
-              type: 'point',
-              value: selectedPoint,
-            });
-            if (canClose) dispatch('setIsClosed', true);
+            const canClose = canClosePath(state, selectedPoint);
+            if (canClose && !event.shiftKey) dispatch('setIsClosed', true);
           } else if (selectedControlPoint) {
             dispatch(
               'selectControlPoint',
