@@ -1,5 +1,6 @@
 import { CanvasKit } from 'canvaskit';
 import { VirtualConsole } from 'jsdom';
+import { loadCanvasKit } from 'noya-renderer';
 import { AffineTransform } from '../AffineTransform';
 import { toRadians } from '../utils';
 
@@ -10,7 +11,7 @@ const originalVirtualConsole: VirtualConsole = global._virtualConsole;
 beforeAll(async () => {
   global._virtualConsole = new VirtualConsole();
 
-  ck = await global.loadCanvasKit();
+  ck = await loadCanvasKit();
 });
 
 afterAll(() => {

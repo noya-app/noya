@@ -1,9 +1,9 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { VirtualConsole } from 'jsdom';
+import { loadCanvasKit } from 'noya-renderer';
 import loadSVGKit from '..';
 
 let CanvasKit: CanvasKitType;
-let pk: any;
 let SVGKit: CanvasKitType;
 
 const originalVirtualConsole: VirtualConsole = global._virtualConsole;
@@ -11,9 +11,8 @@ const originalVirtualConsole: VirtualConsole = global._virtualConsole;
 beforeAll(async () => {
   global._virtualConsole = new VirtualConsole();
 
-  CanvasKit = await global.loadCanvasKit();
-  pk = await global.loadPathKit();
-  SVGKit = await loadSVGKit(pk);
+  CanvasKit = await loadCanvasKit();
+  SVGKit = await loadSVGKit();
 });
 
 afterAll(() => {

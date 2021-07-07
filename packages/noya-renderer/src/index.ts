@@ -1,5 +1,5 @@
-import type { Paint, PaintStyle } from 'canvaskit';
-import { CanvasKitInit } from 'canvaskit';
+import { CanvasKitInit, Paint, PaintStyle } from 'canvaskit';
+import { PATH_TO_WASM } from 'noya-utils';
 import { v4 as uuid } from 'uuid';
 import { Context } from './context';
 import * as Primitives from './primitives';
@@ -31,7 +31,7 @@ export function loadCanvasKit() {
 
   loadingPromise = new Promise(async (resolve) => {
     const CanvasKit = await CanvasKitInit({
-      locateFile: (file: string) => '/wasm/' + file,
+      locateFile: (file: string) => PATH_TO_WASM + file,
     });
 
     const _setStyle = CanvasKit.Paint.prototype.setStyle;

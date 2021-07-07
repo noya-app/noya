@@ -38,12 +38,10 @@ export function renderImageFromCanvas(
   format: 'bytes' | Sketch.ExportFileFormat,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
-  const backend = format === Sketch.ExportFileFormat.SVG ? 'svg' : 'canvaskit';
-
-  switch (backend) {
-    case 'svg': {
+  switch (format) {
+    case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider backend={backend}>
+        <CanvasKitProvider>
           <ThemeProvider theme={theme}>
             <StateProvider state={state}>
               <ImageCacheProvider>
@@ -62,7 +60,7 @@ export function renderImageFromCanvas(
         UTF16.toUTF8(`<?xml version="1.0" encoding="UTF-8"?>\n` + svg),
       );
     }
-    case 'canvaskit': {
+    default: {
       const surface = CanvasKit.MakeSurface(width, height);
 
       if (!surface) {
@@ -72,7 +70,7 @@ export function renderImageFromCanvas(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider backend={backend}>
+          <CanvasKitProvider>
             <ThemeProvider theme={theme}>
               <StateProvider state={state}>
                 <ImageCacheProvider>

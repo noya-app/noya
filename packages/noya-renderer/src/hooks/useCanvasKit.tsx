@@ -1,5 +1,5 @@
 import type { CanvasKit } from 'canvaskit';
-import { loadCanvasKit } from '..';
+import { loadCanvasKit } from 'noya-renderer';
 import { SuspendedValue } from 'noya-utils';
 import { createContext, memo, useContext, ReactNode } from 'react';
 // import loadSVGKit from 'noya-svgkit';
@@ -9,14 +9,10 @@ let suspendedCanvasKit = new SuspendedValue<CanvasKit>(loadCanvasKit());
 
 const CanvasKitContext = createContext<CanvasKit | undefined>(undefined);
 
-type CanvasKitBackend = 'canvaskit' | 'svg';
-
 export const CanvasKitProvider = memo(function CanvasKitProvider({
   children,
-  backend = 'canvaskit',
 }: {
   children?: ReactNode;
-  backend?: CanvasKitBackend;
 }) {
   const CanvasKit = suspendedCanvasKit.getValueOrThrow();
 
