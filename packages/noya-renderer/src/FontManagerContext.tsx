@@ -1,19 +1,15 @@
 import { FontMgr } from 'canvaskit';
-import {
-  createContext,
-  memo,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-} from 'react';
 import { useCanvasKit } from 'noya-renderer';
-
-let cachedFontManager: FontMgr | undefined;
-let isLoading = false;
+import { SuspendedValue } from 'noya-utils';
+import { createContext, memo, ReactNode, useContext, useMemo } from 'react';
 
 const FontManagerContext = createContext<FontMgr | undefined>(undefined);
+
+const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
+  fetch(
+    'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
+  ).then((resp) => resp.arrayBuffer()),
+);
 
 export const FontManagerProvider = memo(function FontManagerProvider({
   children,
@@ -21,31 +17,13 @@ export const FontManagerProvider = memo(function FontManagerProvider({
   children?: ReactNode;
 }) {
   const CanvasKit = useCanvasKit();
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
+  const defaultFont = suspendedDefaultFont.getValueOrThrow();
   const fontManager = useMemo(
-    () => cachedFontManager ?? CanvasKit.FontMgr.RefDefault(),
-    [CanvasKit.FontMgr],
+    () =>
+      CanvasKit.FontMgr.FromData(defaultFont) ?? CanvasKit.FontMgr.RefDefault(),
+    [CanvasKit.FontMgr, defaultFont],
   );
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    isLoading = true;
-
-    fetch(
-      'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
-    )
-      .then((resp) => resp.arrayBuffer())
-      .then((arrayBuffer) => {
-        const fontManager = CanvasKit.FontMgr.FromData(arrayBuffer);
-
-        if (!fontManager) return;
-
-        cachedFontManager = fontManager;
-        forceUpdate();
-      });
-  });
 
   return (
     <FontManagerContext.Provider value={fontManager}>

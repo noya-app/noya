@@ -1,4 +1,4 @@
-import type { CanvasKit, Paint, PaintStyle } from 'canvaskit';
+import type { Paint, PaintStyle } from 'canvaskit';
 import { CanvasKitInit } from 'canvaskit';
 import { v4 as uuid } from 'uuid';
 import { Context } from './context';
@@ -23,9 +23,10 @@ declare module 'canvaskit' {
   }
 }
 
-let loadingPromise: Promise<CanvasKit>;
+// Using `var` avoids this being uninitialized, maybe due to circular dependencies
+var loadingPromise: ReturnType<typeof CanvasKitInit> | undefined = undefined;
 
-export async function load() {
+export function loadCanvasKit() {
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = new Promise(async (resolve) => {
