@@ -1,4 +1,4 @@
-import { detectFileType, FILE_EXTENSION } from '../fileType';
+import { detectFileType, getFileExtensionForType } from '../fileType';
 import { Base64 } from '../index';
 
 const PNG =
@@ -12,23 +12,23 @@ const PDF =
 test('detects png', () => {
   const type = detectFileType(Base64.decode(PNG));
   expect(type).toEqual('image/png');
-  expect(FILE_EXTENSION[type!]).toEqual('png');
+  expect(getFileExtensionForType(type!)).toEqual('png');
 });
 
 test('detects jpg', () => {
   const type = detectFileType(Base64.decode(JPG));
   expect(type).toEqual('image/jpeg');
-  expect(FILE_EXTENSION[type!]).toEqual('jpg');
+  expect(getFileExtensionForType(type!)).toEqual('jpg');
 });
 
 test('detects webp', () => {
   const type = detectFileType(Base64.decode(WEBP));
   expect(type).toEqual('image/webp');
-  expect(FILE_EXTENSION[type!]).toEqual('webp');
+  expect(getFileExtensionForType(type!)).toEqual('webp');
 });
 
 test('detects pdf', () => {
   const type = detectFileType(Base64.decode(PDF));
   expect(type).toEqual('application/pdf');
-  expect(FILE_EXTENSION[type!]).toEqual('pdf');
+  expect(getFileExtensionForType(type!)).toEqual('pdf');
 });

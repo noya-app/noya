@@ -6,6 +6,11 @@ import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElem
 import { Size } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
+import {
+  FileType,
+  getFileExtensionForType,
+  getFileTypeForExtension,
+} from 'noya-utils';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import ArrayController from '../components/inspector/ExportArrayController';
@@ -19,14 +24,14 @@ import {
 } from '../contexts/ApplicationStateContext';
 import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
 
-async function saveFile(name: string, fileFormat: string, data: ArrayBuffer) {
+async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {
-    type: `${fileFormat === 'zip' ? 'application' : 'image'}/${fileFormat}`,
+    type,
   });
 
   await fileSave(
     file,
-    { fileName: file.name, extensions: [`.${fileFormat}`] },
+    { fileName: file.name, extensions: [`.${getFileExtensionForType(type)}`] },
     undefined,
     false,
   );
@@ -58,10 +63,10 @@ export default memo(function ExportInspector() {
   const selectedLayer = useSelector(
     Selectors.getSelectedLayers,
   )[0] as Sketch.SymbolInstance;
-  // TODO: Handle export formats
+
   const exportFormats = selectedLayer.exportOptions.exportFormats;
 
-  const handleFileFormat = useCallback(
+  const renderImageForExportFormat = useCallback(
     async (exportFormat: Sketch.ExportFormat) => {
       const size = {
         width: selectedLayer.frame.width,
@@ -70,7 +75,7 @@ export default memo(function ExportInspector() {
 
       const exportSize = getExportSize(exportFormat, size);
 
-      const data = await renderImageFromCanvas(
+      return renderImageFromCanvas(
         CanvasKit,
         exportSize.width,
         exportSize.height,
@@ -79,51 +84,54 @@ export default memo(function ExportInspector() {
         exportFormat.fileFormat,
         () => <RCKLayerPreview layer={selectedLayer} size={exportSize} />,
       );
-      return data;
     },
     [CanvasKit, theme, selectedLayer, getWorkspaceStateSnapshot],
   );
 
-  const setFileName = useCallback(
+  const getExportFileName = useCallback(
     (exportFormat: Sketch.ExportFormat) => {
       const { name, namingScheme, fileFormat } = exportFormat;
 
       if (namingScheme === Sketch.ExportFormatNamingScheme.Suffix)
         return `${selectedLayer.name}${name}.${fileFormat}`;
 
-      return `${name ? name : ''}${selectedLayer.name}.${fileFormat}`;
+      return `${name}${selectedLayer.name}.${fileFormat}`;
     },
     [selectedLayer],
   );
 
   const handleExport = useCallback(async () => {
-    const handledExportFormat = ['png', 'jpg', 'webp'];
-
-    if (
-      !exportFormats
-        .map((e) => e.fileFormat)
-        .some((f) => handledExportFormat.includes(f))
-    ) {
-      alert('Export format not supported... yet');
-      return;
-    }
-
     if (exportFormats.length === 1) {
       const exportFormat = exportFormats[0];
-      const data = await handleFileFormat(exportFormat);
+
+      if (
+        exportFormat.fileFormat !== Sketch.ExportFileFormat.JPG &&
+        exportFormat.fileFormat !== Sketch.ExportFileFormat.PNG &&
+        exportFormat.fileFormat !== Sketch.ExportFileFormat.SVG &&
+        exportFormat.fileFormat !== Sketch.ExportFileFormat.WEBP
+      )
+        return;
+
+      const data = await renderImageForExportFormat(exportFormat);
 
       if (!data) return;
-      const fileName = setFileName(exportFormat);
 
-      saveFile(fileName, exportFormat.fileFormat, data);
+      const fileName = getExportFileName(exportFormat);
+
+      saveFile(
+        fileName,
+        getFileTypeForExtension(exportFormat.fileFormat),
+        data,
+      );
     } else {
       const zip = new JSZip();
 
       const files = exportFormats.map(async (exportFormat) => {
-        const data = await handleFileFormat(exportFormat);
+        const data = await renderImageForExportFormat(exportFormat);
+
         if (!data) return;
 
-        zip.file(setFileName(exportFormat), data, {
+        zip.file(getExportFileName(exportFormat), data, {
           base64: true,
         });
       });
@@ -134,10 +142,15 @@ export default memo(function ExportInspector() {
           mimeType: 'application/zip',
         });
 
-        saveFile(`${selectedLayer.name}.zip`, 'zip', data);
+        saveFile(`${selectedLayer.name}.zip`, 'application/zip', data);
       });
     }
-  }, [selectedLayer, exportFormats, setFileName, handleFileFormat]);
+  }, [
+    selectedLayer,
+    exportFormats,
+    getExportFileName,
+    renderImageForExportFormat,
+  ]);
 
   const elements = [
     <ArrayController<Sketch.ExportFormat>

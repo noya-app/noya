@@ -47,6 +47,17 @@ export function getRectCornerPoints(rect: Rect): [Point, Point, Point, Point] {
   ];
 }
 
+export function getRectEdgeMidPoints(rect: Rect): [Point, Point, Point, Point] {
+  const { minX, minY, midX, midY, maxX, maxY } = createBounds(rect);
+
+  return [
+    { x: midX, y: minY },
+    { x: maxX, y: midY },
+    { x: midX, y: maxY },
+    { x: minX, y: midY },
+  ];
+}
+
 function areaOfTriangle(p1: Point, p2: Point, p3: Point): number {
   const { x: x1, y: y1 } = p1;
   const { x: x2, y: y2 } = p2;

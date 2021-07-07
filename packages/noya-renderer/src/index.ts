@@ -1,5 +1,5 @@
-import type { FontMgr, Paint, PaintStyle } from 'canvaskit';
-import { CanvasKitInit } from 'canvaskit';
+import { CanvasKitInit, Paint, PaintStyle } from 'canvaskit';
+import { PATH_TO_WASM } from 'noya-utils';
 import { v4 as uuid } from 'uuid';
 import { Context } from './context';
 import * as Primitives from './primitives';
@@ -9,14 +9,13 @@ export { default as SketchGroup } from './components/layers/SketchGroup';
 export { default as SketchLayer } from './components/layers/SketchLayer';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
-export { default as useCanvasKit } from './hooks/useCanvasKit';
+export * from './FontManagerContext';
+export * from './hooks/useCanvasKit';
 export { ImageCacheProvider } from './ImageCache';
 export type { Context };
 export { uuid, Primitives };
 
 export type SimpleTextDecoration = Primitives.SimpleTextDecoration;
-
-export let fontManager: FontMgr;
 
 declare module 'canvaskit' {
   interface Paint {
@@ -24,27 +23,29 @@ declare module 'canvaskit' {
   }
 }
 
-export async function load() {
-  const [CanvasKit, fontBuffer] = await Promise.all([
-    CanvasKitInit({
-      locateFile: (file: string) => '/wasm/' + file,
-    }),
-    fetch(
-      'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
-    ).then((resp) => resp.arrayBuffer()),
-  ]);
+// Using `var` avoids this being uninitialized, maybe due to circular dependencies
+var loadingPromise: ReturnType<typeof CanvasKitInit> | undefined = undefined;
 
-  fontManager = CanvasKit.FontMgr.FromData(fontBuffer)!;
+export function loadCanvasKit() {
+  if (loadingPromise) return loadingPromise;
 
-  const _setStyle = CanvasKit.Paint.prototype.setStyle;
+  loadingPromise = new Promise(async (resolve) => {
+    const CanvasKit = await CanvasKitInit({
+      locateFile: (file: string) => PATH_TO_WASM + file,
+    });
 
-  CanvasKit.Paint.prototype.setStyle = function (
-    this: Paint,
-    paintStyle: PaintStyle,
-  ) {
-    this.style = paintStyle;
-    _setStyle.call(this, paintStyle);
-  };
+    const _setStyle = CanvasKit.Paint.prototype.setStyle;
 
-  return CanvasKit;
+    CanvasKit.Paint.prototype.setStyle = function (
+      this: Paint,
+      paintStyle: PaintStyle,
+    ) {
+      this.style = paintStyle;
+      _setStyle.call(this, paintStyle);
+    };
+
+    resolve(CanvasKit);
+  });
+
+  return loadingPromise;
 }

@@ -1,5 +1,5 @@
 import type { CanvasKit } from 'canvaskit';
-import { load } from 'noya-renderer';
+import { loadCanvasKit } from 'noya-renderer';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 interface Props {
@@ -35,7 +35,7 @@ function App() {
   const [CanvasKit, setCanvasKit] = useState<CanvasKit | undefined>(undefined);
 
   useEffect(() => {
-    load().then(setCanvasKit);
+    loadCanvasKit().then(setCanvasKit);
   }, []);
 
   if (!CanvasKit) return null;

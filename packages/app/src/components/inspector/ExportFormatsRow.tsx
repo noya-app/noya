@@ -19,6 +19,13 @@ const Row = styled.div(({ theme }) => ({
   alignItems: 'center',
 }));
 
+export const SUPPORTED_EXPORT_FORMAT_OPTIONS: Sketch.ExportFileFormat[] = [
+  Sketch.ExportFileFormat.PNG,
+  Sketch.ExportFileFormat.JPG,
+  Sketch.ExportFileFormat.WEBP,
+  Sketch.ExportFileFormat.SVG,
+];
+
 interface Props {
   id: string;
   last: boolean;
@@ -40,7 +47,6 @@ export default memo(function ExportFormatsRow({
   onChangeFileFormat,
   onChangeNamingScheme,
 }: Props) {
-  const fileFormatOptions = Object.values(Sketch.ExportFileFormat);
   const { scale, absoluteSize, visibleScaleType } = exportFormat;
 
   const scaleString =
@@ -129,7 +135,7 @@ export default memo(function ExportFormatsRow({
       <Select
         id={'fileFormat-select'}
         value={exportFormat.fileFormat}
-        options={fileFormatOptions}
+        options={SUPPORTED_EXPORT_FORMAT_OPTIONS}
         getTitle={useCallback((id) => id.toUpperCase(), [])}
         onChange={onChangeFileFormat}
       />

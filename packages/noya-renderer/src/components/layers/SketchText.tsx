@@ -1,6 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useDeletable, useFontManager } from 'noya-react-canvaskit';
-import { Group, Primitives, Text, useCanvasKit } from 'noya-renderer';
+import { useDeletable } from 'noya-react-canvaskit';
+import {
+  Group,
+  Primitives,
+  Text,
+  useCanvasKit,
+  useFontManager,
+} from 'noya-renderer';
 import { memo, useMemo } from 'react';
 
 interface Props {
