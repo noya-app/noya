@@ -1,3 +1,5 @@
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
+
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
@@ -24,6 +26,7 @@ import {
   getScreenTransform,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSymbols,
 } from 'noya-state/src/selectors/selectors';
 import {
   getAxisValues,
@@ -451,6 +454,26 @@ export default memo(function SketchFileRenderer() {
     );
   }, [isEditingPath, page, state]);
 
+  const symbol = useMemo(() => {
+    if (interactionState.type !== 'insertingSymbol') return;
+    // TODO: Modifying only the instance of the symbol master, not the master itself. Improve mouse pointer position.
+    const symbol = {
+      ...getSymbols(state).find(
+        ({ do_objectID }) => do_objectID === interactionState.symbolID,
+      ),
+    } as Sketch.SymbolMaster;
+
+    if (!symbol || !symbol.style) return;
+    symbol.style.contextSettings = {
+      _class: 'graphicsContextSettings',
+      blendMode: 1,
+      opacity: 0.4,
+    };
+    symbol.frame = { ...symbol.frame, ...interactionState.point };
+
+    return symbol;
+  }, [state, interactionState]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -493,6 +516,9 @@ export default memo(function SketchFileRenderer() {
         )}
       </Group>
       <Group transform={screenTransform}>
+        {interactionState.type === 'insertingSymbol' && symbol && (
+          <SketchLayer key={symbol.symbolID} layer={symbol} />
+        )}
         {interactionState.type === 'marquee' && (
           <Marquee
             rect={createRect(interactionState.origin, interactionState.current)}

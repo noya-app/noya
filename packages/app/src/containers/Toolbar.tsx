@@ -60,14 +60,13 @@ const ToolbarContent = memo(function ToolbarContent({
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
   const symbols = useSelector(Selectors.getSymbols).map((symbol) => ({
     title: symbol.name,
-    value: symbol.symbolID,
+    value: symbol.do_objectID,
   }));
 
   const isInsertArtboard = interactionType === 'insertArtboard';
   const isInsertRectangle = interactionType === 'insertRectangle';
   const isInsertOval = interactionType === 'insertOval';
   const isInsertText = interactionType === 'insertText';
-  const isInsertSymbol = interactionType === 'insertArtboard';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
@@ -126,13 +125,9 @@ const ToolbarContent = memo(function ToolbarContent({
 
   const handleInsertSymbol = useCallback(
     (value: string) => {
-      if (isInsertSymbol) {
-        dispatch('interaction', ['reset']);
-      } else {
-        //dispatch('insertSymbol', value);
-      }
+      dispatch('interaction', ['insertingSymbol', value, undefined]);
     },
-    [dispatch, isInsertSymbol],
+    [dispatch],
   );
   const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
 

@@ -38,6 +38,7 @@ export type ShapeType =
 export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
+  | [`insertingSymbol`, UUID, Point?]
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
@@ -80,6 +81,11 @@ export type InteractionState =
     }
   | {
       type: `insert${Capitalize<ShapeType>}`;
+    }
+  | {
+      type: 'insertingSymbol';
+      symbolID: UUID;
+      point?: Point;
     }
   | {
       type: 'editPath';
@@ -161,9 +167,10 @@ type CreateLayerReturnType =
   | Sketch.Rectangle
   | Sketch.Text
   | Sketch.Artboard
-  | Sketch.ShapePath;
+  | Sketch.ShapePath
+  | Sketch.SymbolInstance;
 
-function createLayer(shapeType: ShapeType): CreateLayerReturnType {
+function createLayer(shapeType: ShapeType | 'symbol'): CreateLayerReturnType {
   switch (shapeType) {
     case 'oval':
       return Models.oval;
@@ -175,6 +182,8 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
       return Models.artboard;
     case 'shapePath':
       return Models.shapePath;
+    case 'symbol':
+      return Models.symbolInstance;
   }
 }
 
@@ -194,6 +203,10 @@ export function interactionReducer(
     case 'insertRectangle':
     case 'insertText': {
       return { type: action[0] };
+    }
+    case 'insertingSymbol': {
+      const [, symbolID, point] = action;
+      return { type: 'insertingSymbol', symbolID, point };
     }
     case 'hoverHandle': {
       const [type, direction] = action;
