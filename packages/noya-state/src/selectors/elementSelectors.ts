@@ -21,12 +21,44 @@ type PathElement =
       value: SelectedControlPoint;
     };
 
+export function canClosePath(state: ApplicationState, element: SelectedPoint) {
+  if (state.keyModifiers.shiftKey) return false;
+
+  const [layerId, index] = element;
+
+  const layer = Layers.find(
+    getCurrentPage(state),
+    (layer) => layer.do_objectID === layerId,
+  );
+
+  if (!layer || !Layers.isPointsLayer(layer)) return false;
+
+  // A path needs at least 2 points to be closed.
+  // TODO: Don't allow closing a straight line segment with 2 points.
+  if (layer.points.length < 2) return false;
+
+  const selectedPoint = getIndexPathOfOpenShapeLayer(state);
+
+  if (!selectedPoint) return false;
+
+  const lastIndex = layer.points.length - 1;
+
+  return (
+    (index === lastIndex && selectedPoint.pointIndex === 0) ||
+    (index === 0 && selectedPoint.pointIndex === lastIndex)
+  );
+}
+
 export const getCursorForEditPathMode = (
   state: ApplicationState,
   point: Point,
 ) => {
-  if (getPathElementAtPoint(state, point)) {
-    return 'move';
+  const elementAtPoint = getPathElementAtPoint(state, point);
+  if (elementAtPoint) {
+    return elementAtPoint.type === 'point' &&
+      canClosePath(state, elementAtPoint.value)
+      ? 'pointer'
+      : 'move';
   } else if (getIndexPathOfOpenShapeLayer(state)) {
     return 'crosshair';
   } else {
