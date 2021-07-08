@@ -234,6 +234,7 @@ export default memo(function Canvas() {
         case 'drawingShapePath': {
           dispatch('addShapePathLayer', point);
           dispatch('interaction', ['editPath']);
+          //  dispatch('interaction', ['maybeMoveControlPoint', point]);
           break;
         }
         case 'editPath': {
@@ -310,6 +311,7 @@ export default memo(function Canvas() {
             dispatch('interaction', ['maybeMoveControlPoint', point]);
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
+            dispatch('interaction', ['maybeMoveControlPoint', point]);
           } else if (!(shiftKey || event.metaKey)) {
             dispatch('interaction', ['reset']);
           }

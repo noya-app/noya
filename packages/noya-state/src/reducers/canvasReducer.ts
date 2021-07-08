@@ -241,8 +241,8 @@ export function canvasReducer(
         const decodedPoint: DecodedCurvePoint = {
           _class: 'curvePoint',
           cornerRadius: 0,
-          curveFrom: { x: 0, y: 0 },
-          curveTo: { x: 0, y: 0 },
+          curveFrom: point,
+          curveTo: point,
           hasCurveFrom: false,
           hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
@@ -395,13 +395,37 @@ export function canvasReducer(
             break;
           }
           case 'movingControlPoint': {
-            if (!draft.selectedControlPoint) return;
+            if (!draft.selectedControlPoint && !draft.selectedObjects) return;
             const { current, origin, pageSnapshot } = interactionState;
 
+            if (!draft.selectedControlPoint) {
+              let pointIndex = 0;
+
+              const layer = Layers.find(
+                getCurrentPage(state),
+                (layer) => layer.do_objectID === draft.selectedObjects[0],
+              );
+
+              if (!layer || !Layers.isPointsLayer(layer)) return;
+
+              layer.points[0].curveMode = Sketch.CurveMode.Mirrored;
+
+              for (let layerId in draft.selectedPointLists) {
+                draft.selectedPointLists[layerId] = [];
+              }
+
+              draft.selectedControlPoint = {
+                layerId: draft.selectedObjects[0],
+                pointIndex,
+                controlPointType: 'curveTo',
+              };
+            }
             const delta = {
               x: current.x - origin.x,
               y: current.y - origin.y,
             };
+
+            if (!draft.selectedControlPoint) return;
 
             moveControlPoints(
               draft.selectedControlPoint,
