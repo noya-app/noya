@@ -1,5 +1,5 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-
+import produce from 'immer';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
@@ -61,6 +61,7 @@ import MeasurementGuide from './MeasurementGuide';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
+import { SketchArtboardContent } from './layers/SketchArtboard';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -456,7 +457,6 @@ export default memo(function SketchFileRenderer() {
 
   const symbol = useMemo(() => {
     if (interactionState.type !== 'insertingSymbol') return;
-    if (!interactionState.point) return;
 
     const symbol = {
       ...getSymbols(state).find(
@@ -464,22 +464,23 @@ export default memo(function SketchFileRenderer() {
       ),
     } as Sketch.SymbolMaster;
 
-    if (!symbol || !symbol.style) return;
+    const symbolInstance = produce(symbol, (draft) => {
+      if (!symbol || !draft.style || !interactionState.point) return;
 
-    // TODO: add opacity without modifying the master and the instances
-    /*symbol.style.contextSettings = {
-      _class: 'graphicsContextSettings',
-      blendMode: 1,
-      opacity: 0.5,
-    }; */
+      draft.style.contextSettings = {
+        _class: 'graphicsContextSettings',
+        blendMode: 1,
+        opacity: 0.5,
+      };
 
-    symbol.frame = {
-      ...symbol.frame,
-      x: interactionState.point.x - symbol.frame.width / 2,
-      y: interactionState.point.y - symbol.frame.height / 2,
-    };
+      draft.frame = {
+        ...symbol.frame,
+        x: interactionState.point.x - symbol.frame.width / 2,
+        y: interactionState.point.y - symbol.frame.height / 2,
+      };
+    });
 
-    return symbol;
+    return symbolInstance;
   }, [state, interactionState]);
 
   return (
@@ -488,7 +489,11 @@ export default memo(function SketchFileRenderer() {
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
         {interactionState.type === 'insertingSymbol' && symbol && (
-          <SketchLayer key={symbol.symbolID} layer={symbol} />
+          <SketchArtboardContent
+            key={symbol.symbolID}
+            layer={symbol}
+            showBackground={false}
+          />
         )}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
