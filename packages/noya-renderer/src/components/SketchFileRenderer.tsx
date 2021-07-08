@@ -444,6 +444,11 @@ export default memo(function SketchFileRenderer() {
               selectedIndexes={
                 state.selectedPointLists[layer.do_objectID] ?? []
               }
+              selectedControlPoint={
+                state.selectedControlPoint
+                  ? state.selectedControlPoint
+                  : undefined
+              }
             />
           );
         })}
