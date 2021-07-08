@@ -46,7 +46,10 @@ export function renderImageFromCanvas(
             <StateProvider state={state}>
               <ImageCacheProvider>
                 <FontManagerProvider>
-                  <SVGRenderer size={{ width: width, height: height }}>
+                  <SVGRenderer
+                    idPrefix=""
+                    size={{ width: width, height: height }}
+                  >
                     {renderContent()}
                   </SVGRenderer>
                 </FontManagerProvider>

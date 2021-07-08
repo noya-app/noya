@@ -7,75 +7,8 @@ import {
   useCanvasKit,
 } from 'noya-renderer';
 import { Base64, detectFileType, getFileExtensionForType } from 'noya-utils';
-import {
-  createContext,
-  Fragment,
-  memo,
-  ReactNode,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
-import styled from 'styled-components';
-
-type Definitions = Record<string, ReactNode>;
-
-export type DefinitionsContextValue = {
-  definitions: Definitions;
-  addDefinition: (key: string, value: ReactNode) => void;
-  removeDefinition: (key: string) => void;
-};
-
-const DefinitionsContext = createContext<DefinitionsContextValue | undefined>(
-  undefined,
-);
-
-export const DefinitionsProvider = ({ children }: { children: ReactNode }) => {
-  const [definitions, setDefinitions] = useState<Definitions>({});
-
-  const addDefinition = useCallback((key: string, value: ReactNode) => {
-    setDefinitions((definitions) => ({ ...definitions, [key]: value }));
-  }, []);
-
-  const removeDefinition = useCallback(
-    (key: string) => setDefinitions(({ [key]: _, ...rest }) => rest),
-    [],
-  );
-
-  const contextValue = useMemo(
-    () => ({ definitions, addDefinition, removeDefinition } as const),
-    [definitions, addDefinition, removeDefinition],
-  );
-
-  return (
-    <DefinitionsContext.Provider value={contextValue}>
-      <defs>
-        {Object.entries(definitions).map(([key, value]) => (
-          <Fragment key={key}>{value}</Fragment>
-        ))}
-      </defs>
-      {children}
-    </DefinitionsContext.Provider>
-  );
-};
-
-export function useDefinitions(): DefinitionsContextValue {
-  const value = useContext(DefinitionsContext);
-
-  if (!value) {
-    throw new Error('Missing DefinitionsProvider');
-  }
-
-  return value;
-}
-
-const SVGComponent = styled.svg(({ theme }) => ({
-  position: 'absolute',
-  inset: 0,
-  zIndex: -1,
-}));
+import { memo, ReactNode, useMemo, useRef } from 'react';
+import { ElementIdProvider, useGetNextElementId } from './ElementIdContext';
 
 const stringifyAffineTransform = (matrix: AffineTransform) => {
   const values = [
@@ -92,7 +25,18 @@ const stringifyAffineTransform = (matrix: AffineTransform) => {
 
 const stringifyColor = (color: Iterable<number>) => {
   const [r, g, b, a] = color;
-  return `rgba(${r * 100}%, ${g * 100}%, ${b * 100}%, ${a})`;
+
+  // Format a precision of 4 then parse again as a number to trim trailing 0s
+  // and remove any exponentially formatted numbers
+  const components = [r, g, b].map(
+    (c) => Number((c * 100).toPrecision(4)) + '%',
+  );
+
+  if (a !== 1) {
+    return `rgba(${components.join(', ')}, ${a})`;
+  } else {
+    return `rgb(${components.join(', ')})`;
+  }
 };
 
 function usePaintProps(paint: Paint): React.SVGProps<any> {
@@ -109,7 +53,6 @@ function usePaintProps(paint: Paint): React.SVGProps<any> {
 
   return {
     fill: color,
-    stroke: 'none',
   };
 }
 
@@ -204,53 +147,50 @@ const Text: ComponentsContextValue['Text'] = memo(({ rect, paragraph }) => {
   // );
 });
 
-let clipPathId = 0;
-const getNextClipPathId = () => `${++clipPathId}`;
-
-function useClipPath(id: string, path: ClipProps['path']) {
-  const { addDefinition } = useDefinitions();
-
-  const element = useMemo(() => {
-    return (
-      <clipPath id={id}>
-        {path instanceof Float32Array ? (
-          <rect {...getRectProps(path)} />
-        ) : (
-          <path d={path.toSVGString()} />
-        )}
-      </clipPath>
-    );
-  }, [id, path]);
-
-  useLayoutEffect(() => {
-    addDefinition(id, element);
-  }, [addDefinition, element, id]);
-}
-
-const ClipPath = ({ id, path }: ClipProps & { id: string }) => {
-  useClipPath(id, path);
-
-  return null;
-};
-
-const Group: ComponentsContextValue['Group'] = memo(
-  ({ opacity, transform, children, clip, colorFilter, imageFilter }) => {
-    const clipPathId = useMemo(() => `clip-${getNextClipPathId()}`, []);
+const ClipPath = memo(
+  ({
+    clip,
+    children,
+  }: {
+    clip: ClipProps;
+    children: (url: string) => ReactNode;
+  }) => {
+    const { path } = clip;
+    const getNextId = useGetNextElementId();
+    const id = useMemo(() => getNextId('clip-'), [getNextId]);
 
     return (
       <>
-        {clip && <ClipPath id={clipPathId} {...clip} />}
-        <g
-          opacity={opacity}
-          transform={
-            transform ? stringifyAffineTransform(transform) : undefined
-          }
-          clipPath={clip ? `url(#${clipPathId})` : undefined}
-        >
-          {children}
-        </g>
+        <clipPath id={id}>
+          {path instanceof Float32Array ? (
+            <rect {...getRectProps(path)} />
+          ) : (
+            <path d={path.toSVGString()} />
+          )}
+        </clipPath>
+        {children(`url(#${id})`)}
       </>
     );
+  },
+);
+
+const Group: ComponentsContextValue['Group'] = memo(
+  ({ opacity, transform, children, clip, colorFilter, imageFilter }) => {
+    const groupProps = {
+      opacity,
+      transform: transform ? stringifyAffineTransform(transform) : undefined,
+      children,
+    };
+
+    if (clip) {
+      return (
+        <ClipPath clip={clip}>
+          {(url) => <g {...groupProps} clipPath={url} />}
+        </ClipPath>
+      );
+    }
+
+    return <g {...groupProps} />;
   },
 );
 
@@ -282,20 +222,26 @@ const SVGComponents = {
 interface Props {
   size: Size;
   children: ReactNode;
+  idPrefix?: string;
 }
 
-export default memo(function SVGRenderer({ size, children }: Props) {
+let svgId = 0;
+const getNextSvgPrefix = () => `svg-${++svgId}-`;
+
+export default memo(function SVGRenderer({ size, children, idPrefix }: Props) {
+  const prefix = useRef(idPrefix ?? getNextSvgPrefix()).current;
+
   return (
-    <SVGComponent
-      width={size.width}
-      height={size.height}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <DefinitionsProvider>
+    <ElementIdProvider prefix={prefix}>
+      <svg
+        width={size.width}
+        height={size.height}
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <ComponentsProvider value={SVGComponents}>
           {children}
         </ComponentsProvider>
-      </DefinitionsProvider>
-    </SVGComponent>
+      </svg>
+    </ElementIdProvider>
   );
 });
