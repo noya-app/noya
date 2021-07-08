@@ -545,7 +545,7 @@ export function canvasReducer(
               ),
             } as Sketch.SymbolMaster;
 
-            const symbolInstance = produce(Models.symbolInstance, (layer) => {
+            const layer = produce(Models.symbolInstance, (layer) => {
               if (!layer.style) return;
               layer.do_objectID = interactionState.id;
               layer.name = symbol.name;
@@ -557,8 +557,23 @@ export function canvasReducer(
               };
             });
 
-            // Add to artboard
-            draft.sketch.pages[pageIndex].layers.push(symbolInstance);
+            // Check if the layer intersects any artboards or symbolMasters.
+            // If so, we'll insert the layer within
+            const parent = draft.sketch.pages[pageIndex].layers
+              .filter(
+                (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+                  Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+              )
+              .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
+
+            if (parent && Layers.isChildLayer(layer)) {
+              layer.frame.x -= parent.frame.x;
+              layer.frame.y -= parent.frame.y;
+
+              parent.layers.push(layer);
+            } else {
+              draft.sketch.pages[pageIndex].layers.push(layer);
+            }
           }
         }
       });
