@@ -16,7 +16,6 @@ import {
   DecodedCurvePoint,
   encodeCurvePoint,
   resizeRect,
-  stringifyPoint,
 } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
@@ -188,17 +187,18 @@ export function canvasReducer(
           draft.sketch.pages[pageIndex].layers.push(layer);
         }
 
-        const encodedPoint: Sketch.CurvePoint = {
+        const decodedPoint: DecodedCurvePoint = {
           _class: 'curvePoint',
           cornerRadius: 0,
-          curveFrom: stringifyPoint({ x: 0, y: 0 }),
-          curveTo: stringifyPoint({ x: 0, y: 0 }),
+          curveFrom: point,
+          curveTo: point,
           hasCurveFrom: false,
           hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
-          point: stringifyPoint({ x: 0, y: 0 }),
+          point,
         };
 
+        const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
         layer.points = [encodedPoint];
 
         draft.selectedObjects = [layer.do_objectID];
@@ -265,6 +265,8 @@ export function canvasReducer(
 
         draft.selectedPointLists[layer.do_objectID] =
           pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+
+        draft.selectedControlPoint = undefined;
 
         return;
       });
@@ -399,7 +401,13 @@ export function canvasReducer(
             const { current, origin, pageSnapshot } = interactionState;
 
             if (!draft.selectedControlPoint) {
-              let pointIndex = 0;
+              const pointIndexPath = getIndexPathOfOpenShapeLayer(state);
+
+              if (!pointIndexPath) return state;
+              // const layer = Layers.access(
+              //   draft.sketch.pages[pageIndex],
+              //   pointIndexPath.indexPath,
+              // );
 
               const layer = Layers.find(
                 getCurrentPage(state),
@@ -408,15 +416,16 @@ export function canvasReducer(
 
               if (!layer || !Layers.isPointsLayer(layer)) return;
 
-              layer.points[0].curveMode = Sketch.CurveMode.Mirrored;
+              layer.points[pointIndexPath.pointIndex].curveMode =
+                Sketch.CurveMode.Mirrored;
 
-              for (let layerId in draft.selectedPointLists) {
-                draft.selectedPointLists[layerId] = [];
-              }
+              // for (let layerId in draft.selectedPointLists) {
+              //   draft.selectedPointLists[layerId] = [];
+              // }
 
               draft.selectedControlPoint = {
                 layerId: draft.selectedObjects[0],
-                pointIndex,
+                pointIndex: pointIndexPath.pointIndex,
                 controlPointType: 'curveTo',
               };
             }
