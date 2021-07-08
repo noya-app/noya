@@ -29,6 +29,7 @@ import {
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSymbols,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
@@ -70,6 +71,7 @@ export type CanvasAction =
                 | 'maybeScale'
                 | 'maybeMovePoint'
                 | 'maybeMoveControlPoint'
+                | 'addSymbolLayer'
               ),
               ...any[]
             ]
@@ -81,6 +83,7 @@ export type CanvasAction =
             direction: CompassDirection,
             canvasSize: Size,
           ]
+        | [type: 'addSymbolLayer', symbolId: string, id: string, point: Point]
         | [type: 'maybeMovePoint', origin: Point]
         | [type: 'maybeMoveControlPoint', origin: Point],
     ];
@@ -534,6 +537,28 @@ export function canvasReducer(
             };
 
             break;
+          }
+          case 'addSymbolLayer': {
+            const symbol = {
+              ...getSymbols(state).find(
+                ({ do_objectID }) => do_objectID === interactionState.symbolId,
+              ),
+            } as Sketch.SymbolMaster;
+
+            const symbolInstance = produce(Models.symbolInstance, (layer) => {
+              if (!layer.style) return;
+              layer.do_objectID = interactionState.id;
+              layer.name = symbol.name;
+              layer.symbolID = symbol.symbolID;
+              layer.frame = {
+                ...symbol.frame,
+                x: interactionState.point.x - symbol.frame.width / 2,
+                y: interactionState.point.y - symbol.frame.height / 2,
+              };
+            });
+
+            // Add to artboard
+            draft.sketch.pages[pageIndex].layers.push(symbolInstance);
           }
         }
       });

@@ -456,7 +456,8 @@ export default memo(function SketchFileRenderer() {
 
   const symbol = useMemo(() => {
     if (interactionState.type !== 'insertingSymbol') return;
-    // TODO: Modifying only the instance of the symbol master, not the master itself. Improve mouse pointer position.
+    if (!interactionState.point) return;
+
     const symbol = {
       ...getSymbols(state).find(
         ({ do_objectID }) => do_objectID === interactionState.symbolID,
@@ -464,12 +465,19 @@ export default memo(function SketchFileRenderer() {
     } as Sketch.SymbolMaster;
 
     if (!symbol || !symbol.style) return;
-    symbol.style.contextSettings = {
+
+    // TODO: add opacity without modifying the master and the instances
+    /*symbol.style.contextSettings = {
       _class: 'graphicsContextSettings',
       blendMode: 1,
-      opacity: 0.4,
+      opacity: 0.5,
+    }; */
+
+    symbol.frame = {
+      ...symbol.frame,
+      x: interactionState.point.x - symbol.frame.width / 2,
+      y: interactionState.point.y - symbol.frame.height / 2,
     };
-    symbol.frame = { ...symbol.frame, ...interactionState.point };
 
     return symbol;
   }, [state, interactionState]);
@@ -479,6 +487,9 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
+        {interactionState.type === 'insertingSymbol' && symbol && (
+          <SketchLayer key={symbol.symbolID} layer={symbol} />
+        )}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
         ) : isEditingPath ? (
@@ -516,9 +527,6 @@ export default memo(function SketchFileRenderer() {
         )}
       </Group>
       <Group transform={screenTransform}>
-        {interactionState.type === 'insertingSymbol' && symbol && (
-          <SketchLayer key={symbol.symbolID} layer={symbol} />
-        )}
         {interactionState.type === 'marquee' && (
           <Marquee
             rect={createRect(interactionState.origin, interactionState.current)}

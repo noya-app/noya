@@ -216,12 +216,14 @@ export default memo(function Canvas() {
           break;
         }
         case 'insertingSymbol': {
-          /*dispatch('interaction', [
-            'addSymbol',
-            state.interactionState.type.slice(6).toLowerCase() as ShapeType,
+          const id = uuid();
+
+          dispatch('interaction', [
+            'addSymbolLayer',
+            state.interactionState.symbolID,
             id,
             point,
-          ]);*/
+          ]);
           dispatch('interaction', ['reset']);
           break;
         }
