@@ -413,7 +413,7 @@ export default memo(function SketchFileRenderer() {
         <PseudoPathLine
           point={interactionState.point}
           curvePoint={layer.points[indexPath.pointIndex]}
-          layer={layer}
+          frame={layer.frame}
         />
         <PseudoPoint point={interactionState.point} />
       </>

@@ -10,13 +10,13 @@ import { DecodedCurvePoint, encodeCurvePoint } from '../primitives/path';
 interface EditablePathPointProps {
   point: Point;
   curvePoint: CurvePoint;
-  layer: Sketch.AnyLayer;
+  frame: Sketch.Rect;
 }
 
 export default function PseudoPathLine({
   point,
   curvePoint,
-  layer,
+  frame,
 }: EditablePathPointProps) {
   const CanvasKit = useCanvasKit();
   const { primary } = useTheme().colors;
@@ -33,13 +33,13 @@ export default function PseudoPathLine({
     point,
   };
 
-  const encodedPointToDraw = encodeCurvePoint(decodedPointToDraw, layer.frame);
+  const encodedPointToDraw = encodeCurvePoint(decodedPointToDraw, frame);
 
   const points = useMemo(() => {
     return [encodedPointToDraw, curvePoint];
   }, [encodedPointToDraw, curvePoint]);
 
-  const path = Primitives.path(CanvasKit, points, layer.frame, false);
+  const path = Primitives.path(CanvasKit, points, frame, false);
 
   const strokedPath = useMemo(
     () => Primitives.getStrokedBorderPath(CanvasKit, path, 1, 0),
