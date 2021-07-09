@@ -6,7 +6,9 @@ import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
+  parsePoint,
   path,
+  stringifyPoint,
 } from 'noya-renderer/src/primitives';
 import { IndexPath } from 'tree-visit';
 import {
@@ -131,14 +133,29 @@ export function getIndexPathOfOpenShapeLayer(
   state: ApplicationState,
 ): PointIndexPath | undefined {
   // If multiple points are selected, we don't allow adding points to the path
-  if (Object.values(state.selectedPointLists).flat().length !== 1) return;
+  if (
+    Object.values(state.selectedPointLists).flat().length !== 1 &&
+    !state.selectedControlPoint
+  )
+    return;
 
-  // Find the selected [layerId, [pointIndex]] pair
-  const selectedPairs = Object.entries(state.selectedPointLists).filter(
-    ([_, value]) => value.length > 0,
-  );
+  const [layerId, pointIndex] = (() => {
+    if (state.selectedControlPoint) {
+      return [
+        state.selectedControlPoint.layerId,
+        state.selectedControlPoint.pointIndex,
+      ] as const;
+    }
 
-  const [[layerId, [pointIndex]]] = selectedPairs;
+    // Find the selected [layerId, [pointIndex]] pair
+    const selectedPairs = Object.entries(state.selectedPointLists).filter(
+      ([_, value]) => value.length > 0,
+    );
+
+    const [[layerId, [pointIndex]]] = selectedPairs;
+
+    return [layerId, pointIndex] as const;
+  })();
 
   const page = getCurrentPage(state);
 
@@ -168,7 +185,8 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
     type === 'maybeMovePoint' ||
     type === 'movingPoint' ||
     type === 'maybeMoveControlPoint' ||
-    type === 'movingControlPoint'
+    type === 'movingControlPoint' ||
+    type === 'maybeConvertCurveMode'
   );
 };
 
@@ -273,9 +291,37 @@ export const moveControlPoints = (
 
   layerIndexPaths.forEach((indexPath) => {
     const layer = Layers.access(pageSnapshot, indexPath);
+
+    if (!Layers.isPointsLayer(layer)) return;
+
     const boundingRect = boundingRects[layer.do_objectID];
 
-    if (!Layers.isPointsLayer(layer) || !boundingRect) return;
+    if (!boundingRect) return;
+
+    // We handle a single point specially
+    if (layer.points.length === 1) {
+      const draftLayer = Layers.access(draftPage, indexPath) as PointsLayer;
+
+      const curveFrom = parsePoint(layer.points[0].curveFrom);
+      const curveTo = parsePoint(layer.points[0].curveTo);
+
+      const inverseDelta = {
+        x: delta.x !== undefined ? delta.x * -1 : undefined,
+        y: delta.y !== undefined ? delta.y * -1 : undefined,
+      };
+
+      draftLayer.points[0].curveTo = stringifyPoint({
+        x: getNewValue(curveTo.x, mode, delta.x),
+        y: getNewValue(curveTo.y, mode, delta.y),
+      });
+
+      draftLayer.points[0].curveFrom = stringifyPoint({
+        x: getNewValue(curveFrom.x, mode, inverseDelta.x),
+        y: getNewValue(curveFrom.y, mode, inverseDelta.y),
+      });
+
+      return;
+    }
 
     const curveMode = layer.points[pointIndex].curveMode;
 

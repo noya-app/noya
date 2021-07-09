@@ -68,6 +68,7 @@ export type InteractionAction =
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
   | [type: 'maybeMovePoint', origin: Point, pageSnapshot: Sketch.Page]
+  | [type: 'maybeConvertCurveMode', origin: Point]
   | [type: 'maybeMoveControlPoint', origin: Point, pageSnapshot: Sketch.Page]
   | [type: 'movingPoint', origin: Point, current: Point]
   | [type: 'movingControlPoint', origin: Point, current: Point]
@@ -109,6 +110,10 @@ export type InteractionState =
       type: 'maybeMovePoint';
       origin: Point;
       pageSnapshot: Sketch.Page;
+    }
+  | {
+      type: 'maybeConvertCurveMode';
+      origin: Point;
     }
   | {
       type: 'maybeMoveControlPoint';
@@ -280,6 +285,14 @@ export function interactionReducer(
         type,
         origin,
         pageSnapshot,
+      };
+    }
+    case 'maybeConvertCurveMode': {
+      const [type, origin] = action;
+
+      return {
+        type,
+        origin,
       };
     }
     case 'maybeMoveControlPoint': {

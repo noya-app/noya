@@ -397,40 +397,14 @@ export function canvasReducer(
             break;
           }
           case 'movingControlPoint': {
-            if (!draft.selectedControlPoint && !draft.selectedObjects) return;
+            if (!draft.selectedControlPoint) return;
 
             const { current, origin, pageSnapshot } = interactionState;
 
-            if (!draft.selectedControlPoint) {
-              const pointIndexPath = getIndexPathOfOpenShapeLayer(state);
-
-              if (!pointIndexPath) return state;
-
-              const layer = Layers.find(
-                getCurrentPage(state),
-                (layer) => layer.do_objectID === draft.selectedObjects[0],
-              );
-
-              if (!layer || !Layers.isPointsLayer(layer)) return;
-
-              layer.points[pointIndexPath.pointIndex].curveMode =
-                Sketch.CurveMode.Mirrored;
-
-              layer.points[pointIndexPath.pointIndex].hasCurveFrom = true;
-              layer.points[pointIndexPath.pointIndex].hasCurveTo = true;
-
-              draft.selectedControlPoint = {
-                layerId: draft.selectedObjects[0],
-                pointIndex: pointIndexPath.pointIndex,
-                controlPointType: 'curveFrom',
-              };
-            }
             const delta = {
               x: current.x - origin.x,
               y: current.y - origin.y,
             };
-
-            if (!draft.selectedControlPoint) return;
 
             moveControlPoints(
               draft.selectedControlPoint,
