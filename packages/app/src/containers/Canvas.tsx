@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ContextMenu } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
@@ -233,9 +234,7 @@ export default memo(function Canvas() {
         }
         case 'drawingShapePath': {
           dispatch('addShapePathLayer', point);
-
-          dispatch('interaction', ['maybeMoveControlPoint', point]);
-          // dispatch('interaction', ['editPath']);
+          dispatch('interaction', ['maybeConvertCurveMode', point]);
           break;
         }
         case 'editPath': {
@@ -312,7 +311,7 @@ export default memo(function Canvas() {
             dispatch('interaction', ['maybeMoveControlPoint', point]);
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
-            dispatch('interaction', ['maybeMoveControlPoint', point]);
+            dispatch('interaction', ['maybeConvertCurveMode', point]);
           } else if (!(shiftKey || event.metaKey)) {
             dispatch('interaction', ['reset']);
           }
@@ -434,6 +433,25 @@ export default memo(function Canvas() {
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
+          break;
+        }
+        case 'maybeConvertCurveMode': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('setPointCurveMode', Sketch.CurveMode.Mirrored);
+            dispatch(
+              'selectControlPoint',
+              selectedLayers[0].do_objectID,
+              0,
+              'curveFrom',
+            );
+            dispatch('interaction', ['maybeMoveControlPoint', origin]);
+            dispatch('interaction', ['movingControlPoint', origin, point]);
+          }
+
+          event.preventDefault();
+          containerRef.current?.setPointerCapture(event.pointerId);
           break;
         }
         case 'maybeMoveControlPoint': {
@@ -564,6 +582,7 @@ export default memo(function Canvas() {
       state,
       dispatch,
       CanvasKit,
+      selectedLayers,
       insets,
       highlightedLayer?.id,
       highlightLayer,
@@ -653,6 +672,9 @@ export default memo(function Canvas() {
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
+        case 'maybeConvertCurveMode':
+          dispatch('interaction', ['resetEditPath', point]);
+          break;
       }
     },
     [offsetEventPoint, state, dispatch, insets],
