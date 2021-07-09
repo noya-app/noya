@@ -1,19 +1,32 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit, Image } from 'canvaskit';
 import { Theme } from 'noya-designsystem';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import { WorkspaceState } from 'noya-state';
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { ComponentsProvider } from 'noya-renderer';
+import {
+  CanvasKitProvider,
+  ComponentsProvider,
+  FontManagerProvider,
+} from 'noya-renderer';
 import { StateProvider } from '../contexts/ApplicationStateContext';
 import { ImageCacheProvider } from 'noya-renderer';
+import { renderToStaticMarkup } from 'react-dom/server';
+import SVGRenderer from '../containers/renderer/SVGRenderer';
+import { UTF16 } from 'noya-utils';
 
 function readPixels(image: Image): Uint8Array | null {
-  return image.readPixels(0, 0, {
+  const colorSpace = image.getColorSpace();
+
+  const pixels = image.readPixels(0, 0, {
     ...image.getImageInfo(),
-    colorSpace: image.getColorSpace(),
+    colorSpace,
   }) as Uint8Array | null;
+
+  colorSpace.delete();
+
+  return pixels;
 }
 
 export function renderImageFromCanvas(
@@ -25,55 +38,83 @@ export function renderImageFromCanvas(
   format: 'bytes' | Sketch.ExportFileFormat,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
-  const surface = CanvasKit.MakeSurface(width, height);
+  switch (format) {
+    case Sketch.ExportFileFormat.SVG: {
+      const svg = renderToStaticMarkup(
+        <CanvasKitProvider>
+          <ThemeProvider theme={theme}>
+            <StateProvider state={state}>
+              <ImageCacheProvider>
+                <FontManagerProvider>
+                  <SVGRenderer
+                    idPrefix=""
+                    size={{ width: width, height: height }}
+                  >
+                    {renderContent()}
+                  </SVGRenderer>
+                </FontManagerProvider>
+              </ImageCacheProvider>
+            </StateProvider>
+          </ThemeProvider>
+        </CanvasKitProvider>,
+      );
 
-  if (!surface) {
-    console.warn('failed to create surface');
-    return Promise.resolve(undefined);
-  }
+      return Promise.resolve(
+        UTF16.toUTF8(`<?xml version="1.0" encoding="UTF-8"?>\n` + svg),
+      );
+    }
+    default: {
+      const surface = CanvasKit.MakeSurface(width, height);
 
-  return new Promise((resolve) => {
-    const root = (
-      <ThemeProvider theme={theme}>
-        <ImageCacheProvider>
-          <StateProvider state={state}>
-            <ComponentsProvider value={Components}>
-              {renderContent()}
-            </ComponentsProvider>
-          </StateProvider>
-        </ImageCacheProvider>
-      </ThemeProvider>
-    );
-
-    render(root, surface, CanvasKit, () => {
-      const image = surface.makeImageSnapshot();
-
-      const colorSpace = image.getColorSpace();
-
-      const bytes =
-        format === 'bytes'
-          ? readPixels(image)
-          : image.encodeToBytes(
-              format === 'png'
-                ? CanvasKit.ImageFormat.PNG
-                : format === 'jpg'
-                ? CanvasKit.ImageFormat.JPEG
-                : CanvasKit.ImageFormat.WEBP,
-              100,
-            );
-
-      if (!bytes) {
-        resolve(undefined);
-        return;
+      if (!surface) {
+        console.warn('failed to create surface');
+        return Promise.resolve(undefined);
       }
 
-      colorSpace.delete();
+      return new Promise((resolve) => {
+        const root = (
+          <CanvasKitProvider>
+            <ThemeProvider theme={theme}>
+              <StateProvider state={state}>
+                <ImageCacheProvider>
+                  <FontManagerProvider>
+                    <ComponentsProvider value={Components}>
+                      {renderContent()}
+                    </ComponentsProvider>
+                  </FontManagerProvider>
+                </ImageCacheProvider>
+              </StateProvider>
+            </ThemeProvider>
+          </CanvasKitProvider>
+        );
 
-      unmount(surface, () => {
-        resolve(bytes);
+        render(root, surface, CanvasKit, () => {
+          const image = surface.makeImageSnapshot();
 
-        surface.delete();
+          const bytes =
+            format === 'bytes'
+              ? readPixels(image)
+              : image.encodeToBytes(
+                  format === 'png'
+                    ? CanvasKit.ImageFormat.PNG
+                    : format === 'jpg'
+                    ? CanvasKit.ImageFormat.JPEG
+                    : CanvasKit.ImageFormat.WEBP,
+                  100,
+                );
+
+          if (!bytes) {
+            resolve(undefined);
+            return;
+          }
+
+          unmount(surface, () => {
+            resolve(bytes);
+
+            surface.delete();
+          });
+        });
       });
-    });
-  });
+    }
+  }
 }

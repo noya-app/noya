@@ -2,11 +2,9 @@
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
 import { Canvas, CanvasKit, Surface } from 'canvaskit';
-import { fontManager } from 'noya-renderer';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
 import ReactReconciler from 'react-reconciler';
-import { FontManagerProvider } from './contexts/FontManagerContext';
 import {
   AnyElementInstance,
   AnyElementProps,
@@ -435,14 +433,9 @@ export function render(
 
   const container = getContainerForSurface(surface, context);
 
-  canvaskitReconciler.updateContainer(
-    <FontManagerProvider value={fontManager}>{element}</FontManagerProvider>,
-    container,
-    null,
-    () => {
-      callback?.();
-    },
-  );
+  canvaskitReconciler.updateContainer(element, container, null, () => {
+    callback?.();
+  });
 }
 
 export function unmount(surface: Surface, callback?: () => void) {

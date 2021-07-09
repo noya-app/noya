@@ -88,7 +88,7 @@ export function layerPropertyReducer(
 
           layer.fixedRadius = Math.max(0, newValue);
           layer.points.forEach((point) => {
-            point.cornerRadius = newValue;
+            point.cornerRadius = layer.fixedRadius;
           });
         });
       });

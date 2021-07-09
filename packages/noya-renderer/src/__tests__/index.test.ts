@@ -1,6 +1,7 @@
 import { CanvasKit } from 'canvaskit';
 import { VirtualConsole } from 'jsdom';
 import { color, fill, rect } from '../primitives';
+import { loadCanvasKit } from 'noya-renderer';
 
 let ck: CanvasKit;
 
@@ -9,7 +10,7 @@ const originalVirtualConsole: VirtualConsole = global._virtualConsole;
 beforeAll(async () => {
   global._virtualConsole = new VirtualConsole();
 
-  ck = await global.loadCanvasKit();
+  ck = await loadCanvasKit();
 });
 
 afterAll(() => {

@@ -172,6 +172,14 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
   );
 };
 
+function getNewValue(value: number, mode: SetNumberMode, delta?: number) {
+  return delta === undefined
+    ? value
+    : mode === 'replace'
+    ? delta
+    : value + delta;
+}
+
 export const moveSelectedPoints = (
   selectedPointLists: SelectedPointLists,
   layerIndexPaths: IndexPath[],
@@ -193,10 +201,28 @@ export const moveSelectedPoints = (
 
   layerIndexPaths.forEach((indexPath) => {
     const layer = Layers.access(pageSnapshot, indexPath);
+
+    if (!Layers.isPointsLayer(layer)) return;
+
+    // We handle dragging a single point by adjusting the layer's frame directly.
+    // The position of points within the layer's frame isn't meaningful when there's
+    // only one point, so we don't need to change the point itself.
+    if (layer.points.length === 1) {
+      const draftLayer = Layers.access(draftPage, indexPath) as PointsLayer;
+
+      draftLayer.frame = {
+        ...layer.frame,
+        x: getNewValue(layer.frame.x, mode, delta.x),
+        y: getNewValue(layer.frame.y, mode, delta.y),
+      };
+
+      return;
+    }
+
     const pointList = selectedPointLists[layer.do_objectID];
     const boundingRect = boundingRects[layer.do_objectID];
 
-    if (!Layers.isPointsLayer(layer) || !boundingRect) return;
+    if (!boundingRect) return;
 
     // Update all points by first transforming to the canvas's coordinate system
     const decodedPoints = layer.points
@@ -206,18 +232,8 @@ export const moveSelectedPoints = (
 
         (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
           decodedPoint[key] = {
-            x:
-              delta.x === undefined
-                ? decodedPoint[key].x
-                : mode === 'replace'
-                ? delta.x
-                : decodedPoint[key].x + delta.x,
-            y:
-              delta.y === undefined
-                ? decodedPoint[key].y
-                : mode === 'replace'
-                ? delta.y
-                : decodedPoint[key].y + delta.y,
+            x: getNewValue(decodedPoint[key].x, mode, delta.x),
+            y: getNewValue(decodedPoint[key].y, mode, delta.y),
           };
         });
 

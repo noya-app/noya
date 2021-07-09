@@ -11,10 +11,19 @@ export * from './groupBy';
 export * from './getIncrementedName';
 export * from './interpolate';
 export * from './rotate';
+export * from './invert';
 export * from './base64';
+export * from './utf16';
 export * from './fileType';
 export * as delimitedPath from './delimitedPath';
 
 // Consider moving these to a more React-specific package
 export * from './PromiseState';
 export * from './SuspendedValue';
+
+// These are exposed for simpler dependency injection in tests
+// Consider moving to a separate package
+export let PATH_TO_WASM = '/wasm/';
+export function setPathToWasm(path: string) {
+  PATH_TO_WASM = path + '/';
+}

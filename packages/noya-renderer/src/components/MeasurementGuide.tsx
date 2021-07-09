@@ -1,6 +1,6 @@
 import { Point } from 'noya-geometry';
-import { useColorFill, useFontManager, usePaint } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { useColorFill, usePaint } from 'noya-react-canvaskit';
+import { useCanvasKit, useFontManager } from 'noya-renderer';
 import React, { useMemo } from 'react';
 import { Polyline, Rect, Text } from '..';
 import { DistanceMeasurementProps } from './guides';

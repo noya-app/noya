@@ -41,6 +41,7 @@ import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
+// import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
   position: 'absolute',
@@ -711,6 +712,9 @@ export default memo(function Canvas() {
       >
         <InsetContainer insets={insets}>
           {canvasSizeWithInsets && (
+            // <SVGRenderer size={canvasSizeWithInsets}>
+            //   <SketchFileRenderer />
+            // </SVGRenderer>
             <CanvasKitRenderer size={canvasSizeWithInsets} />
           )}
         </InsetContainer>
