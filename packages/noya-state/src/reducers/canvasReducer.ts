@@ -417,6 +417,7 @@ export function canvasReducer(
                 Sketch.CurveMode.Mirrored;
 
               layer.points[pointIndexPath.pointIndex].hasCurveFrom = true;
+              layer.points[pointIndexPath.pointIndex].hasCurveTo = true;
 
               draft.selectedControlPoint = {
                 layerId: draft.selectedObjects[0],

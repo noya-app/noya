@@ -407,16 +407,13 @@ export default memo(function SketchFileRenderer() {
       return;
 
     const layer = Layers.access(page, indexPath.indexPath) as PointsLayer;
-    const decodedCurvePoint = Primitives.decodeCurvePoint(
-      layer.points[indexPath.pointIndex],
-      layer.frame,
-    );
 
     return (
       <>
         <PseudoPathLine
           point={interactionState.point}
-          decodedCurvePoint={decodedCurvePoint}
+          curvePoint={layer.points[indexPath.pointIndex]}
+          layer={layer}
         />
         <PseudoPoint point={interactionState.point} />
       </>
