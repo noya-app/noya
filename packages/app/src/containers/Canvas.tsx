@@ -232,8 +232,9 @@ export default memo(function Canvas() {
         }
         case 'drawingShapePath': {
           dispatch('addShapePathLayer', point);
-          dispatch('interaction', ['editPath']);
+
           dispatch('interaction', ['maybeMoveControlPoint', point]);
+          // dispatch('interaction', ['editPath']);
           break;
         }
         case 'editPath': {

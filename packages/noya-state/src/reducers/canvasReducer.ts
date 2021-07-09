@@ -398,16 +398,13 @@ export function canvasReducer(
           }
           case 'movingControlPoint': {
             if (!draft.selectedControlPoint && !draft.selectedObjects) return;
+
             const { current, origin, pageSnapshot } = interactionState;
 
             if (!draft.selectedControlPoint) {
               const pointIndexPath = getIndexPathOfOpenShapeLayer(state);
 
               if (!pointIndexPath) return state;
-              // const layer = Layers.access(
-              //   draft.sketch.pages[pageIndex],
-              //   pointIndexPath.indexPath,
-              // );
 
               const layer = Layers.find(
                 getCurrentPage(state),
@@ -419,14 +416,12 @@ export function canvasReducer(
               layer.points[pointIndexPath.pointIndex].curveMode =
                 Sketch.CurveMode.Mirrored;
 
-              // for (let layerId in draft.selectedPointLists) {
-              //   draft.selectedPointLists[layerId] = [];
-              // }
+              layer.points[pointIndexPath.pointIndex].hasCurveFrom = true;
 
               draft.selectedControlPoint = {
                 layerId: draft.selectedObjects[0],
                 pointIndex: pointIndexPath.pointIndex,
-                controlPointType: 'curveTo',
+                controlPointType: 'curveFrom',
               };
             }
             const delta = {
