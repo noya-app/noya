@@ -1,25 +1,24 @@
-import { Point } from 'noya-geometry';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CurvePoint } from '@sketch-hq/sketch-file-format-ts/dist/cjs/types';
 import { useStroke } from 'noya-react-canvaskit';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTheme } from 'styled-components';
-import { Polyline, Primitives } from '..';
+import { Path, Primitives, useCanvasKit } from '..';
 
 interface EditablePathPointProps {
-  point: Point;
-  decodedCurvePoint: Primitives.DecodedCurvePoint;
+  points: CurvePoint[];
+  frame: Sketch.Rect;
 }
 
 export default function PseudoPathLine({
-  point,
-  decodedCurvePoint,
+  points,
+  frame,
 }: EditablePathPointProps) {
+  const CanvasKit = useCanvasKit();
   const { primary } = useTheme().colors;
-
   const stroke = useStroke({ color: primary });
 
-  const points = useMemo(() => {
-    return [point, decodedCurvePoint.point];
-  }, [decodedCurvePoint.point, point]);
+  const path = Primitives.path(CanvasKit, points, frame, false);
 
-  return <Polyline points={points} paint={stroke} />;
+  return <Path path={path} paint={stroke} />;
 }

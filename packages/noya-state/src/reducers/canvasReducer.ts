@@ -14,7 +14,6 @@ import {
   DecodedCurvePoint,
   encodeCurvePoint,
   resizeRect,
-  stringifyPoint,
 } from 'noya-renderer/src/primitives';
 import * as Layers from '../layers';
 import * as Models from '../models';
@@ -158,17 +157,18 @@ export function canvasReducer(
 
         addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
 
-        const encodedPoint: Sketch.CurvePoint = {
+        const decodedPoint: DecodedCurvePoint = {
           _class: 'curvePoint',
           cornerRadius: 0,
-          curveFrom: stringifyPoint({ x: 0, y: 0 }),
-          curveTo: stringifyPoint({ x: 0, y: 0 }),
+          curveFrom: point,
+          curveTo: point,
           hasCurveFrom: false,
           hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
-          point: stringifyPoint({ x: 0, y: 0 }),
+          point,
         };
 
+        const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
         layer.points = [encodedPoint];
 
         draft.selectedObjects = [layer.do_objectID];
@@ -235,8 +235,8 @@ export function canvasReducer(
         const decodedPoint: DecodedCurvePoint = {
           _class: 'curvePoint',
           cornerRadius: 0,
-          curveFrom: { x: 0, y: 0 },
-          curveTo: { x: 0, y: 0 },
+          curveFrom: point,
+          curveTo: point,
           hasCurveFrom: false,
           hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
@@ -259,6 +259,8 @@ export function canvasReducer(
 
         draft.selectedPointLists[layer.do_objectID] =
           pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+
+        draft.selectedControlPoint = undefined;
 
         return;
       });
@@ -390,6 +392,7 @@ export function canvasReducer(
           }
           case 'movingControlPoint': {
             if (!draft.selectedControlPoint) return;
+
             const { current, origin, pageSnapshot } = interactionState;
 
             const delta = {

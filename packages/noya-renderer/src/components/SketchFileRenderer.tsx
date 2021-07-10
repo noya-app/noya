@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
@@ -40,6 +40,7 @@ import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
+import { DecodedCurvePoint, encodeCurvePoint } from '../primitives';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -411,17 +412,27 @@ export default memo(function SketchFileRenderer() {
       return;
 
     const layer = Layers.access(page, indexPath.indexPath) as PointsLayer;
-    const decodedCurvePoint = Primitives.decodeCurvePoint(
-      layer.points[indexPath.pointIndex],
+
+    const decodedPointToDraw: DecodedCurvePoint = {
+      _class: 'curvePoint',
+      cornerRadius: 0,
+      curveFrom: interactionState.point,
+      curveTo: interactionState.point,
+      hasCurveFrom: false,
+      hasCurveTo: false,
+      curveMode: Sketch.CurveMode.Straight,
+      point: interactionState.point,
+    };
+
+    const encodedPointToDraw = encodeCurvePoint(
+      decodedPointToDraw,
       layer.frame,
     );
+    const points = [encodedPointToDraw, layer.points[indexPath.pointIndex]];
 
     return (
       <>
-        <PseudoPathLine
-          point={interactionState.point}
-          decodedCurvePoint={decodedCurvePoint}
-        />
+        <PseudoPathLine points={points} frame={layer.frame} />
         <PseudoPoint point={interactionState.point} />
       </>
     );
@@ -447,6 +458,11 @@ export default memo(function SketchFileRenderer() {
               layer={layer}
               selectedIndexes={
                 state.selectedPointLists[layer.do_objectID] ?? []
+              }
+              selectedControlPoint={
+                state.selectedControlPoint
+                  ? state.selectedControlPoint
+                  : undefined
               }
             />
           );
