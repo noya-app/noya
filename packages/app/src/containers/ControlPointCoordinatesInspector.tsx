@@ -1,12 +1,8 @@
 import { SetNumberMode } from 'noya-state';
-import { getSelectedControlPoint } from 'noya-state/src/selectors/pointSelectors';
+import { getCurvePointForSelectedControlPoint } from 'noya-state/src/selectors/pointSelectors';
 import React, { memo, useCallback } from 'react';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
-
-function roundNumber(number: number, roundTo: number) {
-  return parseFloat(number.toFixed(roundTo));
-}
 
 export default memo(function ControlPointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();
@@ -25,23 +21,18 @@ export default memo(function ControlPointCoordinatesInspector() {
     [dispatch],
   );
 
-  const selectedControlPoint = getSelectedControlPoint(state);
-  if (!selectedControlPoint || !state.selectedControlPoint) {
-    return;
-  }
+  const decodedCurvePoint = getCurvePointForSelectedControlPoint(state);
 
-  const pointX =
-    selectedControlPoint[state.selectedControlPoint.controlPointType].x;
-  const pointY =
-    selectedControlPoint[state.selectedControlPoint.controlPointType].y;
+  if (!decodedCurvePoint || !state.selectedControlPoint) return null;
 
-  const roundedPointX = pointX ? roundNumber(pointX, 2) : undefined;
-  const roundedPointY = pointY ? roundNumber(pointY, 2) : undefined;
+  const { x, y } = decodedCurvePoint[
+    state.selectedControlPoint.controlPointType
+  ];
 
   return (
     <CoordinatesInspector
-      x={roundedPointX}
-      y={roundedPointY}
+      x={x}
+      y={y}
       onSetX={handleSetPointX}
       onSetY={handleSetPointY}
     />

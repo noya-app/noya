@@ -5,6 +5,10 @@ import styled from 'styled-components';
 import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';
 
+function roundNumber(number: number, roundTo: number) {
+  return Number(number.toFixed(roundTo));
+}
+
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
@@ -22,9 +26,17 @@ export interface Props {
 export default function CoordinatesInspector({ x, y, onSetX, onSetY }: Props) {
   return (
     <Row>
-      <DimensionInput value={x} onSetValue={onSetX} label="X" />
+      <DimensionInput
+        value={x ? roundNumber(x, 2) : undefined}
+        onSetValue={onSetX}
+        label="X"
+      />
       <Spacer.Horizontal size={16} />
-      <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+      <DimensionInput
+        value={y ? roundNumber(y, 2) : undefined}
+        onSetValue={onSetY}
+        label="Y"
+      />
     </Row>
   );
 }

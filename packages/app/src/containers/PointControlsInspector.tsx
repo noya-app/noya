@@ -66,7 +66,7 @@ export default memo(function PointControlsInspector() {
   const isClosed =
     getMultiValue(selectedLayers.map((layer) => layer.isClosed)) ?? true;
 
-  const controlPoint = Selectors.getSelectedControlPoint(state);
+  const controlPoint = Selectors.getCurvePointForSelectedControlPoint(state);
   const points = controlPoint
     ? [controlPoint]
     : Selectors.getSelectedPoints(state);

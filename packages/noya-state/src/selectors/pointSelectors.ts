@@ -106,7 +106,7 @@ export const getSelectedPoints = (
   return selectedPoints;
 };
 
-export const getSelectedControlPoint = (
+export const getCurvePointForSelectedControlPoint = (
   state: ApplicationState,
 ): DecodedCurvePoint | undefined => {
   if (!state.selectedControlPoint) {
