@@ -456,7 +456,8 @@ export default memo(function SketchFileRenderer() {
   }, [isEditingPath, page, state]);
 
   const symbol = useMemo(() => {
-    if (interactionState.type !== 'insertingSymbol') return;
+    if (interactionState.type !== 'insertingSymbol' || !interactionState.point)
+      return;
 
     const symbol = {
       ...getSymbols(state).find(
@@ -465,7 +466,7 @@ export default memo(function SketchFileRenderer() {
     } as Sketch.SymbolMaster;
 
     const symbolInstance = produce(symbol, (draft) => {
-      if (!symbol || !draft.style || !interactionState.point) return;
+      if (!symbol || !draft.style) return;
 
       draft.style.contextSettings = {
         _class: 'graphicsContextSettings',
@@ -475,8 +476,8 @@ export default memo(function SketchFileRenderer() {
 
       draft.frame = {
         ...symbol.frame,
-        x: interactionState.point.x - symbol.frame.width / 2,
-        y: interactionState.point.y - symbol.frame.height / 2,
+        x: interactionState.point!.x - symbol.frame.width / 2,
+        y: interactionState.point!.y - symbol.frame.height / 2,
       };
     });
 
@@ -488,12 +489,8 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {interactionState.type === 'insertingSymbol' && symbol && (
-          <SketchArtboardContent
-            key={symbol.symbolID}
-            layer={symbol}
-            showBackground={false}
-          />
+        {symbol && (
+          <SketchArtboardContent layer={symbol} showBackground={false} />
         )}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
