@@ -327,6 +327,7 @@ export default memo(function LayerList() {
 
         return (
           <LayerRow
+            id={id}
             menuItems={menuItems}
             onSelectMenuItem={onSelectMenuItem}
             onContextMenu={handleContextMenu}
@@ -380,6 +381,7 @@ export default memo(function LayerList() {
   return (
     <TreeView.Root
       scrollable
+      sortable
       onClick={useCallback(() => dispatch('selectLayer', undefined), [
         dispatch,
       ])}
