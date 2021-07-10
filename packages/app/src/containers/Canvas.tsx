@@ -101,7 +101,7 @@ export default memo(function Canvas() {
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => {
-      dispatch('gesturePan', { x, y });
+      dispatch('pan', { x, y });
     },
   });
 

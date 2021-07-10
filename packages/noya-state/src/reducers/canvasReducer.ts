@@ -55,7 +55,7 @@ export type CanvasAction =
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
   | [type: 'addPointToPath', point: Point]
-  | [type: 'gesturePan', point: Point]
+  | [type: 'pan', point: Point]
   | [
       type: 'interaction',
       // Some actions may need to be augmented by additional state before
@@ -266,7 +266,7 @@ export function canvasReducer(
         return;
       });
     }
-    case 'gesturePan': {
+    case 'pan': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
       const { x, y } = action[1];

@@ -113,7 +113,7 @@ export function applicationReducer(
     case 'addShapePathLayer':
     case 'addSymbolLayer':
     case 'addPointToPath':
-    case 'gesturePan':
+    case 'pan':
     case 'interaction':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
