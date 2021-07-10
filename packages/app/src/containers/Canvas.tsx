@@ -100,14 +100,8 @@ export default memo(function Canvas() {
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
-    onWheel: ({ movement: [x, y] }) => {
-      const rawPoint = { x, y };
-      dispatch('interaction', [
-        state.interactionState.type === 'maybePan'
-          ? 'updatePanning'
-          : 'maybePan',
-        rawPoint,
-      ]);
+    onWheel: ({ delta: [x, y] }) => {
+      dispatch('gesturePan', { x, y });
     },
   });
 
