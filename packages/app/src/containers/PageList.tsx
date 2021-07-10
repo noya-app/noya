@@ -29,9 +29,11 @@ const Header = styled.div(({ theme }) => ({
 
 type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
+type PageInfo = { do_objectID: string; name: string };
+
 interface Props {
   selectedPageId: string;
-  pageInfo: { do_objectID: string; name: string }[];
+  pageInfo: PageInfo[];
   canDelete: boolean;
 }
 
@@ -80,28 +82,6 @@ const PageListContent = memo(function PageListContent({
     if (name !== null) dispatch('addPage', name);
   }, [dispatch]);
 
-  const pageElements = useMemo(() => {
-    return pageInfo.map((page) => (
-      <ListView.Row<MenuItemType>
-        id={page.do_objectID}
-        key={page.do_objectID}
-        selected={selectedPageId === page.do_objectID}
-        onClick={() => {
-          dispatch('interaction', ['reset']);
-          dispatch('selectPage', page.do_objectID);
-        }}
-        menuItems={menuItems}
-        onSelectMenuItem={handleSelectMenuItem}
-        onContextMenu={() => {
-          dispatch('selectPage', page.do_objectID);
-        }}
-      >
-        <Spacer.Horizontal size={6 + 15} />
-        {page.name}
-      </ListView.Row>
-    ));
-  }, [pageInfo, selectedPageId, menuItems, handleSelectMenuItem, dispatch]);
-
   return (
     <Container>
       <Header>
@@ -120,9 +100,30 @@ const PageListContent = memo(function PageListContent({
           },
           [dispatch],
         )}
-      >
-        {pageElements}
-      </ListView.Root>
+        items={pageInfo}
+        renderItem={useCallback(
+          (page: PageInfo, { isDragging }) => (
+            <ListView.Row<MenuItemType>
+              id={page.do_objectID}
+              key={page.do_objectID}
+              selected={!isDragging && selectedPageId === page.do_objectID}
+              onClick={() => {
+                dispatch('interaction', ['reset']);
+                dispatch('selectPage', page.do_objectID);
+              }}
+              menuItems={menuItems}
+              onSelectMenuItem={handleSelectMenuItem}
+              onContextMenu={() => {
+                dispatch('selectPage', page.do_objectID);
+              }}
+            >
+              <Spacer.Horizontal size={6 + 15} />
+              {page.name}
+            </ListView.Row>
+          ),
+          [selectedPageId, menuItems, handleSelectMenuItem, dispatch],
+        )}
+      />
     </Container>
   );
 });

@@ -6,8 +6,6 @@ import {
   createBounds,
   createRect,
   normalizeRect,
-  rectContainsPoint,
-  rectsIntersect,
   Size,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
@@ -20,6 +18,7 @@ import {
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
+  addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
   getBoundingRect,
@@ -28,6 +27,7 @@ import {
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSymbols,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
@@ -53,6 +53,7 @@ export type CanvasAction =
     ]
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
+  | [type: 'addSymbolLayer', symbolId: string, point: Point]
   | [type: 'addPointToPath', point: Point]
   | [
       type: 'interaction',
@@ -127,24 +128,7 @@ export function canvasReducer(
         const layer = draft.interactionState.value;
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
-          // Check if the layer intersects any artboards or symbolMasters.
-          // If so, we'll insert the layer within
-          const parent = draft.sketch.pages[pageIndex].layers
-            .filter(
-              (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
-                Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
-            )
-            .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
-
-          if (parent && Layers.isChildLayer(layer)) {
-            layer.frame.x -= parent.frame.x;
-            layer.frame.y -= parent.frame.y;
-
-            parent.layers.push(layer);
-          } else {
-            draft.sketch.pages[pageIndex].layers.push(layer);
-          }
-
+          addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
           draft.selectedObjects = [layer.do_objectID];
         }
 
@@ -158,13 +142,6 @@ export function canvasReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (draft) => {
-        const parent = draft.sketch.pages[pageIndex].layers
-          .filter(
-            (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
-              Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
-          )
-          .find((artboard) => rectContainsPoint(artboard.frame, point));
-
         const layer = produce(Models.shapePath, (layer) => {
           const minArea = {
             x: point.x + 1,
@@ -178,14 +155,7 @@ export function canvasReducer(
           };
         });
 
-        if (parent && Layers.isChildLayer(layer)) {
-          layer.frame.x -= parent.frame.x;
-          layer.frame.y -= parent.frame.y;
-
-          parent.layers.push(layer);
-        } else {
-          draft.sketch.pages[pageIndex].layers.push(layer);
-        }
+        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
 
         const decodedPoint: DecodedCurvePoint = {
           _class: 'curvePoint',
@@ -203,6 +173,30 @@ export function canvasReducer(
 
         draft.selectedObjects = [layer.do_objectID];
         draft.selectedPointLists = { [layer.do_objectID]: [0] };
+      });
+    }
+    case 'addSymbolLayer': {
+      const [, symbolId, point] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      const symbol = getSymbols(state).find(
+        ({ do_objectID }) => do_objectID === symbolId,
+      ) as Sketch.SymbolMaster;
+
+      const layer = produce(Models.symbolInstance, (layer) => {
+        layer.do_objectID = uuid();
+        layer.name = symbol.name;
+        layer.symbolID = symbol.symbolID;
+        layer.frame = {
+          ...symbol.frame,
+          x: point.x - symbol.frame.width / 2,
+          y: point.y - symbol.frame.height / 2,
+        };
+      });
+
+      return produce(state, (draft) => {
+        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
+        draft.selectedObjects = [layer.do_objectID];
       });
     }
     case 'addPointToPath': {

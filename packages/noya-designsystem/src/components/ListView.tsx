@@ -11,6 +11,7 @@ import {
   Ref,
   useCallback,
   useContext,
+  useMemo,
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
 import { useHover } from '../hooks/useHover';
@@ -79,6 +80,7 @@ const SectionHeaderContainer = styled.li<{
   borderBottom: `1px solid ${
     selected ? theme.colors.primaryDark : theme.colors.divider
   }`,
+  color: theme.colors.textMuted,
   backgroundColor: theme.colors.listView.raisedBackground,
   ...(disabled && {
     color: theme.colors.textDisabled,
@@ -89,6 +91,7 @@ const SectionHeaderContainer = styled.li<{
   }),
   display: 'flex',
   alignItems: 'center',
+  position: 'relative',
 }));
 
 const RowContainer = styled.li<{
@@ -112,6 +115,7 @@ const RowContainer = styled.li<{
   paddingLeft: '12px',
   marginLeft: '8px',
   marginRight: '8px',
+  color: theme.colors.textMuted,
   ...(disabled && {
     color: theme.colors.textDisabled,
   }),
@@ -137,6 +141,21 @@ const RowContainer = styled.li<{
       borderBottomRightRadius: '0px',
       borderBottomLeftRadius: '0px',
     }),
+  position: 'relative',
+}));
+
+const DragIndicatorElement = styled.div<{
+  dragIndicator: Sortable.DragIndicator;
+}>(({ theme, dragIndicator }) => ({
+  position: 'absolute',
+  top: dragIndicator === 'above' ? 0 : undefined,
+  bottom: dragIndicator === 'below' ? 0 : undefined,
+  left: 0,
+  right: 0,
+  height: 3,
+  background: theme.colors.primary,
+  border: '1px solid rgba(255,255,255,0.5)',
+  borderRadius: '3px',
 }));
 
 export interface ListViewClickInfo {
@@ -191,7 +210,12 @@ const ListViewRow = forwardRef(function ListViewRow<
   );
 
   const renderContent = (
-    renderProps: React.ComponentProps<typeof RowContainer>,
+    {
+      dragIndicator,
+      ...renderProps
+    }: React.ComponentProps<typeof RowContainer> & {
+      dragIndicator?: Sortable.DragIndicator;
+    },
     ref: Ref<HTMLLIElement>,
   ) => {
     const Component = isSectionHeader ? SectionHeaderContainer : RowContainer;
@@ -210,6 +234,9 @@ const ListViewRow = forwardRef(function ListViewRow<
         aria-selected={selected}
         {...renderProps}
       >
+        {dragIndicator && (
+          <DragIndicatorElement dragIndicator={dragIndicator} />
+        )}
         {children}
       </Component>
     );
@@ -256,23 +283,36 @@ const RootContainer = styled.ul<{ scrollable?: boolean }>(
   }),
 );
 
-interface ListViewRootProps {
-  children?: ReactNode;
+type ItemInfo = {
+  index: number;
+  isDragging: boolean;
+};
+
+type ChildrenProps<T> =
+  | {
+      children: ReactNode;
+    }
+  | {
+      items: T[];
+      renderItem: (item: T, info: ItemInfo) => ReactNode;
+    };
+
+type ListViewRootProps<T> = ChildrenProps<T> & {
   onClick?: () => void;
   sortable?: boolean;
   scrollable?: boolean;
   expandable?: boolean;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
-}
+};
 
-function ListViewRoot({
+function ListViewRoot<T = any>({
   onClick,
-  children,
   sortable = false,
   scrollable = false,
   expandable = true,
   onMoveItem,
-}: ListViewRootProps) {
+  ...props
+}: ListViewRootProps<T>) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -282,7 +322,12 @@ function ListViewRoot({
     [onClick],
   );
 
-  const flattened = Children.toArray(children);
+  const flattened =
+    'items' in props
+      ? props.items.map((item, index) =>
+          props.renderItem(item, { index, isDragging: false }),
+        )
+      : Children.toArray(props.children);
 
   const ids: string[] = flattened.flatMap((current) =>
     isValidElement(current) && typeof current.props.id === 'string'
@@ -290,7 +335,7 @@ function ListViewRoot({
       : [],
   );
 
-  const mappedChildren = flattened.map((current, i) => {
+  const getWrappedChild = (current: ReactNode, i: number) => {
     if (!isValidElement(current)) return current;
 
     const prev = flattened[i - 1];
@@ -337,20 +382,41 @@ function ListViewRoot({
         {current}
       </ListRowContext.Provider>
     );
-  });
+  };
 
-  if (sortable && ids.length !== mappedChildren.length) {
+  const wrappedChildren = flattened.map(getWrappedChild);
+
+  if (sortable && ids.length !== wrappedChildren.length) {
     throw new Error(
       'Bad ListView props: each row element needs an id to be sortable',
     );
   }
 
+  const renderItem = 'items' in props ? props.renderItem : undefined;
+  const items = 'items' in props ? props.items : undefined;
+
+  const renderOverlay = useMemo(
+    () =>
+      renderItem && items
+        ? (index: number) =>
+            renderItem(items[index], {
+              index,
+              isDragging: true,
+            })
+        : undefined,
+    [renderItem, items],
+  );
+
   const content = sortable ? (
-    <Sortable.Root onMoveItem={onMoveItem} keys={ids}>
-      {mappedChildren}
+    <Sortable.Root
+      onMoveItem={onMoveItem}
+      keys={ids}
+      renderOverlay={renderOverlay}
+    >
+      {wrappedChildren}
     </Sortable.Root>
   ) : (
-    mappedChildren
+    wrappedChildren
   );
 
   const scrollableContent = scrollable ? (
