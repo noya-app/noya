@@ -10,7 +10,6 @@ import {
   SUPPORTED_FILE_TYPES,
   useHover,
 } from 'noya-designsystem';
-import { FileMap } from 'noya-sketch-file';
 import { uuid } from 'noya-utils';
 import { DragEvent, memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -58,7 +57,6 @@ const UploadButton = styled.button<{ show: boolean }>(({ show = false }) => ({
 
 interface Props {
   id: string;
-  images: FileMap;
   pattern: SketchPattern;
   onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
   onChangeFillType: (amount: Sketch.PatternFillType) => void;
@@ -76,22 +74,13 @@ export const PATTERN_FILL_TYPE_OPTIONS: PatternFillType[] = [
 ];
 
 interface PatternPreviewProps {
-  images: FileMap;
-
   pattern: SketchPattern;
-  isTile: boolean;
   onAddImage: (image: ArrayBuffer, _ref: string) => void;
   onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
 }
 
 const PatternPreview = memo(
-  ({
-    images,
-    pattern,
-    isTile,
-    onAddImage,
-    onChangeImage,
-  }: PatternPreviewProps) => {
+  ({ pattern, onAddImage, onChangeImage }: PatternPreviewProps) => {
     const [isHovering, onHoverChange] = useState(false);
     const { hoverProps } = useHover({
       onHoverChange,
@@ -176,7 +165,6 @@ const PatternPreview = memo(
 
 export default memo(function PatternInspector({
   id,
-  images,
   pattern,
   createImage,
   onChangeImage,
@@ -212,9 +200,7 @@ export default memo(function PatternInspector({
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Column>
         <PatternPreview
-          images={images}
           pattern={pattern}
-          isTile={isTile}
           onAddImage={createImage}
           onChangeImage={onChangeImage}
         />
