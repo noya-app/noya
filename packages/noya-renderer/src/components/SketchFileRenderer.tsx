@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
@@ -37,6 +38,7 @@ import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
+import { DecodedCurvePoint, encodeCurvePoint } from '../primitives';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -408,13 +410,26 @@ export default memo(function SketchFileRenderer() {
 
     const layer = Layers.access(page, indexPath.indexPath) as PointsLayer;
 
+    const decodedPointToDraw: DecodedCurvePoint = {
+      _class: 'curvePoint',
+      cornerRadius: 0,
+      curveFrom: interactionState.point,
+      curveTo: interactionState.point,
+      hasCurveFrom: false,
+      hasCurveTo: false,
+      curveMode: Sketch.CurveMode.Straight,
+      point: interactionState.point,
+    };
+
+    const encodedPointToDraw = encodeCurvePoint(
+      decodedPointToDraw,
+      layer.frame,
+    );
+    const points = [encodedPointToDraw, layer.points[indexPath.pointIndex]];
+
     return (
       <>
-        <PseudoPathLine
-          point={interactionState.point}
-          curvePoint={layer.points[indexPath.pointIndex]}
-          frame={layer.frame}
-        />
+        <PseudoPathLine points={points} frame={layer.frame} />
         <PseudoPoint point={interactionState.point} />
       </>
     );

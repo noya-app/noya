@@ -45,6 +45,10 @@ export function pointReducer(
 
       return visitSelectedDraftPoints(state, (curvePoint) => {
         curvePoint.curveMode = curveMode;
+        if (curveMode !== Sketch.CurveMode.Straight) {
+          curvePoint.hasCurveFrom = true;
+          curvePoint.hasCurveTo = true;
+        }
       });
     }
     case 'setPointCornerRadius': {

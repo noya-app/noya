@@ -192,8 +192,8 @@ export function canvasReducer(
           cornerRadius: 0,
           curveFrom: point,
           curveTo: point,
-          hasCurveFrom: true,
-          hasCurveTo: true,
+          hasCurveFrom: false,
+          hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
           point,
         };
@@ -243,8 +243,8 @@ export function canvasReducer(
           cornerRadius: 0,
           curveFrom: point,
           curveTo: point,
-          hasCurveFrom: true,
-          hasCurveTo: true,
+          hasCurveFrom: false,
+          hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
           point,
         };
