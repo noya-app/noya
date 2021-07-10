@@ -83,7 +83,9 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
       );
 
       return () => {
-        unmount(surface);
+        if (surface.isDeleted()) {
+          unmount(surface);
+        }
       };
     } catch (e) {
       console.warn('rendering error', e);
