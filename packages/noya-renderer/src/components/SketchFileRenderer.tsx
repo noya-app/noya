@@ -456,8 +456,10 @@ export default memo(function SketchFileRenderer() {
   }, [isEditingPath, page, state]);
 
   const symbol = useMemo(() => {
-    if (interactionState.type !== 'insertingSymbol' || !interactionState.point)
-      return;
+    if (interactionState.type !== 'insertingSymbol') return;
+
+    const point = interactionState.point;
+    if (!point) return;
 
     const symbol = {
       ...getSymbols(state).find(
@@ -476,8 +478,8 @@ export default memo(function SketchFileRenderer() {
 
       draft.frame = {
         ...symbol.frame,
-        x: interactionState.point!.x - symbol.frame.width / 2,
-        y: interactionState.point!.y - symbol.frame.height / 2,
+        x: point.x - symbol.frame.width / 2,
+        y: point.y - symbol.frame.height / 2,
       };
     });
 
