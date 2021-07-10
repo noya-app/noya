@@ -20,6 +20,9 @@ body {
   display: flex;
   flex-direction: row;
   align-items: stretch;
+
+  /* Disable 2-finger swipe-to-navigate-back gesture */
+  overscroll-behavior-x: none;
 }
 
 #root {
