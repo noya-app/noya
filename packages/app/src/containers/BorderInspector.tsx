@@ -1,13 +1,29 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { isDeepEqual, zipLongest } from 'noya-utils';
 import ArrayController from '../components/inspector/ArrayController';
 import BorderRow from '../components/inspector/BorderRow';
+import { DimensionValue } from '../components/inspector/DimensionsInspector';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
+import getMultiValue from '../utils/getMultiValue';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
+
+type EditableBorder = {
+  // TODO: Indeterminate `isEnabled` state
+  isEnabled: boolean;
+  hasMultipleFills: boolean;
+  color?: Sketch.Color;
+  fillType?: Sketch.FillType;
+  position?: Sketch.BorderPosition;
+  thickness?: DimensionValue;
+  contextOpacity?: DimensionValue;
+  gradient: Sketch.Gradient;
+};
 
 export default memo(function BorderInspector() {
   const [, dispatch] = useApplicationState();
@@ -16,18 +32,62 @@ export default memo(function BorderInspector() {
     useSelector(Selectors.getSelectedStyles),
   );
 
-  const borders = useShallowArray(
-    selectedStyles.map((style) => style?.borders),
+  const layerBorderLists = useShallowArray(
+    selectedStyles.map((style) => style?.borders ?? []),
   );
-  // TODO: Modify all borders
-  const firstBorder = useMemo(() => borders[0] || [], [borders]);
+
+  const editableBorders = useMemo(
+    () =>
+      zipLongest(undefined, ...layerBorderLists).map(
+        (borders): EditableBorder => {
+          const filtered = borders.flatMap((border) =>
+            border ? [border] : [],
+          );
+
+          const fillType = getMultiValue(
+            filtered.map((border) => border.fillType),
+            isDeepEqual,
+          );
+
+          const gradient = getMultiValue(
+            filtered.map((border) => border.gradient),
+            isDeepEqual,
+          );
+
+          return {
+            isEnabled:
+              getMultiValue(filtered.map((border) => border.isEnabled)) ?? true,
+            hasMultipleFills:
+              fillType === undefined ||
+              (fillType === Sketch.FillType.Gradient && !gradient),
+            color: getMultiValue(
+              filtered.map((border) => border.color),
+              isDeepEqual,
+            ),
+            fillType,
+            position: getMultiValue(
+              filtered.map((border) => border.position),
+              isDeepEqual,
+            ),
+            thickness: getMultiNumberValue(
+              filtered.map((border) => border.thickness),
+            ),
+            contextOpacity: getMultiNumberValue(
+              filtered.map((border) => border.contextSettings.opacity),
+            ),
+            gradient: gradient ?? filtered[0].gradient,
+          };
+        },
+      ),
+    [layerBorderLists],
+  );
 
   return (
-    <ArrayController<Sketch.Border>
+    <ArrayController<EditableBorder>
       title="Borders"
       id="borders"
       key="borders"
-      value={firstBorder}
+      value={editableBorders}
       onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
       onClickTrash={useCallback(() => dispatch('deleteDisabledBorders'), [
         dispatch,
@@ -51,16 +111,17 @@ export default memo(function BorderInspector() {
           index,
           checkbox,
         }: {
-          item: Sketch.Border;
+          item: EditableBorder;
           index: number;
           checkbox: ReactNode;
         }) => (
           <BorderRow
             id={`border-${index}`}
             prefix={checkbox}
-            fillType={item.fillType}
+            fillType={item.fillType ?? Sketch.FillType.Color}
+            hasMultipleFills={item.hasMultipleFills}
             width={item.thickness}
-            position={item.position}
+            position={item.position ?? Sketch.BorderPosition.Inside}
             onSetWidth={(value, mode) =>
               dispatch('setBorderWidth', index, value, mode)
             }

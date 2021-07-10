@@ -164,7 +164,7 @@ export default memo(function Inspector() {
       !hasSymbolInstance && selectedLayers.length === 1 && (
         <FillInspector title={'Fills'} allowMoreThanOne={true} />
       ),
-      !hasSymbolInstance && selectedLayers.length === 1 && <BorderInspector />,
+      selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,

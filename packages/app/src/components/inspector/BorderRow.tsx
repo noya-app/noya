@@ -46,6 +46,7 @@ interface Props {
   id: string;
   prefix?: ReactNode;
   fillType?: Sketch.FillType;
+  hasMultipleFills: boolean;
   width: DimensionValue;
   position: Sketch.BorderPosition;
   onSetWidth: (amount: number, mode: SetNumberMode) => void;
@@ -59,6 +60,7 @@ export default memo(function BorderRow({
   id,
   prefix,
   fillType,
+  hasMultipleFills,
   width,
   position,
   onSetWidth,
@@ -102,6 +104,7 @@ export default memo(function BorderRow({
         <FillInputFieldWithPicker
           id={colorInputId}
           fillType={fillType}
+          hasMultipleFills={hasMultipleFills}
           onChangeType={onChangeFillType}
           colorProps={colorProps}
           gradientProps={gradientProps}
