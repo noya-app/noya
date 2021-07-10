@@ -4,7 +4,7 @@ import type { UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
-import { createBounds } from 'noya-geometry';
+import { createBounds, rectsIntersect } from 'noya-geometry';
 import { Draft } from 'immer';
 
 export const getSelectedLayersExcludingDescendants = (
@@ -119,4 +119,25 @@ export function findSymbolMaster<T extends Sketch.SymbolMaster | undefined>(
     state.sketch.pages,
     (child) => Layers.isSymbolMaster(child) && symbolID === child.symbolID,
   ) as T;
+}
+
+export function addToParentLayer(
+  layers: Sketch.AnyLayer[],
+  layer: Sketch.AnyLayer,
+) {
+  const parent = layers
+    .filter(
+      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+        Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+    )
+    .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
+
+  if (parent && Layers.isChildLayer(layer)) {
+    layer.frame.x -= parent.frame.x;
+    layer.frame.y -= parent.frame.y;
+
+    parent.layers.push(layer);
+  } else {
+    layers.push(layer);
+  }
 }

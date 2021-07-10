@@ -1,3 +1,5 @@
+import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import produce from 'immer';
 import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
@@ -24,6 +26,7 @@ import {
   getScreenTransform,
   getSelectedLayerIndexPaths,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSymbols,
 } from 'noya-state/src/selectors/selectors';
 import {
   getAxisValues,
@@ -58,6 +61,7 @@ import MeasurementGuide from './MeasurementGuide';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
+import { SketchArtboardContent } from './layers/SketchArtboard';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -451,11 +455,45 @@ export default memo(function SketchFileRenderer() {
     );
   }, [isEditingPath, page, state]);
 
+  const symbol = useMemo(() => {
+    if (interactionState.type !== 'insertingSymbol') return;
+
+    const point = interactionState.point;
+    if (!point) return;
+
+    const symbol = {
+      ...getSymbols(state).find(
+        ({ do_objectID }) => do_objectID === interactionState.symbolID,
+      ),
+    } as Sketch.SymbolMaster;
+
+    const symbolInstance = produce(symbol, (draft) => {
+      if (!symbol || !draft.style) return;
+
+      draft.style.contextSettings = {
+        _class: 'graphicsContextSettings',
+        blendMode: 1,
+        opacity: 0.5,
+      };
+
+      draft.frame = {
+        ...symbol.frame,
+        x: point.x - symbol.frame.width / 2,
+        y: point.y - symbol.frame.height / 2,
+      };
+    });
+
+    return symbolInstance;
+  }, [state, interactionState]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
+        {symbol && (
+          <SketchArtboardContent layer={symbol} showBackground={false} />
+        )}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
         ) : isEditingPath ? (

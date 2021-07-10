@@ -224,6 +224,11 @@ export default memo(function Canvas() {
 
           break;
         }
+        case 'insertingSymbol': {
+          dispatch('addSymbolLayer', state.interactionState.symbolID, point);
+          dispatch('interaction', ['reset']);
+          break;
+        }
         case 'panMode': {
           dispatch('interaction', ['maybePan', rawPoint]);
 
@@ -376,6 +381,14 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'insertingSymbol': {
+          dispatch('interaction', [
+            'insertingSymbol',
+            state.interactionState.symbolID,
+            point,
+          ]);
+          break;
+        }
         case 'editPath': {
           dispatch('interaction', ['resetEditPath', point]);
           break;
