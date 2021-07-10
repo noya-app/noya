@@ -1,4 +1,4 @@
-import { ContextMenu } from 'noya-designsystem';
+import { ContextMenu, SUPPORTED_FILE_TYPES } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit, uuid } from 'noya-renderer';
@@ -30,12 +30,14 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  DragEvent,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
+import { useFileDropTarget } from '../hooks/useFileDropTarget';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
@@ -711,11 +713,59 @@ export default memo(function Canvas() {
     }
   }, [state, handleDirection]);
 
+  const handleDropEvent = useCallback(
+    async (e: DragEvent) => {
+      if (!e.dataTransfer) return;
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      const rawPoint = getPoint(e.nativeEvent);
+      const point = offsetEventPoint(rawPoint);
+
+      if (!file) {
+        alert('Unable to read file');
+        return;
+      }
+
+      const extension = SUPPORTED_FILE_TYPES[file.type];
+
+      if (!extension) {
+        alert(
+          `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
+        );
+        return;
+      }
+
+      const data = await file.arrayBuffer();
+      const img = new Image();
+      img.src = URL.createObjectURL(new Blob([new Uint8Array(data)]));
+
+      img.onload = function () {
+        const frame = {
+          width: img.width,
+          height: img.height,
+          x: point.x - img.width / 2,
+          y: point.y - img.height / 2,
+        };
+
+        alert(`${file.name}`);
+        dispatch('insertBitmap', data, {
+          name: file.name,
+          frame: frame,
+          extension: extension,
+        });
+      };
+    },
+    [dispatch, offsetEventPoint],
+  );
+
+  const { dropTargetProps } = useFileDropTarget(handleDropEvent);
+
   return (
     <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
       <Container
         ref={containerRef}
         cursor={cursor}
+        {...dropTargetProps}
         onPointerDown={handleMouseDown}
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}

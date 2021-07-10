@@ -39,7 +39,7 @@ import {
   getPossibleSnapLayers,
   getSnappingPairs,
 } from '../snapping';
-import { Point } from '../types';
+import { Point, Rect } from '../types';
 import { ApplicationState } from './applicationReducer';
 import {
   CompassDirection,
@@ -55,6 +55,11 @@ export type CanvasAction =
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
+  | [
+      type: 'insertBitmap',
+      file: ArrayBuffer,
+      details: { name: string; frame: Rect; extension: string },
+    ]
   | [type: 'addPointToPath', point: Point]
   | [
       type: 'interaction',
@@ -530,6 +535,24 @@ export function canvasReducer(
             break;
           }
         }
+      });
+    }
+    case 'insertBitmap': {
+      const [, file, { name, frame, extension }] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const _ref = `images/${uuid()}.${extension}`;
+        draft.sketch.images[_ref] = file;
+
+        const bitmap = produce(Models.bitmap, (layer) => {
+          layer.do_objectID = uuid();
+          layer.name = name.replace(`.${extension}`, '');
+          layer.image._ref = _ref;
+          layer.frame = { ...layer.frame, ...frame };
+        });
+
+        draft.sketch.pages[pageIndex].layers.push(bitmap);
       });
     }
     default:
