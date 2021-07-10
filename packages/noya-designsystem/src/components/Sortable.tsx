@@ -2,6 +2,8 @@ import {
   closestCenter,
   DndContext,
   DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   PointerSensor,
   useSensor,
   useSensors,
@@ -15,8 +17,19 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import {
+  createContext,
+  memo,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
+import { createPortal } from 'react-dom';
+
+export type DragIndicator = 'above' | 'below' | 'inside';
+
+const ActiveIndexContext = createContext<number | undefined>(undefined);
 
 /* ----------------------------------------------------------------------------
  * Item
@@ -28,19 +41,29 @@ interface ItemProps {
 }
 
 function SortableItem({ id, children }: ItemProps) {
+  const activeIndex = useContext(ActiveIndexContext);
   const sortable = useSortable({ id });
 
-  const { attributes, listeners, setNodeRef, transform, transition } = sortable;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    isDragging,
+    index,
+    overIndex,
+  } = sortable;
 
-  const style = useMemo(
-    () => ({
-      transform: CSS.Transform.toString(transform),
-      transition,
-    }),
-    [transform, transition],
-  );
-
-  return children({ ref: setNodeRef, style, ...attributes, ...listeners });
+  return children({
+    ref: setNodeRef,
+    ...attributes,
+    ...listeners,
+    dragIndicator:
+      index === overIndex && !isDragging
+        ? activeIndex !== undefined && activeIndex > index
+          ? 'above'
+          : 'below'
+        : undefined,
+  });
 }
 
 /* ----------------------------------------------------------------------------
@@ -50,15 +73,38 @@ function SortableItem({ id, children }: ItemProps) {
 interface RootProps {
   keys: string[];
   children: ReactNode;
+  renderOverlay?: (index: number) => ReactNode;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
 }
 
-function SortableRoot({ keys, children, onMoveItem }: RootProps) {
-  const sensors = useSensors(useSensor(PointerSensor));
+function SortableRoot({
+  keys,
+  children,
+  onMoveItem,
+  renderOverlay,
+}: RootProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+  );
+
+  const [activeIndex, setActiveIndex] = useState<number | undefined>();
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      setActiveIndex(keys.indexOf(event.active.id));
+    },
+    [keys],
+  );
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
+
+      setActiveIndex(undefined);
 
       if (over && active.id !== over.id) {
         const oldIndex = keys.indexOf(active.id);
@@ -71,16 +117,26 @@ function SortableRoot({ keys, children, onMoveItem }: RootProps) {
   );
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-      modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
-    >
-      <SortableContext items={keys} strategy={verticalListSortingStrategy}>
-        {children}
-      </SortableContext>
-    </DndContext>
+    <ActiveIndexContext.Provider value={activeIndex}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+      >
+        <SortableContext items={keys} strategy={verticalListSortingStrategy}>
+          {children}
+        </SortableContext>
+        {renderOverlay &&
+          createPortal(
+            <DragOverlay dropAnimation={null}>
+              {activeIndex !== undefined && renderOverlay(activeIndex)}
+            </DragOverlay>,
+            document.body,
+          )}
+      </DndContext>
+    </ActiveIndexContext.Provider>
   );
 }
 
