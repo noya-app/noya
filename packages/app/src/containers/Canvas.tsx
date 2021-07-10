@@ -1,5 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
+import {
+  ContextMenu,
+  mergeEventHandlers,
+  SUPPORTED_FILE_TYPES,
+} from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit, uuid } from 'noya-renderer';
@@ -31,6 +35,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  DragEvent,
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
@@ -39,6 +44,7 @@ import {
   useApplicationState,
   useSelector,
 } from '../contexts/ApplicationStateContext';
+import { useFileDropTarget } from '../hooks/useFileDropTarget';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import { useWorkspace } from '../hooks/useWorkspace';
