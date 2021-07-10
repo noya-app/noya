@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu } from 'noya-designsystem';
+import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit, uuid } from 'noya-renderer';
@@ -32,6 +32,7 @@ import {
   useMemo,
   useRef,
 } from 'react';
+import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import ImageDropTarget from '../components/ImageDropTarget';
 import {
@@ -99,6 +100,11 @@ export default memo(function Canvas() {
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
+  const bind = useGesture({
+    onWheel: ({ delta: [x, y] }) => {
+      dispatch('pan', { x, y });
+    },
+  });
 
   const isEditingPath = getIsEditingPath(state.interactionState.type);
   const nudge = (axis: 'X' | 'Y', amount: number) => {
@@ -772,9 +778,11 @@ export default memo(function Canvas() {
         <Container
           ref={containerRef}
           cursor={cursor}
-          onPointerDown={handleMouseDown}
-          onPointerMove={handleMouseMove}
-          onPointerUp={handleMouseUp}
+          {...mergeEventHandlers(bind(), {
+            onPointerDown: handleMouseDown,
+            onPointerMove: handleMouseMove,
+            onPointerUp: handleMouseUp,
+          })}
         >
           <InsetContainer insets={insets}>
             {canvasSizeWithInsets && (

@@ -59,6 +59,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'pan', point: Point]
   | [
       type: 'interaction',
       action: InteractionAction | SnapshotInteractionAction,
@@ -242,6 +243,28 @@ export function canvasReducer(
         draft.selectedControlPoint = undefined;
 
         return;
+      });
+    }
+    case 'pan': {
+      const page = getCurrentPage(state);
+      const currentPageId = page.do_objectID;
+      const { x, y } = action[1];
+
+      return produce(state, (draft) => {
+        const meta: EncodedPageMetadata = draft.sketch.user[currentPageId] ?? {
+          zoomValue: 1,
+          scrollOrigin: '{100,100}',
+        };
+
+        const parsed = Primitives.parsePoint(meta.scrollOrigin);
+
+        parsed.x -= x;
+        parsed.y -= y;
+
+        draft.sketch.user[currentPageId] = {
+          ...meta,
+          scrollOrigin: Primitives.stringifyPoint(parsed),
+        };
       });
     }
     case 'interaction': {

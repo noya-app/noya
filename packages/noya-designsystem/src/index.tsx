@@ -45,6 +45,9 @@ export type { MenuItem } from './components/internal/Menu';
 // Contexts
 export * from './contexts/GlobalInputBlurContext';
 
+// Hooks
+export * from './hooks/mergeEventHandlers';
+
 // Utils
 export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
