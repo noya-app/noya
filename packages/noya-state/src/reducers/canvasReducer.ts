@@ -6,7 +6,6 @@ import {
   createBounds,
   createRect,
   normalizeRect,
-  Size,
 } from 'noya-geometry';
 import { Primitives, uuid } from 'noya-renderer';
 import {
@@ -41,9 +40,9 @@ import {
 import { Point } from '../types';
 import { ApplicationState } from './applicationReducer';
 import {
-  CompassDirection,
   InteractionAction,
   interactionReducer,
+  SnapshotInteractionAction,
 } from './interactionReducer';
 
 export type CanvasAction =
@@ -57,32 +56,7 @@ export type CanvasAction =
   | [type: 'addPointToPath', point: Point]
   | [
       type: 'interaction',
-      // Some actions may need to be augmented by additional state before
-      // being passed to nested reducers (e.g. `maybeScale` takes a snapshot
-      // of the current page). Maybe there's a better way? This still seems
-      // better than moving the whole reducer up into the parent.
-      action:
-        | Exclude<
-            InteractionAction,
-            [
-              (
-                | 'maybeMove'
-                | 'maybeScale'
-                | 'maybeMovePoint'
-                | 'maybeMoveControlPoint'
-              ),
-              ...any[]
-            ]
-          >
-        | [type: 'maybeMove', origin: Point, canvasSize: Size]
-        | [
-            type: 'maybeScale',
-            origin: Point,
-            direction: CompassDirection,
-            canvasSize: Size,
-          ]
-        | [type: 'maybeMovePoint', origin: Point]
-        | [type: 'maybeMoveControlPoint', origin: Point],
+      action: InteractionAction | SnapshotInteractionAction,
     ];
 
 export function canvasReducer(

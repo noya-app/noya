@@ -35,6 +35,21 @@ export type ShapeType =
   | 'artboard'
   | 'shapePath';
 
+type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
+
+// These actions need to be augmented by additional state (a snapshot of the
+// current page) before being passed to the interaction reducer.
+export type SnapshotInteractionAction =
+  | [type: 'maybeMove', origin: Point, canvasSize: Size]
+  | [
+      type: 'maybeScale',
+      origin: Point,
+      direction: CompassDirection,
+      canvasSize: Size,
+    ]
+  | [type: 'maybeMovePoint', origin: Point]
+  | [type: 'maybeMoveControlPoint', origin: Point];
+
 export type InteractionAction =
   | ['reset']
   | [`insert${Capitalize<ShapeType>}`]
@@ -46,21 +61,7 @@ export type InteractionAction =
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
-  | [
-      type: 'maybeMove',
-      origin: Point,
-      canvasSize: Size,
-      pageSnapshot: Sketch.Page,
-    ]
   | [type: 'hoverHandle', direction: CompassDirection]
-  | [
-      type: 'maybeScale',
-      origin: Point,
-      direction: CompassDirection,
-      canvasSize: Size,
-      pageSnapshot: Sketch.Page,
-    ]
-  | [type: 'maybePan', origin: Point]
   | [type: 'startMoving', point: Point]
   | [type: 'startScaling', point: Point]
   | [type: 'startPanning', point: Point]
@@ -68,9 +69,8 @@ export type InteractionAction =
   | [type: 'updateScaling', point: Point]
   | [type: 'updatePanning', point: Point]
   | [type: 'enablePanMode']
-  | [type: 'maybeMovePoint', origin: Point, pageSnapshot: Sketch.Page]
+  | [type: 'maybePan', origin: Point]
   | [type: 'maybeConvertCurveMode', origin: Point]
-  | [type: 'maybeMoveControlPoint', origin: Point, pageSnapshot: Sketch.Page]
   | [type: 'movingPoint', origin: Point, current: Point]
   | [type: 'movingControlPoint', origin: Point, current: Point]
   | [type: 'updateMovingPoint', origin: Point, current: Point]
@@ -191,7 +191,9 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
 
 export function interactionReducer(
   state: InteractionState,
-  action: InteractionAction,
+  action:
+    | InteractionAction
+    | Append<SnapshotInteractionAction, [pageSnapshot: Sketch.Page]>,
 ): InteractionState {
   switch (action[0]) {
     case 'editPath':
