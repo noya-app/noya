@@ -747,7 +747,6 @@ export default memo(function Canvas() {
           y: point.y - img.height / 2,
         };
 
-        alert(`${file.name}`);
         dispatch('insertBitmap', data, {
           name: file.name,
           frame: frame,
