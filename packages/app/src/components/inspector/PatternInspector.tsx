@@ -220,7 +220,6 @@ export default memo(function PatternInspector({
         />
         <Spacer.Vertical size={10} />
         <InspectorPrimitives.LabeledRow label={'Size'}>
-          <Spacer.Vertical size={10} />
           <Select
             id={`${id}-pattern-options`}
             value={Sketch.PatternFillType[patternType] as PatternFillType}

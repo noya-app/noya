@@ -1,7 +1,7 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
-import { memo, ReactNode, useCallback } from 'react';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
 import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
@@ -25,31 +25,33 @@ export default memo(function ShadowInspector() {
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),
   );
+
   const layerShadowLists = useShallowArray(
     selectedStyles.map((style) => style?.shadows ?? []),
   );
 
-  const editableShadows: EditableShadow[] = zipLongest(
-    undefined,
-    ...layerShadowLists,
-  ).map((shadows) => {
-    const filtered = shadows.flatMap((shadow) => (shadow ? [shadow] : []));
+  const editableShadows: EditableShadow[] = useMemo(
+    () =>
+      zipLongest(undefined, ...layerShadowLists).map((shadows) => {
+        const filtered = shadows.flatMap((shadow) => (shadow ? [shadow] : []));
 
-    return {
-      isEnabled:
-        getMultiValue(filtered.map((shadow) => shadow.isEnabled)) ?? true,
-      blurRadius: getMultiNumberValue(
-        filtered.map((shadow) => shadow.blurRadius),
-      ),
-      color: getMultiValue(
-        filtered.map((shadow) => shadow.color),
-        isDeepEqual,
-      ),
-      offsetX: getMultiValue(filtered.map((shadow) => shadow.offsetX)),
-      offsetY: getMultiValue(filtered.map((shadow) => shadow.offsetY)),
-      spread: getMultiValue(filtered.map((shadow) => shadow.spread)),
-    };
-  });
+        return {
+          isEnabled:
+            getMultiValue(filtered.map((shadow) => shadow.isEnabled)) ?? true,
+          blurRadius: getMultiNumberValue(
+            filtered.map((shadow) => shadow.blurRadius),
+          ),
+          color: getMultiValue(
+            filtered.map((shadow) => shadow.color),
+            isDeepEqual,
+          ),
+          offsetX: getMultiValue(filtered.map((shadow) => shadow.offsetX)),
+          offsetY: getMultiValue(filtered.map((shadow) => shadow.offsetY)),
+          spread: getMultiValue(filtered.map((shadow) => shadow.spread)),
+        };
+      }),
+    [layerShadowLists],
+  );
 
   return (
     <ArrayController<EditableShadow>
