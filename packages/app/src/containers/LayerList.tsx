@@ -413,11 +413,7 @@ export default memo(function LayerList() {
             'moveLayer',
             sourceIds,
             items[destinationIndex].id,
-            position === 'above'
-              ? 'below'
-              : position === 'below'
-              ? 'above'
-              : position,
+            position,
           );
         },
         [dispatch, items, selectedObjects],

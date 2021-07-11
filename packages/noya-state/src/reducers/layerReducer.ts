@@ -190,7 +190,16 @@ export function layerReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'moveLayer': {
-      const [, id, destinationId, position] = action;
+      const [, id, destinationId, rawPosition] = action;
+
+      // Since layers are stored in reverse order, to place a layer "above",
+      // we actually place it "below" in terms of index, etc.
+      const position =
+        rawPosition === 'above'
+          ? 'below'
+          : rawPosition === 'below'
+          ? 'above'
+          : rawPosition;
 
       const ids = typeof id === 'string' ? [id] : id;
 
