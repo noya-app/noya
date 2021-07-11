@@ -168,8 +168,8 @@ const DragIndicatorElement = styled.div<{
         boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.text}`,
       }
     : {
-        top: relativeDropPosition === 'above' ? -2 : undefined,
-        bottom: relativeDropPosition === 'below' ? -2 : undefined,
+        top: relativeDropPosition === 'above' ? -3 : undefined,
+        bottom: relativeDropPosition === 'below' ? -3 : undefined,
         left: offsetLeft,
         right: 0,
         height: 6,

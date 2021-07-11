@@ -442,6 +442,19 @@ export default memo(function LayerList() {
           const sourceLayer = Layers.access(page, sourcePath);
           const destinationLayer = Layers.access(page, destinationPath);
 
+          const destinationExpanded =
+            destinationLayer.layerListExpandedType !==
+            Sketch.LayerListExpanded.Collapsed;
+
+          if (
+            destinationExpanded &&
+            Layers.isParentLayer(destinationLayer) &&
+            destinationLayer.layers.length > 0 &&
+            relationDropPosition === 'below'
+          ) {
+            return false;
+          }
+
           // Artboards can't be moved into other layers
           if (
             Layers.isSymbolMasterOrArtboard(sourceLayer) &&

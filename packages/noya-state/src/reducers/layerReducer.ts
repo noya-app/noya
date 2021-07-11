@@ -214,19 +214,22 @@ export function layerReducer(
 
         if (!destinationIndexPath) return state;
 
+        let parent: Layers.ParentLayer;
+        let destinationIndex: number;
+
         switch (position) {
           case 'inside': {
-            const parent = Layers.access(
+            parent = Layers.access(
               draftPage,
               destinationIndexPath,
             ) as Layers.ParentLayer;
 
-            parent.layers.push(...layers);
+            destinationIndex = parent.layers.length;
             break;
           }
           case 'above':
           case 'below': {
-            const parent = Layers.access(
+            parent = Layers.access(
               draftPage,
               destinationIndexPath.slice(0, -1),
             ) as Layers.ParentLayer;
@@ -234,16 +237,13 @@ export function layerReducer(
             const siblingIndex =
               destinationIndexPath[destinationIndexPath.length - 1];
 
-            parent.layers.splice(
-              position === 'above' ? siblingIndex : siblingIndex + 1,
-              0,
-              ...layers,
-            );
+            destinationIndex =
+              position === 'above' ? siblingIndex : siblingIndex + 1;
             break;
           }
-          default:
-            break;
         }
+
+        parent.layers.splice(destinationIndex, 0, ...layers);
 
         // draft.selectedObjects = [group.do_objectID];
       });

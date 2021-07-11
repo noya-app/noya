@@ -70,18 +70,26 @@ function validateDropIndicator(
   elementTop: number,
   elementHeight: number,
 ): RelativeDropPosition | undefined {
-  // First, check if we can drop inside
+  const acceptsDropInside = acceptsDrop(activeId, overId, 'inside');
+
+  // If we're in the center of the element, prefer dropping inside
   if (
     offsetTop >= elementTop + elementHeight / 3 &&
     offsetTop <= elementTop + (elementHeight * 2) / 3 &&
-    acceptsDrop(activeId, overId, 'inside')
+    acceptsDropInside
   )
     return 'inside';
 
+  // Are we over the top or bottom half of the element?
   const indicator =
     offsetTop < elementTop + elementHeight / 2 ? 'above' : 'below';
 
-  return acceptsDrop(activeId, overId, indicator) ? indicator : undefined;
+  // Drop above or below if possible, falling back to inside
+  return acceptsDrop(activeId, overId, indicator)
+    ? indicator
+    : acceptsDropInside
+    ? 'inside'
+    : undefined;
 }
 
 function SortableItem({ id, children }: ItemProps) {
