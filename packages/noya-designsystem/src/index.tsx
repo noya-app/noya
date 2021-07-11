@@ -40,6 +40,7 @@ export { default as Tooltip } from './components/Tooltip';
 export { default as ContextMenu } from './components/ContextMenu';
 export { default as DropdownMenu } from './components/DropdownMenu';
 export { default as ScrollArea } from './components/ScrollArea';
+export { default as Stack } from './components/Stack';
 export { SEPARATOR_ITEM } from './components/internal/Menu';
 export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 
