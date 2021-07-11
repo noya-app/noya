@@ -1,6 +1,7 @@
 import styled from 'styled-components';
+// import { Stack } from 'noya-designsystem';
 import Logo from '../assets/logo.svg';
-import { Stack, Heading } from '../components/ui';
+import { Heading, Stack } from '../components/ui';
 
 const LogoWrapper = styled.div({
   '* >': { height: '32px' },
