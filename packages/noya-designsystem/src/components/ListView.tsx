@@ -165,7 +165,7 @@ const DragIndicatorElement = styled.div<{
   ...(relativeDropPosition === 'inside'
     ? {
         inset: 2,
-        boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.text}`,
+        boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.dragOutline}`,
       }
     : {
         top: relativeDropPosition === 'above' ? -3 : undefined,
@@ -174,7 +174,8 @@ const DragIndicatorElement = styled.div<{
         right: 0,
         height: 6,
         background: theme.colors.primary,
-        border: `2px solid ${theme.colors.text}`,
+        border: `2px solid white`,
+        boxShadow: '0 0 2px rgba(0,0,0,0.5)',
       }),
 }));
 
