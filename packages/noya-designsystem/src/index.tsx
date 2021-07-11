@@ -41,7 +41,7 @@ export { default as ContextMenu } from './components/ContextMenu';
 export { default as DropdownMenu } from './components/DropdownMenu';
 export { default as ScrollArea } from './components/ScrollArea';
 export { SEPARATOR_ITEM } from './components/internal/Menu';
-export type { MenuItem } from './components/internal/Menu';
+export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 
 // Contexts
 export * from './contexts/GlobalInputBlurContext';
