@@ -545,14 +545,14 @@ export function canvasReducer(
         const _ref = `images/${uuid()}.${extension}`;
         draft.sketch.images[_ref] = file;
 
-        const bitmap = produce(Models.bitmap, (layer) => {
+        const layer = produce(Models.bitmap, (layer) => {
           layer.do_objectID = uuid();
           layer.name = name.replace(`.${extension}`, '');
           layer.image._ref = _ref;
           layer.frame = { ...layer.frame, ...frame };
         });
 
-        draft.sketch.pages[pageIndex].layers.push(bitmap);
+        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
       });
     }
     default:
