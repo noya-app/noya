@@ -13,6 +13,7 @@
   },
   "scripts": {
     "start": "modular start app",
+    "start:site": "yarn workspace site start",
     "build": "modular build app",
     "test": "modular test",
     "lint": "eslint . --ext .js,.ts,.tsx",

@@ -13,6 +13,8 @@ node_modules
 /packages/*/dist-cjs/
 /packages/*/dist-es/
 /packages/*/dist-types/
+/packages/*/.next
+/packages/*/out
 
 # misc
 .DS_Store
