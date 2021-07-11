@@ -1,24 +1,30 @@
 import {
+  ChevronDownIcon,
   CircleIcon,
   FrameIcon,
   MoveIcon,
   RulerHorizontalIcon,
+  SewingPinIcon,
   SquareIcon,
   TextIcon,
-  ChevronDownIcon,
-  SewingPinIcon,
 } from '@radix-ui/react-icons';
-import { Spacer, DropdownMenu } from 'noya-designsystem';
+import {
+  createSectionedMenu,
+  DropdownMenu,
+  MenuItem,
+  RegularMenuItem,
+  Spacer,
+} from 'noya-designsystem';
 import Button from 'noya-designsystem/src/components/Button';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import PointModeIcon from '../components/icons/PointModeIcon';
 import {
-  useSelector,
   useApplicationState,
   useDispatch,
+  useSelector,
 } from '../contexts/ApplicationStateContext';
 import { useHistory } from '../hooks/useHistory';
 import useShallowArray from '../hooks/useShallowArray';
@@ -48,6 +54,10 @@ interface Props {
   selectedLayerIds: string[];
 }
 
+type InsertMenuShape = 'rectangle' | 'oval' | 'vector' | 'text';
+
+const SYMBOL_ITEM_PREFIX = 'symbol:';
+
 const ToolbarContent = memo(function ToolbarContent({
   interactionType,
   setShowRulers,
@@ -58,10 +68,23 @@ const ToolbarContent = memo(function ToolbarContent({
 }: Props) {
   const dispatch = useDispatch();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
-  const symbols = useSelector(Selectors.getSymbols).map((symbol) => ({
+
+  const symbolsMenuItems = useSelector(Selectors.getSymbols).map((symbol) => ({
     title: symbol.name,
-    value: symbol.do_objectID,
+    value: `${SYMBOL_ITEM_PREFIX}${symbol.do_objectID}`,
   }));
+
+  const shapeMenuItems: RegularMenuItem<InsertMenuShape>[] = [
+    { title: 'Rectangle', value: 'rectangle' },
+    { title: 'Oval', value: 'oval' },
+    { title: 'Vector', value: 'vector' },
+    { title: 'Text', value: 'text' },
+  ];
+
+  const menuItems: MenuItem<string>[] = createSectionedMenu(
+    shapeMenuItems,
+    symbolsMenuItems,
+  );
 
   const isInsertArtboard = interactionType === 'insertArtboard';
   const isInsertRectangle = interactionType === 'insertRectangle';
@@ -125,7 +148,25 @@ const ToolbarContent = memo(function ToolbarContent({
 
   const handleInsertSymbol = useCallback(
     (value: string) => {
-      dispatch('interaction', ['insertingSymbol', value, undefined]);
+      if (value.startsWith(SYMBOL_ITEM_PREFIX)) {
+        const id = value.replace(SYMBOL_ITEM_PREFIX, '');
+        dispatch('interaction', ['insertingSymbol', id, undefined]);
+      } else {
+        switch (value as InsertMenuShape) {
+          case 'rectangle':
+            dispatch('interaction', ['insertRectangle']);
+            break;
+          case 'oval':
+            dispatch('interaction', ['insertOval']);
+            break;
+          case 'text':
+            dispatch('interaction', ['insertText']);
+            break;
+          case 'vector':
+            dispatch('interaction', ['drawingShapePath']);
+            break;
+        }
+      }
     },
     [dispatch],
   );
@@ -164,7 +205,7 @@ const ToolbarContent = memo(function ToolbarContent({
     <Container>
       <Spacer.Horizontal size={itemSeparatorSize} />
       <Row>
-        <DropdownMenu<string> items={symbols} onSelect={handleInsertSymbol}>
+        <DropdownMenu<string> items={menuItems} onSelect={handleInsertSymbol}>
           <Button id="insert-stymbol">
             {useMemo(
               () => (
