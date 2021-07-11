@@ -200,10 +200,10 @@ export function layerReducer(
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[pageIndex];
 
-        const layers = indexPaths.map(
-          (indexPath) =>
-            Layers.access(draftPage, indexPath) as Layers.ChildLayer,
-        );
+        const layerInfo = indexPaths.map((indexPath) => ({
+          layer: Layers.access(draftPage, indexPath) as Layers.ChildLayer,
+          transform: getLayerTransformAtIndexPath(draftPage, indexPath),
+        }));
 
         deleteLayers(indexPaths, draftPage);
 
@@ -212,16 +212,18 @@ export function layerReducer(
           (layer) => layer.do_objectID === destinationId,
         );
 
-        if (!destinationIndexPath) return state;
+        if (!destinationIndexPath) return;
 
+        let parentIndexPath: IndexPath;
         let parent: Layers.ParentLayer;
         let destinationIndex: number;
 
         switch (position) {
           case 'inside': {
+            parentIndexPath = destinationIndexPath;
             parent = Layers.access(
               draftPage,
-              destinationIndexPath,
+              parentIndexPath,
             ) as Layers.ParentLayer;
 
             destinationIndex = parent.layers.length;
@@ -229,9 +231,10 @@ export function layerReducer(
           }
           case 'above':
           case 'below': {
+            parentIndexPath = destinationIndexPath.slice(0, -1);
             parent = Layers.access(
               draftPage,
-              destinationIndexPath.slice(0, -1),
+              parentIndexPath,
             ) as Layers.ParentLayer;
 
             const siblingIndex =
@@ -243,9 +246,29 @@ export function layerReducer(
           }
         }
 
-        parent.layers.splice(destinationIndex, 0, ...layers);
+        const parentTransform = getLayerTransformAtIndexPath(
+          draftPage,
+          parentIndexPath,
+          undefined,
+          'includeLast',
+        );
 
-        // draft.selectedObjects = [group.do_objectID];
+        const adjustedLayers = layerInfo.map(({ layer, transform }) => {
+          // First we undo the original parent's transform, then we apply the new parent's transform
+          const newTransform = AffineTransform.multiply(
+            transform,
+            parentTransform.invert(),
+          );
+
+          return produce(layer, (draftLayer) => {
+            draftLayer.frame = {
+              ...draftLayer.frame,
+              ...transformRect(draftLayer.frame, newTransform),
+            };
+          });
+        });
+
+        parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
       });
     }
     case 'deleteLayer':

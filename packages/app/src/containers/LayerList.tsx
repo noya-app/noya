@@ -404,9 +404,14 @@ export default memo(function LayerList() {
       ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
+          const sourceId = items[sourceIndex].id;
+          const sourceIds = selectedObjects.includes(sourceId)
+            ? selectedObjects
+            : sourceId;
+
           dispatch(
             'moveLayer',
-            items[sourceIndex].id,
+            sourceIds,
             items[destinationIndex].id,
             position === 'above'
               ? 'below'
@@ -415,37 +420,52 @@ export default memo(function LayerList() {
               : position,
           );
         },
-        [dispatch, items],
+        [dispatch, items, selectedObjects],
       )}
       acceptsDrop={useCallback(
-        (sourceId, destinationId, relationDropPosition) => {
+        (
+          sourceId: string,
+          destinationId: string,
+          relationDropPosition: RelativeDropPosition,
+        ) => {
+          const sourceIds = selectedObjects.includes(sourceId)
+            ? selectedObjects
+            : sourceId;
+
           const state = getStateSnapshot();
           const page = Selectors.getCurrentPage(state);
 
-          const sourcePath = Layers.findIndexPath(
-            page,
-            (layer) => layer.do_objectID === sourceId,
+          const sourcePaths = Layers.findAllIndexPaths(page, (layer) =>
+            sourceIds.includes(layer.do_objectID),
           );
           const destinationPath = Layers.findIndexPath(
             page,
             (layer) => layer.do_objectID === destinationId,
           );
 
-          if (!sourcePath || !destinationPath) return false;
+          if (sourcePaths.length === 0 || !destinationPath) return false;
 
           // Don't allow dragging into a descendant
           if (
-            isDeepEqual(sourcePath, destinationPath.slice(0, sourcePath.length))
+            sourcePaths.some((sourcePath) =>
+              isDeepEqual(
+                sourcePath,
+                destinationPath.slice(0, sourcePath.length),
+              ),
+            )
           )
             return false;
 
-          const sourceLayer = Layers.access(page, sourcePath);
+          const sourceLayers = sourcePaths.map((sourcePath) =>
+            Layers.access(page, sourcePath),
+          );
           const destinationLayer = Layers.access(page, destinationPath);
 
           const destinationExpanded =
             destinationLayer.layerListExpandedType !==
             Sketch.LayerListExpanded.Collapsed;
 
+          // Don't allow dragging below expanded layers - we'll fall back to inside
           if (
             destinationExpanded &&
             Layers.isParentLayer(destinationLayer) &&
@@ -457,7 +477,7 @@ export default memo(function LayerList() {
 
           // Artboards can't be moved into other layers
           if (
-            Layers.isSymbolMasterOrArtboard(sourceLayer) &&
+            sourceLayers.some(Layers.isSymbolMasterOrArtboard) &&
             (relationDropPosition === 'inside' || destinationPath.length > 1)
           ) {
             return false;
@@ -473,7 +493,7 @@ export default memo(function LayerList() {
 
           return true;
         },
-        [getStateSnapshot],
+        [getStateSnapshot, selectedObjects],
       )}
     />
   );

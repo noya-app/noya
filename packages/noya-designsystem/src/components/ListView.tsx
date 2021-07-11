@@ -164,7 +164,7 @@ const DragIndicatorElement = styled.div<{
   borderRadius: '3px',
   ...(relativeDropPosition === 'inside'
     ? {
-        inset: 0,
+        inset: 2,
         boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.text}`,
       }
     : {
