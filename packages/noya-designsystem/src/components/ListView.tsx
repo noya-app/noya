@@ -18,6 +18,7 @@ import { useHover } from '../hooks/useHover';
 import ContextMenu from './ContextMenu';
 import * as Sortable from './Sortable';
 import { MenuItem } from './internal/Menu';
+import { Spacer } from '..';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
@@ -39,6 +40,7 @@ type ListRowContextValue = {
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
+  indentation: number;
 };
 
 export const ListRowContext = createContext<ListRowContextValue>({
@@ -46,6 +48,7 @@ export const ListRowContext = createContext<ListRowContextValue>({
   selectedPosition: 'only',
   sortable: false,
   expandable: true,
+  indentation: 12,
 });
 
 /* ----------------------------------------------------------------------------
@@ -66,7 +69,8 @@ const ListViewRowTitle = styled.span(({ theme }) => ({
 const SectionHeaderContainer = styled.li<{
   selected: boolean;
   disabled: boolean;
-}>(({ theme, selected, disabled }) => ({
+  hovered: boolean;
+}>(({ theme, selected, disabled, hovered }) => ({
   ...listReset,
   ...theme.textStyles.small,
   flex: '0 0 auto',
@@ -92,6 +96,9 @@ const SectionHeaderContainer = styled.li<{
   display: 'flex',
   alignItems: 'center',
   position: 'relative',
+  ...(hovered && {
+    boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+  }),
 }));
 
 const RowContainer = styled.li<{
@@ -99,7 +106,8 @@ const RowContainer = styled.li<{
   selected: boolean;
   selectedPosition: ListRowPosition;
   disabled: boolean;
-}>(({ theme, position, selected, selectedPosition, disabled }) => ({
+  hovered: boolean;
+}>(({ theme, position, selected, selectedPosition, disabled, hovered }) => ({
   ...listReset,
   ...theme.textStyles.small,
   flex: '0 0 auto',
@@ -142,20 +150,32 @@ const RowContainer = styled.li<{
       borderBottomLeftRadius: '0px',
     }),
   position: 'relative',
+  ...(hovered && {
+    boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+  }),
 }));
 
 const DragIndicatorElement = styled.div<{
-  dragIndicator: Sortable.DragIndicator;
-}>(({ theme, dragIndicator }) => ({
+  relativeDropPosition: Sortable.RelativeDropPosition;
+  offsetLeft: number;
+}>(({ theme, relativeDropPosition, offsetLeft }) => ({
+  zIndex: 1,
   position: 'absolute',
-  top: dragIndicator === 'above' ? 0 : undefined,
-  bottom: dragIndicator === 'below' ? 0 : undefined,
-  left: 0,
-  right: 0,
-  height: 3,
-  background: theme.colors.primary,
-  border: '1px solid rgba(255,255,255,0.5)',
   borderRadius: '3px',
+  ...(relativeDropPosition === 'inside'
+    ? {
+        inset: 0,
+        boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.text}`,
+      }
+    : {
+        top: relativeDropPosition === 'above' ? -2 : undefined,
+        bottom: relativeDropPosition === 'below' ? -2 : undefined,
+        left: offsetLeft,
+        right: 0,
+        height: 6,
+        background: theme.colors.primary,
+        border: `2px solid ${theme.colors.text}`,
+      }),
 }));
 
 export interface ListViewClickInfo {
@@ -167,7 +187,9 @@ export interface ListViewClickInfo {
 export interface ListViewRowProps<MenuItemType extends string = string> {
   id?: string;
   selected?: boolean;
+  depth?: number;
   disabled?: boolean;
+  hovered?: boolean;
   sortable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
@@ -184,7 +206,9 @@ const ListViewRow = forwardRef(function ListViewRow<
   {
     id,
     selected = false,
+    depth = 0,
     disabled = false,
+    hovered = false,
     isSectionHeader = false,
     onClick,
     onHoverChange,
@@ -195,7 +219,9 @@ const ListViewRow = forwardRef(function ListViewRow<
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLLIElement>,
 ) {
-  const { position, selectedPosition, sortable } = useContext(ListRowContext);
+  const { position, selectedPosition, sortable, indentation } = useContext(
+    ListRowContext,
+  );
   const { hoverProps } = useHover({
     onHoverChange,
   });
@@ -211,10 +237,10 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   const renderContent = (
     {
-      dragIndicator,
+      relativeDropPosition,
       ...renderProps
     }: React.ComponentProps<typeof RowContainer> & {
-      dragIndicator?: Sortable.DragIndicator;
+      relativeDropPosition?: Sortable.RelativeDropPosition;
     },
     ref: Ref<HTMLLIElement>,
   ) => {
@@ -229,14 +255,19 @@ const ListViewRow = forwardRef(function ListViewRow<
         onClick={handleClick}
         position={position}
         disabled={disabled}
+        hovered={hovered}
         selected={selected}
         selectedPosition={selectedPosition}
         aria-selected={selected}
         {...renderProps}
       >
-        {dragIndicator && (
-          <DragIndicatorElement dragIndicator={dragIndicator} />
+        {relativeDropPosition && (
+          <DragIndicatorElement
+            relativeDropPosition={relativeDropPosition}
+            offsetLeft={33 + depth * indentation}
+          />
         )}
+        {depth > 0 && <Spacer.Horizontal size={depth * indentation} />}
         {children}
       </Component>
     );
@@ -283,8 +314,7 @@ const RootContainer = styled.ul<{ scrollable?: boolean }>(
   }),
 );
 
-type ItemInfo = {
-  index: number;
+export type ItemInfo = {
   isDragging: boolean;
 };
 
@@ -294,7 +324,7 @@ type ChildrenProps<T> =
     }
   | {
       items: T[];
-      renderItem: (item: T, info: ItemInfo) => ReactNode;
+      renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
     };
 
 type ListViewRootProps<T> = ChildrenProps<T> & {
@@ -302,7 +332,13 @@ type ListViewRootProps<T> = ChildrenProps<T> & {
   sortable?: boolean;
   scrollable?: boolean;
   expandable?: boolean;
-  onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
+  onMoveItem?: (
+    sourceIndex: number,
+    destinationIndex: number,
+    position: Sortable.RelativeDropPosition,
+  ) => void;
+  indentation?: number;
+  acceptsDrop?: Sortable.DropValidator;
 };
 
 function ListViewRoot<T = any>({
@@ -311,6 +347,8 @@ function ListViewRoot<T = any>({
   scrollable = false,
   expandable = true,
   onMoveItem,
+  indentation = 12,
+  acceptsDrop,
   ...props
 }: ListViewRootProps<T>) {
   const handleClick = useCallback(
@@ -325,7 +363,7 @@ function ListViewRoot<T = any>({
   const flattened =
     'items' in props
       ? props.items.map((item, index) =>
-          props.renderItem(item, { index, isDragging: false }),
+          props.renderItem(item, index, { isDragging: false }),
         )
       : Children.toArray(props.children);
 
@@ -375,6 +413,7 @@ function ListViewRoot<T = any>({
       selectedPosition,
       sortable,
       expandable,
+      indentation,
     };
 
     return (
@@ -399,8 +438,7 @@ function ListViewRoot<T = any>({
     () =>
       renderItem && items
         ? (index: number) =>
-            renderItem(items[index], {
-              index,
+            renderItem(items[index], index, {
               isDragging: true,
             })
         : undefined,
@@ -412,6 +450,7 @@ function ListViewRoot<T = any>({
       onMoveItem={onMoveItem}
       keys={ids}
       renderOverlay={renderOverlay}
+      acceptsDrop={acceptsDrop}
     >
       {wrappedChildren}
     </Sortable.Root>

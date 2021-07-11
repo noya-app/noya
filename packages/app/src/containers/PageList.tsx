@@ -1,5 +1,11 @@
 import { PlusIcon } from '@radix-ui/react-icons';
-import { Button, ListView, MenuItem, Spacer } from 'noya-designsystem';
+import {
+  Button,
+  ListView,
+  MenuItem,
+  RelativeDropPosition,
+  Spacer,
+} from 'noya-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
@@ -95,14 +101,25 @@ const PageListContent = memo(function PageListContent({
         sortable
         scrollable
         onMoveItem={useCallback(
-          (sourceIndex, destinationIndex) => {
+          (
+            sourceIndex: number,
+            destinationIndex: number,
+            position: RelativeDropPosition,
+          ) => {
+            if (
+              sourceIndex === destinationIndex ||
+              (position === 'above' && sourceIndex + 1 === destinationIndex) ||
+              (position === 'below' && sourceIndex - 1 === destinationIndex)
+            )
+              return;
+
             dispatch('movePage', sourceIndex, destinationIndex);
           },
           [dispatch],
         )}
         items={pageInfo}
         renderItem={useCallback(
-          (page: PageInfo, { isDragging }) => (
+          (page: PageInfo, index, { isDragging }) => (
             <ListView.Row<MenuItemType>
               id={page.do_objectID}
               key={page.do_objectID}

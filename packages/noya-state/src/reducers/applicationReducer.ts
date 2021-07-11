@@ -133,6 +133,7 @@ export function applicationReducer(
       return layerPropertyReducer(state, action);
     case 'groupLayer':
     case 'deleteLayer':
+    case 'moveLayer':
     case 'selectLayer':
     case 'selectAllLayers':
     case 'ungroupLayer':
