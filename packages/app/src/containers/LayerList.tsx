@@ -15,21 +15,27 @@ import {
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Spacer, TreeView } from 'noya-designsystem';
+import {
+  ListView,
+  RelativeDropPosition,
+  Spacer,
+  TreeView,
+} from 'noya-designsystem';
 import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Layers, PageLayer, Selectors } from 'noya-state';
+import { isDeepEqual } from 'noya-utils';
 import React, {
   ForwardedRef,
   forwardRef,
   memo,
   useCallback,
-  useMemo,
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
 import {
   useApplicationState,
+  useGetStateSnapshot,
   useSelector,
 } from '../contexts/ApplicationStateContext';
 import useDeepArray from '../hooks/useDeepArray';
@@ -155,6 +161,7 @@ const LayerRow = memo(
       onChangeVisible,
       onChangeIsLocked,
       isLocked,
+      isDragging,
       ...props
     }: TreeView.TreeRowProps<LayerMenuItemType> & {
       name: string;
@@ -162,6 +169,7 @@ const LayerRow = memo(
       visible: boolean;
       isWithinMaskChain: boolean;
       isLocked: boolean;
+      isDragging: boolean;
       onChangeVisible: (visible: boolean) => void;
       onChangeIsLocked: (isLocked: boolean) => void;
     },
@@ -209,32 +217,37 @@ const LayerRow = memo(
       [onChangeIsLocked],
     );
 
+    const titleElement = <TreeView.RowTitle>{name}</TreeView.RowTitle>;
+
     return (
       <TreeView.Row<LayerMenuItemType>
         ref={forwardedRef}
         onHoverChange={handleHoverChange}
-        selected={selected}
+        selected={!isDragging && selected}
         disabled={!visible}
+        hovered={!isDragging && hovered}
         {...props}
       >
-        {withSeparatorElements(
-          [
-            <TreeView.RowTitle>{name}</TreeView.RowTitle>,
-            isLocked ? (
-              <LockClosedIcon onClick={handleSetUnlocked} />
-            ) : hovered ? (
-              <LockOpen1Icon onClick={handleSetLocked} />
-            ) : null,
-            !visible ? (
-              <EyeClosedIcon onClick={handleSetVisible} />
-            ) : hovered ? (
-              <EyeOpenIcon onClick={handleSetHidden} />
-            ) : isLocked ? (
-              <Spacer.Horizontal size={15} />
-            ) : null,
-          ],
-          <Spacer.Horizontal size={6} />,
-        )}
+        {isDragging
+          ? titleElement
+          : withSeparatorElements(
+              [
+                titleElement,
+                isLocked ? (
+                  <LockClosedIcon onClick={handleSetUnlocked} />
+                ) : hovered ? (
+                  <LockOpen1Icon onClick={handleSetLocked} />
+                ) : null,
+                !visible ? (
+                  <EyeClosedIcon onClick={handleSetVisible} />
+                ) : hovered ? (
+                  <EyeOpenIcon onClick={handleSetHidden} />
+                ) : isLocked ? (
+                  <Spacer.Horizontal size={15} />
+                ) : null,
+              ],
+              <Spacer.Horizontal size={6} />,
+            )}
       </TreeView.Row>
     );
   }),
@@ -242,6 +255,7 @@ const LayerRow = memo(
 
 export default memo(function LayerList() {
   const [state, dispatch] = useApplicationState();
+  const getStateSnapshot = useGetStateSnapshot();
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
 
@@ -251,140 +265,232 @@ export default memo(function LayerList() {
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
-  const layerElements = useMemo(() => {
-    return items.map(
-      (
-        {
-          id,
-          name,
-          depth,
-          type,
-          expanded,
-          selected,
-          visible,
-          isWithinMaskChain,
-          hasClippingMask,
-          isLocked,
-        },
-        index,
-      ) => {
-        const handleClick = (info: TreeView.TreeViewClickInfo) => {
-          const { metaKey, shiftKey } = info;
+  const renderItem = useCallback(
+    (
+      {
+        id,
+        name,
+        depth,
+        type,
+        expanded,
+        selected,
+        visible,
+        isWithinMaskChain,
+        hasClippingMask,
+        isLocked,
+      }: LayerListItem,
+      index: number,
+      { isDragging }: ListView.ItemInfo,
+    ) => {
+      const handleClick = (info: TreeView.TreeViewClickInfo) => {
+        const { metaKey, shiftKey } = info;
 
-          dispatch('interaction', ['reset']);
+        dispatch('interaction', ['reset']);
 
-          if (metaKey) {
-            dispatch(
-              'selectLayer',
-              id,
-              selectedObjects.includes(id) ? 'difference' : 'intersection',
-            );
-          } else if (shiftKey && selectedObjects.length > 0) {
-            const lastSelectedIndex = items.findIndex(
-              (item) => item.id === selectedObjects[selectedObjects.length - 1],
-            );
-
-            const first = Math.min(index, lastSelectedIndex);
-            const last = Math.max(index, lastSelectedIndex) + 1;
-
-            dispatch(
-              'selectLayer',
-              items.slice(first, last).map((item) => item.id),
-              'intersection',
-            );
-          } else {
-            dispatch('selectLayer', id, 'replace');
-          }
-        };
-
-        const handleHoverChange = (hovered: boolean) => {
-          highlightLayer(
-            hovered
-              ? { id, precedence: 'aboveSelection', isMeasured: false }
-              : undefined,
+        if (metaKey) {
+          dispatch(
+            'selectLayer',
+            id,
+            selectedObjects.includes(id) ? 'difference' : 'intersection',
           );
-        };
+        } else if (shiftKey && selectedObjects.length > 0) {
+          const lastSelectedIndex = items.findIndex(
+            (item) => item.id === selectedObjects[selectedObjects.length - 1],
+          );
 
-        const handleClickChevron = () =>
-          dispatch('setExpandedInLayerList', id, !expanded);
+          const first = Math.min(index, lastSelectedIndex);
+          const last = Math.max(index, lastSelectedIndex) + 1;
 
-        const handleChangeVisible = (value: boolean) =>
-          dispatch('setLayerVisible', id, value);
+          dispatch(
+            'selectLayer',
+            items.slice(first, last).map((item) => item.id),
+            'intersection',
+          );
+        } else {
+          dispatch('selectLayer', id, 'replace');
+        }
+      };
 
-        const handleChangeIsLocked = (value: boolean) =>
-          dispatch('setLayerIsLocked', id, value);
-
-        const handleContextMenu = () => {
-          if (selected) return;
-
-          dispatch('selectLayer', id);
-        };
-
-        const isSymbolClass =
-          type === 'symbolInstance' || type === 'symbolMaster';
-        const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
-        const isGroupClass = isArtboardClass || type === 'group';
-
-        return (
-          <LayerRow
-            menuItems={menuItems}
-            onSelectMenuItem={onSelectMenuItem}
-            onContextMenu={handleContextMenu}
-            key={id}
-            name={name}
-            visible={visible}
-            isWithinMaskChain={isWithinMaskChain}
-            isLocked={isLocked}
-            depth={depth}
-            selected={selected}
-            onClick={handleClick}
-            onHoverChange={handleHoverChange}
-            onChangeVisible={handleChangeVisible}
-            onChangeIsLocked={handleChangeIsLocked}
-            icon={
-              <IconContainer>
-                {hasClippingMask ? (
-                  <>
-                    <MaskOnIcon />
-                    <Spacer.Horizontal size={4} />
-                  </>
-                ) : isWithinMaskChain ? (
-                  <>
-                    <ArrowDownIcon />
-                    <Spacer.Horizontal size={4} />
-                  </>
-                ) : null}
-                <LayerIcon
-                  type={type}
-                  selected={selected}
-                  variant={isSymbolClass ? 'primary' : undefined}
-                />
-              </IconContainer>
-            }
-            isSectionHeader={isArtboardClass}
-            expanded={isGroupClass ? expanded : undefined}
-            onClickChevron={handleClickChevron}
-          />
+      const handleHoverChange = (hovered: boolean) => {
+        highlightLayer(
+          hovered
+            ? { id, precedence: 'aboveSelection', isMeasured: false }
+            : undefined,
         );
-      },
-    );
-  }, [
-    items,
-    menuItems,
-    onSelectMenuItem,
-    dispatch,
-    selectedObjects,
-    highlightLayer,
-  ]);
+      };
+
+      const handleClickChevron = () =>
+        dispatch('setExpandedInLayerList', id, !expanded);
+
+      const handleChangeVisible = (value: boolean) =>
+        dispatch('setLayerVisible', id, value);
+
+      const handleChangeIsLocked = (value: boolean) =>
+        dispatch('setLayerIsLocked', id, value);
+
+      const handleContextMenu = () => {
+        if (selected) return;
+
+        dispatch('selectLayer', id);
+      };
+
+      const isSymbolClass =
+        type === 'symbolInstance' || type === 'symbolMaster';
+      const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
+      const isGroupClass = isArtboardClass || type === 'group';
+
+      return (
+        <LayerRow
+          id={id}
+          menuItems={menuItems}
+          onSelectMenuItem={onSelectMenuItem}
+          onContextMenu={handleContextMenu}
+          key={id}
+          name={name}
+          visible={visible}
+          isWithinMaskChain={isWithinMaskChain}
+          isLocked={isLocked}
+          isDragging={isDragging}
+          depth={depth}
+          selected={selected}
+          onClick={handleClick}
+          onHoverChange={handleHoverChange}
+          onChangeVisible={handleChangeVisible}
+          onChangeIsLocked={handleChangeIsLocked}
+          icon={
+            <IconContainer>
+              {hasClippingMask ? (
+                <>
+                  <MaskOnIcon />
+                  <Spacer.Horizontal size={4} />
+                </>
+              ) : isWithinMaskChain ? (
+                <>
+                  <ArrowDownIcon />
+                  <Spacer.Horizontal size={4} />
+                </>
+              ) : null}
+              <LayerIcon
+                type={type}
+                selected={selected}
+                variant={isSymbolClass ? 'primary' : undefined}
+              />
+            </IconContainer>
+          }
+          isSectionHeader={isArtboardClass}
+          expanded={isGroupClass ? expanded : undefined}
+          onClickChevron={handleClickChevron}
+        />
+      );
+    },
+    [
+      dispatch,
+      highlightLayer,
+      items,
+      menuItems,
+      onSelectMenuItem,
+      selectedObjects,
+    ],
+  );
 
   return (
     <TreeView.Root
+      items={items}
+      renderItem={renderItem}
       scrollable
+      sortable
       onClick={useCallback(() => dispatch('selectLayer', undefined), [
         dispatch,
       ])}
-    >
-      {layerElements}
-    </TreeView.Root>
+      onMoveItem={useCallback(
+        (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
+          const sourceId = items[sourceIndex].id;
+          const sourceIds = selectedObjects.includes(sourceId)
+            ? selectedObjects
+            : sourceId;
+
+          dispatch(
+            'moveLayer',
+            sourceIds,
+            items[destinationIndex].id,
+            position,
+          );
+        },
+        [dispatch, items, selectedObjects],
+      )}
+      acceptsDrop={useCallback(
+        (
+          sourceId: string,
+          destinationId: string,
+          relationDropPosition: RelativeDropPosition,
+        ) => {
+          const sourceIds = selectedObjects.includes(sourceId)
+            ? selectedObjects
+            : sourceId;
+
+          const state = getStateSnapshot();
+          const page = Selectors.getCurrentPage(state);
+
+          const sourcePaths = Layers.findAllIndexPaths(page, (layer) =>
+            sourceIds.includes(layer.do_objectID),
+          );
+          const destinationPath = Layers.findIndexPath(
+            page,
+            (layer) => layer.do_objectID === destinationId,
+          );
+
+          if (sourcePaths.length === 0 || !destinationPath) return false;
+
+          // Don't allow dragging into a descendant
+          if (
+            sourcePaths.some((sourcePath) =>
+              isDeepEqual(
+                sourcePath,
+                destinationPath.slice(0, sourcePath.length),
+              ),
+            )
+          )
+            return false;
+
+          const sourceLayers = sourcePaths.map((sourcePath) =>
+            Layers.access(page, sourcePath),
+          );
+          const destinationLayer = Layers.access(page, destinationPath);
+
+          const destinationExpanded =
+            destinationLayer.layerListExpandedType !==
+            Sketch.LayerListExpanded.Collapsed;
+
+          // Don't allow dragging below expanded layers - we'll fall back to inside
+          if (
+            destinationExpanded &&
+            Layers.isParentLayer(destinationLayer) &&
+            destinationLayer.layers.length > 0 &&
+            relationDropPosition === 'below'
+          ) {
+            return false;
+          }
+
+          // Artboards can't be moved into other layers
+          if (
+            sourceLayers.some(Layers.isSymbolMasterOrArtboard) &&
+            (relationDropPosition === 'inside' || destinationPath.length > 1)
+          ) {
+            return false;
+          }
+
+          // Only allow dropping inside of parent layers
+          if (
+            relationDropPosition === 'inside' &&
+            !Layers.isParentLayer(destinationLayer)
+          ) {
+            return false;
+          }
+
+          return true;
+        },
+        [getStateSnapshot, selectedObjects],
+      )}
+    />
   );
 });

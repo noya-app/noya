@@ -32,6 +32,7 @@ export { default as GradientPicker } from './components/GradientPicker';
 export * as ListView from './components/ListView';
 export * as GridView from './components/GridView';
 export * as Sortable from './components/Sortable';
+export type { RelativeDropPosition } from './components/Sortable';
 export * as InputField from './components/InputField';
 export * as RadioGroup from './components/RadioGroup';
 export * as Spacer from './components/Spacer';

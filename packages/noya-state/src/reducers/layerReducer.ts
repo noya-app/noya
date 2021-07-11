@@ -3,6 +3,7 @@ import produce from 'immer';
 import { AffineTransform, transformRect } from 'noya-geometry';
 import { uuid } from 'noya-renderer';
 import { IndexPath } from 'tree-visit';
+import { RelativeDropPosition } from '../../../noya-designsystem/src';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -14,6 +15,7 @@ import {
   getCurrentPageIndex,
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
+  getLayerIndexPathsExcludingDescendants,
   getLayerTransformAtIndexPath,
   getParentLayer,
   getRightMostLayerBounds,
@@ -28,6 +30,12 @@ import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
 
 export type LayerAction =
+  | [
+      type: 'moveLayer',
+      layerId: string | string[],
+      relativeLayer: string,
+      position: RelativeDropPosition,
+    ]
   | [type: 'deleteLayer', layerId: string | string[]]
   | [type: 'groupLayer', layerId: string | string[], name: string]
   | [type: 'ungroupLayer', layerId: string | string[]]
@@ -181,6 +189,97 @@ export function layerReducer(
   action: LayerAction,
 ): ApplicationState {
   switch (action[0]) {
+    case 'moveLayer': {
+      const [, id, destinationId, rawPosition] = action;
+
+      // Since layers are stored in reverse order, to place a layer "above",
+      // we actually place it "below" in terms of index, etc.
+      const position =
+        rawPosition === 'above'
+          ? 'below'
+          : rawPosition === 'below'
+          ? 'above'
+          : rawPosition;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const draftPage = draft.sketch.pages[pageIndex];
+
+        const layerInfo = indexPaths.map((indexPath) => ({
+          layer: Layers.access(draftPage, indexPath) as Layers.ChildLayer,
+          transform: getLayerTransformAtIndexPath(draftPage, indexPath),
+        }));
+
+        deleteLayers(indexPaths, draftPage);
+
+        const destinationIndexPath = Layers.findIndexPath(
+          draftPage,
+          (layer) => layer.do_objectID === destinationId,
+        );
+
+        if (!destinationIndexPath) return;
+
+        let parentIndexPath: IndexPath;
+        let parent: Layers.ParentLayer;
+        let destinationIndex: number;
+
+        switch (position) {
+          case 'inside': {
+            parentIndexPath = destinationIndexPath;
+            parent = Layers.access(
+              draftPage,
+              parentIndexPath,
+            ) as Layers.ParentLayer;
+
+            destinationIndex = parent.layers.length;
+            break;
+          }
+          case 'above':
+          case 'below': {
+            parentIndexPath = destinationIndexPath.slice(0, -1);
+            parent = Layers.access(
+              draftPage,
+              parentIndexPath,
+            ) as Layers.ParentLayer;
+
+            const siblingIndex =
+              destinationIndexPath[destinationIndexPath.length - 1];
+
+            destinationIndex =
+              position === 'above' ? siblingIndex : siblingIndex + 1;
+            break;
+          }
+        }
+
+        const parentTransform = getLayerTransformAtIndexPath(
+          draftPage,
+          parentIndexPath,
+          undefined,
+          'includeLast',
+        );
+
+        const adjustedLayers = layerInfo.map(({ layer, transform }) => {
+          // First we undo the original parent's transform, then we apply the new parent's transform
+          const newTransform = AffineTransform.multiply(
+            transform,
+            parentTransform.invert(),
+          );
+
+          return produce(layer, (draftLayer) => {
+            draftLayer.frame = {
+              ...draftLayer.frame,
+              ...transformRect(draftLayer.frame, newTransform),
+            };
+          });
+        });
+
+        parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
+      });
+    }
     case 'deleteLayer':
     case 'deleteSymbol': {
       const [, id] = action;
