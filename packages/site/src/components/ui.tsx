@@ -5,6 +5,8 @@ export type StackProps = {
   width?: number | string;
   height?: number | string;
   padding?: number | string;
+  paddingX?: number | string;
+  paddingY?: number | string;
   background?: string;
 };
 
@@ -14,11 +16,15 @@ export const Stack = styled.div<StackProps>((props) => ({
   width: props.width,
   height: props.height,
   padding: props.padding,
+  paddingLeft: props.paddingX,
+  paddingRight: props.paddingX,
+  paddingTop: props.paddingY,
+  paddingBottom: props.paddingY,
   background: props.background,
 }));
 
 const headingSizes = {
-  1: '20vw',
+  1: 'min(20vw, 20vh)',
   2: 24,
   3: 18,
 };

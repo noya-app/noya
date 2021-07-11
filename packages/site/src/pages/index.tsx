@@ -1,4 +1,10 @@
+import styled from 'styled-components';
+import Logo from '../assets/logo.svg';
 import { Stack, Heading } from '../components/ui';
+
+const LogoWrapper = styled.div({
+  '* >': { height: '32px' },
+});
 
 function App() {
   return (
@@ -10,7 +16,9 @@ function App() {
       background="black"
     >
       <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-        <span>Noya</span>
+        <LogoWrapper>
+          <Logo />
+        </LogoWrapper>
         <span style={{ justifySelf: 'end' }}>GitHub</span>
       </header>
       <Heading level={1}>
@@ -20,9 +28,12 @@ function App() {
         <br />
         Design
       </Heading>
-      <p>Build your own design tool.</p>
       {/* <p>Noya is an open-source toolkit to build your own design tool.</p> */}
       {/* <p>An open-source toolkit to build your own design tool.</p> */}
+
+      <Stack axis="x" paddingY={48}>
+        <Heading level={2}>Build your own design tool</Heading>
+      </Stack>
     </Stack>
   );
 }
