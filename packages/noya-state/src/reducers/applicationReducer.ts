@@ -115,7 +115,6 @@ export function applicationReducer(
     case 'addPointToPath':
     case 'insertBitmap':
     case 'pan':
-    case 'insertBitmap':
     case 'interaction':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
