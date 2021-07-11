@@ -742,8 +742,8 @@ export default memo(function Canvas() {
   );
 
   return (
-    <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
-      <ImageDropTarget onDropFile={onDropFile}>
+    <ImageDropTarget onDropFile={onDropFile}>
+      <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container
           ref={containerRef}
           cursor={cursor}
@@ -760,7 +760,7 @@ export default memo(function Canvas() {
             )}
           </InsetContainer>
         </Container>
-      </ImageDropTarget>
-    </ContextMenu>
+      </ContextMenu>
+    </ImageDropTarget>
   );
 });
