@@ -18,7 +18,6 @@ import * as Spacer from './Spacer';
 
 type TreeRowBaseProps = {
   icon?: ReactNode;
-  depth: number;
   expanded?: boolean;
   onClickChevron?: () => void;
 };
@@ -34,7 +33,6 @@ export type TreeRowProps<
 
 const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
   {
-    depth,
     icon,
     expanded,
     onClickChevron,
@@ -55,7 +53,6 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
 
   return (
     <ListView.Row ref={forwardedRef} {...rest}>
-      <Spacer.Horizontal size={depth * 12} />
       {expandable && (
         <>
           {expanded === undefined ? (

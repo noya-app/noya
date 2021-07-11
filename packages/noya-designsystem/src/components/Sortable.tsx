@@ -2,34 +2,56 @@ import {
   closestCenter,
   DndContext,
   DragEndEvent,
+  DragMoveEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  Translate,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import {
-  restrictToFirstScrollableAncestor,
-  restrictToVerticalAxis,
-} from '@dnd-kit/modifiers';
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
+import React, {
   createContext,
   memo,
   ReactNode,
   useCallback,
   useContext,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
 
-export type DragIndicator = 'above' | 'below' | 'inside';
+export type RelativeDropPosition = 'above' | 'below' | 'inside';
 
-const ActiveIndexContext = createContext<number | undefined>(undefined);
+export type DropValidator = (
+  sourceId: string,
+  destinationId: string,
+  position: RelativeDropPosition,
+) => boolean;
+
+const defaultAcceptsDrop: DropValidator = (
+  sourceId,
+  destinationId,
+  position,
+) => {
+  return position !== 'inside' && sourceId !== destinationId;
+};
+
+const SortableItemContext = createContext<{
+  position: Translate;
+  acceptsDrop: DropValidator;
+  setActivatorEvent: (event: PointerEvent) => void;
+}>({
+  position: { x: 0, y: 0 },
+  acceptsDrop: defaultAcceptsDrop,
+  setActivatorEvent: () => {},
+});
 
 /* ----------------------------------------------------------------------------
  * Item
@@ -40,28 +62,75 @@ interface ItemProps {
   children: (props: any) => JSX.Element;
 }
 
+function validateDropIndicator(
+  acceptsDrop: DropValidator,
+  activeId: string,
+  overId: string,
+  offsetTop: number,
+  elementTop: number,
+  elementHeight: number,
+): RelativeDropPosition | undefined {
+  const acceptsDropInside = acceptsDrop(activeId, overId, 'inside');
+
+  // If we're in the center of the element, prefer dropping inside
+  if (
+    offsetTop >= elementTop + elementHeight / 3 &&
+    offsetTop <= elementTop + (elementHeight * 2) / 3 &&
+    acceptsDropInside
+  )
+    return 'inside';
+
+  // Are we over the top or bottom half of the element?
+  const indicator =
+    offsetTop < elementTop + elementHeight / 2 ? 'above' : 'below';
+
+  // Drop above or below if possible, falling back to inside
+  return acceptsDrop(activeId, overId, indicator)
+    ? indicator
+    : acceptsDropInside
+    ? 'inside'
+    : undefined;
+}
+
 function SortableItem({ id, children }: ItemProps) {
-  const activeIndex = useContext(ActiveIndexContext);
+  const { position, acceptsDrop, setActivatorEvent } = useContext(
+    SortableItemContext,
+  );
   const sortable = useSortable({ id });
 
   const {
+    active,
+    activatorEvent,
     attributes,
     listeners,
     setNodeRef,
     isDragging,
     index,
     overIndex,
+    over,
   } = sortable;
+
+  if (activatorEvent) {
+    setActivatorEvent(activatorEvent as PointerEvent);
+  }
+
+  const eventY = (activatorEvent as PointerEvent | null)?.clientY ?? 0;
+  const offsetTop = eventY + position.y;
 
   return children({
     ref: setNodeRef,
     ...attributes,
     ...listeners,
-    dragIndicator:
-      index === overIndex && !isDragging
-        ? activeIndex !== undefined && activeIndex > index
-          ? 'above'
-          : 'below'
+    relativeDropPosition:
+      index === overIndex && !isDragging && active && over
+        ? validateDropIndicator(
+            acceptsDrop,
+            active.id,
+            over.id,
+            offsetTop,
+            over.rect.offsetTop,
+            over.rect.height,
+          )
         : undefined,
   });
 }
@@ -74,7 +143,12 @@ interface RootProps {
   keys: string[];
   children: ReactNode;
   renderOverlay?: (index: number) => ReactNode;
-  onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
+  onMoveItem?: (
+    sourceIndex: number,
+    destinationIndex: number,
+    position: RelativeDropPosition,
+  ) => void;
+  acceptsDrop?: DropValidator;
 }
 
 function SortableRoot({
@@ -82,6 +156,7 @@ function SortableRoot({
   children,
   onMoveItem,
   renderOverlay,
+  acceptsDrop = defaultAcceptsDrop,
 }: RootProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -92,6 +167,13 @@ function SortableRoot({
   );
 
   const [activeIndex, setActiveIndex] = useState<number | undefined>();
+  const activatorEvent = useRef<PointerEvent | null>(null);
+
+  const setActivatorEvent = useCallback((event: PointerEvent) => {
+    activatorEvent.current = event;
+  }, []);
+
+  const [position, setPosition] = useState<Translate>({ x: 0, y: 0 });
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
@@ -99,6 +181,10 @@ function SortableRoot({
     },
     [keys],
   );
+
+  const handleDragMove = useCallback((event: DragMoveEvent) => {
+    setPosition({ ...event.delta });
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -110,20 +196,43 @@ function SortableRoot({
         const oldIndex = keys.indexOf(active.id);
         const newIndex = keys.indexOf(over.id);
 
-        onMoveItem?.(oldIndex, newIndex);
+        const eventY = activatorEvent.current?.clientY ?? 0;
+        const offsetTop = eventY + position.y;
+
+        const indicator = validateDropIndicator(
+          acceptsDrop,
+          active.id,
+          over.id,
+          offsetTop,
+          over.rect.offsetTop,
+          over.rect.height,
+        );
+
+        if (!indicator) return;
+
+        onMoveItem?.(oldIndex, newIndex, indicator);
       }
     },
-    [keys, onMoveItem],
+    [acceptsDrop, keys, onMoveItem, position.y],
   );
 
   return (
-    <ActiveIndexContext.Provider value={activeIndex}>
+    <SortableItemContext.Provider
+      value={useMemo(
+        () => ({
+          acceptsDrop,
+          position,
+          setActivatorEvent,
+        }),
+        [acceptsDrop, position, setActivatorEvent],
+      )}
+    >
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
+        onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
-        modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
       >
         <SortableContext items={keys} strategy={verticalListSortingStrategy}>
           {children}
@@ -136,7 +245,7 @@ function SortableRoot({
             document.body,
           )}
       </DndContext>
-    </ActiveIndexContext.Provider>
+    </SortableItemContext.Provider>
   );
 }
 

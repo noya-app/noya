@@ -96,8 +96,8 @@ export const addSiblingLayer = <
   layer: T | T[],
 ) => {
   const parent = getParentLayer(page, indexPath);
-  const l = layer instanceof Array ? layer : [layer];
-  parent.layers.splice(indexPath[indexPath.length - 1], 0, ...l);
+  const layers = layer instanceof Array ? layer : [layer];
+  parent.layers.splice(indexPath[indexPath.length - 1], 0, ...layers);
 };
 
 export const getRightMostLayerBounds = (page: Sketch.Page) => {
