@@ -10,7 +10,7 @@ import {
   SUPPORTED_FILE_TYPES,
 } from 'noya-designsystem';
 import { useHover } from 'noya-designsystem/src/hooks/useHover';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import { FileMap } from 'noya-sketch-file';
 import { DragEvent, memo, useCallback, useState } from 'react';
 import styled from 'styled-components';

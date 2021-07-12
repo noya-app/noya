@@ -1,5 +1,5 @@
-import { Primitives, useCanvasKit } from 'noya-renderer';
-import { Layers } from 'noya-state';
+import { useCanvasKit } from 'noya-renderer';
+import { Layers, Primitives } from 'noya-state';
 import { useMemo } from 'react';
 
 export default function useLayerPath(layer: Layers.PointsLayer) {

@@ -1,9 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit, Path, PathOp } from 'canvaskit';
 import { distance, Rect } from 'noya-geometry';
-import { Point } from 'noya-state';
+import { parsePoint, Point, stringifyPoint } from 'noya-state';
 import { rotate, windowsOf, zip } from 'noya-utils';
-import { parsePoint, stringifyPoint } from '../primitives';
 
 /**
  * The radius of an edge should be less than half the length of that edge

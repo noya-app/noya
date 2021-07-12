@@ -5,6 +5,7 @@ import { useWorkspace } from 'app/src/hooks/useWorkspace';
 import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,
+  Axis,
   Bounds,
   createBounds,
   createRect,
@@ -12,9 +13,15 @@ import {
   Point,
 } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
-import { Primitives, useCanvasKit } from 'noya-renderer';
-import { Layers, Rect } from 'noya-state';
-import { findIndexPath, PointsLayer } from 'noya-state/src/layers';
+import { useCanvasKit } from 'noya-renderer';
+import {
+  Layers,
+  Rect,
+  Primitives,
+  Selectors,
+  DecodedCurvePoint,
+  encodeCurvePoint,
+} from 'noya-state';
 import {
   getBoundingPoints,
   getBoundingRect,
@@ -38,16 +45,13 @@ import {
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
-import { DecodedCurvePoint, encodeCurvePoint } from '../primitives';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
 import {
   ALL_DIRECTIONS,
-  Axis,
   getAxisProperties,
   getGuides,
   Guides,
@@ -153,7 +157,7 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    const indexPath = findIndexPath(
+    const indexPath = Layers.findIndexPath(
       page,
       (layer) => layer.do_objectID === highlightedLayer.id,
     );
@@ -367,7 +371,7 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    const indexPath = findIndexPath(
+    const indexPath = Layers.findIndexPath(
       page,
       (layer) => layer.do_objectID === highlightedLayer.id,
     );
@@ -407,11 +411,14 @@ export default memo(function SketchFileRenderer() {
       !indexPath ||
       interactionState.type !== 'editPath' ||
       !interactionState.point ||
-      getPathElementAtPoint(state, interactionState.point)
+      Selectors.getPathElementAtPoint(state, interactionState.point)
     )
       return;
 
-    const layer = Layers.access(page, indexPath.indexPath) as PointsLayer;
+    const layer = Layers.access(
+      page,
+      indexPath.indexPath,
+    ) as Layers.PointsLayer;
 
     const decodedPointToDraw: DecodedCurvePoint = {
       _class: 'curvePoint',

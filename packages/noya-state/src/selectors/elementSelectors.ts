@@ -1,5 +1,5 @@
 import { Point } from 'noya-geometry';
-import { decodeCurvePoint } from 'noya-renderer/src/primitives';
+import { decodeCurvePoint } from 'noya-state';
 import { ApplicationState, Layers } from '../index';
 import { SelectedControlPoint } from '../reducers/applicationReducer';
 import { SelectedPoint } from '../reducers/pointReducer';

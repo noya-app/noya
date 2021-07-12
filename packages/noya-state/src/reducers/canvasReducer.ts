@@ -7,13 +7,14 @@ import {
   createRect,
   normalizeRect,
 } from 'noya-geometry';
-import { Primitives, uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
   resizeRect,
-} from 'noya-renderer/src/primitives';
+  Primitives,
+} from 'noya-state';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {

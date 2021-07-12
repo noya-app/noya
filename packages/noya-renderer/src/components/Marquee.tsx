@@ -1,6 +1,6 @@
 import { usePaint } from 'noya-react-canvaskit';
-import { Primitives, useCanvasKit } from 'noya-renderer';
-import { Rect } from 'noya-state';
+import { useCanvasKit } from 'noya-renderer';
+import { Rect, Primitives } from 'noya-state';
 import React, { memo } from 'react';
 import { Rect as RCKRect } from '../ComponentsContext';
 

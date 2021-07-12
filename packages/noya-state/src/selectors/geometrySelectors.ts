@@ -9,8 +9,8 @@ import {
   rotatedRectContainsPoint,
   transformRect,
 } from 'noya-geometry';
-import { getDragHandles } from 'noya-renderer/src/canvas/selection';
-import * as Primitives from 'noya-renderer/src/primitives';
+import { getDragHandles } from 'noya-state';
+import * as Primitives from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';

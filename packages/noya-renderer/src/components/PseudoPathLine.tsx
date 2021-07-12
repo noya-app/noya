@@ -3,7 +3,8 @@ import { CurvePoint } from '@sketch-hq/sketch-file-format-ts/dist/cjs/types';
 import { useStroke } from 'noya-react-canvaskit';
 import React from 'react';
 import { useTheme } from 'styled-components';
-import { Path, Primitives, useCanvasKit } from '..';
+import { Path, useCanvasKit } from '..';
+import { Primitives } from 'noya-state';
 
 interface EditablePathPointProps {
   points: CurvePoint[];

@@ -7,3 +7,4 @@ export * from './themeSelectors';
 export * from './transformSelectors';
 export * from './workspaceSelectors';
 export * from './pointSelectors';
+export * from './elementSelectors';

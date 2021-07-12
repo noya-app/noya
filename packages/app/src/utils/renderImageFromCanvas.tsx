@@ -29,19 +29,21 @@ function readPixels(image: Image): Uint8Array | null {
   return pixels;
 }
 
+export type ImageEncoding = 'bytes' | 'svg' | 'png' | 'jpg' | 'webp';
+
 export function renderImageFromCanvas(
   CanvasKit: CanvasKit,
   width: number,
   height: number,
   theme: Theme,
   state: WorkspaceState,
-  format: 'bytes' | Sketch.ExportFileFormat,
+  format: ImageEncoding,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider>
+        <CanvasKitProvider CanvasKit={CanvasKit}>
           <ThemeProvider theme={theme}>
             <StateProvider state={state}>
               <ImageCacheProvider>
@@ -73,7 +75,7 @@ export function renderImageFromCanvas(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider>
+          <CanvasKitProvider CanvasKit={CanvasKit}>
             <ThemeProvider theme={theme}>
               <StateProvider state={state}>
                 <ImageCacheProvider>

@@ -1,6 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, Bounds, createBounds, Size } from 'noya-geometry';
-import { Axis } from 'noya-renderer/src/components/guides';
+import {
+  AffineTransform,
+  Bounds,
+  createBounds,
+  Size,
+  Axis,
+} from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';

@@ -3,11 +3,10 @@ import * as CanvasKit from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable, usePaint } from 'noya-react-canvaskit';
 import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
-import { Group, Path, Primitives, useCanvasKit } from 'noya-renderer';
+import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
-import { Rect } from '../../../../noya-state/src';
+import { Rect, Primitives, getStrokedPath } from 'noya-state';
 import { useSketchImage } from '../../ImageCache';
-import { getStrokedPath } from '../../primitives/path';
 import SketchBorder from '../effects/SketchBorder';
 
 const SketchFill = memo(function SketchFill({

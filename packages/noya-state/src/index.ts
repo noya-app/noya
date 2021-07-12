@@ -17,3 +17,8 @@ export * from './reducers/interactionReducer';
 export * from './types';
 
 export type { SelectionType } from './utils/selection';
+
+export * as Primitives from './primitives';
+export * from './primitives';
+export * from './selection';
+export * from './checkeredBackground';
