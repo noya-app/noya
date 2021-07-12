@@ -7,13 +7,7 @@ import {
   Select,
   Button,
 } from 'noya-designsystem';
-import { ApplicationState, Overrides } from 'noya-state';
-import {
-  getSharedStyles,
-  getSharedTextStyles,
-  getSymbols,
-  findSymbolMaster,
-} from 'noya-state/src/selectors/selectors';
+import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
 import { useApplicationState } from '../../contexts/ApplicationStateContext';
@@ -150,7 +144,7 @@ function getOverrideElements(
           Overrides.getOverrideValue(overrideValues, 'symbolID', key) ??
           layer.symbolID;
 
-        const symbolMaster = findSymbolMaster(state, symbolID);
+        const symbolMaster = Selectors.findSymbolMaster(state, symbolID);
         if (!symbolMaster && symbolID !== 'none') return [];
 
         const nestedOverrides =
@@ -173,7 +167,7 @@ function getOverrideElements(
           canOverride('symbolID') && (
             <TreeView.Row key={symbolIdOverrideName} depth={depth + 1}>
               <SymbolMasterSelector
-                symbols={getSymbols(state)}
+                symbols={Selectors.getSymbols(state)}
                 symbolId={symbolID}
                 onChange={(value) =>
                   onSetOverrideValue(symbolIdOverrideName, value)
@@ -214,7 +208,7 @@ function getOverrideElements(
           layer.sharedStyleID && canOverride('textStyle') && (
             <TreeView.Row key={textStyleOverrideName} depth={depth + 1}>
               <TextStyleSelector
-                textStyles={getSharedTextStyles(state)}
+                textStyles={Selectors.getSharedTextStyles(state)}
                 sharedStyleID={
                   Overrides.getOverrideValue(
                     overrideValues,
@@ -258,7 +252,7 @@ function getOverrideElements(
               layer.sharedStyleID && (
                 <TreeView.Row key={layerStyleOverrideName} depth={depth + 1}>
                   <ThemeStyleSelector
-                    themeStyles={getSharedStyles(state)}
+                    themeStyles={Selectors.getSharedStyles(state)}
                     sharedStyleID={
                       Overrides.getOverrideValue(
                         overrideValues,

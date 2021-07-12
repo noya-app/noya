@@ -9,13 +9,13 @@ import {
   TextIcon,
 } from '@radix-ui/react-icons';
 import {
+  Button,
   createSectionedMenu,
   DropdownMenu,
   MenuItem,
   RegularMenuItem,
   Spacer,
 } from 'noya-designsystem';
-import Button from 'noya-designsystem/src/components/Button';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';

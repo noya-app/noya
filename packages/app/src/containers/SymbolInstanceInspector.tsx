@@ -3,10 +3,9 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useSelector, useDispatch } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import SymbolSelectorRow from '../components/inspector/SymbolSelectorRow';
 import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
-import { Divider } from 'noya-designsystem';
+import { Divider, withSeparatorElements } from 'noya-designsystem';
 import FillInspector from './FillInspector';
 
 export default memo(function SymbolMasterInspector() {

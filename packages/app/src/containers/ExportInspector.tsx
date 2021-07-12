@@ -1,8 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
-import { Button, Divider, Spacer } from 'noya-designsystem';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
+import {
+  Button,
+  Divider,
+  Spacer,
+  withSeparatorElements,
+} from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';

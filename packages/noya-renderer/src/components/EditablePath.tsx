@@ -9,10 +9,8 @@ import {
   Selectors,
   Primitives,
 } from 'noya-state';
-import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { PointsLayer } from 'noya-state/src/layers';
 
 const CONTROL_POINT_SIZE = 2;
 
@@ -34,10 +32,10 @@ export function EditablePathPoint({
 
     path.addOval(
       CanvasKit.XYWHRect(
-        point.x - POINT_RADIUS,
-        point.y - POINT_RADIUS,
-        POINT_RADIUS * 2,
-        POINT_RADIUS * 2,
+        point.x - Selectors.POINT_RADIUS,
+        point.y - Selectors.POINT_RADIUS,
+        Selectors.POINT_RADIUS * 2,
+        Selectors.POINT_RADIUS * 2,
       ),
     );
 
@@ -76,7 +74,7 @@ function EditablePathControlPoint({
 }
 
 interface EditablePathOutlineProps {
-  layer: PointsLayer;
+  layer: Layers.PointsLayer;
   stroke: Paint;
 }
 

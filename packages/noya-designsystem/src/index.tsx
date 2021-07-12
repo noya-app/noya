@@ -48,9 +48,11 @@ export * from './contexts/GlobalInputBlurContext';
 
 // Hooks
 export * from './hooks/mergeEventHandlers';
+export * from './hooks/useHover';
 
 // Utils
 export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
 export * from './utils/sketchPattern';
+export { default as withSeparatorElements } from './utils/withSeparatorElements';

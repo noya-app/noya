@@ -11,6 +11,7 @@ export * from './FontManagerContext';
 export * from './hooks/useCanvasKit';
 export { ImageCacheProvider } from './ImageCache';
 export type { Context };
+export { useTextLayerParagraph } from './components/layers/SketchText';
 
 declare module 'canvaskit' {
   interface Paint {

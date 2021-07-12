@@ -6,8 +6,8 @@ import {
   Spacer,
   LabeledElementView,
   Label,
+  withSeparatorElements,
 } from 'noya-designsystem';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { ExportOptions } from 'noya-state';

@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable, usePaint } from 'noya-react-canvaskit';
-import { PaintParameters } from 'noya-react-canvaskit/src/hooks/usePaint';
+import { PaintParameters } from 'noya-react-canvaskit';
 import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { Rect, Primitives, getStrokedPath } from 'noya-state';

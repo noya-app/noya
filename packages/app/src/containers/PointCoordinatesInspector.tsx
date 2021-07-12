@@ -1,5 +1,4 @@
-import { SetNumberMode } from 'noya-state';
-import { getSelectedPoints } from 'noya-state/src/selectors/pointSelectors';
+import { Selectors, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import { useApplicationState } from '../contexts/ApplicationStateContext';
@@ -22,7 +21,7 @@ export default memo(function PointCoordinatesInspector() {
     [dispatch],
   );
 
-  const selectedPoints = getSelectedPoints(state).map(
+  const selectedPoints = Selectors.getSelectedPoints(state).map(
     (curvePoint) => curvePoint.point,
   );
   const pointX = getMultiNumberValue(selectedPoints.map((point) => point.x));
