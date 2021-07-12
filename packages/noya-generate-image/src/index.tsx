@@ -13,7 +13,7 @@ import {
 import { StateProvider } from 'noya-app-state-context';
 import { ImageCacheProvider } from 'noya-renderer';
 import { renderToStaticMarkup } from 'react-dom/server';
-import SVGRenderer from '../containers/renderer/SVGRenderer';
+import { SVGRenderer } from 'noya-svg-renderer';
 import { UTF16 } from 'noya-utils';
 
 function readPixels(image: Image): Uint8Array | null {
@@ -31,7 +31,7 @@ function readPixels(image: Image): Uint8Array | null {
 
 export type ImageEncoding = 'bytes' | 'svg' | 'png' | 'jpg' | 'webp';
 
-export function renderImageFromCanvas(
+export function generateImage(
   CanvasKit: CanvasKit,
   width: number,
   height: number,

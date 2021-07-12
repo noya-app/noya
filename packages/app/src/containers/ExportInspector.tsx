@@ -26,10 +26,7 @@ import {
   useGetWorkspaceStateSnapshot,
   useSelector,
 } from 'noya-app-state-context';
-import {
-  ImageEncoding,
-  renderImageFromCanvas,
-} from '../utils/renderImageFromCanvas';
+import { ImageEncoding, generateImage } from 'noya-generate-image';
 
 async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {
@@ -82,7 +79,7 @@ export default memo(function ExportInspector() {
 
       const exportSize = getExportSize(exportFormat, size);
 
-      return renderImageFromCanvas(
+      return generateImage(
         CanvasKit,
         exportSize.width,
         exportSize.height,
