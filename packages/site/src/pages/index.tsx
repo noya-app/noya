@@ -1,9 +1,6 @@
 import { ThemeProvider } from 'styled-components';
 import { Button, Stack, Text, darkTheme } from 'noya-designsystem';
 
-import { Heading } from '../components/ui';
-import React from 'react';
-
 function App() {
   return (
     <ThemeProvider theme={darkTheme}>
@@ -11,13 +8,13 @@ function App() {
         <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
           <span style={{ justifySelf: 'end' }}>GitHub</span>
         </header>
-        <Heading level={1}>
+        <Text variant="heading1">
           Open
           <br />
           Source
           <br />
           Design
-        </Heading>
+        </Text>
         <Button id="hi">Get Started</Button>
         {/* <p>Noya is an open-source toolkit to build your own design tool.</p> */}
         {/* <p>An open-source toolkit to build your own design tool.</p> */}

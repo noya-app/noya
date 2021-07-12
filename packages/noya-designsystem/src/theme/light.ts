@@ -53,7 +53,7 @@ export const fonts = {
 };
 
 // The last one, 0.85, I just eyeballed
-const typeScale = [3.052, 2.441, 1.953, 1.563, 1.25, 1, 0.85]; // Major third
+const typeScale = [10, 4, 1.8, 1.4, 1.25, 1, 0.85]; // Major third
 
 export const textStyles = {
   title: {
@@ -75,20 +75,18 @@ export const textStyles = {
     },
   } as CSSObject,
   heading1: {
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[2]}rem`,
-    fontWeight: 500,
-    lineHeight: '1.75',
+    fontSize: `${typeScale[0]}rem`,
+    fontWeight: 700,
+    lineHeight: '1',
   } as CSSObject,
   heading2: {
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[3]}rem`,
+    fontSize: `${typeScale[1]}rem`,
     fontWeight: 500,
-    lineHeight: '1.75',
+    lineHeight: '1.2',
   } as CSSObject,
   heading3: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[4]}rem`,
+    fontSize: `${typeScale[2]}rem`,
     fontWeight: 500,
     lineHeight: '1.75',
   } as CSSObject,
