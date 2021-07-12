@@ -1,7 +1,4 @@
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';

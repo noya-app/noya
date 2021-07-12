@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { createSectionedMenu, MenuItem } from 'noya-designsystem';
 import { Layers } from 'noya-state';
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from '../contexts/ApplicationStateContext';
+import { useDispatch } from 'noya-app-state-context';
 import useShallowArray from './useShallowArray';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {

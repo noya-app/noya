@@ -1,10 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Spacer, TreeView } from 'noya-designsystem';
-import { ApplicationState, Overrides } from 'noya-state';
-import { findSymbolMaster } from 'noya-state/src/selectors/layerSelectors';
+import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
@@ -42,7 +41,8 @@ function getOverrideElements(
 
     switch (layer._class) {
       case 'symbolInstance': {
-        const symbolMaster = findSymbolMaster(state, layer.symbolID);
+        const symbolMaster = Selectors.findSymbolMaster(state, layer.symbolID);
+
         if (!symbolMaster) return [];
 
         const nestedOverrides = symbolMaster.allowsOverrides

@@ -1,10 +1,9 @@
 import * as CanvasKit from 'canvaskit';
 import { insetRect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { Primitives, useCanvasKit } from 'noya-renderer';
-import { Rect } from 'noya-state';
+import { useCanvasKit } from 'noya-renderer';
+import { Rect, Primitives, getDragHandles } from 'noya-state';
 import React, { memo } from 'react';
-import { getDragHandles } from '../canvas/selection';
 import { Rect as RCKRect } from '../ComponentsContext';
 
 interface Props {

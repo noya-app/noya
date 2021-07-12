@@ -1,5 +1,5 @@
 import { Draft } from 'immer';
-import * as Primitives from 'noya-renderer/src/primitives';
+import { Primitives } from 'noya-state';
 import { ApplicationState, Layers } from '../index';
 import type { Point } from '../types';
 

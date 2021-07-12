@@ -7,7 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { useTheme } from 'styled-components';
-import { useWorkspaceState } from '../contexts/ApplicationStateContext';
+import { useWorkspaceState } from 'noya-app-state-context';
 import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
 
 interface Props {

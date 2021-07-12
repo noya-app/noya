@@ -2,8 +2,9 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { useCanvasKit, uuid } from 'noya-renderer';
-import { decodeCurvePoint } from 'noya-renderer/src/primitives';
+import { uuid } from 'noya-utils';
+import { useCanvasKit } from 'noya-renderer';
+import { decodeCurvePoint, SelectedPoint } from 'noya-state';
 import {
   CompassDirection,
   Layers,
@@ -12,18 +13,6 @@ import {
   Selectors,
   ShapeType,
 } from 'noya-state';
-import { SelectedPoint } from 'noya-state/src/reducers/pointReducer';
-import {
-  canClosePath,
-  getCursorForEditPathMode,
-} from 'noya-state/src/selectors/elementSelectors';
-import { getBoundingRectMap } from 'noya-state/src/selectors/geometrySelectors';
-import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
-import { getCurrentPage } from 'noya-state/src/selectors/pageSelectors';
-import {
-  getIsEditingPath,
-  isPointInRange,
-} from 'noya-state/src/selectors/pointSelectors';
 import {
   CSSProperties,
   memo,
@@ -34,13 +23,10 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspace } from 'noya-app-state-context';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 // import SVGRenderer from './renderer/SVGRenderer';
@@ -105,7 +91,7 @@ export default memo(function Canvas() {
     },
   });
 
-  const isEditingPath = getIsEditingPath(state.interactionState.type);
+  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
       dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
@@ -253,8 +239,8 @@ export default memo(function Canvas() {
           let selectedPoint: SelectedPoint | undefined = undefined;
           let selectedControlPoint: SelectedControlPoint | undefined;
 
-          const boundingRects = getBoundingRectMap(
-            getCurrentPage(state),
+          const boundingRects = Selectors.getBoundingRectMap(
+            Selectors.getCurrentPage(state),
             state.selectedObjects,
             {
               clickThroughGroups: true,
@@ -263,22 +249,26 @@ export default memo(function Canvas() {
             },
           );
 
-          getSelectedLayers(state)
+          Selectors.getSelectedLayers(state)
             .filter(Layers.isPointsLayer)
             .forEach((layer) => {
               const boundingRect = boundingRects[layer.do_objectID];
               layer.points.forEach((curvePoint, index) => {
                 const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
 
-                if (isPointInRange(decodedPoint.point, point)) {
+                if (Selectors.isPointInRange(decodedPoint.point, point)) {
                   selectedPoint = [layer.do_objectID, index];
-                } else if (isPointInRange(decodedPoint.curveTo, point)) {
+                } else if (
+                  Selectors.isPointInRange(decodedPoint.curveTo, point)
+                ) {
                   selectedControlPoint = {
                     layerId: layer.do_objectID,
                     pointIndex: index,
                     controlPointType: 'curveTo',
                   };
-                } else if (isPointInRange(decodedPoint.curveFrom, point)) {
+                } else if (
+                  Selectors.isPointInRange(decodedPoint.curveFrom, point)
+                ) {
                   selectedControlPoint = {
                     layerId: layer.do_objectID,
                     pointIndex: index,
@@ -293,7 +283,7 @@ export default memo(function Canvas() {
           );
 
           if (selectedPoint) {
-            if (canClosePath(state, selectedPoint) && !shiftKey) {
+            if (Selectors.canClosePath(state, selectedPoint) && !shiftKey) {
               dispatch('setIsClosed', true);
               dispatch('selectPoint', selectedPoint);
             } else {
@@ -730,7 +720,9 @@ export default memo(function Canvas() {
       case 'editPath': {
         const { point } = state.interactionState;
 
-        return point ? getCursorForEditPathMode(state, point) : 'default';
+        return point
+          ? Selectors.getCursorForEditPathMode(state, point)
+          : 'default';
       }
       case 'maybeMoveControlPoint':
       case 'maybeMovePoint':

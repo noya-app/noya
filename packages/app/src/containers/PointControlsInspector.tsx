@@ -10,7 +10,7 @@ import {
 import { Layers, Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useApplicationState } from '../contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
 import getMultiValue from '../utils/getMultiValue';
 

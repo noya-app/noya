@@ -1,8 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { center, Size } from 'noya-geometry';
-import { uuid } from 'noya-renderer';
-import SketchLayer from 'noya-renderer/src/components/layers/SketchLayer';
+import { uuid } from 'noya-utils';
+import { SketchLayer } from 'noya-renderer';
 import { Models } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import CanvasGridItem from './CanvasGridItem';

@@ -1,14 +1,9 @@
-import { Divider, Spacer } from 'noya-designsystem';
-import { Selectors, SetNumberMode } from 'noya-state';
-import * as Layers from 'noya-state/src/layers';
+import { Divider, Spacer, withSeparatorElements } from 'noya-designsystem';
+import { Layers, Selectors, SetNumberMode } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
-import withSeparatorElements from '../utils/withSeparatorElements';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';

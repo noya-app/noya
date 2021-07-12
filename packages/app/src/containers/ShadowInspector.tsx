@@ -4,7 +4,7 @@ import { isDeepEqual, zipLongest } from 'noya-utils';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
-import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
+import { useDispatch, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
 import getMultiValue from '../utils/getMultiValue';

@@ -19,8 +19,8 @@ import {
   useDispatch,
   useGetStateSnapshot,
   useSelector,
-} from '../contexts/ApplicationStateContext';
-import { useWorkspace } from '../hooks/useWorkspace';
+} from 'noya-app-state-context';
+import { useWorkspace } from 'noya-app-state-context';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,

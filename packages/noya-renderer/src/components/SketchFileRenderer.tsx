@@ -1,10 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
-import { useWorkspace } from 'app/src/hooks/useWorkspace';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,
+  Axis,
   Bounds,
   createBounds,
   createRect,
@@ -12,42 +12,32 @@ import {
   Point,
 } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
-import { Primitives, useCanvasKit } from 'noya-renderer';
-import { Layers, Rect } from 'noya-state';
-import { findIndexPath, PointsLayer } from 'noya-state/src/layers';
+import { useCanvasKit } from 'noya-renderer';
 import {
-  getBoundingPoints,
-  getBoundingRect,
-  getCanvasTransform,
-  getCurrentPage,
-  getIndexPathOfOpenShapeLayer,
-  getIsEditingPath,
-  getLayerTransformAtIndexPath,
-  getScreenTransform,
-  getSelectedLayerIndexPaths,
-  getSelectedLayerIndexPathsExcludingDescendants,
-  getSymbols,
-} from 'noya-state/src/selectors/selectors';
+  Layers,
+  Rect,
+  Primitives,
+  Selectors,
+  DecodedCurvePoint,
+  encodeCurvePoint,
+} from 'noya-state';
 import {
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
   getSnappingPairs,
   SnappingPair,
-} from 'noya-state/src/snapping';
+} from 'noya-state';
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { getPathElementAtPoint } from '../../../noya-state/src/selectors/elementSelectors';
 import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
-import { DecodedCurvePoint, encodeCurvePoint } from '../primitives';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
 import {
   ALL_DIRECTIONS,
-  Axis,
   getAxisProperties,
   getGuides,
   Guides,
@@ -91,10 +81,10 @@ export default memo(function SketchFileRenderer() {
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
   const CanvasKit = useCanvasKit();
-  const page = getCurrentPage(state);
-  const screenTransform = getScreenTransform(canvasInsets);
-  const canvasTransform = getCanvasTransform(state, canvasInsets);
-  const isEditingPath = getIsEditingPath(interactionState.type);
+  const page = Selectors.getCurrentPage(state);
+  const screenTransform = Selectors.getScreenTransform(canvasInsets);
+  const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
+  const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
 
   const canvasRect = useMemo(
     () =>
@@ -122,18 +112,23 @@ export default memo(function SketchFileRenderer() {
 
   const boundingRect = useMemo(
     () =>
-      getBoundingRect(page, AffineTransform.identity, state.selectedObjects, {
-        clickThroughGroups: true,
-        includeHiddenLayers: true,
-        includeArtboardLayers: false,
-      }),
+      Selectors.getBoundingRect(
+        page,
+        AffineTransform.identity,
+        state.selectedObjects,
+        {
+          clickThroughGroups: true,
+          includeHiddenLayers: true,
+          includeArtboardLayers: false,
+        },
+      ),
     [page, state.selectedObjects],
   );
 
   const boundingPoints = useMemo(
     () =>
       state.selectedObjects.map((id) =>
-        getBoundingPoints(page, AffineTransform.identity, id, {
+        Selectors.getBoundingPoints(page, AffineTransform.identity, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
           includeArtboardLayers: false,
@@ -153,14 +148,14 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    const indexPath = findIndexPath(
+    const indexPath = Layers.findIndexPath(
       page,
       (layer) => layer.do_objectID === highlightedLayer.id,
     );
 
     if (!indexPath) return;
 
-    const highlightedBoundingRect = getBoundingRect(
+    const highlightedBoundingRect = Selectors.getBoundingRect(
       page,
       AffineTransform.identity,
       [highlightedLayer.id],
@@ -206,7 +201,7 @@ export default memo(function SketchFileRenderer() {
   const smartSnapGuides = useMemo(() => {
     if (interactionState.type !== 'moving' || !boundingRect) return;
 
-    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+    const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
       state,
     );
 
@@ -247,7 +242,7 @@ export default memo(function SketchFileRenderer() {
       .forEach((layerId) => {
         if (layerId in layerBoundsMap) return;
 
-        const layerToSnapBoundingRect = getBoundingRect(
+        const layerToSnapBoundingRect = Selectors.getBoundingRect(
           page,
           AffineTransform.identity,
           [layerId],
@@ -367,7 +362,7 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
-    const indexPath = findIndexPath(
+    const indexPath = Layers.findIndexPath(
       page,
       (layer) => layer.do_objectID === highlightedLayer.id,
     );
@@ -375,7 +370,7 @@ export default memo(function SketchFileRenderer() {
     if (!indexPath) return;
 
     const layer = Layers.access(page, indexPath);
-    const layerTransform = getLayerTransformAtIndexPath(
+    const layerTransform = Selectors.getLayerTransformAtIndexPath(
       page,
       indexPath,
       AffineTransform.identity,
@@ -401,17 +396,20 @@ export default memo(function SketchFileRenderer() {
 
   // The `useMemo` is just for organization here, since we have `state` in the deps
   const editPathPseudoElements = useMemo(() => {
-    const indexPath = getIndexPathOfOpenShapeLayer(state);
+    const indexPath = Selectors.getIndexPathOfOpenShapeLayer(state);
 
     if (
       !indexPath ||
       interactionState.type !== 'editPath' ||
       !interactionState.point ||
-      getPathElementAtPoint(state, interactionState.point)
+      Selectors.getPathElementAtPoint(state, interactionState.point)
     )
       return;
 
-    const layer = Layers.access(page, indexPath.indexPath) as PointsLayer;
+    const layer = Layers.access(
+      page,
+      indexPath.indexPath,
+    ) as Layers.PointsLayer;
 
     const decodedPointToDraw: DecodedCurvePoint = {
       _class: 'curvePoint',
@@ -440,7 +438,7 @@ export default memo(function SketchFileRenderer() {
 
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
-    const selectedLayerIndexPaths = getSelectedLayerIndexPaths(state);
+    const selectedLayerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
 
     return (
       <>
@@ -449,7 +447,10 @@ export default memo(function SketchFileRenderer() {
 
           if (!Layers.isPointsLayer(layer)) return null;
 
-          const layerTransform = getLayerTransformAtIndexPath(page, indexPath);
+          const layerTransform = Selectors.getLayerTransformAtIndexPath(
+            page,
+            indexPath,
+          );
 
           return (
             <EditablePath
@@ -478,7 +479,7 @@ export default memo(function SketchFileRenderer() {
     if (!point) return;
 
     const symbol = {
-      ...getSymbols(state).find(
+      ...Selectors.getSymbols(state).find(
         ({ do_objectID }) => do_objectID === interactionState.symbolID,
       ),
     } as Sketch.SymbolMaster;

@@ -4,20 +4,28 @@ import { SuspendedValue } from 'noya-utils';
 import { createContext, memo, useContext, ReactNode } from 'react';
 // import loadSVGKit from 'noya-svgkit';
 
-// let suspendedCanvasKit = new SuspendedValue<CanvasKit>(loadSVGKit());
-let suspendedCanvasKit = new SuspendedValue<CanvasKit>(loadCanvasKit());
+// We don't start loading CanvasKit until the Provider renders the first time,
+// since we currently support setting the wasm path at runtime when the app starts,
+// which needs to happen before `loadCanvasKit` is called.
+let suspendedCanvasKit: SuspendedValue<CanvasKit>;
 
 const CanvasKitContext = createContext<CanvasKit | undefined>(undefined);
 
 export const CanvasKitProvider = memo(function CanvasKitProvider({
   children,
+  CanvasKit,
 }: {
   children?: ReactNode;
+  CanvasKit?: CanvasKit;
 }) {
-  const CanvasKit = suspendedCanvasKit.getValueOrThrow();
+  if (!suspendedCanvasKit) {
+    suspendedCanvasKit = new SuspendedValue<CanvasKit>(loadCanvasKit());
+  }
+
+  const LoadedCanvasKit = CanvasKit ?? suspendedCanvasKit.getValueOrThrow();
 
   return (
-    <CanvasKitContext.Provider value={CanvasKit}>
+    <CanvasKitContext.Provider value={LoadedCanvasKit}>
       {children}
     </CanvasKitContext.Provider>
   );

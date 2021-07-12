@@ -20,8 +20,8 @@ import {
   RelativeDropPosition,
   Spacer,
   TreeView,
+  withSeparatorElements,
 } from 'noya-designsystem';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
 import React, {
@@ -37,11 +37,11 @@ import {
   useApplicationState,
   useGetStateSnapshot,
   useSelector,
-} from '../contexts/ApplicationStateContext';
+} from 'noya-app-state-context';
 import useDeepArray from '../hooks/useDeepArray';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 import useShallowArray from '../hooks/useShallowArray';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspace } from 'noya-app-state-context';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,

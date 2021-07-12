@@ -5,10 +5,7 @@ import { isDeepEqual, zipLongest } from 'noya-utils';
 import ArrayController from '../components/inspector/ArrayController';
 import BorderRow from '../components/inspector/BorderRow';
 import { DimensionValue } from '../components/inspector/DimensionsInspector';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiValue from '../utils/getMultiValue';
 import getMultiNumberValue from '../utils/getMultiNumberValue';

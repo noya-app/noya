@@ -1,8 +1,6 @@
 import { CanvasKitInit, Paint, PaintStyle } from 'canvaskit';
-import { PATH_TO_WASM } from 'noya-utils';
-import { v4 as uuid } from 'uuid';
+import { getPathToWasm } from 'noya-utils';
 import { Context } from './context';
-import * as Primitives from './primitives';
 export { default as LayerPreview } from './components/LayerPreview';
 export { default as SketchArtboard } from './components/layers/SketchArtboard';
 export { default as SketchGroup } from './components/layers/SketchGroup';
@@ -13,9 +11,7 @@ export * from './FontManagerContext';
 export * from './hooks/useCanvasKit';
 export { ImageCacheProvider } from './ImageCache';
 export type { Context };
-export { uuid, Primitives };
-
-export type SimpleTextDecoration = Primitives.SimpleTextDecoration;
+export { useTextLayerParagraph } from './components/layers/SketchText';
 
 declare module 'canvaskit' {
   interface Paint {
@@ -31,7 +27,7 @@ export function loadCanvasKit() {
 
   loadingPromise = new Promise(async (resolve) => {
     const CanvasKit = await CanvasKitInit({
-      locateFile: (file: string) => PATH_TO_WASM + file,
+      locateFile: (file: string) => getPathToWasm() + file,
     });
 
     const _setStyle = CanvasKit.Paint.prototype.setStyle;

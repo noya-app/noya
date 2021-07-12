@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { SimpleTextDecoration } from 'noya-renderer';
-import { uuid } from 'noya-renderer';
+import { SimpleTextDecoration } from 'noya-state';
+import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   getCurrentTab,

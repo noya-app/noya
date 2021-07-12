@@ -8,10 +8,10 @@ import {
   Slider,
   Spacer,
   SUPPORTED_FILE_TYPES,
+  useHover,
 } from 'noya-designsystem';
-import { useHover } from 'noya-designsystem/src/hooks/useHover';
-import { uuid } from 'noya-renderer';
 import { FileMap } from 'noya-sketch-file';
+import { uuid } from 'noya-utils';
 import { DragEvent, memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useFileDropTarget } from '../../hooks/useFileDropTarget';

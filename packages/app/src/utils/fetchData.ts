@@ -1,3 +1,5 @@
+import fetch from 'cross-fetch';
+
 export type ResponseEncoding = 'json' | 'text' | 'arrayBuffer';
 
 export default async function fetchData(

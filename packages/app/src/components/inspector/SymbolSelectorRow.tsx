@@ -4,7 +4,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from './InspectorPrimitives';
-import { useSelector } from '../../contexts/ApplicationStateContext';
+import { useSelector } from 'noya-app-state-context';
 import useShallowArray from '../../hooks/useShallowArray';
 
 interface Props {

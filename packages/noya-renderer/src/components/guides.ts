@@ -1,4 +1,4 @@
-import { Bounds, distance, Point } from 'noya-geometry';
+import { Bounds, distance, Point, Axis } from 'noya-geometry';
 
 export type DistanceMeasurementProps = {
   distance: number;
@@ -6,7 +6,6 @@ export type DistanceMeasurementProps = {
 };
 
 type BoundsKey = keyof Bounds;
-export type Axis = 'x' | 'y';
 export type Direction = '+' | '-';
 type AxisDirectionPair = [Direction, Axis];
 
