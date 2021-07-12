@@ -244,6 +244,10 @@ export const moveSelectedPoints = (
         draftLayer.frame.height = 1;
       }
 
+      if (draftLayer.frame.width === 0) {
+        draftLayer.frame.width = 1;
+      }
+
       return;
     }
 
@@ -277,6 +281,10 @@ export const moveSelectedPoints = (
 
     if (draftLayer.frame.height === 0) {
       draftLayer.frame.height = 1;
+    }
+
+    if (draftLayer.frame.width === 0) {
+      draftLayer.frame.width = 1;
     }
 
     // Transform back to the range [0, 1], using the new bounds

@@ -13,7 +13,7 @@ import { getDragHandles } from 'noya-state';
 import * as Primitives from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
-import { visitReversed } from '../layers';
+import { isPointsLayer, visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { CanvasInsets } from '../reducers/workspaceReducer';
 import type { Point, Rect } from '../types';
@@ -25,6 +25,8 @@ import {
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
 } from './transformSelectors';
+import { isLine } from './pointSelectors';
+import { decodeCurvePoint } from '../primitives/path';
 
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
@@ -254,7 +256,13 @@ export function getBoundingPoints(
     );
 
     const framePoints = getRectCornerPoints(layer.frame);
-    points = framePoints.map((point) => transform.applyTo(point));
+    points =
+      isPointsLayer(layer) && isLine(layer.points)
+        ? layer.points.map((point) => {
+            const decodedPoint = decodeCurvePoint(point, layer.frame);
+            return transform.applyTo(decodedPoint.point);
+          })
+        : framePoints.map((point) => transform.applyTo(point));
 
     return STOP;
   });

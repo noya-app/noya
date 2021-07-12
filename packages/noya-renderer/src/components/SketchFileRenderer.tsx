@@ -53,6 +53,8 @@ import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import { SketchArtboardContent } from './layers/SketchArtboard';
+import { isPointsLayer } from '../../../noya-state/src/layers';
+import { isLine } from '../../../noya-state/src/selectors/pointSelectors';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -62,11 +64,27 @@ const BoundingRect = memo(function BoundingRect({
   rect: Rect;
 }) {
   const CanvasKit = useCanvasKit();
+  const [state] = useApplicationState();
 
   const alignedRect = useMemo(
     () => Primitives.rect(CanvasKit, insetRect(rect, 0.5, 0.5)),
     [CanvasKit, rect],
   );
+
+  let isShapeALine = false;
+
+  const page = Selectors.getCurrentPage(state);
+  const indexPath = Layers.findIndexPath(
+    page,
+    (layer) => layer.do_objectID === state.selectedObjects[0],
+  );
+
+  if (indexPath) {
+    const layer = Layers.access(page, indexPath);
+    isShapeALine = isPointsLayer(layer) ? isLine(layer.points) : false;
+  }
+
+  if (isShapeALine) return null;
 
   return <RCKRect rect={alignedRect} paint={selectionPaint} />;
 });
@@ -127,7 +145,7 @@ export default memo(function SketchFileRenderer() {
 
   const boundingPoints = useMemo(
     () =>
-      state.selectedObjects.map((id) =>
+      state.selectedObjects.map((id: string) =>
         Selectors.getBoundingPoints(page, AffineTransform.identity, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
@@ -526,7 +544,7 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {boundingPoints.map((points, index) => (
+            {boundingPoints.map((points: Point[], index: number) => (
               <Polyline key={index} points={points} paint={selectionPaint} />
             ))}
             {!isEditingPath && highlightedSketchLayer}

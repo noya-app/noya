@@ -16,10 +16,11 @@ const compassDirectionMap: Record<CompassDirection, Point> = {
   w: { x: 0, y: 0.5 },
   nw: { x: 0, y: 0 },
 };
+export const dragHandelSize: number = 7;
 
 export function getDragHandles(
   boundingRect: Rect,
-  handleSize: number = 7,
+  handleSize: number = dragHandelSize,
 ): DragHandle[] {
   return compassDirections.map((compassDirection) => {
     const translationPercent = compassDirectionMap[compassDirection];

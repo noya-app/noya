@@ -233,6 +233,10 @@ export function canvasReducer(
           layer.frame.height = 1;
         }
 
+        if (layer.frame.width === 0) {
+          layer.frame.width = 1;
+        }
+
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
