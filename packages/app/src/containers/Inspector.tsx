@@ -2,10 +2,7 @@ import { Divider, Spacer, withSeparatorElements } from 'noya-designsystem';
 import { Layers, Selectors, SetNumberMode } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';

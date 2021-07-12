@@ -1,6 +1,6 @@
 import { Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
-import { useSelector } from '../contexts/ApplicationStateContext';
+import { useSelector } from 'noya-app-state-context';
 import SwatchInspector from './SwatchesInspector';
 import ThemeTextStyleInspector from './ThemeTextStyleInspector';
 import ThemeStyleInspector from './ThemeStyleInspector';

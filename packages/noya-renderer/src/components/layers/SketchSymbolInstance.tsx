@@ -6,7 +6,7 @@ import { useCanvasKit } from 'noya-renderer';
 import { Layers, Overrides, PageLayer, Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
-import { useApplicationState } from '../../../../app/src/contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';
 

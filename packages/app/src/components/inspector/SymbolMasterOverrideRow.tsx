@@ -3,7 +3,7 @@ import { Spacer, TreeView } from 'noya-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {

@@ -10,7 +10,7 @@ import {
   useMemo,
   useReducer,
 } from 'react';
-import { useApplicationState } from '../../app/src/contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 
 type ImageCache = Record<string, ArrayBuffer>;
 type ImageCacheContextValue = [

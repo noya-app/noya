@@ -10,7 +10,7 @@ import {
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from './InspectorPrimitives';
 interface Props {
   symbolMaster: Sketch.SymbolMaster;

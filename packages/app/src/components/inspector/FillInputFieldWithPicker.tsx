@@ -10,7 +10,7 @@ import {
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useApplicationState } from '../../contexts/ApplicationStateContext';
+import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';

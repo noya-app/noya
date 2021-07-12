@@ -1,5 +1,4 @@
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
-import { useWorkspace } from 'app/src/hooks/useWorkspace';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { Point, Selectors } from 'noya-state';

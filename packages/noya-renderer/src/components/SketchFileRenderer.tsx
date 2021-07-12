@@ -1,7 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
-import { useWorkspace } from 'app/src/hooks/useWorkspace';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,

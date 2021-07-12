@@ -10,7 +10,7 @@ import {
 import { Selectors } from 'noya-state';
 import { memo, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useSelector } from '../contexts/ApplicationStateContext';
+import { useSelector } from 'noya-app-state-context';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';

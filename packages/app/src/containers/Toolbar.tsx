@@ -25,10 +25,10 @@ import {
   useApplicationState,
   useDispatch,
   useSelector,
-} from '../contexts/ApplicationStateContext';
+} from 'noya-app-state-context';
 import { useHistory } from '../hooks/useHistory';
 import useShallowArray from '../hooks/useShallowArray';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspace } from 'noya-app-state-context';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
