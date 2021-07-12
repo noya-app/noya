@@ -20,7 +20,11 @@ export type StackProps = {
   alignment?: keyof typeof alignments;
   distribution?: keyof typeof distributions | 'fill';
   width?: number | string;
+  minWidth?: number | string;
+  maxWidth?: number | string;
   height?: number | string;
+  minHeight?: number | string;
+  maxHeight?: number | string;
   padding?: number | string;
   paddingX?: number | string;
   paddingXStart?: number | string;
@@ -37,11 +41,16 @@ const Stack = styled.div<StackProps>(
     display: 'flex',
     flexDirection: props.axis === 'x' ? 'row' : 'column',
     width: props.width,
+    minWidth: props.minWidth,
+    maxWidth: props.maxWidth,
     height: props.height,
+    minHeight: props.minHeight,
+    maxHeight: props.maxHeight,
     padding: props.padding,
     paddingInline: props.paddingX,
     paddingInlineStart: props.paddingXStart,
     paddingInlineEnd: props.paddingXEnd,
+    paddingBlock: props.paddingY,
     paddingBlockStart: props.paddingYStart,
     paddingBlockEnd: props.paddingYEnd,
     gap: props.spacing,
@@ -56,7 +65,7 @@ const Stack = styled.div<StackProps>(
   }),
   (props) =>
     props.distribution === 'fill' && {
-      '> &': { flex: '1 0 0px' },
+      '& > *': { flex: '1 0 0px' },
     },
 );
 
