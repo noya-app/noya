@@ -10,7 +10,7 @@ import {
   ComponentsProvider,
   FontManagerProvider,
 } from 'noya-renderer';
-import { StateProvider } from '../contexts/ApplicationStateContext';
+import { StateProvider } from 'noya-app-state-context';
 import { ImageCacheProvider } from 'noya-renderer';
 import { renderToStaticMarkup } from 'react-dom/server';
 import SVGRenderer from '../containers/renderer/SVGRenderer';

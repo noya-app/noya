@@ -4,10 +4,7 @@ import { interpolate, InterpolateOptions } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
 

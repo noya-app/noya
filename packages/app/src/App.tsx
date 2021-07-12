@@ -13,7 +13,7 @@ import {
   ImageCacheProvider,
 } from 'noya-renderer';
 import Workspace from './containers/Workspace';
-import { StateProvider } from './contexts/ApplicationStateContext';
+import { StateProvider } from 'noya-app-state-context';
 import { useCanvasKit } from 'noya-renderer';
 import { useResource } from './hooks/useResource';
 

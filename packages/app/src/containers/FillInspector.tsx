@@ -3,10 +3,7 @@ import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import FillRow from '../components/inspector/FillRow';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 
 export default memo(function FillInspector({

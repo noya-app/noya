@@ -11,7 +11,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useDispatch, useSelector } from '../contexts/ApplicationStateContext';
+import { useDispatch, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiValue from '../utils/getMultiValue';
 

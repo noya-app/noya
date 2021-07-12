@@ -1,9 +1,6 @@
 import { LayerHighlight } from 'noya-state';
 import { useCallback, useMemo } from 'react';
-import {
-  useWorkspaceState,
-  useDispatch,
-} from '../contexts/ApplicationStateContext';
+import { useWorkspaceState, useDispatch } from 'noya-app-state-context';
 
 export function useWorkspace() {
   const state = useWorkspaceState();

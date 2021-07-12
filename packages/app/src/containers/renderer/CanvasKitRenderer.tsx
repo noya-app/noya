@@ -11,10 +11,7 @@ import {
 } from 'noya-renderer';
 import { memo, useLayoutEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
-import {
-  StateProvider,
-  useWorkspaceState,
-} from '../../contexts/ApplicationStateContext';
+import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
 
 const CanvasComponent = styled.canvas({
   position: 'absolute',

@@ -23,13 +23,10 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
-import { useWorkspace } from '../hooks/useWorkspace';
+import { useWorkspace } from 'noya-app-state-context';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 // import SVGRenderer from './renderer/SVGRenderer';

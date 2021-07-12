@@ -25,7 +25,7 @@ import {
   useDispatch,
   useGetWorkspaceStateSnapshot,
   useSelector,
-} from '../contexts/ApplicationStateContext';
+} from 'noya-app-state-context';
 import {
   ImageEncoding,
   renderImageFromCanvas,
