@@ -1,0 +1,22 @@
+{
+  "name": "noya-graphql-server",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "scripts": {
+    "clean": "rm -rf build",
+    "build": "webpack --env production",
+    "build:dev": "webpack --env development",
+    "start": "node build/bundle.js",
+    "dev": "yarn clean && yarn build:dev && yarn start"
+  },
+  "dependencies": {
+    "apollo-server": "^2.25.2",
+    "atob": "^2.1.2",
+    "babel-loader": "^8.2.2",
+    "graphql": "^15.5.1",
+    "next": "^11.0.1",
+    "webpack": "^5.44.0",
+    "webpack-cli": "^4.7.2"
+  }
+}
