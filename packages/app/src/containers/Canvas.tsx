@@ -60,7 +60,12 @@ function getCursorForDirection(
   }
 }
 
-function getPoint(event: MouseEvent): Point {
+export type OffsetPoint = {
+  offsetX: number;
+  offsetY: number;
+};
+
+function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
@@ -736,7 +741,7 @@ export default memo(function Canvas() {
   }, [state, handleDirection]);
 
   const onDropFile = useCallback(
-    async (file: File, extension: string, e: MouseEvent) => {
+    async (file: File, extension: string, e: OffsetPoint) => {
       const rawPoint = getPoint(e);
       const point = offsetEventPoint(rawPoint);
 

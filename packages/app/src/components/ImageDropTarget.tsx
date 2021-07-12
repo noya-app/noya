@@ -2,10 +2,11 @@ import { memo, DragEvent, useCallback, ReactNode } from 'react';
 import { useFileDropTarget } from '../hooks/useFileDropTarget';
 import styled from 'styled-components';
 import { SUPPORTED_FILE_TYPES } from 'noya-designsystem';
+import { OffsetPoint } from '../containers/Canvas';
 
 interface Props {
   children: ReactNode | ((isActive: boolean) => ReactNode);
-  onDropFile: (file: File, extension: string, event: MouseEvent) => void;
+  onDropFile: (file: File, extension: string, event: OffsetPoint) => void;
 }
 
 const Container = styled.div(() => ({ display: 'flex', flex: 1 }));
@@ -31,7 +32,12 @@ export default memo(function ImageDropTarget({ children, onDropFile }: Props) {
         return;
       }
 
-      onDropFile(file, extension, e.nativeEvent);
+      const offsetPoint = {
+        offsetX: e.nativeEvent.offsetX,
+        offsetY: e.nativeEvent.offsetY,
+      };
+
+      onDropFile(file, extension, offsetPoint);
     },
     [onDropFile],
   );
