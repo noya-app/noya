@@ -42,7 +42,7 @@ module.exports = (env) => {
       ],
     },
     plugins: [
-      // Node doesn't provider the global `atob`, so we polyfill it
+      // Node doesn't provide the global `atob`, so we polyfill it
       new webpack.ProvidePlugin({
         atob: 'atob',
       }),
