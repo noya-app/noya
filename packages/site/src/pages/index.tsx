@@ -1,28 +1,14 @@
-import styled, { ThemeProvider } from 'styled-components';
-import { Button, darkTheme } from 'noya-designsystem';
-import Logo from '../assets/logo.svg';
-import { Heading, Stack } from '../components/ui';
-import React from 'react';
+import { ThemeProvider } from 'styled-components';
+import { Button, Stack, Text, darkTheme } from 'noya-designsystem';
 
-const LogoWrapper = styled.div({
-  '* >': { height: '32px' },
-});
+import { Heading } from '../components/ui';
+import React from 'react';
 
 function App() {
   return (
     <ThemeProvider theme={darkTheme}>
-      <Stack
-        axis="y"
-        width="100%"
-        height="100vh"
-        padding="10rem"
-        background="black"
-      >
-        <Button id="hi">Hi</Button>
+      <Stack axis="y" width="100%" height="100vh" padding="10rem">
         <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <LogoWrapper>
-            <Logo />
-          </LogoWrapper>
           <span style={{ justifySelf: 'end' }}>GitHub</span>
         </header>
         <Heading level={1}>
@@ -32,11 +18,16 @@ function App() {
           <br />
           Design
         </Heading>
+        <Button id="hi">Get Started</Button>
         {/* <p>Noya is an open-source toolkit to build your own design tool.</p> */}
         {/* <p>An open-source toolkit to build your own design tool.</p> */}
 
         <Stack axis="x" paddingY={48}>
-          <Heading level={2}>Build your own design tool</Heading>
+          <Text variant="heading2">Build your own design tool</Text>
+          <Text variant="body">
+            This is an example of what <Text variant="body">nested text</Text>{' '}
+            can look like.
+          </Text>
         </Stack>
       </Stack>
     </ThemeProvider>
