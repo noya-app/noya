@@ -9,7 +9,7 @@ export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
 export * from './FontManagerContext';
 export * from './hooks/useCanvasKit';
-export { ImageCacheProvider } from './ImageCache';
+export { ImageCacheProvider, useSketchImage } from './ImageCache';
 export type { Context };
 export { useTextLayerParagraph } from './components/layers/SketchText';
 
