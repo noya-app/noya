@@ -1,12 +1,14 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit, Paint, Path, TextAlign, TextStyle } from 'canvaskit';
-import { AffineTransform, createBounds, distance, resize } from 'noya-geometry';
 import {
-  CompassDirection,
-  getCardinalDirections,
+  AffineTransform,
+  createBounds,
+  distance,
+  resize,
   Point,
   Rect,
-} from 'noya-state';
+} from 'noya-geometry';
+import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
 
 export * from './primitives/path';

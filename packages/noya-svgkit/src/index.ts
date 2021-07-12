@@ -1,7 +1,7 @@
 import { createJSPath } from './JSPath';
 import { SVGKit } from './SVGKit';
 import { PathKitInit } from 'pathkit';
-import { PATH_TO_WASM } from 'noya-utils';
+import { getPathToWasm } from 'noya-utils';
 
 export type SerializableProperties<T> = {
   [K in keyof T as T[K] extends Function ? never : K]: T[K];
@@ -14,7 +14,7 @@ export default function loadSVGKit() {
 
   loadingPromise = new Promise(async (resolve) => {
     const PathKit = await PathKitInit({
-      locateFile: (file: string) => PATH_TO_WASM + file,
+      locateFile: (file: string) => getPathToWasm() + file,
     });
 
     (SVGKit as any).Path = createJSPath(PathKit);

@@ -2,15 +2,13 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Paint } from 'canvaskit';
 import { AffineTransform, Point } from 'noya-geometry';
 import { useDeletable, useFill, useStroke } from 'noya-react-canvaskit';
+import { Group, Path, Polyline, Rect, useCanvasKit } from 'noya-renderer';
 import {
-  Group,
-  Path,
-  Polyline,
+  Layers,
+  SelectedControlPoint,
+  Selectors,
   Primitives,
-  Rect,
-  useCanvasKit,
-} from 'noya-renderer';
-import { Layers, SelectedControlPoint, Selectors } from 'noya-state';
+} from 'noya-state';
 import { POINT_RADIUS } from 'noya-state/src/selectors/pointSelectors';
 import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';

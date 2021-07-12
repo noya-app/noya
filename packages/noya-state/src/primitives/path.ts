@@ -3,7 +3,7 @@ import { CanvasKit, Path, PathOp } from 'canvaskit';
 import { distance, Rect } from 'noya-geometry';
 import { Point } from 'noya-state';
 import { rotate, windowsOf, zip } from 'noya-utils';
-import { parsePoint, stringifyPoint } from '../primitives';
+import { parsePoint, stringifyPoint } from '.';
 
 /**
  * The radius of an edge should be less than half the length of that edge

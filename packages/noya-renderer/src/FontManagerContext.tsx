@@ -1,3 +1,4 @@
+import fetch from 'cross-fetch';
 import { FontMgr } from 'canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import { SuspendedValue } from 'noya-utils';

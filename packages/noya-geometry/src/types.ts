@@ -19,3 +19,5 @@ export type Insets = {
   bottom: number;
   left: number;
 };
+
+export type Axis = 'x' | 'y';

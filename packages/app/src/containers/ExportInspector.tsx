@@ -22,7 +22,10 @@ import {
   useGetWorkspaceStateSnapshot,
   useSelector,
 } from '../contexts/ApplicationStateContext';
-import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
+import {
+  ImageEncoding,
+  renderImageFromCanvas,
+} from '../utils/renderImageFromCanvas';
 
 async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {
@@ -81,7 +84,7 @@ export default memo(function ExportInspector() {
         exportSize.height,
         theme,
         getWorkspaceStateSnapshot(),
-        exportFormat.fileFormat,
+        exportFormat.fileFormat.toString() as ImageEncoding,
         () => <RCKLayerPreview layer={selectedLayer} size={exportSize} />,
       );
     },

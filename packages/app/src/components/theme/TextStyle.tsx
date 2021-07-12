@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { sketchColorToRgba } from 'noya-designsystem';
 import { center, Size } from 'noya-geometry';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import SketchLayer from 'noya-renderer/src/components/layers/SketchLayer';
 import { useTextLayerParagraph } from 'noya-renderer/src/components/layers/SketchText';
 import { Models } from 'noya-state';

@@ -1,6 +1,6 @@
 import { CanvasKit } from 'canvaskit';
 import { VirtualConsole } from 'jsdom';
-import { color, fill, rect } from '../primitives';
+import { color, fill, rect } from 'noya-state';
 import { loadCanvasKit } from 'noya-renderer';
 
 let ck: CanvasKit;

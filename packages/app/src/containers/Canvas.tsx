@@ -2,8 +2,9 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { useCanvasKit, uuid } from 'noya-renderer';
-import { decodeCurvePoint } from 'noya-renderer/src/primitives';
+import { uuid } from 'noya-utils';
+import { useCanvasKit } from 'noya-renderer';
+import { decodeCurvePoint } from 'noya-state';
 import {
   CompassDirection,
   Layers,

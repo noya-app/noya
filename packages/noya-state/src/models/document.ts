@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 
 function createSharedObjectContainer<T extends string>(_class: T) {
   return {

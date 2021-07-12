@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Primitives, useCanvasKit } from 'noya-renderer';
+import { useCanvasKit } from 'noya-renderer';
+import { Primitives } from 'noya-state';
 import { useMemo } from 'react';
 
 export default function useLayerFrameRect(layer: Sketch.AnyLayer) {
