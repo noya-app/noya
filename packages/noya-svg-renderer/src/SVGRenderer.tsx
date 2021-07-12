@@ -134,7 +134,7 @@ const Text: ComponentsContextValue['Text'] = memo(({ rect, paragraph }) => {
   //           <text
   //             fontSize={12}
   //             fill="white"
-  //             key={`${s}-${r-${i}`}
+  //             key={`${s}-${r}-${i}`}
   //             x={position.x}
   //             y={shapedLine.top + position.y}
   //           >

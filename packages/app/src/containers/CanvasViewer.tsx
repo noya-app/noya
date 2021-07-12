@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { useTheme } from 'styled-components';
 import { useWorkspaceState } from 'noya-app-state-context';
-import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
+import { generateImage } from 'noya-generate-image';
 
 interface Props {
   width: number;
@@ -30,7 +30,7 @@ export default memo(function CanvasViewer({
   useLayoutEffect(() => {
     let valid = true;
 
-    renderImageFromCanvas(
+    generateImage(
       CanvasKit,
       width,
       height,

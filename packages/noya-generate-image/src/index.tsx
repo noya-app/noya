@@ -31,7 +31,7 @@ function readPixels(image: Image): Uint8Array | null {
 
 export type ImageEncoding = 'bytes' | 'svg' | 'png' | 'jpg' | 'webp';
 
-export function renderImageFromCanvas(
+export function generateImage(
   CanvasKit: CanvasKit,
   width: number,
   height: number,
