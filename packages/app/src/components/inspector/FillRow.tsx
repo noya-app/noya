@@ -9,7 +9,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
-import { SetNumberMode } from '../../../../noya-state/src';
+import { SetNumberMode } from 'noya-state';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
 import FillInputFieldWithPicker, {
