@@ -20,8 +20,8 @@ import {
   RelativeDropPosition,
   Spacer,
   TreeView,
+  withSeparatorElements,
 } from 'noya-designsystem';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
 import React, {

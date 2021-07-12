@@ -14,6 +14,7 @@ export { default as useColor } from './hooks/useColor';
 export { default as useDeletable } from './hooks/useDeletable';
 export * from './hooks/useFill';
 export { default as usePaint } from './hooks/usePaint';
+export type { PaintParameters } from './hooks/usePaint';
 export { default as useRect } from './hooks/useRect';
 export { default as useStableColor } from './hooks/useStable4ElementArray';
 export * from './hooks/useStroke';

@@ -1,5 +1,4 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useApplicationState } from 'app/src/contexts/ApplicationStateContext';
 import produce from 'immer';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
@@ -7,6 +6,7 @@ import { useCanvasKit } from 'noya-renderer';
 import { Layers, Overrides, PageLayer, Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
+import { useApplicationState } from '../../../../app/src/contexts/ApplicationStateContext';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';
 

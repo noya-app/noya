@@ -15,6 +15,7 @@ export * from './invert';
 export * from './base64';
 export * from './utf16';
 export * from './fileType';
+export * from './memoize';
 export * as delimitedPath from './delimitedPath';
 
 // Consider moving these to a more React-specific package

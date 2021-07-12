@@ -1,4 +1,5 @@
-export default function memoize<I extends unknown[], O>(
+// TODO: Review this. Is it a good approach for Noya?
+export function memoize<I extends unknown[], O>(
   f: (...values: I) => O,
 ): (...values: I) => O {
   const intermediateCache = new Map<I[number], string>();

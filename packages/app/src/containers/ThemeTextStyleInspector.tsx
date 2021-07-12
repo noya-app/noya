@@ -1,4 +1,4 @@
-import { Divider } from 'noya-designsystem';
+import { Divider, withSeparatorElements } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import {
@@ -7,7 +7,6 @@ import {
 } from '../contexts/ApplicationStateContext';
 import useShallowArray from '../hooks/useShallowArray';
 import FillInspector from './FillInspector';
-import withSeparatorElements from '../utils/withSeparatorElements';
 import NameInspector from '../components/inspector/NameInspector';
 import OpacityInspector from './OpacityInspector';
 import BorderInspector from './BorderInspector';
