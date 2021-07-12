@@ -22,6 +22,8 @@ const wasmPath = path.join(
 
 setPathToWasm(wasmPath);
 
+const schema = fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf8');
+
 async function main() {
   const CanvasKit = await loadCanvasKit();
 
@@ -32,83 +34,7 @@ async function main() {
   const workspaceState = createInitialWorkspaceState(sketch);
   const state = workspaceState.history.present;
 
-  const typeDefs = gql`
-    type ColorValue {
-      r: Float!
-      g: Float!
-      b: Float!
-      a: Float!
-    }
-
-    type Color {
-      id: ID!
-      name: String!
-      value: ColorValue!
-    }
-
-    enum LayerType {
-      artboard
-      bitmap
-      group
-      oval
-      page
-      polygon
-      rectangle
-      shapeGroup
-      shapePath
-      slice
-      star
-      symbolInstance
-      symbolMaster
-      text
-      triangle
-    }
-
-    type Size {
-      width: Float!
-      height: Float!
-    }
-
-    enum BufferEncoding {
-      base64
-      utf8
-    }
-
-    enum RenderedImageFormat {
-      png
-      jpg
-      webp
-      svg
-    }
-
-    type RenderedImage {
-      size: Size!
-      format: RenderedImageFormat!
-      data: String!
-    }
-
-    type Layer {
-      id: ID!
-      name: String!
-      type: LayerType!
-      renderedImage(
-        format: RenderedImageFormat
-        bufferEncoding: BufferEncoding
-      ): RenderedImage
-    }
-
-    input LayersFilter {
-      name: String
-      type: LayerType
-    }
-
-    # The "Query" type is special: it lists all of the available queries that
-    # clients can execute, along with the return type for each.
-    type Query {
-      colors: [Color]
-      layers(filter: LayersFilter): [Layer]
-    }
-  `;
+  const typeDefs = gql(schema);
 
   const resolvers = {
     Query: {

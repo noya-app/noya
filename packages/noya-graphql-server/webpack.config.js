@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const workspacePath = path.join(__dirname, '..');
 const entryPath = path.join(__dirname, 'src', 'index.ts');
@@ -9,11 +10,6 @@ module.exports = (env) => {
   const mode = env.production ? 'production' : 'development';
 
   return {
-    plugins: [
-      new webpack.ProvidePlugin({
-        atob: 'atob',
-      }),
-    ],
     mode,
     target: 'node',
     entry: entryPath,
@@ -45,5 +41,14 @@ module.exports = (env) => {
         },
       ],
     },
+    plugins: [
+      // Node doesn't provider the global `atob`, so we polyfill it
+      new webpack.ProvidePlugin({
+        atob: 'atob',
+      }),
+      new CopyPlugin({
+        patterns: [{ from: 'src/**/*.graphql', to: '[name][ext]' }],
+      }),
+    ],
   };
 };
