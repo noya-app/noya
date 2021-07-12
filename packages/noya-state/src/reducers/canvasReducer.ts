@@ -228,6 +228,10 @@ export function canvasReducer(
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
+        if (layer.frame.height === 0) {
+          layer.frame.height = 1;
+        }
+
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
