@@ -1,9 +1,9 @@
 import { ThemeProvider } from 'styled-components';
-import { Stack, Text, Spacer, darkTheme } from 'noya-designsystem';
+import { Stack, Text, Spacer, siteTheme } from 'noya-designsystem';
 
 function App() {
   return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={siteTheme}>
       <Stack
         axis="y"
         width="100%"

@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Colors } from '../theme';
 
 const alignments = {
   start: 'flex-start',
@@ -33,7 +34,7 @@ export type StackProps = {
   paddingYStart?: number | string;
   paddingYEnd?: number | string;
   spacing?: number | string;
-  background?: string;
+  background?: keyof Colors;
 };
 
 const Stack = styled.div<StackProps>(

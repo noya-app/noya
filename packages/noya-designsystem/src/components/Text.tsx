@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 import styled from 'styled-components';
-import { textStyles } from '../theme/light';
+import { TextStyles } from '../theme';
 
 export type TextProps = {
   as?: any;
-  variant?: keyof typeof textStyles;
+  variant?: keyof TextStyles;
   className?: string;
   children: ReactNode;
 };
@@ -41,7 +41,7 @@ const Text = styled(
     margin: 0,
     lineHeight: 1,
   },
-  (props) => textStyles[props.variant || 'body'],
+  (props) => props.theme.textStyles[props.variant || 'body'],
 );
 
 export default Text;

@@ -52,8 +52,8 @@ export const fonts = {
   monospace: "Menlo, Monaco, Consolas, 'Courier New', monospace",
 };
 
-// The last one, 0.85, I just eyeballed
-const typeScale = [3.052, 2.441, 1.953, 1.563, 1.25, 1, 0.85]; // Major third
+// TODO: need to make a marketing theme with its own scale
+const typeScale = [10, 4, 1.8, 1.4, 1, 0.85];
 
 export const textStyles = {
   title: {
@@ -75,32 +75,40 @@ export const textStyles = {
     },
   } as CSSObject,
   heading1: {
-    fontFamily: fonts.normal,
+    // fontFamily: fonts.normal,
+    fontSize: `${typeScale[0]}rem`,
+    fontWeight: 700,
+    lineHeight: '1',
+  } as CSSObject,
+  heading2: {
+    // fontFamily: fonts.normal,
+    fontSize: `${typeScale[1]}rem`,
+    fontWeight: 500,
+    lineHeight: '1.2',
+  } as CSSObject,
+  heading3: {
+    // fontFamily: fonts.normal,
     fontSize: `${typeScale[2]}rem`,
     fontWeight: 500,
     lineHeight: '1.75',
   } as CSSObject,
-  heading2: {
-    fontFamily: fonts.normal,
+  body1: {
+    // fontFamily: fonts.normal,
     fontSize: `${typeScale[3]}rem`,
-    fontWeight: 500,
-    lineHeight: '1.75',
-  } as CSSObject,
-  heading3: {
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[4]}rem`,
-    fontWeight: 500,
+    fontWeight: 400,
     lineHeight: '1.75',
   } as CSSObject,
   body: {
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[5]}rem`,
+    // TODO: body2
+    // fontFamily: fonts.normal,
+    fontSize: `${typeScale[4]}rem`,
     fontWeight: 400,
     lineHeight: '1.75',
   } as CSSObject,
   small: {
+    // body3?
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[6]}rem`,
+    fontSize: `${typeScale[5]}rem`,
     fontWeight: 400,
     lineHeight: '1.4',
   } as CSSObject,
@@ -109,6 +117,10 @@ export const textStyles = {
     fontSize: '90%',
     lineHeight: '1.5',
   } as CSSObject,
+  mark: {
+    background: 'none',
+    color: '#e0bcfe',
+  },
 };
 
 export const sizes = {
