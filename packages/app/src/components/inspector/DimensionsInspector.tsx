@@ -1,7 +1,13 @@
+// eslint-disable-next-line no-restricted-imports
+import { useSelector } from 'noya-app-state-context/src/ApplicationStateContext';
 import { Button, Spacer } from 'noya-designsystem';
-import { SetNumberMode } from 'noya-state';
+import { decodeCurvePoint, Point, Selectors, SetNumberMode } from 'noya-state';
+// eslint-disable-next-line no-restricted-imports
+import { isPointsLayer } from 'noya-state/src/layers';
 import { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import LinePointCoordinatesInspector from '../../containers/LinePointCoordinatesInspector';
+import useShallowArray from '../../hooks/useShallowArray';
 import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
 import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 import DimensionInput from './DimensionInput';
@@ -108,6 +114,22 @@ export default function DimensionsInspector({
     ],
   );
 
+  const selectedLayers = useShallowArray(
+    useSelector(Selectors.getSelectedLayers),
+  );
+
+  const startPoint: Point | undefined =
+    hasLineLayer && isPointsLayer(selectedLayers[0])
+      ? decodeCurvePoint(selectedLayers[0].points[0], selectedLayers[0].frame)
+          .point
+      : undefined;
+
+  const endPoint: Point | undefined =
+    hasLineLayer && isPointsLayer(selectedLayers[0])
+      ? decodeCurvePoint(selectedLayers[0].points[1], selectedLayers[0].frame)
+          .point
+      : undefined;
+
   return (
     <>
       {!hasLineLayer && (
@@ -137,18 +159,14 @@ export default function DimensionsInspector({
         <>
           <Row>
             Start
-            <Spacer.Horizontal size={40} />
-            <DimensionInput value={x} onSetValue={onSetX} label="X" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+            <Spacer.Horizontal size={20} />
+            <LinePointCoordinatesInspector point={endPoint} />
           </Row>
           <Spacer.Vertical size={10} />
           <Row>
             End
-            <Spacer.Horizontal size={40} />
-            <DimensionInput value={x} onSetValue={onSetX} label="X" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+            <Spacer.Horizontal size={20} />
+            <LinePointCoordinatesInspector point={startPoint} />
           </Row>
           <Spacer.Vertical size={10} />
           <Row>
