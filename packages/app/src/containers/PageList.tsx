@@ -8,10 +8,7 @@ import {
 } from 'noya-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {
-  useApplicationState,
-  useDispatch,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import useDeepArray from '../hooks/useDeepArray';
 
 const Container = styled.div(({ theme }) => ({

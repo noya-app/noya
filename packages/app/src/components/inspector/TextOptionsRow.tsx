@@ -11,7 +11,7 @@ import {
   Select,
   Spacer,
 } from 'noya-designsystem';
-import { SimpleTextDecoration } from 'noya-renderer';
+import { SimpleTextDecoration } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

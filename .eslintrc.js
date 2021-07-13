@@ -4,5 +4,11 @@ module.exports = {
   rules: {
     'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
     '@shopify/prefer-early-return': 'warn',
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: ['*src*'],
+      },
+    ],
   },
 };

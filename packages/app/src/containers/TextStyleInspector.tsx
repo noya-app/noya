@@ -5,10 +5,7 @@ import { memo, useCallback, useMemo } from 'react';
 import TextAlignmentRow from '../components/inspector/TextLayoutRow';
 import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 
 export default memo(function TextStyleInspector() {

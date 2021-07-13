@@ -10,10 +10,10 @@ import {
   ComponentsProvider,
   FontManagerProvider,
 } from 'noya-renderer';
-import { StateProvider } from '../contexts/ApplicationStateContext';
+import { StateProvider } from 'noya-app-state-context';
 import { ImageCacheProvider } from 'noya-renderer';
 import { renderToStaticMarkup } from 'react-dom/server';
-import SVGRenderer from '../containers/renderer/SVGRenderer';
+import { SVGRenderer } from 'noya-svg-renderer';
 import { UTF16 } from 'noya-utils';
 
 function readPixels(image: Image): Uint8Array | null {
@@ -29,19 +29,21 @@ function readPixels(image: Image): Uint8Array | null {
   return pixels;
 }
 
-export function renderImageFromCanvas(
+export type ImageEncoding = 'bytes' | 'svg' | 'png' | 'jpg' | 'webp';
+
+export function generateImage(
   CanvasKit: CanvasKit,
   width: number,
   height: number,
   theme: Theme,
   state: WorkspaceState,
-  format: 'bytes' | Sketch.ExportFileFormat,
+  format: ImageEncoding,
   renderContent: () => ReactNode,
 ): Promise<Uint8Array | undefined> {
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider>
+        <CanvasKitProvider CanvasKit={CanvasKit}>
           <ThemeProvider theme={theme}>
             <StateProvider state={state}>
               <ImageCacheProvider>
@@ -73,7 +75,7 @@ export function renderImageFromCanvas(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider>
+          <CanvasKitProvider CanvasKit={CanvasKit}>
             <ThemeProvider theme={theme}>
               <StateProvider state={state}>
                 <ImageCacheProvider>

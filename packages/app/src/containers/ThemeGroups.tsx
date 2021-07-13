@@ -1,9 +1,6 @@
 import { Selectors } from 'noya-state';
 import { memo, useMemo, useCallback } from 'react';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { GroupIcon } from '@radix-ui/react-icons';
 import { ListView, Spacer } from 'noya-designsystem';
 import { sortBy } from 'noya-utils';

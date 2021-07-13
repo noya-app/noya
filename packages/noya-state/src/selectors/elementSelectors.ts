@@ -1,5 +1,5 @@
 import { Point } from 'noya-geometry';
-import { decodeCurvePoint } from 'noya-renderer/src/primitives';
+import { decodeCurvePoint } from 'noya-state';
 import { ApplicationState, Layers } from '../index';
 import { SelectedControlPoint } from '../reducers/applicationReducer';
 import { SelectedPoint } from '../reducers/pointReducer';
@@ -8,8 +8,8 @@ import {
   getBoundingRectMap,
   getIndexPathOfOpenShapeLayer,
   isPointInRange,
+  getSelectedLayers,
 } from './selectors';
-import { getSelectedLayers } from 'noya-state/src/selectors/layerSelectors';
 
 type PathElement =
   | {

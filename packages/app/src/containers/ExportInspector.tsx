@@ -1,8 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
-import { Button, Divider, Spacer } from 'noya-designsystem';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
+import {
+  Button,
+  Divider,
+  Spacer,
+  withSeparatorElements,
+} from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
@@ -21,8 +25,8 @@ import {
   useDispatch,
   useGetWorkspaceStateSnapshot,
   useSelector,
-} from '../contexts/ApplicationStateContext';
-import { renderImageFromCanvas } from '../utils/renderImageFromCanvas';
+} from 'noya-app-state-context';
+import { ImageEncoding, generateImage } from 'noya-generate-image';
 
 async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {
@@ -75,13 +79,13 @@ export default memo(function ExportInspector() {
 
       const exportSize = getExportSize(exportFormat, size);
 
-      return renderImageFromCanvas(
+      return generateImage(
         CanvasKit,
         exportSize.width,
         exportSize.height,
         theme,
         getWorkspaceStateSnapshot(),
-        exportFormat.fileFormat,
+        exportFormat.fileFormat.toString() as ImageEncoding,
         () => <RCKLayerPreview layer={selectedLayer} size={exportSize} />,
       );
     },

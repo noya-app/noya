@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import { SketchFile } from 'noya-sketch-file';
 import { IndexPath } from 'tree-visit';
 import { KeyModifiers } from 'noya-keymap';
@@ -114,6 +114,7 @@ export function applicationReducer(
     case 'addSymbolLayer':
     case 'addPointToPath':
     case 'pan':
+    case 'insertBitmap':
     case 'interaction':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':

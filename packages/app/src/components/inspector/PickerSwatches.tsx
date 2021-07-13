@@ -7,7 +7,7 @@ import {
   sketchColorToRgbaString,
   Spacer,
 } from 'noya-designsystem';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import { memo, useCallback, useState } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {

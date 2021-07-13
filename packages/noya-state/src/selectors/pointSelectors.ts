@@ -9,7 +9,7 @@ import {
   parsePoint,
   stringifyPoint,
   path,
-} from 'noya-renderer/src/primitives';
+} from 'noya-state';
 import { IndexPath } from 'tree-visit';
 import {
   ApplicationState,

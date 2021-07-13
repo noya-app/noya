@@ -4,10 +4,7 @@ import { delimitedPath, isDeepEqual } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import ColorInspector from '../components/inspector/ColorInspector';
 import NameInspector from '../components/inspector/NameInspector';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiValue from '../utils/getMultiValue';
 

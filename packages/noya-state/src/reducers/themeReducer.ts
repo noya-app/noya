@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import { delimitedPath, getIncrementedName } from 'noya-utils';
 import * as Layers from '../layers';
 import * as Models from '../models';

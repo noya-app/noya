@@ -6,9 +6,9 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
+import { Primitives } from 'noya-state';
 import {
   Group,
-  Primitives,
   Rect as RCKRect,
   Text,
   useCanvasKit,

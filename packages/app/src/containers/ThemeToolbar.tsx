@@ -1,4 +1,4 @@
-import { RadioGroup, Spacer } from 'noya-designsystem';
+import { Button, RadioGroup, Spacer } from 'noya-designsystem';
 import {
   BlendingModeIcon,
   ComponentInstanceIcon,
@@ -9,11 +9,7 @@ import {
 } from '@radix-ui/react-icons';
 import React, { useMemo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
-import Button from 'noya-designsystem/src/components/Button';
-import {
-  useApplicationState,
-  useSelector,
-} from '../contexts/ApplicationStateContext';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Selectors, ThemeTab } from 'noya-state';
 
 const Container = styled.header(({ theme }) => ({

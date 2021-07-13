@@ -8,12 +8,11 @@ import {
 } from 'noya-geometry';
 import {
   Group,
-  Primitives,
   Rect as RCKRect,
   SketchLayer,
   useCanvasKit,
 } from 'noya-renderer';
-import { Layers, PageLayer } from 'noya-state';
+import { Layers, PageLayer, Primitives } from 'noya-state';
 import { useMemo } from 'react';
 import useCheckeredFill from '../hooks/useCheckeredFill';
 import { SketchArtboardContent } from './layers/SketchArtboard';

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useWorkspaceState } from '../contexts/ApplicationStateContext';
+import { useWorkspaceState } from 'noya-app-state-context';
 
 export function useHistory() {
   const state = useWorkspaceState();

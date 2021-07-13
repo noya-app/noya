@@ -1,6 +1,5 @@
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import { Spacer } from 'noya-designsystem';
-import withSeparatorElements from 'noya-designsystem/src/utils/withSeparatorElements';
+import { Spacer, withSeparatorElements } from 'noya-designsystem';
 import { memo, ReactNode, useCallback } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';

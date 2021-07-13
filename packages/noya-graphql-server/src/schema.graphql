@@ -1,0 +1,73 @@
+type ColorValue {
+  r: Float!
+  g: Float!
+  b: Float!
+  a: Float!
+}
+
+type Color {
+  id: ID!
+  name: String!
+  value: ColorValue!
+}
+
+enum LayerType {
+  artboard
+  bitmap
+  group
+  oval
+  page
+  polygon
+  rectangle
+  shapeGroup
+  shapePath
+  slice
+  star
+  symbolInstance
+  symbolMaster
+  text
+  triangle
+}
+
+type Size {
+  width: Float!
+  height: Float!
+}
+
+enum BufferEncoding {
+  base64
+  utf8
+}
+
+enum RenderedImageFormat {
+  png
+  jpg
+  webp
+  svg
+}
+
+type RenderedImage {
+  size: Size!
+  format: RenderedImageFormat!
+  data: String!
+}
+
+type Layer {
+  id: ID!
+  name: String!
+  type: LayerType!
+  renderedImage(
+    format: RenderedImageFormat
+    bufferEncoding: BufferEncoding
+  ): RenderedImage
+}
+
+input LayersFilter {
+  name: String
+  type: LayerType
+}
+
+type Query {
+  colors: [Color]
+  layers(filter: LayersFilter): [Layer]
+}

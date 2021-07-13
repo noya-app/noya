@@ -1,9 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { AffineTransform, transformRect } from 'noya-geometry';
-import { uuid } from 'noya-renderer';
+import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import { RelativeDropPosition } from '../../../noya-designsystem/src';
+import { RelativeDropPosition } from 'noya-designsystem';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {

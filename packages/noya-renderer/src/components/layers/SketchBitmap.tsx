@@ -1,7 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { getRectCornerPoints } from 'noya-geometry';
+import { Primitives } from 'noya-state';
 import { makePath } from 'noya-react-canvaskit';
-import { Group, Image, Primitives, useCanvasKit } from 'noya-renderer';
+import { Group, Image, useCanvasKit } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
 import { useSketchImage } from '../../ImageCache';
 import ColorControlsGroup from '../effects/ColorControlsGroup';

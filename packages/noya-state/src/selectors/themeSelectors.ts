@@ -5,8 +5,8 @@ import { Draft } from 'immer';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
 import { getCurrentTab } from './workspaceSelectors';
-import { uuid } from 'noya-renderer';
-import { CHECKERED_BACKGROUND_BYTES } from 'noya-renderer/src/hooks/useCheckeredFill';
+import { uuid } from 'noya-utils';
+import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
 
 export type ComponentsTypes =
   | Sketch.Swatch
