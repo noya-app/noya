@@ -10,11 +10,10 @@ import {
   SUPPORTED_FILE_TYPES,
   useHover,
 } from 'noya-designsystem';
-import { FileMap } from 'noya-sketch-file';
-import { uuid } from 'noya-utils';
-import { DragEvent, memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { useFileDropTarget } from '../../hooks/useFileDropTarget';
+import { uuid } from 'noya-utils';
+import ImageDropTarget from '../ImageDropTarget';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const Container = styled.div<{
@@ -58,7 +57,6 @@ const UploadButton = styled.button<{ show: boolean }>(({ show = false }) => ({
 
 interface Props {
   id: string;
-  images: FileMap;
   pattern: SketchPattern;
   onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
   onChangeFillType: (amount: Sketch.PatternFillType) => void;
@@ -76,38 +74,20 @@ export const PATTERN_FILL_TYPE_OPTIONS: PatternFillType[] = [
 ];
 
 interface PatternPreviewProps {
-  images: FileMap;
-
   pattern: SketchPattern;
-  isTile: boolean;
   onAddImage: (image: ArrayBuffer, _ref: string) => void;
   onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
 }
 
 const PatternPreview = memo(
-  ({
-    images,
-    pattern,
-    isTile,
-    onAddImage,
-    onChangeImage,
-  }: PatternPreviewProps) => {
+  ({ pattern, onAddImage, onChangeImage }: PatternPreviewProps) => {
     const [isHovering, onHoverChange] = useState(false);
     const { hoverProps } = useHover({
       onHoverChange,
     });
 
     const handleImageFile = useCallback(
-      async (file: File) => {
-        const extension = SUPPORTED_FILE_TYPES[file.type];
-
-        if (!extension) {
-          alert(
-            `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
-          );
-          return;
-        }
-
+      async (file: File, extension: string) => {
         const data = await file.arrayBuffer();
         const _ref = `images/${uuid()}.${extension}`;
 
@@ -127,56 +107,45 @@ const PatternPreview = memo(
         mimeTypes: Object.keys(SUPPORTED_FILE_TYPES),
       });
 
-      handleImageFile(file);
+      const extension = SUPPORTED_FILE_TYPES[file.type];
+
+      if (!extension) {
+        alert(
+          `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
+        );
+        return;
+      }
+
+      handleImageFile(file, extension);
     }, [handleImageFile]);
 
-    const handleDropEvent = useCallback(
-      async (e: DragEvent) => {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0];
-
-        if (!file) {
-          alert('Unable to read file');
-          return;
-        }
-
-        handleImageFile(file);
-      },
-      [handleImageFile],
-    );
-
-    const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
-      handleDropEvent,
-    );
-
     return (
-      <Container
-        {...dropTargetProps}
-        {...hoverProps}
-        isActive={isDropTargetActive}
-      >
-        {pattern.image && (
-          <PatternPreviewBackground
-            imageRef={pattern.image}
-            fillType={pattern.patternFillType}
-            tileScale={pattern.patternTileScale}
-          />
+      <ImageDropTarget onDropFile={handleImageFile}>
+        {(isDropTargetActive: boolean) => (
+          <Container {...hoverProps} isActive={isDropTargetActive}>
+            {pattern.image && (
+              <PatternPreviewBackground
+                imageRef={pattern.image}
+                fillType={pattern.patternFillType}
+                tileScale={pattern.patternTileScale}
+              />
+            )}
+            <UploadButton
+              show={!isDropTargetActive && isHovering}
+              onClick={openFile}
+            >
+              Upload Image
+            </UploadButton>
+            {isDropTargetActive && <DropTargetOverlay />}
+          </Container>
         )}
-        <UploadButton
-          show={!isDropTargetActive && isHovering}
-          onClick={openFile}
-        >
-          Upload Image
-        </UploadButton>
-        {isDropTargetActive && <DropTargetOverlay />}
-      </Container>
+      </ImageDropTarget>
     );
   },
 );
 
 export default memo(function PatternInspector({
   id,
-  images,
   pattern,
   createImage,
   onChangeImage,
@@ -212,9 +181,7 @@ export default memo(function PatternInspector({
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Column>
         <PatternPreview
-          images={images}
           pattern={pattern}
-          isTile={isTile}
           onAddImage={createImage}
           onChangeImage={onChangeImage}
         />

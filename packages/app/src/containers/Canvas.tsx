@@ -29,6 +29,7 @@ import { useSize } from '../hooks/useSize';
 import { useWorkspace } from 'noya-app-state-context';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
+import ImageDropTarget from '../components/ImageDropTarget';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -59,7 +60,12 @@ function getCursorForDirection(
   }
 }
 
-function getPoint(event: MouseEvent): Point {
+export type OffsetPoint = {
+  offsetX: number;
+  offsetY: number;
+};
+
+function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
@@ -734,26 +740,57 @@ export default memo(function Canvas() {
     }
   }, [state, handleDirection]);
 
+  const onDropFile = useCallback(
+    async (file: File, extension: string, e: OffsetPoint) => {
+      const rawPoint = getPoint(e);
+      const point = offsetEventPoint(rawPoint);
+
+      const data = await file.arrayBuffer();
+      const img = CanvasKit.MakeImageFromEncoded(data);
+      if (!img) return;
+
+      const rect = {
+        width: img.width(),
+        height: img.height(),
+      };
+
+      const frame = {
+        ...rect,
+        x: point.x - rect.width / 2,
+        y: point.y - rect.height / 2,
+      };
+
+      dispatch('insertBitmap', data, {
+        name: file.name,
+        frame: frame,
+        extension: extension,
+      });
+    },
+    [CanvasKit, dispatch, offsetEventPoint],
+  );
+
   return (
-    <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
-      <Container
-        ref={containerRef}
-        cursor={cursor}
-        {...mergeEventHandlers(bind(), {
-          onPointerDown: handleMouseDown,
-          onPointerMove: handleMouseMove,
-          onPointerUp: handleMouseUp,
-        })}
-      >
-        <InsetContainer insets={insets}>
-          {canvasSizeWithInsets && (
-            // <SVGRenderer size={canvasSizeWithInsets}>
-            //   <SketchFileRenderer />
-            // </SVGRenderer>
-            <CanvasKitRenderer size={canvasSizeWithInsets} />
-          )}
-        </InsetContainer>
-      </Container>
-    </ContextMenu>
+    <ImageDropTarget onDropFile={onDropFile}>
+      <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
+        <Container
+          ref={containerRef}
+          cursor={cursor}
+          {...mergeEventHandlers(bind(), {
+            onPointerDown: handleMouseDown,
+            onPointerMove: handleMouseMove,
+            onPointerUp: handleMouseUp,
+          })}
+        >
+          <InsetContainer insets={insets}>
+            {canvasSizeWithInsets && (
+              // <SVGRenderer size={canvasSizeWithInsets}>
+              //   <SketchFileRenderer />
+              // </SVGRenderer>
+              <CanvasKitRenderer size={canvasSizeWithInsets} />
+            )}
+          </InsetContainer>
+        </Container>
+      </ContextMenu>
+    </ImageDropTarget>
   );
 });
