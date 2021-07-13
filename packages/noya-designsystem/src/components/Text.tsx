@@ -17,23 +17,23 @@ const elements = {
   mark: 'mark',
 };
 
-const TextContext = createContext(false);
+const TextAncestorContext = createContext(false);
 
 const Text = styled(
   ({ as: Element = 'p', variant = 'body', className, children }: TextProps) => {
-    const inline = useContext(TextContext);
+    const hasTextAncestor = useContext(TextAncestorContext);
     // @ts-ignore
     const propElement = elements[variant];
-    if (inline) {
+    if (hasTextAncestor) {
       Element = 'span';
     }
     if (propElement) {
       Element = propElement;
     }
     return (
-      <TextContext.Provider value={true}>
+      <TextAncestorContext.Provider value={true}>
         <Element className={className}>{children}</Element>
-      </TextContext.Provider>
+      </TextAncestorContext.Provider>
     );
   },
 )<TextProps>(
