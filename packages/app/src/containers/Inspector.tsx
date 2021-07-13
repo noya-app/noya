@@ -22,6 +22,8 @@ import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import getMultiValue from '../utils/getMultiValue';
+// eslint-disable-next-line no-restricted-imports
+import { isLine } from 'noya-state/src/selectors/pointSelectors';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -108,6 +110,9 @@ export default memo(function Inspector() {
       Layers.isBitmapLayer(l),
     );
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const hasLineLayer = selectedLayers.some(
+      (l) => Layers.isPointsLayer(l) && isLine(l.points),
+    );
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
     const hasSymbolMaster = selectedLayers.some((l) =>
       Layers.isSymbolMaster(l),
@@ -131,18 +136,21 @@ export default memo(function Inspector() {
             <PointCoordinatesInspector />
           )
         ) : (
-          <DimensionsInspector
-            {...dimensionsInspectorProps}
-            isFlippedHorizontal={isFlippedHorizontal}
-            isFlippedVertical={isFlippedVertical}
-            onSetRotation={handleSetRotation}
-            onSetX={handleSetX}
-            onSetY={handleSetY}
-            onSetWidth={handleSetWidth}
-            onSetHeight={handleSetHeight}
-            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
-            onSetIsFlippedVertical={handleSetIsFlippedVertical}
-          />
+          <>
+            <DimensionsInspector
+              {...dimensionsInspectorProps}
+              isFlippedHorizontal={isFlippedHorizontal}
+              isFlippedVertical={isFlippedVertical}
+              hasLineLayer={hasLineLayer}
+              onSetRotation={handleSetRotation}
+              onSetX={handleSetX}
+              onSetY={handleSetY}
+              onSetWidth={handleSetWidth}
+              onSetHeight={handleSetHeight}
+              onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+              onSetIsFlippedVertical={handleSetIsFlippedVertical}
+            />
+          </>
         )}
         <Spacer.Vertical size={10} />
       </Fragment>,

@@ -30,6 +30,7 @@ export interface Props {
   rotation: DimensionValue;
   isFlippedVertical: boolean;
   isFlippedHorizontal: boolean;
+  hasLineLayer: boolean;
   onSetX: (value: number, mode: SetNumberMode) => void;
   onSetY: (value: number, mode: SetNumberMode) => void;
   onSetWidth: (value: number, mode: SetNumberMode) => void;
@@ -47,6 +48,7 @@ export default function DimensionsInspector({
   rotation,
   isFlippedVertical,
   isFlippedHorizontal,
+  hasLineLayer,
   onSetX,
   onSetY,
   onSetWidth,
@@ -108,21 +110,64 @@ export default function DimensionsInspector({
 
   return (
     <>
-      <Row>
-        <DimensionInput value={x} onSetValue={onSetX} label="X" />
-        <Spacer.Horizontal size={16} />
-        <DimensionInput value={y} onSetValue={onSetY} label="Y" />
-        <Spacer.Horizontal size={16} />
-        <DimensionInput value={rotation} onSetValue={onSetRotation} label="°" />
-      </Row>
-      <Spacer.Vertical size={10} />
-      <Row>
-        <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
-        <Spacer.Horizontal size={16} />
-        <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
-        <Spacer.Horizontal size={16} />
-        {flipButtonElements}
-      </Row>
+      {!hasLineLayer && (
+        <>
+          <Row>
+            <DimensionInput value={x} onSetValue={onSetX} label="X" />
+            <Spacer.Horizontal size={16} />
+            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+            <Spacer.Horizontal size={16} />
+            <DimensionInput
+              value={rotation}
+              onSetValue={onSetRotation}
+              label="°"
+            />
+          </Row>
+          <Spacer.Vertical size={10} />
+          <Row>
+            <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
+            <Spacer.Horizontal size={16} />
+            <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
+            <Spacer.Horizontal size={16} />
+            {flipButtonElements}
+          </Row>
+        </>
+      )}
+      {hasLineLayer && (
+        <>
+          <Row>
+            Start
+            <Spacer.Horizontal size={40} />
+            <DimensionInput value={x} onSetValue={onSetX} label="X" />
+            <Spacer.Horizontal size={16} />
+            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+          </Row>
+          <Spacer.Vertical size={10} />
+          <Row>
+            End
+            <Spacer.Horizontal size={40} />
+            <DimensionInput value={x} onSetValue={onSetX} label="X" />
+            <Spacer.Horizontal size={16} />
+            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+          </Row>
+          <Spacer.Vertical size={10} />
+          <Row>
+            <DimensionInput
+              value={width}
+              onSetValue={onSetWidth}
+              label={String.fromCharCode(8596)}
+            />
+            <Spacer.Horizontal size={16} />
+            <DimensionInput
+              value={rotation}
+              onSetValue={onSetRotation}
+              label="°"
+            />
+            <Spacer.Horizontal size={16} />
+            {flipButtonElements}
+          </Row>
+        </>
+      )}
     </>
   );
 }

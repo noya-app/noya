@@ -84,9 +84,11 @@ const BoundingRect = memo(function BoundingRect({
     isShapeALine = isPointsLayer(layer) ? isLine(layer.points) : false;
   }
 
-  if (isShapeALine) return null;
-
-  return <RCKRect rect={alignedRect} paint={selectionPaint} />;
+  return (
+    <>
+      {!isShapeALine && <RCKRect rect={alignedRect} paint={selectionPaint} />}
+    </>
+  );
 });
 
 export default memo(function SketchFileRenderer() {
