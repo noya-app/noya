@@ -28,6 +28,8 @@ import {
   getIndexPathOfOpenShapeLayer,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
+  isLine,
+  isPointInRange,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
@@ -229,11 +231,11 @@ export function canvasReducer(
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
-        if (layer.frame.height === 0) {
+        if (layer.frame.height === 0 || isLine(layer.points)) {
           layer.frame.height = 1;
         }
 
-        if (layer.frame.width === 0) {
+        if (layer.frame.width === 0 || isLine(layer.points)) {
           layer.frame.width = 1;
         }
 
@@ -503,6 +505,51 @@ export function canvasReducer(
                 height: Math.round(max.y - min.y),
               });
 
+              //is newLayer a line?
+              if (Layers.isPointsLayer(newLayer) && isLine(newLayer.points)) {
+                let direction = undefined;
+
+                const isStartInRange = isPointInRange(
+                  current,
+                  decodeCurvePoint(newLayer.points[0], newLayer.frame).point,
+                );
+                const isEndInRange = isPointInRange(
+                  current,
+                  decodeCurvePoint(newLayer.points[1], newLayer.frame).point,
+                );
+                if (isEndInRange) {
+                  direction = 'end';
+                } else if (isStartInRange) {
+                  direction = 'start';
+                }
+
+                const selectedPointLists =
+                  direction && direction === 'start'
+                    ? {
+                        [newLayer.do_objectID]: [0],
+                      }
+                    : direction && direction === 'end'
+                    ? {
+                        [newLayer.do_objectID]: [1],
+                      }
+                    : undefined;
+
+                const delta = {
+                  x: current.x - origin.x,
+                  y: current.y - origin.y,
+                };
+                if (selectedPointLists) {
+                  moveSelectedPoints(
+                    selectedPointLists,
+                    layerIndexPaths,
+                    delta,
+                    'adjust',
+                    draft.sketch.pages[pageIndex],
+                    pageSnapshot,
+                    CanvasKit,
+                  );
+                }
+              }
               newLayer.frame.x = newFrame.x;
               newLayer.frame.y = newFrame.y;
               newLayer.frame.width = newFrame.width;

@@ -1,12 +1,14 @@
+import { CurvePoint } from '@sketch-hq/sketch-file-format-ts/dist/cjs/types';
 import {
   CompassDirection,
   compassDirections,
+  decodeCurvePoint,
   DragHandle,
   Point,
   Rect,
 } from 'noya-state';
 
-const compassDirectionMap: Record<CompassDirection, Point> = {
+export const compassDirectionMap: Record<CompassDirection, Point> = {
   n: { x: 0.5, y: 0 },
   ne: { x: 1, y: 0 },
   e: { x: 1, y: 0.5 },
@@ -41,4 +43,33 @@ export function getDragHandles(
       compassDirection,
     };
   });
+}
+
+export function getLineDragHandles(
+  boundingRect: Rect,
+  points: CurvePoint[],
+  handleSize: number = dragHandelSize,
+): DragHandle[] {
+  const startDecodedPoint = decodeCurvePoint(points[0], boundingRect);
+  const endDecodedPoint = decodeCurvePoint(points[1], boundingRect);
+
+  return compassDirections
+    .filter(
+      (compassDirection) =>
+        compassDirection === 'e' || compassDirection === 'w',
+    )
+    .map((compassDirection) => {
+      const directionPoint =
+        compassDirection === 'w' ? startDecodedPoint : endDecodedPoint;
+
+      return {
+        rect: {
+          x: directionPoint.point.x - handleSize / 2,
+          y: directionPoint.point.y - handleSize / 2,
+          width: handleSize,
+          height: handleSize,
+        },
+        compassDirection,
+      };
+    });
 }

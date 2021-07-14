@@ -132,7 +132,7 @@ export default function DimensionsInspector({
 
   return (
     <>
-      {!hasLineLayer && (
+      {(!hasLineLayer || selectedLayers.length > 1) && (
         <>
           <Row>
             <DimensionInput value={x} onSetValue={onSetX} label="X" />
@@ -155,7 +155,7 @@ export default function DimensionsInspector({
           </Row>
         </>
       )}
-      {hasLineLayer && (
+      {hasLineLayer && selectedLayers.length === 1 && (
         <>
           <Row>
             Start

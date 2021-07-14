@@ -72,16 +72,17 @@ const BoundingRect = memo(function BoundingRect({
   );
 
   let isShapeALine = false;
+  if (state.selectedObjects.length === 1) {
+    const page = Selectors.getCurrentPage(state);
+    const indexPath = Layers.findIndexPath(
+      page,
+      (layer) => layer.do_objectID === state.selectedObjects[0],
+    );
 
-  const page = Selectors.getCurrentPage(state);
-  const indexPath = Layers.findIndexPath(
-    page,
-    (layer) => layer.do_objectID === state.selectedObjects[0],
-  );
-
-  if (indexPath) {
-    const layer = Layers.access(page, indexPath);
-    isShapeALine = isPointsLayer(layer) ? isLine(layer.points) : false;
+    if (indexPath) {
+      const layer = Layers.access(page, indexPath);
+      isShapeALine = isPointsLayer(layer) ? isLine(layer.points) : false;
+    }
   }
 
   return (
