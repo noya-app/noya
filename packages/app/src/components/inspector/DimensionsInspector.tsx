@@ -160,13 +160,16 @@ export default function DimensionsInspector({
           <Row>
             Start
             <Spacer.Horizontal size={20} />
-            <LinePointCoordinatesInspector point={endPoint} />
+            <LinePointCoordinatesInspector point={endPoint} direction={'end'} />
           </Row>
           <Spacer.Vertical size={10} />
           <Row>
             End
             <Spacer.Horizontal size={20} />
-            <LinePointCoordinatesInspector point={startPoint} />
+            <LinePointCoordinatesInspector
+              point={startPoint}
+              direction={'start'}
+            />
           </Row>
           <Spacer.Vertical size={10} />
           <Row>

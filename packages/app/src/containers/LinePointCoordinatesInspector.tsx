@@ -6,23 +6,27 @@ import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 interface Props {
   point: Point | undefined;
+  direction: 'start' | 'end';
 }
 
-export default memo(function LinePointCoordinatesInspector({ point }: Props) {
+export default memo(function LinePointCoordinatesInspector({
+  point,
+  direction,
+}: Props) {
   const [, dispatch] = useApplicationState();
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointX', value, mode);
+      dispatch('setLinePointX', value, direction, mode);
     },
-    [dispatch],
+    [direction, dispatch],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointY', value, mode);
+      dispatch('setLinePointY', value, direction, mode);
     },
-    [dispatch],
+    [direction, dispatch],
   );
 
   if (!point) return null;

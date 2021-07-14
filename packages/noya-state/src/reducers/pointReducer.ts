@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { Selectors } from '..';
 import * as Layers from '../layers';
 import {
   getCurrentPageIndex,
@@ -15,6 +16,12 @@ export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
   | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
+  | [
+      type: 'setLinePointX' | 'setLinePointY',
+      amount: number,
+      direction: 'start' | 'end',
+      mode?: SetNumberMode,
+    ]
   | [
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
@@ -105,6 +112,42 @@ export function pointReducer(
 
         moveSelectedPoints(
           draft.selectedPointLists,
+          layerIndexPaths,
+          delta,
+          mode,
+          draft.sketch.pages[pageIndex],
+          draft.sketch.pages[pageIndex],
+          CanvasKit,
+        );
+      });
+    }
+
+    case 'setLinePointX':
+    case 'setLinePointY': {
+      const [type, amount, direction = 'start', mode = 'replace'] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const page = Selectors.getCurrentPage(state);
+
+      return produce(state, (draft) => {
+        const delta = type === 'setLinePointX' ? { x: amount } : { y: amount };
+
+        const layer = Layers.access(page, layerIndexPaths[0]);
+
+        if (!Layers.isPointsLayer(layer) || layerIndexPaths.length > 1) return;
+
+        const selectedPointLists =
+          direction === 'start'
+            ? {
+                [layer.do_objectID]: [0],
+              }
+            : {
+                [layer.do_objectID]: [1],
+              };
+
+        moveSelectedPoints(
+          selectedPointLists,
           layerIndexPaths,
           delta,
           mode,
