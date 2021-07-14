@@ -7,6 +7,7 @@ import {
   colorControlsReducer,
 } from './colorControlsReducer';
 import { clamp } from 'noya-utils';
+import { SketchModel } from 'noya-sketch-model';
 
 export type SetNumberMode = 'replace' | 'adjust';
 
@@ -79,10 +80,14 @@ export function styleReducer(
   switch (action[0]) {
     case 'addNewBorder':
       return produce(state, (draft) => {
+        const border = SketchModel.border({
+          color: SketchModel.color({ red: 0.6, green: 0.6, blue: 0.6 }),
+        });
+
         if (draft.borders) {
-          draft.borders.unshift(Models.border);
+          draft.borders.unshift(border);
         } else {
-          draft.borders = [Models.border];
+          draft.borders = [border];
         }
       });
     case 'addNewFill':

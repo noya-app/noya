@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`creates borders 1`] = `
+Object {
+  "_class": "border",
+  "color": Object {
+    "_class": "color",
+    "alpha": 1,
+    "blue": 0,
+    "green": 0,
+    "red": 0,
+  },
+  "contextSettings": Object {
+    "_class": "graphicsContextSettings",
+    "blendMode": 0,
+    "opacity": 1,
+  },
+  "fillType": 0,
+  "gradient": Object {
+    "_class": "gradient",
+    "elipseLength": 0,
+    "from": "{0.5, 0}",
+    "gradientType": 0,
+    "stops": Array [
+      Object {
+        "_class": "gradientStop",
+        "color": Object {
+          "_class": "color",
+          "alpha": 1,
+          "blue": 1,
+          "green": 1,
+          "red": 1,
+        },
+        "position": 0,
+      },
+      Object {
+        "_class": "gradientStop",
+        "color": Object {
+          "_class": "color",
+          "alpha": 1,
+          "blue": 0,
+          "green": 0,
+          "red": 0,
+        },
+        "position": 1,
+      },
+    ],
+    "to": "{0.5, 1}",
+  },
+  "isEnabled": true,
+  "position": 1,
+  "thickness": 1,
+}
+`;
+
+exports[`creates colors 1`] = `
+Object {
+  "_class": "color",
+  "alpha": 1,
+  "blue": 0,
+  "green": 0,
+  "red": 0,
+}
+`;
+
+exports[`creates gradients 1`] = `
+Object {
+  "_class": "gradient",
+  "elipseLength": 0,
+  "from": "{0.5, 0}",
+  "gradientType": 0,
+  "stops": Array [
+    Object {
+      "_class": "gradientStop",
+      "color": Object {
+        "_class": "color",
+        "alpha": 1,
+        "blue": 1,
+        "green": 1,
+        "red": 1,
+      },
+      "position": 0,
+    },
+    Object {
+      "_class": "gradientStop",
+      "color": Object {
+        "_class": "color",
+        "alpha": 1,
+        "blue": 0,
+        "green": 0,
+        "red": 0,
+      },
+      "position": 1,
+    },
+  ],
+  "to": "{0.5, 1}",
+}
+`;
+
+exports[`creates graphicsContextSettings 1`] = `
+Object {
+  "_class": "graphicsContextSettings",
+  "blendMode": 0,
+  "opacity": 1,
+}
+`;
