@@ -1,21 +1,36 @@
-import { memo, DragEvent, useCallback, ReactNode } from 'react';
-import { useFileDropTarget } from '../hooks/useFileDropTarget';
+import { DragEvent, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
-import { SUPPORTED_FILE_TYPES } from 'noya-designsystem';
 import { OffsetPoint } from '../containers/Canvas';
+import { useFileDropTarget } from '../hooks/useFileDropTarget';
 
-interface Props {
+export type TypedFile<T> = File & { type: T };
+
+export function isSupportedFile<T extends string>(
+  file: File,
+  supportedFileTypes: T[],
+): file is TypedFile<T> {
+  return supportedFileTypes.includes(file.type as T);
+}
+
+interface Props<T extends string> {
   children: ReactNode | ((isActive: boolean) => ReactNode);
-  onDropFile: (file: File, extension: string, event: OffsetPoint) => void;
+  onDropFile: (file: TypedFile<T>, event: OffsetPoint) => void;
+  supportedFileTypes: T[];
 }
 
 const Container = styled.div(() => ({ display: 'flex', flex: 1 }));
 
-export default memo(function ImageDropTarget({ children, onDropFile }: Props) {
+export default memo(function ImageDropTarget<T extends string>({
+  children,
+  onDropFile,
+  supportedFileTypes,
+}: Props<T>) {
   const handleImageFile = useCallback(
     (e: DragEvent) => {
       e.preventDefault();
+
       if (!e.dataTransfer) return;
+
       const file = e.dataTransfer.files[0];
 
       if (!file) {
@@ -23,11 +38,13 @@ export default memo(function ImageDropTarget({ children, onDropFile }: Props) {
         return;
       }
 
-      const extension = SUPPORTED_FILE_TYPES[file.type];
-
-      if (!extension) {
+      if (!isSupportedFile(file, supportedFileTypes)) {
         alert(
-          `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
+          `Files of type ${
+            file.type
+          } aren't supported. The following types are supported: ${supportedFileTypes.join(
+            ', ',
+          )}`,
         );
         return;
       }
@@ -37,9 +54,9 @@ export default memo(function ImageDropTarget({ children, onDropFile }: Props) {
         offsetY: e.nativeEvent.offsetY,
       };
 
-      onDropFile(file, extension, offsetPoint);
+      onDropFile(file, offsetPoint);
     },
-    [onDropFile],
+    [onDropFile, supportedFileTypes],
   );
 
   const { dropTargetProps, isDropTargetActive } = useFileDropTarget(

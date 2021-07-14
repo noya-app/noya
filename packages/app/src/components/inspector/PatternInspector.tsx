@@ -7,13 +7,17 @@ import {
   SketchPattern,
   Slider,
   Spacer,
-  SUPPORTED_FILE_TYPES,
+  SupportedImageUploadType,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
   useHover,
 } from 'noya-designsystem';
 import { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { uuid } from 'noya-utils';
-import ImageDropTarget from '../ImageDropTarget';
+import { getFileExtensionForType, uuid } from 'noya-utils';
+import ImageDropTarget, {
+  isSupportedFile,
+  TypedFile,
+} from '../ImageDropTarget';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const Container = styled.div<{
@@ -87,9 +91,9 @@ const PatternPreview = memo(
     });
 
     const handleImageFile = useCallback(
-      async (file: File, extension: string) => {
+      async (file: TypedFile<SupportedImageUploadType>) => {
         const data = await file.arrayBuffer();
-        const _ref = `images/${uuid()}.${extension}`;
+        const _ref = `images/${uuid()}.${getFileExtensionForType(file.type)}`;
 
         onAddImage(data, _ref);
         onChangeImage({
@@ -103,24 +107,31 @@ const PatternPreview = memo(
 
     const openFile = useCallback(async () => {
       const file = await fileOpen({
-        extensions: Object.values(SUPPORTED_FILE_TYPES).map((e) => '.' + e),
-        mimeTypes: Object.keys(SUPPORTED_FILE_TYPES),
+        extensions: Object.values(SUPPORTED_IMAGE_UPLOAD_TYPES).map(
+          (type) => '.' + getFileExtensionForType(type),
+        ),
+        mimeTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
       });
 
-      const extension = SUPPORTED_FILE_TYPES[file.type];
-
-      if (!extension) {
+      if (!isSupportedFile(file, SUPPORTED_IMAGE_UPLOAD_TYPES)) {
         alert(
-          `Files of type ${file.type} aren't supported. Files of type png, jpg, and webp are supported.`,
+          `Files of type ${
+            file.type
+          } aren't supported. The following types are supported: ${SUPPORTED_IMAGE_UPLOAD_TYPES.join(
+            ', ',
+          )}`,
         );
         return;
       }
 
-      handleImageFile(file, extension);
+      handleImageFile(file);
     }, [handleImageFile]);
 
     return (
-      <ImageDropTarget onDropFile={handleImageFile}>
+      <ImageDropTarget
+        onDropFile={handleImageFile}
+        supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
+      >
         {(isDropTargetActive: boolean) => (
           <Container {...hoverProps} isActive={isDropTargetActive}>
             {pattern.image && (
