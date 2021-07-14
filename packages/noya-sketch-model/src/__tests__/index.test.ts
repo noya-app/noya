@@ -15,3 +15,7 @@ test('creates graphicsContextSettings', () => {
 test('creates borders', () => {
   expect(SketchModel.border()).toMatchSnapshot();
 });
+
+test('creates fills', () => {
+  expect(SketchModel.fill()).toMatchSnapshot();
+});

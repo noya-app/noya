@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { SketchModel } from 'noya-sketch-model';
 import { uuid } from 'noya-utils';
 import { delimitedPath, getIncrementedName } from 'noya-utils';
 import * as Layers from '../layers';
@@ -195,10 +196,12 @@ export function themeReducer(
             draftLayerStyles.groupName,
             name || 'New Layer Style',
           ]),
-          value: produce(style || Models.style, (style) => {
-            style.do_objectID = uuid();
-            return style;
-          }),
+          value: style
+            ? produce(style, (style) => {
+                style.do_objectID = uuid();
+                return style;
+              })
+            : SketchModel.style(),
         };
 
         layerStyles.objects.push(sharedStyle);

@@ -28,6 +28,7 @@ import {
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
+import { SketchModel } from 'noya-sketch-model';
 
 export type LayerAction =
   | [
@@ -85,9 +86,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
       constrainProportions: false,
       ...groupFrame,
     };
-    draft.style = produce(Models.style, (s) => {
-      s.do_objectID = uuid();
-    });
+    draft.style = SketchModel.style();
 
     draft.layers = [...indexPaths].map((indexPath) => {
       const layer = Layers.access(page, indexPath) as Layers.ChildLayer;

@@ -1,7 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { GradientAction, gradientReducer } from './gradientReducer';
-import * as Models from '../models';
 import {
   ColorControlsAction,
   colorControlsReducer,
@@ -92,18 +91,28 @@ export function styleReducer(
       });
     case 'addNewFill':
       return produce(state, (draft) => {
+        const fill = SketchModel.fill({
+          color: SketchModel.color({ red: 0.85, green: 0.85, blue: 0.85 }),
+        });
+
         if (draft.fills) {
-          draft.fills.unshift(Models.fill);
+          draft.fills.unshift(fill);
         } else {
-          draft.fills = [Models.fill];
+          draft.fills = [fill];
         }
       });
     case 'addNewShadow':
+      const shadow = SketchModel.shadow({
+        color: SketchModel.color({ alpha: 0.5 }),
+        offsetY: 2,
+        blurRadius: 4,
+      });
+
       return produce(state, (draft) => {
         if (draft.shadows) {
-          draft.shadows.unshift(Models.shadow);
+          draft.shadows.unshift(shadow);
         } else {
-          draft.shadows = [Models.shadow];
+          draft.shadows = [shadow];
         }
       });
     case 'setBorderEnabled': {
@@ -323,7 +332,7 @@ export function styleReducer(
         draft.fills[index].fillType = type;
 
         if (type === Sketch.FillType.Gradient && !draft.fills[index].gradient) {
-          draft.fills[index].gradient = Models.fill.gradient;
+          draft.fills[index].gradient = SketchModel.gradient();
         }
       });
     }
@@ -334,7 +343,7 @@ export function styleReducer(
         draft.borders[index].fillType = type;
 
         if (!draft.borders[index].gradient) {
-          draft.borders[index].gradient = Models.fill.gradient;
+          draft.borders[index].gradient = SketchModel.gradient();
         }
       });
     }
