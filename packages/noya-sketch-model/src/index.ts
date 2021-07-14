@@ -5,15 +5,40 @@ type ModelOptions<T> = Partial<Omit<T, '_class'>>;
 
 type ModelConstructor<T> = (options?: ModelOptions<T>) => T;
 
+// We don't {...spread} options in order to preserve property order.
+// This makes colors a little nicer to read in logs/snapshots.
 const color: ModelConstructor<Sketch.Color> = (options) => {
-  // We don't {...spread} options in order to preserve property order.
-  // This makes colors a little nicer to read in logs/snapshots.
   return {
     _class: Sketch.ClassValue.Color,
     red: options?.red ?? 0,
     green: options?.green ?? 0,
     blue: options?.blue ?? 0,
     alpha: 1,
+  };
+};
+
+const rect: ModelConstructor<Sketch.Rect> = (options) => {
+  return {
+    _class: Sketch.ClassValue.Rect,
+    constrainProportions: false,
+    x: options?.x ?? 0,
+    y: options?.y ?? 0,
+    width: options?.width ?? 0,
+    height: options?.height ?? 0,
+  };
+};
+
+const curvePoint: ModelConstructor<Sketch.CurvePoint> = (options) => {
+  return {
+    _class: Sketch.ClassValue.CurvePoint,
+    cornerRadius: 0,
+    curveFrom: '{0, 0}',
+    curveMode: Sketch.CurveMode.Straight,
+    curveTo: '{0, 0}',
+    hasCurveFrom: false,
+    hasCurveTo: false,
+    point: '{0, 0}',
+    ...options,
   };
 };
 
@@ -142,6 +167,19 @@ const colorControls: ModelConstructor<Sketch.ColorControls> = (
   };
 };
 
+const exportOptions: ModelConstructor<Sketch.ExportOptions> = (
+  options,
+): Sketch.ExportOptions => {
+  return {
+    _class: Sketch.ClassValue.ExportOptions,
+    includedLayerIds: [],
+    layerOptions: 0,
+    shouldTrim: false,
+    exportFormats: [],
+    ...options,
+  };
+};
+
 const style: ModelConstructor<Sketch.Style> = (options): Sketch.Style => {
   return {
     _class: Sketch.ClassValue.Style,
@@ -162,6 +200,77 @@ const style: ModelConstructor<Sketch.Style> = (options): Sketch.Style => {
   };
 };
 
+const rectangle: ModelConstructor<Sketch.Rectangle> = (
+  options,
+): Sketch.Rectangle => {
+  return {
+    _class: Sketch.ClassValue.Rectangle,
+    do_objectID: options?.do_objectID ?? uuid(),
+    booleanOperation: Sketch.BooleanOperation.None,
+    isFixedToViewport: false,
+    isFlippedHorizontal: false,
+    isFlippedVertical: false,
+    isLocked: false,
+    isVisible: true,
+    layerListExpandedType: Sketch.LayerListExpanded.Undecided,
+    name: 'Rectangle',
+    nameIsFixed: false,
+    resizingConstraint: 63,
+    resizingType: Sketch.ResizeType.Stretch,
+    rotation: 0,
+    shouldBreakMaskChain: false,
+    exportOptions: exportOptions(),
+    frame: rect(),
+    clippingMaskMode: 0,
+    hasClippingMask: false,
+    style: style(),
+    edited: false,
+    isClosed: true,
+    pointRadiusBehaviour: Sketch.PointsRadiusBehaviour.Rounded,
+    points: [
+      curvePoint({
+        curveFrom: '{0, 0}',
+        curveTo: '{0, 0}',
+        point: '{0, 0}',
+      }),
+      {
+        _class: 'curvePoint',
+        cornerRadius: 0,
+        curveFrom: '{1, 0}',
+        curveMode: 1,
+        curveTo: '{1, 0}',
+        hasCurveFrom: false,
+        hasCurveTo: false,
+        point: '{1, 0}',
+      },
+      {
+        _class: 'curvePoint',
+        cornerRadius: 0,
+        curveFrom: '{1, 1}',
+        curveMode: 1,
+        curveTo: '{1, 1}',
+        hasCurveFrom: false,
+        hasCurveTo: false,
+        point: '{1, 1}',
+      },
+      {
+        _class: 'curvePoint',
+        cornerRadius: 0,
+        curveFrom: '{0, 1}',
+        curveMode: 1,
+        curveTo: '{0, 1}',
+        hasCurveFrom: false,
+        hasCurveTo: false,
+        point: '{0, 1}',
+      },
+    ],
+    fixedRadius: 0,
+    needsConvertionToNewRoundCorners: false,
+    hasConvertedToNewRoundCorners: true,
+    ...options,
+  };
+};
+
 export const SketchModel = {
   border,
   borderOptions,
@@ -173,4 +282,5 @@ export const SketchModel = {
   graphicsContextSettings,
   shadow,
   style,
+  rectangle,
 };
