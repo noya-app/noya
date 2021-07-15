@@ -1,9 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { createRect, Size } from 'noya-geometry';
+import { SketchModel } from 'noya-sketch-model';
 import type { PageLayer } from '..';
-import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
+import { defaultFillColor } from './styleReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -175,17 +176,25 @@ type CreateLayerReturnType =
   | Sketch.ShapePath;
 
 function createLayer(shapeType: ShapeType): CreateLayerReturnType {
+  const style = SketchModel.style({
+    fills: [
+      SketchModel.fill({
+        color: defaultFillColor,
+      }),
+    ],
+  });
+
   switch (shapeType) {
     case 'oval':
-      return Models.oval;
+      return SketchModel.oval({ style });
     case 'rectangle':
-      return Models.rectangle;
+      return SketchModel.rectangle({ style });
     case 'text':
-      return Models.text;
+      return SketchModel.text();
     case 'artboard':
-      return Models.artboard;
+      return SketchModel.artboard();
     case 'shapePath':
-      return Models.shapePath;
+      return SketchModel.shapePath({ style });
   }
 }
 
