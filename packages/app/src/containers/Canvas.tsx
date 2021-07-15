@@ -1,8 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
+import {
+  ContextMenu,
+  mergeEventHandlers,
+  SupportedImageUploadType,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
+} from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { uuid } from 'noya-utils';
+import { getFileExtensionForType, uuid } from 'noya-utils';
 import { useCanvasKit } from 'noya-renderer';
 import { decodeCurvePoint, SelectedPoint } from 'noya-state';
 import {
@@ -29,7 +34,7 @@ import { useSize } from '../hooks/useSize';
 import { useWorkspace } from 'noya-app-state-context';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
-import ImageDropTarget from '../components/ImageDropTarget';
+import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -741,36 +746,43 @@ export default memo(function Canvas() {
   }, [state, handleDirection]);
 
   const onDropFile = useCallback(
-    async (file: File, extension: string, e: OffsetPoint) => {
-      const rawPoint = getPoint(e);
+    async (
+      file: TypedFile<SupportedImageUploadType>,
+      offsetPoint: OffsetPoint,
+    ) => {
+      const rawPoint = getPoint(offsetPoint);
       const point = offsetEventPoint(rawPoint);
 
       const data = await file.arrayBuffer();
-      const img = CanvasKit.MakeImageFromEncoded(data);
-      if (!img) return;
+      const image = CanvasKit.MakeImageFromEncoded(data);
 
-      const rect = {
-        width: img.width(),
-        height: img.height(),
+      if (!image) return;
+
+      const size = {
+        width: image.width(),
+        height: image.height(),
       };
 
       const frame = {
-        ...rect,
-        x: point.x - rect.width / 2,
-        y: point.y - rect.height / 2,
+        ...size,
+        x: point.x - size.width / 2,
+        y: point.y - size.height / 2,
       };
 
       dispatch('insertBitmap', data, {
         name: file.name,
         frame: frame,
-        extension: extension,
+        extension: getFileExtensionForType(file.type),
       });
     },
     [CanvasKit, dispatch, offsetEventPoint],
   );
 
   return (
-    <ImageDropTarget onDropFile={onDropFile}>
+    <ImageDropTarget
+      onDropFile={onDropFile}
+      supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
+    >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container
           ref={containerRef}
