@@ -1,10 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SketchModel } from 'noya-sketch-model';
-import { uuid } from 'noya-utils';
-import { delimitedPath, getIncrementedName } from 'noya-utils';
+import { delimitedPath, getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import * as Models from '../models';
 import {
   findPageLayerIndexPaths,
   getCurrentPageIndex,
@@ -153,10 +151,16 @@ export function themeReducer(
             name || 'New Text Style',
           ]),
 
-          value: produce(style || Models.textStyle, (style) => {
-            style.do_objectID = uuid();
-            return style;
-          }),
+          value: produce(
+            style ||
+              SketchModel.style({
+                textStyle: SketchModel.textStyle(),
+              }),
+            (style) => {
+              style.do_objectID = uuid();
+              return style;
+            },
+          ),
         };
 
         textStyles.objects.push(sharedStyle);

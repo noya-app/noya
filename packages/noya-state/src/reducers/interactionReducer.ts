@@ -3,7 +3,6 @@ import produce from 'immer';
 import { createRect, Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import type { PageLayer } from '..';
-import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
 import { defaultFillColor } from './styleReducer';
 
@@ -191,7 +190,7 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
     case 'rectangle':
       return SketchModel.rectangle({ style });
     case 'text':
-      return Models.text;
+      return SketchModel.text();
     case 'artboard':
       return SketchModel.artboard();
     case 'shapePath':

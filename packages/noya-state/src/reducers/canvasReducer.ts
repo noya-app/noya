@@ -12,7 +12,6 @@ import {
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import * as Models from '../models';
 import {
   addToParentLayer,
   computeNewBoundingRect,
@@ -161,15 +160,14 @@ export function canvasReducer(
         ({ do_objectID }) => do_objectID === symbolId,
       ) as Sketch.SymbolMaster;
 
-      const layer = produce(Models.symbolInstance, (layer) => {
-        layer.do_objectID = uuid();
-        layer.name = symbol.name;
-        layer.symbolID = symbol.symbolID;
-        layer.frame = {
+      const layer = SketchModel.symbolInstance({
+        name: symbol.name,
+        symbolID: symbol.symbolID,
+        frame: {
           ...symbol.frame,
           x: point.x - symbol.frame.width / 2,
           y: point.y - symbol.frame.height / 2,
-        };
+        },
       });
 
       return produce(state, (draft) => {

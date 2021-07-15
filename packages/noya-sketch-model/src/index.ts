@@ -9,28 +9,27 @@ type ModelConstructor<T> = (options?: ModelOptions<T>) => T;
 // This makes colors a little nicer to read in logs/snapshots.
 const color: ModelConstructor<Sketch.Color> = (options) => {
   return {
-    _class: Sketch.ClassValue.Color,
     red: options?.red ?? 0,
     green: options?.green ?? 0,
     blue: options?.blue ?? 0,
     alpha: 1,
+    _class: Sketch.ClassValue.Color,
   };
 };
 
 const rect: ModelConstructor<Sketch.Rect> = (options) => {
   return {
-    _class: Sketch.ClassValue.Rect,
     constrainProportions: false,
     x: options?.x ?? 0,
     y: options?.y ?? 0,
     width: options?.width ?? 0,
     height: options?.height ?? 0,
+    _class: Sketch.ClassValue.Rect,
   };
 };
 
 const curvePoint: ModelConstructor<Sketch.CurvePoint> = (options) => {
   return {
-    _class: Sketch.ClassValue.CurvePoint,
     cornerRadius: 0,
     curveFrom: '{0, 0}',
     curveMode: Sketch.CurveMode.Straight,
@@ -39,6 +38,7 @@ const curvePoint: ModelConstructor<Sketch.CurvePoint> = (options) => {
     hasCurveTo: false,
     point: '{0, 0}',
     ...options,
+    _class: Sketch.ClassValue.CurvePoint,
   };
 };
 
@@ -46,25 +46,24 @@ const graphicsContextSettings: ModelConstructor<Sketch.GraphicsContextSettings> 
   options,
 ) => {
   return {
-    _class: Sketch.ClassValue.GraphicsContextSettings,
     blendMode: Sketch.BlendMode.Normal,
     opacity: 1,
     ...options,
+    _class: Sketch.ClassValue.GraphicsContextSettings,
   };
 };
 
 const gradientStop: ModelConstructor<Sketch.GradientStop> = (options) => {
   return {
-    _class: Sketch.ClassValue.GradientStop,
     position: 0,
     color: color(),
     ...options,
+    _class: Sketch.ClassValue.GradientStop,
   };
 };
 
 const gradient: ModelConstructor<Sketch.Gradient> = (options) => {
   return {
-    _class: Sketch.ClassValue.Gradient,
     elipseLength: 0,
     from: '{0.5, 0}',
     gradientType: 0,
@@ -80,12 +79,12 @@ const gradient: ModelConstructor<Sketch.Gradient> = (options) => {
       }),
     ],
     ...options,
+    _class: Sketch.ClassValue.Gradient,
   };
 };
 
 const border: ModelConstructor<Sketch.Border> = (options) => {
   return {
-    _class: Sketch.ClassValue.Border,
     isEnabled: true,
     fillType: Sketch.FillType.Color,
     color: color(),
@@ -94,12 +93,12 @@ const border: ModelConstructor<Sketch.Border> = (options) => {
     position: 1,
     thickness: 1,
     ...options,
+    _class: Sketch.ClassValue.Border,
   };
 };
 
 const fill: ModelConstructor<Sketch.Fill> = (options) => {
   return {
-    _class: Sketch.ClassValue.Fill,
     isEnabled: true,
     fillType: Sketch.FillType.Color,
     color: color(),
@@ -110,12 +109,12 @@ const fill: ModelConstructor<Sketch.Fill> = (options) => {
     patternFillType: Sketch.PatternFillType.Fill,
     patternTileScale: 1,
     ...options,
+    _class: Sketch.ClassValue.Fill,
   };
 };
 
 const shadow: ModelConstructor<Sketch.Shadow> = (options) => {
   return {
-    _class: Sketch.ClassValue.Shadow,
     isEnabled: true,
     color: color(),
     contextSettings: graphicsContextSettings(),
@@ -124,12 +123,12 @@ const shadow: ModelConstructor<Sketch.Shadow> = (options) => {
     offsetY: 0,
     spread: 0,
     ...options,
+    _class: Sketch.ClassValue.Shadow,
   };
 };
 
 const blur: ModelConstructor<Sketch.Blur> = (options): Sketch.Blur => {
   return {
-    _class: Sketch.ClassValue.Blur,
     isEnabled: false,
     center: '{0.5, 0.5}',
     motionAngle: 0,
@@ -137,6 +136,7 @@ const blur: ModelConstructor<Sketch.Blur> = (options): Sketch.Blur => {
     saturation: 1,
     type: Sketch.BlurType.Gaussian,
     ...options,
+    _class: Sketch.ClassValue.Blur,
   };
 };
 
@@ -144,12 +144,12 @@ const borderOptions: ModelConstructor<Sketch.BorderOptions> = (
   options,
 ): Sketch.BorderOptions => {
   return {
-    _class: Sketch.ClassValue.BorderOptions,
     isEnabled: true,
     dashPattern: [],
     lineCapStyle: Sketch.LineCapStyle.Butt,
     lineJoinStyle: Sketch.LineJoinStyle.Miter,
     ...options,
+    _class: Sketch.ClassValue.BorderOptions,
   };
 };
 
@@ -157,13 +157,13 @@ const colorControls: ModelConstructor<Sketch.ColorControls> = (
   options,
 ): Sketch.ColorControls => {
   return {
-    _class: Sketch.ClassValue.ColorControls,
     isEnabled: true,
     brightness: 0,
     contrast: 1,
     hue: 0,
     saturation: 1,
     ...options,
+    _class: Sketch.ClassValue.ColorControls,
   };
 };
 
@@ -171,18 +171,63 @@ const exportOptions: ModelConstructor<Sketch.ExportOptions> = (
   options,
 ): Sketch.ExportOptions => {
   return {
-    _class: Sketch.ClassValue.ExportOptions,
     includedLayerIds: [],
     layerOptions: 0,
     shouldTrim: false,
     exportFormats: [],
     ...options,
+    _class: Sketch.ClassValue.ExportOptions,
+  };
+};
+
+const fontDescriptor: ModelConstructor<Sketch.FontDescriptor> = (
+  options,
+): Sketch.FontDescriptor => {
+  return {
+    attributes: {
+      name: 'Helvetica',
+      size: 18,
+    },
+    ...options,
+    _class: Sketch.ClassValue.FontDescriptor,
+  };
+};
+
+const paragraphStyle: ModelConstructor<Sketch.ParagraphStyle> = (
+  options,
+): Sketch.ParagraphStyle => {
+  return {
+    alignment: Sketch.TextHorizontalAlignment.Left,
+    ...options,
+    _class: Sketch.ClassValue.ParagraphStyle,
+  };
+};
+
+const encodedAttributes: ModelConstructor<
+  Sketch.TextStyle['encodedAttributes']
+> = (options): Sketch.TextStyle['encodedAttributes'] => {
+  return {
+    MSAttributedStringFontAttribute: fontDescriptor(),
+    MSAttributedStringColorAttribute: color(),
+    textStyleVerticalAlignmentKey: Sketch.TextVerticalAlignment.Top,
+    paragraphStyle: paragraphStyle(),
+    ...options,
+  };
+};
+
+const textStyle: ModelConstructor<Sketch.TextStyle> = (
+  options,
+): Sketch.TextStyle => {
+  return {
+    verticalAlignment: Sketch.TextVerticalAlignment.Top,
+    encodedAttributes: encodedAttributes(),
+    ...options,
+    _class: Sketch.ClassValue.TextStyle,
   };
 };
 
 const style: ModelConstructor<Sketch.Style> = (options): Sketch.Style => {
   return {
-    _class: Sketch.ClassValue.Style,
     do_objectID: options?.do_objectID ?? uuid(),
     endMarkerType: Sketch.MarkerType.OpenArrow,
     miterLimit: 10,
@@ -197,6 +242,7 @@ const style: ModelConstructor<Sketch.Style> = (options): Sketch.Style => {
     innerShadows: [],
     shadows: [],
     ...options,
+    _class: Sketch.ClassValue.Style,
   };
 };
 
@@ -219,7 +265,6 @@ const newLayerBase = (options?: { do_objectID?: string }) => {
     frame: rect(),
     clippingMaskMode: 0,
     hasClippingMask: false,
-    style: style(),
     edited: false,
     isClosed: true,
     pointRadiusBehaviour: Sketch.PointsRadiusBehaviour.Rounded,
@@ -230,9 +275,9 @@ const rectangle: ModelConstructor<Sketch.Rectangle> = (
   options,
 ): Sketch.Rectangle => {
   return {
-    _class: Sketch.ClassValue.Rectangle,
     ...newLayerBase(options),
     name: 'Rectangle',
+    style: style(),
     points: [
       curvePoint({
         curveFrom: '{0, 0}',
@@ -259,14 +304,15 @@ const rectangle: ModelConstructor<Sketch.Rectangle> = (
     needsConvertionToNewRoundCorners: false,
     hasConvertedToNewRoundCorners: true,
     ...options,
+    _class: Sketch.ClassValue.Rectangle,
   };
 };
 
 const oval: ModelConstructor<Sketch.Oval> = (options): Sketch.Oval => {
   return {
-    _class: Sketch.ClassValue.Oval,
     ...newLayerBase(options),
     name: 'Oval',
+    style: style(),
     points: [
       curvePoint({
         curveFrom: '{0.77614237490000004, 1}',
@@ -302,6 +348,7 @@ const oval: ModelConstructor<Sketch.Oval> = (options): Sketch.Oval => {
       }),
     ],
     ...options,
+    _class: Sketch.ClassValue.Oval,
   };
 };
 
@@ -309,11 +356,12 @@ const shapePath: ModelConstructor<Sketch.ShapePath> = (
   options,
 ): Sketch.ShapePath => {
   return {
-    _class: Sketch.ClassValue.ShapePath,
     ...newLayerBase(options),
     name: 'Path',
+    style: style(),
     points: [],
     ...options,
+    _class: Sketch.ClassValue.ShapePath,
   };
 };
 
@@ -323,7 +371,6 @@ const dataReference: ModelConstructor<Sketch.DataRef> = (
   options,
 ): Sketch.DataRef => {
   return {
-    _class: Sketch.ClassValue.MSJSONOriginalDataReference,
     _ref_class: 'MSImageData',
     _ref: '',
     data: {
@@ -333,39 +380,88 @@ const dataReference: ModelConstructor<Sketch.DataRef> = (
       _data: 'e17bf8d6e2e327a621e67be822bb4352949bded3',
     },
     ...options,
+    _class: Sketch.ClassValue.MSJSONOriginalDataReference,
   };
 };
 
 const fileReference = (options: { _ref: string }): Sketch.FileRef => {
   return {
-    _class: Sketch.ClassValue.MSJSONFileReference,
     _ref_class: 'MSImageData',
     _ref: options._ref,
+    _class: Sketch.ClassValue.MSJSONFileReference,
   };
 };
 
 const bitmap: ModelConstructor<Sketch.Bitmap> = (options): Sketch.Bitmap => {
   return {
-    _class: Sketch.ClassValue.Bitmap,
     ...newLayerBase(options),
     name: 'Image',
+    style: style(),
     clippingMask: '{{0, 0}, {1, 1}}',
     fillReplacesImage: false,
     image: dataReference(),
     intendedDPI: 72,
     ...options,
+    _class: Sketch.ClassValue.Bitmap,
+  };
+};
+
+const stringAttribute: ModelConstructor<Sketch.StringAttribute> = (
+  options,
+): Sketch.StringAttribute => {
+  return {
+    location: 0,
+    length: 0,
+    attributes: {
+      MSAttributedStringFontAttribute: fontDescriptor(),
+      MSAttributedStringColorAttribute: color(),
+      textStyleVerticalAlignmentKey: Sketch.TextVerticalAlignment.Top,
+      paragraphStyle: paragraphStyle(),
+    },
+    ...options,
+    _class: Sketch.ClassValue.StringAttribute,
+  };
+};
+
+const attributedString: ModelConstructor<Sketch.AttributedString> = (
+  options,
+): Sketch.AttributedString => {
+  return {
+    string: '',
+    attributes: [stringAttribute()],
+    ...options,
+    _class: Sketch.ClassValue.AttributedString,
+  };
+};
+
+const text: ModelConstructor<Sketch.Text> = (options): Sketch.Text => {
+  return {
+    ...newLayerBase(options),
+    name: 'Text',
+    style: style({
+      textStyle: textStyle(),
+    }),
+    attributedString: attributedString(),
+    automaticallyDrawOnUnderlyingPath: false,
+    dontSynchroniseWithSymbol: false,
+    glyphBounds: '{{0, 5}, {126, 17}}',
+    lineSpacingBehaviour: 3,
+    textBehaviour: Sketch.TextBehaviour.Flexible,
+    ...options,
+    _class: Sketch.ClassValue.Text,
   };
 };
 
 const group: ModelConstructor<Sketch.Group> = (options): Sketch.Group => {
   return {
-    _class: Sketch.ClassValue.Group,
     ...newLayerBase(options),
     name: 'Group',
+    style: style(),
     hasClickThrough: false,
     groupLayout: { _class: 'MSImmutableFreeformGroupLayout' },
     layers: [],
     ...options,
+    _class: Sketch.ClassValue.Group,
   };
 };
 
@@ -373,10 +469,10 @@ const rulerData: ModelConstructor<Sketch.RulerData> = (
   options,
 ): Sketch.RulerData => {
   return {
-    _class: Sketch.ClassValue.RulerData,
     base: 0,
     guides: [],
     ...options,
+    _class: Sketch.ClassValue.RulerData,
   };
 };
 
@@ -384,7 +480,6 @@ const artboard: ModelConstructor<Sketch.Artboard> = (
   options,
 ): Sketch.Artboard => {
   return {
-    _class: Sketch.ClassValue.Artboard,
     ...newLayerBase(options),
     name: 'Artboard',
     hasClickThrough: false,
@@ -400,12 +495,12 @@ const artboard: ModelConstructor<Sketch.Artboard> = (
     verticalRulerData: rulerData(),
     // includeInCloudUpload: true,
     ...options,
+    _class: Sketch.ClassValue.Artboard,
   };
 };
 
 const page: ModelConstructor<Sketch.Page> = (options): Sketch.Page => {
   return {
-    _class: Sketch.ClassValue.Page,
     ...newLayerBase(options),
     name: 'Page',
     hasClickThrough: false,
@@ -415,6 +510,70 @@ const page: ModelConstructor<Sketch.Page> = (options): Sketch.Page => {
     verticalRulerData: rulerData(),
     // includeInCloudUpload: true,
     ...options,
+    _class: Sketch.ClassValue.Page,
+  };
+};
+
+const symbolInstance = (
+  options: Partial<Sketch.SymbolInstance> &
+    Pick<Sketch.SymbolInstance, 'symbolID'>,
+): Sketch.SymbolInstance => {
+  return {
+    ...newLayerBase(options),
+    name: 'Symbol',
+    style: style(),
+    horizontalSpacing: 0,
+    scale: 1,
+    verticalSpacing: 0,
+    overrideValues: [],
+    ...options,
+    _class: Sketch.ClassValue.SymbolInstance,
+  };
+};
+
+const inferredGroupLayout: ModelConstructor<Sketch.InferredGroupLayout> = (
+  options,
+): Sketch.InferredGroupLayout => {
+  return {
+    axis: Sketch.InferredLayoutAxis.Horizontal,
+    layoutAnchor: Sketch.InferredLayoutAnchor.Middle,
+    maxSize: 0,
+    minSize: 0,
+    ...options,
+    _class: Sketch.ClassValue.MSImmutableInferredGroupLayout,
+  };
+};
+
+const freeformGroupLayout = (): Sketch.FreeformGroupLayout => {
+  return {
+    _class: Sketch.ClassValue.MSImmutableFreeformGroupLayout,
+  };
+};
+
+const symbolMaster: ModelConstructor<Sketch.SymbolMaster> = (
+  options,
+): Sketch.SymbolMaster => {
+  return {
+    ...newLayerBase(options),
+    name: 'Symbol',
+    style: style(),
+    hasClickThrough: true,
+    groupLayout: inferredGroupLayout(),
+    layers: [],
+    hasBackgroundColor: false,
+    includeBackgroundColorInExport: false,
+    isFlowHome: false,
+    presetDictionary: {},
+    resizesContent: false,
+    backgroundColor: color({ red: 1, green: 1, blue: 1 }),
+    horizontalRulerData: rulerData(),
+    verticalRulerData: rulerData(),
+    allowsOverrides: true,
+    includeBackgroundColorInInstance: false,
+    overrideProperties: [],
+    symbolID: options?.symbolID ?? uuid(),
+    ...options,
+    _class: Sketch.ClassValue.SymbolMaster,
   };
 };
 
@@ -426,17 +585,26 @@ export const SketchModel = {
   color,
   colorControls,
   dataReference,
+  encodedAttributes,
   fileReference,
   fill,
+  fontDescriptor,
+  freeformGroupLayout,
   gradient,
   gradientStop,
   graphicsContextSettings,
   group,
+  inferredGroupLayout,
   oval,
   page,
+  paragraphStyle,
   rect,
   rectangle,
   shadow,
   shapePath,
   style,
+  symbolInstance,
+  symbolMaster,
+  text,
+  textStyle,
 };
