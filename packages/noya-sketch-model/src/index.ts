@@ -577,6 +577,103 @@ const symbolMaster: ModelConstructor<Sketch.SymbolMaster> = (
   };
 };
 
+export const meta: ModelConstructor<Sketch.Meta> = (options) => {
+  const app = Sketch.BundleId.PublicRelease;
+  const build = 109185;
+  const commit = '1cee2bd6f09ef2258eb62d151bbe50dd6c3af3f2';
+  const version = 134;
+  const variant = 'NONAPPSTORE';
+  const appVersion = '70.4';
+  const compatibilityVersion = 99;
+
+  // We don't include `fonts` or `pagesAndArtboards` since they don't seem
+  // to be necessary for Sketch to load the resulting file
+  return {
+    app,
+    appVersion,
+    autosaved: 0,
+    build,
+    commit,
+    compatibilityVersion,
+    created: {
+      commit,
+      appVersion,
+      build,
+      app,
+      compatibilityVersion,
+      version,
+      variant,
+    },
+    pagesAndArtboards: {},
+    saveHistory: [`${variant}.${build}`],
+    variant,
+    version,
+    ...options,
+  };
+};
+
+function createSharedObjectContainer<T extends string>(_class: T) {
+  return {
+    _class,
+    do_objectID: uuid(),
+    objects: [],
+  };
+}
+
+export const document: ModelConstructor<Sketch.Document> = (options) => {
+  return {
+    _class: 'document',
+    do_objectID: uuid(),
+    documentState: { _class: 'documentState' },
+    colorSpace: 0,
+    currentPageIndex: 0,
+    assets: {
+      _class: Sketch.ClassValue.AssetCollection,
+      do_objectID: uuid(),
+      images: [],
+      colorAssets: [],
+      exportPresets: [],
+      gradientAssets: [],
+      imageCollection: {
+        _class: Sketch.ClassValue.ImageCollection,
+        images: {},
+      },
+      colors: [],
+      gradients: [],
+    },
+    fontReferences: [],
+    foreignLayerStyles: [],
+    foreignSwatches: [],
+    foreignSymbols: [],
+    foreignTextStyles: [],
+    layerStyles: createSharedObjectContainer(
+      Sketch.ClassValue.SharedStyleContainer,
+    ),
+    layerTextStyles: createSharedObjectContainer(
+      Sketch.ClassValue.SharedTextStyleContainer,
+    ),
+    sharedSwatches: createSharedObjectContainer(
+      Sketch.ClassValue.SwatchContainer,
+    ),
+    pages: [],
+    // Legacy, not used in new documents
+    layerSymbols: createSharedObjectContainer(
+      Sketch.ClassValue.SymbolContainer,
+    ) as any,
+    ...options,
+  };
+};
+
+export const user: ModelConstructor<Sketch.User> = (options) => {
+  return {
+    document: {
+      pageListHeight: 0,
+      pageListCollapsed: Sketch.NumericalBool.False,
+    },
+    ...options,
+  };
+};
+
 export const SketchModel = {
   artboard,
   bitmap,
@@ -585,6 +682,7 @@ export const SketchModel = {
   color,
   colorControls,
   dataReference,
+  document,
   encodedAttributes,
   fileReference,
   fill,
@@ -595,6 +693,7 @@ export const SketchModel = {
   graphicsContextSettings,
   group,
   inferredGroupLayout,
+  meta,
   oval,
   page,
   paragraphStyle,
@@ -607,4 +706,5 @@ export const SketchModel = {
   symbolMaster,
   text,
   textStyle,
+  user,
 };

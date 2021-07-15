@@ -225,6 +225,58 @@ Object {
 }
 `;
 
+exports[`creates documents 1`] = `
+Object {
+  "_class": "document",
+  "assets": Object {
+    "_class": "assetCollection",
+    "colorAssets": Array [],
+    "colors": Array [],
+    "do_objectID": "0",
+    "exportPresets": Array [],
+    "gradientAssets": Array [],
+    "gradients": Array [],
+    "imageCollection": Object {
+      "_class": "imageCollection",
+      "images": Object {},
+    },
+    "images": Array [],
+  },
+  "colorSpace": 0,
+  "currentPageIndex": 0,
+  "do_objectID": "0",
+  "documentState": Object {
+    "_class": "documentState",
+  },
+  "fontReferences": Array [],
+  "foreignLayerStyles": Array [],
+  "foreignSwatches": Array [],
+  "foreignSymbols": Array [],
+  "foreignTextStyles": Array [],
+  "layerStyles": Object {
+    "_class": "sharedStyleContainer",
+    "do_objectID": "0",
+    "objects": Array [],
+  },
+  "layerSymbols": Object {
+    "_class": "symbolContainer",
+    "do_objectID": "0",
+    "objects": Array [],
+  },
+  "layerTextStyles": Object {
+    "_class": "sharedTextStyleContainer",
+    "do_objectID": "0",
+    "objects": Array [],
+  },
+  "pages": Array [],
+  "sharedSwatches": Object {
+    "_class": "swatchContainer",
+    "do_objectID": "0",
+    "objects": Array [],
+  },
+}
+`;
+
 exports[`creates fills 1`] = `
 Object {
   "_class": "fill",
@@ -405,6 +457,32 @@ Object {
     "startMarkerType": 0,
     "windingRule": 1,
   },
+}
+`;
+
+exports[`creates metas 1`] = `
+Object {
+  "app": "com.bohemiancoding.sketch3",
+  "appVersion": "70.4",
+  "autosaved": 0,
+  "build": 109185,
+  "commit": "1cee2bd6f09ef2258eb62d151bbe50dd6c3af3f2",
+  "compatibilityVersion": 99,
+  "created": Object {
+    "app": "com.bohemiancoding.sketch3",
+    "appVersion": "70.4",
+    "build": 109185,
+    "commit": "1cee2bd6f09ef2258eb62d151bbe50dd6c3af3f2",
+    "compatibilityVersion": 99,
+    "variant": "NONAPPSTORE",
+    "version": 134,
+  },
+  "pagesAndArtboards": Object {},
+  "saveHistory": Array [
+    "NONAPPSTORE.109185",
+  ],
+  "variant": "NONAPPSTORE",
+  "version": 134,
 }
 `;
 

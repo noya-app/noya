@@ -61,3 +61,11 @@ test('creates symbolMasters', () => {
 test('creates symbolInstances', () => {
   expect(SketchModel.symbolInstance({ symbolID: '1' })).toMatchSnapshot();
 });
+
+test('creates metas', () => {
+  expect(SketchModel.meta()).toMatchSnapshot();
+});
+
+test('creates documents', () => {
+  expect(SketchModel.document()).toMatchSnapshot();
+});
