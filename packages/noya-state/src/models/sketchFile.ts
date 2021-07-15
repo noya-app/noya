@@ -1,11 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchFile } from 'noya-sketch-file';
-import { Models } from '..';
-import meta from './meta';
+import { SketchModel } from 'noya-sketch-model';
 import { createDocument } from './document';
+import meta from './meta';
 
 export function createSketchFile(): SketchFile {
-  const pages = [Models.page];
+  const pages = [SketchModel.page()];
 
   return {
     document: createDocument(),

@@ -193,7 +193,7 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
     case 'text':
       return Models.text;
     case 'artboard':
-      return Models.artboard;
+      return SketchModel.artboard();
     case 'shapePath':
       return SketchModel.shapePath({ style });
   }

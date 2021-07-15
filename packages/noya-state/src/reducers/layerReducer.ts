@@ -139,15 +139,14 @@ const symbolToGroup = (
     (s) => s.symbolID === element.symbolID,
   )[0];
 
-  const group = produce(Models.group, (group) => {
-    group.do_objectID = uuid();
-    group.name = element.name;
-    group.frame = element.frame;
-    group.layers = symbol.layers.map((l) =>
+  const group = SketchModel.group({
+    name: element.name,
+    frame: element.frame,
+    layers: symbol.layers.map((l) =>
       produce(l, (l) => {
         l.do_objectID = uuid();
       }),
-    );
+    ),
   });
 
   deleteLayers([indexPath], page);
@@ -316,7 +315,14 @@ export function layerReducer(
 
       const indexPaths = getIndexPathsForGroup(state, ids);
 
-      const group = createGroup(Models.group, page, ids, name, indexPaths);
+      const group = createGroup(
+        SketchModel.group(),
+        page,
+        ids,
+        name,
+        indexPaths,
+      );
+
       if (!group) return state;
 
       // Fire we remove selected layers, then we insert the group layer

@@ -357,7 +357,69 @@ const bitmap: ModelConstructor<Sketch.Bitmap> = (options): Sketch.Bitmap => {
   };
 };
 
+const group: ModelConstructor<Sketch.Group> = (options): Sketch.Group => {
+  return {
+    _class: Sketch.ClassValue.Group,
+    ...newLayerBase(options),
+    name: 'Group',
+    hasClickThrough: false,
+    groupLayout: { _class: 'MSImmutableFreeformGroupLayout' },
+    layers: [],
+    ...options,
+  };
+};
+
+const rulerData: ModelConstructor<Sketch.RulerData> = (
+  options,
+): Sketch.RulerData => {
+  return {
+    _class: Sketch.ClassValue.RulerData,
+    base: 0,
+    guides: [],
+    ...options,
+  };
+};
+
+const artboard: ModelConstructor<Sketch.Artboard> = (
+  options,
+): Sketch.Artboard => {
+  return {
+    _class: Sketch.ClassValue.Artboard,
+    ...newLayerBase(options),
+    name: 'Artboard',
+    hasClickThrough: false,
+    groupLayout: { _class: 'MSImmutableFreeformGroupLayout' },
+    layers: [],
+    hasBackgroundColor: false,
+    includeBackgroundColorInExport: true,
+    isFlowHome: false,
+    presetDictionary: {},
+    resizesContent: false,
+    backgroundColor: color({ blue: 1, green: 1, red: 1 }),
+    horizontalRulerData: rulerData(),
+    verticalRulerData: rulerData(),
+    // includeInCloudUpload: true,
+    ...options,
+  };
+};
+
+const page: ModelConstructor<Sketch.Page> = (options): Sketch.Page => {
+  return {
+    _class: Sketch.ClassValue.Page,
+    ...newLayerBase(options),
+    name: 'Page',
+    hasClickThrough: false,
+    groupLayout: { _class: 'MSImmutableFreeformGroupLayout' },
+    layers: [],
+    horizontalRulerData: rulerData(),
+    verticalRulerData: rulerData(),
+    // includeInCloudUpload: true,
+    ...options,
+  };
+};
+
 export const SketchModel = {
+  artboard,
   bitmap,
   border,
   borderOptions,
@@ -369,7 +431,9 @@ export const SketchModel = {
   gradient,
   gradientStop,
   graphicsContextSettings,
+  group,
   oval,
+  page,
   rect,
   rectangle,
   shadow,

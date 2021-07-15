@@ -75,19 +75,16 @@ export function canvasReducer(
       const { scrollOrigin } = getCurrentPageMetadata(state);
 
       return produce(state, (draft) => {
-        let layer = produce(Models.artboard, (layer) => {
-          layer.do_objectID = uuid();
-          layer.name = name;
-          layer.frame = {
-            _class: 'rect',
-            constrainProportions: false,
+        const layer = SketchModel.artboard({
+          name,
+          frame: SketchModel.rect({
             // TODO: Figure out positioning based on other artboards.
             // Also, don't hardcode sidebar width.
             x: -scrollOrigin.x + 100,
             y: -scrollOrigin.y + 100,
             width,
             height,
-          };
+          }),
         });
 
         draft.sketch.pages[pageIndex].layers.push(layer);
