@@ -317,19 +317,62 @@ const shapePath: ModelConstructor<Sketch.ShapePath> = (
   };
 };
 
+const CHECKERED_BACKGROUND = `iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYII=`;
+
+const dataReference: ModelConstructor<Sketch.DataRef> = (
+  options,
+): Sketch.DataRef => {
+  return {
+    _class: Sketch.ClassValue.MSJSONOriginalDataReference,
+    _ref_class: 'MSImageData',
+    _ref: '',
+    data: {
+      _data: CHECKERED_BACKGROUND,
+    },
+    sha1: {
+      _data: 'e17bf8d6e2e327a621e67be822bb4352949bded3',
+    },
+    ...options,
+  };
+};
+
+const fileReference = (options: { _ref: string }): Sketch.FileRef => {
+  return {
+    _class: Sketch.ClassValue.MSJSONFileReference,
+    _ref_class: 'MSImageData',
+    _ref: options._ref,
+  };
+};
+
+const bitmap: ModelConstructor<Sketch.Bitmap> = (options): Sketch.Bitmap => {
+  return {
+    _class: Sketch.ClassValue.Bitmap,
+    ...newLayerBase(options),
+    name: 'Image',
+    clippingMask: '{{0, 0}, {1, 1}}',
+    fillReplacesImage: false,
+    image: dataReference(),
+    intendedDPI: 72,
+    ...options,
+  };
+};
+
 export const SketchModel = {
+  bitmap,
   border,
   borderOptions,
   color,
   colorControls,
+  dataReference,
+  fileReference,
   fill,
   gradient,
   gradientStop,
   graphicsContextSettings,
-  shadow,
-  style,
-  rectangle,
-  rect,
   oval,
+  rect,
+  rectangle,
+  shadow,
   shapePath,
+  style,
 };
