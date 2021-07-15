@@ -7,14 +7,14 @@ import {
   createRect,
   normalizeRect,
 } from 'noya-geometry';
-import { uuid } from 'noya-utils';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
-  resizeRect,
   Primitives,
+  resizeRect,
 } from 'noya-state';
+import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -29,7 +29,6 @@ import {
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   isLine,
-  isPointInRange,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
@@ -498,57 +497,19 @@ export function canvasReducer(
                 y: originalLayer.frame.y + originalLayer.frame.height,
               });
 
+              const width = max.x - min.x;
+              const height = max.y - min.y;
+
               const newFrame = normalizeRect({
                 x: Math.round(min.x),
                 y: Math.round(min.y),
-                width: Math.round(max.x - min.x),
-                height: Math.round(max.y - min.y),
+                width: Math.round(width),
+                height: Math.round(height),
               });
 
-              if (Layers.isPointsLayer(newLayer) && isLine(newLayer.points)) {
-                let direction = undefined;
+              newLayer.isFlippedHorizontal = width < 0;
+              newLayer.isFlippedVertical = height < 0;
 
-                const isStartInRange = isPointInRange(
-                  current,
-                  decodeCurvePoint(newLayer.points[0], newLayer.frame).point,
-                );
-                const isEndInRange = isPointInRange(
-                  current,
-                  decodeCurvePoint(newLayer.points[1], newLayer.frame).point,
-                );
-                if (isEndInRange) {
-                  direction = 'end';
-                } else if (isStartInRange) {
-                  direction = 'start';
-                }
-
-                const selectedPointLists =
-                  direction && direction === 'start'
-                    ? {
-                        [newLayer.do_objectID]: [0],
-                      }
-                    : direction && direction === 'end'
-                    ? {
-                        [newLayer.do_objectID]: [1],
-                      }
-                    : undefined;
-
-                const delta = {
-                  x: current.x - origin.x,
-                  y: current.y - origin.y,
-                };
-                if (selectedPointLists) {
-                  moveSelectedPoints(
-                    selectedPointLists,
-                    layerIndexPaths,
-                    delta,
-                    'adjust',
-                    draft.sketch.pages[pageIndex],
-                    pageSnapshot,
-                    CanvasKit,
-                  );
-                }
-              }
               newLayer.frame.x = newFrame.x;
               newLayer.frame.y = newFrame.y;
               newLayer.frame.width = newFrame.width;

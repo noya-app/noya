@@ -26,6 +26,10 @@ const FlipButtonContainer = styled.div(({ theme }) => ({
   flexDirection: 'row',
 }));
 
+const LinePointCoordinatesContainer = styled.div(({ theme }) => ({
+  width: '200px',
+}));
+
 function roundNumber(number: number, roundTo: number) {
   return Number(number.toFixed(roundTo));
 }
@@ -121,15 +125,21 @@ export default function LineInspector({
           .point
       : undefined;
 
-  let lineRotation = undefined;
+  const findLineRotation = useCallback(() => {
+    let lineRotation = undefined;
 
-  if (startPoint && endPoint) {
-    let theta = Math.atan2(
-      startPoint.y - endPoint.y,
-      startPoint.x - endPoint.x,
-    );
-    lineRotation = clampRotation(theta * (180 / Math.PI));
-  }
+    if (startPoint && endPoint) {
+      let theta = Math.atan2(
+        startPoint.y - endPoint.y,
+        startPoint.x - endPoint.x,
+      );
+      lineRotation = clampRotation(theta * (180 / Math.PI));
+
+      return roundNumber(lineRotation, 1);
+    }
+  }, [endPoint, startPoint]);
+
+  const pointRotaion = findLineRotation();
 
   return (
     <>
@@ -138,16 +148,23 @@ export default function LineInspector({
           <Row>
             Start
             <Spacer.Horizontal size={20} />
-            <LinePointCoordinatesInspector point={endPoint} direction={'end'} />
+            <LinePointCoordinatesContainer>
+              <LinePointCoordinatesInspector
+                point={endPoint}
+                direction={'end'}
+              />
+            </LinePointCoordinatesContainer>
           </Row>
           <Spacer.Vertical size={10} />
           <Row>
             End
             <Spacer.Horizontal size={20} />
-            <LinePointCoordinatesInspector
-              point={startPoint}
-              direction={'start'}
-            />
+            <LinePointCoordinatesContainer>
+              <LinePointCoordinatesInspector
+                point={startPoint}
+                direction={'start'}
+              />
+            </LinePointCoordinatesContainer>
           </Row>
           <Spacer.Vertical size={10} />
           <Row>
@@ -158,7 +175,7 @@ export default function LineInspector({
             />
             <Spacer.Horizontal size={16} />
             <DimensionInput
-              value={lineRotation ? roundNumber(lineRotation, 1) : undefined}
+              value={rotation ? rotation : pointRotaion}
               onSetValue={onSetRotation}
               label="°"
             />

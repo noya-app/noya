@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,
   Axis,
@@ -14,24 +14,25 @@ import {
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import {
-  Layers,
-  Rect,
-  Primitives,
-  Selectors,
   DecodedCurvePoint,
   encodeCurvePoint,
-} from 'noya-state';
-import {
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
   getSnappingPairs,
+  Layers,
+  Primitives,
+  Rect,
+  Selectors,
   SnappingPair,
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
+import Polyline from '../../../noya-react-canvaskit/src/components/Polyline';
+import { isPointsLayer } from '../../../noya-state/src/layers';
+import { isLine } from '../../../noya-state/src/selectors/pointSelectors';
+import { Group, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -45,6 +46,7 @@ import {
   Y_DIRECTIONS,
 } from './guides';
 import HoverOutline from './HoverOutline';
+import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
@@ -52,9 +54,6 @@ import MeasurementGuide from './MeasurementGuide';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
-import { SketchArtboardContent } from './layers/SketchArtboard';
-import { isPointsLayer } from '../../../noya-state/src/layers';
-import { isLine } from '../../../noya-state/src/selectors/pointSelectors';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -547,9 +546,10 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {boundingPoints.map((points: Point[], index: number) => (
-              <Polyline key={index} points={points} paint={selectionPaint} />
-            ))}
+            {state.selectedObjects.length > 1 &&
+              boundingPoints.map((points: Point[], index: number) => (
+                <Polyline key={index} points={points} paint={selectionPaint} />
+              ))}
             {!isEditingPath && highlightedSketchLayer}
             {smartSnapGuides}
             {quickMeasureGuides}

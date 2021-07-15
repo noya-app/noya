@@ -127,7 +127,7 @@ const InputElement = styled(TextInput)<{
   }) => ({
     ...theme.textStyles.small,
     color: disabled ? theme.colors.textDisabled : theme.colors.text,
-    width: '70px', // Reset intrinsic width
+    width: '0px', // Reset intrinsic width
     flex: '1 1 0px',
     position: 'relative',
     border: '0',

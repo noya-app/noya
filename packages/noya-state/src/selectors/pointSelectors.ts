@@ -36,6 +36,26 @@ export function isLine(points: Sketch.CurvePoint[]) {
   );
 }
 
+export function isDegeneratePath(
+  CanvasKit: CanvasKit,
+  points: Sketch.CurvePoint[],
+) {
+  const bounds = path(
+    CanvasKit,
+    points,
+    { x: 0, y: 0, width: 1, height: 1 },
+    false,
+  ).computeTightBounds();
+
+  if (bounds.some(isNaN)) return true;
+
+  const [minX, minY, maxX, maxY] = bounds;
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  return width === 0 || height === 0;
+}
+
 export const computeNewBoundingRect = (
   CanvasKit: CanvasKit,
   decodedPoints: DecodedCurvePoint[],
@@ -240,18 +260,25 @@ export const moveSelectedPoints = (
         y: getNewValue(layer.frame.y, mode, delta.y),
       };
 
-      if (draftLayer.frame.height === 0) {
-        draftLayer.frame.height = 1;
+      // if (draftLayer.frame.height === 0) {
+      //   draftLayer.frame.height = 1;
+      //   draftLayer.frame.y -= 0.5;
 
-        draftLayer.points.map((curvePoint) => {
-          const decodedPoint = decodeCurvePoint(curvePoint, draftLayer.frame);
-          return (decodedPoint.point.y = 0.5);
-        });
-      }
+      //   draftLayer.points.forEach((curvePoint) => {
+      //     const decodedPoint = decodeCurvePoint(curvePoint, draftLayer.frame);
+      //     decodedPoint.point.y = 0.5;
+      //   });
+      // }
 
-      if (draftLayer.frame.width === 0) {
-        draftLayer.frame.width = 1;
-      }
+      // if (draftLayer.frame.width === 0) {
+      //   draftLayer.frame.width = 1;
+      //   draftLayer.frame.x -= 0.5;
+
+      //   draftLayer.points.forEach((curvePoint) => {
+      //     const decodedPoint = decodeCurvePoint(curvePoint, draftLayer.frame);
+      //     decodedPoint.point.x = 0.5;
+      //   });
+      // }
 
       return;
     }

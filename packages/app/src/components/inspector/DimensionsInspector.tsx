@@ -108,29 +108,21 @@ export default function DimensionsInspector({
 
   return (
     <>
-      {
-        <>
-          <Row>
-            <DimensionInput value={x} onSetValue={onSetX} label="X" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput
-              value={rotation}
-              onSetValue={onSetRotation}
-              label="°"
-            />
-          </Row>
-          <Spacer.Vertical size={10} />
-          <Row>
-            <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
-            <Spacer.Horizontal size={16} />
-            {flipButtonElements}
-          </Row>
-        </>
-      }
+      <Row>
+        <DimensionInput value={x} onSetValue={onSetX} label="X" />
+        <Spacer.Horizontal size={16} />
+        <DimensionInput value={y} onSetValue={onSetY} label="Y" />
+        <Spacer.Horizontal size={16} />
+        <DimensionInput value={rotation} onSetValue={onSetRotation} label="°" />
+      </Row>
+      <Spacer.Vertical size={10} />
+      <Row>
+        <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
+        <Spacer.Horizontal size={16} />
+        <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
+        <Spacer.Horizontal size={16} />
+        {flipButtonElements}
+      </Row>
     </>
   );
 }
