@@ -12,7 +12,7 @@ const color: ModelConstructor<Sketch.Color> = (options) => {
     red: options?.red ?? 0,
     green: options?.green ?? 0,
     blue: options?.blue ?? 0,
-    alpha: 1,
+    alpha: options?.alpha ?? 1,
     _class: Sketch.ClassValue.Color,
   };
 };
@@ -515,7 +515,7 @@ const page: ModelConstructor<Sketch.Page> = (options): Sketch.Page => {
 };
 
 const symbolInstance = (
-  options: Partial<Sketch.SymbolInstance> &
+  options: ModelOptions<Sketch.SymbolInstance> &
     Pick<Sketch.SymbolInstance, 'symbolID'>,
 ): Sketch.SymbolInstance => {
   return {
