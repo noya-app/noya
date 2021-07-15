@@ -1,20 +1,16 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import {
-  AffineTransform,
-  createBounds,
-  createRect,
-  normalizeRect,
-} from 'noya-geometry';
-import { uuid } from 'noya-utils';
+import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
+import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
-  resizeRect,
   Primitives,
+  resizeRect,
 } from 'noya-state';
+import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import * as Models from '../models';
 import {
@@ -45,6 +41,7 @@ import {
   interactionReducer,
   SnapshotInteractionAction,
 } from './interactionReducer';
+import { defaultBorderColor } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -123,17 +120,20 @@ export function canvasReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (draft) => {
-        const layer = produce(Models.shapePath, (layer) => {
-          const minArea = {
-            x: point.x + 1,
-            y: point.y + 1,
-          };
-          layer.do_objectID = uuid();
-          layer.frame = {
-            _class: 'rect',
-            constrainProportions: false,
-            ...createRect(point, minArea),
-          };
+        const layer = SketchModel.shapePath({
+          frame: SketchModel.rect({
+            x: point.x,
+            y: point.y,
+            width: 1,
+            height: 1,
+          }),
+          style: SketchModel.style({
+            borders: [
+              SketchModel.border({
+                color: defaultBorderColor,
+              }),
+            ],
+          }),
         });
 
         addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);

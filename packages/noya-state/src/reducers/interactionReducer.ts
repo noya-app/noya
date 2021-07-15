@@ -5,6 +5,7 @@ import { SketchModel } from 'noya-sketch-model';
 import type { PageLayer } from '..';
 import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
+import { defaultFillColor } from './styleReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -179,7 +180,7 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
   const style = SketchModel.style({
     fills: [
       SketchModel.fill({
-        color: SketchModel.color({ red: 0.85, green: 0.85, blue: 0.85 }),
+        color: defaultFillColor,
       }),
     ],
   });
@@ -194,7 +195,7 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
     case 'artboard':
       return Models.artboard;
     case 'shapePath':
-      return Models.shapePath;
+      return SketchModel.shapePath({ style });
   }
 }
 

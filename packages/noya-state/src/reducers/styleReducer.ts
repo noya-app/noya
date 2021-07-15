@@ -8,6 +8,18 @@ import {
 import { clamp } from 'noya-utils';
 import { SketchModel } from 'noya-sketch-model';
 
+export const defaultBorderColor = SketchModel.color({
+  red: 0.6,
+  green: 0.6,
+  blue: 0.6,
+});
+
+export const defaultFillColor = SketchModel.color({
+  red: 0.85,
+  green: 0.85,
+  blue: 0.85,
+});
+
 export type SetNumberMode = 'replace' | 'adjust';
 
 export type StyleElementType = 'Fill' | 'Border' | 'Shadow';
@@ -80,7 +92,7 @@ export function styleReducer(
     case 'addNewBorder':
       return produce(state, (draft) => {
         const border = SketchModel.border({
-          color: SketchModel.color({ red: 0.6, green: 0.6, blue: 0.6 }),
+          color: defaultBorderColor,
         });
 
         if (draft.borders) {
@@ -92,7 +104,7 @@ export function styleReducer(
     case 'addNewFill':
       return produce(state, (draft) => {
         const fill = SketchModel.fill({
-          color: SketchModel.color({ red: 0.85, green: 0.85, blue: 0.85 }),
+          color: defaultFillColor,
         });
 
         if (draft.fills) {

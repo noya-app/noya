@@ -305,6 +305,18 @@ const oval: ModelConstructor<Sketch.Oval> = (options): Sketch.Oval => {
   };
 };
 
+const shapePath: ModelConstructor<Sketch.ShapePath> = (
+  options,
+): Sketch.ShapePath => {
+  return {
+    _class: Sketch.ClassValue.ShapePath,
+    ...newLayerBase(options),
+    name: 'Path',
+    points: [],
+    ...options,
+  };
+};
+
 export const SketchModel = {
   border,
   borderOptions,
@@ -319,4 +331,5 @@ export const SketchModel = {
   rectangle,
   rect,
   oval,
+  shapePath,
 };
