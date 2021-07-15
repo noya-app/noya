@@ -505,7 +505,6 @@ export function canvasReducer(
                 height: Math.round(max.y - min.y),
               });
 
-              //is newLayer a line?
               if (Layers.isPointsLayer(newLayer) && isLine(newLayer.points)) {
                 let direction = undefined;
 

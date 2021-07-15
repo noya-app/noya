@@ -61,7 +61,7 @@ export function getLayerRotationMultiplier(): number {
 }
 
 /**
- * Clamp rotation within the range [180, 360)
+ * Clamp rotation within the range [-180, 360)
  *
  * -1801  => -1
  * -181   =>  179
@@ -71,7 +71,7 @@ export function getLayerRotationMultiplier(): number {
  *  360   =>  0
  *  3601  =>  1
  */
-function clampRotation(rotation: number) {
+export function clampRotation(rotation: number) {
   if (rotation <= -180) {
     // Round toward the positive direction
     return rotation + 360 * Math.round(-rotation / 360);

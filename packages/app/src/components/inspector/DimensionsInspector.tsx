@@ -6,6 +6,8 @@ import { decodeCurvePoint, Point, Selectors, SetNumberMode } from 'noya-state';
 import { isPointsLayer } from 'noya-state/src/layers';
 import { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+// eslint-disable-next-line no-restricted-imports
+import { clampRotation } from 'noya-state/src/selectors/transformSelectors';
 import LinePointCoordinatesInspector from '../../containers/LinePointCoordinatesInspector';
 import useShallowArray from '../../hooks/useShallowArray';
 import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
@@ -27,6 +29,10 @@ const FlipButtonContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
 }));
+
+function roundNumber(number: number, roundTo: number) {
+  return Number(number.toFixed(roundTo));
+}
 
 export interface Props {
   x: DimensionValue;
@@ -130,6 +136,15 @@ export default function DimensionsInspector({
           .point
       : undefined;
 
+  let lineRotation = undefined;
+  if (startPoint && endPoint) {
+    let theta = Math.atan2(
+      startPoint.y - endPoint.y,
+      startPoint.x - endPoint.x,
+    );
+    lineRotation = clampRotation(theta * (180 / Math.PI));
+  }
+
   return (
     <>
       {(!hasLineLayer || selectedLayers.length > 1) && (
@@ -180,7 +195,7 @@ export default function DimensionsInspector({
             />
             <Spacer.Horizontal size={16} />
             <DimensionInput
-              value={rotation}
+              value={lineRotation ? roundNumber(lineRotation, 1) : undefined}
               onSetValue={onSetRotation}
               label="°"
             />
