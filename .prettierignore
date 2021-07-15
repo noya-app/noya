@@ -1,5 +1,5 @@
 useHover.ts
 packages/noya-colorpicker
-packages/canvaskit/index.d.ts
+packages/canvaskit/src/index.ts
 canvaskit.js
 pathkit.js
