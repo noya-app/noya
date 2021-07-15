@@ -29,12 +29,7 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type ShapeType =
-  | 'rectangle'
-  | 'oval'
-  | 'text'
-  | 'artboard'
-  | 'shapePath';
+export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 
@@ -172,8 +167,7 @@ type CreateLayerReturnType =
   | Sketch.Oval
   | Sketch.Rectangle
   | Sketch.Text
-  | Sketch.Artboard
-  | Sketch.ShapePath;
+  | Sketch.Artboard;
 
 function createLayer(shapeType: ShapeType): CreateLayerReturnType {
   const style = SketchModel.style({
@@ -193,8 +187,6 @@ function createLayer(shapeType: ShapeType): CreateLayerReturnType {
       return SketchModel.text();
     case 'artboard':
       return SketchModel.artboard();
-    case 'shapePath':
-      return SketchModel.shapePath({ style });
   }
 }
 

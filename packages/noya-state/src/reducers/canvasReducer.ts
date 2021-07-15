@@ -130,6 +130,7 @@ export function canvasReducer(
               }),
             ],
           }),
+          isClosed: false,
         });
 
         addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
