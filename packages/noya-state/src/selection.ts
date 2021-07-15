@@ -53,14 +53,19 @@ export function getLineDragHandles(
   const startDecodedPoint = decodeCurvePoint(points[0], boundingRect);
   const endDecodedPoint = decodeCurvePoint(points[1], boundingRect);
 
+  // let theta = Math.atan2(
+  //   startDecodedPoint.point.y - endDecodedPoint.point.y,
+  //   startDecodedPoint.point.x - endDecodedPoint.point.x,
+  // );
+  // const lineRotation = theta * (180 / Math.PI);
+
   return compassDirections
     .filter(
       (compassDirection) =>
         compassDirection === 'e' || compassDirection === 'w',
     )
-    .map((compassDirection) => {
-      const directionPoint =
-        compassDirection === 'w' ? startDecodedPoint : endDecodedPoint;
+    .map((compassDirection, index) => {
+      const directionPoint = index === 0 ? startDecodedPoint : endDecodedPoint;
 
       return {
         rect: {

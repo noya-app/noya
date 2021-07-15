@@ -134,7 +134,7 @@ export default memo(function Inspector() {
           ) : (
             <PointCoordinatesInspector />
           )
-        ) : !hasLineLayer ? (
+        ) : !hasLineLayer || selectedLayers.length > 1 ? (
           <DimensionsInspector
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}
