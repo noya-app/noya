@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { createRect, Size } from 'noya-geometry';
+import { SketchModel } from 'noya-sketch-model';
 import type { PageLayer } from '..';
 import * as Models from '../models';
 import { Point, Rect, UUID } from '../types';
@@ -175,11 +176,19 @@ type CreateLayerReturnType =
   | Sketch.ShapePath;
 
 function createLayer(shapeType: ShapeType): CreateLayerReturnType {
+  const style = SketchModel.style({
+    fills: [
+      SketchModel.fill({
+        color: SketchModel.color({ red: 0.85, green: 0.85, blue: 0.85 }),
+      }),
+    ],
+  });
+
   switch (shapeType) {
     case 'oval':
-      return Models.oval;
+      return SketchModel.oval({ style });
     case 'rectangle':
-      return Models.rectangle;
+      return SketchModel.rectangle({ style });
     case 'text':
       return Models.text;
     case 'artboard':

@@ -200,11 +200,8 @@ const style: ModelConstructor<Sketch.Style> = (options): Sketch.Style => {
   };
 };
 
-const rectangle: ModelConstructor<Sketch.Rectangle> = (
-  options,
-): Sketch.Rectangle => {
+const newLayerBase = (options?: { do_objectID?: string }) => {
   return {
-    _class: Sketch.ClassValue.Rectangle,
     do_objectID: options?.do_objectID ?? uuid(),
     booleanOperation: Sketch.BooleanOperation.None,
     isFixedToViewport: false,
@@ -213,7 +210,6 @@ const rectangle: ModelConstructor<Sketch.Rectangle> = (
     isLocked: false,
     isVisible: true,
     layerListExpandedType: Sketch.LayerListExpanded.Undecided,
-    name: 'Rectangle',
     nameIsFixed: false,
     resizingConstraint: 63,
     resizingType: Sketch.ResizeType.Stretch,
@@ -227,46 +223,84 @@ const rectangle: ModelConstructor<Sketch.Rectangle> = (
     edited: false,
     isClosed: true,
     pointRadiusBehaviour: Sketch.PointsRadiusBehaviour.Rounded,
+  };
+};
+
+const rectangle: ModelConstructor<Sketch.Rectangle> = (
+  options,
+): Sketch.Rectangle => {
+  return {
+    _class: Sketch.ClassValue.Rectangle,
+    ...newLayerBase(options),
+    name: 'Rectangle',
     points: [
       curvePoint({
         curveFrom: '{0, 0}',
         curveTo: '{0, 0}',
         point: '{0, 0}',
       }),
-      {
-        _class: 'curvePoint',
-        cornerRadius: 0,
+      curvePoint({
         curveFrom: '{1, 0}',
-        curveMode: 1,
         curveTo: '{1, 0}',
-        hasCurveFrom: false,
-        hasCurveTo: false,
         point: '{1, 0}',
-      },
-      {
-        _class: 'curvePoint',
-        cornerRadius: 0,
+      }),
+      curvePoint({
         curveFrom: '{1, 1}',
-        curveMode: 1,
         curveTo: '{1, 1}',
-        hasCurveFrom: false,
-        hasCurveTo: false,
         point: '{1, 1}',
-      },
-      {
-        _class: 'curvePoint',
-        cornerRadius: 0,
+      }),
+      curvePoint({
         curveFrom: '{0, 1}',
-        curveMode: 1,
         curveTo: '{0, 1}',
-        hasCurveFrom: false,
-        hasCurveTo: false,
         point: '{0, 1}',
-      },
+      }),
     ],
     fixedRadius: 0,
     needsConvertionToNewRoundCorners: false,
     hasConvertedToNewRoundCorners: true,
+    ...options,
+  };
+};
+
+const oval: ModelConstructor<Sketch.Oval> = (options): Sketch.Oval => {
+  return {
+    _class: Sketch.ClassValue.Oval,
+    ...newLayerBase(options),
+    name: 'Oval',
+    points: [
+      curvePoint({
+        curveFrom: '{0.77614237490000004, 1}',
+        curveMode: Sketch.CurveMode.Mirrored,
+        curveTo: '{0.22385762510000001, 1}',
+        hasCurveFrom: true,
+        hasCurveTo: true,
+        point: '{0.5, 1}',
+      }),
+      curvePoint({
+        curveFrom: '{1, 0.22385762510000001}',
+        curveMode: Sketch.CurveMode.Mirrored,
+        curveTo: '{1, 0.77614237490000004}',
+        hasCurveFrom: true,
+        hasCurveTo: true,
+        point: '{1, 0.5}',
+      }),
+      curvePoint({
+        curveFrom: '{0.22385762510000001, 0}',
+        curveMode: Sketch.CurveMode.Mirrored,
+        curveTo: '{0.77614237490000004, 0}',
+        hasCurveFrom: true,
+        hasCurveTo: true,
+        point: '{0.5, 0}',
+      }),
+      curvePoint({
+        curveFrom: '{0, 0.77614237490000004}',
+        curveMode: Sketch.CurveMode.Mirrored,
+        curveTo: '{0, 0.22385762510000001}',
+        hasCurveFrom: true,
+        hasCurveTo: true,
+        point: '{0, 0.5}',
+      }),
+    ],
     ...options,
   };
 };
@@ -283,4 +317,6 @@ export const SketchModel = {
   shadow,
   style,
   rectangle,
+  rect,
+  oval,
 };
