@@ -242,6 +242,11 @@ export const moveSelectedPoints = (
 
       if (draftLayer.frame.height === 0) {
         draftLayer.frame.height = 1;
+
+        draftLayer.points.map((curvePoint) => {
+          const decodedPoint = decodeCurvePoint(curvePoint, draftLayer.frame);
+          return (decodedPoint.point.y = 0.5);
+        });
       }
 
       if (draftLayer.frame.width === 0) {

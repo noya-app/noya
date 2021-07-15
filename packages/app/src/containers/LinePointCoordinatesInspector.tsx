@@ -1,4 +1,4 @@
-import { useApplicationState } from 'noya-app-state-context';
+import { useDispatch } from 'noya-app-state-context';
 import { Point, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
@@ -13,18 +13,18 @@ export default memo(function LinePointCoordinatesInspector({
   point,
   direction,
 }: Props) {
-  const [, dispatch] = useApplicationState();
+  const dispatch = useDispatch();
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setLinePointX', value, direction, mode);
+      dispatch('setPointX', value, mode, direction);
     },
     [direction, dispatch],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setLinePointY', value, direction, mode);
+      dispatch('setPointY', value, mode, direction);
     },
     [direction, dispatch],
   );

@@ -1,7 +1,11 @@
+import { useSelector } from 'noya-app-state-context';
 import { Button, Spacer } from 'noya-designsystem';
-import { SetNumberMode } from 'noya-state';
+import { decodeCurvePoint, Point, Selectors, SetNumberMode } from 'noya-state';
+import { isPointsLayer, clampRotation } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import LinePointCoordinatesInspector from '../../containers/LinePointCoordinatesInspector';
+import useShallowArray from '../../hooks/useShallowArray';
 import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
 import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 import DimensionInput from './DimensionInput';
@@ -22,16 +26,16 @@ const FlipButtonContainer = styled.div(({ theme }) => ({
   flexDirection: 'row',
 }));
 
+function roundNumber(number: number, roundTo: number) {
+  return Number(number.toFixed(roundTo));
+}
+
 export interface Props {
-  x: DimensionValue;
-  y: DimensionValue;
   width: DimensionValue;
-  height: DimensionValue;
-  rotation: DimensionValue;
   isFlippedVertical: boolean;
   isFlippedHorizontal: boolean;
-  onSetX: (value: number, mode: SetNumberMode) => void;
-  onSetY: (value: number, mode: SetNumberMode) => void;
+  rotation: DimensionValue;
+  hasLineLayer: boolean;
   onSetWidth: (value: number, mode: SetNumberMode) => void;
   onSetHeight: (value: number, mode: SetNumberMode) => void;
   onSetRotation: (value: number, mode: SetNumberMode) => void;
@@ -39,18 +43,13 @@ export interface Props {
   onSetIsFlippedHorizontal: (value: boolean) => void;
 }
 
-export default function DimensionsInspector({
-  x,
-  y,
+export default function LineInspector({
   width,
-  height,
   rotation,
   isFlippedVertical,
   isFlippedHorizontal,
-  onSetX,
-  onSetY,
+  hasLineLayer,
   onSetWidth,
-  onSetHeight,
   onSetRotation,
   onSetIsFlippedVertical,
   onSetIsFlippedHorizontal,
@@ -106,31 +105,68 @@ export default function DimensionsInspector({
     ],
   );
 
+  const selectedLayers = useShallowArray(
+    useSelector(Selectors.getSelectedLayers),
+  );
+
+  const startPoint: Point | undefined =
+    hasLineLayer && isPointsLayer(selectedLayers[0])
+      ? decodeCurvePoint(selectedLayers[0].points[0], selectedLayers[0].frame)
+          .point
+      : undefined;
+
+  const endPoint: Point | undefined =
+    hasLineLayer && isPointsLayer(selectedLayers[0])
+      ? decodeCurvePoint(selectedLayers[0].points[1], selectedLayers[0].frame)
+          .point
+      : undefined;
+
+  let lineRotation = undefined;
+
+  if (startPoint && endPoint) {
+    let theta = Math.atan2(
+      startPoint.y - endPoint.y,
+      startPoint.x - endPoint.x,
+    );
+    lineRotation = clampRotation(theta * (180 / Math.PI));
+  }
+
   return (
     <>
-      {
+      {hasLineLayer && selectedLayers.length === 1 && (
         <>
           <Row>
-            <DimensionInput value={x} onSetValue={onSetX} label="X" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput value={y} onSetValue={onSetY} label="Y" />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput
-              value={rotation}
-              onSetValue={onSetRotation}
-              label="°"
+            Start
+            <Spacer.Horizontal size={20} />
+            <LinePointCoordinatesInspector point={endPoint} direction={'end'} />
+          </Row>
+          <Spacer.Vertical size={10} />
+          <Row>
+            End
+            <Spacer.Horizontal size={20} />
+            <LinePointCoordinatesInspector
+              point={startPoint}
+              direction={'start'}
             />
           </Row>
           <Spacer.Vertical size={10} />
           <Row>
-            <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
+            <DimensionInput
+              value={width}
+              onSetValue={onSetWidth}
+              label={String.fromCharCode(8596)}
+            />
             <Spacer.Horizontal size={16} />
-            <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
+            <DimensionInput
+              value={lineRotation ? roundNumber(lineRotation, 1) : undefined}
+              onSetValue={onSetRotation}
+              label="°"
+            />
             <Spacer.Horizontal size={16} />
             {flipButtonElements}
           </Row>
         </>
-      }
+      )}
     </>
   );
 }

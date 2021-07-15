@@ -18,11 +18,11 @@ export const compassDirectionMap: Record<CompassDirection, Point> = {
   w: { x: 0, y: 0.5 },
   nw: { x: 0, y: 0 },
 };
-export const dragHandelSize: number = 7;
+export const dragHandleSize: number = 7;
 
 export function getDragHandles(
   boundingRect: Rect,
-  handleSize: number = dragHandelSize,
+  handleSize: number = dragHandleSize,
 ): DragHandle[] {
   return compassDirections.map((compassDirection) => {
     const translationPercent = compassDirectionMap[compassDirection];
@@ -48,7 +48,7 @@ export function getDragHandles(
 export function getLineDragHandles(
   boundingRect: Rect,
   points: CurvePoint[],
-  handleSize: number = dragHandelSize,
+  handleSize: number = dragHandleSize,
 ): DragHandle[] {
   const startDecodedPoint = decodeCurvePoint(points[0], boundingRect);
   const endDecodedPoint = decodeCurvePoint(points[1], boundingRect);

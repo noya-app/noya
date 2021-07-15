@@ -310,8 +310,6 @@ export function applicationReducer(
     case 'setPointCornerRadius':
     case 'setPointX':
     case 'setPointY':
-    case 'setLinePointX':
-    case 'setLinePointY':
     case 'setControlPointX':
     case 'setControlPointY':
     case 'selectPoint':
