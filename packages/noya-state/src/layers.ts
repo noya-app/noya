@@ -1,4 +1,6 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { sketchColorToRgbaString } from 'noya-designsystem';
+import { round } from 'noya-utils';
 import {
   withOptions,
   SKIP,
@@ -198,6 +200,7 @@ export const {
   findIndexPath,
   access,
   accessPath,
+  diagram,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
 });
@@ -263,4 +266,50 @@ export function isWithinMaskChain(
   }
 
   return isMasked;
+}
+
+export function summary(
+  root: Sketch.AnyLayer,
+  options?: { fills?: boolean; borders?: boolean },
+) {
+  const includeFills = options?.fills ?? false;
+  const includeBorders = options?.borders ?? false;
+
+  function describeFill(fill: Sketch.Fill | Sketch.Border) {
+    const typeString = Sketch.FillType[fill.fillType];
+    switch (fill.fillType) {
+      case Sketch.FillType.Color:
+        return `  * ${fill._class} (${typeString}) ${sketchColorToRgbaString(
+          fill.color,
+        )}`;
+      default:
+        return `  * ${fill._class} (${typeString})`;
+    }
+  }
+
+  return diagram(root, {
+    getChildren,
+    getLabel: (layer) => {
+      const { x, y, width, height } = layer.frame;
+      const pairs = [
+        ['x', round(x, 2)],
+        ['y', round(y, 2)],
+        ['w', round(width, 2)],
+        ['h', round(height, 2)],
+      ] as const;
+      const frameString = pairs
+        .map((pair) => `${pair[0]}: ${pair[1]}`)
+        .join(', ');
+      return [
+        `${layer.name} (${layer._class}) { ${frameString} }`,
+        ...(includeFills ? (layer.style?.fills ?? []).map(describeFill) : []),
+        ...(includeBorders
+          ? (layer.style?.borders ?? []).map(describeFill)
+          : []),
+      ]
+        .filter((s) => !!s)
+        .join('\n');
+    },
+    flattenSingleChildNodes: false,
+  });
 }

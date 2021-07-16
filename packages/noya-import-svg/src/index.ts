@@ -1,118 +1,39 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as SVGModel from '@lona/svg-model';
-import { Point, Rect, Size } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import parseColor from 'color-parse';
-
-function makeRect(x: number, y: number, width: number, height: number): Rect {
-  return { x, y, width, height };
-}
-
-export function makeBoundingRectFromPoints(points: Point[]): Rect {
-  const x = Math.min(...points.map((point) => point.x));
-  const y = Math.min(...points.map((point) => point.y));
-  const width = Math.max(...points.map((point) => point.x)) - x;
-  const height = Math.max(...points.map((point) => point.y)) - y;
-
-  return makeRect(x, y, width, height);
-}
+import {
+  computeBoundsFromPoints,
+  Point,
+  Rect,
+  resize,
+  scaleRect,
+  unionRects,
+} from 'noya-geometry';
+import { SketchModel } from 'noya-sketch-model';
 
 export function makeBoundingRectFromCommands(
   commands: SVGModel.CommandWithoutQuadratics[],
 ): Rect {
-  const points: Point[] = commands.reduce(
-    (acc: Point[], command: SVGModel.CommandWithoutQuadratics) => {
-      switch (command.type) {
-        case 'line':
-        case 'move': {
-          const { to } = command;
-          return [...acc, to];
-        }
-        case 'cubicCurve': {
-          const { to, controlPoint1, controlPoint2 } = command;
-          return [...acc, to, controlPoint1, controlPoint2];
-        }
-        case 'close':
-          return acc;
-        default:
-          console.error(`Invalid SVG path command: ${JSON.stringify(command)}`);
-          return acc;
+  const points: Point[] = commands.flatMap((command) => {
+    switch (command.type) {
+      case 'line':
+      case 'move': {
+        const { to } = command;
+        return [to];
       }
-    },
-    [],
-  );
-
-  return makeBoundingRectFromPoints(points);
-}
-
-export function unionRects(...rects: Rect[]): Rect {
-  function union(a: Rect, b: Rect) {
-    const minX = Math.min(a.x, b.x);
-    const minY = Math.min(a.y, b.y);
-    const maxX = Math.max(a.x + a.width, b.x + b.width);
-    const maxY = Math.max(a.y + a.height, b.y + b.height);
-
-    return makeRect(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  if (rects.length === 0) {
-    throw new Error('No rects to union');
-  }
-
-  return rects.reduce((acc, rect) => union(acc, rect), rects[0]);
-}
-
-export function scaleRect(rect: Rect, scale: number) {
-  return makeRect(
-    rect.x * scale,
-    rect.y * scale,
-    rect.width * scale,
-    rect.height * scale,
-  );
-}
-
-// Port of Lona's resizing algorithm
-// https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/examples/generated/test/swift/CGSize%2BResizing.swift
-export function resize(
-  source: Size,
-  destination: Size,
-  resizingMode: 'cover' | 'contain' | 'stretch',
-) {
-  const newSize = { ...destination };
-
-  const sourceAspectRatio = source.height / source.width;
-  const destinationAspectRatio = destination.height / destination.width;
-
-  const sourceIsWiderThanDestination =
-    sourceAspectRatio < destinationAspectRatio;
-
-  switch (resizingMode) {
-    case 'contain':
-      if (sourceIsWiderThanDestination) {
-        newSize.height = destination.width * sourceAspectRatio;
-      } else {
-        newSize.width = destination.height / sourceAspectRatio;
+      case 'cubicCurve': {
+        const { to, controlPoint1, controlPoint2 } = command;
+        return [controlPoint1, controlPoint2, to];
       }
-      break;
-    case 'cover':
-      if (sourceIsWiderThanDestination) {
-        newSize.width = destination.height / sourceAspectRatio;
-      } else {
-        newSize.height = destination.width * sourceAspectRatio;
-      }
-      break;
-    case 'stretch':
-      break;
-    default:
-      throw new Error('Invalid resizing mode');
-  }
+      case 'close':
+        return [];
+      default:
+        console.error(`Invalid SVG path command: ${JSON.stringify(command)}`);
+        return [];
+    }
+  }, []);
 
-  return makeRect(
-    (destination.width - newSize.width) / 2.0,
-    (destination.height - newSize.height) / 2.0,
-    newSize.width,
-    newSize.height,
-  );
+  return computeBoundsFromPoints(points);
 }
 
 export function normalizePointInRect(point: Point, rect: Rect): Point {
@@ -151,28 +72,6 @@ function makePath(curvePoints: Sketch.CurvePoint[], isClosed: boolean): Path {
     isClosed,
     points: curvePoints,
   };
-}
-
-function convertCubicToCurvePoint(
-  curvePoints: Sketch.CurvePoint[],
-  frame: Rect,
-  command: SVGModel.CubicCurve,
-) {
-  const { to, controlPoint1, controlPoint2 } = command;
-
-  if (curvePoints.length > 0) {
-    const last = curvePoints[curvePoints.length - 1];
-    last.curveFrom = describePoint(normalizePointInRect(controlPoint1, frame));
-    last.curveMode = Sketch.CurveMode.Mirrored;
-    last.hasCurveFrom = true;
-  }
-
-  return makeCurvePoint(
-    normalizePointInRect(to, frame),
-    undefined,
-    normalizePointInRect(controlPoint2, frame),
-    2,
-  );
 }
 
 // Points are normalized between 0 and 1, relative to the frame.
@@ -223,10 +122,22 @@ export function makePathsFromCommands(
         break;
       }
       case 'cubicCurve': {
-        const curvePoint = convertCubicToCurvePoint(
-          curvePoints,
-          frame,
-          command,
+        const { to, controlPoint1, controlPoint2 } = command;
+
+        if (curvePoints.length > 0) {
+          const last = curvePoints[curvePoints.length - 1];
+          last.curveFrom = describePoint(
+            normalizePointInRect(controlPoint1, frame),
+          );
+          last.curveMode = Sketch.CurveMode.Mirrored;
+          last.hasCurveFrom = true;
+        }
+
+        const curvePoint = makeCurvePoint(
+          normalizePointInRect(to, frame),
+          undefined,
+          normalizePointInRect(controlPoint2, frame),
+          2,
         );
 
         curvePoints.push(curvePoint);
@@ -286,7 +197,7 @@ function makeColor(cssString: string) {
 
 function makeLayerFromPathElement(
   pathElement: SVGModel.PathWithoutQuadratics,
-  _parentFrame: Rect,
+  parentFrame: Rect, // TODO: Do we need this?
   scale: number,
 ) {
   const { commands, style } = pathElement;
@@ -300,12 +211,12 @@ function makeLayerFromPathElement(
 
   // Each shape path has an origin of {0, 0}, since the shapeGroup layer stores the real origin,
   // and we don't want to apply the origin translation twice.
-  const shapePathFrame = makeRect(
-    0,
-    0,
-    shapeGroupFrame.width,
-    shapeGroupFrame.height,
-  );
+  const shapePathFrame = {
+    x: 0,
+    y: 0,
+    width: shapeGroupFrame.width,
+    height: shapeGroupFrame.height,
+  };
 
   const shapePaths = paths.map((path) =>
     SketchModel.shapePath({
@@ -355,7 +266,7 @@ export function makeSvgLayer(layout: Rect, name: string, svg: string) {
   });
 
   // Determine the rect to generate layers within
-  const croppedRect = resize(viewBox, layout, 'contain');
+  const croppedRect = resize(viewBox, layout, 'scaleAspectFit');
   const scale = croppedRect.width / viewBox.width;
 
   // The top-level frame is the union of every path within

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`makes layers 1`] = `
+"svg (group) { x: 0, y: 0, w: 100, h: 100 }
+└── Path (shapeGroup) { x: 20.59, y: 20.59, w: 58.82, h: 58.82 }
+      * fill (Color) rgba(0, 30345, 65025, 1)
+      * border (Color) rgba(0, 0, 0, 1)
+    └── Path (shapePath) { x: 0, y: 0, w: 58.82, h: 58.82 }"
+`;

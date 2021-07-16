@@ -12,10 +12,17 @@ import {
   LockClosedIcon,
   LockOpen1Icon,
   MaskOnIcon,
+  Share1Icon,
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import {
+  useApplicationState,
+  useGetStateSnapshot,
+  useSelector,
+  useWorkspace,
+} from 'noya-app-state-context';
 import {
   ListView,
   RelativeDropPosition,
@@ -34,15 +41,9 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import {
-  useApplicationState,
-  useGetStateSnapshot,
-  useSelector,
-} from 'noya-app-state-context';
 import useDeepArray from '../hooks/useDeepArray';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 import useShallowArray from '../hooks/useShallowArray';
-import { useWorkspace } from 'noya-app-state-context';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -148,6 +149,8 @@ export const LayerIcon = memo(function LayerIcon({
       return <ImageIcon color={color} />;
     case 'shapeGroup':
       return <CopyIcon color={color} />;
+    case 'shapePath':
+      return <Share1Icon color={color} />;
     default:
       return null;
   }
