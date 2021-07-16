@@ -4,6 +4,6 @@
   "main": "src/index.ts",
   "license": "UNLICENSED",
   "dependencies": {
-    "@lona/svg-model": "^3.0.0-alpha.9"
+    "@lona/svg-model": "^3.0.0-alpha.10"
   }
 }

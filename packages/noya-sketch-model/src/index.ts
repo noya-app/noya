@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Point } from 'noya-geometry';
 import { uuid } from 'noya-utils';
 
 type ModelOptions<T> = Partial<Omit<T, '_class'>>;
@@ -678,6 +679,18 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
     ...options,
   };
 }
+
+export const PointString = {
+  decode(pointString: string): Point {
+    const [x, y] = pointString.slice(1, -1).split(',');
+
+    return { x: parseFloat(x), y: parseFloat(y) };
+  },
+
+  encode({ x, y }: Point): string {
+    return `{${x.toString()},${y.toString()}}`;
+  },
+};
 
 export const SketchModel = {
   artboard,

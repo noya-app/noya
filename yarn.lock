@@ -2457,10 +2457,10 @@
   resolved "https://registry.yarnpkg.com/@josephg/resolvable/-/resolvable-1.0.1.tgz#69bc4db754d79e1a2f17a650d3466e038d94a5eb"
   integrity sha512-CtzORUwWTTOTqfVtHaKRJ0I1kNQd1bpn3sUh8I3nJDVY+5/M/Oe1DnEWzPQvqq/xPIIkzzzIP7mfCoAjFRvDhg==
 
-"@lona/svg-model@^3.0.0-alpha.9":
-  version "3.0.0-alpha.9"
-  resolved "https://registry.yarnpkg.com/@lona/svg-model/-/svg-model-3.0.0-alpha.9.tgz#6c46dd5d7b50b8a77a756dc73088e9e0898d4184"
-  integrity sha512-nwEfoOhduOfAqInbtfAlGRkB8H+TSlP2d/wjo6oL0lx4iBJVM46kCPhfcASfHdVFTgw6APbCuXEZv6DGvikvjg==
+"@lona/svg-model@^3.0.0-alpha.10":
+  version "3.0.0-alpha.10"
+  resolved "https://registry.yarnpkg.com/@lona/svg-model/-/svg-model-3.0.0-alpha.10.tgz#badcdba727050c59a207f075229bd8da0a7a281a"
+  integrity sha512-DFtrDBWpz112FVS49REFbUJM/V+zUzBXRFhBENiGHZBaFg1pP1P4LZfy+ZDL5Ff2nGO60AAvHGRiIKC24gGTkQ==
   dependencies:
     csscolorparser-ts "^1.1.1"
     element-to-path "^1.2.0"

@@ -2,6 +2,8 @@ import {
   Command,
   CommandWithoutQuadratics,
   convert,
+  getCommandPoints,
+  mapCommandPoints,
   parseCSSColor,
   PathWithoutQuadratics,
 } from '@lona/svg-model';
@@ -12,24 +14,8 @@ import {
   Rect,
   resize,
   scaleRect,
-  unionRects,
 } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
-
-function getCommandPoints(command: CommandWithoutQuadratics): Point[] {
-  switch (command.type) {
-    case 'line':
-    case 'move':
-      return [command.to];
-    case 'cubicCurve':
-      return [command.controlPoint1, command.controlPoint2, command.to];
-    case 'close':
-      return [];
-    default:
-      console.error(`Invalid SVG path command: ${JSON.stringify(command)}`);
-      return [];
-  }
-}
+import { PointString, SketchModel } from 'noya-sketch-model';
 
 function getBoundingRectFromCommands(
   commands: CommandWithoutQuadratics[],
@@ -37,58 +23,45 @@ function getBoundingRectFromCommands(
   return computeBoundsFromPoints(commands.flatMap(getCommandPoints));
 }
 
-function normalizePointInRect(point: Point, rect: Rect): Point {
+function scalePointInFrame(point: Point, rect: Rect): Point {
   const x = (point.x - rect.x) / rect.width;
   const y = (point.y - rect.y) / rect.height;
   return { x, y };
 }
 
-function describePoint(point: Point): string {
-  const { x, y } = point;
-  return `{${x}, ${y}}`;
-}
-
 function makeCurvePoint(
+  curveMode: Sketch.CurveMode,
   point: Point,
   curveFrom?: Point,
   curveTo?: Point,
-  curveMode?: Sketch.CurveMode,
 ): Sketch.CurvePoint {
   return {
     _class: 'curvePoint',
     cornerRadius: 0,
-    curveFrom: describePoint(curveFrom || point),
+    curveFrom: PointString.encode(curveFrom || point),
     curveMode: curveMode || Sketch.CurveMode.None,
-    curveTo: describePoint(curveTo || point),
+    curveTo: PointString.encode(curveTo || point),
     hasCurveFrom: !!curveFrom,
     hasCurveTo: !!curveTo,
-    point: describePoint(point),
+    point: PointString.encode(point),
   };
 }
 
 type Path = Pick<Sketch.ShapePath, 'isClosed' | 'points'>;
-
-function makePath(curvePoints: Sketch.CurvePoint[], isClosed: boolean): Path {
-  return {
-    isClosed,
-    points: curvePoints,
-  };
-}
 
 // Points are normalized between 0 and 1, relative to the frame.
 // We use the original frame here and can scale it later.
 //
 // This is a rough port of Lona's PDF to Sketch path conversion
 // https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/studio/LonaStudio/Utils/Sketch.swift#L285
-function makePathsFromCommands(commands: Command[], frame: Rect): Path[] {
+function makePathsFromCommands(commands: Command[]): Path[] {
   const paths: Path[] = [];
   let curvePoints: Sketch.CurvePoint[] = [];
 
   function finishPath(isClosed: boolean) {
     if (curvePoints.length === 0) return;
 
-    const path = makePath(curvePoints, isClosed);
-    paths.push(path);
+    paths.push({ points: curvePoints, isClosed });
 
     curvePoints = [];
   }
@@ -99,23 +72,13 @@ function makePathsFromCommands(commands: Command[], frame: Rect): Path[] {
         finishPath(false);
 
         const { to } = command;
-        const curvePoint = makeCurvePoint(
-          normalizePointInRect(to, frame),
-          undefined,
-          undefined,
-          Sketch.CurveMode.Straight,
-        );
+        const curvePoint = makeCurvePoint(Sketch.CurveMode.Straight, to);
         curvePoints.push(curvePoint);
         break;
       }
       case 'line': {
         const { to } = command;
-        const curvePoint = makeCurvePoint(
-          normalizePointInRect(to, frame),
-          undefined,
-          undefined,
-          Sketch.CurveMode.Straight,
-        );
+        const curvePoint = makeCurvePoint(Sketch.CurveMode.Straight, to);
         curvePoints.push(curvePoint);
         break;
       }
@@ -124,18 +87,16 @@ function makePathsFromCommands(commands: Command[], frame: Rect): Path[] {
 
         if (curvePoints.length > 0) {
           const last = curvePoints[curvePoints.length - 1];
-          last.curveFrom = describePoint(
-            normalizePointInRect(controlPoint1, frame),
-          );
+          last.curveFrom = PointString.encode(controlPoint1);
           last.curveMode = Sketch.CurveMode.Mirrored;
           last.hasCurveFrom = true;
         }
 
         const curvePoint = makeCurvePoint(
-          normalizePointInRect(to, frame),
+          Sketch.CurveMode.Mirrored,
+          to,
           undefined,
-          normalizePointInRect(controlPoint2, frame),
-          2,
+          controlPoint2,
         );
 
         curvePoints.push(curvePoint);
@@ -195,19 +156,30 @@ function makeColor(cssString: string) {
   });
 }
 
+function makeLayerPaths(commands: CommandWithoutQuadratics[]) {
+  // Find the original frame
+  const frame = getBoundingRectFromCommands(commands);
+
+  // Scale points to within [0, 1]
+  const scaledCommands = commands.map((command) =>
+    mapCommandPoints(command, (point) => scalePointInFrame(point, frame)),
+  );
+
+  const paths = makePathsFromCommands(scaledCommands);
+
+  return { frame, paths };
+}
+
 function makeLayerFromPathElement(
   pathElement: PathWithoutQuadratics,
-  parentFrame: Rect, // TODO: Do we need this?
   scale: number,
 ) {
   const { commands, style } = pathElement;
 
-  // Paths are created using the original frame
-  const pathFrame = getBoundingRectFromCommands(commands);
-  const paths = makePathsFromCommands(commands, pathFrame);
+  const { frame, paths } = makeLayerPaths(commands);
 
   // Scale the frame to fill the viewBox
-  const shapeGroupFrame = scaleRect(pathFrame, scale);
+  const shapeGroupFrame = scaleRect(frame, scale);
 
   // Each shape path has an origin of {0, 0}, since the shapeGroup layer stores the real origin,
   // and we don't want to apply the origin translation twice.
@@ -260,7 +232,8 @@ function makeLayerFromPathElement(
   return shapeGroup;
 }
 
-function makeSvgLayer(layout: Rect, name: string, svg: string) {
+function makeSvgLayer(name: string, svg: string) {
+  const layout = { x: 0, y: 0, width: 100, height: 100 };
   const { viewBox = layout, children } = convert(svg, {
     convertQuadraticsToCubics: true,
   });
@@ -269,18 +242,8 @@ function makeSvgLayer(layout: Rect, name: string, svg: string) {
   const croppedRect = resize(viewBox, layout, 'scaleAspectFit');
   const scale = croppedRect.width / viewBox.width;
 
-  // The top-level frame is the union of every path within
-  const frame = unionRects(
-    ...children.map((pathElement) =>
-      getBoundingRectFromCommands(pathElement.commands),
-    ),
-  );
-
-  // Scale the frame to fill the viewBox
-  const scaledFrame = scaleRect(frame, scale);
-
   const layers = children.map((element) =>
-    makeLayerFromPathElement(element, scaledFrame, scale),
+    makeLayerFromPathElement(element, scale),
   );
 
   return SketchModel.group({
@@ -291,14 +254,5 @@ function makeSvgLayer(layout: Rect, name: string, svg: string) {
 }
 
 export function svgToLayer(svgString: string) {
-  return makeSvgLayer(
-    {
-      x: 0,
-      y: 0,
-      width: 100,
-      height: 100,
-    },
-    'svg',
-    svgString,
-  );
+  return makeSvgLayer('svg', svgString);
 }
