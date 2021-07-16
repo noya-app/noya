@@ -11,43 +11,39 @@ import {
 } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 
-export function makeBoundingRectFromCommands(
-  commands: SVGModel.CommandWithoutQuadratics[],
-): Rect {
-  const points: Point[] = commands.flatMap((command) => {
-    switch (command.type) {
-      case 'line':
-      case 'move': {
-        const { to } = command;
-        return [to];
-      }
-      case 'cubicCurve': {
-        const { to, controlPoint1, controlPoint2 } = command;
-        return [controlPoint1, controlPoint2, to];
-      }
-      case 'close':
-        return [];
-      default:
-        console.error(`Invalid SVG path command: ${JSON.stringify(command)}`);
-        return [];
-    }
-  }, []);
-
-  return computeBoundsFromPoints(points);
+function getCommandPoints(command: SVGModel.CommandWithoutQuadratics): Point[] {
+  switch (command.type) {
+    case 'line':
+    case 'move':
+      return [command.to];
+    case 'cubicCurve':
+      return [command.controlPoint1, command.controlPoint2, command.to];
+    case 'close':
+      return [];
+    default:
+      console.error(`Invalid SVG path command: ${JSON.stringify(command)}`);
+      return [];
+  }
 }
 
-export function normalizePointInRect(point: Point, rect: Rect): Point {
+function getBoundingRectFromCommands(
+  commands: SVGModel.CommandWithoutQuadratics[],
+): Rect {
+  return computeBoundsFromPoints(commands.flatMap(getCommandPoints));
+}
+
+function normalizePointInRect(point: Point, rect: Rect): Point {
   const x = (point.x - rect.x) / rect.width;
   const y = (point.y - rect.y) / rect.height;
   return { x, y };
 }
 
-export function describePoint(point: Point): string {
+function describePoint(point: Point): string {
   const { x, y } = point;
   return `{${x}, ${y}}`;
 }
 
-export function makeCurvePoint(
+function makeCurvePoint(
   point: Point,
   curveFrom?: Point,
   curveTo?: Point,
@@ -79,7 +75,7 @@ function makePath(curvePoints: Sketch.CurvePoint[], isClosed: boolean): Path {
 //
 // This is a rough port of Lona's PDF to Sketch path conversion
 // https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/studio/LonaStudio/Utils/Sketch.swift#L285
-export function makePathsFromCommands(
+function makePathsFromCommands(
   commands: SVGModel.Command[],
   frame: Rect,
 ): Path[] {
@@ -171,7 +167,7 @@ export function makePathsFromCommands(
   return paths;
 }
 
-export function makeLineCapStyle(
+function makeLineCapStyle(
   strokeLineCap: 'butt' | 'round' | 'square',
 ): Sketch.LineCapStyle {
   switch (strokeLineCap) {
@@ -203,7 +199,7 @@ function makeLayerFromPathElement(
   const { commands, style } = pathElement;
 
   // Paths are created using the original frame
-  const pathFrame = makeBoundingRectFromCommands(commands);
+  const pathFrame = getBoundingRectFromCommands(commands);
   const paths = makePathsFromCommands(commands, pathFrame);
 
   // Scale the frame to fill the viewBox
@@ -260,7 +256,7 @@ function makeLayerFromPathElement(
   return shapeGroup;
 }
 
-export function makeSvgLayer(layout: Rect, name: string, svg: string) {
+function makeSvgLayer(layout: Rect, name: string, svg: string) {
   const { viewBox = layout, children } = SVGModel.convert(svg, {
     convertQuadraticsToCubics: true,
   });
@@ -272,7 +268,7 @@ export function makeSvgLayer(layout: Rect, name: string, svg: string) {
   // The top-level frame is the union of every path within
   const frame = unionRects(
     ...children.map((pathElement) =>
-      makeBoundingRectFromCommands(pathElement.commands),
+      getBoundingRectFromCommands(pathElement.commands),
     ),
   );
 
