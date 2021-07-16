@@ -95,14 +95,15 @@ export default memo(function Canvas() {
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
       dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else {
+    } else if (isEditingPath) {
       dispatch(
-        isEditingPath
-          ? (`setPoint${axis}` as const)
-          : (`setLayer${axis}` as const),
+        `setPoint${axis}` as const,
+        state.selectedPointLists,
         amount,
         'adjust',
       );
+    } else {
+      dispatch(`setLayer${axis}` as const, amount, 'adjust');
     }
   };
 

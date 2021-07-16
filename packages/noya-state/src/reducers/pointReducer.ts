@@ -1,7 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { Selectors } from '..';
 import * as Layers from '../layers';
 import {
   getCurrentPageIndex,
@@ -10,16 +9,20 @@ import {
   moveSelectedPoints,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState, SetNumberMode } from './applicationReducer';
+import {
+  ApplicationState,
+  SelectedPointLists,
+  SetNumberMode,
+} from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
   | [
       type: 'setPointX' | 'setPointY',
+      pointLists: SelectedPointLists,
       amount: number,
       mode?: SetNumberMode,
-      direction?: 'start' | 'end',
     ]
   | [
       type: 'setControlPointX' | 'setControlPointY',
@@ -101,40 +104,38 @@ export function pointReducer(
     }
     case 'setPointX':
     case 'setPointY': {
-      const [type, amount, mode = 'replace', direction] = action;
+      const [type, selectedPointList, amount, mode = 'replace'] = action;
 
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
-      const page = Selectors.getCurrentPage(state);
 
-      const layer = Layers.access(page, layerIndexPaths[0]);
+      // const page = Selectors.getCurrentPage(state);
+      // const layer = Layers.access(page, layerIndexPaths[0]);
 
       return produce(state, (draft) => {
         const delta = type === 'setPointX' ? { x: amount } : { y: amount };
 
-        let selectedPointLists = undefined;
+        // if (
+        //   direction &&
+        //   Layers.isPointsLayer(layer) &&
+        //   layerIndexPaths.length === 1
+        // ) {
+        //   selectedPointLists =
+        //     direction === 'start'
+        //       ? {
+        //           [layer.do_objectID]: [0],
+        //         }
+        //       : {
+        //           [layer.do_objectID]: [1],
+        //         };
+        // }
 
-        if (
-          direction &&
-          Layers.isPointsLayer(layer) &&
-          layerIndexPaths.length === 1
-        ) {
-          selectedPointLists =
-            direction === 'start'
-              ? {
-                  [layer.do_objectID]: [0],
-                }
-              : {
-                  [layer.do_objectID]: [1],
-                };
-        }
-
-        const pointList = selectedPointLists
-          ? selectedPointLists
-          : draft.selectedPointLists;
+        // const pointList = selectedPointLists
+        //   ? selectedPointLists
+        //   : draft.selectedPointLists;
 
         moveSelectedPoints(
-          pointList,
+          selectedPointList,
           layerIndexPaths,
           delta,
           mode,

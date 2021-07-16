@@ -30,8 +30,7 @@ import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import Polyline from '../../../noya-react-canvaskit/src/components/Polyline';
-import { isPointsLayer } from '../../../noya-state/src/layers';
-import { isLine } from '../../../noya-state/src/selectors/pointSelectors';
+import { getSelectedLineLayer } from '../../../noya-state/src/selectors/layerSelectors';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
@@ -63,32 +62,12 @@ const BoundingRect = memo(function BoundingRect({
   rect: Rect;
 }) {
   const CanvasKit = useCanvasKit();
-  const [state] = useApplicationState();
-
   const alignedRect = useMemo(
     () => Primitives.rect(CanvasKit, insetRect(rect, 0.5, 0.5)),
     [CanvasKit, rect],
   );
 
-  let isShapeALine = false;
-  if (state.selectedObjects.length === 1) {
-    const page = Selectors.getCurrentPage(state);
-    const indexPath = Layers.findIndexPath(
-      page,
-      (layer) => layer.do_objectID === state.selectedObjects[0],
-    );
-
-    if (indexPath) {
-      const layer = Layers.access(page, indexPath);
-      isShapeALine = isPointsLayer(layer) ? isLine(layer.points) : false;
-    }
-  }
-
-  return (
-    <>
-      {!isShapeALine && <RCKRect rect={alignedRect} paint={selectionPaint} />}
-    </>
-  );
+  return <>{<RCKRect rect={alignedRect} paint={selectionPaint} />}</>;
 });
 
 export default memo(function SketchFileRenderer() {
@@ -129,6 +108,10 @@ export default memo(function SketchFileRenderer() {
     color: CanvasKit.Color(132, 63, 255, 1),
     strokeWidth: 2,
   });
+
+  const omitBoundingRect = () => {
+    return state.selectedObjects.length === 1 && getSelectedLineLayer(state);
+  };
 
   const boundingRect = useMemo(
     () =>
@@ -540,7 +523,7 @@ export default memo(function SketchFileRenderer() {
           </>
         ) : (
           <>
-            {boundingRect && (
+            {!omitBoundingRect() && boundingRect && (
               <BoundingRect
                 rect={boundingRect}
                 selectionPaint={selectionPaint}

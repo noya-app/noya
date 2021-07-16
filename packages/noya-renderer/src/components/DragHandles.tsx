@@ -3,17 +3,14 @@ import { insetRect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import {
-  getRectDragHandles,
   getLineDragHandles,
-  Layers,
+  getRectDragHandles,
   Primitives,
   Rect,
   Selectors,
 } from 'noya-state';
 import React, { memo } from 'react';
 import { useApplicationState } from '../../../noya-app-state-context/src';
-import { isPointsLayer } from '../../../noya-state/src/layers';
-import { isLine } from '../../../noya-state/src/selectors/pointSelectors';
 import { Rect as RCKRect } from '../ComponentsContext';
 
 interface Props {
@@ -27,26 +24,11 @@ export default memo(function DragHandles({ selectionPaint, rect }: Props) {
 
   const dragHandlePaint = useColorFill(CanvasKit.Color(255, 255, 255, 1));
 
-  let dragHandles = getRectDragHandles(rect);
-
-  let isShapeALine = false;
-
-  if (state.selectedObjects.length === 1) {
-    const page = Selectors.getCurrentPage(state);
-    const indexPath = Layers.findIndexPath(
-      page,
-      (layer) => layer.do_objectID === state.selectedObjects[0],
-    );
-
-    if (indexPath) {
-      const layer = Layers.access(page, indexPath);
-      isShapeALine = isPointsLayer(layer) ? isLine(layer.points) : false;
-
-      if (isShapeALine && isPointsLayer(layer)) {
-        dragHandles = getLineDragHandles(layer.frame, layer.points);
-      }
-    }
-  }
+  const lineLayer = Selectors.getSelectedLineLayer(state);
+  const dragHandles =
+    lineLayer && state.selectedObjects.length === 1
+      ? getLineDragHandles(lineLayer.frame, lineLayer.points)
+      : getRectDragHandles(rect);
 
   return (
     <>

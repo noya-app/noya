@@ -1,5 +1,5 @@
-import { useDispatch } from 'noya-app-state-context';
-import { Point, SetNumberMode } from 'noya-state';
+import { useApplicationState } from 'noya-app-state-context';
+import { Point, Selectors, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
@@ -13,20 +13,39 @@ export default memo(function LinePointCoordinatesInspector({
   point,
   direction,
 }: Props) {
-  const dispatch = useDispatch();
+  const [state, dispatch] = useApplicationState();
+  const lineLayer = Selectors.getSelectedLineLayer(state);
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointX', value, mode, direction);
+      if (!lineLayer) return;
+      const selectedPointList =
+        direction === 'start'
+          ? {
+              [lineLayer.do_objectID]: [0],
+            }
+          : {
+              [lineLayer.do_objectID]: [1],
+            };
+      dispatch('setPointX', selectedPointList, value, mode);
     },
-    [direction, dispatch],
+    [direction, dispatch, lineLayer],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointY', value, mode, direction);
+      if (!lineLayer) return;
+      const selectedPointList =
+        direction === 'start'
+          ? {
+              [lineLayer.do_objectID]: [0],
+            }
+          : {
+              [lineLayer.do_objectID]: [1],
+            };
+      dispatch('setPointY', selectedPointList, value, mode);
     },
-    [direction, dispatch],
+    [direction, dispatch, lineLayer],
   );
 
   if (!point) return null;
