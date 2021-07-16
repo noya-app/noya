@@ -14,6 +14,7 @@ import {
   Rect,
   resize,
   scaleRect,
+  unionRects,
 } from 'noya-geometry';
 import { PointString, SketchModel } from 'noya-sketch-model';
 
@@ -233,14 +234,25 @@ function makeLayerFromPathElement(
 }
 
 function makeSvgLayer(name: string, svg: string) {
-  const layout = { x: 0, y: 0, width: 100, height: 100 };
-  const { viewBox = layout, children } = convert(svg, {
+  const { viewBox, width, height, children } = convert(svg, {
     convertQuadraticsToCubics: true,
   });
 
+  // The top-level frame is the union of every path within
+  const frame = unionRects(
+    ...children.map((pathElement) =>
+      getBoundingRectFromCommands(pathElement.commands),
+    ),
+  );
+
+  const layoutWidth = width ?? viewBox?.width ?? frame.width;
+  const layoutHeight = height ?? viewBox?.height ?? frame.height;
+  const layoutSize = { width: layoutWidth, height: layoutHeight };
+  const layoutFrame = viewBox ?? frame;
+
   // Determine the rect to generate layers within
-  const croppedRect = resize(viewBox, layout, 'scaleAspectFit');
-  const scale = croppedRect.width / viewBox.width;
+  const croppedRect = resize(layoutFrame, layoutSize, 'scaleAspectFit');
+  const scale = croppedRect.width / layoutFrame.width;
 
   const layers = children.map((element) =>
     makeLayerFromPathElement(element, scale),

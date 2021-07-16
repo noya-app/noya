@@ -1,41 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`makes demo layers 1`] = `
-"svg (group) { x: 0, y: 0, w: 100, h: 100 }
-├── Path (shapeGroup) { x: 0, y: 302, w: 139, h: 96 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
-├── Path (shapeGroup) { x: 0, y: 302, w: 139, h: 96 }
-│   ├── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
-├── Path (shapeGroup) { x: 179, y: 302, w: 139, h: 96 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
-├── Path (shapeGroup) { x: 169, y: 292, w: 159, h: 116 }
-│   ├── Path (shapePath) { x: 0, y: 0, w: 159, h: 116 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 159, h: 116 }
-├── Path (shapeGroup) { x: 378, y: 302, w: 139, h: 96 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
-├── Path (shapeGroup) { x: 358, y: 282, w: 179, h: 136 }
-│   ├── Path (shapePath) { x: 0, y: 0, w: 179, h: 136 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 179, h: 136 }
-├── Path (shapeGroup) { x: 358, y: 0, w: 149, h: 145 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 149, h: 145 }
-├── Path (shapeGroup) { x: 358, y: 0, w: 149, h: 145 }
-│   ├── Path (shapePath) { x: 0, y: 0, w: 149, h: 145 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 149, h: 145 }
-├── Path (shapeGroup) { x: 165, y: 438, w: 100, h: 100 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
-├── Path (shapeGroup) { x: 285, y: 438, w: 100, h: 100 }
-│   └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
-└── Path (shapeGroup) { x: 405, y: 438, w: 100, h: 100 }
-    └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }"
+"svg (group) { x: 0, y: 20.02, w: 517, h: 517.96 }
+├── Path (shapeGroup) { x: 0, y: 290.75, w: 133.82, h: 92.42 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 133.82, h: 92.42 }
+├── Path (shapeGroup) { x: 0, y: 290.75, w: 133.82, h: 92.42 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 133.82, h: 92.42 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 133.82, h: 92.42 }
+├── Path (shapeGroup) { x: 172.33, y: 290.75, w: 133.82, h: 92.42 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 133.82, h: 92.42 }
+├── Path (shapeGroup) { x: 162.71, y: 281.12, w: 153.08, h: 111.68 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 153.08, h: 111.68 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 153.08, h: 111.68 }
+├── Path (shapeGroup) { x: 363.92, y: 290.75, w: 133.82, h: 92.42 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 133.82, h: 92.42 }
+├── Path (shapeGroup) { x: 344.67, y: 271.5, w: 172.33, h: 130.93 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 172.33, h: 130.93 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 172.33, h: 130.93 }
+├── Path (shapeGroup) { x: 344.67, y: 0, w: 143.45, h: 139.6 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 143.45, h: 139.6 }
+├── Path (shapeGroup) { x: 344.67, y: 0, w: 143.45, h: 139.6 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 143.45, h: 139.6 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 143.45, h: 139.6 }
+├── Path (shapeGroup) { x: 158.85, y: 421.69, w: 96.28, h: 96.28 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 96.28, h: 96.28 }
+├── Path (shapeGroup) { x: 274.39, y: 421.69, w: 96.28, h: 96.28 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 96.28, h: 96.28 }
+└── Path (shapeGroup) { x: 389.92, y: 421.69, w: 96.28, h: 96.28 }
+    └── Path (shapePath) { x: 0, y: 0, w: 96.28, h: 96.28 }"
 `;
 
 exports[`makes layers 1`] = `
-"svg (group) { x: 0, y: 0, w: 100, h: 100 }
-└── Path (shapeGroup) { x: 20.59, y: 20.59, w: 58.82, h: 58.82 }
+"svg (group) { x: 0, y: 0, w: 153, h: 153 }
+└── Path (shapeGroup) { x: 31.5, y: 31.5, w: 90, h: 90 }
       * fill (Color) rgba(0, 119, 255, 1)
       * border (Color) rgba(0, 0, 0, 1)
-    └── Path (shapePath) { x: 0, y: 0, w: 58.82, h: 58.82 }
+    └── Path (shapePath) { x: 0, y: 0, w: 90, h: 90 }
           * { x: 1, y: 0.5 } (Mirrored)
           * { x: 0.5, y: 1 } (Mirrored)
           * { x: 0, y: 0.5 } (Mirrored)
@@ -44,26 +44,26 @@ exports[`makes layers 1`] = `
 `;
 
 exports[`makes multiple shapePaths in a shapeGroup 1`] = `
-"svg (group) { x: 0, y: 0, w: 100, h: 100 }
-└── Path (shapeGroup) { x: 0, y: 0, w: 100, h: 100 }
-    ├── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
+"svg (group) { x: 0, y: 0, w: 200, h: 200 }
+└── Path (shapeGroup) { x: 0, y: 0, w: 200, h: 200 }
+    ├── Path (shapePath) { x: 0, y: 0, w: 200, h: 200 }
     │     * { x: 0.5, y: 1 } (Straight)
     │     * { x: 0, y: 0.5 } (Straight)
     │     * { x: 0.5, y: 0.5 } (Straight)
-    └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
+    └── Path (shapePath) { x: 0, y: 0, w: 200, h: 200 }
           * { x: 0.5, y: 0 } (Straight)
           * { x: 1, y: 0.5 } (Straight)
           * { x: 0.5, y: 0.5 } (Straight)"
 `;
 
 exports[`uses viewbox 1`] = `
-"svg (group) { x: 0, y: 0, w: 100, h: 100 }
-└── Path (shapeGroup) { x: 0, y: 0, w: 40, h: 40 }
-    ├── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }
+"svg (group) { x: 0, y: 0, w: 200, h: 200 }
+└── Path (shapeGroup) { x: 0, y: 0, w: 80, h: 80 }
+    ├── Path (shapePath) { x: 0, y: 0, w: 80, h: 80 }
     │     * { x: 0.5, y: 1 } (Straight)
     │     * { x: 0, y: 0.5 } (Straight)
     │     * { x: 0.5, y: 0.5 } (Straight)
-    └── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }
+    └── Path (shapePath) { x: 0, y: 0, w: 80, h: 80 }
           * { x: 0.5, y: 0 } (Straight)
           * { x: 1, y: 0.5 } (Straight)
           * { x: 0.5, y: 0.5 } (Straight)"
