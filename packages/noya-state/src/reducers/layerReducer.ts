@@ -182,7 +182,8 @@ export function layerReducer(
 
       layer.frame = {
         ...layer.frame,
-        ...point,
+        x: point.x - layer.frame.width / 2,
+        y: point.y - layer.frame.height / 2,
       };
 
       const pageIndex = getCurrentPageIndex(state);
