@@ -1,14 +1,19 @@
 import { useSelector } from 'noya-app-state-context';
-import { Button, Spacer } from 'noya-designsystem';
-import { decodeCurvePoint, Point, Selectors, SetNumberMode } from 'noya-state';
-import { isPointsLayer, clampRotation } from 'noya-state';
-import { useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
+import { Spacer } from 'noya-designsystem';
+import {
+  clampRotation,
+  decodeCurvePoint,
+  isPointsLayer,
+  Point,
+  Selectors,
+  SetNumberMode,
+} from 'noya-state';
+import { useCallback } from 'react';
+import styled from 'styled-components';
 import LinePointCoordinatesInspector from '../../containers/LinePointCoordinatesInspector';
 import useShallowArray from '../../hooks/useShallowArray';
-import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
-import FlipVerticalIcon from '../icons/FlipVerticalIcon';
 import DimensionInput from './DimensionInput';
+import FlipControls from './FlipControls';
 
 export type DimensionValue = number | undefined;
 
@@ -18,12 +23,6 @@ const Row = styled.div(({ theme }) => ({
   flexDirection: 'row',
   paddingLeft: '10px',
   paddingRight: '10px',
-}));
-
-const FlipButtonContainer = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
 }));
 
 const LinePointCoordinatesContainer = styled.div(({ theme }) => ({
@@ -58,57 +57,6 @@ export default function LineInspector({
   onSetIsFlippedVertical,
   onSetIsFlippedHorizontal,
 }: Props) {
-  const {
-    icon: iconColor,
-    iconSelected: iconSelectedColor,
-  } = useTheme().colors;
-
-  const handleSetIsFlippedVertical = useCallback(
-    () => onSetIsFlippedVertical(!isFlippedVertical),
-    [isFlippedVertical, onSetIsFlippedVertical],
-  );
-
-  const handleSetIsFlippedHorizontal = useCallback(
-    () => onSetIsFlippedHorizontal(!isFlippedHorizontal),
-    [isFlippedHorizontal, onSetIsFlippedHorizontal],
-  );
-
-  const flipButtonElements = useMemo(
-    () => (
-      <FlipButtonContainer>
-        <Button
-          id="flip-horizontal"
-          tooltip="Flip horizontally"
-          onClick={handleSetIsFlippedHorizontal}
-          active={isFlippedHorizontal}
-        >
-          <FlipHorizontalIcon
-            color={isFlippedHorizontal ? iconSelectedColor : iconColor}
-          />
-        </Button>
-        <Spacer.Horizontal />
-        <Button
-          id="flip-vertical"
-          tooltip="Flip vertically"
-          onClick={handleSetIsFlippedVertical}
-          active={isFlippedVertical}
-        >
-          <FlipVerticalIcon
-            color={isFlippedVertical ? iconSelectedColor : iconColor}
-          />
-        </Button>
-      </FlipButtonContainer>
-    ),
-    [
-      handleSetIsFlippedHorizontal,
-      handleSetIsFlippedVertical,
-      iconColor,
-      iconSelectedColor,
-      isFlippedHorizontal,
-      isFlippedVertical,
-    ],
-  );
-
   const selectedLayers = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   );
@@ -143,7 +91,7 @@ export default function LineInspector({
 
   return (
     <>
-      {hasLineLayer && selectedLayers.length === 1 && (
+      {hasLineLayer && (
         <>
           <Row>
             Start
@@ -180,7 +128,12 @@ export default function LineInspector({
               label="°"
             />
             <Spacer.Horizontal size={16} />
-            {flipButtonElements}
+            <FlipControls
+              isFlippedVertical={isFlippedVertical}
+              isFlippedHorizontal={isFlippedHorizontal}
+              onSetIsFlippedVertical={onSetIsFlippedVertical}
+              onSetIsFlippedHorizontal={onSetIsFlippedHorizontal}
+            />
           </Row>
         </>
       )}

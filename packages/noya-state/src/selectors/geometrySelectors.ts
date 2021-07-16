@@ -10,7 +10,7 @@ import {
   transformRect,
 } from 'noya-geometry';
 import * as Primitives from 'noya-state';
-import { getDragHandles } from 'noya-state';
+import { getRectDragHandles } from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
@@ -275,7 +275,7 @@ export function getScaleDirectionAtPoint(
 
   if (!boundingRect) return;
 
-  const handles = getDragHandles(boundingRect);
+  const handles = getRectDragHandles(boundingRect);
 
   const handle = handles.find((handle) =>
     rectContainsPoint(handle.rect, point),

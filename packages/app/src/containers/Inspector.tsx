@@ -109,7 +109,7 @@ export default memo(function Inspector() {
       Layers.isBitmapLayer(l),
     );
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
-    const hasLineLayer = selectedLayers.some(
+    const hasLineLayer = selectedLayers.every(
       (l) => Layers.isPointsLayer(l) && isLine(l.points),
     );
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
@@ -134,7 +134,7 @@ export default memo(function Inspector() {
           ) : (
             <PointCoordinatesInspector />
           )
-        ) : !hasLineLayer || selectedLayers.length > 1 ? (
+        ) : !hasLineLayer ? (
           <DimensionsInspector
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}

@@ -3,7 +3,7 @@ import { insetRect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import {
-  getDragHandles,
+  getRectDragHandles,
   getLineDragHandles,
   Layers,
   Primitives,
@@ -27,7 +27,7 @@ export default memo(function DragHandles({ selectionPaint, rect }: Props) {
 
   const dragHandlePaint = useColorFill(CanvasKit.Color(255, 255, 255, 1));
 
-  let dragHandles = getDragHandles(rect);
+  let dragHandles = getRectDragHandles(rect);
 
   let isShapeALine = false;
 

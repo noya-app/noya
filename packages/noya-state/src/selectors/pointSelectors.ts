@@ -260,26 +260,6 @@ export const moveSelectedPoints = (
         y: getNewValue(layer.frame.y, mode, delta.y),
       };
 
-      // if (draftLayer.frame.height === 0) {
-      //   draftLayer.frame.height = 1;
-      //   draftLayer.frame.y -= 0.5;
-
-      //   draftLayer.points.forEach((curvePoint) => {
-      //     const decodedPoint = decodeCurvePoint(curvePoint, draftLayer.frame);
-      //     decodedPoint.point.y = 0.5;
-      //   });
-      // }
-
-      // if (draftLayer.frame.width === 0) {
-      //   draftLayer.frame.width = 1;
-      //   draftLayer.frame.x -= 0.5;
-
-      //   draftLayer.points.forEach((curvePoint) => {
-      //     const decodedPoint = decodeCurvePoint(curvePoint, draftLayer.frame);
-      //     decodedPoint.point.x = 0.5;
-      //   });
-      // }
-
       return;
     }
 

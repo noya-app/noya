@@ -1,10 +1,8 @@
-import { Button, Spacer } from 'noya-designsystem';
+import { Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
-import FlipHorizontalIcon from '../icons/FlipHorizontalIcon';
-import FlipVerticalIcon from '../icons/FlipVerticalIcon';
+import styled from 'styled-components';
 import DimensionInput from './DimensionInput';
+import FlipControls from './FlipControls';
 
 export type DimensionValue = number | undefined;
 
@@ -14,12 +12,6 @@ const Row = styled.div(({ theme }) => ({
   flexDirection: 'row',
   paddingLeft: '10px',
   paddingRight: '10px',
-}));
-
-const FlipButtonContainer = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
 }));
 
 export interface Props {
@@ -55,57 +47,6 @@ export default function DimensionsInspector({
   onSetIsFlippedVertical,
   onSetIsFlippedHorizontal,
 }: Props) {
-  const {
-    icon: iconColor,
-    iconSelected: iconSelectedColor,
-  } = useTheme().colors;
-
-  const handleSetIsFlippedVertical = useCallback(
-    () => onSetIsFlippedVertical(!isFlippedVertical),
-    [isFlippedVertical, onSetIsFlippedVertical],
-  );
-
-  const handleSetIsFlippedHorizontal = useCallback(
-    () => onSetIsFlippedHorizontal(!isFlippedHorizontal),
-    [isFlippedHorizontal, onSetIsFlippedHorizontal],
-  );
-
-  const flipButtonElements = useMemo(
-    () => (
-      <FlipButtonContainer>
-        <Button
-          id="flip-horizontal"
-          tooltip="Flip horizontally"
-          onClick={handleSetIsFlippedHorizontal}
-          active={isFlippedHorizontal}
-        >
-          <FlipHorizontalIcon
-            color={isFlippedHorizontal ? iconSelectedColor : iconColor}
-          />
-        </Button>
-        <Spacer.Horizontal />
-        <Button
-          id="flip-vertical"
-          tooltip="Flip vertically"
-          onClick={handleSetIsFlippedVertical}
-          active={isFlippedVertical}
-        >
-          <FlipVerticalIcon
-            color={isFlippedVertical ? iconSelectedColor : iconColor}
-          />
-        </Button>
-      </FlipButtonContainer>
-    ),
-    [
-      handleSetIsFlippedHorizontal,
-      handleSetIsFlippedVertical,
-      iconColor,
-      iconSelectedColor,
-      isFlippedHorizontal,
-      isFlippedVertical,
-    ],
-  );
-
   return (
     <>
       <Row>
@@ -121,7 +62,12 @@ export default function DimensionsInspector({
         <Spacer.Horizontal size={16} />
         <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
         <Spacer.Horizontal size={16} />
-        {flipButtonElements}
+        <FlipControls
+          isFlippedVertical={isFlippedVertical}
+          isFlippedHorizontal={isFlippedHorizontal}
+          onSetIsFlippedVertical={onSetIsFlippedVertical}
+          onSetIsFlippedHorizontal={onSetIsFlippedHorizontal}
+        />
       </Row>
     </>
   );
