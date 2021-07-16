@@ -1,6 +1,11 @@
-import * as SVGModel from '@lona/svg-model';
+import {
+  Command,
+  CommandWithoutQuadratics,
+  convert,
+  parseCSSColor,
+  PathWithoutQuadratics,
+} from '@lona/svg-model';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import parseColor from 'color-parse';
 import {
   computeBoundsFromPoints,
   Point,
@@ -11,7 +16,7 @@ import {
 } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 
-function getCommandPoints(command: SVGModel.CommandWithoutQuadratics): Point[] {
+function getCommandPoints(command: CommandWithoutQuadratics): Point[] {
   switch (command.type) {
     case 'line':
     case 'move':
@@ -27,7 +32,7 @@ function getCommandPoints(command: SVGModel.CommandWithoutQuadratics): Point[] {
 }
 
 function getBoundingRectFromCommands(
-  commands: SVGModel.CommandWithoutQuadratics[],
+  commands: CommandWithoutQuadratics[],
 ): Rect {
   return computeBoundsFromPoints(commands.flatMap(getCommandPoints));
 }
@@ -75,10 +80,7 @@ function makePath(curvePoints: Sketch.CurvePoint[], isClosed: boolean): Path {
 //
 // This is a rough port of Lona's PDF to Sketch path conversion
 // https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/studio/LonaStudio/Utils/Sketch.swift#L285
-function makePathsFromCommands(
-  commands: SVGModel.Command[],
-  frame: Rect,
-): Path[] {
+function makePathsFromCommands(commands: Command[], frame: Rect): Path[] {
   const paths: Path[] = [];
   let curvePoints: Sketch.CurvePoint[] = [];
 
@@ -183,16 +185,13 @@ function makeLineCapStyle(
 }
 
 function makeColor(cssString: string) {
-  const {
-    values: [red, green, blue],
-    alpha,
-  } = parseColor(cssString);
+  const [red, green, blue, alpha] = parseCSSColor(cssString) ?? [0, 0, 0, 1];
 
   return SketchModel.color({ red, green, blue, alpha });
 }
 
 function makeLayerFromPathElement(
-  pathElement: SVGModel.PathWithoutQuadratics,
+  pathElement: PathWithoutQuadratics,
   parentFrame: Rect, // TODO: Do we need this?
   scale: number,
 ) {
@@ -257,7 +256,7 @@ function makeLayerFromPathElement(
 }
 
 function makeSvgLayer(layout: Rect, name: string, svg: string) {
-  const { viewBox = layout, children } = SVGModel.convert(svg, {
+  const { viewBox = layout, children } = convert(svg, {
     convertQuadraticsToCubics: true,
   });
 
