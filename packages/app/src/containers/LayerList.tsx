@@ -3,6 +3,7 @@ import {
   CircleIcon,
   Component1Icon,
   ComponentInstanceIcon,
+  CopyIcon,
   EyeClosedIcon,
   EyeOpenIcon,
   FrameIcon,
@@ -145,6 +146,8 @@ export const LayerIcon = memo(function LayerIcon({
       return <GroupIcon color={color} />;
     case 'bitmap':
       return <ImageIcon color={color} />;
+    case 'shapeGroup':
+      return <CopyIcon color={color} />;
     default:
       return null;
   }
@@ -337,7 +340,8 @@ export default memo(function LayerList() {
       const isSymbolClass =
         type === 'symbolInstance' || type === 'symbolMaster';
       const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
-      const isGroupClass = isArtboardClass || type === 'group';
+      const isGroupClass =
+        isArtboardClass || type === 'group' || type === 'shapeGroup';
 
       return (
         <LayerRow

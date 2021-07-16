@@ -361,6 +361,21 @@ function shapePath(options?: ModelOptions<Sketch.ShapePath>): Sketch.ShapePath {
   };
 }
 
+function shapeGroup(
+  options?: ModelOptions<Sketch.ShapeGroup>,
+): Sketch.ShapeGroup {
+  return {
+    ...newLayerBase(options),
+    name: 'Path',
+    style: style(),
+    hasClickThrough: true,
+    layers: [],
+    windingRule: Sketch.WindingRule.EvenOdd,
+    ...options,
+    _class: Sketch.ClassValue.ShapeGroup,
+  };
+}
+
 const CHECKERED_BACKGROUND = `iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYII=`;
 
 function dataReference(options?: ModelOptions<Sketch.DataRef>): Sketch.DataRef {
@@ -690,6 +705,7 @@ export const SketchModel = {
   rect,
   rectangle,
   shadow,
+  shapeGroup,
   shapePath,
   style,
   symbolInstance,

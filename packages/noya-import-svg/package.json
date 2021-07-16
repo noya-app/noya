@@ -1,0 +1,9 @@
+{
+  "name": "noya-import-svg",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@lona/svg-model": "^3.0.0-alpha.5"
+  }
+}

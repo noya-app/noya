@@ -8,6 +8,7 @@ import SketchShape from './SketchShape';
 import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
 import { Group } from '../..';
+import SketchShapeGroup from './SketchShapeGroup';
 
 interface Props {
   layer: PageLayer;
@@ -38,6 +39,9 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'oval':
     case 'shapePath':
       element = <SketchShape layer={layer} />;
+      break;
+    case 'shapeGroup':
+      element = <SketchShapeGroup layer={layer} />;
       break;
     case 'symbolInstance':
       element = <SketchSymbolInstance layer={layer} />;

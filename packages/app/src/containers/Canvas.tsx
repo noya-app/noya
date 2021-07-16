@@ -1,5 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
+  useApplicationState,
+  useSelector,
+  useWorkspace,
+} from 'noya-app-state-context';
+import {
   ContextMenu,
   mergeEventHandlers,
   SupportedImageUploadType,
@@ -7,17 +12,18 @@ import {
 } from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { getFileExtensionForType, uuid } from 'noya-utils';
 import { useCanvasKit } from 'noya-renderer';
-import { decodeCurvePoint, SelectedPoint } from 'noya-state';
 import {
   CompassDirection,
+  decodeCurvePoint,
   Layers,
   Point,
   SelectedControlPoint,
+  SelectedPoint,
   Selectors,
   ShapeType,
 } from 'noya-state';
+import { getFileExtensionForType, uuid } from 'noya-utils';
 import {
   CSSProperties,
   memo,
@@ -28,13 +34,11 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
+import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
-import { useWorkspace } from 'noya-app-state-context';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
-import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -752,6 +756,12 @@ export default memo(function Canvas() {
     ) => {
       const rawPoint = getPoint(offsetPoint);
       const point = offsetEventPoint(rawPoint);
+
+      if (file.type === 'image/svg+xml') {
+        const svgString = await file.text();
+        dispatch('importSvg', point, svgString);
+        return;
+      }
 
       const data = await file.arrayBuffer();
       const image = CanvasKit.MakeImageFromEncoded(data);
