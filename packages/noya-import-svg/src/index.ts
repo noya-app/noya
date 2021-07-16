@@ -187,7 +187,12 @@ function makeLineCapStyle(
 function makeColor(cssString: string) {
   const [red, green, blue, alpha] = parseCSSColor(cssString) ?? [0, 0, 0, 1];
 
-  return SketchModel.color({ red, green, blue, alpha });
+  return SketchModel.color({
+    red: red / 255,
+    green: green / 255,
+    blue: blue / 255,
+    alpha,
+  });
 }
 
 function makeLayerFromPathElement(
