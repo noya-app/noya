@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`makes demo layers 1`] = `
+"svg (group) { x: 0, y: 0, w: 100, h: 100 }
+├── Path (shapeGroup) { x: 0, y: 302, w: 139, h: 96 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
+├── Path (shapeGroup) { x: 0, y: 302, w: 139, h: 96 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
+├── Path (shapeGroup) { x: 179, y: 302, w: 139, h: 96 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
+├── Path (shapeGroup) { x: 169, y: 292, w: 159, h: 116 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 159, h: 116 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 159, h: 116 }
+├── Path (shapeGroup) { x: 378, y: 302, w: 139, h: 96 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 139, h: 96 }
+├── Path (shapeGroup) { x: 358, y: 282, w: 179, h: 136 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 179, h: 136 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 179, h: 136 }
+├── Path (shapeGroup) { x: 358, y: 0, w: 149, h: 145 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 149, h: 145 }
+├── Path (shapeGroup) { x: 358, y: 0, w: 149, h: 145 }
+│   ├── Path (shapePath) { x: 0, y: 0, w: 149, h: 145 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 149, h: 145 }
+├── Path (shapeGroup) { x: 165, y: 438, w: 100, h: 100 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
+├── Path (shapeGroup) { x: 285, y: 438, w: 100, h: 100 }
+│   └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
+└── Path (shapeGroup) { x: 405, y: 438, w: 100, h: 100 }
+    └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }"
+`;
+
 exports[`makes layers 1`] = `
 "svg (group) { x: 0, y: 0, w: 100, h: 100 }
 └── Path (shapeGroup) { x: 20.59, y: 20.59, w: 58.82, h: 58.82 }

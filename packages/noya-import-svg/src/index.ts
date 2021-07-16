@@ -261,7 +261,7 @@ function makeLayerFromPathElement(
 }
 
 export function makeSvgLayer(layout: Rect, name: string, svg: string) {
-  const { viewBox = layout, children } = SVGModel.convertSync(svg, {
+  const { viewBox = layout, children } = SVGModel.convert(svg, {
     convertQuadraticsToCubics: true,
   });
 
