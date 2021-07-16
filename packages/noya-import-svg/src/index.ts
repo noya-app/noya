@@ -9,11 +9,12 @@ import {
 } from '@lona/svg-model';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
+  AffineTransform,
   computeBoundsFromPoints,
   Point,
   Rect,
   resize,
-  scaleRect,
+  transformRect,
   unionRects,
 } from 'noya-geometry';
 import { PointString, SketchModel } from 'noya-sketch-model';
@@ -22,12 +23,6 @@ function getBoundingRectFromCommands(
   commands: CommandWithoutQuadratics[],
 ): Rect {
   return computeBoundsFromPoints(commands.flatMap(getCommandPoints));
-}
-
-function scalePointInFrame(point: Point, rect: Rect): Point {
-  const x = (point.x - rect.x) / rect.width;
-  const y = (point.y - rect.y) / rect.height;
-  return { x, y };
 }
 
 function makeCurvePoint(
@@ -50,9 +45,6 @@ function makeCurvePoint(
 
 type Path = Pick<Sketch.ShapePath, 'isClosed' | 'points'>;
 
-// Points are normalized between 0 and 1, relative to the frame.
-// We use the original frame here and can scale it later.
-//
 // This is a rough port of Lona's PDF to Sketch path conversion
 // https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/studio/LonaStudio/Utils/Sketch.swift#L285
 function makePathsFromCommands(commands: Command[]): Path[] {
@@ -157,13 +149,21 @@ function makeColor(cssString: string) {
   });
 }
 
+/**
+ * Return the original frame, and scale all points within [0, 1]
+ */
 function makeLayerPaths(commands: CommandWithoutQuadratics[]) {
   // Find the original frame
   const frame = getBoundingRectFromCommands(commands);
 
+  const transform = AffineTransform.scale(
+    1 / frame.width,
+    1 / frame.height,
+  ).translate(-frame.x, -frame.y);
+
   // Scale points to within [0, 1]
   const scaledCommands = commands.map((command) =>
-    mapCommandPoints(command, (point) => scalePointInFrame(point, frame)),
+    mapCommandPoints(command, (point) => transform.applyTo(point)),
   );
 
   const paths = makePathsFromCommands(scaledCommands);
@@ -174,13 +174,16 @@ function makeLayerPaths(commands: CommandWithoutQuadratics[]) {
 function makeLayerFromPathElement(
   pathElement: PathWithoutQuadratics,
   scale: number,
+  offset: Point,
 ) {
   const { commands, style } = pathElement;
 
   const { frame, paths } = makeLayerPaths(commands);
 
-  // Scale the frame to fill the viewBox
-  const shapeGroupFrame = scaleRect(frame, scale);
+  const shapeGroupFrame = transformRect(
+    frame,
+    AffineTransform.scale(scale).translate(offset.x, offset.y),
+  );
 
   // Each shape path has an origin of {0, 0}, since the shapeGroup layer stores the real origin,
   // and we don't want to apply the origin translation twice.
@@ -233,38 +236,48 @@ function makeLayerFromPathElement(
   return shapeGroup;
 }
 
-function makeSvgLayer(name: string, svg: string) {
-  const { viewBox, width, height, children } = convert(svg, {
+export function svgToLayer(name: string, svgString: string) {
+  const { viewBox, width, height, children } = convert(svgString, {
     convertQuadraticsToCubics: true,
   });
 
   // The top-level frame is the union of every path within
-  const frame = unionRects(
+  const originalFrame = unionRects(
     ...children.map((pathElement) =>
       getBoundingRectFromCommands(pathElement.commands),
     ),
   );
 
-  const layoutWidth = width ?? viewBox?.width ?? frame.width;
-  const layoutHeight = height ?? viewBox?.height ?? frame.height;
+  // Figure out which dimensions to use for scaling
+  const layoutWidth = width ?? viewBox?.width ?? originalFrame.width;
+  const layoutHeight = height ?? viewBox?.height ?? originalFrame.height;
   const layoutSize = { width: layoutWidth, height: layoutHeight };
-  const layoutFrame = viewBox ?? frame;
+  const layoutFrame = viewBox ?? originalFrame;
 
   // Determine the rect to generate layers within
   const croppedRect = resize(layoutFrame, layoutSize, 'scaleAspectFit');
   const scale = croppedRect.width / layoutFrame.width;
 
+  // Scale the frame to our resized scale
+  const scaledFrame = transformRect(
+    originalFrame,
+    AffineTransform.scale(scale),
+  );
+
+  // Undo any translation in the frame so that our new layers appear at {0,0}
+  const layerOffset = { x: -scaledFrame.x, y: -scaledFrame.y };
+
   const layers = children.map((element) =>
-    makeLayerFromPathElement(element, scale),
+    makeLayerFromPathElement(element, scale, layerOffset),
   );
 
   return SketchModel.group({
-    frame: SketchModel.rect(croppedRect),
+    frame: SketchModel.rect({
+      ...scaledFrame,
+      x: 0,
+      y: 0,
+    }),
     name,
     layers,
   });
-}
-
-export function svgToLayer(svgString: string) {
-  return makeSvgLayer('svg', svgString);
 }

@@ -31,7 +31,7 @@ import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
 
 export type LayerAction =
-  | [type: 'importSvg', point: Point, svgString: string]
+  | [type: 'importSvg', point: Point, name: string, svgString: string]
   | [
       type: 'moveLayer',
       layerId: string | string[],
@@ -176,9 +176,9 @@ export function layerReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'importSvg': {
-      const [, point, svgString] = action;
+      const [, point, name, svgString] = action;
 
-      const layer = svgToLayer(svgString);
+      const layer = svgToLayer(name, svgString);
 
       layer.frame = {
         ...layer.frame,

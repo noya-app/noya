@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`makes demo layers 1`] = `
-"svg (group) { x: 0, y: 20.02, w: 517, h: 517.96 }
+"svg (group) { x: 0, y: 0, w: 517, h: 517.96 }
 ├── Path (shapeGroup) { x: 0, y: 290.75, w: 133.82, h: 92.42 }
 │   └── Path (shapePath) { x: 0, y: 0, w: 133.82, h: 92.42 }
 ├── Path (shapeGroup) { x: 0, y: 290.75, w: 133.82, h: 92.42 }
@@ -31,8 +31,8 @@ exports[`makes demo layers 1`] = `
 `;
 
 exports[`makes layers 1`] = `
-"svg (group) { x: 0, y: 0, w: 153, h: 153 }
-└── Path (shapeGroup) { x: 31.5, y: 31.5, w: 90, h: 90 }
+"svg (group) { x: 0, y: 0, w: 90, h: 90 }
+└── Path (shapeGroup) { x: 0, y: 0, w: 90, h: 90 }
       * fill (Color) rgba(0, 119, 255, 1)
       * border (Color) rgba(0, 0, 0, 1)
     └── Path (shapePath) { x: 0, y: 0, w: 90, h: 90 }
@@ -57,7 +57,7 @@ exports[`makes multiple shapePaths in a shapeGroup 1`] = `
 `;
 
 exports[`uses viewbox 1`] = `
-"svg (group) { x: 0, y: 0, w: 200, h: 200 }
+"svg (group) { x: 0, y: 0, w: 80, h: 80 }
 └── Path (shapeGroup) { x: 0, y: 0, w: 80, h: 80 }
     ├── Path (shapePath) { x: 0, y: 0, w: 80, h: 80 }
     │     * { x: 0.5, y: 1 } (Straight)

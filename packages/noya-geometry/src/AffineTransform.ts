@@ -127,13 +127,25 @@ export class AffineTransform implements Transformable {
     return rotation;
   }
 
+  rotation: typeof AffineTransform['rotation'] = (...args) => {
+    return this.transform(AffineTransform.rotation(...args));
+  };
+
   static scale(sx: number, sy: number = sx): AffineTransform {
     return new AffineTransform([sx, 0, 0, 0, sy, 0]);
   }
 
+  scale: typeof AffineTransform['scale'] = (...args) => {
+    return this.transform(AffineTransform.scale(...args));
+  };
+
   static translation(tx: number, ty: number): AffineTransform {
     return new AffineTransform([1, 0, tx, 0, 1, ty]);
   }
+
+  translate: typeof AffineTransform['translation'] = (...args) => {
+    return this.transform(AffineTransform.translation(...args));
+  };
 
   /**
    * Multiply the matrices together from left to right.

@@ -12,7 +12,7 @@ const bowtieViewBox = fs.readFileSync(
 );
 
 test('makes layers', () => {
-  const rootLayer = svgToLayer(circleSvg);
+  const rootLayer = svgToLayer('svg', circleSvg);
 
   expect(
     Layers.summary(rootLayer, { fills: true, borders: true, points: true }),
@@ -20,19 +20,19 @@ test('makes layers', () => {
 });
 
 test('makes demo layers', () => {
-  const rootLayer = svgToLayer(demoSvg);
+  const rootLayer = svgToLayer('svg', demoSvg);
 
   expect(Layers.summary(rootLayer)).toMatchSnapshot();
 });
 
 test('makes multiple shapePaths in a shapeGroup', () => {
-  const rootLayer = svgToLayer(bowtieSvg);
+  const rootLayer = svgToLayer('svg', bowtieSvg);
 
   expect(Layers.summary(rootLayer, { points: true })).toMatchSnapshot();
 });
 
 test('uses viewbox', () => {
-  const rootLayer = svgToLayer(bowtieViewBox);
+  const rootLayer = svgToLayer('svg', bowtieViewBox);
 
   expect(Layers.summary(rootLayer, { points: true })).toMatchSnapshot();
 });

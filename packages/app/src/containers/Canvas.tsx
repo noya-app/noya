@@ -759,7 +759,8 @@ export default memo(function Canvas() {
 
       if (file.type === 'image/svg+xml') {
         const svgString = await file.text();
-        dispatch('importSvg', point, svgString);
+        const name = file.name.replace(/\.svg$/, '');
+        dispatch('importSvg', point, name, svgString);
         return;
       }
 
