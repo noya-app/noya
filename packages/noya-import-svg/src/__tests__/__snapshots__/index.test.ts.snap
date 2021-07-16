@@ -44,3 +44,10 @@ exports[`makes multiple shapePaths in a shapeGroup 1`] = `
     ├── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
     └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }"
 `;
+
+exports[`uses viewbox 1`] = `
+"svg (group) { x: 0, y: 0, w: 100, h: 100 }
+└── Path (shapeGroup) { x: 0, y: 0, w: 40, h: 40 }
+    ├── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }
+    └── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }"
+`;

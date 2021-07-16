@@ -6,6 +6,10 @@ import { svgToLayer } from '..';
 const circleSvg = fs.readFileSync(path.join(__dirname, 'circle.svg'), 'utf8');
 const demoSvg = fs.readFileSync(path.join(__dirname, 'demo.svg'), 'utf8');
 const bowtieSvg = fs.readFileSync(path.join(__dirname, 'bowtie.svg'), 'utf8');
+const bowtieViewBox = fs.readFileSync(
+  path.join(__dirname, 'bowtie-viewbox.svg'),
+  'utf8',
+);
 
 test('makes layers', () => {
   const rootLayer = svgToLayer(circleSvg);
@@ -23,6 +27,12 @@ test('makes demo layers', () => {
 
 test('makes multiple shapePaths in a shapeGroup', () => {
   const rootLayer = svgToLayer(bowtieSvg);
+
+  expect(Layers.summary(rootLayer)).toMatchSnapshot();
+});
+
+test('uses viewbox', () => {
+  const rootLayer = svgToLayer(bowtieViewBox);
 
   expect(Layers.summary(rootLayer)).toMatchSnapshot();
 });
