@@ -699,6 +699,7 @@ export const SketchModel = {
   borderOptions,
   color,
   colorControls,
+  curvePoint,
   dataReference,
   document,
   encodedAttributes,

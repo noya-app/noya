@@ -16,110 +16,13 @@ import {
   transformRect,
   unionRects,
 } from 'noya-geometry';
-import { PointString, SketchModel } from 'noya-sketch-model';
+import { SketchModel } from 'noya-sketch-model';
+import { makePathsFromCommands } from './PathBuilder';
 
 function getBoundingRectFromCommands(
   commands: CommandWithoutQuadratics[],
 ): Rect {
   return computeBoundsFromPoints(commands.flatMap(getCommandPoints));
-}
-
-function makeCurvePoint(
-  curveMode: Sketch.CurveMode,
-  point: Point,
-  curveFrom?: Point,
-  curveTo?: Point,
-): Sketch.CurvePoint {
-  return {
-    _class: 'curvePoint',
-    cornerRadius: 0,
-    curveFrom: PointString.encode(curveFrom || point),
-    curveMode: curveMode || Sketch.CurveMode.None,
-    curveTo: PointString.encode(curveTo || point),
-    hasCurveFrom: !!curveFrom,
-    hasCurveTo: !!curveTo,
-    point: PointString.encode(point),
-  };
-}
-
-type Path = Pick<Sketch.ShapePath, 'isClosed' | 'points'>;
-
-// This is a rough port of Lona's PDF to Sketch path conversion
-// https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/studio/LonaStudio/Utils/Sketch.swift#L285
-function makePathsFromCommands(commands: CommandWithoutQuadratics[]): Path[] {
-  const paths: Path[] = [];
-  let curvePoints: Sketch.CurvePoint[] = [];
-
-  function finishPath(isClosed: boolean) {
-    if (curvePoints.length === 0) return;
-
-    paths.push({ points: curvePoints, isClosed });
-
-    curvePoints = [];
-  }
-
-  commands.forEach((command) => {
-    switch (command.type) {
-      case 'move': {
-        finishPath(false);
-
-        const { to } = command;
-        const curvePoint = makeCurvePoint(Sketch.CurveMode.Straight, to);
-        curvePoints.push(curvePoint);
-        break;
-      }
-      case 'line': {
-        const { to } = command;
-        const curvePoint = makeCurvePoint(Sketch.CurveMode.Straight, to);
-        curvePoints.push(curvePoint);
-        break;
-      }
-      case 'cubicCurve': {
-        const { to, controlPoint1, controlPoint2 } = command;
-
-        if (curvePoints.length > 0) {
-          const last = curvePoints[curvePoints.length - 1];
-          last.curveFrom = PointString.encode(controlPoint1);
-          last.curveMode = Sketch.CurveMode.Mirrored;
-          last.hasCurveFrom = true;
-        }
-
-        const curvePoint = makeCurvePoint(
-          Sketch.CurveMode.Mirrored,
-          to,
-          undefined,
-          controlPoint2,
-        );
-
-        curvePoints.push(curvePoint);
-        break;
-      }
-      case 'close': {
-        // If first and last points are equal, combine them
-        if (curvePoints.length > 0) {
-          const first = curvePoints[0];
-          const last = curvePoints[curvePoints.length - 1];
-
-          if (first.point === last.point && last.hasCurveTo) {
-            first.curveTo = last.curveTo;
-            first.hasCurveTo = last.hasCurveTo;
-            first.curveMode = Sketch.CurveMode.Mirrored;
-
-            curvePoints.pop();
-          }
-        }
-
-        finishPath(true);
-        break;
-      }
-      default:
-        throw new Error(`Invalid SVG path command: ${JSON.stringify(command)}`);
-    }
-  });
-
-  finishPath(false);
-
-  return paths;
 }
 
 function makeLineCapStyle(
@@ -235,6 +138,8 @@ function makeLayerFromPathElement(
   return shapeGroup;
 }
 
+// Loosely based on the react-sketchapp (MIT) implementation (which I wrote)
+// https://github.com/airbnb/react-sketchapp/blob/b238e69c6f1e65ec6b1d8a908a91fbd9a8cc43a7/src/jsonUtils/makeSvgLayer/index.ts#L81
 export function svgToLayer(name: string, svgString: string) {
   const { viewBox, width, height, children } = convert(svgString, {
     convertQuadraticsToCubics: true,
