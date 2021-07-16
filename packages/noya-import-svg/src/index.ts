@@ -1,5 +1,4 @@
 import {
-  Command,
   CommandWithoutQuadratics,
   convert,
   getCommandPoints,
@@ -47,7 +46,7 @@ type Path = Pick<Sketch.ShapePath, 'isClosed' | 'points'>;
 
 // This is a rough port of Lona's PDF to Sketch path conversion
 // https://github.com/airbnb/Lona/blob/94fd0b26de3e3f4b4496cdaa4ab31c6d258dc4ac/studio/LonaStudio/Utils/Sketch.swift#L285
-function makePathsFromCommands(commands: Command[]): Path[] {
+function makePathsFromCommands(commands: CommandWithoutQuadratics[]): Path[] {
   const paths: Path[] = [];
   let curvePoints: Sketch.CurvePoint[] = [];
 

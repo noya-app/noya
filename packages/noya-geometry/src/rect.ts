@@ -166,15 +166,6 @@ export function unionRects(...rects: Rect[]): Rect {
   return rects.reduce((acc, rect) => union(acc, rect), rects[0]);
 }
 
-export function scaleRect(rect: Rect, scale: number): Rect {
-  return {
-    x: rect.x * scale,
-    y: rect.y * scale,
-    width: rect.width * scale,
-    height: rect.height * scale,
-  };
-}
-
 export function computeBoundsFromPoints(points: Point[]): Rect {
   const x = Math.min(...points.map((point) => point.x));
   const y = Math.min(...points.map((point) => point.y));
