@@ -9,6 +9,7 @@ import {
   IndexPath,
   visit as visitNode,
 } from 'tree-visit';
+import { parsePoint } from './primitives';
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
@@ -270,10 +271,18 @@ export function isWithinMaskChain(
 
 export function summary(
   root: Sketch.AnyLayer,
-  options?: { fills?: boolean; borders?: boolean },
+  options?: { fills?: boolean; borders?: boolean; points?: boolean },
 ) {
   const includeFills = options?.fills ?? false;
   const includeBorders = options?.borders ?? false;
+  const includePoints = options?.points ?? false;
+
+  function describeCurvePoint(curvePoint: Sketch.CurvePoint) {
+    const point = parsePoint(curvePoint.point);
+    return `  * { x: ${round(point.x, 2)}, y: ${round(point.y, 2)} } (${
+      Sketch.CurveMode[curvePoint.curveMode]
+    })`;
+  }
 
   function describeFill(fill: Sketch.Fill | Sketch.Border) {
     const typeString = Sketch.FillType[fill.fillType];
@@ -305,6 +314,9 @@ export function summary(
         ...(includeFills ? (layer.style?.fills ?? []).map(describeFill) : []),
         ...(includeBorders
           ? (layer.style?.borders ?? []).map(describeFill)
+          : []),
+        ...(includePoints
+          ? (isPointsLayer(layer) ? layer.points : []).map(describeCurvePoint)
           : []),
       ]
         .filter((s) => !!s)

@@ -15,7 +15,7 @@ test('makes layers', () => {
   const rootLayer = svgToLayer(circleSvg);
 
   expect(
-    Layers.summary(rootLayer, { fills: true, borders: true }),
+    Layers.summary(rootLayer, { fills: true, borders: true, points: true }),
   ).toMatchSnapshot();
 });
 
@@ -28,11 +28,11 @@ test('makes demo layers', () => {
 test('makes multiple shapePaths in a shapeGroup', () => {
   const rootLayer = svgToLayer(bowtieSvg);
 
-  expect(Layers.summary(rootLayer)).toMatchSnapshot();
+  expect(Layers.summary(rootLayer, { points: true })).toMatchSnapshot();
 });
 
 test('uses viewbox', () => {
   const rootLayer = svgToLayer(bowtieViewBox);
 
-  expect(Layers.summary(rootLayer)).toMatchSnapshot();
+  expect(Layers.summary(rootLayer, { points: true })).toMatchSnapshot();
 });

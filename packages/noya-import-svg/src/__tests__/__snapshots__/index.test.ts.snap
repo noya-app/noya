@@ -35,19 +35,36 @@ exports[`makes layers 1`] = `
 └── Path (shapeGroup) { x: 20.59, y: 20.59, w: 58.82, h: 58.82 }
       * fill (Color) rgba(0, 119, 255, 1)
       * border (Color) rgba(0, 0, 0, 1)
-    └── Path (shapePath) { x: 0, y: 0, w: 58.82, h: 58.82 }"
+    └── Path (shapePath) { x: 0, y: 0, w: 58.82, h: 58.82 }
+          * { x: 1, y: 0.5 } (Mirrored)
+          * { x: 0.5, y: 1 } (Mirrored)
+          * { x: 0, y: 0.5 } (Mirrored)
+          * { x: 0.5, y: 0 } (Mirrored)
+          * { x: 1, y: 0.5 } (Mirrored)"
 `;
 
 exports[`makes multiple shapePaths in a shapeGroup 1`] = `
 "svg (group) { x: 0, y: 0, w: 100, h: 100 }
 └── Path (shapeGroup) { x: 0, y: 0, w: 100, h: 100 }
     ├── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
-    └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }"
+    │     * { x: 0.5, y: 1 } (Straight)
+    │     * { x: 0, y: 0.5 } (Straight)
+    │     * { x: 0.5, y: 0.5 } (Straight)
+    └── Path (shapePath) { x: 0, y: 0, w: 100, h: 100 }
+          * { x: 0.5, y: 0 } (Straight)
+          * { x: 1, y: 0.5 } (Straight)
+          * { x: 0.5, y: 0.5 } (Straight)"
 `;
 
 exports[`uses viewbox 1`] = `
 "svg (group) { x: 0, y: 0, w: 100, h: 100 }
 └── Path (shapeGroup) { x: 0, y: 0, w: 40, h: 40 }
     ├── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }
-    └── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }"
+    │     * { x: 0.5, y: 1 } (Straight)
+    │     * { x: 0, y: 0.5 } (Straight)
+    │     * { x: 0.5, y: 0.5 } (Straight)
+    └── Path (shapePath) { x: 0, y: 0, w: 40, h: 40 }
+          * { x: 0.5, y: 0 } (Straight)
+          * { x: 1, y: 0.5 } (Straight)
+          * { x: 0.5, y: 0.5 } (Straight)"
 `;
