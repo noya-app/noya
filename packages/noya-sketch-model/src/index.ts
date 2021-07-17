@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Point } from 'noya-geometry';
 import { uuid } from 'noya-utils';
 
 type ModelOptions<T> = Partial<Omit<T, '_class'>>;
@@ -361,6 +362,21 @@ function shapePath(options?: ModelOptions<Sketch.ShapePath>): Sketch.ShapePath {
   };
 }
 
+function shapeGroup(
+  options?: ModelOptions<Sketch.ShapeGroup>,
+): Sketch.ShapeGroup {
+  return {
+    ...newLayerBase(options),
+    name: 'Path',
+    style: style(),
+    hasClickThrough: true,
+    layers: [],
+    windingRule: Sketch.WindingRule.EvenOdd,
+    ...options,
+    _class: Sketch.ClassValue.ShapeGroup,
+  };
+}
+
 const CHECKERED_BACKGROUND = `iVBORw0KGgoAAAANSUhEUgAAABgAAAAYAQMAAADaua+7AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAABNJREFUCNdjYOD/TxL+/4GBFAwAvMsj3bQ3H74AAAAASUVORK5CYII=`;
 
 function dataReference(options?: ModelOptions<Sketch.DataRef>): Sketch.DataRef {
@@ -664,6 +680,18 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
   };
 }
 
+export const PointString = {
+  decode(pointString: string): Point {
+    const [x, y] = pointString.slice(1, -1).split(',');
+
+    return { x: parseFloat(x), y: parseFloat(y) };
+  },
+
+  encode({ x, y }: Point): string {
+    return `{${x.toString()},${y.toString()}}`;
+  },
+};
+
 export const SketchModel = {
   artboard,
   bitmap,
@@ -671,6 +699,7 @@ export const SketchModel = {
   borderOptions,
   color,
   colorControls,
+  curvePoint,
   dataReference,
   document,
   encodedAttributes,
@@ -690,6 +719,7 @@ export const SketchModel = {
   rect,
   rectangle,
   shadow,
+  shapeGroup,
   shapePath,
   style,
   symbolInstance,

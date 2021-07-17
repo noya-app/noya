@@ -5,6 +5,7 @@ export const SUPPORTED_IMAGE_UPLOAD_TYPES = [
   'image/jpeg' as const,
   'image/webp' as const,
   'application/pdf' as const,
+  'image/svg+xml' as const,
 ];
 
 export type SupportedImageUploadType = typeof SUPPORTED_IMAGE_UPLOAD_TYPES[number];

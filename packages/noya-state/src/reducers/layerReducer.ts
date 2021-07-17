@@ -1,7 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
-import { AffineTransform, transformRect } from 'noya-geometry';
+import { AffineTransform, Point, transformRect } from 'noya-geometry';
+import { svgToLayer } from 'noya-import-svg';
 import { SketchModel } from 'noya-sketch-model';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
@@ -30,6 +31,7 @@ import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
 
 export type LayerAction =
+  | [type: 'importSvg', point: Point, name: string, svgString: string]
   | [
       type: 'moveLayer',
       layerId: string | string[],
@@ -173,6 +175,24 @@ export function layerReducer(
   action: LayerAction,
 ): ApplicationState {
   switch (action[0]) {
+    case 'importSvg': {
+      const [, point, name, svgString] = action;
+
+      const layer = svgToLayer(name, svgString);
+
+      layer.frame = {
+        ...layer.frame,
+        x: point.x - layer.frame.width / 2,
+        y: point.y - layer.frame.height / 2,
+      };
+
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const page = draft.sketch.pages[pageIndex];
+        page.layers.push(layer);
+      });
+    }
     case 'moveLayer': {
       const [, id, destinationId, rawPosition] = action;
 

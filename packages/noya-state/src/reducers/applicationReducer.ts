@@ -132,6 +132,7 @@ export function applicationReducer(
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
       return layerPropertyReducer(state, action);
+    case 'importSvg':
     case 'groupLayer':
     case 'deleteLayer':
     case 'moveLayer':
