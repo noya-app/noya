@@ -23,7 +23,6 @@ import {
   getIndexPathOfOpenShapeLayer,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
-  isLine,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
@@ -231,11 +230,11 @@ export function canvasReducer(
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
-        if (layer.frame.height === 0 || isLine(layer.points)) {
+        if (layer.frame.height === 0) {
           layer.frame.height = 1;
         }
 
-        if (layer.frame.width === 0 || isLine(layer.points)) {
+        if (layer.frame.width === 0) {
           layer.frame.width = 1;
         }
 
@@ -247,7 +246,6 @@ export function canvasReducer(
           pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
 
         draft.selectedControlPoint = undefined;
-
         return;
       });
     }

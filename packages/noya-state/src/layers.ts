@@ -100,13 +100,13 @@ export const hasInspectableShadow = (layer: Sketch.AnyLayer): boolean => {
     case 'polygon':
     case 'rectangle':
     case 'shapeGroup':
+    case 'shapePath':
     case 'star':
     case 'triangle':
     case 'group':
     case 'symbolInstance':
     case 'text':
       return true;
-    case 'shapePath':
     case 'page':
     case 'artboard':
     case 'MSImmutableHotspotLayer':
@@ -123,13 +123,13 @@ export const hasInspectableBorder = (layer: Sketch.AnyLayer): boolean => {
     case 'polygon':
     case 'rectangle':
     case 'shapeGroup':
+    case 'shapePath':
     case 'star':
     case 'triangle':
     case 'text':
       return true;
     case 'group':
     case 'symbolInstance':
-    case 'shapePath':
     case 'page':
     case 'artboard':
     case 'MSImmutableHotspotLayer':

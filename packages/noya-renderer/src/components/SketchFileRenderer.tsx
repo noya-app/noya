@@ -29,8 +29,6 @@ import {
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import Polyline from '../../../noya-react-canvaskit/src/components/Polyline';
-import { getSelectedLineLayer } from '../../../noya-state/src/selectors/layerSelectors';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
@@ -45,6 +43,7 @@ import {
   Y_DIRECTIONS,
 } from './guides';
 import HoverOutline from './HoverOutline';
+import { Polyline } from 'noya-renderer';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
@@ -110,7 +109,10 @@ export default memo(function SketchFileRenderer() {
   });
 
   const omitBoundingRect = () => {
-    return state.selectedObjects.length === 1 && getSelectedLineLayer(state);
+    return (
+      state.selectedObjects.length === 1 &&
+      Selectors.getSelectedLineLayer(state)
+    );
   };
 
   const boundingRect = useMemo(

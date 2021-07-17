@@ -10,7 +10,7 @@ import {
   Selectors,
 } from 'noya-state';
 import React, { memo } from 'react';
-import { useApplicationState } from '../../../noya-app-state-context/src';
+import { useApplicationState } from 'noya-app-state-context';
 import { Rect as RCKRect } from '../ComponentsContext';
 
 interface Props {
