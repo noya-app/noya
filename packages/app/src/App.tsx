@@ -25,7 +25,7 @@ function Contents() {
   const CanvasKit = useCanvasKit();
 
   const sketchFileData = useResource<ArrayBuffer>(
-    '/line.sketch',
+    '/Demo.sketch',
     'arrayBuffer',
   );
 
