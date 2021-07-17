@@ -230,6 +230,14 @@ export function canvasReducer(
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
+        if (layer.frame.height === 0) {
+          layer.frame.height = 1;
+        }
+
+        if (layer.frame.width === 0) {
+          layer.frame.width = 1;
+        }
+
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
@@ -238,7 +246,6 @@ export function canvasReducer(
           pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
 
         draft.selectedControlPoint = undefined;
-
         return;
       });
     }
@@ -489,12 +496,18 @@ export function canvasReducer(
                 y: originalLayer.frame.y + originalLayer.frame.height,
               });
 
+              const width = max.x - min.x;
+              const height = max.y - min.y;
+
               const newFrame = normalizeRect({
                 x: Math.round(min.x),
                 y: Math.round(min.y),
-                width: Math.round(max.x - min.x),
-                height: Math.round(max.y - min.y),
+                width: Math.round(width),
+                height: Math.round(height),
               });
+
+              newLayer.isFlippedHorizontal = width < 0;
+              newLayer.isFlippedVertical = height < 0;
 
               newLayer.frame.x = newFrame.x;
               newLayer.frame.y = newFrame.y;

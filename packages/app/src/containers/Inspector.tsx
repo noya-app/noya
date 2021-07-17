@@ -1,5 +1,5 @@
 import { Divider, Spacer, withSeparatorElements } from 'noya-designsystem';
-import { Layers, Selectors, SetNumberMode } from 'noya-state';
+import { Layers, Selectors, SetNumberMode, isLine } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
@@ -22,6 +22,7 @@ import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import getMultiValue from '../utils/getMultiValue';
+import LineInspector from '../components/inspector/LineInspector';
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -108,6 +109,9 @@ export default memo(function Inspector() {
       Layers.isBitmapLayer(l),
     );
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const hasLineLayer = selectedLayers.every(
+      (l) => Layers.isPointsLayer(l) && isLine(l.points),
+    );
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
     const hasSymbolMaster = selectedLayers.some((l) =>
       Layers.isSymbolMaster(l),
@@ -130,7 +134,7 @@ export default memo(function Inspector() {
           ) : (
             <PointCoordinatesInspector />
           )
-        ) : (
+        ) : !hasLineLayer ? (
           <DimensionsInspector
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}
@@ -138,6 +142,18 @@ export default memo(function Inspector() {
             onSetRotation={handleSetRotation}
             onSetX={handleSetX}
             onSetY={handleSetY}
+            onSetWidth={handleSetWidth}
+            onSetHeight={handleSetHeight}
+            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+            onSetIsFlippedVertical={handleSetIsFlippedVertical}
+          />
+        ) : (
+          <LineInspector
+            {...dimensionsInspectorProps}
+            isFlippedHorizontal={isFlippedHorizontal}
+            isFlippedVertical={isFlippedVertical}
+            hasLineLayer={hasLineLayer}
+            onSetRotation={handleSetRotation}
             onSetWidth={handleSetWidth}
             onSetHeight={handleSetHeight}
             onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}

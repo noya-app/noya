@@ -29,6 +29,33 @@ export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
 
+export function isLine(points: Sketch.CurvePoint[]) {
+  return (
+    points.length === 2 &&
+    points.every((point) => point.curveMode === Sketch.CurveMode.Straight)
+  );
+}
+
+export function isDegeneratePath(
+  CanvasKit: CanvasKit,
+  points: Sketch.CurvePoint[],
+) {
+  const bounds = path(
+    CanvasKit,
+    points,
+    { x: 0, y: 0, width: 1, height: 1 },
+    false,
+  ).computeTightBounds();
+
+  if (bounds.some(isNaN)) return true;
+
+  const [minX, minY, maxX, maxY] = bounds;
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  return width === 0 || height === 0;
+}
+
 export const computeNewBoundingRect = (
   CanvasKit: CanvasKit,
   decodedPoints: DecodedCurvePoint[],
@@ -263,6 +290,14 @@ export const moveSelectedPoints = (
       ...layer.frame,
       ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
     };
+
+    if (draftLayer.frame.height === 0) {
+      draftLayer.frame.height = 1;
+    }
+
+    if (draftLayer.frame.width === 0) {
+      draftLayer.frame.width = 1;
+    }
 
     // Transform back to the range [0, 1], using the new bounds
     draftLayer.points = decodedPoints.map((decodedCurvePoint) =>

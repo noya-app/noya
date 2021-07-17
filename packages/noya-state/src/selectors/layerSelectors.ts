@@ -1,5 +1,12 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ApplicationState, Layers, PageLayer } from '../index';
+import {
+  ApplicationState,
+  isLine,
+  isPointsLayer,
+  Layers,
+  PageLayer,
+  Selectors,
+} from '../index';
 import type { UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
@@ -140,4 +147,21 @@ export function addToParentLayer(
   } else {
     layers.push(layer);
   }
+}
+
+export function getSelectedLineLayer(
+  state: ApplicationState,
+): Layers.PointsLayer | undefined {
+  const page = Selectors.getCurrentPage(state);
+  const indexPath = Layers.findIndexPath(
+    page,
+    (layer) => layer.do_objectID === state.selectedObjects[0],
+  );
+  if (!indexPath) return undefined;
+
+  const layer = Layers.access(page, indexPath);
+
+  if (!isPointsLayer(layer)) return undefined;
+
+  return isLine(layer.points) ? layer : undefined;
 }
