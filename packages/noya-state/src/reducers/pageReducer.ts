@@ -1,8 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { SketchModel } from 'noya-sketch-model';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import * as Models from '../models';
 import {
   getCurrentPage,
   getCurrentPageIndex,
@@ -25,11 +25,7 @@ export const createPage = (
   user: Sketch.User,
   name: string,
 ): Sketch.Page => {
-  const newPage = produce(Models.page, (page) => {
-    page.do_objectID = uuid();
-    page.name = name;
-    return page;
-  });
+  const newPage = SketchModel.page({ name });
 
   user[newPage.do_objectID] = {
     scrollOrigin: '{0, 0}',
@@ -37,6 +33,7 @@ export const createPage = (
   };
 
   pages.push(newPage);
+
   return newPage;
 };
 

@@ -1,11 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { AffineTransform, transformRect } from 'noya-geometry';
+import { RelativeDropPosition } from 'noya-designsystem';
+import { AffineTransform, Point, transformRect } from 'noya-geometry';
+import { svgToLayer } from 'noya-import-svg';
+import { SketchModel } from 'noya-sketch-model';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import { RelativeDropPosition } from '../../../noya-designsystem/src';
 import * as Layers from '../layers';
-import * as Models from '../models';
 import {
   addSiblingLayer,
   deleteLayers,
@@ -30,6 +31,7 @@ import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
 
 export type LayerAction =
+  | [type: 'importSvg', point: Point, name: string, svgString: string]
   | [
       type: 'moveLayer',
       layerId: string | string[],
@@ -85,9 +87,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
       constrainProportions: false,
       ...groupFrame,
     };
-    draft.style = produce(Models.style, (s) => {
-      s.do_objectID = uuid();
-    });
+    draft.style = SketchModel.style();
 
     draft.layers = [...indexPaths].map((indexPath) => {
       const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
@@ -140,15 +140,14 @@ const symbolToGroup = (
     (s) => s.symbolID === element.symbolID,
   )[0];
 
-  const group = produce(Models.group, (group) => {
-    group.do_objectID = uuid();
-    group.name = element.name;
-    group.frame = element.frame;
-    group.layers = symbol.layers.map((l) =>
+  const group = SketchModel.group({
+    name: element.name,
+    frame: element.frame,
+    layers: symbol.layers.map((l) =>
       produce(l, (l) => {
         l.do_objectID = uuid();
       }),
-    );
+    ),
   });
 
   deleteLayers([indexPath], page);
@@ -171,24 +170,29 @@ export const detachSymbolIntances = (
   });
 };
 
-const createSymbolInstance = (
-  symbolMaster: Sketch.SymbolMaster,
-  frame?: Sketch.Rect,
-) => {
-  return produce(Models.symbolInstance, (draft) => {
-    draft.do_objectID = uuid();
-    draft.name = symbolMaster.name;
-    draft.frame = frame ? frame : symbolMaster.frame;
-    if (draft.style) draft.style.do_objectID = uuid();
-    draft.symbolID = symbolMaster.symbolID;
-  });
-};
-
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
 ): ApplicationState {
   switch (action[0]) {
+    case 'importSvg': {
+      const [, point, name, svgString] = action;
+
+      const layer = svgToLayer(name, svgString);
+
+      layer.frame = {
+        ...layer.frame,
+        x: point.x - layer.frame.width / 2,
+        y: point.y - layer.frame.height / 2,
+      };
+
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const page = draft.sketch.pages[pageIndex];
+        page.layers.push(layer);
+      });
+    }
     case 'moveLayer': {
       const [, id, destinationId, rawPosition] = action;
 
@@ -317,7 +321,14 @@ export function layerReducer(
 
       const indexPaths = getIndexPathsForGroup(state, ids);
 
-      const group = createGroup(Models.group, page, ids, name, indexPaths);
+      const group = createGroup(
+        SketchModel.group(),
+        page,
+        ids,
+        name,
+        indexPaths,
+      );
+
       if (!group) return state;
 
       // Fire we remove selected layers, then we insert the group layer
@@ -387,12 +398,10 @@ export function layerReducer(
           draft.selectedObjects = [];
           indexPathsArtboards.forEach((indexPath: IndexPath) => {
             const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
-            const symbolMaster = {
-              ...Models.symbolMaster,
+
+            const symbolMaster = SketchModel.symbolMaster({
               ...artboard,
-              _class: 'symbolMaster' as const,
-              symbolID: uuid(),
-            };
+            });
 
             addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
             draft.selectedObjects = [
@@ -405,26 +414,25 @@ export function layerReducer(
 
       const symbolsPageIndex = getSymbolsPageIndex(state);
       const indexPaths = getIndexPathsForGroup(state, ids);
-      const symbolMasters = createGroup(
-        Models.symbolMaster,
+      const symbolMaster = createGroup(
+        SketchModel.symbolMaster(),
         page,
         ids,
         name,
         indexPaths,
       );
 
-      if (!symbolMasters) return state;
-      symbolMasters.symbolID = uuid();
+      if (!symbolMaster) return state;
 
-      const originalFrame = { ...symbolMasters.frame };
+      const originalFrame = { ...symbolMaster.frame };
       const symbolsPage = state.sketch.pages[symbolsPageIndex];
 
       const rect = symbolsPage
         ? getRightMostLayerBounds(symbolsPage)
         : { maxX: 0, minY: 25 };
 
-      symbolMasters.frame.x = rect.maxX + 100;
-      symbolMasters.frame.y = rect.minY;
+      symbolMaster.frame.x = rect.maxX + 100;
+      symbolMaster.frame.y = rect.minY;
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
@@ -436,12 +444,13 @@ export function layerReducer(
             ? createPage(pages, draft.sketch.user, 'Symbols')
             : pages[symbolsPageIndex];
 
-        const symbolInstance = createSymbolInstance(
-          symbolMasters,
-          originalFrame,
-        );
+        const symbolInstance = SketchModel.symbolInstance({
+          name: symbolMaster.name,
+          symbolID: symbolMaster.symbolID,
+          frame: originalFrame,
+        });
 
-        symbolsPage.layers = [...symbolsPage.layers, symbolMasters];
+        symbolsPage.layers = [...symbolsPage.layers, symbolMaster];
         addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
         draft.selectedObjects = [symbolInstance.do_objectID];

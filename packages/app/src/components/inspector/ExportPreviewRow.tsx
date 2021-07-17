@@ -1,7 +1,7 @@
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
 import { memo, useCallback } from 'react';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
-import { PageLayer } from '../../../../noya-state/src';
+import { PageLayer } from 'noya-state';
 import CanvasGridItem from '../theme/CanvasGridItem';
 
 interface Props {

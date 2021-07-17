@@ -1,9 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { uuid } from 'noya-utils';
-import { delimitedPath, getIncrementedName } from 'noya-utils';
+import { SketchModel } from 'noya-sketch-model';
+import { delimitedPath, getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import * as Models from '../models';
 import {
   findPageLayerIndexPaths,
   getCurrentPageIndex,
@@ -152,10 +151,16 @@ export function themeReducer(
             name || 'New Text Style',
           ]),
 
-          value: produce(style || Models.textStyle, (style) => {
-            style.do_objectID = uuid();
-            return style;
-          }),
+          value: produce(
+            style ||
+              SketchModel.style({
+                textStyle: SketchModel.textStyle(),
+              }),
+            (style) => {
+              style.do_objectID = uuid();
+              return style;
+            },
+          ),
         };
 
         textStyles.objects.push(sharedStyle);
@@ -195,10 +200,12 @@ export function themeReducer(
             draftLayerStyles.groupName,
             name || 'New Layer Style',
           ]),
-          value: produce(style || Models.style, (style) => {
-            style.do_objectID = uuid();
-            return style;
-          }),
+          value: style
+            ? produce(style, (style) => {
+                style.do_objectID = uuid();
+                return style;
+              })
+            : SketchModel.style(),
         };
 
         layerStyles.objects.push(sharedStyle);

@@ -114,6 +114,7 @@ export function applicationReducer(
     case 'addSymbolLayer':
     case 'addPointToPath':
     case 'pan':
+    case 'insertBitmap':
     case 'interaction':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
@@ -131,6 +132,7 @@ export function applicationReducer(
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
       return layerPropertyReducer(state, action);
+    case 'importSvg':
     case 'groupLayer':
     case 'deleteLayer':
     case 'moveLayer':

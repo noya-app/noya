@@ -2,7 +2,7 @@ import type { FileSystemHandle } from 'browser-fs-access';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { SketchFile } from 'noya-sketch-file';
-import { Models } from '..';
+import { createSketchFile } from '../sketchFile';
 import {
   createInitialHistoryState,
   HistoryAction,
@@ -58,7 +58,7 @@ export function workspaceReducer(
     case 'newFile': {
       return produce(state, (draft) => {
         draft.fileHandle = undefined;
-        draft.history = createInitialHistoryState(Models.createSketchFile());
+        draft.history = createInitialHistoryState(createSketchFile());
       });
     }
     case 'setFile': {

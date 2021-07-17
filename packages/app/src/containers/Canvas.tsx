@@ -1,19 +1,31 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ContextMenu, mergeEventHandlers } from 'noya-designsystem';
+import {
+  useApplicationState,
+  useSelector,
+  useWorkspace,
+} from 'noya-app-state-context';
+import {
+  ContextMenu,
+  mergeEventHandlers,
+  SupportedImageUploadType,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
+} from 'noya-designsystem';
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { uuid } from 'noya-utils';
 import { useCanvasKit } from 'noya-renderer';
-import { ApplicationState, decodeCurvePoint, SelectedPoint } from 'noya-state';
 import {
+  ApplicationState,
   CompassDirection,
+  decodeCurvePoint,
+  getSelectedLineLayer,
   Layers,
   Point,
   SelectedControlPoint,
+  SelectedPoint,
   Selectors,
   ShapeType,
-  getSelectedLineLayer,
 } from 'noya-state';
+import { getFileExtensionForType, uuid } from 'noya-utils';
 import {
   CSSProperties,
   memo,
@@ -24,10 +36,9 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
+import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
-import { useWorkspace } from 'noya-app-state-context';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 // import SVGRenderer from './renderer/SVGRenderer';
@@ -64,7 +75,12 @@ function getCursorForDirection(
   }
 }
 
-function getPoint(event: MouseEvent): Point {
+export type OffsetPoint = {
+  offsetX: number;
+  offsetY: number;
+};
+
+function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
@@ -740,26 +756,71 @@ export default memo(function Canvas() {
     }
   }, [state, handleDirection]);
 
+  const onDropFile = useCallback(
+    async (
+      file: TypedFile<SupportedImageUploadType>,
+      offsetPoint: OffsetPoint,
+    ) => {
+      const rawPoint = getPoint(offsetPoint);
+      const point = offsetEventPoint(rawPoint);
+
+      if (file.type === 'image/svg+xml') {
+        const svgString = await file.text();
+        const name = file.name.replace(/\.svg$/, '');
+        dispatch('importSvg', point, name, svgString);
+        return;
+      }
+
+      const data = await file.arrayBuffer();
+      const image = CanvasKit.MakeImageFromEncoded(data);
+
+      if (!image) return;
+
+      const size = {
+        width: image.width(),
+        height: image.height(),
+      };
+
+      const frame = {
+        ...size,
+        x: point.x - size.width / 2,
+        y: point.y - size.height / 2,
+      };
+
+      dispatch('insertBitmap', data, {
+        name: file.name,
+        frame: frame,
+        extension: getFileExtensionForType(file.type),
+      });
+    },
+    [CanvasKit, dispatch, offsetEventPoint],
+  );
+
   return (
-    <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
-      <Container
-        ref={containerRef}
-        cursor={cursor}
-        {...mergeEventHandlers(bind(), {
-          onPointerDown: handleMouseDown,
-          onPointerMove: handleMouseMove,
-          onPointerUp: handleMouseUp,
-        })}
-      >
-        <InsetContainer insets={insets}>
-          {canvasSizeWithInsets && (
-            // <SVGRenderer size={canvasSizeWithInsets}>
-            //   <SketchFileRenderer />
-            // </SVGRenderer>
-            <CanvasKitRenderer size={canvasSizeWithInsets} />
-          )}
-        </InsetContainer>
-      </Container>
-    </ContextMenu>
+    <ImageDropTarget
+      onDropFile={onDropFile}
+      supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
+    >
+      <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
+        <Container
+          ref={containerRef}
+          cursor={cursor}
+          {...mergeEventHandlers(bind(), {
+            onPointerDown: handleMouseDown,
+            onPointerMove: handleMouseMove,
+            onPointerUp: handleMouseUp,
+          })}
+        >
+          <InsetContainer insets={insets}>
+            {canvasSizeWithInsets && (
+              // <SVGRenderer size={canvasSizeWithInsets}>
+              //   <SketchFileRenderer />
+              // </SVGRenderer>
+              <CanvasKitRenderer size={canvasSizeWithInsets} />
+            )}
+          </InsetContainer>
+        </Container>
+      </ContextMenu>
+    </ImageDropTarget>
   );
 });

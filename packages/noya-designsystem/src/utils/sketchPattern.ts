@@ -1,11 +1,14 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 
-export const SUPPORTED_FILE_TYPES: { [key: string]: string } = {
-  'image/png': 'png',
-  'image/jpeg': 'jpg',
-  'image/webp': 'webp',
-  'application/pdf': 'pdf',
-};
+export const SUPPORTED_IMAGE_UPLOAD_TYPES = [
+  'image/png' as const,
+  'image/jpeg' as const,
+  'image/webp' as const,
+  'application/pdf' as const,
+  'image/svg+xml' as const,
+];
+
+export type SupportedImageUploadType = typeof SUPPORTED_IMAGE_UPLOAD_TYPES[number];
 
 export type SketchPattern = {
   _class: 'pattern';

@@ -165,7 +165,6 @@ function PatternFillPicker({
       <PatternInspector
         id={`${id}-pattern-inspector`}
         pattern={pattern}
-        images={state.sketch.images}
         createImage={createImage}
         onChangeImage={onChangeFillImage}
         onChangeFillType={onChangePatternFillType}

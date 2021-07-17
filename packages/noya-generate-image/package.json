@@ -1,0 +1,6 @@
+{
+  "name": "noya-generate-image",
+  "version": "1.0.0",
+  "main": "src/index.tsx",
+  "license": "UNLICENSED"
+}

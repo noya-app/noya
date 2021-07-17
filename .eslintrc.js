@@ -5,9 +5,9 @@ module.exports = {
     'no-console': ['warn', { allow: ['info', 'warn', 'error'] }],
     '@shopify/prefer-early-return': 'warn',
     'no-restricted-imports': [
-      'warn',
+      'error',
       {
-        patterns: ['*/src/*'],
+        patterns: ['*src*'],
       },
     ],
   },

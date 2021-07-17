@@ -1,12 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import {
-  AffineTransform,
-  createBounds,
-  createRect,
-  normalizeRect,
-} from 'noya-geometry';
+import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
+import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -16,7 +12,6 @@ import {
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import * as Models from '../models';
 import {
   addToParentLayer,
   computeNewBoundingRect,
@@ -39,13 +34,14 @@ import {
   getPossibleSnapLayers,
   getSnappingPairs,
 } from '../snapping';
-import { Point } from '../types';
+import { Point, Rect } from '../types';
 import { ApplicationState } from './applicationReducer';
 import {
   InteractionAction,
   interactionReducer,
   SnapshotInteractionAction,
 } from './interactionReducer';
+import { defaultBorderColor } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -55,6 +51,11 @@ export type CanvasAction =
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
+  | [
+      type: 'insertBitmap',
+      file: ArrayBuffer,
+      details: { name: string; frame: Rect; extension: string },
+    ]
   | [type: 'addPointToPath', point: Point]
   | [type: 'pan', point: Point]
   | [
@@ -74,19 +75,16 @@ export function canvasReducer(
       const { scrollOrigin } = getCurrentPageMetadata(state);
 
       return produce(state, (draft) => {
-        let layer = produce(Models.artboard, (layer) => {
-          layer.do_objectID = uuid();
-          layer.name = name;
-          layer.frame = {
-            _class: 'rect',
-            constrainProportions: false,
+        const layer = SketchModel.artboard({
+          name,
+          frame: SketchModel.rect({
             // TODO: Figure out positioning based on other artboards.
             // Also, don't hardcode sidebar width.
             x: -scrollOrigin.x + 100,
             y: -scrollOrigin.y + 100,
             width,
             height,
-          };
+          }),
         });
 
         draft.sketch.pages[pageIndex].layers.push(layer);
@@ -119,17 +117,21 @@ export function canvasReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (draft) => {
-        const layer = produce(Models.shapePath, (layer) => {
-          const minArea = {
-            x: point.x + 1,
-            y: point.y + 1,
-          };
-          layer.do_objectID = uuid();
-          layer.frame = {
-            _class: 'rect',
-            constrainProportions: false,
-            ...createRect(point, minArea),
-          };
+        const layer = SketchModel.shapePath({
+          frame: SketchModel.rect({
+            x: point.x,
+            y: point.y,
+            width: 1,
+            height: 1,
+          }),
+          style: SketchModel.style({
+            borders: [
+              SketchModel.border({
+                color: defaultBorderColor,
+              }),
+            ],
+          }),
+          isClosed: false,
         });
 
         addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
@@ -160,15 +162,14 @@ export function canvasReducer(
         ({ do_objectID }) => do_objectID === symbolId,
       ) as Sketch.SymbolMaster;
 
-      const layer = produce(Models.symbolInstance, (layer) => {
-        layer.do_objectID = uuid();
-        layer.name = symbol.name;
-        layer.symbolID = symbol.symbolID;
-        layer.frame = {
+      const layer = SketchModel.symbolInstance({
+        name: symbol.name,
+        symbolID: symbol.symbolID,
+        frame: {
           ...symbol.frame,
           x: point.x - symbol.frame.width / 2,
           y: point.y - symbol.frame.height / 2,
-        };
+        },
       });
 
       return produce(state, (draft) => {
@@ -546,6 +547,24 @@ export function canvasReducer(
             break;
           }
         }
+      });
+    }
+    case 'insertBitmap': {
+      const [, file, { name, frame, extension }] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const _ref = `images/${uuid()}.${extension}`;
+
+        draft.sketch.images[_ref] = file;
+
+        const layer = SketchModel.bitmap({
+          name: name.replace(`.${extension}`, ''),
+          image: SketchModel.fileReference({ _ref }),
+          frame: SketchModel.rect(frame),
+        });
+
+        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
       });
     }
     default:
