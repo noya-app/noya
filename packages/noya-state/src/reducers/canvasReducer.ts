@@ -300,13 +300,18 @@ export function canvasReducer(
           ? (Layers.access(draftPage, parentIndexPath) as Layers.ParentLayer)
           : draftPage;
 
-        if (layerInfo.every((l) => l.parent === parent)) return;
+        if (
+          layerInfo.every((l) => l.parent === parent) ||
+          layerInfo.some(
+            (l) => Layers.isArtboard(l.layer) || Layers.isSymbolMaster(l.layer),
+          )
+        )
+          return;
 
         deleteLayers(indexPaths, draftPage);
-
         const parentTransform = getLayerTransformAtIndexPath(
           draftPage,
-          parentIndexPath ? parentIndexPath : [0],
+          parentIndexPath ? parentIndexPath : [],
           undefined,
           'includeLast',
         );
