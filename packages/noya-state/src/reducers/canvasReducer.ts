@@ -1,7 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  normalizeRect,
+  rectContainsPoint,
+  transformRect,
+} from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -15,12 +21,15 @@ import * as Layers from '../layers';
 import {
   addToParentLayer,
   computeNewBoundingRect,
+  deleteLayers,
   EncodedPageMetadata,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
+  getLayerTransformAtIndexPath,
+  getParentLayer,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
@@ -56,6 +65,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'moveLayersIntoParentAtPoint', LayersIds: string, point: Point]
   | [type: 'pan', point: Point]
   | [
       type: 'interaction',
@@ -264,6 +274,64 @@ export function canvasReducer(
         };
       });
     }
+    case 'moveLayersIntoParentAtPoint': {
+      const [, , point] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPaths = getSelectedLayerIndexPathsExcludingDescendants(state);
+
+      const parentIndexPath = Layers.findIndexPath(
+        state.sketch.pages[pageIndex],
+        (layer) =>
+          (Layers.isArtboard(layer) || Layers.isSymbolMaster(layer)) &&
+          rectContainsPoint(layer.frame, point),
+      );
+
+      return produce(state, (draft) => {
+        const draftPage = draft.sketch.pages[pageIndex];
+
+        const layerInfo = indexPaths.map((indexPath) => ({
+          layer: Layers.access(draftPage, indexPath) as Layers.ChildLayer,
+          parent: getParentLayer(draftPage, indexPath),
+          transform: getLayerTransformAtIndexPath(draftPage, indexPath),
+        }));
+
+        const parent = parentIndexPath
+          ? (Layers.access(draftPage, parentIndexPath) as Layers.ParentLayer)
+          : draftPage;
+
+        if (layerInfo.every((l) => l.parent === parent)) return;
+
+        deleteLayers(indexPaths, draftPage);
+
+        const parentTransform = getLayerTransformAtIndexPath(
+          draftPage,
+          parentIndexPath ? parentIndexPath : [0],
+          undefined,
+          'includeLast',
+        );
+
+        const adjustedLayers = layerInfo.map(({ layer, transform }) => {
+          // First we undo the original parent's transform, then we apply the new parent's transform
+          const newTransform = AffineTransform.multiply(
+            transform,
+            parentTransform.invert(),
+          );
+
+          return produce(layer, (draftLayer) => {
+            draftLayer.frame = {
+              ...draftLayer.frame,
+              ...transformRect(draftLayer.frame, newTransform),
+            };
+          });
+        });
+
+        const destinationIndex = parent.layers.length;
+        parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
+
+        return draft;
+      });
+    }
     case 'interaction': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
@@ -271,6 +339,7 @@ export function canvasReducer(
       const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
         state,
       );
+
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );

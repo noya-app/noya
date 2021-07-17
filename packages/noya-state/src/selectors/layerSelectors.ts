@@ -1,10 +1,10 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ApplicationState, Layers, PageLayer } from '../index';
-import type { UUID } from '../types';
+import type { Point, UUID } from '../types';
 import { IndexPath } from 'tree-visit';
 import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
-import { createBounds, rectsIntersect } from 'noya-geometry';
+import { createBounds, rectContainsPoint, rectsIntersect } from 'noya-geometry';
 import { Draft } from 'immer';
 
 export const getSelectedLayersExcludingDescendants = (
@@ -140,4 +140,13 @@ export function addToParentLayer(
   } else {
     layers.push(layer);
   }
+}
+
+export function mouseIsInParentLayer(layers: Sketch.AnyLayer[], point: Point) {
+  return layers
+    .filter(
+      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+        Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+    )
+    .find((artboard) => rectContainsPoint(artboard.frame, point));
 }

@@ -678,6 +678,7 @@ export default memo(function Canvas() {
               : 'updateScaling',
             point,
           ]);
+          dispatch('moveLayersIntoParentAtPoint', '', point);
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
