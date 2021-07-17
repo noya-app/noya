@@ -1,4 +1,4 @@
-import { CurvePoint } from '@sketch-hq/sketch-file-format-ts/dist/cjs/types';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   CompassDirection,
   compassDirections,
@@ -6,6 +6,7 @@ import {
   DragHandle,
   Point,
   Rect,
+  Selectors,
 } from 'noya-state';
 
 export const compassDirectionMap: Record<CompassDirection, Point> = {
@@ -47,34 +48,25 @@ export function getRectDragHandles(
 
 export function getLineDragHandles(
   boundingRect: Rect,
-  points: CurvePoint[],
+  points: Sketch.CurvePoint[],
+  layer: Sketch.AnyLayer,
   handleSize: number = dragHandleSize,
 ): DragHandle[] {
-  const startDecodedPoint = decodeCurvePoint(points[0], boundingRect);
-  const endDecodedPoint = decodeCurvePoint(points[1], boundingRect);
+  const transform = Selectors.getLayerFlipTransform(layer);
 
-  // let theta = Math.atan2(
-  //   startDecodedPoint.point.y - endDecodedPoint.point.y,
-  //   startDecodedPoint.point.x - endDecodedPoint.point.x,
-  // );
-  // const lineRotation = theta * (180 / Math.PI);
-
-  return compassDirections
-    .filter(
-      (compassDirection) =>
-        compassDirection === 'e' || compassDirection === 'w',
-    )
-    .map((compassDirection, index) => {
-      const directionPoint = index === 0 ? startDecodedPoint : endDecodedPoint;
+  return points
+    .map((point) => decodeCurvePoint(point, boundingRect))
+    .map((decodedPoint) => {
+      const transformedPoint = transform.applyTo(decodedPoint.point);
 
       return {
         rect: {
-          x: directionPoint.point.x - handleSize / 2,
-          y: directionPoint.point.y - handleSize / 2,
+          x: transformedPoint.x - handleSize / 2,
+          y: transformedPoint.y - handleSize / 2,
           width: handleSize,
           height: handleSize,
         },
-        compassDirection,
+        compassDirection: 'n',
       };
     });
 }

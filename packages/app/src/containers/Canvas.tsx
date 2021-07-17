@@ -4,7 +4,7 @@ import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { uuid } from 'noya-utils';
 import { useCanvasKit } from 'noya-renderer';
-import { decodeCurvePoint, SelectedPoint } from 'noya-state';
+import { ApplicationState, decodeCurvePoint, SelectedPoint } from 'noya-state';
 import {
   CompassDirection,
   Layers,
@@ -12,6 +12,7 @@ import {
   SelectedControlPoint,
   Selectors,
   ShapeType,
+  getSelectedLineLayer,
 } from 'noya-state';
 import {
   CSSProperties,
@@ -42,7 +43,11 @@ const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
 
 function getCursorForDirection(
   direction: CompassDirection,
+  state: ApplicationState,
 ): CSSProperties['cursor'] {
+  if (getSelectedLineLayer(state)) {
+    return 'move';
+  }
   switch (direction) {
     case 'e':
     case 'w':
@@ -715,7 +720,7 @@ export default memo(function Canvas() {
       case 'scaling':
       case 'hoverHandle':
         if (handleDirection) {
-          return getCursorForDirection(handleDirection);
+          return getCursorForDirection(handleDirection, state);
         }
         return 'default';
       case 'editPath': {

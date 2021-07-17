@@ -1,13 +1,13 @@
+import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
-import { AffineTransform, createBounds } from 'noya-geometry';
+import { Group } from '../..';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
 import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
-import { Group } from '../..';
 
 interface Props {
   layer: PageLayer;
@@ -50,18 +50,7 @@ export default memo(function SketchLayer({ layer }: Props) {
   let transforms: AffineTransform[] = [];
 
   if (layer.isFlippedHorizontal || layer.isFlippedVertical) {
-    const bounds = createBounds(layer.frame);
-
-    transforms.push(
-      AffineTransform.multiply(
-        AffineTransform.translation(bounds.midX, bounds.midY),
-        AffineTransform.scale(
-          layer.isFlippedHorizontal ? -1 : 1,
-          layer.isFlippedVertical ? -1 : 1,
-        ),
-        AffineTransform.translation(-bounds.midX, -bounds.midY),
-      ),
-    );
+    transforms.push(Selectors.getLayerFlipTransform(layer));
   }
 
   // TODO: Investigate rotation appearing incorrect in inspector, e.g. rotate the image

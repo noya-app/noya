@@ -27,13 +27,13 @@ export default memo(function DragHandles({ selectionPaint, rect }: Props) {
   const lineLayer = Selectors.getSelectedLineLayer(state);
   const dragHandles =
     lineLayer && state.selectedObjects.length === 1
-      ? getLineDragHandles(lineLayer.frame, lineLayer.points)
+      ? getLineDragHandles(lineLayer.frame, lineLayer.points, lineLayer)
       : getRectDragHandles(rect);
 
   return (
     <>
-      {dragHandles.map((handle) => (
-        <React.Fragment key={handle.compassDirection}>
+      {dragHandles.map((handle, index) => (
+        <React.Fragment key={index}>
           <RCKRect
             rect={Primitives.rect(CanvasKit, handle.rect)}
             paint={dragHandlePaint}

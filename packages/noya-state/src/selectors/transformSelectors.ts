@@ -12,8 +12,25 @@ export function getLayerTransform(
 ): AffineTransform {
   const rotation = getLayerRotationTransform(layer);
   const translation = getLayerTranslationTransform(layer);
+  const flip = getLayerFlipTransform(layer);
 
-  return AffineTransform.multiply(ctm, rotation, translation);
+  return AffineTransform.multiply(ctm, rotation, translation, flip);
+}
+
+export function getLayerFlipTransform(layer: Sketch.AnyLayer) {
+  if (!layer.isFlippedHorizontal && !layer.isFlippedVertical)
+    return AffineTransform.identity;
+
+  const bounds = createBounds(layer.frame);
+
+  return AffineTransform.multiply(
+    AffineTransform.translation(bounds.midX, bounds.midY),
+    AffineTransform.scale(
+      layer.isFlippedHorizontal ? -1 : 1,
+      layer.isFlippedVertical ? -1 : 1,
+    ),
+    AffineTransform.translation(-bounds.midX, -bounds.midY),
+  );
 }
 
 export function getLayerTranslationTransform(
