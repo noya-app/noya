@@ -25,8 +25,11 @@ const Row = styled.div(({ theme }) => ({
   paddingRight: '10px',
 }));
 
-const LinePointCoordinatesContainer = styled.div(({ theme }) => ({
-  width: '200px',
+const LabelContainer = styled.div(({ theme }) => ({
+  ...theme.textStyles.small,
+  width: '69px',
+  display: 'flex',
+  alignItems: 'center',
 }));
 
 function roundNumber(number: number, roundTo: number) {
@@ -89,54 +92,42 @@ export default function LineInspector({
 
   const pointRotaion = findLineRotation();
 
+  if (!hasLineLayer) return null;
+
   return (
     <>
-      {hasLineLayer && (
-        <>
-          <Row>
-            Start
-            <Spacer.Horizontal size={20} />
-            <LinePointCoordinatesContainer>
-              <LinePointCoordinatesInspector
-                point={endPoint}
-                direction={'end'}
-              />
-            </LinePointCoordinatesContainer>
-          </Row>
-          <Spacer.Vertical size={10} />
-          <Row>
-            End
-            <Spacer.Horizontal size={20} />
-            <LinePointCoordinatesContainer>
-              <LinePointCoordinatesInspector
-                point={startPoint}
-                direction={'start'}
-              />
-            </LinePointCoordinatesContainer>
-          </Row>
-          <Spacer.Vertical size={10} />
-          <Row>
-            <DimensionInput
-              value={width}
-              onSetValue={onSetWidth}
-              label={String.fromCharCode(8596)}
-            />
-            <Spacer.Horizontal size={16} />
-            <DimensionInput
-              value={rotation ? rotation : pointRotaion}
-              onSetValue={onSetRotation}
-              label="°"
-            />
-            <Spacer.Horizontal size={16} />
-            <FlipControls
-              isFlippedVertical={isFlippedVertical}
-              isFlippedHorizontal={isFlippedHorizontal}
-              onSetIsFlippedVertical={onSetIsFlippedVertical}
-              onSetIsFlippedHorizontal={onSetIsFlippedHorizontal}
-            />
-          </Row>
-        </>
-      )}
+      <Row>
+        <LabelContainer>Start</LabelContainer>
+        <Spacer.Horizontal size={16} />
+        <LinePointCoordinatesInspector point={endPoint} direction={'end'} />
+      </Row>
+      <Spacer.Vertical size={10} />
+      <Row>
+        <LabelContainer>End</LabelContainer>
+        <Spacer.Horizontal size={16} />
+        <LinePointCoordinatesInspector point={startPoint} direction={'start'} />
+      </Row>
+      <Spacer.Vertical size={10} />
+      <Row>
+        <DimensionInput
+          value={width}
+          onSetValue={onSetWidth}
+          label={String.fromCharCode(8596)}
+        />
+        <Spacer.Horizontal size={16} />
+        <DimensionInput
+          value={rotation ? rotation : pointRotaion}
+          onSetValue={onSetRotation}
+          label="°"
+        />
+        <Spacer.Horizontal size={16} />
+        <FlipControls
+          isFlippedVertical={isFlippedVertical}
+          isFlippedHorizontal={isFlippedHorizontal}
+          onSetIsFlippedVertical={onSetIsFlippedVertical}
+          onSetIsFlippedHorizontal={onSetIsFlippedHorizontal}
+        />
+      </Row>
     </>
   );
 }

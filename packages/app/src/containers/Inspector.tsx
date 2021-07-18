@@ -23,6 +23,11 @@ import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import getMultiValue from '../utils/getMultiValue';
 import LineInspector from '../components/inspector/LineInspector';
+import styled from 'styled-components';
+
+const PointControlsContainer = styled.div({
+  padding: '0 10px',
+});
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -129,11 +134,13 @@ export default memo(function Inspector() {
       <Fragment key="layout">
         <AlignmentInspector />
         {isEditingPath ? (
-          isEditingControlPoint ? (
-            <ControlPointCoordinatesInspector />
-          ) : (
-            <PointCoordinatesInspector />
-          )
+          <PointControlsContainer>
+            {isEditingControlPoint ? (
+              <ControlPointCoordinatesInspector />
+            ) : (
+              <PointCoordinatesInspector />
+            )}
+          </PointControlsContainer>
         ) : !hasLineLayer ? (
           <DimensionsInspector
             {...dimensionsInspectorProps}
