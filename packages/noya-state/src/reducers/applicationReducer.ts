@@ -29,7 +29,7 @@ import {
 } from './layerPropertyReducer';
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
-import { PointAction, pointReducer } from './pointReducer';
+import { markLayersAsEdited, PointAction, pointReducer } from './pointReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
@@ -313,7 +313,9 @@ export function applicationReducer(
     case 'setPointX':
     case 'setPointY':
     case 'setControlPointX':
-    case 'setControlPointY':
+    case 'setControlPointY': {
+      return markLayersAsEdited(pointReducer(state, action, CanvasKit));
+    }
     case 'selectPoint':
     case 'selectControlPoint':
       return pointReducer(state, action, CanvasKit);
