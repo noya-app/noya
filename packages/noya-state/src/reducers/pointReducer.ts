@@ -9,12 +9,21 @@ import {
   moveSelectedPoints,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState, SetNumberMode } from './applicationReducer';
+import {
+  ApplicationState,
+  SelectedPointLists,
+  SetNumberMode,
+} from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
-  | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
+  | [
+      type: 'setPointX' | 'setPointY',
+      pointLists: SelectedPointLists,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | [
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
@@ -95,7 +104,7 @@ export function pointReducer(
     }
     case 'setPointX':
     case 'setPointY': {
-      const [type, amount, mode = 'replace'] = action;
+      const [type, selectedPointList, amount, mode = 'replace'] = action;
 
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -104,7 +113,7 @@ export function pointReducer(
         const delta = type === 'setPointX' ? { x: amount } : { y: amount };
 
         moveSelectedPoints(
-          draft.selectedPointLists,
+          selectedPointList,
           layerIndexPaths,
           delta,
           mode,

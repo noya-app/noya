@@ -16,6 +16,7 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
@@ -224,25 +225,29 @@ export function canvasReducer(
           point,
         };
 
-        const newDecodedPoints =
-          pointIndexPath.pointIndex === 0
-            ? [decodedPoint, ...decodedPoints]
-            : [...decodedPoints, decodedPoint];
+        const isLastPointSelected =
+          pointIndexPath.pointIndex === layer.points.length - 1;
+
+        const newDecodedPoints = isLastPointSelected
+          ? [...decodedPoints, decodedPoint]
+          : [decodedPoint, ...decodedPoints];
 
         layer.frame = {
           ...layer.frame,
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
+        fixZeroLayerDimensions(layer);
+
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
 
-        draft.selectedPointLists[layer.do_objectID] =
-          pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+        draft.selectedPointLists[layer.do_objectID] = isLastPointSelected
+          ? [layer.points.length - 1]
+          : [0];
 
         draft.selectedControlPoint = undefined;
-
         return;
       });
     }
@@ -516,12 +521,18 @@ export function canvasReducer(
                 y: originalLayer.frame.y + originalLayer.frame.height,
               });
 
+              const width = max.x - min.x;
+              const height = max.y - min.y;
+
               const newFrame = normalizeRect({
                 x: Math.round(min.x),
                 y: Math.round(min.y),
-                width: Math.round(max.x - min.x),
-                height: Math.round(max.y - min.y),
+                width: Math.round(width),
+                height: Math.round(height),
               });
+
+              newLayer.isFlippedHorizontal = width < 0;
+              newLayer.isFlippedVertical = height < 0;
 
               newLayer.frame.x = newFrame.x;
               newLayer.frame.y = newFrame.y;

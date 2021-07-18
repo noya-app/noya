@@ -14,8 +14,10 @@ import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
 import {
+  ApplicationState,
   CompassDirection,
   decodeCurvePoint,
+  getSelectedLineLayer,
   Layers,
   Point,
   SelectedControlPoint,
@@ -52,7 +54,11 @@ const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
 
 function getCursorForDirection(
   direction: CompassDirection,
+  state: ApplicationState,
 ): CSSProperties['cursor'] {
+  if (getSelectedLineLayer(state)) {
+    return 'move';
+  }
   switch (direction) {
     case 'e':
     case 'w':
@@ -110,14 +116,15 @@ export default memo(function Canvas() {
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
       dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else {
+    } else if (isEditingPath) {
       dispatch(
-        isEditingPath
-          ? (`setPoint${axis}` as const)
-          : (`setLayer${axis}` as const),
+        `setPoint${axis}` as const,
+        state.selectedPointLists,
         amount,
         'adjust',
       );
+    } else {
+      dispatch(`setLayer${axis}` as const, amount, 'adjust');
     }
   };
 
@@ -733,7 +740,7 @@ export default memo(function Canvas() {
       case 'scaling':
       case 'hoverHandle':
         if (handleDirection) {
-          return getCursorForDirection(handleDirection);
+          return getCursorForDirection(handleDirection, state);
         }
         return 'default';
       case 'editPath': {

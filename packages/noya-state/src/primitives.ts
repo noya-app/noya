@@ -287,7 +287,7 @@ export function stringifyPoint({ x, y }: Point): string {
 export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
-  frame: Sketch.Rect,
+  frame: Rect,
   isClosed: boolean,
 ): Path {
   return PathUtils.path(CanvasKit, points, frame, isClosed);

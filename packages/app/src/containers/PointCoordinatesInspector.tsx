@@ -9,16 +9,16 @@ export default memo(function PointCoordinatesInspector() {
 
   const handleSetPointX = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointX', value, mode);
+      dispatch('setPointX', state.selectedPointLists, value, mode);
     },
-    [dispatch],
+    [dispatch, state.selectedPointLists],
   );
 
   const handleSetPointY = useCallback(
     (value: number, mode: SetNumberMode) => {
-      dispatch('setPointY', value, mode);
+      dispatch('setPointY', state.selectedPointLists, value, mode);
     },
-    [dispatch],
+    [dispatch, state.selectedPointLists],
   );
 
   const selectedPoints = Selectors.getSelectedPoints(state).map(

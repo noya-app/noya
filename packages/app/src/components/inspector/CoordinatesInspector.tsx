@@ -1,20 +1,13 @@
 import { Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React from 'react';
-import styled from 'styled-components';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';
 
 function roundNumber(number: number, roundTo: number) {
   return Number(number.toFixed(roundTo));
 }
-
-const Row = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'row',
-  paddingLeft: '10px',
-  paddingRight: '10px',
-}));
 
 export interface Props {
   x: DimensionValue;
@@ -25,7 +18,7 @@ export interface Props {
 
 export default function CoordinatesInspector({ x, y, onSetX, onSetY }: Props) {
   return (
-    <Row>
+    <InspectorPrimitives.Row>
       <DimensionInput
         value={x ? roundNumber(x, 2) : undefined}
         onSetValue={onSetX}
@@ -37,6 +30,6 @@ export default function CoordinatesInspector({ x, y, onSetX, onSetY }: Props) {
         onSetValue={onSetY}
         label="Y"
       />
-    </Row>
+    </InspectorPrimitives.Row>
   );
 }

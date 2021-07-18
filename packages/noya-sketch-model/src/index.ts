@@ -93,7 +93,7 @@ function border(options?: ModelOptions<Sketch.Border>): Sketch.Border {
     color: color(),
     contextSettings: graphicsContextSettings(),
     gradient: gradient(),
-    position: 1,
+    position: Sketch.BorderPosition.Center,
     thickness: 1,
     ...options,
     _class: Sketch.ClassValue.Border,
@@ -359,8 +359,8 @@ function shapePath(options?: ModelOptions<Sketch.ShapePath>): Sketch.ShapePath {
   return {
     ...newLayerBase(options),
     name: 'Path',
-    style: style(),
     points: [],
+    style: style(),
     ...options,
     _class: Sketch.ClassValue.ShapePath,
   };

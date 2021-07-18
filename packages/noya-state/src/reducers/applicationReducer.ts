@@ -132,7 +132,7 @@ export function applicationReducer(
     case 'setIsFlippedVertical':
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
-      return layerPropertyReducer(state, action);
+      return layerPropertyReducer(state, action, CanvasKit);
     case 'importSvg':
     case 'groupLayer':
     case 'deleteLayer':

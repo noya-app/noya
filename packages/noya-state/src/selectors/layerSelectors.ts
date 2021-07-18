@@ -1,12 +1,6 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { ApplicationState, Layers, PageLayer } from '../index';
-import type { Point, UUID } from '../types';
-import { IndexPath } from 'tree-visit';
-import {
-  getLayerIndexPathsExcludingDescendants,
-  getSelectedLayerIndexPathsExcludingDescendants,
-} from './indexPathSelectors';
-import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
+import produce, { Draft } from 'immer';
+import { RelativeDropPosition } from 'noya-designsystem';
 import {
   AffineTransform,
   createBounds,
@@ -14,8 +8,21 @@ import {
   rectsIntersect,
   transformRect,
 } from 'noya-geometry';
-import produce, { Draft } from 'immer';
-import { RelativeDropPosition } from 'noya-designsystem';
+import { IndexPath } from 'tree-visit';
+import {
+  ApplicationState,
+  isLine,
+  isPointsLayer,
+  Layers,
+  PageLayer,
+  Selectors,
+} from '../index';
+import type { Point, UUID } from '../types';
+import {
+  getLayerIndexPathsExcludingDescendants,
+  getSelectedLayerIndexPathsExcludingDescendants,
+} from './indexPathSelectors';
+import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 import { getLayerTransformAtIndexPath } from './transformSelectors';
 
 export const getSelectedLayersExcludingDescendants = (
@@ -153,6 +160,22 @@ export function addToParentLayer(
   }
 }
 
+export function getSelectedLineLayer(
+  state: ApplicationState,
+): Layers.PointsLayer | undefined {
+  const page = Selectors.getCurrentPage(state);
+  const indexPath = Layers.findIndexPath(
+    page,
+    (layer) => layer.do_objectID === state.selectedObjects[0],
+  );
+  if (!indexPath) return undefined;
+
+  const layer = Layers.access(page, indexPath);
+
+  if (!isPointsLayer(layer)) return undefined;
+
+  return isLine(layer.points) ? layer : undefined;
+}
 export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {
   return page.layers
     .filter(

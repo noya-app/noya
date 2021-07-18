@@ -1,7 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import * as Layers from '../layers';
+import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
+  computeNewBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getLayerRotation,
@@ -30,6 +33,7 @@ export type LayerPropertyAction =
 export function layerPropertyReducer(
   state: ApplicationState,
   action: LayerPropertyAction,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
     case 'setLayerVisible':
@@ -151,8 +155,21 @@ export function layerPropertyReducer(
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           if (!Layers.isPointsLayer(layer)) return;
-
           layer.isClosed = value;
+
+          const decodedPoints = layer.points.map((point) =>
+            decodeCurvePoint(point, layer.frame),
+          );
+
+          layer.frame = {
+            ...layer.frame,
+            ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
+          };
+
+          // Transform back to the range [0, 1], using the new bounds
+          layer.points = decodedPoints.map((decodedCurvePoint) =>
+            encodeCurvePoint(decodedCurvePoint, layer.frame),
+          );
         });
       });
     }
