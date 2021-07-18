@@ -21,6 +21,7 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
+  getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
@@ -273,6 +274,19 @@ export function canvasReducer(
       const page = getCurrentPage(state);
       const parentId =
         getParentLayerAtPoint(page, point)?.do_objectID ?? page.do_objectID;
+      const indexPaths = getSelectedLayerIndexPathsExcludingDescendants(state);
+
+      if (
+        indexPaths.every(
+          (indexPath) =>
+            getParentLayer(page, indexPath).do_objectID === parentId,
+        ) ||
+        indexPaths.some((indexPath) => {
+          const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
+          return Layers.isArtboard(layer) || Layers.isSymbolMaster(layer);
+        })
+      )
+        return state;
 
       return moveLayer(state, state.selectedObjects, parentId, 'inside');
     }
