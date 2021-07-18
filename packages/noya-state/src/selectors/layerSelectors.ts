@@ -1,11 +1,22 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { ApplicationState, Layers, PageLayer } from '../index';
-import type { UUID } from '../types';
+import type { Point, UUID } from '../types';
 import { IndexPath } from 'tree-visit';
-import { getSelectedLayerIndexPathsExcludingDescendants } from './indexPathSelectors';
+import {
+  getLayerIndexPathsExcludingDescendants,
+  getSelectedLayerIndexPathsExcludingDescendants,
+} from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
-import { createBounds, rectsIntersect } from 'noya-geometry';
-import { Draft } from 'immer';
+import {
+  AffineTransform,
+  createBounds,
+  rectContainsPoint,
+  rectsIntersect,
+  transformRect,
+} from 'noya-geometry';
+import produce, { Draft } from 'immer';
+import { RelativeDropPosition } from 'noya-designsystem';
+import { getLayerTransformAtIndexPath } from './transformSelectors';
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -140,4 +151,106 @@ export function addToParentLayer(
   } else {
     layers.push(layer);
   }
+}
+
+export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {
+  return page.layers
+    .filter(
+      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
+        Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+    )
+    .find((artboard) => rectContainsPoint(artboard.frame, point));
+}
+
+export function moveLayer(
+  state: ApplicationState,
+  id: string | string[],
+  destinationId: string,
+  rawPosition: RelativeDropPosition,
+) {
+  const position =
+    rawPosition === 'above'
+      ? 'below'
+      : rawPosition === 'below'
+      ? 'above'
+      : rawPosition;
+
+  const ids = typeof id === 'string' ? [id] : id;
+
+  const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
+  const pageIndex = getCurrentPageIndex(state);
+
+  return produce(state, (draft) => {
+    const draftPage = draft.sketch.pages[pageIndex];
+
+    const layerInfo = indexPaths.map((indexPath) => ({
+      layer: Layers.access(draftPage, indexPath) as Layers.ChildLayer,
+      transform: getLayerTransformAtIndexPath(draftPage, indexPath),
+    }));
+
+    deleteLayers(indexPaths, draftPage);
+
+    const destinationIndexPath = Layers.findIndexPath(
+      draftPage,
+      (layer) => layer.do_objectID === destinationId,
+    );
+
+    if (!destinationIndexPath) return;
+
+    let parentIndexPath: IndexPath;
+    let parent: Layers.ParentLayer;
+    let destinationIndex: number;
+
+    switch (position) {
+      case 'inside': {
+        parentIndexPath = destinationIndexPath;
+        parent = Layers.access(
+          draftPage,
+          parentIndexPath,
+        ) as Layers.ParentLayer;
+
+        destinationIndex = parent.layers.length;
+        break;
+      }
+      case 'above':
+      case 'below': {
+        parentIndexPath = destinationIndexPath.slice(0, -1);
+        parent = Layers.access(
+          draftPage,
+          parentIndexPath,
+        ) as Layers.ParentLayer;
+
+        const siblingIndex =
+          destinationIndexPath[destinationIndexPath.length - 1];
+
+        destinationIndex =
+          position === 'above' ? siblingIndex : siblingIndex + 1;
+        break;
+      }
+    }
+
+    const parentTransform = getLayerTransformAtIndexPath(
+      draftPage,
+      parentIndexPath,
+      undefined,
+      'includeLast',
+    );
+
+    const adjustedLayers = layerInfo.map(({ layer, transform }) => {
+      // First we undo the original parent's transform, then we apply the new parent's transform
+      const newTransform = AffineTransform.multiply(
+        transform,
+        parentTransform.invert(),
+      );
+
+      return produce(layer, (draftLayer) => {
+        draftLayer.frame = {
+          ...draftLayer.frame,
+          ...transformRect(draftLayer.frame, newTransform),
+        };
+      });
+    });
+
+    parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
+  });
 }

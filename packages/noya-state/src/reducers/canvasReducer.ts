@@ -21,9 +21,12 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
+  getParentLayer,
+  getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
+  moveLayer,
   moveSelectedPoints,
 } from '../selectors/selectors';
 import {
@@ -56,6 +59,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
       type: 'interaction',
@@ -264,6 +268,28 @@ export function canvasReducer(
         };
       });
     }
+    case 'moveLayersIntoParentAtPoint': {
+      const [, point] = action;
+
+      const page = getCurrentPage(state);
+      const parentId =
+        getParentLayerAtPoint(page, point)?.do_objectID ?? page.do_objectID;
+      const indexPaths = getSelectedLayerIndexPathsExcludingDescendants(state);
+
+      if (
+        indexPaths.every(
+          (indexPath) =>
+            getParentLayer(page, indexPath).do_objectID === parentId,
+        ) ||
+        indexPaths.some((indexPath) => {
+          const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
+          return Layers.isArtboard(layer) || Layers.isSymbolMaster(layer);
+        })
+      )
+        return state;
+
+      return moveLayer(state, state.selectedObjects, parentId, 'inside');
+    }
     case 'interaction': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
@@ -271,6 +297,7 @@ export function canvasReducer(
       const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
         state,
       );
+
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
