@@ -166,3 +166,32 @@ function visitSelectedDraftPoints(
     });
   });
 }
+
+/**
+ * Layers with an `edited` property track whether their points have been changed.
+ * This affects whether certain inspectable properties, like `numberOfPoints`, are
+ * still meaningful/editable.
+ */
+export function markLayersAsEdited(state: ApplicationState) {
+  const pageIndex = getCurrentPageIndex(state);
+  const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+  return produce(state, (draft) => {
+    layerIndexPaths.forEach((indexPath) => {
+      const page = draft.sketch.pages[pageIndex];
+      const layer = Layers.access(page, indexPath);
+      const pointList = draft.selectedControlPoint
+        ? [draft.selectedControlPoint.pointIndex]
+        : draft.selectedPointLists[layer.do_objectID];
+
+      if (
+        !Layers.isLayerWithEditedProperty(layer) ||
+        !pointList ||
+        pointList.length === 0
+      )
+        return;
+
+      layer.edited = true;
+    });
+  });
+}

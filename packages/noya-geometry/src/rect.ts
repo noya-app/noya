@@ -147,3 +147,30 @@ export function insetRect(rect: Rect, dx: number, dy: number): Rect {
     height: rect.height - dy * 2,
   };
 }
+
+export function unionRects(...rects: Rect[]): Rect {
+  function union(a: Rect, b: Rect) {
+    const minX = Math.min(a.x, b.x);
+    const minY = Math.min(a.y, b.y);
+    const maxX = Math.max(a.x + a.width, b.x + b.width);
+    const maxY = Math.max(a.y + a.height, b.y + b.height);
+
+    return createRectFromBounds({ minX, minY, maxX, maxY });
+  }
+
+  if (rects.length === 0) {
+    console.error('No rects to union');
+    return { x: 0, y: 0, width: 0, height: 0 };
+  }
+
+  return rects.reduce((acc, rect) => union(acc, rect), rects[0]);
+}
+
+export function computeBoundsFromPoints(points: Point[]): Rect {
+  const x = Math.min(...points.map((point) => point.x));
+  const y = Math.min(...points.map((point) => point.y));
+  const width = Math.max(...points.map((point) => point.x)) - x;
+  const height = Math.max(...points.map((point) => point.y)) - y;
+
+  return { x, y, width, height };
+}

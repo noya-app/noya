@@ -2,9 +2,9 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { sketchColorToRgba } from 'noya-designsystem';
 import { center, Size } from 'noya-geometry';
-import { uuid } from 'noya-utils';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
-import { Models } from 'noya-state';
+import { SketchModel } from 'noya-sketch-model';
+import { uuid } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
 import CanvasGridItem from './CanvasGridItem';
 
@@ -23,7 +23,7 @@ function RCKTextStylePreview({
   size: Size;
 }) {
   const layer = useMemo(() => {
-    const layer = produce(Models.text, (draft) => {
+    const layer = produce(SketchModel.text(), (draft) => {
       draft.do_objectID = uuid();
       draft.style = style;
       draft.attributedString.string = name;
