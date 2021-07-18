@@ -1,25 +1,16 @@
-import { CanvasKit } from 'canvaskit';
-import { VirtualConsole } from 'jsdom';
+import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { color, fill, rect } from 'noya-state';
 import { loadCanvasKit } from 'noya-renderer';
 
-let ck: CanvasKit;
-
-const originalVirtualConsole: VirtualConsole = global._virtualConsole;
+let CanvasKit: CanvasKitType;
 
 beforeAll(async () => {
-  global._virtualConsole = new VirtualConsole();
-
-  ck = await loadCanvasKit();
-});
-
-afterAll(() => {
-  global._virtualConsole = originalVirtualConsole;
+  CanvasKit = await loadCanvasKit();
 });
 
 test('converts color', async () => {
   expect(
-    color(ck, {
+    color(CanvasKit, {
       _class: 'color',
       red: 0.5,
       green: 0.5,
@@ -31,7 +22,7 @@ test('converts color', async () => {
 
 test('converts rect', async () => {
   expect(
-    rect(ck, {
+    rect(CanvasKit, {
       x: 10,
       y: 20,
       width: 30,
@@ -43,7 +34,7 @@ test('converts rect', async () => {
 test('converts fill', async () => {
   const frame = { x: 0, y: 0, width: 100, height: 100 };
   const paint = fill(
-    ck,
+    CanvasKit,
     {
       _class: 'fill',
       isEnabled: true,
