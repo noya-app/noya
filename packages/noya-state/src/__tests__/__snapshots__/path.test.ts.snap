@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`oval 1`] = `
+Array [
+  "move(50, 100)",
+  "cubic(77.61, 100, 100, 77.61, 100, 50)",
+  "cubic(100, 22.39, 77.61, 0, 50, 0)",
+  "cubic(22.39, 0, 0, 22.39, 0, 50)",
+  "cubic(0, 77.61, 22.39, 100, 50, 100)",
+  "close()",
+]
+`;
+
+exports[`rectangle 1`] = `
+Array [
+  "move(0, 0)",
+  "line(100, 0)",
+  "line(100, 100)",
+  "line(100, 100)",
+  "line(0, 100)",
+  "line(0, 100)",
+  "line(0, 0)",
+  "line(0, 0)",
+  "close()",
+]
+`;
+
+exports[`rounded rectangle 1`] = `
+Array [
+  "move(10, 0)",
+  "line(90, 0)",
+  "conic(100, 0, 100, 10, 0.71)",
+  "line(100, 90)",
+  "line(100, 90)",
+  "conic(100, 100, 90, 100, 0.71)",
+  "line(10, 100)",
+  "line(10, 100)",
+  "conic(0, 100, 0, 90, 0.71)",
+  "line(0, 10)",
+  "line(0, 10)",
+  "conic(0, 0, 10, 0, 0.71)",
+  "close()",
+]
+`;

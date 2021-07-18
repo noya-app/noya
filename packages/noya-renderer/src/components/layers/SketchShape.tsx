@@ -157,7 +157,13 @@ const SketchFillShadow = memo(function SketchFillShadow({
 });
 
 interface Props {
-  layer: Sketch.Rectangle | Sketch.Oval | Sketch.ShapePath;
+  layer:
+    | Sketch.Rectangle
+    | Sketch.Oval
+    | Sketch.Triangle
+    | Sketch.Star
+    | Sketch.Polygon
+    | Sketch.ShapePath;
 }
 
 export default memo(function SketchShape({ layer }: Props) {

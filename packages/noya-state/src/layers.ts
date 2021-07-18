@@ -45,6 +45,12 @@ export const isPointsLayer = (layer: Sketch.AnyLayer): layer is PointsLayer => {
   return 'points' in layer;
 };
 
+export const isLayerWithEditedProperty = <T extends Sketch.AnyLayer>(
+  layer: Sketch.AnyLayer,
+): layer is T & { edited: boolean } => {
+  return 'edited' in layer;
+};
+
 export const isPageLayer = (layer: Sketch.AnyLayer): layer is Sketch.Page => {
   return layer._class === 'page';
 };
