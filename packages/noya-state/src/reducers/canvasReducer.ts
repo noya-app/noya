@@ -16,6 +16,7 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
@@ -232,13 +233,7 @@ export function canvasReducer(
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
-        if (layer.frame.height === 0) {
-          layer.frame.height = 1;
-        }
-
-        if (layer.frame.width === 0) {
-          layer.frame.width = 1;
-        }
+        fixZeroLayerDimensions(layer);
 
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),

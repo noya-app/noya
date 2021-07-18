@@ -39,7 +39,6 @@ export interface Props {
   isFlippedVertical: boolean;
   isFlippedHorizontal: boolean;
   onSetWidth: (value: number, mode: SetNumberMode) => void;
-  onSetRotation: (value: number, mode: SetNumberMode) => void;
   onSetIsFlippedVertical: (value: boolean) => void;
   onSetIsFlippedHorizontal: (value: boolean) => void;
 }
@@ -48,7 +47,6 @@ export default function LineInspector({
   width,
   isFlippedVertical,
   isFlippedHorizontal,
-  onSetRotation,
   onSetWidth,
   onSetIsFlippedVertical,
   onSetIsFlippedHorizontal,
@@ -91,12 +89,28 @@ export default function LineInspector({
       endPoint.x - startPoint.x,
     );
 
-    const lineRotation = toDegrees(theta);
-
-    return clampRotation(lineRotation - layer.rotation);
+    return toDegrees(theta);
   };
 
-  const rotation = getMultiNumberValue(selectedLayers.map(findLineRotation));
+  const rotation = getMultiNumberValue(
+    selectedLayers.map((layer) => {
+      return clampRotation(findLineRotation(layer) - layer.rotation);
+    }),
+  );
+
+  // TODO: Handle setting rotation for multiple layers using the theta for each layer
+  const handleSetRotation = useCallback(
+    (value: number, mode: SetNumberMode) => {
+      dispatch(
+        'setLayerRotation',
+        mode === 'replace'
+          ? value - findLineRotation(selectedLayers[0])
+          : value,
+        mode,
+      );
+    },
+    [dispatch, selectedLayers],
+  );
 
   const handleSetStartX = useCallback(
     (value: number, mode: SetNumberMode) => {
@@ -165,7 +179,11 @@ export default function LineInspector({
       <Row>
         <DimensionInput value={width} onSetValue={onSetWidth} label="↔" />
         <Spacer.Horizontal size={16} />
-        <DimensionInput value={rotation} onSetValue={onSetRotation} label="°" />
+        <DimensionInput
+          value={rotation}
+          onSetValue={handleSetRotation}
+          label="°"
+        />
         <Spacer.Horizontal size={16} />
         <FlipControls
           isFlippedVertical={isFlippedVertical}

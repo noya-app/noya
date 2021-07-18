@@ -108,13 +108,6 @@ export default memo(function SketchFileRenderer() {
     strokeWidth: 2,
   });
 
-  const omitBoundingRect = () => {
-    return (
-      state.selectedObjects.length === 1 &&
-      Selectors.getSelectedLineLayer(state)
-    );
-  };
-
   const boundingRect = useMemo(
     () =>
       Selectors.getBoundingRect(
@@ -525,16 +518,23 @@ export default memo(function SketchFileRenderer() {
           </>
         ) : (
           <>
-            {!omitBoundingRect() && boundingRect && (
-              <BoundingRect
-                rect={boundingRect}
-                selectionPaint={selectionPaint}
-              />
-            )}
-            {state.selectedObjects.length > 1 &&
-              boundingPoints.map((points: Point[], index: number) => (
-                <Polyline key={index} points={points} paint={selectionPaint} />
-              ))}
+            {(state.selectedObjects.length > 1 ||
+              !Selectors.getSelectedLineLayer(state)) &&
+              boundingRect && (
+                <>
+                  <BoundingRect
+                    rect={boundingRect}
+                    selectionPaint={selectionPaint}
+                  />
+                  {boundingPoints.map((points: Point[], index: number) => (
+                    <Polyline
+                      key={index}
+                      points={points}
+                      paint={selectionPaint}
+                    />
+                  ))}
+                </>
+              )}
             {!isEditingPath && highlightedSketchLayer}
             {smartSnapGuides}
             {quickMeasureGuides}

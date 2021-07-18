@@ -146,7 +146,6 @@ export default memo(function Inspector() {
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}
             isFlippedVertical={isFlippedVertical}
-            onSetRotation={handleSetRotation}
             onSetWidth={handleSetWidth}
             onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
             onSetIsFlippedVertical={handleSetIsFlippedVertical}

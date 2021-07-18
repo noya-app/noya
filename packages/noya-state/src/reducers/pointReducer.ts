@@ -109,30 +109,8 @@ export function pointReducer(
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-      // const page = Selectors.getCurrentPage(state);
-      // const layer = Layers.access(page, layerIndexPaths[0]);
-
       return produce(state, (draft) => {
         const delta = type === 'setPointX' ? { x: amount } : { y: amount };
-
-        // if (
-        //   direction &&
-        //   Layers.isPointsLayer(layer) &&
-        //   layerIndexPaths.length === 1
-        // ) {
-        //   selectedPointLists =
-        //     direction === 'start'
-        //       ? {
-        //           [layer.do_objectID]: [0],
-        //         }
-        //       : {
-        //           [layer.do_objectID]: [1],
-        //         };
-        // }
-
-        // const pointList = selectedPointLists
-        //   ? selectedPointLists
-        //   : draft.selectedPointLists;
 
         moveSelectedPoints(
           selectedPointList,

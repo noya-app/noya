@@ -2,6 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import { Draft } from 'immer';
 import { distance, Point, Rect } from 'noya-geometry';
+import { PointString } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -34,26 +35,6 @@ export function isLine(points: Sketch.CurvePoint[]) {
     points.length === 2 &&
     points.every((point) => point.curveMode === Sketch.CurveMode.Straight)
   );
-}
-
-export function isDegeneratePath(
-  CanvasKit: CanvasKit,
-  points: Sketch.CurvePoint[],
-) {
-  const bounds = path(
-    CanvasKit,
-    points,
-    { x: 0, y: 0, width: 1, height: 1 },
-    false,
-  ).computeTightBounds();
-
-  if (bounds.some(isNaN)) return true;
-
-  const [minX, minY, maxX, maxY] = bounds;
-  const width = maxX - minX;
-  const height = maxY - minY;
-
-  return width === 0 || height === 0;
 }
 
 export const computeNewBoundingRect = (
@@ -291,19 +272,41 @@ export const moveSelectedPoints = (
       ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
     };
 
-    if (draftLayer.frame.height === 0) {
-      draftLayer.frame.height = 1;
-    }
-
-    if (draftLayer.frame.width === 0) {
-      draftLayer.frame.width = 1;
-    }
+    fixZeroLayerDimensions(draftLayer);
 
     // Transform back to the range [0, 1], using the new bounds
     draftLayer.points = decodedPoints.map((decodedCurvePoint) =>
       encodeCurvePoint(decodedCurvePoint, draftLayer.frame),
     );
   });
+};
+
+export const fixZeroLayerDimensions = (layer: PointsLayer) => {
+  if (layer.frame.height === 0) {
+    layer.frame.height = 1;
+    layer.points.forEach((point) => {
+      (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
+        point[key] = PointString.encode({
+          x: PointString.decode(point[key]).x,
+          y: 0.5,
+        });
+      });
+    });
+    layer.frame.y -= 0.5;
+  }
+
+  if (layer.frame.width === 0) {
+    layer.frame.width = 1;
+    layer.points.forEach((point) => {
+      (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
+        point[key] = PointString.encode({
+          x: 0.5,
+          y: PointString.decode(point[key]).y,
+        });
+      });
+    });
+    layer.frame.x -= 0.5;
+  }
 };
 
 export const moveControlPoints = (
