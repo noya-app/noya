@@ -1,13 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import {
-  AffineTransform,
-  createBounds,
-  normalizeRect,
-  rectContainsPoint,
-  transformRect,
-} from 'noya-geometry';
+import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -21,18 +15,17 @@ import * as Layers from '../layers';
 import {
   addToParentLayer,
   computeNewBoundingRect,
-  deleteLayers,
   EncodedPageMetadata,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
-  getLayerTransformAtIndexPath,
-  getParentLayer,
+  getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
+  moveLayer,
   moveSelectedPoints,
 } from '../selectors/selectors';
 import {
@@ -65,7 +58,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
-  | [type: 'moveLayersIntoParentAtPoint', LayersIds: string, point: Point]
+  | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
       type: 'interaction',
@@ -275,67 +268,13 @@ export function canvasReducer(
       });
     }
     case 'moveLayersIntoParentAtPoint': {
-      const [, , point] = action;
+      const [, point] = action;
 
-      const pageIndex = getCurrentPageIndex(state);
-      const indexPaths = getSelectedLayerIndexPathsExcludingDescendants(state);
+      const page = getCurrentPage(state);
+      const parentId =
+        getParentLayerAtPoint(page, point)?.do_objectID ?? page.do_objectID;
 
-      const parentIndexPath = Layers.findIndexPath(
-        state.sketch.pages[pageIndex],
-        (layer) =>
-          (Layers.isArtboard(layer) || Layers.isSymbolMaster(layer)) &&
-          rectContainsPoint(layer.frame, point),
-      );
-
-      return produce(state, (draft) => {
-        const draftPage = draft.sketch.pages[pageIndex];
-
-        const layerInfo = indexPaths.map((indexPath) => ({
-          layer: Layers.access(draftPage, indexPath) as Layers.ChildLayer,
-          parent: getParentLayer(draftPage, indexPath),
-          transform: getLayerTransformAtIndexPath(draftPage, indexPath),
-        }));
-
-        const parent = parentIndexPath
-          ? (Layers.access(draftPage, parentIndexPath) as Layers.ParentLayer)
-          : draftPage;
-
-        if (
-          layerInfo.every((l) => l.parent === parent) ||
-          layerInfo.some(
-            (l) => Layers.isArtboard(l.layer) || Layers.isSymbolMaster(l.layer),
-          )
-        )
-          return;
-
-        deleteLayers(indexPaths, draftPage);
-        const parentTransform = getLayerTransformAtIndexPath(
-          draftPage,
-          parentIndexPath ? parentIndexPath : [],
-          undefined,
-          'includeLast',
-        );
-
-        const adjustedLayers = layerInfo.map(({ layer, transform }) => {
-          // First we undo the original parent's transform, then we apply the new parent's transform
-          const newTransform = AffineTransform.multiply(
-            transform,
-            parentTransform.invert(),
-          );
-
-          return produce(layer, (draftLayer) => {
-            draftLayer.frame = {
-              ...draftLayer.frame,
-              ...transformRect(draftLayer.frame, newTransform),
-            };
-          });
-        });
-
-        const destinationIndex = parent.layers.length;
-        parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
-
-        return draft;
-      });
+      return moveLayer(state, state.selectedObjects, parentId, 'inside');
     }
     case 'interaction': {
       const page = getCurrentPage(state);
