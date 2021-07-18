@@ -141,7 +141,17 @@ export default memo(function Inspector() {
               <PointCoordinatesInspector />
             )}
           </PointControlsContainer>
-        ) : !hasLineLayer ? (
+        ) : hasLineLayer ? (
+          <LineInspector
+            {...dimensionsInspectorProps}
+            isFlippedHorizontal={isFlippedHorizontal}
+            isFlippedVertical={isFlippedVertical}
+            onSetRotation={handleSetRotation}
+            onSetWidth={handleSetWidth}
+            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+            onSetIsFlippedVertical={handleSetIsFlippedVertical}
+          />
+        ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}
@@ -149,18 +159,6 @@ export default memo(function Inspector() {
             onSetRotation={handleSetRotation}
             onSetX={handleSetX}
             onSetY={handleSetY}
-            onSetWidth={handleSetWidth}
-            onSetHeight={handleSetHeight}
-            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
-            onSetIsFlippedVertical={handleSetIsFlippedVertical}
-          />
-        ) : (
-          <LineInspector
-            {...dimensionsInspectorProps}
-            isFlippedHorizontal={isFlippedHorizontal}
-            isFlippedVertical={isFlippedVertical}
-            hasLineLayer={hasLineLayer}
-            onSetRotation={handleSetRotation}
             onSetWidth={handleSetWidth}
             onSetHeight={handleSetHeight}
             onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}

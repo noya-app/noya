@@ -220,10 +220,12 @@ export function canvasReducer(
           point,
         };
 
-        const newDecodedPoints =
-          pointIndexPath.pointIndex === 0
-            ? [decodedPoint, ...decodedPoints]
-            : [...decodedPoints, decodedPoint];
+        const isLastPointSelected =
+          pointIndexPath.pointIndex === layer.points.length - 1;
+
+        const newDecodedPoints = isLastPointSelected
+          ? [...decodedPoints, decodedPoint]
+          : [decodedPoint, ...decodedPoints];
 
         layer.frame = {
           ...layer.frame,
@@ -242,8 +244,9 @@ export function canvasReducer(
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
 
-        draft.selectedPointLists[layer.do_objectID] =
-          pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+        draft.selectedPointLists[layer.do_objectID] = isLastPointSelected
+          ? [layer.points.length - 1]
+          : [0];
 
         draft.selectedControlPoint = undefined;
         return;
