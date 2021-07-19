@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
+import { Path } from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
@@ -11,11 +12,14 @@ import {
 } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
+import { SketchModel } from 'noya-sketch-model';
 import {
   createDrawingLayer,
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
+  findMatchingSegmentPoints,
+  getSelectedLayerIndexPathsExcludingDescendants,
   Layers,
   Primitives,
   Selectors,
@@ -23,9 +27,10 @@ import {
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { ALL_DIRECTIONS, getGuides } from '../guides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
-import { ALL_DIRECTIONS, getGuides } from '../guides';
+import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
@@ -36,8 +41,6 @@ import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
-import { MeasurementGuide, ExtensionGuide } from './Guides';
-import { SketchModel } from 'noya-sketch-model';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -262,6 +265,59 @@ export default memo(function SketchFileRenderer() {
     );
   }, [interactionState, page, state]);
 
+  const maybeAddPointToPath = useMemo(() => {
+    if (interactionState.type !== 'maybeAddPointToLine') return;
+
+    const { point } = interactionState;
+    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+      state,
+    );
+
+    //layerIndexPaths.forEach((layerIndex, index) => {
+    const layer = Layers.access(page, layerIndexPaths[0]);
+
+    if (!Layers.isPointsLayer(layer)) return;
+
+    let segmentsArr: Sketch.CurvePoint[][] = [];
+    layer.points.forEach(function (point, index) {
+      const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
+      const item = [point, layer.points[nextPoint]];
+      segmentsArr.push(item);
+    });
+
+    let segmentPoints: Sketch.CurvePoint[] | undefined = undefined;
+    let segmentPath: Path | undefined = undefined;
+
+    for (let i = 0; i < segmentsArr.length; i++) {
+      const segmentToAddPoint = findMatchingSegmentPoints(
+        CanvasKit,
+        layer,
+        point,
+        segmentsArr[i],
+      );
+      if (segmentToAddPoint) {
+        segmentPoints = segmentToAddPoint.segmentPoints;
+        segmentPath = segmentToAddPoint.segmentPath;
+        break;
+      }
+    }
+    //});
+    return (
+      <>
+        {segmentPoints && layer.frame && (
+          <>
+            <PseudoPoint point={point} />
+            <PseudoPathLine
+              path={segmentPath}
+              points={segmentPoints}
+              frame={layer.frame}
+            />
+          </>
+        )}
+      </>
+    );
+  }, [CanvasKit, interactionState, page, state]);
+
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
     const selectedLayerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
@@ -356,6 +412,7 @@ export default memo(function SketchFileRenderer() {
           <>
             {editablePaths}
             {editPathPseudoElements}
+            {maybeAddPointToPath}
           </>
         ) : (
           <>

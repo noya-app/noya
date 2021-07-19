@@ -21,6 +21,7 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  findMatchingSegmentPoints,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
@@ -29,6 +30,7 @@ import {
   getIndexPathOfOpenShapeLayer,
   getParentLayer,
   getParentLayerAtPoint,
+  getPointToAddToCurve,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
@@ -65,6 +67,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'appendPointToPath', point: Point]
   | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
@@ -314,6 +317,105 @@ export function canvasReducer(
         return state;
 
       return moveLayer(state, state.selectedObjects, parentId, 'inside');
+    }
+    case 'appendPointToPath': {
+      const [, point] = action;
+      const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+        state,
+      );
+
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          layerIndexPaths[0],
+        );
+
+        if (!layer || !Layers.isPointsLayer(layer)) return;
+
+        let segmentsArr: Sketch.CurvePoint[][] = [];
+        layer.points.forEach(function (point, index) {
+          const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
+          const item = [point, layer.points[nextPoint]];
+          segmentsArr.push(item);
+        });
+
+        const decodedPoints = layer.points.map((curvePoint) =>
+          decodeCurvePoint(curvePoint, layer.frame),
+        );
+
+        let indexToSplice = undefined;
+        let segmentToAddPoint = undefined;
+        for (let i = 0; i < segmentsArr.length; i++) {
+          segmentToAddPoint = findMatchingSegmentPoints(
+            CanvasKit,
+            layer,
+            point,
+            segmentsArr[i],
+          );
+          if (segmentToAddPoint) {
+            indexToSplice = layer.points.findIndex(
+              (point) => point === segmentsArr[i][1],
+            );
+            break;
+          }
+        }
+        if (!indexToSplice) return;
+
+        const decodedPoint: DecodedCurvePoint = {
+          _class: 'curvePoint',
+          cornerRadius: 0,
+          curveFrom: point,
+          curveTo: point,
+          hasCurveFrom: false,
+          hasCurveTo: false,
+          curveMode: Sketch.CurveMode.Straight,
+          point: point,
+        };
+
+        const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
+        if (!segmentToAddPoint) return;
+
+        const posTanPoint = getPointToAddToCurve(
+          CanvasKit,
+          layer,
+          encodedPoint,
+          segmentToAddPoint.segmentPoints,
+        )?.posTanPoint;
+
+        if (!posTanPoint) return;
+
+        const newDecodedPoints = [...decodedPoints];
+
+        const newPoint: DecodedCurvePoint = {
+          _class: 'curvePoint',
+          cornerRadius: 0,
+          curveFrom: {
+            x: posTanPoint[0],
+            y: posTanPoint[1],
+          },
+          curveTo: {
+            x: posTanPoint[0],
+            y: posTanPoint[1],
+          },
+          hasCurveFrom: false,
+          hasCurveTo: false,
+          curveMode: Sketch.CurveMode.Mirrored,
+          point: { x: posTanPoint[0], y: posTanPoint[1] },
+        };
+
+        newDecodedPoints.splice(indexToSplice, 0, newPoint);
+
+        layer.frame = {
+          ...layer.frame,
+          ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
+        };
+
+        layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
+          encodeCurvePoint(decodedCurvePoint, layer.frame),
+        );
+      });
     }
     case 'interaction': {
       const page = getCurrentPage(state);

@@ -65,7 +65,8 @@ export type InteractionAction =
   | [type: 'movingPoint', origin: Point, current: Point]
   | [type: 'movingControlPoint', origin: Point, current: Point]
   | [type: 'updateMovingPoint', origin: Point, current: Point]
-  | [type: 'updateMovingControlPoint', origin: Point, current: Point];
+  | [type: 'updateMovingControlPoint', origin: Point, current: Point]
+  | [type: 'maybeAddPointToLine', current: Point];
 
 export type InteractionState =
   | {
@@ -153,6 +154,7 @@ export type InteractionState =
     }
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
+  | { type: 'maybeAddPointToLine'; point: Point }
   | { type: 'panning'; previous: Point; next: Point };
 
 export type InteractionType = InteractionState['type'];
