@@ -410,6 +410,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'editPath': {
+          dispatch('interaction', ['maybeAddPointToLine', point]);
           dispatch('interaction', ['resetEditPath', point]);
           break;
         }

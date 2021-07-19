@@ -12,6 +12,7 @@ import {
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
+import { path } from '../primitives/path';
 import {
   addToParentLayer,
   computeNewBoundingRect,
@@ -334,6 +335,30 @@ export function canvasReducer(
                   index === 0 ? [0] : [];
               }
             });
+            break;
+          }
+          case 'maybeAddPointToLine': {
+            const { point } = interactionState;
+            layerIndexPaths.forEach((layerIndex, index) => {
+              const layer = Layers.access(page, layerIndex);
+
+              if (Layers.isPointsLayer(layer)) {
+                const decodedPoints = layer.points.map((point) =>
+                  decodeCurvePoint(point, layer.frame),
+                );
+                const isOnPath = path(
+                  CanvasKit,
+                  decodedPoints.map((decodedCurvePoint) =>
+                    encodeCurvePoint(decodedCurvePoint, layer.frame),
+                  ),
+                  layer.frame,
+                  layer.isClosed,
+                ).contains(point.x, point.y);
+
+                if (isOnPath) return;
+              }
+            });
+
             break;
           }
           case 'moving': {
