@@ -19,6 +19,7 @@ import {
   Layers,
   Point,
   SelectedControlPoint,
+  SelectedGradientPoint,
   SelectedPoint,
   Selectors,
   ShapeType,
@@ -375,7 +376,31 @@ export default memo(function Canvas() {
               );
             }
 
-            dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
+            const gradientsPoints = Selectors.getGradientLinesMap(state);
+
+            const selectedGradientPoint = gradientsPoints.flatMap(
+              (gradientPoint, index) => {
+                if (!gradientPoint) return [];
+                if (Selectors.isPointInRange(gradientPoint.from, point))
+                  return [index, 'from'];
+                if (Selectors.isPointInRange(gradientPoint.to, point))
+                  return [index, 'to'];
+                return [];
+              },
+            );
+
+            if (selectedGradientPoint.length > 1) {
+              const [id, index] = selectedGradientPoint;
+
+              const gradientPoint = {
+                layerId: id,
+                pointIndex: index,
+              } as SelectedGradientPoint;
+
+              dispatch('interaction', ['editGradient', gradientPoint]);
+            } else {
+              dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
+            }
           } else {
             dispatch('selectLayer', undefined);
 
@@ -394,6 +419,26 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'moveGradientPoint': {
+          //TODO: Handle points outside of frame
+          // TODO: Handle correct pointIndex
+          const boundingRect = Selectors.getSelectedRect(state);
+
+          if (!state.interactionState.point || !boundingRect) return;
+
+          const pointIndex = state.interactionState.point.pointIndex;
+
+          if (typeof pointIndex === 'string') {
+            const x = (point.x - boundingRect.x) / boundingRect.width;
+            const y = (point.y - boundingRect.y) / boundingRect.height;
+
+            if (pointIndex === 'from')
+              dispatch('setFillGradientFrom', 0, `{${x}, ${y}}`);
+            else dispatch('setFillGradientTo', 0, `{${x}, ${y}}`);
+          }
+
+          break;
+        }
         case 'insertingSymbol': {
           dispatch('interaction', [
             'insertingSymbol',
@@ -667,7 +712,8 @@ export default memo(function Canvas() {
           break;
         }
         case 'maybeMove':
-        case 'maybeScale': {
+        case 'maybeScale':
+        case 'moveGradientPoint': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);

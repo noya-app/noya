@@ -315,6 +315,10 @@ export function canvasReducer(
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
         switch (interactionState.type) {
+          case 'moveGradientPoint': {
+            draft.selectedGradientPoint = interactionState.point;
+            break;
+          }
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
 

@@ -31,7 +31,7 @@ import {
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Path, Polyline, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -503,6 +503,48 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
+  const stroke = useStroke({ color: dragHandleStroke, strokeWidth: 1 });
+  const circleStroke = useStroke({ color: '#000', strokeWidth: 1 });
+
+  const points = useMemo(() => {
+    const gradientsPoints = Selectors.getGradientLinesMap(state);
+
+    return (
+      <>
+        {gradientsPoints.map((points) => {
+          if (!points) return null;
+
+          const path = new CanvasKit.Path();
+
+          path.addOval(
+            CanvasKit.XYWHRect(
+              points.from.x - Selectors.POINT_RADIUS,
+              points.from.y - Selectors.POINT_RADIUS,
+              Selectors.POINT_RADIUS * 2,
+              Selectors.POINT_RADIUS * 2,
+            ),
+          );
+
+          path.addOval(
+            CanvasKit.XYWHRect(
+              points.to.x - Selectors.POINT_RADIUS,
+              points.to.y - Selectors.POINT_RADIUS,
+              Selectors.POINT_RADIUS * 2,
+              Selectors.POINT_RADIUS * 2,
+            ),
+          );
+
+          return (
+            <>
+              <Polyline points={[points.from, points.to]} paint={stroke} />
+              <Path path={path} paint={circleStroke} />
+            </>
+          );
+        })}
+      </>
+    );
+  }, [state, stroke, CanvasKit, circleStroke]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -511,6 +553,7 @@ export default memo(function SketchFileRenderer() {
         {symbol && (
           <SketchArtboardContent layer={symbol} showBackground={false} />
         )}
+        {points}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
         ) : isEditingPath ? (

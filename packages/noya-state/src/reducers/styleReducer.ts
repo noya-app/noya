@@ -363,6 +363,8 @@ export function styleReducer(
     case 'setFillGradientPosition':
     case 'setFillGradientType':
     case 'addFillGradientStop':
+    case 'setFillGradientFrom':
+    case 'setFillGradientTo':
     case 'deleteFillGradientStop':
     case 'setFillGradient': {
       const [, index] = action;

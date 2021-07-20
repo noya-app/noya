@@ -317,3 +317,48 @@ export function getBoundingRectMap(
 
   return rectMap;
 }
+
+export function getGradientLinesMap(state: ApplicationState) {
+  const page = getCurrentPage(state);
+  const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+  const boundingRects = getBoundingRectMap(page, state.selectedObjects, {
+    clickThroughGroups: true,
+    includeArtboardLayers: false,
+    includeHiddenLayers: false,
+  });
+
+  return layerIndexPaths.map((indexPath) => {
+    const layer = Layers.access(page, indexPath);
+    const boundingRect = boundingRects[layer.do_objectID];
+
+    if (
+      !boundingRect ||
+      !layer.style ||
+      !layer.style.fills ||
+      !layer.style.fills[0] ||
+      layer.style.fills[0].fillType !== 1
+    )
+      return null;
+
+    const gradient = layer.style.fills[0].gradient;
+
+    let start = JSON.parse(
+      gradient.from.replace('{', '{"x":').replace(',', ', "y":'),
+    ) as Point;
+    let end = JSON.parse(
+      gradient.to.replace('{', '{"x":').replace(',', ', "y":'),
+    ) as Point;
+
+    return {
+      from: {
+        x: boundingRect.width * start.x + boundingRect.x,
+        y: boundingRect.height * start.y + boundingRect.y,
+      },
+      to: {
+        x: boundingRect.width * end.x + boundingRect.x,
+        y: boundingRect.height * end.y + boundingRect.y,
+      },
+    };
+  });
+}

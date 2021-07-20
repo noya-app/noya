@@ -4,6 +4,7 @@ import { createRect, Size } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import type { PageLayer } from '..';
 import { Point, Rect, UUID } from '../types';
+import { SelectedGradientPoint } from './applicationReducer';
 import { defaultFillColor } from './styleReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
@@ -70,7 +71,8 @@ export type InteractionAction =
   | [type: 'movingPoint', origin: Point, current: Point]
   | [type: 'movingControlPoint', origin: Point, current: Point]
   | [type: 'updateMovingPoint', origin: Point, current: Point]
-  | [type: 'updateMovingControlPoint', origin: Point, current: Point];
+  | [type: 'updateMovingControlPoint', origin: Point, current: Point]
+  | [type: 'editGradient', point?: SelectedGradientPoint];
 
 export type InteractionState =
   | {
@@ -159,7 +161,8 @@ export type InteractionState =
     }
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
-  | { type: 'panning'; previous: Point; next: Point };
+  | { type: 'panning'; previous: Point; next: Point }
+  | { type: 'moveGradientPoint'; point?: SelectedGradientPoint };
 
 export type InteractionType = InteractionState['type'];
 
@@ -471,6 +474,14 @@ export function interactionReducer(
         type: 'panning',
         previous: state.next,
         next: point,
+      };
+    }
+    case 'editGradient': {
+      const [, point] = action;
+
+      return {
+        type: 'moveGradientPoint',
+        point,
       };
     }
     case 'reset': {

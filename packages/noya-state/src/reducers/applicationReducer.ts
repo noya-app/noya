@@ -50,6 +50,11 @@ export type SelectedControlPoint = {
   controlPointType: controlPointType;
 };
 
+export type SelectedGradientPoint = {
+  layerId: string;
+  pointIndex: number | 'from' | 'to';
+};
+
 export type SelectedPointLists = Record<string, number[]>;
 
 export type ApplicationState = {
@@ -61,6 +66,7 @@ export type ApplicationState = {
   selectedObjects: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
+  selectedGradientPoint?: SelectedGradientPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
   sketch: SketchFile;
 };
@@ -197,7 +203,11 @@ export function applicationReducer(
     case 'setPatternFillType':
     case 'setPatternTileScale':
     case 'setFillImage':
-    case 'setFillContextSettingsOpacity': {
+    case 'setFillContextSettingsOpacity':
+    case 'setFillGradientFrom':
+    case 'setBorderGradientFrom':
+    case 'setFillGradientTo':
+    case 'setBorderGradientTo': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -360,6 +370,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedPointLists: {},
     selectedControlPoint: undefined,
+    selectedGradientPoint: undefined,
     selectedThemeTab: {
       swatches: { ids: [], groupName: '' },
       layerStyles: { ids: [], groupName: '' },
