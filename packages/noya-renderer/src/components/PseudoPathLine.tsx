@@ -5,21 +5,26 @@ import React from 'react';
 import { useTheme } from 'styled-components';
 import { Path, useCanvasKit } from '..';
 import { Primitives } from 'noya-state';
+import { Path as PathType } from 'canvaskit';
 
 interface EditablePathPointProps {
-  points: CurvePoint[];
   frame: Sketch.Rect;
+  points: CurvePoint[];
+  path?: PathType;
 }
 
 export default function PseudoPathLine({
   points,
   frame,
+  path,
 }: EditablePathPointProps) {
   const CanvasKit = useCanvasKit();
   const { primary } = useTheme().colors;
   const stroke = useStroke({ color: primary });
 
-  const path = Primitives.path(CanvasKit, points, frame, false);
+  const pseudoPath = path
+    ? path
+    : Primitives.path(CanvasKit, points, frame, false);
 
-  return <Path path={path} paint={stroke} />;
+  return <Path path={pseudoPath} paint={stroke} />;
 }

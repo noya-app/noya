@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
+import { Path } from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
@@ -16,13 +17,13 @@ import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
   DecodedCurvePoint,
   encodeCurvePoint,
+  findMatchingSegmentPoints,
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSnappingPairs,
   Layers,
-  path,
   Primitives,
   Rect,
   Selectors,
@@ -442,66 +443,46 @@ export default memo(function SketchFileRenderer() {
     const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
       state,
     );
-    let isOnLine = false;
-    let points: Point[] | undefined = undefined;
-    let frame: Sketch.Rect | undefined = undefined;
 
     //layerIndexPaths.forEach((layerIndex, index) => {
     const layer = Layers.access(page, layerIndexPaths[0]);
 
-    if (Layers.isPointsLayer(layer)) {
-      // const decodedPoints = layer.points.map((point) =>
-      //   decodeCurvePoint(point, layer.frame),
-      // );
+    if (!Layers.isPointsLayer(layer)) return;
 
-      // const pathMeasure = new CanvasKit.ContourMeasureIter(
-      //   path(CanvasKit, layer.points, layer.frame, layer.isClosed),
-      //   false,
-      //   1,
-      // );
+    let segmentsArr: Sketch.CurvePoint[][] = [];
+    layer.points.forEach(function (point, index) {
+      const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
+      const item = [point, layer.points[nextPoint]];
+      segmentsArr.push(item);
+    });
 
-      const segmentsArr: any[] = [];
-      layer.points.forEach(function (point, index) {
-        const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
-        const item = [point, layer.points[nextPoint]];
-        segmentsArr.push(item);
-      });
+    let segmentPoints: Sketch.CurvePoint[] | undefined = undefined;
+    let segmentPath: Path | undefined = undefined;
 
-      segmentsArr.forEach(function (segment) {
-        //console.log({ segment });
-        const segmentPath = path(
-          CanvasKit,
-          segment,
-          layer.frame,
-          layer.isClosed,
-        );
-        isOnLine = segmentPath.contains(point.x, point.y);
-        //console.log({ segmentPath });
-        if (isOnLine) {
-          const segmentMeasure = new CanvasKit.ContourMeasureIter(
-            segmentPath,
-            false,
-            1,
-          );
-          const segmentLength = segmentMeasure.next()?.length();
-          if (!segmentLength) return;
-
-          // const pathSegment = pathMeasure
-          //   .next()
-          //   ?.getSegment(0, segmentLength, false);
-          //console.log(pathSegment);
-        }
-        points = segment;
-        frame = layer.frame;
-      });
+    for (let i = 0; i < segmentsArr.length; i++) {
+      const segmentToAddPoint = findMatchingSegmentPoints(
+        CanvasKit,
+        layer,
+        point,
+        segmentsArr[i],
+      );
+      if (segmentToAddPoint) {
+        segmentPoints = segmentToAddPoint.segmentPoints;
+        segmentPath = segmentToAddPoint.segmentPath;
+        break;
+      }
     }
     //});
     return (
       <>
-        {isOnLine && points && frame && (
+        {segmentPoints && layer.frame && (
           <>
-            <PseudoPoint point={interactionState.point} />
-            <PseudoPathLine points={points} frame={layer.frame} />
+            <PseudoPoint point={point} />
+            <PseudoPathLine
+              path={segmentPath}
+              points={segmentPoints}
+              frame={layer.frame}
+            />
           </>
         )}
       </>

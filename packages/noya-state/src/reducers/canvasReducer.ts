@@ -16,6 +16,7 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  findMatchingSegmentPoints,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
@@ -60,6 +61,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'appendPointToPath', point: Point]
   | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
@@ -295,6 +297,73 @@ export function canvasReducer(
 
       return moveLayer(state, state.selectedObjects, parentId, 'inside');
     }
+    case 'appendPointToPath': {
+      const [, point] = action;
+      const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+        state,
+      );
+
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          layerIndexPaths[0],
+        );
+
+        if (!layer || !Layers.isPointsLayer(layer)) return;
+
+        let segmentsArr: Sketch.CurvePoint[][] = [];
+        layer.points.forEach(function (point, index) {
+          const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
+          const item = [point, layer.points[nextPoint]];
+          segmentsArr.push(item);
+        });
+
+        let indexToSplice = 0;
+        for (let i = 0; i < segmentsArr.length; i++) {
+          const segmentToAddPoint = findMatchingSegmentPoints(
+            CanvasKit,
+            layer,
+            point,
+            segmentsArr[i],
+          );
+          if (segmentToAddPoint) {
+            indexToSplice = layer.points.findIndex(
+              (point) => point === segmentsArr[i][0],
+            );
+            break;
+          }
+        }
+
+        const decodedPoints = layer.points.map((curvePoint) =>
+          decodeCurvePoint(curvePoint, layer.frame),
+        );
+
+        const decodedPoint: DecodedCurvePoint = {
+          _class: 'curvePoint',
+          cornerRadius: 0,
+          curveFrom: point,
+          curveTo: point,
+          hasCurveFrom: false,
+          hasCurveTo: false,
+          curveMode: Sketch.CurveMode.Straight,
+          point,
+        };
+
+        const newDecodedPoints = [...decodedPoints];
+        newDecodedPoints.splice(indexToSplice, 0, decodedPoint);
+
+        layer.frame = {
+          ...layer.frame,
+          ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
+        };
+
+        layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
+          encodeCurvePoint(decodedCurvePoint, layer.frame),
+        );
+      });
+    }
     case 'interaction': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
@@ -334,59 +403,6 @@ export function canvasReducer(
                   index === 0 ? [0] : [];
               }
             });
-            break;
-          }
-          case 'maybeAddPointToLine': {
-            //const { point } = interactionState;
-            // layerIndexPaths.forEach((layerIndex, index) => {
-            //   const layer = Layers.access(page, layerIndex);
-
-            //   if (Layers.isPointsLayer(layer)) {
-            //     const decodedPoints = layer.points.map((point) =>
-            //       decodeCurvePoint(point, layer.frame),
-            //     );
-
-            //     const pathMeasure = new CanvasKit.ContourMeasureIter(
-            //       path(CanvasKit, layer.points, layer.frame, layer.isClosed),
-            //       false,
-            //       1,
-            //     );
-
-            //     const segmentsArr: any[] = [];
-            //     layer.points.forEach(function (point, index) {
-            //       const nextPoint =
-            //         index === layer.points.length - 1 ? 0 : index + 1;
-            //       const item = [point, layer.points[nextPoint]];
-            //       segmentsArr.push(item);
-            //     });
-
-            //     segmentsArr.forEach(function (segment) {
-            //       const segmentPath = path(
-            //         CanvasKit,
-            //         segment,
-            //         layer.frame,
-            //         layer.isClosed,
-            //       );
-            //       const isOnLine = segmentPath.contains(point.x, point.y);
-
-            //       if (isOnLine) {
-            //         const segmentMeasure = new CanvasKit.ContourMeasureIter(
-            //           segmentPath,
-            //           false,
-            //           1,
-            //         );
-            //         const segmentLength = segmentMeasure.next()?.length();
-            //         if (!segmentLength) return;
-
-            //         const pathSegment = pathMeasure
-            //           .next()
-            //           ?.getSegment(0, segmentLength, false);
-            //         //console.log(pathSegment);
-            //       }
-            //     });
-            //   }
-            // });
-
             break;
           }
           case 'moving': {

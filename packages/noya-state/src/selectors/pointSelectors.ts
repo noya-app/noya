@@ -18,7 +18,7 @@ import {
   Layers,
   SelectedPointLists,
 } from '../index';
-import { PointsLayer, visit } from '../layers';
+import { isPointsLayer, PointsLayer, visit } from '../layers';
 import { SelectedControlPoint } from '../reducers/applicationReducer';
 import { SetNumberMode } from '../reducers/styleReducer';
 import { getCurrentPage } from './pageSelectors';
@@ -104,6 +104,75 @@ const getSelectedPointsFromPointLists = (
   });
 
   return points;
+};
+
+export const findMatchingSegmentPoints = (
+  CanvasKit: CanvasKit,
+  layer: Sketch.AnyLayer,
+  point: Point,
+  segment: Sketch.CurvePoint[],
+) => {
+  let isOnLine = false;
+  if (!isPointsLayer(layer)) return;
+
+  //Find StartD
+  const startDistancePath = path(
+    CanvasKit,
+    [layer.points[0], segment[0]],
+    layer.frame,
+    layer.isClosed,
+  );
+
+  const startSegmentMeasure = new CanvasKit.ContourMeasureIter(
+    startDistancePath,
+    false,
+    1,
+  );
+  const startDistance = startSegmentMeasure.next()?.length();
+
+  if (!startDistance) return;
+
+  //Find EndD
+  const endDistancePath = path(
+    CanvasKit,
+    [layer.points[0], segment[1]],
+    layer.frame,
+    layer.isClosed,
+  );
+
+  const endSegmentMeasure = new CanvasKit.ContourMeasureIter(
+    endDistancePath,
+    false,
+    1,
+  );
+
+  const segmentDistance = endSegmentMeasure.next()?.length();
+
+  if (!segmentDistance) return false;
+
+  //const endDistance = startDistance + segmentDistance;
+  const endDistance = segmentDistance;
+
+  //getSegment
+
+  const layerPath = path(CanvasKit, layer.points, layer.frame, layer.isClosed);
+
+  const layerMeasure = new CanvasKit.ContourMeasureIter(layerPath, false, 1);
+
+  const segmentToAddPoint = layerMeasure
+    .next()
+    ?.getSegment(startDistance, endDistance, true);
+
+  if (!segmentToAddPoint) return;
+
+  isOnLine = segmentToAddPoint.contains(point.x, point.y);
+
+  if (!isOnLine) return;
+
+  return {
+    segmentPoints: segment,
+    segmentPath: segmentToAddPoint,
+  };
 };
 
 export const getSelectedPoints = (
