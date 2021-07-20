@@ -12,7 +12,6 @@ import {
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import { path } from '../primitives/path';
 import {
   addToParentLayer,
   computeNewBoundingRect,
@@ -338,26 +337,55 @@ export function canvasReducer(
             break;
           }
           case 'maybeAddPointToLine': {
-            const { point } = interactionState;
-            layerIndexPaths.forEach((layerIndex, index) => {
-              const layer = Layers.access(page, layerIndex);
+            //const { point } = interactionState;
+            // layerIndexPaths.forEach((layerIndex, index) => {
+            //   const layer = Layers.access(page, layerIndex);
 
-              if (Layers.isPointsLayer(layer)) {
-                const decodedPoints = layer.points.map((point) =>
-                  decodeCurvePoint(point, layer.frame),
-                );
-                const isOnPath = path(
-                  CanvasKit,
-                  decodedPoints.map((decodedCurvePoint) =>
-                    encodeCurvePoint(decodedCurvePoint, layer.frame),
-                  ),
-                  layer.frame,
-                  layer.isClosed,
-                ).contains(point.x, point.y);
+            //   if (Layers.isPointsLayer(layer)) {
+            //     const decodedPoints = layer.points.map((point) =>
+            //       decodeCurvePoint(point, layer.frame),
+            //     );
 
-                if (isOnPath) return;
-              }
-            });
+            //     const pathMeasure = new CanvasKit.ContourMeasureIter(
+            //       path(CanvasKit, layer.points, layer.frame, layer.isClosed),
+            //       false,
+            //       1,
+            //     );
+
+            //     const segmentsArr: any[] = [];
+            //     layer.points.forEach(function (point, index) {
+            //       const nextPoint =
+            //         index === layer.points.length - 1 ? 0 : index + 1;
+            //       const item = [point, layer.points[nextPoint]];
+            //       segmentsArr.push(item);
+            //     });
+
+            //     segmentsArr.forEach(function (segment) {
+            //       const segmentPath = path(
+            //         CanvasKit,
+            //         segment,
+            //         layer.frame,
+            //         layer.isClosed,
+            //       );
+            //       const isOnLine = segmentPath.contains(point.x, point.y);
+
+            //       if (isOnLine) {
+            //         const segmentMeasure = new CanvasKit.ContourMeasureIter(
+            //           segmentPath,
+            //           false,
+            //           1,
+            //         );
+            //         const segmentLength = segmentMeasure.next()?.length();
+            //         if (!segmentLength) return;
+
+            //         const pathSegment = pathMeasure
+            //           .next()
+            //           ?.getSegment(0, segmentLength, false);
+            //         //console.log(pathSegment);
+            //       }
+            //     });
+            //   }
+            // });
 
             break;
           }

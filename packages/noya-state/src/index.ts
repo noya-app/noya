@@ -27,3 +27,4 @@ export * from './layers';
 export * from './selectors/transformSelectors';
 export * from './selectors/pointSelectors';
 export * from './selectors/layerSelectors';
+export * from './selectors/selectors';

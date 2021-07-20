@@ -205,8 +205,8 @@ export function interactionReducer(
       return { type: 'editPath', point: point };
     }
     case 'maybeAddPointToLine': {
-      const [type, point] = action;
-      return { type, point };
+      const [, point] = action;
+      return { type: 'maybeAddPointToLine', point };
     }
     case 'insertArtboard':
     case 'insertOval':

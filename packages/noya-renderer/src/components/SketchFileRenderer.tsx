@@ -12,15 +12,17 @@ import {
   Point,
 } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
   DecodedCurvePoint,
   encodeCurvePoint,
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
+  getSelectedLayerIndexPathsExcludingDescendants,
   getSnappingPairs,
   Layers,
+  path,
   Primitives,
   Rect,
   Selectors,
@@ -43,7 +45,6 @@ import {
   Y_DIRECTIONS,
 } from './guides';
 import HoverOutline from './HoverOutline';
-import { Polyline } from 'noya-renderer';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
@@ -434,6 +435,79 @@ export default memo(function SketchFileRenderer() {
     );
   }, [interactionState, page, state]);
 
+  const maybeAddPointToPath = useMemo(() => {
+    if (interactionState.type !== 'maybeAddPointToLine') return;
+
+    const { point } = interactionState;
+    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
+      state,
+    );
+    let isOnLine = false;
+    let points: Point[] | undefined = undefined;
+    let frame: Sketch.Rect | undefined = undefined;
+
+    //layerIndexPaths.forEach((layerIndex, index) => {
+    const layer = Layers.access(page, layerIndexPaths[0]);
+
+    if (Layers.isPointsLayer(layer)) {
+      // const decodedPoints = layer.points.map((point) =>
+      //   decodeCurvePoint(point, layer.frame),
+      // );
+
+      // const pathMeasure = new CanvasKit.ContourMeasureIter(
+      //   path(CanvasKit, layer.points, layer.frame, layer.isClosed),
+      //   false,
+      //   1,
+      // );
+
+      const segmentsArr: any[] = [];
+      layer.points.forEach(function (point, index) {
+        const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
+        const item = [point, layer.points[nextPoint]];
+        segmentsArr.push(item);
+      });
+
+      segmentsArr.forEach(function (segment) {
+        //console.log({ segment });
+        const segmentPath = path(
+          CanvasKit,
+          segment,
+          layer.frame,
+          layer.isClosed,
+        );
+        isOnLine = segmentPath.contains(point.x, point.y);
+        //console.log({ segmentPath });
+        if (isOnLine) {
+          const segmentMeasure = new CanvasKit.ContourMeasureIter(
+            segmentPath,
+            false,
+            1,
+          );
+          const segmentLength = segmentMeasure.next()?.length();
+          if (!segmentLength) return;
+
+          // const pathSegment = pathMeasure
+          //   .next()
+          //   ?.getSegment(0, segmentLength, false);
+          //console.log(pathSegment);
+        }
+        points = segment;
+        frame = layer.frame;
+      });
+    }
+    //});
+    return (
+      <>
+        {isOnLine && points && frame && (
+          <>
+            <PseudoPoint point={interactionState.point} />
+            <PseudoPathLine points={points} frame={layer.frame} />
+          </>
+        )}
+      </>
+    );
+  }, [CanvasKit, interactionState, page, state]);
+
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
     const selectedLayerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
@@ -515,6 +589,7 @@ export default memo(function SketchFileRenderer() {
           <>
             {editablePaths}
             {editPathPseudoElements}
+            {maybeAddPointToPath}
           </>
         ) : (
           <>

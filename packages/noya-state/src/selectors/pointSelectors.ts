@@ -193,7 +193,8 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
     type === 'movingPoint' ||
     type === 'maybeMoveControlPoint' ||
     type === 'movingControlPoint' ||
-    type === 'maybeConvertCurveMode'
+    type === 'maybeConvertCurveMode' ||
+    type === 'maybeAddPointToLine'
   );
 };
 
