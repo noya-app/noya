@@ -8,8 +8,8 @@ import {
   DecodedCurvePoint,
   encodeCurvePoint,
   parsePoint,
-  stringifyPoint,
   path,
+  stringifyPoint,
 } from 'noya-state';
 import { IndexPath } from 'tree-visit';
 import {
@@ -146,12 +146,10 @@ export const findMatchingSegmentPoints = (
     1,
   );
 
-  const segmentDistance = endSegmentMeasure.next()?.length();
+  const endDistance = endSegmentMeasure.next()?.length();
+  // }
 
-  if (!segmentDistance) return false;
-
-  //const endDistance = startDistance + segmentDistance;
-  const endDistance = segmentDistance;
+  if (!endDistance) return false;
 
   //getSegment
 
@@ -159,19 +157,32 @@ export const findMatchingSegmentPoints = (
 
   const layerMeasure = new CanvasKit.ContourMeasureIter(layerPath, false, 1);
 
-  const segmentToAddPoint = layerMeasure
-    .next()
-    ?.getSegment(startDistance, endDistance, true);
+  const contourMeasure = layerMeasure.next();
+  //const layerLength = contourMeasure?.length();
+
+  // const segmentToAddPoint =
+  //   endDistance < startDistance && layerLength
+  //     ? contourMeasure?.getSegment(startDistance, layerLength, false)
+  //     : contourMeasure?.getSegment(startDistance, endDistance, true);
+
+  const segmentToAddPoint = contourMeasure?.getSegment(
+    startDistance,
+    endDistance,
+    true,
+  );
 
   if (!segmentToAddPoint) return;
 
-  isOnLine = segmentToAddPoint.contains(point.x, point.y);
+  isOnLine = path(CanvasKit, segment, layer.frame, false).contains(
+    point.x,
+    point.y,
+  );
 
   if (!isOnLine) return;
 
   return {
     segmentPoints: segment,
-    segmentPath: segmentToAddPoint,
+    segmentPath: path(CanvasKit, segment, layer.frame, false), //segmentToAddPoint,
   };
 };
 
