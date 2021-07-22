@@ -13,6 +13,7 @@ import { ReactNode } from 'react';
 
 export interface RectComponentProps {
   rect: Rect;
+  cornerRadius?: number;
   paint: Paint;
 }
 
