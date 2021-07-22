@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`deleteLayer delete multiple bad nesting 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`deleteLayer delete multiple within different parents 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`deleteLayer delete multiple within same parent 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`moveLayer move multiple inside 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+├── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+    ├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+    └── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`moveLayer move one above 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`moveLayer move one below 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`moveLayer move one inside 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }"
+`;
