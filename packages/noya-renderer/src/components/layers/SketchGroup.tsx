@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit, ImageFilter, Shader } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
@@ -7,6 +8,29 @@ import { chunkBy } from 'noya-utils';
 import { memo, ReactNode, useMemo } from 'react';
 import { Group } from '../..';
 import SketchLayer from './SketchLayer';
+
+function composeImageFilters(
+  CanvasKit: CanvasKit,
+  imageFilters: ImageFilter[],
+): ImageFilter {
+  // If there are no image filters, return a transparent color image filter
+  if (imageFilters.length === 0) {
+    return CanvasKit.ImageFilter.MakeShader(
+      CanvasKit.Shader.MakeColor(
+        CanvasKit.TRANSPARENT,
+        CanvasKit.ColorSpace.SRGB,
+      ),
+    );
+  }
+
+  const [first, ...rest] = imageFilters;
+
+  return rest.reduce(
+    (result, item) =>
+      CanvasKit.ImageFilter.MakeBlend(CanvasKit.BlendMode.Plus, item, result),
+    first,
+  );
+}
 
 interface Props {
   layer: Sketch.Group | Sketch.Artboard | Sketch.SymbolMaster | Sketch.Page;
@@ -53,22 +77,20 @@ const SketchMask = memo(function SketchGroup({
   const imageFilter = useMemo(() => {
     if (maskMode !== 'alpha' || !layer.style?.fills) return;
 
-    const shader = Primitives.shader(
-      CanvasKit,
-      layer.style.fills[0],
-      layer.frame,
-      undefined,
-    );
+    const shaderFilters = layer.style.fills
+      .filter((fill) => fill.isEnabled)
+      .map((fill) => Primitives.shader(CanvasKit, fill, layer.frame, undefined))
+      .filter((shader): shader is Shader => !!shader)
+      .map((shader) => CanvasKit.ImageFilter.MakeShader(shader));
 
-    if (!shader) return;
+    const shaderFilter = composeImageFilters(CanvasKit, shaderFilters);
 
-    const shaderFilter = CanvasKit.ImageFilter.MakeShader(shader);
-    const originalFilter = CanvasKit.ImageFilter.MakeCompose(null, null);
+    const srcFilter = CanvasKit.ImageFilter.MakeCompose(null, null);
 
     return CanvasKit.ImageFilter.MakeBlend(
       CanvasKit.BlendMode.SrcIn,
       shaderFilter,
-      originalFilter,
+      srcFilter,
     );
   }, [CanvasKit, layer.frame, layer.style, maskMode]);
 
