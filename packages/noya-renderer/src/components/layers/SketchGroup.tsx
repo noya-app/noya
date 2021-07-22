@@ -14,10 +14,12 @@ interface Props {
 
 const SketchMask = memo(function SketchGroup({
   layer,
+  maskMode,
   children,
 }: {
   layer: Sketch.AnyLayer;
   children: ReactNode;
+  maskMode: 'outline' | 'alpha';
 }) {
   const CanvasKit = useCanvasKit();
 
@@ -48,7 +50,33 @@ const SketchMask = memo(function SketchGroup({
 
   useDeletable(maskPath);
 
-  return <Group clip={clip}>{children}</Group>;
+  const imageFilter = useMemo(() => {
+    if (maskMode !== 'alpha' || !layer.style?.fills) return;
+
+    const shader = Primitives.shader(
+      CanvasKit,
+      layer.style.fills[0],
+      layer.frame,
+      undefined,
+    );
+
+    if (!shader) return;
+
+    const shaderFilter = CanvasKit.ImageFilter.MakeShader(shader);
+    const originalFilter = CanvasKit.ImageFilter.MakeCompose(null, null);
+
+    return CanvasKit.ImageFilter.MakeBlend(
+      CanvasKit.BlendMode.SrcIn,
+      shaderFilter,
+      originalFilter,
+    );
+  }, [CanvasKit, layer.frame, layer.style, maskMode]);
+
+  return (
+    <Group imageFilter={imageFilter} clip={clip}>
+      {children}
+    </Group>
+  );
 });
 
 export default memo(function SketchGroup({ layer }: Props) {
@@ -69,12 +97,19 @@ export default memo(function SketchGroup({ layer }: Props) {
   );
 
   const elements = maskChains.map((chain) => {
-    const chainElements = chain.map((child) => (
-      <SketchLayer key={child.do_objectID} layer={child} />
-    ));
+    const hasClippingMask = chain[0].hasClippingMask;
+    const hasAlphaMask = hasClippingMask && chain[0].clippingMaskMode === 1;
 
-    return chain[0].hasClippingMask ? (
-      <SketchMask key={chain[0].do_objectID} layer={chain[0]}>
+    const chainElements = chain
+      .slice(hasAlphaMask ? 1 : 0)
+      .map((child) => <SketchLayer key={child.do_objectID} layer={child} />);
+
+    return hasClippingMask ? (
+      <SketchMask
+        key={chain[0].do_objectID}
+        layer={chain[0]}
+        maskMode={hasAlphaMask ? 'alpha' : 'outline'}
+      >
         {chainElements}
       </SketchMask>
     ) : (
