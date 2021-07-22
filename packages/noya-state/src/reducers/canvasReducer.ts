@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
+import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -24,6 +24,7 @@ import {
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
+  getSelectedRect,
   getSymbols,
   moveControlPoints,
   moveLayer,
@@ -43,7 +44,7 @@ import {
   interactionReducer,
   SnapshotInteractionAction,
 } from './interactionReducer';
-import { defaultBorderColor } from './styleReducer';
+import { defaultBorderColor, styleReducer } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -316,7 +317,56 @@ export function canvasReducer(
         draft.interactionState = interactionState;
         switch (interactionState.type) {
           case 'moveGradientPoint': {
-            draft.selectedGradientPoint = interactionState.point;
+            const { gradientPoint, point } = interactionState;
+            if (gradientPoint) draft.selectedGradientPoint = gradientPoint;
+
+            if (!point) {
+              draft.selectedGradientPoint = undefined;
+              return;
+            }
+
+            const crrGradientPoint = gradientPoint
+              ? gradientPoint
+              : draft.selectedGradientPoint;
+
+            const boundingRect = getSelectedRect(state);
+            if (!point || !crrGradientPoint || !boundingRect) return;
+
+            const gradient = {
+              x: (point.x - boundingRect.x) / boundingRect.width,
+              y: (point.y - boundingRect.y) / boundingRect.height,
+            };
+
+            layerIndexPaths.forEach((layerIndex, index) => {
+              const layer = Layers.access(page, layerIndex);
+              if (index === 0 && layer.style) {
+                switch (crrGradientPoint.pointIndex) {
+                  case 0:
+                    layer.style = styleReducer(layer.style, [
+                      'setFillGradientFrom',
+                      0,
+                      PointString.encode(gradient),
+                    ]);
+                    break;
+                  case 2:
+                    layer.style = styleReducer(layer.style, [
+                      'setFillGradientTo',
+                      0,
+                      PointString.encode(gradient),
+                    ]);
+                    break;
+                  default:
+                    layer.style = styleReducer(layer.style, [
+                      'setFillGradientPosition',
+                      0,
+                      crrGradientPoint.pointIndex,
+                      0.5,
+                    ]);
+                    break;
+                }
+              }
+            });
+
             break;
           }
           case 'editPath': {

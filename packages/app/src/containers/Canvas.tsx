@@ -13,14 +13,12 @@ import {
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
-import { PointString } from 'noya-sketch-model';
 import {
   CompassDirection,
   decodeCurvePoint,
   Layers,
   Point,
   SelectedControlPoint,
-  SelectedGradientPoint,
   SelectedPoint,
   Selectors,
   ShapeType,
@@ -379,12 +377,15 @@ export default memo(function Canvas() {
             );
 
             if (index === -1) return;
-            const gradientPoint = {
-              layerId: '',
-              pointIndex: index,
-            } as SelectedGradientPoint;
 
-            dispatch('interaction', ['editGradient', gradientPoint]);
+            dispatch('interaction', [
+              'startEditGradientPoint',
+              {
+                layerId: '',
+                pointIndex: index,
+              },
+              point,
+            ]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
@@ -418,37 +419,7 @@ export default memo(function Canvas() {
 
       switch (state.interactionState.type) {
         case 'moveGradientPoint': {
-          //TODO: Handle points outside of frame
-          // TODO: Handle correct pointIndex
-          const boundingRect = Selectors.getSelectedRect(state);
-          if (!state.interactionState.point || !boundingRect) return;
-
-          const pointIndex = state.interactionState.point.pointIndex;
-
-          const gradientPoint = {
-            x: (point.x - boundingRect.x) / boundingRect.width,
-            y: (point.y - boundingRect.y) / boundingRect.height,
-          };
-
-          switch (pointIndex) {
-            case 0:
-              dispatch(
-                'setFillGradientFrom',
-                0,
-                PointString.encode(gradientPoint),
-              );
-              break;
-            case 2:
-              dispatch(
-                'setFillGradientTo',
-                0,
-                PointString.encode(gradientPoint),
-              );
-              break;
-            default:
-              dispatch('setFillGradientPosition', 0, pointIndex, 0.5);
-              break;
-          }
+          dispatch('interaction', ['updateGradientPoint', point]);
           break;
         }
         case 'insertingSymbol': {

@@ -72,7 +72,12 @@ export type InteractionAction =
   | [type: 'movingControlPoint', origin: Point, current: Point]
   | [type: 'updateMovingPoint', origin: Point, current: Point]
   | [type: 'updateMovingControlPoint', origin: Point, current: Point]
-  | [type: 'editGradient', point?: SelectedGradientPoint];
+  | [
+      type: 'startEditGradientPoint',
+      gradientPoint?: SelectedGradientPoint,
+      point?: Point,
+    ]
+  | [type: 'updateGradientPoint', point?: Point];
 
 export type InteractionState =
   | {
@@ -162,7 +167,11 @@ export type InteractionState =
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
   | { type: 'panning'; previous: Point; next: Point }
-  | { type: 'moveGradientPoint'; point?: SelectedGradientPoint };
+  | {
+      type: 'moveGradientPoint';
+      gradientPoint?: SelectedGradientPoint;
+      point?: Point;
+    };
 
 export type InteractionType = InteractionState['type'];
 
@@ -476,7 +485,16 @@ export function interactionReducer(
         next: point,
       };
     }
-    case 'editGradient': {
+    case 'startEditGradientPoint': {
+      const [, gradientPoint, point] = action;
+
+      return {
+        type: 'moveGradientPoint',
+        gradientPoint,
+        point,
+      };
+    }
+    case 'updateGradientPoint': {
       const [, point] = action;
 
       return {
