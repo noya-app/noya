@@ -6,6 +6,7 @@ import { RectComponentProps } from '../types';
 
 interface RectProps {
   rect: RectParameters;
+  cornerRadius?: number;
   paint: Paint;
 }
 
@@ -17,8 +18,9 @@ export default memo(function Rect(props: RectProps) {
     () => ({
       rect,
       paint,
+      cornerRadius: props.cornerRadius,
     }),
-    [rect, paint],
+    [rect, paint, props.cornerRadius],
   );
 
   return createElement('Rect', elementProps);
