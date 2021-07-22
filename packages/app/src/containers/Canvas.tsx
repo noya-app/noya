@@ -362,27 +362,17 @@ export default memo(function Canvas() {
             },
           );
 
-          const selectedLayerGradientPoints = Selectors.getFirstSelectedLayerGradientPoints(
+          const selectedGradientIndex = Selectors.pointerOnGradientPoint(
             state,
+            point,
           );
 
-          if (
-            selectedLayerGradientPoints &&
-            selectedLayerGradientPoints.some((gradientPoint) =>
-              Selectors.isPointInRange(gradientPoint, point),
-            )
-          ) {
-            const index = selectedLayerGradientPoints.findIndex(
-              (gradientPoint) => Selectors.isPointInRange(gradientPoint, point),
-            );
-
-            if (index === -1) return;
-
+          if (selectedGradientIndex !== -1) {
             dispatch('interaction', [
               'startEditGradientPoint',
               {
                 layerId: '',
-                pointIndex: index,
+                pointIndex: selectedGradientIndex,
               },
               point,
             ]);
@@ -404,6 +394,9 @@ export default memo(function Canvas() {
             dispatch('selectLayer', undefined);
 
             dispatch('interaction', ['startMarquee', rawPoint]);
+          }
+          if (selectedGradientIndex === -1) {
+            dispatch('setFillPopoverOpen', false);
           }
           break;
         }

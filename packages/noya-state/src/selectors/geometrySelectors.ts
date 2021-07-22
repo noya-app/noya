@@ -27,6 +27,7 @@ import {
 } from './transformSelectors';
 import { PointString } from 'noya-sketch-model';
 import { lerp } from 'noya-utils';
+import { isPointInRange } from './pointSelectors';
 
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
@@ -372,4 +373,16 @@ export function getFirstSelectedLayerGradientPoints(
       y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
     };
   });
+}
+
+export function pointerOnGradientPoint(state: ApplicationState, point: Point) {
+  const selectedLayerGradientPoints = getFirstSelectedLayerGradientPoints(
+    state,
+  );
+
+  if (!selectedLayerGradientPoints) return -1;
+
+  return selectedLayerGradientPoints.findIndex((gradientPoint) =>
+    isPointInRange(gradientPoint, point),
+  );
 }

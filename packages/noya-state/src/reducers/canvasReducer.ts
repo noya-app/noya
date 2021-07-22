@@ -337,35 +337,41 @@ export function canvasReducer(
               y: (point.y - boundingRect.y) / boundingRect.height,
             };
 
-            layerIndexPaths.forEach((layerIndex, index) => {
-              const layer = Layers.access(page, layerIndex);
-              if (index === 0 && layer.style) {
-                switch (crrGradientPoint.pointIndex) {
-                  case 0:
-                    layer.style = styleReducer(layer.style, [
+            const layer = Layers.access(
+              draft.sketch.pages[pageIndex],
+              layerIndexPaths[0],
+            );
+
+            if (layer.style) {
+              switch (crrGradientPoint.pointIndex) {
+                case 0:
+                  layer.style = produce(layer.style, (draft) =>
+                    styleReducer(draft, [
                       'setFillGradientFrom',
                       0,
                       PointString.encode(gradient),
-                    ]);
-                    break;
-                  case 2:
-                    layer.style = styleReducer(layer.style, [
+                    ]),
+                  );
+                  break;
+                case 2:
+                  layer.style = produce(layer.style, (draft) =>
+                    styleReducer(draft, [
                       'setFillGradientTo',
                       0,
                       PointString.encode(gradient),
-                    ]);
-                    break;
-                  default:
-                    layer.style = styleReducer(layer.style, [
-                      'setFillGradientPosition',
-                      0,
-                      crrGradientPoint.pointIndex,
-                      0.5,
-                    ]);
-                    break;
-                }
+                    ]),
+                  );
+                  break;
+                default:
+                  layer.style = styleReducer(layer.style, [
+                    'setFillGradientPosition',
+                    0,
+                    crrGradientPoint.pointIndex,
+                    0.5,
+                  ]);
+                  break;
               }
-            });
+            }
 
             break;
           }

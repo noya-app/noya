@@ -11,3 +11,7 @@ export const getCurrentTab = (
 export const getCurrentComponentsTab = (state: ApplicationState): ThemeTab => {
   return state.currentThemeTab;
 };
+
+export const getFillPopoverOpen = (state: ApplicationState): boolean => {
+  return state.fillPopoverOpen;
+};

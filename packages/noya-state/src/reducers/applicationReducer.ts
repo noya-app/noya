@@ -60,6 +60,7 @@ export type SelectedPointLists = Record<string, number[]>;
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
+  fillPopoverOpen: boolean;
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
   selectedPage: string;
@@ -74,6 +75,7 @@ export type ApplicationState = {
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
+  | [type: 'setFillPopoverOpen', value: boolean]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -104,6 +106,12 @@ export function applicationReducer(
         draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
+      });
+    }
+    case 'setFillPopoverOpen': {
+      const [, value] = action;
+      return produce(state, (draft) => {
+        draft.fillPopoverOpen = value;
       });
     }
     case 'selectPage':
@@ -359,6 +367,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   return {
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
+    fillPopoverOpen: false,
     interactionState: createInitialInteractionState(),
     keyModifiers: {
       altKey: false,

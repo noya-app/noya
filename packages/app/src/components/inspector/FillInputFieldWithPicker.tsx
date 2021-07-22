@@ -302,6 +302,7 @@ export default memo(function FillInputFieldWithPicker({
   gradientProps,
   patternProps,
 }: Props) {
+  const [state, dispatch] = useApplicationState();
   const picker = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Gradient:
@@ -336,7 +337,13 @@ export default memo(function FillInputFieldWithPicker({
   ]);
 
   return (
-    <Popover.Root>
+    <Popover.Root
+      open={Selectors.getFillPopoverOpen(state)}
+      onOpenChange={(open) => {
+        if (open || fillType !== Sketch.FillType.Gradient)
+          dispatch('setFillPopoverOpen', open);
+      }}
+    >
       <Popover.Trigger as={Slot}>
         <ColorInputField id={id} value={hasMultipleFills ? undefined : value} />
       </Popover.Trigger>

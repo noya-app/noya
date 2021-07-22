@@ -509,7 +509,7 @@ export default memo(function SketchFileRenderer() {
   const points = useMemo(() => {
     const gradientsPoint = Selectors.getFirstSelectedLayerGradientPoints(state);
 
-    if (!gradientsPoint) return <></>;
+    if (!gradientsPoint || !Selectors.getFillPopoverOpen(state)) return <></>;
 
     const path = new CanvasKit.Path();
 
