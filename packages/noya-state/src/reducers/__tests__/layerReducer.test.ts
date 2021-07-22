@@ -13,24 +13,72 @@ const getPageLayersLength = (state: ApplicationState) =>
 const rectangle = SketchModel.rectangle();
 const oval = SketchModel.oval();
 
+describe('moveLayer', () => {
+  test('move one inside', () => {
+    const group = SketchModel.group();
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
+    );
+
+    const state = workspaceState.history.present;
+
+    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
+
+    const updated = layerReducer(state, [
+      'moveLayer',
+      rectangle.do_objectID,
+      group.do_objectID,
+      'inside',
+    ]);
+
+    expect(
+      debugDescription(Selectors.getCurrentPage(updated)),
+    ).toMatchSnapshot();
+  });
+
+  test('move multiple inside', () => {
+    const group = SketchModel.group();
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, oval, group] })),
+    );
+
+    const state = workspaceState.history.present;
+
+    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
+
+    const updated = layerReducer(state, [
+      'moveLayer',
+      [rectangle.do_objectID, oval.do_objectID],
+      group.do_objectID,
+      'inside',
+    ]);
+
+    expect(
+      debugDescription(Selectors.getCurrentPage(updated)),
+    ).toMatchSnapshot();
+  });
+});
+
 describe('deleteLayer', () => {
   test('delete one', () => {
     const workspaceState = createInitialWorkspaceState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
 
-    let state = workspaceState.history.present;
+    const state = workspaceState.history.present;
 
     expect(getPageLayersLength(state)).toEqual(1);
 
-    state = layerReducer(state, ['deleteLayer', rectangle.do_objectID]);
+    const updated = layerReducer(state, ['deleteLayer', rectangle.do_objectID]);
 
-    expect(getPageLayersLength(state)).toEqual(0);
+    expect(getPageLayersLength(updated)).toEqual(0);
   });
 
-  describe('delete multiple', () => {
-    const group = SketchModel.group({ layers: [rectangle] });
+  const group = SketchModel.group({ layers: [rectangle] });
 
+  describe('delete multiple', () => {
     const workspaceState = createInitialWorkspaceState(
       createSketchFile(SketchModel.page({ layers: [group, oval] })),
     );
