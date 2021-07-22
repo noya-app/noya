@@ -1,13 +1,9 @@
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import {
-  ChevronDownIcon,
-  CircleIcon,
-  FrameIcon,
-  MoveIcon,
-  RulerHorizontalIcon,
-  SewingPinIcon,
-  SquareIcon,
-  TextIcon,
-} from '@radix-ui/react-icons';
+  useApplicationState,
+  useDispatch,
+  useSelector,
+} from 'noya-app-state-context';
 import {
   Button,
   createSectionedMenu,
@@ -21,14 +17,7 @@ import { InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
-import {
-  useApplicationState,
-  useDispatch,
-  useSelector,
-} from 'noya-app-state-context';
-import { useHistory } from '../hooks/useHistory';
 import useShallowArray from '../hooks/useShallowArray';
-import { useWorkspace } from 'noya-app-state-context';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
@@ -47,23 +36,15 @@ const Row = styled.div(({ theme }) => ({
 
 interface Props {
   interactionType: InteractionType;
-  setShowRulers: (value: boolean) => void;
-  showRulers: boolean;
-  redoDisabled: boolean;
-  undoDisabled: boolean;
   selectedLayerIds: string[];
 }
 
-type InsertMenuShape = 'rectangle' | 'oval' | 'vector' | 'text';
+type InsertMenuShape = 'artboard' | 'rectangle' | 'oval' | 'vector' | 'text';
 
 const SYMBOL_ITEM_PREFIX = 'symbol:';
 
 const ToolbarContent = memo(function ToolbarContent({
   interactionType,
-  setShowRulers,
-  showRulers,
-  redoDisabled,
-  undoDisabled,
   selectedLayerIds,
 }: Props) {
   const dispatch = useDispatch();
@@ -75,6 +56,7 @@ const ToolbarContent = memo(function ToolbarContent({
   }));
 
   const shapeMenuItems: RegularMenuItem<InsertMenuShape>[] = [
+    { title: 'Artboard', value: 'artboard' },
     { title: 'Rectangle', value: 'rectangle' },
     { title: 'Oval', value: 'oval' },
     { title: 'Vector', value: 'vector' },
@@ -130,14 +112,6 @@ const ToolbarContent = memo(function ToolbarContent({
     }
   }, [isInsertText, dispatch]);
 
-  const handleEnablePanMode = useCallback(() => {
-    if (isPanning) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['enablePanMode']);
-    }
-  }, [isPanning, dispatch]);
-
   const handleEnablePenTool = useCallback(() => {
     if (isCreatingPath) {
       dispatch('interaction', ['reset']);
@@ -153,6 +127,9 @@ const ToolbarContent = memo(function ToolbarContent({
         dispatch('interaction', ['insertingSymbol', id, undefined]);
       } else {
         switch (value as InsertMenuShape) {
+          case 'artboard':
+            dispatch('interaction', ['insertArtboard']);
+            break;
           case 'rectangle':
             dispatch('interaction', ['insertRectangle']);
             break;
@@ -221,89 +198,6 @@ const ToolbarContent = memo(function ToolbarContent({
         </DropdownMenu>
       </Row>
       <Spacer.Horizontal size={8} />
-      <Button
-        id="tool-artboard"
-        tooltip="Insert an artboard"
-        active={isInsertArtboard}
-        onClick={handleInsertArtboard}
-      >
-        {useMemo(
-          () => (
-            <FrameIcon />
-          ),
-          [],
-        )}
-      </Button>
-      <Spacer.Horizontal size={itemSeparatorSize} />
-      <Button
-        id="tool-rectangle"
-        tooltip="Insert a rectangle"
-        active={isInsertRectangle}
-        onClick={handleInsertRectangle}
-      >
-        {useMemo(
-          () => (
-            <SquareIcon />
-          ),
-          [],
-        )}
-      </Button>
-      <Spacer.Horizontal size={itemSeparatorSize} />
-      <Button
-        id="tool-oval"
-        tooltip="Insert an oval"
-        active={isInsertOval}
-        onClick={handleInsertOval}
-      >
-        {useMemo(
-          () => (
-            <CircleIcon />
-          ),
-          [],
-        )}
-      </Button>
-      <Spacer.Horizontal size={itemSeparatorSize} />
-      <Button
-        id="tool-text"
-        tooltip="Insert text"
-        active={isInsertText}
-        onClick={handleInsertText}
-      >
-        {useMemo(
-          () => (
-            <TextIcon />
-          ),
-          [],
-        )}
-      </Button>
-      <Spacer.Horizontal size={itemSeparatorSize} />
-      <Button
-        id="tool-move"
-        tooltip="Move the canvas"
-        active={isPanning}
-        onClick={handleEnablePanMode}
-      >
-        {useMemo(
-          () => (
-            <MoveIcon />
-          ),
-          [],
-        )}
-      </Button>
-      <Spacer.Horizontal size={40} />
-      <Button
-        id="create-path"
-        tooltip="Create path"
-        active={isCreatingPath}
-        onClick={handleEnablePenTool}
-      >
-        {useMemo(
-          () => (
-            <SewingPinIcon />
-          ),
-          [],
-        )}
-      </Button>
       <Spacer.Horizontal size={itemSeparatorSize} />
       <Button
         id="edit-path"
@@ -325,51 +219,17 @@ const ToolbarContent = memo(function ToolbarContent({
           [],
         )}
       </Button>
-      <Spacer.Horizontal size={40} />
-      <Button
-        id="tool-rulers"
-        tooltip="Show rulers"
-        active={showRulers}
-        onClick={useCallback(() => {
-          setShowRulers(!showRulers);
-        }, [setShowRulers, showRulers])}
-      >
-        {useMemo(
-          () => (
-            <RulerHorizontalIcon />
-          ),
-          [],
-        )}
-      </Button>
-      <Spacer.Horizontal size={40} />
-      <Button id="undo" disabled={undoDisabled} onClick={handleUndo}>
-        Undo
-      </Button>
-      <Spacer.Horizontal size={itemSeparatorSize} />
-      <Button id="redo" disabled={redoDisabled} onClick={handleRedo}>
-        Redo
-      </Button>
-      <Spacer.Horizontal size={8} />
     </Container>
   );
 });
 
 export default function Toolbar() {
   const [state] = useApplicationState();
-  const {
-    setShowRulers,
-    preferences: { showRulers },
-  } = useWorkspace();
-  const { redoDisabled, undoDisabled } = useHistory();
   const selectedLayerIds = useShallowArray(state.selectedObjects);
 
   return (
     <ToolbarContent
       interactionType={state.interactionState.type}
-      setShowRulers={setShowRulers}
-      showRulers={showRulers}
-      redoDisabled={redoDisabled}
-      undoDisabled={undoDisabled}
       selectedLayerIds={selectedLayerIds}
     />
   );

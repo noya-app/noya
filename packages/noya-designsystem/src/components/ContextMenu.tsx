@@ -2,7 +2,13 @@ import styled from 'styled-components';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { memo, ReactNode } from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { SEPARATOR_ITEM, MenuItem, styles } from './internal/Menu';
+import {
+  SEPARATOR_ITEM,
+  MenuItem,
+  styles,
+  CHECKBOX_WIDTH,
+  CHECKBOX_RIGHT_INSET,
+} from './internal/Menu';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Spacer } from '..';
 
@@ -31,16 +37,9 @@ interface ContextMenuItemProps {
   indented: boolean;
 }
 
-const CHECKBOX_WIDTH = 15;
-const CHECKBOX_RIGHT_INSET = 3;
-
-const StyledItemIndicator = styled(RadixContextMenu.ItemIndicator)({
-  display: 'flex',
-  alignItems: 'center',
-  left: `-${CHECKBOX_WIDTH / 2}px`,
-  position: 'relative',
-  marginRight: `-${CHECKBOX_RIGHT_INSET}px`,
-});
+const StyledItemIndicator = styled(RadixContextMenu.ItemIndicator)(
+  styles.itemIndicatorStyle,
+);
 
 const ContextMenuItem = memo(function ContextMenuItem({
   indented,
