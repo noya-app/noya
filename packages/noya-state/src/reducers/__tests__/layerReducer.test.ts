@@ -1,9 +1,5 @@
 import { debugDescription, SketchModel } from 'noya-sketch-model';
-import {
-  createInitialWorkspaceState,
-  createSketchFile,
-  Selectors,
-} from 'noya-state';
+import { createInitialState, createSketchFile, Selectors } from 'noya-state';
 import { ApplicationState } from '../applicationReducer';
 import { layerReducer } from '../layerReducer';
 
@@ -17,11 +13,9 @@ describe('moveLayer', () => {
   test('move one inside', () => {
     const group = SketchModel.group();
 
-    const workspaceState = createInitialWorkspaceState(
+    const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
-
-    const state = workspaceState.history.present;
 
     expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
 
@@ -37,14 +31,80 @@ describe('moveLayer', () => {
     ).toMatchSnapshot();
   });
 
+  test('move one above', () => {
+    const group = SketchModel.group();
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
+    );
+
+    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
+
+    const updated = layerReducer(state, [
+      'moveLayer',
+      rectangle.do_objectID,
+      group.do_objectID,
+      'above',
+    ]);
+
+    expect(
+      debugDescription(Selectors.getCurrentPage(updated)),
+    ).toMatchSnapshot();
+  });
+
+  test('move one below', () => {
+    const group = SketchModel.group();
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
+    );
+
+    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
+
+    const updated = layerReducer(state, [
+      'moveLayer',
+      group.do_objectID,
+      rectangle.do_objectID,
+      'below',
+    ]);
+
+    expect(
+      debugDescription(Selectors.getCurrentPage(updated)),
+    ).toMatchSnapshot();
+  });
+
+  test('move already in correct place', () => {
+    const group = SketchModel.group();
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
+    );
+
+    expect(state).toEqual(
+      layerReducer(state, [
+        'moveLayer',
+        rectangle.do_objectID,
+        group.do_objectID,
+        'below',
+      ]),
+    );
+
+    expect(state).toEqual(
+      layerReducer(state, [
+        'moveLayer',
+        group.do_objectID,
+        rectangle.do_objectID,
+        'above',
+      ]),
+    );
+  });
+
   test('move multiple inside', () => {
     const group = SketchModel.group();
 
-    const workspaceState = createInitialWorkspaceState(
+    const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval, group] })),
     );
-
-    const state = workspaceState.history.present;
 
     expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
 
@@ -63,11 +123,9 @@ describe('moveLayer', () => {
 
 describe('deleteLayer', () => {
   test('delete one', () => {
-    const workspaceState = createInitialWorkspaceState(
+    const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-
-    const state = workspaceState.history.present;
 
     expect(getPageLayersLength(state)).toEqual(1);
 
@@ -79,11 +137,9 @@ describe('deleteLayer', () => {
   const group = SketchModel.group({ layers: [rectangle] });
 
   describe('delete multiple', () => {
-    const workspaceState = createInitialWorkspaceState(
+    const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [group, oval] })),
     );
-
-    let state = workspaceState.history.present;
 
     expect(
       debugDescription(Selectors.getCurrentPage(state), { frames: false }),
