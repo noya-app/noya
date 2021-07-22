@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit, ImageFilter, Shader } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
@@ -8,16 +9,41 @@ import { memo, ReactNode, useMemo } from 'react';
 import { Group } from '../..';
 import SketchLayer from './SketchLayer';
 
+function composeImageFilters(
+  CanvasKit: CanvasKit,
+  imageFilters: ImageFilter[],
+): ImageFilter {
+  // If there are no image filters, return a transparent color image filter
+  if (imageFilters.length === 0) {
+    return CanvasKit.ImageFilter.MakeShader(
+      CanvasKit.Shader.MakeColor(
+        CanvasKit.TRANSPARENT,
+        CanvasKit.ColorSpace.SRGB,
+      ),
+    );
+  }
+
+  const [first, ...rest] = imageFilters;
+
+  return rest.reduce(
+    (result, item) =>
+      CanvasKit.ImageFilter.MakeBlend(CanvasKit.BlendMode.Plus, item, result),
+    first,
+  );
+}
+
 interface Props {
   layer: Sketch.Group | Sketch.Artboard | Sketch.SymbolMaster | Sketch.Page;
 }
 
 const SketchMask = memo(function SketchGroup({
   layer,
+  maskMode,
   children,
 }: {
   layer: Sketch.AnyLayer;
   children: ReactNode;
+  maskMode: 'outline' | 'alpha';
 }) {
   const CanvasKit = useCanvasKit();
 
@@ -48,7 +74,31 @@ const SketchMask = memo(function SketchGroup({
 
   useDeletable(maskPath);
 
-  return <Group clip={clip}>{children}</Group>;
+  const imageFilter = useMemo(() => {
+    if (maskMode !== 'alpha' || !layer.style?.fills) return;
+
+    const shaderFilters = layer.style.fills
+      .filter((fill) => fill.isEnabled)
+      .map((fill) => Primitives.shader(CanvasKit, fill, layer.frame, undefined))
+      .filter((shader): shader is Shader => !!shader)
+      .map((shader) => CanvasKit.ImageFilter.MakeShader(shader));
+
+    const shaderFilter = composeImageFilters(CanvasKit, shaderFilters);
+
+    const srcFilter = CanvasKit.ImageFilter.MakeCompose(null, null);
+
+    return CanvasKit.ImageFilter.MakeBlend(
+      CanvasKit.BlendMode.SrcIn,
+      shaderFilter,
+      srcFilter,
+    );
+  }, [CanvasKit, layer.frame, layer.style, maskMode]);
+
+  return (
+    <Group imageFilter={imageFilter} clip={clip}>
+      {children}
+    </Group>
+  );
 });
 
 export default memo(function SketchGroup({ layer }: Props) {
@@ -69,12 +119,19 @@ export default memo(function SketchGroup({ layer }: Props) {
   );
 
   const elements = maskChains.map((chain) => {
-    const chainElements = chain.map((child) => (
-      <SketchLayer key={child.do_objectID} layer={child} />
-    ));
+    const hasClippingMask = chain[0].hasClippingMask;
+    const hasAlphaMask = hasClippingMask && chain[0].clippingMaskMode === 1;
 
-    return chain[0].hasClippingMask ? (
-      <SketchMask key={chain[0].do_objectID} layer={chain[0]}>
+    const chainElements = chain
+      .slice(hasAlphaMask ? 1 : 0)
+      .map((child) => <SketchLayer key={child.do_objectID} layer={child} />);
+
+    return hasClippingMask ? (
+      <SketchMask
+        key={chain[0].do_objectID}
+        layer={chain[0]}
+        maskMode={hasAlphaMask ? 'alpha' : 'outline'}
+      >
         {chainElements}
       </SketchMask>
     ) : (

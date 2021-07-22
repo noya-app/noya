@@ -3179,6 +3179,20 @@ export interface FontMgrFactory {
  */
 export interface ImageFilterFactory {
     /**
+     *  Create a filter from a shader.
+     *  @param shader       The input shader.
+     */
+    MakeShader(shader: Shader): ImageFilter;
+
+    /**
+     *  Create a blend of two image filters.
+     *  @param blendMode - BlendMode combining the two filters
+     *  @param background - Background filter (dst)
+     *  @param foreground - Foreground filter (src)
+     */
+    MakeBlend(blendMode: BlendMode, background: ImageFilter, foreground: ImageFilter): ImageFilter;
+
+    /**
      *  Create a filter that draws a drop shadow under the input content. This filter produces an
      *  image that includes the inputs' content.
      *  @param dx       The X offset of the shadow.

@@ -61,6 +61,7 @@ export type LayerMenuItemType =
   | 'detachSymbol'
   | 'useAsMask'
   | 'ignoreMasks'
+  | 'isAlphaMask'
   | 'lock'
   | 'unlock'
   | 'hide'
@@ -96,6 +97,10 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
     layers.length > 1 && !Layers.isArtboard(layers[0]);
 
   const newUseAsMaskValue = !layers.every((item) => item.hasClippingMask);
+
+  const newIsAlphaMaskValue = !layers.every(
+    (item) => item.clippingMaskMode === 1,
+  );
 
   const newIgnoreMasksValue = !layers.every(
     (item) => item.shouldBreakMaskChain,
@@ -141,6 +146,11 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
                 title: 'Use as mask',
                 checked: !newUseAsMaskValue,
               },
+              canBeMask && {
+                value: 'isAlphaMask',
+                title: 'Mask using alpha',
+                checked: !newIsAlphaMaskValue,
+              },
               canBeMaskChainBreaker && {
                 value: 'ignoreMasks',
                 title: 'Ignore masks',
@@ -159,6 +169,7 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
       canUngroup,
       canUnlock,
       hasSelectedLayers,
+      newIsAlphaMaskValue,
       newIgnoreMasksValue,
       newUseAsMaskValue,
     ],
@@ -210,6 +221,9 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           dispatch('setShouldBreakMaskChain', newIgnoreMasksValue);
           return;
         }
+        case 'isAlphaMask':
+          dispatch('setMaskMode', newIsAlphaMaskValue ? 'alpha' : 'outline');
+          return;
         case 'lock': {
           dispatch('setLayerIsLocked', selectedLayerIds, true);
           return;
@@ -230,6 +244,7 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
     },
     [
       dispatch,
+      newIsAlphaMaskValue,
       newIgnoreMasksValue,
       newUseAsMaskValue,
       selectedLayerIds,
