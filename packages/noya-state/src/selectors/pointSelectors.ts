@@ -115,63 +115,63 @@ export const findMatchingSegmentPoints = (
   let isOnLine = false;
   if (!isPointsLayer(layer)) return;
 
-  //Find StartD
-  const startDistancePath = path(
-    CanvasKit,
-    [layer.points[0], segment[0]],
-    layer.frame,
-    layer.isClosed,
-  );
+  // //Find StartD
+  // const startDistancePath = path(
+  //   CanvasKit,
+  //   [layer.points[0], segment[0]],
+  //   layer.frame,
+  //   layer.isClosed,
+  // );
 
-  const startSegmentMeasure = new CanvasKit.ContourMeasureIter(
-    startDistancePath,
-    false,
-    1,
-  );
-  const startDistance = startSegmentMeasure.next()?.length();
+  // const startSegmentMeasure = new CanvasKit.ContourMeasureIter(
+  //   startDistancePath,
+  //   false,
+  //   1,
+  // );
+  // const startDistance = startSegmentMeasure.next()?.length();
 
-  if (!startDistance) return;
+  // if (!startDistance) return;
 
-  //Find EndD
-  const endDistancePath = path(
-    CanvasKit,
-    [layer.points[0], segment[1]],
-    layer.frame,
-    layer.isClosed,
-  );
+  // //Find EndD
+  // const endDistancePath = path(
+  //   CanvasKit,
+  //   [layer.points[0], segment[1]],
+  //   layer.frame,
+  //   layer.isClosed,
+  // );
 
-  const endSegmentMeasure = new CanvasKit.ContourMeasureIter(
-    endDistancePath,
-    false,
-    1,
-  );
+  // const endSegmentMeasure = new CanvasKit.ContourMeasureIter(
+  //   endDistancePath,
+  //   false,
+  //   1,
+  // );
 
-  const endDistance = endSegmentMeasure.next()?.length();
-  // }
+  // const endDistance = endSegmentMeasure.next()?.length();
+  // // }
 
-  if (!endDistance) return false;
+  // if (!endDistance) return false;
 
-  //getSegment
+  // //getSegment
 
-  const layerPath = path(CanvasKit, layer.points, layer.frame, layer.isClosed);
+  // const layerPath = path(CanvasKit, layer.points, layer.frame, layer.isClosed);
 
-  const layerMeasure = new CanvasKit.ContourMeasureIter(layerPath, false, 1);
+  // const layerMeasure = new CanvasKit.ContourMeasureIter(layerPath, false, 1);
 
-  const contourMeasure = layerMeasure.next();
-  //const layerLength = contourMeasure?.length();
+  // const contourMeasure = layerMeasure.next();
+  // //const layerLength = contourMeasure?.length();
 
-  // const segmentToAddPoint =
-  //   endDistance < startDistance && layerLength
-  //     ? contourMeasure?.getSegment(startDistance, layerLength, false)
-  //     : contourMeasure?.getSegment(startDistance, endDistance, true);
+  // // const segmentToAddPoint =
+  // //   endDistance < startDistance && layerLength
+  // //     ? contourMeasure?.getSegment(startDistance, layerLength, false)
+  // //     : contourMeasure?.getSegment(startDistance, endDistance, true);
 
-  const segmentToAddPoint = contourMeasure?.getSegment(
-    startDistance,
-    endDistance,
-    true,
-  );
+  // const segmentToAddPoint = contourMeasure?.getSegment(
+  //   startDistance,
+  //   endDistance,
+  //   true,
+  // );
 
-  if (!segmentToAddPoint) return;
+  // if (!segmentToAddPoint) return;
 
   isOnLine = path(CanvasKit, segment, layer.frame, false).contains(
     point.x,
@@ -182,7 +182,7 @@ export const findMatchingSegmentPoints = (
 
   return {
     segmentPoints: segment,
-    segmentPath: path(CanvasKit, segment, layer.frame, false), //segmentToAddPoint,
+    segmentPath: path(CanvasKit, segment, layer.frame, false),
   };
 };
 
