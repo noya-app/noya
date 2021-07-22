@@ -96,9 +96,13 @@ type DescribeOptions = {
 };
 
 export function debugDescription(
-  object: Sketch.AnyObject,
+  object: Sketch.AnyObject | Sketch.AnyObject[],
   options?: DescribeOptions,
 ): string {
+  if (Array.isArray(object)) {
+    return object.map((item) => debugDescription(item, options)).join('\n\n');
+  }
+
   return diagram(object, {
     flattenSingleChildNodes: false,
     getLabel: (object) => describeObject(object, options),

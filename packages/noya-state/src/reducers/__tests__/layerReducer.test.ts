@@ -17,8 +17,6 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
 
-    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
-
     const updated = layerReducer(state, [
       'moveLayer',
       rectangle.do_objectID,
@@ -27,7 +25,10 @@ describe('moveLayer', () => {
     ]);
 
     expect(
-      debugDescription(Selectors.getCurrentPage(updated)),
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
     ).toMatchSnapshot();
   });
 
@@ -38,8 +39,6 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
 
-    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
-
     const updated = layerReducer(state, [
       'moveLayer',
       rectangle.do_objectID,
@@ -48,7 +47,10 @@ describe('moveLayer', () => {
     ]);
 
     expect(
-      debugDescription(Selectors.getCurrentPage(updated)),
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
     ).toMatchSnapshot();
   });
 
@@ -59,8 +61,6 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
 
-    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
-
     const updated = layerReducer(state, [
       'moveLayer',
       group.do_objectID,
@@ -69,7 +69,10 @@ describe('moveLayer', () => {
     ]);
 
     expect(
-      debugDescription(Selectors.getCurrentPage(updated)),
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
     ).toMatchSnapshot();
   });
 
@@ -106,8 +109,6 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, oval, group] })),
     );
 
-    expect(debugDescription(Selectors.getCurrentPage(state))).toMatchSnapshot();
-
     const updated = layerReducer(state, [
       'moveLayer',
       [rectangle.do_objectID, oval.do_objectID],
@@ -116,7 +117,10 @@ describe('moveLayer', () => {
     ]);
 
     expect(
-      debugDescription(Selectors.getCurrentPage(updated)),
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
     ).toMatchSnapshot();
   });
 });
@@ -141,10 +145,6 @@ describe('deleteLayer', () => {
       createSketchFile(SketchModel.page({ layers: [group, oval] })),
     );
 
-    expect(
-      debugDescription(Selectors.getCurrentPage(state), { frames: false }),
-    ).toMatchSnapshot();
-
     test('within same parent', () => {
       const updated = layerReducer(state, [
         'deleteLayer',
@@ -152,7 +152,10 @@ describe('deleteLayer', () => {
       ]);
 
       expect(
-        debugDescription(Selectors.getCurrentPage(updated), { frames: false }),
+        debugDescription(
+          [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+          { frames: false },
+        ),
       ).toMatchSnapshot();
     });
 
@@ -163,7 +166,10 @@ describe('deleteLayer', () => {
       ]);
 
       expect(
-        debugDescription(Selectors.getCurrentPage(updated), { frames: false }),
+        debugDescription(
+          [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+          { frames: false },
+        ),
       ).toMatchSnapshot();
     });
 
@@ -175,7 +181,10 @@ describe('deleteLayer', () => {
       ]);
 
       expect(
-        debugDescription(Selectors.getCurrentPage(updated), { frames: false }),
+        debugDescription(
+          [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+          { frames: false },
+        ),
       ).toMatchSnapshot();
     });
   });
