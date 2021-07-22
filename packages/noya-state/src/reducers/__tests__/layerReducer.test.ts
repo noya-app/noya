@@ -152,10 +152,10 @@ describe('deleteLayer', () => {
       ]);
 
       expect(
-        debugDescription(
-          [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
-          { frames: false },
-        ),
+        debugDescription([
+          Selectors.getCurrentPage(state),
+          Selectors.getCurrentPage(updated),
+        ]),
       ).toMatchSnapshot();
     });
 
@@ -166,10 +166,10 @@ describe('deleteLayer', () => {
       ]);
 
       expect(
-        debugDescription(
-          [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
-          { frames: false },
-        ),
+        debugDescription([
+          Selectors.getCurrentPage(state),
+          Selectors.getCurrentPage(updated),
+        ]),
       ).toMatchSnapshot();
     });
 
@@ -181,10 +181,10 @@ describe('deleteLayer', () => {
       ]);
 
       expect(
-        debugDescription(
-          [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
-          { frames: false },
-        ),
+        debugDescription([
+          Selectors.getCurrentPage(state),
+          Selectors.getCurrentPage(updated),
+        ]),
       ).toMatchSnapshot();
     });
   });
