@@ -1,0 +1,3 @@
+/*! For license information please see 13.ddd75c01.chunk.js.LICENSE.txt */
+(this.webpackJsonpapp=this.webpackJsonpapp||[]).push([[13],{281:function(e,t,n){"use strict";n.r(t);var r=n(22),c=n(25);t.default=function(){var e=Object(c.a)(r.mark((function e(t){var n,c,a=arguments;return r.wrap((function(e){for(;;)switch(e.prev=e.next){case 0:n=a.length>1&&void 0!==a[1]?a[1]:{},(c=document.createElement("a")).download=n.fileName||"Untitled",c.href=URL.createObjectURL(t),c.addEventListener("click",(function(){setTimeout((function(){return URL.revokeObjectURL(c.href)}),3e4)})),c.click();case 3:case"end":return e.stop()}}),e)})));return function(t){return e.apply(this,arguments)}}()}}]);
+//# sourceMappingURL=13.ddd75c01.chunk.js.map
