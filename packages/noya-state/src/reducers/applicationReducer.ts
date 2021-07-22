@@ -52,7 +52,7 @@ export type SelectedControlPoint = {
 
 export type SelectedGradientPoint = {
   layerId: string;
-  pointIndex: number | 'from' | 'to';
+  pointIndex: number;
 };
 
 export type SelectedPointLists = Record<string, number[]>;

@@ -507,40 +507,33 @@ export default memo(function SketchFileRenderer() {
   const circleStroke = useStroke({ color: '#000', strokeWidth: 1 });
 
   const points = useMemo(() => {
-    const gradientsPoints = Selectors.getGradientLinesMap(state);
+    const gradientsPoint = Selectors.getFirstSelectedLayerGradientPoints(state);
+
+    if (!gradientsPoint) return <></>;
+
+    const path = new CanvasKit.Path();
+
+    gradientsPoint.forEach((point, index) => {
+      path.addOval(
+        CanvasKit.XYWHRect(
+          point.x - Selectors.POINT_RADIUS,
+          point.y - Selectors.POINT_RADIUS,
+          Selectors.POINT_RADIUS * 2,
+          Selectors.POINT_RADIUS * 2,
+        ),
+      );
+    });
 
     return (
       <>
-        {gradientsPoints.map((points) => {
-          if (!points) return null;
-
-          const path = new CanvasKit.Path();
-
-          path.addOval(
-            CanvasKit.XYWHRect(
-              points.from.x - Selectors.POINT_RADIUS,
-              points.from.y - Selectors.POINT_RADIUS,
-              Selectors.POINT_RADIUS * 2,
-              Selectors.POINT_RADIUS * 2,
-            ),
-          );
-
-          path.addOval(
-            CanvasKit.XYWHRect(
-              points.to.x - Selectors.POINT_RADIUS,
-              points.to.y - Selectors.POINT_RADIUS,
-              Selectors.POINT_RADIUS * 2,
-              Selectors.POINT_RADIUS * 2,
-            ),
-          );
-
-          return (
-            <>
-              <Polyline points={[points.from, points.to]} paint={stroke} />
-              <Path path={path} paint={circleStroke} />
-            </>
-          );
-        })}
+        <Polyline
+          points={[
+            gradientsPoint[0],
+            gradientsPoint[gradientsPoint.length - 1],
+          ]}
+          paint={stroke}
+        />
+        <Path path={path} paint={circleStroke} />
       </>
     );
   }, [state, stroke, CanvasKit, circleStroke]);

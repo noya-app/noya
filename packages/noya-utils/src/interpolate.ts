@@ -4,7 +4,7 @@ function isIncreasing(values: number[]) {
   return windowsOf(values, 2).every(([a, b]) => a <= b);
 }
 
-function lerp(a: number, b: number, t: number) {
+export function lerp(a: number, b: number, t: number) {
   return a * (1 - t) + b * t;
 }
 

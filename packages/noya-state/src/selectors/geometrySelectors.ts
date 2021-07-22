@@ -25,6 +25,8 @@ import {
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
 } from './transformSelectors';
+import { PointString } from 'noya-sketch-model';
+import { lerp } from 'noya-utils';
 
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
@@ -318,9 +320,14 @@ export function getBoundingRectMap(
   return rectMap;
 }
 
-export function getGradientLinesMap(state: ApplicationState) {
+export function getFirstSelectedLayerGradientPoints(
+  state: ApplicationState,
+  fillIndex = 0,
+) {
   const page = getCurrentPage(state);
-  const layerIndexPaths = getSelectedLayerIndexPaths(state);
+  const firstLayerIndexPath = getSelectedLayerIndexPaths(state);
+
+  if (firstLayerIndexPath.length === 0) return null;
 
   const boundingRects = getBoundingRectMap(page, state.selectedObjects, {
     clickThroughGroups: true,
@@ -328,37 +335,41 @@ export function getGradientLinesMap(state: ApplicationState) {
     includeHiddenLayers: false,
   });
 
-  return layerIndexPaths.map((indexPath) => {
-    const layer = Layers.access(page, indexPath);
-    const boundingRect = boundingRects[layer.do_objectID];
+  const layer = Layers.access(page, firstLayerIndexPath[0]);
+  const boundingRect = boundingRects[layer.do_objectID];
 
-    if (
-      !boundingRect ||
-      !layer.style ||
-      !layer.style.fills ||
-      !layer.style.fills[0] ||
-      layer.style.fills[0].fillType !== 1
-    )
-      return null;
+  if (
+    !boundingRect ||
+    !layer.style ||
+    !layer.style.fills ||
+    !layer.style.fills[fillIndex] ||
+    layer.style.fills[fillIndex].fillType !== 1
+  )
+    return null;
 
-    const gradient = layer.style.fills[0].gradient;
+  const gradient = layer.style.fills[fillIndex].gradient;
 
-    let start = JSON.parse(
-      gradient.from.replace('{', '{"x":').replace(',', ', "y":'),
-    ) as Point;
-    let end = JSON.parse(
-      gradient.to.replace('{', '{"x":').replace(',', ', "y":'),
-    ) as Point;
+  const from = PointString.decode(gradient.from);
+  const to = PointString.decode(gradient.to);
+
+  const extremePoints = {
+    from: {
+      x: boundingRect.width * from.x + boundingRect.x,
+      y: boundingRect.height * from.y + boundingRect.y,
+    },
+    to: {
+      x: boundingRect.width * to.x + boundingRect.x,
+      y: boundingRect.height * to.y + boundingRect.y,
+    },
+  };
+
+  return gradient.stops.sort().map((stop, index) => {
+    if (index === 0) return extremePoints.from;
+    else if (index === gradient.stops.length - 1) return extremePoints.to;
 
     return {
-      from: {
-        x: boundingRect.width * start.x + boundingRect.x,
-        y: boundingRect.height * start.y + boundingRect.y,
-      },
-      to: {
-        x: boundingRect.width * end.x + boundingRect.x,
-        y: boundingRect.height * end.y + boundingRect.y,
-      },
+      x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
+      y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
     };
   });
 }

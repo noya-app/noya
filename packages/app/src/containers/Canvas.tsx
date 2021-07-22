@@ -13,6 +13,7 @@ import {
 import { createRect, Insets } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
+import { PointString } from 'noya-sketch-model';
 import {
   CompassDirection,
   decodeCurvePoint,
@@ -363,7 +364,28 @@ export default memo(function Canvas() {
             },
           );
 
-          if (layer) {
+          const selectedLayerGradientPoints = Selectors.getFirstSelectedLayerGradientPoints(
+            state,
+          );
+
+          if (
+            selectedLayerGradientPoints &&
+            selectedLayerGradientPoints.some((gradientPoint) =>
+              Selectors.isPointInRange(gradientPoint, point),
+            )
+          ) {
+            const index = selectedLayerGradientPoints.findIndex(
+              (gradientPoint) => Selectors.isPointInRange(gradientPoint, point),
+            );
+
+            if (index === -1) return;
+            const gradientPoint = {
+              layerId: '',
+              pointIndex: index,
+            } as SelectedGradientPoint;
+
+            dispatch('interaction', ['editGradient', gradientPoint]);
+          } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
                 dispatch('selectLayer', layer.do_objectID, 'difference');
@@ -376,31 +398,7 @@ export default memo(function Canvas() {
               );
             }
 
-            const gradientsPoints = Selectors.getGradientLinesMap(state);
-
-            const selectedGradientPoint = gradientsPoints.flatMap(
-              (gradientPoint, index) => {
-                if (!gradientPoint) return [];
-                if (Selectors.isPointInRange(gradientPoint.from, point))
-                  return [index, 'from'];
-                if (Selectors.isPointInRange(gradientPoint.to, point))
-                  return [index, 'to'];
-                return [];
-              },
-            );
-
-            if (selectedGradientPoint.length > 1) {
-              const [id, index] = selectedGradientPoint;
-
-              const gradientPoint = {
-                layerId: id,
-                pointIndex: index,
-              } as SelectedGradientPoint;
-
-              dispatch('interaction', ['editGradient', gradientPoint]);
-            } else {
-              dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
-            }
+            dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
           } else {
             dispatch('selectLayer', undefined);
 
@@ -423,20 +421,34 @@ export default memo(function Canvas() {
           //TODO: Handle points outside of frame
           // TODO: Handle correct pointIndex
           const boundingRect = Selectors.getSelectedRect(state);
-
           if (!state.interactionState.point || !boundingRect) return;
 
           const pointIndex = state.interactionState.point.pointIndex;
 
-          if (typeof pointIndex === 'string') {
-            const x = (point.x - boundingRect.x) / boundingRect.width;
-            const y = (point.y - boundingRect.y) / boundingRect.height;
+          const gradientPoint = {
+            x: (point.x - boundingRect.x) / boundingRect.width,
+            y: (point.y - boundingRect.y) / boundingRect.height,
+          };
 
-            if (pointIndex === 'from')
-              dispatch('setFillGradientFrom', 0, `{${x}, ${y}}`);
-            else dispatch('setFillGradientTo', 0, `{${x}, ${y}}`);
+          switch (pointIndex) {
+            case 0:
+              dispatch(
+                'setFillGradientFrom',
+                0,
+                PointString.encode(gradientPoint),
+              );
+              break;
+            case 2:
+              dispatch(
+                'setFillGradientTo',
+                0,
+                PointString.encode(gradientPoint),
+              );
+              break;
+            default:
+              dispatch('setFillGradientPosition', 0, pointIndex, 0.5);
+              break;
           }
-
           break;
         }
         case 'insertingSymbol': {
