@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[` 1`] = `
+"<Page> Page
+├── <Group> Group
+│   └── <Rectangle> Rectangle
+└── <Oval> Oval"
+`;
+
+exports[`deleteLayer delete multiple bad nesting 1`] = `
+"<Page> Page
+└── <Oval> Oval"
+`;
+
+exports[`deleteLayer delete multiple within different parents 1`] = `
+"<Page> Page
+└── <Group> Group"
+`;
+
+exports[`deleteLayer delete multiple within same parent 1`] = `"<Page> Page"`;
