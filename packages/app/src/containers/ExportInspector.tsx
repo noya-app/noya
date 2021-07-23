@@ -17,7 +17,7 @@ import {
 } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import ExportArrayController from '../components/inspector/ExportArrayController';
+import ArrayController from '../components/inspector/ArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
@@ -157,7 +157,7 @@ export default memo(function ExportInspector() {
   ]);
 
   const elements = [
-    <ExportArrayController<Sketch.ExportFormat>
+    <ArrayController<Sketch.ExportFormat>
       sortable
       title={title}
       id={title}

@@ -1,10 +1,11 @@
-import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
+import * as InspectorPrimitives from './InspectorPrimitives';
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import {
   Sortable,
   Spacer,
   ListView,
   RelativeDropPosition,
+  withSeparatorElements,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -51,17 +52,6 @@ function ArrayController<Item>({
     [getKey, items],
   );
 
-  const renderRow = (index: number) => {
-    return (
-      <ElementRow>
-        {renderItem({
-          item: items[index],
-          index,
-        })}
-      </ElementRow>
-    );
-  };
-
   const handleMoveItem = useCallback(
     (
       sourceIndex: number,
@@ -80,16 +70,31 @@ function ArrayController<Item>({
     [onMoveItem],
   );
 
+  const renderRow = (index: number) => {
+    return (
+      <ElementRow>
+        {renderItem({
+          item: items[index],
+          index,
+        })}
+      </ElementRow>
+    );
+  };
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
         <Spacer.Horizontal />
-        {onClickTrash && items.some((item) => !item) && (
-          <TrashIcon color={iconColor} onClick={onClickTrash} />
+        {withSeparatorElements(
+          [
+            onClickTrash && (
+              <TrashIcon color={iconColor} onClick={onClickTrash} />
+            ),
+            onClickPlus && <PlusIcon color={iconColor} onClick={onClickPlus} />,
+          ],
+          <Spacer.Horizontal size={12} />,
         )}
-        <Spacer.Horizontal size={12} />
-        {onClickPlus && <PlusIcon color={iconColor} onClick={onClickPlus} />}
       </InspectorPrimitives.SectionHeader>
       {sortable ? (
         <Sortable.Root
