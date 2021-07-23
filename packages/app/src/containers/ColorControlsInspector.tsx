@@ -1,10 +1,10 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 import getMultiNumberValue from '../utils/getMultiNumberValue';
 
@@ -152,21 +152,15 @@ export default memo(function ColorControlsInspector() {
     <ArrayController<Sketch.ColorControls>
       title="Color Adjust"
       id="color-adjust"
-      value={firstColorControls}
-      isDraggable={false}
-      alwaysShowTrashIcon
+      items={firstColorControls}
       onClickPlus={isEnabled ? undefined : handleClickPlus}
       onClickTrash={isEnabled ? handleClickTrash : undefined}
-      onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
-        dispatch,
-      ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveFill', sourceIndex, destinationIndex),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         () => (
           <ColorControlsRow
             id={'color-controls'}
@@ -191,6 +185,6 @@ export default memo(function ColorControlsInspector() {
           interpolatedSaturation,
         ],
       )}
-    </ArrayController>
+    />
   );
 });

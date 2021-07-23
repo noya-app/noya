@@ -292,6 +292,7 @@ export function applicationReducer(
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);
+    case 'moveExportFormat':
     case 'setExportScale':
     case 'setExportName':
     case 'setExportFileFormat':
