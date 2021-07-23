@@ -19,6 +19,7 @@ import React, {
   createContext,
   memo,
   ReactNode,
+  Ref,
   useCallback,
   useContext,
   useMemo,
@@ -53,15 +54,6 @@ const SortableItemContext = createContext<{
   setActivatorEvent: () => {},
 });
 
-/* ----------------------------------------------------------------------------
- * Item
- * ------------------------------------------------------------------------- */
-
-interface ItemProps {
-  id: string;
-  children: (props: any) => JSX.Element;
-}
-
 function validateDropIndicator(
   acceptsDrop: DropValidator,
   activeId: string,
@@ -92,7 +84,24 @@ function validateDropIndicator(
     : undefined;
 }
 
-function SortableItem({ id, children }: ItemProps) {
+/* ----------------------------------------------------------------------------
+ * Item
+ * ------------------------------------------------------------------------- */
+
+type UseSortableReturnType = ReturnType<typeof useSortable>;
+
+interface ItemProps<T> {
+  id: string;
+  children: (
+    props: {
+      ref: Ref<T>;
+      relativeDropPosition?: RelativeDropPosition;
+      [key: string]: any;
+    } & UseSortableReturnType['attributes'],
+  ) => JSX.Element;
+}
+
+function SortableItem<T extends HTMLElement>({ id, children }: ItemProps<T>) {
   const { position, acceptsDrop, setActivatorEvent } = useContext(
     SortableItemContext,
   );
@@ -117,8 +126,10 @@ function SortableItem({ id, children }: ItemProps) {
   const eventY = (activatorEvent as PointerEvent | null)?.clientY ?? 0;
   const offsetTop = eventY + position.y;
 
+  const ref = useCallback((node: T) => setNodeRef(node), [setNodeRef]);
+
   return children({
-    ref: setNodeRef,
+    ref,
     ...attributes,
     ...listeners,
     relativeDropPosition:

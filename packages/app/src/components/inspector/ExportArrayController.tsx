@@ -1,8 +1,8 @@
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import { Spacer } from 'noya-designsystem';
-import { memo, ReactNode, useCallback } from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import styled from 'styled-components';
+import { Sortable, Spacer, ListView } from 'noya-designsystem';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
+// import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import styled, { useTheme } from 'styled-components';
 
 /* ----------------------------------------------------------------------------
  * ArrayElement
@@ -14,33 +14,11 @@ const ElementRow = styled.div(({ theme }) => ({
   flexDirection: 'row',
   alignItems: 'center',
   marginTop: '10px',
-  cursor: 'initial !important', // Override draggableProps.style
+  // cursor: 'initial !important',
 }));
 
-interface ArrayElementProps {
-  id: string;
-  index: number;
-  children: ReactNode;
-}
-
-const ArrayElement = memo(function ArrayElement({
-  id,
-  index,
-  children,
-}: ArrayElementProps) {
-  return (
-    <Draggable draggableId={id} index={index}>
-      {(provided) => (
-        <ElementRow
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          ref={provided.innerRef}
-        >
-          {children}
-        </ElementRow>
-      )}
-    </Draggable>
-  );
+const ArrayElement = styled.div({
+  position: 'relative',
 });
 
 /* ----------------------------------------------------------------------------
@@ -75,7 +53,7 @@ interface ArrayControllerProps<Item> {
   onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
-  getKey?: (item: Item) => string | number;
+  getKey?: (item: Item) => string;
   children: (props: {
     item: Item;
     index: number;
@@ -95,77 +73,84 @@ function ArrayController<Item>({
   onChangeCheckbox,
   children: renderItem,
 }: ArrayControllerProps<Item>) {
-  const handleDragEnd = useCallback(
-    (result) => {
-      const { destination, source } = result;
+  const iconColor = useTheme().colors.icon;
 
-      if (!destination) {
-        onDeleteItem?.(source.index);
-        return;
-      }
-
-      if (
-        // Different destination
-        source.droppableId !== destination.droppableId ||
-        // Same index
-        source.index === destination.index
-      ) {
-        return;
-      }
-
-      onMoveItem?.(source.index, destination.index);
-    },
-    [onDeleteItem, onMoveItem],
+  const keys = useMemo(
+    () => value.map((item, index) => getKey?.(item) ?? index.toString()),
+    [getKey, value],
   );
 
+  const renderRow = (index: number) => {
+    return (
+      <ElementRow>
+        {renderItem({
+          item: value[index],
+          index,
+          checkbox: onChangeCheckbox && (
+            <Checkbox
+              type="checkbox"
+              checked={true}
+              onChange={(event) => {
+                onChangeCheckbox(index, event.target.checked);
+              }}
+            />
+          ),
+        })}
+      </ElementRow>
+    );
+  };
+
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <ArrayControllerContainer>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Title>{title}</Title>
-          <Spacer.Horizontal />
-          {onClickTrash && value.some((item) => !item) && (
-            <span onClick={onClickTrash}>
-              <TrashIcon color="rgb(139,139,139)" />
-            </span>
-          )}
-          <Spacer.Horizontal size={12} />
-          {onClickPlus && (
-            <span onClick={onClickPlus}>
-              <PlusIcon color="rgb(139,139,139)" />
-            </span>
-          )}
-        </div>
-        <Droppable droppableId={id}>
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
-              {value.map((item, index) => (
-                <ArrayElement
-                  key={getKey?.(item) ?? index}
-                  id={String(index)}
-                  index={index}
-                >
-                  {renderItem({
-                    item,
-                    index,
-                    checkbox: onChangeCheckbox && (
-                      <Checkbox
-                        type="checkbox"
-                        checked={true}
-                        onChange={(event) => {
-                          onChangeCheckbox(index, event.target.checked);
-                        }}
-                      />
-                    ),
-                  })}
-                </ArrayElement>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </ArrayControllerContainer>
-    </DragDropContext>
+    <ArrayControllerContainer>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <Title>{title}</Title>
+        <Spacer.Horizontal />
+        {onClickTrash && value.some((item) => !item) && (
+          <span onClick={onClickTrash}>
+            <TrashIcon color={iconColor} />
+          </span>
+        )}
+        <Spacer.Horizontal size={12} />
+        {onClickPlus && (
+          <span onClick={onClickPlus}>
+            <PlusIcon color={iconColor} />
+          </span>
+        )}
+      </div>
+      <Sortable.Root
+        keys={keys}
+        renderOverlay={renderRow}
+        onMoveItem={useCallback(
+          (sourceIndex, destinationIndex, position) => {
+            if (
+              sourceIndex === destinationIndex ||
+              (position === 'above' && sourceIndex + 1 === destinationIndex) ||
+              (position === 'below' && sourceIndex - 1 === destinationIndex)
+            )
+              return;
+
+            onMoveItem?.(sourceIndex, destinationIndex);
+          },
+          [onMoveItem],
+        )}
+      >
+        {value.map((_, index) => (
+          <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
+            {({ relativeDropPosition, ...sortableProps }) => (
+              <ArrayElement {...sortableProps}>
+                {renderRow(index)}
+                {relativeDropPosition && (
+                  <ListView.DragIndicatorElement
+                    relativeDropPosition={relativeDropPosition}
+                    offsetLeft={0}
+                  />
+                )}
+              </ArrayElement>
+            )}
+          </Sortable.Item>
+        ))}
+      </Sortable.Root>
+    </ArrayControllerContainer>
   );
 }
 

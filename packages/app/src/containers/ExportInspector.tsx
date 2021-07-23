@@ -17,7 +17,7 @@ import {
 } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import ArrayController from '../components/inspector/ExportArrayController';
+import ExportArrayController from '../components/inspector/ExportArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
@@ -157,7 +157,7 @@ export default memo(function ExportInspector() {
   ]);
 
   const elements = [
-    <ArrayController<Sketch.ExportFormat>
+    <ExportArrayController<Sketch.ExportFormat>
       title={title}
       id={title}
       key={title}
@@ -165,6 +165,12 @@ export default memo(function ExportInspector() {
       onClickPlus={useCallback(() => {
         dispatch('addExportFormat');
       }, [dispatch])}
+      onMoveItem={useCallback(
+        (sourceIndex, destinationIndex) => {
+          dispatch('moveExportFormat', sourceIndex, destinationIndex);
+        },
+        [dispatch],
+      )}
     >
       {useCallback(
         ({ item, index }: { item: Sketch.ExportFormat; index: number }) => (
@@ -189,7 +195,7 @@ export default memo(function ExportInspector() {
         ),
         [exportFormats.length, dispatch],
       )}
-    </ArrayController>,
+    </ExportArrayController>,
     exportFormats.length > 0 && selectedLayer && (
       <>
         <InspectorPrimitives.Section>
