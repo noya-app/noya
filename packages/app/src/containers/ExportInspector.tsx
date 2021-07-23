@@ -158,10 +158,11 @@ export default memo(function ExportInspector() {
 
   const elements = [
     <ExportArrayController<Sketch.ExportFormat>
+      sortable
       title={title}
       id={title}
       key={title}
-      value={exportFormats}
+      items={exportFormats}
       onClickPlus={useCallback(() => {
         dispatch('addExportFormat');
       }, [dispatch])}
@@ -171,9 +172,8 @@ export default memo(function ExportInspector() {
         },
         [dispatch],
       )}
-    >
-      {useCallback(
-        ({ item, index }: { item: Sketch.ExportFormat; index: number }) => (
+      renderItem={useCallback(
+        ({ item, index }) => (
           <ExportFormatsRow
             id={`exportFormat-${index}}`}
             last={index === exportFormats.length - 1}
@@ -195,7 +195,7 @@ export default memo(function ExportInspector() {
         ),
         [exportFormats.length, dispatch],
       )}
-    </ExportArrayController>,
+    />,
     exportFormats.length > 0 && selectedLayer && (
       <>
         <InspectorPrimitives.Section>

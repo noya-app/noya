@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { isDeepEqual, zipLongest } from 'noya-utils';
-import ArrayController from '../components/inspector/ArrayController';
+import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import BorderRow from '../components/inspector/BorderRow';
 import { DimensionValue } from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
@@ -80,7 +80,7 @@ export default memo(function BorderInspector() {
   );
 
   return (
-    <ArrayController<EditableBorder>
+    <CheckboxArrayController<EditableBorder>
       title="Borders"
       id="borders"
       key="borders"
@@ -152,6 +152,6 @@ export default memo(function BorderInspector() {
         ),
         [dispatch],
       )}
-    </ArrayController>
+    </CheckboxArrayController>
   );
 });

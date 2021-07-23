@@ -2,7 +2,7 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
-import ArrayController from '../components/inspector/ArrayController';
+import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
@@ -149,7 +149,7 @@ export default memo(function ColorControlsInspector() {
   );
 
   return (
-    <ArrayController<Sketch.ColorControls>
+    <CheckboxArrayController<Sketch.ColorControls>
       title="Color Adjust"
       id="color-adjust"
       value={firstColorControls}
@@ -191,6 +191,6 @@ export default memo(function ColorControlsInspector() {
           interpolatedSaturation,
         ],
       )}
-    </ArrayController>
+    </CheckboxArrayController>
   );
 });
