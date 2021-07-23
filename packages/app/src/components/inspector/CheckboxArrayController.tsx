@@ -13,7 +13,6 @@ interface CheckboxArrayControllerProps<Item> {
   value: Item[];
   title: ReactNode;
   sortable?: boolean;
-  onDeleteItem?: (index: number) => void;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;

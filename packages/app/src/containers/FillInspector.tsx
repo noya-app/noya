@@ -38,9 +38,6 @@ export default memo(function FillInspector({
       onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
-        dispatch,
-      ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveFill', sourceIndex, destinationIndex),

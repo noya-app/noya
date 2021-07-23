@@ -63,9 +63,6 @@ export default memo(function ShadowInspector() {
       onClickTrash={useCallback(() => dispatch('deleteDisabledShadows'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteShadow', index), [
-        dispatch,
-      ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveShadow', sourceIndex, destinationIndex),

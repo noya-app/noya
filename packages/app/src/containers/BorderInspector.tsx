@@ -89,9 +89,6 @@ export default memo(function BorderInspector() {
       onClickTrash={useCallback(() => dispatch('deleteDisabledBorders'), [
         dispatch,
       ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteBorder', index), [
-        dispatch,
-      ])}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveBorder', sourceIndex, destinationIndex),
