@@ -101,8 +101,7 @@ export default memo(function BorderInspector() {
         (index, checked) => dispatch('setBorderEnabled', index, checked),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         ({
           item,
           index,
@@ -152,6 +151,6 @@ export default memo(function BorderInspector() {
         ),
         [dispatch],
       )}
-    </CheckboxArrayController>
+    />
   );
 });

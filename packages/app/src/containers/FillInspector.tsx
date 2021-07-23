@@ -50,8 +50,7 @@ export default memo(function FillInspector({
         (index, checked) => dispatch('setFillEnabled', index, checked),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         ({
           item,
           index,
@@ -113,6 +112,6 @@ export default memo(function FillInspector({
 
         [dispatch],
       )}
-    </CheckboxArrayController>
+    />
   );
 });

@@ -75,8 +75,7 @@ export default memo(function ShadowInspector() {
         (index, checked) => dispatch('setShadowEnabled', index, checked),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         ({
           item,
           index,
@@ -110,6 +109,6 @@ export default memo(function ShadowInspector() {
         ),
         [dispatch],
       )}
-    </CheckboxArrayController>
+    />
   );
 });

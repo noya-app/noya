@@ -12,15 +12,14 @@ interface CheckboxArrayControllerProps<Item> {
   id: string;
   value: Item[];
   title: ReactNode;
-  isDraggable?: boolean;
-  alwaysShowTrashIcon?: boolean;
+  sortable?: boolean;
   onDeleteItem?: (index: number) => void;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
   getKey?: (item: Item) => string;
-  children: (props: {
+  renderItem: (props: {
     item: Item;
     index: number;
     checkbox: ReactNode;
@@ -31,14 +30,13 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
   id,
   value,
   title,
-  isDraggable = true,
-  alwaysShowTrashIcon = false,
+  sortable = true,
   getKey,
   onMoveItem,
   onClickPlus,
   onClickTrash,
   onChangeCheckbox,
-  children: renderItem,
+  renderItem,
 }: CheckboxArrayControllerProps<Item>) {
   const getCheckboxElement = (index: number) =>
     onChangeCheckbox ? (
@@ -51,8 +49,7 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       />
     ) : null;
 
-  const showTrash =
-    alwaysShowTrashIcon || value.some((item) => !item.isEnabled);
+  const showTrash = value.some((item) => !item.isEnabled);
 
   return (
     <ArrayController<Item>
@@ -60,7 +57,7 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       items={value}
       getKey={getKey}
       title={title}
-      sortable={isDraggable}
+      sortable={sortable}
       onMoveItem={onMoveItem}
       onClickPlus={onClickPlus}
       onClickTrash={showTrash ? onClickTrash : undefined}

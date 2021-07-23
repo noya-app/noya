@@ -35,7 +35,7 @@ interface ArrayControllerProps<Item> {
 }
 
 function ArrayController<Item>({
-  // id,
+  id,
   items,
   title,
   sortable = false,
@@ -82,7 +82,7 @@ function ArrayController<Item>({
   };
 
   return (
-    <InspectorPrimitives.Section>
+    <InspectorPrimitives.Section id={id}>
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
         <Spacer.Horizontal />
