@@ -176,8 +176,8 @@ export default memo(function Inspector() {
       hasTextLayer && <TextStyleInspector />,
       hasOneSymbolMaster && <SymbolMasterInspector />,
       hasOneSymbolInstance && <SymbolInstanceInspector />,
-      !hasSymbolInstance && selectedLayers.length === 1 && (
-        <FillInspector title={'Fills'} allowMoreThanOne={true} />
+      selectedLayers.every(Layers.hasInspectableFill) && (
+        <FillInspector title="Fills" allowMoreThanOne />
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
