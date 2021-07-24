@@ -27,6 +27,7 @@ interface ArrayControllerProps<Item> {
   items: Item[];
   title: ReactNode;
   sortable?: boolean;
+  reversed?: boolean;
   getKey?: (item: Item) => string;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onClickPlus?: () => void;
@@ -34,11 +35,34 @@ interface ArrayControllerProps<Item> {
   renderItem: (props: { item: Item; index: number }) => ReactNode;
 }
 
+function getIndex<T>(array: T[], index: number): number {
+  return index;
+}
+
+function getReversedIndex<T>(array: T[], index: number): number {
+  return array.length - 1 - index;
+}
+
+function mapIndex<T, U>(
+  array: T[],
+  getIndex: (array: T[], index: number) => number,
+  f: (value: T, index: number, array: T[]) => U,
+): U[] {
+  let result: U[] = [];
+
+  for (let i = 0; i < array.length; i++) {
+    result.push(f(array[getIndex(array, i)], i, array));
+  }
+
+  return result;
+}
+
 function ArrayController<Item>({
   id,
   items,
   title,
   sortable = false,
+  reversed = true,
   getKey,
   onMoveItem,
   onClickPlus,
@@ -51,6 +75,8 @@ function ArrayController<Item>({
     () => items.map((item, index) => getKey?.(item) ?? index.toString()),
     [getKey, items],
   );
+
+  const indexMapper = reversed ? getReversedIndex : getIndex;
 
   const handleMoveItem = useCallback(
     (
@@ -65,20 +91,16 @@ function ArrayController<Item>({
       )
         return;
 
-      onMoveItem?.(sourceIndex, destinationIndex);
+      onMoveItem?.(
+        indexMapper(items, sourceIndex),
+        indexMapper(items, destinationIndex),
+      );
     },
-    [onMoveItem],
+    [indexMapper, items, onMoveItem],
   );
 
-  const renderRow = (index: number) => {
-    return (
-      <ElementRow>
-        {renderItem({
-          item: items[index],
-          index,
-        })}
-      </ElementRow>
-    );
+  const renderRow = (item: Item, index: number) => {
+    return <ElementRow>{renderItem({ item, index })}</ElementRow>;
   };
 
   return (
@@ -99,14 +121,19 @@ function ArrayController<Item>({
       {sortable ? (
         <Sortable.Root
           keys={keys}
-          renderOverlay={renderRow}
+          renderOverlay={(index) =>
+            renderRow(
+              items[indexMapper(items, index)],
+              indexMapper(items, index),
+            )
+          }
           onMoveItem={handleMoveItem}
         >
-          {items.map((_, index) => (
+          {mapIndex(items, indexMapper, (item, index) => (
             <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
               {({ relativeDropPosition, ...sortableProps }) => (
                 <ItemContainer {...sortableProps}>
-                  {renderRow(index)}
+                  {renderRow(item, indexMapper(items, index))}
                   {relativeDropPosition && (
                     <ListView.DragIndicatorElement
                       relativeDropPosition={relativeDropPosition}
@@ -119,7 +146,7 @@ function ArrayController<Item>({
           ))}
         </Sortable.Root>
       ) : (
-        items.map((_, index) => renderRow(index))
+        mapIndex(items, indexMapper, (item, index) => renderRow(item, index))
       )}
     </InspectorPrimitives.Section>
   );
