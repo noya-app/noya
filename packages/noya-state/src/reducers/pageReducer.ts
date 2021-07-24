@@ -71,6 +71,8 @@ export function pageReducer(
         (page) => page.do_objectID === pageId,
       );
 
+      if (pageIndex === -1) return state;
+
       return produce(state, (draft) => {
         draft.sketch.pages[pageIndex].name = name;
       });

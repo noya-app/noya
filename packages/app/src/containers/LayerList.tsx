@@ -365,12 +365,10 @@ export default memo(function LayerList() {
       };
 
       const handleSubmitEditing = (name: string) => {
-        if (!name) {
-          setEditingLayer(undefined);
-          return;
-        }
-
         setEditingLayer(undefined);
+
+        if (!name) return;
+
         dispatch('setLayerName', id, name);
       };
 

@@ -17,4 +17,10 @@ describe('setPageName', () => {
 
     expect(updated.sketch.pages[0].name).toEqual('Test');
   });
+
+  test('fails silently when renaming missing id', () => {
+    const state = createInitialState(createSketchFile(SketchModel.page()));
+
+    pageReducer(state, ['setPageName', 'bad', 'Test']);
+  });
 });

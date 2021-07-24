@@ -28,4 +28,10 @@ describe('setLayerName', () => {
 
     expect(updated.sketch.pages[0].layers[0].name).toEqual('Test');
   });
+
+  test('fails silently when renaming missing id', () => {
+    const state = createInitialState(createSketchFile(SketchModel.page()));
+
+    layerPropertyReducer(state, ['setLayerName', 'bad', 'Test'], CanvasKit);
+  });
 });
