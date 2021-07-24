@@ -137,22 +137,6 @@ const PageListContent = memo(function PageListContent({
               id={page.do_objectID}
               key={page.do_objectID}
               depth={2}
-              editableProps={
-                page.do_objectID === editingPage
-                  ? {
-                      value: page.name,
-                      onSubmitEditing: (name) => {
-                        if (!name) {
-                          setEditingPage(undefined);
-                          return;
-                        }
-
-                        setEditingPage(undefined);
-                        dispatch('renamePage', name);
-                      },
-                    }
-                  : undefined
-              }
               selected={!isDragging && selectedPageId === page.do_objectID}
               onClick={() => {
                 dispatch('interaction', ['reset']);
@@ -164,7 +148,21 @@ const PageListContent = memo(function PageListContent({
                 dispatch('selectPage', page.do_objectID);
               }}
             >
-              {page.name}
+              {page.do_objectID === editingPage ? (
+                <ListView.EditableRowTitle
+                  autoFocus
+                  value={page.name}
+                  onSubmitEditing={(name) => {
+                    setEditingPage(undefined);
+
+                    if (!name) return;
+
+                    dispatch('setPageName', page.do_objectID, name);
+                  }}
+                />
+              ) : (
+                page.name
+              )}
             </ListView.Row>
           ),
           [

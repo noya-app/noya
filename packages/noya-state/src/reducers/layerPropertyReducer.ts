@@ -15,6 +15,7 @@ import { accessPageLayers, ApplicationState } from './applicationReducer';
 import { SetNumberMode } from './styleReducer';
 
 export type LayerPropertyAction =
+  | [type: 'setLayerName', layerId: string, name: string]
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setLayerIsLocked', layerId: string | string[], isLocked: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
@@ -37,6 +38,26 @@ export function layerPropertyReducer(
   CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setLayerName': {
+      const [, layerId, name] = action;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
+        draftLayer.name = name;
+      });
+    }
     case 'setLayerVisible':
     case 'setLayerIsLocked': {
       const [type, id, value] = action;

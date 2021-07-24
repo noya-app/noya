@@ -102,7 +102,7 @@ export function applicationReducer(
     }
     case 'selectPage':
     case 'addPage':
-    case 'renamePage':
+    case 'setPageName':
     case 'duplicatePage':
     case 'deletePage':
     case 'movePage': {
@@ -119,6 +119,7 @@ export function applicationReducer(
     case 'moveLayersIntoParentAtPoint':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
+    case 'setLayerName':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
     case 'setFixedRadius':

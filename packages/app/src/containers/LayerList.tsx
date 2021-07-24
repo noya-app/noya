@@ -37,6 +37,7 @@ import React, {
   forwardRef,
   memo,
   useCallback,
+  useLayoutEffect,
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -168,6 +169,8 @@ const LayerRow = memo(
       onChangeIsLocked,
       isLocked,
       isDragging,
+      isEditing,
+      onSubmitEditing,
       ...props
     }: TreeView.TreeRowProps<LayerMenuItemType> & {
       name: string;
@@ -176,8 +179,10 @@ const LayerRow = memo(
       isWithinMaskChain: boolean;
       isLocked: boolean;
       isDragging: boolean;
+      isEditing: boolean;
       onChangeVisible: (visible: boolean) => void;
       onChangeIsLocked: (isLocked: boolean) => void;
+      onSubmitEditing: (name: string) => void;
     },
     forwardedRef: ForwardedRef<HTMLLIElement>,
   ) {
@@ -234,26 +239,34 @@ const LayerRow = memo(
         hovered={!isDragging && hovered}
         {...props}
       >
-        {isDragging
-          ? titleElement
-          : withSeparatorElements(
-              [
-                titleElement,
-                isLocked ? (
-                  <LockClosedIcon onClick={handleSetUnlocked} />
-                ) : hovered ? (
-                  <LockOpen1Icon onClick={handleSetLocked} />
-                ) : null,
-                !visible ? (
-                  <EyeClosedIcon onClick={handleSetVisible} />
-                ) : hovered ? (
-                  <EyeOpenIcon onClick={handleSetHidden} />
-                ) : isLocked ? (
-                  <Spacer.Horizontal size={15} />
-                ) : null,
-              ],
-              <Spacer.Horizontal size={6} />,
-            )}
+        {isEditing ? (
+          <ListView.EditableRowTitle
+            autoFocus
+            value={name}
+            onSubmitEditing={onSubmitEditing}
+          />
+        ) : isDragging ? (
+          titleElement
+        ) : (
+          withSeparatorElements(
+            [
+              titleElement,
+              isLocked ? (
+                <LockClosedIcon onClick={handleSetUnlocked} />
+              ) : hovered ? (
+                <LockOpen1Icon onClick={handleSetLocked} />
+              ) : null,
+              !visible ? (
+                <EyeClosedIcon onClick={handleSetVisible} />
+              ) : hovered ? (
+                <EyeOpenIcon onClick={handleSetHidden} />
+              ) : isLocked ? (
+                <Spacer.Horizontal size={15} />
+              ) : null,
+            ],
+            <Spacer.Horizontal size={6} />,
+          )
+        )}
       </TreeView.Row>
     );
   }),
@@ -265,11 +278,22 @@ export default memo(function LayerList() {
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
 
-  const { highlightLayer } = useWorkspace();
+  const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
+
+  const [editingLayer, setEditingLayer] = useState<string | undefined>();
+
+  useLayoutEffect(() => {
+    if (!renamingLayer) return;
+
+    setTimeout(() => {
+      setEditingLayer(renamingLayer);
+      didHandleFocus();
+    }, 50);
+  }, [didHandleFocus, renamingLayer]);
 
   const renderItem = useCallback(
     (
@@ -340,6 +364,14 @@ export default memo(function LayerList() {
         dispatch('selectLayer', id);
       };
 
+      const handleSubmitEditing = (name: string) => {
+        setEditingLayer(undefined);
+
+        if (!name) return;
+
+        dispatch('setLayerName', id, name);
+      };
+
       const isSymbolClass =
         type === 'symbolInstance' || type === 'symbolMaster';
       const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
@@ -364,6 +396,8 @@ export default memo(function LayerList() {
           onHoverChange={handleHoverChange}
           onChangeVisible={handleChangeVisible}
           onChangeIsLocked={handleChangeIsLocked}
+          isEditing={id === editingLayer}
+          onSubmitEditing={handleSubmitEditing}
           icon={
             <IconContainer>
               {hasClippingMask ? (
@@ -392,6 +426,7 @@ export default memo(function LayerList() {
     },
     [
       dispatch,
+      editingLayer,
       highlightLayer,
       items,
       menuItems,
@@ -405,7 +440,7 @@ export default memo(function LayerList() {
       items={items}
       renderItem={renderItem}
       scrollable
-      sortable
+      sortable={!editingLayer}
       onClick={useCallback(() => dispatch('selectLayer', undefined), [
         dispatch,
       ])}

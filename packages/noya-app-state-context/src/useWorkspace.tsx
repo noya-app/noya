@@ -44,6 +44,15 @@ export function useWorkspace() {
     [dispatch],
   );
 
+  const startRenamingLayer = useCallback(
+    (id: string) =>
+      dispatch('setNextFocusAction', {
+        type: 'renameLayer',
+        id,
+      }),
+    [dispatch],
+  );
+
   const didHandleFocus = useCallback(
     () => dispatch('setNextFocusAction', undefined),
     [dispatch],
@@ -51,6 +60,9 @@ export function useWorkspace() {
 
   const renamingPage =
     nextFocusAction?.type === 'renamePage' ? nextFocusAction.id : undefined;
+
+  const renamingLayer =
+    nextFocusAction?.type === 'renameLayer' ? nextFocusAction.id : undefined;
 
   return useMemo(
     () => ({
@@ -62,9 +74,11 @@ export function useWorkspace() {
       preferences,
       setCanvasSize,
       setShowRulers,
-      startRenamingPage,
       didHandleFocus,
       renamingPage,
+      startRenamingPage,
+      renamingLayer,
+      startRenamingLayer,
     }),
     [
       canvasInsets,
@@ -75,9 +89,11 @@ export function useWorkspace() {
       preferences,
       setCanvasSize,
       setShowRulers,
-      startRenamingPage,
       didHandleFocus,
       renamingPage,
+      startRenamingPage,
+      renamingLayer,
+      startRenamingLayer,
     ],
   );
 }

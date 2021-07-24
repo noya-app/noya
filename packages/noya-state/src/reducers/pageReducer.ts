@@ -18,7 +18,7 @@ export type PageAction =
   | [type: 'selectPage', pageId: UUID]
   | [type: 'addPage', pageId: UUID]
   | [type: 'deletePage']
-  | [type: 'renamePage', name: string]
+  | [type: 'setPageName', pageId: UUID, name: string]
   | [type: 'duplicatePage'];
 
 export const createPage = (
@@ -65,18 +65,16 @@ export function pageReducer(
         draft.selectedPage = newPage.do_objectID;
       });
     }
-    case 'renamePage': {
-      const [, name] = action;
-      const pageIndex = getCurrentPageIndex(state);
+    case 'setPageName': {
+      const [, pageId, name] = action;
+      const pageIndex = state.sketch.pages.findIndex(
+        (page) => page.do_objectID === pageId,
+      );
+
+      if (pageIndex === -1) return state;
 
       return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const page = pages[pageIndex];
-
-        pages[pageIndex] = produce(page, (page) => {
-          page.name = name || `Page ${pages.length + 1}`;
-          return page;
-        });
+        draft.sketch.pages[pageIndex].name = name;
       });
     }
     case 'duplicatePage': {
