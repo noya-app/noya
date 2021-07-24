@@ -22,17 +22,17 @@ export interface Interaction {
 }
 
 // Check if an event was triggered by touch
-const isTouch = (e: MouseEvent | TouchEvent): e is TouchEvent => 'touches' in e;
+const isTouch = (e: PointerEvent | TouchEvent): e is TouchEvent => 'touches' in e;
 
 // Returns a relative position of the pointer inside the node's bounding box
 const getRelativePosition = (
   node: HTMLDivElement,
-  event: MouseEvent | TouchEvent,
+  event: PointerEvent | TouchEvent,
 ): Interaction => {
   const rect = node.getBoundingClientRect();
 
   // Get user's pointer position from `touches` array if it's a `TouchEvent`
-  const pointer = isTouch(event) ? event.touches[0] : (event as MouseEvent);
+  const pointer = isTouch(event) ? event.touches[0] : (event as PointerEvent);
 
   return {
     left: clamp(
@@ -69,14 +69,14 @@ const InteractiveBase = ({
 
   // Prevent mobile browsers from handling mouse events (conflicting with touch ones).
   // If we detected a touch interaction before, we prefer reacting to touch events only.
-  const isValid = (event: MouseEvent | TouchEvent): boolean => {
+  const isValid = (event: PointerEvent | TouchEvent): boolean => {
     if (hasTouched.current && !isTouch(event)) return false;
     if (!hasTouched.current) hasTouched.current = isTouch(event);
     return true;
   };
 
   const handleMove = useCallback(
-    (event: MouseEvent | TouchEvent) => {
+    (event: PointerEvent | TouchEvent) => {
       if (!isDragging.current || !container.current) return;
 
       event.preventDefault();
@@ -104,7 +104,7 @@ const InteractiveBase = ({
   );
 
   const handleMoveStart = useCallback(
-    ({ nativeEvent: event }: React.MouseEvent | React.TouchEvent) => {
+    ({ nativeEvent: event }: React.TouchEvent | React.PointerEvent) => {
       event.preventDefault();
 
       if (!isValid(event)) return;
@@ -157,7 +157,7 @@ const InteractiveBase = ({
     [onKeyCallback, onDelete],
   );
 
-  const handleMoveEnd = useCallback((event: MouseEvent | TouchEvent) => {
+  const handleMoveEnd = useCallback((event: PointerEvent | TouchEvent) => {
     // console.log('is dragging?', isDragging.current);
 
     if (!isDragging.current) return;
@@ -180,12 +180,12 @@ const InteractiveBase = ({
         ? window.addEventListener
         : window.removeEventListener;
       toggleEvent(
-        hasTouched.current ? 'touchmove' : 'mousemove',
+        hasTouched.current ? 'touchmove' : 'pointermove',
         handleMove,
         true,
       );
       toggleEvent(
-        hasTouched.current ? 'touchend' : 'mouseup',
+        hasTouched.current ? 'touchend' : 'pointerup',
         handleMoveEnd,
         true,
       );
@@ -206,7 +206,7 @@ const InteractiveBase = ({
       {...rest}
       ref={container}
       onTouchStart={handleMoveStart}
-      onMouseDown={handleMoveStart}
+      onPointerDown={handleMoveStart}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="slider"
