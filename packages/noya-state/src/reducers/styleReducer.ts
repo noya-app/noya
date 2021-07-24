@@ -7,6 +7,7 @@ import {
 } from './colorControlsReducer';
 import { clamp } from 'noya-utils';
 import { SketchModel } from 'noya-sketch-model';
+import { moveArrayItem } from '../utils/moveArrayItem';
 
 export const defaultBorderColor = SketchModel.color({
   red: 0.6,
@@ -174,10 +175,7 @@ export function styleReducer(
       return produce(state, (draft) => {
         if (!draft.borders) return;
 
-        const sourceItem = draft.borders[sourceIndex];
-
-        draft.borders.splice(sourceIndex, 1);
-        draft.borders.splice(destinationIndex, 0, sourceItem);
+        moveArrayItem(draft.borders, sourceIndex, destinationIndex);
       });
     }
     case 'moveFill': {
@@ -185,10 +183,7 @@ export function styleReducer(
       return produce(state, (draft) => {
         if (!draft.fills) return;
 
-        const sourceItem = draft.fills[sourceIndex];
-
-        draft.fills.splice(sourceIndex, 1);
-        draft.fills.splice(destinationIndex, 0, sourceItem);
+        moveArrayItem(draft.fills, sourceIndex, destinationIndex);
       });
     }
     case 'moveShadow': {
@@ -196,10 +191,7 @@ export function styleReducer(
       return produce(state, (draft) => {
         if (!draft.shadows) return;
 
-        const sourceItem = draft.shadows[sourceIndex];
-
-        draft.shadows.splice(sourceIndex, 1);
-        draft.shadows.splice(destinationIndex, 0, sourceItem);
+        moveArrayItem(draft.shadows, sourceIndex, destinationIndex);
       });
     }
     case 'deleteDisabledBorders':

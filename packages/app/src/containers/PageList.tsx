@@ -103,14 +103,11 @@ const PageListContent = memo(function PageListContent({
             destinationIndex: number,
             position: RelativeDropPosition,
           ) => {
-            if (
-              sourceIndex === destinationIndex ||
-              (position === 'above' && sourceIndex + 1 === destinationIndex) ||
-              (position === 'below' && sourceIndex - 1 === destinationIndex)
-            )
-              return;
-
-            dispatch('movePage', sourceIndex, destinationIndex);
+            dispatch(
+              'movePage',
+              sourceIndex,
+              position === 'below' ? destinationIndex + 1 : destinationIndex,
+            );
           },
           [dispatch],
         )}

@@ -9,6 +9,7 @@ import {
   getSymbolsInstancesIndexPaths,
 } from '../selectors/selectors';
 import { UUID } from '../types';
+import { moveArrayItem } from '../utils/moveArrayItem';
 import { ApplicationState } from './applicationReducer';
 import { detachSymbolIntances } from './layerReducer';
 
@@ -140,10 +141,7 @@ export function pageReducer(
       const [, sourceIndex, destinationIndex] = action;
 
       return produce(state, (draft) => {
-        const sourceItem = draft.sketch.pages[sourceIndex];
-
-        draft.sketch.pages.splice(sourceIndex, 1);
-        draft.sketch.pages.splice(destinationIndex, 0, sourceItem);
+        moveArrayItem(draft.sketch.pages, sourceIndex, destinationIndex);
       });
     }
     default:

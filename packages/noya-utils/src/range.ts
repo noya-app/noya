@@ -10,7 +10,7 @@
  * @param {number} step The value to increment or decrement by.
  * @returns {Array} Returns the range of numbers.
  */
-export function range(start: number, end?: number, step?: number) {
+export function range(start: number, end?: number, step?: number): number[] {
   if (end === undefined) {
     end = start;
     start = 0;
@@ -20,7 +20,7 @@ export function range(start: number, end?: number, step?: number) {
 
   let index = -1;
   let length = Math.max(Math.ceil((end - start) / (step || 1)), 0);
-  let result = Array(length);
+  let result = Array<number>(length);
 
   while (length--) {
     result[++index] = start;

@@ -9,6 +9,7 @@ import {
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import { range } from 'noya-utils';
 
 const ElementRow = styled.div({
   flex: '0 0 auto',
@@ -35,28 +36,6 @@ interface ArrayControllerProps<Item> {
   renderItem: (props: { item: Item; index: number }) => ReactNode;
 }
 
-function getIndex<T>(array: T[], index: number): number {
-  return index;
-}
-
-function getReversedIndex<T>(array: T[], index: number): number {
-  return array.length - 1 - index;
-}
-
-function mapIndex<T, U>(
-  array: T[],
-  getIndex: (array: T[], index: number) => number,
-  f: (value: T, index: number, array: T[]) => U,
-): U[] {
-  let result: U[] = [];
-
-  for (let i = 0; i < array.length; i++) {
-    result.push(f(array[getIndex(array, i)], i, array));
-  }
-
-  return result;
-}
-
 function ArrayController<Item>({
   id,
   items,
@@ -76,7 +55,9 @@ function ArrayController<Item>({
     [getKey, items],
   );
 
-  const indexMapper = reversed ? getReversedIndex : getIndex;
+  const indexes = reversed
+    ? range(0, items.length).reverse()
+    : range(0, items.length);
 
   const handleMoveItem = useCallback(
     (
@@ -84,27 +65,26 @@ function ArrayController<Item>({
       destinationIndex: number,
       position: RelativeDropPosition,
     ) => {
-      if (
-        sourceIndex === destinationIndex ||
-        (position === 'above' && sourceIndex + 1 === destinationIndex) ||
-        (position === 'below' && sourceIndex - 1 === destinationIndex)
-      )
-        return;
+      if (reversed) {
+        if (position === 'above') {
+          position = 'below';
+        } else if (position === 'below') {
+          position = 'above';
+        }
+      }
 
       onMoveItem?.(
-        indexMapper(items, sourceIndex),
-        indexMapper(items, destinationIndex),
+        sourceIndex,
+        position === 'below' ? destinationIndex + 1 : destinationIndex,
       );
     },
-    [indexMapper, items, onMoveItem],
+    [onMoveItem, reversed],
   );
 
   const renderRow = (index: number) => {
-    const mappedIndex = indexMapper(items, index);
-
     return (
       <ElementRow>
-        {renderItem({ item: items[mappedIndex], index: mappedIndex })}
+        {renderItem({ item: items[index], index: index })}
       </ElementRow>
     );
   };
@@ -130,7 +110,7 @@ function ArrayController<Item>({
           renderOverlay={renderRow}
           onMoveItem={handleMoveItem}
         >
-          {mapIndex(items, indexMapper, (_, index) => (
+          {indexes.map((index) => (
             <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
               {({ relativeDropPosition, ...sortableProps }) => (
                 <ItemContainer {...sortableProps}>
@@ -147,7 +127,7 @@ function ArrayController<Item>({
           ))}
         </Sortable.Root>
       ) : (
-        mapIndex(items, indexMapper, (_, index) => renderRow(index))
+        indexes.map(renderRow)
       )}
     </InspectorPrimitives.Section>
   );
