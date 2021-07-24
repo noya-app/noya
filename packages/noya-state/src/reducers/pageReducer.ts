@@ -70,13 +70,7 @@ export function pageReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const page = pages[pageIndex];
-
-        pages[pageIndex] = produce(page, (page) => {
-          page.name = name || `Page ${pages.length + 1}`;
-          return page;
-        });
+        draft.sketch.pages[pageIndex].name = name;
       });
     }
     case 'duplicatePage': {

@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { createSectionedMenu, MenuItem } from 'noya-designsystem';
 import { Layers } from 'noya-state';
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'noya-app-state-context';
+import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import useShallowArray from './useShallowArray';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
@@ -54,6 +54,7 @@ function isValidMaskChainBreakerType(type: Sketch.AnyLayer['_class']): boolean {
 export type LayerMenuItemType =
   | 'selectAll'
   | 'duplicate'
+  | 'rename'
   | 'group'
   | 'ungroup'
   | 'delete'
@@ -69,6 +70,7 @@ export type LayerMenuItemType =
 
 export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
   const dispatch = useDispatch();
+  const { startRenamingLayer } = useWorkspace();
 
   const hasSelectedLayers = layers.length > 0;
 
@@ -129,6 +131,7 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
               },
             ],
             [
+              { value: 'rename', title: 'Rename' },
               { value: 'group', title: 'Group' },
               canUngroup && { value: 'ungroup', title: 'Ungroup' },
             ],
@@ -240,15 +243,20 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           dispatch('setLayerVisible', selectedLayerIds, false);
           return;
         }
+        case 'rename': {
+          startRenamingLayer(selectedLayerIds[0]);
+          return;
+        }
       }
     },
     [
       dispatch,
-      newIsAlphaMaskValue,
-      newIgnoreMasksValue,
-      newUseAsMaskValue,
       selectedLayerIds,
+      newIsAlphaMaskValue,
       shouldAskForSymbolName,
+      newUseAsMaskValue,
+      newIgnoreMasksValue,
+      startRenamingLayer,
     ],
   );
 

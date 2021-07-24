@@ -119,6 +119,7 @@ export function applicationReducer(
     case 'moveLayersIntoParentAtPoint':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
+    case 'setLayerName':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
     case 'setFixedRadius':

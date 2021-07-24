@@ -37,6 +37,7 @@ import React, {
   forwardRef,
   memo,
   useCallback,
+  useLayoutEffect,
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -265,11 +266,22 @@ export default memo(function LayerList() {
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
 
-  const { highlightLayer } = useWorkspace();
+  const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const selectedObjects = useShallowArray(state.selectedObjects);
   const items = useDeepArray(flattenLayerList(page, selectedObjects));
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
+
+  const [editingLayer, setEditingLayer] = useState<string | undefined>();
+
+  useLayoutEffect(() => {
+    if (!renamingLayer) return;
+
+    setTimeout(() => {
+      setEditingLayer(renamingLayer);
+      didHandleFocus();
+    }, 50);
+  }, [didHandleFocus, renamingLayer]);
 
   const renderItem = useCallback(
     (
@@ -387,11 +399,28 @@ export default memo(function LayerList() {
           isSectionHeader={isArtboardClass}
           expanded={isGroupClass ? expanded : undefined}
           onClickChevron={handleClickChevron}
+          editableProps={
+            id === editingLayer
+              ? {
+                  value: name,
+                  onSubmitEditing: (name) => {
+                    if (!name) {
+                      setEditingLayer(undefined);
+                      return;
+                    }
+
+                    setEditingLayer(undefined);
+                    dispatch('setLayerName', id, name);
+                  },
+                }
+              : undefined
+          }
         />
       );
     },
     [
       dispatch,
+      editingLayer,
       highlightLayer,
       items,
       menuItems,
