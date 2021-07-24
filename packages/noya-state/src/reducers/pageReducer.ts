@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SketchModel } from 'noya-sketch-model';
-import { uuid } from 'noya-utils';
+import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   getCurrentPage,
@@ -16,7 +16,7 @@ import { detachSymbolIntances } from './layerReducer';
 export type PageAction =
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
   | [type: 'selectPage', pageId: UUID]
-  | [type: 'addPage', name: string]
+  | [type: 'addPage', pageId: UUID]
   | [type: 'deletePage']
   | [type: 'renamePage', name: string]
   | [type: 'duplicatePage'];
@@ -24,9 +24,10 @@ export type PageAction =
 export const createPage = (
   pages: Sketch.Page[],
   user: Sketch.User,
+  pageId: string,
   name: string,
 ): Sketch.Page => {
-  const newPage = SketchModel.page({ name });
+  const newPage = SketchModel.page({ do_objectID: pageId, name });
 
   user[newPage.do_objectID] = {
     scrollOrigin: '{0, 0}',
@@ -49,10 +50,18 @@ export function pageReducer(
       });
     }
     case 'addPage': {
-      const [, name] = action;
+      const [, pageId] = action;
 
       return produce(state, (draft) => {
-        const newPage = createPage(draft.sketch.pages, draft.sketch.user, name);
+        const newPage = createPage(
+          draft.sketch.pages,
+          draft.sketch.user,
+          pageId,
+          getIncrementedName(
+            'Page',
+            state.sketch.pages.map((p) => p.name),
+          ),
+        );
         draft.selectedPage = newPage.do_objectID;
       });
     }

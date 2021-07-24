@@ -2,6 +2,8 @@ import { CaretDownIcon } from '@radix-ui/react-icons';
 import {
   Children,
   createContext,
+  ForwardedRef,
+  forwardRef,
   isValidElement,
   memo,
   ReactNode,
@@ -108,13 +110,16 @@ function InputFieldDropdownMenu<T extends string>({
  * Input
  * ------------------------------------------------------------------------- */
 
-const InputElement = styled(TextInput)<{
+type InputFieldVariant = 'normal' | 'bare';
+
+export const InputElement = styled(TextInput)<{
   labelPosition: LabelPosition;
   labelSize: number;
   hasLabel: boolean;
   hasDropdown: boolean;
   textAlign?: Property.TextAlign;
   disabled?: boolean;
+  variant?: InputFieldVariant;
 }>(
   ({
     theme,
@@ -124,6 +129,7 @@ const InputElement = styled(TextInput)<{
     textAlign,
     disabled,
     hasLabel,
+    variant = 'normal',
   }) => ({
     ...theme.textStyles.small,
     color: disabled ? theme.colors.textDisabled : theme.colors.text,
@@ -149,11 +155,18 @@ const InputElement = styled(TextInput)<{
     '&:focus': {
       boxShadow: `0 0 0 2px ${theme.colors.primary}`,
     },
+    ...(variant === 'bare' && {
+      paddingTop: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+    }),
   }),
 );
 
-function InputFieldInput(
-  props: TextInputProps & { textAlign?: Property.TextAlign },
+const InputFieldInput = forwardRef(function InputFieldInput(
+  props: TextInputProps & { textAlign?: Property.TextAlign; variant?: 'bare' },
+  forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
   const { labelPosition, labelSize, hasDropdown, hasLabel } = useContext(
     InputFieldContext,
@@ -161,15 +174,15 @@ function InputFieldInput(
 
   return (
     <InputElement
+      ref={forwardedRef}
       labelPosition={labelPosition}
       labelSize={labelSize}
       hasLabel={hasLabel}
       hasDropdown={hasDropdown}
-      disabled={props.disabled}
       {...props}
     />
   );
-}
+});
 
 /* ----------------------------------------------------------------------------
  * NumberInput

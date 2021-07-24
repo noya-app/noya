@@ -1,5 +1,4 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
-import ScrollArea from './ScrollArea';
 import {
   Children,
   createContext,
@@ -11,14 +10,17 @@ import {
   Ref,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
+  useRef,
 } from 'react';
 import styled, { CSSObject } from 'styled-components';
+import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
 import ContextMenu from './ContextMenu';
-import * as Sortable from './Sortable';
 import { MenuItem } from './internal/Menu';
-import { Spacer } from '..';
+import ScrollArea from './ScrollArea';
+import * as Sortable from './Sortable';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
@@ -185,12 +187,18 @@ export interface ListViewClickInfo {
   metaKey: boolean;
 }
 
+export interface EditableProps {
+  value: string;
+  onSubmitEditing: (value: string, reset: () => void) => void;
+}
+
 export interface ListViewRowProps<MenuItemType extends string = string> {
   id?: string;
   selected?: boolean;
   depth?: number;
   disabled?: boolean;
   hovered?: boolean;
+  editableProps?: EditableProps;
   sortable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
@@ -211,6 +219,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     disabled = false,
     hovered = false,
     isSectionHeader = false,
+    editableProps,
     onClick,
     onHoverChange,
     children,
@@ -218,7 +227,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     onContextMenu,
     onSelectMenuItem,
   }: ListViewRowProps<MenuItemType>,
-  forwardedRef: ForwardedRef<HTMLLIElement>,
+  forwardedRef: ForwardedRef<HTMLElement>,
 ) {
   const { position, selectedPosition, sortable, indentation } = useContext(
     ListRowContext,
@@ -236,6 +245,22 @@ const ListViewRow = forwardRef(function ListViewRow<
     [onClick],
   );
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useLayoutEffect(() => {
+    const element = inputRef.current;
+
+    if (!editableProps || !element) return;
+
+    // Calling `focus` is necessary, in addition to `select`, to ensure
+    // the `onBlur` fires correctly.
+    element.focus();
+
+    setTimeout(() => {
+      element.select();
+    }, 0);
+  }, [editableProps]);
+
   const renderContent = (
     {
       relativeDropPosition,
@@ -243,7 +268,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     }: React.ComponentProps<typeof RowContainer> & {
       relativeDropPosition?: Sortable.RelativeDropPosition;
     },
-    ref: Ref<HTMLLIElement>,
+    ref: Ref<HTMLElement>,
   ) => {
     const Component = isSectionHeader ? SectionHeaderContainer : RowContainer;
 
@@ -269,7 +294,19 @@ const ListViewRow = forwardRef(function ListViewRow<
           />
         )}
         {depth > 0 && <Spacer.Horizontal size={depth * indentation} />}
-        {children}
+        {editableProps ? (
+          <InputField.Input
+            ref={inputRef}
+            variant="bare"
+            value={editableProps.value}
+            onSubmit={editableProps.onSubmitEditing}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          />
+        ) : (
+          children
+        )}
       </Component>
     );
 
@@ -289,7 +326,7 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   if (sortable && id) {
     return (
-      <Sortable.Item<HTMLLIElement> id={id}>
+      <Sortable.Item<HTMLElement> id={id}>
         {({ ref: sortableRef, ...sortableProps }) =>
           renderContent(sortableProps, composeRefs(sortableRef, forwardedRef))
         }

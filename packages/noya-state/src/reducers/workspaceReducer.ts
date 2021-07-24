@@ -20,6 +20,10 @@ export type LayerHighlight = {
 
 export type CanvasInsets = { left: number; right: number };
 
+export type NextFocusAction =
+  | { type: 'renamePage'; id: string }
+  | { type: 'renameLayer'; id: string };
+
 /**
  * This object contains state that shouldn't be part of `history`.
  * For example, we store user `preferences` here, since we would never
@@ -31,6 +35,7 @@ export type WorkspaceState = {
   highlightedLayer?: LayerHighlight;
   canvasSize: { width: number; height: number };
   canvasInsets: CanvasInsets;
+  nextFocusAction?: NextFocusAction;
   preferences: {
     showRulers: boolean;
   };
@@ -46,6 +51,7 @@ export type WorkspaceAction =
       insets: { left: number; right: number },
     ]
   | [type: 'setShowRulers', value: boolean]
+  | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | HistoryAction;
 
@@ -105,6 +111,13 @@ export function workspaceReducer(
 
       return produce(state, (draft) => {
         draft.highlightedLayer = highlight ? { ...highlight } : undefined;
+      });
+    }
+    case 'setNextFocusAction': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.nextFocusAction = value;
       });
     }
     default: {

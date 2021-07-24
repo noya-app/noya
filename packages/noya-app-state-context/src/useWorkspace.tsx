@@ -12,6 +12,7 @@ export function useWorkspace() {
     canvasSize,
     canvasInsets,
     preferences,
+    nextFocusAction,
   } = state;
 
   const setCanvasSize = useCallback(
@@ -34,6 +35,23 @@ export function useWorkspace() {
     [dispatch],
   );
 
+  const startRenamingPage = useCallback(
+    (id: string) =>
+      dispatch('setNextFocusAction', {
+        type: 'renamePage',
+        id,
+      }),
+    [dispatch],
+  );
+
+  const didHandleFocus = useCallback(
+    () => dispatch('setNextFocusAction', undefined),
+    [dispatch],
+  );
+
+  const renamingPage =
+    nextFocusAction?.type === 'renamePage' ? nextFocusAction.id : undefined;
+
   return useMemo(
     () => ({
       canvasInsets,
@@ -44,6 +62,9 @@ export function useWorkspace() {
       preferences,
       setCanvasSize,
       setShowRulers,
+      startRenamingPage,
+      didHandleFocus,
+      renamingPage,
     }),
     [
       canvasInsets,
@@ -54,6 +75,9 @@ export function useWorkspace() {
       preferences,
       setCanvasSize,
       setShowRulers,
+      startRenamingPage,
+      didHandleFocus,
+      renamingPage,
     ],
   );
 }
