@@ -102,7 +102,7 @@ export function applicationReducer(
     }
     case 'selectPage':
     case 'addPage':
-    case 'renamePage':
+    case 'setPageName':
     case 'duplicatePage':
     case 'deletePage':
     case 'movePage': {

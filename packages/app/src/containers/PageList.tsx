@@ -157,7 +157,7 @@ const PageListContent = memo(function PageListContent({
 
                     if (!name) return;
 
-                    dispatch('renamePage', name);
+                    dispatch('setPageName', page.do_objectID, name);
                   }}
                 />
               ) : (
