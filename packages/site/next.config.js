@@ -19,6 +19,10 @@ module.exports = {
           exclude: /node_modules/,
           use: options.defaultLoaders.babel,
         },
+        {
+          test: /\.svg$/,
+          use: ['@svgr/webpack', 'url-loader'],
+        },
       ],
     };
 

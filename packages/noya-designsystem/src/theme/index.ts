@@ -7,10 +7,3 @@ declare module 'styled-components' {
 }
 
 export interface Colors {}
-
-export interface TextStyles {
-  heading1: string;
-  heading2: string;
-  heading3: string;
-  body: string;
-}

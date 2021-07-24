@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 import styled from 'styled-components';
-import { TextStyles } from '../theme';
+import { Theme } from '../theme';
 
 export type TextProps = {
   as?: any;
-  variant?: keyof TextStyles;
+  variant?: keyof Theme['textStyles'];
   className?: string;
   children: ReactNode;
   alignment?: 'start' | 'center' | 'end';
@@ -44,14 +44,12 @@ const Text = styled(
       </TextAncestorContext.Provider>
     );
   },
-)<TextProps>(
-  (props) => ({
-    margin: 0,
-    lineHeight: 1,
-    width: props.width,
-    textAlign: props.alignment,
-  }),
-  (props) => props.theme.textStyles[props.variant || 'body'],
-);
+)<TextProps>(({ theme, width, alignment, variant }) => ({
+  ...(theme.textStyles[variant || 'body'] ?? {}),
+  margin: 0,
+  lineHeight: 1,
+  width,
+  textAlign: alignment,
+}));
 
 export default Text;

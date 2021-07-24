@@ -109,6 +109,12 @@ export const textStyles = {
     fontSize: '90%',
     lineHeight: '1.5',
   } as CSSObject,
+
+  // Site
+  body1: {} as CSSObject,
+  bodyAlternate: {} as CSSObject,
+  mark: {} as CSSObject,
+  link: {} as CSSObject,
 };
 
 export const sizes = {

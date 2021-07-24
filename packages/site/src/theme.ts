@@ -1,7 +1,7 @@
-import { mediaQuery } from 'noya-designsystem';
+import { lightTheme, mediaQuery, Theme } from 'noya-designsystem';
 import { CSSObject } from 'styled-components';
 
-export const colors = {
+export const colors: Theme['colors'] = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
   textDisabled: 'rgb(160, 160, 160)',
@@ -55,7 +55,7 @@ export const fonts = {
 // TODO: need to make a marketing theme with its own scale
 const typeScale = [10, 4, 1.8, 1.4, 1, 0.85];
 
-export const textStyles = {
+export const textStyles: Theme['textStyles'] = {
   title: {
     fontFamily: fonts.normal,
     fontSize: `${typeScale[0]}rem`,
@@ -129,27 +129,4 @@ export const textStyles = {
   },
 };
 
-export const sizes = {
-  sidebarWidth: 260,
-  toolbar: {
-    height: 46,
-    itemSeparator: 8,
-  },
-  spacing: {
-    nano: 2,
-    micro: 4,
-    small: 8,
-    medium: 16,
-    large: 32,
-    xlarge: 64,
-    xxlarge: 128,
-  },
-};
-
-type LocalColors = typeof colors;
-type LocalTextStyles = typeof textStyles;
-
-declare module 'noya-designsystem/src/theme/index' {
-  export interface TextStyles extends LocalColors {}
-  export interface TextStyles extends LocalTextStyles {}
-}
+export const sizes = lightTheme.sizes;

@@ -1,6 +1,6 @@
 import { ThemeProvider } from 'styled-components';
 import { Stack, Text, Spacer } from 'noya-designsystem';
-import logo from '../assets/logo.svg';
+import logoSrc from '../assets/logo.svg';
 import * as theme from '../theme';
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <Stack axis="y" width="100%" paddingX="10rem" paddingY="6rem">
         <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <img src={logo.src} alt="logo" width="100px" />
+          <img src={logoSrc} alt="logo" width="100px" />
           <span style={{ justifySelf: 'end' }}>
             <Stack as="nav" axis="x" spacing={8}>
               <Text variant="link">Team</Text>
@@ -20,14 +20,14 @@ function App() {
         <Spacer.Vertical size="4rem" />
 
         <Stack axis="x" spacing="6rem">
-          <Stack axis="y" distribution="fill" style={{ '--width': 100 }}>
-            <svg style={{ width: 'var(--width)' }} viewBox="0 0 100 100">
+          <Stack axis="y" distribution="fill">
+            <svg style={{ width: '100px' }} viewBox="0 0 100 100">
               <rect width="300" height="100" fill="#E0BCFF" />
             </svg>
-            <svg style={{ width: 'var(--width)' }} viewBox="0 0 100 100">
+            <svg style={{ width: '100px' }} viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="50" fill="#C388F5" />
             </svg>
-            <svg style={{ width: 'var(--width)' }} viewBox="0 0 100 80">
+            <svg style={{ width: '100px' }} viewBox="0 0 100 80">
               <polygon points="0,80 50,0 100,80" fill="#9C2FF1" />
             </svg>
           </Stack>
