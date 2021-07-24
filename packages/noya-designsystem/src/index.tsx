@@ -16,7 +16,7 @@ declare module 'react' {
 export * from './theme';
 export * as lightTheme from './theme/light';
 export * as darkTheme from './theme/dark';
-export * as siteTheme from './theme/site';
+export * from './mediaQuery';
 
 // Components
 export { default as Button } from './components/Button';

@@ -1,4 +1,4 @@
-import mediaQuery from '../mediaQuery';
+import { mediaQuery } from 'noya-designsystem';
 import { CSSObject } from 'styled-components';
 
 export const colors = {
@@ -124,6 +124,9 @@ export const textStyles = {
     background: 'none',
     color: '#e0bcfe',
   },
+  link: {
+    color: 'pink',
+  },
 };
 
 export const sizes = {
@@ -142,3 +145,11 @@ export const sizes = {
     xxlarge: 128,
   },
 };
+
+type LocalColors = typeof colors;
+type LocalTextStyles = typeof textStyles;
+
+declare module 'noya-designsystem/src/theme/index' {
+  export interface TextStyles extends LocalColors {}
+  export interface TextStyles extends LocalTextStyles {}
+}

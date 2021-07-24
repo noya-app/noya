@@ -1,13 +1,14 @@
 import { ThemeProvider } from 'styled-components';
-import { Stack, Text, Spacer, siteTheme } from 'noya-designsystem';
-import Logo from '../assets/logo.svg';
+import { Stack, Text, Spacer } from 'noya-designsystem';
+import logo from '../assets/logo.svg';
+import * as theme from '../theme';
 
 function App() {
   return (
-    <ThemeProvider theme={siteTheme}>
+    <ThemeProvider theme={theme}>
       <Stack axis="y" width="100%" paddingX="10rem" paddingY="6rem">
         <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <Logo width="100px" />
+          <img src={logo.src} alt="logo" width="100px" />
           <span style={{ justifySelf: 'end' }}>
             <Stack as="nav" axis="x" spacing={8}>
               <Text variant="link">Team</Text>
