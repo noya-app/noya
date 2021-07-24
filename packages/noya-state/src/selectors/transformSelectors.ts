@@ -12,8 +12,25 @@ export function getLayerTransform(
 ): AffineTransform {
   const rotation = getLayerRotationTransform(layer);
   const translation = getLayerTranslationTransform(layer);
+  const flip = getLayerFlipTransform(layer);
 
-  return AffineTransform.multiply(ctm, rotation, translation);
+  return AffineTransform.multiply(ctm, rotation, translation, flip);
+}
+
+export function getLayerFlipTransform(layer: Sketch.AnyLayer) {
+  if (!layer.isFlippedHorizontal && !layer.isFlippedVertical)
+    return AffineTransform.identity;
+
+  const bounds = createBounds(layer.frame);
+
+  return AffineTransform.multiply(
+    AffineTransform.translation(bounds.midX, bounds.midY),
+    AffineTransform.scale(
+      layer.isFlippedHorizontal ? -1 : 1,
+      layer.isFlippedVertical ? -1 : 1,
+    ),
+    AffineTransform.translation(-bounds.midX, -bounds.midY),
+  );
 }
 
 export function getLayerTranslationTransform(
@@ -61,7 +78,7 @@ export function getLayerRotationMultiplier(): number {
 }
 
 /**
- * Clamp rotation within the range [180, 360)
+ * Clamp rotation within the range [-180, 360)
  *
  * -1801  => -1
  * -181   =>  179
@@ -71,7 +88,7 @@ export function getLayerRotationMultiplier(): number {
  *  360   =>  0
  *  3601  =>  1
  */
-function clampRotation(rotation: number) {
+export function clampRotation(rotation: number) {
   if (rotation <= -180) {
     // Round toward the positive direction
     return rotation + 360 * Math.round(-rotation / 360);

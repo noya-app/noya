@@ -1,15 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { sketchColorToRgbaString } from 'noya-designsystem';
-import { round } from 'noya-utils';
 import {
-  withOptions,
-  SKIP,
-  STOP,
   BaseOptions,
   IndexPath,
+  SKIP,
+  STOP,
   visit as visitNode,
+  withOptions,
 } from 'tree-visit';
-import { parsePoint } from './primitives';
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
@@ -106,13 +103,13 @@ export const hasInspectableShadow = (layer: Sketch.AnyLayer): boolean => {
     case 'polygon':
     case 'rectangle':
     case 'shapeGroup':
+    case 'shapePath':
     case 'star':
     case 'triangle':
     case 'group':
     case 'symbolInstance':
     case 'text':
       return true;
-    case 'shapePath':
     case 'page':
     case 'artboard':
     case 'MSImmutableHotspotLayer':
@@ -129,13 +126,13 @@ export const hasInspectableBorder = (layer: Sketch.AnyLayer): boolean => {
     case 'polygon':
     case 'rectangle':
     case 'shapeGroup':
+    case 'shapePath':
     case 'star':
     case 'triangle':
     case 'text':
       return true;
     case 'group':
     case 'symbolInstance':
-    case 'shapePath':
     case 'page':
     case 'artboard':
     case 'MSImmutableHotspotLayer':
@@ -273,61 +270,4 @@ export function isWithinMaskChain(
   }
 
   return isMasked;
-}
-
-export function summary(
-  root: Sketch.AnyLayer,
-  options?: { fills?: boolean; borders?: boolean; points?: boolean },
-) {
-  const includeFills = options?.fills ?? false;
-  const includeBorders = options?.borders ?? false;
-  const includePoints = options?.points ?? false;
-
-  function describeCurvePoint(curvePoint: Sketch.CurvePoint) {
-    const point = parsePoint(curvePoint.point);
-    return `  * { x: ${round(point.x, 2)}, y: ${round(point.y, 2)} } (${
-      Sketch.CurveMode[curvePoint.curveMode]
-    })`;
-  }
-
-  function describeFill(fill: Sketch.Fill | Sketch.Border) {
-    const typeString = Sketch.FillType[fill.fillType];
-    switch (fill.fillType) {
-      case Sketch.FillType.Color:
-        return `  * ${fill._class} (${typeString}) ${sketchColorToRgbaString(
-          fill.color,
-        )}`;
-      default:
-        return `  * ${fill._class} (${typeString})`;
-    }
-  }
-
-  return diagram(root, {
-    getChildren,
-    getLabel: (layer) => {
-      const { x, y, width, height } = layer.frame;
-      const pairs = [
-        ['x', round(x, 2)],
-        ['y', round(y, 2)],
-        ['w', round(width, 2)],
-        ['h', round(height, 2)],
-      ] as const;
-      const frameString = pairs
-        .map((pair) => `${pair[0]}: ${pair[1]}`)
-        .join(', ');
-      return [
-        `${layer.name} (${layer._class}) { ${frameString} }`,
-        ...(includeFills ? (layer.style?.fills ?? []).map(describeFill) : []),
-        ...(includeBorders
-          ? (layer.style?.borders ?? []).map(describeFill)
-          : []),
-        ...(includePoints
-          ? (isPointsLayer(layer) ? layer.points : []).map(describeCurvePoint)
-          : []),
-      ]
-        .filter((s) => !!s)
-        .join('\n');
-    },
-    flattenSingleChildNodes: false,
-  });
 }

@@ -1,5 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import type { CanvasKit, Paint, Path, TextAlign, TextStyle } from 'canvaskit';
+import type {
+  CanvasKit,
+  Paint,
+  Path,
+  Shader,
+  TextAlign,
+  TextStyle,
+} from 'canvaskit';
 import {
   AffineTransform,
   createBounds,
@@ -61,20 +68,18 @@ export function clearColor(CanvasKit: CanvasKit) {
   return CanvasKit.Color4f(0, 0, 0, 0);
 }
 
-export function fill(
+export function shader(
   CanvasKit: CanvasKit,
   fill: Sketch.Fill,
   layerFrame: Rect,
   image?: ArrayBuffer,
-): Paint {
-  const paint = new CanvasKit.Paint();
-
+): Shader | undefined {
   switch (fill.fillType) {
     case Sketch.FillType.Color:
-      paint.setColor(
-        fill.color ? color(CanvasKit, fill.color) : clearColor(CanvasKit),
-      );
-      break;
+      const fillColor = fill.color
+        ? color(CanvasKit, fill.color)
+        : clearColor(CanvasKit);
+      return CanvasKit.Shader.MakeColor(fillColor, CanvasKit.ColorSpace.SRGB);
     case Sketch.FillType.Gradient: {
       let colors: Float32Array[] = [];
       let positions: number[] = [];
@@ -99,30 +104,24 @@ export function fill(
 
       switch (fill.gradient.gradientType) {
         case Sketch.GradientType.Linear: {
-          paint.setShader(
-            CanvasKit.Shader.MakeLinearGradient(
-              point(fromPoint),
-              point(toPoint),
-              colors,
-              positions,
-              CanvasKit.TileMode.Clamp,
-              unitTransform.float32Array,
-            ),
+          return CanvasKit.Shader.MakeLinearGradient(
+            point(fromPoint),
+            point(toPoint),
+            colors,
+            positions,
+            CanvasKit.TileMode.Clamp,
+            unitTransform.float32Array,
           );
-          break;
         }
         case Sketch.GradientType.Radial: {
-          paint.setShader(
-            CanvasKit.Shader.MakeRadialGradient(
-              point(fromPoint),
-              distance(toPoint, fromPoint),
-              colors,
-              positions,
-              CanvasKit.TileMode.Clamp,
-              unitTransform.float32Array,
-            ),
+          return CanvasKit.Shader.MakeRadialGradient(
+            point(fromPoint),
+            distance(toPoint, fromPoint),
+            colors,
+            positions,
+            CanvasKit.TileMode.Clamp,
+            unitTransform.float32Array,
           );
-          break;
         }
         case Sketch.GradientType.Angular: {
           const hasStartPosition = positions[0] === 0;
@@ -157,99 +156,109 @@ export function fill(
                 )
               : unitTransform;
 
-          paint.setShader(
-            CanvasKit.Shader.MakeSweepGradient(
-              0.5,
-              0.5,
-              colors,
-              positions,
-              CanvasKit.TileMode.Clamp,
-              matrix.float32Array,
+          return CanvasKit.Shader.MakeSweepGradient(
+            0.5,
+            0.5,
+            colors,
+            positions,
+            CanvasKit.TileMode.Clamp,
+            matrix.float32Array,
+          );
+        }
+        default:
+          return;
+      }
+    }
+    case Sketch.FillType.Pattern: {
+      if (!image) return;
+
+      const canvasImage = CanvasKit.MakeImageFromEncoded(image);
+
+      if (!canvasImage) return;
+
+      switch (fill.patternFillType) {
+        case Sketch.PatternFillType.Tile: {
+          return canvasImage.makeShaderCubic(
+            CanvasKit.TileMode.Repeat,
+            CanvasKit.TileMode.Repeat,
+            0,
+            0,
+            CanvasKit.Matrix.multiply(
+              CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+              CanvasKit.Matrix.scaled(
+                fill.patternTileScale,
+                fill.patternTileScale,
+              ),
             ),
           );
+        }
+        case Sketch.PatternFillType.Stretch:
+        case Sketch.PatternFillType.Fit:
+        case Sketch.PatternFillType.Fill: {
+          const bounds = createBounds(layerFrame);
+          const scaledRect = resize(
+            {
+              ...layerFrame,
+              width: canvasImage.width(),
+              height: canvasImage.height(),
+            },
+            layerFrame,
+            fill.patternFillType === Sketch.PatternFillType.Stretch
+              ? 'scaleToFill'
+              : fill.patternFillType === Sketch.PatternFillType.Fit
+              ? 'scaleAspectFit'
+              : 'scaleAspectFill',
+          );
 
-          break;
+          return canvasImage.makeShaderCubic(
+            CanvasKit.TileMode.Decal,
+            CanvasKit.TileMode.Decal,
+            0,
+            0,
+            CanvasKit.Matrix.multiply(
+              CanvasKit.Matrix.translated(
+                bounds.midX - scaledRect.width / 2,
+                bounds.midY - scaledRect.height / 2,
+              ),
+              CanvasKit.Matrix.scaled(
+                scaledRect.width / canvasImage.width(),
+                scaledRect.height / canvasImage.height(),
+              ),
+            ),
+          );
         }
       }
+    }
+  }
+}
 
+export function fill(
+  CanvasKit: CanvasKit,
+  fill: Sketch.Fill,
+  layerFrame: Rect,
+  image?: ArrayBuffer,
+): Paint {
+  const paint = new CanvasKit.Paint();
+
+  switch (fill.fillType) {
+    case Sketch.FillType.Color:
+      paint.setColor(
+        fill.color ? color(CanvasKit, fill.color) : clearColor(CanvasKit),
+      );
+      break;
+    case Sketch.FillType.Gradient:
+    case Sketch.FillType.Pattern: {
+      const fillShader = shader(CanvasKit, fill, layerFrame, image);
+
+      if (!fillShader) {
+        paint.setColor(clearColor(CanvasKit));
+        break;
+      }
+
+      paint.setShader(fillShader);
       paint.setAlphaf(fill.contextSettings.opacity);
       break;
     }
-    case Sketch.FillType.Pattern:
-      {
-        if (!image) {
-          paint.setColor(clearColor(CanvasKit));
-          break;
-        }
-
-        const canvasImage = CanvasKit.MakeImageFromEncoded(image);
-
-        if (!canvasImage) {
-          paint.setColor(clearColor(CanvasKit));
-          break;
-        }
-
-        switch (fill.patternFillType) {
-          case Sketch.PatternFillType.Tile: {
-            paint.setShader(
-              canvasImage.makeShaderCubic(
-                CanvasKit.TileMode.Repeat,
-                CanvasKit.TileMode.Repeat,
-                0,
-                0,
-                CanvasKit.Matrix.multiply(
-                  CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
-                  CanvasKit.Matrix.scaled(
-                    fill.patternTileScale,
-                    fill.patternTileScale,
-                  ),
-                ),
-              ),
-            );
-            break;
-          }
-          case Sketch.PatternFillType.Stretch:
-          case Sketch.PatternFillType.Fit:
-          case Sketch.PatternFillType.Fill: {
-            const bounds = createBounds(layerFrame);
-            const scaledRect = resize(
-              {
-                ...layerFrame,
-                width: canvasImage.width(),
-                height: canvasImage.height(),
-              },
-              layerFrame,
-              fill.patternFillType === Sketch.PatternFillType.Stretch
-                ? 'scaleToFill'
-                : fill.patternFillType === Sketch.PatternFillType.Fit
-                ? 'scaleAspectFit'
-                : 'scaleAspectFill',
-            );
-
-            paint.setShader(
-              canvasImage.makeShaderCubic(
-                CanvasKit.TileMode.Decal,
-                CanvasKit.TileMode.Decal,
-                0,
-                0,
-                CanvasKit.Matrix.multiply(
-                  CanvasKit.Matrix.translated(
-                    bounds.midX - scaledRect.width / 2,
-                    bounds.midY - scaledRect.height / 2,
-                  ),
-                  CanvasKit.Matrix.scaled(
-                    scaledRect.width / canvasImage.width(),
-                    scaledRect.height / canvasImage.height(),
-                  ),
-                ),
-              ),
-            );
-            break;
-          }
-        }
-      }
-
-      paint.setAlphaf(fill.contextSettings.opacity);
   }
 
   paint.setStyle(CanvasKit.PaintStyle.Fill);
@@ -287,7 +296,7 @@ export function stringifyPoint({ x, y }: Point): string {
 export function path(
   CanvasKit: CanvasKit,
   points: Sketch.CurvePoint[],
-  frame: Sketch.Rect,
+  frame: Rect,
   isClosed: boolean,
 ): Path {
   return PathUtils.path(CanvasKit, points, frame, isClosed);

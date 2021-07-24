@@ -210,7 +210,7 @@ Object {
     "to": "{0.5, 1}",
   },
   "isEnabled": true,
-  "position": 1,
+  "position": 0,
   "thickness": 1,
 }
 `;

@@ -3,6 +3,7 @@ import produce from 'immer';
 import { ExportOptions } from '../index';
 
 export type ExportAction =
+  | [type: 'moveExportFormat', sourceIndex: number, destinationIndex: number]
   | [type: 'setExportScale', index: number, value: ExportOptions.ExportSize]
   | [type: 'setExportName', index: number, value: string]
   | [type: 'setExportFileFormat', index: number, value: Sketch.ExportFileFormat]
@@ -20,6 +21,16 @@ export function exportReducer(
   frame: Sketch.Rect,
 ): Sketch.ExportOptions {
   switch (action[0]) {
+    case 'moveExportFormat': {
+      const [, sourceIndex, destinationIndex] = action;
+
+      return produce(state, (draft) => {
+        const sourceItem = draft.exportFormats[sourceIndex];
+
+        draft.exportFormats.splice(sourceIndex, 1);
+        draft.exportFormats.splice(destinationIndex, 0, sourceItem);
+      });
+    }
     case 'setExportScale': {
       const [, index, value] = action;
 

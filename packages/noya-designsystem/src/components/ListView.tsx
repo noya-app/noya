@@ -155,7 +155,7 @@ const RowContainer = styled.li<{
   }),
 }));
 
-const DragIndicatorElement = styled.div<{
+export const DragIndicatorElement = styled.div<{
   relativeDropPosition: Sortable.RelativeDropPosition;
   offsetLeft: number;
 }>(({ theme, relativeDropPosition, offsetLeft }) => ({
@@ -289,7 +289,7 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   if (sortable && id) {
     return (
-      <Sortable.Item id={id}>
+      <Sortable.Item<HTMLLIElement> id={id}>
         {({ ref: sortableRef, ...sortableProps }) =>
           renderContent(sortableProps, composeRefs(sortableRef, forwardedRef))
         }

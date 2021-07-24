@@ -116,6 +116,7 @@ export function applicationReducer(
     case 'pan':
     case 'insertBitmap':
     case 'interaction':
+    case 'moveLayersIntoParentAtPoint':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
     case 'setLayerIsLocked':
@@ -131,7 +132,8 @@ export function applicationReducer(
     case 'setIsFlippedVertical':
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
-      return layerPropertyReducer(state, action);
+    case 'setMaskMode':
+      return layerPropertyReducer(state, action, CanvasKit);
     case 'importSvg':
     case 'groupLayer':
     case 'deleteLayer':
@@ -290,6 +292,7 @@ export function applicationReducer(
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);
+    case 'moveExportFormat':
     case 'setExportScale':
     case 'setExportName':
     case 'setExportFileFormat':

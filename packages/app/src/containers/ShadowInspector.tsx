@@ -2,7 +2,7 @@ import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
-import ArrayController from '../components/inspector/ArrayController';
+import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
@@ -54,16 +54,13 @@ export default memo(function ShadowInspector() {
   );
 
   return (
-    <ArrayController<EditableShadow>
+    <CheckboxArrayController<EditableShadow>
       title="Shadows"
       id="shadows"
       key="shadows"
       value={editableShadows}
       onClickPlus={useCallback(() => dispatch('addNewShadow'), [dispatch])}
       onClickTrash={useCallback(() => dispatch('deleteDisabledShadows'), [
-        dispatch,
-      ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteShadow', index), [
         dispatch,
       ])}
       onMoveItem={useCallback(
@@ -75,8 +72,7 @@ export default memo(function ShadowInspector() {
         (index, checked) => dispatch('setShadowEnabled', index, checked),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         ({
           item,
           index,
@@ -110,6 +106,6 @@ export default memo(function ShadowInspector() {
         ),
         [dispatch],
       )}
-    </ArrayController>
+    />
   );
 });

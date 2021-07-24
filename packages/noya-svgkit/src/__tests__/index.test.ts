@@ -1,22 +1,13 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
-import { VirtualConsole } from 'jsdom';
 import { loadCanvasKit } from 'noya-renderer';
 import loadSVGKit from '..';
 
 let CanvasKit: CanvasKitType;
 let SVGKit: CanvasKitType;
 
-const originalVirtualConsole: VirtualConsole = global._virtualConsole;
-
 beforeAll(async () => {
-  global._virtualConsole = new VirtualConsole();
-
   CanvasKit = await loadCanvasKit();
   SVGKit = await loadSVGKit();
-});
-
-afterAll(() => {
-  global._virtualConsole = originalVirtualConsole;
 });
 
 describe('color', () => {

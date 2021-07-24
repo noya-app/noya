@@ -23,3 +23,8 @@ export * from './primitives';
 export * from './selection';
 export * from './checkeredBackground';
 export * from './snapping';
+export * from './layers';
+export * from './sketchFile';
+export * from './selectors/transformSelectors';
+export * from './selectors/pointSelectors';
+export * from './selectors/layerSelectors';

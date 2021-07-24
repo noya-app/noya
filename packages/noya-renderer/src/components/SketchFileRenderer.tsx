@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import * as CanvasKit from 'canvaskit';
 import {
   AffineTransform,
   Axis,
@@ -14,24 +14,22 @@ import {
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import {
-  Layers,
-  Rect,
-  Primitives,
-  Selectors,
   DecodedCurvePoint,
   encodeCurvePoint,
-} from 'noya-state';
-import {
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
   getSnappingPairs,
+  Layers,
+  Primitives,
+  Rect,
+  Selectors,
   SnappingPair,
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Rect as RCKRect } from '../ComponentsContext';
 import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -45,6 +43,8 @@ import {
   Y_DIRECTIONS,
 } from './guides';
 import HoverOutline from './HoverOutline';
+import { Polyline } from 'noya-renderer';
+import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
@@ -52,7 +52,6 @@ import MeasurementGuide from './MeasurementGuide';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
-import { SketchArtboardContent } from './layers/SketchArtboard';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -62,13 +61,12 @@ const BoundingRect = memo(function BoundingRect({
   rect: Rect;
 }) {
   const CanvasKit = useCanvasKit();
-
   const alignedRect = useMemo(
     () => Primitives.rect(CanvasKit, insetRect(rect, 0.5, 0.5)),
     [CanvasKit, rect],
   );
 
-  return <RCKRect rect={alignedRect} paint={selectionPaint} />;
+  return <>{<RCKRect rect={alignedRect} paint={selectionPaint} />}</>;
 });
 
 export default memo(function SketchFileRenderer() {
@@ -127,7 +125,7 @@ export default memo(function SketchFileRenderer() {
 
   const boundingPoints = useMemo(
     () =>
-      state.selectedObjects.map((id) =>
+      state.selectedObjects.map((id: string) =>
         Selectors.getBoundingPoints(page, AffineTransform.identity, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
@@ -520,15 +518,23 @@ export default memo(function SketchFileRenderer() {
           </>
         ) : (
           <>
-            {boundingRect && (
-              <BoundingRect
-                rect={boundingRect}
-                selectionPaint={selectionPaint}
-              />
-            )}
-            {boundingPoints.map((points, index) => (
-              <Polyline key={index} points={points} paint={selectionPaint} />
-            ))}
+            {(state.selectedObjects.length > 1 ||
+              !Selectors.getSelectedLineLayer(state)) &&
+              boundingRect && (
+                <>
+                  <BoundingRect
+                    rect={boundingRect}
+                    selectionPaint={selectionPaint}
+                  />
+                  {boundingPoints.map((points: Point[], index: number) => (
+                    <Polyline
+                      key={index}
+                      points={points}
+                      paint={selectionPaint}
+                    />
+                  ))}
+                </>
+              )}
             {!isEditingPath && highlightedSketchLayer}
             {smartSnapGuides}
             {quickMeasureGuides}

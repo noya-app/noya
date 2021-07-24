@@ -1,38 +1,31 @@
-import { CanvasKit } from 'canvaskit';
-import { VirtualConsole } from 'jsdom';
+import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
 import { AffineTransform } from '../AffineTransform';
 import { toRadians } from '../utils';
 
-let ck: CanvasKit;
-
-const originalVirtualConsole: VirtualConsole = global._virtualConsole;
+let CanvasKit: CanvasKitType;
 
 beforeAll(async () => {
-  global._virtualConsole = new VirtualConsole();
-
-  ck = await loadCanvasKit();
-});
-
-afterAll(() => {
-  global._virtualConsole = originalVirtualConsole;
+  CanvasKit = await loadCanvasKit();
 });
 
 test('matches canvaskit', () => {
-  expect(AffineTransform.identity.array).toEqual(ck.Matrix.identity());
+  expect(AffineTransform.identity.array).toEqual(CanvasKit.Matrix.identity());
   expect(AffineTransform.translation(2, 3).array).toEqual(
-    ck.Matrix.translated(2, 3),
+    CanvasKit.Matrix.translated(2, 3),
   );
-  expect(AffineTransform.scale(2, 3).array).toEqual(ck.Matrix.scaled(2, 3));
+  expect(AffineTransform.scale(2, 3).array).toEqual(
+    CanvasKit.Matrix.scaled(2, 3),
+  );
   expect(AffineTransform.rotation(toRadians(90)).array).toEqual(
-    ck.Matrix.rotated(toRadians(90)),
+    CanvasKit.Matrix.rotated(toRadians(90)),
   );
   expect(
     AffineTransform.rotation(toRadians(90), 2, 3).array.map((x) =>
       x.toPrecision(6),
     ),
   ).toEqual(
-    ck.Matrix.rotated(toRadians(90), 2, 3).map((x) => x.toPrecision(6)),
+    CanvasKit.Matrix.rotated(toRadians(90), 2, 3).map((x) => x.toPrecision(6)),
   );
   expect(
     AffineTransform.multiply(
@@ -40,9 +33,9 @@ test('matches canvaskit', () => {
       AffineTransform.translation(2, 3),
     ).array,
   ).toEqual(
-    ck.Matrix.multiply(
-      ck.Matrix.rotated(toRadians(90)),
-      ck.Matrix.translated(2, 3),
+    CanvasKit.Matrix.multiply(
+      CanvasKit.Matrix.rotated(toRadians(90)),
+      CanvasKit.Matrix.translated(2, 3),
     ),
   );
 });

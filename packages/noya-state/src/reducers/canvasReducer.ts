@@ -16,14 +16,18 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
+  getParentLayer,
+  getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
+  moveLayer,
   moveSelectedPoints,
 } from '../selectors/selectors';
 import {
@@ -56,6 +60,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
       type: 'interaction',
@@ -220,25 +225,29 @@ export function canvasReducer(
           point,
         };
 
-        const newDecodedPoints =
-          pointIndexPath.pointIndex === 0
-            ? [decodedPoint, ...decodedPoints]
-            : [...decodedPoints, decodedPoint];
+        const isLastPointSelected =
+          pointIndexPath.pointIndex === layer.points.length - 1;
+
+        const newDecodedPoints = isLastPointSelected
+          ? [...decodedPoints, decodedPoint]
+          : [decodedPoint, ...decodedPoints];
 
         layer.frame = {
           ...layer.frame,
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
+        fixZeroLayerDimensions(layer);
+
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
 
-        draft.selectedPointLists[layer.do_objectID] =
-          pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+        draft.selectedPointLists[layer.do_objectID] = isLastPointSelected
+          ? [layer.points.length - 1]
+          : [0];
 
         draft.selectedControlPoint = undefined;
-
         return;
       });
     }
@@ -264,6 +273,28 @@ export function canvasReducer(
         };
       });
     }
+    case 'moveLayersIntoParentAtPoint': {
+      const [, point] = action;
+
+      const page = getCurrentPage(state);
+      const parentId =
+        getParentLayerAtPoint(page, point)?.do_objectID ?? page.do_objectID;
+      const indexPaths = getSelectedLayerIndexPathsExcludingDescendants(state);
+
+      if (
+        indexPaths.every(
+          (indexPath) =>
+            getParentLayer(page, indexPath).do_objectID === parentId,
+        ) ||
+        indexPaths.some((indexPath) => {
+          const layer = Layers.access(page, indexPath) as Layers.ChildLayer;
+          return Layers.isArtboard(layer) || Layers.isSymbolMaster(layer);
+        })
+      )
+        return state;
+
+      return moveLayer(state, state.selectedObjects, parentId, 'inside');
+    }
     case 'interaction': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
@@ -271,6 +302,7 @@ export function canvasReducer(
       const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
         state,
       );
+
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
@@ -489,12 +521,18 @@ export function canvasReducer(
                 y: originalLayer.frame.y + originalLayer.frame.height,
               });
 
+              const width = max.x - min.x;
+              const height = max.y - min.y;
+
               const newFrame = normalizeRect({
                 x: Math.round(min.x),
                 y: Math.round(min.y),
-                width: Math.round(max.x - min.x),
-                height: Math.round(max.y - min.y),
+                width: Math.round(width),
+                height: Math.round(height),
               });
+
+              newLayer.isFlippedHorizontal = width < 0;
+              newLayer.isFlippedVertical = height < 0;
 
               newLayer.frame.x = newFrame.x;
               newLayer.frame.y = newFrame.y;

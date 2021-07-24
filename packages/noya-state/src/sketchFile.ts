@@ -1,9 +1,10 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 
-export function createSketchFile(): SketchFile {
-  const page = SketchModel.page();
-
+export function createSketchFile(
+  page: Sketch.Page = SketchModel.page(),
+): SketchFile {
   return {
     document: SketchModel.document(),
     images: {},

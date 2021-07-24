@@ -1,6 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Point } from 'noya-geometry';
 import { uuid } from 'noya-utils';
+
+export { PointString } from './PointString';
+export * from './debugDescription';
 
 type ModelOptions<T> = Partial<Omit<T, '_class'>>;
 
@@ -93,7 +95,7 @@ function border(options?: ModelOptions<Sketch.Border>): Sketch.Border {
     color: color(),
     contextSettings: graphicsContextSettings(),
     gradient: gradient(),
-    position: 1,
+    position: Sketch.BorderPosition.Center,
     thickness: 1,
     ...options,
     _class: Sketch.ClassValue.Border,
@@ -282,21 +284,25 @@ function rectangle(options?: ModelOptions<Sketch.Rectangle>): Sketch.Rectangle {
         curveFrom: '{0, 0}',
         curveTo: '{0, 0}',
         point: '{0, 0}',
+        cornerRadius: options?.fixedRadius ?? 0,
       }),
       curvePoint({
         curveFrom: '{1, 0}',
         curveTo: '{1, 0}',
         point: '{1, 0}',
+        cornerRadius: options?.fixedRadius ?? 0,
       }),
       curvePoint({
         curveFrom: '{1, 1}',
         curveTo: '{1, 1}',
         point: '{1, 1}',
+        cornerRadius: options?.fixedRadius ?? 0,
       }),
       curvePoint({
         curveFrom: '{0, 1}',
         curveTo: '{0, 1}',
         point: '{0, 1}',
+        cornerRadius: options?.fixedRadius ?? 0,
       }),
     ],
     fixedRadius: 0,
@@ -355,8 +361,8 @@ function shapePath(options?: ModelOptions<Sketch.ShapePath>): Sketch.ShapePath {
   return {
     ...newLayerBase(options),
     name: 'Path',
-    style: style(),
     points: [],
+    style: style(),
     ...options,
     _class: Sketch.ClassValue.ShapePath,
   };
@@ -679,18 +685,6 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
     ...options,
   };
 }
-
-export const PointString = {
-  decode(pointString: string): Point {
-    const [x, y] = pointString.slice(1, -1).split(',');
-
-    return { x: parseFloat(x), y: parseFloat(y) };
-  },
-
-  encode({ x, y }: Point): string {
-    return `{${x.toString()},${y.toString()}}`;
-  },
-};
 
 export const SketchModel = {
   artboard,

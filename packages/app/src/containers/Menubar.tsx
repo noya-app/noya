@@ -5,9 +5,15 @@ import {
 } from '@radix-ui/react-icons';
 import { fileOpen, fileSave, FileSystemHandle } from 'browser-fs-access';
 import {
+  useDispatch,
+  useGetStateSnapshot,
+  useSelector,
+  useWorkspace,
+} from 'noya-app-state-context';
+import {
   Button,
+  createSectionedMenu,
   DropdownMenu,
-  MenuItem,
   RadioGroup,
   Spacer,
 } from 'noya-designsystem';
@@ -15,12 +21,7 @@ import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState, Selectors, WorkspaceTab } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {
-  useDispatch,
-  useGetStateSnapshot,
-  useSelector,
-} from 'noya-app-state-context';
-import { useWorkspace } from 'noya-app-state-context';
+import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
@@ -37,18 +38,33 @@ const Row = styled.div(({ theme }) => ({
   flexDirection: 'row',
 }));
 
-type MenuItemType = 'new' | 'open' | 'save' | 'saveAs';
+type MenuItemType =
+  | 'new'
+  | 'open'
+  | 'save'
+  | 'saveAs'
+  | 'undo'
+  | 'redo'
+  | 'showRulers';
 
 interface Props {
   currentTab: WorkspaceTab;
   fileHandle?: FileSystemHandle;
   getStateSnapshot: () => ApplicationState;
+  setShowRulers: (value: boolean) => void;
+  showRulers: boolean;
+  redoDisabled: boolean;
+  undoDisabled: boolean;
 }
 
 const MenubarContent = memo(function MenubarContent({
   currentTab,
   fileHandle,
   getStateSnapshot,
+  setShowRulers,
+  showRulers,
+  redoDisabled,
+  undoDisabled,
 }: Props) {
   const dispatch = useDispatch();
 
@@ -59,14 +75,28 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch],
   );
 
-  const menuItems: MenuItem<MenuItemType>[] = useMemo(
-    () => [
-      { value: 'new', title: 'File: New' },
-      { value: 'open', title: 'File: Open' },
-      { value: 'save', title: 'File: Save' },
-      { value: 'saveAs', title: 'File: Save As...' },
-    ],
-    [],
+  const menuItems = useMemo(
+    () =>
+      createSectionedMenu<MenuItemType>(
+        [
+          { value: 'new', title: 'File: New' },
+          { value: 'open', title: 'File: Open' },
+          { value: 'save', title: 'File: Save' },
+          { value: 'saveAs', title: 'File: Save As...' },
+        ],
+        [
+          { value: 'undo', title: 'Edit: Undo' },
+          { value: 'redo', title: 'Edit: Redo' },
+        ],
+        [
+          {
+            value: 'showRulers',
+            title: 'Preferences: Rulers',
+            checked: showRulers,
+          },
+        ],
+      ),
+    [showRulers],
   );
 
   const onSelectMenuItem = useCallback(
@@ -107,9 +137,18 @@ const MenubarContent = memo(function MenubarContent({
           dispatch('setFileHandle', newFileHandle);
           return;
         }
+        case 'undo':
+          dispatch('undo');
+          return;
+        case 'redo':
+          dispatch('redo');
+          return;
+        case 'showRulers':
+          setShowRulers(!showRulers);
+          return;
       }
     },
-    [dispatch, fileHandle, getStateSnapshot],
+    [dispatch, fileHandle, getStateSnapshot, setShowRulers, showRulers],
   );
 
   return (
@@ -140,15 +179,24 @@ const MenubarContent = memo(function MenubarContent({
 });
 
 export default function Menubar() {
-  const { fileHandle } = useWorkspace();
+  const {
+    fileHandle,
+    setShowRulers,
+    preferences: { showRulers },
+  } = useWorkspace();
   const getStateSnapshot = useGetStateSnapshot();
   const currentTab = useSelector(Selectors.getCurrentTab);
+  const { redoDisabled, undoDisabled } = useHistory();
 
   return (
     <MenubarContent
       currentTab={currentTab}
       fileHandle={fileHandle}
       getStateSnapshot={getStateSnapshot}
+      redoDisabled={redoDisabled}
+      undoDisabled={undoDisabled}
+      showRulers={showRulers}
+      setShowRulers={setShowRulers}
     />
   );
 }

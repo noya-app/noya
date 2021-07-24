@@ -1,9 +1,15 @@
 import { Point } from 'noya-geometry';
 import { useColorFill, usePaint } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { Polyline, Rect, Text } from '..';
 import { DistanceMeasurementProps } from './guides';
+
+const padding = {
+  width: 6,
+  height: 2,
+};
 
 function DistanceMeasurement({
   distance,
@@ -44,22 +50,34 @@ function DistanceMeasurement({
     [CanvasKit, paragraph, bounds],
   );
 
+  const size = useMemo(
+    () => ({
+      width: paragraph.getMinIntrinsicWidth() + padding.width * 2,
+      height: paragraph.getHeight() + padding.height * 2,
+    }),
+    [paragraph],
+  );
+
   const bgRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        bounds.x - 2,
-        bounds.y - 1,
-        paragraph.getMinIntrinsicWidth() + 5,
-        paragraph.getHeight() + 2,
+        round(bounds.x - padding.width),
+        round(bounds.y - padding.height),
+        round(size.width),
+        round(size.height),
       ),
-    [CanvasKit, paragraph, bounds],
+    [CanvasKit, bounds.x, bounds.y, size.width, size.height],
   );
 
   const backgroundFill = useColorFill('rgb(43, 92, 207)');
 
   return (
     <>
-      <Rect rect={bgRect} paint={backgroundFill} />
+      <Rect
+        rect={bgRect}
+        paint={backgroundFill}
+        cornerRadius={size.height / 2}
+      />
       <Text rect={labelRect} paragraph={paragraph} />
     </>
   );

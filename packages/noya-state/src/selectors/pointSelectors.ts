@@ -2,6 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import { Draft } from 'immer';
 import { distance, Point, Rect } from 'noya-geometry';
+import { PointString } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -28,6 +29,13 @@ export const POINT_RADIUS = 4;
 export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
   return distance(point, rawPoint) < POINT_RADIUS;
 };
+
+export function isLine(points: Sketch.CurvePoint[]) {
+  return (
+    points.length === 2 &&
+    points.every((point) => point.curveMode === Sketch.CurveMode.Straight)
+  );
+}
 
 export const computeNewBoundingRect = (
   CanvasKit: CanvasKit,
@@ -264,11 +272,41 @@ export const moveSelectedPoints = (
       ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
     };
 
+    fixZeroLayerDimensions(draftLayer);
+
     // Transform back to the range [0, 1], using the new bounds
     draftLayer.points = decodedPoints.map((decodedCurvePoint) =>
       encodeCurvePoint(decodedCurvePoint, draftLayer.frame),
     );
   });
+};
+
+export const fixZeroLayerDimensions = (layer: PointsLayer) => {
+  if (layer.frame.height === 0) {
+    layer.frame.height = 1;
+    layer.points.forEach((point) => {
+      (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
+        point[key] = PointString.encode({
+          x: PointString.decode(point[key]).x,
+          y: 0.5,
+        });
+      });
+    });
+    layer.frame.y -= 0.5;
+  }
+
+  if (layer.frame.width === 0) {
+    layer.frame.width = 1;
+    layer.points.forEach((point) => {
+      (['point', 'curveFrom', 'curveTo'] as const).forEach((key) => {
+        point[key] = PointString.encode({
+          x: 0.5,
+          y: PointString.decode(point[key]).y,
+        });
+      });
+    });
+    layer.frame.x -= 0.5;
+  }
 };
 
 export const moveControlPoints = (
