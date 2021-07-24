@@ -99,8 +99,14 @@ function ArrayController<Item>({
     [indexMapper, items, onMoveItem],
   );
 
-  const renderRow = (item: Item, index: number) => {
-    return <ElementRow>{renderItem({ item, index })}</ElementRow>;
+  const renderRow = (index: number) => {
+    const mappedIndex = indexMapper(items, index);
+
+    return (
+      <ElementRow>
+        {renderItem({ item: items[mappedIndex], index: mappedIndex })}
+      </ElementRow>
+    );
   };
 
   return (
@@ -121,19 +127,14 @@ function ArrayController<Item>({
       {sortable ? (
         <Sortable.Root
           keys={keys}
-          renderOverlay={(index) =>
-            renderRow(
-              items[indexMapper(items, index)],
-              indexMapper(items, index),
-            )
-          }
+          renderOverlay={renderRow}
           onMoveItem={handleMoveItem}
         >
-          {mapIndex(items, indexMapper, (item, index) => (
+          {mapIndex(items, indexMapper, (_, index) => (
             <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
               {({ relativeDropPosition, ...sortableProps }) => (
                 <ItemContainer {...sortableProps}>
-                  {renderRow(item, indexMapper(items, index))}
+                  {renderRow(index)}
                   {relativeDropPosition && (
                     <ListView.DragIndicatorElement
                       relativeDropPosition={relativeDropPosition}
@@ -146,7 +147,7 @@ function ArrayController<Item>({
           ))}
         </Sortable.Root>
       ) : (
-        mapIndex(items, indexMapper, (item, index) => renderRow(item, index))
+        mapIndex(items, indexMapper, (_, index) => renderRow(index))
       )}
     </InspectorPrimitives.Section>
   );
