@@ -65,6 +65,50 @@ const ListViewRowTitle = styled.span(({ theme }) => ({
 }));
 
 /* ----------------------------------------------------------------------------
+ * EditableRowTitle
+ * ------------------------------------------------------------------------- */
+
+interface EditableRowProps {
+  value: string;
+  onSubmitEditing: (value: string, reset: () => void) => void;
+  autoFocus: boolean;
+}
+
+function ListViewEditableRowTitle({
+  value,
+  onSubmitEditing,
+  autoFocus,
+}: EditableRowProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useLayoutEffect(() => {
+    const element = inputRef.current;
+
+    if (!element || !autoFocus) return;
+
+    // Calling `focus` is necessary, in addition to `select`, to ensure
+    // the `onBlur` fires correctly.
+    element.focus();
+
+    setTimeout(() => {
+      element.select();
+    }, 0);
+  }, [autoFocus]);
+
+  return (
+    <InputField.Input
+      ref={inputRef}
+      variant="bare"
+      value={value}
+      onSubmit={onSubmitEditing}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    />
+  );
+}
+
+/* ----------------------------------------------------------------------------
  * Row
  * ------------------------------------------------------------------------- */
 
@@ -187,18 +231,12 @@ export interface ListViewClickInfo {
   metaKey: boolean;
 }
 
-export interface EditableProps {
-  value: string;
-  onSubmitEditing: (value: string, reset: () => void) => void;
-}
-
 export interface ListViewRowProps<MenuItemType extends string = string> {
   id?: string;
   selected?: boolean;
   depth?: number;
   disabled?: boolean;
   hovered?: boolean;
-  editableProps?: EditableProps;
   sortable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
   onHoverChange?: (isHovering: boolean) => void;
@@ -219,7 +257,6 @@ const ListViewRow = forwardRef(function ListViewRow<
     disabled = false,
     hovered = false,
     isSectionHeader = false,
-    editableProps,
     onClick,
     onHoverChange,
     children,
@@ -244,22 +281,6 @@ const ListViewRow = forwardRef(function ListViewRow<
     },
     [onClick],
   );
-
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useLayoutEffect(() => {
-    const element = inputRef.current;
-
-    if (!editableProps || !element) return;
-
-    // Calling `focus` is necessary, in addition to `select`, to ensure
-    // the `onBlur` fires correctly.
-    element.focus();
-
-    setTimeout(() => {
-      element.select();
-    }, 0);
-  }, [editableProps]);
 
   const renderContent = (
     {
@@ -294,19 +315,7 @@ const ListViewRow = forwardRef(function ListViewRow<
           />
         )}
         {depth > 0 && <Spacer.Horizontal size={depth * indentation} />}
-        {editableProps ? (
-          <InputField.Input
-            ref={inputRef}
-            variant="bare"
-            value={editableProps.value}
-            onSubmit={editableProps.onSubmitEditing}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          />
-        ) : (
-          children
-        )}
+        {children}
       </Component>
     );
 
@@ -510,5 +519,6 @@ function ListViewRoot<T = any>({
 }
 
 export const RowTitle = memo(ListViewRowTitle);
+export const EditableRowTitle = memo(ListViewEditableRowTitle);
 export const Row = memo(ListViewRow);
 export const Root = memo(ListViewRoot);
