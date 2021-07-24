@@ -357,7 +357,7 @@ export function layerReducer(
 
         const symbolsPage =
           symbolsPageIndex === -1
-            ? createPage(pages, draft.sketch.user, 'Symbols')
+            ? createPage(pages, draft.sketch.user, uuid(), 'Symbols')
             : pages[symbolsPageIndex];
 
         const symbolInstance = SketchModel.symbolInstance({

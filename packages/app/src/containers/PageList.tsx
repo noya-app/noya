@@ -1,15 +1,21 @@
 import { PlusIcon } from '@radix-ui/react-icons';
 import {
+  useApplicationState,
+  useDispatch,
+  useWorkspace,
+} from 'noya-app-state-context';
+import {
   Button,
   ListView,
   MenuItem,
   RelativeDropPosition,
   Spacer,
 } from 'noya-designsystem';
-import { memo, useCallback, useMemo } from 'react';
+import { useState } from 'react';
+import { memo, useCallback, useLayoutEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import useDeepArray from '../hooks/useDeepArray';
+import { uuid } from 'noya-utils';
 
 const Container = styled.div(({ theme }) => ({
   height: '200px',
@@ -38,14 +44,21 @@ interface Props {
   selectedPageId: string;
   pageInfo: PageInfo[];
   canDelete: boolean;
+  renamingPage?: string;
+  startRenamingPage: (id: string) => void;
+  didHandleFocus: () => void;
 }
 
 const PageListContent = memo(function PageListContent({
   selectedPageId,
   pageInfo,
   canDelete,
+  renamingPage,
+  startRenamingPage,
+  didHandleFocus,
 }: Props) {
   const dispatch = useDispatch();
+  const [editingPage, setEditingPage] = useState<string | undefined>();
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
@@ -62,9 +75,7 @@ const PageListContent = memo(function PageListContent({
     (value: MenuItemType) => {
       switch (value) {
         case 'rename': {
-          const name = prompt('New page Name');
-
-          if (name) dispatch('renamePage', name);
+          startRenamingPage(selectedPageId);
           break;
         }
         case 'duplicate': {
@@ -76,14 +87,22 @@ const PageListContent = memo(function PageListContent({
           break;
       }
     },
-    [dispatch],
+    [dispatch, selectedPageId, startRenamingPage],
   );
 
   const handleAddPage = useCallback(() => {
-    const name = prompt('New page Name');
+    const pageId = uuid();
+    dispatch('addPage', pageId);
+    startRenamingPage(pageId);
+  }, [dispatch, startRenamingPage]);
 
-    if (name !== null) dispatch('addPage', name);
-  }, [dispatch]);
+  useLayoutEffect(() => {
+    if (!renamingPage) return;
+
+    setEditingPage(renamingPage);
+
+    didHandleFocus();
+  }, [didHandleFocus, renamingPage]);
 
   return (
     <Container>
@@ -95,7 +114,7 @@ const PageListContent = memo(function PageListContent({
         </Button>
       </Header>
       <ListView.Root
-        sortable
+        sortable={!editingPage}
         scrollable
         onMoveItem={useCallback(
           (
@@ -117,6 +136,23 @@ const PageListContent = memo(function PageListContent({
             <ListView.Row<MenuItemType>
               id={page.do_objectID}
               key={page.do_objectID}
+              depth={2}
+              editableProps={
+                page.do_objectID === editingPage
+                  ? {
+                      value: page.name,
+                      onSubmitEditing: (name) => {
+                        if (!name) {
+                          setEditingPage(undefined);
+                          return;
+                        }
+
+                        setEditingPage(undefined);
+                        dispatch('renamePage', name);
+                      },
+                    }
+                  : undefined
+              }
               selected={!isDragging && selectedPageId === page.do_objectID}
               onClick={() => {
                 dispatch('interaction', ['reset']);
@@ -128,11 +164,16 @@ const PageListContent = memo(function PageListContent({
                 dispatch('selectPage', page.do_objectID);
               }}
             >
-              <Spacer.Horizontal size={6 + 15} />
               {page.name}
             </ListView.Row>
           ),
-          [selectedPageId, menuItems, handleSelectMenuItem, dispatch],
+          [
+            editingPage,
+            selectedPageId,
+            menuItems,
+            handleSelectMenuItem,
+            dispatch,
+          ],
         )}
       />
     </Container>
@@ -141,6 +182,7 @@ const PageListContent = memo(function PageListContent({
 
 export default function PageList() {
   const [state] = useApplicationState();
+  const { renamingPage, startRenamingPage, didHandleFocus } = useWorkspace();
 
   const pageInfo = useDeepArray(
     state.sketch.pages.map((page) => ({
@@ -154,6 +196,9 @@ export default function PageList() {
       selectedPageId={state.selectedPage}
       pageInfo={pageInfo}
       canDelete={state.sketch.pages.length > 1}
+      renamingPage={renamingPage}
+      startRenamingPage={startRenamingPage}
+      didHandleFocus={didHandleFocus}
     />
   );
 }
