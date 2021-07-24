@@ -97,7 +97,7 @@ export function styleReducer(
         });
 
         if (draft.borders) {
-          draft.borders.unshift(border);
+          draft.borders.push(border);
         } else {
           draft.borders = [border];
         }
@@ -109,7 +109,7 @@ export function styleReducer(
         });
 
         if (draft.fills) {
-          draft.fills.unshift(fill);
+          draft.fills.push(fill);
         } else {
           draft.fills = [fill];
         }
@@ -123,7 +123,7 @@ export function styleReducer(
 
       return produce(state, (draft) => {
         if (draft.shadows) {
-          draft.shadows.unshift(shadow);
+          draft.shadows.push(shadow);
         } else {
           draft.shadows = [shadow];
         }
