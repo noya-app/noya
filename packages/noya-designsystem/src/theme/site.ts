@@ -98,6 +98,9 @@ export const textStyles = {
     fontWeight: 400,
     lineHeight: '1.75',
   } as CSSObject,
+  bodyAlternate: {
+    color: '#c388f5',
+  } as CSSObject,
   body: {
     // TODO: body2
     // fontFamily: fonts.normal,

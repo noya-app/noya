@@ -8,6 +8,8 @@ export type TextProps = {
   variant?: keyof TextStyles;
   className?: string;
   children: ReactNode;
+  alignment?: 'start' | 'center' | 'end';
+  width?: string | number;
 };
 
 const elements = {
@@ -20,7 +22,13 @@ const elements = {
 const TextAncestorContext = createContext(false);
 
 const Text = styled(
-  ({ as: Element = 'p', variant = 'body', className, children }: TextProps) => {
+  ({
+    as: Element = 'p',
+    alignment,
+    variant = 'body',
+    className,
+    children,
+  }: TextProps) => {
     const hasTextAncestor = useContext(TextAncestorContext);
     // @ts-ignore
     const propElement = elements[variant];
@@ -37,10 +45,12 @@ const Text = styled(
     );
   },
 )<TextProps>(
-  {
+  (props) => ({
     margin: 0,
     lineHeight: 1,
-  },
+    width: props.width,
+    textAlign: props.alignment,
+  }),
   (props) => props.theme.textStyles[props.variant || 'body'],
 );
 
