@@ -40,6 +40,10 @@ export function getPossibleSnapLayers(
     },
   );
 
+  // If we're not snapping to a layer (e.g. we're snapping a point) then
+  // we can snap anywhere in the hierarchy
+  if (selectedIndexPaths.length === 0) return allVisibleLayers;
+
   // Are all selected ids in the same artboard?
   const inSameArtboard =
     Layers.isSymbolMasterOrArtboard(page.layers[selectedIndexPaths[0][0]]) &&

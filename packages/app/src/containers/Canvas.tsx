@@ -25,7 +25,7 @@ import {
   Selectors,
   ShapeType,
 } from 'noya-state';
-import { getFileExtensionForType, uuid } from 'noya-utils';
+import { getFileExtensionForType } from 'noya-utils';
 import {
   CSSProperties,
   memo,
@@ -228,15 +228,11 @@ export default memo(function Canvas() {
         case 'insertRectangle':
         case 'insertOval':
         case 'insertText': {
-          const id = uuid();
-
           dispatch('interaction', [
             'startDrawing',
             state.interactionState.type.slice(6).toLowerCase() as ShapeType,
-            id,
             point,
           ]);
-
           break;
         }
         case 'insertingSymbol': {
@@ -401,6 +397,12 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'insertArtboard':
+        case 'insertRectangle':
+        case 'insertOval':
+        case 'insertText':
+          dispatch('interaction', [state.interactionState.type, point]);
+          break;
         case 'insertingSymbol': {
           dispatch('interaction', [
             'insertingSymbol',

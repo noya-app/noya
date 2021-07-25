@@ -6,7 +6,9 @@ import { AffineTransform, createRect, insetRect, Point } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
+  createDrawingLayer,
   DecodedCurvePoint,
+  defaultBorderColor,
   encodeCurvePoint,
   Layers,
   Primitives,
@@ -30,6 +32,7 @@ import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
 import { MeasurementGuide, ExtensionGuide } from './Guides';
+import { SketchModel } from 'noya-sketch-model';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -321,6 +324,21 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
+  const drawingLayer =
+    interactionState.type === 'drawing'
+      ? createDrawingLayer(
+          interactionState.shapeType === 'oval' ? 'oval' : 'rectangle',
+          SketchModel.style({
+            borders: [
+              SketchModel.border({
+                color: defaultBorderColor,
+              }),
+            ],
+          }),
+          createRect(interactionState.origin, interactionState.current),
+        )
+      : undefined;
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -364,12 +382,7 @@ export default memo(function SketchFileRenderer() {
                 selectionPaint={selectionPaint}
               />
             )}
-            {interactionState.type === 'drawing' && (
-              <SketchLayer
-                key={interactionState.value.do_objectID}
-                layer={interactionState.value}
-              />
-            )}
+            {drawingLayer && <SketchLayer layer={drawingLayer} />}
           </>
         )}
       </Group>

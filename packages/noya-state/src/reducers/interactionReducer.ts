@@ -1,10 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { createRect, Size } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
-import type { PageLayer } from '..';
+import { Size } from 'noya-geometry';
 import { Point, Rect, UUID } from '../types';
-import { defaultFillColor } from './styleReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -47,13 +44,13 @@ export type SnapshotInteractionAction =
   | [type: 'maybeMoveControlPoint', origin: Point];
 
 export type InteractionAction =
-  | ['reset']
-  | [`insert${Capitalize<ShapeType>}`]
-  | [`insertingSymbol`, UUID, Point?]
+  | [type: 'reset']
+  | [type: `insert${Capitalize<ShapeType>}`, current?: Point]
+  | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
-  | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
+  | [type: 'startDrawing', shapeType: ShapeType, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
@@ -78,6 +75,7 @@ export type InteractionState =
     }
   | {
       type: `insert${Capitalize<ShapeType>}`;
+      point?: Point;
     }
   | {
       type: 'insertingSymbol';
@@ -95,7 +93,8 @@ export type InteractionState =
   | {
       type: 'drawing';
       origin: Point;
-      value: PageLayer;
+      current: Point;
+      shapeType: ShapeType;
     }
   | {
       type: 'marquee';
@@ -163,33 +162,6 @@ export type InteractionState =
 
 export type InteractionType = InteractionState['type'];
 
-type CreateLayerReturnType =
-  | Sketch.Oval
-  | Sketch.Rectangle
-  | Sketch.Text
-  | Sketch.Artboard;
-
-function createLayer(shapeType: ShapeType): CreateLayerReturnType {
-  const style = SketchModel.style({
-    fills: [
-      SketchModel.fill({
-        color: defaultFillColor,
-      }),
-    ],
-  });
-
-  switch (shapeType) {
-    case 'oval':
-      return SketchModel.oval({ style });
-    case 'rectangle':
-      return SketchModel.rectangle({ style });
-    case 'text':
-      return SketchModel.text();
-    case 'artboard':
-      return SketchModel.artboard();
-  }
-}
-
 export function interactionReducer(
   state: InteractionState,
   action:
@@ -207,7 +179,8 @@ export function interactionReducer(
     case 'insertOval':
     case 'insertRectangle':
     case 'insertText': {
-      return { type: action[0] };
+      const [, point] = action;
+      return { type: action[0], point };
     }
     case 'insertingSymbol': {
       const [, symbolID, point] = action;
@@ -245,35 +218,24 @@ export function interactionReducer(
       };
     }
     case 'startDrawing': {
-      const [, shapeType, id, point] = action;
-
-      let layer = produce(createLayer(shapeType), (layer) => {
-        layer.do_objectID = id;
-        layer.frame = {
-          _class: 'rect',
-          constrainProportions: false,
-          ...createRect(point, point),
-        };
-      });
+      const [, shapeType, point] = action;
 
       return {
         type: 'drawing',
-        value: layer,
         origin: point,
+        current: point,
+        shapeType,
       };
     }
     case 'updateDrawing': {
       if (state.type !== 'drawing') return state;
+
       const [, point] = action;
 
-      const rect = createRect(state.origin, point);
-
-      return produce(state, (draft) => {
-        draft.value.frame = {
-          ...draft.value.frame,
-          ...rect,
-        };
-      });
+      return {
+        ...state,
+        current: point,
+      };
     }
     case 'maybeMove': {
       const [, origin, canvasSize, pageSnapshot] = action;

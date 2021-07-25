@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   AffineTransform,
   Axis,
@@ -16,7 +16,7 @@ import {
   Selectors,
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import {
   AXES,
   getAxisProperties,
@@ -124,46 +124,51 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
         <AlignmentGuide key={index} points={points} />
       ))}
       {guides.map((guide, index) => (
-        <>
-          <ExtensionGuide key={index} points={guide.extension} />
-          <MeasurementGuide key={index} points={guide.measurement} />
-          <MeasurementLabel key={index} points={guide.measurement} />
-        </>
+        <Fragment key={index}>
+          <ExtensionGuide points={guide.extension} />
+          <MeasurementGuide points={guide.measurement} />
+          <MeasurementLabel points={guide.measurement} />
+        </Fragment>
       ))}
     </>
   );
 });
 
 export default memo(function SnapGuides() {
+  const { canvasSize } = useWorkspace();
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
   const page = Selectors.getCurrentPage(state);
-  const boundingRect = useMemo(
-    () =>
-      Selectors.getBoundingRect(
-        page,
-        AffineTransform.identity,
-        state.selectedObjects,
-        {
-          clickThroughGroups: true,
-          includeHiddenLayers: true,
-          includeArtboardLayers: false,
-        },
-      ),
-    [page, state.selectedObjects],
-  );
 
-  if (interactionState.type !== 'moving' || !boundingRect) return null;
+  const sourceRect = useMemo(() => {
+    switch (interactionState.type) {
+      case 'moving':
+        return Selectors.getBoundingRect(
+          page,
+          AffineTransform.identity,
+          state.selectedObjects,
+          {
+            clickThroughGroups: true,
+            includeHiddenLayers: true,
+            includeArtboardLayers: false,
+          },
+        );
+      case 'insertRectangle':
+        const point = interactionState.point;
+
+        if (!point) return;
+
+        return { x: point.x, y: point.y, width: 0, height: 0 };
+    }
+  }, [interactionState, page, state.selectedObjects]);
+
+  if (!sourceRect) return null;
 
   const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
     state,
   );
 
-  const targetLayers = getPossibleSnapLayers(
-    state,
-    layerIndexPaths,
-    interactionState.canvasSize,
-  )
+  const targetLayers = getPossibleSnapLayers(state, layerIndexPaths, canvasSize)
     // Ensure we don't snap to the selected layer itself
     .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
 
@@ -174,7 +179,7 @@ export default memo(function SnapGuides() {
           key={axis}
           axis={axis}
           targetLayers={targetLayers}
-          sourceRect={boundingRect}
+          sourceRect={sourceRect}
           page={page}
         />
       ))}

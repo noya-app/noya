@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, normalizeRect } from 'noya-geometry';
+import { AffineTransform, createRect, normalizeRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -42,9 +42,10 @@ import { ApplicationState } from './applicationReducer';
 import {
   InteractionAction,
   interactionReducer,
+  ShapeType,
   SnapshotInteractionAction,
 } from './interactionReducer';
-import { defaultBorderColor } from './styleReducer';
+import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -104,7 +105,21 @@ export function canvasReducer(
       return produce(state, (draft) => {
         if (draft.interactionState.type !== 'drawing') return;
 
-        const layer = draft.interactionState.value;
+        const shapeType = draft.interactionState.shapeType;
+        const layer = createDrawingLayer(
+          shapeType,
+          SketchModel.style({
+            fills: [
+              SketchModel.fill({
+                color: defaultFillColor,
+              }),
+            ],
+          }),
+          createRect(
+            draft.interactionState.origin,
+            draft.interactionState.current,
+          ),
+        );
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
@@ -597,5 +612,24 @@ export function canvasReducer(
     }
     default:
       return state;
+  }
+}
+
+export function createDrawingLayer(
+  shapeType: ShapeType,
+  style: Sketch.Style,
+  rect: Rect,
+): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
+  const frame = SketchModel.rect(rect);
+
+  switch (shapeType) {
+    case 'oval':
+      return SketchModel.oval({ style, frame });
+    case 'rectangle':
+      return SketchModel.rectangle({ style, frame });
+    case 'text':
+      return SketchModel.text({ frame });
+    case 'artboard':
+      return SketchModel.artboard({ frame });
   }
 }
