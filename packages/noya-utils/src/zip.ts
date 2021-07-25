@@ -17,7 +17,7 @@ export function zip<T>(...arrays: T[][]): T[][];
 export function zip(...arrays: unknown[][]): unknown[][] {
   const length = Math.min(...arrays.map((array) => array.length));
 
-  const result: unknown[][] = [];
+  const result = new Array<unknown[]>(length);
 
   for (let i = 0; i < length; i++) {
     result[i] = [];
