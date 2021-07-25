@@ -19,7 +19,7 @@ import { Group, Rect as RCKRect } from '../ComponentsContext';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
 import ExtensionGuide from './ExtensionGuide';
-import { ALL_DIRECTIONS, getGuides } from './guides';
+import { ALL_DIRECTIONS, getGuides } from '../guides';
 import HoverOutline from './HoverOutline';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';

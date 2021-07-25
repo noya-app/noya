@@ -26,7 +26,7 @@ import {
   Guides,
   X_DIRECTIONS,
   Y_DIRECTIONS,
-} from './guides';
+} from '../guides';
 import { MeasurementGuide, MeasurementLabel } from './Measurement';
 
 interface Props {

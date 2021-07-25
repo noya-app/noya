@@ -1,4 +1,4 @@
-import { getGuides } from '../components/guides';
+import { getGuides } from '../guides';
 
 test('create guides', () => {
   expect(
