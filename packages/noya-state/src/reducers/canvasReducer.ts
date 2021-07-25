@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
+import { AffineTransform, normalizeRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -31,11 +31,11 @@ import {
   moveSelectedPoints,
 } from '../selectors/selectors';
 import {
-  findSmallestSnappingDistance,
-  getAxisValues,
-  getLayerAxisInfo,
+  getSnapAdjustmentDistance,
+  getSnapValues,
+  getLayerSnapValues,
   getPossibleSnapLayers,
-  getSnappingPairs,
+  getSnaps,
 } from '../snapping';
 import { Point, Rect } from '../types';
 import { ApplicationState } from './applicationReducer';
@@ -339,7 +339,7 @@ export function canvasReducer(
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
 
-            const selectedRect = getBoundingRect(
+            const sourceRect = getBoundingRect(
               pageSnapshot,
               AffineTransform.identity,
               layerIds,
@@ -350,7 +350,7 @@ export function canvasReducer(
               },
             );
 
-            if (!selectedRect) {
+            if (!sourceRect) {
               console.info('No selected rect');
               return;
             }
@@ -360,7 +360,11 @@ export function canvasReducer(
               y: current.y - origin.y,
             };
 
-            const possibleSnapLayers = getPossibleSnapLayers(
+            // Simulate where the selection rect would be, assuming no snapping
+            sourceRect.x += delta.x;
+            sourceRect.y += delta.y;
+
+            const targetLayers = getPossibleSnapLayers(
               state,
               layerIndexPaths,
               interactionState.canvasSize,
@@ -368,25 +372,26 @@ export function canvasReducer(
               // Ensure we don't snap to the selected layer itself
               .filter((layer) => !layerIds.includes(layer.do_objectID));
 
-            const snappingLayerInfos = getLayerAxisInfo(
-              page,
-              possibleSnapLayers,
+            const sourceXs = getSnapValues(sourceRect, 'x');
+            const sourceYs = getSnapValues(sourceRect, 'y');
+
+            const xSnaps = targetLayers.flatMap((targetLayer) =>
+              getSnaps(
+                sourceXs,
+                getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
+                targetLayer.do_objectID,
+              ),
+            );
+            const ySnaps = targetLayers.flatMap((targetLayer) =>
+              getSnaps(
+                sourceYs,
+                getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
+                targetLayer.do_objectID,
+              ),
             );
 
-            // Simulate where the selection rect would be, assuming no snapping
-            selectedRect.x += delta.x;
-            selectedRect.y += delta.y;
-
-            const selectedBounds = createBounds(selectedRect);
-
-            const xValues = getAxisValues(selectedBounds, 'x');
-            const yValues = getAxisValues(selectedBounds, 'y');
-
-            const xPairs = getSnappingPairs(xValues, snappingLayerInfos, 'x');
-            const yPairs = getSnappingPairs(yValues, snappingLayerInfos, 'y');
-
-            delta.y -= findSmallestSnappingDistance(yPairs);
-            delta.x -= findSmallestSnappingDistance(xPairs);
+            delta.x -= getSnapAdjustmentDistance(xSnaps);
+            delta.y -= getSnapAdjustmentDistance(ySnaps);
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;

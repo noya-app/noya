@@ -1,27 +1,24 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import {
-  AffineTransform,
-  Bounds,
-  createBounds,
-  Size,
-  Axis,
-} from 'noya-geometry';
+import { AffineTransform, Axis, createBounds, Rect, Size } from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';
+import { cartesianProduct } from 'noya-utils';
 import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
 import { getBoundingRect, getCurrentPage } from './selectors/selectors';
 
-export function getAxisValues(
-  rectBounds: Bounds,
+export function getSnapValues(
+  rect: Rect,
   axis: Axis,
 ): [number, number, number] {
+  const bounds = createBounds(rect);
+
   if (axis === 'x') {
-    return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
+    return [bounds.minX, bounds.midX, bounds.maxX];
   } else {
-    return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
+    return [bounds.minY, bounds.midY, bounds.maxY];
   }
 }
 
@@ -85,73 +82,45 @@ export function getPossibleSnapLayers(
   return visibleLayers;
 }
 
-export function getLayerAxisInfo(
+export function getLayerSnapValues(
   page: Sketch.Page,
-  layers: Sketch.AnyLayer[],
-): SnappingLayerInfo[] {
-  return layers.flatMap((layer) => {
-    const rect = getBoundingRect(
-      page,
-      AffineTransform.identity,
-      [layer.do_objectID],
-      {
-        clickThroughGroups: true,
-        includeHiddenLayers: false,
-        includeArtboardLayers: false,
-      },
-    );
-
-    if (!rect) return [];
-
-    const bounds = createBounds(rect);
-
-    return [
-      {
-        layerId: layer.do_objectID,
-        y: getAxisValues(bounds, 'y'),
-        x: getAxisValues(bounds, 'x'),
-      },
-    ];
+  layerId: string,
+  axis: Axis,
+): number[] {
+  const rect = getBoundingRect(page, AffineTransform.identity, [layerId], {
+    clickThroughGroups: true,
+    includeHiddenLayers: false,
+    includeArtboardLayers: false,
   });
+
+  return rect ? getSnapValues(rect, axis) : [];
 }
 
-export function findSmallestSnappingDistance(values: SnappingPair[]) {
-  const getDelta = (pair: SnappingPair) =>
-    pair.selectedLayerValue - pair.visibleLayerValue;
+export function getSnapAdjustmentDistance(values: Snap[]) {
+  const getDelta = (snap: Snap) => snap.source - snap.target;
 
-  const getDistance = (pair: SnappingPair) => Math.abs(getDelta(pair));
+  const getDistance = (snap: Snap) => Math.abs(getDelta(snap));
 
   const distances = values
-    .filter((pair) => getDistance(pair) <= 6)
+    .filter((snap) => getDistance(snap) <= 6)
     .sort((a, b) => getDistance(a) - getDistance(b));
 
   return distances.length > 0 ? getDelta(distances[0]) : 0;
 }
 
-type SnappingLayerInfo = {
-  layerId: string;
-  y: [number, number, number];
-  x: [number, number, number];
+export type Snap = {
+  source: number;
+  target: number;
+  targetId: string;
 };
 
-export type SnappingPair = {
-  selectedLayerValue: number;
-  visibleLayerValue: number;
-  visibleLayerId: string;
-};
-
-export function getSnappingPairs(
-  selectedAxisValues: [number, number, number],
-  visibleLayersAxisValues: SnappingLayerInfo[],
-  axis: Axis,
-): SnappingPair[] {
-  return visibleLayersAxisValues.flatMap((axisValues) =>
-    selectedAxisValues.flatMap((selectedLayerValue) =>
-      axisValues[axis].map((visibleLayerValue) => ({
-        selectedLayerValue: selectedLayerValue,
-        visibleLayerValue: visibleLayerValue,
-        visibleLayerId: axisValues.layerId,
-      })),
-    ),
-  );
+export function getSnaps(
+  sourceValues: number[],
+  targetValues: number[],
+  targetId: string,
+): Snap[] {
+  return cartesianProduct(
+    sourceValues,
+    targetValues,
+  ).map(([source, target]) => ({ source, target, targetId }));
 }

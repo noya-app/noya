@@ -2,56 +2,34 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import {
-  AffineTransform,
-  Axis,
-  Bounds,
-  createBounds,
-  createRect,
-  insetRect,
-  Point,
-} from 'noya-geometry';
+import { AffineTransform, createRect, insetRect, Point } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
   DecodedCurvePoint,
   encodeCurvePoint,
-  getAxisValues,
-  getLayerAxisInfo,
-  getPossibleSnapLayers,
-  getSnappingPairs,
   Layers,
   Primitives,
   Rect,
   Selectors,
-  SnappingPair,
 } from 'noya-state';
-import { groupBy } from 'noya-utils';
-import React, { Fragment, memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
-import AlignmentGuides from './AlignmentGuides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
-import ExtensionGuide from './ExtensionGuide';
-import {
-  ALL_DIRECTIONS,
-  getAxisProperties,
-  getGuides,
-  Guides,
-  X_DIRECTIONS,
-  Y_DIRECTIONS,
-} from './guides';
+import { ALL_DIRECTIONS, getGuides } from '../guides';
 import HoverOutline from './HoverOutline';
-import { Polyline } from 'noya-renderer';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
-import MeasurementGuide from './MeasurementGuide';
+import { MeasurementLabel } from './MeasurementLabel';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
+import SnapGuides from './SnapGuides';
+import { MeasurementGuide, ExtensionGuide } from './Guides';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -166,15 +144,12 @@ export default memo(function SketchFileRenderer() {
 
     if (!highlightedBoundingRect) return;
 
-    const highlightedBounds = createBounds(highlightedBoundingRect);
-    const selectedBounds = createBounds(boundingRect);
-
     const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
       const result = getGuides(
         direction,
         axis,
-        selectedBounds,
-        highlightedBounds,
+        boundingRect,
+        highlightedBoundingRect,
       );
 
       return result ? [result] : [];
@@ -186,169 +161,14 @@ export default memo(function SketchFileRenderer() {
           <ExtensionGuide key={index} points={guide.extension} />
         ))}
         {guides.map((guide, index) => (
-          <MeasurementGuide
-            key={index}
-            distanceMeasurement={guide.distanceMeasurement!}
-            measurement={guide.measurement}
-          />
+          <>
+            <MeasurementGuide key={index} points={guide.measurement} />
+            <MeasurementLabel key={index} points={guide.measurement} />
+          </>
         ))}
       </>
     );
   }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
-
-  const smartSnapGuides = useMemo(() => {
-    if (interactionState.type !== 'moving' || !boundingRect) return;
-
-    const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
-      state,
-    );
-
-    const possibleSnapLayers = getPossibleSnapLayers(
-      state,
-      layerIndexPaths,
-      interactionState.canvasSize,
-    )
-      // Ensure we don't snap to the selected layer itself
-      .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
-
-    const snappingLayerInfos = getLayerAxisInfo(page, possibleSnapLayers);
-
-    const bounds = createBounds(boundingRect);
-    const selectedBounds = createBounds(boundingRect);
-
-    const xPairs = getSnappingPairs(
-      getAxisValues(bounds, 'x'),
-      snappingLayerInfos,
-      'x',
-    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
-
-    const yPairs = getSnappingPairs(
-      getAxisValues(bounds, 'y'),
-      snappingLayerInfos,
-      'y',
-    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
-
-    const axisSnappingPairs: [Axis, SnappingPair[]][] = [
-      ['x', xPairs],
-      ['y', yPairs],
-    ];
-
-    const layerBoundsMap: Record<string, Bounds> = {};
-
-    [...xPairs, ...yPairs]
-      .map((pair) => pair.visibleLayerId)
-      .forEach((layerId) => {
-        if (layerId in layerBoundsMap) return;
-
-        const layerToSnapBoundingRect = Selectors.getBoundingRect(
-          page,
-          AffineTransform.identity,
-          [layerId],
-          {
-            clickThroughGroups: true,
-            includeHiddenLayers: false,
-            includeArtboardLayers: false,
-          },
-        );
-
-        if (!layerToSnapBoundingRect) return;
-
-        layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
-      });
-
-    const nearestLayerGuides = axisSnappingPairs.map(
-      ([axis, snappingPairs]) => {
-        const getMinGuideDistance = (guides: Guides[]) =>
-          Math.min(
-            ...guides.map((guide) => guide.distanceMeasurement.distance),
-          );
-
-        const guides = snappingPairs
-          .map((pair) => {
-            const visibleLayerBounds = layerBoundsMap[pair.visibleLayerId];
-
-            const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
-
-            return directions.flatMap(([direction, axis]) => {
-              const result = getGuides(
-                direction,
-                axis,
-                selectedBounds,
-                visibleLayerBounds,
-              );
-
-              return result ? [result] : [];
-            });
-          })
-          .sort((a, b) => getMinGuideDistance(a) - getMinGuideDistance(b));
-
-        return guides.length > 0 ? guides[0] : undefined;
-      },
-    );
-
-    const alignmentGuides = axisSnappingPairs.flatMap(
-      ([axis, snappingPairs]) => {
-        const groupedPairs = groupBy(
-          snappingPairs,
-          (value) => value.selectedLayerValue,
-        );
-
-        return Object.values(groupedPairs).map((pairs): Point[] => {
-          const visibleLayerBounds = pairs.map(
-            ({ visibleLayerId }) => layerBoundsMap[visibleLayerId],
-          );
-
-          const m = axis;
-          const c = axis === 'x' ? 'y' : 'x';
-
-          const [minC, , maxC] = getAxisProperties(c, '+');
-
-          return [
-            {
-              [m]: pairs[0].visibleLayerValue,
-              [c]: Math.min(
-                selectedBounds[minC],
-                ...visibleLayerBounds.map((bounds) => bounds[minC]),
-              ),
-            } as Point,
-            {
-              [m]: pairs[0].visibleLayerValue,
-              [c]: Math.max(
-                selectedBounds[maxC],
-                ...visibleLayerBounds.map((bounds) => bounds[maxC]),
-              ),
-            } as Point,
-          ];
-        });
-      },
-    );
-
-    return (
-      <>
-        <AlignmentGuides lines={alignmentGuides} />
-        {nearestLayerGuides.map(
-          (guides, i) =>
-            guides && (
-              <Fragment key={i}>
-                {guides.map((guide, j) => (
-                  <ExtensionGuide
-                    key={`extension-${i}-${j}`}
-                    points={guide.extension}
-                  />
-                ))}
-                {guides.map((guide, j) => (
-                  <MeasurementGuide
-                    key={`measurement-${i}-${j}`}
-                    distanceMeasurement={guide.distanceMeasurement!}
-                    measurement={guide.measurement}
-                  />
-                ))}
-              </Fragment>
-            ),
-        )}
-      </>
-    );
-  }, [interactionState, boundingRect, state, page]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
@@ -536,7 +356,7 @@ export default memo(function SketchFileRenderer() {
                 </>
               )}
             {!isEditingPath && highlightedSketchLayer}
-            {smartSnapGuides}
+            <SnapGuides />
             {quickMeasureGuides}
             {boundingRect && (
               <DragHandles
