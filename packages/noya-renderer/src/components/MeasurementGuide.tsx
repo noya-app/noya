@@ -1,22 +1,31 @@
-import { distance, Point } from 'noya-geometry';
-import { useColorFill, usePaint } from 'noya-react-canvaskit';
+import { AffineTransform, distance, Point } from 'noya-geometry';
+import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
-import { Polyline, Rect, Text } from '..';
-import { DistanceMeasurementProps } from './guides';
+import { useTheme } from 'styled-components';
+import { Group, Polyline, Rect, Text } from '..';
 
 const padding = {
   width: 6,
   height: 2,
 };
 
+export type DistanceMeasurementProps = {
+  distance: number;
+  midpoint: Point;
+  orientation: 'vertical' | 'horizontal';
+};
+
 function DistanceMeasurement({
   distance,
-  midpoint: bounds,
+  midpoint,
+  orientation,
 }: DistanceMeasurementProps) {
+  const measurementColor = useTheme().colors.canvas.measurement;
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
+
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
@@ -39,47 +48,70 @@ function DistanceMeasurement({
     return paragraph;
   }, [CanvasKit, fontManager, distance]);
 
-  const labelRect = useMemo(
-    () =>
-      CanvasKit.XYWHRect(
-        bounds.x,
-        bounds.y,
-        paragraph.getMinIntrinsicWidth(),
-        paragraph.getHeight(),
-      ),
-    [CanvasKit, paragraph, bounds],
-  );
-
-  const size = useMemo(
+  const paragraphSize = useMemo(
     () => ({
-      width: paragraph.getMinIntrinsicWidth() + padding.width * 2,
-      height: paragraph.getHeight() + padding.height * 2,
+      width: paragraph.getMinIntrinsicWidth(),
+      height: paragraph.getHeight(),
     }),
     [paragraph],
   );
 
-  const bgRect = useMemo(
+  const labelRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        round(bounds.x - padding.width),
-        round(bounds.y - padding.height),
-        round(size.width),
-        round(size.height),
+        midpoint.x + padding.width,
+        midpoint.y + padding.height,
+        paragraphSize.width,
+        paragraphSize.height,
       ),
-    [CanvasKit, bounds.x, bounds.y, size.width, size.height],
+    [
+      CanvasKit,
+      midpoint.x,
+      midpoint.y,
+      paragraphSize.width,
+      paragraphSize.height,
+    ],
   );
 
-  const backgroundFill = useColorFill('rgb(43, 92, 207)');
+  const backgroundSize = useMemo(
+    () => ({
+      width: paragraphSize.width + padding.width * 2,
+      height: paragraphSize.height + padding.height * 2,
+    }),
+    [paragraphSize.height, paragraphSize.width],
+  );
+
+  const backgroundRect = useMemo(
+    () =>
+      CanvasKit.XYWHRect(
+        round(midpoint.x),
+        round(midpoint.y),
+        backgroundSize.width,
+        backgroundSize.height,
+      ),
+    [midpoint.x, midpoint.y, backgroundSize, CanvasKit],
+  );
+
+  const backgroundFill = useColorFill(measurementColor);
+
+  const transform = useMemo(() => {
+    switch (orientation) {
+      case 'vertical':
+        return AffineTransform.translation(6, -backgroundSize.height / 2);
+      case 'horizontal':
+        return AffineTransform.translation(-backgroundSize.width / 2, 6);
+    }
+  }, [backgroundSize, orientation]);
 
   return (
-    <>
+    <Group transform={transform}>
       <Rect
-        rect={bgRect}
+        rect={backgroundRect}
         paint={backgroundFill}
-        cornerRadius={size.height / 2}
+        cornerRadius={backgroundSize.height / 2}
       />
       <Text rect={labelRect} paragraph={paragraph} />
-    </>
+    </Group>
   );
 }
 
@@ -89,6 +121,7 @@ interface Props {
 
 export default function MeasurementGuide({ measurement }: Props) {
   const CanvasKit = useCanvasKit();
+  const measurementColor = useTheme().colors.canvas.measurement;
 
   const extensionGuidePaint = new CanvasKit.Paint();
   extensionGuidePaint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));
@@ -96,10 +129,9 @@ export default function MeasurementGuide({ measurement }: Props) {
   extensionGuidePaint.setStyle(CanvasKit.PaintStyle.Stroke);
   extensionGuidePaint.setStrokeWidth(1);
 
-  const measurementGuidePaint = usePaint({
-    color: CanvasKit.Color4f(0.0, 0.2, 1.0),
+  const measurementGuidePaint = useStroke({
+    color: measurementColor,
     strokeWidth: 1,
-    style: CanvasKit.PaintStyle.Stroke,
   });
 
   const midpoint = useMemo(
@@ -110,12 +142,21 @@ export default function MeasurementGuide({ measurement }: Props) {
     [measurement],
   );
 
+  const orientation =
+    measurement[0].x === measurement[1].x ? 'vertical' : 'horizontal';
+
+  const alignedMeasurement = measurement.map((point) => ({
+    x: round(point.x) + (orientation === 'vertical' ? 0.5 : 0),
+    y: round(point.y) + (orientation === 'horizontal' ? 0.5 : 0),
+  }));
+
   return (
     <>
-      <Polyline paint={measurementGuidePaint} points={measurement} />
+      <Polyline paint={measurementGuidePaint} points={alignedMeasurement} />
       <DistanceMeasurement
         midpoint={midpoint}
         distance={distance(...measurement)}
+        orientation={orientation}
       />
     </>
   );

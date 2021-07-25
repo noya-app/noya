@@ -1,10 +1,5 @@
 import { Axis, Bounds, createBounds, Point, Rect } from 'noya-geometry';
 
-export type DistanceMeasurementProps = {
-  distance: number;
-  midpoint: Point;
-};
-
 type BoundsKey = keyof Bounds;
 export type Direction = '+' | '-';
 type AxisDirectionPair = [Direction, Axis];
