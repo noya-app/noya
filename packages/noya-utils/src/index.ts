@@ -6,6 +6,7 @@ export * from './clamp';
 export * from './sum';
 export * from './round';
 export * from './range';
+export * from './cartesianProduct';
 export * from './windowsOf';
 export * from './sortBy';
 export * from './chunkBy';

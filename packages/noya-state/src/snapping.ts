@@ -3,6 +3,7 @@ import { AffineTransform, Axis, createBounds, Rect, Size } from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';
+import { cartesianProduct } from 'noya-utils';
 import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
@@ -118,11 +119,8 @@ export function getSnaps(
   targetValues: number[],
   targetId: string,
 ): Snap[] {
-  return sourceValues.flatMap((source) =>
-    targetValues.map((target) => ({
-      source,
-      target,
-      targetId,
-    })),
-  );
+  return cartesianProduct(
+    sourceValues,
+    targetValues,
+  ).map(([source, target]) => ({ source, target, targetId }));
 }
