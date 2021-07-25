@@ -1,27 +1,39 @@
-import { AffineTransform, distance, Point } from 'noya-geometry';
-import { useColorFill, useStroke } from 'noya-react-canvaskit';
+import {
+  AffineTransform,
+  distance,
+  getLineOrientation,
+  Point,
+} from 'noya-geometry';
+import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Polyline, Rect, Text } from '..';
+import { pixelAlignPoints } from '../pixelAlignment';
 
 const padding = {
   width: 6,
   height: 2,
 };
 
-export type DistanceMeasurementProps = {
-  distance: number;
-  midpoint: Point;
-  orientation: 'vertical' | 'horizontal';
+export type MeasurementLabelProps = {
+  points: [Point, Point];
 };
 
-function DistanceMeasurement({
-  distance,
-  midpoint,
-  orientation,
-}: DistanceMeasurementProps) {
+export function MeasurementLabel({ points }: MeasurementLabelProps) {
+  const text = round(distance(...points)).toString();
+
+  const centerPoint = useMemo(
+    () => ({
+      x: (points[0].x + points[1].x) / 2,
+      y: (points[0].y + points[1].y) / 2,
+    }),
+    [points],
+  );
+
+  const orientation = getLineOrientation(points);
+
   const measurementColor = useTheme().colors.canvas.measurement;
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
@@ -40,13 +52,13 @@ function DistanceMeasurement({
       paragraphStyle,
       fontManager,
     );
-    builder.addText(distance.toString());
+    builder.addText(text);
 
     const paragraph = builder.build();
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, fontManager, distance]);
+  }, [CanvasKit, fontManager, text]);
 
   const paragraphSize = useMemo(
     () => ({
@@ -59,15 +71,15 @@ function DistanceMeasurement({
   const labelRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        midpoint.x + padding.width,
-        midpoint.y + padding.height,
+        centerPoint.x + padding.width,
+        centerPoint.y + padding.height,
         paragraphSize.width,
         paragraphSize.height,
       ),
     [
       CanvasKit,
-      midpoint.x,
-      midpoint.y,
+      centerPoint.x,
+      centerPoint.y,
       paragraphSize.width,
       paragraphSize.height,
     ],
@@ -84,12 +96,12 @@ function DistanceMeasurement({
   const backgroundRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        round(midpoint.x),
-        round(midpoint.y),
+        round(centerPoint.x),
+        round(centerPoint.y),
         backgroundSize.width,
         backgroundSize.height,
       ),
-    [midpoint.x, midpoint.y, backgroundSize, CanvasKit],
+    [centerPoint.x, centerPoint.y, backgroundSize, CanvasKit],
   );
 
   const backgroundFill = useColorFill(measurementColor);
@@ -116,48 +128,25 @@ function DistanceMeasurement({
 }
 
 interface Props {
-  measurement: [Point, Point];
+  points: [Point, Point];
 }
 
-export default function MeasurementGuide({ measurement }: Props) {
+export function MeasurementGuide({ points }: Props) {
   const CanvasKit = useCanvasKit();
   const measurementColor = useTheme().colors.canvas.measurement;
 
-  const extensionGuidePaint = new CanvasKit.Paint();
-  extensionGuidePaint.setColor(CanvasKit.Color4f(0.52, 0.248, 1.0));
-  extensionGuidePaint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
-  extensionGuidePaint.setStyle(CanvasKit.PaintStyle.Stroke);
-  extensionGuidePaint.setStrokeWidth(1);
+  const paint = useMemo(() => {
+    const paint = new CanvasKit.Paint();
+    paint.setColor(CanvasKit.parseColorString(measurementColor));
+    paint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
+    paint.setStyle(CanvasKit.PaintStyle.Stroke);
+    paint.setStrokeWidth(1);
+    return paint;
+  }, [CanvasKit, measurementColor]);
 
-  const measurementGuidePaint = useStroke({
-    color: measurementColor,
-    strokeWidth: 1,
-  });
+  useDeletable(paint);
 
-  const midpoint = useMemo(
-    () => ({
-      x: (measurement[0].x + measurement[1].x) / 2,
-      y: (measurement[0].y + measurement[1].y) / 2,
-    }),
-    [measurement],
-  );
+  const alignedMeasurement = useMemo(() => pixelAlignPoints(points), [points]);
 
-  const orientation =
-    measurement[0].x === measurement[1].x ? 'vertical' : 'horizontal';
-
-  const alignedMeasurement = measurement.map((point) => ({
-    x: round(point.x) + (orientation === 'vertical' ? 0.5 : 0),
-    y: round(point.y) + (orientation === 'horizontal' ? 0.5 : 0),
-  }));
-
-  return (
-    <>
-      <Polyline paint={measurementGuidePaint} points={alignedMeasurement} />
-      <DistanceMeasurement
-        midpoint={midpoint}
-        distance={distance(...measurement)}
-        orientation={orientation}
-      />
-    </>
-  );
+  return <Polyline paint={paint} points={alignedMeasurement} />;
 }

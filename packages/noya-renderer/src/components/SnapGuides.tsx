@@ -17,7 +17,7 @@ import {
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
-import AlignmentGuides from './AlignmentGuides';
+import AlignmentGuide from './AlignmentGuide';
 import ExtensionGuide from './ExtensionGuide';
 import {
   AXES,
@@ -27,7 +27,7 @@ import {
   X_DIRECTIONS,
   Y_DIRECTIONS,
 } from './guides';
-import MeasurementGuide from './MeasurementGuide';
+import { MeasurementGuide, MeasurementLabel } from './Measurement';
 
 interface Props {
   page: Sketch.Page;
@@ -88,7 +88,10 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   const groupedSnaps = groupBy(snaps, (value) => value.source);
   const selectedBounds = createBounds(sourceRect);
 
-  const alignmentGuides = Object.values(groupedSnaps).map((pairs): Point[] => {
+  const alignmentGuides = Object.values(groupedSnaps).map((pairs): [
+    Point,
+    Point,
+  ] => {
     const targetBounds = pairs
       .map(({ targetId }) => targetLayerBoundingRectMap[targetId])
       .map(createBounds);
@@ -118,12 +121,15 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
 
   return (
     <>
-      <AlignmentGuides lines={alignmentGuides} />
-      {guides.map((guide, i) => (
-        <ExtensionGuide key={i} points={guide.extension} />
+      {alignmentGuides.map((points, index) => (
+        <AlignmentGuide key={index} points={points} />
       ))}
-      {guides.map((guide, i) => (
-        <MeasurementGuide key={i} measurement={guide.measurement} />
+      {guides.map((guide, index) => (
+        <>
+          <ExtensionGuide key={index} points={guide.extension} />
+          <MeasurementGuide key={index} points={guide.measurement} />
+          <MeasurementLabel key={index} points={guide.measurement} />
+        </>
       ))}
     </>
   );

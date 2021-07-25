@@ -21,3 +21,5 @@ export type Insets = {
 };
 
 export type Axis = 'x' | 'y';
+
+export type Orientation = 'horizontal' | 'vertical';

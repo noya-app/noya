@@ -25,7 +25,7 @@ import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
-import MeasurementGuide from './MeasurementGuide';
+import { MeasurementGuide, MeasurementLabel } from './Measurement';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
@@ -161,7 +161,10 @@ export default memo(function SketchFileRenderer() {
           <ExtensionGuide key={index} points={guide.extension} />
         ))}
         {guides.map((guide, index) => (
-          <MeasurementGuide key={index} measurement={guide.measurement} />
+          <>
+            <MeasurementGuide key={index} points={guide.measurement} />
+            <MeasurementLabel key={index} points={guide.measurement} />
+          </>
         ))}
       </>
     );
