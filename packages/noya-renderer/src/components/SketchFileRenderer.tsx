@@ -161,11 +161,7 @@ export default memo(function SketchFileRenderer() {
           <ExtensionGuide key={index} points={guide.extension} />
         ))}
         {guides.map((guide, index) => (
-          <MeasurementGuide
-            key={index}
-            distanceMeasurement={guide.distanceMeasurement!}
-            measurement={guide.measurement}
-          />
+          <MeasurementGuide key={index} measurement={guide.measurement} />
         ))}
       </>
     );

@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create guides 1`] = `
+Object {
+  "extension": Array [
+    Object {
+      "x": 200,
+      "y": 0,
+    },
+    Object {
+      "x": 200,
+      "y": 0,
+    },
+  ],
+  "measurement": Array [
+    Object {
+      "x": 100,
+      "y": 50,
+    },
+    Object {
+      "x": 200,
+      "y": 50,
+    },
+  ],
+}
+`;

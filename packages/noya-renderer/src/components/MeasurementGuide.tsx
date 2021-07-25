@@ -1,4 +1,4 @@
-import { Point } from 'noya-geometry';
+import { distance, Point } from 'noya-geometry';
 import { useColorFill, usePaint } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { round } from 'noya-utils';
@@ -84,14 +84,10 @@ function DistanceMeasurement({
 }
 
 interface Props {
-  measurement: Point[];
-  distanceMeasurement: DistanceMeasurementProps;
+  measurement: [Point, Point];
 }
 
-export default function MeasurementGuide({
-  measurement,
-  distanceMeasurement,
-}: Props) {
+export default function MeasurementGuide({ measurement }: Props) {
   const CanvasKit = useCanvasKit();
 
   const extensionGuidePaint = new CanvasKit.Paint();
@@ -106,12 +102,20 @@ export default function MeasurementGuide({
     style: CanvasKit.PaintStyle.Stroke,
   });
 
+  const midpoint = useMemo(
+    () => ({
+      x: (measurement[0].x + measurement[1].x) / 2,
+      y: (measurement[0].y + measurement[1].y) / 2,
+    }),
+    [measurement],
+  );
+
   return (
     <>
       <Polyline paint={measurementGuidePaint} points={measurement} />
       <DistanceMeasurement
-        midpoint={distanceMeasurement.midpoint}
-        distance={distanceMeasurement.distance}
+        midpoint={midpoint}
+        distance={distance(...measurement)}
       />
     </>
   );

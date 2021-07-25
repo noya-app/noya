@@ -4,6 +4,7 @@ import {
   AffineTransform,
   Axis,
   createBounds,
+  distance,
   Point,
   Rect,
 } from 'noya-geometry';
@@ -64,7 +65,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   );
 
   const getMinGuideDistance = (guides: Guides[]) =>
-    Math.min(...guides.map((guide) => guide.distanceMeasurement.distance));
+    Math.min(...guides.map((guide) => distance(...guide.measurement)));
 
   const nearestLayerGuides = snaps
     .map((pair) => {
@@ -122,11 +123,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
         <ExtensionGuide key={i} points={guide.extension} />
       ))}
       {guides.map((guide, i) => (
-        <MeasurementGuide
-          key={i}
-          distanceMeasurement={guide.distanceMeasurement!}
-          measurement={guide.measurement}
-        />
+        <MeasurementGuide key={i} measurement={guide.measurement} />
       ))}
     </>
   );

@@ -1,11 +1,4 @@
-import {
-  Bounds,
-  distance,
-  Point,
-  Axis,
-  Rect,
-  createBounds,
-} from 'noya-geometry';
+import { Axis, Bounds, createBounds, Point, Rect } from 'noya-geometry';
 
 export type DistanceMeasurementProps = {
   distance: number;
@@ -44,9 +37,8 @@ export function getAxisProperties(
 }
 
 export type Guides = {
-  extension: Point[];
-  measurement: Point[];
-  distanceMeasurement: DistanceMeasurementProps;
+  extension: [Point, Point];
+  measurement: [Point, Point];
 };
 
 export function getGuides(
@@ -82,28 +74,15 @@ export function getGuides(
 
   if (edge === undefined) return;
 
-  const extension = [
+  const extension: [Point, Point] = [
     { [m]: edge, [c]: startC } as Point,
     { [m]: edge, [c]: endC } as Point,
   ];
 
-  const measurement = [
+  const measurement: [Point, Point] = [
     { [m]: source[minM], [c]: source[midC] } as Point,
     { [m]: edge, [c]: source[midC] } as Point,
   ];
 
-  const itemDistance = distance(
-    { [m]: source[minM], [c]: source[midC] } as Point,
-    { [m]: edge, [c]: source[midC] } as Point,
-  );
-
-  const distanceMeasurement: DistanceMeasurementProps = {
-    distance: itemDistance,
-    midpoint: {
-      [m]: (source[minM] + edge) / 2,
-      [c]: source[midC],
-    } as Point,
-  };
-
-  return { extension, measurement, distanceMeasurement };
+  return { extension, measurement };
 }
