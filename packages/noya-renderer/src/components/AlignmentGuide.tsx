@@ -12,10 +12,7 @@ interface Props {
 export default function AlignmentGuide({ points }: Props) {
   const primaryColor = useTheme().colors.primary;
 
-  const snapGuidePaint = useStroke({
-    color: primaryColor,
-    strokeWidth: 1,
-  });
+  const snapGuidePaint = useStroke({ color: primaryColor });
 
   const alignedPoints = useMemo(() => pixelAlignPoints(points), [points]);
 

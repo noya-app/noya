@@ -1,5 +1,5 @@
 import { Point } from 'noya-geometry';
-import { useColor } from 'noya-react-canvaskit';
+import { useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -14,11 +14,16 @@ export default function ExtensionGuide({ points }: Props) {
   const CanvasKit = useCanvasKit();
   const primaryColor = useTheme().colors.primary;
 
-  const paint = new CanvasKit.Paint();
-  paint.setColor(useColor(primaryColor));
-  paint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
-  paint.setStyle(CanvasKit.PaintStyle.Stroke);
-  paint.setStrokeWidth(1);
+  const paint = useMemo(() => {
+    const paint = new CanvasKit.Paint();
+    paint.setColor(CanvasKit.parseColorString(primaryColor));
+    paint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
+    paint.setStyle(CanvasKit.PaintStyle.Stroke);
+    paint.setStrokeWidth(1);
+    return paint;
+  }, [CanvasKit, primaryColor]);
+
+  useDeletable(paint);
 
   const alignedPoints = useMemo(() => pixelAlignPoints(points), [points]);
 
