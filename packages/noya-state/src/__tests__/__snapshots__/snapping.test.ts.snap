@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapping pairs 1`] = `
+Object {
+  "xPairs": Array [
+    Object {
+      "selectedLayerValue": 0,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 0,
+    },
+    Object {
+      "selectedLayerValue": 0,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 50,
+    },
+    Object {
+      "selectedLayerValue": 0,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 100,
+    },
+    Object {
+      "selectedLayerValue": 50,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 0,
+    },
+    Object {
+      "selectedLayerValue": 50,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 50,
+    },
+    Object {
+      "selectedLayerValue": 50,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 100,
+    },
+    Object {
+      "selectedLayerValue": 100,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 0,
+    },
+    Object {
+      "selectedLayerValue": 100,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 50,
+    },
+    Object {
+      "selectedLayerValue": 100,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 100,
+    },
+  ],
+  "yPairs": Array [
+    Object {
+      "selectedLayerValue": 0,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 104,
+    },
+    Object {
+      "selectedLayerValue": 0,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 154,
+    },
+    Object {
+      "selectedLayerValue": 0,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 204,
+    },
+    Object {
+      "selectedLayerValue": 50,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 104,
+    },
+    Object {
+      "selectedLayerValue": 50,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 154,
+    },
+    Object {
+      "selectedLayerValue": 50,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 204,
+    },
+    Object {
+      "selectedLayerValue": 100,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 104,
+    },
+    Object {
+      "selectedLayerValue": 100,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 154,
+    },
+    Object {
+      "selectedLayerValue": 100,
+      "visibleLayerId": "2",
+      "visibleLayerValue": 204,
+    },
+  ],
+}
+`;
+
+exports[`snapping pairs 2`] = `
+Object {
+  "x": 0,
+  "y": -4,
+}
+`;
