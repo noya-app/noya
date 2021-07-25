@@ -34,11 +34,14 @@ import {
   getSnapAdjustmentDistance,
   getSnapValues,
   getLayerSnapValues,
-  getPossibleSnapLayers,
+  getPossibleTargetSnapLayers,
   getSnaps,
 } from '../snapping';
 import { Point, Rect } from '../types';
-import { ApplicationState } from './applicationReducer';
+import {
+  ApplicationReducerContext,
+  ApplicationState,
+} from './applicationReducer';
 import {
   InteractionAction,
   interactionReducer,
@@ -72,6 +75,7 @@ export function canvasReducer(
   state: ApplicationState,
   action: CanvasAction,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'insertArtboard': {
@@ -379,13 +383,11 @@ export function canvasReducer(
             sourceRect.x += delta.x;
             sourceRect.y += delta.y;
 
-            const targetLayers = getPossibleSnapLayers(
+            const targetLayers = getPossibleTargetSnapLayers(
               state,
-              layerIndexPaths,
               interactionState.canvasSize,
-            )
-              // Ensure we don't snap to the selected layer itself
-              .filter((layer) => !layerIds.includes(layer.do_objectID));
+              layerIndexPaths,
+            );
 
             const sourceXs = getSnapValues(sourceRect, 'x');
             const sourceYs = getSnapValues(sourceRect, 'y');

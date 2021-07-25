@@ -22,12 +22,17 @@ export function getSnapValues(
   }
 }
 
-export function getPossibleSnapLayers(
+export function getPossibleTargetSnapLayers(
   state: ApplicationState,
-  selectedIndexPaths: IndexPath[],
   canvasSize: Size,
+  sourceIndexPaths: IndexPath[],
 ) {
   const page = getCurrentPage(state);
+
+  // Ensure we don't snap to a selected layer by filtering them out
+  const sourceIds = sourceIndexPaths.map(
+    (indexPath) => Layers.access(page, indexPath).do_objectID,
+  );
 
   const allVisibleLayers = getLayersInRect(
     state,
@@ -40,21 +45,24 @@ export function getPossibleSnapLayers(
     },
   );
 
-  // If we're not snapping to a layer (e.g. we're snapping a point) then
+  // If we're not snapping a source layer (i.e. a layer with a parent) then
   // we can snap anywhere in the hierarchy
-  if (selectedIndexPaths.length === 0) return allVisibleLayers;
+  if (sourceIndexPaths.length === 0)
+    return allVisibleLayers.filter(
+      (layer) => !sourceIds.includes(layer.do_objectID),
+    );
 
   // Are all selected ids in the same artboard?
   const inSameArtboard =
-    Layers.isSymbolMasterOrArtboard(page.layers[selectedIndexPaths[0][0]]) &&
-    selectedIndexPaths.every((indexPath) => indexPath.length > 1) &&
-    selectedIndexPaths.every(
-      (indexPath) => indexPath[0] === selectedIndexPaths[0][0],
+    Layers.isSymbolMasterOrArtboard(page.layers[sourceIndexPaths[0][0]]) &&
+    sourceIndexPaths.every((indexPath) => indexPath.length > 1) &&
+    sourceIndexPaths.every(
+      (indexPath) => indexPath[0] === sourceIndexPaths[0][0],
     );
 
   // Do all selected ids have the same parent?
-  const sharedParentIndex = selectedIndexPaths[0].slice(0, -1);
-  const inSameParent = selectedIndexPaths.every((indexPath) =>
+  const sharedParentIndex = sourceIndexPaths[0].slice(0, -1);
+  const inSameParent = sourceIndexPaths.every((indexPath) =>
     isDeepEqual(indexPath.slice(0, -1), sharedParentIndex),
   );
 
@@ -62,7 +70,7 @@ export function getPossibleSnapLayers(
   let groupLayers: Sketch.AnyLayer[] = [];
 
   if (inSameArtboard) {
-    const artboard = page.layers[selectedIndexPaths[0][0]] as Sketch.Artboard;
+    const artboard = page.layers[sourceIndexPaths[0][0]] as Sketch.Artboard;
 
     groupLayers.push(artboard);
 
@@ -74,7 +82,7 @@ export function getPossibleSnapLayers(
   if (inSameParent) {
     const parent = Layers.access(
       page,
-      selectedIndexPaths[0].slice(0, -1),
+      sourceIndexPaths[0].slice(0, -1),
     ) as ParentLayer;
 
     groupLayers.push(...parent.layers);
@@ -83,7 +91,9 @@ export function getPossibleSnapLayers(
   const visibleLayers =
     inSameArtboard || inSameParent ? groupLayers : allVisibleLayers;
 
-  return visibleLayers;
+  return visibleLayers.filter(
+    (layer) => !sourceIds.includes(layer.do_objectID),
+  );
 }
 
 export function getLayerSnapValues(

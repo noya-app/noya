@@ -10,7 +10,7 @@ import {
 } from 'noya-geometry';
 import {
   getLayerSnapValues,
-  getPossibleSnapLayers,
+  getPossibleTargetSnapLayers,
   getSnaps,
   getSnapValues,
   Selectors,
@@ -168,9 +168,11 @@ export default memo(function SnapGuides() {
     state,
   );
 
-  const targetLayers = getPossibleSnapLayers(state, layerIndexPaths, canvasSize)
-    // Ensure we don't snap to the selected layer itself
-    .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
+  const targetLayers = getPossibleTargetSnapLayers(
+    state,
+    canvasSize,
+    layerIndexPaths,
+  );
 
   return (
     <>
