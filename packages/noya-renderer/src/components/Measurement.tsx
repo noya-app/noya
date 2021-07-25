@@ -4,7 +4,7 @@ import {
   getLineOrientation,
   Point,
 } from 'noya-geometry';
-import { useColorFill, useDeletable } from 'noya-react-canvaskit';
+import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
@@ -132,19 +132,9 @@ interface Props {
 }
 
 export function MeasurementGuide({ points }: Props) {
-  const CanvasKit = useCanvasKit();
   const measurementColor = useTheme().colors.canvas.measurement;
 
-  const paint = useMemo(() => {
-    const paint = new CanvasKit.Paint();
-    paint.setColor(CanvasKit.parseColorString(measurementColor));
-    paint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));
-    paint.setStyle(CanvasKit.PaintStyle.Stroke);
-    paint.setStrokeWidth(1);
-    return paint;
-  }, [CanvasKit, measurementColor]);
-
-  useDeletable(paint);
+  const paint = useStroke({ color: measurementColor });
 
   const alignedMeasurement = useMemo(() => pixelAlignPoints(points), [points]);
 
