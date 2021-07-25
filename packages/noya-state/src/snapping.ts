@@ -95,29 +95,29 @@ export function getLayerSnapValues(
   return rect ? getSnapValues(rect, axis) : [];
 }
 
-export function getSnapAdjustmentDistance(values: PossibleSnap[]) {
-  const getDelta = (pair: PossibleSnap) => pair.source - pair.target;
+export function getSnapAdjustmentDistance(values: Snap[]) {
+  const getDelta = (snap: Snap) => snap.source - snap.target;
 
-  const getDistance = (pair: PossibleSnap) => Math.abs(getDelta(pair));
+  const getDistance = (snap: Snap) => Math.abs(getDelta(snap));
 
   const distances = values
-    .filter((pair) => getDistance(pair) <= 6)
+    .filter((snap) => getDistance(snap) <= 6)
     .sort((a, b) => getDistance(a) - getDistance(b));
 
   return distances.length > 0 ? getDelta(distances[0]) : 0;
 }
 
-export type PossibleSnap = {
+export type Snap = {
   source: number;
   target: number;
   targetId: string;
 };
 
-export function getPossibleSnaps(
+export function getSnaps(
   sourceValues: number[],
   targetValues: number[],
   targetId: string,
-): PossibleSnap[] {
+): Snap[] {
   return sourceValues.flatMap((source) =>
     targetValues.map((target) => ({
       source,

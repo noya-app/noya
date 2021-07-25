@@ -2,7 +2,7 @@ import { SketchModel } from 'noya-sketch-model';
 import {
   getSnapAdjustmentDistance,
   getLayerSnapValues,
-  getPossibleSnaps,
+  getSnaps,
   getSnapValues,
 } from '../snapping';
 
@@ -60,8 +60,8 @@ test('snapping pairs', () => {
   const targetXs = getLayerSnapValues(page, target.do_objectID, 'x');
   const targetYs = getLayerSnapValues(page, target.do_objectID, 'y');
 
-  const xPairs = getPossibleSnaps(sourceXs, targetXs, target.do_objectID);
-  const yPairs = getPossibleSnaps(sourceYs, targetYs, target.do_objectID);
+  const xPairs = getSnaps(sourceXs, targetXs, target.do_objectID);
+  const yPairs = getSnaps(sourceYs, targetYs, target.do_objectID);
 
   expect({ xPairs, yPairs }).toMatchSnapshot();
 

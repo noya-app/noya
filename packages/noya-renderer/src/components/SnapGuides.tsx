@@ -10,7 +10,7 @@ import {
 import {
   getLayerSnapValues,
   getPossibleSnapLayers,
-  getPossibleSnaps,
+  getSnaps,
   getSnapValues,
   Selectors,
 } from 'noya-state';
@@ -29,23 +29,23 @@ import {
 import MeasurementGuide from './MeasurementGuide';
 
 interface Props {
-  boundingRect: Rect;
   page: Sketch.Page;
+  sourceRect: Rect;
   targetLayers: Sketch.AnyLayer[];
   axis: Axis;
 }
 
 const SnapGuidesAxis = memo(function SnapGuidesAxis({
-  boundingRect,
   page,
+  sourceRect,
   targetLayers,
   axis,
 }: Props) {
-  const sourceValues = getSnapValues(boundingRect, axis);
+  const sourceValues = getSnapValues(sourceRect, axis);
 
   const snaps = targetLayers
     .flatMap((targetLayer) =>
-      getPossibleSnaps(
+      getSnaps(
         sourceValues,
         getLayerSnapValues(page, targetLayer.do_objectID, axis),
         targetLayer.do_objectID,
@@ -53,7 +53,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
     )
     .filter((pair) => pair.source === pair.target);
 
-  const layerBoundsMap = Selectors.getBoundingRectMap(
+  const targetLayerBoundingRectMap = Selectors.getBoundingRectMap(
     page,
     snaps.map((pair) => pair.targetId),
     {
@@ -68,13 +68,13 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
 
   const nearestLayerGuides = snaps
     .map((pair) => {
-      const visibleLayerBounds = layerBoundsMap[pair.targetId];
+      const targetRect = targetLayerBoundingRectMap[pair.targetId];
 
       const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
 
       return directions.flatMap(
         ([direction, axis]) =>
-          getGuides(direction, axis, boundingRect, visibleLayerBounds) ?? [],
+          getGuides(direction, axis, sourceRect, targetRect) ?? [],
       );
     })
     .sort((a, b) => getMinGuideDistance(a) - getMinGuideDistance(b));
@@ -85,11 +85,11 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   if (!guides) return null;
 
   const groupedSnaps = groupBy(snaps, (value) => value.source);
-  const selectedBounds = createBounds(boundingRect);
+  const selectedBounds = createBounds(sourceRect);
 
   const alignmentGuides = Object.values(groupedSnaps).map((pairs): Point[] => {
     const targetBounds = pairs
-      .map(({ targetId }) => layerBoundsMap[targetId])
+      .map(({ targetId }) => targetLayerBoundingRectMap[targetId])
       .map(createBounds);
 
     const m = axis;
@@ -172,7 +172,7 @@ export default memo(function SnapGuides() {
           key={axis}
           axis={axis}
           targetLayers={targetLayers}
-          boundingRect={boundingRect}
+          sourceRect={boundingRect}
           page={page}
         />
       ))}
