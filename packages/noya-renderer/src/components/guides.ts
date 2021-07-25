@@ -16,6 +16,7 @@ type BoundsKey = keyof Bounds;
 export type Direction = '+' | '-';
 type AxisDirectionPair = [Direction, Axis];
 
+export const AXES: Axis[] = ['x', 'y'];
 export const X_DIRECTIONS: AxisDirectionPair[] = [
   ['+', 'x'],
   ['-', 'x'],
