@@ -19,7 +19,7 @@ import {
   getSnapValues,
   getLayerSnapValues,
   getPossibleSnapLayers,
-  getSnappingPairs,
+  getPossibleSnaps,
   Layers,
   Primitives,
   Rect,
@@ -214,9 +214,9 @@ export default memo(function SketchFileRenderer() {
     const sourceXs = getSnapValues(boundingRect, 'x');
     const sourceYs = getSnapValues(boundingRect, 'y');
 
-    const xPairs = targetLayers
+    const xSnaps = targetLayers
       .flatMap((targetLayer) =>
-        getSnappingPairs(
+        getPossibleSnaps(
           sourceXs,
           getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
           targetLayer.do_objectID,
@@ -224,9 +224,9 @@ export default memo(function SketchFileRenderer() {
       )
       .filter((pair) => pair.source === pair.target);
 
-    const yPairs = targetLayers
+    const ySnaps = targetLayers
       .flatMap((targetLayer) =>
-        getSnappingPairs(
+        getPossibleSnaps(
           sourceYs,
           getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
           targetLayer.do_objectID,
@@ -235,13 +235,13 @@ export default memo(function SketchFileRenderer() {
       .filter((pair) => pair.source === pair.target);
 
     const axisSnappingPairs: [Axis, PossibleSnap[]][] = [
-      ['x', xPairs],
-      ['y', yPairs],
+      ['x', xSnaps],
+      ['y', ySnaps],
     ];
 
     const layerBoundsMap: Record<string, Bounds> = {};
 
-    [...xPairs, ...yPairs]
+    [...xSnaps, ...ySnaps]
       .map((pair) => pair.targetId)
       .forEach((layerId) => {
         if (layerId in layerBoundsMap) return;

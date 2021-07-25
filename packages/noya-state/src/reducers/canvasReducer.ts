@@ -35,7 +35,7 @@ import {
   getSnapValues,
   getLayerSnapValues,
   getPossibleSnapLayers,
-  getSnappingPairs,
+  getPossibleSnaps,
 } from '../snapping';
 import { Point, Rect } from '../types';
 import { ApplicationState } from './applicationReducer';
@@ -375,23 +375,23 @@ export function canvasReducer(
             const sourceXs = getSnapValues(sourceRect, 'x');
             const sourceYs = getSnapValues(sourceRect, 'y');
 
-            const xPairs = targetLayers.flatMap((targetLayer) =>
-              getSnappingPairs(
+            const xSnaps = targetLayers.flatMap((targetLayer) =>
+              getPossibleSnaps(
                 sourceXs,
                 getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
                 targetLayer.do_objectID,
               ),
             );
-            const yPairs = targetLayers.flatMap((targetLayer) =>
-              getSnappingPairs(
+            const ySnaps = targetLayers.flatMap((targetLayer) =>
+              getPossibleSnaps(
                 sourceYs,
                 getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
                 targetLayer.do_objectID,
               ),
             );
 
-            delta.x -= getSnapAdjustmentDistance(xPairs);
-            delta.y -= getSnapAdjustmentDistance(yPairs);
+            delta.x -= getSnapAdjustmentDistance(xSnaps);
+            delta.y -= getSnapAdjustmentDistance(ySnaps);
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;

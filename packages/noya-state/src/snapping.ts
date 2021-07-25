@@ -95,17 +95,6 @@ export function getLayerSnapValues(
   return rect ? getSnapValues(rect, axis) : [];
 }
 
-export function getLayerSnappingInfo(
-  page: Sketch.Page,
-  layerId: string,
-): SnappingLayerInfo {
-  return {
-    layerId,
-    x: getLayerSnapValues(page, layerId, 'x'),
-    y: getLayerSnapValues(page, layerId, 'y'),
-  };
-}
-
 export function getSnapAdjustmentDistance(values: PossibleSnap[]) {
   const getDelta = (pair: PossibleSnap) => pair.source - pair.target;
 
@@ -118,19 +107,13 @@ export function getSnapAdjustmentDistance(values: PossibleSnap[]) {
   return distances.length > 0 ? getDelta(distances[0]) : 0;
 }
 
-type SnappingLayerInfo = {
-  layerId: string;
-  y: number[];
-  x: number[];
-};
-
 export type PossibleSnap = {
   source: number;
   target: number;
   targetId: string;
 };
 
-export function getSnappingPairs(
+export function getPossibleSnaps(
   sourceValues: number[],
   targetValues: number[],
   targetId: string,
