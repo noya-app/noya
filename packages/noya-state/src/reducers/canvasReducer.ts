@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
@@ -11,6 +12,7 @@ import {
   resizeRect,
 } from 'noya-state';
 import { uuid } from 'noya-utils';
+import { interpolateRgba } from 'noya-colorpicker';
 import * as Layers from '../layers';
 import {
   addToParentLayer,
@@ -23,6 +25,7 @@ import {
   getIndexPathOfOpenShapeLayer,
   getParentLayer,
   getParentLayerAtPoint,
+  getPercentageOfPointInGradient,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedRect,
   getSymbols,
@@ -341,7 +344,7 @@ export function canvasReducer(
               draft.sketch.pages[pageIndex],
               layerIndexPaths[0],
             );
-
+            const percetage = getPercentageOfPointInGradient(state, point);
             if (layer.style) {
               switch (crrGradientPoint.pointIndex) {
                 case 0:
@@ -362,12 +365,35 @@ export function canvasReducer(
                     ]),
                   );
                   break;
+                case -1:
+                  if (
+                    !layer.style.fills ||
+                    !layer.style.fills[0] ||
+                    !layer.style.fills[0].gradient
+                  )
+                    return;
+
+                  const gradients = layer.style.fills[0].gradient.stops.map(
+                    (g, index) => ({
+                      color: sketchColorToRgba(g.color),
+                      position: g.position,
+                    }),
+                  );
+
+                  layer.style = styleReducer(layer.style, [
+                    'addFillGradientStop',
+                    0,
+                    rgbaToSketchColor(interpolateRgba(gradients, percetage)),
+                    percetage,
+                  ]);
+                  draft.selectedGradientPoint = undefined;
+                  break;
                 default:
                   layer.style = styleReducer(layer.style, [
                     'setFillGradientPosition',
                     0,
                     crrGradientPoint.pointIndex,
-                    0.5,
+                    percetage,
                   ]);
                   break;
               }

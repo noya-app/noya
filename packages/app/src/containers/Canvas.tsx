@@ -367,7 +367,12 @@ export default memo(function Canvas() {
             point,
           );
 
-          if (selectedGradientIndex !== -1) {
+          const isPointerOnGradientLine = Selectors.isPointerOnGradientLine(
+            state,
+            point,
+          );
+
+          if (selectedGradientIndex !== -1 || isPointerOnGradientLine) {
             dispatch('interaction', [
               'startEditGradientPoint',
               {
@@ -396,7 +401,7 @@ export default memo(function Canvas() {
             dispatch('interaction', ['startMarquee', rawPoint]);
           }
           if (selectedGradientIndex === -1) {
-            dispatch('setFillPopoverOpen', false);
+            //dispatch('setFillPopoverOpen', false);
           }
           break;
         }

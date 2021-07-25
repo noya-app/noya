@@ -302,7 +302,7 @@ export default memo(function FillInputFieldWithPicker({
   gradientProps,
   patternProps,
 }: Props) {
-  const [state, dispatch] = useApplicationState();
+  const [, dispatch] = useApplicationState();
   const picker = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Gradient:
@@ -336,9 +336,14 @@ export default memo(function FillInputFieldWithPicker({
     patternProps?.pattern,
   ]);
 
+  /*
+    TODO: Maria - Add closing the popover for the gradients 
+                  when the user clicks outside (right now only closes 
+                  when the user clicks on the canvas)
+  */
+
   return (
     <Popover.Root
-      open={Selectors.getFillPopoverOpen(state)}
       onOpenChange={(open) => {
         if (open || fillType !== Sketch.FillType.Gradient)
           dispatch('setFillPopoverOpen', open);

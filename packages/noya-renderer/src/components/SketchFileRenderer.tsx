@@ -513,7 +513,7 @@ export default memo(function SketchFileRenderer() {
 
     const path = new CanvasKit.Path();
 
-    gradientsPoint.forEach((point, index) => {
+    gradientsPoint.forEach((point) => {
       path.addOval(
         CanvasKit.XYWHRect(
           point.x - Selectors.POINT_RADIUS,

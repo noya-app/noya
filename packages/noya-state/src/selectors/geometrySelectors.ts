@@ -3,6 +3,7 @@ import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
   createRectFromBounds,
+  distance,
   getRectCornerPoints,
   rectContainsPoint,
   rectsIntersect,
@@ -384,5 +385,59 @@ export function pointerOnGradientPoint(state: ApplicationState, point: Point) {
 
   return selectedLayerGradientPoints.findIndex((gradientPoint) =>
     isPointInRange(gradientPoint, point),
+  );
+}
+
+function isPointOnLine(A: Point, B: Point, point: Point) {
+  // get distance from the point to the two ends of the line
+  const d1 = distance(point, A);
+  const d2 = distance(point, B);
+
+  const lineLen = distance(A, B);
+
+  const buffer = 0.2; // higher # = less accurate
+
+  return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
+}
+
+function getLinePercentage(A: Point, B: Point, point: Point) {
+  const d1 = distance(point, A);
+  const d2 = distance(point, B);
+
+  const buffer = 0.2;
+
+  //calculate the percentage of the line that the point is on
+  return (d1 + buffer) / (d1 + d2 + 2 * buffer);
+}
+
+export function getPercentageOfPointInGradient(
+  state: ApplicationState,
+  point: Point,
+) {
+  const selectedLayerGradientPoints = getFirstSelectedLayerGradientPoints(
+    state,
+  );
+
+  if (!selectedLayerGradientPoints) return 0;
+
+  return getLinePercentage(
+    selectedLayerGradientPoints[0],
+    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1],
+    point,
+  );
+}
+
+export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
+  if (pointerOnGradientPoint(state, point) !== -1) return false;
+  const selectedLayerGradientPoints = getFirstSelectedLayerGradientPoints(
+    state,
+  );
+
+  if (!selectedLayerGradientPoints) return false;
+
+  return isPointOnLine(
+    selectedLayerGradientPoints[0],
+    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1],
+    point,
   );
 }
