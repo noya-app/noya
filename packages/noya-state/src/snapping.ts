@@ -1,11 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import {
-  AffineTransform,
-  Bounds,
-  createBounds,
-  Size,
-  Axis,
-} from 'noya-geometry';
+import { AffineTransform, Axis, createBounds, Rect, Size } from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';
@@ -15,13 +9,15 @@ import { getLayersInRect } from './selectors/geometrySelectors';
 import { getBoundingRect, getCurrentPage } from './selectors/selectors';
 
 export function getAxisValues(
-  rectBounds: Bounds,
+  rect: Rect,
   axis: Axis,
 ): [number, number, number] {
+  const bounds = createBounds(rect);
+
   if (axis === 'x') {
-    return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
+    return [bounds.minX, bounds.midX, bounds.maxX];
   } else {
-    return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
+    return [bounds.minY, bounds.midY, bounds.maxY];
   }
 }
 
@@ -103,13 +99,11 @@ export function getLayerAxisInfo(
 
     if (!rect) return [];
 
-    const bounds = createBounds(rect);
-
     return [
       {
         layerId: layer.do_objectID,
-        y: getAxisValues(bounds, 'y'),
-        x: getAxisValues(bounds, 'x'),
+        y: getAxisValues(rect, 'y'),
+        x: getAxisValues(rect, 'x'),
       },
     ];
   });

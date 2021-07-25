@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
+import { AffineTransform, normalizeRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -377,10 +377,8 @@ export function canvasReducer(
             selectedRect.x += delta.x;
             selectedRect.y += delta.y;
 
-            const selectedBounds = createBounds(selectedRect);
-
-            const xValues = getAxisValues(selectedBounds, 'x');
-            const yValues = getAxisValues(selectedBounds, 'y');
+            const xValues = getAxisValues(selectedRect, 'x');
+            const yValues = getAxisValues(selectedRect, 'y');
 
             const xPairs = getSnappingPairs(xValues, snappingLayerInfos, 'x');
             const yPairs = getSnappingPairs(yValues, snappingLayerInfos, 'y');

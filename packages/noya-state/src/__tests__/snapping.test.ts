@@ -1,4 +1,3 @@
-import { createBounds } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   findSmallestSnappingDistance,
@@ -9,21 +8,21 @@ import {
 
 let mockInitialId = 0;
 
+beforeEach(() => {
+  mockInitialId = 0;
+});
+
 jest.mock('noya-utils', () => {
   const uuid = () => (mockInitialId++).toString();
   const original = jest.requireActual('noya-utils');
   return { ...original, uuid };
 });
 
-beforeEach(() => {
-  mockInitialId = 0;
-});
-
 test('axis values', () => {
-  const bounds = createBounds({ x: 20, y: -50, width: 80, height: 100 });
+  const rect = { x: 20, y: -50, width: 80, height: 100 };
 
-  expect(getAxisValues(bounds, 'x')).toEqual([20, 60, 100]);
-  expect(getAxisValues(bounds, 'y')).toEqual([-50, 0, 50]);
+  expect(getAxisValues(rect, 'x')).toEqual([20, 60, 100]);
+  expect(getAxisValues(rect, 'y')).toEqual([-50, 0, 50]);
 });
 
 test('get layer axis info', () => {
@@ -66,11 +65,10 @@ test('snapping pairs', () => {
     },
   ]);
 
-  const selectedBounds = createBounds(rectangle.frame);
   const possibleSnapInfos = getLayerAxisInfo(page, [oval]);
 
-  const xValues = getAxisValues(selectedBounds, 'x');
-  const yValues = getAxisValues(selectedBounds, 'y');
+  const xValues = getAxisValues(rectangle.frame, 'x');
+  const yValues = getAxisValues(rectangle.frame, 'y');
 
   const xPairs = getSnappingPairs(xValues, possibleSnapInfos, 'x');
   const yPairs = getSnappingPairs(yValues, possibleSnapInfos, 'y');

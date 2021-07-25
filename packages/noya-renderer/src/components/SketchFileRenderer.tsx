@@ -213,17 +213,16 @@ export default memo(function SketchFileRenderer() {
 
     const snappingLayerInfos = getLayerAxisInfo(page, possibleSnapLayers);
 
-    const bounds = createBounds(boundingRect);
     const selectedBounds = createBounds(boundingRect);
 
     const xPairs = getSnappingPairs(
-      getAxisValues(bounds, 'x'),
+      getAxisValues(boundingRect, 'x'),
       snappingLayerInfos,
       'x',
     ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
 
     const yPairs = getSnappingPairs(
-      getAxisValues(bounds, 'y'),
+      getAxisValues(boundingRect, 'y'),
       snappingLayerInfos,
       'y',
     ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
