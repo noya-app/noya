@@ -17,8 +17,6 @@ import {
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
 import React, { memo, useMemo } from 'react';
-import AlignmentGuide from './AlignmentGuide';
-import ExtensionGuide from './ExtensionGuide';
 import {
   AXES,
   getAxisProperties,
@@ -27,7 +25,8 @@ import {
   X_DIRECTIONS,
   Y_DIRECTIONS,
 } from '../guides';
-import { MeasurementGuide, MeasurementLabel } from './Measurement';
+import { AlignmentGuide, ExtensionGuide, MeasurementGuide } from './Guides';
+import { MeasurementLabel } from './MeasurementLabel';
 
 interface Props {
   page: Sketch.Page;

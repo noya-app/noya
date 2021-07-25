@@ -18,18 +18,18 @@ import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
-import ExtensionGuide from './ExtensionGuide';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import HoverOutline from './HoverOutline';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
-import { MeasurementGuide, MeasurementLabel } from './Measurement';
+import { MeasurementLabel } from './MeasurementLabel';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
+import { MeasurementGuide, ExtensionGuide } from './Guides';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,

@@ -12,10 +12,14 @@ export function pixelAlignPoint(
   };
 }
 
-export function pixelAlignPoints(points: [Point, Point], lineThickness = 1) {
+export function pixelAlignPoints(
+  points: [Point, Point],
+  lineThickness = 1,
+): [Point, Point] {
   const orientation = getLineOrientation(points);
 
-  return points.map((point) =>
-    pixelAlignPoint(point, orientation, lineThickness),
-  );
+  return [
+    pixelAlignPoint(points[0], orientation, lineThickness),
+    pixelAlignPoint(points[1], orientation, lineThickness),
+  ];
 }

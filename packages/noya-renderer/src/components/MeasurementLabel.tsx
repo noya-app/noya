@@ -4,24 +4,23 @@ import {
   getLineOrientation,
   Point,
 } from 'noya-geometry';
-import { useColorFill, useStroke } from 'noya-react-canvaskit';
+import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Polyline, Rect, Text } from '..';
-import { pixelAlignPoints } from '../pixelAlignment';
+import { Group, Rect, Text } from '..';
 
-const padding = {
+const PADDING = {
   width: 6,
   height: 2,
 };
 
-export type MeasurementLabelProps = {
+interface Props {
   points: [Point, Point];
-};
+}
 
-export function MeasurementLabel({ points }: MeasurementLabelProps) {
+export function MeasurementLabel({ points }: Props) {
   const text = round(distance(...points)).toString();
 
   const centerPoint = useMemo(
@@ -71,8 +70,8 @@ export function MeasurementLabel({ points }: MeasurementLabelProps) {
   const labelRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        centerPoint.x + padding.width,
-        centerPoint.y + padding.height,
+        centerPoint.x + PADDING.width,
+        centerPoint.y + PADDING.height,
         paragraphSize.width,
         paragraphSize.height,
       ),
@@ -87,8 +86,8 @@ export function MeasurementLabel({ points }: MeasurementLabelProps) {
 
   const backgroundSize = useMemo(
     () => ({
-      width: paragraphSize.width + padding.width * 2,
-      height: paragraphSize.height + padding.height * 2,
+      width: paragraphSize.width + PADDING.width * 2,
+      height: paragraphSize.height + PADDING.height * 2,
     }),
     [paragraphSize.height, paragraphSize.width],
   );
@@ -125,18 +124,4 @@ export function MeasurementLabel({ points }: MeasurementLabelProps) {
       <Text rect={labelRect} paragraph={paragraph} />
     </Group>
   );
-}
-
-interface Props {
-  points: [Point, Point];
-}
-
-export function MeasurementGuide({ points }: Props) {
-  const measurementColor = useTheme().colors.canvas.measurement;
-
-  const paint = useStroke({ color: measurementColor });
-
-  const alignedMeasurement = useMemo(() => pixelAlignPoints(points), [points]);
-
-  return <Polyline paint={paint} points={alignedMeasurement} />;
 }
