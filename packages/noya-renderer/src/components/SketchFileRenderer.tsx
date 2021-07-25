@@ -16,15 +16,15 @@ import { useCanvasKit } from 'noya-renderer';
 import {
   DecodedCurvePoint,
   encodeCurvePoint,
-  getAxisValues,
-  getLayerAxisInfo,
+  getSnapValues,
+  getLayerSnapValues,
   getPossibleSnapLayers,
   getSnappingPairs,
   Layers,
   Primitives,
   Rect,
   Selectors,
-  SnappingPair,
+  PossibleSnap,
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
@@ -203,7 +203,7 @@ export default memo(function SketchFileRenderer() {
       state,
     );
 
-    const possibleSnapLayers = getPossibleSnapLayers(
+    const targetLayers = getPossibleSnapLayers(
       state,
       layerIndexPaths,
       interactionState.canvasSize,
@@ -211,23 +211,30 @@ export default memo(function SketchFileRenderer() {
       // Ensure we don't snap to the selected layer itself
       .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
 
-    const snappingLayerInfos = getLayerAxisInfo(page, possibleSnapLayers);
+    const sourceXs = getSnapValues(boundingRect, 'x');
+    const sourceYs = getSnapValues(boundingRect, 'y');
 
-    const selectedBounds = createBounds(boundingRect);
+    const xPairs = targetLayers
+      .flatMap((targetLayer) =>
+        getSnappingPairs(
+          sourceXs,
+          getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
+          targetLayer.do_objectID,
+        ),
+      )
+      .filter((pair) => pair.source === pair.target);
 
-    const xPairs = getSnappingPairs(
-      getAxisValues(boundingRect, 'x'),
-      snappingLayerInfos,
-      'x',
-    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
+    const yPairs = targetLayers
+      .flatMap((targetLayer) =>
+        getSnappingPairs(
+          sourceYs,
+          getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
+          targetLayer.do_objectID,
+        ),
+      )
+      .filter((pair) => pair.source === pair.target);
 
-    const yPairs = getSnappingPairs(
-      getAxisValues(boundingRect, 'y'),
-      snappingLayerInfos,
-      'y',
-    ).filter((pair) => pair.selectedLayerValue === pair.visibleLayerValue);
-
-    const axisSnappingPairs: [Axis, SnappingPair[]][] = [
+    const axisSnappingPairs: [Axis, PossibleSnap[]][] = [
       ['x', xPairs],
       ['y', yPairs],
     ];
@@ -235,7 +242,7 @@ export default memo(function SketchFileRenderer() {
     const layerBoundsMap: Record<string, Bounds> = {};
 
     [...xPairs, ...yPairs]
-      .map((pair) => pair.visibleLayerId)
+      .map((pair) => pair.targetId)
       .forEach((layerId) => {
         if (layerId in layerBoundsMap) return;
 
@@ -255,6 +262,8 @@ export default memo(function SketchFileRenderer() {
         layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
       });
 
+    const selectedBounds = createBounds(boundingRect);
+
     const nearestLayerGuides = axisSnappingPairs.map(
       ([axis, snappingPairs]) => {
         const getMinGuideDistance = (guides: Guides[]) =>
@@ -264,7 +273,7 @@ export default memo(function SketchFileRenderer() {
 
         const guides = snappingPairs
           .map((pair) => {
-            const visibleLayerBounds = layerBoundsMap[pair.visibleLayerId];
+            const visibleLayerBounds = layerBoundsMap[pair.targetId];
 
             const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
 
@@ -287,14 +296,11 @@ export default memo(function SketchFileRenderer() {
 
     const alignmentGuides = axisSnappingPairs.flatMap(
       ([axis, snappingPairs]) => {
-        const groupedPairs = groupBy(
-          snappingPairs,
-          (value) => value.selectedLayerValue,
-        );
+        const groupedPairs = groupBy(snappingPairs, (value) => value.source);
 
         return Object.values(groupedPairs).map((pairs): Point[] => {
           const visibleLayerBounds = pairs.map(
-            ({ visibleLayerId }) => layerBoundsMap[visibleLayerId],
+            ({ targetId }) => layerBoundsMap[targetId],
           );
 
           const m = axis;
@@ -304,14 +310,14 @@ export default memo(function SketchFileRenderer() {
 
           return [
             {
-              [m]: pairs[0].visibleLayerValue,
+              [m]: pairs[0].target,
               [c]: Math.min(
                 selectedBounds[minC],
                 ...visibleLayerBounds.map((bounds) => bounds[minC]),
               ),
             } as Point,
             {
-              [m]: pairs[0].visibleLayerValue,
+              [m]: pairs[0].target,
               [c]: Math.max(
                 selectedBounds[maxC],
                 ...visibleLayerBounds.map((bounds) => bounds[maxC]),

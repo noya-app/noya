@@ -1,9 +1,9 @@
 import { SketchModel } from 'noya-sketch-model';
 import {
-  findSmallestSnappingDistance,
-  getAxisValues,
-  getLayerAxisInfo,
+  getSnapAdjustmentDistance,
+  getLayerSnapValues,
   getSnappingPairs,
+  getSnapValues,
 } from '../snapping';
 
 let mockInitialId = 0;
@@ -21,8 +21,11 @@ jest.mock('noya-utils', () => {
 test('axis values', () => {
   const rect = { x: 20, y: -50, width: 80, height: 100 };
 
-  expect(getAxisValues(rect, 'x')).toEqual([20, 60, 100]);
-  expect(getAxisValues(rect, 'y')).toEqual([-50, 0, 50]);
+  const xs = getSnapValues(rect, 'x');
+  const ys = getSnapValues(rect, 'y');
+
+  expect(xs).toEqual([20, 60, 100]);
+  expect(ys).toEqual([-50, 0, 50]);
 });
 
 test('get layer axis info', () => {
@@ -33,50 +36,37 @@ test('get layer axis info', () => {
     layers: [rectangle],
   });
 
-  const info = getLayerAxisInfo(page, [rectangle]);
+  const xs = getLayerSnapValues(page, rectangle.do_objectID, 'x');
+  const ys = getLayerSnapValues(page, rectangle.do_objectID, 'y');
 
-  expect(info).toEqual([
-    {
-      layerId: rectangle.do_objectID,
-      x: [20, 60, 100],
-      y: [-50, 0, 50],
-    },
-  ]);
+  expect(xs).toEqual([20, 60, 100]);
+  expect(ys).toEqual([-50, 0, 50]);
 });
 
 test('snapping pairs', () => {
-  const rectangle = SketchModel.rectangle({
+  const source = SketchModel.rectangle({
     frame: SketchModel.rect({ x: 0, y: 0, width: 100, height: 100 }),
   });
-  const oval = SketchModel.oval({
+  const target = SketchModel.oval({
     frame: SketchModel.rect({ x: 0, y: 104, width: 100, height: 100 }),
   });
   const page = SketchModel.page({
-    layers: [rectangle, oval],
+    layers: [source, target],
   });
 
-  const ovalInfo = getLayerAxisInfo(page, [oval]);
+  const sourceXs = getSnapValues(source.frame, 'x');
+  const sourceYs = getSnapValues(source.frame, 'y');
 
-  expect(ovalInfo).toEqual([
-    {
-      layerId: oval.do_objectID,
-      x: [0, 50, 100],
-      y: [104, 154, 204],
-    },
-  ]);
+  const targetXs = getLayerSnapValues(page, target.do_objectID, 'x');
+  const targetYs = getLayerSnapValues(page, target.do_objectID, 'y');
 
-  const possibleSnapInfos = getLayerAxisInfo(page, [oval]);
-
-  const xValues = getAxisValues(rectangle.frame, 'x');
-  const yValues = getAxisValues(rectangle.frame, 'y');
-
-  const xPairs = getSnappingPairs(xValues, possibleSnapInfos, 'x');
-  const yPairs = getSnappingPairs(yValues, possibleSnapInfos, 'y');
+  const xPairs = getSnappingPairs(sourceXs, targetXs, target.do_objectID);
+  const yPairs = getSnappingPairs(sourceYs, targetYs, target.do_objectID);
 
   expect({ xPairs, yPairs }).toMatchSnapshot();
 
-  const x = findSmallestSnappingDistance(xPairs);
-  const y = findSmallestSnappingDistance(yPairs);
+  const x = getSnapAdjustmentDistance(xPairs);
+  const y = getSnapAdjustmentDistance(yPairs);
 
   expect({ x, y }).toMatchSnapshot();
 });

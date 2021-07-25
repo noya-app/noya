@@ -8,7 +8,7 @@ import { ApplicationState } from './reducers/applicationReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
 import { getBoundingRect, getCurrentPage } from './selectors/selectors';
 
-export function getAxisValues(
+export function getSnapValues(
   rect: Rect,
   axis: Axis,
 ): [number, number, number] {
@@ -81,39 +81,35 @@ export function getPossibleSnapLayers(
   return visibleLayers;
 }
 
-export function getLayerAxisInfo(
+export function getLayerSnapValues(
   page: Sketch.Page,
-  layers: Sketch.AnyLayer[],
-): SnappingLayerInfo[] {
-  return layers.flatMap((layer) => {
-    const rect = getBoundingRect(
-      page,
-      AffineTransform.identity,
-      [layer.do_objectID],
-      {
-        clickThroughGroups: true,
-        includeHiddenLayers: false,
-        includeArtboardLayers: false,
-      },
-    );
-
-    if (!rect) return [];
-
-    return [
-      {
-        layerId: layer.do_objectID,
-        y: getAxisValues(rect, 'y'),
-        x: getAxisValues(rect, 'x'),
-      },
-    ];
+  layerId: string,
+  axis: Axis,
+): number[] {
+  const rect = getBoundingRect(page, AffineTransform.identity, [layerId], {
+    clickThroughGroups: true,
+    includeHiddenLayers: false,
+    includeArtboardLayers: false,
   });
+
+  return rect ? getSnapValues(rect, axis) : [];
 }
 
-export function findSmallestSnappingDistance(values: SnappingPair[]) {
-  const getDelta = (pair: SnappingPair) =>
-    pair.selectedLayerValue - pair.visibleLayerValue;
+export function getLayerSnappingInfo(
+  page: Sketch.Page,
+  layerId: string,
+): SnappingLayerInfo {
+  return {
+    layerId,
+    x: getLayerSnapValues(page, layerId, 'x'),
+    y: getLayerSnapValues(page, layerId, 'y'),
+  };
+}
 
-  const getDistance = (pair: SnappingPair) => Math.abs(getDelta(pair));
+export function getSnapAdjustmentDistance(values: PossibleSnap[]) {
+  const getDelta = (pair: PossibleSnap) => pair.source - pair.target;
+
+  const getDistance = (pair: PossibleSnap) => Math.abs(getDelta(pair));
 
   const distances = values
     .filter((pair) => getDistance(pair) <= 6)
@@ -124,28 +120,26 @@ export function findSmallestSnappingDistance(values: SnappingPair[]) {
 
 type SnappingLayerInfo = {
   layerId: string;
-  y: [number, number, number];
-  x: [number, number, number];
+  y: number[];
+  x: number[];
 };
 
-export type SnappingPair = {
-  selectedLayerValue: number;
-  visibleLayerValue: number;
-  visibleLayerId: string;
+export type PossibleSnap = {
+  source: number;
+  target: number;
+  targetId: string;
 };
 
 export function getSnappingPairs(
-  selectedAxisValues: [number, number, number],
-  visibleLayersAxisValues: SnappingLayerInfo[],
-  axis: Axis,
-): SnappingPair[] {
-  return visibleLayersAxisValues.flatMap((axisValues) =>
-    selectedAxisValues.flatMap((selectedLayerValue) =>
-      axisValues[axis].map((visibleLayerValue) => ({
-        selectedLayerValue: selectedLayerValue,
-        visibleLayerValue: visibleLayerValue,
-        visibleLayerId: axisValues.layerId,
-      })),
-    ),
+  sourceValues: number[],
+  targetValues: number[],
+  targetId: string,
+): PossibleSnap[] {
+  return sourceValues.flatMap((source) =>
+    targetValues.map((target) => ({
+      source,
+      target,
+      targetId,
+    })),
   );
 }
