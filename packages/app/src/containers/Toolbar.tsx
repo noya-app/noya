@@ -153,6 +153,7 @@ const ToolbarContent = memo(function ToolbarContent({
 
   useKeyboardShortcuts({
     a: handleInsertArtboard,
+    f: handleInsertArtboard,
     r: handleInsertRectangle,
     o: handleInsertOval,
     t: handleInsertText,
