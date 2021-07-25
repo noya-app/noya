@@ -1,11 +1,5 @@
 import { useApplicationState } from 'noya-app-state-context';
-import {
-  AffineTransform,
-  Axis,
-  Bounds,
-  createBounds,
-  Point,
-} from 'noya-geometry';
+import { AffineTransform, Axis, createBounds, Point } from 'noya-geometry';
 import {
   getLayerSnapValues,
   getPossibleSnapLayers,
@@ -89,30 +83,15 @@ export default memo(function SnapGuides() {
       ['y', ySnaps],
     ];
 
-    const layerBoundsMap: Record<string, Bounds> = {};
-
-    [...xSnaps, ...ySnaps]
-      .map((pair) => pair.targetId)
-      .forEach((layerId) => {
-        if (layerId in layerBoundsMap) return;
-
-        const layerToSnapBoundingRect = Selectors.getBoundingRect(
-          page,
-          AffineTransform.identity,
-          [layerId],
-          {
-            clickThroughGroups: true,
-            includeHiddenLayers: false,
-            includeArtboardLayers: false,
-          },
-        );
-
-        if (!layerToSnapBoundingRect) return;
-
-        layerBoundsMap[layerId] = createBounds(layerToSnapBoundingRect);
-      });
-
-    const selectedBounds = createBounds(boundingRect);
+    const layerBoundsMap = Selectors.getBoundingRectMap(
+      page,
+      [...xSnaps, ...ySnaps].map((pair) => pair.targetId),
+      {
+        clickThroughGroups: true,
+        includeHiddenLayers: false,
+        includeArtboardLayers: false,
+      },
+    );
 
     const nearestLayerGuides = axisSnappingPairs.map(
       ([axis, snappingPairs]) => {
@@ -127,16 +106,11 @@ export default memo(function SnapGuides() {
 
             const directions = axis === 'y' ? X_DIRECTIONS : Y_DIRECTIONS;
 
-            return directions.flatMap(([direction, axis]) => {
-              const result = getGuides(
-                direction,
-                axis,
-                selectedBounds,
-                visibleLayerBounds,
-              );
-
-              return result ? [result] : [];
-            });
+            return directions.flatMap(
+              ([direction, axis]) =>
+                getGuides(direction, axis, boundingRect, visibleLayerBounds) ??
+                [],
+            );
           })
           .sort((a, b) => getMinGuideDistance(a) - getMinGuideDistance(b));
 
@@ -147,11 +121,12 @@ export default memo(function SnapGuides() {
     const alignmentGuides = axisSnappingPairs.flatMap(
       ([axis, snappingPairs]) => {
         const groupedPairs = groupBy(snappingPairs, (value) => value.source);
+        const selectedBounds = createBounds(boundingRect);
 
         return Object.values(groupedPairs).map((pairs): Point[] => {
-          const visibleLayerBounds = pairs.map(
-            ({ targetId }) => layerBoundsMap[targetId],
-          );
+          const targetBounds = pairs
+            .map(({ targetId }) => layerBoundsMap[targetId])
+            .map(createBounds);
 
           const m = axis;
           const c = axis === 'x' ? 'y' : 'x';
@@ -163,14 +138,14 @@ export default memo(function SnapGuides() {
               [m]: pairs[0].target,
               [c]: Math.min(
                 selectedBounds[minC],
-                ...visibleLayerBounds.map((bounds) => bounds[minC]),
+                ...targetBounds.map((bounds) => bounds[minC]),
               ),
             } as Point,
             {
               [m]: pairs[0].target,
               [c]: Math.max(
                 selectedBounds[maxC],
-                ...visibleLayerBounds.map((bounds) => bounds[maxC]),
+                ...targetBounds.map((bounds) => bounds[maxC]),
               ),
             } as Point,
           ];

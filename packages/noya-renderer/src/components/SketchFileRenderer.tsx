@@ -2,13 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import {
-  AffineTransform,
-  createBounds,
-  createRect,
-  insetRect,
-  Point,
-} from 'noya-geometry';
+import { AffineTransform, createRect, insetRect, Point } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
@@ -150,15 +144,12 @@ export default memo(function SketchFileRenderer() {
 
     if (!highlightedBoundingRect) return;
 
-    const highlightedBounds = createBounds(highlightedBoundingRect);
-    const selectedBounds = createBounds(boundingRect);
-
     const guides = ALL_DIRECTIONS.flatMap(([direction, axis]) => {
       const result = getGuides(
         direction,
         axis,
-        selectedBounds,
-        highlightedBounds,
+        boundingRect,
+        highlightedBoundingRect,
       );
 
       return result ? [result] : [];
