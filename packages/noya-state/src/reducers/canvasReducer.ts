@@ -434,7 +434,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
-              interactionState.canvasSize,
+              context.canvasSize,
               sourceRect,
               layerIndexPaths,
             );
