@@ -30,13 +30,7 @@ import {
   moveLayer,
   moveSelectedPoints,
 } from '../selectors/selectors';
-import {
-  getSnapAdjustmentDistance,
-  getSnapValues,
-  getLayerSnapValues,
-  getPossibleTargetSnapLayers,
-  getSnaps,
-} from '../snapping';
+import { getSnapAdjustmentForVisibleLayers } from '../snapping';
 import { Point, Rect } from '../types';
 import {
   ApplicationReducerContext,
@@ -355,6 +349,64 @@ export function canvasReducer(
             });
             break;
           }
+          case 'insertArtboard':
+          case 'insertOval':
+          case 'insertRectangle':
+          case 'insertText': {
+            const { point } = interactionState;
+
+            if (!point) return;
+
+            const snapAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(point, point),
+              layerIndexPaths,
+            );
+
+            const newInteractionState = {
+              ...interactionState,
+              point: {
+                x: point.x - snapAdjustment.x,
+                y: point.y - snapAdjustment.y,
+              },
+            };
+
+            draft.interactionState = newInteractionState;
+            break;
+          }
+          case 'drawing': {
+            const { origin, current } = interactionState;
+
+            const originAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(origin, origin),
+              layerIndexPaths,
+            );
+
+            const currentAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(current, current),
+              layerIndexPaths,
+            );
+
+            const newInteractionState = {
+              ...interactionState,
+              origin: {
+                x: origin.x - originAdjustment.x,
+                y: origin.y - originAdjustment.y,
+              },
+              current: {
+                x: current.x - currentAdjustment.x,
+                y: current.y - currentAdjustment.y,
+              },
+            };
+
+            draft.interactionState = newInteractionState;
+            break;
+          }
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
 
@@ -383,32 +435,15 @@ export function canvasReducer(
             sourceRect.x += delta.x;
             sourceRect.y += delta.y;
 
-            const targetLayers = getPossibleTargetSnapLayers(
+            const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
               interactionState.canvasSize,
+              sourceRect,
               layerIndexPaths,
             );
 
-            const sourceXs = getSnapValues(sourceRect, 'x');
-            const sourceYs = getSnapValues(sourceRect, 'y');
-
-            const xSnaps = targetLayers.flatMap((targetLayer) =>
-              getSnaps(
-                sourceXs,
-                getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
-                targetLayer.do_objectID,
-              ),
-            );
-            const ySnaps = targetLayers.flatMap((targetLayer) =>
-              getSnaps(
-                sourceYs,
-                getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
-                targetLayer.do_objectID,
-              ),
-            );
-
-            delta.x -= getSnapAdjustmentDistance(xSnaps);
-            delta.y -= getSnapAdjustmentDistance(ySnaps);
+            delta.x -= snapAdjustment.x;
+            delta.y -= snapAdjustment.y;
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;

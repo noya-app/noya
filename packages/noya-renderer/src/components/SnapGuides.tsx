@@ -4,6 +4,7 @@ import {
   AffineTransform,
   Axis,
   createBounds,
+  createRect,
   distance,
   Point,
   Rect,
@@ -33,6 +34,7 @@ interface Props {
   sourceRect: Rect;
   targetLayers: Sketch.AnyLayer[];
   axis: Axis;
+  showLabels: boolean;
 }
 
 const SnapGuidesAxis = memo(function SnapGuidesAxis({
@@ -40,6 +42,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   sourceRect,
   targetLayers,
   axis,
+  showLabels,
 }: Props) {
   const sourceValues = getSnapValues(sourceRect, axis);
 
@@ -127,7 +130,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
         <Fragment key={index}>
           <ExtensionGuide points={guide.extension} />
           <MeasurementGuide points={guide.measurement} />
-          <MeasurementLabel points={guide.measurement} />
+          {showLabels && <MeasurementLabel points={guide.measurement} />}
         </Fragment>
       ))}
     </>
@@ -153,12 +156,23 @@ export default memo(function SnapGuides() {
             includeArtboardLayers: false,
           },
         );
+      case 'insertArtboard':
+      case 'insertOval':
       case 'insertRectangle':
+      case 'insertText': {
         const point = interactionState.point;
 
         if (!point) return;
 
-        return { x: point.x, y: point.y, width: 0, height: 0 };
+        return createRect(point, point);
+      }
+      case 'drawing': {
+        const current = interactionState.current;
+
+        if (!current) return;
+
+        return createRect(current, current);
+      }
     }
   }, [interactionState, page, state.selectedObjects]);
 
@@ -183,6 +197,7 @@ export default memo(function SnapGuides() {
           targetLayers={targetLayers}
           sourceRect={sourceRect}
           page={page}
+          showLabels={interactionState.type === 'moving'}
         />
       ))}
     </>

@@ -358,7 +358,8 @@ export default memo(function SketchFileRenderer() {
           <>
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
-              boundingRect && (
+              boundingRect &&
+              !drawingLayer && (
                 <>
                   <BoundingRect
                     rect={boundingRect}
@@ -374,15 +375,15 @@ export default memo(function SketchFileRenderer() {
                 </>
               )}
             {!isEditingPath && highlightedSketchLayer}
+            {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {boundingRect && (
+            {boundingRect && !drawingLayer && (
               <DragHandles
                 rect={boundingRect}
                 selectionPaint={selectionPaint}
               />
             )}
-            {drawingLayer && <SketchLayer layer={drawingLayer} />}
           </>
         )}
       </Group>

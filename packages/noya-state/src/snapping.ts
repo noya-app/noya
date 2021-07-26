@@ -1,5 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, Axis, createBounds, Rect, Size } from 'noya-geometry';
+import {
+  AffineTransform,
+  Axis,
+  createBounds,
+  Point,
+  Rect,
+  Size,
+} from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';
@@ -110,13 +117,15 @@ export function getLayerSnapValues(
   return rect ? getSnapValues(rect, axis) : [];
 }
 
+const SNAP_DISTANCE = 6;
+
 export function getSnapAdjustmentDistance(values: Snap[]) {
   const getDelta = (snap: Snap) => snap.source - snap.target;
 
   const getDistance = (snap: Snap) => Math.abs(getDelta(snap));
 
   const distances = values
-    .filter((snap) => getDistance(snap) <= 6)
+    .filter((snap) => getDistance(snap) <= SNAP_DISTANCE)
     .sort((a, b) => getDistance(a) - getDistance(b));
 
   return distances.length > 0 ? getDelta(distances[0]) : 0;
@@ -137,4 +146,42 @@ export function getSnaps(
     sourceValues,
     targetValues,
   ).map(([source, target]) => ({ source, target, targetId }));
+}
+
+export function getSnapAdjustmentForVisibleLayers(
+  state: ApplicationState,
+  canvasSize: Size,
+  sourceRect: Rect,
+  sourceIndexPaths: IndexPath[],
+): Point {
+  const page = getCurrentPage(state);
+
+  const targetLayers = getPossibleTargetSnapLayers(
+    state,
+    canvasSize,
+    sourceIndexPaths,
+  );
+
+  const sourceXs = getSnapValues(sourceRect, 'x');
+  const sourceYs = getSnapValues(sourceRect, 'y');
+
+  const xSnaps = targetLayers.flatMap((targetLayer) =>
+    getSnaps(
+      sourceXs,
+      getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
+      targetLayer.do_objectID,
+    ),
+  );
+  const ySnaps = targetLayers.flatMap((targetLayer) =>
+    getSnaps(
+      sourceYs,
+      getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
+      targetLayer.do_objectID,
+    ),
+  );
+
+  return {
+    x: getSnapAdjustmentDistance(xSnaps),
+    y: getSnapAdjustmentDistance(ySnaps),
+  };
 }
