@@ -34,7 +34,7 @@ const rectangle = SketchModel.rectangle({
   }),
 });
 
-const oval = SketchModel.rectangle({
+const oval = SketchModel.oval({
   frame: SketchModel.rect({
     x: 200,
     y: 200,
@@ -202,6 +202,25 @@ describe('scale', () => {
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'sw']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale multiple layer', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
       ['interaction', ['updateScaling', { x: 125, y: 125 }]],
     ]);
 

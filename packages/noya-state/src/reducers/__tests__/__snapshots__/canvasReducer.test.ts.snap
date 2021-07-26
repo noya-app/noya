@@ -13,11 +13,11 @@ exports[`move move layer in artboard 1`] = `
 exports[`move move multiple layers 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
-└── <Rectangle> Rectangle { x: 200, y: 200, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 15, y: 15, w: 100, h: 100 }
-└── <Rectangle> Rectangle { x: 215, y: 215, w: 100, h: 100 }"
+└── <Oval> Oval { x: 215, y: 215, w: 100, h: 100 }"
 `;
 
 exports[`move move one layer 1`] = `
@@ -31,11 +31,21 @@ exports[`move move one layer 1`] = `
 exports[`move move with snap 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
-└── <Rectangle> Rectangle { x: 200, y: 200, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
 
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 200, y: 15, w: 100, h: 100 }
-└── <Rectangle> Rectangle { x: 200, y: 200, w: 100, h: 100 }"
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }"
+`;
+
+exports[`scale scale multiple layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 108, h: 108 }
+└── <Oval> Oval { x: 217, y: 217, w: 108, h: 108 }"
 `;
 
 exports[`scale scale one layer in artboard 1`] = `
