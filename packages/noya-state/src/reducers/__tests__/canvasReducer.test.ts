@@ -259,4 +259,32 @@ describe('scale', () => {
       ]),
     ).toMatchSnapshot();
   });
+
+  test('scale layers in different parents', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 450,
+        y: 450,
+        width: 300,
+        height: 300,
+      }),
+      layers: [rectangle],
+    });
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard, oval] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
 });
