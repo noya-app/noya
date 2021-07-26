@@ -827,6 +827,7 @@ export default memo(function Canvas() {
     >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container
+          id="canvas-container"
           ref={containerRef}
           cursor={cursor}
           {...mergeEventHandlers(bind(), {

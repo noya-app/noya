@@ -6,6 +6,7 @@ import {
   Divider,
   Select,
   SketchPattern,
+  useGlobalInputBlurListener,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
@@ -340,19 +341,41 @@ export default memo(function FillInputFieldWithPicker({
     TODO: Maria - Add closing the popover for the gradients 
                   when the user clicks outside (right now only closes 
                   when the user clicks on the canvas)
+
+                  update fillPopoverOpen when fill type changes
   */
+
+  useGlobalInputBlurListener(() => {
+    dispatch('setFillPopoverOpen', false);
+  });
 
   return (
     <Popover.Root
       onOpenChange={(open) => {
-        if (open || fillType !== Sketch.FillType.Gradient)
-          dispatch('setFillPopoverOpen', open);
+        dispatch(
+          'setFillPopoverOpen',
+          open && fillType === Sketch.FillType.Gradient,
+        );
       }}
     >
       <Popover.Trigger as={Slot}>
         <ColorInputField id={id} value={hasMultipleFills ? undefined : value} />
       </Popover.Trigger>
-      <Content side="bottom" align="center">
+      <Content
+        side="bottom"
+        align="center"
+        onInteractOutside={useCallback((event) => {
+          // We allow interacting with the canvas to support editing gradients.
+          // If the inspector re-renders, e.g. due to layer selection change, the
+          // popover will close automatically.
+          if (
+            event.target instanceof HTMLElement &&
+            event.target.id === 'canvas-container'
+          ) {
+            event.preventDefault();
+          }
+        }, [])}
+      >
         {(gradientProps || patternProps) && (
           <>
             <InspectorPrimitives.Section>
