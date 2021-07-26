@@ -440,7 +440,7 @@ export default memo(function Canvas() {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
                 ? 'updateMoving'
-                : 'startScaling',
+                : 'updateScaling',
               point,
             ]);
           }

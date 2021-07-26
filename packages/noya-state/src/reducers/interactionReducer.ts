@@ -55,7 +55,6 @@ export type InteractionAction =
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
-  | [type: 'startScaling', point: Point]
   | [type: 'startPanning', point: Point]
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point]
@@ -337,22 +336,6 @@ export function interactionReducer(
         pageSnapshot: state.pageSnapshot,
       };
     }
-    case 'startScaling': {
-      const [, point] = action;
-
-      if (state.type !== 'maybeScale') {
-        throw new Error('Bad interaction state - should be in `maybeScale`');
-      }
-
-      return {
-        type: 'scaling',
-        origin: state.origin,
-        current: point,
-        direction: state.direction,
-        canvasSize: state.canvasSize,
-        pageSnapshot: state.pageSnapshot,
-      };
-    }
     case 'updateMoving': {
       const [, point] = action;
 
@@ -372,8 +355,10 @@ export function interactionReducer(
     case 'updateScaling': {
       const [, point] = action;
 
-      if (state.type !== 'scaling') {
-        throw new Error('Bad interaction state - should be in `scaling`');
+      if (state.type !== 'scaling' && state.type !== 'maybeScale') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeScale` or `scaling`',
+        );
       }
 
       return {
