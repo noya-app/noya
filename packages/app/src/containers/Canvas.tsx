@@ -379,7 +379,7 @@ export default memo(function Canvas() {
               );
             }
 
-            dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
+            dispatch('interaction', ['maybeMove', point]);
           } else {
             dispatch('selectLayer', undefined);
 
@@ -439,7 +439,7 @@ export default memo(function Canvas() {
           if (isMoving(point, origin)) {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
-                ? 'startMoving'
+                ? 'updateMoving'
                 : 'startScaling',
               point,
             ]);

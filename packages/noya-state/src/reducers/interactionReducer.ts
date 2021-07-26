@@ -33,7 +33,7 @@ type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 // These actions need to be augmented by additional state (a snapshot of the
 // current page) before being passed to the interaction reducer.
 export type SnapshotInteractionAction =
-  | [type: 'maybeMove', origin: Point, canvasSize: Size]
+  | [type: 'maybeMove', origin: Point]
   | [
       type: 'maybeScale',
       origin: Point,
@@ -55,7 +55,6 @@ export type InteractionAction =
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
-  | [type: 'startMoving', point: Point]
   | [type: 'startScaling', point: Point]
   | [type: 'startPanning', point: Point]
   | [type: 'updateMoving', point: Point]
@@ -104,7 +103,6 @@ export type InteractionState =
   | {
       type: 'maybeMove';
       origin: Point;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | {
@@ -145,7 +143,6 @@ export type InteractionState =
       type: 'moving';
       origin: Point;
       current: Point;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | {
@@ -238,9 +235,9 @@ export function interactionReducer(
       };
     }
     case 'maybeMove': {
-      const [, origin, canvasSize, pageSnapshot] = action;
+      const [, origin, pageSnapshot] = action;
 
-      return { type: action[0], origin, canvasSize, pageSnapshot };
+      return { type: action[0], origin, pageSnapshot };
     }
     case 'maybeScale': {
       const [, origin, direction, canvasSize, pageSnapshot] = action;
@@ -340,21 +337,6 @@ export function interactionReducer(
         pageSnapshot: state.pageSnapshot,
       };
     }
-    case 'startMoving': {
-      const [, point] = action;
-
-      if (state.type !== 'maybeMove') {
-        throw new Error('Bad interaction state - should be in `maybeMove`');
-      }
-
-      return {
-        type: 'moving',
-        origin: state.origin,
-        current: point,
-        canvasSize: state.canvasSize,
-        pageSnapshot: state.pageSnapshot,
-      };
-    }
     case 'startScaling': {
       const [, point] = action;
 
@@ -374,15 +356,16 @@ export function interactionReducer(
     case 'updateMoving': {
       const [, point] = action;
 
-      if (state.type !== 'moving') {
-        throw new Error('Bad interaction state - should be in `moving`');
+      if (state.type !== 'moving' && state.type !== 'maybeMove') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeMove` or `moving`',
+        );
       }
 
       return {
         type: 'moving',
         origin: state.origin,
         current: point,
-        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }
