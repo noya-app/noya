@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, normalizeRect } from 'noya-geometry';
+import { AffineTransform, createRect, normalizeRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -30,21 +30,19 @@ import {
   moveLayer,
   moveSelectedPoints,
 } from '../selectors/selectors';
-import {
-  getSnapAdjustmentDistance,
-  getSnapValues,
-  getLayerSnapValues,
-  getPossibleSnapLayers,
-  getSnaps,
-} from '../snapping';
+import { getSnapAdjustmentForVisibleLayers } from '../snapping';
 import { Point, Rect } from '../types';
-import { ApplicationState } from './applicationReducer';
+import {
+  ApplicationReducerContext,
+  ApplicationState,
+} from './applicationReducer';
 import {
   InteractionAction,
   interactionReducer,
+  ShapeType,
   SnapshotInteractionAction,
 } from './interactionReducer';
-import { defaultBorderColor } from './styleReducer';
+import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -71,6 +69,7 @@ export function canvasReducer(
   state: ApplicationState,
   action: CanvasAction,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'insertArtboard': {
@@ -104,7 +103,21 @@ export function canvasReducer(
       return produce(state, (draft) => {
         if (draft.interactionState.type !== 'drawing') return;
 
-        const layer = draft.interactionState.value;
+        const shapeType = draft.interactionState.shapeType;
+        const layer = createDrawingLayer(
+          shapeType,
+          SketchModel.style({
+            fills: [
+              SketchModel.fill({
+                color: defaultFillColor,
+              }),
+            ],
+          }),
+          createRect(
+            draft.interactionState.origin,
+            draft.interactionState.current,
+          ),
+        );
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
@@ -336,6 +349,61 @@ export function canvasReducer(
             });
             break;
           }
+          case 'insertArtboard':
+          case 'insertOval':
+          case 'insertRectangle':
+          case 'insertText': {
+            const { point } = interactionState;
+
+            if (!point) return;
+
+            const snapAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(point, point),
+            );
+
+            const newInteractionState = {
+              ...interactionState,
+              point: {
+                x: point.x - snapAdjustment.x,
+                y: point.y - snapAdjustment.y,
+              },
+            };
+
+            draft.interactionState = newInteractionState;
+            break;
+          }
+          case 'drawing': {
+            const { origin, current } = interactionState;
+
+            const originAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(origin, origin),
+            );
+
+            const currentAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(current, current),
+            );
+
+            const newInteractionState = {
+              ...interactionState,
+              origin: {
+                x: origin.x - originAdjustment.x,
+                y: origin.y - originAdjustment.y,
+              },
+              current: {
+                x: current.x - currentAdjustment.x,
+                y: current.y - currentAdjustment.y,
+              },
+            };
+
+            draft.interactionState = newInteractionState;
+            break;
+          }
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
 
@@ -364,34 +432,15 @@ export function canvasReducer(
             sourceRect.x += delta.x;
             sourceRect.y += delta.y;
 
-            const targetLayers = getPossibleSnapLayers(
+            const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
-              layerIndexPaths,
               interactionState.canvasSize,
-            )
-              // Ensure we don't snap to the selected layer itself
-              .filter((layer) => !layerIds.includes(layer.do_objectID));
-
-            const sourceXs = getSnapValues(sourceRect, 'x');
-            const sourceYs = getSnapValues(sourceRect, 'y');
-
-            const xSnaps = targetLayers.flatMap((targetLayer) =>
-              getSnaps(
-                sourceXs,
-                getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
-                targetLayer.do_objectID,
-              ),
-            );
-            const ySnaps = targetLayers.flatMap((targetLayer) =>
-              getSnaps(
-                sourceYs,
-                getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
-                targetLayer.do_objectID,
-              ),
+              sourceRect,
+              layerIndexPaths,
             );
 
-            delta.x -= getSnapAdjustmentDistance(xSnaps);
-            delta.y -= getSnapAdjustmentDistance(ySnaps);
+            delta.x -= snapAdjustment.x;
+            delta.y -= snapAdjustment.y;
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;
@@ -597,5 +646,24 @@ export function canvasReducer(
     }
     default:
       return state;
+  }
+}
+
+export function createDrawingLayer(
+  shapeType: ShapeType,
+  style: Sketch.Style,
+  rect: Rect,
+): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
+  const frame = SketchModel.rect(rect);
+
+  switch (shapeType) {
+    case 'oval':
+      return SketchModel.oval({ style, frame });
+    case 'rectangle':
+      return SketchModel.rectangle({ style, frame });
+    case 'text':
+      return SketchModel.text({ frame });
+    case 'artboard':
+      return SketchModel.artboard({ frame });
   }
 }

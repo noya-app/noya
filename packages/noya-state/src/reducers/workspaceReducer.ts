@@ -122,7 +122,9 @@ export function workspaceReducer(
     }
     default: {
       return produce(state, (draft) => {
-        draft.history = historyReducer(state.history, action, CanvasKit);
+        draft.history = historyReducer(state.history, action, CanvasKit, {
+          canvasSize: state.canvasSize,
+        });
       });
     }
   }

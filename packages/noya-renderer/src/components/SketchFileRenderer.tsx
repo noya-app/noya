@@ -6,7 +6,9 @@ import { AffineTransform, createRect, insetRect, Point } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
+  createDrawingLayer,
   DecodedCurvePoint,
+  defaultBorderColor,
   encodeCurvePoint,
   Layers,
   Primitives,
@@ -30,6 +32,7 @@ import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
 import { MeasurementGuide, ExtensionGuide } from './Guides';
+import { SketchModel } from 'noya-sketch-model';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -61,6 +64,11 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
+  const isInserting =
+    interactionState.type === 'insertRectangle' ||
+    interactionState.type === 'insertOval' ||
+    interactionState.type === 'insertText' ||
+    interactionState.type === 'insertArtboard';
 
   const canvasRect = useMemo(
     () =>
@@ -321,6 +329,21 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
+  const drawingLayer =
+    interactionState.type === 'drawing'
+      ? createDrawingLayer(
+          interactionState.shapeType === 'oval' ? 'oval' : 'rectangle',
+          SketchModel.style({
+            borders: [
+              SketchModel.border({
+                color: defaultBorderColor,
+              }),
+            ],
+          }),
+          createRect(interactionState.origin, interactionState.current),
+        )
+      : undefined;
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -340,7 +363,9 @@ export default memo(function SketchFileRenderer() {
           <>
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
-              boundingRect && (
+              boundingRect &&
+              !drawingLayer &&
+              !isInserting && (
                 <>
                   <BoundingRect
                     rect={boundingRect}
@@ -355,19 +380,17 @@ export default memo(function SketchFileRenderer() {
                   ))}
                 </>
               )}
-            {!isEditingPath && highlightedSketchLayer}
+            {!isEditingPath &&
+              !drawingLayer &&
+              !isInserting &&
+              highlightedSketchLayer}
+            {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {boundingRect && (
+            {boundingRect && !drawingLayer && !isInserting && (
               <DragHandles
                 rect={boundingRect}
                 selectionPaint={selectionPaint}
-              />
-            )}
-            {interactionState.type === 'drawing' && (
-              <SketchLayer
-                key={interactionState.value.do_objectID}
-                layer={interactionState.value}
               />
             )}
           </>

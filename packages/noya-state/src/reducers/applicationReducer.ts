@@ -34,6 +34,7 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
+import { Size } from 'noya-geometry';
 
 export type { SetNumberMode };
 
@@ -80,10 +81,15 @@ export type Action =
   | ExportAction
   | PointAction;
 
+export type ApplicationReducerContext = {
+  canvasSize: Size;
+};
+
 export function applicationReducer(
   state: ApplicationState,
   action: Action,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'setKeyModifier':
@@ -117,7 +123,7 @@ export function applicationReducer(
     case 'insertBitmap':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
-      return canvasReducer(state, action, CanvasKit);
+      return canvasReducer(state, action, CanvasKit, context);
     case 'setLayerVisible':
     case 'setLayerName':
     case 'setLayerIsLocked':

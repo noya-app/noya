@@ -1,5 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, Axis, createBounds, Rect, Size } from 'noya-geometry';
+import {
+  AffineTransform,
+  Axis,
+  createBounds,
+  Point,
+  Rect,
+  Size,
+} from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { Layers } from '.';
@@ -22,12 +29,17 @@ export function getSnapValues(
   }
 }
 
-export function getPossibleSnapLayers(
+export function getPossibleTargetSnapLayers(
   state: ApplicationState,
-  selectedIndexPaths: IndexPath[],
   canvasSize: Size,
+  sourceIndexPaths: IndexPath[] = [],
 ) {
   const page = getCurrentPage(state);
+
+  // Ensure we don't snap to a selected layer by filtering them out
+  const sourceIds = sourceIndexPaths.map(
+    (indexPath) => Layers.access(page, indexPath).do_objectID,
+  );
 
   const allVisibleLayers = getLayersInRect(
     state,
@@ -36,21 +48,30 @@ export function getPossibleSnapLayers(
     {
       clickThroughGroups: false,
       includeHiddenLayers: false,
-      includeArtboardLayers: true,
+      includeArtboardLayers:
+        sourceIndexPaths.length === 0 ? 'includeAndClickThrough' : true,
     },
   );
 
+  // If we're not snapping a source layer (i.e. a layer with a parent) then
+  // we can snap anywhere in the hierarchy
+  if (sourceIndexPaths.length === 0) {
+    return allVisibleLayers.filter(
+      (layer) => !sourceIds.includes(layer.do_objectID),
+    );
+  }
+
   // Are all selected ids in the same artboard?
   const inSameArtboard =
-    Layers.isSymbolMasterOrArtboard(page.layers[selectedIndexPaths[0][0]]) &&
-    selectedIndexPaths.every((indexPath) => indexPath.length > 1) &&
-    selectedIndexPaths.every(
-      (indexPath) => indexPath[0] === selectedIndexPaths[0][0],
+    Layers.isSymbolMasterOrArtboard(page.layers[sourceIndexPaths[0][0]]) &&
+    sourceIndexPaths.every((indexPath) => indexPath.length > 1) &&
+    sourceIndexPaths.every(
+      (indexPath) => indexPath[0] === sourceIndexPaths[0][0],
     );
 
   // Do all selected ids have the same parent?
-  const sharedParentIndex = selectedIndexPaths[0].slice(0, -1);
-  const inSameParent = selectedIndexPaths.every((indexPath) =>
+  const sharedParentIndex = sourceIndexPaths[0].slice(0, -1);
+  const inSameParent = sourceIndexPaths.every((indexPath) =>
     isDeepEqual(indexPath.slice(0, -1), sharedParentIndex),
   );
 
@@ -58,7 +79,7 @@ export function getPossibleSnapLayers(
   let groupLayers: Sketch.AnyLayer[] = [];
 
   if (inSameArtboard) {
-    const artboard = page.layers[selectedIndexPaths[0][0]] as Sketch.Artboard;
+    const artboard = page.layers[sourceIndexPaths[0][0]] as Sketch.Artboard;
 
     groupLayers.push(artboard);
 
@@ -70,7 +91,7 @@ export function getPossibleSnapLayers(
   if (inSameParent) {
     const parent = Layers.access(
       page,
-      selectedIndexPaths[0].slice(0, -1),
+      sourceIndexPaths[0].slice(0, -1),
     ) as ParentLayer;
 
     groupLayers.push(...parent.layers);
@@ -79,7 +100,9 @@ export function getPossibleSnapLayers(
   const visibleLayers =
     inSameArtboard || inSameParent ? groupLayers : allVisibleLayers;
 
-  return visibleLayers;
+  return visibleLayers.filter(
+    (layer) => !sourceIds.includes(layer.do_objectID),
+  );
 }
 
 export function getLayerSnapValues(
@@ -96,13 +119,15 @@ export function getLayerSnapValues(
   return rect ? getSnapValues(rect, axis) : [];
 }
 
+const SNAP_DISTANCE = 6;
+
 export function getSnapAdjustmentDistance(values: Snap[]) {
   const getDelta = (snap: Snap) => snap.source - snap.target;
 
   const getDistance = (snap: Snap) => Math.abs(getDelta(snap));
 
   const distances = values
-    .filter((snap) => getDistance(snap) <= 6)
+    .filter((snap) => getDistance(snap) <= SNAP_DISTANCE)
     .sort((a, b) => getDistance(a) - getDistance(b));
 
   return distances.length > 0 ? getDelta(distances[0]) : 0;
@@ -123,4 +148,42 @@ export function getSnaps(
     sourceValues,
     targetValues,
   ).map(([source, target]) => ({ source, target, targetId }));
+}
+
+export function getSnapAdjustmentForVisibleLayers(
+  state: ApplicationState,
+  canvasSize: Size,
+  sourceRect: Rect,
+  sourceIndexPaths?: IndexPath[],
+): Point {
+  const page = getCurrentPage(state);
+
+  const targetLayers = getPossibleTargetSnapLayers(
+    state,
+    canvasSize,
+    sourceIndexPaths,
+  );
+
+  const sourceXs = getSnapValues(sourceRect, 'x');
+  const sourceYs = getSnapValues(sourceRect, 'y');
+
+  const xSnaps = targetLayers.flatMap((targetLayer) =>
+    getSnaps(
+      sourceXs,
+      getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
+      targetLayer.do_objectID,
+    ),
+  );
+  const ySnaps = targetLayers.flatMap((targetLayer) =>
+    getSnaps(
+      sourceYs,
+      getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
+      targetLayer.do_objectID,
+    ),
+  );
+
+  return {
+    x: getSnapAdjustmentDistance(xSnaps),
+    y: getSnapAdjustmentDistance(ySnaps),
+  };
 }

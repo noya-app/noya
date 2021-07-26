@@ -1,22 +1,23 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   AffineTransform,
   Axis,
   createBounds,
+  createRect,
   distance,
   Point,
   Rect,
 } from 'noya-geometry';
 import {
   getLayerSnapValues,
-  getPossibleSnapLayers,
+  getPossibleTargetSnapLayers,
   getSnaps,
   getSnapValues,
   Selectors,
 } from 'noya-state';
 import { groupBy } from 'noya-utils';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import {
   AXES,
   getAxisProperties,
@@ -33,6 +34,7 @@ interface Props {
   sourceRect: Rect;
   targetLayers: Sketch.AnyLayer[];
   axis: Axis;
+  showLabels: boolean;
 }
 
 const SnapGuidesAxis = memo(function SnapGuidesAxis({
@@ -40,6 +42,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   sourceRect,
   targetLayers,
   axis,
+  showLabels,
 }: Props) {
   const sourceValues = getSnapValues(sourceRect, axis);
 
@@ -124,48 +127,64 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
         <AlignmentGuide key={index} points={points} />
       ))}
       {guides.map((guide, index) => (
-        <>
-          <ExtensionGuide key={index} points={guide.extension} />
-          <MeasurementGuide key={index} points={guide.measurement} />
-          <MeasurementLabel key={index} points={guide.measurement} />
-        </>
+        <Fragment key={index}>
+          <ExtensionGuide points={guide.extension} />
+          <MeasurementGuide points={guide.measurement} />
+          {showLabels && <MeasurementLabel points={guide.measurement} />}
+        </Fragment>
       ))}
     </>
   );
 });
 
 export default memo(function SnapGuides() {
+  const { canvasSize } = useWorkspace();
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
   const page = Selectors.getCurrentPage(state);
-  const boundingRect = useMemo(
-    () =>
-      Selectors.getBoundingRect(
-        page,
-        AffineTransform.identity,
-        state.selectedObjects,
-        {
-          clickThroughGroups: true,
-          includeHiddenLayers: true,
-          includeArtboardLayers: false,
-        },
-      ),
-    [page, state.selectedObjects],
-  );
 
-  if (interactionState.type !== 'moving' || !boundingRect) return null;
+  const sourceRect = useMemo(() => {
+    switch (interactionState.type) {
+      case 'moving':
+        return Selectors.getBoundingRect(
+          page,
+          AffineTransform.identity,
+          state.selectedObjects,
+          {
+            clickThroughGroups: true,
+            includeHiddenLayers: true,
+            includeArtboardLayers: false,
+          },
+        );
+      case 'insertArtboard':
+      case 'insertOval':
+      case 'insertRectangle':
+      case 'insertText': {
+        const point = interactionState.point;
 
-  const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
+        if (!point) return;
+
+        return createRect(point, point);
+      }
+      case 'drawing': {
+        const current = interactionState.current;
+
+        if (!current) return;
+
+        return createRect(current, current);
+      }
+    }
+  }, [interactionState, page, state.selectedObjects]);
+
+  if (!sourceRect) return null;
+
+  const targetLayers = getPossibleTargetSnapLayers(
     state,
+    canvasSize,
+    interactionState.type === 'moving'
+      ? Selectors.getSelectedLayerIndexPathsExcludingDescendants(state)
+      : undefined,
   );
-
-  const targetLayers = getPossibleSnapLayers(
-    state,
-    layerIndexPaths,
-    interactionState.canvasSize,
-  )
-    // Ensure we don't snap to the selected layer itself
-    .filter((layer) => !state.selectedObjects.includes(layer.do_objectID));
 
   return (
     <>
@@ -174,8 +193,9 @@ export default memo(function SnapGuides() {
           key={axis}
           axis={axis}
           targetLayers={targetLayers}
-          sourceRect={boundingRect}
+          sourceRect={sourceRect}
           page={page}
+          showLabels={interactionState.type === 'moving'}
         />
       ))}
     </>
