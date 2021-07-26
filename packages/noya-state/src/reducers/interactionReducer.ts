@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { Size } from 'noya-geometry';
 import { Point, Rect, UUID } from '../types';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
@@ -34,12 +33,7 @@ type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 // current page) before being passed to the interaction reducer.
 export type SnapshotInteractionAction =
   | [type: 'maybeMove', origin: Point]
-  | [
-      type: 'maybeScale',
-      origin: Point,
-      direction: CompassDirection,
-      canvasSize: Size,
-    ]
+  | [type: 'maybeScale', origin: Point, direction: CompassDirection]
   | [type: 'maybeMovePoint', origin: Point]
   | [type: 'maybeMoveControlPoint', origin: Point];
 
@@ -135,7 +129,6 @@ export type InteractionState =
       type: 'maybeScale';
       origin: Point;
       direction: CompassDirection;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | {
@@ -149,7 +142,6 @@ export type InteractionState =
       origin: Point;
       current: Point;
       direction: CompassDirection;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | { type: 'panMode' }
@@ -239,13 +231,12 @@ export function interactionReducer(
       return { type: action[0], origin, pageSnapshot };
     }
     case 'maybeScale': {
-      const [, origin, direction, canvasSize, pageSnapshot] = action;
+      const [, origin, direction, pageSnapshot] = action;
 
       return {
         type: action[0],
         origin,
         direction,
-        canvasSize,
         pageSnapshot,
       };
     }
@@ -366,7 +357,6 @@ export function interactionReducer(
         origin: state.origin,
         current: point,
         direction: state.direction,
-        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }
