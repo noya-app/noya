@@ -140,6 +140,7 @@ export default memo(function Canvas() {
     Backspace: () => dispatch('deleteLayer', state.selectedObjects),
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
+    'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
   });
 
   useKeyboardShortcuts('keyup', {

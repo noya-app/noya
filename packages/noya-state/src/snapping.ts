@@ -32,7 +32,7 @@ export function getSnapValues(
 export function getPossibleTargetSnapLayers(
   state: ApplicationState,
   canvasSize: Size,
-  sourceIndexPaths: IndexPath[],
+  sourceIndexPaths: IndexPath[] = [],
 ) {
   const page = getCurrentPage(state);
 
@@ -48,16 +48,18 @@ export function getPossibleTargetSnapLayers(
     {
       clickThroughGroups: false,
       includeHiddenLayers: false,
-      includeArtboardLayers: true,
+      includeArtboardLayers:
+        sourceIndexPaths.length === 0 ? 'includeAndClickThrough' : true,
     },
   );
 
   // If we're not snapping a source layer (i.e. a layer with a parent) then
   // we can snap anywhere in the hierarchy
-  if (sourceIndexPaths.length === 0)
+  if (sourceIndexPaths.length === 0) {
     return allVisibleLayers.filter(
       (layer) => !sourceIds.includes(layer.do_objectID),
     );
+  }
 
   // Are all selected ids in the same artboard?
   const inSameArtboard =
@@ -152,7 +154,7 @@ export function getSnapAdjustmentForVisibleLayers(
   state: ApplicationState,
   canvasSize: Size,
   sourceRect: Rect,
-  sourceIndexPaths: IndexPath[],
+  sourceIndexPaths?: IndexPath[],
 ): Point {
   const page = getCurrentPage(state);
 

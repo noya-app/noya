@@ -361,7 +361,6 @@ export function canvasReducer(
               state,
               context.canvasSize,
               createRect(point, point),
-              layerIndexPaths,
             );
 
             const newInteractionState = {
@@ -382,14 +381,12 @@ export function canvasReducer(
               state,
               context.canvasSize,
               createRect(origin, origin),
-              layerIndexPaths,
             );
 
             const currentAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
               context.canvasSize,
               createRect(current, current),
-              layerIndexPaths,
             );
 
             const newInteractionState = {

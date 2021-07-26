@@ -64,6 +64,11 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
+  const isInserting =
+    interactionState.type === 'insertRectangle' ||
+    interactionState.type === 'insertOval' ||
+    interactionState.type === 'insertText' ||
+    interactionState.type === 'insertArtboard';
 
   const canvasRect = useMemo(
     () =>
@@ -359,7 +364,8 @@ export default memo(function SketchFileRenderer() {
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
               boundingRect &&
-              !drawingLayer && (
+              !drawingLayer &&
+              !isInserting && (
                 <>
                   <BoundingRect
                     rect={boundingRect}
@@ -374,11 +380,14 @@ export default memo(function SketchFileRenderer() {
                   ))}
                 </>
               )}
-            {!isEditingPath && highlightedSketchLayer}
+            {!isEditingPath &&
+              !drawingLayer &&
+              !isInserting &&
+              highlightedSketchLayer}
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {boundingRect && !drawingLayer && (
+            {boundingRect && !drawingLayer && !isInserting && (
               <DragHandles
                 rect={boundingRect}
                 selectionPaint={selectionPaint}

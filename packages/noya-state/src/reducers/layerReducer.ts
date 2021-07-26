@@ -383,6 +383,8 @@ export function layerReducer(
       ).reverse();
 
       return produce(state, (draft) => {
+        draft.selectedObjects = [];
+
         pagesIndexPaths.forEach((pagesIndexPath) => {
           const { indexPaths, pageIndex } = pagesIndexPath;
           const page = pages[pageIndex];
@@ -408,6 +410,8 @@ export function layerReducer(
             }) as Exclude<Sketch.AnyLayer, { _class: 'page' }>;
 
             addSiblingLayer(draftPage, indexPath, elem);
+
+            draft.selectedObjects.push(elem.do_objectID);
           });
         });
       });

@@ -29,7 +29,7 @@ import {
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
   clickThroughGroups: boolean;
-  includeArtboardLayers: boolean;
+  includeArtboardLayers: boolean | 'includeAndClickThrough';
 };
 
 function shouldClickThrough(
@@ -38,7 +38,7 @@ function shouldClickThrough(
 ) {
   return (
     layer._class === 'symbolMaster' ||
-    (layer._class === 'artboard' && !options.includeArtboardLayers) ||
+    (layer._class === 'artboard' && options.includeArtboardLayers !== true) ||
     (layer._class === 'group' &&
       (layer.hasClickThrough || options.clickThroughGroups))
   );
@@ -66,9 +66,11 @@ function visitLayersReversed(
 
       if (result === STOP) return result;
 
-      if (!shouldClickThrough(layer, options)) return SKIP;
-
-      return result;
+      if (shouldClickThrough(layer, options)) {
+        return result;
+      } else {
+        return SKIP;
+      }
     },
   });
 }
@@ -105,8 +107,12 @@ export function getLayersInRect(
 
       if (!hasIntersect) return SKIP;
 
-      // Artboards can't be selected themselves
-      if (shouldClickThrough(layer, options)) return;
+      const includeArtboard =
+        layer._class === 'artboard' &&
+        options.includeArtboardLayers === 'includeAndClickThrough';
+
+      // Artboards can't be selected themselves, unless we enable that option
+      if (!includeArtboard && shouldClickThrough(layer, options)) return;
 
       found.push(layer);
     },

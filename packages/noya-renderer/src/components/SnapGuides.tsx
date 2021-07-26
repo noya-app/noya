@@ -178,14 +178,12 @@ export default memo(function SnapGuides() {
 
   if (!sourceRect) return null;
 
-  const layerIndexPaths = Selectors.getSelectedLayerIndexPathsExcludingDescendants(
-    state,
-  );
-
   const targetLayers = getPossibleTargetSnapLayers(
     state,
     canvasSize,
-    layerIndexPaths,
+    interactionState.type === 'moving'
+      ? Selectors.getSelectedLayerIndexPathsExcludingDescendants(state)
+      : undefined,
   );
 
   return (
