@@ -22,16 +22,19 @@ import {
 } from './selectors/selectors';
 import { CompassDirection } from './reducers/interactionReducer';
 
-export function getSnapValues(
-  rect: Rect,
-  axis: Axis,
-): [number, number, number] {
+export function getSnapValues(rect: Rect, axis: Axis): number[] {
   const bounds = createBounds(rect);
 
-  if (axis === 'x') {
-    return [bounds.minX, bounds.midX, bounds.maxX];
+  const values =
+    axis === 'x'
+      ? [bounds.minX, bounds.midX, bounds.maxX]
+      : [bounds.minY, bounds.midY, bounds.maxY];
+
+  // If the values are close enough, don't snap to the midpoint as a separate value
+  if (values[2] - values[0] <= 1) {
+    return [values[0], values[2]];
   } else {
-    return [bounds.minY, bounds.midY, bounds.maxY];
+    return values;
   }
 }
 
