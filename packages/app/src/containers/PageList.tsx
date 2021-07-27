@@ -1,4 +1,4 @@
-import { PlusIcon } from '@radix-ui/react-icons';
+import { FileIcon, PlusIcon, StackIcon } from '@radix-ui/react-icons';
 import {
   useApplicationState,
   useDispatch,
@@ -11,11 +11,11 @@ import {
   RelativeDropPosition,
   Spacer,
 } from 'noya-designsystem';
-import { useState } from 'react';
-import { memo, useCallback, useLayoutEffect, useMemo } from 'react';
-import styled from 'styled-components';
-import useDeepArray from '../hooks/useDeepArray';
+import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
+import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import styled, { useTheme } from 'styled-components';
+import useDeepArray from '../hooks/useDeepArray';
 
 const Container = styled.div(({ theme }) => ({
   height: '200px',
@@ -58,6 +58,10 @@ const PageListContent = memo(function PageListContent({
   didHandleFocus,
 }: Props) {
   const dispatch = useDispatch();
+  const {
+    icon: iconColor,
+    iconSelected: iconSelectedColor,
+  } = useTheme().colors;
   const [editingPage, setEditingPage] = useState<string | undefined>();
 
   const menuItems: MenuItem<MenuItemType>[] = useMemo(
@@ -132,44 +136,56 @@ const PageListContent = memo(function PageListContent({
         )}
         items={pageInfo}
         renderItem={useCallback(
-          (page: PageInfo, index, { isDragging }) => (
-            <ListView.Row<MenuItemType>
-              id={page.do_objectID}
-              key={page.do_objectID}
-              depth={2}
-              selected={!isDragging && selectedPageId === page.do_objectID}
-              onClick={() => {
-                dispatch('interaction', ['reset']);
-                dispatch('selectPage', page.do_objectID);
-              }}
-              menuItems={menuItems}
-              onSelectMenuItem={handleSelectMenuItem}
-              onContextMenu={() => {
-                dispatch('selectPage', page.do_objectID);
-              }}
-            >
-              {page.do_objectID === editingPage ? (
-                <ListView.EditableRowTitle
-                  autoFocus
-                  value={page.name}
-                  onSubmitEditing={(name) => {
-                    setEditingPage(undefined);
+          (page: PageInfo, index, { isDragging }) => {
+            const selected = !isDragging && selectedPageId === page.do_objectID;
+            const IconComponent = Selectors.isSymbolsPage({ name: page.name })
+              ? StackIcon
+              : FileIcon;
 
-                    if (!name) return;
-
-                    dispatch('setPageName', page.do_objectID, name);
-                  }}
+            return (
+              <ListView.Row<MenuItemType>
+                id={page.do_objectID}
+                key={page.do_objectID}
+                selected={selected}
+                onClick={() => {
+                  dispatch('interaction', ['reset']);
+                  dispatch('selectPage', page.do_objectID);
+                }}
+                menuItems={menuItems}
+                onSelectMenuItem={handleSelectMenuItem}
+                onContextMenu={() => {
+                  dispatch('selectPage', page.do_objectID);
+                }}
+              >
+                <IconComponent
+                  color={selected ? iconSelectedColor : iconColor}
                 />
-              ) : (
-                page.name
-              )}
-            </ListView.Row>
-          ),
+                <Spacer.Horizontal size={10} />
+                {page.do_objectID === editingPage ? (
+                  <ListView.EditableRowTitle
+                    autoFocus
+                    value={page.name}
+                    onSubmitEditing={(name) => {
+                      setEditingPage(undefined);
+
+                      if (!name) return;
+
+                      dispatch('setPageName', page.do_objectID, name);
+                    }}
+                  />
+                ) : (
+                  page.name
+                )}
+              </ListView.Row>
+            );
+          },
           [
-            editingPage,
             selectedPageId,
             menuItems,
             handleSelectMenuItem,
+            iconSelectedColor,
+            iconColor,
+            editingPage,
             dispatch,
           ],
         )}
