@@ -7,6 +7,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
+import { PageLayer } from '../layers';
 import {
   addSiblingLayer,
   deleteLayers,
@@ -27,7 +28,6 @@ import {
   LayerIndexPaths,
   moveLayer,
 } from '../selectors/selectors';
-import { PageLayer } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';

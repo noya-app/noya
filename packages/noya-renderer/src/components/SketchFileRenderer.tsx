@@ -2,7 +2,13 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { AffineTransform, createRect, insetRect, Point } from 'noya-geometry';
+import {
+  AffineTransform,
+  createRect,
+  insetRect,
+  Point,
+  Rect,
+} from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
@@ -12,7 +18,6 @@ import {
   encodeCurvePoint,
   Layers,
   Primitives,
-  Rect,
   Selectors,
 } from 'noya-state';
 import React, { memo, useMemo } from 'react';

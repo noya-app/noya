@@ -1,12 +1,11 @@
 import * as CanvasKit from 'canvaskit';
-import { insetRect } from 'noya-geometry';
+import { insetRect, Rect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import {
   getLineDragHandles,
   getRectDragHandles,
   Primitives,
-  Rect,
   Selectors,
 } from 'noya-state';
 import React, { memo } from 'react';

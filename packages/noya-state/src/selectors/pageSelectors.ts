@@ -1,7 +1,7 @@
 import { Draft } from 'immer';
+import { Point } from 'noya-geometry';
 import { Primitives } from 'noya-state';
 import { ApplicationState, Layers } from '../index';
-import type { Point } from '../types';
 
 export type EncodedPageMetadata = {
   zoomValue: number;

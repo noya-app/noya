@@ -8,15 +8,15 @@ import {
   rectsIntersect,
   rotatedRectContainsPoint,
   transformRect,
+  Rect,
+  Point,
 } from 'noya-geometry';
-import * as Primitives from 'noya-state';
-import { getRectDragHandles } from 'noya-state';
+import { getRectDragHandles, Primitives } from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { CanvasInsets } from '../reducers/workspaceReducer';
-import type { Point, Rect } from '../types';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {

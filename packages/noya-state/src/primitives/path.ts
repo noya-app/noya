@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit, Path, PathOp } from 'canvaskit';
-import { distance, Rect } from 'noya-geometry';
-import { parsePoint, Point, stringifyPoint } from 'noya-state';
+import { distance, Point, Rect } from 'noya-geometry';
+import { parsePoint, stringifyPoint } from 'noya-state';
 import { rotate, windowsOf, zip } from 'noya-utils';
 
 /**

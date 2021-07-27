@@ -1,6 +1,6 @@
 import { Paint } from 'canvaskit';
+import { Point } from 'noya-geometry';
 import { useCanvasKit } from 'noya-renderer';
-import { Point } from 'noya-state';
 import { memo, useMemo } from 'react';
 import useDeletable from '../hooks/useDeletable';
 import usePaint from '../hooks/usePaint';

@@ -1,7 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, createBounds, createRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  createRect,
+  Point,
+  Rect,
+} from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -33,7 +39,6 @@ import {
   getScaledSnapBoundingRect,
   getSnapAdjustmentForVisibleLayers,
 } from '../snapping';
-import { Point, Rect } from '../types';
 import {
   ApplicationReducerContext,
   ApplicationState,

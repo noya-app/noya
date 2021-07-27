@@ -10,6 +10,8 @@ import {
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
+export type PageLayer = Sketch.Page['layers'][number];
+
 export type ChildLayer = Exclude<
   Sketch.AnyLayer,
   { _class: 'artboard' | 'symbolMaster' | 'page' }

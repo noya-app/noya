@@ -1,11 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { Point, Rect } from 'noya-geometry';
 import {
   CompassDirection,
   compassDirections,
   decodeCurvePoint,
   DragHandle,
-  Point,
-  Rect,
   Selectors,
 } from 'noya-state';
 

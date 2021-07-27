@@ -10,7 +10,7 @@ import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
-import { createRect, Insets } from 'noya-geometry';
+import { createRect, Insets, Point } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
 import {
@@ -19,7 +19,6 @@ import {
   decodeCurvePoint,
   getSelectedLineLayer,
   Layers,
-  Point,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
