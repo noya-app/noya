@@ -3,18 +3,24 @@ import {
   AffineTransform,
   Axis,
   createBounds,
+  createRect,
   Point,
   Rect,
   Size,
 } from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import { Layers } from '.';
+import { getRectExtentPoint, Layers, resizeRect } from '.';
 import { cartesianProduct } from 'noya-utils';
 import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
-import { getBoundingRect, getCurrentPage } from './selectors/selectors';
+import {
+  getBoundingRect,
+  getCurrentPage,
+  getSelectedLayerIndexPathsExcludingDescendants,
+} from './selectors/selectors';
+import { CompassDirection } from './reducers/interactionReducer';
 
 export function getSnapValues(
   rect: Rect,
@@ -186,4 +192,32 @@ export function getSnapAdjustmentForVisibleLayers(
     x: getSnapAdjustmentDistance(xSnaps),
     y: getSnapAdjustmentDistance(ySnaps),
   };
+}
+
+export function getScaledSnapBoundingRect(
+  state: ApplicationState,
+  boundingRect: Rect,
+  delta: Point,
+  canvasSize: Size,
+  direction: CompassDirection,
+): Rect {
+  const newBoundingRectBeforeSnap = resizeRect(boundingRect, delta, direction);
+
+  const extentPoint = getRectExtentPoint(newBoundingRectBeforeSnap, direction);
+
+  const snapAdjustment = getSnapAdjustmentForVisibleLayers(
+    state,
+    canvasSize,
+    createRect(extentPoint, extentPoint),
+    getSelectedLayerIndexPathsExcludingDescendants(state),
+  );
+
+  return resizeRect(
+    boundingRect,
+    {
+      x: delta.x - snapAdjustment.x,
+      y: delta.y - snapAdjustment.y,
+    },
+    direction,
+  );
 }

@@ -70,3 +70,28 @@ export function getLineDragHandles(
       };
     });
 }
+
+// This function doesn't ensure a positive width/height, since we use it when
+// scaling, which can result in a negative width/height.
+export function getRectExtentPoint(rect: Rect, direction: CompassDirection) {
+  const minX = rect.x;
+  const minY = rect.y;
+  const maxX = rect.x + rect.width;
+  const maxY = rect.y + rect.height;
+  const midX = (maxX + minX) / 2;
+  const midY = (maxY + minY) / 2;
+
+  const x = direction.includes('w')
+    ? minX
+    : direction.includes('e')
+    ? maxX
+    : midX;
+
+  const y = direction.includes('n')
+    ? minY
+    : direction.includes('s')
+    ? maxY
+    : midY;
+
+  return { x, y };
+}

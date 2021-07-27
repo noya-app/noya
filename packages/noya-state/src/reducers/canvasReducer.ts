@@ -1,14 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, createRect, normalizeRect } from 'noya-geometry';
+import { AffineTransform, createBounds, createRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
   Primitives,
-  resizeRect,
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
@@ -30,7 +29,10 @@ import {
   moveLayer,
   moveSelectedPoints,
 } from '../selectors/selectors';
-import { getSnapAdjustmentForVisibleLayers } from '../snapping';
+import {
+  getScaledSnapBoundingRect,
+  getSnapAdjustmentForVisibleLayers,
+} from '../snapping';
 import { Point, Rect } from '../types';
 import {
   ApplicationReducerContext,
@@ -504,18 +506,22 @@ export function canvasReducer(
               direction,
             } = interactionState;
 
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
             const originalBoundingRect = getBoundingRect(
               pageSnapshot,
               AffineTransform.identity,
               layerIds,
             )!;
 
-            const newBoundingRect = resizeRect(
+            const newBoundingRect = getScaledSnapBoundingRect(
+              state,
               originalBoundingRect,
-              {
-                x: current.x - origin.x,
-                y: current.y - origin.y,
-              },
+              delta,
+              context.canvasSize,
               direction,
             );
 
@@ -555,35 +561,32 @@ export function canvasReducer(
                 layerIndex,
               );
 
-              const min = AffineTransform.multiply(
+              const originalBounds = createBounds(originalLayer.frame);
+
+              const scaleTransform = AffineTransform.multiply(
                 layerTransform.invert(),
                 newTransform,
                 originalTransform,
                 layerTransform,
-              ).applyTo({
-                x: originalLayer.frame.x,
-                y: originalLayer.frame.y,
+              );
+
+              const min = scaleTransform.applyTo({
+                x: originalBounds.minX,
+                y: originalBounds.minY,
               });
 
-              const max = AffineTransform.multiply(
-                layerTransform.invert(),
-                newTransform,
-                originalTransform,
-                layerTransform,
-              ).applyTo({
-                x: originalLayer.frame.x + originalLayer.frame.width,
-                y: originalLayer.frame.y + originalLayer.frame.height,
+              const max = scaleTransform.applyTo({
+                x: originalBounds.maxX,
+                y: originalBounds.maxY,
               });
 
-              const width = max.x - min.x;
-              const height = max.y - min.y;
+              const roundedMin = { x: Math.round(min.x), y: Math.round(min.y) };
+              const roundedMax = { x: Math.round(max.x), y: Math.round(max.y) };
 
-              const newFrame = normalizeRect({
-                x: Math.round(min.x),
-                y: Math.round(min.y),
-                width: Math.round(width),
-                height: Math.round(height),
-              });
+              const newFrame = createRect(roundedMin, roundedMax);
+
+              const width = roundedMax.x - roundedMin.x;
+              const height = roundedMax.y - roundedMin.y;
 
               newLayer.isFlippedHorizontal = width < 0;
               newLayer.isFlippedVertical = height < 0;
