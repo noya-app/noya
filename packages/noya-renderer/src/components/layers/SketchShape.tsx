@@ -59,7 +59,7 @@ const SketchShadow = memo(function SketchShadow({
   const paint = usePaint(paintParameters);
 
   const transform = useMemo(
-    () => AffineTransform.translation(shadow.offsetX, shadow.offsetY),
+    () => AffineTransform.translate(shadow.offsetX, shadow.offsetY),
     [shadow.offsetX, shadow.offsetY],
   );
 

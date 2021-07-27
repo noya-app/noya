@@ -24,19 +24,19 @@ export function getLayerFlipTransform(layer: Sketch.AnyLayer) {
   const bounds = createBounds(layer.frame);
 
   return AffineTransform.multiply(
-    AffineTransform.translation(bounds.midX, bounds.midY),
+    AffineTransform.translate(bounds.midX, bounds.midY),
     AffineTransform.scale(
       layer.isFlippedHorizontal ? -1 : 1,
       layer.isFlippedVertical ? -1 : 1,
     ),
-    AffineTransform.translation(-bounds.midX, -bounds.midY),
+    AffineTransform.translate(-bounds.midX, -bounds.midY),
   );
 }
 
 export function getLayerTranslationTransform(
   layer: Sketch.AnyLayer,
 ): AffineTransform {
-  return AffineTransform.translation(layer.frame.x, layer.frame.y);
+  return AffineTransform.translate(layer.frame.x, layer.frame.y);
 }
 
 export function getLayerRotationTransform(
@@ -46,7 +46,7 @@ export function getLayerRotationTransform(
   const midpoint = { x: bounds.midX, y: bounds.midY };
   const rotation = getLayerRotationRadians(layer);
 
-  return AffineTransform.rotation(rotation, midpoint.x, midpoint.y);
+  return AffineTransform.rotate(rotation, midpoint.x, midpoint.y);
 }
 
 export function getLayerTransformAtIndexPath(
@@ -108,7 +108,7 @@ export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {
 }
 
 export function getScreenTransform(insets: CanvasInsets) {
-  return AffineTransform.translation(insets.left, 0);
+  return AffineTransform.translate(insets.left, 0);
 }
 
 export function getCanvasTransform(
@@ -119,7 +119,7 @@ export function getCanvasTransform(
 
   return AffineTransform.multiply(
     getScreenTransform(insets),
-    AffineTransform.translation(scrollOrigin.x, scrollOrigin.y),
+    AffineTransform.translate(scrollOrigin.x, scrollOrigin.y),
     AffineTransform.scale(zoomValue),
   );
 }

@@ -56,13 +56,13 @@ export default function LayerPreview({
   const transform = useMemo(() => {
     return AffineTransform.multiply(
       // Translate to the center of the size
-      AffineTransform.translation(size.width / 2, size.height / 2),
+      AffineTransform.translate(size.width / 2, size.height / 2),
       AffineTransform.scale(
         scaledRect.width / layerSize.width,
         scaledRect.height / layerSize.height,
       ),
       // Translate to (0,0) before scaling, since scale is applied at the origin
-      AffineTransform.translation(-bounds.midX, -bounds.midY),
+      AffineTransform.translate(-bounds.midX, -bounds.midY),
     );
   }, [
     size.width,

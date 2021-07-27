@@ -102,7 +102,7 @@ export class AffineTransform implements Transformable {
     return new AffineTransform([1, 0, 0, 0, 1, 0]);
   }
 
-  static rotation(
+  static rotate(
     theta: number,
     rx: number = 0,
     ry: number = 0,
@@ -118,17 +118,17 @@ export class AffineTransform implements Transformable {
 
     if (rx !== 0 || ry !== 0) {
       return AffineTransform.multiply(
-        AffineTransform.translation(rx, ry),
+        AffineTransform.translate(rx, ry),
         rotation,
-        AffineTransform.translation(-rx, -ry),
+        AffineTransform.translate(-rx, -ry),
       );
     }
 
     return rotation;
   }
 
-  rotation: typeof AffineTransform['rotation'] = (...args) => {
-    return this.transform(AffineTransform.rotation(...args));
+  rotate: typeof AffineTransform['rotate'] = (...args) => {
+    return this.transform(AffineTransform.rotate(...args));
   };
 
   static scale(sx: number, sy: number = sx): AffineTransform {
@@ -139,12 +139,12 @@ export class AffineTransform implements Transformable {
     return this.transform(AffineTransform.scale(...args));
   };
 
-  static translation(tx: number, ty: number): AffineTransform {
+  static translate(tx: number, ty: number): AffineTransform {
     return new AffineTransform([1, 0, tx, 0, 1, ty]);
   }
 
-  translate: typeof AffineTransform['translation'] = (...args) => {
-    return this.transform(AffineTransform.translation(...args));
+  translate: typeof AffineTransform['translate'] = (...args) => {
+    return this.transform(AffineTransform.translate(...args));
   };
 
   /**

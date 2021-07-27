@@ -531,7 +531,7 @@ export function canvasReducer(
             );
 
             const originalTransform = AffineTransform.multiply(
-              AffineTransform.translation(
+              AffineTransform.translate(
                 originalBoundingRect.x,
                 originalBoundingRect.y,
               ),
@@ -542,7 +542,7 @@ export function canvasReducer(
             ).invert();
 
             const newTransform = AffineTransform.multiply(
-              AffineTransform.translation(newBoundingRect.x, newBoundingRect.y),
+              AffineTransform.translate(newBoundingRect.x, newBoundingRect.y),
               AffineTransform.scale(
                 newBoundingRect.width,
                 newBoundingRect.height,
@@ -556,7 +556,7 @@ export function canvasReducer(
                 ...Layers.accessPath(pageSnapshot, layerIndex)
                   .slice(1, -1) // Remove the page and current layer
                   .map((layer) =>
-                    AffineTransform.translation(layer.frame.x, layer.frame.y),
+                    AffineTransform.translate(layer.frame.x, layer.frame.y),
                   )
                   .reverse(),
               );

@@ -40,7 +40,7 @@ const Symbol = memo(function Symbol({
 
   const transform = useMemo(
     () =>
-      AffineTransform.translation(
+      AffineTransform.translate(
         layer.frame.x - symbolMaster.frame.x,
         layer.frame.y - symbolMaster.frame.y,
       ),

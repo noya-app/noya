@@ -108,9 +108,9 @@ export function MeasurementLabel({ points }: Props) {
   const transform = useMemo(() => {
     switch (orientation) {
       case 'vertical':
-        return AffineTransform.translation(6, -backgroundSize.height / 2);
+        return AffineTransform.translate(6, -backgroundSize.height / 2);
       case 'horizontal':
-        return AffineTransform.translation(-backgroundSize.width / 2, 6);
+        return AffineTransform.translate(-backgroundSize.width / 2, 6);
     }
   }, [backgroundSize, orientation]);
 

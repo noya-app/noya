@@ -78,7 +78,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
 
   const newGroupTransform = AffineTransform.multiply(
     newParentTransform,
-    AffineTransform.translation(groupFrame.x, groupFrame.y),
+    AffineTransform.translate(groupFrame.x, groupFrame.y),
   );
 
   return produce(model, (draft) => {

@@ -103,7 +103,7 @@ const SketchMask = memo(function SketchGroup({
 
 export default memo(function SketchGroup({ layer }: Props) {
   const transform = useMemo(
-    () => AffineTransform.translation(layer.frame.x, layer.frame.y),
+    () => AffineTransform.translate(layer.frame.x, layer.frame.y),
     [layer.frame.x, layer.frame.y],
   );
 
