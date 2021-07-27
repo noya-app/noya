@@ -34,7 +34,7 @@ const rectangle = SketchModel.rectangle({
   }),
 });
 
-const oval = SketchModel.rectangle({
+const oval = SketchModel.oval({
   frame: SketchModel.rect({
     x: 200,
     y: 200,
@@ -125,6 +125,159 @@ describe('move', () => {
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 460, y: 460 }]],
       ['interaction', ['updateMoving', { x: 475, y: 475 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+});
+
+describe('scale', () => {
+  test('scale one layer se', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale one layer ne', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'ne']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale one layer nw', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'nw']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale one layer sw', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'sw']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale multiple layer', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale one layer in artboard', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 450,
+        y: 450,
+        width: 300,
+        height: 300,
+      }),
+      layers: [rectangle],
+    });
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('scale layers in different parents', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 450,
+        y: 450,
+        width: 300,
+        height: 300,
+      }),
+      layers: [rectangle],
+    });
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard, oval] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
+      ['interaction', ['updateScaling', { x: 125, y: 125 }]],
     ]);
 
     expect(

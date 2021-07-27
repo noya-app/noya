@@ -164,11 +164,6 @@ export default memo(function Canvas() {
     setCanvasSize(containerSize, insets);
   }, [insets, setCanvasSize, containerSize]);
 
-  const visibleCanvasSize = useMemo(
-    () => containerSize ?? { width: 0, height: 0 },
-    [containerSize],
-  );
-
   const canvasSizeWithInsets = useMemo(
     () =>
       containerSize && containerSize.width > 0 && containerSize.height > 0
@@ -343,12 +338,7 @@ export default memo(function Canvas() {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction) {
-              dispatch('interaction', [
-                'maybeScale',
-                point,
-                direction,
-                visibleCanvasSize,
-              ]);
+              dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
             }
@@ -389,7 +379,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, CanvasKit, insets, dispatch, visibleCanvasSize],
+    [offsetEventPoint, state, CanvasKit, insets, dispatch],
   );
 
   const handleMouseMove = useCallback(
@@ -440,7 +430,7 @@ export default memo(function Canvas() {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
                 ? 'updateMoving'
-                : 'startScaling',
+                : 'updateScaling',
               point,
             ]);
           }

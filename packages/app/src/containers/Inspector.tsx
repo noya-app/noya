@@ -24,6 +24,7 @@ import ThemeTextInspector from './ThemeTextInspector';
 import getMultiValue from '../utils/getMultiValue';
 import LineInspector from '../components/inspector/LineInspector';
 import styled from 'styled-components';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 const PointControlsContainer = styled.div({
   padding: '0 10px',
@@ -96,19 +97,19 @@ export default memo(function Inspector() {
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {
-    const dimensionsInspectorProps =
-      selectedLayers.length === 1
-        ? {
-            ...selectedLayers[0].frame,
-            rotation: Selectors.getLayerRotation(selectedLayers[0]),
-          }
-        : {
-            x: undefined,
-            y: undefined,
-            width: undefined,
-            height: undefined,
-            rotation: undefined,
-          };
+    const dimensionsInspectorProps = {
+      x: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.x)),
+      y: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.y)),
+      width: getMultiNumberValue(
+        selectedLayers.map((layer) => layer.frame.width),
+      ),
+      height: getMultiNumberValue(
+        selectedLayers.map((layer) => layer.frame.height),
+      ),
+      rotation: getMultiNumberValue(
+        selectedLayers.map(Selectors.getLayerRotation),
+      ),
+    };
 
     const onlyBitmapLayers = selectedLayers.every((l) =>
       Layers.isBitmapLayer(l),

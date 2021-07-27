@@ -12,6 +12,8 @@ import {
 import {
   getLayerSnapValues,
   getPossibleTargetSnapLayers,
+  getRectExtentPoint,
+  getScaledSnapBoundingRect,
   getSnaps,
   getSnapValues,
   Selectors,
@@ -156,6 +158,32 @@ export default memo(function SnapGuides() {
             includeArtboardLayers: false,
           },
         );
+      case 'scaling': {
+        const { origin, current, pageSnapshot, direction } = interactionState;
+
+        const delta = {
+          x: current.x - origin.x,
+          y: current.y - origin.y,
+        };
+
+        const originalBoundingRect = Selectors.getBoundingRect(
+          pageSnapshot,
+          AffineTransform.identity,
+          state.selectedObjects,
+        )!;
+
+        const newBoundingRect = getScaledSnapBoundingRect(
+          state,
+          originalBoundingRect,
+          delta,
+          canvasSize,
+          direction,
+        );
+
+        const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
+
+        return createRect(newExtentPoint, newExtentPoint);
+      }
       case 'insertArtboard':
       case 'insertOval':
       case 'insertRectangle':
@@ -174,14 +202,14 @@ export default memo(function SnapGuides() {
         return createRect(current, current);
       }
     }
-  }, [interactionState, page, state.selectedObjects]);
+  }, [canvasSize, interactionState, page, state]);
 
   if (!sourceRect) return null;
 
   const targetLayers = getPossibleTargetSnapLayers(
     state,
     canvasSize,
-    interactionState.type === 'moving'
+    interactionState.type === 'moving' || interactionState.type === 'scaling'
       ? Selectors.getSelectedLayerIndexPathsExcludingDescendants(state)
       : undefined,
   );
