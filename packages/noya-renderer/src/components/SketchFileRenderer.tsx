@@ -69,12 +69,7 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
-  const isInserting =
-    interactionState.type === 'insertRectangle' ||
-    interactionState.type === 'insertOval' ||
-    interactionState.type === 'insertText' ||
-    interactionState.type === 'insertArtboard';
-
+  const isInserting = interactionState.type === 'insert';
   const canvasRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
@@ -354,9 +349,7 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {symbol && (
-          <SketchArtboardContent layer={symbol} showBackground={false} />
-        )}
+        {symbol && <SketchArtboardContent layer={symbol} />}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
         ) : isEditingPath ? (

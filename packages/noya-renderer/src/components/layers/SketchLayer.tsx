@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
@@ -9,9 +10,10 @@ import SketchShape from './SketchShape';
 import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
 import SketchShapeGroup from './SketchShapeGroup';
+import SketchSlice from './SketchSlice';
 
 interface Props {
-  layer: PageLayer;
+  layer: PageLayer | Sketch.Page;
 }
 
 export default memo(function SketchLayer({ layer }: Props) {
@@ -26,6 +28,7 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'symbolMaster':
       element = <SketchArtboard layer={layer} isSymbolMaster={true} />;
       break;
+    case 'page':
     case 'group':
       element = <SketchGroup layer={layer} />;
       break;
@@ -48,6 +51,9 @@ export default memo(function SketchLayer({ layer }: Props) {
       break;
     case 'symbolInstance':
       element = <SketchSymbolInstance layer={layer} />;
+      break;
+    case 'slice':
+      element = <SketchSlice layer={layer} />;
       break;
     default:
       console.info(layer._class, 'not handled');

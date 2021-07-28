@@ -184,10 +184,7 @@ export default memo(function SnapGuides() {
 
         return createRect(newExtentPoint, newExtentPoint);
       }
-      case 'insertArtboard':
-      case 'insertOval':
-      case 'insertRectangle':
-      case 'insertText': {
+      case 'insert': {
         const point = interactionState.point;
 
         if (!point) return;

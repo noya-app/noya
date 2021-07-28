@@ -80,6 +80,10 @@ export const isArtboard = (
   return layer._class === 'artboard';
 };
 
+export const isSlice = (layer: Sketch.AnyLayer): layer is Sketch.Slice => {
+  return layer._class === 'slice';
+};
+
 export const isSymbolMasterOrArtboard = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolMaster | Sketch.Artboard => {

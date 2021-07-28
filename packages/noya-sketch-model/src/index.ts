@@ -172,6 +172,20 @@ function colorControls(
   };
 }
 
+function exportFormat(
+  options?: ModelOptions<Sketch.ExportFormat>,
+): Sketch.ExportFormat {
+  return {
+    absoluteSize: 0,
+    fileFormat: Sketch.ExportFileFormat.PNG,
+    name: '',
+    scale: 1,
+    visibleScaleType: Sketch.VisibleScaleType.Scale,
+    ...options,
+    _class: Sketch.ClassValue.ExportFormat,
+  };
+}
+
 function exportOptions(
   options?: ModelOptions<Sketch.ExportOptions>,
 ): Sketch.ExportOptions {
@@ -481,6 +495,18 @@ function group(options?: ModelOptions<Sketch.Group>): Sketch.Group {
   };
 }
 
+function slice(options?: ModelOptions<Sketch.Slice>): Sketch.Slice {
+  return {
+    ...newLayerBase(options),
+    name: 'Slice',
+    style: style(),
+    hasBackgroundColor: false,
+    backgroundColor: color({ blue: 1, green: 1, red: 1 }),
+    ...options,
+    _class: Sketch.ClassValue.Slice,
+  };
+}
+
 function rulerData(options?: ModelOptions<Sketch.RulerData>): Sketch.RulerData {
   return {
     base: 0,
@@ -697,6 +723,8 @@ export const SketchModel = {
   dataReference,
   document,
   encodedAttributes,
+  exportFormat,
+  exportOptions,
   fileReference,
   fill,
   fontDescriptor,
@@ -715,6 +743,7 @@ export const SketchModel = {
   shadow,
   shapeGroup,
   shapePath,
+  slice,
   style,
   symbolInstance,
   symbolMaster,

@@ -26,7 +26,12 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
+export type DrawableLayerType =
+  | 'rectangle'
+  | 'oval'
+  | 'text'
+  | 'artboard'
+  | 'slice';
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 
@@ -40,12 +45,12 @@ export type SnapshotInteractionAction =
 
 export type InteractionAction =
   | [type: 'reset']
-  | [type: `insert${Capitalize<ShapeType>}`, current?: Point]
+  | [type: 'insert', layerType: DrawableLayerType, current?: Point]
   | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
-  | [type: 'startDrawing', shapeType: ShapeType, point: Point]
+  | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
@@ -67,7 +72,8 @@ export type InteractionState =
       type: 'none';
     }
   | {
-      type: `insert${Capitalize<ShapeType>}`;
+      type: 'insert';
+      layerType: DrawableLayerType;
       point?: Point;
     }
   | {
@@ -87,7 +93,7 @@ export type InteractionState =
       type: 'drawing';
       origin: Point;
       current: Point;
-      shapeType: ShapeType;
+      shapeType: DrawableLayerType;
     }
   | {
       type: 'marquee';
@@ -163,13 +169,9 @@ export function interactionReducer(
       const [, point] = action;
       return { type: 'editPath', point: point };
     }
-
-    case 'insertArtboard':
-    case 'insertOval':
-    case 'insertRectangle':
-    case 'insertText': {
-      const [, point] = action;
-      return { type: action[0], point };
+    case 'insert': {
+      const [, layerType, point] = action;
+      return { type: action[0], layerType, point };
     }
     case 'insertingSymbol': {
       const [, symbolID, point] = action;

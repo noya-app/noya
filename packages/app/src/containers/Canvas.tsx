@@ -22,7 +22,6 @@ import {
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
-  ShapeType,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
 import {
@@ -219,13 +218,10 @@ export default memo(function Canvas() {
       if (!MouseEvent.isLeftButtonClicked(event)) return;
 
       switch (state.interactionState.type) {
-        case 'insertArtboard':
-        case 'insertRectangle':
-        case 'insertOval':
-        case 'insertText': {
+        case 'insert': {
           dispatch('interaction', [
             'startDrawing',
-            state.interactionState.type.slice(6).toLowerCase() as ShapeType,
+            state.interactionState.layerType,
             point,
           ]);
           break;
@@ -387,11 +383,12 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
-        case 'insertArtboard':
-        case 'insertRectangle':
-        case 'insertOval':
-        case 'insertText':
-          dispatch('interaction', [state.interactionState.type, point]);
+        case 'insert':
+          dispatch('interaction', [
+            state.interactionState.type,
+            state.interactionState.layerType,
+            point,
+          ]);
           break;
         case 'insertingSymbol': {
           dispatch('interaction', [
@@ -721,10 +718,7 @@ export default memo(function Canvas() {
         return 'grabbing';
       case 'panMode':
         return 'grab';
-      case 'insertArtboard':
-      case 'insertOval':
-      case 'insertRectangle':
-      case 'insertText':
+      case 'insert':
         return 'crosshair';
       case 'drawingShapePath':
         return 'crosshair';
