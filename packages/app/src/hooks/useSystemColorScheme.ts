@@ -5,8 +5,8 @@ const preferDarkQuery = '(prefers-color-scheme: dark)';
 
 type ColorScheme = 'light' | 'dark';
 
-export default function useSystemColorScheme(glbl = global) {
-  const mediaQuery = useLazyValue(() => glbl.matchMedia(preferDarkQuery));
+export default function useSystemColorScheme() {
+  const mediaQuery = useLazyValue(() => global.matchMedia(preferDarkQuery));
 
   const [colorScheme, setColorScheme] = useState<ColorScheme>(
     mediaQuery.matches ? 'dark' : 'light',

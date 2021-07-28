@@ -1,41 +1,32 @@
-import {
-  HamburgerMenuIcon,
-  StackIcon,
-  TokensIcon,
-} from '@radix-ui/react-icons';
+import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 import { fileOpen, fileSave, FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
   useGetStateSnapshot,
-  useSelector,
   useWorkspace,
 } from 'noya-app-state-context';
 import {
   Button,
   createSectionedMenu,
   DropdownMenu,
-  RadioGroup,
   Spacer,
 } from 'noya-designsystem';
 import { decode, encode } from 'noya-sketch-file';
-import { ApplicationState, Selectors, WorkspaceTab } from 'noya-state';
+import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
   display: 'flex',
-  borderBottom: `1px solid transparent`, // For height to match toolbar
-  alignItems: 'center',
+  flexDirection: 'column',
+  borderBottom: `1px solid ${theme.colors.divider}`,
+  alignItems: 'stretch',
+  justifyContent: 'center',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
-}));
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
 }));
 
 type MenuItemType =
@@ -48,7 +39,6 @@ type MenuItemType =
   | 'showRulers';
 
 interface Props {
-  currentTab: WorkspaceTab;
   fileHandle?: FileSystemHandle;
   getStateSnapshot: () => ApplicationState;
   setShowRulers: (value: boolean) => void;
@@ -58,7 +48,6 @@ interface Props {
 }
 
 const MenubarContent = memo(function MenubarContent({
-  currentTab,
   fileHandle,
   getStateSnapshot,
   setShowRulers,
@@ -67,13 +56,6 @@ const MenubarContent = memo(function MenubarContent({
   undoDisabled,
 }: Props) {
   const dispatch = useDispatch();
-
-  const handleChangeTab = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch('setTab', event.target.value as WorkspaceTab);
-    },
-    [dispatch],
-  );
 
   const menuItems = useMemo(
     () =>
@@ -85,8 +67,8 @@ const MenubarContent = memo(function MenubarContent({
           { value: 'saveAs', title: 'File: Save As...' },
         ],
         [
-          { value: 'undo', title: 'Edit: Undo' },
-          { value: 'redo', title: 'Edit: Redo' },
+          { value: 'undo', title: 'Edit: Undo', disabled: undoDisabled },
+          { value: 'redo', title: 'Edit: Redo', disabled: redoDisabled },
         ],
         [
           {
@@ -96,7 +78,7 @@ const MenubarContent = memo(function MenubarContent({
           },
         ],
       ),
-    [showRulers],
+    [redoDisabled, showRulers, undoDisabled],
   );
 
   const onSelectMenuItem = useCallback(
@@ -153,8 +135,8 @@ const MenubarContent = memo(function MenubarContent({
 
   return (
     <Container>
-      <Spacer.Horizontal size={8} />
-      <Row>
+      <InspectorPrimitives.Row>
+        <Spacer.Horizontal size={8} />
         <DropdownMenu<MenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
@@ -163,17 +145,8 @@ const MenubarContent = memo(function MenubarContent({
             <HamburgerMenuIcon />
           </Button>
         </DropdownMenu>
-        <Spacer.Horizontal />
-        <RadioGroup.Root value={currentTab} onValueChange={handleChangeTab}>
-          <RadioGroup.Item value="canvas" tooltip="Canvas">
-            <StackIcon />
-          </RadioGroup.Item>
-          <RadioGroup.Item value="theme" tooltip="Theme">
-            <TokensIcon />
-          </RadioGroup.Item>
-        </RadioGroup.Root>
-      </Row>
-      <Spacer.Horizontal size={8} />
+        <Spacer.Horizontal size={8} />
+      </InspectorPrimitives.Row>
     </Container>
   );
 });
@@ -185,12 +158,10 @@ export default function Menubar() {
     preferences: { showRulers },
   } = useWorkspace();
   const getStateSnapshot = useGetStateSnapshot();
-  const currentTab = useSelector(Selectors.getCurrentTab);
   const { redoDisabled, undoDisabled } = useHistory();
 
   return (
     <MenubarContent
-      currentTab={currentTab}
       fileHandle={fileHandle}
       getStateSnapshot={getStateSnapshot}
       redoDisabled={redoDisabled}

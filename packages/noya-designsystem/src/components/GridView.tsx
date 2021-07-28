@@ -175,6 +175,7 @@ function GridViewSectionHeader({ title }: { title: string }) {
 
   return (
     <SectionHeaderContainer>
+      <Spacer.Vertical size={12} />
       {withSeparatorElements(
         grouped.map((title, index) => (
           <SectionTitle last={index === grouped.length - 1}>

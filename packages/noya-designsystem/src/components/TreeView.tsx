@@ -82,5 +82,6 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
 
 export const Root = ListView.Root;
 export const RowTitle = ListView.RowTitle;
+export const EditableRowTitle = ListView.EditableRowTitle;
 export const Row = memo(TreeRow);
 export type TreeViewClickInfo = ListView.ListViewClickInfo;

@@ -1,4 +1,5 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
   Divider,
@@ -8,9 +9,8 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
-import { memo, useState } from 'react';
+import { useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useSelector } from 'noya-app-state-context';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
@@ -65,13 +65,18 @@ const FilterContainer = styled.div(({ theme }) => ({
   display: 'flex',
 }));
 
-const CanvasTab = memo(function CanvasTab() {
+export default function Workspace() {
+  const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
+  const currentTab = useSelector(Selectors.getCurrentTab);
 
   return (
-    <>
+    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       <LeftSidebar>
         <Menubar />
+        <PageList />
+        <Divider />
+        {currentTab === 'canvas' ? <LayerList /> : <ThemeGroups />}
         <FilterContainer>
           <InputField.Root labelPosition="start" labelSize={14}>
             <InputField.Input
@@ -84,56 +89,19 @@ const CanvasTab = memo(function CanvasTab() {
             </InputField.Label>
           </InputField.Root>
         </FilterContainer>
-        <Spacer.Vertical size={4} />
-        <PageList />
-        <Divider />
-        <LayerList />
+        <Spacer.Vertical size={8} />
       </LeftSidebar>
       <MainView>
-        <Toolbar />
+        {currentTab === 'canvas' ? <Toolbar /> : <ThemeToolbar />}
         <ContentArea>
-          <Canvas />
+          {currentTab === 'canvas' ? <Canvas /> : <ThemeWindow />}
           <RightSidebar>
             <ScrollArea>
-              <Inspector />
+              {currentTab === 'canvas' ? <Inspector /> : <ThemeInspector />}
             </ScrollArea>
           </RightSidebar>
         </ContentArea>
       </MainView>
-    </>
-  );
-});
-
-const ThemeTab = memo(function ThemeTab() {
-  return (
-    <>
-      <LeftSidebar>
-        <Menubar />
-        <Spacer.Vertical size={4} />
-        <ThemeGroups />
-      </LeftSidebar>
-      <MainView>
-        <ThemeToolbar />
-        <ContentArea>
-          <ThemeWindow />
-          <RightSidebar>
-            <ScrollArea>
-              <ThemeInspector />
-            </ScrollArea>
-          </RightSidebar>
-        </ContentArea>
-      </MainView>
-    </>
-  );
-});
-
-export default function Workspace() {
-  const colorScheme = useSystemColorScheme();
-  const currentTab = useSelector(Selectors.getCurrentTab);
-
-  return (
-    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-      {currentTab === 'canvas' ? <CanvasTab /> : <ThemeTab />}
     </ThemeProvider>
   );
 }

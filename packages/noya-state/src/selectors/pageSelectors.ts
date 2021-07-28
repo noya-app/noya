@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Draft } from 'immer';
 import { Point } from 'noya-geometry';
 import { Primitives } from 'noya-state';
@@ -25,12 +26,11 @@ export const getCurrentPageIndex = (state: Draft<ApplicationState>) => {
   return pageIndex;
 };
 
-export const getSymbolsPageIndex = (state: ApplicationState) => {
-  const pageIndex = state.sketch.pages.findIndex(
-    (page) => page.name === 'Symbols',
-  );
+export const isSymbolsPage = (page: Pick<Sketch.Page, 'name'>) =>
+  page.name === 'Symbols';
 
-  return pageIndex;
+export const getSymbolsPageIndex = (state: ApplicationState) => {
+  return state.sketch.pages.findIndex(isSymbolsPage);
 };
 
 export const getCurrentPage = (state: Draft<ApplicationState>) => {
