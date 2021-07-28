@@ -134,6 +134,7 @@ const RowContainer = styled.li<{
     ...(isSectionHeader && { fontWeight: 500 }),
     flex: '0 0 auto',
     userSelect: 'none',
+    cursor: 'default',
     borderTopRightRadius: '4px',
     borderTopLeftRadius: '4px',
     borderBottomRightRadius: '4px',
