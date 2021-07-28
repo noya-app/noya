@@ -204,7 +204,10 @@ export default memo(function Inspector() {
     hasContextSettingsLayers,
   ]);
 
-  if (state.interactionState.type === 'insertArtboard') {
+  if (
+    state.interactionState.type === 'insert' &&
+    state.interactionState.layerType === 'artboard'
+  ) {
     return <ArtboardSizeList />;
   }
 

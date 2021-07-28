@@ -13,7 +13,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { InteractionType, Selectors } from 'noya-state';
+import { DrawableLayerType, InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
@@ -34,8 +34,15 @@ const Row = styled.div(({ theme }) => ({
   minWidth: '50px',
 }));
 
+type InteractionStateProjection =
+  | {
+      type: 'insert';
+      layerType: DrawableLayerType;
+    }
+  | { type: Exclude<InteractionType, 'insert'> };
+
 interface Props {
-  interactionType: InteractionType;
+  interactionStateProjection: InteractionStateProjection;
   selectedLayerIds: string[];
 }
 
@@ -44,7 +51,7 @@ type InsertMenuShape = 'artboard' | 'rectangle' | 'oval' | 'vector' | 'text';
 const SYMBOL_ITEM_PREFIX = 'symbol:';
 
 const ToolbarContent = memo(function ToolbarContent({
-  interactionType,
+  interactionStateProjection,
   selectedLayerIds,
 }: Props) {
   const dispatch = useDispatch();
@@ -68,10 +75,16 @@ const ToolbarContent = memo(function ToolbarContent({
     symbolsMenuItems,
   );
 
-  const isInsertArtboard = interactionType === 'insertArtboard';
-  const isInsertRectangle = interactionType === 'insertRectangle';
-  const isInsertOval = interactionType === 'insertOval';
-  const isInsertText = interactionType === 'insertText';
+  const interactionType = interactionStateProjection.type;
+  const isInsertingLayerType =
+    interactionStateProjection.type === 'insert'
+      ? interactionStateProjection.layerType
+      : undefined;
+
+  const isInsertArtboard = isInsertingLayerType === 'artboard';
+  const isInsertRectangle = isInsertingLayerType === 'rectangle';
+  const isInsertOval = isInsertingLayerType === 'oval';
+  const isInsertText = isInsertingLayerType === 'text';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
@@ -84,7 +97,7 @@ const ToolbarContent = memo(function ToolbarContent({
     if (isInsertArtboard) {
       dispatch('interaction', ['reset']);
     } else {
-      dispatch('interaction', ['insertArtboard']);
+      dispatch('interaction', ['insert', 'artboard']);
     }
   }, [dispatch, isInsertArtboard]);
 
@@ -92,7 +105,7 @@ const ToolbarContent = memo(function ToolbarContent({
     if (isInsertRectangle) {
       dispatch('interaction', ['reset']);
     } else {
-      dispatch('interaction', ['insertRectangle']);
+      dispatch('interaction', ['insert', 'rectangle']);
     }
   }, [isInsertRectangle, dispatch]);
 
@@ -100,7 +113,7 @@ const ToolbarContent = memo(function ToolbarContent({
     if (isInsertOval) {
       dispatch('interaction', ['reset']);
     } else {
-      dispatch('interaction', ['insertOval']);
+      dispatch('interaction', ['insert', 'oval']);
     }
   }, [isInsertOval, dispatch]);
 
@@ -108,7 +121,7 @@ const ToolbarContent = memo(function ToolbarContent({
     if (isInsertText) {
       dispatch('interaction', ['reset']);
     } else {
-      dispatch('interaction', ['insertText']);
+      dispatch('interaction', ['insert', 'text']);
     }
   }, [isInsertText, dispatch]);
 
@@ -128,16 +141,16 @@ const ToolbarContent = memo(function ToolbarContent({
       } else {
         switch (value as InsertMenuShape) {
           case 'artboard':
-            dispatch('interaction', ['insertArtboard']);
+            dispatch('interaction', ['insert', 'artboard']);
             break;
           case 'rectangle':
-            dispatch('interaction', ['insertRectangle']);
+            dispatch('interaction', ['insert', 'rectangle']);
             break;
           case 'oval':
-            dispatch('interaction', ['insertOval']);
+            dispatch('interaction', ['insert', 'oval']);
             break;
           case 'text':
-            dispatch('interaction', ['insertText']);
+            dispatch('interaction', ['insert', 'text']);
             break;
           case 'vector':
             dispatch('interaction', ['drawingShapePath']);
@@ -228,9 +241,22 @@ export default function Toolbar() {
   const [state] = useApplicationState();
   const selectedLayerIds = useShallowArray(state.selectedObjects);
 
+  const layerType =
+    state.interactionState.type === 'insert'
+      ? state.interactionState.layerType
+      : undefined;
+
+  const projection = useMemo(
+    (): InteractionStateProjection =>
+      state.interactionState.type === 'insert'
+        ? { type: 'insert', layerType: layerType! }
+        : { type: state.interactionState.type },
+    [state.interactionState.type, layerType],
+  );
+
   return (
     <ToolbarContent
-      interactionType={state.interactionState.type}
+      interactionStateProjection={projection}
       selectedLayerIds={selectedLayerIds}
     />
   );

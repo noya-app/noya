@@ -46,7 +46,7 @@ import {
 import {
   InteractionAction,
   interactionReducer,
-  ShapeType,
+  DrawableLayerType,
   SnapshotInteractionAction,
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
@@ -356,10 +356,7 @@ export function canvasReducer(
             });
             break;
           }
-          case 'insertArtboard':
-          case 'insertOval':
-          case 'insertRectangle':
-          case 'insertText': {
+          case 'insert': {
             const { point } = interactionState;
 
             if (!point) return;
@@ -658,7 +655,7 @@ export function canvasReducer(
 }
 
 export function createDrawingLayer(
-  shapeType: ShapeType,
+  shapeType: DrawableLayerType,
   style: Sketch.Style,
   rect: Rect,
 ): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
