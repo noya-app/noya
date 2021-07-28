@@ -354,9 +354,7 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {symbol && (
-          <SketchArtboardContent layer={symbol} showBackground={false} />
-        )}
+        {symbol && <SketchArtboardContent layer={symbol} />}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
         ) : isEditingPath ? (

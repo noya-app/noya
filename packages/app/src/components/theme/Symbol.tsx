@@ -13,7 +13,8 @@ export default memo(function Symbol({ layer }: Props) {
       renderContent={(size) => (
         <RCKLayerPreview
           layer={layer}
-          size={size}
+          layerFrame={layer.frame}
+          previewSize={size}
           padding={10}
           scalingMode="down"
         />

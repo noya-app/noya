@@ -1,3 +1,4 @@
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   AffineTransform,
   createBounds,
@@ -14,6 +15,7 @@ import {
 } from 'noya-renderer';
 import { Layers, PageLayer, Primitives } from 'noya-state';
 import { useMemo } from 'react';
+
 import useCheckeredFill from '../hooks/useCheckeredFill';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 
@@ -25,8 +27,9 @@ function CheckeredRect({ rect }: { rect: Rect }) {
 }
 
 interface Props {
-  layer: PageLayer;
-  size: Size;
+  layer: PageLayer | Sketch.Page;
+  layerFrame: Rect;
+  previewSize: Size;
   padding?: number;
   scalingMode?: 'upOrDown' | 'down';
   showCheckeredBackground?: boolean;
@@ -34,19 +37,20 @@ interface Props {
 
 export default function LayerPreview({
   layer,
-  size,
+  layerFrame: frame,
+  previewSize: size,
   padding = 0,
   scalingMode = 'upOrDown',
   showCheckeredBackground = false,
 }: Props) {
-  const bounds = createBounds(layer.frame);
+  const bounds = createBounds(frame);
 
   const paddedSize = {
     width: size.width - padding * 2,
     height: size.height - padding * 2,
   };
 
-  const layerSize = { width: layer.frame.width, height: layer.frame.height };
+  const layerSize = { width: frame.width, height: frame.height };
 
   const scaledRect =
     scalingMode === 'down'
@@ -80,12 +84,7 @@ export default function LayerPreview({
       {showCheckeredBackground && <CheckeredRect rect={scaledRect} />}
       <Group transform={transform}>
         {Layers.isSymbolMasterOrArtboard(layer) ? (
-          <SketchArtboardContent
-            layer={layer}
-            showBackground={
-              layer.hasBackgroundColor && layer.includeBackgroundColorInExport
-            }
-          />
+          <SketchArtboardContent layer={layer} />
         ) : (
           <SketchLayer layer={layer} />
         )}

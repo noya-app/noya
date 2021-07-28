@@ -6,6 +6,7 @@ import {
   ComponentsProvider,
   FontManagerProvider,
   ImageCacheProvider,
+  RenderingModeProvider,
   SketchFileRenderer,
   useCanvasKit,
 } from 'noya-renderer';
@@ -68,7 +69,9 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
               <ImageCacheProvider>
                 <FontManagerProvider>
                   <ComponentsProvider value={Components}>
-                    <SketchFileRenderer />
+                    <RenderingModeProvider value="interactive">
+                      <SketchFileRenderer />
+                    </RenderingModeProvider>
                   </ComponentsProvider>
                 </FontManagerProvider>
               </ImageCacheProvider>

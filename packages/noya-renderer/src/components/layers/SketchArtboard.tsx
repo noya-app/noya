@@ -17,6 +17,7 @@ import {
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import SketchGroup from './SketchGroup';
+import { useRenderingMode } from '../../RenderingModeContext';
 
 interface ArtboardLabelProps {
   text: string;
@@ -102,12 +103,10 @@ const ArtboardBlur = memo(function ArtboardBlur({
 
 interface SketchArtboardContentProps {
   layer: Sketch.Artboard | Sketch.SymbolMaster;
-  showBackground: boolean;
 }
 
 export const SketchArtboardContent = memo(function SketchArtboardContent({
   layer,
-  showBackground,
 }: SketchArtboardContentProps) {
   const CanvasKit = useCanvasKit();
 
@@ -127,6 +126,11 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
     }),
     [CanvasKit.ClipOp.Intersect, rect],
   );
+
+  const renderingMode = useRenderingMode();
+  const showBackground =
+    renderingMode === 'interactive' ||
+    (layer.hasBackgroundColor && layer.includeBackgroundColorInExport);
 
   return (
     <>
@@ -152,7 +156,7 @@ export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
         isSymbolMaster={isSymbolMaster}
       />
       <ArtboardBlur layerFrame={layer.frame} />
-      <SketchArtboardContent layer={layer} showBackground={true} />
+      <SketchArtboardContent layer={layer} />
     </>
   );
 });
