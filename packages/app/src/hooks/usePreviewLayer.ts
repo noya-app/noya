@@ -13,15 +13,18 @@ export function usePreviewLayer({
   const previewLayer = Layers.isSlice(layer) ? page : layer;
 
   const previewFrame = useMemo(() => {
-    const indexPath =
-      Layers.findIndexPath(page, (l) => l.do_objectID === layer.do_objectID) ??
-      [];
+    if (!Layers.isSlice(layer)) return layer.frame;
+
+    const indexPath = Layers.findIndexPath(
+      page,
+      (l) => l.do_objectID === layer.do_objectID,
+    );
+
+    if (!indexPath) return layer.frame;
 
     const transform = Selectors.getLayerTransformAtIndexPath(page, indexPath);
 
-    return Layers.isSlice(layer)
-      ? transformRect(layer.frame, transform)
-      : layer.frame;
+    return transformRect(layer.frame, transform);
   }, [layer, page]);
 
   return {
