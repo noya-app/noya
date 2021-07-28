@@ -26,7 +26,12 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type DrawableLayerType = 'rectangle' | 'oval' | 'text' | 'artboard';
+export type DrawableLayerType =
+  | 'rectangle'
+  | 'oval'
+  | 'text'
+  | 'artboard'
+  | 'slice';
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 

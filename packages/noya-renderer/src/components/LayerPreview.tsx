@@ -7,17 +7,16 @@ import {
   resizeIfLarger,
   Size,
 } from 'noya-geometry';
+import { ClipProps, useDeletable } from 'noya-react-canvaskit';
 import {
   Group,
   Rect as RCKRect,
   SketchLayer,
   useCanvasKit,
 } from 'noya-renderer';
-import { Layers, PageLayer, Primitives } from 'noya-state';
+import { PageLayer, Primitives } from 'noya-state';
 import { useMemo } from 'react';
-
 import useCheckeredFill from '../hooks/useCheckeredFill';
-import { SketchArtboardContent } from './layers/SketchArtboard';
 
 function CheckeredRect({ rect }: { rect: Rect }) {
   const paint = useCheckeredFill();
@@ -79,15 +78,29 @@ export default function LayerPreview({
     bounds.midY,
   ]);
 
+  const CanvasKit = useCanvasKit();
+
+  const path = useMemo(() => {
+    const path = new CanvasKit.Path();
+    path.addRect(Primitives.rect(CanvasKit, scaledRect));
+    return path;
+  }, [CanvasKit, scaledRect]);
+
+  useDeletable(path);
+
+  const clip: ClipProps = useMemo(
+    () => ({
+      path,
+      op: CanvasKit.ClipOp.Intersect,
+    }),
+    [CanvasKit.ClipOp.Intersect, path],
+  );
+
   return (
     <>
       {showCheckeredBackground && <CheckeredRect rect={scaledRect} />}
-      <Group transform={transform}>
-        {Layers.isSymbolMasterOrArtboard(layer) ? (
-          <SketchArtboardContent layer={layer} />
-        ) : (
-          <SketchLayer layer={layer} />
-        )}
+      <Group transform={transform} clip={clip}>
+        <SketchLayer layer={layer} />
       </Group>
     </>
   );

@@ -46,7 +46,13 @@ interface Props {
   selectedLayerIds: string[];
 }
 
-type InsertMenuShape = 'artboard' | 'rectangle' | 'oval' | 'vector' | 'text';
+type InsertMenuLayerType =
+  | 'artboard'
+  | 'rectangle'
+  | 'oval'
+  | 'vector'
+  | 'text'
+  | 'slice';
 
 const SYMBOL_ITEM_PREFIX = 'symbol:';
 
@@ -62,7 +68,7 @@ const ToolbarContent = memo(function ToolbarContent({
     value: `${SYMBOL_ITEM_PREFIX}${symbol.do_objectID}`,
   }));
 
-  const shapeMenuItems: RegularMenuItem<InsertMenuShape>[] = [
+  const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
     { title: 'Artboard', value: 'artboard' },
     { title: 'Rectangle', value: 'rectangle' },
     { title: 'Oval', value: 'oval' },
@@ -85,6 +91,7 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertRectangle = isInsertingLayerType === 'rectangle';
   const isInsertOval = isInsertingLayerType === 'oval';
   const isInsertText = isInsertingLayerType === 'text';
+  const isInsertSlice = isInsertingLayerType === 'slice';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
@@ -125,6 +132,14 @@ const ToolbarContent = memo(function ToolbarContent({
     }
   }, [isInsertText, dispatch]);
 
+  const handleInsertSlice = useCallback(() => {
+    if (isInsertSlice) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insert', 'slice']);
+    }
+  }, [isInsertSlice, dispatch]);
+
   const handleEnablePenTool = useCallback(() => {
     if (isCreatingPath) {
       dispatch('interaction', ['reset']);
@@ -139,7 +154,7 @@ const ToolbarContent = memo(function ToolbarContent({
         const id = value.replace(SYMBOL_ITEM_PREFIX, '');
         dispatch('interaction', ['insertingSymbol', id, undefined]);
       } else {
-        switch (value as InsertMenuShape) {
+        switch (value as InsertMenuLayerType) {
           case 'artboard':
             dispatch('interaction', ['insert', 'artboard']);
             break;
@@ -151,6 +166,9 @@ const ToolbarContent = memo(function ToolbarContent({
             break;
           case 'text':
             dispatch('interaction', ['insert', 'text']);
+            break;
+          case 'slice':
+            dispatch('interaction', ['insert', 'slice']);
             break;
           case 'vector':
             dispatch('interaction', ['drawingShapePath']);
@@ -170,6 +188,7 @@ const ToolbarContent = memo(function ToolbarContent({
     r: handleInsertRectangle,
     o: handleInsertOval,
     t: handleInsertText,
+    s: handleInsertSlice,
     p: handleEnablePenTool,
     v: handleEnablePenTool,
     'Mod-z': handleUndo,

@@ -658,7 +658,12 @@ export function createDrawingLayer(
   shapeType: DrawableLayerType,
   style: Sketch.Style,
   rect: Rect,
-): Sketch.Oval | Sketch.Rectangle | Sketch.Text | Sketch.Artboard {
+):
+  | Sketch.Oval
+  | Sketch.Rectangle
+  | Sketch.Text
+  | Sketch.Artboard
+  | Sketch.Slice {
   const frame = SketchModel.rect(rect);
 
   switch (shapeType) {
@@ -670,5 +675,12 @@ export function createDrawingLayer(
       return SketchModel.text({ frame });
     case 'artboard':
       return SketchModel.artboard({ frame });
+    case 'slice':
+      return SketchModel.slice({
+        frame,
+        exportOptions: SketchModel.exportOptions({
+          exportFormats: [SketchModel.exportFormat()],
+        }),
+      });
   }
 }

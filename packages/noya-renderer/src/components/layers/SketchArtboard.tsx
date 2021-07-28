@@ -148,14 +148,20 @@ interface Props {
 }
 
 export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
+  const renderingMode = useRenderingMode();
+
   return (
     <>
-      <ArtboardLabel
-        text={layer.name}
-        layerFrame={layer.frame}
-        isSymbolMaster={isSymbolMaster}
-      />
-      <ArtboardBlur layerFrame={layer.frame} />
+      {renderingMode === 'interactive' && (
+        <>
+          <ArtboardLabel
+            text={layer.name}
+            layerFrame={layer.frame}
+            isSymbolMaster={isSymbolMaster}
+          />
+          <ArtboardBlur layerFrame={layer.frame} />
+        </>
+      )}
       <SketchArtboardContent layer={layer} />
     </>
   );
