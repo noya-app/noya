@@ -273,6 +273,7 @@ const LayerRow = memo(
 );
 
 export default memo(function LayerList() {
+  const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const getStateSnapshot = useGetStateSnapshot();
   const page = useSelector(Selectors.getCurrentPage);
@@ -372,6 +373,10 @@ export default memo(function LayerList() {
         dispatch('setLayerName', id, name);
       };
 
+      const handleRename = () => {
+        startRenamingLayer(id);
+      };
+
       const isSymbolClass =
         type === 'symbolInstance' || type === 'symbolMaster';
       const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
@@ -393,6 +398,7 @@ export default memo(function LayerList() {
           depth={depth}
           selected={selected}
           onClick={handleClick}
+          onDoubleClick={handleRename}
           onHoverChange={handleHoverChange}
           onChangeVisible={handleChangeVisible}
           onChangeIsLocked={handleChangeIsLocked}
@@ -432,6 +438,7 @@ export default memo(function LayerList() {
       menuItems,
       onSelectMenuItem,
       selectedObjects,
+      startRenamingLayer,
     ],
   );
 

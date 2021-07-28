@@ -1,4 +1,9 @@
-import { FileIcon, PlusIcon, StackIcon } from '@radix-ui/react-icons';
+import {
+  FileIcon,
+  PlusIcon,
+  StackIcon,
+  TokensIcon,
+} from '@radix-ui/react-icons';
 import {
   useApplicationState,
   useDispatch,
@@ -6,12 +11,12 @@ import {
 } from 'noya-app-state-context';
 import {
   Button,
-  ListView,
+  TreeView,
   MenuItem,
   RelativeDropPosition,
   Spacer,
 } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
+import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';
 import { memo, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -26,7 +31,6 @@ const Container = styled.div(({ theme }) => ({
 const Header = styled.div(({ theme }) => ({
   ...theme.textStyles.small,
   userSelect: 'none',
-  cursor: 'pointer',
   fontWeight: 500,
   paddingTop: '8px',
   paddingRight: '8px',
@@ -38,9 +42,10 @@ const Header = styled.div(({ theme }) => ({
 
 type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
-type PageInfo = { do_objectID: string; name: string };
+type PageInfo = { do_objectID: string; name: string; type: 'design' | 'theme' };
 
 interface Props {
+  currentTab: WorkspaceTab;
   selectedPageId: string;
   pageInfo: PageInfo[];
   canDelete: boolean;
@@ -50,6 +55,7 @@ interface Props {
 }
 
 const PageListContent = memo(function PageListContent({
+  currentTab,
   selectedPageId,
   pageInfo,
   canDelete,
@@ -64,13 +70,15 @@ const PageListContent = memo(function PageListContent({
   } = useTheme().colors;
   const [editingPage, setEditingPage] = useState<string | undefined>();
 
-  const menuItems: MenuItem<MenuItemType>[] = useMemo(
+  const pageMenuItems: MenuItem<MenuItemType>[] = useMemo(
     () => [
       { value: 'duplicate', title: 'Duplicate Page' },
       { value: 'rename', title: 'Rename Page' },
-      ...(canDelete
-        ? [{ value: 'delete' as MenuItemType, title: 'Delete Page' }]
-        : []),
+      {
+        value: 'delete' as MenuItemType,
+        title: 'Delete Page',
+        disabled: !canDelete,
+      },
     ],
     [canDelete],
   );
@@ -108,6 +116,8 @@ const PageListContent = memo(function PageListContent({
     didHandleFocus();
   }, [didHandleFocus, renamingPage]);
 
+  const lastIndex = pageInfo.length - 1;
+
   return (
     <Container>
       <Header>
@@ -117,7 +127,7 @@ const PageListContent = memo(function PageListContent({
           <PlusIcon />
         </Button>
       </Header>
-      <ListView.Root
+      <TreeView.Root
         sortable={!editingPage}
         scrollable
         onMoveItem={useCallback(
@@ -126,43 +136,72 @@ const PageListContent = memo(function PageListContent({
             destinationIndex: number,
             position: RelativeDropPosition,
           ) => {
-            dispatch(
-              'movePage',
-              sourceIndex,
-              position === 'below' ? destinationIndex + 1 : destinationIndex,
-            );
+            const adjustedDestinationIndex =
+              position === 'below' ? destinationIndex + 1 : destinationIndex;
+
+            if (
+              sourceIndex === lastIndex ||
+              adjustedDestinationIndex === lastIndex + 1
+            )
+              return;
+
+            dispatch('movePage', sourceIndex, adjustedDestinationIndex);
           },
-          [dispatch],
+          [dispatch, lastIndex],
         )}
         items={pageInfo}
         renderItem={useCallback(
           (page: PageInfo, index, { isDragging }) => {
-            const selected = !isDragging && selectedPageId === page.do_objectID;
-            const IconComponent = Selectors.isSymbolsPage({ name: page.name })
-              ? StackIcon
-              : FileIcon;
+            const selected =
+              !isDragging &&
+              ((page.type === 'theme' && currentTab === 'theme') ||
+                (page.type === 'design' &&
+                  currentTab === 'canvas' &&
+                  selectedPageId === page.do_objectID));
+
+            const IconComponent =
+              page.type === 'theme'
+                ? TokensIcon
+                : Selectors.isSymbolsPage({ name: page.name })
+                ? StackIcon
+                : FileIcon;
 
             return (
-              <ListView.Row<MenuItemType>
+              <TreeView.Row<MenuItemType>
                 id={page.do_objectID}
                 key={page.do_objectID}
                 selected={selected}
                 onClick={() => {
                   dispatch('interaction', ['reset']);
-                  dispatch('selectPage', page.do_objectID);
+
+                  switch (page.type) {
+                    case 'design':
+                      dispatch('setTab', 'canvas');
+                      dispatch('selectPage', page.do_objectID);
+                      break;
+                    case 'theme':
+                      dispatch('setTab', 'theme');
+                      break;
+                  }
                 }}
-                menuItems={menuItems}
+                onDoubleClick={() => {
+                  startRenamingPage(page.do_objectID);
+                }}
+                menuItems={page.type === 'design' ? pageMenuItems : undefined}
                 onSelectMenuItem={handleSelectMenuItem}
                 onContextMenu={() => {
+                  if (page.type === 'theme') return;
+
                   dispatch('selectPage', page.do_objectID);
                 }}
+                icon={
+                  <IconComponent
+                    color={selected ? iconSelectedColor : iconColor}
+                  />
+                }
               >
-                <IconComponent
-                  color={selected ? iconSelectedColor : iconColor}
-                />
-                <Spacer.Horizontal size={10} />
                 {page.do_objectID === editingPage ? (
-                  <ListView.EditableRowTitle
+                  <TreeView.EditableRowTitle
                     autoFocus
                     value={page.name}
                     onSubmitEditing={(name) => {
@@ -176,17 +215,19 @@ const PageListContent = memo(function PageListContent({
                 ) : (
                   page.name
                 )}
-              </ListView.Row>
+              </TreeView.Row>
             );
           },
           [
+            currentTab,
             selectedPageId,
-            menuItems,
+            pageMenuItems,
             handleSelectMenuItem,
             iconSelectedColor,
             iconColor,
             editingPage,
             dispatch,
+            startRenamingPage,
           ],
         )}
       />
@@ -197,16 +238,24 @@ const PageListContent = memo(function PageListContent({
 export default function PageList() {
   const [state] = useApplicationState();
   const { renamingPage, startRenamingPage, didHandleFocus } = useWorkspace();
+  const currentTab = Selectors.getCurrentTab(state);
 
-  const pageInfo = useDeepArray(
-    state.sketch.pages.map((page) => ({
+  const pageInfo = useDeepArray([
+    ...state.sketch.pages.map((page) => ({
       do_objectID: page.do_objectID,
       name: page.name,
+      type: 'design' as const,
     })),
-  );
+    {
+      do_objectID: 'theme',
+      name: 'Theme',
+      type: 'theme' as const,
+    },
+  ]);
 
   return (
     <PageListContent
+      currentTab={currentTab}
       selectedPageId={state.selectedPage}
       pageInfo={pageInfo}
       canDelete={state.sketch.pages.length > 1}

@@ -239,6 +239,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   hovered?: boolean;
   sortable?: boolean;
   onClick?: (info: ListViewClickInfo) => void;
+  onDoubleClick?: () => void;
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
   isSectionHeader?: boolean;
@@ -258,6 +259,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     hovered = false,
     isSectionHeader = false,
     onClick,
+    onDoubleClick,
     onHoverChange,
     children,
     menuItems,
@@ -282,6 +284,15 @@ const ListViewRow = forwardRef(function ListViewRow<
     [onClick],
   );
 
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+
+      onDoubleClick?.();
+    },
+    [onDoubleClick],
+  );
+
   const renderContent = (
     {
       relativeDropPosition,
@@ -300,6 +311,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         id={id}
         {...hoverProps}
         onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
         position={position}
         disabled={disabled}
         hovered={hovered}

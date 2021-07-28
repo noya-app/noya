@@ -7,6 +7,7 @@ export type RegularMenuItem<T extends string> = {
   value: T;
   title: string;
   checked?: boolean;
+  disabled?: boolean;
 };
 
 export type MenuItem<T extends string> =
