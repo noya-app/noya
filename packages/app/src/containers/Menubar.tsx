@@ -15,21 +15,18 @@ import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height}px`,
   display: 'flex',
-  borderBottom: `1px solid transparent`, // For height to match toolbar
-  alignItems: 'center',
+  flexDirection: 'column',
+  borderBottom: `1px solid ${theme.colors.divider}`,
+  alignItems: 'stretch',
+  justifyContent: 'center',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
-}));
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
 }));
 
 type MenuItemType =
@@ -138,8 +135,8 @@ const MenubarContent = memo(function MenubarContent({
 
   return (
     <Container>
-      <Spacer.Horizontal size={8} />
-      <Row>
+      <InspectorPrimitives.Row>
+        <Spacer.Horizontal size={8} />
         <DropdownMenu<MenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
@@ -148,8 +145,8 @@ const MenubarContent = memo(function MenubarContent({
             <HamburgerMenuIcon />
           </Button>
         </DropdownMenu>
-      </Row>
-      <Spacer.Horizontal size={8} />
+        <Spacer.Horizontal size={8} />
+      </InspectorPrimitives.Row>
     </Container>
   );
 });

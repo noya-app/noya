@@ -112,94 +112,75 @@ function ListViewEditableRowTitle({
  * Row
  * ------------------------------------------------------------------------- */
 
-const SectionHeaderContainer = styled.li<{
-  selected: boolean;
-  disabled: boolean;
-  hovered: boolean;
-}>(({ theme, selected, disabled, hovered }) => ({
-  ...listReset,
-  ...theme.textStyles.small,
-  flex: '0 0 auto',
-  userSelect: 'none',
-  cursor: 'pointer',
-  fontWeight: 500,
-  paddingTop: '6px',
-  paddingRight: '20px',
-  paddingBottom: '6px',
-  paddingLeft: '20px',
-  borderBottom: `1px solid ${
-    selected ? theme.colors.primaryDark : theme.colors.divider
-  }`,
-  color: theme.colors.textMuted,
-  backgroundColor: theme.colors.listView.raisedBackground,
-  ...(disabled && {
-    color: theme.colors.textDisabled,
-  }),
-  ...(selected && {
-    color: 'white',
-    backgroundColor: theme.colors.primary,
-  }),
-  display: 'flex',
-  alignItems: 'center',
-  position: 'relative',
-  ...(hovered && {
-    boxShadow: `0 0 0 1px ${theme.colors.primary}`,
-  }),
-}));
-
 const RowContainer = styled.li<{
   position: ListRowPosition;
   selected: boolean;
   selectedPosition: ListRowPosition;
   disabled: boolean;
   hovered: boolean;
-}>(({ theme, position, selected, selectedPosition, disabled, hovered }) => ({
-  ...listReset,
-  ...theme.textStyles.small,
-  flex: '0 0 auto',
-  userSelect: 'none',
-  cursor: 'pointer',
-  borderTopRightRadius: '4px',
-  borderTopLeftRadius: '4px',
-  borderBottomRightRadius: '4px',
-  borderBottomLeftRadius: '4px',
-  paddingTop: '6px',
-  paddingRight: '12px',
-  paddingBottom: '6px',
-  paddingLeft: '12px',
-  marginLeft: '8px',
-  marginRight: '8px',
-  color: theme.colors.textMuted,
-  ...(disabled && {
-    color: theme.colors.textDisabled,
-  }),
-  ...(selected && {
-    color: 'white',
-    backgroundColor: theme.colors.primary,
-  }),
-  display: 'flex',
-  alignItems: 'center',
-  ...((position === 'first' || position === 'only') && {
-    marginTop: '8px',
-  }),
-  ...((position === 'last' || position === 'only') && {
-    marginBottom: '8px',
-  }),
-  ...(selected &&
-    (selectedPosition === 'middle' || selectedPosition === 'last') && {
-      borderTopRightRadius: '0px',
-      borderTopLeftRadius: '0px',
+  isSectionHeader: boolean;
+}>(
+  ({
+    theme,
+    position,
+    selected,
+    selectedPosition,
+    disabled,
+    hovered,
+    isSectionHeader,
+  }) => ({
+    ...listReset,
+    ...theme.textStyles.small,
+    ...(isSectionHeader && { fontWeight: 500 }),
+    flex: '0 0 auto',
+    userSelect: 'none',
+    borderTopRightRadius: '4px',
+    borderTopLeftRadius: '4px',
+    borderBottomRightRadius: '4px',
+    borderBottomLeftRadius: '4px',
+    paddingTop: '6px',
+    paddingRight: '12px',
+    paddingBottom: '6px',
+    paddingLeft: '12px',
+    marginLeft: '8px',
+    marginRight: '8px',
+    color: theme.colors.textMuted,
+    ...(isSectionHeader && {
+      backgroundColor: theme.colors.listView.raisedBackground,
     }),
-  ...(selected &&
-    (selectedPosition === 'middle' || selectedPosition === 'first') && {
-      borderBottomRightRadius: '0px',
-      borderBottomLeftRadius: '0px',
+    ...(disabled && {
+      color: theme.colors.textDisabled,
     }),
-  position: 'relative',
-  ...(hovered && {
-    boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+    ...(selected && {
+      color: 'white',
+      backgroundColor: theme.colors.primary,
+    }),
+    display: 'flex',
+    alignItems: 'center',
+    ...((position === 'first' || position === 'only') && {
+      marginTop: '8px',
+    }),
+    ...((position === 'last' || position === 'only') && {
+      marginBottom: '8px',
+    }),
+    ...(selected &&
+      !isSectionHeader &&
+      (selectedPosition === 'middle' || selectedPosition === 'last') && {
+        borderTopRightRadius: '0px',
+        borderTopLeftRadius: '0px',
+      }),
+    ...(selected &&
+      !isSectionHeader &&
+      (selectedPosition === 'middle' || selectedPosition === 'first') && {
+        borderBottomRightRadius: '0px',
+        borderBottomLeftRadius: '0px',
+      }),
+    position: 'relative',
+    ...(hovered && {
+      boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+    }),
   }),
-}));
+);
 
 export const DragIndicatorElement = styled.div<{
   relativeDropPosition: Sortable.RelativeDropPosition;
@@ -302,12 +283,11 @@ const ListViewRow = forwardRef(function ListViewRow<
     },
     ref: Ref<HTMLElement>,
   ) => {
-    const Component = isSectionHeader ? SectionHeaderContainer : RowContainer;
-
     const element = (
-      <Component
+      <RowContainer
         ref={ref}
         onContextMenu={onContextMenu}
+        isSectionHeader={isSectionHeader}
         id={id}
         {...hoverProps}
         onClick={handleClick}
@@ -328,7 +308,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         )}
         {depth > 0 && <Spacer.Horizontal size={depth * indentation} />}
         {children}
-      </Component>
+      </RowContainer>
     );
 
     if (menuItems) {

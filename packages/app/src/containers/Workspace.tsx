@@ -74,6 +74,9 @@ export default function Workspace() {
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       <LeftSidebar>
         <Menubar />
+        <PageList />
+        <Divider />
+        {currentTab === 'canvas' ? <LayerList /> : <ThemeGroups />}
         <FilterContainer>
           <InputField.Root labelPosition="start" labelSize={14}>
             <InputField.Input
@@ -86,10 +89,7 @@ export default function Workspace() {
             </InputField.Label>
           </InputField.Root>
         </FilterContainer>
-        <Spacer.Vertical size={4} />
-        <PageList />
-        <Divider />
-        {currentTab === 'canvas' ? <LayerList /> : <ThemeGroups />}
+        <Spacer.Vertical size={8} />
       </LeftSidebar>
       <MainView>
         {currentTab === 'canvas' ? <Toolbar /> : <ThemeToolbar />}
