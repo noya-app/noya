@@ -40,6 +40,17 @@ const TitlePrefix = styled.span({
   whiteSpace: 'pre',
 });
 
+// Icon components can't have tooltips (no ref) so need a container.
+// We use padding to expand the hit target a little.
+const PlusIconContainer = styled.span({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '2px',
+  position: 'relative',
+  left: '2px',
+});
+
 type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
 type PageInfo = {
@@ -254,15 +265,9 @@ const PageListContent = memo(function PageListContent({
                     <Spacer.Horizontal />
                     <Spacer.Horizontal size={10} />
                     <Tooltip content="Add a new page">
-                      <span
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <PlusIcon id="add-page" onClick={handleAddPage} />
-                      </span>
+                      <PlusIconContainer id="add-page" onClick={handleAddPage}>
+                        <PlusIcon />
+                      </PlusIconContainer>
                     </Tooltip>
                   </>
                 )}
