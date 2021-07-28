@@ -74,6 +74,7 @@ const ToolbarContent = memo(function ToolbarContent({
     { title: 'Oval', value: 'oval' },
     { title: 'Vector', value: 'vector' },
     { title: 'Text', value: 'text' },
+    { title: 'Slice', value: 'slice' },
   ];
 
   const menuItems: MenuItem<string>[] = createSectionedMenu(
