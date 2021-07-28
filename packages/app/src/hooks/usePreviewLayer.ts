@@ -30,5 +30,9 @@ export function usePreviewLayer({
   return {
     layer: previewLayer,
     frame: previewFrame,
+    backgroundColor:
+      Layers.isSlice(layer) && layer.hasBackgroundColor
+        ? layer.backgroundColor
+        : undefined,
   };
 }

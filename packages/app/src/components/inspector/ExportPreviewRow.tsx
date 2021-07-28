@@ -24,11 +24,12 @@ export default memo(function ExportPreviewRow({ layer, page }: Props) {
             <RCKLayerPreview
               layer={preview.layer}
               layerFrame={preview.frame}
+              backgroundColor={preview.backgroundColor}
               previewSize={size}
               showCheckeredBackground
             />
           ),
-          [preview.frame, preview.layer],
+          [preview.backgroundColor, preview.frame, preview.layer],
         )}
       />
     </AspectRatio.Root>

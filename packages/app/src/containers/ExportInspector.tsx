@@ -91,6 +91,7 @@ export default memo(function ExportInspector() {
           <RCKLayerPreview
             layer={preview.layer}
             layerFrame={preview.frame}
+            backgroundColor={preview.backgroundColor}
             previewSize={exportSize}
           />
         ),
@@ -104,6 +105,7 @@ export default memo(function ExportInspector() {
       getWorkspaceStateSnapshot,
       preview.layer,
       preview.frame,
+      preview.backgroundColor,
     ],
   );
 

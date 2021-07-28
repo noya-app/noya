@@ -7,7 +7,7 @@ import {
   resizeIfLarger,
   Size,
 } from 'noya-geometry';
-import { ClipProps, useDeletable } from 'noya-react-canvaskit';
+import { ClipProps, useColorFill, useDeletable } from 'noya-react-canvaskit';
 import {
   Group,
   Rect as RCKRect,
@@ -18,9 +18,18 @@ import { PageLayer, Primitives } from 'noya-state';
 import { useMemo } from 'react';
 import useCheckeredFill from '../hooks/useCheckeredFill';
 
-function CheckeredRect({ rect }: { rect: Rect }) {
-  const paint = useCheckeredFill();
+function CheckeredFill({ rect }: { rect: Rect }) {
   const CanvasKit = useCanvasKit();
+
+  const paint = useCheckeredFill();
+
+  return <RCKRect paint={paint} rect={Primitives.rect(CanvasKit, rect)} />;
+}
+
+function BackgroundFill({ color, rect }: { color: Sketch.Color; rect: Rect }) {
+  const CanvasKit = useCanvasKit();
+
+  const paint = useColorFill(Primitives.color(CanvasKit, color));
 
   return <RCKRect paint={paint} rect={Primitives.rect(CanvasKit, rect)} />;
 }
@@ -32,6 +41,7 @@ interface Props {
   padding?: number;
   scalingMode?: 'upOrDown' | 'down';
   showCheckeredBackground?: boolean;
+  backgroundColor?: Sketch.Color;
 }
 
 export default function LayerPreview({
@@ -41,7 +51,10 @@ export default function LayerPreview({
   padding = 0,
   scalingMode = 'upOrDown',
   showCheckeredBackground = false,
+  backgroundColor,
 }: Props) {
+  const CanvasKit = useCanvasKit();
+
   const bounds = createBounds(frame);
 
   const paddedSize = {
@@ -78,8 +91,6 @@ export default function LayerPreview({
     bounds.midY,
   ]);
 
-  const CanvasKit = useCanvasKit();
-
   const path = useMemo(() => {
     const path = new CanvasKit.Path();
     path.addRect(Primitives.rect(CanvasKit, scaledRect));
@@ -98,7 +109,10 @@ export default function LayerPreview({
 
   return (
     <>
-      {showCheckeredBackground && <CheckeredRect rect={scaledRect} />}
+      {showCheckeredBackground && <CheckeredFill rect={scaledRect} />}
+      {backgroundColor && (
+        <BackgroundFill color={backgroundColor} rect={scaledRect} />
+      )}
       <Group transform={transform} clip={clip}>
         <SketchLayer layer={layer} />
       </Group>
