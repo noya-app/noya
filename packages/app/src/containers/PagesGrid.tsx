@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useApplicationState } from 'noya-app-state-context';
-import { GridView, MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { GridView, MenuItem } from 'noya-designsystem';
 import { AffineTransform } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
@@ -44,12 +44,13 @@ const PageGridItem = memo(function PageGridItem({ page }: PageGridItemProps) {
 });
 
 export default memo(function PagesGrid() {
+  const { startRenamingPage } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const pages = state.sketch.pages;
 
   const menuItems: MenuItem<PageGridMenuItemType>[] = [
     { value: 'duplicate', title: 'Duplicate' },
-    SEPARATOR_ITEM,
+    { value: 'rename', title: 'Rename' },
     { value: 'delete', title: 'Delete', disabled: pages.length === 1 },
   ];
 
@@ -62,9 +63,12 @@ export default memo(function PagesGrid() {
         case 'duplicate':
           dispatch('duplicatePage', state.selectedPage);
           break;
+        case 'rename':
+          startRenamingPage(state.selectedPage);
+          break;
       }
     },
-    [dispatch, state.selectedPage],
+    [dispatch, startRenamingPage, state.selectedPage],
   );
 
   return (

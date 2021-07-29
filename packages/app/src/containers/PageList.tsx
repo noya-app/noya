@@ -122,7 +122,6 @@ const PageListContent = memo(function PageListContent({
     (event: React.MouseEvent) => {
       event.stopPropagation();
 
-      setIsExpanded(true);
       const pageId = uuid();
       dispatch('addPage', pageId);
       startRenamingPage(pageId);
@@ -133,6 +132,7 @@ const PageListContent = memo(function PageListContent({
   useLayoutEffect(() => {
     if (!renamingPage) return;
 
+    setIsExpanded(true);
     setEditingPage(renamingPage);
 
     didHandleFocus();
