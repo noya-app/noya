@@ -43,6 +43,7 @@ import {
   Y_DIRECTIONS,
 } from './guides';
 import HoverOutline from './HoverOutline';
+import { InsertPointOverlay } from './InsertPointOverlay';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
@@ -433,56 +434,6 @@ export default memo(function SketchFileRenderer() {
     );
   }, [interactionState, page, state]);
 
-  const maybeAddPointToPath = useMemo(() => {
-    if (interactionState.type !== 'editPath') return null;
-
-    const { point } = interactionState;
-
-    if (!point) return null;
-
-    const layers = Layers.findAll(
-      page,
-      (layer) => layer.do_objectID in state.selectedPointLists,
-    ).filter(Layers.isPointsLayer);
-
-    const layer = layers.find((layer) =>
-      Selectors.layerPathContainsPoint(CanvasKit, layer, point),
-    );
-
-    if (!layer) return null;
-
-    const segmentIndex = Selectors.findIndexOfPathSegmentContainingPoint(
-      CanvasKit,
-      layer,
-      point,
-    );
-
-    if (segmentIndex === undefined) return null;
-
-    const segmentPath = Selectors.getPathSegment(
-      CanvasKit,
-      layer,
-      segmentIndex,
-    );
-
-    if (!segmentPath) return null;
-
-    const pointDistance = Selectors.getDistanceAlongPath(
-      CanvasKit,
-      segmentPath,
-      point,
-    );
-
-    if (!pointDistance) return;
-
-    return (
-      <>
-        <PseudoPathLine path={segmentPath} points={[]} frame={layer.frame} />
-        <PseudoPoint point={pointDistance.point} />
-      </>
-    );
-  }, [CanvasKit, interactionState, page, state]);
-
   const editablePaths = useMemo(() => {
     if (!isEditingPath) return;
     const selectedLayerIndexPaths = Selectors.getSelectedLayerIndexPaths(state);
@@ -564,7 +515,7 @@ export default memo(function SketchFileRenderer() {
           <>
             {editablePaths}
             {editPathPseudoElements}
-            {maybeAddPointToPath}
+            <InsertPointOverlay />
           </>
         ) : (
           <>
