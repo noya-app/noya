@@ -340,10 +340,6 @@ export default memo(function Canvas() {
           }
           break;
         }
-        case 'maybeAddPointToLine': {
-          dispatch('appendPointToPath', point);
-          break;
-        }
         case 'hoverHandle':
         case 'none': {
           if (state.selectedObjects.length > 0) {
@@ -415,15 +411,10 @@ export default memo(function Canvas() {
         }
         case 'editPath': {
           dispatch('interaction', ['resetEditPath', point]);
-          dispatch('interaction', ['maybeAddPointToLine', point]);
           break;
         }
         case 'drawingShapePath': {
           dispatch('interaction', ['drawingShapePath', point]);
-          break;
-        }
-        case 'maybeAddPointToLine': {
-          dispatch('interaction', ['maybeAddPointToLine', point]);
           break;
         }
         case 'maybePan': {

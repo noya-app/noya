@@ -435,9 +435,12 @@ export default memo(function SketchFileRenderer() {
   }, [interactionState, page, state]);
 
   const maybeAddPointToPath = useMemo(() => {
-    if (interactionState.type !== 'maybeAddPointToLine') return;
+    if (interactionState.type !== 'editPath') return null;
 
     const { point } = interactionState;
+
+    if (!point) return null;
+
     const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
       state,
     );
