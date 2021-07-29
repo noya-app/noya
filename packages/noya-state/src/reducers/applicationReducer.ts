@@ -38,7 +38,7 @@ import { Size } from 'noya-geometry';
 
 export type { SetNumberMode };
 
-export type WorkspaceTab = 'canvas' | 'theme';
+export type WorkspaceTab = 'canvas' | 'theme' | 'pages';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 type ThemeSelection = { ids: string[]; groupName: string };

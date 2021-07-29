@@ -1,19 +1,25 @@
 import React, {
+  createContext,
   ForwardedRef,
   forwardRef,
   memo,
   ReactNode,
   useCallback,
+  useContext,
 } from 'react';
 import styled from 'styled-components';
 import { ContextMenu, Divider, MenuItem, ScrollArea, Spacer } from '..';
 import withSeparatorElements from '../utils/withSeparatorElements';
 
-const Grid = styled.div(({ theme }) => ({
+export type GridViewVariant = 'small' | 'large';
+
+const Grid = styled.div<{ variant: GridViewVariant }>(({ theme, variant }) => ({
   color: theme.colors.text,
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, 250px)',
-  gridAutoRows: '170px',
+  gridTemplateColumns: `repeat(auto-fill, ${
+    variant === 'large' ? 280 : 250
+  }px)`,
+  gridAutoRows: variant === 'large' ? '280px' : '170px',
   justifyContent: 'space-between',
   gap: '20px',
   padding: '20px',
@@ -33,7 +39,6 @@ const ItemContainer = styled.div<{ selected: boolean }>(
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '12px',
-    cursor: 'pointer',
     border: `2px solid ${selected ? theme.colors.primary : 'transparent'}`,
     overflow: 'hidden',
   }),
@@ -85,6 +90,7 @@ interface ItemProps<MenuItemType extends string = string> {
   subtitle?: string;
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
+  onDoubleClick?: () => void;
   children?: ReactNode;
   menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
@@ -100,6 +106,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     subtitle,
     selected,
     onClick,
+    onDoubleClick,
     children,
     menuItems,
     onSelectMenuItem,
@@ -122,6 +129,7 @@ const GridViewItem = forwardRef(function GridViewItem<
       <ItemContainer
         selected={selected}
         onClick={handleClick}
+        onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
       >
         {children}
@@ -143,12 +151,15 @@ const GridViewItem = forwardRef(function GridViewItem<
   return element;
 });
 
+const GridViewContext = createContext<GridViewVariant>('small');
+
 interface GridViewRootProps {
+  variant?: GridViewVariant;
   children: ReactNode;
   onClick: () => void;
 }
 
-function GridViewRoot({ children, onClick }: GridViewRootProps) {
+function GridViewRoot({ variant, children, onClick }: GridViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -160,14 +171,18 @@ function GridViewRoot({ children, onClick }: GridViewRootProps) {
   );
 
   return (
-    <Container onClick={handleClick}>
-      <ScrollArea>{children}</ScrollArea>
-    </Container>
+    <GridViewContext.Provider value={variant ?? 'small'}>
+      <Container onClick={handleClick}>
+        <ScrollArea>{children}</ScrollArea>
+      </Container>
+    </GridViewContext.Provider>
   );
 }
 
 function GridViewSection({ children }: { children?: ReactNode }) {
-  return <Grid>{children}</Grid>;
+  const variant = useContext(GridViewContext);
+
+  return <Grid variant={variant}>{children}</Grid>;
 }
 
 function GridViewSectionHeader({ title }: { title: string }) {

@@ -70,15 +70,20 @@ export default function LayerPreview({
       : resize(layerSize, paddedSize);
 
   const transform = useMemo(() => {
+    const scale = {
+      x: scaledRect.width / layerSize.width,
+      y: scaledRect.height / layerSize.height,
+    };
+
     return AffineTransform.multiply(
       // Translate to the center of the size
-      AffineTransform.translate(size.width / 2, size.height / 2),
-      AffineTransform.scale(
-        scaledRect.width / layerSize.width,
-        scaledRect.height / layerSize.height,
+      AffineTransform.translate(
+        size.width / 2 + padding * scale.x,
+        size.height / 2 + padding * scale.y,
       ),
+      AffineTransform.scale(scale.x, scale.y),
       // Translate to (0,0) before scaling, since scale is applied at the origin
-      AffineTransform.translate(-bounds.midX, -bounds.midY),
+      AffineTransform.translate(-bounds.midX - padding, -bounds.midY - padding),
     );
   }, [
     size.width,
@@ -89,13 +94,24 @@ export default function LayerPreview({
     layerSize.height,
     bounds.midX,
     bounds.midY,
+    padding,
   ]);
+
+  const paddedRect = useMemo(
+    () => ({
+      x: scaledRect.x + padding,
+      y: scaledRect.y + padding,
+      width: scaledRect.width,
+      height: scaledRect.height,
+    }),
+    [padding, scaledRect.height, scaledRect.width, scaledRect.x, scaledRect.y],
+  );
 
   const path = useMemo(() => {
     const path = new CanvasKit.Path();
-    path.addRect(Primitives.rect(CanvasKit, scaledRect));
+    path.addRect(Primitives.rect(CanvasKit, paddedRect));
     return path;
-  }, [CanvasKit, scaledRect]);
+  }, [CanvasKit, paddedRect]);
 
   useDeletable(path);
 
@@ -109,9 +125,9 @@ export default function LayerPreview({
 
   return (
     <>
-      {showCheckeredBackground && <CheckeredFill rect={scaledRect} />}
+      {showCheckeredBackground && <CheckeredFill rect={paddedRect} />}
       {backgroundColor && (
-        <BackgroundFill color={backgroundColor} rect={scaledRect} />
+        <BackgroundFill color={backgroundColor} rect={paddedRect} />
       )}
       <Group transform={transform} clip={clip}>
         <SketchLayer layer={layer} />

@@ -3,11 +3,7 @@ import produce from 'immer';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import {
-  getCurrentPage,
-  getCurrentPageIndex,
-  getSymbolsInstancesIndexPaths,
-} from '../selectors/selectors';
+import { getSymbolsInstancesIndexPaths } from '../selectors/selectors';
 import { UUID } from '../types';
 import { moveArrayItem } from '../utils/moveArrayItem';
 import { ApplicationState } from './applicationReducer';
@@ -17,9 +13,9 @@ export type PageAction =
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
   | [type: 'selectPage', pageId: UUID]
   | [type: 'addPage', pageId: UUID]
-  | [type: 'deletePage']
+  | [type: 'deletePage', pageId: UUID]
   | [type: 'setPageName', pageId: UUID, name: string]
-  | [type: 'duplicatePage'];
+  | [type: 'duplicatePage', pageId: UUID];
 
 export const createPage = (
   pages: Sketch.Page[],
@@ -78,7 +74,11 @@ export function pageReducer(
       });
     }
     case 'duplicatePage': {
-      const pageIndex = getCurrentPageIndex(state);
+      const [, id] = action;
+
+      const pageIndex = state.sketch.pages.findIndex(
+        (page) => page.do_objectID === id,
+      );
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
@@ -115,13 +115,18 @@ export function pageReducer(
           zoomValue: user[page.do_objectID].zoomValue,
         };
 
-        pages.push(duplicatePage);
+        pages.splice(pageIndex + 1, 0, duplicatePage);
+
         draft.selectedPage = duplicatePage.do_objectID;
       });
     }
     case 'deletePage': {
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
+      const [, id] = action;
+
+      const pageIndex = state.sketch.pages.findIndex(
+        (page) => page.do_objectID === id,
+      );
+      const page = state.sketch.pages[pageIndex];
 
       const symbolsIds = page.layers.flatMap((layer) =>
         Layers.isSymbolMaster(layer) ? [layer.symbolID] : [],
@@ -141,6 +146,7 @@ export function pageReducer(
         detachSymbolIntances(pages, state, symbolsInstancesIndexPaths);
 
         const newIndex = Math.max(pageIndex - 1, 0);
+
         draft.selectedPage = pages[newIndex].do_objectID;
       });
     }
