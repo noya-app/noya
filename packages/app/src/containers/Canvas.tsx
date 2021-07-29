@@ -415,7 +415,7 @@ export default memo(function Canvas() {
         }
         case 'editPath': {
           dispatch('interaction', ['resetEditPath', point]);
-          dispatch('interaction', ['maybeAddPointToLine', rawPoint]);
+          dispatch('interaction', ['maybeAddPointToLine', point]);
           break;
         }
         case 'drawingShapePath': {
@@ -423,7 +423,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'maybeAddPointToLine': {
-          dispatch('interaction', ['maybeAddPointToLine', rawPoint]);
+          dispatch('interaction', ['maybeAddPointToLine', point]);
           break;
         }
         case 'maybePan': {

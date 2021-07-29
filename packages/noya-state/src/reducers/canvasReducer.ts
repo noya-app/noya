@@ -25,6 +25,7 @@ import {
   getIndexPathOfOpenShapeLayer,
   getParentLayer,
   getParentLayerAtPoint,
+  getPointToAddToCurve,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
@@ -320,9 +321,14 @@ export function canvasReducer(
           segmentsArr.push(item);
         });
 
-        let indexToSplice = 0;
+        const decodedPoints = layer.points.map((curvePoint) =>
+          decodeCurvePoint(curvePoint, layer.frame),
+        );
+
+        let indexToSplice = undefined;
+        let segmentToAddPoint = undefined;
         for (let i = 0; i < segmentsArr.length; i++) {
-          const segmentToAddPoint = findMatchingSegmentPoints(
+          segmentToAddPoint = findMatchingSegmentPoints(
             CanvasKit,
             layer,
             point,
@@ -330,15 +336,12 @@ export function canvasReducer(
           );
           if (segmentToAddPoint) {
             indexToSplice = layer.points.findIndex(
-              (point) => point === segmentsArr[i][0],
+              (point) => point === segmentsArr[i][1],
             );
             break;
           }
         }
-
-        const decodedPoints = layer.points.map((curvePoint) =>
-          decodeCurvePoint(curvePoint, layer.frame),
-        );
+        if (!indexToSplice) return;
 
         const decodedPoint: DecodedCurvePoint = {
           _class: 'curvePoint',
@@ -348,11 +351,41 @@ export function canvasReducer(
           hasCurveFrom: false,
           hasCurveTo: false,
           curveMode: Sketch.CurveMode.Straight,
-          point,
+          point: point,
         };
 
+        const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
+        if (!segmentToAddPoint) return;
+
+        const posTanPoint = getPointToAddToCurve(
+          CanvasKit,
+          layer,
+          encodedPoint,
+          segmentToAddPoint.segmentPoints,
+        )?.posTanPoint;
+
+        if (!posTanPoint) return;
+
         const newDecodedPoints = [...decodedPoints];
-        newDecodedPoints.splice(indexToSplice, 0, decodedPoint);
+
+        const newPoint: DecodedCurvePoint = {
+          _class: 'curvePoint',
+          cornerRadius: 0,
+          curveFrom: {
+            x: posTanPoint[0],
+            y: posTanPoint[1],
+          },
+          curveTo: {
+            x: posTanPoint[0],
+            y: posTanPoint[1],
+          },
+          hasCurveFrom: false,
+          hasCurveTo: false,
+          curveMode: Sketch.CurveMode.Mirrored,
+          point: { x: posTanPoint[0], y: posTanPoint[1] },
+        };
+
+        newDecodedPoints.splice(indexToSplice, 0, newPoint);
 
         layer.frame = {
           ...layer.frame,

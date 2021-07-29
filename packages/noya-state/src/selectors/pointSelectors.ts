@@ -115,65 +115,7 @@ export const findMatchingSegmentPoints = (
   let isOnLine = false;
   if (!isPointsLayer(layer)) return;
 
-  // //Find StartD
-  // const startDistancePath = path(
-  //   CanvasKit,
-  //   [layer.points[0], segment[0]],
-  //   layer.frame,
-  //   layer.isClosed,
-  // );
-
-  // const startSegmentMeasure = new CanvasKit.ContourMeasureIter(
-  //   startDistancePath,
-  //   false,
-  //   1,
-  // );
-  // const startDistance = startSegmentMeasure.next()?.length();
-
-  // if (!startDistance) return;
-
-  // //Find EndD
-  // const endDistancePath = path(
-  //   CanvasKit,
-  //   [layer.points[0], segment[1]],
-  //   layer.frame,
-  //   layer.isClosed,
-  // );
-
-  // const endSegmentMeasure = new CanvasKit.ContourMeasureIter(
-  //   endDistancePath,
-  //   false,
-  //   1,
-  // );
-
-  // const endDistance = endSegmentMeasure.next()?.length();
-  // // }
-
-  // if (!endDistance) return false;
-
-  // //getSegment
-
-  // const layerPath = path(CanvasKit, layer.points, layer.frame, layer.isClosed);
-
-  // const layerMeasure = new CanvasKit.ContourMeasureIter(layerPath, false, 1);
-
-  // const contourMeasure = layerMeasure.next();
-  // //const layerLength = contourMeasure?.length();
-
-  // // const segmentToAddPoint =
-  // //   endDistance < startDistance && layerLength
-  // //     ? contourMeasure?.getSegment(startDistance, layerLength, false)
-  // //     : contourMeasure?.getSegment(startDistance, endDistance, true);
-
-  // const segmentToAddPoint = contourMeasure?.getSegment(
-  //   startDistance,
-  //   endDistance,
-  //   true,
-  // );
-
-  // if (!segmentToAddPoint) return;
-
-  isOnLine = path(CanvasKit, segment, layer.frame, false).contains(
+  isOnLine = path(CanvasKit, segment, layer.frame, layer.isClosed).contains(
     point.x,
     point.y,
   );
@@ -185,6 +127,124 @@ export const findMatchingSegmentPoints = (
     segmentPath: path(CanvasKit, segment, layer.frame, false),
   };
 };
+
+export const getPointToAddToCurve = (
+  CanvasKit: CanvasKit,
+  layer: Sketch.AnyLayer,
+  point: Sketch.CurvePoint,
+  segmentPoints: Sketch.CurvePoint[],
+):
+  | {
+      posTanPoint: Float32Array;
+      controlPoints?: number[];
+    }
+  | undefined => {
+  if (!isPointsLayer(layer)) return;
+
+  //Find distance for PointToAdd
+  const newPointDistancePath = path(
+    CanvasKit,
+    [layer.points[0], point],
+    layer.frame,
+    false,
+  );
+
+  const newPointSegmentMeasure = new CanvasKit.ContourMeasureIter(
+    newPointDistancePath,
+    false,
+    1,
+  );
+  const pointMeasure = newPointSegmentMeasure.next();
+  const pointDistance = pointMeasure?.length();
+
+  if (!pointDistance) return;
+
+  const layerPath = path(CanvasKit, segmentPoints, layer.frame, layer.isClosed);
+  const layerMeasure = new CanvasKit.ContourMeasureIter(layerPath, false, 1);
+
+  const contourMeasure = layerMeasure.next();
+  const posTanPoint = contourMeasure?.getPosTan(pointDistance);
+
+  if (!posTanPoint || !contourMeasure) return;
+
+  return {
+    posTanPoint,
+  };
+};
+
+// function lerp(r, v1, v2) {
+//   const ret = {
+//     x: v1.x + r * (v2.x - v1.x),
+//     y: v1.y + r * (v2.y - v1.y),
+//   };
+//   if (!!v1.z && !!v2.z) {
+//     ret.z = v1.z + r * (v2.z - v1.z);
+//   }
+//   return ret;
+// }
+
+// function hull(t) {
+//   let p = this.points,
+//     _p = [],
+//     q = [],
+//     idx = 0;
+//   q[idx++] = p[0];
+//   q[idx++] = p[1];
+//   q[idx++] = p[2];
+//   if (this.order === 3) {
+//     q[idx++] = p[3];
+//   }
+//   // we lerp between all points at each iteration, until we have 1 point left.
+//   while (p.length > 1) {
+//     _p = [];
+//     for (let i = 0, pt, l = p.length - 1; i < l; i++) {
+//       pt = lerp(t, p[i], p[i + 1]);
+//       q[idx++] = pt;
+//       _p.push(pt);
+//     }
+//     p = _p;
+//   }
+//   return q;
+// }
+
+// function split(t1, t2) {
+//   // shortcuts
+//   if (t1 === 0 && !!t2) {
+//     return this.split(t2).left;
+//   }
+//   if (t2 === 1) {
+//     return this.split(t1).right;
+//   }
+
+//   // no shortcut: use "de Casteljau" iteration.
+//   const q = this.hull(t1);
+//   const result = {
+//     left:
+//       this.order === 2
+//         ? new Bezier([q[0], q[3], q[5]])
+//         : new Bezier([q[0], q[4], q[7], q[9]]),
+//     right:
+//       this.order === 2
+//         ? new Bezier([q[5], q[4], q[2]])
+//         : new Bezier([q[9], q[8], q[6], q[3]]),
+//     span: q,
+//   };
+
+//   // make sure we bind _t1/_t2 information!
+//   result.left._t1 = utils.map(0, 0, 1, this._t1, this._t2);
+//   result.left._t2 = utils.map(t1, 0, 1, this._t1, this._t2);
+//   result.right._t1 = utils.map(t1, 0, 1, this._t1, this._t2);
+//   result.right._t2 = utils.map(1, 0, 1, this._t1, this._t2);
+
+//   // if we have no t2, we're done
+//   if (!t2) {
+//     return result;
+//   }
+
+//   // if we have a t2, split again:
+//   t2 = utils.map(t2, t1, 1, 0, 1);
+//   return result.right.split(t2).left;
+// }
 
 export const getSelectedPoints = (
   state: ApplicationState,
