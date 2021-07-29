@@ -18,7 +18,7 @@ import {
   Layers,
   SelectedPointLists,
 } from '../index';
-import { isPointsLayer, PointsLayer, visit } from '../layers';
+import { PointsLayer, visit } from '../layers';
 import { SelectedControlPoint } from '../reducers/applicationReducer';
 import { SetNumberMode } from '../reducers/styleReducer';
 import { getCurrentPage } from './pageSelectors';
@@ -104,27 +104,6 @@ const getSelectedPointsFromPointLists = (
   });
 
   return points;
-};
-
-export const findMatchingSegmentPoints = (
-  CanvasKit: CanvasKit,
-  layer: Sketch.AnyLayer,
-  point: Point,
-  segment: Sketch.CurvePoint[],
-) => {
-  if (!isPointsLayer(layer)) return;
-
-  let isOnLine = path(CanvasKit, segment, layer.frame, layer.isClosed).contains(
-    point.x,
-    point.y,
-  );
-
-  if (!isOnLine) return;
-
-  return {
-    segmentPoints: segment,
-    segmentPath: path(CanvasKit, segment, layer.frame, false),
-  };
 };
 
 export const getDistanceAlongPath = (
