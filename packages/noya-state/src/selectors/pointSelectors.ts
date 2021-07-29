@@ -9,6 +9,7 @@ import {
   encodeCurvePoint,
   parsePoint,
   path,
+  Primitives,
   stringifyPoint,
 } from 'noya-state';
 import { IndexPath } from 'tree-visit';
@@ -465,3 +466,22 @@ export const moveControlPoints = (
     );
   });
 };
+
+export function layerPathContainsPoint(
+  CanvasKit: CanvasKit,
+  layer: Sketch.AnyLayer,
+  point: Point,
+): boolean {
+  if (!Layers.isPointsLayer(layer)) return false;
+
+  const strokedPath = Primitives.path(
+    CanvasKit,
+    layer.points,
+    layer.frame,
+    layer.isClosed,
+  ).stroke({ width: 3 });
+
+  if (!strokedPath) return false;
+
+  return strokedPath.contains(point.x, point.y);
+}

@@ -61,7 +61,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
-  | [type: 'appendPointToPath', point: Point]
+  | [type: 'insertPointInPath', point: Point]
   | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
@@ -297,7 +297,7 @@ export function canvasReducer(
 
       return moveLayer(state, state.selectedObjects, parentId, 'inside');
     }
-    case 'appendPointToPath': {
+    case 'insertPointInPath': {
       const [, point] = action;
       const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
         state,

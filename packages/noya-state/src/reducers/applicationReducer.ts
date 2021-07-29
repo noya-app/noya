@@ -117,7 +117,7 @@ export function applicationReducer(
     case 'insertBitmap':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
-    case 'appendPointToPath':
+    case 'insertPointInPath':
       return canvasReducer(state, action, CanvasKit);
     case 'setLayerVisible':
     case 'setLayerIsLocked':
