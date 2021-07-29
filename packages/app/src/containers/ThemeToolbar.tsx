@@ -12,15 +12,6 @@ import styled, { useTheme } from 'styled-components';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Selectors, ThemeTab } from 'noya-state';
 
-const Container = styled.header(({ theme }) => ({
-  minHeight: `${theme.sizes.toolbar.height}px`,
-  display: 'flex',
-  borderBottom: `1px solid ${theme.colors.dividerStrong}`,
-  alignItems: 'center',
-  backgroundColor: theme.colors.sidebar.background,
-  color: theme.colors.textMuted,
-}));
-
 const TabsContainer = styled.div(({ theme }) => ({
   minWidth: `${54 * 4}px`,
   maxWidth: `${54 * 4}px`,
@@ -93,7 +84,7 @@ export default function SwatchesToolbar() {
 
   return useMemo(
     () => (
-      <Container>
+      <>
         <Spacer.Horizontal size={8} />
         <Spacer.Horizontal />
         <TabsContainer>
@@ -129,7 +120,7 @@ export default function SwatchesToolbar() {
           </Button>
         </RightContainer>
         <Spacer.Horizontal size={sidebarWidth + 8} />
-      </Container>
+      </>
     ),
     [
       sidebarWidth,

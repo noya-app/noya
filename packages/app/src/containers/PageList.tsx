@@ -107,11 +107,11 @@ const PageListContent = memo(function PageListContent({
           break;
         }
         case 'duplicate': {
-          dispatch('duplicatePage');
+          dispatch('duplicatePage', selectedPageId);
           break;
         }
         case 'delete':
-          dispatch('deletePage');
+          dispatch('deletePage', selectedPageId);
           break;
       }
     },
@@ -181,6 +181,7 @@ const PageListContent = memo(function PageListContent({
             const selected =
               !isDragging &&
               ((page.type === 'theme' && currentTab === 'theme') ||
+                (page.type === 'header' && currentTab === 'pages') ||
                 (page.type === 'design' &&
                   currentTab === 'canvas' &&
                   selectedPageId === page.do_objectID));
@@ -207,7 +208,7 @@ const PageListContent = memo(function PageListContent({
 
                   switch (page.type) {
                     case 'header':
-                      setIsExpanded(!isExpanded);
+                      dispatch('setTab', 'pages');
                       break;
                     case 'design':
                       dispatch('setTab', 'canvas');

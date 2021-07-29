@@ -19,15 +19,6 @@ import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
 import useShallowArray from '../hooks/useShallowArray';
 
-const Container = styled.header(({ theme }) => ({
-  minHeight: `${theme.sizes.toolbar.height}px`,
-  display: 'flex',
-  borderBottom: `1px solid ${theme.colors.dividerStrong}`,
-  alignItems: 'center',
-  backgroundColor: theme.colors.sidebar.background,
-  color: theme.colors.textMuted,
-}));
-
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -213,7 +204,7 @@ const ToolbarContent = memo(function ToolbarContent({
   });
 
   return (
-    <Container>
+    <>
       <Spacer.Horizontal size={itemSeparatorSize} />
       <Row>
         <DropdownMenu<string> items={menuItems} onSelect={handleInsertSymbol}>
@@ -253,7 +244,7 @@ const ToolbarContent = memo(function ToolbarContent({
           [],
         )}
       </Button>
-    </Container>
+    </>
   );
 });
 
