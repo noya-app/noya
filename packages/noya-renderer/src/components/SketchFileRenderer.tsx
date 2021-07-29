@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
-import { Path } from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
@@ -17,7 +16,6 @@ import { Polyline, useCanvasKit } from 'noya-renderer';
 import {
   DecodedCurvePoint,
   encodeCurvePoint,
-  findMatchingSegmentPoints,
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
@@ -29,7 +27,7 @@ import {
   Selectors,
   SnappingPair,
 } from 'noya-state';
-import { groupBy } from 'noya-utils';
+import { groupBy, windowsOf } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
@@ -443,48 +441,36 @@ export default memo(function SketchFileRenderer() {
     const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
       state,
     );
-
-    //layerIndexPaths.forEach((layerIndex, index) => {
     const layer = Layers.access(page, layerIndexPaths[0]);
 
     if (!Layers.isPointsLayer(layer)) return;
 
-    let segmentsArr: Sketch.CurvePoint[][] = [];
-    layer.points.forEach(function (point, index) {
-      const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
-      const item = [point, layer.points[nextPoint]];
-      segmentsArr.push(item);
-    });
+    const segments = windowsOf(layer.points, 2, layer.isClosed);
 
-    let segmentPoints: Sketch.CurvePoint[] | undefined = undefined;
-    let segmentPath: Path | undefined = undefined;
+    const segmentPaths = segments.map((segment) =>
+      Primitives.path(CanvasKit, segment, layer.frame, false),
+    );
 
-    for (let i = 0; i < segmentsArr.length; i++) {
-      const segmentToAddPoint = findMatchingSegmentPoints(
-        CanvasKit,
-        layer,
-        point,
-        segmentsArr[i],
-      );
-      if (segmentToAddPoint) {
-        segmentPoints = segmentToAddPoint.segmentPoints;
-        segmentPath = segmentToAddPoint.segmentPath;
-        break;
-      }
-    }
-    //});
+    const segmentIndex = segmentPaths.findIndex((path) =>
+      path.copy().stroke({ width: 3 })?.contains(point.x, point.y),
+    );
+
+    if (segmentIndex === -1) return null;
+
+    const segmentPath = segmentPaths[segmentIndex];
+
+    const pointDistance = Selectors.getDistanceAlongPath(
+      CanvasKit,
+      segmentPath,
+      point,
+    );
+
+    if (!pointDistance) return;
+
     return (
       <>
-        {segmentPoints && layer.frame && (
-          <>
-            <PseudoPoint point={point} />
-            <PseudoPathLine
-              path={segmentPath}
-              points={segmentPoints}
-              frame={layer.frame}
-            />
-          </>
-        )}
+        <PseudoPathLine path={segmentPath} points={[]} frame={layer.frame} />
+        <PseudoPoint point={pointDistance.point} />
       </>
     );
   }, [CanvasKit, interactionState, page, state]);

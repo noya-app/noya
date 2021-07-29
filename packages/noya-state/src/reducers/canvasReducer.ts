@@ -10,22 +10,21 @@ import {
   Primitives,
   resizeRect,
 } from 'noya-state';
-import { uuid } from 'noya-utils';
+import { uuid, windowsOf } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
-  findMatchingSegmentPoints,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
+  getDistanceAlongPath,
   getIndexPathOfOpenShapeLayer,
   getParentLayer,
   getParentLayerAtPoint,
-  getPointToAddToCurve,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
   moveControlPoints,
@@ -314,87 +313,43 @@ export function canvasReducer(
 
         if (!layer || !Layers.isPointsLayer(layer)) return;
 
-        let segmentsArr: Sketch.CurvePoint[][] = [];
-        layer.points.forEach(function (point, index) {
-          const nextPoint = index === layer.points.length - 1 ? 0 : index + 1;
-          const item = [point, layer.points[nextPoint]];
-          segmentsArr.push(item);
-        });
+        const segments = windowsOf(layer.points, 2, layer.isClosed);
 
-        const decodedPoints = layer.points.map((curvePoint) =>
-          decodeCurvePoint(curvePoint, layer.frame),
+        const segmentPaths = segments.map((segment) =>
+          Primitives.path(CanvasKit, segment, layer.frame, false),
         );
 
-        let indexToSplice = undefined;
-        let segmentToAddPoint = undefined;
-        for (let i = 0; i < segmentsArr.length; i++) {
-          segmentToAddPoint = findMatchingSegmentPoints(
-            CanvasKit,
-            layer,
-            point,
-            segmentsArr[i],
-          );
-          if (segmentToAddPoint) {
-            indexToSplice = layer.points.findIndex(
-              (point) => point === segmentsArr[i][1],
-            );
-            break;
-          }
-        }
-        if (!indexToSplice) return;
+        const segmentIndex = segmentPaths.findIndex((path) =>
+          path.copy().stroke({ width: 3 })?.contains(point.x, point.y),
+        );
 
-        const decodedPoint: DecodedCurvePoint = {
-          _class: 'curvePoint',
-          cornerRadius: 0,
-          curveFrom: point,
-          curveTo: point,
-          hasCurveFrom: false,
-          hasCurveTo: false,
-          curveMode: Sketch.CurveMode.Straight,
-          point: point,
-        };
+        if (segmentIndex === -1) return;
 
-        const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
-        if (!segmentToAddPoint) return;
+        const segmentPath = segmentPaths[segmentIndex];
 
-        const posTanPoint = getPointToAddToCurve(
+        const pointDistance = getDistanceAlongPath(
           CanvasKit,
-          layer,
-          encodedPoint,
-          segmentToAddPoint.segmentPoints,
-        )?.posTanPoint;
-
-        if (!posTanPoint) return;
-
-        const newDecodedPoints = [...decodedPoints];
-
-        const newPoint: DecodedCurvePoint = {
-          _class: 'curvePoint',
-          cornerRadius: 0,
-          curveFrom: {
-            x: posTanPoint[0],
-            y: posTanPoint[1],
-          },
-          curveTo: {
-            x: posTanPoint[0],
-            y: posTanPoint[1],
-          },
-          hasCurveFrom: false,
-          hasCurveTo: false,
-          curveMode: Sketch.CurveMode.Mirrored,
-          point: { x: posTanPoint[0], y: posTanPoint[1] },
-        };
-
-        newDecodedPoints.splice(indexToSplice, 0, newPoint);
-
-        layer.frame = {
-          ...layer.frame,
-          ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
-        };
-
-        layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
-          encodeCurvePoint(decodedCurvePoint, layer.frame),
+          segmentPath,
+          point,
         );
+
+        if (!pointDistance) return;
+
+        const newCurvePoints = Primitives.splitPath(
+          segmentPath,
+          pointDistance.percent,
+        ).map((path) =>
+          Primitives.pathToCurvePoints(CanvasKit, path, layer.frame),
+        );
+
+        const start = layer.points.slice(0, segmentIndex + 1);
+        const end = layer.points.slice(segmentIndex + 1);
+        const merged = Primitives.joinCurvePoints(
+          [start, ...newCurvePoints, end],
+          segmentIndex === segments.length - 1,
+        );
+
+        layer.points = merged;
       });
     }
     case 'interaction': {

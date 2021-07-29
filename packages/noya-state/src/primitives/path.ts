@@ -1,8 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, Path, PathOp } from 'canvaskit';
+import { CanvasKit, Path, PathCommand, PathOp } from 'canvaskit';
 import { distance, Rect } from 'noya-geometry';
+import {
+  CommandWithoutQuadratics,
+  makePathsFromCommands,
+} from 'noya-import-svg';
+import { PointString, SketchModel } from 'noya-sketch-model';
 import { parsePoint, Point, stringifyPoint } from 'noya-state';
-import { rotate, windowsOf, zip } from 'noya-utils';
+import { clamp, rotate, windowsOf, zip } from 'noya-utils';
 
 /**
  * The radius of an edge should be less than half the length of that edge
@@ -332,4 +337,99 @@ export function getStrokedBorderPath(
   const pathOp = getBorderPositionPathOp(CanvasKit, borderPosition);
 
   return getStrokedPath(CanvasKit, path, borderWidth, pathOp);
+}
+
+export function unscaleCurvePoint(curvePoint: Sketch.CurvePoint, frame: Rect) {
+  const unscale = (value: string) =>
+    PointString.encode(unscalePoint(PointString.decode(value), frame));
+
+  return {
+    ...curvePoint,
+    curveFrom: unscale(curvePoint.curveFrom),
+    curveTo: unscale(curvePoint.curveTo),
+    point: unscale(curvePoint.point),
+  };
+}
+
+function pathCommandToSVGCommand(
+  CanvasKit: CanvasKit,
+  command: PathCommand,
+): CommandWithoutQuadratics {
+  switch (command[0]) {
+    case CanvasKit.MOVE_VERB: {
+      const [, x, y] = command;
+      return { type: 'move', to: { x, y } };
+    }
+    case CanvasKit.CUBIC_VERB: {
+      const [, x1, y1, x2, y2, x3, y3] = command;
+      return {
+        type: 'cubicCurve',
+        to: { x: x3, y: y3 },
+        controlPoint1: { x: x1, y: y1 },
+        controlPoint2: { x: x2, y: y2 },
+      };
+    }
+    default:
+      throw new Error('Path command not handled');
+  }
+}
+
+export function pathToCurvePoints(
+  CanvasKit: CanvasKit,
+  path: Path,
+  frame: Rect,
+): Sketch.CurvePoint[] {
+  const svgCommands = path
+    .toCmds()
+    .map((cmd) => pathCommandToSVGCommand(CanvasKit, cmd));
+
+  // Assume a single path. `isClosed` should already be handled, before calling
+  // this function, so we can ignore it here.
+  const curvePoints = makePathsFromCommands(svgCommands)[0].points;
+
+  return curvePoints.map((curvePoint) => unscaleCurvePoint(curvePoint, frame));
+}
+
+export function joinCurvePoints(
+  segments: Sketch.CurvePoint[][],
+  wrapsAround: boolean,
+): Sketch.CurvePoint[] {
+  const nonEmptySegments = segments.filter((segment) => segment.length > 0);
+
+  if (nonEmptySegments.length === 0) return [];
+
+  const [first, ...rest] = nonEmptySegments;
+
+  const merged = rest.reduce((start, end) => {
+    const lastStartPoint = start[start.length - 1];
+    const firstEndPoint = end[0];
+
+    return [
+      ...start.slice(0, -1),
+      SketchModel.curvePoint({
+        curveMode: Sketch.CurveMode.Mirrored,
+        hasCurveFrom: true,
+        hasCurveTo: true,
+        point: lastStartPoint.point,
+        curveFrom: firstEndPoint.curveFrom,
+        curveTo: lastStartPoint.curveTo,
+      }),
+      ...end.slice(1),
+    ];
+  }, first);
+
+  if (wrapsAround) {
+    const lastIndex = merged.length - 1;
+    const last = merged[lastIndex];
+    merged.splice(lastIndex, 1);
+    merged[0].curveTo = last.curveTo;
+  }
+
+  return merged;
+}
+
+export function splitPath(path: Path, t: number): [Path, Path] {
+  t = clamp(t, 0, 1);
+
+  return [path.copy().trim(0, t, false)!, path.copy().trim(t, 1, false)!];
 }
