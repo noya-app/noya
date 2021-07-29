@@ -19,6 +19,9 @@ import {
 import { SketchModel } from 'noya-sketch-model';
 import { makePathsFromCommands } from './PathBuilder';
 
+export type { CommandWithoutQuadratics };
+export { makePathsFromCommands };
+
 function getBoundingRectFromCommands(
   commands: CommandWithoutQuadratics[],
 ): Rect {
