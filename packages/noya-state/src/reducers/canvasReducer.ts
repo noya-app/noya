@@ -9,8 +9,9 @@ import {
   encodeCurvePoint,
   Primitives,
   resizeRect,
+  Selectors,
 } from 'noya-state';
-import { uuid, windowsOf } from 'noya-utils';
+import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   addToParentLayer,
@@ -21,7 +22,6 @@ import {
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
-  getDistanceAlongPath,
   getIndexPathOfOpenShapeLayer,
   getParentLayer,
   getParentLayerAtPoint,
@@ -299,57 +299,50 @@ export function canvasReducer(
     }
     case 'insertPointInPath': {
       const [, point] = action;
-      const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
-        state,
-      );
 
       const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = Layers.findAllIndexPaths(
+        getCurrentPage(state),
+        (layer) => layer.do_objectID in state.selectedPointLists,
+      );
 
       return produce(state, (draft) => {
-        const layer = Layers.access(
-          draft.sketch.pages[pageIndex],
-          layerIndexPaths[0],
-        );
+        const draftLayer = layerIndexPaths
+          .map((indexPath) =>
+            Layers.access(draft.sketch.pages[pageIndex], indexPath),
+          )
+          .filter(Layers.isPointsLayer)
+          .find((layer) =>
+            Selectors.layerPathContainsPoint(CanvasKit, layer, point),
+          );
 
-        if (!layer || !Layers.isPointsLayer(layer)) return;
+        if (!draftLayer) return;
 
-        const segments = windowsOf(layer.points, 2, layer.isClosed);
-
-        const segmentPaths = segments.map((segment) =>
-          Primitives.path(CanvasKit, segment, layer.frame, false),
-        );
-
-        const segmentIndex = segmentPaths.findIndex((path) =>
-          path.copy().stroke({ width: 3 })?.contains(point.x, point.y),
-        );
-
-        if (segmentIndex === -1) return;
-
-        const segmentPath = segmentPaths[segmentIndex];
-
-        const pointDistance = getDistanceAlongPath(
+        const splitParameters = Selectors.getSplitLayerPathParameters(
           CanvasKit,
-          segmentPath,
+          draftLayer,
           point,
         );
 
-        if (!pointDistance) return;
+        if (!splitParameters) return;
+
+        const { segmentIndex, segmentPath, pointDistance } = splitParameters;
 
         const newCurvePoints = Primitives.splitPath(
           segmentPath,
           pointDistance.percent,
         ).map((path) =>
-          Primitives.pathToCurvePoints(CanvasKit, path, layer.frame),
+          Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
         );
 
-        const start = layer.points.slice(0, segmentIndex + 1);
-        const end = layer.points.slice(segmentIndex + 1);
-        const merged = Primitives.joinCurvePoints(
+        const start = draftLayer.points.slice(0, segmentIndex + 1);
+        const end = draftLayer.points.slice(segmentIndex + 1);
+        const joined = Primitives.joinCurvePoints(
           [start, ...newCurvePoints, end],
-          segmentIndex === segments.length - 1,
+          segmentIndex === draftLayer.points.length - 1,
         );
 
-        layer.points = merged;
+        draftLayer.points = joined;
       });
     }
     case 'interaction': {

@@ -511,3 +511,31 @@ export function getPathSegment(
 
   return Primitives.path(CanvasKit, segments[segmentIndex], layer.frame, false);
 }
+
+export function getSplitLayerPathParameters(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  point: Point,
+) {
+  const segmentIndex = findIndexOfPathSegmentContainingPoint(
+    CanvasKit,
+    layer,
+    point,
+  );
+
+  if (segmentIndex === undefined) return;
+
+  const segmentPath = getPathSegment(CanvasKit, layer, segmentIndex);
+
+  if (!segmentPath) return;
+
+  const pointDistance = getDistanceAlongPath(CanvasKit, segmentPath, point);
+
+  if (!pointDistance) return;
+
+  return {
+    segmentIndex,
+    segmentPath,
+    pointDistance,
+  };
+}

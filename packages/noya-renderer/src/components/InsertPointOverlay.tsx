@@ -30,25 +30,15 @@ export const InsertPointOverlay = memo(function InsertPointOverlay() {
 
   if (!layer) return null;
 
-  const segmentIndex = Selectors.findIndexOfPathSegmentContainingPoint(
+  const splitParameters = Selectors.getSplitLayerPathParameters(
     CanvasKit,
     layer,
     point,
   );
 
-  if (segmentIndex === undefined) return null;
+  if (!splitParameters) return;
 
-  const segmentPath = Selectors.getPathSegment(CanvasKit, layer, segmentIndex);
-
-  if (!segmentPath) return null;
-
-  const pointDistance = Selectors.getDistanceAlongPath(
-    CanvasKit,
-    segmentPath,
-    point,
-  );
-
-  if (!pointDistance) return;
+  const { segmentPath, pointDistance } = splitParameters;
 
   return (
     <>
