@@ -12,6 +12,7 @@ import {
   Primitives,
   stringifyPoint,
 } from 'noya-state';
+import { windowsOf } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import {
   ApplicationState,
@@ -467,6 +468,8 @@ export const moveControlPoints = (
   });
 };
 
+const CLICKABLE_PATH_WIDTH = 3;
+
 export function layerPathContainsPoint(
   CanvasKit: CanvasKit,
   layer: Sketch.AnyLayer,
@@ -474,14 +477,37 @@ export function layerPathContainsPoint(
 ): boolean {
   if (!Layers.isPointsLayer(layer)) return false;
 
-  const strokedPath = Primitives.path(
-    CanvasKit,
-    layer.points,
-    layer.frame,
-    layer.isClosed,
-  ).stroke({ width: 3 });
+  return (
+    Primitives.path(CanvasKit, layer.points, layer.frame, layer.isClosed)
+      .stroke({ width: CLICKABLE_PATH_WIDTH })
+      ?.contains(point.x, point.y) ?? false
+  );
+}
 
-  if (!strokedPath) return false;
+export function findIndexOfPathSegmentContainingPoint(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  point: Point,
+): number | undefined {
+  const segments = windowsOf(layer.points, 2, layer.isClosed);
 
-  return strokedPath.contains(point.x, point.y);
+  const segmentPaths = segments.map((segment) =>
+    Primitives.path(CanvasKit, segment, layer.frame, false),
+  );
+
+  const segmentIndex = segmentPaths.findIndex((path) =>
+    path.stroke({ width: CLICKABLE_PATH_WIDTH })?.contains(point.x, point.y),
+  );
+
+  return segmentIndex >= 0 ? segmentIndex : undefined;
+}
+
+export function getPathSegment(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  segmentIndex: number,
+): Path | undefined {
+  const segments = windowsOf(layer.points, 2, layer.isClosed);
+
+  return Primitives.path(CanvasKit, segments[segmentIndex], layer.frame, false);
 }

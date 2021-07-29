@@ -19,7 +19,6 @@ import {
   getAxisValues,
   getLayerAxisInfo,
   getPossibleSnapLayers,
-  getSelectedLayerIndexPathsExcludingDescendants,
   getSnappingPairs,
   Layers,
   Primitives,
@@ -27,7 +26,7 @@ import {
   Selectors,
   SnappingPair,
 } from 'noya-state';
-import { groupBy, windowsOf } from 'noya-utils';
+import { groupBy } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
@@ -441,26 +440,32 @@ export default memo(function SketchFileRenderer() {
 
     if (!point) return null;
 
-    const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
-      state,
-    );
-    const layer = Layers.access(page, layerIndexPaths[0]);
+    const layers = Layers.findAll(
+      page,
+      (layer) => layer.do_objectID in state.selectedPointLists,
+    ).filter(Layers.isPointsLayer);
 
-    if (!Layers.isPointsLayer(layer)) return;
-
-    const segments = windowsOf(layer.points, 2, layer.isClosed);
-
-    const segmentPaths = segments.map((segment) =>
-      Primitives.path(CanvasKit, segment, layer.frame, false),
+    const layer = layers.find((layer) =>
+      Selectors.layerPathContainsPoint(CanvasKit, layer, point),
     );
 
-    const segmentIndex = segmentPaths.findIndex((path) =>
-      path.copy().stroke({ width: 3 })?.contains(point.x, point.y),
+    if (!layer) return null;
+
+    const segmentIndex = Selectors.findIndexOfPathSegmentContainingPoint(
+      CanvasKit,
+      layer,
+      point,
     );
 
-    if (segmentIndex === -1) return null;
+    if (segmentIndex === undefined) return null;
 
-    const segmentPath = segmentPaths[segmentIndex];
+    const segmentPath = Selectors.getPathSegment(
+      CanvasKit,
+      layer,
+      segmentIndex,
+    );
+
+    if (!segmentPath) return null;
 
     const pointDistance = Selectors.getDistanceAlongPath(
       CanvasKit,
