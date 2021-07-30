@@ -41,6 +41,7 @@ type InsertMenuLayerType =
   | 'artboard'
   | 'rectangle'
   | 'oval'
+  | 'line'
   | 'vector'
   | 'text'
   | 'slice';
@@ -63,6 +64,7 @@ const ToolbarContent = memo(function ToolbarContent({
     { title: 'Artboard', value: 'artboard' },
     { title: 'Rectangle', value: 'rectangle' },
     { title: 'Oval', value: 'oval' },
+    { title: 'Line', value: 'line' },
     { title: 'Vector', value: 'vector' },
     { title: 'Text', value: 'text' },
     { title: 'Slice', value: 'slice' },
@@ -82,6 +84,7 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertArtboard = isInsertingLayerType === 'artboard';
   const isInsertRectangle = isInsertingLayerType === 'rectangle';
   const isInsertOval = isInsertingLayerType === 'oval';
+  const isInsertLine = isInsertingLayerType === 'line';
   const isInsertText = isInsertingLayerType === 'text';
   const isInsertSlice = isInsertingLayerType === 'slice';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
@@ -115,6 +118,14 @@ const ToolbarContent = memo(function ToolbarContent({
       dispatch('interaction', ['insert', 'oval']);
     }
   }, [isInsertOval, dispatch]);
+
+  const handleInsertLine = useCallback(() => {
+    if (isInsertLine) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insert', 'line']);
+    }
+  }, [isInsertLine, dispatch]);
 
   const handleInsertText = useCallback(() => {
     if (isInsertText) {
@@ -156,6 +167,9 @@ const ToolbarContent = memo(function ToolbarContent({
           case 'oval':
             dispatch('interaction', ['insert', 'oval']);
             break;
+          case 'line':
+            dispatch('interaction', ['insert', 'line']);
+            break;
           case 'text':
             dispatch('interaction', ['insert', 'text']);
             break;
@@ -179,6 +193,7 @@ const ToolbarContent = memo(function ToolbarContent({
     f: handleInsertArtboard,
     r: handleInsertRectangle,
     o: handleInsertOval,
+    l: handleInsertLine,
     t: handleInsertText,
     s: handleInsertSlice,
     p: handleEnablePenTool,

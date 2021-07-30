@@ -29,6 +29,7 @@ export type DragHandle = {
 export type DrawableLayerType =
   | 'rectangle'
   | 'oval'
+  | 'line'
   | 'text'
   | 'artboard'
   | 'slice';

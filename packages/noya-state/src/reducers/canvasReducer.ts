@@ -122,10 +122,8 @@ export function canvasReducer(
               }),
             ],
           }),
-          createRect(
-            draft.interactionState.origin,
-            draft.interactionState.current,
-          ),
+          draft.interactionState.origin,
+          draft.interactionState.current,
         );
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
@@ -707,13 +705,16 @@ export function canvasReducer(
 export function createDrawingLayer(
   shapeType: DrawableLayerType,
   style: Sketch.Style,
-  rect: Rect,
+  origin: Point,
+  current: Point,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
   | Sketch.Text
   | Sketch.Artboard
-  | Sketch.Slice {
+  | Sketch.Slice
+  | Sketch.ShapePath {
+  const rect = createRect(origin, current);
   const frame = SketchModel.rect(rect);
 
   switch (shapeType) {
@@ -725,6 +726,33 @@ export function createDrawingLayer(
       return SketchModel.text({ frame });
     case 'artboard':
       return SketchModel.artboard({ frame });
+    case 'line':
+      const createCurvePoint = (point: Point) =>
+        encodeCurvePoint(
+          {
+            curveMode: Sketch.CurveMode.Straight,
+            hasCurveFrom: false,
+            hasCurveTo: false,
+            curveFrom: point,
+            curveTo: point,
+            point: point,
+            cornerRadius: 0,
+            _class: 'curvePoint',
+          },
+          frame,
+        );
+
+      return SketchModel.shapePath({
+        style: SketchModel.style({
+          borders: [
+            SketchModel.border({
+              color: defaultBorderColor,
+            }),
+          ],
+        }),
+        frame,
+        points: [createCurvePoint(origin), createCurvePoint(current)],
+      });
     case 'slice':
       return SketchModel.slice({
         frame,
