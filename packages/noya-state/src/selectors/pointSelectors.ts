@@ -478,11 +478,9 @@ const CLICKABLE_PATH_WIDTH = 3;
 
 export function layerPathContainsPoint(
   CanvasKit: CanvasKit,
-  layer: Sketch.AnyLayer,
+  layer: PointsLayer,
   point: Point,
 ): boolean {
-  if (!Layers.isPointsLayer(layer)) return false;
-
   return (
     Primitives.path(CanvasKit, layer.points, layer.frame, layer.isClosed)
       .stroke({ width: CLICKABLE_PATH_WIDTH })
