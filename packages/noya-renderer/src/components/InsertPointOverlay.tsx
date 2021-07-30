@@ -38,12 +38,12 @@ export const InsertPointOverlay = memo(function InsertPointOverlay() {
 
   if (!splitParameters) return;
 
-  const { segmentPath, pointDistance } = splitParameters;
+  const { segmentPath, pointOnPath } = splitParameters;
 
   return (
     <>
       <Path path={segmentPath} paint={paint} />
-      <PseudoPoint point={pointDistance.point} />
+      <PseudoPoint point={pointOnPath} />
     </>
   );
 });

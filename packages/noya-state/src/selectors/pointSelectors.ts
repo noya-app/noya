@@ -12,7 +12,7 @@ import {
   Primitives,
   stringifyPoint,
 } from 'noya-state';
-import { windowsOf } from 'noya-utils';
+import { range, windowsOf } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import {
   ApplicationState,
@@ -112,7 +112,7 @@ export const getDistanceAlongPath = (
   CanvasKit: CanvasKit,
   path: Path,
   point: Point,
-): { percent: number; point: Point } | undefined => {
+): { t: number; pointOnPath: Point } | undefined => {
   const measureIter = new CanvasKit.ContourMeasureIter(path, false, 1);
 
   const contour = measureIter.next();
@@ -121,20 +121,25 @@ export const getDistanceAlongPath = (
 
   const length = contour.length();
 
-  // TODO: Choose reasonable step size or find better approach (this could become massive)
-  const steps = Math.ceil(length);
+  // TODO: Consider alternatives (is this enough granularity?)
+  const steps = Math.min(Math.ceil(length), 500);
 
-  // TODO: Find smallest distance
-  for (let i = 0; i < steps; i++) {
-    const percent = i / steps;
-    const percentageLength = length * percent;
-    const [x, y] = contour.getPosTan(percentageLength);
-    const pointOnPath = { x, y };
+  const sorted = range(0, steps)
+    .map((i) => {
+      const t = i / steps;
+      const percentageLength = length * t;
+      const [x, y] = contour.getPosTan(percentageLength);
+      const pointOnPath = { x, y };
 
-    if (distance(point, pointOnPath) < 2) {
-      return { percent, point: pointOnPath };
-    }
-  }
+      return { t, pointOnPath, distance: distance(point, pointOnPath) };
+    })
+    .sort((a, b) => a.distance - b.distance);
+
+  const smallest = sorted[0];
+
+  if (!smallest || smallest.distance > CLICKABLE_PATH_WIDTH) return;
+
+  return { t: smallest.t, pointOnPath: smallest.pointOnPath };
 };
 
 export const getSelectedPoints = (
@@ -537,6 +542,7 @@ export function getSplitPathParameters(
   return {
     segmentIndex,
     segmentPath,
-    pointDistance,
+    t: pointDistance.t,
+    pointOnPath: pointDistance.pointOnPath,
   };
 }

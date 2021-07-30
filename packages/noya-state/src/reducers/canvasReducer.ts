@@ -346,11 +346,11 @@ export function canvasReducer(
 
         if (!splitParameters) return;
 
-        const { segmentIndex, segmentPath, pointDistance } = splitParameters;
+        const { segmentIndex, segmentPath, t } = splitParameters;
 
         const newCurvePoints = Primitives.splitPath(
           segmentPath,
-          pointDistance.percent,
+          t,
         ).map((path) =>
           Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
         );
