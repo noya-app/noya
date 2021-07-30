@@ -29,7 +29,7 @@ import {
   Y_DIRECTIONS,
 } from '../guides';
 import { AlignmentGuide, ExtensionGuide, MeasurementGuide } from './Guides';
-import { MeasurementLabel } from './MeasurementLabel';
+import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 
 interface Props {
   page: Sketch.Page;
@@ -132,7 +132,9 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
         <Fragment key={index}>
           <ExtensionGuide points={guide.extension} />
           <MeasurementGuide points={guide.measurement} />
-          {showLabels && <MeasurementLabel points={guide.measurement} />}
+          {showLabels && (
+            <DistanceMeasurementLabel points={guide.measurement} />
+          )}
         </Fragment>
       ))}
     </>
