@@ -1,5 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`drawing draw line layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <ShapePath> Path { x: 0, y: 0, w: 100, h: 100 }
+    ├── <CurvePoint> { x: 0, y: 0 } (Straight)
+    └── <CurvePoint> { x: 1, y: 1 } (Straight)"
+`;
+
+exports[`drawing draw oval layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 100, h: 100 }"
+`;
+
+exports[`drawing draw rectangle layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }"
+`;
+
 exports[`move move layer in artboard 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 └── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }

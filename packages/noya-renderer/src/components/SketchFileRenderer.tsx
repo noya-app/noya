@@ -333,7 +333,10 @@ export default memo(function SketchFileRenderer() {
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
-          interactionState.shapeType === 'oval' ? 'oval' : 'rectangle',
+          interactionState.shapeType === 'oval' ||
+            interactionState.shapeType === 'line'
+            ? interactionState.shapeType
+            : 'rectangle',
           SketchModel.style({
             borders: [
               SketchModel.border({
@@ -341,7 +344,8 @@ export default memo(function SketchFileRenderer() {
               }),
             ],
           }),
-          createRect(interactionState.origin, interactionState.current),
+          interactionState.origin,
+          interactionState.current,
         )
       : undefined;
 

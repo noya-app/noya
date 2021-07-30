@@ -288,3 +288,56 @@ describe('scale', () => {
     ).toMatchSnapshot();
   });
 });
+
+describe('drawing', () => {
+  test('draw rectangle layer', () => {
+    const state = createInitialState(createSketchFile(SketchModel.page()));
+
+    const updated = run(state, [
+      ['interaction', ['startDrawing', 'rectangle', { x: 0, y: 0 }]],
+      ['interaction', ['updateDrawing', { x: 100, y: 100 }]],
+      ['addDrawnLayer'],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('draw oval layer', () => {
+    const state = createInitialState(createSketchFile(SketchModel.page()));
+
+    const updated = run(state, [
+      ['interaction', ['startDrawing', 'oval', { x: 0, y: 0 }]],
+      ['interaction', ['updateDrawing', { x: 100, y: 100 }]],
+      ['addDrawnLayer'],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('draw line layer', () => {
+    const state = createInitialState(createSketchFile(SketchModel.page()));
+
+    const updated = run(state, [
+      ['interaction', ['startDrawing', 'line', { x: 0, y: 0 }]],
+      ['interaction', ['updateDrawing', { x: 100, y: 100 }]],
+      ['addDrawnLayer'],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
+    ).toMatchSnapshot();
+  });
+});
