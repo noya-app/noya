@@ -11,6 +11,7 @@ import {
 } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
+import { SketchModel } from 'noya-sketch-model';
 import {
   createDrawingLayer,
   DecodedCurvePoint,
@@ -23,10 +24,12 @@ import {
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { ALL_DIRECTIONS, getGuides } from '../guides';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
-import { ALL_DIRECTIONS, getGuides } from '../guides';
+import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
+import { InsertPointOverlay } from './InsertPointOverlay';
 import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
@@ -36,8 +39,6 @@ import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
-import { MeasurementGuide, ExtensionGuide } from './Guides';
-import { SketchModel } from 'noya-sketch-model';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -356,6 +357,7 @@ export default memo(function SketchFileRenderer() {
           <>
             {editablePaths}
             {editPathPseudoElements}
+            <InsertPointOverlay />
           </>
         ) : (
           <>

@@ -14,6 +14,7 @@ import {
   DecodedCurvePoint,
   encodeCurvePoint,
   Primitives,
+  Selectors,
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
@@ -44,9 +45,9 @@ import {
   ApplicationState,
 } from './applicationReducer';
 import {
+  DrawableLayerType,
   InteractionAction,
   interactionReducer,
-  DrawableLayerType,
   SnapshotInteractionAction,
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
@@ -65,6 +66,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'insertPointInPath', point: Point]
   | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
@@ -314,6 +316,54 @@ export function canvasReducer(
         return state;
 
       return moveLayer(state, state.selectedObjects, parentId, 'inside');
+    }
+    case 'insertPointInPath': {
+      const [, point] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = Layers.findAllIndexPaths(
+        getCurrentPage(state),
+        (layer) => layer.do_objectID in state.selectedPointLists,
+      );
+
+      return produce(state, (draft) => {
+        const draftLayer = layerIndexPaths
+          .map((indexPath) =>
+            Layers.access(draft.sketch.pages[pageIndex], indexPath),
+          )
+          .filter(Layers.isPointsLayer)
+          .find((layer) =>
+            Selectors.layerPathContainsPoint(CanvasKit, layer, point),
+          );
+
+        if (!draftLayer) return;
+
+        const splitParameters = Selectors.getSplitPathParameters(
+          CanvasKit,
+          draftLayer,
+          point,
+        );
+
+        if (!splitParameters) return;
+
+        const { segmentIndex, segmentPath, t } = splitParameters;
+
+        const newCurvePoints = Primitives.splitPath(
+          segmentPath,
+          t,
+        ).map((path) =>
+          Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
+        );
+
+        const start = draftLayer.points.slice(0, segmentIndex + 1);
+        const end = draftLayer.points.slice(segmentIndex + 1);
+        const joined = Primitives.joinCurvePoints(
+          [start, ...newCurvePoints, end],
+          segmentIndex === draftLayer.points.length - 1,
+        );
+
+        draftLayer.points = joined;
+      });
     }
     case 'interaction': {
       const page = getCurrentPage(state);

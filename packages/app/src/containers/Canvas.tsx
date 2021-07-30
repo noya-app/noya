@@ -258,34 +258,36 @@ export default memo(function Canvas() {
             },
           );
 
-          Selectors.getSelectedLayers(state)
-            .filter(Layers.isPointsLayer)
-            .forEach((layer) => {
-              const boundingRect = boundingRects[layer.do_objectID];
-              layer.points.forEach((curvePoint, index) => {
-                const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+          const selectedPointsLayers = Selectors.getSelectedLayers(
+            state,
+          ).filter(Layers.isPointsLayer);
 
-                if (Selectors.isPointInRange(decodedPoint.point, point)) {
-                  selectedPoint = [layer.do_objectID, index];
-                } else if (
-                  Selectors.isPointInRange(decodedPoint.curveTo, point)
-                ) {
-                  selectedControlPoint = {
-                    layerId: layer.do_objectID,
-                    pointIndex: index,
-                    controlPointType: 'curveTo',
-                  };
-                } else if (
-                  Selectors.isPointInRange(decodedPoint.curveFrom, point)
-                ) {
-                  selectedControlPoint = {
-                    layerId: layer.do_objectID,
-                    pointIndex: index,
-                    controlPointType: 'curveFrom',
-                  };
-                }
-              });
+          selectedPointsLayers.forEach((layer) => {
+            const boundingRect = boundingRects[layer.do_objectID];
+            layer.points.forEach((curvePoint, index) => {
+              const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+
+              if (Selectors.isPointInRange(decodedPoint.point, point)) {
+                selectedPoint = [layer.do_objectID, index];
+              } else if (
+                Selectors.isPointInRange(decodedPoint.curveTo, point)
+              ) {
+                selectedControlPoint = {
+                  layerId: layer.do_objectID,
+                  pointIndex: index,
+                  controlPointType: 'curveTo',
+                };
+              } else if (
+                Selectors.isPointInRange(decodedPoint.curveFrom, point)
+              ) {
+                selectedControlPoint = {
+                  layerId: layer.do_objectID,
+                  pointIndex: index,
+                  controlPointType: 'curveFrom',
+                };
+              }
             });
+          });
 
           const indexPathOfOpenShapeLayer = Selectors.getIndexPathOfOpenShapeLayer(
             state,
@@ -319,6 +321,12 @@ export default memo(function Canvas() {
               selectedControlPoint.controlPointType,
             );
             dispatch('interaction', ['maybeMoveControlPoint', point]);
+          } else if (
+            selectedPointsLayers.some((layer) =>
+              Selectors.layerPathContainsPoint(CanvasKit, layer, point),
+            )
+          ) {
+            dispatch('insertPointInPath', point);
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
             dispatch('interaction', ['maybeConvertCurveMode', point]);

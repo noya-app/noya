@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
 import { distance, Point, Rect } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
@@ -8,9 +8,11 @@ import {
   DecodedCurvePoint,
   encodeCurvePoint,
   parsePoint,
-  stringifyPoint,
   path,
+  Primitives,
+  stringifyPoint,
 } from 'noya-state';
+import { range, windowsOf } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import {
   ApplicationState,
@@ -104,6 +106,40 @@ const getSelectedPointsFromPointLists = (
   });
 
   return points;
+};
+
+export const getDistanceAlongPath = (
+  CanvasKit: CanvasKit,
+  path: Path,
+  point: Point,
+): { t: number; pointOnPath: Point } | undefined => {
+  const measureIter = new CanvasKit.ContourMeasureIter(path, false, 1);
+
+  const contour = measureIter.next();
+
+  if (!contour) return;
+
+  const length = contour.length();
+
+  // TODO: Consider alternatives (is this enough granularity?)
+  const steps = Math.min(Math.ceil(length), 500);
+
+  const sorted = range(0, steps)
+    .map((i) => {
+      const t = i / steps;
+      const percentageLength = length * t;
+      const [x, y] = contour.getPosTan(percentageLength);
+      const pointOnPath = { x, y };
+
+      return { t, pointOnPath, distance: distance(point, pointOnPath) };
+    })
+    .sort((a, b) => a.distance - b.distance);
+
+  const smallest = sorted[0];
+
+  if (!smallest || smallest.distance > CLICKABLE_PATH_WIDTH) return;
+
+  return { t: smallest.t, pointOnPath: smallest.pointOnPath };
 };
 
 export const getSelectedPoints = (
@@ -437,3 +473,74 @@ export const moveControlPoints = (
     );
   });
 };
+
+const CLICKABLE_PATH_WIDTH = 3;
+
+export function layerPathContainsPoint(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  point: Point,
+): boolean {
+  return (
+    Primitives.path(CanvasKit, layer.points, layer.frame, layer.isClosed)
+      .stroke({ width: CLICKABLE_PATH_WIDTH })
+      ?.contains(point.x, point.y) ?? false
+  );
+}
+
+export function findIndexOfPathSegmentContainingPoint(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  point: Point,
+): number | undefined {
+  const segments = windowsOf(layer.points, 2, layer.isClosed);
+
+  const segmentPaths = segments.map((segment) =>
+    Primitives.path(CanvasKit, segment, layer.frame, false),
+  );
+
+  const segmentIndex = segmentPaths.findIndex((path) =>
+    path.stroke({ width: CLICKABLE_PATH_WIDTH })?.contains(point.x, point.y),
+  );
+
+  return segmentIndex >= 0 ? segmentIndex : undefined;
+}
+
+export function getPathSegment(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  segmentIndex: number,
+): Path | undefined {
+  const segments = windowsOf(layer.points, 2, layer.isClosed);
+
+  return Primitives.path(CanvasKit, segments[segmentIndex], layer.frame, false);
+}
+
+export function getSplitPathParameters(
+  CanvasKit: CanvasKit,
+  layer: PointsLayer,
+  point: Point,
+) {
+  const segmentIndex = findIndexOfPathSegmentContainingPoint(
+    CanvasKit,
+    layer,
+    point,
+  );
+
+  if (segmentIndex === undefined) return;
+
+  const segmentPath = getPathSegment(CanvasKit, layer, segmentIndex);
+
+  if (!segmentPath) return;
+
+  const pointDistance = getDistanceAlongPath(CanvasKit, segmentPath, point);
+
+  if (!pointDistance) return;
+
+  return {
+    segmentIndex,
+    segmentPath,
+    t: pointDistance.t,
+    pointOnPath: pointDistance.pointOnPath,
+  };
+}
