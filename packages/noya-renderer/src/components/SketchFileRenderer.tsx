@@ -34,11 +34,12 @@ import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
-import { MeasurementLabel } from './MeasurementLabel';
+import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
+import { AreaMeasurementLabel } from './AreaMeasurementLabel';
 
 const BoundingRect = memo(function BoundingRect({
   selectionPaint,
@@ -172,7 +173,7 @@ export default memo(function SketchFileRenderer() {
         {guides.map((guide, index) => (
           <>
             <MeasurementGuide key={index} points={guide.measurement} />
-            <MeasurementLabel key={index} points={guide.measurement} />
+            <DistanceMeasurementLabel key={index} points={guide.measurement} />
           </>
         ))}
       </>
@@ -349,6 +350,31 @@ export default memo(function SketchFileRenderer() {
         )
       : undefined;
 
+  const areaMeasurementLabel = useMemo(() => {
+    if (
+      interactionState.type !== 'drawing' &&
+      interactionState.type !== 'scaling'
+    )
+      return null;
+
+    const frame = createRect(interactionState.origin, interactionState.current);
+
+    return (
+      <AreaMeasurementLabel
+        origin={{
+          x: interactionState.current.x + 20,
+          y: interactionState.current.y + 20,
+        }}
+        text={`${frame.width} × ${frame.height}`}
+        fontSize={12}
+        padding={{
+          width: 8,
+          height: 4,
+        }}
+      />
+    );
+  }, [interactionState]);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
@@ -389,6 +415,7 @@ export default memo(function SketchFileRenderer() {
               !isInserting &&
               highlightedSketchLayer}
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
+            {areaMeasurementLabel}
             <SnapGuides />
             {quickMeasureGuides}
             {boundingRect && !drawingLayer && !isInserting && (

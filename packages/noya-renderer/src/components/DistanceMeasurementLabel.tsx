@@ -20,7 +20,7 @@ interface Props {
   points: [Point, Point];
 }
 
-export function MeasurementLabel({ points }: Props) {
+export function DistanceMeasurementLabel({ points }: Props) {
   const text = round(distance(...points)).toString();
 
   const centerPoint = useMemo(
