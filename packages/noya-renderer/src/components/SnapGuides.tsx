@@ -8,6 +8,7 @@ import {
   distance,
   Point,
   Rect,
+  Size,
 } from 'noya-geometry';
 import {
   getLayerSnapValues,
@@ -28,8 +29,9 @@ import {
   X_DIRECTIONS,
   Y_DIRECTIONS,
 } from '../guides';
-import { AlignmentGuide, ExtensionGuide, MeasurementGuide } from './Guides';
+import { AreaMeasurementLabel } from './AreaMeasurementLabel';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
+import { AlignmentGuide, ExtensionGuide, MeasurementGuide } from './Guides';
 
 interface Props {
   page: Sketch.Page;
@@ -147,10 +149,12 @@ export default memo(function SnapGuides() {
   const interactionState = state.interactionState;
   const page = Selectors.getCurrentPage(state);
 
-  const sourceRect = useMemo(() => {
+  const adjustedSource = useMemo(():
+    | { snapRect: Rect; areaSize: Size }
+    | undefined => {
     switch (interactionState.type) {
-      case 'moving':
-        return Selectors.getBoundingRect(
+      case 'moving': {
+        const rect = Selectors.getBoundingRect(
           page,
           AffineTransform.identity,
           state.selectedObjects,
@@ -160,6 +164,14 @@ export default memo(function SnapGuides() {
             includeArtboardLayers: false,
           },
         );
+
+        if (!rect) return;
+
+        return {
+          snapRect: rect,
+          areaSize: rect,
+        };
+      }
       case 'scaling': {
         const { origin, current, pageSnapshot, direction } = interactionState;
 
@@ -184,26 +196,61 @@ export default memo(function SnapGuides() {
 
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
 
-        return createRect(newExtentPoint, newExtentPoint);
+        return {
+          snapRect: createRect(newExtentPoint, newExtentPoint),
+          areaSize: newBoundingRect,
+        };
       }
       case 'insert': {
         const point = interactionState.point;
 
         if (!point) return;
 
-        return createRect(point, point);
+        const rect = createRect(point, point);
+
+        return { snapRect: rect, areaSize: rect };
       }
       case 'drawing': {
-        const current = interactionState.current;
+        const { origin, current } = interactionState;
 
         if (!current) return;
 
-        return createRect(current, current);
+        return {
+          snapRect: createRect(current, current),
+          areaSize: createRect(origin, current),
+        };
       }
     }
   }, [canvasSize, interactionState, page, state]);
 
-  if (!sourceRect) return null;
+  const snapRect = adjustedSource?.snapRect;
+  const areaSize = adjustedSource?.areaSize;
+
+  const areaMeasurementLabel = useMemo(() => {
+    if (
+      !areaSize ||
+      (interactionState.type !== 'drawing' &&
+        interactionState.type !== 'scaling')
+    )
+      return null;
+
+    return (
+      <AreaMeasurementLabel
+        origin={{
+          x: interactionState.current.x + 20,
+          y: interactionState.current.y + 20,
+        }}
+        text={`${areaSize.width} × ${areaSize.height}`}
+        fontSize={12}
+        padding={{
+          width: 8,
+          height: 4,
+        }}
+      />
+    );
+  }, [interactionState, areaSize]);
+
+  if (!snapRect) return null;
 
   const targetLayers = getPossibleTargetSnapLayers(
     state,
@@ -220,11 +267,12 @@ export default memo(function SnapGuides() {
           key={axis}
           axis={axis}
           targetLayers={targetLayers}
-          sourceRect={sourceRect}
+          sourceRect={snapRect}
           page={page}
           showLabels={interactionState.type === 'moving'}
         />
       ))}
+      {areaMeasurementLabel}
     </>
   );
 });
