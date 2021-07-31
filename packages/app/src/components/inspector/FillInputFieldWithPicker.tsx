@@ -289,7 +289,6 @@ interface Props {
   id: string;
   fillType?: Sketch.FillType;
   onChangeType?: (type: Sketch.FillType) => void;
-  onChangeIndex?: () => void;
   hasMultipleFills?: boolean;
   colorProps: ColorFillProps;
   gradientProps?: GradientFillProps;
@@ -300,7 +299,6 @@ export default memo(function FillInputFieldWithPicker({
   id,
   fillType,
   onChangeType,
-  onChangeIndex = () => {},
   hasMultipleFills = false,
   colorProps,
   gradientProps,
@@ -347,8 +345,6 @@ export default memo(function FillInputFieldWithPicker({
   return (
     <Popover.Root
       onOpenChange={(open) => {
-        onChangeIndex();
-
         if (open && Sketch.FillType.Gradient) {
           gradientProps?.onEditGradient(0);
         }

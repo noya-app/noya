@@ -3,6 +3,7 @@ export * from './isDeepEqual';
 export * from './isNumberEqual';
 export * from './zip';
 export * from './clamp';
+export * from './lerp';
 export * from './sum';
 export * from './round';
 export * from './range';
