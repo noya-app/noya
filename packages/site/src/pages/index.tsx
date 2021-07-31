@@ -50,8 +50,8 @@ function App() {
 
         <Spacer.Vertical size="12rem" />
 
-        <Stack axis="x" spacing="2rem">
-          <Stack axis="y" alignment="center">
+        <Stack axis="x" distribution="fill" spacing="2rem">
+          <Stack axis="y" alignment="center" spacing="1rem">
             <Text variant="heading3">Editor</Text>
             <Text alignment="center">
               The full power of the design tools you're used to. Packed with a
@@ -59,7 +59,7 @@ function App() {
             </Text>
           </Stack>
 
-          <Stack axis="y" alignment="center">
+          <Stack axis="y" alignment="center" spacing="1rem">
             <Text variant="heading3">GraphQL</Text>
             <Text alignment="center">
               The full power of the design tools you're used to. Packed with a
@@ -67,14 +67,14 @@ function App() {
             </Text>
           </Stack>
 
-          <Stack axis="y" alignment="center">
+          <Stack axis="y" alignment="center" spacing="1rem">
             <Text variant="heading3">SVG Export</Text>
             <Text alignment="center">
               Export designs to SVG from Figma, Sketch, and AdobeXD.
             </Text>
           </Stack>
 
-          <Stack axis="y" alignment="center">
+          <Stack axis="y" alignment="center" spacing="1rem">
             <Text variant="heading3">Canvas</Text>
             <Text alignment="center">
               Built on Canvas. The full power of the design tools you're used
