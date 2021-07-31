@@ -33,6 +33,7 @@ import {
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
   getLayerFlipTransform,
+  getLayerRotationTransform,
   getLayerTransformAtIndexPath,
   getLayerTranslationTransform,
   getParentLayer,
@@ -453,6 +454,7 @@ export function canvasReducer(
               indexPath,
             )
               .transform(getLayerFlipTransform(layer))
+              .transform(getLayerRotationTransform(layer))
               .transform(getLayerTranslationTransform(layer))
               .scale(layer.frame.width, layer.frame.height);
 

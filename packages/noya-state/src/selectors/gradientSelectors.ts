@@ -14,6 +14,7 @@ import {
   ApplicationState,
   SelectedGradient,
 } from '../reducers/applicationReducer';
+import { getLayerRotationTransform } from './transformSelectors';
 
 export function getSelectedGradient(
   page: Sketch.Page,
@@ -56,6 +57,7 @@ export function getSelectedGradientStopPoints(
 
   const transform = getLayerTransformAtIndexPath(page, indexPath)
     .transform(getLayerFlipTransform(layer))
+    .transform(getLayerRotationTransform(layer))
     .transform(getLayerTranslationTransform(layer))
     .scale(layer.frame.width, layer.frame.height);
 
