@@ -3,7 +3,6 @@ import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
   createRectFromBounds,
-  distance,
   getRectCornerPoints,
   Point,
   Rect,
@@ -12,10 +11,8 @@ import {
   rotatedRectContainsPoint,
   transformRect,
 } from 'noya-geometry';
-import { PointString } from 'noya-sketch-model';
 import * as Primitives from 'noya-state';
-import { getRectDragHandles, isPointInRange } from 'noya-state';
-import { lerp } from 'noya-utils';
+import { getRectDragHandles } from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
@@ -25,11 +22,8 @@ import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
   getCanvasTransform,
-  getLayerFlipTransform,
   getLayerRotationTransform,
-  getLayerTransformAtIndexPath,
   getLayerTransformAtIndexPathReversed,
-  getLayerTranslationTransform,
   getScreenTransform,
 } from './transformSelectors';
 
@@ -330,107 +324,4 @@ export function getBoundingRectMap(
   });
 
   return rectMap;
-}
-
-type GradientStopPoint = { point: Point; color: Sketch.Color };
-
-export function getSelectedGradientStopPoints(
-  state: ApplicationState,
-): GradientStopPoint[] | undefined {
-  if (!state.selectedGradient) return;
-
-  const { layerId, fillIndex } = state.selectedGradient;
-
-  const page = getCurrentPage(state);
-  const indexPath = Layers.findIndexPath(
-    page,
-    (layer) => layer.do_objectID === layerId,
-  );
-
-  if (!indexPath) return;
-
-  const layer = Layers.access(page, indexPath);
-
-  if (layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient)
-    return;
-
-  const transform = getLayerTransformAtIndexPath(page, indexPath)
-    .transform(getLayerFlipTransform(layer))
-    .transform(getLayerTranslationTransform(layer))
-    .scale(layer.frame.width, layer.frame.height);
-
-  const gradient = layer.style.fills[fillIndex].gradient;
-
-  const from = PointString.decode(gradient.from);
-  const to = PointString.decode(gradient.to);
-
-  const extremePoints = {
-    from: transform.applyTo(from),
-    to: transform.applyTo(to),
-  };
-
-  return gradient.stops.map((stop) => {
-    return {
-      color: stop.color,
-      point: {
-        x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
-        y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
-      },
-    };
-  });
-}
-
-export function getGradientStopIndexAtPoint(
-  state: ApplicationState,
-  point: Point,
-): number {
-  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
-
-  if (!selectedLayerGradientPoints) return -1;
-
-  return selectedLayerGradientPoints.findIndex((gradientPoint) =>
-    isPointInRange(gradientPoint.point, point),
-  );
-}
-
-function isPointOnLine(A: Point, B: Point, point: Point) {
-  // get distance from the point to the two ends of the line
-  const d1 = distance(point, A);
-  const d2 = distance(point, B);
-
-  const lineLen = distance(A, B);
-
-  const buffer = 5; // higher # = less accurate
-
-  return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
-}
-
-export function getPercentageOfPointInGradient(
-  state: ApplicationState,
-  point: Point,
-) {
-  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
-
-  if (!selectedLayerGradientPoints) return 0;
-
-  // return getLinePercentage(
-  //   selectedLayerGradientPoints[0],
-  //   selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1],
-  //   point,
-  // );
-
-  return 0;
-}
-
-export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
-  if (getGradientStopIndexAtPoint(state, point) !== -1) return false;
-  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
-
-  if (!selectedLayerGradientPoints) return false;
-
-  return isPointOnLine(
-    selectedLayerGradientPoints[0].point,
-    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
-    point,
-  );
 }

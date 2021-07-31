@@ -8,8 +8,10 @@ import { SketchFile } from 'noya-sketch-file';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
+import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
   findPageLayerIndexPaths,
+  fixGradientPositions,
   getCurrentComponentsTab,
   getCurrentPageIndex,
   getCurrentTab,
@@ -118,7 +120,20 @@ export function applicationReducer(
     }
     case 'setSelectedGradient': {
       const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
       return produce(state, (draft) => {
+        if (state.selectedGradient && !value) {
+          const gradient = getSelectedGradient(
+            draft.sketch.pages[pageIndex],
+            state.selectedGradient,
+          );
+
+          if (gradient) {
+            fixGradientPositions(gradient);
+          }
+        }
+
         draft.selectedGradient = value;
       });
     }

@@ -20,10 +20,12 @@ import {
 } from 'noya-state';
 import { lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
+import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixGradientPositions,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
@@ -400,6 +402,24 @@ export function canvasReducer(
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
         switch (interactionState.type) {
+          case 'maybeMoveGradientStop': {
+            if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
+
+            const { pageSnapshot } = draft.interactionState;
+
+            if (!state.selectedGradient) return;
+
+            const gradient = getSelectedGradient(
+              pageSnapshot,
+              state.selectedGradient,
+            );
+
+            if (!gradient) return;
+
+            fixGradientPositions(gradient);
+
+            return;
+          }
           case 'moveGradientStop': {
             const { origin, current, pageSnapshot } = interactionState;
 
