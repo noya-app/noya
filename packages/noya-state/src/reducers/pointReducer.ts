@@ -3,6 +3,7 @@ import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import * as Layers from '../layers';
 import {
+  getCurrentPage,
   getCurrentPageIndex,
   getSelectedLayerIndexPaths,
   moveControlPoints,
@@ -126,17 +127,26 @@ export function pointReducer(
     case 'setControlPointX':
     case 'setControlPointY': {
       const [type, amount, mode = 'replace'] = action;
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const selectedControlPoint = state.selectedControlPoint;
+
+      if (!selectedControlPoint) return state;
+
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === selectedControlPoint.layerId,
+      );
+
+      if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        if (!draft.selectedControlPoint) return;
         const delta =
           type === 'setControlPointX' ? { x: amount } : { y: amount };
 
         moveControlPoints(
-          draft.selectedControlPoint,
-          layerIndexPaths,
+          selectedControlPoint,
+          indexPath,
           delta,
           mode,
           draft.sketch.pages[pageIndex],

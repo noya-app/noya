@@ -25,12 +25,6 @@ function run(state: ApplicationState, actions: Action[]) {
     state,
   );
 }
-// function run(state: ApplicationState, actions: CanvasAction[]) {
-//   return actions.reduce(
-//     (result, action) => canvasReducer(result, action, CanvasKit, context),
-//     state,
-//   );
-// }
 
 const rectangle = SketchModel.rectangle({
   frame: SketchModel.rect({
