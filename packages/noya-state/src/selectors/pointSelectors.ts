@@ -287,7 +287,7 @@ export const moveSelectedPoints = (
 
     // Update all points by first transforming to the canvas's coordinate system
     const decodedPoints = layer.points
-      .map((curvePoint) => decodeCurvePoint(curvePoint, boundingRect))
+      .map((curvePoint) => decodeCurvePoint(curvePoint, layer.frame))
       .map((decodedPoint, index) => {
         if (!pointList.includes(index)) return decodedPoint;
 
