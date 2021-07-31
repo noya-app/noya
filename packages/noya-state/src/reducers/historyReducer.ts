@@ -6,6 +6,7 @@ import {
   Action,
   applicationReducer,
   createInitialState,
+  ApplicationReducerContext,
 } from './applicationReducer';
 import { createInitialInteractionState } from './interactionReducer';
 
@@ -29,6 +30,7 @@ export function historyReducer(
   state: HistoryState,
   action: HistoryAction,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ) {
   const currentState = state.present;
   switch (action[0]) {
@@ -61,7 +63,12 @@ export function historyReducer(
         });
       }
     default:
-      const nextState = applicationReducer(currentState, action, CanvasKit);
+      const nextState = applicationReducer(
+        currentState,
+        action,
+        CanvasKit,
+        context,
+      );
       const mergableEntry = getMergableHistoryEntry(state, action[0]);
       const sketchFileChanged = currentState.sketch !== nextState.sketch;
       return produce(state, (draft) => {

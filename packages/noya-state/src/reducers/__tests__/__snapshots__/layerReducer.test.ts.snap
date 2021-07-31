@@ -29,6 +29,57 @@ exports[`deleteLayer delete multiple within same parent 1`] = `
 <Page> Page { x: 0, y: 0, w: 0, h: 0 }"
 `;
 
+exports[`duplicateLayer duplicate multiple 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+├── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle Copy { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval Copy { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`duplicateLayer duplicate multiple in different parents 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 0, y: 0, w: 0, h: 0 }
+    └── <Text> Text { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle Copy { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 0, y: 0, w: 0, h: 0 }
+    ├── <Text> Text { x: 0, y: 0, w: 0, h: 0 }
+    └── <Text> Text Copy { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`duplicateLayer duplicate multiple with gap 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+├── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+├── <Artboard> Artboard { x: 0, y: 0, w: 0, h: 0 }
+└── <Text> Text { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+├── <Oval> Oval { x: 0, y: 0, w: 0, h: 0 }
+├── <Artboard> Artboard { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle Copy { x: 0, y: 0, w: 0, h: 0 }
+├── <Artboard> Artboard Copy { x: 100, y: 0, w: 0, h: 0 }
+└── <Text> Text { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
+exports[`duplicateLayer duplicate one 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle Copy { x: 0, y: 0, w: 0, h: 0 }"
+`;
+
 exports[`moveLayer move multiple inside 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 0, y: 0, w: 0, h: 0 }

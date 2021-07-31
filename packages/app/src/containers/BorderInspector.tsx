@@ -18,7 +18,6 @@ type EditableBorder = {
   fillType?: Sketch.FillType;
   position?: Sketch.BorderPosition;
   thickness?: DimensionValue;
-  contextOpacity?: DimensionValue;
   gradient: Sketch.Gradient;
 };
 
@@ -68,9 +67,6 @@ export default memo(function BorderInspector() {
             ),
             thickness: getMultiNumberValue(
               filtered.map((border) => border.thickness),
-            ),
-            contextOpacity: getMultiNumberValue(
-              filtered.map((border) => border.contextSettings.opacity),
             ),
             gradient: gradient ?? filtered[0].gradient,
           };

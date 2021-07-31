@@ -10,6 +10,8 @@ import {
 
 export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
+export type PageLayer = Sketch.Page['layers'][number];
+
 export type ChildLayer = Exclude<
   Sketch.AnyLayer,
   { _class: 'artboard' | 'symbolMaster' | 'page' }
@@ -78,6 +80,10 @@ export const isArtboard = (
   return layer._class === 'artboard';
 };
 
+export const isSlice = (layer: Sketch.AnyLayer): layer is Sketch.Slice => {
+  return layer._class === 'slice';
+};
+
 export const isSymbolMasterOrArtboard = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolMaster | Sketch.Artboard => {
@@ -120,6 +126,29 @@ export const hasInspectableShadow = (layer: Sketch.AnyLayer): boolean => {
 };
 
 export const hasInspectableBorder = (layer: Sketch.AnyLayer): boolean => {
+  switch (layer._class) {
+    case 'bitmap':
+    case 'oval':
+    case 'polygon':
+    case 'rectangle':
+    case 'shapeGroup':
+    case 'shapePath':
+    case 'star':
+    case 'triangle':
+    case 'text':
+      return true;
+    case 'group':
+    case 'symbolInstance':
+    case 'page':
+    case 'artboard':
+    case 'MSImmutableHotspotLayer':
+    case 'slice':
+    case 'symbolMaster':
+      return false;
+  }
+};
+
+export const hasInspectableFill = (layer: Sketch.AnyLayer): boolean => {
   switch (layer._class) {
     case 'bitmap':
     case 'oval':

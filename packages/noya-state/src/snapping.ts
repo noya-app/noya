@@ -1,36 +1,54 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   AffineTransform,
-  Bounds,
-  createBounds,
-  Size,
   Axis,
+  createBounds,
+  createRect,
+  Point,
+  Rect,
+  Size,
 } from 'noya-geometry';
 import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import { Layers } from '.';
+import { getRectExtentPoint, Layers, resizeRect } from '.';
+import { cartesianProduct } from 'noya-utils';
 import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
-import { getBoundingRect, getCurrentPage } from './selectors/selectors';
+import {
+  getBoundingRect,
+  getCurrentPage,
+  getSelectedLayerIndexPathsExcludingDescendants,
+} from './selectors/selectors';
+import { CompassDirection } from './reducers/interactionReducer';
 
-export function getAxisValues(
-  rectBounds: Bounds,
-  axis: Axis,
-): [number, number, number] {
-  if (axis === 'x') {
-    return [rectBounds.minX, rectBounds.midX, rectBounds.maxX];
+export function getSnapValues(rect: Rect, axis: Axis): number[] {
+  const bounds = createBounds(rect);
+
+  const values =
+    axis === 'x'
+      ? [bounds.minX, bounds.midX, bounds.maxX]
+      : [bounds.minY, bounds.midY, bounds.maxY];
+
+  // If the values are close enough, don't snap to the midpoint as a separate value
+  if (values[2] - values[0] <= 1) {
+    return [values[0], values[2]];
   } else {
-    return [rectBounds.minY, rectBounds.midY, rectBounds.maxY];
+    return values;
   }
 }
 
-export function getPossibleSnapLayers(
+export function getPossibleTargetSnapLayers(
   state: ApplicationState,
-  selectedIndexPaths: IndexPath[],
   canvasSize: Size,
+  sourceIndexPaths: IndexPath[] = [],
 ) {
   const page = getCurrentPage(state);
+
+  // Ensure we don't snap to a selected layer by filtering them out
+  const sourceIds = sourceIndexPaths.map(
+    (indexPath) => Layers.access(page, indexPath).do_objectID,
+  );
 
   const allVisibleLayers = getLayersInRect(
     state,
@@ -39,21 +57,30 @@ export function getPossibleSnapLayers(
     {
       clickThroughGroups: false,
       includeHiddenLayers: false,
-      includeArtboardLayers: true,
+      includeArtboardLayers:
+        sourceIndexPaths.length === 0 ? 'includeAndClickThrough' : true,
     },
   );
 
+  // If we're not snapping a source layer (i.e. a layer with a parent) then
+  // we can snap anywhere in the hierarchy
+  if (sourceIndexPaths.length === 0) {
+    return allVisibleLayers.filter(
+      (layer) => !sourceIds.includes(layer.do_objectID),
+    );
+  }
+
   // Are all selected ids in the same artboard?
   const inSameArtboard =
-    Layers.isSymbolMasterOrArtboard(page.layers[selectedIndexPaths[0][0]]) &&
-    selectedIndexPaths.every((indexPath) => indexPath.length > 1) &&
-    selectedIndexPaths.every(
-      (indexPath) => indexPath[0] === selectedIndexPaths[0][0],
+    Layers.isSymbolMasterOrArtboard(page.layers[sourceIndexPaths[0][0]]) &&
+    sourceIndexPaths.every((indexPath) => indexPath.length > 1) &&
+    sourceIndexPaths.every(
+      (indexPath) => indexPath[0] === sourceIndexPaths[0][0],
     );
 
   // Do all selected ids have the same parent?
-  const sharedParentIndex = selectedIndexPaths[0].slice(0, -1);
-  const inSameParent = selectedIndexPaths.every((indexPath) =>
+  const sharedParentIndex = sourceIndexPaths[0].slice(0, -1);
+  const inSameParent = sourceIndexPaths.every((indexPath) =>
     isDeepEqual(indexPath.slice(0, -1), sharedParentIndex),
   );
 
@@ -61,7 +88,7 @@ export function getPossibleSnapLayers(
   let groupLayers: Sketch.AnyLayer[] = [];
 
   if (inSameArtboard) {
-    const artboard = page.layers[selectedIndexPaths[0][0]] as Sketch.Artboard;
+    const artboard = page.layers[sourceIndexPaths[0][0]] as Sketch.Artboard;
 
     groupLayers.push(artboard);
 
@@ -73,7 +100,7 @@ export function getPossibleSnapLayers(
   if (inSameParent) {
     const parent = Layers.access(
       page,
-      selectedIndexPaths[0].slice(0, -1),
+      sourceIndexPaths[0].slice(0, -1),
     ) as ParentLayer;
 
     groupLayers.push(...parent.layers);
@@ -82,76 +109,118 @@ export function getPossibleSnapLayers(
   const visibleLayers =
     inSameArtboard || inSameParent ? groupLayers : allVisibleLayers;
 
-  return visibleLayers;
+  return visibleLayers.filter(
+    (layer) => !sourceIds.includes(layer.do_objectID),
+  );
 }
 
-export function getLayerAxisInfo(
+export function getLayerSnapValues(
   page: Sketch.Page,
-  layers: Sketch.AnyLayer[],
-): SnappingLayerInfo[] {
-  return layers.flatMap((layer) => {
-    const rect = getBoundingRect(
-      page,
-      AffineTransform.identity,
-      [layer.do_objectID],
-      {
-        clickThroughGroups: true,
-        includeHiddenLayers: false,
-        includeArtboardLayers: false,
-      },
-    );
-
-    if (!rect) return [];
-
-    const bounds = createBounds(rect);
-
-    return [
-      {
-        layerId: layer.do_objectID,
-        y: getAxisValues(bounds, 'y'),
-        x: getAxisValues(bounds, 'x'),
-      },
-    ];
+  layerId: string,
+  axis: Axis,
+): number[] {
+  const rect = getBoundingRect(page, AffineTransform.identity, [layerId], {
+    clickThroughGroups: true,
+    includeHiddenLayers: false,
+    includeArtboardLayers: false,
   });
+
+  return rect ? getSnapValues(rect, axis) : [];
 }
 
-export function findSmallestSnappingDistance(values: SnappingPair[]) {
-  const getDelta = (pair: SnappingPair) =>
-    pair.selectedLayerValue - pair.visibleLayerValue;
+const SNAP_DISTANCE = 6;
 
-  const getDistance = (pair: SnappingPair) => Math.abs(getDelta(pair));
+export function getSnapAdjustmentDistance(values: Snap[]) {
+  const getDelta = (snap: Snap) => snap.source - snap.target;
+
+  const getDistance = (snap: Snap) => Math.abs(getDelta(snap));
 
   const distances = values
-    .filter((pair) => getDistance(pair) <= 6)
+    .filter((snap) => getDistance(snap) <= SNAP_DISTANCE)
     .sort((a, b) => getDistance(a) - getDistance(b));
 
   return distances.length > 0 ? getDelta(distances[0]) : 0;
 }
 
-type SnappingLayerInfo = {
-  layerId: string;
-  y: [number, number, number];
-  x: [number, number, number];
+export type Snap = {
+  source: number;
+  target: number;
+  targetId: string;
 };
 
-export type SnappingPair = {
-  selectedLayerValue: number;
-  visibleLayerValue: number;
-  visibleLayerId: string;
-};
+export function getSnaps(
+  sourceValues: number[],
+  targetValues: number[],
+  targetId: string,
+): Snap[] {
+  return cartesianProduct(
+    sourceValues,
+    targetValues,
+  ).map(([source, target]) => ({ source, target, targetId }));
+}
 
-export function getSnappingPairs(
-  selectedAxisValues: [number, number, number],
-  visibleLayersAxisValues: SnappingLayerInfo[],
-  axis: Axis,
-): SnappingPair[] {
-  return visibleLayersAxisValues.flatMap((axisValues) =>
-    selectedAxisValues.flatMap((selectedLayerValue) =>
-      axisValues[axis].map((visibleLayerValue) => ({
-        selectedLayerValue: selectedLayerValue,
-        visibleLayerValue: visibleLayerValue,
-        visibleLayerId: axisValues.layerId,
-      })),
+export function getSnapAdjustmentForVisibleLayers(
+  state: ApplicationState,
+  canvasSize: Size,
+  sourceRect: Rect,
+  sourceIndexPaths?: IndexPath[],
+): Point {
+  const page = getCurrentPage(state);
+
+  const targetLayers = getPossibleTargetSnapLayers(
+    state,
+    canvasSize,
+    sourceIndexPaths,
+  );
+
+  const sourceXs = getSnapValues(sourceRect, 'x');
+  const sourceYs = getSnapValues(sourceRect, 'y');
+
+  const xSnaps = targetLayers.flatMap((targetLayer) =>
+    getSnaps(
+      sourceXs,
+      getLayerSnapValues(page, targetLayer.do_objectID, 'x'),
+      targetLayer.do_objectID,
     ),
+  );
+  const ySnaps = targetLayers.flatMap((targetLayer) =>
+    getSnaps(
+      sourceYs,
+      getLayerSnapValues(page, targetLayer.do_objectID, 'y'),
+      targetLayer.do_objectID,
+    ),
+  );
+
+  return {
+    x: getSnapAdjustmentDistance(xSnaps),
+    y: getSnapAdjustmentDistance(ySnaps),
+  };
+}
+
+export function getScaledSnapBoundingRect(
+  state: ApplicationState,
+  boundingRect: Rect,
+  delta: Point,
+  canvasSize: Size,
+  direction: CompassDirection,
+): Rect {
+  const newBoundingRectBeforeSnap = resizeRect(boundingRect, delta, direction);
+
+  const extentPoint = getRectExtentPoint(newBoundingRectBeforeSnap, direction);
+
+  const snapAdjustment = getSnapAdjustmentForVisibleLayers(
+    state,
+    canvasSize,
+    createRect(extentPoint, extentPoint),
+    getSelectedLayerIndexPathsExcludingDescendants(state),
+  );
+
+  return resizeRect(
+    boundingRect,
+    {
+      x: delta.x - snapAdjustment.x,
+      y: delta.y - snapAdjustment.y,
+    },
+    direction,
   );
 }

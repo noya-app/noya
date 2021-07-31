@@ -10,7 +10,7 @@ interface Props {
 
 export default memo(function SketchShapeGroup({ layer }: Props) {
   const transform = useMemo(
-    () => AffineTransform.translation(layer.frame.x, layer.frame.y),
+    () => AffineTransform.translate(layer.frame.x, layer.frame.y),
     [layer.frame.x, layer.frame.y],
   );
 

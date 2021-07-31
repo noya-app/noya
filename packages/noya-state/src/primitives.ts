@@ -98,7 +98,7 @@ export function shader(
       // relative to the layer's frame. This function returns a matrix that converts
       // absolute coordinates into the range (0, 1).
       const unitTransform = AffineTransform.multiply(
-        AffineTransform.translation(layerFrame.x, layerFrame.y),
+        AffineTransform.translate(layerFrame.x, layerFrame.y),
         AffineTransform.scale(layerFrame.width, layerFrame.height),
       );
 
@@ -152,7 +152,7 @@ export function shader(
             rotationRadians > 0
               ? AffineTransform.multiply(
                   unitTransform,
-                  AffineTransform.rotation(rotationRadians, 0.5, 0.5),
+                  AffineTransform.rotate(rotationRadians, 0.5, 0.5),
                 )
               : unitTransform;
 

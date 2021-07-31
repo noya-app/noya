@@ -8,15 +8,15 @@ import {
   rectsIntersect,
   rotatedRectContainsPoint,
   transformRect,
+  Rect,
+  Point,
 } from 'noya-geometry';
-import * as Primitives from 'noya-state';
-import { getRectDragHandles } from 'noya-state';
+import { getRectDragHandles, Primitives } from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { CanvasInsets } from '../reducers/workspaceReducer';
-import type { Point, Rect } from '../types';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
@@ -29,7 +29,7 @@ import {
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
   clickThroughGroups: boolean;
-  includeArtboardLayers: boolean;
+  includeArtboardLayers: boolean | 'includeAndClickThrough';
 };
 
 function shouldClickThrough(
@@ -38,7 +38,8 @@ function shouldClickThrough(
 ) {
   return (
     layer._class === 'symbolMaster' ||
-    (layer._class === 'artboard' && !options.includeArtboardLayers) ||
+    (layer._class === 'artboard' && options.includeArtboardLayers !== true) ||
+    (layer._class === 'slice' && options.clickThroughGroups) ||
     (layer._class === 'group' &&
       (layer.hasClickThrough || options.clickThroughGroups))
   );
@@ -66,9 +67,11 @@ function visitLayersReversed(
 
       if (result === STOP) return result;
 
-      if (!shouldClickThrough(layer, options)) return SKIP;
-
-      return result;
+      if (shouldClickThrough(layer, options)) {
+        return result;
+      } else {
+        return SKIP;
+      }
     },
   });
 }
@@ -105,8 +108,12 @@ export function getLayersInRect(
 
       if (!hasIntersect) return SKIP;
 
-      // Artboards can't be selected themselves
-      if (shouldClickThrough(layer, options)) return;
+      const includeArtboard =
+        layer._class === 'artboard' &&
+        options.includeArtboardLayers === 'includeAndClickThrough';
+
+      // Artboards can't be selected themselves, unless we enable that option
+      if (!includeArtboard && shouldClickThrough(layer, options)) return;
 
       found.push(layer);
     },

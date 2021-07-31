@@ -1,6 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  Bounds,
+  createBounds,
+  transformRect,
+} from 'noya-geometry';
 import { sum } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
@@ -11,7 +16,6 @@ import {
   getSelectedLayerIndexPaths,
   getSelectedRect,
 } from '../selectors/selectors';
-import { Bounds } from '../types';
 import { accessPageLayers, ApplicationState } from './applicationReducer';
 
 export type AlignmentAction =

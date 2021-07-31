@@ -1,5 +1,5 @@
 import { CanvasKit, Path } from 'canvaskit';
-import { Point } from 'noya-state';
+import { Point } from 'noya-geometry';
 
 export default function makePath(CanvasKit: CanvasKit, points: Point[]): Path {
   const path = new CanvasKit.Path();

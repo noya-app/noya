@@ -26,6 +26,8 @@ export const colors = {
   canvas: {
     background: 'rgb(249,249,249)',
     dragHandleStroke: 'rgba(180,180,180,0.5)',
+    measurement: 'rgb(207,92,42)',
+    sliceOutline: 'rgb(210,210,210)',
   },
   sidebar: {
     background: 'rgba(252,252,252,0.85)',

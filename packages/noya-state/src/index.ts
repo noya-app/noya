@@ -14,6 +14,8 @@ export * from './reducers/workspaceReducer';
 export * from './reducers/applicationReducer';
 export * from './reducers/historyReducer';
 export * from './reducers/interactionReducer';
+export * from './reducers/canvasReducer';
+export * from './reducers/styleReducer';
 export * from './types';
 
 export type { SelectionType } from './utils/selection';
@@ -28,3 +30,4 @@ export * from './sketchFile';
 export * from './selectors/transformSelectors';
 export * from './selectors/pointSelectors';
 export * from './selectors/layerSelectors';
+export * from './selectors/selectors';

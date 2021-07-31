@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { CSSObject } from 'styled-components';
 import { Theme } from '../../theme';
 
@@ -7,6 +8,8 @@ export type RegularMenuItem<T extends string> = {
   value: T;
   title: string;
   checked?: boolean;
+  disabled?: boolean;
+  icon?: ReactElement;
 };
 
 export type MenuItem<T extends string> =

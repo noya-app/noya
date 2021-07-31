@@ -1,4 +1,5 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
   Divider,
@@ -7,16 +8,16 @@ import {
   ScrollArea,
   Spacer,
 } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
-import { memo, useState } from 'react';
+import { Selectors, WorkspaceTab } from 'noya-state';
+import { ReactNode, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useSelector } from 'noya-app-state-context';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
+import PagesGrid from './PagesGrid';
 import ThemeGroups from './ThemeGroups';
 import ThemeInspector from './ThemeInspector';
 import ThemeToolbar from './ThemeToolbar';
@@ -65,13 +66,36 @@ const FilterContainer = styled.div(({ theme }) => ({
   display: 'flex',
 }));
 
-const CanvasTab = memo(function CanvasTab() {
+const ToolbarContainer = styled.header(({ theme }) => ({
+  minHeight: `${theme.sizes.toolbar.height}px`,
+  display: 'flex',
+  borderBottom: `1px solid ${theme.colors.dividerStrong}`,
+  alignItems: 'center',
+  backgroundColor: theme.colors.sidebar.background,
+  color: theme.colors.textMuted,
+}));
+
+function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
+  const currentTab = useSelector(Selectors.getCurrentTab);
+
+  return elementMap[currentTab];
+}
+
+export default function Workspace() {
+  const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
 
   return (
-    <>
+    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       <LeftSidebar>
         <Menubar />
+        <PageList />
+        <Divider />
+        {useTabElement({
+          canvas: <LayerList />,
+          pages: <Spacer.Vertical />,
+          theme: <ThemeGroups />,
+        })}
         <FilterContainer>
           <InputField.Root labelPosition="start" labelSize={14}>
             <InputField.Input
@@ -84,56 +108,33 @@ const CanvasTab = memo(function CanvasTab() {
             </InputField.Label>
           </InputField.Root>
         </FilterContainer>
-        <Spacer.Vertical size={4} />
-        <PageList />
-        <Divider />
-        <LayerList />
+        <Spacer.Vertical size={8} />
       </LeftSidebar>
       <MainView>
-        <Toolbar />
+        <ToolbarContainer>
+          {useTabElement({
+            canvas: <Toolbar />,
+            pages: null,
+            theme: <ThemeToolbar />,
+          })}
+        </ToolbarContainer>
         <ContentArea>
-          <Canvas />
+          {useTabElement({
+            canvas: <Canvas />,
+            pages: <PagesGrid />,
+            theme: <ThemeWindow />,
+          })}
           <RightSidebar>
             <ScrollArea>
-              <Inspector />
+              {useTabElement({
+                canvas: <Inspector />,
+                pages: null,
+                theme: <ThemeInspector />,
+              })}
             </ScrollArea>
           </RightSidebar>
         </ContentArea>
       </MainView>
-    </>
-  );
-});
-
-const ThemeTab = memo(function ThemeTab() {
-  return (
-    <>
-      <LeftSidebar>
-        <Menubar />
-        <Spacer.Vertical size={4} />
-        <ThemeGroups />
-      </LeftSidebar>
-      <MainView>
-        <ThemeToolbar />
-        <ContentArea>
-          <ThemeWindow />
-          <RightSidebar>
-            <ScrollArea>
-              <ThemeInspector />
-            </ScrollArea>
-          </RightSidebar>
-        </ContentArea>
-      </MainView>
-    </>
-  );
-});
-
-export default function Workspace() {
-  const colorScheme = useSystemColorScheme();
-  const currentTab = useSelector(Selectors.getCurrentTab);
-
-  return (
-    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
-      {currentTab === 'canvas' ? <CanvasTab /> : <ThemeTab />}
     </ThemeProvider>
   );
 }

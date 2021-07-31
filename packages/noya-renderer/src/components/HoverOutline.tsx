@@ -48,6 +48,7 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
     case 'bitmap':
     case 'group':
     case 'text':
+    case 'slice':
     case 'symbolInstance':
     case 'symbolMaster': {
       element = <HoverOutlineRect layer={layer} paint={paint} />;

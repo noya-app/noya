@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  ForwardedRef,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useGlobalInputBlurListener } from '../../contexts/GlobalInputBlurContext';
 
 type Props = {
@@ -9,22 +15,27 @@ type Props = {
   value: string;
   placeholder?: string;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClick?: (event: React.MouseEvent) => void;
 };
 
 type ControlledProps = Props & {
   onChange: (value: string) => void;
 };
 
-function ControlledTextInput({
-  id,
-  style,
-  className,
-  placeholder,
-  disabled,
-  onKeyDown,
-  value,
-  onChange,
-}: ControlledProps) {
+const ControlledTextInput = forwardRef(function ControlledTextInput(
+  {
+    id,
+    style,
+    className,
+    placeholder,
+    disabled,
+    onKeyDown,
+    value,
+    onChange,
+    onClick,
+  }: ControlledProps,
+  forwardedRef: ForwardedRef<HTMLInputElement>,
+) {
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       onKeyDown?.(event);
@@ -41,6 +52,7 @@ function ControlledTextInput({
 
   return (
     <input
+      ref={forwardedRef}
       id={id}
       style={style}
       className={className}
@@ -50,24 +62,29 @@ function ControlledTextInput({
       placeholder={placeholder}
       onKeyDown={handleKeyDown}
       onChange={handleChange}
+      onClick={onClick}
     />
   );
-}
+});
 
 type SubmittableProps = Props & {
   onSubmit: (value: string, reset: () => void) => void;
 };
 
-function SubmittableTextInput({
-  id,
-  style,
-  className,
-  placeholder,
-  onKeyDown,
-  value,
-  disabled,
-  onSubmit,
-}: SubmittableProps) {
+const SubmittableTextInput = forwardRef(function SubmittableTextInput(
+  {
+    id,
+    style,
+    className,
+    placeholder,
+    onKeyDown,
+    value,
+    disabled,
+    onSubmit,
+    onClick,
+  }: SubmittableProps,
+  forwardedRef: ForwardedRef<HTMLInputElement>,
+) {
   const [internalValue, setInternalValue] = useState('');
 
   // Only trigger a submit event on blur if the value changed
@@ -123,6 +140,7 @@ function SubmittableTextInput({
 
   return (
     <input
+      ref={forwardedRef}
       id={id}
       style={style}
       className={className}
@@ -134,19 +152,23 @@ function SubmittableTextInput({
       onChange={handleChange}
       onBlur={handleSubmit}
       onFocus={handleFocus}
+      onClick={onClick}
     />
   );
-}
+});
 
 export type TextInputProps = ControlledProps | SubmittableProps;
 
 /**
  * This component shouldn't be used directly. Instead use the InputField components.
  */
-export default function TextInput(props: TextInputProps) {
+export default forwardRef(function TextInput(
+  props: TextInputProps,
+  forwardedRef: ForwardedRef<HTMLInputElement>,
+) {
   if ('onChange' in props) {
-    return <ControlledTextInput {...props} />;
+    return <ControlledTextInput ref={forwardedRef} {...props} />;
   } else {
-    return <SubmittableTextInput {...props} />;
+    return <SubmittableTextInput ref={forwardedRef} {...props} />;
   }
-}
+});

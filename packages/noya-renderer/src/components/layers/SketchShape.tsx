@@ -1,11 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
-import { AffineTransform } from 'noya-geometry';
+import { Rect, AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable, usePaint } from 'noya-react-canvaskit';
 import { PaintParameters } from 'noya-react-canvaskit';
 import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
-import { Rect, Primitives, getStrokedPath } from 'noya-state';
+import { Primitives, getStrokedPath } from 'noya-state';
 import { useSketchImage } from '../../ImageCache';
 import SketchBorder from '../effects/SketchBorder';
 
@@ -59,7 +59,7 @@ const SketchShadow = memo(function SketchShadow({
   const paint = usePaint(paintParameters);
 
   const transform = useMemo(
-    () => AffineTransform.translation(shadow.offsetX, shadow.offsetY),
+    () => AffineTransform.translate(shadow.offsetX, shadow.offsetY),
     [shadow.offsetX, shadow.offsetY],
   );
 
@@ -181,13 +181,8 @@ export default memo(function SketchShape({ layer }: Props) {
   if (!layer.style) return null;
 
   const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled);
-  const borders = (layer.style.borders ?? [])
-    .filter((x) => x.isEnabled)
-    .reverse();
-  const shadows = (layer.style.shadows ?? [])
-    .filter((x) => x.isEnabled)
-    .reverse();
-
+  const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
+  const shadows = (layer.style.shadows ?? []).filter((x) => x.isEnabled);
   const borderWidth = Math.max(0, ...borders.map((border) => border.thickness));
   const borderPosition =
     borders.length > 0 ? borders[0].position : Sketch.BorderPosition.Inside;

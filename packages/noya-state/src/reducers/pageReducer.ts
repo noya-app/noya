@@ -1,31 +1,29 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { SketchModel } from 'noya-sketch-model';
-import { uuid } from 'noya-utils';
+import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import {
-  getCurrentPage,
-  getCurrentPageIndex,
-  getSymbolsInstancesIndexPaths,
-} from '../selectors/selectors';
+import { getSymbolsInstancesIndexPaths } from '../selectors/selectors';
 import { UUID } from '../types';
+import { moveArrayItem } from '../utils/moveArrayItem';
 import { ApplicationState } from './applicationReducer';
 import { detachSymbolIntances } from './layerReducer';
 
 export type PageAction =
   | [type: 'movePage', sourceIndex: number, destinationIndex: number]
   | [type: 'selectPage', pageId: UUID]
-  | [type: 'addPage', name: string]
-  | [type: 'deletePage']
-  | [type: 'renamePage', name: string]
-  | [type: 'duplicatePage'];
+  | [type: 'addPage', pageId: UUID]
+  | [type: 'deletePage', pageId: UUID]
+  | [type: 'setPageName', pageId: UUID, name: string]
+  | [type: 'duplicatePage', pageId: UUID];
 
 export const createPage = (
   pages: Sketch.Page[],
   user: Sketch.User,
+  pageId: string,
   name: string,
 ): Sketch.Page => {
-  const newPage = SketchModel.page({ name });
+  const newPage = SketchModel.page({ do_objectID: pageId, name });
 
   user[newPage.do_objectID] = {
     scrollOrigin: '{0, 0}',
@@ -48,29 +46,39 @@ export function pageReducer(
       });
     }
     case 'addPage': {
-      const [, name] = action;
+      const [, pageId] = action;
 
       return produce(state, (draft) => {
-        const newPage = createPage(draft.sketch.pages, draft.sketch.user, name);
+        const newPage = createPage(
+          draft.sketch.pages,
+          draft.sketch.user,
+          pageId,
+          getIncrementedName(
+            'Page',
+            state.sketch.pages.map((p) => p.name),
+          ),
+        );
         draft.selectedPage = newPage.do_objectID;
       });
     }
-    case 'renamePage': {
-      const [, name] = action;
-      const pageIndex = getCurrentPageIndex(state);
+    case 'setPageName': {
+      const [, pageId, name] = action;
+      const pageIndex = state.sketch.pages.findIndex(
+        (page) => page.do_objectID === pageId,
+      );
+
+      if (pageIndex === -1) return state;
 
       return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        const page = pages[pageIndex];
-
-        pages[pageIndex] = produce(page, (page) => {
-          page.name = name || `Page ${pages.length + 1}`;
-          return page;
-        });
+        draft.sketch.pages[pageIndex].name = name;
       });
     }
     case 'duplicatePage': {
-      const pageIndex = getCurrentPageIndex(state);
+      const [, id] = action;
+
+      const pageIndex = state.sketch.pages.findIndex(
+        (page) => page.do_objectID === id,
+      );
 
       return produce(state, (draft) => {
         const pages = draft.sketch.pages;
@@ -107,13 +115,18 @@ export function pageReducer(
           zoomValue: user[page.do_objectID].zoomValue,
         };
 
-        pages.push(duplicatePage);
+        pages.splice(pageIndex + 1, 0, duplicatePage);
+
         draft.selectedPage = duplicatePage.do_objectID;
       });
     }
     case 'deletePage': {
-      const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
+      const [, id] = action;
+
+      const pageIndex = state.sketch.pages.findIndex(
+        (page) => page.do_objectID === id,
+      );
+      const page = state.sketch.pages[pageIndex];
 
       const symbolsIds = page.layers.flatMap((layer) =>
         Layers.isSymbolMaster(layer) ? [layer.symbolID] : [],
@@ -133,6 +146,7 @@ export function pageReducer(
         detachSymbolIntances(pages, state, symbolsInstancesIndexPaths);
 
         const newIndex = Math.max(pageIndex - 1, 0);
+
         draft.selectedPage = pages[newIndex].do_objectID;
       });
     }
@@ -140,10 +154,7 @@ export function pageReducer(
       const [, sourceIndex, destinationIndex] = action;
 
       return produce(state, (draft) => {
-        const sourceItem = draft.sketch.pages[sourceIndex];
-
-        draft.sketch.pages.splice(sourceIndex, 1);
-        draft.sketch.pages.splice(destinationIndex, 0, sourceItem);
+        moveArrayItem(draft.sketch.pages, sourceIndex, destinationIndex);
       });
     }
     default:

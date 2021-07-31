@@ -87,7 +87,7 @@ function flattenThemeTree<T extends BaseThemeItem>(
       name: group.name,
       items: group.items,
       path,
-      depth: indexPath.length - 1,
+      depth: Math.max(indexPath.length - 1, 0),
     });
   });
 

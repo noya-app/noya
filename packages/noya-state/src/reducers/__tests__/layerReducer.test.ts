@@ -8,6 +8,8 @@ const getPageLayersLength = (state: ApplicationState) =>
 
 const rectangle = SketchModel.rectangle();
 const oval = SketchModel.oval();
+const artboard = SketchModel.artboard();
+const text = SketchModel.text();
 
 describe('moveLayer', () => {
   test('move one inside', () => {
@@ -187,5 +189,83 @@ describe('deleteLayer', () => {
         ]),
       ).toMatchSnapshot();
     });
+  });
+});
+
+describe('duplicateLayer', () => {
+  test('duplicate one', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+
+    const updated = layerReducer(state, [
+      'duplicateLayer',
+      [rectangle.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('duplicate multiple', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
+    );
+
+    const updated = layerReducer(state, [
+      'duplicateLayer',
+      [rectangle.do_objectID, oval.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('duplicate multiple with gap', () => {
+    const state = createInitialState(
+      createSketchFile(
+        SketchModel.page({ layers: [rectangle, oval, artboard, text] }),
+      ),
+    );
+
+    const updated = layerReducer(state, [
+      'duplicateLayer',
+      [rectangle.do_objectID, artboard.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+
+  test('duplicate multiple in different parents', () => {
+    const artboard = SketchModel.artboard({ layers: [text] });
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, artboard] })),
+    );
+
+    const updated = layerReducer(state, [
+      'duplicateLayer',
+      [rectangle.do_objectID, text.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
   });
 });

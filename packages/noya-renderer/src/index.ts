@@ -8,6 +8,7 @@ export { default as SketchLayer } from './components/layers/SketchLayer';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
 export * from './FontManagerContext';
+export * from './RenderingModeContext';
 export * from './hooks/useCanvasKit';
 export { ImageCacheProvider, useSketchImage } from './ImageCache';
 export type { Context };

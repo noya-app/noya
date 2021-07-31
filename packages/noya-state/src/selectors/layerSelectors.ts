@@ -7,6 +7,7 @@ import {
   rectContainsPoint,
   rectsIntersect,
   transformRect,
+  Point,
 } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import {
@@ -17,7 +18,7 @@ import {
   PageLayer,
   Selectors,
 } from '../index';
-import type { Point, UUID } from '../types';
+import type { UUID } from '../types';
 import {
   getLayerIndexPathsExcludingDescendants,
   getSelectedLayerIndexPathsExcludingDescendants,

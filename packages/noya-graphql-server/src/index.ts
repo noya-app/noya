@@ -93,7 +93,8 @@ async function main() {
               () =>
                 React.createElement(LayerPreview, {
                   layer: layer as any,
-                  size,
+                  layerFrame: layer.frame,
+                  previewSize: size,
                 }),
             );
 
