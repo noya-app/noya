@@ -1,10 +1,10 @@
-import { getLinePercentage, getPerpendicularPointOnLine } from '../line';
+import { getLinePercentage, getClosestPointOnLine } from '../line';
 import { Point } from '../types';
 
 describe('perpendicular point on line', () => {
   test('line', () => {
     expect(
-      getPerpendicularPointOnLine({ x: 0, y: 10 }, [
+      getClosestPointOnLine({ x: 0, y: 10 }, [
         { x: 0, y: 0 },
         { x: 10, y: 10 },
       ]),
@@ -13,7 +13,7 @@ describe('perpendicular point on line', () => {
 
   test('horizontal line', () => {
     expect(
-      getPerpendicularPointOnLine({ x: 5, y: 5 }, [
+      getClosestPointOnLine({ x: 5, y: 5 }, [
         { x: 0, y: 0 },
         { x: 10, y: 0 },
       ]),
@@ -22,7 +22,7 @@ describe('perpendicular point on line', () => {
 
   test('vertical line', () => {
     expect(
-      getPerpendicularPointOnLine({ x: 5, y: 5 }, [
+      getClosestPointOnLine({ x: 5, y: 5 }, [
         { x: 0, y: 0 },
         { x: 0, y: 10 },
       ]),
@@ -31,7 +31,7 @@ describe('perpendicular point on line', () => {
 
   test('point already on line', () => {
     expect(
-      getPerpendicularPointOnLine({ x: 0, y: 0 }, [
+      getClosestPointOnLine({ x: 0, y: 0 }, [
         { x: 0, y: 0 },
         { x: 0, y: 10 },
       ]),

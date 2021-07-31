@@ -2,7 +2,7 @@ import { clamp } from 'noya-utils';
 import { Point } from './types';
 
 // http://paulbourke.net/geometry/pointlineplane/
-export function getPerpendicularPointOnLine(
+export function getClosestPointOnLine(
   point: Point,
   line: [Point, Point],
 ): Point {
@@ -20,7 +20,7 @@ export function getPerpendicularPointOnLine(
 }
 
 export function getLinePercentage(point: Point, line: [Point, Point]) {
-  const p = getPerpendicularPointOnLine(point, line);
+  const p = getClosestPointOnLine(point, line);
 
   const [p1, p2] = line;
 
