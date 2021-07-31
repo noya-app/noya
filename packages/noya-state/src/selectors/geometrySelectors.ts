@@ -322,12 +322,10 @@ export function getBoundingRectMap(
   return rectMap;
 }
 
-export function getFirstSelectedLayerGradientPoints(
-  state: ApplicationState,
-  fillIndex = 0,
-) {
+export function getFirstSelectedLayerGradientPoints(state: ApplicationState) {
   const page = getCurrentPage(state);
   const firstLayerIndexPath = getSelectedLayerIndexPaths(state);
+  const fillIndex = state.fillPopoverIndex;
 
   if (firstLayerIndexPath.length === 0) return null;
 
@@ -365,9 +363,17 @@ export function getFirstSelectedLayerGradientPoints(
     },
   };
 
-  return gradient.stops.sort().map((stop, index) => {
-    if (index === 0) return extremePoints.from;
-    else if (index === gradient.stops.length - 1) return extremePoints.to;
+  const sortedGradients = [...gradient.stops].sort(
+    (a, b) => a.position - b.position,
+  );
+
+  return [...gradient.stops].map((stop) => {
+    if (sortedGradients[0].position === stop.position)
+      return extremePoints.from;
+    else if (
+      sortedGradients[sortedGradients.length - 1].position === stop.position
+    )
+      return extremePoints.to;
 
     return {
       x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
@@ -395,7 +401,7 @@ function isPointOnLine(A: Point, B: Point, point: Point) {
 
   const lineLen = distance(A, B);
 
-  const buffer = 0.2; // higher # = less accurate
+  const buffer = 5; // higher # = less accurate
 
   return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
 }

@@ -61,9 +61,11 @@ export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   fillPopoverOpen: boolean;
+  fillPopoverIndex: number;
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
   selectedPage: string;
+  gradientSelectedIndex: number;
   selectedObjects: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
@@ -76,6 +78,8 @@ export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setFillPopoverOpen', value: boolean]
+  | [type: 'setFillPopoverIndex', value: number]
+  | [type: 'setGradientSelectedIndex', value: number]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -112,6 +116,18 @@ export function applicationReducer(
       const [, value] = action;
       return produce(state, (draft) => {
         draft.fillPopoverOpen = value;
+      });
+    }
+    case 'setFillPopoverIndex': {
+      const [, value] = action;
+      return produce(state, (draft) => {
+        draft.fillPopoverIndex = value;
+      });
+    }
+    case 'setGradientSelectedIndex': {
+      const [, value] = action;
+      return produce(state, (draft) => {
+        draft.gradientSelectedIndex = value;
       });
     }
     case 'selectPage':
@@ -230,6 +246,30 @@ export function applicationReducer(
                 layer.style.fills
               )
                 setNewPatternFill(layer.style.fills, action[1], draft);
+
+              if (
+                action[0] === 'setFillGradientPosition' &&
+                layer.style.fills
+              ) {
+                const [, indexFill, stopIndex] = action;
+                if (
+                  !layer.style.fills[indexFill] &&
+                  !layer.style.fills[indexFill].gradient &&
+                  !layer.style.fills[indexFill].gradient.stops[stopIndex]
+                )
+                  return;
+
+                const stops = [...layer.style.fills[indexFill].gradient.stops];
+                const sortedStops = [...stops].sort(
+                  (a, b) => a.position - b.position,
+                );
+
+                const index = sortedStops.findIndex(
+                  (s) => s.position === stops[stopIndex].position,
+                );
+
+                draft.gradientSelectedIndex = index !== -1 ? index : 0;
+              }
 
               layer.style = styleReducer(layer.style, action);
             },
@@ -368,6 +408,8 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
     fillPopoverOpen: false,
+    fillPopoverIndex: 0,
+    gradientSelectedIndex: 0,
     interactionState: createInitialInteractionState(),
     keyModifiers: {
       altKey: false,

@@ -288,6 +288,7 @@ interface Props {
   id: string;
   fillType?: Sketch.FillType;
   onChangeType?: (type: Sketch.FillType) => void;
+  onChangeIndex?: () => void;
   hasMultipleFills?: boolean;
   colorProps: ColorFillProps;
   gradientProps?: GradientFillProps;
@@ -298,6 +299,7 @@ export default memo(function FillInputFieldWithPicker({
   id,
   fillType,
   onChangeType,
+  onChangeIndex = () => {},
   hasMultipleFills = false,
   colorProps,
   gradientProps,
@@ -337,14 +339,6 @@ export default memo(function FillInputFieldWithPicker({
     patternProps?.pattern,
   ]);
 
-  /*
-    TODO: Maria - Add closing the popover for the gradients 
-                  when the user clicks outside (right now only closes 
-                  when the user clicks on the canvas)
-
-                  update fillPopoverOpen when fill type changes
-  */
-
   useGlobalInputBlurListener(() => {
     dispatch('setFillPopoverOpen', false);
   });
@@ -352,6 +346,7 @@ export default memo(function FillInputFieldWithPicker({
   return (
     <Popover.Root
       onOpenChange={(open) => {
+        onChangeIndex();
         dispatch(
           'setFillPopoverOpen',
           open && fillType === Sketch.FillType.Gradient,

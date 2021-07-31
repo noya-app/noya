@@ -67,10 +67,7 @@ export function gradientReducer(
       return produce(state, (draft) => {
         if (!draft || !draft.stops[stopIndex]) return;
         draft.stops[stopIndex].position = position;
-        /*TODO >>> Sort the stops by position
-         draft.fills[fillIndex].gradient.stops.sort(
-          (a, b) => a.position - b.position,
-        );  */
+        draft.stops.sort((a, b) => a.position - b.position);
       });
     }
     case 'addFillGradientStop':

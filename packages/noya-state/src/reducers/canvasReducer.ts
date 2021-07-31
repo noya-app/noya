@@ -344,59 +344,72 @@ export function canvasReducer(
               draft.sketch.pages[pageIndex],
               layerIndexPaths[0],
             );
+
+            if (
+              !layer.style ||
+              !layer.style.fills ||
+              !layer.style.fills[0] ||
+              !layer.style.fills[0].gradient
+            )
+              return;
+            const gradientStops =
+              layer.style.fills[state.fillPopoverIndex].gradient.stops;
+            const gradientStopsSorted = [...gradientStops].sort(
+              (a, b) => a.position - b.position,
+            );
+
+            /*if (crrGradientPoint.pointIndex !== -1)
+              console.log(
+                crrGradientPoint.pointIndex,
+                gradientStops[crrGradientPoint.pointIndex].position,
+                gradientStopsSorted[gradientStops.length - 1].position,
+              );*/
+
             const percetage = getPercentageOfPointInGradient(state, point);
-            if (layer.style) {
-              switch (crrGradientPoint.pointIndex) {
-                case 0:
-                  layer.style = produce(layer.style, (draft) =>
-                    styleReducer(draft, [
-                      'setFillGradientFrom',
-                      0,
-                      PointString.encode(gradient),
-                    ]),
-                  );
-                  break;
-                case 2:
-                  layer.style = produce(layer.style, (draft) =>
-                    styleReducer(draft, [
-                      'setFillGradientTo',
-                      0,
-                      PointString.encode(gradient),
-                    ]),
-                  );
-                  break;
-                case -1:
-                  if (
-                    !layer.style.fills ||
-                    !layer.style.fills[0] ||
-                    !layer.style.fills[0].gradient
-                  )
-                    return;
+            if (crrGradientPoint.pointIndex === -1) {
+              const gradients = layer.style.fills[
+                state.fillPopoverIndex
+              ].gradient.stops.map((g) => ({
+                color: sketchColorToRgba(g.color),
+                position: g.position,
+              }));
 
-                  const gradients = layer.style.fills[0].gradient.stops.map(
-                    (g, index) => ({
-                      color: sketchColorToRgba(g.color),
-                      position: g.position,
-                    }),
-                  );
-
-                  layer.style = styleReducer(layer.style, [
-                    'addFillGradientStop',
-                    0,
-                    rgbaToSketchColor(interpolateRgba(gradients, percetage)),
-                    percetage,
-                  ]);
-                  draft.selectedGradientPoint = undefined;
-                  break;
-                default:
-                  layer.style = styleReducer(layer.style, [
-                    'setFillGradientPosition',
-                    0,
-                    crrGradientPoint.pointIndex,
-                    percetage,
-                  ]);
-                  break;
-              }
+              layer.style = styleReducer(layer.style, [
+                'addFillGradientStop',
+                state.fillPopoverIndex,
+                rgbaToSketchColor(interpolateRgba(gradients, percetage)),
+                percetage,
+              ]);
+              draft.selectedGradientPoint = undefined;
+            } else if (
+              gradientStops[crrGradientPoint.pointIndex] ===
+              gradientStopsSorted[0]
+            )
+              layer.style = produce(layer.style, (draft) =>
+                styleReducer(draft, [
+                  'setFillGradientFrom',
+                  state.fillPopoverIndex,
+                  PointString.encode(gradient),
+                ]),
+              );
+            else if (
+              gradientStops[crrGradientPoint.pointIndex].position ===
+              gradientStopsSorted[gradientStops.length - 1].position
+            ) {
+              layer.style = produce(layer.style, (draft) =>
+                styleReducer(draft, [
+                  'setFillGradientTo',
+                  state.fillPopoverIndex,
+                  PointString.encode(gradient),
+                ]),
+              );
+            } else {
+              layer.style = styleReducer(layer.style, [
+                'setFillGradientPosition',
+                state.fillPopoverIndex,
+                crrGradientPoint.pointIndex,
+                percetage,
+              ]);
             }
 
             break;

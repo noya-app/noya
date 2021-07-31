@@ -66,6 +66,7 @@ export default memo(function FillInspector({
             prefix={checkbox}
             fillType={item.fillType}
             contextOpacity={item.contextSettings.opacity}
+            onChangeFillIndex={() => dispatch('setFillPopoverIndex', index)}
             onSetOpacity={(value, mode) =>
               dispatch('setFillOpacity', index, value, mode)
             }

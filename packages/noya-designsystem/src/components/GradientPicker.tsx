@@ -13,7 +13,7 @@ import {
 } from 'noya-colorpicker';
 import { memo, useCallback } from 'react';
 import * as Spacer from '../components/Spacer';
-import { rgbaToSketchColor } from '../utils/sketchColor';
+import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 
 const colorModel: ColorModel<RgbaColor> = {
   defaultColor: { r: 0, g: 0, b: 0, a: 1 },
@@ -58,7 +58,7 @@ export default memo(function GradientPicker({
   return (
     <NoyaColorPicker
       colorModel={colorModel}
-      color={colorModel.defaultColor}
+      color={sketchColorToRgba(value[selectedStop].color)}
       onChange={handleChangeColor}
     >
       <Gradient
