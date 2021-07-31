@@ -83,7 +83,6 @@ export default memo(function SketchFileRenderer() {
   );
   const {
     canvas: { background: backgroundColor, dragHandleStroke },
-    primary: primaryColor,
   } = useTheme().colors;
   const backgroundFill = useColorFill(backgroundColor);
 
@@ -333,31 +332,29 @@ export default memo(function SketchFileRenderer() {
 
   const gradientLineStroke = useStroke({ color: '#FFF' });
   const gradientStopStroke = useStroke({ color: '#FFF', strokeWidth: 1.5 });
-  const selectedGradientStopStroke = useStroke({
-    color: primaryColor,
-    strokeWidth: 1.5,
-  });
+  const gradientEditorShadow = useMemo(
+    () =>
+      CanvasKit.ImageFilter.MakeDropShadowOnly(
+        0,
+        0,
+        2,
+        2,
+        CanvasKit.Color(0, 0, 0, 0.5),
+        null,
+      ),
+
+    [CanvasKit],
+  );
 
   const points = useMemo(() => {
-    const gradientStopPoints = Selectors.getFirstSelectedLayerGradientPoints(
-      state,
-    );
+    const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
 
     if (!gradientStopPoints || !state.selectedGradient) return null;
 
     const { stopIndex } = state.selectedGradient;
 
-    const shadowFilter = CanvasKit.ImageFilter.MakeDropShadowOnly(
-      0,
-      0,
-      2,
-      2,
-      CanvasKit.Color(0, 0, 0, 0.5),
-      null,
-    );
-
     return (
-      <Group imageFilter={shadowFilter}>
+      <Group imageFilter={gradientEditorShadow}>
         <Polyline
           points={[
             gradientStopPoints[0].point,
@@ -388,14 +385,7 @@ export default memo(function SketchFileRenderer() {
           return (
             <Fragment key={index}>
               <Path path={path} paint={paint} />
-              <Path
-                path={path}
-                paint={
-                  index === stopIndex
-                    ? selectedGradientStopStroke
-                    : gradientStopStroke
-                }
-              />
+              <Path path={path} paint={gradientStopStroke} />
             </Fragment>
           );
         })}
@@ -403,11 +393,12 @@ export default memo(function SketchFileRenderer() {
     );
   }, [
     state,
-    CanvasKit,
+    gradientEditorShadow,
     gradientLineStroke,
-    selectedGradientStopStroke,
+    CanvasKit,
     gradientStopStroke,
   ]);
+
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(

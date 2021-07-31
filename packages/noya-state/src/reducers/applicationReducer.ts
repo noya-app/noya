@@ -2,10 +2,11 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { uuid } from 'noya-utils';
-import { SketchFile } from 'noya-sketch-file';
-import { IndexPath } from 'tree-visit';
+import { Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
+import { SketchFile } from 'noya-sketch-file';
+import { uuid } from 'noya-utils';
+import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import {
   findPageLayerIndexPaths,
@@ -34,7 +35,6 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import { Size } from 'noya-geometry';
 
 export type { SetNumberMode };
 
@@ -49,11 +49,6 @@ export type SelectedControlPoint = {
   layerId: string;
   pointIndex: number;
   controlPointType: controlPointType;
-};
-
-export type SelectedGradientPoint = {
-  layerId: string;
-  pointIndex: number;
 };
 
 export type SelectedGradient = {

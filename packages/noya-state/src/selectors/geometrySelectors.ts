@@ -3,6 +3,7 @@ import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
   createRectFromBounds,
+  distance,
   getRectCornerPoints,
   Point,
   Rect,
@@ -13,7 +14,7 @@ import {
 } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import * as Primitives from 'noya-state';
-import { getRectDragHandles } from 'noya-state';
+import { getRectDragHandles, isPointInRange } from 'noya-state';
 import { lerp } from 'noya-utils';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
@@ -24,8 +25,11 @@ import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
   getCanvasTransform,
+  getLayerFlipTransform,
   getLayerRotationTransform,
+  getLayerTransformAtIndexPath,
   getLayerTransformAtIndexPathReversed,
+  getLayerTranslationTransform,
   getScreenTransform,
 } from './transformSelectors';
 
@@ -328,35 +332,32 @@ export function getBoundingRectMap(
   return rectMap;
 }
 
-export function getFirstSelectedLayerGradientPoints(
+type GradientStopPoint = { point: Point; color: Sketch.Color };
+
+export function getSelectedGradientStopPoints(
   state: ApplicationState,
-): { point: Point; color: Sketch.Color }[] | undefined {
+): GradientStopPoint[] | undefined {
   if (!state.selectedGradient) return;
 
   const { layerId, fillIndex } = state.selectedGradient;
 
   const page = getCurrentPage(state);
-  const layer = Layers.find(page, (layer) => layer.do_objectID === layerId);
-  const boundingRect = getBoundingRect(
+  const indexPath = Layers.findIndexPath(
     page,
-    AffineTransform.identity,
-    [layerId],
-    {
-      clickThroughGroups: true,
-      includeArtboardLayers: false,
-      includeHiddenLayers: false,
-    },
+    (layer) => layer.do_objectID === layerId,
   );
 
-  if (
-    !boundingRect ||
-    !layer ||
-    !layer.style ||
-    !layer.style.fills ||
-    !layer.style.fills[fillIndex] ||
-    layer.style.fills[fillIndex].fillType !== Sketch.FillType.Gradient
-  )
+  if (!indexPath) return;
+
+  const layer = Layers.access(page, indexPath);
+
+  if (layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient)
     return;
+
+  const transform = getLayerTransformAtIndexPath(page, indexPath)
+    .transform(getLayerFlipTransform(layer))
+    .transform(getLayerTranslationTransform(layer))
+    .scale(layer.frame.width, layer.frame.height);
 
   const gradient = layer.style.fills[fillIndex].gradient;
 
@@ -364,87 +365,51 @@ export function getFirstSelectedLayerGradientPoints(
   const to = PointString.decode(gradient.to);
 
   const extremePoints = {
-    from: {
-      x: boundingRect.width * from.x + boundingRect.x,
-      y: boundingRect.height * from.y + boundingRect.y,
-    },
-    to: {
-      x: boundingRect.width * to.x + boundingRect.x,
-      y: boundingRect.height * to.y + boundingRect.y,
-    },
+    from: transform.applyTo(from),
+    to: transform.applyTo(to),
   };
 
-  const sortedGradients = [...gradient.stops].sort(
-    (a, b) => a.position - b.position,
-  );
-
-  return [...gradient.stops].map((stop, index) => {
-    switch (index) {
-      case 0:
-        return {
-          color: stop.color,
-          point: extremePoints.from,
-        };
-      case sortedGradients.length - 1:
-        return {
-          color: stop.color,
-          point: extremePoints.to,
-        };
-      default:
-        return {
-          color: stop.color,
-          point: {
-            x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
-            y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
-          },
-        };
-    }
+  return gradient.stops.map((stop) => {
+    return {
+      color: stop.color,
+      point: {
+        x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
+        y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
+      },
+    };
   });
 }
 
-export function pointerOnGradientPoint(state: ApplicationState, point: Point) {
-  const selectedLayerGradientPoints = getFirstSelectedLayerGradientPoints(
-    state,
-  );
+export function getGradientStopIndexAtPoint(
+  state: ApplicationState,
+  point: Point,
+): number {
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
 
   if (!selectedLayerGradientPoints) return -1;
 
-  // return selectedLayerGradientPoints.findIndex((gradientPoint) =>
-  //   isPointInRange(gradientPoint, point),
-  // );
-
-  return -1;
+  return selectedLayerGradientPoints.findIndex((gradientPoint) =>
+    isPointInRange(gradientPoint.point, point),
+  );
 }
 
-// function isPointOnLine(A: Point, B: Point, point: Point) {
-//   // get distance from the point to the two ends of the line
-//   const d1 = distance(point, A);
-//   const d2 = distance(point, B);
+function isPointOnLine(A: Point, B: Point, point: Point) {
+  // get distance from the point to the two ends of the line
+  const d1 = distance(point, A);
+  const d2 = distance(point, B);
 
-//   const lineLen = distance(A, B);
+  const lineLen = distance(A, B);
 
-//   const buffer = 5; // higher # = less accurate
+  const buffer = 5; // higher # = less accurate
 
-//   return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
-// }
-
-// function getLinePercentage(A: Point, B: Point, point: Point) {
-//   const d1 = distance(point, A);
-//   const d2 = distance(point, B);
-
-//   const buffer = 0.2;
-
-//   //calculate the percentage of the line that the point is on
-//   return (d1 + buffer) / (d1 + d2 + 2 * buffer);
-// }
+  return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
+}
 
 export function getPercentageOfPointInGradient(
   state: ApplicationState,
   point: Point,
 ) {
-  const selectedLayerGradientPoints = getFirstSelectedLayerGradientPoints(
-    state,
-  );
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
 
   if (!selectedLayerGradientPoints) return 0;
 
@@ -458,18 +423,14 @@ export function getPercentageOfPointInGradient(
 }
 
 export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
-  if (pointerOnGradientPoint(state, point) !== -1) return false;
-  const selectedLayerGradientPoints = getFirstSelectedLayerGradientPoints(
-    state,
-  );
+  if (getGradientStopIndexAtPoint(state, point) !== -1) return false;
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
 
   if (!selectedLayerGradientPoints) return false;
 
-  // return isPointOnLine(
-  //   selectedLayerGradientPoints[0],
-  //   selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1],
-  //   point,
-  // );
-
-  return false;
+  return isPointOnLine(
+    selectedLayerGradientPoints[0].point,
+    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
+    point,
+  );
 }

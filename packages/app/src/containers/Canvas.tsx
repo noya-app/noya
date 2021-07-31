@@ -359,25 +359,21 @@ export default memo(function Canvas() {
             },
           );
 
-          const selectedGradientIndex = Selectors.pointerOnGradientPoint(
+          const selectedGradientStopIndex = Selectors.getGradientStopIndexAtPoint(
             state,
             point,
           );
 
-          const isPointerOnGradientLine = Selectors.isPointerOnGradientLine(
-            state,
-            point,
-          );
+          // const isPointerOnGradientLine = Selectors.isPointerOnGradientLine(
+          //   state,
+          //   point,
+          // );
 
-          if (selectedGradientIndex !== -1 || isPointerOnGradientLine) {
-            dispatch('interaction', [
-              'startEditGradientPoint',
-              {
-                layerId: '',
-                pointIndex: selectedGradientIndex,
-              },
-              point,
-            ]);
+          //  || isPointerOnGradientLine
+
+          if (state.selectedGradient && selectedGradientStopIndex !== -1) {
+            dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
+            dispatch('interaction', ['maybeMoveGradientStop', point]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
@@ -397,9 +393,7 @@ export default memo(function Canvas() {
 
             dispatch('interaction', ['startMarquee', rawPoint]);
           }
-          if (selectedGradientIndex === -1) {
-            //dispatch('setFillPopoverOpen', false);
-          }
+
           break;
         }
       }
@@ -413,8 +407,20 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
-        case 'moveGradientPoint': {
-          dispatch('interaction', ['updateGradientPoint', point]);
+        case 'maybeMoveGradientStop': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientStop', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'moveGradientStop': {
+          dispatch('interaction', ['movingGradientStop', point]);
+          event.preventDefault();
           break;
         }
         case 'insert':
@@ -698,7 +704,7 @@ export default memo(function Canvas() {
         }
         case 'maybeMove':
         case 'maybeScale':
-        case 'moveGradientPoint': {
+        case 'moveGradientStop': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
