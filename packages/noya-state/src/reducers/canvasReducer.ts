@@ -539,14 +539,14 @@ export function canvasReducer(
 
             if (!selectedControlPoint) return;
 
-            const { current, origin, pageSnapshot } = interactionState;
-
             const indexPath = Layers.findIndexPath(
               page,
               (layer) => layer.do_objectID === selectedControlPoint.layerId,
             );
 
             if (!indexPath) return state;
+
+            const { current, origin, pageSnapshot } = interactionState;
 
             const delta = {
               x: current.x - origin.x,
