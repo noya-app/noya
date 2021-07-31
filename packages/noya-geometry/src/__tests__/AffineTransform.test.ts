@@ -1,7 +1,7 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
 import { AffineTransform } from '../AffineTransform';
-import { toRadians } from '../utils';
+import { toRadians } from '../radians';
 
 let CanvasKit: CanvasKitType;
 
@@ -11,17 +11,17 @@ beforeAll(async () => {
 
 test('matches canvaskit', () => {
   expect(AffineTransform.identity.array).toEqual(CanvasKit.Matrix.identity());
-  expect(AffineTransform.translation(2, 3).array).toEqual(
+  expect(AffineTransform.translate(2, 3).array).toEqual(
     CanvasKit.Matrix.translated(2, 3),
   );
   expect(AffineTransform.scale(2, 3).array).toEqual(
     CanvasKit.Matrix.scaled(2, 3),
   );
-  expect(AffineTransform.rotation(toRadians(90)).array).toEqual(
+  expect(AffineTransform.rotate(toRadians(90)).array).toEqual(
     CanvasKit.Matrix.rotated(toRadians(90)),
   );
   expect(
-    AffineTransform.rotation(toRadians(90), 2, 3).array.map((x) =>
+    AffineTransform.rotate(toRadians(90), 2, 3).array.map((x) =>
       x.toPrecision(6),
     ),
   ).toEqual(
@@ -29,8 +29,8 @@ test('matches canvaskit', () => {
   );
   expect(
     AffineTransform.multiply(
-      AffineTransform.rotation(toRadians(90)),
-      AffineTransform.translation(2, 3),
+      AffineTransform.rotate(toRadians(90)),
+      AffineTransform.translate(2, 3),
     ).array,
   ).toEqual(
     CanvasKit.Matrix.multiply(
@@ -61,7 +61,7 @@ test('scale', () => {
 test('translate', () => {
   const point = { x: 1, y: 1 };
 
-  expect(AffineTransform.translation(2, 3).applyTo(point)).toEqual({
+  expect(AffineTransform.translate(2, 3).applyTo(point)).toEqual({
     x: 3,
     y: 4,
   });
@@ -69,8 +69,8 @@ test('translate', () => {
 
 test('rotate', () => {
   const point = { x: 1, y: 1 };
-  const rotated90 = AffineTransform.rotation(toRadians(90)).applyTo(point);
-  const rotated180 = AffineTransform.rotation(toRadians(180)).applyTo(point);
+  const rotated90 = AffineTransform.rotate(toRadians(90)).applyTo(point);
+  const rotated180 = AffineTransform.rotate(toRadians(180)).applyTo(point);
 
   expect(rotated90.x).toBeCloseTo(-1);
   expect(rotated90.y).toBeCloseTo(1);
@@ -81,10 +81,10 @@ test('rotate', () => {
 
 test('rotate around point', () => {
   const point = { x: 1, y: 1 };
-  const rotated90 = AffineTransform.rotation(toRadians(90), 10, 10).applyTo(
+  const rotated90 = AffineTransform.rotate(toRadians(90), 10, 10).applyTo(
     point,
   );
-  const rotated180 = AffineTransform.rotation(toRadians(180), 10, 10).applyTo(
+  const rotated180 = AffineTransform.rotate(toRadians(180), 10, 10).applyTo(
     point,
   );
 
@@ -98,12 +98,26 @@ test('rotate around point', () => {
 test('transform', () => {
   expect(
     AffineTransform.multiply(
-      AffineTransform.rotation(toRadians(90)),
-      AffineTransform.translation(2, 3),
+      AffineTransform.rotate(toRadians(90)),
+      AffineTransform.translate(2, 3),
     ).array,
   ).toEqual(
-    AffineTransform.rotation(toRadians(90)).transform(
-      AffineTransform.translation(2, 3),
+    AffineTransform.rotate(toRadians(90)).transform(
+      AffineTransform.translate(2, 3),
     ).array,
   );
+});
+
+describe('chaining', () => {
+  test('scale then translate', () => {
+    const transform = AffineTransform.scale(100).translate(10, 5).array;
+    const expected = [100, 0, 1000, 0, 100, 500, 0, 0, 1];
+    expect(transform).toEqual(expected);
+  });
+
+  test('translate then scale', () => {
+    const transform = AffineTransform.translate(10, 5).scale(100).array;
+    const expected = [100, 0, 10, 0, 100, 5, 0, 0, 1];
+    expect(transform).toEqual(expected);
+  });
 });

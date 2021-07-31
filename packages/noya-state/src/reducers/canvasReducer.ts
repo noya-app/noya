@@ -1,14 +1,21 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  createRect,
+  insetRect,
+  Point,
+  Rect,
+} from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
   Primitives,
-  resizeRect,
+  Selectors,
 } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
@@ -16,6 +23,7 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
@@ -30,20 +38,20 @@ import {
   moveSelectedPoints,
 } from '../selectors/selectors';
 import {
-  findSmallestSnappingDistance,
-  getAxisValues,
-  getLayerAxisInfo,
-  getPossibleSnapLayers,
-  getSnappingPairs,
+  getScaledSnapBoundingRect,
+  getSnapAdjustmentForVisibleLayers,
 } from '../snapping';
-import { Point, Rect } from '../types';
-import { ApplicationState } from './applicationReducer';
 import {
+  ApplicationReducerContext,
+  ApplicationState,
+} from './applicationReducer';
+import {
+  DrawableLayerType,
   InteractionAction,
   interactionReducer,
   SnapshotInteractionAction,
 } from './interactionReducer';
-import { defaultBorderColor } from './styleReducer';
+import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -59,6 +67,7 @@ export type CanvasAction =
       details: { name: string; frame: Rect; extension: string },
     ]
   | [type: 'addPointToPath', point: Point]
+  | [type: 'insertPointInPath', point: Point]
   | [type: 'moveLayersIntoParentAtPoint', point: Point]
   | [type: 'pan', point: Point]
   | [
@@ -70,6 +79,7 @@ export function canvasReducer(
   state: ApplicationState,
   action: CanvasAction,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'insertArtboard': {
@@ -103,7 +113,25 @@ export function canvasReducer(
       return produce(state, (draft) => {
         if (draft.interactionState.type !== 'drawing') return;
 
-        const layer = draft.interactionState.value;
+        const shapeType = draft.interactionState.shapeType;
+        const layer = createDrawingLayer(
+          shapeType,
+          SketchModel.style({
+            fills: [
+              SketchModel.fill({
+                color: defaultFillColor,
+              }),
+            ],
+            borders: [
+              SketchModel.border({
+                color: defaultBorderColor,
+              }),
+            ],
+          }),
+          draft.interactionState.origin,
+          draft.interactionState.current,
+          false,
+        );
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
@@ -224,25 +252,29 @@ export function canvasReducer(
           point,
         };
 
-        const newDecodedPoints =
-          pointIndexPath.pointIndex === 0
-            ? [decodedPoint, ...decodedPoints]
-            : [...decodedPoints, decodedPoint];
+        const isLastPointSelected =
+          pointIndexPath.pointIndex === layer.points.length - 1;
+
+        const newDecodedPoints = isLastPointSelected
+          ? [...decodedPoints, decodedPoint]
+          : [decodedPoint, ...decodedPoints];
 
         layer.frame = {
           ...layer.frame,
           ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
         };
 
+        fixZeroLayerDimensions(layer);
+
         layer.points = newDecodedPoints.map((decodedCurvePoint, index) =>
           encodeCurvePoint(decodedCurvePoint, layer.frame),
         );
 
-        draft.selectedPointLists[layer.do_objectID] =
-          pointIndexPath.pointIndex === 0 ? [0] : [layer.points.length - 1];
+        draft.selectedPointLists[layer.do_objectID] = isLastPointSelected
+          ? [layer.points.length - 1]
+          : [0];
 
         draft.selectedControlPoint = undefined;
-
         return;
       });
     }
@@ -289,6 +321,54 @@ export function canvasReducer(
         return state;
 
       return moveLayer(state, state.selectedObjects, parentId, 'inside');
+    }
+    case 'insertPointInPath': {
+      const [, point] = action;
+
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = Layers.findAllIndexPaths(
+        getCurrentPage(state),
+        (layer) => layer.do_objectID in state.selectedPointLists,
+      );
+
+      return produce(state, (draft) => {
+        const draftLayer = layerIndexPaths
+          .map((indexPath) =>
+            Layers.access(draft.sketch.pages[pageIndex], indexPath),
+          )
+          .filter(Layers.isPointsLayer)
+          .find((layer) =>
+            Selectors.layerPathContainsPoint(CanvasKit, layer, point),
+          );
+
+        if (!draftLayer) return;
+
+        const splitParameters = Selectors.getSplitPathParameters(
+          CanvasKit,
+          draftLayer,
+          point,
+        );
+
+        if (!splitParameters) return;
+
+        const { segmentIndex, segmentPath, t } = splitParameters;
+
+        const newCurvePoints = Primitives.splitPath(
+          segmentPath,
+          t,
+        ).map((path) =>
+          Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
+        );
+
+        const start = draftLayer.points.slice(0, segmentIndex + 1);
+        const end = draftLayer.points.slice(segmentIndex + 1);
+        const joined = Primitives.joinCurvePoints(
+          [start, ...newCurvePoints, end],
+          segmentIndex === draftLayer.points.length - 1,
+        );
+
+        draftLayer.points = joined;
+      });
     }
     case 'interaction': {
       const page = getCurrentPage(state);
@@ -426,10 +506,62 @@ export function canvasReducer(
             });
             break;
           }
+          case 'insert': {
+            const { point } = interactionState;
+
+            if (!point) return;
+
+            const snapAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(point, point),
+            );
+
+            const newInteractionState = {
+              ...interactionState,
+              point: {
+                x: point.x - snapAdjustment.x,
+                y: point.y - snapAdjustment.y,
+              },
+            };
+
+            draft.interactionState = newInteractionState;
+            break;
+          }
+          case 'drawing': {
+            const { origin, current } = interactionState;
+
+            const originAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(origin, origin),
+            );
+
+            const currentAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              createRect(current, current),
+            );
+
+            const newInteractionState = {
+              ...interactionState,
+              origin: {
+                x: origin.x - originAdjustment.x,
+                y: origin.y - originAdjustment.y,
+              },
+              current: {
+                x: current.x - currentAdjustment.x,
+                y: current.y - currentAdjustment.y,
+              },
+            };
+
+            draft.interactionState = newInteractionState;
+            break;
+          }
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
 
-            const selectedRect = getBoundingRect(
+            const sourceRect = getBoundingRect(
               pageSnapshot,
               AffineTransform.identity,
               layerIds,
@@ -440,7 +572,7 @@ export function canvasReducer(
               },
             );
 
-            if (!selectedRect) {
+            if (!sourceRect) {
               console.info('No selected rect');
               return;
             }
@@ -450,33 +582,19 @@ export function canvasReducer(
               y: current.y - origin.y,
             };
 
-            const possibleSnapLayers = getPossibleSnapLayers(
-              state,
-              layerIndexPaths,
-              interactionState.canvasSize,
-            )
-              // Ensure we don't snap to the selected layer itself
-              .filter((layer) => !layerIds.includes(layer.do_objectID));
+            // Simulate where the selection rect would be, assuming no snapping
+            sourceRect.x += delta.x;
+            sourceRect.y += delta.y;
 
-            const snappingLayerInfos = getLayerAxisInfo(
-              page,
-              possibleSnapLayers,
+            const snapAdjustment = getSnapAdjustmentForVisibleLayers(
+              state,
+              context.canvasSize,
+              sourceRect,
+              layerIndexPaths,
             );
 
-            // Simulate where the selection rect would be, assuming no snapping
-            selectedRect.x += delta.x;
-            selectedRect.y += delta.y;
-
-            const selectedBounds = createBounds(selectedRect);
-
-            const xValues = getAxisValues(selectedBounds, 'x');
-            const yValues = getAxisValues(selectedBounds, 'y');
-
-            const xPairs = getSnappingPairs(xValues, snappingLayerInfos, 'x');
-            const yPairs = getSnappingPairs(yValues, snappingLayerInfos, 'y');
-
-            delta.y -= findSmallestSnappingDistance(yPairs);
-            delta.x -= findSmallestSnappingDistance(xPairs);
+            delta.x -= snapAdjustment.x;
+            delta.y -= snapAdjustment.y;
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;
@@ -512,7 +630,16 @@ export function canvasReducer(
             break;
           }
           case 'movingControlPoint': {
-            if (!draft.selectedControlPoint) return;
+            const selectedControlPoint = draft.selectedControlPoint;
+
+            if (!selectedControlPoint) return;
+
+            const indexPath = Layers.findIndexPath(
+              page,
+              (layer) => layer.do_objectID === selectedControlPoint.layerId,
+            );
+
+            if (!indexPath) return state;
 
             const { current, origin, pageSnapshot } = interactionState;
 
@@ -522,8 +649,8 @@ export function canvasReducer(
             };
 
             moveControlPoints(
-              draft.selectedControlPoint,
-              layerIndexPaths,
+              selectedControlPoint,
+              indexPath,
               delta,
               'adjust',
               draft.sketch.pages[pageIndex],
@@ -540,23 +667,27 @@ export function canvasReducer(
               direction,
             } = interactionState;
 
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
             const originalBoundingRect = getBoundingRect(
               pageSnapshot,
               AffineTransform.identity,
               layerIds,
             )!;
 
-            const newBoundingRect = resizeRect(
+            const newBoundingRect = getScaledSnapBoundingRect(
+              state,
               originalBoundingRect,
-              {
-                x: current.x - origin.x,
-                y: current.y - origin.y,
-              },
+              delta,
+              context.canvasSize,
               direction,
             );
 
             const originalTransform = AffineTransform.multiply(
-              AffineTransform.translation(
+              AffineTransform.translate(
                 originalBoundingRect.x,
                 originalBoundingRect.y,
               ),
@@ -567,7 +698,7 @@ export function canvasReducer(
             ).invert();
 
             const newTransform = AffineTransform.multiply(
-              AffineTransform.translation(newBoundingRect.x, newBoundingRect.y),
+              AffineTransform.translate(newBoundingRect.x, newBoundingRect.y),
               AffineTransform.scale(
                 newBoundingRect.width,
                 newBoundingRect.height,
@@ -581,7 +712,7 @@ export function canvasReducer(
                 ...Layers.accessPath(pageSnapshot, layerIndex)
                   .slice(1, -1) // Remove the page and current layer
                   .map((layer) =>
-                    AffineTransform.translation(layer.frame.x, layer.frame.y),
+                    AffineTransform.translate(layer.frame.x, layer.frame.y),
                   )
                   .reverse(),
               );
@@ -591,32 +722,35 @@ export function canvasReducer(
                 layerIndex,
               );
 
-              const min = AffineTransform.multiply(
+              const originalBounds = createBounds(originalLayer.frame);
+
+              const scaleTransform = AffineTransform.multiply(
                 layerTransform.invert(),
                 newTransform,
                 originalTransform,
                 layerTransform,
-              ).applyTo({
-                x: originalLayer.frame.x,
-                y: originalLayer.frame.y,
+              );
+
+              const min = scaleTransform.applyTo({
+                x: originalBounds.minX,
+                y: originalBounds.minY,
               });
 
-              const max = AffineTransform.multiply(
-                layerTransform.invert(),
-                newTransform,
-                originalTransform,
-                layerTransform,
-              ).applyTo({
-                x: originalLayer.frame.x + originalLayer.frame.width,
-                y: originalLayer.frame.y + originalLayer.frame.height,
+              const max = scaleTransform.applyTo({
+                x: originalBounds.maxX,
+                y: originalBounds.maxY,
               });
 
-              const newFrame = normalizeRect({
-                x: Math.round(min.x),
-                y: Math.round(min.y),
-                width: Math.round(max.x - min.x),
-                height: Math.round(max.y - min.y),
-              });
+              const roundedMin = { x: Math.round(min.x), y: Math.round(min.y) };
+              const roundedMax = { x: Math.round(max.x), y: Math.round(max.y) };
+
+              const newFrame = createRect(roundedMin, roundedMax);
+
+              const width = roundedMax.x - roundedMin.x;
+              const height = roundedMax.y - roundedMin.y;
+
+              newLayer.isFlippedHorizontal = width < 0;
+              newLayer.isFlippedVertical = height < 0;
 
               newLayer.frame.x = newFrame.x;
               newLayer.frame.y = newFrame.y;
@@ -676,5 +810,71 @@ export function canvasReducer(
     }
     default:
       return state;
+  }
+}
+
+export function createDrawingLayer(
+  shapeType: DrawableLayerType,
+  style: Sketch.Style,
+  origin: Point,
+  current: Point,
+  pixelAlign: boolean,
+):
+  | Sketch.Oval
+  | Sketch.Rectangle
+  | Sketch.Text
+  | Sketch.Artboard
+  | Sketch.Slice
+  | Sketch.ShapePath {
+  const rect = createRect(origin, current);
+  let frame = SketchModel.rect(rect);
+
+  if (pixelAlign) {
+    frame = insetRect(frame, 0.5);
+  }
+
+  switch (shapeType) {
+    case 'oval':
+      return SketchModel.oval({ style, frame });
+    case 'rectangle':
+      return SketchModel.rectangle({ style, frame });
+    case 'text':
+      return SketchModel.text({ frame });
+    case 'artboard':
+      return SketchModel.artboard({ frame });
+    case 'line':
+      const createCurvePoint = (point: Point) =>
+        encodeCurvePoint(
+          {
+            curveMode: Sketch.CurveMode.Straight,
+            hasCurveFrom: false,
+            hasCurveTo: false,
+            curveFrom: point,
+            curveTo: point,
+            point: point,
+            cornerRadius: 0,
+            _class: 'curvePoint',
+          },
+          frame,
+        );
+
+      return SketchModel.shapePath({
+        style: SketchModel.style({
+          borders: [
+            SketchModel.border({
+              color: defaultBorderColor,
+            }),
+          ],
+        }),
+        frame,
+        points: [createCurvePoint(origin), createCurvePoint(current)],
+      });
+    case 'slice':
+      return SketchModel.slice({
+        frame,
+        exportOptions: SketchModel.exportOptions({
+          exportFormats: [SketchModel.exportFormat()],
+        }),
+      });
   }
 }

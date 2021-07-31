@@ -263,8 +263,17 @@ const hostConfig: ReactCanvasKitHostConfig = {
       const draw = (element: AnyElementInstance) => {
         switch (element.type) {
           case 'Rect': {
-            const { rect, paint } = element.props;
-            canvas.drawRect(rect, paint);
+            const { rect, cornerRadius, paint } = element.props;
+
+            if (cornerRadius) {
+              const roundedRect = new Float32Array(12);
+              roundedRect.set(rect);
+              roundedRect.fill(cornerRadius, 4);
+              canvas.drawRRect(roundedRect, paint);
+            } else {
+              canvas.drawRect(rect, paint);
+            }
+
             break;
           }
           case 'Path': {

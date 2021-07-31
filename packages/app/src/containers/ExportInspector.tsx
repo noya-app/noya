@@ -2,11 +2,17 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
 import {
+  useDispatch,
+  useGetWorkspaceStateSnapshot,
+  useSelector,
+} from 'noya-app-state-context';
+import {
   Button,
   Divider,
   Spacer,
   withSeparatorElements,
 } from 'noya-designsystem';
+import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
@@ -17,16 +23,11 @@ import {
 } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import ArrayController from '../components/inspector/ExportArrayController';
+import ArrayController from '../components/inspector/ArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import {
-  useDispatch,
-  useGetWorkspaceStateSnapshot,
-  useSelector,
-} from 'noya-app-state-context';
-import { ImageEncoding, generateImage } from 'noya-generate-image';
+import { usePreviewLayer } from '../hooks/usePreviewLayer';
 
 async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {
@@ -64,9 +65,9 @@ export default memo(function ExportInspector() {
   const CanvasKit = useCanvasKit();
   const getWorkspaceStateSnapshot = useGetWorkspaceStateSnapshot();
 
-  const selectedLayer = useSelector(
-    Selectors.getSelectedLayers,
-  )[0] as Sketch.SymbolInstance;
+  const page = useSelector(Selectors.getCurrentPage);
+  const selectedLayer = useSelector(Selectors.getSelectedLayers)[0];
+  const preview = usePreviewLayer({ layer: selectedLayer, page });
 
   const exportFormats = selectedLayer.exportOptions.exportFormats;
 
@@ -86,10 +87,26 @@ export default memo(function ExportInspector() {
         theme,
         getWorkspaceStateSnapshot(),
         exportFormat.fileFormat.toString() as ImageEncoding,
-        () => <RCKLayerPreview layer={selectedLayer} size={exportSize} />,
+        () => (
+          <RCKLayerPreview
+            layer={preview.layer}
+            layerFrame={preview.frame}
+            backgroundColor={preview.backgroundColor}
+            previewSize={exportSize}
+          />
+        ),
       );
     },
-    [CanvasKit, theme, selectedLayer, getWorkspaceStateSnapshot],
+    [
+      selectedLayer.frame.width,
+      selectedLayer.frame.height,
+      CanvasKit,
+      theme,
+      getWorkspaceStateSnapshot,
+      preview.layer,
+      preview.frame,
+      preview.backgroundColor,
+    ],
   );
 
   const getExportFileName = useCallback(
@@ -158,16 +175,22 @@ export default memo(function ExportInspector() {
 
   const elements = [
     <ArrayController<Sketch.ExportFormat>
+      sortable
       title={title}
       id={title}
       key={title}
-      value={exportFormats}
+      items={exportFormats}
       onClickPlus={useCallback(() => {
         dispatch('addExportFormat');
       }, [dispatch])}
-    >
-      {useCallback(
-        ({ item, index }: { item: Sketch.ExportFormat; index: number }) => (
+      onMoveItem={useCallback(
+        (sourceIndex, destinationIndex) => {
+          dispatch('moveExportFormat', sourceIndex, destinationIndex);
+        },
+        [dispatch],
+      )}
+      renderItem={useCallback(
+        ({ item, index }) => (
           <ExportFormatsRow
             id={`exportFormat-${index}}`}
             last={index === exportFormats.length - 1}
@@ -189,11 +212,11 @@ export default memo(function ExportInspector() {
         ),
         [exportFormats.length, dispatch],
       )}
-    </ArrayController>,
+    />,
     exportFormats.length > 0 && selectedLayer && (
       <>
         <InspectorPrimitives.Section>
-          <ExportPreviewRow layer={selectedLayer} />
+          <ExportPreviewRow layer={selectedLayer} page={page} />
           <Spacer.Vertical size={10} />
           <Button id="export-selected" onClick={handleExport}>
             Export Selected...

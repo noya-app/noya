@@ -4,9 +4,10 @@ import { RelativeDropPosition } from 'noya-designsystem';
 import { AffineTransform, Point, transformRect } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
 import { SketchModel } from 'noya-sketch-model';
-import { uuid } from 'noya-utils';
+import { groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
+import { PageLayer } from '../layers';
 import {
   addSiblingLayer,
   deleteLayers,
@@ -16,6 +17,7 @@ import {
   getCurrentPageIndex,
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
+  getLayerIndexPathsExcludingDescendants,
   getLayerTransformAtIndexPath,
   getParentLayer,
   getRightMostLayerBounds,
@@ -76,7 +78,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
 
   const newGroupTransform = AffineTransform.multiply(
     newParentTransform,
-    AffineTransform.translation(groupFrame.x, groupFrame.y),
+    AffineTransform.translate(groupFrame.x, groupFrame.y),
   );
 
   return produce(model, (draft) => {
@@ -357,7 +359,7 @@ export function layerReducer(
 
         const symbolsPage =
           symbolsPageIndex === -1
-            ? createPage(pages, draft.sketch.user, 'Symbols')
+            ? createPage(pages, draft.sketch.user, uuid(), 'Symbols')
             : pages[symbolsPageIndex];
 
         const symbolInstance = SketchModel.symbolInstance({
@@ -377,38 +379,59 @@ export function layerReducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      const pages = state.sketch.pages;
-      const pagesIndexPaths = findPageLayerIndexPaths(state, (layer) =>
-        ids.includes(layer.do_objectID),
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
+
+      const parentIds = indexPaths.map(
+        (indexPath) => getParentLayer(page, indexPath).do_objectID,
+      );
+
+      // Layers should be duplicated independently within each parent and placed
+      // above the "top" selected layer in that parent.
+      const groupedByParent = groupBy(
+        indexPaths,
+        (indexPath) => getParentLayer(page, indexPath).do_objectID,
+      );
+
+      // Insert in reverse order to preserve indexPaths
+      const parentIndexPaths = Layers.findAllIndexPaths(page, (layer) =>
+        parentIds.includes(layer.do_objectID),
       ).reverse();
 
       return produce(state, (draft) => {
-        pagesIndexPaths.forEach((pagesIndexPath) => {
-          const { indexPaths, pageIndex } = pagesIndexPath;
-          const page = pages[pageIndex];
-          const draftPage = draft.sketch.pages[pageIndex];
+        const draftPage = draft.sketch.pages[pageIndex];
 
-          indexPaths.forEach((indexPath) => {
-            const layer = Layers.access(page, indexPath);
-            const elem = produce(layer, (layer) => {
-              layer.name = layer.name + ' Copy';
+        draft.selectedObjects = [];
 
-              Layers.visit(layer, (layer) => {
-                if (layer.style) layer.style.do_objectID = uuid();
-                if (Layers.isSymbolMaster(layer)) {
-                  layer.symbolID = uuid();
-                  layer.frame = {
-                    ...layer.frame,
-                    x: layer.frame.x + layer.frame.width + 25,
-                    y: layer.frame.y,
-                  };
-                }
-                layer.do_objectID = uuid();
-              });
-            }) as Exclude<Sketch.AnyLayer, { _class: 'page' }>;
+        parentIndexPaths.forEach((indexPath) => {
+          const originalParent = Layers.access(
+            page,
+            indexPath,
+          ) as Layers.ParentLayer;
 
-            addSiblingLayer(draftPage, indexPath, elem);
-          });
+          const draftParent = Layers.access(
+            draftPage,
+            indexPath,
+          ) as Layers.ParentLayer;
+
+          const childIndexes = groupedByParent[originalParent.do_objectID].map(
+            (indexPath) => indexPath[indexPath.length - 1],
+          );
+
+          // Get the index of the "top" layer
+          const lastIndex = Math.max(...childIndexes);
+
+          const copiedLayers = childIndexes
+            .map((index) => originalParent.layers[index])
+            .map(copyLayer);
+
+          // Insert "above" the original in the layer list
+          draftParent.layers.splice(lastIndex + 1, 0, ...copiedLayers);
+
+          draft.selectedObjects.push(
+            ...copiedLayers.map((layer) => layer.do_objectID),
+          );
         });
       });
     }
@@ -416,4 +439,28 @@ export function layerReducer(
     default:
       return state;
   }
+}
+
+function copyLayer(targetLayer: PageLayer) {
+  return produce(targetLayer, (draft) => {
+    draft.name = draft.name + ' Copy';
+
+    Layers.visit(draft, (layer) => {
+      layer.do_objectID = uuid();
+
+      if (layer.style) {
+        layer.style.do_objectID = uuid();
+      }
+
+      if (Layers.isSymbolMasterOrArtboard(layer)) {
+        layer.frame.x += layer.frame.width + 100;
+      }
+
+      // When we duplicate a symbolMaster, we also duplicate its symbolID.
+      // In other words, a duplicated symbolMaster will have no attached instances.
+      if (Layers.isSymbolMaster(layer)) {
+        layer.symbolID = uuid();
+      }
+    });
+  });
 }

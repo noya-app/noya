@@ -1,10 +1,26 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
-import ArrayController from '../components/inspector/ArrayController';
+import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import FillRow from '../components/inspector/FillRow';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
+import { DimensionValue } from '../components/inspector/DimensionsInspector';
+import { SketchPattern } from 'noya-designsystem';
+import { isDeepEqual, zipLongest } from 'noya-utils';
+import getMultiValue from '../utils/getMultiValue';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
+
+type EditableFill = {
+  // TODO: Indeterminate `isEnabled` state
+  isEnabled: boolean;
+  hasMultipleFills: boolean;
+  color?: Sketch.Color;
+  fillType?: Sketch.FillType;
+  contextOpacity?: DimensionValue;
+  gradient: Sketch.Gradient;
+  pattern: SketchPattern;
+};
 
 export default memo(function FillInspector({
   title,
@@ -20,26 +36,69 @@ export default memo(function FillInspector({
     useSelector(Selectors.getSelectedStyles),
   );
 
-  const fills = useMemo(() => selectedStyles.map((style) => style?.fills), [
-    selectedStyles,
-  ]).reverse();
+  const layerFillLists = useShallowArray(
+    selectedStyles.map((style) => style?.fills ?? []),
+  );
 
-  // TODO: Modify all fills
-  const firstFill = useMemo(() => fills[0] || [], [fills]);
+  const editableFills = useMemo(
+    () =>
+      zipLongest(undefined, ...layerFillLists).map(
+        (borders): EditableFill => {
+          const filtered = borders.flatMap((border) =>
+            border ? [border] : [],
+          );
+
+          const fillType = getMultiValue(
+            filtered.map((border) => border.fillType),
+            isDeepEqual,
+          );
+
+          const gradient = getMultiValue(
+            filtered.map((border) => border.gradient),
+            isDeepEqual,
+          );
+
+          const getPattern = (fill: Sketch.Fill): SketchPattern => ({
+            _class: 'pattern',
+            patternFillType: fill.patternFillType,
+            patternTileScale: fill.patternTileScale,
+            image: fill.image,
+          });
+
+          const patterns = filtered.map(getPattern);
+
+          return {
+            isEnabled:
+              getMultiValue(filtered.map((border) => border.isEnabled)) ?? true,
+            hasMultipleFills:
+              fillType === undefined ||
+              (fillType === Sketch.FillType.Gradient && !gradient),
+            color: getMultiValue(
+              filtered.map((border) => border.color),
+              isDeepEqual,
+            ),
+            fillType,
+            contextOpacity: getMultiNumberValue(
+              filtered.map((border) => border.contextSettings.opacity),
+            ),
+            gradient: gradient ?? filtered[0].gradient,
+            pattern: getMultiValue(patterns, isDeepEqual) ?? patterns[0],
+          };
+        },
+      ),
+    [layerFillLists],
+  );
+
+  const handleClickPlus = useCallback(() => dispatch('addNewFill'), [dispatch]);
+
   return (
-    <ArrayController<Sketch.Fill>
+    <CheckboxArrayController<EditableFill>
       title={title}
       id={title}
       key={title}
-      value={firstFill}
-      onClickPlus={useCallback(
-        () => (!allowMoreThanOne && firstFill[0] ? [] : dispatch('addNewFill')),
-        [dispatch, allowMoreThanOne, firstFill],
-      )}
+      value={editableFills}
+      onClickPlus={allowMoreThanOne ? handleClickPlus : undefined}
       onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
-        dispatch,
-      ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteFill', index), [
         dispatch,
       ])}
       onMoveItem={useCallback(
@@ -51,14 +110,13 @@ export default memo(function FillInspector({
         (index, checked) => dispatch('setFillEnabled', index, checked),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         ({
           item,
           index,
           checkbox,
         }: {
-          item: Sketch.Fill;
+          item: EditableFill;
           index: number;
           checkbox: ReactNode;
         }) => (
@@ -66,7 +124,7 @@ export default memo(function FillInspector({
             id={`fill-${index}`}
             prefix={checkbox}
             fillType={item.fillType}
-            contextOpacity={item.contextSettings.opacity}
+            contextOpacity={item.contextOpacity}
             onSetOpacity={(value, mode) =>
               dispatch('setFillOpacity', index, value, mode)
             }
@@ -103,12 +161,7 @@ export default memo(function FillInspector({
                 }),
             }}
             patternProps={{
-              pattern: {
-                _class: 'pattern',
-                patternFillType: item.patternFillType,
-                patternTileScale: item.patternTileScale,
-                image: item.image,
-              },
+              pattern: item.pattern,
               onChangeFillImage: (value) =>
                 dispatch('setFillImage', index, value),
               onChangePatternFillType: (value) =>
@@ -121,6 +174,6 @@ export default memo(function FillInspector({
 
         [dispatch, selectLayerId],
       )}
-    </ArrayController>
+    />
   );
 });

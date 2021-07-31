@@ -1,5 +1,5 @@
 import { Divider, Spacer, withSeparatorElements } from 'noya-designsystem';
-import { Layers, Selectors, SetNumberMode } from 'noya-state';
+import { Layers, Selectors, SetNumberMode, isLine } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
@@ -22,6 +22,13 @@ import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
 import getMultiValue from '../utils/getMultiValue';
+import LineInspector from '../components/inspector/LineInspector';
+import styled from 'styled-components';
+import getMultiNumberValue from '../utils/getMultiNumberValue';
+
+const PointControlsContainer = styled.div({
+  padding: '0 10px',
+});
 
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
@@ -90,24 +97,27 @@ export default memo(function Inspector() {
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {
-    const dimensionsInspectorProps =
-      selectedLayers.length === 1
-        ? {
-            ...selectedLayers[0].frame,
-            rotation: Selectors.getLayerRotation(selectedLayers[0]),
-          }
-        : {
-            x: undefined,
-            y: undefined,
-            width: undefined,
-            height: undefined,
-            rotation: undefined,
-          };
+    const dimensionsInspectorProps = {
+      x: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.x)),
+      y: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.y)),
+      width: getMultiNumberValue(
+        selectedLayers.map((layer) => layer.frame.width),
+      ),
+      height: getMultiNumberValue(
+        selectedLayers.map((layer) => layer.frame.height),
+      ),
+      rotation: getMultiNumberValue(
+        selectedLayers.map(Selectors.getLayerRotation),
+      ),
+    };
 
     const onlyBitmapLayers = selectedLayers.every((l) =>
       Layers.isBitmapLayer(l),
     );
     const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const hasLineLayer = selectedLayers.every(
+      (l) => Layers.isPointsLayer(l) && isLine(l.points),
+    );
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
     const hasSymbolMaster = selectedLayers.some((l) =>
       Layers.isSymbolMaster(l),
@@ -125,11 +135,22 @@ export default memo(function Inspector() {
       <Fragment key="layout">
         <AlignmentInspector />
         {isEditingPath ? (
-          isEditingControlPoint ? (
-            <ControlPointCoordinatesInspector />
-          ) : (
-            <PointCoordinatesInspector />
-          )
+          <PointControlsContainer>
+            {isEditingControlPoint ? (
+              <ControlPointCoordinatesInspector />
+            ) : (
+              <PointCoordinatesInspector />
+            )}
+          </PointControlsContainer>
+        ) : hasLineLayer ? (
+          <LineInspector
+            {...dimensionsInspectorProps}
+            isFlippedHorizontal={isFlippedHorizontal}
+            isFlippedVertical={isFlippedVertical}
+            onSetWidth={handleSetWidth}
+            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+            onSetIsFlippedVertical={handleSetIsFlippedVertical}
+          />
         ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
@@ -156,8 +177,8 @@ export default memo(function Inspector() {
       hasTextLayer && <TextStyleInspector />,
       hasOneSymbolMaster && <SymbolMasterInspector />,
       hasOneSymbolInstance && <SymbolInstanceInspector />,
-      !hasSymbolInstance && selectedLayers.length === 1 && (
-        <FillInspector title={'Fills'} allowMoreThanOne={true} />
+      selectedLayers.every(Layers.hasInspectableFill) && (
+        <FillInspector title="Fills" allowMoreThanOne />
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
@@ -183,7 +204,10 @@ export default memo(function Inspector() {
     hasContextSettingsLayers,
   ]);
 
-  if (state.interactionState.type === 'insertArtboard') {
+  if (
+    state.interactionState.type === 'insert' &&
+    state.interactionState.layerType === 'artboard'
+  ) {
     return <ArtboardSizeList />;
   }
 

@@ -3,18 +3,28 @@ import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import * as Layers from '../layers';
 import {
+  getCurrentPage,
   getCurrentPageIndex,
   getSelectedLayerIndexPaths,
   moveControlPoints,
   moveSelectedPoints,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState, SetNumberMode } from './applicationReducer';
+import {
+  ApplicationState,
+  SelectedPointLists,
+  SetNumberMode,
+} from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]
   | [type: 'setPointCornerRadius', amount: number, mode?: SetNumberMode]
-  | [type: 'setPointX' | 'setPointY', amount: number, mode?: SetNumberMode]
+  | [
+      type: 'setPointX' | 'setPointY',
+      pointLists: SelectedPointLists,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | [
       type: 'setControlPointX' | 'setControlPointY',
       amount: number,
@@ -95,7 +105,7 @@ export function pointReducer(
     }
     case 'setPointX':
     case 'setPointY': {
-      const [type, amount, mode = 'replace'] = action;
+      const [type, selectedPointList, amount, mode = 'replace'] = action;
 
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -104,7 +114,7 @@ export function pointReducer(
         const delta = type === 'setPointX' ? { x: amount } : { y: amount };
 
         moveSelectedPoints(
-          draft.selectedPointLists,
+          selectedPointList,
           layerIndexPaths,
           delta,
           mode,
@@ -117,17 +127,26 @@ export function pointReducer(
     case 'setControlPointX':
     case 'setControlPointY': {
       const [type, amount, mode = 'replace'] = action;
+      const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const selectedControlPoint = state.selectedControlPoint;
+
+      if (!selectedControlPoint) return state;
+
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === selectedControlPoint.layerId,
+      );
+
+      if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        if (!draft.selectedControlPoint) return;
         const delta =
           type === 'setControlPointX' ? { x: amount } : { y: amount };
 
         moveControlPoints(
-          draft.selectedControlPoint,
-          layerIndexPaths,
+          selectedControlPoint,
+          indexPath,
           delta,
           mode,
           draft.sketch.pages[pageIndex],

@@ -1,6 +1,5 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Layers } from '.';
-import { PageLayer } from './types';
+import { Layers, PageLayer } from '.';
 
 // Names are encoded as, e.g. "id1/id2/id3_stringValue"
 export function decodeName(overrideName: string) {

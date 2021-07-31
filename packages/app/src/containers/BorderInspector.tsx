@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { isDeepEqual, zipLongest } from 'noya-utils';
-import ArrayController from '../components/inspector/ArrayController';
+import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import BorderRow from '../components/inspector/BorderRow';
 import { DimensionValue } from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
@@ -18,7 +18,6 @@ type EditableBorder = {
   fillType?: Sketch.FillType;
   position?: Sketch.BorderPosition;
   thickness?: DimensionValue;
-  contextOpacity?: DimensionValue;
   gradient: Sketch.Gradient;
 };
 
@@ -69,9 +68,6 @@ export default memo(function BorderInspector() {
             thickness: getMultiNumberValue(
               filtered.map((border) => border.thickness),
             ),
-            contextOpacity: getMultiNumberValue(
-              filtered.map((border) => border.contextSettings.opacity),
-            ),
             gradient: gradient ?? filtered[0].gradient,
           };
         },
@@ -80,16 +76,13 @@ export default memo(function BorderInspector() {
   );
 
   return (
-    <ArrayController<EditableBorder>
+    <CheckboxArrayController<EditableBorder>
       title="Borders"
       id="borders"
       key="borders"
       value={editableBorders}
       onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
       onClickTrash={useCallback(() => dispatch('deleteDisabledBorders'), [
-        dispatch,
-      ])}
-      onDeleteItem={useCallback((index) => dispatch('deleteBorder', index), [
         dispatch,
       ])}
       onMoveItem={useCallback(
@@ -101,8 +94,7 @@ export default memo(function BorderInspector() {
         (index, checked) => dispatch('setBorderEnabled', index, checked),
         [dispatch],
       )}
-    >
-      {useCallback(
+      renderItem={useCallback(
         ({
           item,
           index,
@@ -153,6 +145,6 @@ export default memo(function BorderInspector() {
         ),
         [dispatch],
       )}
-    </ArrayController>
+    />
   );
 });

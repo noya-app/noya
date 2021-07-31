@@ -1,11 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { createRect, Size } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
-import type { PageLayer } from '..';
-import { Point, Rect, UUID } from '../types';
+import { Point, Rect } from 'noya-geometry';
+import { UUID } from 'noya-state';
 import { SelectedGradientPoint } from './applicationReducer';
-import { defaultFillColor } from './styleReducer';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -30,37 +27,36 @@ export type DragHandle = {
   compassDirection: CompassDirection;
 };
 
-export type ShapeType = 'rectangle' | 'oval' | 'text' | 'artboard';
+export type DrawableLayerType =
+  | 'rectangle'
+  | 'oval'
+  | 'line'
+  | 'text'
+  | 'artboard'
+  | 'slice';
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 
 // These actions need to be augmented by additional state (a snapshot of the
 // current page) before being passed to the interaction reducer.
 export type SnapshotInteractionAction =
-  | [type: 'maybeMove', origin: Point, canvasSize: Size]
-  | [
-      type: 'maybeScale',
-      origin: Point,
-      direction: CompassDirection,
-      canvasSize: Size,
-    ]
+  | [type: 'maybeMove', origin: Point]
+  | [type: 'maybeScale', origin: Point, direction: CompassDirection]
   | [type: 'maybeMovePoint', origin: Point]
   | [type: 'maybeMoveControlPoint', origin: Point];
 
 export type InteractionAction =
-  | ['reset']
-  | [`insert${Capitalize<ShapeType>}`]
-  | [`insertingSymbol`, UUID, Point?]
+  | [type: 'reset']
+  | [type: 'insert', layerType: DrawableLayerType, current?: Point]
+  | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
-  | [type: 'startDrawing', shapeType: ShapeType, id: UUID, point: Point]
+  | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
   | [type: 'updateDrawing', point: Point]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
-  | [type: 'startMoving', point: Point]
-  | [type: 'startScaling', point: Point]
   | [type: 'startPanning', point: Point]
   | [type: 'updateMoving', point: Point]
   | [type: 'updateScaling', point: Point]
@@ -84,7 +80,9 @@ export type InteractionState =
       type: 'none';
     }
   | {
-      type: `insert${Capitalize<ShapeType>}`;
+      type: 'insert';
+      layerType: DrawableLayerType;
+      point?: Point;
     }
   | {
       type: 'insertingSymbol';
@@ -102,7 +100,8 @@ export type InteractionState =
   | {
       type: 'drawing';
       origin: Point;
-      value: PageLayer;
+      current: Point;
+      shapeType: DrawableLayerType;
     }
   | {
       type: 'marquee';
@@ -112,7 +111,6 @@ export type InteractionState =
   | {
       type: 'maybeMove';
       origin: Point;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | {
@@ -146,14 +144,12 @@ export type InteractionState =
       type: 'maybeScale';
       origin: Point;
       direction: CompassDirection;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | {
       type: 'moving';
       origin: Point;
       current: Point;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | {
@@ -161,7 +157,6 @@ export type InteractionState =
       origin: Point;
       current: Point;
       direction: CompassDirection;
-      canvasSize: Size;
       pageSnapshot: Sketch.Page;
     }
   | { type: 'panMode' }
@@ -175,33 +170,6 @@ export type InteractionState =
 
 export type InteractionType = InteractionState['type'];
 
-type CreateLayerReturnType =
-  | Sketch.Oval
-  | Sketch.Rectangle
-  | Sketch.Text
-  | Sketch.Artboard;
-
-function createLayer(shapeType: ShapeType): CreateLayerReturnType {
-  const style = SketchModel.style({
-    fills: [
-      SketchModel.fill({
-        color: defaultFillColor,
-      }),
-    ],
-  });
-
-  switch (shapeType) {
-    case 'oval':
-      return SketchModel.oval({ style });
-    case 'rectangle':
-      return SketchModel.rectangle({ style });
-    case 'text':
-      return SketchModel.text();
-    case 'artboard':
-      return SketchModel.artboard();
-  }
-}
-
 export function interactionReducer(
   state: InteractionState,
   action:
@@ -214,12 +182,9 @@ export function interactionReducer(
       const [, point] = action;
       return { type: 'editPath', point: point };
     }
-
-    case 'insertArtboard':
-    case 'insertOval':
-    case 'insertRectangle':
-    case 'insertText': {
-      return { type: action[0] };
+    case 'insert': {
+      const [, layerType, point] = action;
+      return { type: action[0], layerType, point };
     }
     case 'insertingSymbol': {
       const [, symbolID, point] = action;
@@ -257,49 +222,37 @@ export function interactionReducer(
       };
     }
     case 'startDrawing': {
-      const [, shapeType, id, point] = action;
-
-      let layer = produce(createLayer(shapeType), (layer) => {
-        layer.do_objectID = id;
-        layer.frame = {
-          _class: 'rect',
-          constrainProportions: false,
-          ...createRect(point, point),
-        };
-      });
+      const [, shapeType, point] = action;
 
       return {
         type: 'drawing',
-        value: layer,
         origin: point,
+        current: point,
+        shapeType,
       };
     }
     case 'updateDrawing': {
       if (state.type !== 'drawing') return state;
+
       const [, point] = action;
 
-      const rect = createRect(state.origin, point);
-
-      return produce(state, (draft) => {
-        draft.value.frame = {
-          ...draft.value.frame,
-          ...rect,
-        };
-      });
+      return {
+        ...state,
+        current: point,
+      };
     }
     case 'maybeMove': {
-      const [, origin, canvasSize, pageSnapshot] = action;
+      const [, origin, pageSnapshot] = action;
 
-      return { type: action[0], origin, canvasSize, pageSnapshot };
+      return { type: action[0], origin, pageSnapshot };
     }
     case 'maybeScale': {
-      const [, origin, direction, canvasSize, pageSnapshot] = action;
+      const [, origin, direction, pageSnapshot] = action;
 
       return {
         type: action[0],
         origin,
         direction,
-        canvasSize,
         pageSnapshot,
       };
     }
@@ -390,57 +343,29 @@ export function interactionReducer(
         pageSnapshot: state.pageSnapshot,
       };
     }
-    case 'startMoving': {
-      const [, point] = action;
-
-      if (state.type !== 'maybeMove') {
-        throw new Error('Bad interaction state - should be in `maybeMove`');
-      }
-
-      return {
-        type: 'moving',
-        origin: state.origin,
-        current: point,
-        canvasSize: state.canvasSize,
-        pageSnapshot: state.pageSnapshot,
-      };
-    }
-    case 'startScaling': {
-      const [, point] = action;
-
-      if (state.type !== 'maybeScale') {
-        throw new Error('Bad interaction state - should be in `maybeScale`');
-      }
-
-      return {
-        type: 'scaling',
-        origin: state.origin,
-        current: point,
-        direction: state.direction,
-        canvasSize: state.canvasSize,
-        pageSnapshot: state.pageSnapshot,
-      };
-    }
     case 'updateMoving': {
       const [, point] = action;
 
-      if (state.type !== 'moving') {
-        throw new Error('Bad interaction state - should be in `moving`');
+      if (state.type !== 'moving' && state.type !== 'maybeMove') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeMove` or `moving`',
+        );
       }
 
       return {
         type: 'moving',
         origin: state.origin,
         current: point,
-        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }
     case 'updateScaling': {
       const [, point] = action;
 
-      if (state.type !== 'scaling') {
-        throw new Error('Bad interaction state - should be in `scaling`');
+      if (state.type !== 'scaling' && state.type !== 'maybeScale') {
+        throw new Error(
+          'Bad interaction state - should be in `maybeScale` or `scaling`',
+        );
       }
 
       return {
@@ -448,7 +373,6 @@ export function interactionReducer(
         origin: state.origin,
         current: point,
         direction: state.direction,
-        canvasSize: state.canvasSize,
         pageSnapshot: state.pageSnapshot,
       };
     }

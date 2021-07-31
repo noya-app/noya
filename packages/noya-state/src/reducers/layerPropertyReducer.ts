@@ -1,7 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import * as Layers from '../layers';
+import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
+  computeNewBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getLayerRotation,
@@ -12,6 +15,7 @@ import { accessPageLayers, ApplicationState } from './applicationReducer';
 import { SetNumberMode } from './styleReducer';
 
 export type LayerPropertyAction =
+  | [type: 'setLayerName', layerId: string, name: string]
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setLayerIsLocked', layerId: string | string[], isLocked: boolean]
   | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
@@ -25,13 +29,35 @@ export type LayerPropertyAction =
   | [type: 'setIsFlippedVertical', value: boolean]
   | [type: 'setIsFlippedHorizontal', value: boolean]
   | [type: 'setHasClippingMask', value: boolean]
-  | [type: 'setShouldBreakMaskChain', value: boolean];
+  | [type: 'setShouldBreakMaskChain', value: boolean]
+  | [type: 'setMaskMode', value: 'alpha' | 'outline'];
 
 export function layerPropertyReducer(
   state: ApplicationState,
   action: LayerPropertyAction,
+  CanvasKit: CanvasKit,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setLayerName': {
+      const [, layerId, name] = action;
+
+      const page = getCurrentPage(state);
+      const pageIndex = getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
+        draftLayer.name = name;
+      });
+    }
     case 'setLayerVisible':
     case 'setLayerIsLocked': {
       const [type, id, value] = action;
@@ -151,8 +177,21 @@ export function layerPropertyReducer(
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           if (!Layers.isPointsLayer(layer)) return;
-
           layer.isClosed = value;
+
+          const decodedPoints = layer.points.map((point) =>
+            decodeCurvePoint(point, layer.frame),
+          );
+
+          layer.frame = {
+            ...layer.frame,
+            ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
+          };
+
+          // Transform back to the range [0, 1], using the new bounds
+          layer.points = decodedPoints.map((decodedCurvePoint) =>
+            encodeCurvePoint(decodedCurvePoint, layer.frame),
+          );
         });
       });
     }
@@ -197,6 +236,17 @@ export function layerPropertyReducer(
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           layer.shouldBreakMaskChain = value;
+        });
+      });
+    }
+    case 'setMaskMode': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.clippingMaskMode = value === 'alpha' ? 1 : 0;
         });
       });
     }

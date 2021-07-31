@@ -1,9 +1,15 @@
 import * as CanvasKit from 'canvaskit';
-import { insetRect } from 'noya-geometry';
+import { insetRect, Rect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
-import { Rect, Primitives, getDragHandles } from 'noya-state';
+import {
+  getLineDragHandles,
+  getRectDragHandles,
+  Primitives,
+  Selectors,
+} from 'noya-state';
 import React, { memo } from 'react';
+import { useApplicationState } from 'noya-app-state-context';
 import { Rect as RCKRect } from '../ComponentsContext';
 
 interface Props {
@@ -13,14 +19,20 @@ interface Props {
 
 export default memo(function DragHandles({ selectionPaint, rect }: Props) {
   const CanvasKit = useCanvasKit();
+  const [state] = useApplicationState();
 
   const dragHandlePaint = useColorFill(CanvasKit.Color(255, 255, 255, 1));
-  const dragHandles = getDragHandles(rect);
+
+  const lineLayer = Selectors.getSelectedLineLayer(state);
+  const dragHandles =
+    lineLayer && state.selectedObjects.length === 1
+      ? getLineDragHandles(lineLayer.frame, lineLayer.points, lineLayer)
+      : getRectDragHandles(rect);
 
   return (
     <>
-      {dragHandles.map((handle) => (
-        <React.Fragment key={handle.compassDirection}>
+      {dragHandles.map((handle, index) => (
+        <React.Fragment key={index}>
           <RCKRect
             rect={Primitives.rect(CanvasKit, handle.rect)}
             paint={dragHandlePaint}

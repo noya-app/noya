@@ -34,10 +34,11 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
+import { Size } from 'noya-geometry';
 
 export type { SetNumberMode };
 
-export type WorkspaceTab = 'canvas' | 'theme';
+export type WorkspaceTab = 'canvas' | 'theme' | 'pages';
 
 export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
 type ThemeSelection = { ids: string[]; groupName: string };
@@ -95,10 +96,15 @@ export type Action =
   | ExportAction
   | PointAction;
 
+export type ApplicationReducerContext = {
+  canvasSize: Size;
+};
+
 export function applicationReducer(
   state: ApplicationState,
   action: Action,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'setKeyModifier':
@@ -131,7 +137,7 @@ export function applicationReducer(
     }
     case 'selectPage':
     case 'addPage':
-    case 'renamePage':
+    case 'setPageName':
     case 'duplicatePage':
     case 'deletePage':
     case 'movePage': {
@@ -146,8 +152,10 @@ export function applicationReducer(
     case 'insertBitmap':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
-      return canvasReducer(state, action, CanvasKit);
+    case 'insertPointInPath':
+      return canvasReducer(state, action, CanvasKit, context);
     case 'setLayerVisible':
+    case 'setLayerName':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
     case 'setFixedRadius':
@@ -161,7 +169,8 @@ export function applicationReducer(
     case 'setIsFlippedVertical':
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
-      return layerPropertyReducer(state, action);
+    case 'setMaskMode':
+      return layerPropertyReducer(state, action, CanvasKit);
     case 'importSvg':
     case 'groupLayer':
     case 'deleteLayer':
@@ -348,6 +357,7 @@ export function applicationReducer(
     case 'goToSymbolSource':
     case 'setOverrideValue':
       return symbolsReducer(state, action);
+    case 'moveExportFormat':
     case 'setExportScale':
     case 'setExportName':
     case 'setExportFileFormat':

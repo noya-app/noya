@@ -139,8 +139,9 @@ export function normalizeRect(rect: Rect): Rect {
   };
 }
 
-export function insetRect(rect: Rect, dx: number, dy: number): Rect {
+export function insetRect<T extends Rect>(rect: T, dx: number, dy = dx): T {
   return {
+    ...rect,
     x: rect.x + dx,
     y: rect.y + dy,
     width: rect.width - dx * 2,

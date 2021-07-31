@@ -1,14 +1,10 @@
-import { Bounds, distance, Point, Axis } from 'noya-geometry';
-
-export type DistanceMeasurementProps = {
-  distance: number;
-  midpoint: Point;
-};
+import { Axis, Bounds, createBounds, Point, Rect } from 'noya-geometry';
 
 type BoundsKey = keyof Bounds;
 export type Direction = '+' | '-';
 type AxisDirectionPair = [Direction, Axis];
 
+export const AXES: Axis[] = ['x', 'y'];
 export const X_DIRECTIONS: AxisDirectionPair[] = [
   ['+', 'x'],
   ['-', 'x'],
@@ -36,17 +32,19 @@ export function getAxisProperties(
 }
 
 export type Guides = {
-  extension: Point[];
-  measurement: Point[];
-  distanceMeasurement: DistanceMeasurementProps;
+  extension: [Point, Point];
+  measurement: [Point, Point];
 };
 
 export function getGuides(
   mainDirection: Direction,
   mainAxis: Axis,
-  selected: Bounds,
-  highlighted: Bounds,
+  sourceRect: Rect,
+  targetRect: Rect,
 ): Guides | undefined {
+  const source = createBounds(sourceRect);
+  const target = createBounds(targetRect);
+
   const m = mainAxis;
   const c = mainAxis === 'x' ? 'y' : 'x';
 
@@ -54,45 +52,32 @@ export function getGuides(
   const [minC, midC, maxC] = getAxisProperties(c, '+');
 
   const [startC, endC] =
-    selected[midC] > highlighted[midC]
-      ? [highlighted[maxC], selected[maxC]]
-      : [highlighted[minC], selected[minC]];
+    source[midC] > target[midC]
+      ? [target[maxC], source[maxC]]
+      : [target[minC], source[minC]];
 
   // Is `a` further along the direction of the primary axis than `b`?
   const isFurther = (a: number, b: number) =>
     mainDirection === '+' ? a > b : a < b;
 
-  let edge = isFurther(selected[minM], highlighted[maxM])
-    ? highlighted[maxM]
-    : isFurther(selected[maxM], highlighted[maxM]) ||
-      isFurther(selected[minM], highlighted[minM])
-    ? highlighted[minM]
+  let edge = isFurther(source[minM], target[maxM])
+    ? target[maxM]
+    : isFurther(source[maxM], target[maxM]) ||
+      isFurther(source[minM], target[minM])
+    ? target[minM]
     : undefined;
 
   if (edge === undefined) return;
 
-  const extension = [
+  const extension: [Point, Point] = [
     { [m]: edge, [c]: startC } as Point,
     { [m]: edge, [c]: endC } as Point,
   ];
 
-  const measurement = [
-    { [m]: selected[minM], [c]: selected[midC] } as Point,
-    { [m]: edge, [c]: selected[midC] } as Point,
+  const measurement: [Point, Point] = [
+    { [m]: source[minM], [c]: source[midC] } as Point,
+    { [m]: edge, [c]: source[midC] } as Point,
   ];
 
-  const itemDistance = distance(
-    { [m]: selected[minM], [c]: selected[midC] } as Point,
-    { [m]: edge, [c]: selected[midC] } as Point,
-  );
-
-  const distanceMeasurement: DistanceMeasurementProps = {
-    distance: itemDistance,
-    midpoint: {
-      [m]: (selected[minM] + edge) / 2,
-      [c]: selected[midC],
-    } as Point,
-  };
-
-  return { extension, measurement, distanceMeasurement };
+  return { extension, measurement };
 }

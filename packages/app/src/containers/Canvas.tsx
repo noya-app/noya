@@ -10,20 +10,20 @@ import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
-import { createRect, Insets } from 'noya-geometry';
+import { createRect, Insets, Point } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
 import {
+  ApplicationState,
   CompassDirection,
   decodeCurvePoint,
+  getSelectedLineLayer,
   Layers,
-  Point,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
-  ShapeType,
 } from 'noya-state';
-import { getFileExtensionForType, uuid } from 'noya-utils';
+import { getFileExtensionForType } from 'noya-utils';
 import {
   CSSProperties,
   memo,
@@ -52,7 +52,11 @@ const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
 
 function getCursorForDirection(
   direction: CompassDirection,
+  state: ApplicationState,
 ): CSSProperties['cursor'] {
+  if (getSelectedLineLayer(state)) {
+    return 'move';
+  }
   switch (direction) {
     case 'e':
     case 'w':
@@ -110,14 +114,15 @@ export default memo(function Canvas() {
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
       dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else {
+    } else if (isEditingPath) {
       dispatch(
-        isEditingPath
-          ? (`setPoint${axis}` as const)
-          : (`setLayer${axis}` as const),
+        `setPoint${axis}` as const,
+        state.selectedPointLists,
         amount,
         'adjust',
       );
+    } else {
+      dispatch(`setLayer${axis}` as const, amount, 'adjust');
     }
   };
 
@@ -133,6 +138,7 @@ export default memo(function Canvas() {
     Backspace: () => dispatch('deleteLayer', state.selectedObjects),
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
+    'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
   });
 
   useKeyboardShortcuts('keyup', {
@@ -155,11 +161,6 @@ export default memo(function Canvas() {
 
     setCanvasSize(containerSize, insets);
   }, [insets, setCanvasSize, containerSize]);
-
-  const visibleCanvasSize = useMemo(
-    () => containerSize ?? { width: 0, height: 0 },
-    [containerSize],
-  );
 
   const canvasSizeWithInsets = useMemo(
     () =>
@@ -217,19 +218,12 @@ export default memo(function Canvas() {
       if (!MouseEvent.isLeftButtonClicked(event)) return;
 
       switch (state.interactionState.type) {
-        case 'insertArtboard':
-        case 'insertRectangle':
-        case 'insertOval':
-        case 'insertText': {
-          const id = uuid();
-
+        case 'insert': {
           dispatch('interaction', [
             'startDrawing',
-            state.interactionState.type.slice(6).toLowerCase() as ShapeType,
-            id,
+            state.interactionState.layerType,
             point,
           ]);
-
           break;
         }
         case 'insertingSymbol': {
@@ -264,34 +258,36 @@ export default memo(function Canvas() {
             },
           );
 
-          Selectors.getSelectedLayers(state)
-            .filter(Layers.isPointsLayer)
-            .forEach((layer) => {
-              const boundingRect = boundingRects[layer.do_objectID];
-              layer.points.forEach((curvePoint, index) => {
-                const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+          const selectedPointsLayers = Selectors.getSelectedLayers(
+            state,
+          ).filter(Layers.isPointsLayer);
 
-                if (Selectors.isPointInRange(decodedPoint.point, point)) {
-                  selectedPoint = [layer.do_objectID, index];
-                } else if (
-                  Selectors.isPointInRange(decodedPoint.curveTo, point)
-                ) {
-                  selectedControlPoint = {
-                    layerId: layer.do_objectID,
-                    pointIndex: index,
-                    controlPointType: 'curveTo',
-                  };
-                } else if (
-                  Selectors.isPointInRange(decodedPoint.curveFrom, point)
-                ) {
-                  selectedControlPoint = {
-                    layerId: layer.do_objectID,
-                    pointIndex: index,
-                    controlPointType: 'curveFrom',
-                  };
-                }
-              });
+          selectedPointsLayers.forEach((layer) => {
+            const boundingRect = boundingRects[layer.do_objectID];
+            layer.points.forEach((curvePoint, index) => {
+              const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+
+              if (Selectors.isPointInRange(decodedPoint.point, point)) {
+                selectedPoint = [layer.do_objectID, index];
+              } else if (
+                Selectors.isPointInRange(decodedPoint.curveTo, point)
+              ) {
+                selectedControlPoint = {
+                  layerId: layer.do_objectID,
+                  pointIndex: index,
+                  controlPointType: 'curveTo',
+                };
+              } else if (
+                Selectors.isPointInRange(decodedPoint.curveFrom, point)
+              ) {
+                selectedControlPoint = {
+                  layerId: layer.do_objectID,
+                  pointIndex: index,
+                  controlPointType: 'curveFrom',
+                };
+              }
             });
+          });
 
           const indexPathOfOpenShapeLayer = Selectors.getIndexPathOfOpenShapeLayer(
             state,
@@ -325,6 +321,12 @@ export default memo(function Canvas() {
               selectedControlPoint.controlPointType,
             );
             dispatch('interaction', ['maybeMoveControlPoint', point]);
+          } else if (
+            selectedPointsLayers.some((layer) =>
+              Selectors.layerPathContainsPoint(CanvasKit, layer, point),
+            )
+          ) {
+            dispatch('insertPointInPath', point);
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
             dispatch('interaction', ['maybeConvertCurveMode', point]);
@@ -339,12 +341,7 @@ export default memo(function Canvas() {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction) {
-              dispatch('interaction', [
-                'maybeScale',
-                point,
-                direction,
-                visibleCanvasSize,
-              ]);
+              dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
             }
@@ -394,7 +391,7 @@ export default memo(function Canvas() {
               );
             }
 
-            dispatch('interaction', ['maybeMove', point, visibleCanvasSize]);
+            dispatch('interaction', ['maybeMove', point]);
           } else {
             dispatch('selectLayer', undefined);
 
@@ -407,7 +404,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, CanvasKit, insets, dispatch, visibleCanvasSize],
+    [offsetEventPoint, state, CanvasKit, insets, dispatch],
   );
 
   const handleMouseMove = useCallback(
@@ -420,6 +417,13 @@ export default memo(function Canvas() {
           dispatch('interaction', ['updateGradientPoint', point]);
           break;
         }
+        case 'insert':
+          dispatch('interaction', [
+            state.interactionState.type,
+            state.interactionState.layerType,
+            point,
+          ]);
+          break;
         case 'insertingSymbol': {
           dispatch('interaction', [
             'insertingSymbol',
@@ -455,8 +459,8 @@ export default memo(function Canvas() {
           if (isMoving(point, origin)) {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
-                ? 'startMoving'
-                : 'startScaling',
+                ? 'updateMoving'
+                : 'updateScaling',
               point,
             ]);
           }
@@ -749,10 +753,7 @@ export default memo(function Canvas() {
         return 'grabbing';
       case 'panMode':
         return 'grab';
-      case 'insertArtboard':
-      case 'insertOval':
-      case 'insertRectangle':
-      case 'insertText':
+      case 'insert':
         return 'crosshair';
       case 'drawingShapePath':
         return 'crosshair';
@@ -760,7 +761,7 @@ export default memo(function Canvas() {
       case 'scaling':
       case 'hoverHandle':
         if (handleDirection) {
-          return getCursorForDirection(handleDirection);
+          return getCursorForDirection(handleDirection, state);
         }
         return 'default';
       case 'editPath': {

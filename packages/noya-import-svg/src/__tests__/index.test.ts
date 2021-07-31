@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Layers } from 'noya-state';
+import { debugDescription } from 'noya-sketch-model';
 import path from 'path';
 import { svgToLayer } from '..';
 
@@ -15,24 +15,29 @@ test('makes layers', () => {
   const rootLayer = svgToLayer('svg', circleSvg);
 
   expect(
-    Layers.summary(rootLayer, { fills: true, borders: true, points: true }),
+    debugDescription(rootLayer, {
+      style: true,
+      fills: true,
+      borders: true,
+      points: true,
+    }),
   ).toMatchSnapshot();
 });
 
 test('makes demo layers', () => {
   const rootLayer = svgToLayer('svg', demoSvg);
 
-  expect(Layers.summary(rootLayer)).toMatchSnapshot();
+  expect(debugDescription(rootLayer)).toMatchSnapshot();
 });
 
 test('makes multiple shapePaths in a shapeGroup', () => {
   const rootLayer = svgToLayer('svg', bowtieSvg);
 
-  expect(Layers.summary(rootLayer, { points: true })).toMatchSnapshot();
+  expect(debugDescription(rootLayer, { points: true })).toMatchSnapshot();
 });
 
 test('uses viewbox', () => {
   const rootLayer = svgToLayer('svg', bowtieViewBox);
 
-  expect(Layers.summary(rootLayer, { points: true })).toMatchSnapshot();
+  expect(debugDescription(rootLayer, { points: true })).toMatchSnapshot();
 });

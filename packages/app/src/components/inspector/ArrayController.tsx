@@ -1,205 +1,135 @@
+import * as InspectorPrimitives from './InspectorPrimitives';
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
-import { Spacer, withSeparatorElements } from 'noya-designsystem';
-import { memo, ReactNode, useCallback } from 'react';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import styled from 'styled-components';
+import {
+  Sortable,
+  Spacer,
+  ListView,
+  RelativeDropPosition,
+  withSeparatorElements,
+} from 'noya-designsystem';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
+import { range } from 'noya-utils';
 
-type BaseArrayItem = { isEnabled: boolean };
-
-/* ----------------------------------------------------------------------------
- * ArrayElement
- * ------------------------------------------------------------------------- */
-
-const ElementRow = styled.div(({ theme }) => ({
+const ElementRow = styled.div({
   flex: '0 0 auto',
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
   marginTop: '10px',
-  cursor: 'initial !important', // Override draggableProps.style
-}));
-
-interface ArrayElementProps {
-  id: string;
-  index: number;
-  children: ReactNode;
-}
-
-const ArrayElement = memo(function ArrayElement({
-  id,
-  index,
-  children,
-}: ArrayElementProps) {
-  return (
-    <Draggable draggableId={id} index={index}>
-      {(provided) => (
-        <ElementRow
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          ref={provided.innerRef}
-        >
-          {children}
-        </ElementRow>
-      )}
-    </Draggable>
-  );
 });
 
-/* ----------------------------------------------------------------------------
- * Root
- * ------------------------------------------------------------------------- */
-
-const TitleRow = styled.div({
-  display: 'flex',
-  alignItems: 'center',
+const ItemContainer = styled.div({
+  position: 'relative',
 });
-
-const Title = styled.div(({ theme }) => ({
-  ...theme.textStyles.small,
-  fontWeight: 'bold',
-  display: 'flex',
-  flexDirection: 'row',
-  userSelect: 'none',
-}));
-
-const Checkbox = styled.input(({ theme }) => ({
-  margin: 0,
-}));
-
-const ArrayControllerContainer = styled.div(({ theme }) => ({
-  flex: '0 0 auto',
-  display: 'flex',
-  flexDirection: 'column',
-  padding: '10px',
-}));
 
 interface ArrayControllerProps<Item> {
   id: string;
-  value: Item[];
+  items: Item[];
   title: ReactNode;
-  isDraggable?: boolean;
-  alwaysShowTrashIcon?: boolean;
-  onDeleteItem?: (index: number) => void;
+  sortable?: boolean;
+  reversed?: boolean;
+  getKey?: (item: Item) => string;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
-  onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
-  getKey?: (item: Item) => string | number;
-  children: (props: {
-    item: Item;
-    index: number;
-    checkbox: ReactNode;
-  }) => ReactNode;
+  renderItem: (props: { item: Item; index: number }) => ReactNode;
 }
 
-function ArrayController<Item extends BaseArrayItem>({
+function ArrayController<Item>({
   id,
-  value,
+  items,
   title,
-  isDraggable = true,
-  alwaysShowTrashIcon = false,
+  sortable = false,
+  reversed = true,
   getKey,
-  onDeleteItem,
   onMoveItem,
   onClickPlus,
   onClickTrash,
-  onChangeCheckbox,
-  children: renderItem,
+  renderItem,
 }: ArrayControllerProps<Item>) {
-  const handleDragEnd = useCallback(
-    (result) => {
-      const { destination, source } = result;
+  const iconColor = useTheme().colors.icon;
 
-      if (!destination) {
-        onDeleteItem?.(source.index);
-        return;
-      }
-
-      if (
-        // Different destination
-        source.droppableId !== destination.droppableId ||
-        // Same index
-        source.index === destination.index
-      ) {
-        return;
-      }
-
-      onMoveItem?.(source.index, destination.index);
-    },
-    [onDeleteItem, onMoveItem],
+  const keys = useMemo(
+    () => items.map((item, index) => getKey?.(item) ?? index.toString()),
+    [getKey, items],
   );
 
-  const getCheckboxElement = (index: number) =>
-    onChangeCheckbox ? (
-      <Checkbox
-        type="checkbox"
-        checked={value[index].isEnabled}
-        onChange={(event) => {
-          onChangeCheckbox(index, event.target.checked);
-        }}
-      />
-    ) : null;
+  const indexes = reversed
+    ? range(0, items.length).reverse()
+    : range(0, items.length);
 
-  const arrayController = (
-    <ArrayControllerContainer>
-      <TitleRow>
-        <Title>{title}</Title>
+  const handleMoveItem = useCallback(
+    (
+      sourceIndex: number,
+      destinationIndex: number,
+      position: RelativeDropPosition,
+    ) => {
+      if (reversed) {
+        if (position === 'above') {
+          position = 'below';
+        } else if (position === 'below') {
+          position = 'above';
+        }
+      }
+
+      onMoveItem?.(
+        sourceIndex,
+        position === 'below' ? destinationIndex + 1 : destinationIndex,
+      );
+    },
+    [onMoveItem, reversed],
+  );
+
+  const renderRow = (index: number) => {
+    return (
+      <ElementRow>
+        {renderItem({ item: items[index], index: index })}
+      </ElementRow>
+    );
+  };
+
+  return (
+    <InspectorPrimitives.Section id={id}>
+      <InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
         <Spacer.Horizontal />
         {withSeparatorElements(
           [
-            onClickTrash &&
-              (alwaysShowTrashIcon ||
-                value.some((item) => !item.isEnabled)) && (
-                <span onClick={onClickTrash}>
-                  <TrashIcon color="rgb(139,139,139)" />
-                </span>
-              ),
-            onClickPlus && (
-              <span onClick={onClickPlus}>
-                <PlusIcon color="rgb(139,139,139)" />
-              </span>
+            onClickTrash && (
+              <TrashIcon color={iconColor} onClick={onClickTrash} />
             ),
+            onClickPlus && <PlusIcon color={iconColor} onClick={onClickPlus} />,
           ],
           <Spacer.Horizontal size={12} />,
         )}
-      </TitleRow>
-      {isDraggable ? (
-        <Droppable droppableId={id}>
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
-              {value.map((item, index) => (
-                <ArrayElement
-                  key={getKey?.(item) ?? index}
-                  id={String(index)}
-                  index={index}
-                >
-                  {renderItem({
-                    item,
-                    index,
-                    checkbox: getCheckboxElement(index),
-                  })}
-                </ArrayElement>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+      </InspectorPrimitives.SectionHeader>
+      {sortable ? (
+        <Sortable.Root
+          keys={keys}
+          renderOverlay={renderRow}
+          onMoveItem={handleMoveItem}
+        >
+          {indexes.map((index) => (
+            <Sortable.Item<HTMLDivElement> id={keys[index]} key={keys[index]}>
+              {({ relativeDropPosition, ...sortableProps }) => (
+                <ItemContainer {...sortableProps}>
+                  {renderRow(index)}
+                  {relativeDropPosition && (
+                    <ListView.DragIndicatorElement
+                      relativeDropPosition={relativeDropPosition}
+                      offsetLeft={0}
+                    />
+                  )}
+                </ItemContainer>
+              )}
+            </Sortable.Item>
+          ))}
+        </Sortable.Root>
       ) : (
-        value.map((item, index) => (
-          <ElementRow key={getKey?.(item) ?? index}>
-            {renderItem({ item, index, checkbox: getCheckboxElement(index) })}
-          </ElementRow>
-        ))
+        indexes.map(renderRow)
       )}
-    </ArrayControllerContainer>
-  );
-
-  return isDraggable ? (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      {arrayController}
-    </DragDropContext>
-  ) : (
-    arrayController
+    </InspectorPrimitives.Section>
   );
 }
 

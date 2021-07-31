@@ -1,0 +1,194 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`drawing draw line layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <ShapePath> Path { x: 0, y: 0, w: 100, h: 100 }
+    ├── <CurvePoint> { x: 0, y: 0 } (Straight)
+    └── <CurvePoint> { x: 1, y: 1 } (Straight)"
+`;
+
+exports[`drawing draw oval layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 0, y: 0, w: 100, h: 100 }"
+`;
+
+exports[`drawing draw rectangle layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }"
+`;
+
+exports[`move move layer in artboard 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }
+    └── <Rectangle> Rectangle { x: 15, y: 15, w: 100, h: 100 }"
+`;
+
+exports[`move move multiple layers 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 15, y: 15, w: 100, h: 100 }
+└── <Oval> Oval { x: 215, y: 215, w: 100, h: 100 }"
+`;
+
+exports[`move move one layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 15, y: 15, w: 100, h: 100 }"
+`;
+
+exports[`move move with snap 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 200, y: 15, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }"
+`;
+
+exports[`movingControlPoint move control point in artboard 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 100, y: 100, w: 300, h: 300 }
+    └── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+        ├── <CurvePoint> { x: 0.5, y: 1 } (Mirrored)
+        ├── <CurvePoint> { x: 1, y: 0.5 } (Mirrored)
+        ├── <CurvePoint> { x: 0.5, y: 0 } (Mirrored)
+        └── <CurvePoint> { x: 0, y: 0.5 } (Mirrored)
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 100, y: 100, w: 300, h: 300 }
+    └── <Oval> Oval { x: 200, y: 200, w: 100, h: 107.05 }
+        ├── <CurvePoint> { x: 0.5, y: 0.93 } (Mirrored)
+        ├── <CurvePoint> { x: 1, y: 0.47 } (Mirrored)
+        ├── <CurvePoint> { x: 0.5, y: 0 } (Mirrored)
+        └── <CurvePoint> { x: 0, y: 0.47 } (Mirrored)"
+`;
+
+exports[`movingControlPoint move one control point 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+    ├── <CurvePoint> { x: 0.5, y: 1 } (Mirrored)
+    ├── <CurvePoint> { x: 1, y: 0.5 } (Mirrored)
+    ├── <CurvePoint> { x: 0.5, y: 0 } (Mirrored)
+    └── <CurvePoint> { x: 0, y: 0.5 } (Mirrored)
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 107.05 }
+    ├── <CurvePoint> { x: 0.5, y: 0.93 } (Mirrored)
+    ├── <CurvePoint> { x: 1, y: 0.47 } (Mirrored)
+    ├── <CurvePoint> { x: 0.5, y: 0 } (Mirrored)
+    └── <CurvePoint> { x: 0, y: 0.47 } (Mirrored)"
+`;
+
+exports[`movingPoint move one point 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+    ├── <CurvePoint> { x: 0, y: 0 } (Straight)
+    ├── <CurvePoint> { x: 1, y: 0 } (Straight)
+    ├── <CurvePoint> { x: 1, y: 1 } (Straight)
+    └── <CurvePoint> { x: 0, y: 1 } (Straight)
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+    ├── <CurvePoint> { x: 0.25, y: 0.25 } (Straight)
+    ├── <CurvePoint> { x: 1, y: 0 } (Straight)
+    ├── <CurvePoint> { x: 1, y: 1 } (Straight)
+    └── <CurvePoint> { x: 0, y: 1 } (Straight)"
+`;
+
+exports[`movingPoint move point in artboard 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 100, y: 100, w: 300, h: 300 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+        ├── <CurvePoint> { x: 0, y: 0 } (Straight)
+        ├── <CurvePoint> { x: 1, y: 0 } (Straight)
+        ├── <CurvePoint> { x: 1, y: 1 } (Straight)
+        └── <CurvePoint> { x: 0, y: 1 } (Straight)
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 100, y: 100, w: 300, h: 300 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+        ├── <CurvePoint> { x: 0.25, y: 0.25 } (Straight)
+        ├── <CurvePoint> { x: 1, y: 0 } (Straight)
+        ├── <CurvePoint> { x: 1, y: 1 } (Straight)
+        └── <CurvePoint> { x: 0, y: 1 } (Straight)"
+`;
+
+exports[`scale scale layers in different parents 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }
+│   └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }
+│   └── <Rectangle> Rectangle { x: 18, y: 18, w: 107, h: 107 }
+└── <Oval> Oval { x: 200, y: 200, w: 107, h: 107 }"
+`;
+
+exports[`scale scale multiple layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 200, y: 200, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 108, h: 108 }
+└── <Oval> Oval { x: 217, y: 217, w: 108, h: 108 }"
+`;
+
+exports[`scale scale one layer in artboard 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Artboard> Artboard { x: 450, y: 450, w: 300, h: 300 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 125, h: 125 }"
+`;
+
+exports[`scale scale one layer ne 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 25, w: 125, h: 75 }"
+`;
+
+exports[`scale scale one layer nw 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 25, y: 25, w: 75, h: 75 }"
+`;
+
+exports[`scale scale one layer se 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 125, h: 125 }"
+`;
+
+exports[`scale scale one layer sw 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 25, y: 0, w: 75, h: 125 }"
+`;

@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { CSSObject } from 'styled-components';
 import { Theme } from '../../theme';
 
@@ -7,11 +8,16 @@ export type RegularMenuItem<T extends string> = {
   value: T;
   title: string;
   checked?: boolean;
+  disabled?: boolean;
+  icon?: ReactElement;
 };
 
 export type MenuItem<T extends string> =
   | typeof SEPARATOR_ITEM
   | RegularMenuItem<T>;
+
+export const CHECKBOX_WIDTH = 15;
+export const CHECKBOX_RIGHT_INSET = 3;
 
 export const styles = {
   separatorStyle: ({ theme }: { theme: Theme }): CSSObject => ({
@@ -46,6 +52,14 @@ export const styles = {
     display: 'flex',
     alignItems: 'center',
   }),
+
+  itemIndicatorStyle: {
+    display: 'flex',
+    alignItems: 'center',
+    left: `-${CHECKBOX_WIDTH / 2}px`,
+    position: 'relative',
+    marginRight: `-${CHECKBOX_RIGHT_INSET}px`,
+  } as CSSObject,
 
   contentStyle: ({ theme }: { theme: Theme }): CSSObject => ({
     borderRadius: 4,

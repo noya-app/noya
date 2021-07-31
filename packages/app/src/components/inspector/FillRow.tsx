@@ -18,6 +18,7 @@ import FillInputFieldWithPicker, {
   PatternFillProps,
 } from './FillInputFieldWithPicker';
 import { PATTERN_FILL_TYPE_OPTIONS, PatternFillType } from './PatternInspector';
+import { DimensionValue } from './DimensionsInspector';
 
 const GRADIENT_TYPE_OPTIONS = [
   Sketch.GradientType.Linear.toString(),
@@ -31,7 +32,7 @@ interface Props {
   fillType?: Sketch.FillType;
   gradient?: Sketch.Gradient;
   pattern?: SketchPattern;
-  contextOpacity: number;
+  contextOpacity: DimensionValue;
   onChangeFillType: (type: Sketch.FillType) => void;
   onSetOpacity: (amount: number, mode: SetNumberMode) => void;
   onSetContextOpacity: (value: number, mode: SetNumberMode) => void;
@@ -169,7 +170,11 @@ export default memo(function FillRow({
               id={opacityInputId}
               size={50}
               label="%"
-              value={Math.round(contextOpacity * 100)}
+              value={
+                contextOpacity !== undefined
+                  ? Math.round(contextOpacity * 100)
+                  : undefined
+              }
               onSetValue={handleSetContextOpacity}
             />
           </>
@@ -192,7 +197,11 @@ export default memo(function FillRow({
               id={opacityInputId}
               size={50}
               label="%"
-              value={Math.round(contextOpacity * 100)}
+              value={
+                contextOpacity !== undefined
+                  ? Math.round(contextOpacity * 100)
+                  : undefined
+              }
               onSetValue={handleSetContextOpacity}
             />
           </>

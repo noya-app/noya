@@ -1,6 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Point } from 'noya-geometry';
 import { uuid } from 'noya-utils';
+
+export { PointString } from './PointString';
+export * from './debugDescription';
 
 type ModelOptions<T> = Partial<Omit<T, '_class'>>;
 
@@ -93,7 +95,7 @@ function border(options?: ModelOptions<Sketch.Border>): Sketch.Border {
     color: color(),
     contextSettings: graphicsContextSettings(),
     gradient: gradient(),
-    position: 1,
+    position: Sketch.BorderPosition.Center,
     thickness: 1,
     ...options,
     _class: Sketch.ClassValue.Border,
@@ -167,6 +169,20 @@ function colorControls(
     saturation: 1,
     ...options,
     _class: Sketch.ClassValue.ColorControls,
+  };
+}
+
+function exportFormat(
+  options?: ModelOptions<Sketch.ExportFormat>,
+): Sketch.ExportFormat {
+  return {
+    absoluteSize: 0,
+    fileFormat: Sketch.ExportFileFormat.PNG,
+    name: '',
+    scale: 1,
+    visibleScaleType: Sketch.VisibleScaleType.Scale,
+    ...options,
+    _class: Sketch.ClassValue.ExportFormat,
   };
 }
 
@@ -359,8 +375,8 @@ function shapePath(options?: ModelOptions<Sketch.ShapePath>): Sketch.ShapePath {
   return {
     ...newLayerBase(options),
     name: 'Path',
-    style: style(),
     points: [],
+    style: style(),
     ...options,
     _class: Sketch.ClassValue.ShapePath,
   };
@@ -476,6 +492,18 @@ function group(options?: ModelOptions<Sketch.Group>): Sketch.Group {
     layers: [],
     ...options,
     _class: Sketch.ClassValue.Group,
+  };
+}
+
+function slice(options?: ModelOptions<Sketch.Slice>): Sketch.Slice {
+  return {
+    ...newLayerBase(options),
+    name: 'Slice',
+    style: style(),
+    hasBackgroundColor: false,
+    backgroundColor: color({ blue: 1, green: 1, red: 1 }),
+    ...options,
+    _class: Sketch.ClassValue.Slice,
   };
 }
 
@@ -684,18 +712,6 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
   };
 }
 
-export const PointString = {
-  decode(pointString: string): Point {
-    const [x, y] = pointString.slice(1, -1).split(',');
-
-    return { x: parseFloat(x), y: parseFloat(y) };
-  },
-
-  encode({ x, y }: Point): string {
-    return `{${x.toString()},${y.toString()}}`;
-  },
-};
-
 export const SketchModel = {
   artboard,
   bitmap,
@@ -707,6 +723,8 @@ export const SketchModel = {
   dataReference,
   document,
   encodedAttributes,
+  exportFormat,
+  exportOptions,
   fileReference,
   fill,
   fontDescriptor,
@@ -725,6 +743,7 @@ export const SketchModel = {
   shadow,
   shapeGroup,
   shapePath,
+  slice,
   style,
   symbolInstance,
   symbolMaster,

@@ -1,78 +1,58 @@
-import { Selectors } from 'noya-state';
-import { memo, useMemo, useCallback } from 'react';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { GroupIcon } from '@radix-ui/react-icons';
-import { ListView, Spacer } from 'noya-designsystem';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { TreeView } from 'noya-designsystem';
+import { Selectors } from 'noya-state';
 import { sortBy } from 'noya-utils';
-import styled from 'styled-components';
+import { memo, useCallback, useMemo } from 'react';
 import useShallowArray from '../hooks/useShallowArray';
 import { createThemeGroups } from '../utils/themeTree';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 
-const Container = styled.div(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-}));
+type ThemeGroupType = Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster;
 
-const Header = styled.div(({ theme }) => ({
-  fontWeight: 500,
-}));
-
-type ContainerType = Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster;
-
-interface ContainerGroupProps {
-  array: Array<ContainerType>;
-  headerTitle: string;
+interface ThemeGroupProps {
+  items: Array<ThemeGroupType>;
+  title: string;
   selectedGroup: string;
   onClick: (title: string) => void;
 }
 
-const ContainerGroup = memo(function ContainerGroup({
-  array,
+const ThemeGroup = memo(function ThemeGroup({
+  items,
   onClick,
-  headerTitle,
+  title,
   selectedGroup,
-}: ContainerGroupProps) {
-  const groupArray = useShallowArray(array);
+}: ThemeGroupProps) {
+  const groupArray = useShallowArray(items);
 
   const groups = useMemo(() => {
     const groups = createThemeGroups(groupArray);
-    groups.shift();
+
+    groups[0].name = `Theme ${title}`;
 
     return sortBy(groups, 'path');
-  }, [groupArray]);
-
-  const groupElements = useMemo(
-    () =>
-      groups.map((group) => (
-        <ListView.Row
-          id={group.name}
-          key={group.name}
-          onClick={() => onClick(group.path)}
-          selected={selectedGroup === group.path}
-        >
-          <Spacer.Horizontal size={16 * group.depth} />
-          <GroupIcon />
-          <Spacer.Horizontal size={8} />
-          {group.name}
-        </ListView.Row>
-      )),
-    [groups, selectedGroup, onClick],
-  );
+  }, [groupArray, title]);
 
   return (
-    <Container>
-      <ListView.Root>
-        <ListView.Row
-          onClick={() => onClick('')}
-          selected={selectedGroup === ''}
-        >
-          <Header>{`All Theme ${headerTitle}`}</Header>
-        </ListView.Row>
-        {groupElements}
-      </ListView.Root>
-    </Container>
+    <TreeView.Root scrollable>
+      {groups.map((group) => {
+        const isRoot = group.path === '';
+
+        return (
+          <TreeView.Row
+            id={group.name}
+            key={group.name}
+            depth={group.depth}
+            isSectionHeader={isRoot}
+            onClick={() => onClick(group.path)}
+            selected={selectedGroup === group.path}
+            icon={!isRoot && <GroupIcon />}
+          >
+            {group.name}
+          </TreeView.Row>
+        );
+      })}
+    </TreeView.Root>
   );
 });
 
@@ -81,9 +61,9 @@ const SwatchesGroup = memo(() => {
   const swatches = useSelector(Selectors.getSharedSwatches);
 
   return (
-    <ContainerGroup
-      array={swatches}
-      headerTitle="Colors"
+    <ThemeGroup
+      items={swatches}
+      title="Colors"
       onClick={useCallback(
         (title: string) => dispatch('setSelectedSwatchGroup', title),
         [dispatch],
@@ -98,9 +78,9 @@ const TextStylesGroup = memo(() => {
   const textStyles = useSelector(Selectors.getSharedTextStyles);
 
   return (
-    <ContainerGroup
-      array={textStyles}
-      headerTitle="Texts"
+    <ThemeGroup
+      items={textStyles}
+      title="Text Styles"
       onClick={useCallback(
         (title: string) => dispatch('setSelectedTextStyleGroup', title),
         [dispatch],
@@ -115,9 +95,9 @@ const ThemeStylesGroup = memo(() => {
   const styles = useSelector(Selectors.getSharedStyles);
 
   return (
-    <ContainerGroup
-      array={styles}
-      headerTitle="Styles"
+    <ThemeGroup
+      items={styles}
+      title="Styles"
       onClick={useCallback(
         (title: string) => dispatch('setSelectedThemeStyleGroup', title),
         [dispatch],
@@ -132,9 +112,9 @@ const SymbolsGroup = memo(() => {
   const symbols = useSelector(Selectors.getSymbols);
 
   return (
-    <ContainerGroup
-      array={symbols}
-      headerTitle="Symbols"
+    <ThemeGroup
+      items={symbols}
+      title="Symbols"
       onClick={useCallback(
         (title: string) => dispatch('setSelectedSymbolGroup', title),
         [dispatch],
@@ -147,18 +127,14 @@ const SymbolsGroup = memo(() => {
 export default memo(function ThemeGroups() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);
 
-  const element = useMemo(() => {
-    switch (tab) {
-      case 'swatches':
-        return <SwatchesGroup />;
-      case 'textStyles':
-        return <TextStylesGroup />;
-      case 'layerStyles':
-        return <ThemeStylesGroup />;
-      case 'symbols':
-        return <SymbolsGroup />;
-    }
-  }, [tab]);
-
-  return <>{element}</>;
+  switch (tab) {
+    case 'swatches':
+      return <SwatchesGroup />;
+    case 'textStyles':
+      return <TextStylesGroup />;
+    case 'layerStyles':
+      return <ThemeStylesGroup />;
+    case 'symbols':
+      return <SymbolsGroup />;
+  }
 });

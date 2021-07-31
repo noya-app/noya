@@ -4,6 +4,8 @@ import {
   AffineTransform,
   createRectFromBounds,
   getRectCornerPoints,
+  Point,
+  Rect,
   rectContainsPoint,
   rectsIntersect,
   rotatedRectContainsPoint,
@@ -11,14 +13,13 @@ import {
 } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import * as Primitives from 'noya-state';
-import { getDragHandles } from 'noya-state';
+import { getRectDragHandles } from 'noya-state';
 import { lerp } from 'noya-utils';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { CanvasInsets } from '../reducers/workspaceReducer';
-import type { Point, Rect } from '../types';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
@@ -31,7 +32,7 @@ import {
 export type LayerTraversalOptions = {
   includeHiddenLayers: boolean;
   clickThroughGroups: boolean;
-  includeArtboardLayers: boolean;
+  includeArtboardLayers: boolean | 'includeAndClickThrough';
 };
 
 function shouldClickThrough(
@@ -40,7 +41,8 @@ function shouldClickThrough(
 ) {
   return (
     layer._class === 'symbolMaster' ||
-    (layer._class === 'artboard' && !options.includeArtboardLayers) ||
+    (layer._class === 'artboard' && options.includeArtboardLayers !== true) ||
+    (layer._class === 'slice' && options.clickThroughGroups) ||
     (layer._class === 'group' &&
       (layer.hasClickThrough || options.clickThroughGroups))
   );
@@ -68,9 +70,11 @@ function visitLayersReversed(
 
       if (result === STOP) return result;
 
-      if (!shouldClickThrough(layer, options)) return SKIP;
-
-      return result;
+      if (shouldClickThrough(layer, options)) {
+        return result;
+      } else {
+        return SKIP;
+      }
     },
   });
 }
@@ -107,8 +111,12 @@ export function getLayersInRect(
 
       if (!hasIntersect) return SKIP;
 
-      // Artboards can't be selected themselves
-      if (shouldClickThrough(layer, options)) return;
+      const includeArtboard =
+        layer._class === 'artboard' &&
+        options.includeArtboardLayers === 'includeAndClickThrough';
+
+      // Artboards can't be selected themselves, unless we enable that option
+      if (!includeArtboard && shouldClickThrough(layer, options)) return;
 
       found.push(layer);
     },
@@ -277,7 +285,7 @@ export function getScaleDirectionAtPoint(
 
   if (!boundingRect) return;
 
-  const handles = getDragHandles(boundingRect);
+  const handles = getRectDragHandles(boundingRect);
 
   const handle = handles.find((handle) =>
     rectContainsPoint(handle.rect, point),
