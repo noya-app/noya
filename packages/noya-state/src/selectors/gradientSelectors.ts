@@ -1,11 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { getLinePercentage, Point } from 'noya-geometry';
+import { AffineTransform, getLinePercentage, Point } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import {
   getCurrentPage,
-  getLayerFlipTransform,
   getLayerTransformAtIndexPath,
-  getLayerTranslationTransform,
   isPointInRange,
   Layers,
 } from 'noya-state';
@@ -14,7 +12,6 @@ import {
   ApplicationState,
   SelectedGradient,
 } from '../reducers/applicationReducer';
-import { getLayerRotationTransform } from './transformSelectors';
 
 export function getSelectedGradient(
   page: Sketch.Page,
@@ -55,11 +52,12 @@ export function getSelectedGradientStopPoints(
   if (layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient)
     return;
 
-  const transform = getLayerTransformAtIndexPath(page, indexPath)
-    .transform(getLayerFlipTransform(layer))
-    .transform(getLayerRotationTransform(layer))
-    .transform(getLayerTranslationTransform(layer))
-    .scale(layer.frame.width, layer.frame.height);
+  const transform = getLayerTransformAtIndexPath(
+    page,
+    indexPath,
+    AffineTransform.identity,
+    'includeLast',
+  ).scale(layer.frame.width, layer.frame.height);
 
   const gradient = layer.style.fills[fillIndex].gradient;
 

@@ -22,6 +22,7 @@ import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
   getCanvasTransform,
+  getLayerFlipTransform,
   getLayerRotationTransform,
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
@@ -149,6 +150,7 @@ export function getLayerAtPoint(
   visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
@@ -218,6 +220,7 @@ export function getBoundingRect(
 
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
@@ -258,6 +261,7 @@ export function getBoundingPoints(
 
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 

@@ -32,10 +32,7 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
-  getLayerFlipTransform,
-  getLayerRotationTransform,
   getLayerTransformAtIndexPath,
-  getLayerTranslationTransform,
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
@@ -452,11 +449,9 @@ export function canvasReducer(
             const transform = getLayerTransformAtIndexPath(
               pageSnapshot,
               indexPath,
-            )
-              .transform(getLayerFlipTransform(layer))
-              .transform(getLayerRotationTransform(layer))
-              .transform(getLayerTranslationTransform(layer))
-              .scale(layer.frame.width, layer.frame.height);
+              AffineTransform.identity,
+              'includeLast',
+            ).scale(layer.frame.width, layer.frame.height);
 
             const delta = {
               x: current.x - origin.x,

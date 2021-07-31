@@ -14,7 +14,7 @@ export function getLayerTransform(
   const translation = getLayerTranslationTransform(layer);
   const flip = getLayerFlipTransform(layer);
 
-  return AffineTransform.multiply(ctm, rotation, translation, flip);
+  return AffineTransform.multiply(ctm, flip, rotation, translation);
 }
 
 export function getLayerFlipTransform(layer: Sketch.AnyLayer) {
