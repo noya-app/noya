@@ -3,10 +3,11 @@ import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';
 import {
+  Action,
+  applicationReducer,
   ApplicationReducerContext,
   ApplicationState,
 } from '../applicationReducer';
-import { CanvasAction, canvasReducer } from '../canvasReducer';
 
 let CanvasKit: CanvasKitType;
 
@@ -18,9 +19,9 @@ const context: ApplicationReducerContext = {
   canvasSize: { width: 1000, height: 1000 },
 };
 
-function run(state: ApplicationState, actions: CanvasAction[]) {
+function run(state: ApplicationState, actions: Action[]) {
   return actions.reduce(
-    (result, action) => canvasReducer(result, action, CanvasKit, context),
+    (result, action) => applicationReducer(result, action, CanvasKit, context),
     state,
   );
 }
@@ -132,6 +133,116 @@ describe('move', () => {
         Selectors.getCurrentPage(state),
         Selectors.getCurrentPage(updated),
       ]),
+    ).toMatchSnapshot();
+  });
+});
+
+describe('movingPoint', () => {
+  test('move one point', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['editPath']],
+      ['selectPoint', [rectangle.do_objectID, 0]],
+      ['interaction', ['maybeMovePoint', { x: 0, y: 0 }]],
+      ['interaction', ['movingPoint', { x: 0, y: 0 }, { x: 25, y: 25 }]],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
+    ).toMatchSnapshot();
+  });
+
+  test('move point in artboard', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 300,
+        height: 300,
+      }),
+      layers: [rectangle],
+    });
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+
+    state.selectedObjects = [rectangle.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['editPath']],
+      ['selectPoint', [rectangle.do_objectID, 0]],
+      ['interaction', ['maybeMovePoint', { x: 0, y: 0 }]],
+      ['interaction', ['movingPoint', { x: 0, y: 0 }, { x: 25, y: 25 }]],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
+    ).toMatchSnapshot();
+  });
+});
+
+describe('movingControlPoint', () => {
+  test('move one control point', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [oval] })),
+    );
+    state.selectedObjects = [oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['editPath']],
+      ['selectControlPoint', oval.do_objectID, 0, 'curveFrom'],
+      ['interaction', ['maybeMoveControlPoint', { x: 0, y: 0 }]],
+      ['interaction', ['movingControlPoint', { x: 0, y: 0 }, { x: 25, y: 25 }]],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
+    ).toMatchSnapshot();
+  });
+
+  test('move control point in artboard', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 300,
+        height: 300,
+      }),
+      layers: [oval],
+    });
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+
+    state.selectedObjects = [oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['editPath']],
+      ['selectControlPoint', oval.do_objectID, 0, 'curveFrom'],
+      ['interaction', ['maybeMoveControlPoint', { x: 0, y: 0 }]],
+      ['interaction', ['movingControlPoint', { x: 0, y: 0 }, { x: 25, y: 25 }]],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
     ).toMatchSnapshot();
   });
 });

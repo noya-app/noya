@@ -535,7 +535,16 @@ export function canvasReducer(
             break;
           }
           case 'movingControlPoint': {
-            if (!draft.selectedControlPoint) return;
+            const selectedControlPoint = draft.selectedControlPoint;
+
+            if (!selectedControlPoint) return;
+
+            const indexPath = Layers.findIndexPath(
+              page,
+              (layer) => layer.do_objectID === selectedControlPoint.layerId,
+            );
+
+            if (!indexPath) return state;
 
             const { current, origin, pageSnapshot } = interactionState;
 
@@ -545,8 +554,8 @@ export function canvasReducer(
             };
 
             moveControlPoints(
-              draft.selectedControlPoint,
-              layerIndexPaths,
+              selectedControlPoint,
+              indexPath,
               delta,
               'adjust',
               draft.sketch.pages[pageIndex],
