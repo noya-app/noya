@@ -80,6 +80,16 @@ export function getSelectedGradientStopPoints(
   });
 }
 
+/**
+ * This function normalizes a gradient so that gradient stop positions are
+ * always between 0 and 1. The first position will be 0 and the last will be 1.
+ * This function shouldn't change the gradient visually at all.
+ *
+ * We need to call this when we finish editing a gradient, or before dragging
+ * a gradient stop on the canvas. It's OK if a gradient is temporarily in a state
+ * where the stop positions aren't correct, since this is a better experience when
+ * editing with the gradient picker.
+ */
 export function fixGradientPositions(gradient: Sketch.Gradient) {
   const stops = gradient.stops;
 
