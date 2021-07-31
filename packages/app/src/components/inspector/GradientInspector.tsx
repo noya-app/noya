@@ -39,7 +39,7 @@ export default memo(function GradientInspector({
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
 
-  const clampedSelectedStopIndex = state.gradientSelectedIndex;
+  const clampedSelectedStopIndex = state.selectedGradient?.stopIndex ?? 0;
 
   const selectedcolor = gradient[clampedSelectedStopIndex].color;
   const selectedColorHex = sketchColorToHex(selectedcolor);
@@ -112,7 +112,7 @@ export default memo(function GradientInspector({
   const handleAddStop = useCallback(
     (color: Sketch.Color, position: number) => {
       onAddStop(color, position);
-      dispatch('setGradientSelectedIndex', gradient.length);
+      dispatch('setSelectedGradientStopIndex', gradient.length);
     },
     [gradient, onAddStop, dispatch],
   );
@@ -122,7 +122,7 @@ export default memo(function GradientInspector({
 
     onDeleteStop(clampedSelectedStopIndex);
     dispatch(
-      'setGradientSelectedIndex',
+      'setSelectedGradientStopIndex',
       clampedSelectedStopIndex - 1 > 0 ? 0 : clampedSelectedStopIndex - 1,
     );
   }, [gradient, clampedSelectedStopIndex, onDeleteStop, dispatch]);
@@ -138,7 +138,7 @@ export default memo(function GradientInspector({
           onAdd={handleAddStop}
           onDelete={handleDeleteStop}
           onSelectStop={useCallback(
-            (index: number) => dispatch('setGradientSelectedIndex', index),
+            (index: number) => dispatch('setSelectedGradientStopIndex', index),
             [dispatch],
           )}
         />

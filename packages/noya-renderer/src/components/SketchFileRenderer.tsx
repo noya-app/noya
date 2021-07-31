@@ -98,6 +98,7 @@ export default memo(function SketchFileRenderer() {
   );
   const {
     canvas: { background: backgroundColor, dragHandleStroke },
+    primary: primaryColor,
   } = useTheme().colors;
   const backgroundFill = useColorFill(backgroundColor);
 
@@ -503,40 +504,83 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
-  const stroke = useStroke({ color: dragHandleStroke, strokeWidth: 1 });
-  const circleStroke = useStroke({ color: '#000', strokeWidth: 1 });
+  const gradientLineStroke = useStroke({ color: '#FFF' });
+  const gradientStopStroke = useStroke({ color: '#FFF', strokeWidth: 1.5 });
+  const selectedGradientStopStroke = useStroke({
+    color: primaryColor,
+    strokeWidth: 1.5,
+  });
 
   const points = useMemo(() => {
-    const gradientsPoint = Selectors.getFirstSelectedLayerGradientPoints(state);
+    const gradientStopPoints = Selectors.getFirstSelectedLayerGradientPoints(
+      state,
+    );
 
-    if (!gradientsPoint || !Selectors.getFillPopoverOpen(state)) return <></>;
+    if (!gradientStopPoints || !state.selectedGradient) return null;
 
-    const path = new CanvasKit.Path();
+    const { stopIndex } = state.selectedGradient;
 
-    gradientsPoint.forEach((point) => {
-      path.addOval(
-        CanvasKit.XYWHRect(
-          point.x - Selectors.POINT_RADIUS,
-          point.y - Selectors.POINT_RADIUS,
-          Selectors.POINT_RADIUS * 2,
-          Selectors.POINT_RADIUS * 2,
-        ),
-      );
-    });
+    const shadowFilter = CanvasKit.ImageFilter.MakeDropShadowOnly(
+      0,
+      0,
+      2,
+      2,
+      CanvasKit.Color(0, 0, 0, 0.5),
+      null,
+    );
 
     return (
-      <>
+      <Group imageFilter={shadowFilter}>
         <Polyline
           points={[
-            gradientsPoint[0],
-            gradientsPoint[gradientsPoint.length - 1],
+            gradientStopPoints[0].point,
+            gradientStopPoints[gradientStopPoints.length - 1].point,
           ]}
-          paint={stroke}
+          paint={gradientLineStroke}
         />
-        <Path path={path} paint={circleStroke} />
-      </>
+        {gradientStopPoints.map(({ point, color }, index) => {
+          const path = new CanvasKit.Path();
+
+          const radius =
+            index === stopIndex
+              ? Selectors.POINT_RADIUS * 1.5
+              : Selectors.POINT_RADIUS;
+
+          path.addOval(
+            CanvasKit.XYWHRect(
+              point.x - radius,
+              point.y - radius,
+              radius * 2,
+              radius * 2,
+            ),
+          );
+
+          const paint = new CanvasKit.Paint();
+          paint.setColor(Primitives.color(CanvasKit, color));
+
+          return (
+            <Fragment key={index}>
+              <Path path={path} paint={paint} />
+              <Path
+                path={path}
+                paint={
+                  index === stopIndex
+                    ? selectedGradientStopStroke
+                    : gradientStopStroke
+                }
+              />
+            </Fragment>
+          );
+        })}
+      </Group>
     );
-  }, [state, stroke, CanvasKit, circleStroke]);
+  }, [
+    state,
+    CanvasKit,
+    gradientLineStroke,
+    selectedGradientStopStroke,
+    gradientStopStroke,
+  ]);
 
   return (
     <>

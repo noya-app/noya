@@ -13,7 +13,8 @@ export default memo(function FillInspector({
   title: string;
   allowMoreThanOne: boolean;
 }) {
-  const [, dispatch] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
+  const selectLayerId = state.selectedObjects[0];
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),
@@ -66,7 +67,6 @@ export default memo(function FillInspector({
             prefix={checkbox}
             fillType={item.fillType}
             contextOpacity={item.contextSettings.opacity}
-            onChangeFillIndex={() => dispatch('setFillPopoverIndex', index)}
             onSetOpacity={(value, mode) =>
               dispatch('setFillOpacity', index, value, mode)
             }
@@ -94,6 +94,13 @@ export default memo(function FillInspector({
                 dispatch('setFillGradientType', index, value),
               onChangeGradient: (value) =>
                 dispatch('setFillGradient', index, value),
+              onEditGradient: (stopIndex) =>
+                dispatch('setSelectedGradient', {
+                  layerId: selectLayerId,
+                  fillIndex: index,
+                  stopIndex,
+                  styleType: 'fill',
+                }),
             }}
             patternProps={{
               pattern: {
@@ -112,7 +119,7 @@ export default memo(function FillInspector({
           />
         ),
 
-        [dispatch],
+        [dispatch, selectLayerId],
       )}
     </ArrayController>
   );

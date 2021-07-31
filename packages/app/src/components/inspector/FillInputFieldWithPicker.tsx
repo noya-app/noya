@@ -275,6 +275,7 @@ export type GradientFillProps = {
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
   onDeleteGradientStop: (index: number) => void;
+  onEditGradient: (stopIndex: number) => void;
 };
 
 export type PatternFillProps = {
@@ -340,17 +341,17 @@ export default memo(function FillInputFieldWithPicker({
   ]);
 
   useGlobalInputBlurListener(() => {
-    dispatch('setFillPopoverOpen', false);
+    dispatch('setSelectedGradient', undefined);
   });
 
   return (
     <Popover.Root
       onOpenChange={(open) => {
         onChangeIndex();
-        dispatch(
-          'setFillPopoverOpen',
-          open && fillType === Sketch.FillType.Gradient,
-        );
+
+        if (open && Sketch.FillType.Gradient) {
+          gradientProps?.onEditGradient(0);
+        }
       }}
     >
       <Popover.Trigger as={Slot}>

@@ -1,9 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import { AffineTransform, createBounds, normalizeRect } from 'noya-geometry';
-import { PointString, SketchModel } from 'noya-sketch-model';
+import { SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -12,7 +11,6 @@ import {
   resizeRect,
 } from 'noya-state';
 import { uuid } from 'noya-utils';
-import { interpolateRgba } from 'noya-colorpicker';
 import * as Layers from '../layers';
 import {
   addToParentLayer,
@@ -25,9 +23,7 @@ import {
   getIndexPathOfOpenShapeLayer,
   getParentLayer,
   getParentLayerAtPoint,
-  getPercentageOfPointInGradient,
   getSelectedLayerIndexPathsExcludingDescendants,
-  getSelectedRect,
   getSymbols,
   moveControlPoints,
   moveLayer,
@@ -47,7 +43,7 @@ import {
   interactionReducer,
   SnapshotInteractionAction,
 } from './interactionReducer';
-import { defaultBorderColor, styleReducer } from './styleReducer';
+import { defaultBorderColor } from './styleReducer';
 
 export type CanvasAction =
   | [
@@ -319,101 +315,101 @@ export function canvasReducer(
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
         switch (interactionState.type) {
-          case 'moveGradientPoint': {
-            const { gradientPoint, point } = interactionState;
-            if (gradientPoint) draft.selectedGradientPoint = gradientPoint;
+          // case 'moveGradientPoint': {
+          //   const { gradientPoint, point } = interactionState;
+          //   if (gradientPoint) draft.selectedGradientPoint = gradientPoint;
 
-            if (!point) {
-              draft.selectedGradientPoint = undefined;
-              return;
-            }
+          //   if (!point) {
+          //     draft.selectedGradientPoint = undefined;
+          //     return;
+          //   }
 
-            const crrGradientPoint = gradientPoint
-              ? gradientPoint
-              : draft.selectedGradientPoint;
+          //   const crrGradientPoint = gradientPoint
+          //     ? gradientPoint
+          //     : draft.selectedGradientPoint;
 
-            const boundingRect = getSelectedRect(state);
-            if (!point || !crrGradientPoint || !boundingRect) return;
+          //   const boundingRect = getSelectedRect(state);
+          //   if (!point || !crrGradientPoint || !boundingRect) return;
 
-            const gradient = {
-              x: (point.x - boundingRect.x) / boundingRect.width,
-              y: (point.y - boundingRect.y) / boundingRect.height,
-            };
+          //   const gradient = {
+          //     x: (point.x - boundingRect.x) / boundingRect.width,
+          //     y: (point.y - boundingRect.y) / boundingRect.height,
+          //   };
 
-            const layer = Layers.access(
-              draft.sketch.pages[pageIndex],
-              layerIndexPaths[0],
-            );
+          //   const layer = Layers.access(
+          //     draft.sketch.pages[pageIndex],
+          //     layerIndexPaths[0],
+          //   );
 
-            if (
-              !layer.style ||
-              !layer.style.fills ||
-              !layer.style.fills[0] ||
-              !layer.style.fills[0].gradient
-            )
-              return;
-            const gradientStops =
-              layer.style.fills[state.fillPopoverIndex].gradient.stops;
-            const gradientStopsSorted = [...gradientStops].sort(
-              (a, b) => a.position - b.position,
-            );
+          //   if (
+          //     !layer.style ||
+          //     !layer.style.fills ||
+          //     !layer.style.fills[0] ||
+          //     !layer.style.fills[0].gradient
+          //   )
+          //     return;
+          //   const gradientStops =
+          //     layer.style.fills[state.fillPopoverIndex].gradient.stops;
+          //   const gradientStopsSorted = [...gradientStops].sort(
+          //     (a, b) => a.position - b.position,
+          //   );
 
-            /*if (crrGradientPoint.pointIndex !== -1)
-              console.log(
-                crrGradientPoint.pointIndex,
-                gradientStops[crrGradientPoint.pointIndex].position,
-                gradientStopsSorted[gradientStops.length - 1].position,
-              );*/
+          //   /*if (crrGradientPoint.pointIndex !== -1)
+          //     console.log(
+          //       crrGradientPoint.pointIndex,
+          //       gradientStops[crrGradientPoint.pointIndex].position,
+          //       gradientStopsSorted[gradientStops.length - 1].position,
+          //     );*/
 
-            const percetage = getPercentageOfPointInGradient(state, point);
-            if (crrGradientPoint.pointIndex === -1) {
-              const gradients = layer.style.fills[
-                state.fillPopoverIndex
-              ].gradient.stops.map((g) => ({
-                color: sketchColorToRgba(g.color),
-                position: g.position,
-              }));
+          //   const percetage = getPercentageOfPointInGradient(state, point);
+          //   if (crrGradientPoint.pointIndex === -1) {
+          //     const gradients = layer.style.fills[
+          //       state.fillPopoverIndex
+          //     ].gradient.stops.map((g) => ({
+          //       color: sketchColorToRgba(g.color),
+          //       position: g.position,
+          //     }));
 
-              layer.style = styleReducer(layer.style, [
-                'addFillGradientStop',
-                state.fillPopoverIndex,
-                rgbaToSketchColor(interpolateRgba(gradients, percetage)),
-                percetage,
-              ]);
-              draft.selectedGradientPoint = undefined;
-            } else if (
-              gradientStops[crrGradientPoint.pointIndex] ===
-              gradientStopsSorted[0]
-            )
-              layer.style = produce(layer.style, (draft) =>
-                styleReducer(draft, [
-                  'setFillGradientFrom',
-                  state.fillPopoverIndex,
-                  PointString.encode(gradient),
-                ]),
-              );
-            else if (
-              gradientStops[crrGradientPoint.pointIndex].position ===
-              gradientStopsSorted[gradientStops.length - 1].position
-            ) {
-              layer.style = produce(layer.style, (draft) =>
-                styleReducer(draft, [
-                  'setFillGradientTo',
-                  state.fillPopoverIndex,
-                  PointString.encode(gradient),
-                ]),
-              );
-            } else {
-              layer.style = styleReducer(layer.style, [
-                'setFillGradientPosition',
-                state.fillPopoverIndex,
-                crrGradientPoint.pointIndex,
-                percetage,
-              ]);
-            }
+          //     layer.style = styleReducer(layer.style, [
+          //       'addFillGradientStop',
+          //       state.fillPopoverIndex,
+          //       rgbaToSketchColor(interpolateRgba(gradients, percetage)),
+          //       percetage,
+          //     ]);
+          //     draft.selectedGradientPoint = undefined;
+          //   } else if (
+          //     gradientStops[crrGradientPoint.pointIndex] ===
+          //     gradientStopsSorted[0]
+          //   )
+          //     layer.style = produce(layer.style, (draft) =>
+          //       styleReducer(draft, [
+          //         'setFillGradientFrom',
+          //         state.fillPopoverIndex,
+          //         PointString.encode(gradient),
+          //       ]),
+          //     );
+          //   else if (
+          //     gradientStops[crrGradientPoint.pointIndex].position ===
+          //     gradientStopsSorted[gradientStops.length - 1].position
+          //   ) {
+          //     layer.style = produce(layer.style, (draft) =>
+          //       styleReducer(draft, [
+          //         'setFillGradientTo',
+          //         state.fillPopoverIndex,
+          //         PointString.encode(gradient),
+          //       ]),
+          //     );
+          //   } else {
+          //     layer.style = styleReducer(layer.style, [
+          //       'setFillGradientPosition',
+          //       state.fillPopoverIndex,
+          //       crrGradientPoint.pointIndex,
+          //       percetage,
+          //     ]);
+          //   }
 
-            break;
-          }
+          //   break;
+          // }
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
 

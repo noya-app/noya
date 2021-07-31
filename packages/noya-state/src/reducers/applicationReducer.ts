@@ -55,31 +55,34 @@ export type SelectedGradientPoint = {
   pointIndex: number;
 };
 
+export type SelectedGradient = {
+  layerId: string;
+  fillIndex: number;
+  stopIndex: number;
+  styleType: 'fill' | 'border';
+};
+
 export type SelectedPointLists = Record<string, number[]>;
 
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
-  fillPopoverOpen: boolean;
-  fillPopoverIndex: number;
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
   selectedPage: string;
-  gradientSelectedIndex: number;
   selectedObjects: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
-  selectedGradientPoint?: SelectedGradientPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
+  selectedGradient?: SelectedGradient;
   sketch: SketchFile;
 };
 
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
-  | [type: 'setFillPopoverOpen', value: boolean]
-  | [type: 'setFillPopoverIndex', value: number]
-  | [type: 'setGradientSelectedIndex', value: number]
+  | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
+  | [type: 'setSelectedGradientStopIndex', value: number]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -112,22 +115,18 @@ export function applicationReducer(
         ]);
       });
     }
-    case 'setFillPopoverOpen': {
+    case 'setSelectedGradient': {
       const [, value] = action;
       return produce(state, (draft) => {
-        draft.fillPopoverOpen = value;
+        draft.selectedGradient = value;
       });
     }
-    case 'setFillPopoverIndex': {
+    case 'setSelectedGradientStopIndex': {
       const [, value] = action;
       return produce(state, (draft) => {
-        draft.fillPopoverIndex = value;
-      });
-    }
-    case 'setGradientSelectedIndex': {
-      const [, value] = action;
-      return produce(state, (draft) => {
-        draft.gradientSelectedIndex = value;
+        if (!draft.selectedGradient) return;
+
+        draft.selectedGradient.stopIndex = value;
       });
     }
     case 'selectPage':
@@ -240,6 +239,7 @@ export function applicationReducer(
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
               if (!layer.style) return;
+
               if (
                 action[0] === 'setFillFillType' &&
                 action[2] === Sketch.FillType.Pattern &&
@@ -247,31 +247,30 @@ export function applicationReducer(
               )
                 setNewPatternFill(layer.style.fills, action[1], draft);
 
-              if (
-                action[0] === 'setFillGradientPosition' &&
-                layer.style.fills
-              ) {
-                const [, indexFill, stopIndex] = action;
-                if (
-                  !layer.style.fills[indexFill] &&
-                  !layer.style.fills[indexFill].gradient &&
-                  !layer.style.fills[indexFill].gradient.stops[stopIndex]
-                )
-                  return;
+              if (action[0] === 'setFillGradientPosition') {
+                const [, , stopIndex, position] = action;
 
-                const stops = [...layer.style.fills[indexFill].gradient.stops];
-                const sortedStops = [...stops].sort(
-                  (a, b) => a.position - b.position,
+                if (!draft.selectedGradient) return;
+
+                const { fillIndex } = draft.selectedGradient;
+
+                const draftGradient = layer.style?.fills?.[fillIndex].gradient;
+
+                if (!draftGradient) return;
+
+                const draftStop = draftGradient.stops[stopIndex];
+                draftStop.position = position;
+
+                draftGradient.stops.sort((a, b) => a.position - b.position);
+
+                const newIndex = draftGradient.stops.findIndex(
+                  (s) => s === draftStop,
                 );
 
-                const index = sortedStops.findIndex(
-                  (s) => s.position === stops[stopIndex].position,
-                );
-
-                draft.gradientSelectedIndex = index !== -1 ? index : 0;
+                draft.selectedGradient.stopIndex = newIndex;
+              } else {
+                layer.style = styleReducer(layer.style, action);
               }
-
-              layer.style = styleReducer(layer.style, action);
             },
           );
         });
@@ -407,9 +406,6 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
   return {
     currentTab: 'canvas',
     currentThemeTab: 'swatches',
-    fillPopoverOpen: false,
-    fillPopoverIndex: 0,
-    gradientSelectedIndex: 0,
     interactionState: createInitialInteractionState(),
     keyModifiers: {
       altKey: false,
@@ -421,7 +417,6 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
     selectedObjects: [],
     selectedPointLists: {},
     selectedControlPoint: undefined,
-    selectedGradientPoint: undefined,
     selectedThemeTab: {
       swatches: { ids: [], groupName: '' },
       layerStyles: { ids: [], groupName: '' },

@@ -35,7 +35,6 @@ interface Props {
   onChangeFillType: (type: Sketch.FillType) => void;
   onSetOpacity: (amount: number, mode: SetNumberMode) => void;
   onSetContextOpacity: (value: number, mode: SetNumberMode) => void;
-  onChangeFillIndex: () => void;
   colorProps: ColorFillProps;
   gradientProps: GradientFillProps;
   patternProps: PatternFillProps;
@@ -49,7 +48,6 @@ export default memo(function FillRow({
   onSetOpacity,
   onSetContextOpacity,
   onChangeFillType,
-  onChangeFillIndex,
   colorProps,
   gradientProps,
   patternProps,
@@ -229,7 +227,6 @@ export default memo(function FillRow({
           colorProps={colorProps}
           gradientProps={gradientProps}
           patternProps={patternProps}
-          onChangeIndex={onChangeFillIndex}
         />
         <Spacer.Horizontal size={8} />
         {fields}

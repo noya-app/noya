@@ -147,6 +147,7 @@ export default memo(function BorderInspector() {
                 dispatch('setBorderGradientType', index, value),
               onChangeGradient: (value) =>
                 dispatch('setBorderGradient', index, value),
+              onEditGradient: () => {},
             }}
           />
         ),
