@@ -5,6 +5,7 @@ import {
   AffineTransform,
   createBounds,
   createRect,
+  insetRect,
   Point,
   Rect,
 } from 'noya-geometry';
@@ -121,9 +122,15 @@ export function canvasReducer(
                 color: defaultFillColor,
               }),
             ],
+            borders: [
+              SketchModel.border({
+                color: defaultBorderColor,
+              }),
+            ],
           }),
           draft.interactionState.origin,
           draft.interactionState.current,
+          false,
         );
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
@@ -707,6 +714,7 @@ export function createDrawingLayer(
   style: Sketch.Style,
   origin: Point,
   current: Point,
+  pixelAlign: boolean,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -715,7 +723,11 @@ export function createDrawingLayer(
   | Sketch.Slice
   | Sketch.ShapePath {
   const rect = createRect(origin, current);
-  const frame = SketchModel.rect(rect);
+  let frame = SketchModel.rect(rect);
+
+  if (pixelAlign) {
+    frame = insetRect(frame, 0.5);
+  }
 
   switch (shapeType) {
     case 'oval':

@@ -346,6 +346,7 @@ export default memo(function SketchFileRenderer() {
           }),
           interactionState.origin,
           interactionState.current,
+          true,
         )
       : undefined;
 
