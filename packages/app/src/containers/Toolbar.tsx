@@ -18,6 +18,7 @@ import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
 import useShallowArray from '../hooks/useShallowArray';
+import { LayerIcon } from './LayerList';
 
 const Row = styled.div(({ theme }) => ({
   display: 'flex',
@@ -61,13 +62,21 @@ const ToolbarContent = memo(function ToolbarContent({
   }));
 
   const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
-    { title: 'Artboard', value: 'artboard' },
-    { title: 'Rectangle', value: 'rectangle' },
-    { title: 'Oval', value: 'oval' },
-    { title: 'Line', value: 'line' },
-    { title: 'Vector', value: 'vector' },
-    { title: 'Text', value: 'text' },
-    { title: 'Slice', value: 'slice' },
+    {
+      title: 'Artboard',
+      value: 'artboard',
+      icon: <LayerIcon type="artboard" />,
+    },
+    {
+      title: 'Rectangle',
+      value: 'rectangle',
+      icon: <LayerIcon type="rectangle" />,
+    },
+    { title: 'Oval', value: 'oval', icon: <LayerIcon type="oval" /> },
+    { title: 'Line', value: 'line', icon: <LayerIcon type="shapePath" /> },
+    { title: 'Vector', value: 'vector', icon: <LayerIcon type="shapePath" /> },
+    { title: 'Text', value: 'text', icon: <LayerIcon type="text" /> },
+    { title: 'Slice', value: 'slice', icon: <LayerIcon type="slice" /> },
   ];
 
   const menuItems: MenuItem<string>[] = createSectionedMenu(
