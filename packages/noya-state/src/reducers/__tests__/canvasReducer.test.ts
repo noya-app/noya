@@ -192,6 +192,61 @@ describe('movingPoint', () => {
   });
 });
 
+describe('movingControlPoint', () => {
+  test('move one control point', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [oval] })),
+    );
+    state.selectedObjects = [oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['editPath']],
+      ['selectControlPoint', oval.do_objectID, 0, 'curveFrom'],
+      ['interaction', ['maybeMoveControlPoint', { x: 0, y: 0 }]],
+      ['interaction', ['movingControlPoint', { x: 0, y: 0 }, { x: 25, y: 25 }]],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
+    ).toMatchSnapshot();
+  });
+
+  test('move control point in artboard', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 300,
+        height: 300,
+      }),
+      layers: [oval],
+    });
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+
+    state.selectedObjects = [oval.do_objectID];
+
+    const updated = run(state, [
+      ['interaction', ['editPath']],
+      ['selectControlPoint', oval.do_objectID, 0, 'curveFrom'],
+      ['interaction', ['maybeMoveControlPoint', { x: 0, y: 0 }]],
+      ['interaction', ['movingControlPoint', { x: 0, y: 0 }, { x: 25, y: 25 }]],
+    ]);
+
+    expect(
+      debugDescription(
+        [Selectors.getCurrentPage(state), Selectors.getCurrentPage(updated)],
+        { points: true },
+      ),
+    ).toMatchSnapshot();
+  });
+});
+
 describe('scale', () => {
   test('scale one layer se', () => {
     const state = createInitialState(
