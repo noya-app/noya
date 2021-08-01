@@ -8,6 +8,8 @@ import {
   rectsIntersect,
   transformRect,
   Point,
+  getRectCornerPoints,
+  createRectFromBounds,
 } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import {
@@ -253,28 +255,65 @@ export function moveLayer(
       }
     }
 
-    const parentTransform = getLayerTransformAtIndexPath(
-      draftPage,
-      parentIndexPath,
-      undefined,
-      'includeLast',
-    );
+    layerInfo.forEach(({ layer, transform }, i) => {
+      const parentTransform = getLayerTransformAtIndexPath(
+        draftPage,
+        parentIndexPath,
+        undefined,
+        'includeLast',
+      );
 
-    const adjustedLayers = layerInfo.map(({ layer, transform }) => {
       // First we undo the original parent's transform, then we apply the new parent's transform
       const newTransform = AffineTransform.multiply(
         transform,
         parentTransform.invert(),
       );
 
-      return produce(layer, (draftLayer) => {
+      const newLayer = produce(layer, (draftLayer) => {
         draftLayer.frame = {
           ...draftLayer.frame,
           ...transformRect(draftLayer.frame, newTransform),
         };
       });
-    });
 
-    parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
+      parent.layers.splice(destinationIndex + i, 0, newLayer);
+
+      if (Layers.isGroup(parent)) {
+        fixGroupFrame(parent);
+      }
+    });
+  });
+}
+
+function fixGroupFrame(group: Sketch.Group) {
+  const originalGroupFrame = { ...group.frame };
+
+  const points = group.layers.flatMap((layer) =>
+    getRectCornerPoints(layer.frame),
+  );
+
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+
+  const bounds = {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+  };
+
+  group.frame = {
+    ...group.frame,
+    ...createRectFromBounds(bounds),
+  };
+
+  const delta = {
+    x: group.frame.x - originalGroupFrame.x,
+    y: group.frame.y - originalGroupFrame.y,
+  };
+
+  group.layers.forEach((layer) => {
+    layer.frame.x -= delta.x;
+    layer.frame.y -= delta.y;
   });
 }
