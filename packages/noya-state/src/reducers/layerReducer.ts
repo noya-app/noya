@@ -28,6 +28,7 @@ import {
   insertLayerAtIndexPath,
   LayerIndexPaths,
   moveLayer,
+  removeLayer,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
@@ -110,20 +111,6 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
       });
     });
   });
-};
-
-const unGroup = (parent: Layers.ParentLayer, indexPath: IndexPath) => {
-  const groupIndex = indexPath[indexPath.length - 1];
-  const group = parent.layers[groupIndex] as Sketch.Group;
-  return group.layers.map((l) =>
-    produce(l, (l) => {
-      l.frame = {
-        ...l.frame,
-        x: l.frame.x + group.frame.x,
-        y: l.frame.y + group.frame.y,
-      };
-    }),
-  );
 };
 
 const symbolToGroup = (
@@ -254,7 +241,35 @@ export function layerReducer(
       // Move all selected layers into the new group
       return moveLayer(state, ids, group.do_objectID, 'inside');
     }
-    case 'ungroupLayers':
+    case 'ungroupLayers': {
+      const [, id] = action;
+
+      const ids = typeof id === 'string' ? [id] : id;
+
+      const page = getCurrentPage(state);
+      const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
+
+      return indexPaths.reduce((state, indexPath) => {
+        const groupLayer = Layers.access(page, indexPath);
+
+        if (!Layers.isGroup(groupLayer)) return state;
+
+        const childrenIds = groupLayer.layers.map((layer) => layer.do_objectID);
+
+        state = moveLayer(state, childrenIds, groupLayer.do_objectID, 'above');
+
+        state = removeLayer(state, groupLayer.do_objectID);
+
+        return produce(state, (draft) => {
+          updateSelection(
+            draft.selectedObjects,
+            groupLayer.do_objectID,
+            'difference',
+          );
+          updateSelection(draft.selectedObjects, childrenIds, 'intersection');
+        });
+      }, state);
+    }
     case 'detachSymbol': {
       const [, id] = action;
 
@@ -268,18 +283,10 @@ export function layerReducer(
         const parent = getParentLayer(page, indexPaths);
         const draftPage = draft.sketch.pages[pageIndex];
 
-        if (action[0] === 'ungroupLayers') {
-          const layers = unGroup(parent, indexPaths);
-          deleteLayers([indexPaths], draftPage);
-          addSiblingLayer(draftPage, indexPaths, layers);
+        symbolToGroup(draftPage, state, parent, indexPaths);
 
-          draft.selectedObjects = layers.map((layer) => layer.do_objectID);
-        } else {
-          symbolToGroup(draftPage, state, parent, indexPaths);
-
-          if (!Layers.isPageLayer(parent)) {
-            draft.selectedObjects = [parent.do_objectID];
-          }
+        if (!Layers.isPageLayer(parent)) {
+          draft.selectedObjects = [parent.do_objectID];
         }
       });
     }

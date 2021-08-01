@@ -435,4 +435,60 @@ describe('grouping', () => {
       oval.do_objectID,
     ]);
   });
+
+  test('Ungroup multiple groups', () => {
+    const rect1 = SketchModel.rectangle({ name: '1' });
+    const rect2 = SketchModel.rectangle({ name: '2' });
+    const rect3 = SketchModel.rectangle({ name: '3' });
+    const rect4 = SketchModel.rectangle({ name: '4' });
+
+    const group1 = SketchModel.group({
+      layers: [rect1, rect2],
+    });
+    const group2 = SketchModel.group({
+      layers: [rect3, rect4],
+    });
+
+    const state = createInitialState(
+      createSketchFile(
+        SketchModel.page({
+          layers: [
+            rectangle,
+            group1,
+            SketchModel.rectangle({ name: 'Middle' }),
+            group2,
+            oval,
+          ],
+        }),
+      ),
+    );
+
+    state.selectedObjects = [
+      rectangle.do_objectID,
+      oval.do_objectID,
+      group1.do_objectID,
+      group2.do_objectID,
+    ];
+
+    const updated = layerReducer(state, [
+      'ungroupLayers',
+      state.selectedObjects,
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+
+    expect(updated.selectedObjects).toEqual([
+      rectangle.do_objectID,
+      oval.do_objectID,
+      rect1.do_objectID,
+      rect2.do_objectID,
+      rect3.do_objectID,
+      rect4.do_objectID,
+    ]);
+  });
 });

@@ -144,6 +144,28 @@ exports[`grouping Group & ungroup nested layers 2`] = `
     └── <Rectangle> Top { x: 0, y: 0, w: 0, h: 0 }"
 `;
 
+exports[`grouping Ungroup multiple groups 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+│   ├── <Rectangle> 1 { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> 2 { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Middle { x: 0, y: 0, w: 0, h: 0 }
+├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
+│   ├── <Rectangle> 3 { x: 0, y: 0, w: 0, h: 0 }
+│   └── <Rectangle> 4 { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+├── <Rectangle> 1 { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> 2 { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Middle { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> 3 { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> 4 { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }"
+`;
+
 exports[`moveLayer move multiple inside 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }

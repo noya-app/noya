@@ -367,3 +367,39 @@ export function insertLayer(
     rawPosition,
   );
 }
+
+export function removeLayerAtIndexPath(
+  state: ApplicationState,
+  indexPaths: IndexPath[],
+) {
+  const pageIndex = getCurrentPageIndex(state);
+
+  return produce(state, (draft) => {
+    // We delete in reverse so that the indexPaths remain accurate even
+    // after some layers are deleted.
+    const reversed = [...indexPaths].reverse();
+
+    reversed.forEach((indexPath) => {
+      const childIndex = indexPath[indexPath.length - 1];
+
+      const parent = Layers.access(
+        draft.sketch.pages[pageIndex],
+        indexPath.slice(0, -1),
+      ) as Layers.ParentLayer;
+
+      parent.layers.splice(childIndex, 1);
+    });
+  });
+}
+
+export function removeLayer(state: ApplicationState, id: string | string[]) {
+  const ids = new Set(typeof id === 'string' ? [id] : id);
+
+  const indexPaths = Layers.findAllIndexPaths(getCurrentPage(state), (layer) =>
+    ids.has(layer.do_objectID),
+  );
+
+  if (!indexPaths) return state;
+
+  return removeLayerAtIndexPath(state, indexPaths);
+}
