@@ -114,6 +114,7 @@ export function applicationReducer(
     case 'movePage': {
       return pageReducer(state, action);
     }
+    case 'setZoom':
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'addShapePathLayer':

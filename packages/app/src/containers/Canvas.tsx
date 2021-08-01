@@ -141,6 +141,10 @@ export default memo(function Canvas() {
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
     'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
     'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
+    'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
+    'Shift-Mod-=': () => dispatch('setZoom', 2, 'multiply'),
+    'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
+    'Shift-Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
   });
 
   useKeyboardShortcuts('keyup', {
