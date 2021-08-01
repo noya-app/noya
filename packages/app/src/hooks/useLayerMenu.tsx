@@ -195,15 +195,11 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           dispatch('duplicateLayer', selectedLayerIds);
           return;
         case 'group': {
-          const name = prompt('New Group Name');
-
-          if (!name) return;
-
-          dispatch('groupLayer', selectedLayerIds, name);
+          dispatch('groupLayers', selectedLayerIds);
           return;
         }
         case 'ungroup':
-          dispatch('ungroupLayer', selectedLayerIds);
+          dispatch('ungroupLayers', selectedLayerIds);
           return;
         case 'createSymbol': {
           const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';

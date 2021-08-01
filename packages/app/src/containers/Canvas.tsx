@@ -139,6 +139,8 @@ export default memo(function Canvas() {
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
+    'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
+    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
   });
 
   useKeyboardShortcuts('keyup', {
