@@ -4,7 +4,7 @@ import { RelativeDropPosition } from 'noya-designsystem';
 import { AffineTransform, Point, transformRect } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
 import { SketchModel } from 'noya-sketch-model';
-import { groupBy, uuid } from 'noya-utils';
+import { getIncrementedName, groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { PageLayer } from '../layers';
@@ -41,8 +41,8 @@ export type LayerAction =
       position: RelativeDropPosition,
     ]
   | [type: 'deleteLayer', layerId: string | string[]]
-  | [type: 'groupLayer', layerId: string | string[], name: string]
-  | [type: 'ungroupLayer', layerId: string | string[]]
+  | [type: 'groupLayers', layerId: string | string[]]
+  | [type: 'ungroupLayers', layerId: string | string[]]
   | [type: 'createSymbol', layerId: string | string[], name: string]
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
@@ -84,11 +84,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   return produce(model, (draft) => {
     draft.do_objectID = uuid();
     draft.name = name;
-    draft.frame = {
-      _class: 'rect',
-      constrainProportions: false,
-      ...groupFrame,
-    };
+    draft.frame = SketchModel.rect(groupFrame);
     draft.style = SketchModel.style();
 
     draft.layers = [...indexPaths].map((indexPath) => {
@@ -229,36 +225,80 @@ export function layerReducer(
         );
       });
     }
-    case 'groupLayer': {
-      const [, id, name] = action;
+    case 'groupLayers': {
+      const [, id] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
+      const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
 
-      const indexPaths = getIndexPathsForGroup(state, ids);
-
-      const group = createGroup(
-        SketchModel.group(),
+      const boundingRect = getBoundingRect(
         page,
+        AffineTransform.identity,
         ids,
-        name,
-        indexPaths,
+        {
+          clickThroughGroups: true,
+          includeHiddenLayers: true,
+          includeArtboardLayers: false,
+        },
       );
 
-      if (!group) return state;
+      if (!boundingRect) return state;
 
-      // Fire we remove selected layers, then we insert the group layer
-      return produce(state, (draft) => {
-        const pages = draft.sketch.pages;
-        deleteLayers(indexPaths, pages[pageIndex]);
-        addSiblingLayer(pages[pageIndex], indexPaths[0], group);
+      const targetIndexPath = indexPaths[0];
+      const parentIndexPath = targetIndexPath.slice(0, -1);
 
+      const siblingNames = (Layers.access(
+        page,
+        parentIndexPath,
+      ) as Layers.ParentLayer).layers.map((layer) => layer.name);
+
+      const group = SketchModel.group({
+        name: siblingNames.includes('Group')
+          ? getIncrementedName('Group', siblingNames)
+          : 'Group',
+      });
+
+      // Add the group layer to the page
+      state = produce(state, (draft) => {
+        draft.sketch.pages[pageIndex].layers.push(group);
         draft.selectedObjects = [group.do_objectID];
       });
+
+      // Move the group layer above the first selected layer
+      state = moveLayer(
+        state,
+        group.do_objectID,
+        Layers.access(page, targetIndexPath).do_objectID,
+        'above',
+      );
+
+      // Determine the group's frame
+      state = produce(state, (draft) => {
+        const result = Layers.find(
+          draft.sketch.pages[pageIndex],
+          (layer) => layer.do_objectID === group.do_objectID,
+        )!;
+
+        result.frame = SketchModel.rect(
+          transformRect(
+            boundingRect,
+            getLayerTransformAtIndexPath(
+              page,
+              parentIndexPath,
+              AffineTransform.identity,
+              'includeLast',
+            ).invert(),
+          ),
+        );
+      });
+
+      // Move all selected layers into the new group
+      return moveLayer(state, ids, group.do_objectID, 'inside');
     }
-    case 'ungroupLayer':
+    case 'ungroupLayers':
     case 'detachSymbol': {
       const [, id] = action;
 
@@ -270,18 +310,20 @@ export function layerReducer(
 
       return produce(state, (draft) => {
         const parent = getParentLayer(page, indexPaths);
-        const pages = draft.sketch.pages[pageIndex];
+        const draftPage = draft.sketch.pages[pageIndex];
 
-        if (action[0] === 'ungroupLayer') {
+        if (action[0] === 'ungroupLayers') {
           const layers = unGroup(parent, indexPaths);
-          deleteLayers([indexPaths], pages);
-          addSiblingLayer(pages, indexPaths, layers);
-        } else {
-          symbolToGroup(pages, state, parent, indexPaths);
-        }
+          deleteLayers([indexPaths], draftPage);
+          addSiblingLayer(draftPage, indexPaths, layers);
 
-        if (!Layers.isPageLayer(parent)) {
-          draft.selectedObjects = [parent.do_objectID];
+          draft.selectedObjects = layers.map((layer) => layer.do_objectID);
+        } else {
+          symbolToGroup(draftPage, state, parent, indexPaths);
+
+          if (!Layers.isPageLayer(parent)) {
+            draft.selectedObjects = [parent.do_objectID];
+          }
         }
       });
     }

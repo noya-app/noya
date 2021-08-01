@@ -1,13 +1,30 @@
 import { debugDescription, SketchModel } from 'noya-sketch-model';
-import { createInitialState, createSketchFile, Selectors } from 'noya-state';
+import {
+  createInitialState,
+  createSketchFile,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { ApplicationState } from '../applicationReducer';
 import { layerReducer } from '../layerReducer';
 
 const getPageLayersLength = (state: ApplicationState) =>
   Selectors.getCurrentPage(state).layers.length;
 
-const rectangle = SketchModel.rectangle();
-const oval = SketchModel.oval();
+const rectangle = SketchModel.rectangle({
+  frame: SketchModel.rect({
+    width: 100,
+    height: 100,
+  }),
+});
+const oval = SketchModel.oval({
+  frame: SketchModel.rect({
+    x: 50,
+    y: 50,
+    width: 100,
+    height: 100,
+  }),
+});
 const artboard = SketchModel.artboard();
 const text = SketchModel.text();
 
@@ -267,5 +284,155 @@ describe('duplicateLayer', () => {
         Selectors.getCurrentPage(updated),
       ]),
     ).toMatchSnapshot();
+  });
+});
+
+describe('grouping', () => {
+  test('Group & ungroup layers', () => {
+    const rectangle = SketchModel.rectangle({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+      }),
+    });
+
+    const oval = SketchModel.oval({
+      frame: SketchModel.rect({
+        x: 250,
+        y: 250,
+        width: 100,
+        height: 100,
+      }),
+    });
+
+    const state = createInitialState(
+      createSketchFile(
+        SketchModel.page({
+          layers: [
+            SketchModel.rectangle({ name: 'Bottom' }),
+            rectangle,
+            oval,
+            SketchModel.rectangle({ name: 'Top' }),
+          ],
+        }),
+      ),
+    );
+
+    const groupedState = layerReducer(state, [
+      'groupLayers',
+      [rectangle.do_objectID, oval.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(groupedState),
+      ]),
+    ).toMatchSnapshot();
+
+    const group = Layers.find(
+      Selectors.getCurrentPage(groupedState),
+      (layer) => layer._class === 'group',
+    )!;
+
+    expect(groupedState.selectedObjects).toEqual([group.do_objectID]);
+
+    const ungroupedState = layerReducer(groupedState, [
+      'ungroupLayers',
+      [group.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(groupedState),
+        Selectors.getCurrentPage(ungroupedState),
+      ]),
+    ).toMatchSnapshot();
+
+    expect(ungroupedState.selectedObjects).toEqual([
+      rectangle.do_objectID,
+      oval.do_objectID,
+    ]);
+  });
+
+  test('Group & ungroup nested layers', () => {
+    const rectangle = SketchModel.rectangle({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+      }),
+    });
+
+    const oval = SketchModel.oval({
+      frame: SketchModel.rect({
+        x: 250,
+        y: 250,
+        width: 100,
+        height: 100,
+      }),
+    });
+
+    const state = createInitialState(
+      createSketchFile(
+        SketchModel.page({
+          layers: [
+            SketchModel.artboard({
+              frame: SketchModel.rect({
+                x: 100,
+                y: 100,
+                width: 300,
+                height: 300,
+              }),
+              layers: [
+                SketchModel.rectangle({ name: 'Bottom' }),
+                rectangle,
+                oval,
+                SketchModel.rectangle({ name: 'Top' }),
+              ],
+            }),
+          ],
+        }),
+      ),
+    );
+
+    const groupedState = layerReducer(state, [
+      'groupLayers',
+      [rectangle.do_objectID, oval.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(groupedState),
+      ]),
+    ).toMatchSnapshot();
+
+    const group = Layers.find(
+      Selectors.getCurrentPage(groupedState),
+      (layer) => layer._class === 'group',
+    )!;
+
+    expect(groupedState.selectedObjects).toEqual([group.do_objectID]);
+
+    const ungroupedState = layerReducer(groupedState, [
+      'ungroupLayers',
+      [group.do_objectID],
+    ]);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(groupedState),
+        Selectors.getCurrentPage(ungroupedState),
+      ]),
+    ).toMatchSnapshot();
+
+    expect(ungroupedState.selectedObjects).toEqual([
+      rectangle.do_objectID,
+      oval.do_objectID,
+    ]);
   });
 });
