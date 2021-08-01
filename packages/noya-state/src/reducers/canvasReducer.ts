@@ -9,7 +9,7 @@ import {
   Point,
   Rect,
 } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
+import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -17,7 +17,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { uuid } from 'noya-utils';
+import { clamp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   addToParentLayer,
@@ -54,6 +54,7 @@ import {
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type CanvasAction =
+  | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -82,6 +83,36 @@ export function canvasReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setZoom': {
+      const [, value, mode] = action;
+      const pageId = getCurrentPage(state).do_objectID;
+      const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const newValue = clamp(
+          mode === 'multiply' ? value * zoomValue : value,
+          0.01,
+          256,
+        );
+
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        // To find the new scrollOrigin: start at the viewport center and
+        // move by the scaled the distance to the scrollOrigin
+        const newScrollOrigin = AffineTransform.translate(
+          (scrollOrigin.x - viewportCenter.x) * (newValue / zoomValue),
+          (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
+        ).applyTo(viewportCenter);
+
+        draftUser[pageId].scrollOrigin = PointString.encode(newScrollOrigin);
+        draftUser[pageId].zoomValue = newValue;
+      });
+    }
     case 'insertArtboard': {
       const [, { name, width, height }] = action;
       const pageIndex = getCurrentPageIndex(state);
