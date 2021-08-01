@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`fix group frame group with existing coordinates 1`] = `
+"<Group> Group { x: -1000, y: -1000, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 100, y: 100, w: 50, h: 50 }
+
+<Group> Group { x: -900, y: -900, w: 50, h: 50 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 50, h: 50 }"
+`;
+
 exports[`fix group frame multiple layers 1`] = `
 "<Group> Group { x: 0, y: 0, w: 0, h: 0 }
 ├── <Rectangle> Rectangle { x: 100, y: 100, w: 50, h: 50 }

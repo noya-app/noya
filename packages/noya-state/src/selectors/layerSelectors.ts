@@ -4,12 +4,12 @@ import { RelativeDropPosition } from 'noya-designsystem';
 import {
   AffineTransform,
   createBounds,
+  createRectFromBounds,
+  getRectCornerPoints,
+  Point,
   rectContainsPoint,
   rectsIntersect,
   transformRect,
-  Point,
-  getRectCornerPoints,
-  createRectFromBounds,
 } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import {
@@ -277,17 +277,19 @@ export function moveLayer(
       });
 
       parent.layers.splice(destinationIndex + i, 0, newLayer);
-
-      if (Layers.isGroup(parent)) {
-        fixGroupFrame(parent);
-      }
     });
+
+    if (Layers.isGroup(parent)) {
+      fixGroupFrame(parent);
+    }
   });
 }
 
+/**
+ * Normalize a group's frame so that it equals exactly the bounding rect of all of its
+ * children, and the top-left-most child begins at {0, 0}
+ */
 export function fixGroupFrame(group: Sketch.Group) {
-  const originalGroupFrame = { ...group.frame };
-
   const points = group.layers.flatMap((layer) =>
     getRectCornerPoints(layer.frame),
   );
@@ -302,19 +304,19 @@ export function fixGroupFrame(group: Sketch.Group) {
     maxY: Math.max(...ys),
   };
 
+  const newGroupFrame = createRectFromBounds(bounds);
+
   group.frame = {
     ...group.frame,
-    ...createRectFromBounds(bounds),
-  };
-
-  const delta = {
-    x: group.frame.x - originalGroupFrame.x,
-    y: group.frame.y - originalGroupFrame.y,
+    x: group.frame.x + newGroupFrame.x,
+    y: group.frame.y + newGroupFrame.y,
+    width: newGroupFrame.width,
+    height: newGroupFrame.height,
   };
 
   group.layers.forEach((layer) => {
-    layer.frame.x -= delta.x;
-    layer.frame.y -= delta.y;
+    layer.frame.x -= bounds.minX;
+    layer.frame.y -= bounds.minY;
   });
 }
 

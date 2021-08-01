@@ -232,27 +232,12 @@ export function layerReducer(
       const ids = typeof id === 'string' ? [id] : id;
 
       const page = getCurrentPage(state);
-      const pageIndex = getCurrentPageIndex(state);
       const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
 
-      const boundingRect = getBoundingRect(
-        page,
-        AffineTransform.identity,
-        ids,
-        {
-          clickThroughGroups: true,
-          includeHiddenLayers: true,
-          includeArtboardLayers: false,
-        },
-      );
-
-      if (!boundingRect) return state;
-
       const targetIndexPath = indexPaths[0];
-      const parentIndexPath = targetIndexPath.slice(0, -1);
       const parentLayer = Layers.access(
         page,
-        parentIndexPath,
+        targetIndexPath.slice(0, -1),
       ) as Layers.ParentLayer;
 
       const siblingNames = parentLayer.layers.map((layer) => layer.name);
@@ -265,26 +250,6 @@ export function layerReducer(
 
       // Insert the group layer
       state = insertLayerAtIndexPath(state, group, targetIndexPath, 'above');
-
-      // Determine the group's frame
-      state = produce(state, (draft) => {
-        const result = Layers.find(
-          draft.sketch.pages[pageIndex],
-          (layer) => layer.do_objectID === group.do_objectID,
-        )!;
-
-        result.frame = SketchModel.rect(
-          transformRect(
-            boundingRect,
-            getLayerTransformAtIndexPath(
-              page,
-              parentIndexPath,
-              AffineTransform.identity,
-              'includeLast',
-            ).invert(),
-          ),
-        );
-      });
 
       // Move all selected layers into the new group
       return moveLayer(state, ids, group.do_objectID, 'inside');
