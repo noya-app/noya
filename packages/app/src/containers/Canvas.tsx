@@ -10,7 +10,7 @@ import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
-import { createRect, Insets, Point } from 'noya-geometry';
+import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
 import {
@@ -145,6 +145,7 @@ export default memo(function Canvas() {
     'Shift-Mod-=': () => dispatch('setZoom', 2, 'multiply'),
     'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
     'Shift-Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
+    'Mod-0': () => dispatch('setZoom', 1),
   });
 
   useKeyboardShortcuts('keyup', {
@@ -180,14 +181,12 @@ export default memo(function Canvas() {
   );
 
   // Event coordinates are relative to (0,0), but we want them to include
-  // the current document's offset from the origin
+  // the current page's zoom and offset from the origin
   const offsetEventPoint = useCallback(
-    (point: Point) => {
-      return {
-        x: point.x - meta.scrollOrigin.x,
-        y: point.y - meta.scrollOrigin.y,
-      };
-    },
+    (point: Point) =>
+      AffineTransform.scale(1 / meta.zoomValue)
+        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+        .applyTo(point),
     [meta],
   );
 
