@@ -36,6 +36,7 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
     () =>
       AffineTransform.multiply(
         transform,
+        Selectors.getLayerFlipTransform(layer),
         Selectors.getLayerRotationTransform(layer),
       ),
     [layer, transform],

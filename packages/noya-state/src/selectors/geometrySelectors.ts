@@ -1,17 +1,18 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
   createRectFromBounds,
   getRectCornerPoints,
+  Point,
+  Rect,
   rectContainsPoint,
   rectsIntersect,
   rotatedRectContainsPoint,
   transformRect,
-  Rect,
-  Point,
 } from 'noya-geometry';
-import { getRectDragHandles, Primitives } from 'noya-state';
+import * as Primitives from 'noya-state';
+import { getRectDragHandles } from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
@@ -21,6 +22,7 @@ import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
   getCanvasTransform,
+  getLayerFlipTransform,
   getLayerRotationTransform,
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
@@ -148,6 +150,7 @@ export function getLayerAtPoint(
   visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
@@ -217,6 +220,7 @@ export function getBoundingRect(
 
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
@@ -257,6 +261,7 @@ export function getBoundingPoints(
 
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
