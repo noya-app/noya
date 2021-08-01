@@ -25,6 +25,7 @@ import {
   getSymbols,
   getSymbolsInstancesIndexPaths,
   getSymbolsPageIndex,
+  insertLayerAtIndexPath,
   LayerIndexPaths,
   moveLayer,
 } from '../selectors/selectors';
@@ -249,11 +250,12 @@ export function layerReducer(
 
       const targetIndexPath = indexPaths[0];
       const parentIndexPath = targetIndexPath.slice(0, -1);
-
-      const siblingNames = (Layers.access(
+      const parentLayer = Layers.access(
         page,
         parentIndexPath,
-      ) as Layers.ParentLayer).layers.map((layer) => layer.name);
+      ) as Layers.ParentLayer;
+
+      const siblingNames = parentLayer.layers.map((layer) => layer.name);
 
       const group = SketchModel.group({
         name: siblingNames.includes('Group')
@@ -261,19 +263,8 @@ export function layerReducer(
           : 'Group',
       });
 
-      // Add the group layer to the page
-      state = produce(state, (draft) => {
-        draft.sketch.pages[pageIndex].layers.push(group);
-        draft.selectedObjects = [group.do_objectID];
-      });
-
-      // Move the group layer above the first selected layer
-      state = moveLayer(
-        state,
-        group.do_objectID,
-        Layers.access(page, targetIndexPath).do_objectID,
-        'above',
-      );
+      // Insert the group layer
+      state = insertLayerAtIndexPath(state, group, targetIndexPath, 'above');
 
       // Determine the group's frame
       state = produce(state, (draft) => {

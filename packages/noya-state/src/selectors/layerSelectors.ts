@@ -285,7 +285,7 @@ export function moveLayer(
   });
 }
 
-function fixGroupFrame(group: Sketch.Group) {
+export function fixGroupFrame(group: Sketch.Group) {
   const originalGroupFrame = { ...group.frame };
 
   const points = group.layers.flatMap((layer) =>
@@ -316,4 +316,52 @@ function fixGroupFrame(group: Sketch.Group) {
     layer.frame.x -= delta.x;
     layer.frame.y -= delta.y;
   });
+}
+
+export function insertLayerAtIndexPath(
+  state: ApplicationState,
+  layer: PageLayer | PageLayer[],
+  destinationIndexPath: IndexPath,
+  rawPosition: RelativeDropPosition,
+) {
+  const layers = Array.isArray(layer) ? layer : [layer];
+  const ids = layers.map((layer) => layer.do_objectID);
+
+  const pageIndex = getCurrentPageIndex(state);
+
+  // Add the layers to the page. Since they're added last, this won't invalidate
+  // the `destinationIndexPath`
+  state = produce(state, (draft) => {
+    draft.sketch.pages[pageIndex].layers.push(...layers);
+    draft.selectedObjects = ids;
+  });
+
+  // Move the layers into their target position
+  return moveLayer(
+    state,
+    ids,
+    Layers.access(getCurrentPage(state), destinationIndexPath).do_objectID,
+    rawPosition,
+  );
+}
+
+export function insertLayer(
+  state: ApplicationState,
+  layer: PageLayer | PageLayer[],
+  destinationId: string,
+  rawPosition: RelativeDropPosition,
+) {
+  const destinationIndexPath = Layers.findIndexPath(
+    getCurrentPage(state),
+    (layer) => layer.do_objectID === destinationId,
+  );
+
+  if (!destinationIndexPath) return state;
+
+  return insertLayerAtIndexPath(
+    state,
+    layer,
+    destinationIndexPath,
+    rawPosition,
+  );
 }
