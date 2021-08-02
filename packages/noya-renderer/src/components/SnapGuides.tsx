@@ -188,6 +188,7 @@ export default memo(function SnapGuides() {
 
         const newBoundingRect = getScaledSnapBoundingRect(
           state,
+          pageSnapshot,
           originalBoundingRect,
           delta,
           canvasSize,
@@ -254,6 +255,7 @@ export default memo(function SnapGuides() {
 
   const targetLayers = getPossibleTargetSnapLayers(
     state,
+    page,
     canvasSize,
     interactionState.type === 'moving' || interactionState.type === 'scaling'
       ? Selectors.getSelectedLayerIndexPathsExcludingDescendants(state)

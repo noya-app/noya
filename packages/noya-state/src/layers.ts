@@ -255,6 +255,23 @@ export function findInArray(
   }
 }
 
+export function assign(
+  node: ParentLayer,
+  indexPath: IndexPath,
+  value: Sketch.AnyLayer,
+) {
+  const parentLayer = access(node, indexPath.slice(0, -1));
+
+  if (!isParentLayer(parentLayer)) {
+    console.info('Bad call to Layers.assign()', parentLayer.name);
+    return;
+  }
+
+  // TODO: We shouldn't assert `PageLayer` here, since it may be incorrect.
+  // But we'll need a more sophisticated way to handle generics.
+  parentLayer.layers[indexPath[indexPath.length - 1]] = value as PageLayer;
+}
+
 export const {
   visit: visitReversed,
   access: accessReversed,

@@ -6,7 +6,9 @@ import {
   createBounds,
   createRectFromBounds,
   getRectCornerPoints,
+  normalizeRect,
   Point,
+  Rect,
   rectContainsPoint,
   rectsIntersect,
   transformRect,
@@ -402,4 +404,33 @@ export function removeLayer(state: ApplicationState, id: string | string[]) {
   if (!indexPaths) return state;
 
   return removeLayerAtIndexPath(state, indexPaths);
+}
+
+export function resizeLayerFrame<T extends Sketch.AnyLayer>(
+  layer: T,
+  rect: Rect,
+): T {
+  const originalFrame = layer.frame;
+  const newFrame = normalizeRect(rect);
+
+  return produce(layer, (draft) => {
+    draft.frame = {
+      ...draft.frame,
+      ...newFrame,
+    };
+
+    if (Layers.isGroup(draft)) {
+      const scaleTransform = AffineTransform.scale(
+        newFrame.width / originalFrame.width,
+        newFrame.height / originalFrame.height,
+      );
+
+      draft.layers = draft.layers.map((childLayer) =>
+        resizeLayerFrame(
+          childLayer,
+          transformRect(childLayer.frame, scaleTransform),
+        ),
+      );
+    }
+  });
 }

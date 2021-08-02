@@ -37,6 +37,7 @@ import {
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
+  resizeLayerFrame,
 } from '../selectors/selectors';
 import {
   getScaledSnapBoundingRect,
@@ -450,6 +451,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(point, point),
             );
@@ -470,12 +472,14 @@ export function canvasReducer(
 
             const originAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(origin, origin),
             );
 
             const currentAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(current, current),
             );
@@ -525,6 +529,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              pageSnapshot,
               context.canvasSize,
               sourceRect,
               layerIndexPaths,
@@ -617,6 +622,7 @@ export function canvasReducer(
 
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
+              pageSnapshot,
               originalBoundingRect,
               delta,
               context.canvasSize,
@@ -641,10 +647,10 @@ export function canvasReducer(
                 indexPath,
               );
 
-              const draftLayer = Layers.access(
-                draft.sketch.pages[pageIndex],
+              const layer = Layers.access(
+                pageSnapshot,
                 indexPath,
-              );
+              ) as Layers.PageLayer;
 
               const originalBounds = createBounds(originalLayer.frame);
 
@@ -671,13 +677,19 @@ export function canvasReducer(
               const width = roundedMax.x - roundedMin.x;
               const height = roundedMax.y - roundedMin.y;
 
-              draftLayer.isFlippedHorizontal = width < 0;
-              draftLayer.isFlippedVertical = height < 0;
+              const newLayer = resizeLayerFrame(
+                layer,
+                createRect(roundedMin, roundedMax),
+              );
 
-              draftLayer.frame = {
-                ...draftLayer.frame,
-                ...createRect(roundedMin, roundedMax),
-              };
+              newLayer.isFlippedHorizontal =
+                width < 0
+                  ? !layer.isFlippedHorizontal
+                  : layer.isFlippedHorizontal;
+              newLayer.isFlippedVertical =
+                height < 0 ? !layer.isFlippedVertical : layer.isFlippedVertical;
+
+              Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });
 
             break;

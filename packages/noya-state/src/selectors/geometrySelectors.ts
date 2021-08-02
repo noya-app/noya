@@ -80,6 +80,7 @@ function visitLayersReversed(
 
 export function getLayersInRect(
   state: ApplicationState,
+  page: Sketch.Page,
   insets: CanvasInsets,
   rect: Rect,
   traversalOptions?: LayerTraversalOptions,
@@ -89,8 +90,6 @@ export function getLayersInRect(
     includeHiddenLayers: false,
     includeArtboardLayers: false,
   };
-
-  const page = getCurrentPage(state);
 
   let found: Sketch.AnyLayer[] = [];
 
