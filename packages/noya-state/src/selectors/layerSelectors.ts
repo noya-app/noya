@@ -281,9 +281,7 @@ export function moveLayer(
       parent.layers.splice(destinationIndex + i, 0, newLayer);
     });
 
-    if (Layers.isGroup(parent)) {
-      fixGroupFrame(parent);
-    }
+    fixGroupFrameHierarchy(draftPage, parentIndexPath);
   });
 }
 
@@ -320,6 +318,21 @@ export function fixGroupFrame(group: Sketch.Group) {
     layer.frame.x -= bounds.minX;
     layer.frame.y -= bounds.minY;
   });
+}
+
+export function fixGroupFrameHierarchy(
+  page: Sketch.Page,
+  indexPath: IndexPath,
+) {
+  const layerPath = Layers.accessPath(page, indexPath).reverse();
+
+  for (let layer of layerPath) {
+    if (Layers.isGroup(layer)) {
+      fixGroupFrame(layer);
+    } else {
+      break;
+    }
+  }
 }
 
 export function insertLayerAtIndexPath(

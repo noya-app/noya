@@ -23,6 +23,7 @@ import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixGroupFrameHierarchy,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
@@ -540,13 +541,18 @@ export function canvasReducer(
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;
-              const layer = Layers.access(
+              const draftLayer = Layers.access(
                 draft.sketch.pages[pageIndex],
                 indexPath,
               );
 
-              layer.frame.x = initialRect.x + delta.x;
-              layer.frame.y = initialRect.y + delta.y;
+              draftLayer.frame.x = initialRect.x + delta.x;
+              draftLayer.frame.y = initialRect.y + delta.y;
+
+              fixGroupFrameHierarchy(
+                draft.sketch.pages[pageIndex],
+                indexPath.slice(0, -1),
+              );
             });
 
             break;
