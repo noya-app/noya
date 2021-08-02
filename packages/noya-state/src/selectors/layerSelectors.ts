@@ -281,6 +281,10 @@ export function moveLayer(
       parent.layers.splice(destinationIndex + i, 0, newLayer);
     });
 
+    indexPaths.forEach((indexPath) => {
+      fixGroupFrameHierarchy(draftPage, indexPath.slice(0, -1));
+    });
+
     fixGroupFrameHierarchy(draftPage, parentIndexPath);
   });
 }
