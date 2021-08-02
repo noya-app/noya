@@ -17,6 +17,7 @@ import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
+  getCurrentPage,
   getSelectedLineLayer,
   Layers,
   SelectedControlPoint,
@@ -540,6 +541,7 @@ export default memo(function Canvas() {
 
           const layers = Selectors.getLayersInRect(
             state,
+            getCurrentPage(state),
             insets,
             createRect(origin, current),
             {
@@ -657,6 +659,7 @@ export default memo(function Canvas() {
 
           const layers = Selectors.getLayersInRect(
             state,
+            getCurrentPage(state),
             insets,
             createRect(origin, current),
             {
