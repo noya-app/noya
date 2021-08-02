@@ -163,6 +163,7 @@ export function applicationReducer(
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':
+    case 'addStopToGradient':
       return canvasReducer(state, action, CanvasKit, context);
     case 'setLayerVisible':
     case 'setLayerName':
@@ -265,6 +266,17 @@ export function applicationReducer(
                 layer.style.fills
               )
                 setNewPatternFill(layer.style.fills, action[1], draft);
+
+              /*if (
+                action[0].includes('Gradient') ||
+                action[0].includes('Fill')
+              ) {
+                if (!draft.selectedGradient) return;
+
+                draft.selectedGradient.styleType = action[0].includes('Border')
+                  ? 'border'
+                  : 'fill';
+              }*/
 
               if (action[0] === 'setFillGradientPosition') {
                 const [, , stopIndex, position] = action;

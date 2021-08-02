@@ -11,7 +11,7 @@ import {
   Saturation,
   Gradient,
 } from 'noya-colorpicker';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import * as Spacer from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 
@@ -41,6 +41,11 @@ export default memo(function GradientPicker({
   onDelete,
   onSelectStop,
 }: Props) {
+  const rgbaColor = useMemo(
+    () => sketchColorToRgba(value[selectedStop].color),
+    [value, selectedStop],
+  );
+
   const handleChangeColor = useCallback(
     (value: RgbaColor) => {
       onChangeColor(rgbaToSketchColor(value));
@@ -58,7 +63,7 @@ export default memo(function GradientPicker({
   return (
     <NoyaColorPicker
       colorModel={colorModel}
-      color={sketchColorToRgba(value[selectedStop].color)}
+      color={rgbaColor}
       onChange={handleChangeColor}
     >
       <Gradient

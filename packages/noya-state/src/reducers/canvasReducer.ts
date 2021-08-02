@@ -1,6 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { interpolateRgba } from 'noya-colorpicker';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import {
   AffineTransform,
   createBounds,
@@ -65,6 +67,7 @@ export type CanvasAction =
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
+  | [type: 'addStopToGradient', point: Point]
   | [
       type: 'insertBitmap',
       file: ArrayBuffer,
@@ -109,6 +112,53 @@ export function canvasReducer(
           'reset',
         ]);
         draft.selectedObjects = [layer.do_objectID];
+      });
+    }
+    case 'addStopToGradient': {
+      const [, point] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const position = Selectors.getPercentageOfPointInGradient(state, point);
+
+      if (!state.selectedGradient) return state;
+
+      const { layerId, fillIndex } = state.selectedGradient;
+
+      const page = getCurrentPage(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+        if (
+          layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient
+        )
+          return state;
+        const gradientStops = layer.style.fills[fillIndex].gradient.stops;
+
+        const gradient = gradientStops.map((g) => ({
+          color: sketchColorToRgba(g.color),
+          position: g.position,
+        }));
+
+        const color = rgbaToSketchColor(interpolateRgba(gradient, position));
+        gradientStops.push({
+          _class: 'gradientStop',
+          color,
+          position,
+        });
+
+        gradientStops.sort((a, b) => a.position - b.position);
+        const nexIndex = gradientStops.findIndex(
+          (g) => g.position === position,
+        );
+
+        if (!draft.selectedGradient) return state;
+        draft.selectedGradient.stopIndex =
+          nexIndex === -1 ? gradientStops.length - 1 : nexIndex;
       });
     }
     case 'addDrawnLayer': {

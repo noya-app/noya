@@ -364,16 +364,16 @@ export default memo(function Canvas() {
             point,
           );
 
-          // const isPointerOnGradientLine = Selectors.isPointerOnGradientLine(
-          //   state,
-          //   point,
-          // );
-
-          //  || isPointerOnGradientLine
+          const isPointerOnGradientLine = Selectors.isPointerOnGradientLine(
+            state,
+            point,
+          );
 
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
             dispatch('interaction', ['maybeMoveGradientStop', point]);
+          } else if (isPointerOnGradientLine) {
+            dispatch('addStopToGradient', point);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {

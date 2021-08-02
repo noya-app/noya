@@ -1,5 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, getLinePercentage, Point } from 'noya-geometry';
+import {
+  AffineTransform,
+  distance,
+  getLinePercentage,
+  Point,
+} from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import {
   getCurrentPage,
@@ -131,48 +136,43 @@ export function getGradientStopIndexAtPoint(
   if (!selectedLayerGradientPoints) return -1;
 
   return selectedLayerGradientPoints.findIndex((gradientPoint) =>
-    isPointInRange(gradientPoint.point, point),
+    isPointInRange(gradientPoint.point, point, 5.5),
   );
 }
 
-// function isPointOnLine(A: Point, B: Point, point: Point) {
-//   // get distance from the point to the two ends of the line
-//   const d1 = distance(point, A);
-//   const d2 = distance(point, B);
+function isPointOnLine(A: Point, B: Point, point: Point) {
+  //get distance from the point to the two ends of the line
+  const d1 = distance(point, A);
+  const d2 = distance(point, B);
 
-//   const lineLen = distance(A, B);
+  const lineLen = distance(A, B);
 
-//   const buffer = 5; // higher # = less accurate
+  const buffer = 0.5; //higher # = less accurate
 
-//   return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
-// }
+  return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
+}
 
-// export function getPercentageOfPointInGradient(
-//   state: ApplicationState,
-//   point: Point,
-// ) {
-//   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
+export function getPercentageOfPointInGradient(
+  state: ApplicationState,
+  point: Point,
+) {
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
+  if (!selectedLayerGradientPoints) return 0;
 
-//   if (!selectedLayerGradientPoints) return 0;
+  return getLinePercentage(point, [
+    selectedLayerGradientPoints[0].point,
+    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
+  ]);
+}
 
-//   // return getLinePercentage(
-//   //   selectedLayerGradientPoints[0],
-//   //   selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1],
-//   //   point,
-//   // );
+export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
+  if (getGradientStopIndexAtPoint(state, point) !== -1) return false;
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
+  if (!selectedLayerGradientPoints) return false;
 
-//   return 0;
-// }
-
-// export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
-//   if (getGradientStopIndexAtPoint(state, point) !== -1) return false;
-//   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
-
-//   if (!selectedLayerGradientPoints) return false;
-
-//   return isPointOnLine(
-//     selectedLayerGradientPoints[0].point,
-//     selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
-//     point,
-//   );
-// }
+  return isPointOnLine(
+    selectedLayerGradientPoints[0].point,
+    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
+    point,
+  );
+}

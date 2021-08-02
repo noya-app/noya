@@ -82,6 +82,7 @@ export function gradientReducer(
           color,
           position,
         });
+        draft.stops.sort((a, b) => a.position - b.position);
       });
     }
     case 'setFillGradientType':

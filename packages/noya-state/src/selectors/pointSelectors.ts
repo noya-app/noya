@@ -28,8 +28,12 @@ import { getBoundingRectMap } from './selectors';
 
 export const POINT_RADIUS = 4;
 
-export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
-  return distance(point, rawPoint) < POINT_RADIUS;
+export const isPointInRange = (
+  point: Point,
+  rawPoint: Point,
+  pointRadius = POINT_RADIUS,
+): boolean => {
+  return distance(point, rawPoint) < pointRadius;
 };
 
 export function isLine(points: Sketch.CurvePoint[]) {
