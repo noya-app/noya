@@ -97,7 +97,10 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
 export default memo(function Canvas() {
   const theme = useTheme();
   const {
-    sizes: { sidebarWidth },
+    sizes: {
+      sidebarWidth,
+      toolbar: { height: toolbarHeight },
+    },
   } = theme;
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -157,10 +160,10 @@ export default memo(function Canvas() {
     () => ({
       left: sidebarWidth,
       right: sidebarWidth,
-      top: 0,
+      top: toolbarHeight,
       bottom: 0,
     }),
-    [sidebarWidth],
+    [sidebarWidth, toolbarHeight],
   );
 
   // Update the canvas size whenever the window is resized
@@ -175,10 +178,10 @@ export default memo(function Canvas() {
       containerSize && containerSize.width > 0 && containerSize.height > 0
         ? {
             width: containerSize.width + insets.left + insets.right,
-            height: containerSize.height,
+            height: containerSize.height + insets.top + insets.bottom,
           }
         : undefined,
-    [containerSize, insets.left, insets.right],
+    [containerSize, insets.bottom, insets.left, insets.right, insets.top],
   );
 
   // Event coordinates are relative to (0,0), but we want them to include

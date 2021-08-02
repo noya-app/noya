@@ -4,6 +4,7 @@ import {
   AffineTransform,
   createRectFromBounds,
   getRectCornerPoints,
+  Insets,
   Point,
   Rect,
   rectContainsPoint,
@@ -17,7 +18,6 @@ import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
-import { CanvasInsets } from '../reducers/workspaceReducer';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
@@ -81,7 +81,7 @@ function visitLayersReversed(
 export function getLayersInRect(
   state: ApplicationState,
   page: Sketch.Page,
-  insets: CanvasInsets,
+  insets: Insets,
   rect: Rect,
   traversalOptions?: LayerTraversalOptions,
 ): PageLayer[] {
@@ -126,7 +126,7 @@ export function getLayersInRect(
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
-  insets: CanvasInsets,
+  insets: Insets,
   point: Point,
   traversalOptions?: LayerTraversalOptions,
 ): PageLayer | undefined {

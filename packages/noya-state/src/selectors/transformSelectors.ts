@@ -1,8 +1,7 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, createBounds } from 'noya-geometry';
+import { AffineTransform, createBounds, Insets } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import { ApplicationState, Layers } from '../index';
-import { CanvasInsets } from '../reducers/workspaceReducer';
 import { toRadians } from '../utils/radians';
 import { getCurrentPageMetadata } from './pageSelectors';
 
@@ -107,14 +106,11 @@ export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {
   return toRadians(getLayerRotation(layer));
 }
 
-export function getScreenTransform(insets: CanvasInsets) {
-  return AffineTransform.translate(insets.left, 0);
+export function getScreenTransform(insets: Insets) {
+  return AffineTransform.translate(insets.left, insets.top);
 }
 
-export function getCanvasTransform(
-  state: ApplicationState,
-  insets: CanvasInsets,
-) {
+export function getCanvasTransform(state: ApplicationState, insets: Insets) {
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
   return AffineTransform.multiply(

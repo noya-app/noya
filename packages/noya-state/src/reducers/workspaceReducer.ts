@@ -1,6 +1,7 @@
 import type { FileSystemHandle } from 'browser-fs-access';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { Insets, Size } from 'noya-geometry';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
@@ -35,7 +36,7 @@ export type WorkspaceState = {
   history: HistoryState;
   highlightedLayer?: LayerHighlight;
   canvasSize: { width: number; height: number };
-  canvasInsets: CanvasInsets;
+  canvasInsets: Insets;
   nextFocusAction?: NextFocusAction;
   preferences: {
     showRulers: boolean;
@@ -46,11 +47,7 @@ export type WorkspaceAction =
   | [type: 'newFile']
   | [type: 'setFile', value: SketchFile, fileHandle?: FileSystemHandle]
   | [type: 'setFileHandle', value?: FileSystemHandle]
-  | [
-      type: 'setCanvasSize',
-      size: { width: number; height: number },
-      insets: { left: number; right: number },
-    ]
+  | [type: 'setCanvasSize', size: Size, insets: Insets]
   | [type: 'setShowRulers', value: boolean]
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
@@ -96,7 +93,9 @@ export function workspaceReducer(
         size.width === state.canvasSize.width &&
         size.height === state.canvasSize.height &&
         insets.left === state.canvasInsets.left &&
-        insets.right === state.canvasInsets.right
+        insets.right === state.canvasInsets.right &&
+        insets.top === state.canvasInsets.top &&
+        insets.bottom === state.canvasInsets.bottom
       ) {
         return state;
       }
@@ -144,7 +143,7 @@ export function createInitialWorkspaceState(
     history: createInitialHistoryState(sketch),
     highlightedLayer: undefined,
     canvasSize: { width: 0, height: 0 },
-    canvasInsets: { left: 0, right: 0 },
+    canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
     preferences: {
       showRulers: false,
     },
