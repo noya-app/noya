@@ -200,7 +200,6 @@ export default memo(function SketchFileRenderer() {
     const layerTransform = Selectors.getLayerTransformAtIndexPath(
       page,
       indexPath,
-      AffineTransform.identity,
     );
 
     return (

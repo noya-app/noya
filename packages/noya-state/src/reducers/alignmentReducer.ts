@@ -1,11 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import {
-  AffineTransform,
-  Bounds,
-  createBounds,
-  transformRect,
-} from 'noya-geometry';
+import { Bounds, createBounds, transformRect } from 'noya-geometry';
 import { sum } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
@@ -59,11 +54,7 @@ export function alignmentReducer(
           layerIndexPath: IndexPath,
         ): Bounds {
           const layer = Layers.access(page, layerIndexPath);
-          const transform = getLayerTransformAtIndexPath(
-            page,
-            layerIndexPath,
-            AffineTransform.identity,
-          );
+          const transform = getLayerTransformAtIndexPath(page, layerIndexPath);
           return createBounds(transformRect(layer.frame, transform));
         }
 
@@ -80,7 +71,6 @@ export function alignmentReducer(
           const transform = getLayerTransformAtIndexPath(
             page,
             layerIndexPath,
-            AffineTransform.identity,
           ).invert();
           const layer = Layers.access(
             draft.sketch.pages[pageIndex], // access page again since we need to write to it
@@ -126,7 +116,6 @@ export function alignmentReducer(
           const transform = getLayerTransformAtIndexPath(
             page,
             layerIndexPath,
-            AffineTransform.identity,
           ).invert();
           const layer = Layers.access(
             draft.sketch.pages[pageIndex], // access page again since we need to write to it

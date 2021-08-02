@@ -29,6 +29,7 @@ import {
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
+  getLayerTransformAtIndexPath,
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
@@ -622,40 +623,27 @@ export function canvasReducer(
               direction,
             );
 
-            const originalTransform = AffineTransform.multiply(
-              AffineTransform.translate(
-                originalBoundingRect.x,
-                originalBoundingRect.y,
-              ),
-              AffineTransform.scale(
-                originalBoundingRect.width,
-                originalBoundingRect.height,
-              ),
-            ).invert();
+            const originalTransform = AffineTransform.translate(
+              originalBoundingRect.x,
+              originalBoundingRect.y,
+            ).scale(originalBoundingRect.width, originalBoundingRect.height);
 
-            const newTransform = AffineTransform.multiply(
-              AffineTransform.translate(newBoundingRect.x, newBoundingRect.y),
-              AffineTransform.scale(
-                newBoundingRect.width,
-                newBoundingRect.height,
-              ),
-            );
+            const newTransform = AffineTransform.translate(
+              newBoundingRect.x,
+              newBoundingRect.y,
+            ).scale(newBoundingRect.width, newBoundingRect.height);
 
-            layerIndexPaths.forEach((layerIndex) => {
-              const originalLayer = Layers.access(pageSnapshot, layerIndex);
+            layerIndexPaths.forEach((indexPath) => {
+              const originalLayer = Layers.access(pageSnapshot, indexPath);
 
-              const layerTransform = AffineTransform.multiply(
-                ...Layers.accessPath(pageSnapshot, layerIndex)
-                  .slice(1, -1) // Remove the page and current layer
-                  .map((layer) =>
-                    AffineTransform.translate(layer.frame.x, layer.frame.y),
-                  )
-                  .reverse(),
+              const layerTransform = getLayerTransformAtIndexPath(
+                pageSnapshot,
+                indexPath,
               );
 
-              const newLayer = Layers.access(
+              const draftLayer = Layers.access(
                 draft.sketch.pages[pageIndex],
-                layerIndex,
+                indexPath,
               );
 
               const originalBounds = createBounds(originalLayer.frame);
@@ -663,7 +651,7 @@ export function canvasReducer(
               const scaleTransform = AffineTransform.multiply(
                 layerTransform.invert(),
                 newTransform,
-                originalTransform,
+                originalTransform.invert(),
                 layerTransform,
               );
 
@@ -680,18 +668,16 @@ export function canvasReducer(
               const roundedMin = { x: Math.round(min.x), y: Math.round(min.y) };
               const roundedMax = { x: Math.round(max.x), y: Math.round(max.y) };
 
-              const newFrame = createRect(roundedMin, roundedMax);
-
               const width = roundedMax.x - roundedMin.x;
               const height = roundedMax.y - roundedMin.y;
 
-              newLayer.isFlippedHorizontal = width < 0;
-              newLayer.isFlippedVertical = height < 0;
+              draftLayer.isFlippedHorizontal = width < 0;
+              draftLayer.isFlippedVertical = height < 0;
 
-              newLayer.frame.x = newFrame.x;
-              newLayer.frame.y = newFrame.y;
-              newLayer.frame.width = newFrame.width;
-              newLayer.frame.height = newFrame.height;
+              draftLayer.frame = {
+                ...draftLayer.frame,
+                ...createRect(roundedMin, roundedMax),
+              };
             });
 
             break;

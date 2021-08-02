@@ -50,7 +50,7 @@ export function getLayerRotationTransform(
 }
 
 export function getLayerTransformAtIndexPath(
-  node: Sketch.AnyLayer,
+  node: Sketch.Page,
   indexPath: IndexPath,
   ctm: AffineTransform = AffineTransform.identity,
   behavior?: 'includeLast',
