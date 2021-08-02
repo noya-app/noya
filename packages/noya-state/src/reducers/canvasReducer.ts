@@ -689,12 +689,7 @@ export function canvasReducer(
               newLayer.isFlippedVertical =
                 height < 0 ? !layer.isFlippedVertical : layer.isFlippedVertical;
 
-              const parentLayer = Layers.access(
-                draft.sketch.pages[pageIndex],
-                indexPath.slice(0, -1),
-              ) as Layers.ParentLayer;
-
-              parentLayer.layers[indexPath[indexPath.length - 1]] = newLayer;
+              Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });
 
             break;
