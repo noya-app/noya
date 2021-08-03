@@ -462,7 +462,7 @@ export default memo(function SketchFileRenderer() {
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {boundingRect && !drawingLayer && !isInserting && (
+            {!points && boundingRect && !drawingLayer && !isInserting && (
               <DragHandles
                 rect={boundingRect}
                 selectionPaint={selectionPaint}

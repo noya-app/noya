@@ -24,5 +24,10 @@ export function getLinePercentage(point: Point, line: [Point, Point]) {
 
   const [p1, p2] = line;
 
-  return clamp((p.x - p1.x) / (p2.x - p1.x), 0, 1);
+  if (p2.x - p1.x !== 0) {
+    return clamp((p.x - p1.x) / (p2.x - p1.x), 0, 1);
+  }
+
+  // If the line is vertical
+  return clamp((p.y - p1.y) / (p2.y - p1.y), 0, 1);
 }

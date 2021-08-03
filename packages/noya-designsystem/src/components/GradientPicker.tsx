@@ -15,13 +15,6 @@ import { memo, useCallback, useMemo } from 'react';
 import * as Spacer from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 
-const colorModel: ColorModel<RgbaColor> = {
-  defaultColor: { r: 0, g: 0, b: 0, a: 1 },
-  toHsva: rgbaToHsva,
-  fromHsva: hsvaToRgba,
-  equal: equalColorObjects,
-};
-
 interface Props {
   value: Sketch.GradientStop[];
   selectedStop: number;
@@ -41,6 +34,13 @@ export default memo(function GradientPicker({
   onDelete,
   onSelectStop,
 }: Props) {
+  const colorModel: ColorModel<RgbaColor> = {
+    defaultColor: { r: 0, g: 0, b: 0, a: 1 },
+    toHsva: rgbaToHsva,
+    fromHsva: hsvaToRgba,
+    equal: equalColorObjects,
+  };
+
   const rgbaColor = useMemo(
     () => sketchColorToRgba(value[selectedStop].color),
     [value, selectedStop],
@@ -62,9 +62,9 @@ export default memo(function GradientPicker({
 
   return (
     <NoyaColorPicker
+      onChange={handleChangeColor}
       colorModel={colorModel}
       color={rgbaColor}
-      onChange={handleChangeColor}
     >
       <Gradient
         gradients={value}

@@ -43,7 +43,6 @@ export function getSelectedGradientStopPoints(
   if (!state.selectedGradient) return;
 
   const { layerId, fillIndex } = state.selectedGradient;
-
   const page = getCurrentPage(state);
   const indexPath = Layers.findIndexPath(
     page,
@@ -65,7 +64,6 @@ export function getSelectedGradientStopPoints(
   ).scale(layer.frame.width, layer.frame.height);
 
   const gradient = layer.style.fills[fillIndex].gradient;
-
   const from = PointString.decode(gradient.from);
   const to = PointString.decode(gradient.to);
 

@@ -75,11 +75,11 @@ function gradient(options?: ModelOptions<Sketch.Gradient>): Sketch.Gradient {
     to: '{0.5, 1}',
     stops: [
       gradientStop({
-        position: 0,
+        position: 0.1,
         color: color({ red: 1, green: 1, blue: 1 }),
       }),
       gradientStop({
-        position: 1,
+        position: 0.9,
         color: color({ red: 0, green: 0, blue: 0 }),
       }),
     ],

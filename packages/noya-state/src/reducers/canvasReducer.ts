@@ -489,9 +489,9 @@ export function canvasReducer(
             );
 
             if (
-              layer.style?.fills?.[fillIndex].fillType !==
+              layer.style?.fills?.[fillIndex]?.fillType !==
                 Sketch.FillType.Gradient ||
-              draftLayer.style?.fills?.[fillIndex].fillType !==
+              draftLayer.style?.fills?.[fillIndex]?.fillType !==
                 Sketch.FillType.Gradient
             )
               return;

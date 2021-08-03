@@ -345,8 +345,12 @@ export default memo(function FillInputFieldWithPicker({
   return (
     <Popover.Root
       onOpenChange={(open) => {
-        if (open && Sketch.FillType.Gradient) {
+        if (open && fillType === Sketch.FillType.Gradient) {
           gradientProps?.onEditGradient(0);
+        }
+
+        if (!open) {
+          dispatch('setSelectedGradient', undefined);
         }
       }}
     >
@@ -380,7 +384,12 @@ export default memo(function FillInputFieldWithPicker({
                     gradientProps?.gradient.gradientType ??
                     Sketch.GradientType.Linear
                   }
-                  onChangeType={onChangeType}
+                  onChangeType={(type) => {
+                    onChangeType?.(type);
+                    if (type === Sketch.FillType.Gradient) {
+                      gradientProps?.onEditGradient(0);
+                    }
+                  }}
                   onChangeGradientType={gradientProps?.onChangeGradientType}
                 />
               </InspectorPrimitives.Row>

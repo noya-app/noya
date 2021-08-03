@@ -267,17 +267,6 @@ export function applicationReducer(
               )
                 setNewPatternFill(layer.style.fills, action[1], draft);
 
-              /*if (
-                action[0].includes('Gradient') ||
-                action[0].includes('Fill')
-              ) {
-                if (!draft.selectedGradient) return;
-
-                draft.selectedGradient.styleType = action[0].includes('Border')
-                  ? 'border'
-                  : 'fill';
-              }*/
-
               if (action[0] === 'setFillGradientPosition') {
                 const [, , stopIndex, position] = action;
 
@@ -293,7 +282,6 @@ export function applicationReducer(
                 draftStop.position = position;
 
                 draftGradient.stops.sort((a, b) => a.position - b.position);
-
                 const newIndex = draftGradient.stops.findIndex(
                   (s) => s === draftStop,
                 );
