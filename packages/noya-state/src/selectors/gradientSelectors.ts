@@ -42,7 +42,7 @@ export function getSelectedGradientStopPoints(
 ): GradientStopPoint[] | undefined {
   if (!state.selectedGradient) return;
 
-  const { layerId, fillIndex } = state.selectedGradient;
+  const { layerId, fillIndex, styleType } = state.selectedGradient;
   const page = getCurrentPage(state);
   const indexPath = Layers.findIndexPath(
     page,
@@ -53,7 +53,12 @@ export function getSelectedGradientStopPoints(
 
   const layer = Layers.access(page, indexPath);
 
-  if (layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient)
+  if (
+    (styleType === 'fill' &&
+      layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient) ||
+    (styleType === 'border' &&
+      layer.style?.borders?.[fillIndex].fillType !== Sketch.FillType.Gradient)
+  )
     return;
 
   const transform = getLayerTransformAtIndexPath(
@@ -63,7 +68,13 @@ export function getSelectedGradientStopPoints(
     'includeLast',
   ).scale(layer.frame.width, layer.frame.height);
 
-  const gradient = layer.style.fills[fillIndex].gradient;
+  const gradient =
+    styleType === 'fill'
+      ? layer.style?.fills?.[fillIndex].gradient
+      : layer.style?.borders?.[fillIndex].gradient;
+
+  if (!gradient) return;
+
   const from = PointString.decode(gradient.from);
   const to = PointString.decode(gradient.to);
 

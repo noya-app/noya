@@ -218,7 +218,12 @@ export default memo(function SketchShape({ layer }: Props) {
         />
       ))}
       {borders.map((border, index) => (
-        <SketchBorder key={`border-${index}`} path={path} border={border} />
+        <SketchBorder
+          key={`border-${index}`}
+          path={path}
+          border={border}
+          frame={layer.frame}
+        />
       ))}
     </>
   );
