@@ -346,7 +346,7 @@ export default memo(function SketchFileRenderer() {
     [CanvasKit],
   );
 
-  const points = useMemo(() => {
+  const gradientPoints = useMemo(() => {
     const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
 
     if (!gradientStopPoints || !state.selectedGradient) return null;
@@ -424,7 +424,7 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {points}
+        {gradientPoints}
         {symbol && <SketchArtboardContent layer={symbol} />}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
@@ -462,12 +462,15 @@ export default memo(function SketchFileRenderer() {
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {!points && boundingRect && !drawingLayer && !isInserting && (
-              <DragHandles
-                rect={boundingRect}
-                selectionPaint={selectionPaint}
-              />
-            )}
+            {!gradientPoints &&
+              boundingRect &&
+              !drawingLayer &&
+              !isInserting && (
+                <DragHandles
+                  rect={boundingRect}
+                  selectionPaint={selectionPaint}
+                />
+              )}
           </>
         )}
       </Group>

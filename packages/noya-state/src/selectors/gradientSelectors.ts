@@ -48,6 +48,7 @@ type GradientStopPoint = { point: Point; color: Sketch.Color };
 
 export function getSelectedGradientStopPoints(
   state: ApplicationState,
+  sorted = false,
 ): GradientStopPoint[] | undefined {
   if (!state.selectedGradient) return;
 
@@ -92,7 +93,11 @@ export function getSelectedGradientStopPoints(
     to: transform.applyTo(to),
   };
 
-  return gradient.stops.map((stop) => {
+  const stops = sorted
+    ? [...gradient.stops].sort((a, b) => a.position - b.position)
+    : gradient.stops;
+
+  return stops.map((stop) => {
     return {
       color: stop.color,
       point: {
@@ -149,7 +154,10 @@ export function getGradientStopIndexAtPoint(
   state: ApplicationState,
   point: Point,
 ): number {
-  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(
+    state,
+    true,
+  );
 
   if (!selectedLayerGradientPoints) return -1;
 

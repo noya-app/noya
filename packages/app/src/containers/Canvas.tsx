@@ -704,7 +704,8 @@ export default memo(function Canvas() {
         }
         case 'maybeMove':
         case 'maybeScale':
-        case 'moveGradientStop': {
+        case 'moveGradientStop':
+        case 'maybeMoveGradientStop': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
