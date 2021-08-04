@@ -3,7 +3,7 @@ import { round } from 'noya-utils';
 import { diagram } from 'tree-visit';
 import { PointString } from './PointString';
 
-function describeValue(value: unknown): string {
+export function describeValue(value: unknown): string {
   switch (typeof value) {
     case 'boolean':
     case 'bigint':
@@ -63,6 +63,14 @@ export function describeObject(
         ...(options?.frames !== false
           ? [describeObject(object.frame, options)]
           : []),
+        ...(options?.flip &&
+        (object.isFlippedHorizontal || object.isFlippedVertical)
+          ? [
+              `flip(${object.isFlippedHorizontal ? 'h' : ''}${
+                object.isFlippedVertical ? 'v' : ''
+              })`,
+            ]
+          : []),
       ].join(' ');
     }
     case Sketch.ClassValue.CurvePoint: {
@@ -93,6 +101,7 @@ type DescribeOptions = {
   borders?: boolean;
   points?: boolean;
   frames?: boolean;
+  flip?: boolean;
 };
 
 export function debugDescription(

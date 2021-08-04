@@ -25,7 +25,6 @@ const Container = styled.header(({ theme }) => ({
   borderBottom: `1px solid ${theme.colors.divider}`,
   alignItems: 'stretch',
   justifyContent: 'center',
-  backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
 }));
 

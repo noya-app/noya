@@ -153,6 +153,7 @@ export function applicationReducer(
     case 'movePage': {
       return pageReducer(state, action);
     }
+    case 'setZoom':
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'addShapePathLayer':
@@ -183,12 +184,12 @@ export function applicationReducer(
     case 'setMaskMode':
       return layerPropertyReducer(state, action, CanvasKit);
     case 'importSvg':
-    case 'groupLayer':
+    case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':
     case 'selectLayer':
     case 'selectAllLayers':
-    case 'ungroupLayer':
+    case 'ungroupLayers':
     case 'createSymbol':
     case 'detachSymbol':
     case 'deleteSymbol':

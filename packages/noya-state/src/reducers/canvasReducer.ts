@@ -20,7 +20,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { lerp, uuid } from 'noya-utils';
+import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
@@ -28,6 +28,7 @@ import {
   computeNewBoundingRect,
   EncodedPageMetadata,
   fixGradientPositions,
+  fixGroupFrameHierarchy,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
@@ -42,6 +43,7 @@ import {
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
+  resizeLayerFrame,
 } from '../selectors/selectors';
 import {
   getScaledSnapBoundingRect,
@@ -60,6 +62,7 @@ import {
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type CanvasAction =
+  | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -89,6 +92,36 @@ export function canvasReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setZoom': {
+      const [, value, mode] = action;
+      const pageId = getCurrentPage(state).do_objectID;
+      const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const newValue = clamp(
+          mode === 'multiply' ? value * zoomValue : value,
+          0.01,
+          256,
+        );
+
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        // To find the new scrollOrigin: start at the viewport center and
+        // move by the scaled the distance to the scrollOrigin
+        const newScrollOrigin = AffineTransform.translate(
+          (scrollOrigin.x - viewportCenter.x) * (newValue / zoomValue),
+          (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
+        ).applyTo(viewportCenter);
+
+        draftUser[pageId].scrollOrigin = PointString.encode(newScrollOrigin);
+        draftUser[pageId].zoomValue = newValue;
+      });
+    }
     case 'insertArtboard': {
       const [, { name, width, height }] = action;
       const pageIndex = getCurrentPageIndex(state);
@@ -598,6 +631,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(point, point),
             );
@@ -618,12 +652,14 @@ export function canvasReducer(
 
             const originAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(origin, origin),
             );
 
             const currentAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(current, current),
             );
@@ -673,6 +709,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              pageSnapshot,
               context.canvasSize,
               sourceRect,
               layerIndexPaths,
@@ -683,13 +720,18 @@ export function canvasReducer(
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;
-              const layer = Layers.access(
+              const draftLayer = Layers.access(
                 draft.sketch.pages[pageIndex],
                 indexPath,
               );
 
-              layer.frame.x = initialRect.x + delta.x;
-              layer.frame.y = initialRect.y + delta.y;
+              draftLayer.frame.x = initialRect.x + delta.x;
+              draftLayer.frame.y = initialRect.y + delta.y;
+
+              fixGroupFrameHierarchy(
+                draft.sketch.pages[pageIndex],
+                indexPath.slice(0, -1),
+              );
             });
 
             break;
@@ -765,54 +807,42 @@ export function canvasReducer(
 
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
+              pageSnapshot,
               originalBoundingRect,
               delta,
               context.canvasSize,
               direction,
             );
 
-            const originalTransform = AffineTransform.multiply(
-              AffineTransform.translate(
-                originalBoundingRect.x,
-                originalBoundingRect.y,
-              ),
-              AffineTransform.scale(
-                originalBoundingRect.width,
-                originalBoundingRect.height,
-              ),
-            ).invert();
+            const originalTransform = AffineTransform.translate(
+              originalBoundingRect.x,
+              originalBoundingRect.y,
+            ).scale(originalBoundingRect.width, originalBoundingRect.height);
 
-            const newTransform = AffineTransform.multiply(
-              AffineTransform.translate(newBoundingRect.x, newBoundingRect.y),
-              AffineTransform.scale(
-                newBoundingRect.width,
-                newBoundingRect.height,
-              ),
-            );
+            const newTransform = AffineTransform.translate(
+              newBoundingRect.x,
+              newBoundingRect.y,
+            ).scale(newBoundingRect.width, newBoundingRect.height);
 
-            layerIndexPaths.forEach((layerIndex) => {
-              const originalLayer = Layers.access(pageSnapshot, layerIndex);
+            layerIndexPaths.forEach((indexPath) => {
+              const originalLayer = Layers.access(pageSnapshot, indexPath);
 
-              const layerTransform = AffineTransform.multiply(
-                ...Layers.accessPath(pageSnapshot, layerIndex)
-                  .slice(1, -1) // Remove the page and current layer
-                  .map((layer) =>
-                    AffineTransform.translate(layer.frame.x, layer.frame.y),
-                  )
-                  .reverse(),
+              const layerTransform = getLayerTransformAtIndexPath(
+                pageSnapshot,
+                indexPath,
               );
 
-              const newLayer = Layers.access(
-                draft.sketch.pages[pageIndex],
-                layerIndex,
-              );
+              const layer = Layers.access(
+                pageSnapshot,
+                indexPath,
+              ) as Layers.PageLayer;
 
               const originalBounds = createBounds(originalLayer.frame);
 
               const scaleTransform = AffineTransform.multiply(
                 layerTransform.invert(),
                 newTransform,
-                originalTransform,
+                originalTransform.invert(),
                 layerTransform,
               );
 
@@ -829,18 +859,22 @@ export function canvasReducer(
               const roundedMin = { x: Math.round(min.x), y: Math.round(min.y) };
               const roundedMax = { x: Math.round(max.x), y: Math.round(max.y) };
 
-              const newFrame = createRect(roundedMin, roundedMax);
-
               const width = roundedMax.x - roundedMin.x;
               const height = roundedMax.y - roundedMin.y;
 
-              newLayer.isFlippedHorizontal = width < 0;
-              newLayer.isFlippedVertical = height < 0;
+              const newLayer = resizeLayerFrame(
+                layer,
+                createRect(roundedMin, roundedMax),
+              );
 
-              newLayer.frame.x = newFrame.x;
-              newLayer.frame.y = newFrame.y;
-              newLayer.frame.width = newFrame.width;
-              newLayer.frame.height = newFrame.height;
+              newLayer.isFlippedHorizontal =
+                width < 0
+                  ? !layer.isFlippedHorizontal
+                  : layer.isFlippedHorizontal;
+              newLayer.isFlippedVertical =
+                height < 0 ? !layer.isFlippedVertical : layer.isFlippedVertical;
+
+              Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });
 
             break;

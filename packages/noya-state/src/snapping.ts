@@ -8,19 +8,17 @@ import {
   Rect,
   Size,
 } from 'noya-geometry';
-import { isDeepEqual } from 'noya-utils';
+import { cartesianProduct, isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { getRectExtentPoint, Layers, resizeRect } from '.';
-import { cartesianProduct } from 'noya-utils';
 import { ParentLayer } from './layers';
 import { ApplicationState } from './reducers/applicationReducer';
+import { CompassDirection } from './reducers/interactionReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
 import {
   getBoundingRect,
-  getCurrentPage,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from './selectors/selectors';
-import { CompassDirection } from './reducers/interactionReducer';
 
 export function getSnapValues(rect: Rect, axis: Axis): number[] {
   const bounds = createBounds(rect);
@@ -40,11 +38,10 @@ export function getSnapValues(rect: Rect, axis: Axis): number[] {
 
 export function getPossibleTargetSnapLayers(
   state: ApplicationState,
+  page: Sketch.Page,
   canvasSize: Size,
   sourceIndexPaths: IndexPath[] = [],
 ) {
-  const page = getCurrentPage(state);
-
   // Ensure we don't snap to a selected layer by filtering them out
   const sourceIds = sourceIndexPaths.map(
     (indexPath) => Layers.access(page, indexPath).do_objectID,
@@ -52,7 +49,8 @@ export function getPossibleTargetSnapLayers(
 
   const allVisibleLayers = getLayersInRect(
     state,
-    { left: 0, right: 0 },
+    page,
+    { left: 0, right: 0, top: 0, bottom: 0 },
     { x: 0, y: 0, width: canvasSize.width, height: canvasSize.height },
     {
       clickThroughGroups: false,
@@ -161,14 +159,14 @@ export function getSnaps(
 
 export function getSnapAdjustmentForVisibleLayers(
   state: ApplicationState,
+  page: Sketch.Page,
   canvasSize: Size,
   sourceRect: Rect,
   sourceIndexPaths?: IndexPath[],
 ): Point {
-  const page = getCurrentPage(state);
-
   const targetLayers = getPossibleTargetSnapLayers(
     state,
+    page,
     canvasSize,
     sourceIndexPaths,
   );
@@ -199,6 +197,7 @@ export function getSnapAdjustmentForVisibleLayers(
 
 export function getScaledSnapBoundingRect(
   state: ApplicationState,
+  page: Sketch.Page,
   boundingRect: Rect,
   delta: Point,
   canvasSize: Size,
@@ -210,6 +209,7 @@ export function getScaledSnapBoundingRect(
 
   const snapAdjustment = getSnapAdjustmentForVisibleLayers(
     state,
+    page,
     canvasSize,
     createRect(extentPoint, extentPoint),
     getSelectedLayerIndexPathsExcludingDescendants(state),

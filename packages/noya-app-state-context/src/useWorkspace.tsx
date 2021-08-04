@@ -1,6 +1,7 @@
 import { LayerHighlight } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import { useWorkspaceState, useDispatch } from 'noya-app-state-context';
+import { Insets, Size } from 'noya-geometry';
 
 export function useWorkspace() {
   const state = useWorkspaceState();
@@ -16,10 +17,7 @@ export function useWorkspace() {
   } = state;
 
   const setCanvasSize = useCallback(
-    (
-      size: { width: number; height: number },
-      insets: { left: number; right: number },
-    ) => {
+    (size: Size, insets: Insets) => {
       dispatch('setCanvasSize', size, insets);
     },
     [dispatch],

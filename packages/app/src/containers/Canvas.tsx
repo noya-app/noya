@@ -10,13 +10,14 @@ import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
-import { createRect, Insets, Point } from 'noya-geometry';
+import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
 import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
+  getCurrentPage,
   getSelectedLineLayer,
   Layers,
   SelectedControlPoint,
@@ -96,7 +97,10 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
 export default memo(function Canvas() {
   const theme = useTheme();
   const {
-    sizes: { sidebarWidth },
+    sizes: {
+      sidebarWidth,
+      toolbar: { height: toolbarHeight },
+    },
   } = theme;
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -139,6 +143,13 @@ export default memo(function Canvas() {
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
+    'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
+    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
+    'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
+    'Mod-+': () => dispatch('setZoom', 2, 'multiply'),
+    'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
+    'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
+    'Mod-0': () => dispatch('setZoom', 1),
   });
 
   useKeyboardShortcuts('keyup', {
@@ -149,10 +160,10 @@ export default memo(function Canvas() {
     () => ({
       left: sidebarWidth,
       right: sidebarWidth,
-      top: 0,
+      top: toolbarHeight,
       bottom: 0,
     }),
-    [sidebarWidth],
+    [sidebarWidth, toolbarHeight],
   );
 
   // Update the canvas size whenever the window is resized
@@ -167,21 +178,19 @@ export default memo(function Canvas() {
       containerSize && containerSize.width > 0 && containerSize.height > 0
         ? {
             width: containerSize.width + insets.left + insets.right,
-            height: containerSize.height,
+            height: containerSize.height + insets.top + insets.bottom,
           }
         : undefined,
-    [containerSize, insets.left, insets.right],
+    [containerSize, insets.bottom, insets.left, insets.right, insets.top],
   );
 
   // Event coordinates are relative to (0,0), but we want them to include
-  // the current document's offset from the origin
+  // the current page's zoom and offset from the origin
   const offsetEventPoint = useCallback(
-    (point: Point) => {
-      return {
-        x: point.x - meta.scrollOrigin.x,
-        y: point.y - meta.scrollOrigin.y,
-      };
-    },
+    (point: Point) =>
+      AffineTransform.scale(1 / meta.zoomValue)
+        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+        .applyTo(point),
     [meta],
   );
 
@@ -567,6 +576,7 @@ export default memo(function Canvas() {
 
           const layers = Selectors.getLayersInRect(
             state,
+            getCurrentPage(state),
             insets,
             createRect(origin, current),
             {
@@ -684,6 +694,7 @@ export default memo(function Canvas() {
 
           const layers = Selectors.getLayersInRect(
             state,
+            getCurrentPage(state),
             insets,
             createRect(origin, current),
             {

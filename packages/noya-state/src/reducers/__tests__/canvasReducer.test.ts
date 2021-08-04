@@ -3,6 +3,10 @@ import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';
 import {
+  encodePageMetadata,
+  getCurrentPageMetadata,
+} from '../../selectors/pageSelectors';
+import {
   Action,
   applicationReducer,
   ApplicationReducerContext,
@@ -450,5 +454,57 @@ describe('drawing', () => {
         { points: true },
       ),
     ).toMatchSnapshot();
+  });
+});
+
+describe('setZoom', () => {
+  test('zoom 2x', () => {
+    const state = createInitialState(createSketchFile(SketchModel.page()));
+
+    expect(getCurrentPageMetadata(state)).toEqual({
+      zoomValue: 1,
+      scrollOrigin: { x: 0, y: 0 },
+    });
+
+    const updated = run(state, [['setZoom', 2, 'multiply']]);
+
+    expect(getCurrentPageMetadata(updated)).toEqual({
+      zoomValue: 2,
+      scrollOrigin: { x: -500, y: -500 },
+    });
+  });
+
+  test('zoom 4x', () => {
+    const page = SketchModel.page();
+    const state = createInitialState(createSketchFile(page));
+
+    state.sketch.user[page.do_objectID] = encodePageMetadata({
+      zoomValue: 2,
+      scrollOrigin: { x: -500, y: -500 },
+    });
+
+    const updated = run(state, [['setZoom', 2, 'multiply']]);
+
+    expect(getCurrentPageMetadata(updated)).toEqual({
+      zoomValue: 4,
+      scrollOrigin: { x: -1500, y: -1500 },
+    });
+  });
+
+  test('zoom 0.5x', () => {
+    const page = SketchModel.page();
+    const state = createInitialState(createSketchFile(page));
+
+    state.sketch.user[page.do_objectID] = encodePageMetadata({
+      zoomValue: 2,
+      scrollOrigin: { x: -500, y: -500 },
+    });
+
+    const updated = run(state, [['setZoom', 1 / 2, 'multiply']]);
+
+    expect(getCurrentPageMetadata(updated)).toEqual({
+      zoomValue: 1,
+      scrollOrigin: { x: 0, y: 0 },
+    });
   });
 });

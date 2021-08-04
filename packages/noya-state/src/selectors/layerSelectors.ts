@@ -4,10 +4,14 @@ import { RelativeDropPosition } from 'noya-designsystem';
 import {
   AffineTransform,
   createBounds,
+  createRectFromBounds,
+  getRectCornerPoints,
+  normalizeRect,
+  Point,
+  Rect,
   rectContainsPoint,
   rectsIntersect,
   transformRect,
-  Point,
 } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import {
@@ -253,28 +257,197 @@ export function moveLayer(
       }
     }
 
-    const parentTransform = getLayerTransformAtIndexPath(
-      draftPage,
-      parentIndexPath,
-      undefined,
-      'includeLast',
-    );
+    layerInfo.forEach(({ layer, transform }, i) => {
+      const parentTransform = getLayerTransformAtIndexPath(
+        draftPage,
+        parentIndexPath,
+        undefined,
+        'includeLast',
+      );
 
-    const adjustedLayers = layerInfo.map(({ layer, transform }) => {
       // First we undo the original parent's transform, then we apply the new parent's transform
       const newTransform = AffineTransform.multiply(
         transform,
         parentTransform.invert(),
       );
 
-      return produce(layer, (draftLayer) => {
+      const newLayer = produce(layer, (draftLayer) => {
         draftLayer.frame = {
           ...draftLayer.frame,
           ...transformRect(draftLayer.frame, newTransform),
         };
       });
+
+      parent.layers.splice(destinationIndex + i, 0, newLayer);
     });
 
-    parent.layers.splice(destinationIndex, 0, ...adjustedLayers);
+    indexPaths.forEach((indexPath) => {
+      fixGroupFrameHierarchy(draftPage, indexPath.slice(0, -1));
+    });
+
+    fixGroupFrameHierarchy(draftPage, parentIndexPath);
+  });
+}
+
+/**
+ * Normalize a group's frame so that it equals exactly the bounding rect of all of its
+ * children, and the top-left-most child begins at {0, 0}
+ */
+export function fixGroupFrame(group: Sketch.Group) {
+  const points = group.layers.flatMap((layer) =>
+    getRectCornerPoints(layer.frame),
+  );
+
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+
+  const bounds = {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys),
+  };
+
+  const newGroupFrame = createRectFromBounds(bounds);
+
+  group.frame = {
+    ...group.frame,
+    x: group.frame.x + newGroupFrame.x,
+    y: group.frame.y + newGroupFrame.y,
+    width: newGroupFrame.width,
+    height: newGroupFrame.height,
+  };
+
+  group.layers.forEach((layer) => {
+    layer.frame.x -= bounds.minX;
+    layer.frame.y -= bounds.minY;
+  });
+}
+
+export function fixGroupFrameHierarchy(
+  page: Sketch.Page,
+  indexPath: IndexPath,
+) {
+  const layerPath = Layers.accessPath(page, indexPath).reverse();
+
+  for (let layer of layerPath) {
+    if (Layers.isGroup(layer)) {
+      fixGroupFrame(layer);
+    } else {
+      break;
+    }
+  }
+}
+
+export function insertLayerAtIndexPath(
+  state: ApplicationState,
+  layer: PageLayer | PageLayer[],
+  destinationIndexPath: IndexPath,
+  rawPosition: RelativeDropPosition,
+) {
+  const layers = Array.isArray(layer) ? layer : [layer];
+  const ids = layers.map((layer) => layer.do_objectID);
+
+  const pageIndex = getCurrentPageIndex(state);
+
+  // Add the layers to the page. Since they're added last, this won't invalidate
+  // the `destinationIndexPath`
+  state = produce(state, (draft) => {
+    draft.sketch.pages[pageIndex].layers.push(...layers);
+    draft.selectedObjects = ids;
+  });
+
+  // Move the layers into their target position
+  return moveLayer(
+    state,
+    ids,
+    Layers.access(getCurrentPage(state), destinationIndexPath).do_objectID,
+    rawPosition,
+  );
+}
+
+export function insertLayer(
+  state: ApplicationState,
+  layer: PageLayer | PageLayer[],
+  destinationId: string,
+  rawPosition: RelativeDropPosition,
+) {
+  const destinationIndexPath = Layers.findIndexPath(
+    getCurrentPage(state),
+    (layer) => layer.do_objectID === destinationId,
+  );
+
+  if (!destinationIndexPath) return state;
+
+  return insertLayerAtIndexPath(
+    state,
+    layer,
+    destinationIndexPath,
+    rawPosition,
+  );
+}
+
+export function removeLayerAtIndexPath(
+  state: ApplicationState,
+  indexPaths: IndexPath[],
+) {
+  const pageIndex = getCurrentPageIndex(state);
+
+  return produce(state, (draft) => {
+    // We delete in reverse so that the indexPaths remain accurate even
+    // after some layers are deleted.
+    const reversed = [...indexPaths].reverse();
+
+    reversed.forEach((indexPath) => {
+      const childIndex = indexPath[indexPath.length - 1];
+
+      const parent = Layers.access(
+        draft.sketch.pages[pageIndex],
+        indexPath.slice(0, -1),
+      ) as Layers.ParentLayer;
+
+      parent.layers.splice(childIndex, 1);
+    });
+  });
+}
+
+export function removeLayer(state: ApplicationState, id: string | string[]) {
+  const ids = new Set(typeof id === 'string' ? [id] : id);
+
+  const indexPaths = Layers.findAllIndexPaths(getCurrentPage(state), (layer) =>
+    ids.has(layer.do_objectID),
+  );
+
+  if (!indexPaths) return state;
+
+  return removeLayerAtIndexPath(state, indexPaths);
+}
+
+export function resizeLayerFrame<T extends Sketch.AnyLayer>(
+  layer: T,
+  rect: Rect,
+): T {
+  const originalFrame = layer.frame;
+  const newFrame = normalizeRect(rect);
+
+  return produce(layer, (draft) => {
+    draft.frame = {
+      ...draft.frame,
+      ...newFrame,
+    };
+
+    if (Layers.isGroup(draft)) {
+      const scaleTransform = AffineTransform.scale(
+        newFrame.width / originalFrame.width,
+        newFrame.height / originalFrame.height,
+      );
+
+      draft.layers = draft.layers.map((childLayer) =>
+        resizeLayerFrame(
+          childLayer,
+          transformRect(childLayer.frame, scaleTransform),
+        ),
+      );
+    }
   });
 }
