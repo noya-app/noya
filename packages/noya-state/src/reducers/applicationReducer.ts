@@ -267,14 +267,20 @@ export function applicationReducer(
               )
                 setNewPatternFill(layer.style.fills, action[1], draft);
 
-              if (action[0] === 'setFillGradientPosition') {
+              if (
+                action[0] === 'setFillGradientPosition' ||
+                action[0] === 'setBorderGradientPosition'
+              ) {
                 const [, , stopIndex, position] = action;
 
                 if (!draft.selectedGradient) return;
 
                 const { fillIndex } = draft.selectedGradient;
 
-                const draftGradient = layer.style?.fills?.[fillIndex].gradient;
+                const draftGradient =
+                  action[0] === 'setFillGradientPosition'
+                    ? layer.style?.fills?.[fillIndex].gradient
+                    : layer.style?.borders?.[fillIndex].gradient;
 
                 if (!draftGradient) return;
 

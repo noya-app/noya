@@ -364,10 +364,10 @@ export default memo(function Canvas() {
             point,
           );
 
-          const isPointerOnGradientLine = Selectors.isPointerOnGradientLine(
-            state,
-            point,
-          );
+          const isPointerOnGradientLine =
+            selectedGradientStopIndex === -1
+              ? Selectors.isPointerOnGradientLine(state, point)
+              : false;
 
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);

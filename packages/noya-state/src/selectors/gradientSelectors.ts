@@ -22,17 +22,26 @@ export function getSelectedGradient(
   page: Sketch.Page,
   selectedGradient: SelectedGradient,
 ) {
-  const { layerId, fillIndex } = selectedGradient;
+  const { layerId, fillIndex, styleType } = selectedGradient;
 
   const layer = Layers.find(page, (layer) => layer.do_objectID === layerId);
 
   if (
     !layer ||
-    layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient
+    (styleType === 'fill' &&
+      layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient) ||
+    (styleType === 'border' &&
+      layer.style?.borders?.[fillIndex].fillType !== Sketch.FillType.Gradient)
   )
     return;
 
-  return layer.style.fills[fillIndex].gradient;
+  const gradient =
+    styleType === 'fill'
+      ? layer.style?.fills?.[fillIndex].gradient
+      : layer.style?.borders?.[fillIndex].gradient;
+
+  if (!gradient) return;
+  return gradient;
 }
 
 type GradientStopPoint = { point: Point; color: Sketch.Color };
@@ -175,7 +184,6 @@ export function getPercentageOfPointInGradient(
 }
 
 export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
-  if (getGradientStopIndexAtPoint(state, point) !== -1) return false;
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
   if (!selectedLayerGradientPoints) return false;
 

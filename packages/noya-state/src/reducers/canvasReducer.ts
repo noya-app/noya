@@ -121,7 +121,7 @@ export function canvasReducer(
 
       if (!state.selectedGradient) return state;
 
-      const { layerId, fillIndex } = state.selectedGradient;
+      const { layerId, fillIndex, styleType } = state.selectedGradient;
 
       const page = getCurrentPage(state);
       const indexPath = Layers.findIndexPath(
@@ -133,11 +133,23 @@ export function canvasReducer(
 
       return produce(state, (draft) => {
         const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+
         if (
-          layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient
+          (styleType === 'fill' &&
+            layer.style?.fills?.[fillIndex].fillType !==
+              Sketch.FillType.Gradient) ||
+          (styleType === 'border' &&
+            layer.style?.borders?.[fillIndex].fillType !==
+              Sketch.FillType.Gradient)
         )
           return state;
-        const gradientStops = layer.style.fills[fillIndex].gradient.stops;
+
+        const gradientStops =
+          styleType === 'fill'
+            ? layer.style?.fills?.[fillIndex].gradient.stops
+            : layer.style?.borders?.[fillIndex].gradient.stops;
+
+        if (!gradientStops) return;
 
         const gradient = gradientStops.map((g) => ({
           color: sketchColorToRgba(g.color),
@@ -473,7 +485,12 @@ export function canvasReducer(
 
             if (!state.selectedGradient) return;
 
-            const { layerId, fillIndex, stopIndex } = state.selectedGradient;
+            const {
+              layerId,
+              fillIndex,
+              stopIndex,
+              styleType,
+            } = state.selectedGradient;
 
             const indexPath = Layers.findIndexPath(
               pageSnapshot,
@@ -496,6 +513,18 @@ export function canvasReducer(
             )
               return;
 
+            const gradient =
+              styleType === 'fill'
+                ? layer.style?.fills?.[fillIndex].gradient
+                : layer.style?.borders?.[fillIndex].gradient;
+
+            const draftGradient =
+              styleType === 'fill'
+                ? draftLayer.style?.fills?.[fillIndex].gradient
+                : draftLayer.style?.borders?.[fillIndex].gradient;
+
+            if (!gradient || !draftGradient) return;
+
             const transform = getLayerTransformAtIndexPath(
               pageSnapshot,
               indexPath,
@@ -507,9 +536,6 @@ export function canvasReducer(
               x: current.x - origin.x,
               y: current.y - origin.y,
             };
-
-            const gradient = layer.style.fills[fillIndex].gradient;
-            const draftGradient = draftLayer.style.fills[fillIndex].gradient;
 
             const transformPointString = (pointString: string) => {
               const originalPoint = PointString.decode(pointString);
