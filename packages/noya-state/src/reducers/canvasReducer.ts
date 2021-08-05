@@ -1,10 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { interpolateRgba } from 'noya-colorpicker';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import {
   AffineTransform,
   createBounds,
   createRect,
+  getLinePercentage,
   insetRect,
   Point,
   Rect,
@@ -17,12 +20,14 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { clamp, uuid } from 'noya-utils';
+import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
+import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixGradientPositions,
   fixGroupFrameHierarchy,
   fixZeroLayerDimensions,
   getBoundingRect,
@@ -65,6 +70,7 @@ export type CanvasAction =
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
+  | [type: 'addStopToGradient', point: Point]
   | [
       type: 'insertBitmap',
       file: ArrayBuffer,
@@ -139,6 +145,55 @@ export function canvasReducer(
           'reset',
         ]);
         draft.selectedObjects = [layer.do_objectID];
+      });
+    }
+    case 'addStopToGradient': {
+      const [, point] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const position = Selectors.getPercentageOfPointInGradient(state, point);
+
+      if (!state.selectedGradient) return state;
+
+      const { layerId, fillIndex, styleType } = state.selectedGradient;
+
+      const page = getCurrentPage(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+
+        if (
+          layer.style?.[styleType]?.[fillIndex].fillType !==
+          Sketch.FillType.Gradient
+        )
+          return state;
+
+        const gradientStops =
+          layer.style?.[styleType]?.[fillIndex].gradient.stops;
+
+        if (!gradientStops) return;
+
+        const gradient = gradientStops.map((g) => ({
+          color: sketchColorToRgba(g.color),
+          position: g.position,
+        }));
+
+        const color = rgbaToSketchColor(interpolateRgba(gradient, position));
+        gradientStops.push(SketchModel.gradientStop({ color, position }));
+
+        gradientStops.sort((a, b) => a.position - b.position);
+        const nextIndex = gradientStops.findIndex(
+          (g) => g.position === position,
+        );
+
+        if (!draft.selectedGradient) return state;
+        draft.selectedGradient.stopIndex =
+          nextIndex === -1 ? gradientStops.length - 1 : nextIndex;
       });
     }
     case 'addDrawnLayer': {
@@ -421,7 +476,8 @@ export function canvasReducer(
         action[1][0] === 'maybeScale' ||
           action[1][0] === 'maybeMove' ||
           action[1][0] === 'maybeMovePoint' ||
-          action[1][0] === 'maybeMoveControlPoint'
+          action[1][0] === 'maybeMoveControlPoint' ||
+          action[1][0] === 'maybeMoveGradientStop'
           ? [...action[1], page]
           : action[1],
       );
@@ -429,6 +485,114 @@ export function canvasReducer(
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
         switch (interactionState.type) {
+          case 'maybeMoveGradientStop': {
+            if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
+
+            const { pageSnapshot } = draft.interactionState;
+
+            if (!state.selectedGradient) return;
+
+            const gradient = getSelectedGradient(
+              pageSnapshot,
+              state.selectedGradient,
+            );
+
+            if (!gradient) return;
+
+            fixGradientPositions(gradient);
+
+            return;
+          }
+          case 'moveGradientStop': {
+            const { origin, current, pageSnapshot } = interactionState;
+
+            if (!state.selectedGradient) return;
+
+            const {
+              layerId,
+              fillIndex,
+              stopIndex,
+              styleType,
+            } = state.selectedGradient;
+
+            const indexPath = Layers.findIndexPath(
+              pageSnapshot,
+              (layer) => layer.do_objectID === layerId,
+            );
+
+            if (!indexPath) return;
+
+            const layer = Layers.access(pageSnapshot, indexPath);
+            const draftLayer = Layers.access(
+              draft.sketch.pages[pageIndex],
+              indexPath,
+            );
+
+            if (
+              layer.style?.fills?.[fillIndex]?.fillType !==
+                Sketch.FillType.Gradient ||
+              draftLayer.style?.fills?.[fillIndex]?.fillType !==
+                Sketch.FillType.Gradient
+            )
+              return;
+
+            const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
+
+            const draftGradient =
+              draftLayer.style?.[styleType]?.[fillIndex].gradient;
+
+            if (!gradient || !draftGradient) return;
+
+            const transform = getLayerTransformAtIndexPath(
+              pageSnapshot,
+              indexPath,
+              AffineTransform.identity,
+              'includeLast',
+            ).scale(layer.frame.width, layer.frame.height);
+
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
+            const transformPointString = (pointString: string) => {
+              const originalPoint = PointString.decode(pointString);
+              const transformedPoint = transform.applyTo(originalPoint);
+              transformedPoint.x += delta.x;
+              transformedPoint.y += delta.y;
+              const newPoint = transform.invert().applyTo(transformedPoint);
+              return PointString.encode(newPoint);
+            };
+
+            switch (stopIndex) {
+              case 0:
+                draftGradient.from = transformPointString(gradient.from);
+                break;
+              case gradient.stops.length - 1:
+                draftGradient.to = transformPointString(gradient.to);
+                break;
+              default:
+                const from = transform.applyTo(
+                  PointString.decode(gradient.from),
+                );
+                const to = transform.applyTo(PointString.decode(gradient.to));
+                const stop = gradient.stops[stopIndex];
+
+                const stopPoint = {
+                  x: lerp(from.x, to.x, stop.position),
+                  y: lerp(from.y, to.y, stop.position),
+                };
+                stopPoint.x += delta.x;
+                stopPoint.y += delta.y;
+
+                const position = getLinePercentage(stopPoint, [from, to]);
+
+                draftGradient.stops[stopIndex].position = position;
+                break;
+            }
+
+            break;
+          }
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
 

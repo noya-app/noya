@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { Rect, Point } from 'noya-geometry';
-import { UUID } from '../types';
+import { Point, Rect } from 'noya-geometry';
+import { UUID } from 'noya-state';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -42,7 +42,8 @@ export type SnapshotInteractionAction =
   | [type: 'maybeMove', origin: Point]
   | [type: 'maybeScale', origin: Point, direction: CompassDirection]
   | [type: 'maybeMovePoint', origin: Point]
-  | [type: 'maybeMoveControlPoint', origin: Point];
+  | [type: 'maybeMoveControlPoint', origin: Point]
+  | [type: 'maybeMoveGradientStop', origin: Point];
 
 export type InteractionAction =
   | [type: 'reset']
@@ -66,7 +67,8 @@ export type InteractionAction =
   | [type: 'movingPoint', origin: Point, current: Point]
   | [type: 'movingControlPoint', origin: Point, current: Point]
   | [type: 'updateMovingPoint', origin: Point, current: Point]
-  | [type: 'updateMovingControlPoint', origin: Point, current: Point];
+  | [type: 'updateMovingControlPoint', origin: Point, current: Point]
+  | [type: 'movingGradientStop', current: Point];
 
 export type InteractionState =
   | {
@@ -154,7 +156,14 @@ export type InteractionState =
     }
   | { type: 'panMode' }
   | { type: 'maybePan'; origin: Point }
-  | { type: 'panning'; previous: Point; next: Point };
+  | { type: 'panning'; previous: Point; next: Point }
+  | { type: 'maybeMoveGradientStop'; origin: Point; pageSnapshot: Sketch.Page }
+  | {
+      type: 'moveGradientStop';
+      origin: Point;
+      current: Point;
+      pageSnapshot: Sketch.Page;
+    };
 
 export type InteractionType = InteractionState['type'];
 
@@ -395,6 +404,32 @@ export function interactionReducer(
         type: 'panning',
         previous: state.next,
         next: point,
+      };
+    }
+    case 'maybeMoveGradientStop': {
+      const [, origin, pageSnapshot] = action;
+
+      return {
+        type: 'maybeMoveGradientStop',
+        origin,
+        pageSnapshot,
+      };
+    }
+    case 'movingGradientStop': {
+      const [, current] = action;
+
+      if (
+        state.type !== 'maybeMoveGradientStop' &&
+        state.type !== 'moveGradientStop'
+      ) {
+        throw new Error('Bad interaction state');
+      }
+
+      return {
+        type: 'moveGradientStop',
+        pageSnapshot: state.pageSnapshot,
+        origin: state.origin,
+        current,
       };
     }
     case 'reset': {

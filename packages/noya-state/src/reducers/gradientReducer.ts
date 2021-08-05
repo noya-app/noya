@@ -41,7 +41,9 @@ export type GradientAction =
       type: `set${StyleElementType}GradientType`,
       index: number,
       value: Sketch.GradientType,
-    ];
+    ]
+  | [type: `set${StyleElementType}GradientFrom`, index: number, value: string]
+  | [type: `set${StyleElementType}GradientTo`, index: number, value: string];
 
 export function gradientReducer(
   state: Sketch.Gradient,
@@ -65,10 +67,7 @@ export function gradientReducer(
       return produce(state, (draft) => {
         if (!draft || !draft.stops[stopIndex]) return;
         draft.stops[stopIndex].position = position;
-        /*TODO >>> Sort the stops by position
-         draft.fills[fillIndex].gradient.stops.sort(
-          (a, b) => a.position - b.position,
-        );  */
+        draft.stops.sort((a, b) => a.position - b.position);
       });
     }
     case 'addFillGradientStop':
@@ -83,6 +82,7 @@ export function gradientReducer(
           color,
           position,
         });
+        draft.stops.sort((a, b) => a.position - b.position);
       });
     }
     case 'setFillGradientType':
@@ -108,6 +108,24 @@ export function gradientReducer(
       const [, , gradient] = action;
 
       return gradient;
+    }
+    case 'setFillGradientFrom':
+    case 'setBorderGradientFrom': {
+      const [, , point] = action;
+
+      return produce(state, (draft) => {
+        if (!draft) return;
+        draft.from = point;
+      });
+    }
+    case 'setFillGradientTo':
+    case 'setBorderGradientTo': {
+      const [, , point] = action;
+
+      return produce(state, (draft) => {
+        if (!draft) return;
+        draft.to = point;
+      });
     }
     default:
       return state;

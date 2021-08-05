@@ -49,7 +49,7 @@ export default memo(function Gradient({
       return;
     }
 
-    const gradient = gradients.map((g, index) => ({
+    const gradient = gradients.map(g => ({
       color: sketchColorToRgba(g.color),
       position: g.position,
     }));

@@ -22,7 +22,8 @@ type EditableBorder = {
 };
 
 export default memo(function BorderInspector() {
-  const [, dispatch] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
+  const selectLayerId = state.selectedObjects[0];
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),
@@ -139,10 +140,17 @@ export default memo(function BorderInspector() {
                 dispatch('setBorderGradientType', index, value),
               onChangeGradient: (value) =>
                 dispatch('setBorderGradient', index, value),
+              onEditGradient: (stopIndex) =>
+                dispatch('setSelectedGradient', {
+                  layerId: selectLayerId,
+                  fillIndex: index,
+                  stopIndex,
+                  styleType: 'borders',
+                }),
             }}
           />
         ),
-        [dispatch],
+        [dispatch, selectLayerId],
       )}
     />
   );

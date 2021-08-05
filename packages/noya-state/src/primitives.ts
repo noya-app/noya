@@ -70,7 +70,7 @@ export function clearColor(CanvasKit: CanvasKit) {
 
 export function shader(
   CanvasKit: CanvasKit,
-  fill: Sketch.Fill,
+  fill: Sketch.Fill | Sketch.Border,
   layerFrame: Rect,
   image?: ArrayBuffer,
 ): Shader | undefined {
@@ -170,7 +170,7 @@ export function shader(
       }
     }
     case Sketch.FillType.Pattern: {
-      if (!image) return;
+      if (!image || fill._class === 'border') return;
 
       const canvasImage = CanvasKit.MakeImageFromEncoded(image);
 
@@ -234,7 +234,7 @@ export function shader(
 
 export function fill(
   CanvasKit: CanvasKit,
-  fill: Sketch.Fill,
+  fill: Sketch.Fill | Sketch.Border,
   layerFrame: Rect,
   image?: ArrayBuffer,
 ): Paint {

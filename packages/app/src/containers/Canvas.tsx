@@ -349,7 +349,7 @@ export default memo(function Canvas() {
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
-            if (direction) {
+            if (direction && !state.selectedGradient) {
               dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
@@ -368,7 +368,22 @@ export default memo(function Canvas() {
             },
           );
 
-          if (layer) {
+          const selectedGradientStopIndex = Selectors.getGradientStopIndexAtPoint(
+            state,
+            point,
+          );
+
+          const isPointerOnGradientLine =
+            selectedGradientStopIndex === -1
+              ? Selectors.isPointerOnGradientLine(state, point)
+              : false;
+
+          if (state.selectedGradient && selectedGradientStopIndex !== -1) {
+            dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
+            dispatch('interaction', ['maybeMoveGradientStop', point]);
+          } else if (isPointerOnGradientLine) {
+            dispatch('addStopToGradient', point);
+          } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
                 dispatch('selectLayer', layer.do_objectID, 'difference');
@@ -387,6 +402,7 @@ export default memo(function Canvas() {
 
             dispatch('interaction', ['startMarquee', rawPoint]);
           }
+
           break;
         }
       }
@@ -400,6 +416,22 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'maybeMoveGradientStop': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientStop', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'moveGradientStop': {
+          dispatch('interaction', ['movingGradientStop', point]);
+          event.preventDefault();
+          break;
+        }
         case 'insert':
           dispatch('interaction', [
             state.interactionState.type,
@@ -604,13 +636,13 @@ export default memo(function Canvas() {
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
-            if (direction) {
+            if (direction && !state.selectedGradient) {
               dispatch('interaction', ['hoverHandle', direction]);
 
               return;
             }
+            return;
           }
-
           break;
         }
       }
@@ -682,7 +714,9 @@ export default memo(function Canvas() {
           break;
         }
         case 'maybeMove':
-        case 'maybeScale': {
+        case 'maybeScale':
+        case 'moveGradientStop':
+        case 'maybeMoveGradientStop': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
@@ -812,6 +846,7 @@ export default memo(function Canvas() {
     >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container
+          id="canvas-container"
           ref={containerRef}
           cursor={cursor}
           {...mergeEventHandlers(bind(), {

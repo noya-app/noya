@@ -27,9 +27,14 @@ import { getCurrentPage } from './pageSelectors';
 import { getBoundingRectMap } from './selectors';
 
 export const POINT_RADIUS = 4;
+export const SELECTED_GRADIENT_POINT_RADIUS = POINT_RADIUS * 2;
 
-export const isPointInRange = (point: Point, rawPoint: Point): boolean => {
-  return distance(point, rawPoint) < POINT_RADIUS;
+export const isPointInRange = (
+  point: Point,
+  rawPoint: Point,
+  pointRadius = POINT_RADIUS,
+): boolean => {
+  return distance(point, rawPoint) < pointRadius;
 };
 
 export function isLine(points: Sketch.CurvePoint[]) {
