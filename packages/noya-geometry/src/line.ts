@@ -1,4 +1,5 @@
 import { clamp } from 'noya-utils';
+import { distance } from './point';
 import { Point } from './types';
 
 // http://paulbourke.net/geometry/pointlineplane/
@@ -30,4 +31,14 @@ export function getLinePercentage(point: Point, line: [Point, Point]) {
 
   // If the line is vertical
   return clamp((p.y - p1.y) / (p2.y - p1.y), 0, 1);
+}
+
+export function isPointInLine(point: Point, line: [Point, Point]) {
+  //get distance from the point to the two ends of the line
+  const d1 = distance(point, line[0]);
+  const d2 = distance(point, line[1]);
+
+  const lineLength = distance(line[0], line[1]);
+
+  return Math.abs(d1 + d2 - lineLength) < 0.5;
 }

@@ -168,19 +168,13 @@ export function canvasReducer(
         const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
 
         if (
-          (styleType === 'fill' &&
-            layer.style?.fills?.[fillIndex].fillType !==
-              Sketch.FillType.Gradient) ||
-          (styleType === 'border' &&
-            layer.style?.borders?.[fillIndex].fillType !==
-              Sketch.FillType.Gradient)
+          layer.style?.[styleType]?.[fillIndex].fillType !==
+          Sketch.FillType.Gradient
         )
           return state;
 
         const gradientStops =
-          styleType === 'fill'
-            ? layer.style?.fills?.[fillIndex].gradient.stops
-            : layer.style?.borders?.[fillIndex].gradient.stops;
+          layer.style?.[styleType]?.[fillIndex].gradient.stops;
 
         if (!gradientStops) return;
 
@@ -190,20 +184,16 @@ export function canvasReducer(
         }));
 
         const color = rgbaToSketchColor(interpolateRgba(gradient, position));
-        gradientStops.push({
-          _class: 'gradientStop',
-          color,
-          position,
-        });
+        gradientStops.push(SketchModel.gradientStop({ color, position }));
 
         gradientStops.sort((a, b) => a.position - b.position);
-        const nexIndex = gradientStops.findIndex(
+        const nextIndex = gradientStops.findIndex(
           (g) => g.position === position,
         );
 
         if (!draft.selectedGradient) return state;
         draft.selectedGradient.stopIndex =
-          nexIndex === -1 ? gradientStops.length - 1 : nexIndex;
+          nextIndex === -1 ? gradientStops.length - 1 : nextIndex;
       });
     }
     case 'addDrawnLayer': {
@@ -546,15 +536,10 @@ export function canvasReducer(
             )
               return;
 
-            const gradient =
-              styleType === 'fill'
-                ? layer.style?.fills?.[fillIndex].gradient
-                : layer.style?.borders?.[fillIndex].gradient;
+            const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
 
             const draftGradient =
-              styleType === 'fill'
-                ? draftLayer.style?.fills?.[fillIndex].gradient
-                : draftLayer.style?.borders?.[fillIndex].gradient;
+              draftLayer.style?.[styleType]?.[fillIndex].gradient;
 
             if (!gradient || !draftGradient) return;
 

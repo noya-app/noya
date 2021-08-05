@@ -1,8 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   AffineTransform,
-  distance,
   getLinePercentage,
+  isPointInLine,
   Point,
 } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
@@ -17,6 +17,7 @@ import {
   ApplicationState,
   SelectedGradient,
 } from '../reducers/applicationReducer';
+import { SELECTED_GRADIENT_POINT_RADIUS } from './pointSelectors';
 
 export function getSelectedGradient(
   page: Sketch.Page,
@@ -28,17 +29,11 @@ export function getSelectedGradient(
 
   if (
     !layer ||
-    (styleType === 'fill' &&
-      layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient) ||
-    (styleType === 'border' &&
-      layer.style?.borders?.[fillIndex].fillType !== Sketch.FillType.Gradient)
+    layer.style?.[styleType]?.[fillIndex].fillType !== Sketch.FillType.Gradient
   )
     return;
 
-  const gradient =
-    styleType === 'fill'
-      ? layer.style?.fills?.[fillIndex].gradient
-      : layer.style?.borders?.[fillIndex].gradient;
+  const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
 
   if (!gradient) return;
   return gradient;
@@ -64,10 +59,7 @@ export function getSelectedGradientStopPoints(
   const layer = Layers.access(page, indexPath);
 
   if (
-    (styleType === 'fill' &&
-      layer.style?.fills?.[fillIndex].fillType !== Sketch.FillType.Gradient) ||
-    (styleType === 'border' &&
-      layer.style?.borders?.[fillIndex].fillType !== Sketch.FillType.Gradient)
+    layer.style?.[styleType]?.[fillIndex]?.fillType !== Sketch.FillType.Gradient
   )
     return;
 
@@ -78,10 +70,7 @@ export function getSelectedGradientStopPoints(
     'includeLast',
   ).scale(layer.frame.width, layer.frame.height);
 
-  const gradient =
-    styleType === 'fill'
-      ? layer.style?.fills?.[fillIndex].gradient
-      : layer.style?.borders?.[fillIndex].gradient;
+  const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
 
   if (!gradient) return;
 
@@ -162,20 +151,8 @@ export function getGradientStopIndexAtPoint(
   if (!selectedLayerGradientPoints) return -1;
 
   return selectedLayerGradientPoints.findIndex((gradientPoint) =>
-    isPointInRange(gradientPoint.point, point, 5.5),
+    isPointInRange(gradientPoint.point, point, SELECTED_GRADIENT_POINT_RADIUS),
   );
-}
-
-function isPointOnLine(A: Point, B: Point, point: Point) {
-  //get distance from the point to the two ends of the line
-  const d1 = distance(point, A);
-  const d2 = distance(point, B);
-
-  const lineLen = distance(A, B);
-
-  const buffer = 0.5; //higher # = less accurate
-
-  return d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer;
 }
 
 export function getPercentageOfPointInGradient(
@@ -195,9 +172,8 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
   if (!selectedLayerGradientPoints) return false;
 
-  return isPointOnLine(
+  return isPointInLine(point, [
     selectedLayerGradientPoints[0].point,
     selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
-    point,
-  );
+  ]);
 }

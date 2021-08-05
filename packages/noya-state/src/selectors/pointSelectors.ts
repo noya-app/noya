@@ -27,6 +27,7 @@ import { getCurrentPage } from './pageSelectors';
 import { getBoundingRectMap } from './selectors';
 
 export const POINT_RADIUS = 4;
+export const SELECTED_GRADIENT_POINT_RADIUS = POINT_RADIUS * 1.5;
 
 export const isPointInRange = (
   point: Point,

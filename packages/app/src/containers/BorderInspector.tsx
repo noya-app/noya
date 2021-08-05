@@ -145,7 +145,7 @@ export default memo(function BorderInspector() {
                   layerId: selectLayerId,
                   fillIndex: index,
                   stopIndex,
-                  styleType: 'border',
+                  styleType: 'borders',
                 }),
             }}
           />

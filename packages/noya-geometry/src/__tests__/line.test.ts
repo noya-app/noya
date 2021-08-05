@@ -1,4 +1,8 @@
-import { getLinePercentage, getClosestPointOnLine } from '../line';
+import {
+  getLinePercentage,
+  getClosestPointOnLine,
+  isPointInLine,
+} from '../line';
 import { Point } from '../types';
 
 describe('perpendicular point on line', () => {
@@ -52,5 +56,20 @@ describe('percent on line', () => {
 
     expect(getLinePercentage({ x: -5, y: 0 }, horizontalLine)).toEqual(0);
     expect(getLinePercentage({ x: 15, y: 0 }, horizontalLine)).toEqual(1);
+  });
+});
+
+describe('is point in line', () => {
+  test('horizontal line', () => {
+    const horizontalLine: [Point, Point] = [
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+    ];
+
+    expect(isPointInLine({ x: 0, y: 0 }, horizontalLine)).toEqual(true);
+    expect(isPointInLine({ x: 5, y: 0 }, horizontalLine)).toEqual(true);
+
+    expect(isPointInLine({ x: -5, y: 0 }, horizontalLine)).toEqual(false);
+    expect(isPointInLine({ x: 15, y: 0 }, horizontalLine)).toEqual(false);
   });
 });

@@ -57,7 +57,7 @@ export type SelectedGradient = {
   layerId: string;
   fillIndex: number;
   stopIndex: number;
-  styleType: 'fill' | 'border';
+  styleType: 'fills' | 'borders';
 };
 
 export type SelectedPointLists = Record<string, number[]>;
@@ -276,12 +276,10 @@ export function applicationReducer(
 
                 if (!draft.selectedGradient) return;
 
-                const { fillIndex } = draft.selectedGradient;
+                const { fillIndex, styleType } = draft.selectedGradient;
 
                 const draftGradient =
-                  action[0] === 'setFillGradientPosition'
-                    ? layer.style?.fills?.[fillIndex].gradient
-                    : layer.style?.borders?.[fillIndex].gradient;
+                  layer.style?.[styleType]?.[fillIndex].gradient;
 
                 if (!draftGradient) return;
 

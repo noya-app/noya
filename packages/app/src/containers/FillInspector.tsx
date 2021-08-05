@@ -157,7 +157,7 @@ export default memo(function FillInspector({
                   layerId: selectLayerId,
                   fillIndex: index,
                   stopIndex,
-                  styleType: 'fill',
+                  styleType: 'fills',
                 }),
             }}
             patternProps={{

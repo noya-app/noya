@@ -36,15 +36,5 @@ export default memo(function SketchBorder({
 
   useDeletable(strokedPath);
 
-  const fillShader = Primitives.shader(CanvasKit, border, frame);
-
-  if (!fillShader) {
-    paint.setColor(Primitives.clearColor(CanvasKit));
-    return null;
-  }
-
-  paint.setShader(fillShader);
-  paint.setAlphaf(border.contextSettings.opacity);
-
   return <Path path={strokedPath} paint={paint} />;
 });
