@@ -34,12 +34,15 @@ export default memo(function GradientPicker({
   onDelete,
   onSelectStop,
 }: Props) {
-  const colorModel: ColorModel<RgbaColor> = {
-    defaultColor: { r: 0, g: 0, b: 0, a: 1 },
-    toHsva: rgbaToHsva,
-    fromHsva: hsvaToRgba,
-    equal: equalColorObjects,
-  };
+  const colorModel: ColorModel<RgbaColor> = useMemo(
+    () => ({
+      defaultColor: { r: 0, g: 0, b: 0, a: 1 },
+      toHsva: rgbaToHsva,
+      fromHsva: hsvaToRgba,
+      equal: equalColorObjects,
+    }),
+    [],
+  );
 
   const rgbaColor = useMemo(
     () => sketchColorToRgba(value[selectedStop].color),
