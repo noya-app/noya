@@ -276,6 +276,7 @@ export const SVGKit: CanvasKit = {
   RuntimeEffect: 0 as any,
   Shader: JSShaderFactory,
   TextBlob: 0 as any,
+  Typeface: 0 as any,
   TypefaceFontProvider: 0 as any,
 
   // Misc
@@ -332,7 +333,6 @@ export const SVGKit: CanvasKit = {
   ]),
   FillType: Embind.createEnum(['Winding', 'EvenOdd']),
   FilterMode: Embind.createEnum(['Linear', 'Nearest']),
-  FilterQuality: Embind.createEnum(['None', 'Low', 'Medium', 'High']),
   FontEdging: Embind.createEnum(['Alias', 'AntiAlias', 'SubpixelAntiAlias']),
   FontHinting: Embind.createEnum(['None', 'Slight', 'Normal', 'Full']),
   GlyphRunFlags: {

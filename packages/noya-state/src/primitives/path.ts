@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, Path, PathCommand, PathOp } from 'canvaskit';
+import { CanvasKit, Path, PathOp } from 'canvaskit';
 import { distance, Point, Rect } from 'noya-geometry';
 import {
   CommandWithoutQuadratics,
@@ -351,16 +351,49 @@ export function unscaleCurvePoint(curvePoint: Sketch.CurvePoint, frame: Rect) {
   };
 }
 
-function pathCommandToSVGCommand(
-  CanvasKit: CanvasKit,
-  command: PathCommand,
-): CommandWithoutQuadratics {
+export enum PathCommandVerb {
+  move = 0,
+  line = 1,
+  quad = 2,
+  conic = 3,
+  cubic = 4,
+  close = 5,
+}
+
+export type PathCommand = [PathCommandVerb, ...number[]];
+
+const parameterCount = {
+  [PathCommandVerb.move]: 2,
+  [PathCommandVerb.line]: 2,
+  [PathCommandVerb.quad]: 4,
+  [PathCommandVerb.conic]: 5,
+  [PathCommandVerb.cubic]: 6,
+  [PathCommandVerb.close]: 0,
+};
+
+export function parsePathCmds(input: Float32Array) {
+  const result: PathCommand[] = [];
+
+  let i = 0;
+  while (i < input.length) {
+    const cmd = input[i] as PathCommandVerb;
+    i++;
+    const count = parameterCount[cmd];
+    const params = input.slice(i, i + count);
+    i += count;
+    result.push([cmd, ...params]);
+  }
+
+  return result;
+}
+
+function pathCommandToSVGCommand(command: number[]): CommandWithoutQuadratics {
   switch (command[0]) {
-    case CanvasKit.MOVE_VERB: {
+    case PathCommandVerb.move: {
       const [, x, y] = command;
       return { type: 'move', to: { x, y } };
     }
-    case CanvasKit.CUBIC_VERB: {
+    case PathCommandVerb.cubic: {
       const [, x1, y1, x2, y2, x3, y3] = command;
       return {
         type: 'cubicCurve',
@@ -375,13 +408,10 @@ function pathCommandToSVGCommand(
 }
 
 export function pathToCurvePoints(
-  CanvasKit: CanvasKit,
   path: Path,
   frame: Rect,
 ): Sketch.CurvePoint[] {
-  const svgCommands = path
-    .toCmds()
-    .map((cmd) => pathCommandToSVGCommand(CanvasKit, cmd));
+  const svgCommands = parsePathCmds(path.toCmds()).map(pathCommandToSVGCommand);
 
   // Assume a single path. `isClosed` should already be handled, before calling
   // this function, so we can ignore it here.

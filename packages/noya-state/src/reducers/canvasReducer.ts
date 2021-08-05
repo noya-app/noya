@@ -445,9 +445,7 @@ export function canvasReducer(
         const newCurvePoints = Primitives.splitPath(
           segmentPath,
           t,
-        ).map((path) =>
-          Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
-        );
+        ).map((path) => Primitives.pathToCurvePoints(path, draftLayer.frame));
 
         const start = draftLayer.points.slice(0, segmentIndex + 1);
         const end = draftLayer.points.slice(segmentIndex + 1);
