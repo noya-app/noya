@@ -19,6 +19,7 @@ import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
 
 export * from './primitives/path';
+export * from './primitives/pathCommand';
 
 /**
  * Resize a rect in a compass direction
