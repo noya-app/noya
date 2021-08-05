@@ -438,6 +438,7 @@ export default memo(function SketchFileRenderer() {
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
               boundingRect &&
+              !gradientPoints &&
               !drawingLayer &&
               !isInserting && (
                 <>

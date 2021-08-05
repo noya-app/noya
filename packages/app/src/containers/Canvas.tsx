@@ -349,7 +349,7 @@ export default memo(function Canvas() {
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
-            if (direction) {
+            if (direction && !state.selectedGradient) {
               dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
@@ -778,7 +778,7 @@ export default memo(function Canvas() {
       case 'maybeScale':
       case 'scaling':
       case 'hoverHandle':
-        if (handleDirection) {
+        if (handleDirection && !state.selectedGradient) {
           return getCursorForDirection(handleDirection, state);
         }
         return 'default';
