@@ -152,9 +152,12 @@ export default memo(function Canvas() {
     'Mod-0': () => dispatch('setZoom', 1),
   });
 
-  useKeyboardShortcuts('keyup', {
-    Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
-  });
+  useKeyboardShortcuts(
+    {
+      Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
+    },
+    { eventName: 'keyup' },
+  );
 
   const insets = useMemo(
     () => ({
