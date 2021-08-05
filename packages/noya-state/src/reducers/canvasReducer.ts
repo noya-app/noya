@@ -71,6 +71,7 @@ export type CanvasAction =
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
   | [type: 'addStopToGradient', point: Point]
+  | [type: 'deleteStopToGradient']
   | [
       type: 'insertBitmap',
       file: ArrayBuffer,
@@ -365,6 +366,45 @@ export function canvasReducer(
 
         draft.selectedControlPoint = undefined;
         return;
+      });
+    }
+    case 'deleteStopToGradient': {
+      const pageIndex = getCurrentPageIndex(state);
+
+      if (!state.selectedGradient) return state;
+      const {
+        layerId,
+        fillIndex,
+        stopIndex,
+        styleType,
+      } = state.selectedGradient;
+
+      const page = getCurrentPage(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+
+        if (
+          layer.style?.[styleType]?.[fillIndex].fillType !==
+          Sketch.FillType.Gradient
+        )
+          return state;
+
+        const gradientStops =
+          layer.style?.[styleType]?.[fillIndex].gradient.stops;
+
+        if (!gradientStops || gradientStops.length <= 2) return;
+        gradientStops.splice(stopIndex, 1);
+
+        if (!draft.selectedGradient) return state;
+        draft.selectedGradient.stopIndex =
+          stopIndex - 1 < 0 ? 0 : stopIndex - 1;
       });
     }
     case 'pan': {

@@ -142,6 +142,7 @@ export default memo(function Canvas() {
     Backspace: () => dispatch('deleteLayer', state.selectedObjects),
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
+    Delete: () => dispatch('deleteStopToGradient'), //TODO: Filter? Only works on gradients
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
     'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
     'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),

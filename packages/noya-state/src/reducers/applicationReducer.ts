@@ -165,6 +165,7 @@ export function applicationReducer(
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':
     case 'addStopToGradient':
+    case 'deleteStopToGradient':
       return canvasReducer(state, action, CanvasKit, context);
     case 'setLayerVisible':
     case 'setLayerName':
