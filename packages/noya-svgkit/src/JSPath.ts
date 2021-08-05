@@ -7,7 +7,6 @@ import type {
   InputRect,
   InputRRect,
   Path,
-  PathCommand,
   PathOp,
   Point,
   Rect,
@@ -20,6 +19,7 @@ import {
   getRectCornerPoints,
   getRectEdgeMidPoints,
 } from 'noya-geometry';
+import { parsePathCmds } from 'noya-state';
 import { JSEmbindObject } from './Embind';
 import { SVGKit } from './SVGKit';
 
@@ -27,8 +27,11 @@ const ROOT_2_OVER_2 = Math.sqrt(2) / 2;
 
 export function createJSPath(PathKit: any) {
   class JSPath extends JSEmbindObject implements Path {
-    _path = new PathKit.NewPath();
+    private _path = new PathKit.NewPath();
 
+    makeAsWinding(): Path | null {
+      throw new Error('Not implemented');
+    }
     addArc(
       oval: InputRect,
       startAngle: AngleInDegrees,
@@ -255,8 +258,8 @@ export function createJSPath(PathKit: any) {
       this._path = this._path.stroke(opts);
       return this;
     }
-    toCmds(): PathCommand[] {
-      return this._path.toCmds();
+    toCmds(): Float32Array {
+      return new Float32Array(this._path.toCmds().flat());
     }
     toSVGString(): string {
       return this._path.toSVGString();
@@ -268,9 +271,9 @@ export function createJSPath(PathKit: any) {
       throw new Error('Not implemented');
     }
 
-    static MakeFromCmds(cmds: PathCommand[]): JSPath | null {
+    static MakeFromCmds(cmds: Float32Array): JSPath | null {
       const path = new JSPath();
-      path._path = PathKit.FromCmds(cmds);
+      path._path = PathKit.FromCmds(parsePathCmds(cmds));
       return path;
     }
   }
