@@ -377,16 +377,16 @@ export default memo(function Canvas() {
             point,
           );
 
-          const isPointerOnGradientLine =
-            selectedGradientStopIndex === -1
-              ? Selectors.isPointerOnGradientLine(state, point)
-              : false;
-
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
             dispatch('interaction', ['maybeMoveGradientStop', point]);
-          } else if (isPointerOnGradientLine) {
+          } else if (
+            selectedGradientStopIndex !== -1 &&
+            Selectors.isPointerOnGradientLine(state, point)
+          ) {
             dispatch('addStopToGradient', point);
+          } else if (Selectors.isPointerOnGradientElipseEditor(state, point)) {
+            dispatch('interaction', ['maybeMoveGradientElipseLength', point]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
@@ -420,6 +420,22 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'maybeMoveGradientElipseLength': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientElipseLength', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'moveGradientElipseLength': {
+          dispatch('interaction', ['movingGradientElipseLength', point]);
+          event.preventDefault();
+          break;
+        }
         case 'maybeMoveGradientStop': {
           const { origin } = state.interactionState;
 
@@ -720,7 +736,9 @@ export default memo(function Canvas() {
         case 'maybeMove':
         case 'maybeScale':
         case 'moveGradientStop':
-        case 'maybeMoveGradientStop': {
+        case 'maybeMoveGradientStop':
+        case 'maybeMoveGradientElipseLength':
+        case 'moveGradientElipseLength': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);

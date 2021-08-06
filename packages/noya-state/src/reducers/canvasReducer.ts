@@ -7,6 +7,7 @@ import {
   AffineTransform,
   createBounds,
   createRect,
+  distance,
   getLinePercentage,
   insetRect,
   Point,
@@ -22,7 +23,10 @@ import {
 } from 'noya-state';
 import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import { getSelectedGradient } from '../selectors/gradientSelectors';
+import {
+  getSelectedGradient,
+  getSelectedGradientStopPoints,
+} from '../selectors/gradientSelectors';
 import {
   addToParentLayer,
   computeNewBoundingRect,
@@ -540,7 +544,6 @@ export function canvasReducer(
             if (!gradient) return;
 
             fixGradientPositions(gradient);
-
             return;
           }
           case 'moveGradientStop': {
@@ -632,6 +635,46 @@ export function canvasReducer(
             }
 
             break;
+          }
+          case 'maybeMoveGradientElipseLength': {
+            return;
+          }
+          case 'moveGradientElipseLength': {
+            const { current } = interactionState;
+            if (!state.selectedGradient) return;
+
+            const { layerId, fillIndex } = state.selectedGradient;
+
+            const indexPath = Layers.findIndexPath(
+              page,
+              (layer) => layer.do_objectID === layerId,
+            );
+
+            if (!indexPath) return;
+
+            const draftLayer = Layers.access(
+              draft.sketch.pages[pageIndex],
+              indexPath,
+            );
+
+            if (
+              draftLayer.style?.fills?.[fillIndex]?.fillType !==
+                Sketch.FillType.Gradient &&
+              draftLayer.style?.fills?.[fillIndex]?.gradient.gradientType !==
+                Sketch.GradientType.Radial
+            )
+              return;
+            const gradient = draftLayer.style?.fills?.[fillIndex]?.gradient;
+            const points = getSelectedGradientStopPoints(state);
+            if (!points) return;
+            const center = points[0].point;
+            const lastPoint = points[points.length - 1].point;
+
+            const radius = distance(center, lastPoint);
+            const length = distance(center, { x: current.x, y: center.y });
+
+            gradient.elipseLength = length / radius;
+            return;
           }
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;

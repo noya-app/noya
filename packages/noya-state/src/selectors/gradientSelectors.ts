@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   AffineTransform,
+  distance,
   getLinePercentage,
   isPointInLine,
   Point,
@@ -176,4 +177,40 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
     selectedLayerGradientPoints[0].point,
     selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point,
   ]);
+}
+
+export function isPointerOnGradientElipseEditor(
+  state: ApplicationState,
+  point: Point,
+) {
+  const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
+  if (!state.selectedGradient || !selectedLayerGradientPoints) return false;
+  const selectedGradient = getSelectedGradient(
+    getCurrentPage(state),
+    state.selectedGradient,
+  );
+
+  if (!selectedGradient) return false;
+
+  const center = selectedLayerGradientPoints[0].point;
+  const lastPoint =
+    selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point;
+
+  const height = distance(center, lastPoint) * 2;
+  const width = height * selectedGradient.elipseLength;
+
+  // Maybe there is a function to do this in a more efficient way
+  const theta =
+    Math.atan2(lastPoint.y - center.y, lastPoint.x - center.x) - 1.5708;
+
+  const cos = Math.cos(-theta);
+  const sin = Math.sin(-theta);
+  const x = center.x - width / 2;
+
+  const position = {
+    x: cos * (x - center.x) + sin * 0 + center.x,
+    y: cos * 0 - sin * (x - center.x) + center.y,
+  };
+
+  return isPointInRange(point, position, SELECTED_GRADIENT_POINT_RADIUS);
 }

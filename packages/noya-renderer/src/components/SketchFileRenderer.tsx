@@ -5,6 +5,7 @@ import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   AffineTransform,
   createRect,
+  distance,
   insetRect,
   Point,
   Rect,
@@ -17,6 +18,8 @@ import {
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
+  getCurrentPage,
+  getSelectedGradient,
   Layers,
   Primitives,
   Selectors,
@@ -350,7 +353,65 @@ export default memo(function SketchFileRenderer() {
 
     if (!gradientStopPoints || !state.selectedGradient) return null;
 
+    const selectedGradient = getSelectedGradient(
+      getCurrentPage(state),
+      state.selectedGradient,
+    );
+
+    if (!selectedGradient) return null;
+
     const { stopIndex } = state.selectedGradient;
+
+    let radialGradient = null;
+    if (selectedGradient.gradientType === Sketch.GradientType.Radial) {
+      const path = new CanvasKit.Path();
+      const firstPoint = gradientStopPoints[0].point;
+      const lastPoint = gradientStopPoints[gradientStopPoints.length - 1].point;
+      const len = distance(firstPoint, lastPoint);
+
+      const height = len * 2;
+      const width = height * selectedGradient.elipseLength;
+
+      const x = firstPoint.x - width / 2;
+      const y = firstPoint.y - len;
+
+      const theta =
+        Math.atan2(lastPoint.y - firstPoint.y, lastPoint.x - firstPoint.x) -
+        1.5708;
+
+      path.addOval(CanvasKit.XYWHRect(x, y, width, height));
+
+      // Shows small square to edit elipse length
+      const rectangle = new CanvasKit.Path();
+      path.addRect(
+        CanvasKit.XYWHRect(
+          x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
+          firstPoint.y,
+          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+        ),
+      );
+      rectangle.addRect(
+        CanvasKit.XYWHRect(
+          x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
+          firstPoint.y,
+          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+        ),
+      );
+
+      const paint = new CanvasKit.Paint();
+      paint.setColor(CanvasKit.parseColorString('#fef'));
+
+      radialGradient = (
+        <Group
+          transform={AffineTransform.rotate(theta, firstPoint.x, firstPoint.y)}
+        >
+          <Path path={rectangle} paint={paint} />
+          <Path path={path} paint={gradientLineStroke} />
+        </Group>
+      );
+    }
 
     return (
       <Group imageFilter={gradientEditorShadow}>
@@ -361,6 +422,7 @@ export default memo(function SketchFileRenderer() {
           ]}
           paint={gradientLineStroke}
         />
+        {radialGradient}
         {gradientStopPoints.map(({ point, color }, index) => {
           const path = new CanvasKit.Path();
 

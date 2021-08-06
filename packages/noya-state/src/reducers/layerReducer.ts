@@ -440,7 +440,6 @@ export function layerReducer(
         });
       });
     }
-
     default:
       return state;
   }
