@@ -100,11 +100,6 @@ const ToolbarContent = memo(function ToolbarContent({
   const isEditingText = Selectors.getIsEditingText(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
-  const isPanning =
-    interactionType === 'panMode' ||
-    interactionType === 'maybePan' ||
-    interactionType === 'panning';
-
   const handleInsertArtboard: KeyCommand = useCallback(() => {
     if (isEditingText) return FALLTHROUGH;
 
@@ -226,28 +221,6 @@ const ToolbarContent = memo(function ToolbarContent({
     'Mod-z': handleUndo,
     'Mod-Shift-z': handleRedo,
   });
-
-  useKeyboardShortcuts(
-    {
-      Space: () => {
-        if (interactionType !== 'none') return;
-
-        dispatch('interaction', ['enablePanMode']);
-      },
-    },
-    { eventName: 'keydown' },
-  );
-
-  useKeyboardShortcuts(
-    {
-      Space: () => {
-        if (!isPanning) return;
-
-        dispatch('interaction', ['reset']);
-      },
-    },
-    { eventName: 'keyup' },
-  );
 
   return (
     <>

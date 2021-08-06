@@ -11,7 +11,7 @@ import {
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
-import { useKeyboardShortcuts } from 'noya-keymap';
+import { FALLTHROUGH, useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   ApplicationState,
@@ -116,6 +116,11 @@ export default memo(function Canvas() {
   });
 
   const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
+  const isPanning =
+    state.interactionState.type === 'panMode' ||
+    state.interactionState.type === 'maybePan' ||
+    state.interactionState.type === 'panning';
+
   const nudge = (axis: 'X' | 'Y', amount: number) => {
     if (isEditingPath && state.selectedControlPoint) {
       dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
@@ -151,10 +156,23 @@ export default memo(function Canvas() {
     'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-0': () => dispatch('setZoom', 1),
+    Space: () => {
+      if (Selectors.getIsEditingText(state.interactionState.type))
+        return FALLTHROUGH;
+
+      if (state.interactionState.type !== 'none') return;
+
+      dispatch('interaction', ['enablePanMode']);
+    },
   });
 
   useKeyboardShortcuts(
     {
+      Space: () => {
+        if (!isPanning) return;
+
+        dispatch('interaction', ['reset']);
+      },
       Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
     },
     { eventName: 'keyup' },
@@ -950,8 +968,6 @@ export default memo(function Canvas() {
     if (!input) return;
 
     const handler = (event: InputEvent) => {
-      // console.log(event);
-
       if (typeof event.data !== 'string') return;
 
       dispatch('insertText', event.data);
