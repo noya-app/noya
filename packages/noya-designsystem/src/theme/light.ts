@@ -47,6 +47,7 @@ export const colors = {
   get dragOutline() {
     return colors.primary;
   },
+  selection: 'rgb(179,215,254)',
 };
 
 export const fonts = {

@@ -1,142 +1,159 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { useDeletable } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-state';
-import { Group, Text, useCanvasKit, useFontManager } from 'noya-renderer';
-import { memo, useMemo } from 'react';
+import { Paragraph } from 'canvaskit';
+import { useApplicationState } from 'noya-app-state-context';
+import { AffineTransform } from 'noya-geometry';
+import { useColorFill, useDeletable } from 'noya-react-canvaskit';
+import { Group, Rect, Text, useCanvasKit, useFontManager } from 'noya-renderer';
+import { Selectors, TextSelectionRange } from 'noya-state';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { useTheme } from 'styled-components';
 
 interface Props {
   layer: Sketch.Text;
-}
-
-function getTextStyleAttributes(layer: Sketch.Text) {
-  const encodedAttributes = layer.style?.textStyle?.encodedAttributes;
-  const paragraphStyle = encodedAttributes?.paragraphStyle;
-
-  return {
-    fontSize:
-      encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ?? 12,
-    lineHeight: paragraphStyle?.maximumLineHeight,
-    textHorizontalAlignment:
-      paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left,
-    textTransform:
-      encodedAttributes?.MSAttributedStringTextTransformAttribute ??
-      Sketch.TextTransform.None,
-    textDecoration: encodedAttributes?.underlineStyle
-      ? ('underline' as const)
-      : encodedAttributes?.strikethroughStyle
-      ? ('strikethrough' as const)
-      : ('none' as const),
-  };
-}
-
-function applyTextTransform(text: string, transform: Sketch.TextTransform) {
-  switch (transform) {
-    case Sketch.TextTransform.None:
-      return text;
-    case Sketch.TextTransform.Lowercase:
-      return text.toLowerCase();
-    case Sketch.TextTransform.Uppercase:
-      return text.toUpperCase();
-  }
 }
 
 export function useTextLayerParagraph(layer: Sketch.Text) {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
 
-  const {
-    fontSize,
-    lineHeight,
-    textHorizontalAlignment,
-    textTransform,
-    textDecoration,
-  } = getTextStyleAttributes(layer);
-
-  const paragraph = useMemo(() => {
-    const heightMultiplier = lineHeight ? lineHeight / fontSize : undefined;
-
-    const paragraphStyle = new CanvasKit.ParagraphStyle({
-      // Note: We can put a heightMultiplier in text style, but it has no effect
-      textStyle: {
-        color: CanvasKit.BLACK,
-        fontFamilies: ['Roboto'],
-        fontSize,
-      },
-      textAlign: Primitives.textHorizontalAlignment(
-        CanvasKit,
-        textHorizontalAlignment,
-      ),
-      // TODO:
-      // Using a strut for line height is somewhat different from how Sketch works.
-      // Sketch does not apply the additional height to the first line, so we may
-      // want to handle this differently or move the whole paragraph up to compensate.
-      //
-      // For more on struts: https://en.wikipedia.org/wiki/Strut_(typesetting)
-      strutStyle: {
-        fontFamilies: ['Roboto'],
-        strutEnabled: true,
-        forceStrutHeight: true,
-        fontSize,
-        heightMultiplier,
-      },
-    });
-
-    const builder = CanvasKit.ParagraphBuilder.Make(
-      paragraphStyle,
-      fontManager,
-    );
-
-    layer.attributedString.attributes.forEach((attribute) => {
-      const { location, length } = attribute;
-      const string = layer.attributedString.string.substr(location, length);
-      const style = Primitives.stringAttribute(
-        CanvasKit,
-        attribute,
-        textDecoration,
-      );
-      builder.pushStyle(style);
-      builder.addText(applyTextTransform(string, textTransform));
-      builder.pop();
-    });
-
-    const paragraph = builder.build();
-
-    builder.delete();
-
-    paragraph.layout(layer.frame.width);
-
-    return paragraph;
-  }, [
-    CanvasKit,
-    fontSize,
-    textHorizontalAlignment,
-    lineHeight,
-    fontManager,
-    layer.attributedString.attributes,
-    layer.attributedString.string,
-    layer.frame.width,
-    textDecoration,
-    textTransform,
-  ]);
+  const paragraph = useMemo(
+    () => Selectors.getLayerParagraph(CanvasKit, fontManager, layer),
+    [CanvasKit, fontManager, layer],
+  );
 
   useDeletable(paragraph);
 
   return paragraph;
 }
 
+function TextSelection({
+  paragraph,
+  selectedRange,
+}: {
+  paragraph: Paragraph;
+  selectedRange: TextSelectionRange;
+}) {
+  const CanvasKit = useCanvasKit();
+
+  const selectionPaint = useColorFill(useTheme().colors.selection);
+
+  const { anchor, head } = selectedRange;
+
+  const rects = (paragraph.getRectsForRange(
+    anchor,
+    head,
+    CanvasKit.RectHeightStyle.Max,
+    CanvasKit.RectWidthStyle.Max,
+  ) as unknown) as Float32Array[];
+
+  // console.log('range', rects, anchor, head);
+
+  return (
+    <>
+      {rects.map((rect, i) => (
+        <Rect key={i} rect={rect} paint={selectionPaint} />
+      ))}
+    </>
+  );
+}
+
+function TextCursor({
+  paragraph,
+  selectedRange,
+}: {
+  paragraph: Paragraph;
+  selectedRange: TextSelectionRange;
+}) {
+  const CanvasKit = useCanvasKit();
+
+  const cursorPaint = useColorFill(useTheme().colors.text);
+
+  const { anchor, head } = selectedRange;
+
+  const [cursorVisible, setCursorVisible] = useState(true);
+
+  // When head or anchor change, we set the cursor to visible
+  useEffect(() => {
+    setCursorVisible(head === anchor);
+  }, [head, anchor]);
+
+  useEffect(() => {
+    const intervalId = setTimeout(() => {
+      setCursorVisible(!cursorVisible);
+    }, 400);
+
+    return () => clearTimeout(intervalId);
+  }, [cursorVisible]);
+
+  if (!cursorVisible || anchor !== head) return null;
+
+  const lineMetrics = paragraph
+    .getLineMetrics()
+    .find((lm) => lm.startIndex <= head && lm.endIndex >= head);
+
+  if (!lineMetrics) return null;
+
+  const rects = (paragraph.getRectsForRange(
+    head,
+    head + 1,
+    CanvasKit.RectHeightStyle.Max,
+    CanvasKit.RectWidthStyle.Max,
+  ) as unknown) as Float32Array[];
+
+  // console.log('cursor', rects);
+
+  // console.log('lm', lineMetrics, paragraph.getShapedLines());
+
+  return (
+    <>
+      {rects.map((rect, i) => (
+        <Rect
+          key={i}
+          rect={CanvasKit.LTRBRect(rect[0], rect[1], rect[0] + 1, rect[3])}
+          paint={cursorPaint}
+        />
+      ))}
+    </>
+  );
+
+  // return (
+  //   <Rect
+  //     rect={CanvasKit.XYWHRect(lineMetrics.left, 0, 1, lineMetrics.height)}
+  //     paint={cursorPaint}
+  //   />
+  // );
+}
+
 export default memo(function SketchText({ layer }: Props) {
   const CanvasKit = useCanvasKit();
+  const [state] = useApplicationState();
 
   const paragraph = useTextLayerParagraph(layer);
 
-  const rect = useMemo(() => Primitives.rect(CanvasKit, layer.frame), [
-    CanvasKit,
-    layer.frame,
-  ]);
-
-  const element = <Text paragraph={paragraph} rect={rect} />;
+  const rect = useMemo(
+    () => CanvasKit.XYWHRect(0, 0, layer.frame.width, layer.frame.height),
+    [CanvasKit, layer.frame],
+  );
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 
-  return opacity < 1 ? <Group opacity={opacity}>{element}</Group> : element;
+  const transform = AffineTransform.translate(layer.frame.x, layer.frame.y);
+
+  return (
+    <Group opacity={opacity} transform={transform}>
+      {state.selectedText?.layerId === layer.do_objectID && (
+        <TextSelection
+          paragraph={paragraph}
+          selectedRange={state.selectedText.range}
+        />
+      )}
+      <Text paragraph={paragraph} rect={rect} />
+      {state.selectedText?.layerId === layer.do_objectID && (
+        <TextCursor
+          paragraph={paragraph}
+          selectedRange={state.selectedText.range}
+        />
+      )}
+    </Group>
+  );
 });

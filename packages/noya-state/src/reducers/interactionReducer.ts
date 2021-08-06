@@ -68,7 +68,8 @@ export type InteractionAction =
   | [type: 'movingControlPoint', origin: Point, current: Point]
   | [type: 'updateMovingPoint', origin: Point, current: Point]
   | [type: 'updateMovingControlPoint', origin: Point, current: Point]
-  | [type: 'movingGradientStop', current: Point];
+  | [type: 'movingGradientStop', current: Point]
+  | [type: 'editingText', id: UUID];
 
 export type InteractionState =
   | {
@@ -163,7 +164,8 @@ export type InteractionState =
       origin: Point;
       current: Point;
       pageSnapshot: Sketch.Page;
-    };
+    }
+  | { type: 'editingText'; id: UUID };
 
 export type InteractionType = InteractionState['type'];
 
@@ -430,6 +432,14 @@ export function interactionReducer(
         pageSnapshot: state.pageSnapshot,
         origin: state.origin,
         current,
+      };
+    }
+    case 'editingText': {
+      const [, id] = action;
+
+      return {
+        type: 'editingText',
+        id,
       };
     }
     case 'reset': {

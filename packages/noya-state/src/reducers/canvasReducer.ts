@@ -479,10 +479,25 @@ export function canvasReducer(
           ? [...action[1], page]
           : action[1],
       );
-
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
+
+        if (interactionState.type !== 'editingText') {
+          delete draft.selectedText;
+        }
+
         switch (interactionState.type) {
+          case 'editingText': {
+            draft.selectedText = {
+              layerId: interactionState.id,
+              range: {
+                anchor: 0,
+                head: 9999,
+              },
+            };
+
+            return;
+          }
           case 'maybeMoveGradientStop': {
             if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
 

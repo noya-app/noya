@@ -10,9 +10,16 @@ import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
-import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
+import {
+  AffineTransform,
+  createRect,
+  insetRect,
+  Insets,
+  Point,
+  rectContainsPoint,
+} from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { useCanvasKit } from 'noya-renderer';
+import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   ApplicationState,
   CompassDirection,
@@ -105,6 +112,7 @@ export default memo(function Canvas() {
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const CanvasKit = useCanvasKit();
+  const fontManager = useFontManager();
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
@@ -199,6 +207,19 @@ export default memo(function Canvas() {
 
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
+
+  const handleDoubleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (selectedLayers.length === 0) return;
+
+      const layer = selectedLayers[0];
+
+      if (Layers.isTextLayer(layer) && state.interactionState.type === 'none') {
+        dispatch('interaction', ['editingText', layer.do_objectID]);
+      }
+    },
+    [dispatch, selectedLayers, state.interactionState.type],
+  );
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -348,6 +369,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'hoverHandle':
+        case 'editingText':
         case 'none': {
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
@@ -356,6 +378,56 @@ export default memo(function Canvas() {
               dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
+            }
+          }
+
+          if (state.selectedText) {
+            const page = getCurrentPage(state);
+            const textLayer = Layers.find(
+              page,
+              (layer) => layer.do_objectID === state.selectedText?.layerId,
+            );
+
+            if (textLayer && Layers.isTextLayer(textLayer)) {
+              const boundingRect = Selectors.getBoundingRect(
+                page,
+                AffineTransform.identity,
+                [textLayer.do_objectID],
+              );
+
+              if (boundingRect) {
+                const slopRect = insetRect(boundingRect, -20);
+
+                if (rectContainsPoint(slopRect, point)) {
+                  const paragraph = Selectors.getLayerParagraph(
+                    CanvasKit,
+                    fontManager,
+                    textLayer,
+                  );
+
+                  const position = paragraph.getGlyphPositionAtCoordinate(
+                    point.x - textLayer.frame.x,
+                    point.y - textLayer.frame.y,
+                  );
+
+                  const pos = position.pos;
+
+                  // const pos =
+                  //   position.pos +
+                  //   (position.affinity === CanvasKit.Affinity.Upstream ? -1 : 0);
+
+                  // console.log(CanvasKit.Affinity.Upstream);
+
+                  dispatch('setTextSelection', {
+                    head: pos,
+                    anchor: pos,
+                  });
+
+                  // console.log(position.pos, position.affinity);
+
+                  return;
+                }
+              }
             }
           }
 
@@ -402,7 +474,6 @@ export default memo(function Canvas() {
             dispatch('interaction', ['maybeMove', point]);
           } else {
             dispatch('selectLayer', undefined);
-
             dispatch('interaction', ['startMarquee', rawPoint]);
           }
 
@@ -410,7 +481,7 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, CanvasKit, insets, dispatch],
+    [offsetEventPoint, state, CanvasKit, insets, dispatch, fontManager],
   );
 
   const handleMouseMove = useCallback(
@@ -852,6 +923,7 @@ export default memo(function Canvas() {
           id="canvas-container"
           ref={containerRef}
           cursor={cursor}
+          onDoubleClick={handleDoubleClick}
           {...mergeEventHandlers(bind(), {
             onPointerDown: handleMouseDown,
             onPointerMove: handleMouseMove,
