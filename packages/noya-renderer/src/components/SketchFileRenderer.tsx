@@ -70,6 +70,7 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
+  const isEditingText = Selectors.getIsEditingText(interactionState.type);
   const isInserting = interactionState.type === 'insert';
   const canvasRect = useMemo(
     () =>
@@ -440,6 +441,7 @@ export default memo(function SketchFileRenderer() {
               boundingRect &&
               !gradientPoints &&
               !drawingLayer &&
+              !isEditingText &&
               !isInserting && (
                 <>
                   <BoundingRect
@@ -458,6 +460,7 @@ export default memo(function SketchFileRenderer() {
             {!isEditingPath &&
               !drawingLayer &&
               !isInserting &&
+              !isEditingText &&
               highlightedSketchLayer}
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
@@ -465,7 +468,8 @@ export default memo(function SketchFileRenderer() {
             {!gradientPoints &&
               boundingRect &&
               !drawingLayer &&
-              !isInserting && (
+              !isInserting &&
+              !isEditingText && (
                 <DragHandles
                   rect={boundingRect}
                   selectionPaint={selectionPaint}

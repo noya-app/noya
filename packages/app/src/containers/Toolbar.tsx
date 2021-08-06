@@ -12,7 +12,7 @@ import {
   RegularMenuItem,
   Spacer,
 } from 'noya-designsystem';
-import { useKeyboardShortcuts } from 'noya-keymap';
+import { FALLTHROUGH, KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import { DrawableLayerType, InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -97,68 +97,78 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertText = isInsertingLayerType === 'text';
   const isInsertSlice = isInsertingLayerType === 'slice';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
+  const isEditingText = Selectors.getIsEditingText(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
-  const isPanning =
-    interactionType === 'panMode' ||
-    interactionType === 'maybePan' ||
-    interactionType === 'panning';
+  const handleInsertArtboard: KeyCommand = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
 
-  const handleInsertArtboard = useCallback(() => {
     if (isInsertArtboard) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['insert', 'artboard']);
     }
-  }, [dispatch, isInsertArtboard]);
+  }, [dispatch, isEditingText, isInsertArtboard]);
 
-  const handleInsertRectangle = useCallback(() => {
+  const handleInsertRectangle: KeyCommand = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
+
     if (isInsertRectangle) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['insert', 'rectangle']);
     }
-  }, [isInsertRectangle, dispatch]);
+  }, [isEditingText, isInsertRectangle, dispatch]);
 
   const handleInsertOval = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
+
     if (isInsertOval) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['insert', 'oval']);
     }
-  }, [isInsertOval, dispatch]);
+  }, [isEditingText, isInsertOval, dispatch]);
 
   const handleInsertLine = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
+
     if (isInsertLine) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['insert', 'line']);
     }
-  }, [isInsertLine, dispatch]);
+  }, [isEditingText, isInsertLine, dispatch]);
 
   const handleInsertText = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
+
     if (isInsertText) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['insert', 'text']);
     }
-  }, [isInsertText, dispatch]);
+  }, [isEditingText, isInsertText, dispatch]);
 
   const handleInsertSlice = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
+
     if (isInsertSlice) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['insert', 'slice']);
     }
-  }, [isInsertSlice, dispatch]);
+  }, [isEditingText, isInsertSlice, dispatch]);
 
   const handleEnablePenTool = useCallback(() => {
+    if (isEditingText) return FALLTHROUGH;
+
     if (isCreatingPath) {
       dispatch('interaction', ['reset']);
     } else {
       dispatch('interaction', ['drawingShapePath']);
     }
-  }, [isCreatingPath, dispatch]);
+  }, [isEditingText, isCreatingPath, dispatch]);
 
   const handleInsertSymbol = useCallback(
     (value: string) => {
@@ -193,6 +203,7 @@ const ToolbarContent = memo(function ToolbarContent({
     },
     [dispatch],
   );
+
   const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
 
   const handleRedo = useCallback(() => dispatch('redo'), [dispatch]);
@@ -210,28 +221,6 @@ const ToolbarContent = memo(function ToolbarContent({
     'Mod-z': handleUndo,
     'Mod-Shift-z': handleRedo,
   });
-
-  useKeyboardShortcuts(
-    {
-      Space: () => {
-        if (interactionType !== 'none') return;
-
-        dispatch('interaction', ['enablePanMode']);
-      },
-    },
-    { eventName: 'keydown' },
-  );
-
-  useKeyboardShortcuts(
-    {
-      Space: () => {
-        if (!isPanning) return;
-
-        dispatch('interaction', ['reset']);
-      },
-    },
-    { eventName: 'keyup' },
-  );
 
   return (
     <>

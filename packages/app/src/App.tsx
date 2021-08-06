@@ -11,6 +11,7 @@ import {
   CanvasKitProvider,
   FontManagerProvider,
   ImageCacheProvider,
+  useFontManager,
 } from 'noya-renderer';
 import Workspace from './containers/Workspace';
 import { StateProvider } from 'noya-app-state-context';
@@ -23,6 +24,7 @@ type Action =
 
 function Contents() {
   const CanvasKit = useCanvasKit();
+  const fontManager = useFontManager();
 
   const sketchFileData = useResource<ArrayBuffer>(
     '/Demo.sketch',
@@ -45,14 +47,19 @@ function Contents() {
             if (state.type === 'success') {
               return {
                 type: 'success',
-                value: workspaceReducer(state.value, action.value, CanvasKit),
+                value: workspaceReducer(
+                  state.value,
+                  action.value,
+                  CanvasKit,
+                  fontManager,
+                ),
               };
             } else {
               return state;
             }
         }
       },
-    [CanvasKit],
+    [CanvasKit, fontManager],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });
@@ -72,9 +79,7 @@ function Contents() {
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
       <ImageCacheProvider>
-        <FontManagerProvider>
-          <Workspace />
-        </FontManagerProvider>
+        <Workspace />
       </ImageCacheProvider>
     </StateProvider>
   );
@@ -83,7 +88,9 @@ function Contents() {
 export default function App() {
   return (
     <CanvasKitProvider>
-      <Contents />
+      <FontManagerProvider>
+        <Contents />
+      </FontManagerProvider>
     </CanvasKitProvider>
   );
 }

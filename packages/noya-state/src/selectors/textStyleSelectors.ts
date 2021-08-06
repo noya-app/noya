@@ -155,7 +155,28 @@ function getTextAlignment(layers: Sketch.Text[]) {
 
 type TextStyles = Sketch.Text | Sketch.Style;
 
-export const getTextStyleAttributes = (array: TextStyles[]) => {
+export function getTextStyleAttributes(layer: Sketch.Text) {
+  const encodedAttributes = layer.style?.textStyle?.encodedAttributes;
+  const paragraphStyle = encodedAttributes?.paragraphStyle;
+
+  return {
+    fontSize:
+      encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ?? 12,
+    lineHeight: paragraphStyle?.maximumLineHeight,
+    textHorizontalAlignment:
+      paragraphStyle?.alignment ?? Sketch.TextHorizontalAlignment.Left,
+    textTransform:
+      encodedAttributes?.MSAttributedStringTextTransformAttribute ??
+      Sketch.TextTransform.None,
+    textDecoration: encodedAttributes?.underlineStyle
+      ? ('underline' as const)
+      : encodedAttributes?.strikethroughStyle
+      ? ('strikethrough' as const)
+      : ('none' as const),
+  };
+}
+
+export const getEditableTextStyleAttributes = (array: TextStyles[]) => {
   const first = array[0];
   const textStyle =
     first._class === 'text' ? first.style?.textStyle : first.textStyle;

@@ -31,9 +31,10 @@ export default memo(function TextStyleInspector() {
     fontSize,
     lineHeight,
     letterSpacing,
-  } = useMemo(() => TextStyleSelectors.getTextStyleAttributes(seletedText), [
-    seletedText,
-  ]);
+  } = useMemo(
+    () => TextStyleSelectors.getEditableTextStyleAttributes(seletedText),
+    [seletedText],
+  );
 
   // default value for the spacing (?)
   return (
