@@ -69,7 +69,9 @@ export type InteractionAction =
   | [type: 'updateMovingPoint', origin: Point, current: Point]
   | [type: 'updateMovingControlPoint', origin: Point, current: Point]
   | [type: 'movingGradientStop', current: Point]
-  | [type: 'editingText', id: UUID];
+  | [type: 'editingText', id: UUID]
+  | [type: 'maybeSelectText', origin: Point]
+  | [type: 'selectingText', current: Point];
 
 export type InteractionState =
   | {
@@ -165,7 +167,9 @@ export type InteractionState =
       current: Point;
       pageSnapshot: Sketch.Page;
     }
-  | { type: 'editingText'; id: UUID };
+  | { type: 'editingText'; id: UUID }
+  | { type: 'maybeSelectingText'; origin: Point }
+  | { type: 'selectingText'; origin: Point; current: Point };
 
 export type InteractionType = InteractionState['type'];
 
@@ -440,6 +444,30 @@ export function interactionReducer(
       return {
         type: 'editingText',
         id,
+      };
+    }
+    case 'maybeSelectText': {
+      const [, origin] = action;
+
+      return {
+        type: 'maybeSelectingText',
+        origin,
+      };
+    }
+    case 'selectingText': {
+      const [, current] = action;
+
+      if (
+        state.type !== 'selectingText' &&
+        state.type !== 'maybeSelectingText'
+      ) {
+        throw new Error('Bad interaction state');
+      }
+
+      return {
+        type: 'selectingText',
+        origin: state.origin,
+        current,
       };
     }
     case 'reset': {

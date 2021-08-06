@@ -10,14 +10,7 @@ import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
-import {
-  AffineTransform,
-  createRect,
-  insetRect,
-  Insets,
-  Point,
-  rectContainsPoint,
-} from 'noya-geometry';
+import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
@@ -371,6 +364,23 @@ export default memo(function Canvas() {
         case 'hoverHandle':
         case 'editingText':
         case 'none': {
+          const characterIndex = Selectors.getCharacterIndexAtPoint(
+            CanvasKit,
+            fontManager,
+            state,
+            point,
+            'bounded',
+          );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: characterIndex,
+              head: characterIndex,
+            });
+            dispatch('interaction', ['maybeSelectText', point]);
+            return;
+          }
+
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
@@ -378,56 +388,6 @@ export default memo(function Canvas() {
               dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
-            }
-          }
-
-          if (state.selectedText) {
-            const page = getCurrentPage(state);
-            const textLayer = Layers.find(
-              page,
-              (layer) => layer.do_objectID === state.selectedText?.layerId,
-            );
-
-            if (textLayer && Layers.isTextLayer(textLayer)) {
-              const boundingRect = Selectors.getBoundingRect(
-                page,
-                AffineTransform.identity,
-                [textLayer.do_objectID],
-              );
-
-              if (boundingRect) {
-                const slopRect = insetRect(boundingRect, -20);
-
-                if (rectContainsPoint(slopRect, point)) {
-                  const paragraph = Selectors.getLayerParagraph(
-                    CanvasKit,
-                    fontManager,
-                    textLayer,
-                  );
-
-                  const position = paragraph.getGlyphPositionAtCoordinate(
-                    point.x - textLayer.frame.x,
-                    point.y - textLayer.frame.y,
-                  );
-
-                  const pos = position.pos;
-
-                  // const pos =
-                  //   position.pos +
-                  //   (position.affinity === CanvasKit.Affinity.Upstream ? -1 : 0);
-
-                  // console.log(CanvasKit.Affinity.Upstream);
-
-                  dispatch('setTextSelection', {
-                    head: pos,
-                    anchor: pos,
-                  });
-
-                  // console.log(position.pos, position.affinity);
-
-                  return;
-                }
-              }
             }
           }
 
@@ -490,6 +450,38 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'maybeSelectingText': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['selectingText', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'selectingText': {
+          if (!state.selectedText) return;
+
+          const characterIndex = Selectors.getCharacterIndexAtPoint(
+            CanvasKit,
+            fontManager,
+            state,
+            point,
+            'unbounded',
+          );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: state.selectedText.range.anchor,
+              head: characterIndex,
+            });
+            return;
+          }
+
+          break;
+        }
         case 'maybeMoveGradientStop': {
           const { origin } = state.interactionState;
 
@@ -726,6 +718,7 @@ export default memo(function Canvas() {
       state,
       dispatch,
       CanvasKit,
+      fontManager,
       selectedLayers,
       insets,
       highlightedLayer?.id,
@@ -739,6 +732,42 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
+        case 'maybeSelectingText': {
+          if (!state.selectedText) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
+          dispatch('interaction', ['editingText', state.selectedText.layerId]);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+          break;
+        }
+        case 'selectingText':
+          if (!state.selectedText) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
+          const characterIndex = Selectors.getCharacterIndexAtPoint(
+            CanvasKit,
+            fontManager,
+            state,
+            point,
+            'bounded',
+          );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: state.selectedText.range.anchor,
+              head: characterIndex,
+            });
+          }
+
+          dispatch('interaction', ['editingText', state.selectedText.layerId]);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+          break;
         case 'maybePan':
           dispatch('interaction', ['enablePanMode']);
 
@@ -828,7 +857,7 @@ export default memo(function Canvas() {
           break;
       }
     },
-    [offsetEventPoint, state, dispatch, insets],
+    [offsetEventPoint, state, dispatch, CanvasKit, fontManager, insets],
   );
 
   const handleDirection =

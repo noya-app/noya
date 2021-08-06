@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Paragraph } from 'canvaskit';
+import { CanvasKit, Paragraph } from 'canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
@@ -39,9 +39,11 @@ function TextSelection({
 
   const { anchor, head } = selectedRange;
 
+  const [start, end] = Selectors.normalizeRange([anchor, head]);
+
   const rects = (paragraph.getRectsForRange(
-    anchor,
-    head,
+    start,
+    end,
     CanvasKit.RectHeightStyle.Max,
     CanvasKit.RectWidthStyle.Max,
   ) as unknown) as Float32Array[];
@@ -57,25 +59,72 @@ function TextSelection({
   );
 }
 
+function getCursorRect(
+  CanvasKit: CanvasKit,
+  paragraph: Paragraph,
+  index: number,
+) {
+  const lineMetrics = paragraph
+    .getLineMetrics()
+    .find((lm) => lm.startIndex <= index && lm.endIndex >= index);
+
+  if (!lineMetrics) return;
+
+  let rects = (paragraph.getRectsForRange(
+    index,
+    index + 1,
+    CanvasKit.RectHeightStyle.Max,
+    CanvasKit.RectWidthStyle.Max,
+  ) as unknown) as Float32Array[];
+
+  if (rects.length > 0) {
+    const firstRect = rects[0];
+
+    return CanvasKit.LTRBRect(
+      firstRect[0],
+      firstRect[1],
+      firstRect[0] + 1,
+      firstRect[3],
+    );
+  }
+
+  rects = (paragraph.getRectsForRange(
+    index - 1,
+    index,
+    CanvasKit.RectHeightStyle.Max,
+    CanvasKit.RectWidthStyle.Max,
+  ) as unknown) as Float32Array[];
+
+  if (rects.length > 0) {
+    const firstRect = rects[0];
+
+    return CanvasKit.LTRBRect(
+      firstRect[2],
+      firstRect[1],
+      firstRect[2] + 1,
+      firstRect[3],
+    );
+  }
+}
+
 function TextCursor({
   paragraph,
-  selectedRange,
+  index,
 }: {
   paragraph: Paragraph;
-  selectedRange: TextSelectionRange;
+  index: number;
 }) {
   const CanvasKit = useCanvasKit();
 
   const cursorPaint = useColorFill(useTheme().colors.text);
 
-  const { anchor, head } = selectedRange;
-
   const [cursorVisible, setCursorVisible] = useState(true);
 
-  // When head or anchor change, we set the cursor to visible
   useEffect(() => {
-    setCursorVisible(head === anchor);
-  }, [head, anchor]);
+    setCursorVisible(true);
+  }, [
+    index, // When index changes, we set the cursor to visible
+  ]);
 
   useEffect(() => {
     const intervalId = setTimeout(() => {
@@ -85,43 +134,13 @@ function TextCursor({
     return () => clearTimeout(intervalId);
   }, [cursorVisible]);
 
-  if (!cursorVisible || anchor !== head) return null;
+  if (!cursorVisible) return null;
 
-  const lineMetrics = paragraph
-    .getLineMetrics()
-    .find((lm) => lm.startIndex <= head && lm.endIndex >= head);
+  const cursorRect = getCursorRect(CanvasKit, paragraph, index);
 
-  if (!lineMetrics) return null;
+  if (!cursorRect) return null;
 
-  const rects = (paragraph.getRectsForRange(
-    head,
-    head + 1,
-    CanvasKit.RectHeightStyle.Max,
-    CanvasKit.RectWidthStyle.Max,
-  ) as unknown) as Float32Array[];
-
-  // console.log('cursor', rects);
-
-  // console.log('lm', lineMetrics, paragraph.getShapedLines());
-
-  return (
-    <>
-      {rects.map((rect, i) => (
-        <Rect
-          key={i}
-          rect={CanvasKit.LTRBRect(rect[0], rect[1], rect[0] + 1, rect[3])}
-          paint={cursorPaint}
-        />
-      ))}
-    </>
-  );
-
-  // return (
-  //   <Rect
-  //     rect={CanvasKit.XYWHRect(lineMetrics.left, 0, 1, lineMetrics.height)}
-  //     paint={cursorPaint}
-  //   />
-  // );
+  return <Rect rect={cursorRect} paint={cursorPaint} />;
 }
 
 export default memo(function SketchText({ layer }: Props) {
@@ -151,7 +170,7 @@ export default memo(function SketchText({ layer }: Props) {
       {state.selectedText?.layerId === layer.do_objectID && (
         <TextCursor
           paragraph={paragraph}
-          selectedRange={state.selectedText.range}
+          index={state.selectedText.range.head}
         />
       )}
     </Group>

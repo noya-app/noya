@@ -1,10 +1,21 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit, FontMgr } from 'canvaskit';
-import { InteractionState, Primitives } from 'noya-state';
+import {
+  AffineTransform,
+  insetRect,
+  Point,
+  rectContainsPoint,
+} from 'noya-geometry';
+import { InteractionState, Layers, Primitives, Selectors } from 'noya-state';
+import { ApplicationState } from '../reducers/applicationReducer';
 import { getTextStyleAttributes } from './textStyleSelectors';
 
 export const getIsEditingText = (type: InteractionState['type']): boolean => {
-  return type === 'editingText';
+  return (
+    type === 'editingText' ||
+    type === 'maybeSelectingText' ||
+    type === 'selectingText'
+  );
 };
 
 export function applyTextTransform(
@@ -84,4 +95,47 @@ export function getLayerParagraph(
   paragraph.layout(layer.frame.width);
 
   return paragraph;
+}
+
+export function getCharacterIndexAtPoint(
+  CanvasKit: CanvasKit,
+  fontManager: FontMgr,
+  state: ApplicationState,
+  point: Point,
+  mode: 'bounded' | 'unbounded',
+) {
+  if (!state.selectedText) return;
+
+  const page = Selectors.getCurrentPage(state);
+  const textLayer = Layers.find(
+    page,
+    (layer) => layer.do_objectID === state.selectedText?.layerId,
+  );
+
+  if (!textLayer || !Layers.isTextLayer(textLayer)) return;
+
+  const boundingRect = Selectors.getBoundingRect(
+    page,
+    AffineTransform.identity,
+    [textLayer.do_objectID],
+  );
+
+  if (!boundingRect) return;
+
+  const slopRect = insetRect(boundingRect, -20);
+
+  if (mode === 'bounded' && !rectContainsPoint(slopRect, point)) return;
+
+  const paragraph = Selectors.getLayerParagraph(
+    CanvasKit,
+    fontManager,
+    textLayer,
+  );
+
+  const position = paragraph.getGlyphPositionAtCoordinate(
+    point.x - boundingRect.x,
+    point.y - boundingRect.y,
+  );
+
+  return position.pos;
 }

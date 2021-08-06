@@ -49,7 +49,7 @@ export function fromTextSpans<T extends TextSpan>(
   return attributedString;
 }
 
-function normalizeRange(range: [number, number]): [number, number] {
+export function normalizeRange(range: [number, number]): [number, number] {
   return [Math.min(...range), Math.max(...range)];
 }
 
