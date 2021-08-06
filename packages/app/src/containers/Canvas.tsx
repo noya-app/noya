@@ -13,7 +13,7 @@ import {
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
-  IGNORE_GLOBAL_EVENTS_CLASS,
+  IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
@@ -1007,7 +1007,7 @@ export default memo(function Canvas() {
           onFocus={() => inputRef.current?.focus()}
         >
           <HiddenInputTarget
-            className={IGNORE_GLOBAL_EVENTS_CLASS}
+            className={IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS}
             ref={inputRef}
             type="text"
           />
