@@ -56,7 +56,11 @@ export function useKeyboardShortcuts(
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement) return;
+      if (
+        event.target instanceof HTMLInputElement &&
+        !event.target.classList.contains('ignore-global-events')
+      )
+        return;
 
       const eventShortcutNames = getEventShortcutNames(event, platformName);
 
@@ -66,12 +70,14 @@ export function useKeyboardShortcuts(
 
       if (!matchingName) return;
 
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
       const command = keyMapRef.current[matchingName];
 
-      command();
+      const result = command();
+
+      if (result !== 'fallthrough') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
     };
 
     const listenerElement = eventRef;

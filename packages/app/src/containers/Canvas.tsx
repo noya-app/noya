@@ -913,6 +913,26 @@ export default memo(function Canvas() {
     [CanvasKit, dispatch, offsetEventPoint],
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+
+    if (!input) return;
+
+    const handler = (event: InputEvent) => {
+      // console.log(event);
+
+      if (typeof event.data !== 'string') return;
+
+      dispatch('insertText', event.data);
+    };
+
+    input.addEventListener('beforeinput', handler);
+
+    return () => input.removeEventListener('beforeinput', handler);
+  }, [dispatch]);
+
   return (
     <ImageDropTarget
       onDropFile={onDropFile}
@@ -929,7 +949,18 @@ export default memo(function Canvas() {
             onPointerMove: handleMouseMove,
             onPointerUp: handleMouseUp,
           })}
+          tabIndex={0}
+          onFocus={() => inputRef.current?.focus()}
         >
+          <input
+            className="ignore-global-events"
+            ref={inputRef}
+            type="text"
+            style={{
+              position: 'absolute',
+              top: '-200px',
+            }}
+          />
           <InsetContainer insets={insets}>
             {canvasSizeWithInsets && (
               // <SVGRenderer size={canvasSizeWithInsets}>

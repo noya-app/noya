@@ -90,6 +90,11 @@ export function describeObject(
       const { x, y, width, height } = object;
       const rect = { x, y, w: width, h: height };
       return describeValue(rect);
+    case Sketch.ClassValue.AttributedString:
+      return `${className} ${describeValue(object.string)}`;
+    case Sketch.ClassValue.StringAttribute:
+      const { length, location } = object;
+      return `${className} ${describeValue({ location, length })}`;
     default:
       return className;
   }
@@ -117,6 +122,8 @@ export function debugDescription(
     getLabel: (object) => describeObject(object, options),
     getChildren: (object) => {
       switch (object._class) {
+        case Sketch.ClassValue.AttributedString:
+          return object.attributes;
         case Sketch.ClassValue.SymbolMaster:
         case Sketch.ClassValue.Group:
         case Sketch.ClassValue.Oval:

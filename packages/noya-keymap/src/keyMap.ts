@@ -1,7 +1,9 @@
 import { PlatformName } from './platform';
 import { getPlatformShortcutName, PlatformKeyboardShortcut } from './shortcuts';
 
-export type KeyCommand = () => void;
+export const FALLTHROUGH = 'fallthrough';
+
+export type KeyCommand = () => void | typeof FALLTHROUGH;
 
 export type KeyMap = Record<string, KeyCommand>;
 

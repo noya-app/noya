@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`replace text insert multiple attributes at end 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }
+
+<AttributedString> \\"hellowo++\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 4 }"
+`;
+
+exports[`replace text insert multiple attributes at start 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }
+
+<AttributedString> \\"++lloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }"
+`;
+
+exports[`replace text insert multiple attributes in middle 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }
+
+<AttributedString> \\"hel++rld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 3 }"
+`;
+
+exports[`replace text insert one attribute at end 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"hel++\\"
+└── <StringAttribute> { location: 0, length: 5 }"
+`;
+
+exports[`replace text insert one attribute at start 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"++llo\\"
+└── <StringAttribute> { location: 0, length: 5 }"
+`;
+
+exports[`replace text insert one attribute in middle 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"he++lo\\"
+└── <StringAttribute> { location: 0, length: 6 }"
+`;
+
+exports[`replace text insert spanning entire attributes 1`] = `
+"<AttributedString> \\"helloworld12345\\"
+├── <StringAttribute> { location: 0, length: 5 }
+├── <StringAttribute> { location: 5, length: 5 }
+└── <StringAttribute> { location: 10, length: 5 }
+
+<AttributedString> \\"hel++345\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 3 }"
+`;
+
+exports[`replace text remove multiple attributes at end 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }
+
+<AttributedString> \\"hellowo\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 2 }"
+`;
+
+exports[`replace text remove multiple attributes at start 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }
+
+<AttributedString> \\"lloworld\\"
+├── <StringAttribute> { location: 0, length: 3 }
+└── <StringAttribute> { location: 3, length: 5 }"
+`;
+
+exports[`replace text remove multiple attributes in middle 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5 }
+└── <StringAttribute> { location: 5, length: 5 }
+
+<AttributedString> \\"helrld\\"
+├── <StringAttribute> { location: 0, length: 3 }
+└── <StringAttribute> { location: 3, length: 3 }"
+`;
+
+exports[`replace text remove one attribute at end 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"hel\\"
+└── <StringAttribute> { location: 0, length: 3 }"
+`;
+
+exports[`replace text remove one attribute at start 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"llo\\"
+└── <StringAttribute> { location: 0, length: 3 }"
+`;
+
+exports[`replace text remove one attribute in middle 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"helo\\"
+└── <StringAttribute> { location: 0, length: 4 }"
+`;
+
+exports[`replace text remove spanning entire attributes 1`] = `
+"<AttributedString> \\"helloworld12345\\"
+├── <StringAttribute> { location: 0, length: 5 }
+├── <StringAttribute> { location: 5, length: 5 }
+└── <StringAttribute> { location: 10, length: 5 }
+
+<AttributedString> \\"hel345\\"
+├── <StringAttribute> { location: 0, length: 3 }
+└── <StringAttribute> { location: 3, length: 3 }"
+`;
