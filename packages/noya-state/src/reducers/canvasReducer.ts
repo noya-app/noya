@@ -1,15 +1,18 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import { interpolateRgba } from 'noya-colorpicker';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
 import {
   AffineTransform,
   createBounds,
   createRect,
+  getLinePercentage,
   insetRect,
   Point,
   Rect,
 } from 'noya-geometry';
-import { SketchModel } from 'noya-sketch-model';
+import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
   DecodedCurvePoint,
@@ -17,18 +20,22 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { uuid } from 'noya-utils';
+import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
+import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
   addToParentLayer,
   computeNewBoundingRect,
   EncodedPageMetadata,
+  fixGradientPositions,
+  fixGroupFrameHierarchy,
   fixZeroLayerDimensions,
   getBoundingRect,
   getCurrentPage,
   getCurrentPageIndex,
   getCurrentPageMetadata,
   getIndexPathOfOpenShapeLayer,
+  getLayerTransformAtIndexPath,
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
@@ -36,6 +43,7 @@ import {
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
+  resizeLayerFrame,
 } from '../selectors/selectors';
 import {
   getScaledSnapBoundingRect,
@@ -54,6 +62,7 @@ import {
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type CanvasAction =
+  | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -61,6 +70,7 @@ export type CanvasAction =
   | [type: 'addDrawnLayer']
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
+  | [type: 'addStopToGradient', point: Point]
   | [
       type: 'insertBitmap',
       file: ArrayBuffer,
@@ -82,6 +92,36 @@ export function canvasReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setZoom': {
+      const [, value, mode] = action;
+      const pageId = getCurrentPage(state).do_objectID;
+      const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const newValue = clamp(
+          mode === 'multiply' ? value * zoomValue : value,
+          0.01,
+          256,
+        );
+
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        // To find the new scrollOrigin: start at the viewport center and
+        // move by the scaled the distance to the scrollOrigin
+        const newScrollOrigin = AffineTransform.translate(
+          (scrollOrigin.x - viewportCenter.x) * (newValue / zoomValue),
+          (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
+        ).applyTo(viewportCenter);
+
+        draftUser[pageId].scrollOrigin = PointString.encode(newScrollOrigin);
+        draftUser[pageId].zoomValue = newValue;
+      });
+    }
     case 'insertArtboard': {
       const [, { name, width, height }] = action;
       const pageIndex = getCurrentPageIndex(state);
@@ -105,6 +145,55 @@ export function canvasReducer(
           'reset',
         ]);
         draft.selectedObjects = [layer.do_objectID];
+      });
+    }
+    case 'addStopToGradient': {
+      const [, point] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const position = Selectors.getPercentageOfPointInGradient(state, point);
+
+      if (!state.selectedGradient) return state;
+
+      const { layerId, fillIndex, styleType } = state.selectedGradient;
+
+      const page = getCurrentPage(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+
+        if (
+          layer.style?.[styleType]?.[fillIndex].fillType !==
+          Sketch.FillType.Gradient
+        )
+          return state;
+
+        const gradientStops =
+          layer.style?.[styleType]?.[fillIndex].gradient.stops;
+
+        if (!gradientStops) return;
+
+        const gradient = gradientStops.map((g) => ({
+          color: sketchColorToRgba(g.color),
+          position: g.position,
+        }));
+
+        const color = rgbaToSketchColor(interpolateRgba(gradient, position));
+        gradientStops.push(SketchModel.gradientStop({ color, position }));
+
+        gradientStops.sort((a, b) => a.position - b.position);
+        const nextIndex = gradientStops.findIndex(
+          (g) => g.position === position,
+        );
+
+        if (!draft.selectedGradient) return state;
+        draft.selectedGradient.stopIndex =
+          nextIndex === -1 ? gradientStops.length - 1 : nextIndex;
       });
     }
     case 'addDrawnLayer': {
@@ -356,9 +445,7 @@ export function canvasReducer(
         const newCurvePoints = Primitives.splitPath(
           segmentPath,
           t,
-        ).map((path) =>
-          Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
-        );
+        ).map((path) => Primitives.pathToCurvePoints(path, draftLayer.frame));
 
         const start = draftLayer.points.slice(0, segmentIndex + 1);
         const end = draftLayer.points.slice(segmentIndex + 1);
@@ -387,7 +474,8 @@ export function canvasReducer(
         action[1][0] === 'maybeScale' ||
           action[1][0] === 'maybeMove' ||
           action[1][0] === 'maybeMovePoint' ||
-          action[1][0] === 'maybeMoveControlPoint'
+          action[1][0] === 'maybeMoveControlPoint' ||
+          action[1][0] === 'maybeMoveGradientStop'
           ? [...action[1], page]
           : action[1],
       );
@@ -395,6 +483,114 @@ export function canvasReducer(
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
         switch (interactionState.type) {
+          case 'maybeMoveGradientStop': {
+            if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
+
+            const { pageSnapshot } = draft.interactionState;
+
+            if (!state.selectedGradient) return;
+
+            const gradient = getSelectedGradient(
+              pageSnapshot,
+              state.selectedGradient,
+            );
+
+            if (!gradient) return;
+
+            fixGradientPositions(gradient);
+
+            return;
+          }
+          case 'moveGradientStop': {
+            const { origin, current, pageSnapshot } = interactionState;
+
+            if (!state.selectedGradient) return;
+
+            const {
+              layerId,
+              fillIndex,
+              stopIndex,
+              styleType,
+            } = state.selectedGradient;
+
+            const indexPath = Layers.findIndexPath(
+              pageSnapshot,
+              (layer) => layer.do_objectID === layerId,
+            );
+
+            if (!indexPath) return;
+
+            const layer = Layers.access(pageSnapshot, indexPath);
+            const draftLayer = Layers.access(
+              draft.sketch.pages[pageIndex],
+              indexPath,
+            );
+
+            if (
+              layer.style?.fills?.[fillIndex]?.fillType !==
+                Sketch.FillType.Gradient ||
+              draftLayer.style?.fills?.[fillIndex]?.fillType !==
+                Sketch.FillType.Gradient
+            )
+              return;
+
+            const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
+
+            const draftGradient =
+              draftLayer.style?.[styleType]?.[fillIndex].gradient;
+
+            if (!gradient || !draftGradient) return;
+
+            const transform = getLayerTransformAtIndexPath(
+              pageSnapshot,
+              indexPath,
+              AffineTransform.identity,
+              'includeLast',
+            ).scale(layer.frame.width, layer.frame.height);
+
+            const delta = {
+              x: current.x - origin.x,
+              y: current.y - origin.y,
+            };
+
+            const transformPointString = (pointString: string) => {
+              const originalPoint = PointString.decode(pointString);
+              const transformedPoint = transform.applyTo(originalPoint);
+              transformedPoint.x += delta.x;
+              transformedPoint.y += delta.y;
+              const newPoint = transform.invert().applyTo(transformedPoint);
+              return PointString.encode(newPoint);
+            };
+
+            switch (stopIndex) {
+              case 0:
+                draftGradient.from = transformPointString(gradient.from);
+                break;
+              case gradient.stops.length - 1:
+                draftGradient.to = transformPointString(gradient.to);
+                break;
+              default:
+                const from = transform.applyTo(
+                  PointString.decode(gradient.from),
+                );
+                const to = transform.applyTo(PointString.decode(gradient.to));
+                const stop = gradient.stops[stopIndex];
+
+                const stopPoint = {
+                  x: lerp(from.x, to.x, stop.position),
+                  y: lerp(from.y, to.y, stop.position),
+                };
+                stopPoint.x += delta.x;
+                stopPoint.y += delta.y;
+
+                const position = getLinePercentage(stopPoint, [from, to]);
+
+                draftGradient.stops[stopIndex].position = position;
+                break;
+            }
+
+            break;
+          }
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;
 
@@ -418,6 +614,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(point, point),
             );
@@ -438,12 +635,14 @@ export function canvasReducer(
 
             const originAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(origin, origin),
             );
 
             const currentAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              page,
               context.canvasSize,
               createRect(current, current),
             );
@@ -493,6 +692,7 @@ export function canvasReducer(
 
             const snapAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
+              pageSnapshot,
               context.canvasSize,
               sourceRect,
               layerIndexPaths,
@@ -503,13 +703,18 @@ export function canvasReducer(
 
             layerIndexPaths.forEach((indexPath) => {
               const initialRect = Layers.access(pageSnapshot, indexPath).frame;
-              const layer = Layers.access(
+              const draftLayer = Layers.access(
                 draft.sketch.pages[pageIndex],
                 indexPath,
               );
 
-              layer.frame.x = initialRect.x + delta.x;
-              layer.frame.y = initialRect.y + delta.y;
+              draftLayer.frame.x = initialRect.x + delta.x;
+              draftLayer.frame.y = initialRect.y + delta.y;
+
+              fixGroupFrameHierarchy(
+                draft.sketch.pages[pageIndex],
+                indexPath.slice(0, -1),
+              );
             });
 
             break;
@@ -585,54 +790,42 @@ export function canvasReducer(
 
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
+              pageSnapshot,
               originalBoundingRect,
               delta,
               context.canvasSize,
               direction,
             );
 
-            const originalTransform = AffineTransform.multiply(
-              AffineTransform.translate(
-                originalBoundingRect.x,
-                originalBoundingRect.y,
-              ),
-              AffineTransform.scale(
-                originalBoundingRect.width,
-                originalBoundingRect.height,
-              ),
-            ).invert();
+            const originalTransform = AffineTransform.translate(
+              originalBoundingRect.x,
+              originalBoundingRect.y,
+            ).scale(originalBoundingRect.width, originalBoundingRect.height);
 
-            const newTransform = AffineTransform.multiply(
-              AffineTransform.translate(newBoundingRect.x, newBoundingRect.y),
-              AffineTransform.scale(
-                newBoundingRect.width,
-                newBoundingRect.height,
-              ),
-            );
+            const newTransform = AffineTransform.translate(
+              newBoundingRect.x,
+              newBoundingRect.y,
+            ).scale(newBoundingRect.width, newBoundingRect.height);
 
-            layerIndexPaths.forEach((layerIndex) => {
-              const originalLayer = Layers.access(pageSnapshot, layerIndex);
+            layerIndexPaths.forEach((indexPath) => {
+              const originalLayer = Layers.access(pageSnapshot, indexPath);
 
-              const layerTransform = AffineTransform.multiply(
-                ...Layers.accessPath(pageSnapshot, layerIndex)
-                  .slice(1, -1) // Remove the page and current layer
-                  .map((layer) =>
-                    AffineTransform.translate(layer.frame.x, layer.frame.y),
-                  )
-                  .reverse(),
+              const layerTransform = getLayerTransformAtIndexPath(
+                pageSnapshot,
+                indexPath,
               );
 
-              const newLayer = Layers.access(
-                draft.sketch.pages[pageIndex],
-                layerIndex,
-              );
+              const layer = Layers.access(
+                pageSnapshot,
+                indexPath,
+              ) as Layers.PageLayer;
 
               const originalBounds = createBounds(originalLayer.frame);
 
               const scaleTransform = AffineTransform.multiply(
                 layerTransform.invert(),
                 newTransform,
-                originalTransform,
+                originalTransform.invert(),
                 layerTransform,
               );
 
@@ -649,18 +842,22 @@ export function canvasReducer(
               const roundedMin = { x: Math.round(min.x), y: Math.round(min.y) };
               const roundedMax = { x: Math.round(max.x), y: Math.round(max.y) };
 
-              const newFrame = createRect(roundedMin, roundedMax);
-
               const width = roundedMax.x - roundedMin.x;
               const height = roundedMax.y - roundedMin.y;
 
-              newLayer.isFlippedHorizontal = width < 0;
-              newLayer.isFlippedVertical = height < 0;
+              const newLayer = resizeLayerFrame(
+                layer,
+                createRect(roundedMin, roundedMax),
+              );
 
-              newLayer.frame.x = newFrame.x;
-              newLayer.frame.y = newFrame.y;
-              newLayer.frame.width = newFrame.width;
-              newLayer.frame.height = newFrame.height;
+              newLayer.isFlippedHorizontal =
+                width < 0
+                  ? !layer.isFlippedHorizontal
+                  : layer.isFlippedHorizontal;
+              newLayer.isFlippedVertical =
+                height < 0 ? !layer.isFlippedVertical : layer.isFlippedVertical;
+
+              Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });
 
             break;

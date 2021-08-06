@@ -2,13 +2,16 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { uuid } from 'noya-utils';
-import { SketchFile } from 'noya-sketch-file';
-import { IndexPath } from 'tree-visit';
+import { Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
+import { SketchFile } from 'noya-sketch-file';
+import { uuid } from 'noya-utils';
+import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
+import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
   findPageLayerIndexPaths,
+  fixGradientPositions,
   getCurrentComponentsTab,
   getCurrentPageIndex,
   getCurrentTab,
@@ -34,7 +37,6 @@ import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import { Size } from 'noya-geometry';
 
 export type { SetNumberMode };
 
@@ -51,6 +53,13 @@ export type SelectedControlPoint = {
   controlPointType: controlPointType;
 };
 
+export type SelectedGradient = {
+  layerId: string;
+  fillIndex: number;
+  stopIndex: number;
+  styleType: 'fills' | 'borders';
+};
+
 export type SelectedPointLists = Record<string, number[]>;
 
 export type ApplicationState = {
@@ -63,12 +72,15 @@ export type ApplicationState = {
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
+  selectedGradient?: SelectedGradient;
   sketch: SketchFile;
 };
 
 export type Action =
   | [type: 'setTab', value: WorkspaceTab]
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
+  | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
+  | [type: 'setSelectedGradientStopIndex', value: number]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -106,6 +118,33 @@ export function applicationReducer(
         ]);
       });
     }
+    case 'setSelectedGradient': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        if (state.selectedGradient && !value) {
+          const gradient = getSelectedGradient(
+            draft.sketch.pages[pageIndex],
+            state.selectedGradient,
+          );
+
+          if (gradient) {
+            fixGradientPositions(gradient);
+          }
+        }
+
+        draft.selectedGradient = value;
+      });
+    }
+    case 'setSelectedGradientStopIndex': {
+      const [, value] = action;
+      return produce(state, (draft) => {
+        if (!draft.selectedGradient) return;
+
+        draft.selectedGradient.stopIndex = value;
+      });
+    }
     case 'selectPage':
     case 'addPage':
     case 'setPageName':
@@ -114,6 +153,7 @@ export function applicationReducer(
     case 'movePage': {
       return pageReducer(state, action);
     }
+    case 'setZoom':
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'addShapePathLayer':
@@ -124,6 +164,7 @@ export function applicationReducer(
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':
+    case 'addStopToGradient':
       return canvasReducer(state, action, CanvasKit, context);
     case 'setLayerVisible':
     case 'setLayerName':
@@ -143,12 +184,12 @@ export function applicationReducer(
     case 'setMaskMode':
       return layerPropertyReducer(state, action, CanvasKit);
     case 'importSvg':
-    case 'groupLayer':
+    case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':
     case 'selectLayer':
     case 'selectAllLayers':
-    case 'ungroupLayer':
+    case 'ungroupLayers':
     case 'createSymbol':
     case 'detachSymbol':
     case 'deleteSymbol':
@@ -206,7 +247,11 @@ export function applicationReducer(
     case 'setPatternFillType':
     case 'setPatternTileScale':
     case 'setFillImage':
-    case 'setFillContextSettingsOpacity': {
+    case 'setFillContextSettingsOpacity':
+    case 'setFillGradientFrom':
+    case 'setBorderGradientFrom':
+    case 'setFillGradientTo':
+    case 'setBorderGradientTo': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -215,6 +260,7 @@ export function applicationReducer(
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
               if (!layer.style) return;
+
               if (
                 action[0] === 'setFillFillType' &&
                 action[2] === Sketch.FillType.Pattern &&
@@ -222,7 +268,33 @@ export function applicationReducer(
               )
                 setNewPatternFill(layer.style.fills, action[1], draft);
 
-              layer.style = styleReducer(layer.style, action);
+              if (
+                action[0] === 'setFillGradientPosition' ||
+                action[0] === 'setBorderGradientPosition'
+              ) {
+                const [, , stopIndex, position] = action;
+
+                if (!draft.selectedGradient) return;
+
+                const { fillIndex, styleType } = draft.selectedGradient;
+
+                const draftGradient =
+                  layer.style?.[styleType]?.[fillIndex].gradient;
+
+                if (!draftGradient) return;
+
+                const draftStop = draftGradient.stops[stopIndex];
+                draftStop.position = position;
+
+                draftGradient.stops.sort((a, b) => a.position - b.position);
+                const newIndex = draftGradient.stops.findIndex(
+                  (s) => s === draftStop,
+                );
+
+                draft.selectedGradient.stopIndex = newIndex;
+              } else {
+                layer.style = styleReducer(layer.style, action);
+              }
             },
           );
         });

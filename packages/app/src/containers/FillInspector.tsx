@@ -29,7 +29,8 @@ export default memo(function FillInspector({
   title: string;
   allowMoreThanOne: boolean;
 }) {
-  const [, dispatch] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
+  const selectLayerId = state.selectedObjects[0];
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),
@@ -151,6 +152,13 @@ export default memo(function FillInspector({
                 dispatch('setFillGradientType', index, value),
               onChangeGradient: (value) =>
                 dispatch('setFillGradient', index, value),
+              onEditGradient: (stopIndex) =>
+                dispatch('setSelectedGradient', {
+                  layerId: selectLayerId,
+                  fillIndex: index,
+                  stopIndex,
+                  styleType: 'fills',
+                }),
             }}
             patternProps={{
               pattern: item.pattern,
@@ -164,7 +172,7 @@ export default memo(function FillInspector({
           />
         ),
 
-        [dispatch],
+        [dispatch, selectLayerId],
       )}
     />
   );

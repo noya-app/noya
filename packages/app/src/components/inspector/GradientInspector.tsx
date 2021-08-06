@@ -1,4 +1,5 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import { useApplicationState } from 'noya-app-state-context';
 import {
   GradientPicker,
   InputField,
@@ -8,7 +9,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { clamp } from 'noya-utils';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
@@ -32,15 +33,13 @@ export default memo(function GradientInspector({
   onAddStop = (color: Sketch.Color, position: number) => {},
   onDeleteStop = (index: number) => {},
 }: Props) {
+  const [state, dispatch] = useApplicationState();
+
   const colorInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
 
-  const [selectedStopIndex, setSelectedStopIndex] = useState(0);
-
-  const clampedSelectedStopIndex = !gradient[selectedStopIndex]
-    ? 0
-    : selectedStopIndex;
+  const clampedSelectedStopIndex = state.selectedGradient?.stopIndex ?? 0;
 
   const selectedcolor = gradient[clampedSelectedStopIndex].color;
   const selectedColorHex = sketchColorToHex(selectedcolor);
@@ -113,19 +112,20 @@ export default memo(function GradientInspector({
   const handleAddStop = useCallback(
     (color: Sketch.Color, position: number) => {
       onAddStop(color, position);
-      setSelectedStopIndex(gradient.length);
+      dispatch('setSelectedGradientStopIndex', gradient.length);
     },
-    [gradient, onAddStop, setSelectedStopIndex],
+    [gradient, onAddStop, dispatch],
   );
 
   const handleDeleteStop = useCallback(() => {
     if (gradient.length === 2) return;
 
     onDeleteStop(clampedSelectedStopIndex);
-    setSelectedStopIndex(
+    dispatch(
+      'setSelectedGradientStopIndex',
       clampedSelectedStopIndex - 1 > 0 ? 0 : clampedSelectedStopIndex - 1,
     );
-  }, [gradient, clampedSelectedStopIndex, onDeleteStop, setSelectedStopIndex]);
+  }, [gradient, clampedSelectedStopIndex, onDeleteStop, dispatch]);
 
   return (
     <InspectorPrimitives.Section>
@@ -136,11 +136,11 @@ export default memo(function GradientInspector({
           onChangeColor={handleChangeColor}
           onChangePosition={handleChangePosition}
           onAdd={handleAddStop}
-          onSelectStop={useCallback(
-            (index: number) => setSelectedStopIndex(index),
-            [setSelectedStopIndex],
-          )}
           onDelete={handleDeleteStop}
+          onSelectStop={useCallback(
+            (index: number) => dispatch('setSelectedGradientStopIndex', index),
+            [dispatch],
+          )}
         />
         <Spacer.Vertical size={10} />
         <InspectorPrimitives.Row id={id}>

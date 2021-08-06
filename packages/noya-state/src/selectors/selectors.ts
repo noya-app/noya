@@ -8,3 +8,4 @@ export * from './transformSelectors';
 export * from './workspaceSelectors';
 export * from './pointSelectors';
 export * from './elementSelectors';
+export * from './gradientSelectors';

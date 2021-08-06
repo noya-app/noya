@@ -120,6 +120,7 @@ export default function EditablePath({
     () =>
       AffineTransform.multiply(
         transform,
+        Selectors.getLayerFlipTransform(layer),
         Selectors.getLayerRotationTransform(layer),
       ),
     [layer, transform],

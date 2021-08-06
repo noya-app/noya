@@ -3,6 +3,7 @@ export * from './isDeepEqual';
 export * from './isNumberEqual';
 export * from './zip';
 export * from './clamp';
+export * from './lerp';
 export * from './sum';
 export * from './round';
 export * from './range';
@@ -19,6 +20,7 @@ export * from './base64';
 export * from './utf16';
 export * from './fileType';
 export * from './memoize';
+export * from './types';
 export * as delimitedPath from './delimitedPath';
 
 // Consider moving these to a more React-specific package

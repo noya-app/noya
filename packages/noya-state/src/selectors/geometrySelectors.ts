@@ -1,26 +1,28 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
   createRectFromBounds,
   getRectCornerPoints,
+  Insets,
+  Point,
+  Rect,
   rectContainsPoint,
   rectsIntersect,
   rotatedRectContainsPoint,
   transformRect,
-  Rect,
-  Point,
 } from 'noya-geometry';
-import { getRectDragHandles, Primitives } from 'noya-state';
+import * as Primitives from 'noya-state';
+import { getRectDragHandles } from 'noya-state';
 import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
-import { CanvasInsets } from '../reducers/workspaceReducer';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
 import {
   getCanvasTransform,
+  getLayerFlipTransform,
   getLayerRotationTransform,
   getLayerTransformAtIndexPathReversed,
   getScreenTransform,
@@ -78,7 +80,8 @@ function visitLayersReversed(
 
 export function getLayersInRect(
   state: ApplicationState,
-  insets: CanvasInsets,
+  page: Sketch.Page,
+  insets: Insets,
   rect: Rect,
   traversalOptions?: LayerTraversalOptions,
 ): PageLayer[] {
@@ -87,8 +90,6 @@ export function getLayersInRect(
     includeHiddenLayers: false,
     includeArtboardLayers: false,
   };
-
-  const page = getCurrentPage(state);
 
   let found: Sketch.AnyLayer[] = [];
 
@@ -125,7 +126,7 @@ export function getLayersInRect(
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
   state: ApplicationState,
-  insets: CanvasInsets,
+  insets: Insets,
   point: Point,
   traversalOptions?: LayerTraversalOptions,
 ): PageLayer | undefined {
@@ -148,6 +149,7 @@ export function getLayerAtPoint(
   visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
@@ -217,6 +219,7 @@ export function getBoundingRect(
 
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 
@@ -257,6 +260,7 @@ export function getBoundingPoints(
 
     const transform = AffineTransform.multiply(
       ctm,
+      getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
 

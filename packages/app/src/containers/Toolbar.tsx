@@ -211,21 +211,27 @@ const ToolbarContent = memo(function ToolbarContent({
     'Mod-Shift-z': handleRedo,
   });
 
-  useKeyboardShortcuts('keydown', {
-    Space: () => {
-      if (interactionType !== 'none') return;
+  useKeyboardShortcuts(
+    {
+      Space: () => {
+        if (interactionType !== 'none') return;
 
-      dispatch('interaction', ['enablePanMode']);
+        dispatch('interaction', ['enablePanMode']);
+      },
     },
-  });
+    { eventName: 'keydown' },
+  );
 
-  useKeyboardShortcuts('keyup', {
-    Space: () => {
-      if (!isPanning) return;
+  useKeyboardShortcuts(
+    {
+      Space: () => {
+        if (!isPanning) return;
 
-      dispatch('interaction', ['reset']);
+        dispatch('interaction', ['reset']);
+      },
     },
-  });
+    { eventName: 'keyup' },
+  );
 
   return (
     <>

@@ -24,6 +24,8 @@ import ThemeToolbar from './ThemeToolbar';
 import ThemeWindow from './ThemeWindow';
 import Toolbar from './Toolbar';
 
+const BACKDROP_FILTER = 'blur(10px)';
+
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
   maxWidth: `${theme.sizes.sidebarWidth}px`,
@@ -32,8 +34,8 @@ const LeftSidebar = styled.div(({ theme }) => ({
   flexDirection: 'column',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
-  WebkitBackdropFilter: 'blur(10px)',
-  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: BACKDROP_FILTER,
+  backdropFilter: BACKDROP_FILTER,
 }));
 
 const RightSidebar = styled.div(({ theme }) => ({
@@ -44,8 +46,8 @@ const RightSidebar = styled.div(({ theme }) => ({
   flexDirection: 'column',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
-  WebkitBackdropFilter: 'blur(10px)',
-  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: BACKDROP_FILTER,
+  backdropFilter: BACKDROP_FILTER,
 }));
 
 const MainView = styled.main(({ theme }) => ({
@@ -73,6 +75,8 @@ const ToolbarContainer = styled.header(({ theme }) => ({
   alignItems: 'center',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
+  WebkitBackdropFilter: BACKDROP_FILTER,
+  backdropFilter: BACKDROP_FILTER,
 }));
 
 function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {

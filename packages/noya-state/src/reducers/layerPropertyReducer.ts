@@ -5,11 +5,13 @@ import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
   computeNewBoundingRect,
+  fixGroupFrameHierarchy,
   getCurrentPage,
   getCurrentPageIndex,
   getLayerRotation,
   getLayerRotationMultiplier,
   getSelectedLayerIndexPaths,
+  resizeLayerFrame,
 } from '../selectors/selectors';
 import { accessPageLayers, ApplicationState } from './applicationReducer';
 import { SetNumberMode } from './styleReducer';
@@ -137,15 +139,26 @@ export function layerPropertyReducer(
     case 'setLayerY': {
       const [type, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const indexPaths = getSelectedLayerIndexPaths(state);
 
       const property = type === 'setLayerX' ? ('x' as const) : ('y' as const);
 
       return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          const value = layer.frame[property];
+        indexPaths.forEach((indexPath) => {
+          const draftPage = draft.sketch.pages[pageIndex];
+          const draftLayer = Layers.access(draftPage, indexPath);
 
-          layer.frame[property] = mode === 'replace' ? amount : value + amount;
+          const value = draftLayer.frame[property];
+          const newValue = mode === 'replace' ? amount : value + amount;
+
+          const newLayer = resizeLayerFrame(draftLayer, {
+            ...draftLayer.frame,
+            [property]: newValue,
+          });
+
+          Layers.assign(draftPage, indexPath, newLayer);
+
+          fixGroupFrameHierarchy(draftPage, indexPath.slice(0, -1));
         });
       });
     }
@@ -153,19 +166,30 @@ export function layerPropertyReducer(
     case 'setLayerHeight': {
       const [type, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const indexPaths = getSelectedLayerIndexPaths(state);
 
       const property =
         type === 'setLayerWidth' ? ('width' as const) : ('height' as const);
 
       return produce(state, (draft) => {
-        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-          const value = layer.frame[property];
+        indexPaths.forEach((indexPath) => {
+          const draftPage = draft.sketch.pages[pageIndex];
+          const draftLayer = Layers.access(draftPage, indexPath);
 
-          layer.frame[property] = Math.max(
+          const value = draftLayer.frame[property];
+          const newValue = Math.max(
             mode === 'replace' ? amount : value + amount,
             0.5,
           );
+
+          const newLayer = resizeLayerFrame(draftLayer, {
+            ...draftLayer.frame,
+            [property]: newValue,
+          });
+
+          Layers.assign(draftPage, indexPath, newLayer);
+
+          fixGroupFrameHierarchy(draftPage, indexPath.slice(0, -1));
         });
       });
     }

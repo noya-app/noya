@@ -1,8 +1,7 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { AffineTransform, createBounds } from 'noya-geometry';
+import { AffineTransform, createBounds, Insets } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
 import { ApplicationState, Layers } from '../index';
-import { CanvasInsets } from '../reducers/workspaceReducer';
 import { toRadians } from '../utils/radians';
 import { getCurrentPageMetadata } from './pageSelectors';
 
@@ -10,11 +9,11 @@ export function getLayerTransform(
   ctm: AffineTransform,
   layer: Sketch.AnyLayer,
 ): AffineTransform {
+  const flip = getLayerFlipTransform(layer);
   const rotation = getLayerRotationTransform(layer);
   const translation = getLayerTranslationTransform(layer);
-  const flip = getLayerFlipTransform(layer);
 
-  return AffineTransform.multiply(ctm, rotation, translation, flip);
+  return AffineTransform.multiply(ctm, flip, rotation, translation);
 }
 
 export function getLayerFlipTransform(layer: Sketch.AnyLayer) {
@@ -50,7 +49,7 @@ export function getLayerRotationTransform(
 }
 
 export function getLayerTransformAtIndexPath(
-  node: Sketch.AnyLayer,
+  node: Sketch.Page,
   indexPath: IndexPath,
   ctm: AffineTransform = AffineTransform.identity,
   behavior?: 'includeLast',
@@ -107,14 +106,11 @@ export function getLayerRotationRadians(layer: Sketch.AnyLayer): number {
   return toRadians(getLayerRotation(layer));
 }
 
-export function getScreenTransform(insets: CanvasInsets) {
-  return AffineTransform.translate(insets.left, 0);
+export function getScreenTransform(insets: Insets) {
+  return AffineTransform.translate(insets.left, insets.top);
 }
 
-export function getCanvasTransform(
-  state: ApplicationState,
-  insets: CanvasInsets,
-) {
+export function getCanvasTransform(state: ApplicationState, insets: Insets) {
   const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
 
   return AffineTransform.multiply(

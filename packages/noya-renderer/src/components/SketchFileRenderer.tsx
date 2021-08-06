@@ -21,9 +21,9 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Path, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
@@ -200,7 +200,6 @@ export default memo(function SketchFileRenderer() {
     const layerTransform = Selectors.getLayerTransformAtIndexPath(
       page,
       indexPath,
-      AffineTransform.identity,
     );
 
     return (
@@ -330,6 +329,75 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
+  const gradientLineStroke = useStroke({ color: '#FFF' });
+  const gradientStopStroke = useStroke({ color: '#FFF', strokeWidth: 1.5 });
+  const gradientEditorShadow = useMemo(
+    () =>
+      CanvasKit.ImageFilter.MakeDropShadowOnly(
+        0,
+        0,
+        2,
+        2,
+        CanvasKit.Color(0, 0, 0, 0.5),
+        null,
+      ),
+
+    [CanvasKit],
+  );
+
+  const gradientPoints = useMemo(() => {
+    const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
+
+    if (!gradientStopPoints || !state.selectedGradient) return null;
+
+    const { stopIndex } = state.selectedGradient;
+
+    return (
+      <Group imageFilter={gradientEditorShadow}>
+        <Polyline
+          points={[
+            gradientStopPoints[0].point,
+            gradientStopPoints[gradientStopPoints.length - 1].point,
+          ]}
+          paint={gradientLineStroke}
+        />
+        {gradientStopPoints.map(({ point, color }, index) => {
+          const path = new CanvasKit.Path();
+
+          const radius =
+            index === stopIndex
+              ? Selectors.POINT_RADIUS * 1.5
+              : Selectors.POINT_RADIUS;
+
+          path.addOval(
+            CanvasKit.XYWHRect(
+              point.x - radius,
+              point.y - radius,
+              radius * 2,
+              radius * 2,
+            ),
+          );
+
+          const paint = new CanvasKit.Paint();
+          paint.setColor(Primitives.color(CanvasKit, color));
+
+          return (
+            <Fragment key={index}>
+              <Path path={path} paint={paint} />
+              <Path path={path} paint={gradientStopStroke} />
+            </Fragment>
+          );
+        })}
+      </Group>
+    );
+  }, [
+    state,
+    gradientEditorShadow,
+    gradientLineStroke,
+    CanvasKit,
+    gradientStopStroke,
+  ]);
+
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
@@ -355,6 +423,7 @@ export default memo(function SketchFileRenderer() {
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
+        {gradientPoints}
         {symbol && <SketchArtboardContent layer={symbol} />}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
@@ -369,6 +438,7 @@ export default memo(function SketchFileRenderer() {
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
               boundingRect &&
+              !gradientPoints &&
               !drawingLayer &&
               !isInserting && (
                 <>
@@ -392,12 +462,15 @@ export default memo(function SketchFileRenderer() {
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {boundingRect && !drawingLayer && !isInserting && (
-              <DragHandles
-                rect={boundingRect}
-                selectionPaint={selectionPaint}
-              />
-            )}
+            {!gradientPoints &&
+              boundingRect &&
+              !drawingLayer &&
+              !isInserting && (
+                <DragHandles
+                  rect={boundingRect}
+                  selectionPaint={selectionPaint}
+                />
+              )}
           </>
         )}
       </Group>

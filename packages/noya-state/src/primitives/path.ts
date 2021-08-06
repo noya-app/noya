@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, Path, PathCommand, PathOp } from 'canvaskit';
+import { CanvasKit, Path, PathOp } from 'canvaskit';
 import { distance, Point, Rect } from 'noya-geometry';
 import {
   CommandWithoutQuadratics,
@@ -8,6 +8,7 @@ import {
 import { PointString, SketchModel } from 'noya-sketch-model';
 import { parsePoint, stringifyPoint } from 'noya-state';
 import { clamp, rotate, windowsOf, zip } from 'noya-utils';
+import { parsePathCmds, PathCommand, PathCommandVerb } from './pathCommand';
 
 /**
  * The radius of an edge should be less than half the length of that edge
@@ -352,15 +353,14 @@ export function unscaleCurvePoint(curvePoint: Sketch.CurvePoint, frame: Rect) {
 }
 
 function pathCommandToSVGCommand(
-  CanvasKit: CanvasKit,
   command: PathCommand,
 ): CommandWithoutQuadratics {
   switch (command[0]) {
-    case CanvasKit.MOVE_VERB: {
+    case PathCommandVerb.move: {
       const [, x, y] = command;
       return { type: 'move', to: { x, y } };
     }
-    case CanvasKit.CUBIC_VERB: {
+    case PathCommandVerb.cubic: {
       const [, x1, y1, x2, y2, x3, y3] = command;
       return {
         type: 'cubicCurve',
@@ -375,13 +375,10 @@ function pathCommandToSVGCommand(
 }
 
 export function pathToCurvePoints(
-  CanvasKit: CanvasKit,
   path: Path,
   frame: Rect,
 ): Sketch.CurvePoint[] {
-  const svgCommands = path
-    .toCmds()
-    .map((cmd) => pathCommandToSVGCommand(CanvasKit, cmd));
+  const svgCommands = parsePathCmds(path.toCmds()).map(pathCommandToSVGCommand);
 
   // Assume a single path. `isClosed` should already be handled, before calling
   // this function, so we can ignore it here.

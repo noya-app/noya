@@ -52,7 +52,12 @@ export default memo(function SketchBitmap({ layer }: Props) {
         {imageElement}
       </ColorControlsGroup>
       {borders.map((border, index) => (
-        <SketchBorder key={`border-${index}`} path={path} border={border} />
+        <SketchBorder
+          key={`border-${index}`}
+          path={path}
+          border={border}
+          frame={layer.frame}
+        />
       ))}
     </>
   );

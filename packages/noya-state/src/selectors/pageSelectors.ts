@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Draft } from 'immer';
 import { Point } from 'noya-geometry';
-import { Primitives } from 'noya-state';
+import { PointString } from 'noya-sketch-model';
 import { ApplicationState, Layers } from '../index';
 
 export type EncodedPageMetadata = {
@@ -37,22 +37,33 @@ export const getCurrentPage = (state: Draft<ApplicationState>) => {
   return state.sketch.pages[getCurrentPageIndex(state)];
 };
 
+export function decodePageMetadata(meta: EncodedPageMetadata): PageMetadata {
+  return {
+    zoomValue: meta.zoomValue,
+    scrollOrigin: PointString.decode(meta.scrollOrigin),
+  };
+}
+
+export function encodePageMetadata(meta: PageMetadata): EncodedPageMetadata {
+  return {
+    zoomValue: meta.zoomValue,
+    scrollOrigin: PointString.encode(meta.scrollOrigin),
+  };
+}
+
 export const getCurrentPageMetadata = (
   state: ApplicationState,
 ): PageMetadata => {
   const currentPage = getCurrentPage(state);
 
-  const meta: EncodedPageMetadata = state.sketch.user[currentPage.do_objectID];
+  const meta: EncodedPageMetadata = state.sketch.user[
+    currentPage.do_objectID
+  ] ?? {
+    zoomValue: 1,
+    scrollOrigin: '{100,100}',
+  };
 
-  return meta
-    ? {
-        zoomValue: meta.zoomValue,
-        scrollOrigin: Primitives.parsePoint(meta.scrollOrigin),
-      }
-    : {
-        zoomValue: 1,
-        scrollOrigin: { x: 100, y: 100 },
-      };
+  return decodePageMetadata(meta);
 };
 
 export const getCurrentSymbolPageIndex = (

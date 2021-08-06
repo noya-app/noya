@@ -1,7 +1,8 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { loadCanvasKit } from 'noya-renderer';
-import { SketchModel } from 'noya-sketch-model';
-import { createInitialState, createSketchFile } from 'noya-state';
+import { debugDescription, SketchModel } from 'noya-sketch-model';
+import { createInitialState, createSketchFile, Selectors } from 'noya-state';
+import { fixGroupFrame } from '../../selectors/layerSelectors';
 import { layerPropertyReducer } from '../layerPropertyReducer';
 
 let CanvasKit: CanvasKitType;
@@ -33,5 +34,40 @@ describe('setLayerName', () => {
     const state = createInitialState(createSketchFile(SketchModel.page()));
 
     layerPropertyReducer(state, ['setLayerName', 'bad', 'Test'], CanvasKit);
+  });
+});
+
+describe('setLayerWidth', () => {
+  test('set width', () => {
+    const group = SketchModel.group({
+      layers: [
+        SketchModel.rectangle({
+          frame: SketchModel.rect({
+            width: 100,
+            height: 100,
+          }),
+        }),
+      ],
+    });
+
+    fixGroupFrame(group);
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [group] })),
+    );
+    state.selectedObjects = [group.do_objectID];
+
+    const updated = layerPropertyReducer(
+      state,
+      ['setLayerWidth', 200],
+      CanvasKit,
+    );
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
   });
 });

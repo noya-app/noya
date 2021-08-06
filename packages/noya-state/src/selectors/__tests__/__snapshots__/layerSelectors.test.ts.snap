@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`fix group frame group with existing coordinates 1`] = `
+"<Group> Group { x: -1000, y: -1000, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 100, y: 100, w: 50, h: 50 }
+
+<Group> Group { x: -900, y: -900, w: 50, h: 50 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 50, h: 50 }"
+`;
+
+exports[`fix group frame multiple layers 1`] = `
+"<Group> Group { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 100, y: 100, w: 50, h: 50 }
+└── <Oval> Oval { x: 300, y: 300, w: 50, h: 50 }
+
+<Group> Group { x: 100, y: 100, w: 250, h: 250 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 50, h: 50 }
+└── <Oval> Oval { x: 200, y: 200, w: 50, h: 50 }"
+`;
+
+exports[`fix group frame single layer 1`] = `
+"<Group> Group { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 100, y: 100, w: 50, h: 50 }
+
+<Group> Group { x: 100, y: 100, w: 50, h: 50 }
+└── <Rectangle> Rectangle { x: 0, y: 0, w: 50, h: 50 }"
+`;
+
+exports[`updateLayerFrame resize and flip group 1`] = `
+"<Group> Group { x: 0, y: 0, w: 200, h: 200 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 100, y: 100, w: 100, h: 100 }
+
+<Group> Group { x: -400, y: 0, w: 400, h: 400 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 200, h: 200 }
+└── <Oval> Oval { x: 200, y: 200, w: 200, h: 200 }"
+`;
+
+exports[`updateLayerFrame resize group 1`] = `
+"<Group> Group { x: 0, y: 0, w: 200, h: 200 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 100, y: 100, w: 100, h: 100 }
+
+<Group> Group { x: 0, y: 0, w: 400, h: 400 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 200, h: 200 }
+└── <Oval> Oval { x: 200, y: 200, w: 200, h: 200 }"
+`;

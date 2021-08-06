@@ -7,16 +7,39 @@ type KeyEventName = 'keydown' | 'keyup' | 'keypress';
 
 type KeyMapDefinition = Parameters<typeof createKeyMap>[0];
 
-export function useKeyboardShortcuts(shortcuts: KeyMapDefinition): void;
+interface KeyboardEventListener {
+  addEventListener: (
+    name: string,
+    handler: (keyboardEvent: KeyboardEvent) => void,
+  ) => void;
+  removeEventListener: (
+    name: string,
+    handler: (keyboardEvent: KeyboardEvent) => void,
+  ) => void;
+}
+
+interface KeyboardShortcutOptions {
+  eventName?: KeyEventName;
+
+  /**
+   * A custom event listener.
+   *
+   * Pass null to ignore events, e.g. if the listener element hasn't mounted yet.
+   * This is similar to conditionally disabling the hook.
+   */
+  eventListener?: KeyboardEventListener | null;
+}
+
 export function useKeyboardShortcuts(
-  eventName: KeyEventName,
   shortcuts: KeyMapDefinition,
-): void;
-export function useKeyboardShortcuts(
-  ...args: [KeyMapDefinition] | [KeyEventName, KeyMapDefinition]
+  options: KeyboardShortcutOptions = {},
 ) {
-  const [eventName, shortcuts] =
-    args.length === 1 ? (['keydown', args[0]] as const) : args;
+  const eventName = options.eventName ?? 'keydown';
+  const eventRef = useMemo(
+    () =>
+      options.eventListener !== undefined ? options.eventListener : document,
+    [options?.eventListener],
+  );
 
   const platformName = getCurrentPlatform(navigator);
 
@@ -51,10 +74,12 @@ export function useKeyboardShortcuts(
       command();
     };
 
-    document.addEventListener(eventName, handler, true);
+    const listenerElement = eventRef;
+
+    listenerElement?.addEventListener(eventName, handler);
 
     return () => {
-      document.removeEventListener(eventName, handler, true);
+      listenerElement?.removeEventListener(eventName, handler);
     };
-  }, [eventName, platformName]);
+  }, [eventName, eventRef, platformName]);
 }

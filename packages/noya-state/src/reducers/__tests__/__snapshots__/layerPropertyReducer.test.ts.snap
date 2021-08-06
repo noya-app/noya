@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`setLayerWidth set width 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 100, h: 100 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 200, h: 100 }
+    └── <Rectangle> Rectangle { x: 0, y: 0, w: 200, h: 100 }"
+`;

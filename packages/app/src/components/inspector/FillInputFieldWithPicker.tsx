@@ -6,6 +6,7 @@ import {
   Divider,
   Select,
   SketchPattern,
+  useGlobalInputBlurListener,
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
@@ -274,6 +275,7 @@ export type GradientFillProps = {
   onChangeGradientPosition: (index: number, position: number) => void;
   onAddGradientStop: (color: Sketch.Color, position: number) => void;
   onDeleteGradientStop: (index: number) => void;
+  onEditGradient: (stopIndex: number) => void;
 };
 
 export type PatternFillProps = {
@@ -302,6 +304,7 @@ export default memo(function FillInputFieldWithPicker({
   gradientProps,
   patternProps,
 }: Props) {
+  const [, dispatch] = useApplicationState();
   const picker = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Gradient:
@@ -335,12 +338,40 @@ export default memo(function FillInputFieldWithPicker({
     patternProps?.pattern,
   ]);
 
+  useGlobalInputBlurListener(() => {
+    dispatch('setSelectedGradient', undefined);
+  });
+
   return (
-    <Popover.Root>
+    <Popover.Root
+      onOpenChange={(open) => {
+        if (open && fillType === Sketch.FillType.Gradient) {
+          gradientProps?.onEditGradient(0);
+        }
+
+        if (!open) {
+          dispatch('setSelectedGradient', undefined);
+        }
+      }}
+    >
       <Popover.Trigger as={Slot}>
         <ColorInputField id={id} value={hasMultipleFills ? undefined : value} />
       </Popover.Trigger>
-      <Content side="bottom" align="center">
+      <Content
+        side="bottom"
+        align="center"
+        onInteractOutside={useCallback((event) => {
+          // We allow interacting with the canvas to support editing gradients.
+          // If the inspector re-renders, e.g. due to layer selection change, the
+          // popover will close automatically.
+          if (
+            event.target instanceof HTMLElement &&
+            event.target.id === 'canvas-container'
+          ) {
+            event.preventDefault();
+          }
+        }, [])}
+      >
         {(gradientProps || patternProps) && (
           <>
             <InspectorPrimitives.Section>
@@ -353,7 +384,12 @@ export default memo(function FillInputFieldWithPicker({
                     gradientProps?.gradient.gradientType ??
                     Sketch.GradientType.Linear
                   }
-                  onChangeType={onChangeType}
+                  onChangeType={(type) => {
+                    onChangeType?.(type);
+                    if (type === Sketch.FillType.Gradient) {
+                      gradientProps?.onEditGradient(0);
+                    }
+                  }}
                   onChangeGradientType={gradientProps?.onChangeGradientType}
                 />
               </InspectorPrimitives.Row>
