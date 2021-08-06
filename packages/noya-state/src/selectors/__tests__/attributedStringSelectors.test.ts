@@ -147,5 +147,11 @@ describe('replace text', () => {
 
       expect(debugDescription([helloWorld12345, updated])).toMatchSnapshot();
     });
+
+    test('beyond current string', () => {
+      const updated = replaceTextInRange(hello, [10, 10], '++');
+
+      expect(debugDescription([hello, updated])).toMatchSnapshot();
+    });
   });
 });

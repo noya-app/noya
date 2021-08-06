@@ -62,11 +62,12 @@ export function replaceTextInRange(
   const spans = toTextSpansWithPositions(attributedString);
 
   const updated = spans
-    .map((span) => {
+    .map((span, i) => {
       const start = range[0] - span.location;
       const end = range[1] - span.location;
 
-      const shouldInsert = start >= 0 && start < span.length;
+      const shouldInsert =
+        start >= 0 && (start < span.length || i === spans.length - 1);
 
       return {
         attributes: span.attributes,

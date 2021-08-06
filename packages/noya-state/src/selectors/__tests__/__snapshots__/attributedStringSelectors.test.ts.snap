@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`replace text insert beyond current string 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"hello++\\"
+└── <StringAttribute> { location: 0, length: 7 }"
+`;
+
 exports[`replace text insert multiple attributes at end 1`] = `
 "<AttributedString> \\"helloworld\\"
 ├── <StringAttribute> { location: 0, length: 5 }
