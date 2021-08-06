@@ -3,6 +3,8 @@ import { createKeyMap } from './keyMap';
 import { getCurrentPlatform } from './platform';
 import { getEventShortcutNames } from './shortcuts';
 
+export const IGNORE_GLOBAL_EVENTS_CLASS = 'ignore-global-events';
+
 type KeyEventName = 'keydown' | 'keyup' | 'keypress';
 
 type KeyMapDefinition = Parameters<typeof createKeyMap>[0];
@@ -58,7 +60,7 @@ export function useKeyboardShortcuts(
     const handler = (event: KeyboardEvent) => {
       if (
         event.target instanceof HTMLInputElement &&
-        !event.target.classList.contains('ignore-global-events')
+        !event.target.classList.contains(IGNORE_GLOBAL_EVENTS_CLASS)
       )
         return;
 

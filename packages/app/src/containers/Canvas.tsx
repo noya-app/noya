@@ -11,7 +11,11 @@ import {
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
-import { FALLTHROUGH, useKeyboardShortcuts } from 'noya-keymap';
+import {
+  FALLTHROUGH,
+  IGNORE_GLOBAL_EVENTS_CLASS,
+  useKeyboardShortcuts,
+} from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   ApplicationState,
@@ -50,6 +54,11 @@ const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
   left: -insets.left,
   zIndex: -1,
 }));
+
+const HiddenInputTarget = styled.input({
+  position: 'absolute',
+  top: '-200px',
+});
 
 function getCursorForDirection(
   direction: CompassDirection,
@@ -997,14 +1006,10 @@ export default memo(function Canvas() {
           tabIndex={0}
           onFocus={() => inputRef.current?.focus()}
         >
-          <input
-            className="ignore-global-events"
+          <HiddenInputTarget
+            className={IGNORE_GLOBAL_EVENTS_CLASS}
             ref={inputRef}
             type="text"
-            style={{
-              position: 'absolute',
-              top: '-200px',
-            }}
           />
           <InsetContainer insets={insets}>
             {canvasSizeWithInsets && (
