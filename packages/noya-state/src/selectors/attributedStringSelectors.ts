@@ -49,11 +49,16 @@ export function fromTextSpans<T extends TextSpan>(
   return attributedString;
 }
 
+function normalizeRange(range: [number, number]): [number, number] {
+  return [Math.min(...range), Math.max(...range)];
+}
+
 export function replaceTextInRange(
   attributedString: Sketch.AttributedString,
   range: [number, number],
   text: string,
 ) {
+  range = normalizeRange(range);
   const spans = toTextSpansWithPositions(attributedString);
 
   const updated = spans

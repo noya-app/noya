@@ -119,6 +119,14 @@ exports[`replace text remove one attribute in middle 1`] = `
 └── <StringAttribute> { location: 0, length: 4 }"
 `;
 
+exports[`replace text remove reversed range 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5 }
+
+<AttributedString> \\"llo\\"
+└── <StringAttribute> { location: 0, length: 3 }"
+`;
+
 exports[`replace text remove spanning entire attributes 1`] = `
 "<AttributedString> \\"helloworld12345\\"
 ├── <StringAttribute> { location: 0, length: 5 }

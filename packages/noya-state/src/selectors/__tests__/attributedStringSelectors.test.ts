@@ -97,6 +97,12 @@ describe('replace text', () => {
 
       expect(debugDescription([helloWorld12345, updated])).toMatchSnapshot();
     });
+
+    test('reversed range', () => {
+      const updated = replaceTextInRange(hello, [2, 0], '');
+
+      expect(debugDescription([hello, updated])).toMatchSnapshot();
+    });
   });
 
   describe('insert', () => {
