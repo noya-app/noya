@@ -636,10 +636,10 @@ export function canvasReducer(
 
             break;
           }
-          case 'maybeMoveGradientElipseLength': {
+          case 'maybeMoveGradientEllipseLength': {
             return;
           }
-          case 'moveGradientElipseLength': {
+          case 'moveGradientEllipseLength': {
             const { current } = interactionState;
             if (!state.selectedGradient) return;
 

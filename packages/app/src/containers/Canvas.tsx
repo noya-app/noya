@@ -385,8 +385,8 @@ export default memo(function Canvas() {
             Selectors.isPointerOnGradientLine(state, point)
           ) {
             dispatch('addStopToGradient', point);
-          } else if (Selectors.isPointerOnGradientElipseEditor(state, point)) {
-            dispatch('interaction', ['maybeMoveGradientElipseLength', point]);
+          } else if (Selectors.isPointerOnGradientEllipseEditor(state, point)) {
+            dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
@@ -420,19 +420,19 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
-        case 'maybeMoveGradientElipseLength': {
+        case 'maybeMoveGradientEllipseLength': {
           const { origin } = state.interactionState;
 
           if (isMoving(point, origin)) {
-            dispatch('interaction', ['movingGradientElipseLength', point]);
+            dispatch('interaction', ['movingGradientEllipseLength', point]);
           }
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
           break;
         }
-        case 'moveGradientElipseLength': {
-          dispatch('interaction', ['movingGradientElipseLength', point]);
+        case 'moveGradientEllipseLength': {
+          dispatch('interaction', ['movingGradientEllipseLength', point]);
           event.preventDefault();
           break;
         }
@@ -737,8 +737,8 @@ export default memo(function Canvas() {
         case 'maybeScale':
         case 'moveGradientStop':
         case 'maybeMoveGradientStop':
-        case 'maybeMoveGradientElipseLength':
-        case 'moveGradientElipseLength': {
+        case 'maybeMoveGradientEllipseLength':
+        case 'moveGradientEllipseLength': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);

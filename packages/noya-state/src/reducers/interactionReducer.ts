@@ -69,8 +69,8 @@ export type InteractionAction =
   | [type: 'updateMovingPoint', origin: Point, current: Point]
   | [type: 'updateMovingControlPoint', origin: Point, current: Point]
   | [type: 'movingGradientStop', current: Point]
-  | [type: 'maybeMoveGradientElipseLength', origin: Point]
-  | [type: 'movingGradientElipseLength', current: Point];
+  | [type: 'maybeMoveGradientEllipseLength', origin: Point]
+  | [type: 'movingGradientEllipseLength', current: Point];
 
 export type InteractionState =
   | {
@@ -167,11 +167,11 @@ export type InteractionState =
       pageSnapshot: Sketch.Page;
     }
   | {
-      type: 'maybeMoveGradientElipseLength';
+      type: 'maybeMoveGradientEllipseLength';
       origin: Point;
     }
   | {
-      type: 'moveGradientElipseLength';
+      type: 'moveGradientEllipseLength';
       current: Point;
     };
 
@@ -442,26 +442,26 @@ export function interactionReducer(
         current,
       };
     }
-    case 'maybeMoveGradientElipseLength': {
+    case 'maybeMoveGradientEllipseLength': {
       const [, origin] = action;
 
       return {
-        type: 'maybeMoveGradientElipseLength',
+        type: 'maybeMoveGradientEllipseLength',
         origin,
       };
     }
-    case 'movingGradientElipseLength': {
+    case 'movingGradientEllipseLength': {
       const [, current] = action;
 
       if (
-        state.type !== 'maybeMoveGradientElipseLength' &&
-        state.type !== 'moveGradientElipseLength'
+        state.type !== 'maybeMoveGradientEllipseLength' &&
+        state.type !== 'moveGradientEllipseLength'
       ) {
         throw new Error('Bad interaction state');
       }
 
       return {
-        type: 'moveGradientElipseLength',
+        type: 'moveGradientEllipseLength',
         current,
       };
     }

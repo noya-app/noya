@@ -179,7 +179,7 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
   ]);
 }
 
-export function isPointerOnGradientElipseEditor(
+export function isPointerOnGradientEllipseEditor(
   state: ApplicationState,
   point: Point,
 ) {
