@@ -50,7 +50,7 @@ interface TextStyleRowProps {
   onChangeFontColor: (color: Sketch.Color) => void;
   onChangeLineSpacing: (value: number, mode: SetNumberMode) => void;
   onChangeLetterSpacing: (value: number, mode: SetNumberMode) => void;
-  onChagenParagraphSpacing: (value: number, mode: SetNumberMode) => void;
+  onChangeParagraphSpacing: (value: number, mode: SetNumberMode) => void;
 }
 
 export default memo(function TextStyleRow({
@@ -66,7 +66,7 @@ export default memo(function TextStyleRow({
   onChangeFontWeight,
   onChangeLineSpacing,
   onChangeLetterSpacing,
-  onChagenParagraphSpacing,
+  onChangeParagraphSpacing,
 }: TextStyleRowProps) {
   const characterInputId = `char`;
   const lineInputId = `line`;
@@ -190,7 +190,7 @@ export default memo(function TextStyleRow({
           <DimensionInput
             id={paragraphInputId}
             value={paragraphSpacing}
-            onSetValue={onChagenParagraphSpacing}
+            onSetValue={onChangeParagraphSpacing}
           />
           <Spacer.Horizontal size={8} />
           <FillInputFieldWithPicker

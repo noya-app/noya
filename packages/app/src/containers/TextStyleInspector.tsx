@@ -11,13 +11,13 @@ import useShallowArray from '../hooks/useShallowArray';
 export default memo(function TextStyleInspector() {
   const [state, dispatch] = useApplicationState();
 
-  const textLayer = useShallowArray(
+  const textLayers = useShallowArray(
     useSelector(Selectors.getSelectedTextLayers),
   );
   const textStyles = useShallowArray(useSelector(Selectors.getSelectedStyles));
   const currentTab = Selectors.getCurrentTab(state);
 
-  const seletedText = currentTab === 'canvas' ? textLayer : textStyles;
+  const selectedText = currentTab === 'canvas' ? textLayers : textStyles;
 
   const {
     fontColor,
@@ -32,8 +32,8 @@ export default memo(function TextStyleInspector() {
     lineHeight,
     letterSpacing,
   } = useMemo(
-    () => TextStyleSelectors.getEditableTextStyleAttributes(seletedText),
-    [seletedText],
+    () => TextStyleSelectors.getEditableTextStyleAttributes(selectedText),
+    [selectedText],
   );
 
   // default value for the spacing (?)
@@ -74,7 +74,7 @@ export default memo(function TextStyleInspector() {
           (value, mode) => dispatch('setTextLineSpacing', value, mode),
           [dispatch],
         )}
-        onChagenParagraphSpacing={useCallback(
+        onChangeParagraphSpacing={useCallback(
           (value, mode) => dispatch('setTextParagraphSpacing', value, mode),
           [dispatch],
         )}
