@@ -8,6 +8,7 @@ import {
 } from 'noya-geometry';
 import { InteractionState, Layers, Primitives, Selectors } from 'noya-state';
 import { ApplicationState } from '../reducers/applicationReducer';
+import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
 
 export const getIsEditingText = (type: InteractionState['type']): boolean => {
@@ -75,16 +76,14 @@ export function getLayerParagraph(
 
   const builder = CanvasKit.ParagraphBuilder.Make(paragraphStyle, fontManager);
 
-  layer.attributedString.attributes.forEach((attribute) => {
-    const { location, length } = attribute;
-    const string = layer.attributedString.string.substr(location, length);
-    const style = Primitives.stringAttribute(
+  toTextSpans(layer.attributedString).forEach((span) => {
+    const style = Primitives.createCanvasKitTextStyle(
       CanvasKit,
-      attribute,
+      span.attributes,
       textDecoration,
     );
     builder.pushStyle(style);
-    builder.addText(applyTextTransform(string, textTransform));
+    builder.addText(applyTextTransform(span.string, textTransform));
     builder.pop();
   });
 

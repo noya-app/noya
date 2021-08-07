@@ -222,14 +222,35 @@ export function canvasReducer(
           false,
         );
 
+        if (shapeType === 'text') {
+          if (layer.frame.width < 10) {
+            layer.frame.width = 100;
+          }
+          if (layer.frame.height < 10) {
+            layer.frame.height = 30;
+          }
+        }
+
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
           draft.selectedObjects = [layer.do_objectID];
         }
 
-        draft.interactionState = interactionReducer(draft.interactionState, [
-          'reset',
-        ]);
+        if (shapeType === 'text') {
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'editingText',
+            layer.do_objectID,
+          ]);
+
+          draft.selectedText = {
+            layerId: layer.do_objectID,
+            range: { anchor: 0, head: 0 },
+          };
+        } else {
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'reset',
+          ]);
+        }
       });
     }
     case 'addShapePathLayer': {
