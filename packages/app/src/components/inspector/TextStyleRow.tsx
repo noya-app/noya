@@ -39,8 +39,8 @@ const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
 
 interface TextStyleRowProps {
   fontSize?: number;
-  fontFamily: string;
-  fontColor: Sketch.Color;
+  fontFamily?: string;
+  fontColor?: Sketch.Color;
   lineSpacing?: number;
   letterSpacing?: number;
   paragraphSpacing?: number;
@@ -72,10 +72,10 @@ export default memo(function TextStyleRow({
   const lineInputId = `line`;
   const paragraphInputId = `paragraph`;
 
-  const [family, size] = useMemo(
-    () => fontFamily.replace('MT', '').split('-'),
-    [fontFamily],
-  );
+  // const [family, size] = useMemo(
+  //   () => fontFamily.replace('MT', '').split('-'),
+  //   [fontFamily],
+  // );
 
   // This it's for testing
   const fontFamilies = [
@@ -134,7 +134,7 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
-          value={family}
+          value={fontFamily ?? ''}
           options={fontFamilies}
           getTitle={(name) => name}
           onChange={onChangeFontFamily}
@@ -144,7 +144,7 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-weight"
-          value={size || 'Regular'}
+          value={'Regular'}
           options={textSizeOptions}
           getTitle={getTextSizeTitle}
           onChange={onChangeFontWeight}
@@ -152,7 +152,7 @@ export default memo(function TextStyleRow({
         <Spacer.Horizontal size={8} />
         <InputField.Root id="font-size" size={50}>
           <InputField.NumberInput
-            placeholder={typeof fontSize === undefined ? 'multiple' : ''}
+            placeholder={fontSize === undefined ? 'multiple' : ''}
             value={fontSize}
             onSubmit={useCallback(
               (value) => onChangeFontSize(value, 'replace'),
@@ -185,6 +185,7 @@ export default memo(function TextStyleRow({
             id={lineInputId}
             value={lineSpacing}
             onSetValue={onChangeLetterSpacing}
+            placeholder="auto"
           />
           <Spacer.Horizontal size={8} />
           <DimensionInput

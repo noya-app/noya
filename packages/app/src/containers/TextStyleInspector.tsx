@@ -1,51 +1,47 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
-import { Selectors, TextStyleSelectors } from 'noya-state';
+import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import TextAlignmentRow from '../components/inspector/TextLayoutRow';
 import TextOptionsRow from '../components/inspector/TextOptionsRow';
+import TextLayoutRow from '../components/inspector/TextLayoutRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 
 export default memo(function TextStyleInspector() {
-  const [state, dispatch] = useApplicationState();
+  const dispatch = useDispatch();
 
   const textLayers = useShallowArray(
     useSelector(Selectors.getSelectedTextLayers),
   );
-  const textStyles = useShallowArray(useSelector(Selectors.getSelectedStyles));
-  const currentTab = Selectors.getCurrentTab(state);
 
-  const selectedText = currentTab === 'canvas' ? textLayers : textStyles;
-
-  const {
-    fontColor,
-    fontAlignment,
-    verticalAlignment,
-    textTransform,
-    textDecoration,
-    horizontalAlignment,
-    paragraphSpacing,
-    fontFamily,
-    fontSize,
-    lineHeight,
-    letterSpacing,
-  } = useMemo(
-    () => TextStyleSelectors.getEditableTextStyleAttributes(selectedText),
-    [selectedText],
+  const textBehavior = getMultiValue(
+    textLayers.map((layer) => layer.textBehaviour),
   );
 
-  // default value for the spacing (?)
+  const selectedStyles = useShallowArray(
+    useSelector(Selectors.getSelectedStyles),
+  );
+
+  const textStyles = useShallowArray(
+    selectedStyles.flatMap((style) =>
+      style.textStyle ? [style.textStyle] : [],
+    ),
+  );
+
+  const editableTextStyle = useMemo(() => getEditableTextStyle(textStyles), [
+    textStyles,
+  ]);
+
   return (
     <>
       <TextStyleRow
-        fontColor={fontColor}
-        fontFamily={fontFamily}
-        fontSize={fontSize}
-        letterSpacing={letterSpacing}
-        lineSpacing={lineHeight}
-        paragraphSpacing={paragraphSpacing}
+        fontColor={editableTextStyle.fontColor}
+        fontFamily={editableTextStyle.fontFamily}
+        fontSize={editableTextStyle.fontSize}
+        letterSpacing={editableTextStyle.letterSpacing}
+        lineSpacing={editableTextStyle.lineSpacing}
+        paragraphSpacing={editableTextStyle.paragraphSpacing}
         onChangeFontFamily={useCallback(
           (value) => {
             dispatch('setTextFontName', value);
@@ -80,10 +76,10 @@ export default memo(function TextStyleInspector() {
         )}
       />
       <Divider />
-      <TextAlignmentRow
-        textLayout={currentTab === 'canvas' ? fontAlignment : undefined}
-        textVerticalAlignment={verticalAlignment}
-        textHorizontalAlignment={horizontalAlignment}
+      <TextLayoutRow
+        textLayout={textBehavior}
+        textVerticalAlignment={editableTextStyle.verticalAlignment}
+        textHorizontalAlignment={editableTextStyle.horizontalAlignment}
         onChangeTextLayout={useCallback(
           (value: Sketch.TextBehaviour) => {
             dispatch('setTextAlignment', value);
@@ -105,8 +101,8 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextOptionsRow
-        textTransform={textTransform}
-        textDecoration={textDecoration}
+        textTransform={editableTextStyle.textTransform}
+        textDecoration={editableTextStyle.textDecoration}
         onChangeTextDecoration={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],

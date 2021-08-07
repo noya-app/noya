@@ -1,7 +1,83 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchPattern } from 'noya-designsystem';
-import { getMultiNumberValue, getMultiValue } from 'noya-state';
+import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
+import { SimpleTextDecoration } from './primitives';
+
+export type EditableTextStyle = {
+  fontFamily?: string;
+  fontColor?: Sketch.Color;
+  fontSize?: number;
+  letterSpacing?: number;
+  lineSpacing?: number;
+  paragraphSpacing?: number;
+  textTransform?: Sketch.TextTransform;
+  textDecoration?: SimpleTextDecoration;
+  verticalAlignment?: Sketch.TextVerticalAlignment;
+  horizontalAlignment?: Sketch.TextHorizontalAlignment;
+};
+
+function getEditableTextStyleProperties(
+  textStyle: Sketch.TextStyle,
+): EditableTextStyle {
+  return {
+    fontFamily:
+      textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes
+        .name,
+    fontColor: textStyle.encodedAttributes.MSAttributedStringColorAttribute,
+    fontSize:
+      textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes
+        .size,
+    lineSpacing: textStyle.encodedAttributes.paragraphStyle?.maximumLineHeight,
+    letterSpacing: textStyle.encodedAttributes.kerning,
+    paragraphSpacing:
+      textStyle.encodedAttributes.paragraphStyle?.paragraphSpacing,
+    textTransform:
+      textStyle.encodedAttributes.MSAttributedStringTextTransformAttribute,
+    textDecoration: Selectors.getTextDecoration(textStyle.encodedAttributes),
+    verticalAlignment:
+      textStyle.encodedAttributes.textStyleVerticalAlignmentKey,
+    horizontalAlignment: textStyle.encodedAttributes.paragraphStyle?.alignment,
+  };
+}
+
+export function getEditableTextStyle(
+  textStyles: Sketch.TextStyle[],
+): EditableTextStyle {
+  const properties = textStyles.map(getEditableTextStyleProperties);
+
+  return {
+    fontFamily: getMultiValue(
+      properties.map((textStyle) => textStyle.fontFamily),
+    ),
+    fontColor: getMultiValue(
+      properties.map((textStyle) => textStyle.fontColor),
+      isDeepEqual,
+    ),
+    fontSize: getMultiValue(properties.map((textStyle) => textStyle.fontSize)),
+    letterSpacing: getMultiValue(
+      properties.map((textStyle) => textStyle.letterSpacing),
+    ),
+    lineSpacing: getMultiValue(
+      properties.map((textStyle) => textStyle.lineSpacing),
+    ),
+    paragraphSpacing: getMultiValue(
+      properties.map((textStyle) => textStyle.paragraphSpacing),
+    ),
+    textTransform: getMultiValue(
+      properties.map((textStyle) => textStyle.textTransform),
+    ),
+    textDecoration: getMultiValue(
+      properties.map((textStyle) => textStyle.textDecoration),
+    ),
+    verticalAlignment: getMultiValue(
+      properties.map((textStyle) => textStyle.verticalAlignment),
+    ),
+    horizontalAlignment: getMultiValue(
+      properties.map((textStyle) => textStyle.horizontalAlignment),
+    ),
+  };
+}
 
 export type EditableShadow = {
   // TODO: Indeterminate `isEnabled` state
