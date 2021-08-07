@@ -4,6 +4,7 @@ import { toDegrees } from 'noya-geometry';
 import {
   clampRotation,
   decodeCurvePoint,
+  getMultiNumberValue,
   isPointsLayer,
   PointsLayer,
   Selectors,
@@ -12,7 +13,6 @@ import {
 import { useCallback } from 'react';
 import styled from 'styled-components';
 import useShallowArray from '../../hooks/useShallowArray';
-import getMultiNumberValue from '../../utils/getMultiNumberValue';
 import CoordinatesInspector from './CoordinatesInspector';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';

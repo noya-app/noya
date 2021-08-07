@@ -1,12 +1,11 @@
 import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Selectors, SetNumberMode } from 'noya-state';
+import { getMultiNumberValue, Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 function makeInterpolator(options: InterpolateOptions) {
   return {

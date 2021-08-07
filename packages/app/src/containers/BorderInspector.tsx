@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Selectors } from 'noya-state';
+import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { isDeepEqual, zipLongest } from 'noya-utils';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
@@ -7,8 +7,6 @@ import BorderRow from '../components/inspector/BorderRow';
 import { DimensionValue } from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiValue from '../utils/getMultiValue';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 type EditableBorder = {
   // TODO: Indeterminate `isEnabled` state

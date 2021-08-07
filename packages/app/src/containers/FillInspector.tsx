@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Selectors } from 'noya-state';
+import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import FillRow from '../components/inspector/FillRow';
@@ -8,8 +8,6 @@ import useShallowArray from '../hooks/useShallowArray';
 import { DimensionValue } from '../components/inspector/DimensionsInspector';
 import { SketchPattern } from 'noya-designsystem';
 import { isDeepEqual, zipLongest } from 'noya-utils';
-import getMultiValue from '../utils/getMultiValue';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 type EditableFill = {
   // TODO: Indeterminate `isEnabled` state
