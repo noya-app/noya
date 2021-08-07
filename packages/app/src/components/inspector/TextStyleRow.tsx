@@ -4,11 +4,38 @@ import {
   Select,
   InputField,
   LabeledElementView,
+  MenuItem,
 } from 'noya-designsystem';
 import { Spacer } from 'noya-designsystem';
+import { SetNumberMode } from 'noya-state';
 import { useCallback, memo, useMemo } from 'react';
+import DimensionInput from './DimensionInput';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
+
+const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  14,
+  16,
+  18,
+  21,
+  24,
+  36,
+  48,
+  60,
+  72,
+]
+  .map((size) => size.toString())
+  .map((value) => ({
+    value,
+    title: value,
+  }));
 
 interface TextStyleRowProps {
   fontSize?: number;
@@ -17,13 +44,13 @@ interface TextStyleRowProps {
   lineSpacing?: number;
   letterSpacing?: number;
   paragraphSpacing?: number;
-  onChangeFontSize: (value: number) => void;
+  onChangeFontSize: (value: number, mode: SetNumberMode) => void;
   onChangeFontFamily: (value: string) => void;
   onChangeFontWeight: (value: string) => void;
   onChangeFontColor: (color: Sketch.Color) => void;
-  onChangeLineSpacing: (value: number) => void;
-  onChangeLetterSpacing: (value: number) => void;
-  onChagenParagraphSpacing: (value: number) => void;
+  onChangeLineSpacing: (value: number, mode: SetNumberMode) => void;
+  onChangeLetterSpacing: (value: number, mode: SetNumberMode) => void;
+  onChagenParagraphSpacing: (value: number, mode: SetNumberMode) => void;
 }
 
 export default memo(function TextStyleRow({
@@ -125,38 +152,45 @@ export default memo(function TextStyleRow({
         <Spacer.Horizontal size={8} />
         <InputField.Root id="font-size" size={50}>
           <InputField.NumberInput
-            placeholder={fontSize ? '' : 'multiple'}
+            placeholder={typeof fontSize === undefined ? 'multiple' : ''}
             value={fontSize}
-            onSubmit={onChangeFontSize}
+            onSubmit={useCallback(
+              (value) => onChangeFontSize(value, 'replace'),
+              [onChangeFontSize],
+            )}
+            onNudge={useCallback((value) => onChangeFontSize(value, 'adjust'), [
+              onChangeFontSize,
+            ])}
           />
-          <InputField.Label>px</InputField.Label>
+          <InputField.DropdownMenu
+            id={'font-size-dropdown'}
+            items={FONT_SIZE_DROPDOWN_OPTIONS}
+            onSelect={useCallback(
+              (value: string) => onChangeFontSize(Number(value), 'replace'),
+              [onChangeFontSize],
+            )}
+          />
         </InputField.Root>
       </InspectorPrimitives.Row>
       <Spacer.Vertical size={6} />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
-          <InputField.NumberInput
+          <DimensionInput
             id={characterInputId}
-            placeholder={letterSpacing ? '' : 'multiple'}
             value={letterSpacing}
-            onSubmit={onChangeLineSpacing}
-            onNudge={() => {}}
+            onSetValue={onChangeLineSpacing}
           />
           <Spacer.Horizontal size={8} />
-          <InputField.NumberInput
+          <DimensionInput
             id={lineInputId}
-            placeholder={lineSpacing === undefined ? 'multiple' : undefined}
             value={lineSpacing}
-            onSubmit={onChangeLetterSpacing}
-            onNudge={() => {}}
+            onSetValue={onChangeLetterSpacing}
           />
           <Spacer.Horizontal size={8} />
-          <InputField.NumberInput
+          <DimensionInput
             id={paragraphInputId}
-            placeholder={paragraphSpacing ? '' : 'multiple'}
             value={paragraphSpacing}
-            onSubmit={onChagenParagraphSpacing}
-            onNudge={() => {}}
+            onSetValue={onChagenParagraphSpacing}
           />
           <Spacer.Horizontal size={8} />
           <FillInputFieldWithPicker

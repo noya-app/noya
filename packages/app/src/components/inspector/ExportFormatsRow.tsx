@@ -123,7 +123,7 @@ export default memo(function ExportFormatsRow({
           ],
           [],
         )}
-        buttonId={`${id}-nameingScheme-button`}
+        id={`${id}-naming-scheme-button`}
         onSelect={useCallback(
           (value: string) => onChangeNamingScheme(parseInt(value)),
           [onChangeNamingScheme],
@@ -133,7 +133,7 @@ export default memo(function ExportFormatsRow({
     </InputField.Root>,
     <InputField.Root size={65} id={fileFormatInputId}>
       <Select
-        id={'fileFormat-select'}
+        id={`${id}-file-format-select`}
         value={exportFormat.fileFormat}
         options={SUPPORTED_EXPORT_FORMAT_OPTIONS}
         getTitle={useCallback((id) => id.toUpperCase(), [])}

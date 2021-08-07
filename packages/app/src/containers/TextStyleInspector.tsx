@@ -63,19 +63,19 @@ export default memo(function TextStyleInspector() {
           [dispatch],
         )}
         onChangeFontSize={useCallback(
-          (value) => dispatch('setTextFontSize', value),
+          (value, mode) => dispatch('setTextFontSize', value, mode),
           [dispatch],
         )}
         onChangeLineSpacing={useCallback(
-          (value) => dispatch('setTextLetterSpacing', value),
+          (value, mode) => dispatch('setTextLetterSpacing', value, mode),
           [dispatch],
         )}
         onChangeLetterSpacing={useCallback(
-          (value) => dispatch('setTextLineSpacing', value),
+          (value, mode) => dispatch('setTextLineSpacing', value, mode),
           [dispatch],
         )}
         onChagenParagraphSpacing={useCallback(
-          (value) => dispatch('setTextParagraphSpacing', value),
+          (value, mode) => dispatch('setTextParagraphSpacing', value, mode),
           [dispatch],
         )}
       />
