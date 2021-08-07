@@ -40,7 +40,7 @@ export function getSelectedGradient(
   return gradient;
 }
 
-type GradientStopPoint = { point: Point; color: Sketch.Color };
+export type GradientStopPoint = { point: Point; color: Sketch.Color };
 
 export function getSelectedGradientStopPoints(
   state: ApplicationState,
@@ -179,6 +179,23 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
   ]);
 }
 
+export function getEllipseEditorPoint(
+  center: Point,
+  point: Point,
+  elipseLength: number,
+): Point {
+  const height = distance(center, point) * 2;
+  const width = elipseLength === 0 ? height : height * elipseLength;
+
+  const theta =
+    Math.atan2(point.y - center.y, point.x - center.x) - Math.PI / 2;
+
+  return AffineTransform.rotate(theta, center.x, center.y).applyTo({
+    x: center.x - width / 2,
+    y: center.y,
+  });
+}
+
 export function isPointerOnGradientEllipseEditor(
   state: ApplicationState,
   point: Point,
@@ -189,28 +206,17 @@ export function isPointerOnGradientEllipseEditor(
     getCurrentPage(state),
     state.selectedGradient,
   );
-
   if (!selectedGradient) return false;
 
   const center = selectedLayerGradientPoints[0].point;
   const lastPoint =
     selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point;
 
-  const height = distance(center, lastPoint) * 2;
-  const width = height * selectedGradient.elipseLength;
-
-  // Maybe there is a function to do this in a more efficient way
-  const theta =
-    Math.atan2(lastPoint.y - center.y, lastPoint.x - center.x) - 1.5708;
-
-  const cos = Math.cos(-theta);
-  const sin = Math.sin(-theta);
-  const x = center.x - width / 2;
-
-  const position = {
-    x: cos * (x - center.x) + sin * 0 + center.x,
-    y: cos * 0 - sin * (x - center.x) + center.y,
-  };
+  const position = getEllipseEditorPoint(
+    center,
+    lastPoint,
+    selectedGradient.elipseLength,
+  );
 
   return isPointInRange(point, position, SELECTED_GRADIENT_POINT_RADIUS);
 }

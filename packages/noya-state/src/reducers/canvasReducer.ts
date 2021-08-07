@@ -8,6 +8,7 @@ import {
   createBounds,
   createRect,
   distance,
+  getClosestPointOnLine,
   getLinePercentage,
   insetRect,
   Point,
@@ -407,8 +408,7 @@ export function canvasReducer(
         gradientStops.splice(stopIndex, 1);
 
         if (!draft.selectedGradient) return state;
-        draft.selectedGradient.stopIndex =
-          stopIndex - 1 < 0 ? 0 : stopIndex - 1;
+        draft.selectedGradient.stopIndex = Math.max(stopIndex - 1, 0);
       });
     }
     case 'pan': {
@@ -514,7 +514,6 @@ export function canvasReducer(
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
-
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ||
@@ -636,9 +635,6 @@ export function canvasReducer(
 
             break;
           }
-          case 'maybeMoveGradientEllipseLength': {
-            return;
-          }
           case 'moveGradientEllipseLength': {
             const { current } = interactionState;
             if (!state.selectedGradient) return;
@@ -664,6 +660,7 @@ export function canvasReducer(
                 Sketch.GradientType.Radial
             )
               return;
+
             const gradient = draftLayer.style?.fills?.[fillIndex]?.gradient;
             const points = getSelectedGradientStopPoints(state);
             if (!points) return;
@@ -671,7 +668,10 @@ export function canvasReducer(
             const lastPoint = points[points.length - 1].point;
 
             const radius = distance(center, lastPoint);
-            const length = distance(center, { x: current.x, y: center.y });
+            const length = distance(
+              current,
+              getClosestPointOnLine(current, [center, lastPoint]),
+            );
 
             gradient.elipseLength = length / radius;
             return;

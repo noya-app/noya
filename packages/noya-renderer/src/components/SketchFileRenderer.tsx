@@ -5,7 +5,6 @@ import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   AffineTransform,
   createRect,
-  distance,
   insetRect,
   Point,
   Rect,
@@ -18,19 +17,18 @@ import {
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
-  getCurrentPage,
-  getSelectedGradient,
   Layers,
   Primitives,
   Selectors,
 } from 'noya-state';
 import React, { Fragment, memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Path, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
+import GradientEditor from './GradientEditor';
 import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
 import { InsertPointOverlay } from './InsertPointOverlay';
@@ -332,134 +330,6 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
-  const gradientLineStroke = useStroke({ color: '#FFF' });
-  const gradientStopStroke = useStroke({ color: '#FFF', strokeWidth: 1.5 });
-  const gradientEditorShadow = useMemo(
-    () =>
-      CanvasKit.ImageFilter.MakeDropShadowOnly(
-        0,
-        0,
-        2,
-        2,
-        CanvasKit.Color(0, 0, 0, 0.5),
-        null,
-      ),
-
-    [CanvasKit],
-  );
-
-  const gradientPoints = useMemo(() => {
-    const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
-
-    if (!gradientStopPoints || !state.selectedGradient) return null;
-
-    const selectedGradient = getSelectedGradient(
-      getCurrentPage(state),
-      state.selectedGradient,
-    );
-
-    if (!selectedGradient) return null;
-
-    const { stopIndex } = state.selectedGradient;
-
-    let radialGradient = null;
-    if (selectedGradient.gradientType === Sketch.GradientType.Radial) {
-      const path = new CanvasKit.Path();
-      const firstPoint = gradientStopPoints[0].point;
-      const lastPoint = gradientStopPoints[gradientStopPoints.length - 1].point;
-      const len = distance(firstPoint, lastPoint);
-
-      const height = len * 2;
-      const width = height * selectedGradient.elipseLength;
-
-      const x = firstPoint.x - width / 2;
-      const y = firstPoint.y - len;
-
-      const theta =
-        Math.atan2(lastPoint.y - firstPoint.y, lastPoint.x - firstPoint.x) -
-        1.5708;
-
-      path.addOval(CanvasKit.XYWHRect(x, y, width, height));
-
-      // Shows small square to edit elipse length
-      const rectangle = new CanvasKit.Path();
-      path.addRect(
-        CanvasKit.XYWHRect(
-          x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
-          firstPoint.y,
-          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-        ),
-      );
-      rectangle.addRect(
-        CanvasKit.XYWHRect(
-          x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
-          firstPoint.y,
-          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-          Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-        ),
-      );
-
-      const paint = new CanvasKit.Paint();
-      paint.setColor(CanvasKit.parseColorString('#fef'));
-
-      radialGradient = (
-        <Group
-          transform={AffineTransform.rotate(theta, firstPoint.x, firstPoint.y)}
-        >
-          <Path path={rectangle} paint={paint} />
-          <Path path={path} paint={gradientLineStroke} />
-        </Group>
-      );
-    }
-
-    return (
-      <Group imageFilter={gradientEditorShadow}>
-        <Polyline
-          points={[
-            gradientStopPoints[0].point,
-            gradientStopPoints[gradientStopPoints.length - 1].point,
-          ]}
-          paint={gradientLineStroke}
-        />
-        {radialGradient}
-        {gradientStopPoints.map(({ point, color }, index) => {
-          const path = new CanvasKit.Path();
-
-          const radius =
-            index === stopIndex
-              ? Selectors.POINT_RADIUS * 1.5
-              : Selectors.POINT_RADIUS;
-
-          path.addOval(
-            CanvasKit.XYWHRect(
-              point.x - radius,
-              point.y - radius,
-              radius * 2,
-              radius * 2,
-            ),
-          );
-
-          const paint = new CanvasKit.Paint();
-          paint.setColor(Primitives.color(CanvasKit, color));
-
-          return (
-            <Fragment key={index}>
-              <Path path={path} paint={paint} />
-              <Path path={path} paint={gradientStopStroke} />
-            </Fragment>
-          );
-        })}
-      </Group>
-    );
-  }, [
-    state,
-    gradientEditorShadow,
-    gradientLineStroke,
-    CanvasKit,
-    gradientStopStroke,
-  ]);
-
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
@@ -480,12 +350,19 @@ export default memo(function SketchFileRenderer() {
         )
       : undefined;
 
+  const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {gradientPoints}
+        {gradientStopPoints && state.selectedGradient && (
+          <GradientEditor
+            gradientStopPoints={gradientStopPoints}
+            selectedGradient={state.selectedGradient}
+          />
+        )}
         {symbol && <SketchArtboardContent layer={symbol} />}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
@@ -500,7 +377,7 @@ export default memo(function SketchFileRenderer() {
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
               boundingRect &&
-              !gradientPoints &&
+              !gradientStopPoints &&
               !drawingLayer &&
               !isInserting && (
                 <>
@@ -524,7 +401,7 @@ export default memo(function SketchFileRenderer() {
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {!gradientPoints &&
+            {!gradientStopPoints &&
               boundingRect &&
               !drawingLayer &&
               !isInserting && (

@@ -139,10 +139,22 @@ export default memo(function Canvas() {
     'Shift-ArrowRight': () => nudge('X', 10),
     'Shift-ArrowUp': () => nudge('Y', -10),
     'Shift-ArrowDown': () => nudge('Y', 10),
-    Backspace: () => dispatch('deleteLayer', state.selectedObjects),
+    Backspace: () => {
+      if (state.selectedGradient) {
+        dispatch('deleteStopToGradient');
+      } else {
+        dispatch('deleteLayer', state.selectedObjects);
+      }
+    },
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
-    Delete: () => dispatch('deleteStopToGradient'), //TODO: Filter? Only works on gradients
+    Delete: () => {
+      if (state.selectedGradient) {
+        dispatch('deleteStopToGradient');
+      } else {
+        dispatch('deleteLayer', state.selectedObjects);
+      }
+    }, //TODO: Filter? Only works on gradients
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
     'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
     'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
