@@ -1,5 +1,12 @@
 import { Divider, Spacer, withSeparatorElements } from 'noya-designsystem';
-import { Layers, Selectors, SetNumberMode, isLine } from 'noya-state';
+import {
+  Layers,
+  Selectors,
+  SetNumberMode,
+  isLine,
+  getMultiNumberValue,
+  getMultiValue,
+} from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
@@ -21,10 +28,8 @@ import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 import ThemeTextInspector from './ThemeTextInspector';
-import getMultiValue from '../utils/getMultiValue';
 import LineInspector from '../components/inspector/LineInspector';
 import styled from 'styled-components';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 const PointControlsContainer = styled.div({
   padding: '0 10px',

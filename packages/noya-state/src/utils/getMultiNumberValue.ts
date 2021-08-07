@@ -1,6 +1,4 @@
-export default function getMultiNumberValue(
-  values: number[],
-): number | undefined {
+export function getMultiNumberValue(values: number[]): number | undefined {
   if (values.length === 1) {
     return values[0];
   } else if (values.length > 1) {

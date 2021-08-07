@@ -441,24 +441,23 @@ export default memo(function SketchFileRenderer() {
               boundingRect &&
               !gradientPoints &&
               !drawingLayer &&
-              !isEditingText &&
               !isInserting && (
                 <>
                   <BoundingRect
                     rect={boundingRect}
                     selectionPaint={selectionPaint}
                   />
-                  {boundingPoints.map((points: Point[], index: number) => (
-                    <Polyline
-                      key={index}
-                      points={points}
-                      paint={selectionPaint}
-                    />
-                  ))}
+                  {!isEditingText &&
+                    boundingPoints.map((points: Point[], index: number) => (
+                      <Polyline
+                        key={index}
+                        points={points}
+                        paint={selectionPaint}
+                      />
+                    ))}
                 </>
               )}
-            {!isEditingPath &&
-              !drawingLayer &&
+            {!drawingLayer &&
               !isInserting &&
               !isEditingText &&
               highlightedSketchLayer}
@@ -469,12 +468,7 @@ export default memo(function SketchFileRenderer() {
               boundingRect &&
               !drawingLayer &&
               !isInserting &&
-              !isEditingText && (
-                <DragHandles
-                  rect={boundingRect}
-                  selectionPaint={selectionPaint}
-                />
-              )}
+              !isEditingText && <DragHandles rect={boundingRect} />}
           </>
         )}
       </Group>

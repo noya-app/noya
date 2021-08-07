@@ -41,14 +41,7 @@ function TextSelection({
 
   const [start, end] = Selectors.normalizeRange([anchor, head]);
 
-  const rects = (paragraph.getRectsForRange(
-    start,
-    end,
-    CanvasKit.RectHeightStyle.Max,
-    CanvasKit.RectWidthStyle.Max,
-  ) as unknown) as Float32Array[];
-
-  // console.log('range', rects, anchor, head);
+  const rects = getRectsForRange(CanvasKit, paragraph, start, end);
 
   return (
     <>
@@ -59,23 +52,26 @@ function TextSelection({
   );
 }
 
+function getRectsForRange(
+  CanvasKit: CanvasKit,
+  paragraph: Paragraph,
+  start: number,
+  end: number,
+) {
+  return (paragraph.getRectsForRange(
+    start,
+    end,
+    CanvasKit.RectHeightStyle.Max,
+    CanvasKit.RectWidthStyle.Max,
+  ) as unknown) as Float32Array[];
+}
+
 function getCursorRect(
   CanvasKit: CanvasKit,
   paragraph: Paragraph,
   index: number,
 ) {
-  const lineMetrics = paragraph
-    .getLineMetrics()
-    .find((lm) => lm.startIndex <= index && lm.endIndex >= index);
-
-  if (!lineMetrics) return;
-
-  let rects = (paragraph.getRectsForRange(
-    index,
-    index + 1,
-    CanvasKit.RectHeightStyle.Max,
-    CanvasKit.RectWidthStyle.Max,
-  ) as unknown) as Float32Array[];
+  let rects = getRectsForRange(CanvasKit, paragraph, index, index + 1);
 
   if (rects.length > 0) {
     const firstRect = rects[0];
@@ -88,12 +84,7 @@ function getCursorRect(
     );
   }
 
-  rects = (paragraph.getRectsForRange(
-    index - 1,
-    index,
-    CanvasKit.RectHeightStyle.Max,
-    CanvasKit.RectWidthStyle.Max,
-  ) as unknown) as Float32Array[];
+  rects = getRectsForRange(CanvasKit, paragraph, index - 1, index);
 
   if (rects.length > 0) {
     const firstRect = rects[0];

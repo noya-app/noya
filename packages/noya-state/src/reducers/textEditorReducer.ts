@@ -9,6 +9,7 @@ import {
 
 export type TextEditorAction =
   | [type: 'setTextSelection', range: TextSelectionRange]
+  | [type: 'selectAllText']
   | [type: 'insertText', text: string];
 
 export function textEditorReducer(
@@ -25,6 +26,19 @@ export function textEditorReducer(
         if (!draft.selectedText) return;
 
         draft.selectedText.range = range;
+      });
+    }
+    case 'selectAllText': {
+      return produce(state, (draft) => {
+        if (!draft.selectedText) return;
+
+        draft.selectedText = {
+          layerId: draft.selectedText.layerId,
+          range: {
+            anchor: 0,
+            head: 1_000_000,
+          },
+        };
       });
     }
     case 'insertText': {

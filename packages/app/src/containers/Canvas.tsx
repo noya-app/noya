@@ -165,6 +165,13 @@ export default memo(function Canvas() {
     'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-0': () => dispatch('setZoom', 1),
+    'Mod-a': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('selectAllText');
+      } else {
+        dispatch('selectAllLayers');
+      }
+    },
     Space: () => {
       if (Selectors.getIsEditingText(state.interactionState.type))
         return FALLTHROUGH;

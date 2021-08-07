@@ -1,25 +1,15 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Selectors } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
-import { isDeepEqual, zipLongest } from 'noya-utils';
-import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
-import BorderRow from '../components/inspector/BorderRow';
-import { DimensionValue } from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import {
+  EditableBorder,
+  getEditableBorder,
+  getEditableStyles,
+  Selectors,
+} from 'noya-state';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
+import BorderRow from '../components/inspector/BorderRow';
+import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiValue from '../utils/getMultiValue';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
-
-type EditableBorder = {
-  // TODO: Indeterminate `isEnabled` state
-  isEnabled: boolean;
-  hasMultipleFills: boolean;
-  color?: Sketch.Color;
-  fillType?: Sketch.FillType;
-  position?: Sketch.BorderPosition;
-  thickness?: DimensionValue;
-  gradient: Sketch.Gradient;
-};
 
 export default memo(function BorderInspector() {
   const [state, dispatch] = useApplicationState();
@@ -29,51 +19,13 @@ export default memo(function BorderInspector() {
     useSelector(Selectors.getSelectedStyles),
   );
 
-  const layerBorderLists = useShallowArray(
+  const borderMatrix = useShallowArray(
     selectedStyles.map((style) => style?.borders ?? []),
   );
 
   const editableBorders = useMemo(
-    () =>
-      zipLongest(undefined, ...layerBorderLists).map(
-        (borders): EditableBorder => {
-          const filtered = borders.flatMap((border) =>
-            border ? [border] : [],
-          );
-
-          const fillType = getMultiValue(
-            filtered.map((border) => border.fillType),
-            isDeepEqual,
-          );
-
-          const gradient = getMultiValue(
-            filtered.map((border) => border.gradient),
-            isDeepEqual,
-          );
-
-          return {
-            isEnabled:
-              getMultiValue(filtered.map((border) => border.isEnabled)) ?? true,
-            hasMultipleFills:
-              fillType === undefined ||
-              (fillType === Sketch.FillType.Gradient && !gradient),
-            color: getMultiValue(
-              filtered.map((border) => border.color),
-              isDeepEqual,
-            ),
-            fillType,
-            position: getMultiValue(
-              filtered.map((border) => border.position),
-              isDeepEqual,
-            ),
-            thickness: getMultiNumberValue(
-              filtered.map((border) => border.thickness),
-            ),
-            gradient: gradient ?? filtered[0].gradient,
-          };
-        },
-      ),
-    [layerBorderLists],
+    () => getEditableStyles(borderMatrix, getEditableBorder),
+    [borderMatrix],
   );
 
   return (

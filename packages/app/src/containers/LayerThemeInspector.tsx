@@ -7,13 +7,12 @@ import {
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Button, Select, Spacer } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
+import { getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiValue from '../utils/getMultiValue';
 
 const NO_LAYER_STYLE = 'none';
 

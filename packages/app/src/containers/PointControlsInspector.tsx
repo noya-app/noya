@@ -7,12 +7,15 @@ import {
   Select,
   Spacer,
 } from 'noya-designsystem';
-import { Layers, Selectors } from 'noya-state';
+import {
+  getMultiNumberValue,
+  getMultiValue,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useApplicationState } from 'noya-app-state-context';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
-import getMultiValue from '../utils/getMultiValue';
 
 const CURVE_MODE_OPTIONS = [
   'Straight' as const,
