@@ -1,6 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { SketchPattern } from 'noya-designsystem';
 import { getMultiNumberValue, getMultiValue } from 'noya-state';
-import { isDeepEqual } from 'noya-utils';
+import { isDeepEqual, zipLongest } from 'noya-utils';
 
 export type EditableShadow = {
   // TODO: Indeterminate `isEnabled` state
@@ -12,7 +13,7 @@ export type EditableShadow = {
   spread?: number;
 };
 
-export function getEditableShadows(shadows: Sketch.Shadow[]) {
+export function getEditableShadow(shadows: Sketch.Shadow[]): EditableShadow {
   return {
     isEnabled: getMultiValue(shadows.map((shadow) => shadow.isEnabled)) ?? true,
     blurRadius: getMultiNumberValue(shadows.map((shadow) => shadow.blurRadius)),
@@ -24,4 +25,103 @@ export function getEditableShadows(shadows: Sketch.Shadow[]) {
     offsetY: getMultiValue(shadows.map((shadow) => shadow.offsetY)),
     spread: getMultiValue(shadows.map((shadow) => shadow.spread)),
   };
+}
+
+export type EditableBorder = {
+  // TODO: Indeterminate `isEnabled` state
+  isEnabled: boolean;
+  hasMultipleFills: boolean;
+  color?: Sketch.Color;
+  fillType?: Sketch.FillType;
+  position?: Sketch.BorderPosition;
+  thickness?: number;
+  gradient: Sketch.Gradient;
+};
+
+export function getEditableBorder(borders: Sketch.Border[]): EditableBorder {
+  const fillType = getMultiValue(
+    borders.map((border) => border.fillType),
+    isDeepEqual,
+  );
+
+  const gradient = getMultiValue(
+    borders.map((border) => border.gradient),
+    isDeepEqual,
+  );
+
+  return {
+    isEnabled: getMultiValue(borders.map((border) => border.isEnabled)) ?? true,
+    hasMultipleFills:
+      fillType === undefined ||
+      (fillType === Sketch.FillType.Gradient && !gradient),
+    color: getMultiValue(
+      borders.map((border) => border.color),
+      isDeepEqual,
+    ),
+    fillType,
+    position: getMultiValue(
+      borders.map((border) => border.position),
+      isDeepEqual,
+    ),
+    thickness: getMultiNumberValue(borders.map((border) => border.thickness)),
+    gradient: gradient ?? borders[0].gradient,
+  };
+}
+
+export type EditableFill = {
+  // TODO: Indeterminate `isEnabled` state
+  isEnabled: boolean;
+  hasMultipleFills: boolean;
+  color?: Sketch.Color;
+  fillType?: Sketch.FillType;
+  contextOpacity?: number;
+  gradient: Sketch.Gradient;
+  pattern: SketchPattern;
+};
+
+export function getEditableFill(fills: Sketch.Fill[]): EditableFill {
+  const fillType = getMultiValue(
+    fills.map((fill) => fill.fillType),
+    isDeepEqual,
+  );
+
+  const gradient = getMultiValue(
+    fills.map((fill) => fill.gradient),
+    isDeepEqual,
+  );
+
+  const getPattern = (fill: Sketch.Fill): SketchPattern => ({
+    _class: 'pattern',
+    patternFillType: fill.patternFillType,
+    patternTileScale: fill.patternTileScale,
+    image: fill.image,
+  });
+
+  const patterns = fills.map(getPattern);
+
+  return {
+    isEnabled: getMultiValue(fills.map((fill) => fill.isEnabled)) ?? true,
+    hasMultipleFills:
+      fillType === undefined ||
+      (fillType === Sketch.FillType.Gradient && !gradient),
+    color: getMultiValue(
+      fills.map((fill) => fill.color),
+      isDeepEqual,
+    ),
+    fillType,
+    contextOpacity: getMultiNumberValue(
+      fills.map((fill) => fill.contextSettings.opacity),
+    ),
+    gradient: gradient ?? fills[0].gradient,
+    pattern: getMultiValue(patterns, isDeepEqual) ?? patterns[0],
+  };
+}
+
+export function getEditableStyles<T, U>(
+  styleMatrix: T[][],
+  reduceToEditable: (style: T[]) => U,
+) {
+  return zipLongest(undefined, ...styleMatrix).map((styles) =>
+    reduceToEditable(styles.flatMap((style) => (style ? [style] : []))),
+  );
 }

@@ -1,6 +1,10 @@
 import { useDispatch, useSelector } from 'noya-app-state-context';
-import { EditableShadow, getEditableShadows, Selectors } from 'noya-state';
-import { zipLongest } from 'noya-utils';
+import {
+  EditableShadow,
+  getEditableShadow,
+  getEditableStyles,
+  Selectors,
+} from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
@@ -13,18 +17,13 @@ export default memo(function ShadowInspector() {
     useSelector(Selectors.getSelectedStyles),
   );
 
-  const layerShadowLists = useShallowArray(
+  const shadowMatrix = useShallowArray(
     selectedStyles.map((style) => style?.shadows ?? []),
   );
 
   const editableShadows: EditableShadow[] = useMemo(
-    () =>
-      zipLongest(undefined, ...layerShadowLists).map((shadows) =>
-        getEditableShadows(
-          shadows.flatMap((shadow) => (shadow ? [shadow] : [])),
-        ),
-      ),
-    [layerShadowLists],
+    () => getEditableStyles(shadowMatrix, getEditableShadow),
+    [shadowMatrix],
   );
 
   return (
