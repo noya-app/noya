@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { CSSProperties, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 const CHEVRON_SVG = `
@@ -7,34 +7,37 @@ const CHEVRON_SVG = `
   </svg>
 `;
 
-const SelectElement = styled.select(({ theme }) => ({
-  appearance: 'none',
-  ...theme.textStyles.small,
-  color: theme.colors.text,
-  width: '0px', // Reset intrinsic width
-  flex: '1 1 0px',
-  position: 'relative',
-  border: '0',
-  outline: 'none',
-  minWidth: '0',
-  textAlign: 'left',
-  alignSelf: 'stretch',
-  borderRadius: '4px',
-  paddingTop: '4px',
-  paddingBottom: '4px',
-  paddingLeft: '8px',
-  paddingRight: '23px',
-  background: [
-    `calc(100% - 6px) / 15px url("data:image/svg+xml;utf8,${CHEVRON_SVG}") no-repeat`,
-    theme.colors.inputBackground,
-  ].join(','),
-  '&:focus': {
-    boxShadow: `0 0 0 2px ${theme.colors.primary}`,
-  },
-}));
+const SelectElement = styled.select<{ flex: CSSProperties['flex'] }>(
+  ({ theme, flex }) => ({
+    appearance: 'none',
+    ...theme.textStyles.small,
+    color: theme.colors.text,
+    width: '0px', // Reset intrinsic width
+    flex: flex ?? '1 1 0px',
+    position: 'relative',
+    border: '0',
+    outline: 'none',
+    minWidth: '0',
+    textAlign: 'left',
+    alignSelf: 'stretch',
+    borderRadius: '4px',
+    paddingTop: '4px',
+    paddingBottom: '4px',
+    paddingLeft: '8px',
+    paddingRight: '23px',
+    background: [
+      `calc(100% - 6px) / 15px url("data:image/svg+xml;utf8,${CHEVRON_SVG}") no-repeat`,
+      theme.colors.inputBackground,
+    ].join(','),
+    '&:focus': {
+      boxShadow: `0 0 0 2px ${theme.colors.primary}`,
+    },
+  }),
+);
 
 interface Props<T extends string> {
   id: string;
+  flex?: CSSProperties['flex'];
   value: T;
   onChange: (value: T) => void;
   getTitle?: (option: T) => string;
@@ -43,6 +46,7 @@ interface Props<T extends string> {
 
 function Select<T extends string>({
   id,
+  flex,
   value,
   onChange,
   options,
@@ -61,6 +65,7 @@ function Select<T extends string>({
   return (
     <SelectElement
       id={id}
+      flex={flex}
       value={value}
       onChange={useCallback(
         (event) => {

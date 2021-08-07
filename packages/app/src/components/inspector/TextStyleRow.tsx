@@ -9,6 +9,7 @@ import {
 import { Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { useCallback, memo, useMemo } from 'react';
+import { useTheme } from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
@@ -71,6 +72,7 @@ export default memo(function TextStyleRow({
   const characterInputId = `char`;
   const lineInputId = `line`;
   const paragraphInputId = `paragraph`;
+  const fontSizeId = `size`;
 
   // const [family, size] = useMemo(
   //   () => fontFamily.replace('MT', '').split('-'),
@@ -109,11 +111,13 @@ export default memo(function TextStyleRow({
           return <Label.Label>Line</Label.Label>;
         case paragraphInputId:
           return <Label.Label>Paragraph</Label.Label>;
+        case fontSizeId:
+          return <Label.Label>Size</Label.Label>;
         default:
           return null;
       }
     },
-    [characterInputId, lineInputId, paragraphInputId],
+    [characterInputId, fontSizeId, lineInputId, paragraphInputId],
   );
 
   const textSizeOptions = useMemo(
@@ -125,12 +129,14 @@ export default memo(function TextStyleRow({
     [fontSizes],
   );
 
+  const { horizontalSeparator, verticalSeparator } = useTheme().sizes.inspector;
+
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Text</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={10} />
+      <Spacer.Vertical size={verticalSeparator} />
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
@@ -140,69 +146,72 @@ export default memo(function TextStyleRow({
           onChange={onChangeFontFamily}
         />
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={6} />
+      <Spacer.Vertical size={verticalSeparator} />
       <InspectorPrimitives.Row>
         <Select
           id="font-weight"
+          flex={`0 0 calc(75% - ${(horizontalSeparator * 1) / 4}px)`}
           value={'Regular'}
           options={textSizeOptions}
           getTitle={getTextSizeTitle}
           onChange={onChangeFontWeight}
         />
-        <Spacer.Horizontal size={8} />
-        <InputField.Root id="font-size" size={50}>
-          <InputField.NumberInput
-            placeholder={fontSize === undefined ? 'multiple' : ''}
-            value={fontSize}
-            onSubmit={useCallback(
-              (value) => onChangeFontSize(value, 'replace'),
-              [onChangeFontSize],
-            )}
-            onNudge={useCallback((value) => onChangeFontSize(value, 'adjust'), [
-              onChangeFontSize,
-            ])}
-          />
-          <InputField.DropdownMenu
-            id={'font-size-dropdown'}
-            items={FONT_SIZE_DROPDOWN_OPTIONS}
-            onSelect={useCallback(
-              (value: string) => onChangeFontSize(Number(value), 'replace'),
-              [onChangeFontSize],
-            )}
-          />
-        </InputField.Root>
+        <Spacer.Horizontal size={horizontalSeparator} />
+        <FillInputFieldWithPicker
+          id="font-color"
+          flex={`0 0 calc(25% - ${(horizontalSeparator * 3) / 4}px)`}
+          colorProps={useMemo(
+            () => ({
+              color: fontColor,
+              onChangeColor: onChangeFontColor,
+            }),
+            [fontColor, onChangeFontColor],
+          )}
+        />
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={6} />
+      <Spacer.Vertical size={verticalSeparator} />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
+          <InputField.Root id={fontSizeId}>
+            <InputField.NumberInput
+              placeholder={fontSize === undefined ? 'multiple' : ''}
+              value={fontSize}
+              onSubmit={useCallback(
+                (value) => onChangeFontSize(value, 'replace'),
+                [onChangeFontSize],
+              )}
+              onNudge={useCallback(
+                (value) => onChangeFontSize(value, 'adjust'),
+                [onChangeFontSize],
+              )}
+            />
+            <InputField.DropdownMenu
+              id="font-size-dropdown"
+              items={FONT_SIZE_DROPDOWN_OPTIONS}
+              onSelect={useCallback(
+                (value: string) => onChangeFontSize(Number(value), 'replace'),
+                [onChangeFontSize],
+              )}
+            />
+          </InputField.Root>
+          <Spacer.Horizontal size={horizontalSeparator} />
           <DimensionInput
             id={characterInputId}
             value={letterSpacing}
             onSetValue={onChangeLineSpacing}
           />
-          <Spacer.Horizontal size={8} />
+          <Spacer.Horizontal size={horizontalSeparator} />
           <DimensionInput
             id={lineInputId}
             value={lineSpacing}
             onSetValue={onChangeLetterSpacing}
             placeholder="auto"
           />
-          <Spacer.Horizontal size={8} />
+          <Spacer.Horizontal size={horizontalSeparator} />
           <DimensionInput
             id={paragraphInputId}
             value={paragraphSpacing}
             onSetValue={onChangeParagraphSpacing}
-          />
-          <Spacer.Horizontal size={8} />
-          <FillInputFieldWithPicker
-            id={'colorInputId'}
-            colorProps={useMemo(
-              () => ({
-                color: fontColor,
-                onChangeColor: onChangeFontColor,
-              }),
-              [fontColor, onChangeFontColor],
-            )}
           />
         </LabeledElementView>
       </InspectorPrimitives.Row>

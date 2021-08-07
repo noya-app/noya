@@ -120,6 +120,10 @@ export const sizes = {
     height: 46,
     itemSeparator: 8,
   },
+  inspector: {
+    horizontalSeparator: 8,
+    verticalSeparator: 10,
+  },
   spacing: {
     nano: 2,
     micro: 4,
