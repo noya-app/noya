@@ -127,7 +127,7 @@ export default memo(function PointControlsInspector() {
               [dispatch],
             )}
           />
-          <Spacer.Horizontal size={10} />
+          <InspectorPrimitives.HorizontalSeparator />
           <InputField.Root id={pointRadiusInputId} size={50}>
             <InputField.NumberInput
               value={cornerRadius}
@@ -138,7 +138,7 @@ export default memo(function PointControlsInspector() {
           </InputField.Root>
         </LabeledElementView>
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <InspectorPrimitives.Column>
           <Button

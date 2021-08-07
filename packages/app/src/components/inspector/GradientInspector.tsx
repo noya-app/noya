@@ -6,7 +6,6 @@ import {
   Label,
   LabeledElementView,
   sketchColorToHex,
-  Spacer,
 } from 'noya-designsystem';
 import { clamp } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
@@ -142,10 +141,9 @@ export default memo(function GradientInspector({
             [dispatch],
           )}
         />
-        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row id={id}>
           <LabeledElementView renderLabel={renderLabel}>
-            <Spacer.Vertical size={8} />
             <InputField.Root id={hexInputId} labelPosition="start">
               <InputField.Input
                 value={hexValue ?? ''}
@@ -154,7 +152,7 @@ export default memo(function GradientInspector({
               />
               <InputField.Label>#</InputField.Label>
             </InputField.Root>
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <InputField.Root id={opacityInputId} size={50}>
               <InputField.NumberInput
                 value={Math.round(selectedcolor.alpha * 100)}

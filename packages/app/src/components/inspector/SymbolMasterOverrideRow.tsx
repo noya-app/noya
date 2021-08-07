@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Spacer, TreeView } from 'noya-designsystem';
+import { Divider, Spacer, TreeView } from 'noya-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
@@ -179,8 +179,12 @@ export default memo(function SymbolMasterOverrideRow({
   return (
     <>
       <InspectorPrimitives.Section>
-        <InspectorPrimitives.Title>Manage Overrides</InspectorPrimitives.Title>
-        <Spacer.Vertical size={2} />
+        <InspectorPrimitives.SectionHeader>
+          <InspectorPrimitives.Title>
+            Manage Overrides
+          </InspectorPrimitives.Title>
+        </InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row>
           <InspectorPrimitives.Checkbox
             type="checkbox"
@@ -190,9 +194,11 @@ export default memo(function SymbolMasterOverrideRow({
               [onSetAllowsOverrides],
             )}
           />
-          <Spacer.Horizontal size={8} />
+          <InspectorPrimitives.HorizontalSeparator />
           <InspectorPrimitives.Text>Allow Overrides</InspectorPrimitives.Text>
         </InspectorPrimitives.Row>
+        <InspectorPrimitives.VerticalSeparator />
+        <Divider />
       </InspectorPrimitives.Section>
       <TreeView.Root expandable={false}>{overrideElements}</TreeView.Root>
     </>

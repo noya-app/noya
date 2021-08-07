@@ -1,4 +1,4 @@
-import { Label, LabeledElementView, Spacer } from 'noya-designsystem';
+import { Label, LabeledElementView } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
@@ -65,30 +65,30 @@ export default memo(function FillRow({
     <InspectorPrimitives.Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
-        {prefix && <Spacer.Horizontal size={8} />}
+        {prefix && <InspectorPrimitives.HorizontalSeparator />}
         <FillInputFieldWithPicker id={colorInputId} colorProps={colorProps} />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <DimensionInput
           id={xInputId}
           size={50}
           value={x !== undefined ? Math.round(x) : x}
           onSetValue={onSetX}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <DimensionInput
           id={yInputId}
           size={50}
           value={y !== undefined ? Math.round(y) : y}
           onSetValue={onSetY}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <DimensionInput
           id={blurInputId}
           size={50}
           value={blur !== undefined ? Math.round(blur) : blur}
           onSetValue={onSetBlur}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <DimensionInput
           id={spreadInputId}
           size={50}

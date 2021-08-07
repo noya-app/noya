@@ -1,4 +1,10 @@
-import { ForwardedRef, forwardRef, memo, ReactNode } from 'react';
+import {
+  CSSProperties,
+  ForwardedRef,
+  forwardRef,
+  memo,
+  ReactNode,
+} from 'react';
 import styled from 'styled-components';
 import { Tooltip } from '..';
 
@@ -11,9 +17,10 @@ type ButtonVariant = 'normal' | 'thin';
 const ButtonElement = styled.button<{
   active: boolean;
   variant: ButtonVariant;
-}>(({ theme, active, disabled, variant }) => ({
+  flex?: CSSProperties['flex'];
+}>(({ theme, active, disabled, variant, flex }) => ({
   ...theme.textStyles.small,
-  flex: '0 0 auto',
+  flex: flex ?? '0 0 auto',
   position: 'relative',
   border: '0',
   outline: 'none',
@@ -57,6 +64,7 @@ const ButtonContent = styled.span(({ theme }) => ({
 
 interface ButtonRootProps {
   id: string;
+  flex?: CSSProperties['flex'];
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;
@@ -68,6 +76,7 @@ interface ButtonRootProps {
 const Button = forwardRef(function Button(
   {
     id,
+    flex,
     tooltip,
     active = false,
     disabled = false,
@@ -79,8 +88,9 @@ const Button = forwardRef(function Button(
 ) {
   const buttonElement = (
     <ButtonElement
-      id={id}
       ref={forwardedRef}
+      id={id}
+      flex={flex}
       active={active}
       disabled={disabled}
       variant={variant}

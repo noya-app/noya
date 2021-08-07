@@ -6,14 +6,13 @@ import {
   Select,
   SketchPattern,
   Slider,
-  Spacer,
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
   useHover,
 } from 'noya-designsystem';
+import { getFileExtensionForType, uuid } from 'noya-utils';
 import { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { getFileExtensionForType, uuid } from 'noya-utils';
 import ImageDropTarget, {
   isSupportedFile,
   TypedFile,
@@ -196,7 +195,7 @@ export default memo(function PatternInspector({
           onAddImage={createImage}
           onChangeImage={onChangeImage}
         />
-        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.LabeledRow label={'Size'}>
           <Select
             id={`${id}-pattern-options`}
@@ -207,7 +206,7 @@ export default memo(function PatternInspector({
         </InspectorPrimitives.LabeledRow>
         {isTile && (
           <>
-            <Spacer.Vertical size={10} />
+            <InspectorPrimitives.VerticalSeparator />
             <InspectorPrimitives.LabeledSliderRow label={'Scale'}>
               <Slider
                 id={`${id}-slider`}
@@ -216,7 +215,7 @@ export default memo(function PatternInspector({
                 min={10}
                 max={200}
               />
-              <Spacer.Horizontal size={10} />
+              <InspectorPrimitives.HorizontalSeparator />
               <InputField.Root size={50}>
                 <InputField.NumberInput
                   value={scale}

@@ -5,12 +5,12 @@ import {
   ResetIcon,
   UpdateIcon,
 } from '@radix-ui/react-icons';
-import { Button, Select, Spacer } from 'noya-designsystem';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Button, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 
 const NO_TEXT_STYLE = 'none';
@@ -100,7 +100,7 @@ export default memo(function ThemeTextInspector() {
         <InspectorPrimitives.SectionHeader>
           <InspectorPrimitives.Title>Text Style</InspectorPrimitives.Title>
         </InspectorPrimitives.SectionHeader>
-        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row>
           <Select
             id="theme-text-style"
@@ -110,45 +110,50 @@ export default memo(function ThemeTextInspector() {
             onChange={onSelect}
           />
         </InspectorPrimitives.Row>
-        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row>
           <Button
             id="create-text-style"
+            flex="1 1 0%"
             tooltip="Create text style from text"
             onClick={onAdd}
           >
             <PlusIcon color={iconColor} />
           </Button>
-          <Spacer.Horizontal size={10} />
+          <InspectorPrimitives.HorizontalSeparator />
           <Button
             id="update-text-style"
+            flex="1 1 0%"
             disabled={selectedTextStyleId === undefined}
             tooltip="Update text style to match text"
             onClick={onUpdate}
           >
             <UpdateIcon color={iconColor} />
           </Button>
-          <Spacer.Horizontal size={10} />
+          <InspectorPrimitives.HorizontalSeparator />
           <Button
             id="detach-text-style"
+            flex="1 1 0%"
             disabled={selectedTextStyleId === undefined}
             tooltip="Detach text from text style"
             onClick={onDetach}
           >
             <LinkBreak2Icon color={iconColor} />
           </Button>
-          <Spacer.Horizontal size={10} />
+          <InspectorPrimitives.HorizontalSeparator />
           <Button
             id="rename-text-style"
+            flex="1 1 0%"
             disabled={selectedTextStyleId === undefined}
             tooltip="Rename text style"
             onClick={onRename}
           >
             <CursorTextIcon color={iconColor} />
           </Button>
-          <Spacer.Horizontal size={10} />
+          <InspectorPrimitives.HorizontalSeparator />
           <Button
             id="reset-text-style"
+            flex="1 1 0%"
             disabled={selectedTextStyleId === undefined}
             tooltip="Reset text to text style"
             onClick={onReset}

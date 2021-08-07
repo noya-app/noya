@@ -56,7 +56,7 @@ export default memo(function OpacityInspector() {
               min={0}
               max={100}
             />
-            <Spacer.Horizontal size={10} />
+            <InspectorPrimitives.HorizontalSeparator />
             <InputField.Root id="opacity-input" size={50}>
               <InputField.NumberInput
                 value={roundedValue}

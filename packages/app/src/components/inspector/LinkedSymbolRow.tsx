@@ -1,11 +1,11 @@
-import { LinkBreak2Icon, ComponentInstanceIcon } from '@radix-ui/react-icons';
-import { Button, Select, Spacer } from 'noya-designsystem';
+import { ComponentInstanceIcon, LinkBreak2Icon } from '@radix-ui/react-icons';
+import { useSelector } from 'noya-app-state-context';
+import { Button, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import * as InspectorPrimitives from './InspectorPrimitives';
-import { useSelector } from 'noya-app-state-context';
 import useShallowArray from '../../hooks/useShallowArray';
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
   symbolId: string;
@@ -39,7 +39,7 @@ export default memo(function SymbolSelectorRow({
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Symbol</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Select
           id="symbol-instance-source"
@@ -49,19 +49,21 @@ export default memo(function SymbolSelectorRow({
           onChange={onSelect}
         />
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Button
           id="detach-source-symbol"
+          flex="1 1 0%"
           disabled={symbolId === undefined}
           tooltip="Detach instance from symbol"
           onClick={onDetach}
         >
           <LinkBreak2Icon color={iconColor} />
         </Button>
-        <Spacer.Horizontal size={10} />
+        <InspectorPrimitives.HorizontalSeparator />
         <Button
           id="edit-source-symbol"
+          flex="1 1 0%"
           disabled={symbolId === undefined}
           tooltip="Edit Symbol Source"
           onClick={onEditSource}

@@ -6,12 +6,7 @@ import {
   useGetWorkspaceStateSnapshot,
   useSelector,
 } from 'noya-app-state-context';
-import {
-  Button,
-  Divider,
-  Spacer,
-  withSeparatorElements,
-} from 'noya-designsystem';
+import { Button, Divider, withSeparatorElements } from 'noya-designsystem';
 import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
@@ -217,7 +212,7 @@ export default memo(function ExportInspector() {
       <>
         <InspectorPrimitives.Section>
           <ExportPreviewRow layer={selectedLayer} page={page} />
-          <Spacer.Vertical size={10} />
+          <InspectorPrimitives.VerticalSeparator />
           <Button id="export-selected" onClick={handleExport}>
             Export Selected...
           </Button>

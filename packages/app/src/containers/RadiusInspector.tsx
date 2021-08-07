@@ -51,7 +51,7 @@ export default memo(function RadiusInspector() {
               min={0}
               max={100}
             />
-            <Spacer.Horizontal size={10} />
+            <InspectorPrimitives.HorizontalSeparator />
             <InputField.Root id="radius-input" size={50}>
               <InputField.NumberInput
                 value={roundedValue}

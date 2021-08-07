@@ -5,7 +5,6 @@ import {
   Label,
   LabeledElementView,
   sketchColorToHex,
-  Spacer,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { clamp } from 'noya-utils';
@@ -84,10 +83,9 @@ export default memo(function ColorInspector({
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Column>
         <ColorPicker value={displayColor} onChange={onChangeColor} />
-        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row id={id}>
           <LabeledElementView renderLabel={renderLabel}>
-            <Spacer.Vertical size={8} />
             <InputField.Root id={hexInputId} labelPosition="start">
               <InputField.Input
                 value={color ? sketchColorToHex(displayColor).slice(1) : ''}
@@ -96,7 +94,7 @@ export default memo(function ColorInspector({
               />
               <InputField.Label>#</InputField.Label>
             </InputField.Root>
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <DimensionInput
               id={opacityInputId}
               size={50}

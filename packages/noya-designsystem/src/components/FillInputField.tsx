@@ -8,7 +8,7 @@ const Container = styled.button<{ flex?: CSSProperties['flex'] }>(
   ({ theme, flex }) => ({
     outline: 'none',
     padding: 0,
-    width: '40px',
+    width: '50px',
     height: '27px',
     borderRadius: '4px',
     overflow: 'hidden',

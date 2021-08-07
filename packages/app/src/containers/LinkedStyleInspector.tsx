@@ -6,12 +6,12 @@ import {
   UpdateIcon,
 } from '@radix-ui/react-icons';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Button, Select, Spacer } from 'noya-designsystem';
+import { useDispatch, useSelector } from 'noya-app-state-context';
+import { Button, Select } from 'noya-designsystem';
 import { getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useDispatch, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
 
 const NO_LAYER_STYLE = 'none';
@@ -90,7 +90,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Theme</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Select
           id="theme-layer-style"
@@ -100,45 +100,50 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
           onChange={onSelect}
         />
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Button
           id="create-layer-style"
+          flex="1 1 0%"
           tooltip="Create theme style from layer"
           onClick={onAdd}
         >
           <PlusIcon color={iconColor} />
         </Button>
-        <Spacer.Horizontal size={10} />
+        <InspectorPrimitives.HorizontalSeparator />
         <Button
           id="update-layer-style"
+          flex="1 1 0%"
           disabled={sharedStyleId === undefined}
           tooltip="Update theme style to match layer"
           onClick={onUpdate}
         >
           <UpdateIcon color={iconColor} />
         </Button>
-        <Spacer.Horizontal size={10} />
+        <InspectorPrimitives.HorizontalSeparator />
         <Button
           id="detach-layer-style"
+          flex="1 1 0%"
           disabled={sharedStyleId === undefined}
           tooltip="Detach style from theme"
           onClick={onDetach}
         >
           <LinkBreak2Icon color={iconColor} />
         </Button>
-        <Spacer.Horizontal size={10} />
+        <InspectorPrimitives.HorizontalSeparator />
         <Button
           id="rename-style"
+          flex="1 1 0%"
           disabled={sharedStyleId === undefined}
           tooltip="Rename theme style"
           onClick={onRename}
         >
           <CursorTextIcon color={iconColor} />
         </Button>
-        <Spacer.Horizontal size={10} />
+        <InspectorPrimitives.HorizontalSeparator />
         <Button
           id="reset-style"
+          flex="1 1 0%"
           disabled={sharedStyleId === undefined}
           tooltip="Reset layer style to theme style"
           onClick={onReset}

@@ -1,14 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  Label,
-  Select,
   InputField,
+  Label,
   LabeledElementView,
   MenuItem,
+  Select,
 } from 'noya-designsystem';
-import { Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { useCallback, memo, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
@@ -129,14 +128,14 @@ export default memo(function TextStyleRow({
     [fontSizes],
   );
 
-  const { horizontalSeparator, verticalSeparator } = useTheme().sizes.inspector;
+  const { horizontalSeparator } = useTheme().sizes.inspector;
 
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Text</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={verticalSeparator} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
@@ -146,7 +145,7 @@ export default memo(function TextStyleRow({
           onChange={onChangeFontFamily}
         />
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={verticalSeparator} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Select
           id="font-weight"
@@ -156,7 +155,7 @@ export default memo(function TextStyleRow({
           getTitle={getTextSizeTitle}
           onChange={onChangeFontWeight}
         />
-        <Spacer.Horizontal size={horizontalSeparator} />
+        <InspectorPrimitives.HorizontalSeparator />
         <FillInputFieldWithPicker
           id="font-color"
           flex={`0 0 calc(25% - ${(horizontalSeparator * 3) / 4}px)`}
@@ -169,7 +168,7 @@ export default memo(function TextStyleRow({
           )}
         />
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={verticalSeparator} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
           <InputField.Root id={fontSizeId}>
@@ -194,20 +193,20 @@ export default memo(function TextStyleRow({
               )}
             />
           </InputField.Root>
-          <Spacer.Horizontal size={horizontalSeparator} />
+          <InspectorPrimitives.HorizontalSeparator />
           <DimensionInput
             id={characterInputId}
             value={letterSpacing}
             onSetValue={onChangeLineSpacing}
           />
-          <Spacer.Horizontal size={horizontalSeparator} />
+          <InspectorPrimitives.HorizontalSeparator />
           <DimensionInput
             id={lineInputId}
             value={lineSpacing}
             onSetValue={onChangeLetterSpacing}
             placeholder="auto"
           />
-          <Spacer.Horizontal size={horizontalSeparator} />
+          <InspectorPrimitives.HorizontalSeparator />
           <DimensionInput
             id={paragraphInputId}
             value={paragraphSpacing}
