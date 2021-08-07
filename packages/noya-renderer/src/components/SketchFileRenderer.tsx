@@ -457,8 +457,7 @@ export default memo(function SketchFileRenderer() {
                     ))}
                 </>
               )}
-            {!isEditingPath &&
-              !drawingLayer &&
+            {!drawingLayer &&
               !isInserting &&
               !isEditingText &&
               highlightedSketchLayer}
@@ -469,12 +468,7 @@ export default memo(function SketchFileRenderer() {
               boundingRect &&
               !drawingLayer &&
               !isInserting &&
-              !isEditingText && (
-                <DragHandles
-                  rect={boundingRect}
-                  selectionPaint={selectionPaint}
-                />
-              )}
+              !isEditingText && <DragHandles rect={boundingRect} />}
           </>
         )}
       </Group>
