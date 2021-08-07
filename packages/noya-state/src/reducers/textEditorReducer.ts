@@ -1,6 +1,6 @@
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { Layers, Selectors } from 'noya-state';
+import { Layers, MAX_TEXT_LAYER_STRING_LENGTH, Selectors } from 'noya-state';
 import {
   ApplicationReducerContext,
   ApplicationState,
@@ -36,7 +36,7 @@ export function textEditorReducer(
           layerId: draft.selectedText.layerId,
           range: {
             anchor: 0,
-            head: 1_000_000,
+            head: MAX_TEXT_LAYER_STRING_LENGTH,
           },
         };
       });

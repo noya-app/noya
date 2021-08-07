@@ -1,6 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchModel } from 'noya-sketch-model';
 
+export const MAX_TEXT_LAYER_STRING_LENGTH = 1_000_000;
+
 type TextSpan = {
   string: string;
   attributes: Sketch.StringAttribute['attributes'];

@@ -40,6 +40,7 @@ import {
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
+  MAX_TEXT_LAYER_STRING_LENGTH,
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
@@ -514,7 +515,7 @@ export function canvasReducer(
                 layerId: interactionState.id,
                 range: {
                   anchor: 0,
-                  head: 1_000_000,
+                  head: MAX_TEXT_LAYER_STRING_LENGTH,
                 },
               };
             }

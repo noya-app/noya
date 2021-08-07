@@ -3,7 +3,14 @@ import produce from 'immer';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
-import { Layers, Overrides, PageLayer, Primitives } from 'noya-state';
+import {
+  Layers,
+  MAX_TEXT_LAYER_STRING_LENGTH,
+  Overrides,
+  PageLayer,
+  Primitives,
+  replaceTextInRange,
+} from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
 import { useApplicationState } from 'noya-app-state-context';
@@ -85,7 +92,11 @@ const Symbol = memo(function Symbol({
 
           switch (override.type) {
             case 'stringValue':
-              override.layer.attributedString.string = override.value;
+              override.layer.attributedString = replaceTextInRange(
+                override.layer.attributedString,
+                [0, MAX_TEXT_LAYER_STRING_LENGTH],
+                override.value,
+              );
               break;
             case 'symbolID':
               override.layer.symbolID = override.value;
