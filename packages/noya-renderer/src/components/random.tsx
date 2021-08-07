@@ -5,7 +5,6 @@ import { useStroke } from 'noya-react-canvaskit';
 import {
   getCurrentPage,
   getSelectedGradient,
-  getAngularGradientCircunference,
   GradientStopPoint,
   Primitives,
   SelectedGradient,
@@ -49,6 +48,8 @@ export default memo(function GradientEditor({
     if (!gradient || gradient.gradientType !== Sketch.GradientType.Radial)
       return null;
 
+    const path = new CanvasKit.Path();
+
     const center = gradientStopPoints[0].point;
     const point = gradientStopPoints[gradientStopPoints.length - 1].point;
     const len = distance(center, point);
@@ -63,7 +64,6 @@ export default memo(function GradientEditor({
     const theta =
       Math.atan2(point.y - center.y, point.x - center.x) - Math.PI / 2;
 
-    const path = new CanvasKit.Path();
     path.addOval(CanvasKit.XYWHRect(x, y, width, height));
     const rectangle = CanvasKit.XYWHRect(
       x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
@@ -88,37 +88,19 @@ export default memo(function GradientEditor({
   const angularGradient = useMemo(() => {
     if (!gradient || gradient.gradientType !== Sketch.GradientType.Angular)
       return null;
+  }, [gradient]);
 
-    const gradientCircle = getAngularGradientCircunference(state);
-    if (!gradientCircle) return null;
-
-    const path = new CanvasKit.Path();
-    path.addOval(
-      CanvasKit.XYWHRect(
-        gradientCircle.corner.x,
-        gradientCircle.corner.y,
-        gradientCircle.longitude,
-        gradientCircle.longitude,
-      ),
-    );
-
-    return <Path path={path} paint={gradientLineStroke} />;
-  }, [CanvasKit, state, gradient, gradientLineStroke]);
-
-  if (!gradient) return null;
+  if (angularGradient) return angularGradient;
 
   return (
     <Group imageFilter={gradientEditorShadow}>
-      {gradient.gradientType !== Sketch.GradientType.Angular && (
-        <Polyline
-          points={[
-            gradientStopPoints[0].point,
-            gradientStopPoints[gradientStopPoints.length - 1].point,
-          ]}
-          paint={gradientLineStroke}
-        />
-      )}
-      {angularGradient}
+      <Polyline
+        points={[
+          gradientStopPoints[0].point,
+          gradientStopPoints[gradientStopPoints.length - 1].point,
+        ]}
+        paint={gradientLineStroke}
+      />
       {radialGradient}
       {gradientStopPoints.map(({ point, color }, index) => {
         const path = new CanvasKit.Path();

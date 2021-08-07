@@ -42,3 +42,12 @@ export function isPointInLine(point: Point, line: [Point, Point]) {
 
   return Math.abs(d1 + d2 - lineLength) < 0.5;
 }
+
+// TODO: Not really accurate, but works for now.
+// TODO: add a test for this function
+export function isPointInCircunference(point: Point, circle: [Point, number]) {
+  const center = circle[0];
+  const radius = circle[1];
+
+  return Math.abs(distance(point, center) - radius) < 2;
+}

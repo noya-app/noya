@@ -392,10 +392,7 @@ export default memo(function Canvas() {
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
             dispatch('interaction', ['maybeMoveGradientStop', point]);
-          } else if (
-            selectedGradientStopIndex !== -1 &&
-            Selectors.isPointerOnGradientLine(state, point)
-          ) {
+          } else if (Selectors.isPointerOnGradientLine(state, point)) {
             dispatch('addStopToGradient', point);
           } else if (Selectors.isPointerOnGradientEllipseEditor(state, point)) {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);

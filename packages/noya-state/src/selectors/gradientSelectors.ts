@@ -1,8 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   AffineTransform,
+  createBounds,
   distance,
   getLinePercentage,
+  isPointInCircunference,
   isPointInLine,
   Point,
 } from 'noya-geometry';
@@ -42,6 +44,7 @@ export function getSelectedGradient(
 
 export type GradientStopPoint = { point: Point; color: Sketch.Color };
 
+//return angular position of the point on the gradient line
 export function getSelectedGradientStopPoints(
   state: ApplicationState,
   sorted = false,
@@ -78,24 +81,40 @@ export function getSelectedGradientStopPoints(
   const from = PointString.decode(gradient.from);
   const to = PointString.decode(gradient.to);
 
+  const stops = sorted
+    ? [...gradient.stops].sort((a, b) => a.position - b.position)
+    : gradient.stops;
+
+  if (gradient.gradientType === Sketch.GradientType.Angular) {
+    const circunference = getAngularGradientCircunference(state);
+    if (!circunference) return;
+
+    return stops.map((stop) => {
+      const radians = stop.position * Math.PI * 2;
+      const { center, longitude } = circunference;
+
+      return {
+        color: stop.color,
+        point: {
+          x: (longitude / 2) * Math.cos(radians) + center.x,
+          y: (longitude / 2) * Math.sin(radians) + center.y,
+        },
+      };
+    });
+  }
+
   const extremePoints = {
     from: transform.applyTo(from),
     to: transform.applyTo(to),
   };
 
-  const stops = sorted
-    ? [...gradient.stops].sort((a, b) => a.position - b.position)
-    : gradient.stops;
-
-  return stops.map((stop) => {
-    return {
-      color: stop.color,
-      point: {
-        x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
-        y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
-      },
-    };
-  });
+  return stops.map((stop) => ({
+    color: stop.color,
+    point: {
+      x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
+      y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
+    },
+  }));
 }
 
 /**
@@ -169,7 +188,20 @@ export function getPercentageOfPointInGradient(
   ]);
 }
 
-export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
+export function isPointerOnGradientLine(
+  state: ApplicationState,
+  point: Point,
+  angular = false,
+) {
+  if (angular) {
+    const circunference = getAngularGradientCircunference(state);
+    if (!circunference) return false;
+
+    return isPointInCircunference(point, [
+      circunference.center,
+      circunference.longitude / 2,
+    ]);
+  }
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
   if (!selectedLayerGradientPoints) return false;
 
@@ -219,4 +251,48 @@ export function isPointerOnGradientEllipseEditor(
   );
 
   return isPointInRange(point, position, SELECTED_GRADIENT_POINT_RADIUS);
+}
+
+export function getAngularGradientCircunference(state: ApplicationState) {
+  if (!state.selectedGradient) return;
+
+  const { layerId } = state.selectedGradient;
+  const page = getCurrentPage(state);
+  const indexPath = Layers.findIndexPath(
+    page,
+    (layer) => layer.do_objectID === layerId,
+  );
+
+  if (!indexPath) return;
+
+  const layer = Layers.access(page, indexPath);
+  const bounds = createBounds(layer.frame);
+
+  const horizontalDistance = distance(
+    { x: bounds.minX, y: bounds.minY },
+    { x: bounds.maxX, y: bounds.minY },
+  );
+  const verticalDistance = distance(
+    { x: bounds.minX, y: bounds.minY },
+    { x: bounds.minX, y: bounds.maxY },
+  );
+
+  const center = { x: bounds.midX, y: bounds.midY };
+  const point =
+    horizontalDistance < verticalDistance
+      ? { x: bounds.maxX, y: bounds.midY }
+      : { x: bounds.midX, y: bounds.minY };
+
+  const longitude = distance(center, point) * 2;
+
+  const corner =
+    horizontalDistance < verticalDistance
+      ? { x: bounds.minX, y: bounds.midY - longitude / 2 }
+      : { x: bounds.midX - longitude / 2, y: bounds.minY };
+
+  return {
+    corner,
+    center,
+    longitude,
+  };
 }
