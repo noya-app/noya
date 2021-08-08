@@ -190,8 +190,20 @@ export default memo(function Canvas() {
         dispatch('moveCursor', 'forward', 'word');
       }
     },
-    ArrowUp: () => nudge('Y', -1),
-    ArrowDown: () => nudge('Y', 1),
+    ArrowUp: () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveCursor', 'backward', 'vertical');
+      } else {
+        nudge('Y', -1);
+      }
+    },
+    ArrowDown: () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveCursor', 'forward', 'vertical');
+      } else {
+        nudge('Y', 1);
+      }
+    },
     'Shift-ArrowLeft': () => nudge('X', -10),
     'Shift-ArrowRight': () => nudge('X', 10),
     'Shift-ArrowUp': () => nudge('Y', -10),

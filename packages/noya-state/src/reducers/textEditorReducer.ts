@@ -1,7 +1,9 @@
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit, ShapedLine } from 'canvaskit';
 import produce from 'immer';
+import { Point } from 'noya-geometry';
 import { Layers, MAX_TEXT_LAYER_STRING_LENGTH, Selectors } from 'noya-state';
 import { clamp } from 'noya-utils';
+import { normalizeRange } from '../selectors/attributedStringSelectors';
 import {
   ApplicationReducerContext,
   ApplicationState,
@@ -10,7 +12,12 @@ import {
 
 export type TextEditorCursorDirection = 'forward' | 'backward';
 
-export type TextEditorCursorUnit = 'character' | 'word' | 'line' | 'all';
+export type TextEditorCursorUnit =
+  | 'character'
+  | 'word'
+  | 'line'
+  | 'all'
+  | 'vertical';
 
 const wordRe = new RegExp('[\\p{Alphabetic}\\p{Number}_]', 'u');
 
@@ -60,7 +67,7 @@ export function textEditorReducer(
 
       const {
         layerId,
-        range: { head },
+        range: { head, anchor },
       } = state.selectedText;
       const pageIndex = Selectors.getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
@@ -92,6 +99,14 @@ export function textEditorReducer(
 
         switch (unit) {
           case 'character': {
+            // If we have a selected range, move to one side of it
+            if (head !== anchor) {
+              const [min, max] = normalizeRange([head, anchor]);
+              const nextIndex = direction === 'forward' ? max : min;
+              draft.selectedText.range = { anchor: nextIndex, head: nextIndex };
+              break;
+            }
+
             const nextIndex = clamp(head + directionMultiplier, 0, length);
             draft.selectedText.range = { anchor: nextIndex, head: nextIndex };
             break;
@@ -146,6 +161,64 @@ export function textEditorReducer(
             draft.selectedText.range = { anchor: nextIndex, head: nextIndex };
             break;
           }
+          case 'vertical': {
+            const shapedLines = paragraph.getShapedLines();
+
+            const shapedLine = shapedLines.find(
+              (s) => s.textRange.first <= head && head <= s.textRange.last,
+            );
+            // console.log(shapedLine);
+
+            if (shapedLine) {
+              const coordinates = getGlyphCoordinatesForShapedLine(shapedLine);
+              const coordinate = coordinates[head - shapedLine.textRange.first];
+
+              const nextIndex = paragraph.getGlyphPositionAtCoordinate(
+                coordinate.x,
+                // TODO: Instead of 1, can we use the line metrics to find the actual y pos?
+                direction === 'forward'
+                  ? shapedLine.bottom + 1
+                  : shapedLine.top - 1,
+              ).pos;
+
+              draft.selectedText.range = { anchor: nextIndex, head: nextIndex };
+
+              // console.log(newPosition);
+            } else {
+              switch (direction) {
+                case 'forward': {
+                  const shapedLine = shapedLines.find(
+                    (s) => head <= s.textRange.last,
+                  );
+
+                  const nextIndex = shapedLine
+                    ? shapedLine.textRange.first
+                    : length;
+
+                  draft.selectedText.range = {
+                    anchor: nextIndex,
+                    head: nextIndex,
+                  };
+
+                  break;
+                }
+                case 'backward': {
+                  const shapedLine = [...shapedLines]
+                    .reverse()
+                    .find((s) => s.textRange.first <= head);
+
+                  const nextIndex = shapedLine ? shapedLine.textRange.first : 0;
+
+                  draft.selectedText.range = {
+                    anchor: nextIndex,
+                    head: nextIndex,
+                  };
+
+                  break;
+                }
+              }
+            }
+          }
         }
       });
     }
@@ -187,4 +260,19 @@ export function textEditorReducer(
     default:
       return state;
   }
+}
+
+function getGlyphCoordinatesForShapedLine(shapedLine: ShapedLine) {
+  const coordinates: Point[] = [];
+
+  // TODO: Consider all runs
+  shapedLine.runs[0].positions.forEach((value, index) => {
+    if (index % 2 === 0) {
+      coordinates.push({ x: value, y: 0 });
+    } else {
+      coordinates[coordinates.length - 1].y = value;
+    }
+  });
+
+  return coordinates;
 }
