@@ -100,16 +100,12 @@ export function getCharacterIndexAtPoint(
   CanvasKit: CanvasKit,
   fontManager: FontMgr,
   state: ApplicationState,
+  layerId: string,
   point: Point,
   mode: 'bounded' | 'unbounded',
 ) {
-  if (!state.selectedText) return;
-
   const page = Selectors.getCurrentPage(state);
-  const textLayer = Layers.find(
-    page,
-    (layer) => layer.do_objectID === state.selectedText?.layerId,
-  );
+  const textLayer = Layers.find(page, (layer) => layer.do_objectID === layerId);
 
   if (!textLayer || !Layers.isTextLayer(textLayer)) return;
 
@@ -137,4 +133,23 @@ export function getCharacterIndexAtPoint(
   );
 
   return position.pos;
+}
+
+export function getCharacterIndexAtPointInSelectedLayer(
+  CanvasKit: CanvasKit,
+  fontManager: FontMgr,
+  state: ApplicationState,
+  point: Point,
+  mode: 'bounded' | 'unbounded',
+) {
+  if (!state.selectedText) return;
+
+  return getCharacterIndexAtPoint(
+    CanvasKit,
+    fontManager,
+    state,
+    state.selectedText.layerId,
+    point,
+    mode,
+  );
 }

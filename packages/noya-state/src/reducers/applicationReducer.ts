@@ -442,6 +442,7 @@ export function applicationReducer(
       return pointReducer(state, action, CanvasKit);
     case 'setTextSelection':
     case 'selectAllText':
+    case 'selectContainingText':
     case 'moveCursor':
     case 'moveTextSelection':
     case 'insertText':

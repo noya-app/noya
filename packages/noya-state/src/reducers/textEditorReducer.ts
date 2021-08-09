@@ -16,6 +16,7 @@ import {
 export type TextEditorAction =
   | [type: 'setTextSelection', range: TextSelectionRange]
   | [type: 'selectAllText']
+  | [type: 'selectContainingText', index: number, unit: 'word' | 'line']
   | [
       type: 'moveCursor',
       direction: TextEditorCursorDirection,
@@ -60,6 +61,76 @@ export function textEditorReducer(
             head: MAX_TEXT_LAYER_STRING_LENGTH,
           },
         };
+      });
+    }
+    case 'selectContainingText': {
+      const [, index, unit] = action;
+
+      if (!state.selectedText) return state;
+
+      const { layerId } = state.selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        if (!draft.selectedText) return;
+
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
+
+        if (!Layers.isTextLayer(draftLayer)) return;
+
+        const paragraph = Selectors.getLayerParagraph(
+          CanvasKit,
+          context.fontManager,
+          draftLayer,
+        );
+
+        switch (unit) {
+          case 'word': {
+            const boundary = paragraph.getWordBoundary(index);
+
+            draft.selectedText.range = {
+              anchor: boundary.start,
+              head: boundary.end,
+            };
+
+            break;
+          }
+          case 'line': {
+            const backwardIndex = Selectors.getNextCursorPosition(
+              paragraph,
+              draftLayer.attributedString.string,
+              index,
+              undefined,
+              'backward',
+              unit,
+            ).index;
+
+            const forwardIndex = Selectors.getNextCursorPosition(
+              paragraph,
+              draftLayer.attributedString.string,
+              index,
+              undefined,
+              'forward',
+              unit,
+            ).index;
+
+            draft.selectedText.range = {
+              anchor: backwardIndex,
+              head: forwardIndex,
+            };
+
+            break;
+          }
+        }
       });
     }
     case 'moveTextSelection':
