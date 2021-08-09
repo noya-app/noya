@@ -40,6 +40,7 @@ import {
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
+import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import * as MouseEvent from '../utils/mouseEvent';
@@ -124,145 +125,21 @@ export default memo(function Canvas() {
     },
   });
 
-  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
   const isPanning =
     state.interactionState.type === 'panMode' ||
     state.interactionState.type === 'maybePan' ||
     state.interactionState.type === 'panning';
 
-  const nudge = (axis: 'X' | 'Y', amount: number) => {
-    if (isEditingPath && state.selectedControlPoint) {
-      dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else if (isEditingPath) {
-      dispatch(
-        `setPoint${axis}` as const,
-        state.selectedPointLists,
-        amount,
-        'adjust',
-      );
-    } else {
-      dispatch(`setLayer${axis}` as const, amount, 'adjust');
-    }
-  };
+  const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
+
+  useArrowKeyShortcuts();
 
   useKeyboardShortcuts({
-    ArrowLeft: () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'backward', 'character');
-      } else {
-        nudge('X', -1);
-      }
+    Backspace: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      dispatch('deleteLayer', state.selectedObjects);
     },
-    ArrowRight: () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'forward', 'character');
-      } else {
-        nudge('X', 1);
-      }
-    },
-    ArrowUp: () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'backward', 'vertical');
-      } else {
-        nudge('Y', -1);
-      }
-    },
-    ArrowDown: () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'forward', 'vertical');
-      } else {
-        nudge('Y', 1);
-      }
-    },
-    'Shift-ArrowLeft': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'backward', 'character');
-      } else {
-        nudge('X', -10);
-      }
-    },
-    'Shift-ArrowRight': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'forward', 'character');
-      } else {
-        nudge('X', 10);
-      }
-    },
-    'Shift-ArrowUp': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'backward', 'vertical');
-      } else {
-        nudge('Y', -10);
-      }
-    },
-    'Shift-ArrowDown': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'forward', 'vertical');
-      } else {
-        nudge('Y', 10);
-      }
-    },
-    'Mod-ArrowLeft': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'backward', 'line');
-      }
-    },
-    'Mod-ArrowRight': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'forward', 'line');
-      }
-    },
-    'Mod-ArrowUp': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'backward', 'all');
-      }
-    },
-    'Mod-ArrowDown': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'forward', 'all');
-      }
-    },
-    'Shift-Mod-ArrowLeft': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'backward', 'line');
-      }
-    },
-    'Shift-Mod-ArrowRight': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'forward', 'line');
-      }
-    },
-    'Shift-Mod-ArrowUp': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'backward', 'all');
-      }
-    },
-    'Shift-Mod-ArrowDown': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'forward', 'all');
-      }
-    },
-    'Alt-ArrowLeft': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'backward', 'word');
-      }
-    },
-    'Alt-ArrowRight': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'forward', 'word');
-      }
-    },
-    'Shift-Alt-ArrowLeft': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'backward', 'word');
-      }
-    },
-    'Shift-Alt-ArrowRight': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveTextSelection', 'forward', 'word');
-      }
-    },
-    Backspace: () => dispatch('deleteLayer', state.selectedObjects),
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
@@ -274,15 +151,14 @@ export default memo(function Canvas() {
     'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-0': () => dispatch('setZoom', 1),
     'Mod-a': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
+      if (isEditingText) {
         dispatch('selectAllText');
       } else {
         dispatch('selectAllLayers');
       }
     },
     Space: () => {
-      if (Selectors.getIsEditingText(state.interactionState.type))
-        return FALLTHROUGH;
+      if (isEditingText) return FALLTHROUGH;
 
       if (state.interactionState.type !== 'none') return;
 

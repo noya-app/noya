@@ -237,9 +237,14 @@ function getNextCursorIndex(
     }
     case 'vertical': {
       const lineMetadata = getLineMetadata(paragraph);
-      const metadataIndex = lineMetadata.findIndex(
+      let metadataIndex = lineMetadata.findIndex(
         (m) => m.metrics.startIndex <= head && head <= m.metrics.endIndex,
       );
+
+      if (metadataIndex === -1) {
+        metadataIndex = lineMetadata.length - 1;
+      }
+
       const metadata = lineMetadata[metadataIndex];
       const targetMetadata = lineMetadata[metadataIndex + directionMultiplier];
 
@@ -261,7 +266,10 @@ function getNextCursorIndex(
       // If no previous xPosition, try to find the current xPosition
       if (nextXPosition === undefined && shapedLine) {
         const coordinates = getGlyphCoordinatesForShapedLine(shapedLine);
-        const coordinate = coordinates[head - shapedLine.textRange.first];
+        const coordinate =
+          coordinates[
+            clamp(head - shapedLine.textRange.first, 0, coordinates.length - 1)
+          ];
         nextXPosition = coordinate.x;
       }
 
