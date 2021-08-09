@@ -42,7 +42,7 @@ export function getNextCursorRange(
         };
       }
 
-      const { index, xPosition } = getNextCursorIndex(
+      const { index, xPosition } = getNextCursorPosition(
         paragraph,
         string,
         currentIndex,
@@ -58,7 +58,7 @@ export function getNextCursorRange(
       };
     }
     case 'select': {
-      const { index, xPosition } = getNextCursorIndex(
+      const { index, xPosition } = getNextCursorPosition(
         paragraph,
         string,
         range.head,
@@ -78,7 +78,7 @@ export function getNextCursorRange(
 
 const wordRe = new RegExp('[\\p{Alphabetic}\\p{Number}_]', 'u');
 
-export function getNextCursorIndex(
+export function getNextCursorPosition(
   paragraph: Paragraph,
   string: string,
   currentIndex: number,

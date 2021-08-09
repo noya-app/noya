@@ -186,7 +186,7 @@ export function textEditorReducer(
             draftLayer,
           );
 
-          const position = Selectors.getNextCursorIndex(
+          const position = Selectors.getNextCursorPosition(
             paragraph,
             draftLayer.attributedString.string,
             head,
