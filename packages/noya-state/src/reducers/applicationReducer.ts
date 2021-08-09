@@ -445,6 +445,7 @@ export function applicationReducer(
     case 'moveCursor':
     case 'moveTextSelection':
     case 'insertText':
+    case 'deleteText':
       return textEditorReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);

@@ -13,6 +13,36 @@ import {
   ApplicationState,
 } from './applicationReducer';
 
+type DeletionType =
+  | 'deleteContent'
+  | 'deleteContentForward'
+  | 'deleteContentBackward'
+  | 'deleteEntireSoftLine'
+  | 'deleteHardLineBackward'
+  | 'deleteSoftLineBackward'
+  | 'deleteHardLineForward'
+  | 'deleteSoftLineForward'
+  | 'deleteWordBackward'
+  | 'deleteWordForward';
+
+function getDeletionUnit(type: DeletionType): TextEditorCursorUnit {
+  switch (type) {
+    case 'deleteContent':
+    case 'deleteContentForward':
+    case 'deleteContentBackward':
+      return 'character';
+    case 'deleteEntireSoftLine':
+    case 'deleteHardLineBackward':
+    case 'deleteSoftLineBackward':
+    case 'deleteHardLineForward':
+    case 'deleteSoftLineForward':
+      return 'line';
+    case 'deleteWordBackward':
+    case 'deleteWordForward':
+      return 'word';
+  }
+}
+
 export type TextEditorAction =
   | [type: 'setTextSelection', range: TextSelectionRange]
   | [type: 'selectAllText']
@@ -26,7 +56,8 @@ export type TextEditorAction =
       direction: TextEditorCursorDirection,
       unit: TextEditorCursorUnit,
     ]
-  | [type: 'insertText', text: string];
+  | [type: 'insertText', text: string]
+  | [type: 'deleteText', type: DeletionType];
 
 export function textEditorReducer(
   state: ApplicationState,
@@ -122,15 +153,86 @@ export function textEditorReducer(
 
         if (!Layers.isTextLayer(draftLayer)) return;
 
-        draftLayer.attributedString = Selectors.replaceTextInRange(
+        const {
+          attributedString,
+          range: newRange,
+        } = Selectors.replaceTextAndUpdateSelectionRange(
           draftLayer.attributedString,
-          [range.anchor, range.head],
+          range,
           text,
         );
 
-        const location = Math.min(range.anchor, range.head) + text.length;
+        draftLayer.attributedString = attributedString;
+        draft.selectedText.range = newRange;
+      });
+    }
+    case 'deleteText': {
+      const [, deletionType] = action;
 
-        draft.selectedText.range = { anchor: location, head: location };
+      if (!state.selectedText) return state;
+
+      const { layerId, range } = state.selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        if (!draft.selectedText) return;
+
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
+
+        if (!Layers.isTextLayer(draftLayer)) return;
+
+        const { head, anchor } = range;
+
+        // If we have a selected range, delete that range
+        if (head !== anchor) {
+          const {
+            attributedString,
+            range: newRange,
+          } = Selectors.replaceTextAndUpdateSelectionRange(
+            draftLayer.attributedString,
+            range,
+            '',
+          );
+
+          draftLayer.attributedString = attributedString;
+          draft.selectedText.range = newRange;
+        } else {
+          const paragraph = Selectors.getLayerParagraph(
+            CanvasKit,
+            context.fontManager,
+            draftLayer,
+          );
+
+          const position = Selectors.getNextCursorIndex(
+            paragraph,
+            draftLayer.attributedString.string,
+            head,
+            undefined,
+            deletionType.includes('Backward') ? 'backward' : 'forward',
+            getDeletionUnit(deletionType),
+          );
+
+          const {
+            attributedString,
+            range: newRange,
+          } = Selectors.replaceTextAndUpdateSelectionRange(
+            draftLayer.attributedString,
+            { head: position.index, anchor: head },
+            '',
+          );
+
+          draftLayer.attributedString = attributedString;
+          draft.selectedText.range = newRange;
+        }
       });
     }
     default:

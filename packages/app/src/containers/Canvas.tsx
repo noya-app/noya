@@ -968,9 +968,23 @@ export default memo(function Canvas() {
     if (!input) return;
 
     const handler = (event: InputEvent) => {
-      if (typeof event.data !== 'string') return;
-
-      dispatch('insertText', event.data);
+      if (typeof event.data === 'string') {
+        dispatch('insertText', event.data);
+      } else {
+        switch (event.inputType) {
+          case 'deleteContent':
+          case 'deleteContentForward':
+          case 'deleteContentBackward':
+          case 'deleteEntireSoftLine':
+          case 'deleteHardLineBackward':
+          case 'deleteSoftLineBackward':
+          case 'deleteHardLineForward':
+          case 'deleteSoftLineForward':
+          case 'deleteWordBackward':
+          case 'deleteWordForward':
+            dispatch('deleteText', event.inputType);
+        }
+      }
     };
 
     input.addEventListener('beforeinput', handler);

@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchModel } from 'noya-sketch-model';
+import { TextSelectionRange } from './textEditorSelectors';
 
 export const MAX_TEXT_LAYER_STRING_LENGTH = 1_000_000;
 
@@ -82,4 +83,24 @@ export function replaceTextInRange(
     .filter((span) => span.string !== '');
 
   return fromTextSpans(updated);
+}
+
+export function replaceTextAndUpdateSelectionRange(
+  attributedString: Sketch.AttributedString,
+  selectionRange: TextSelectionRange,
+  textToInsert: string,
+) {
+  const location =
+    Math.min(selectionRange.anchor, selectionRange.head) + textToInsert.length;
+
+  const range = { anchor: location, head: location };
+
+  return {
+    attributedString: replaceTextInRange(
+      attributedString,
+      [selectionRange.anchor, selectionRange.head],
+      textToInsert,
+    ),
+    range,
+  };
 }
