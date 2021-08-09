@@ -19,6 +19,7 @@ import {
   getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
+  TextSelectionRange,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -64,11 +65,6 @@ export type SelectedGradient = {
 };
 
 export type SelectedPointLists = Record<string, number[]>;
-
-export type TextSelectionRange = {
-  head: number;
-  anchor: number;
-};
 
 export type SelectedText = {
   layerId: string;
@@ -446,7 +442,10 @@ export function applicationReducer(
       return pointReducer(state, action, CanvasKit);
     case 'setTextSelection':
     case 'selectAllText':
+    case 'moveCursor':
+    case 'moveTextSelection':
     case 'insertText':
+    case 'deleteText':
       return textEditorReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);

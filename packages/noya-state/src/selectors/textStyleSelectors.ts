@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { SketchModel } from 'noya-sketch-model';
 import { SimpleTextDecoration } from '../primitives';
 
 export function getTextDecoration(
@@ -30,5 +31,23 @@ export function getTextStyleAttributes(layer: Sketch.Text) {
     textDecoration: encodedAttributes
       ? getTextDecoration(encodedAttributes)
       : 'none',
+  };
+}
+
+export function getEncodedStringAttributes(
+  style: Sketch.Style | undefined,
+): Sketch.StringAttribute['attributes'] {
+  const encodedAttributes = style?.textStyle?.encodedAttributes;
+
+  return {
+    kerning: encodedAttributes?.kerning,
+    textStyleVerticalAlignmentKey:
+      encodedAttributes?.textStyleVerticalAlignmentKey,
+    MSAttributedStringFontAttribute:
+      encodedAttributes?.MSAttributedStringFontAttribute ??
+      SketchModel.fontDescriptor(),
+    MSAttributedStringColorAttribute:
+      encodedAttributes?.MSAttributedStringColorAttribute,
+    paragraphStyle: encodedAttributes?.paragraphStyle,
   };
 }

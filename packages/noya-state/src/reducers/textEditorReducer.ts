@@ -1,16 +1,37 @@
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { Layers, MAX_TEXT_LAYER_STRING_LENGTH, Selectors } from 'noya-state';
+import {
+  Layers,
+  MAX_TEXT_LAYER_STRING_LENGTH,
+  Selectors,
+  TextEditorCursorDirection,
+  TextEditorCursorUnit,
+  TextSelectionRange,
+} from 'noya-state';
 import {
   ApplicationReducerContext,
   ApplicationState,
-  TextSelectionRange,
 } from './applicationReducer';
 
 export type TextEditorAction =
   | [type: 'setTextSelection', range: TextSelectionRange]
   | [type: 'selectAllText']
-  | [type: 'insertText', text: string];
+  | [
+      type: 'moveCursor',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ]
+  | [
+      type: 'moveTextSelection',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ]
+  | [type: 'insertText', text: string]
+  | [
+      type: 'deleteText',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ];
 
 export function textEditorReducer(
   state: ApplicationState,
@@ -41,6 +62,47 @@ export function textEditorReducer(
         };
       });
     }
+    case 'moveTextSelection':
+    case 'moveCursor': {
+      const [type, direction, unit] = action;
+
+      if (!state.selectedText) return state;
+
+      const { layerId, range } = state.selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        if (!draft.selectedText) return;
+
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
+
+        if (!Layers.isTextLayer(draftLayer)) return;
+
+        const paragraph = Selectors.getLayerParagraph(
+          CanvasKit,
+          context.fontManager,
+          draftLayer,
+        );
+
+        draft.selectedText.range = Selectors.getNextCursorRange(
+          paragraph,
+          draftLayer.attributedString.string,
+          range,
+          direction,
+          unit,
+          type === 'moveCursor' ? 'move' : 'select',
+        );
+      });
+    }
     case 'insertText': {
       const [, text] = action;
 
@@ -65,15 +127,89 @@ export function textEditorReducer(
 
         if (!Layers.isTextLayer(draftLayer)) return;
 
-        draftLayer.attributedString = Selectors.replaceTextInRange(
+        const {
+          attributedString,
+          range: newRange,
+        } = Selectors.replaceTextAndUpdateSelectionRange(
           draftLayer.attributedString,
-          [range.anchor, range.head],
+          range,
           text,
+          Selectors.getEncodedStringAttributes(draftLayer.style),
         );
 
-        const location = Math.min(range.anchor, range.head) + text.length;
+        draftLayer.attributedString = attributedString;
+        draft.selectedText.range = newRange;
+      });
+    }
+    case 'deleteText': {
+      const [, direction, unit] = action;
 
-        draft.selectedText.range = { anchor: location, head: location };
+      if (!state.selectedText) return state;
+
+      const { layerId, range } = state.selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        if (!draft.selectedText) return;
+
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
+
+        if (!Layers.isTextLayer(draftLayer)) return;
+
+        const { head, anchor } = range;
+
+        // If we have a selected range, delete that range
+        if (head !== anchor) {
+          const {
+            attributedString,
+            range: newRange,
+          } = Selectors.replaceTextAndUpdateSelectionRange(
+            draftLayer.attributedString,
+            range,
+            '',
+            Selectors.getEncodedStringAttributes(draftLayer.style),
+          );
+
+          draftLayer.attributedString = attributedString;
+          draft.selectedText.range = newRange;
+        } else {
+          const paragraph = Selectors.getLayerParagraph(
+            CanvasKit,
+            context.fontManager,
+            draftLayer,
+          );
+
+          const position = Selectors.getNextCursorPosition(
+            paragraph,
+            draftLayer.attributedString.string,
+            head,
+            undefined,
+            direction,
+            unit,
+          );
+
+          const {
+            attributedString,
+            range: newRange,
+          } = Selectors.replaceTextAndUpdateSelectionRange(
+            draftLayer.attributedString,
+            { head: position.index, anchor: head },
+            '',
+            Selectors.getEncodedStringAttributes(draftLayer.style),
+          );
+
+          draftLayer.attributedString = attributedString;
+          draft.selectedText.range = newRange;
+        }
       });
     }
     default:

@@ -40,6 +40,7 @@ import {
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
+import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useSize } from '../hooks/useSize';
 import * as MouseEvent from '../utils/mouseEvent';
@@ -124,37 +125,21 @@ export default memo(function Canvas() {
     },
   });
 
-  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
   const isPanning =
     state.interactionState.type === 'panMode' ||
     state.interactionState.type === 'maybePan' ||
     state.interactionState.type === 'panning';
 
-  const nudge = (axis: 'X' | 'Y', amount: number) => {
-    if (isEditingPath && state.selectedControlPoint) {
-      dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else if (isEditingPath) {
-      dispatch(
-        `setPoint${axis}` as const,
-        state.selectedPointLists,
-        amount,
-        'adjust',
-      );
-    } else {
-      dispatch(`setLayer${axis}` as const, amount, 'adjust');
-    }
-  };
+  const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
+
+  useArrowKeyShortcuts();
 
   useKeyboardShortcuts({
-    ArrowLeft: () => nudge('X', -1),
-    ArrowRight: () => nudge('X', 1),
-    ArrowUp: () => nudge('Y', -1),
-    ArrowDown: () => nudge('Y', 1),
-    'Shift-ArrowLeft': () => nudge('X', -10),
-    'Shift-ArrowRight': () => nudge('X', 10),
-    'Shift-ArrowUp': () => nudge('Y', -10),
-    'Shift-ArrowDown': () => nudge('Y', 10),
-    Backspace: () => dispatch('deleteLayer', state.selectedObjects),
+    Backspace: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      dispatch('deleteLayer', state.selectedObjects);
+    },
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
@@ -166,15 +151,14 @@ export default memo(function Canvas() {
     'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-0': () => dispatch('setZoom', 1),
     'Mod-a': () => {
-      if (Selectors.getIsEditingText(state.interactionState.type)) {
+      if (isEditingText) {
         dispatch('selectAllText');
       } else {
         dispatch('selectAllLayers');
       }
     },
     Space: () => {
-      if (Selectors.getIsEditingText(state.interactionState.type))
-        return FALLTHROUGH;
+      if (isEditingText) return FALLTHROUGH;
 
       if (state.interactionState.type !== 'none') return;
 
@@ -984,9 +968,26 @@ export default memo(function Canvas() {
     if (!input) return;
 
     const handler = (event: InputEvent) => {
-      if (typeof event.data !== 'string') return;
-
-      dispatch('insertText', event.data);
+      if (typeof event.data === 'string') {
+        dispatch('insertText', event.data);
+      } else {
+        switch (event.inputType) {
+          case 'deleteContent':
+          case 'deleteContentForward':
+          case 'deleteContentBackward':
+          case 'deleteEntireSoftLine':
+          case 'deleteHardLineBackward':
+          case 'deleteSoftLineBackward':
+          case 'deleteHardLineForward':
+          case 'deleteSoftLineForward':
+          case 'deleteWordBackward':
+          case 'deleteWordForward':
+            dispatch(
+              'deleteText',
+              ...Selectors.getDeletionParametersForInputEvent(event.inputType),
+            );
+        }
+      }
     };
 
     input.addEventListener('beforeinput', handler);

@@ -10,6 +10,7 @@ import {
   PageLayer,
   Primitives,
   replaceTextInRange,
+  Selectors,
 } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
@@ -96,6 +97,7 @@ const Symbol = memo(function Symbol({
                 override.layer.attributedString,
                 [0, MAX_TEXT_LAYER_STRING_LENGTH],
                 override.value,
+                Selectors.getEncodedStringAttributes(override.layer.style),
               );
               break;
             case 'symbolID':

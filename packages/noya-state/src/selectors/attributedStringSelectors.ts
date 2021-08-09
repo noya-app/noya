@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchModel } from 'noya-sketch-model';
+import { TextSelectionRange } from './textEditorSelectors';
 
 export const MAX_TEXT_LAYER_STRING_LENGTH = 1_000_000;
 
@@ -59,7 +60,17 @@ export function replaceTextInRange(
   attributedString: Sketch.AttributedString,
   range: [number, number],
   text: string,
+  defaultAttributes: Sketch.StringAttribute['attributes'],
 ) {
+  if (attributedString.string.length === 0) {
+    return fromTextSpans([
+      {
+        string: text,
+        attributes: defaultAttributes,
+      },
+    ]);
+  }
+
   range = normalizeRange(range);
   const spans = toTextSpansWithPositions(attributedString);
 
@@ -82,4 +93,26 @@ export function replaceTextInRange(
     .filter((span) => span.string !== '');
 
   return fromTextSpans(updated);
+}
+
+export function replaceTextAndUpdateSelectionRange(
+  attributedString: Sketch.AttributedString,
+  selectionRange: TextSelectionRange,
+  textToInsert: string,
+  defaultAttributes: Sketch.StringAttribute['attributes'],
+) {
+  const location =
+    Math.min(selectionRange.anchor, selectionRange.head) + textToInsert.length;
+
+  const range = { anchor: location, head: location };
+
+  return {
+    attributedString: replaceTextInRange(
+      attributedString,
+      [selectionRange.anchor, selectionRange.head],
+      textToInsert,
+      defaultAttributes,
+    ),
+    range,
+  };
 }
