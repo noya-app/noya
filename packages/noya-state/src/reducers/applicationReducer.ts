@@ -68,6 +68,7 @@ export type SelectedPointLists = Record<string, number[]>;
 export type TextSelectionRange = {
   head: number;
   anchor: number;
+  xPosition?: number;
 };
 
 export type SelectedText = {

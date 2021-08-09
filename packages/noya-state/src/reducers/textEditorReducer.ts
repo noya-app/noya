@@ -90,7 +90,7 @@ export function textEditorReducer(
           draftLayer,
         );
 
-        const nextIndex = getNextCursorIndex(
+        const { index, xPosition } = getNextCursorIndex(
           paragraph,
           draftLayer.attributedString.string,
           range,
@@ -98,7 +98,7 @@ export function textEditorReducer(
           unit,
         );
 
-        draft.selectedText.range = { anchor: nextIndex, head: nextIndex };
+        draft.selectedText.range = { anchor: index, head: index, xPosition };
       });
     }
     case 'insertText': {
@@ -147,8 +147,8 @@ function getNextCursorIndex(
   selectionRange: TextSelectionRange,
   direction: TextEditorCursorDirection,
   unit: TextEditorCursorUnit,
-): number {
-  const { head, anchor } = selectionRange;
+): { index: number; xPosition?: number } {
+  const { head, anchor, xPosition } = selectionRange;
   const directionMultiplier = direction === 'forward' ? 1 : -1;
   const length = string.length;
 
@@ -157,10 +157,10 @@ function getNextCursorIndex(
       // If we have a selected range, move to one side of it
       if (head !== anchor) {
         const [min, max] = normalizeRange([head, anchor]);
-        return direction === 'forward' ? max : min;
+        return { index: direction === 'forward' ? max : min };
       }
 
-      return clamp(head + directionMultiplier, 0, length);
+      return { index: clamp(head + directionMultiplier, 0, length) };
     }
     case 'word':
       const currentWordBoundary = paragraph.getWordBoundary(head);
@@ -189,19 +189,21 @@ function getNextCursorIndex(
           break;
       }
 
-      return nextIndex;
+      return { index: nextIndex };
     case 'line': {
       const metrics = paragraph.getLineMetrics();
       const current = metrics.find(
         (lm) => lm.startIndex <= head && head <= lm.endIndex,
       );
 
-      if (!current) return head;
+      if (!current) return { index: head };
 
-      return direction === 'forward' ? current.endIndex : current.startIndex;
+      return {
+        index: direction === 'forward' ? current.endIndex : current.startIndex,
+      };
     }
     case 'all': {
-      return direction === 'forward' ? length : 0;
+      return { index: direction === 'forward' ? length : 0 };
     }
     case 'vertical': {
       const lineMetadata = getLineMetadata(paragraph);
@@ -215,9 +217,9 @@ function getNextCursorIndex(
       if (!targetMetadata) {
         switch (direction) {
           case 'backward':
-            return 0;
+            return { index: 0 };
           case 'forward':
-            return length;
+            return { index: length };
         }
       }
 
@@ -226,13 +228,17 @@ function getNextCursorIndex(
       if (shapedLine) {
         const coordinates = getGlyphCoordinatesForShapedLine(shapedLine);
         const coordinate = coordinates[head - shapedLine.textRange.first];
+        const nextXPosition = xPosition ?? coordinate.x;
 
-        return paragraph.getGlyphPositionAtCoordinate(
-          coordinate.x,
-          targetMetadata.metrics.baseline,
-        ).pos;
+        return {
+          index: paragraph.getGlyphPositionAtCoordinate(
+            nextXPosition,
+            targetMetadata.metrics.baseline,
+          ).pos,
+          xPosition: nextXPosition,
+        };
       } else {
-        return targetMetadata.metrics.startIndex;
+        return { index: targetMetadata.metrics.startIndex };
       }
     }
   }
