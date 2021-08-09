@@ -982,7 +982,10 @@ export default memo(function Canvas() {
           case 'deleteSoftLineForward':
           case 'deleteWordBackward':
           case 'deleteWordForward':
-            dispatch('deleteText', event.inputType);
+            dispatch(
+              'deleteText',
+              ...Selectors.getDeletionParametersForInputEvent(event.inputType),
+            );
         }
       }
     };

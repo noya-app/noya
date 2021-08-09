@@ -218,3 +218,39 @@ export function getLineMetadata(paragraph: Paragraph) {
     };
   });
 }
+
+export type DeletionType =
+  | 'deleteContent'
+  | 'deleteContentForward'
+  | 'deleteContentBackward'
+  | 'deleteEntireSoftLine'
+  | 'deleteHardLineBackward'
+  | 'deleteSoftLineBackward'
+  | 'deleteHardLineForward'
+  | 'deleteSoftLineForward'
+  | 'deleteWordBackward'
+  | 'deleteWordForward';
+
+export function getDeletionParametersForInputEvent(
+  type: DeletionType,
+): [TextEditorCursorDirection, TextEditorCursorUnit] {
+  const direction: TextEditorCursorDirection = type.includes('Backward')
+    ? 'backward'
+    : 'forward';
+
+  switch (type) {
+    case 'deleteContent':
+    case 'deleteContentForward':
+    case 'deleteContentBackward':
+      return [direction, 'character'];
+    case 'deleteEntireSoftLine':
+    case 'deleteHardLineBackward':
+    case 'deleteSoftLineBackward':
+    case 'deleteHardLineForward':
+    case 'deleteSoftLineForward':
+      return [direction, 'line'];
+    case 'deleteWordBackward':
+    case 'deleteWordForward':
+      return [direction, 'word'];
+  }
+}

@@ -13,36 +13,6 @@ import {
   ApplicationState,
 } from './applicationReducer';
 
-type DeletionType =
-  | 'deleteContent'
-  | 'deleteContentForward'
-  | 'deleteContentBackward'
-  | 'deleteEntireSoftLine'
-  | 'deleteHardLineBackward'
-  | 'deleteSoftLineBackward'
-  | 'deleteHardLineForward'
-  | 'deleteSoftLineForward'
-  | 'deleteWordBackward'
-  | 'deleteWordForward';
-
-function getDeletionUnit(type: DeletionType): TextEditorCursorUnit {
-  switch (type) {
-    case 'deleteContent':
-    case 'deleteContentForward':
-    case 'deleteContentBackward':
-      return 'character';
-    case 'deleteEntireSoftLine':
-    case 'deleteHardLineBackward':
-    case 'deleteSoftLineBackward':
-    case 'deleteHardLineForward':
-    case 'deleteSoftLineForward':
-      return 'line';
-    case 'deleteWordBackward':
-    case 'deleteWordForward':
-      return 'word';
-  }
-}
-
 export type TextEditorAction =
   | [type: 'setTextSelection', range: TextSelectionRange]
   | [type: 'selectAllText']
@@ -57,7 +27,11 @@ export type TextEditorAction =
       unit: TextEditorCursorUnit,
     ]
   | [type: 'insertText', text: string]
-  | [type: 'deleteText', type: DeletionType];
+  | [
+      type: 'deleteText',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ];
 
 export function textEditorReducer(
   state: ApplicationState,
@@ -167,7 +141,7 @@ export function textEditorReducer(
       });
     }
     case 'deleteText': {
-      const [, deletionType] = action;
+      const [, direction, unit] = action;
 
       if (!state.selectedText) return state;
 
@@ -217,8 +191,8 @@ export function textEditorReducer(
             draftLayer.attributedString.string,
             head,
             undefined,
-            deletionType.includes('Backward') ? 'backward' : 'forward',
-            getDeletionUnit(deletionType),
+            direction,
+            unit,
           );
 
           const {
