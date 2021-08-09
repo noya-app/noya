@@ -160,6 +160,48 @@ export default memo(function Canvas() {
         nudge('X', 1);
       }
     },
+    ArrowUp: () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveCursor', 'backward', 'vertical');
+      } else {
+        nudge('Y', -1);
+      }
+    },
+    ArrowDown: () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveCursor', 'forward', 'vertical');
+      } else {
+        nudge('Y', 1);
+      }
+    },
+    'Shift-ArrowLeft': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'backward', 'character');
+      } else {
+        nudge('X', -10);
+      }
+    },
+    'Shift-ArrowRight': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'forward', 'character');
+      } else {
+        nudge('X', 10);
+      }
+    },
+    'Shift-ArrowUp': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'backward', 'vertical');
+      } else {
+        nudge('Y', -10);
+      }
+    },
+    'Shift-ArrowDown': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'forward', 'vertical');
+      } else {
+        nudge('Y', 10);
+      }
+    },
     'Mod-ArrowLeft': () => {
       if (Selectors.getIsEditingText(state.interactionState.type)) {
         dispatch('moveCursor', 'backward', 'line');
@@ -180,6 +222,26 @@ export default memo(function Canvas() {
         dispatch('moveCursor', 'forward', 'all');
       }
     },
+    'Shift-Mod-ArrowLeft': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'backward', 'line');
+      }
+    },
+    'Shift-Mod-ArrowRight': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'forward', 'line');
+      }
+    },
+    'Shift-Mod-ArrowUp': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'backward', 'all');
+      }
+    },
+    'Shift-Mod-ArrowDown': () => {
+      if (Selectors.getIsEditingText(state.interactionState.type)) {
+        dispatch('moveTextSelection', 'forward', 'all');
+      }
+    },
     'Alt-ArrowLeft': () => {
       if (Selectors.getIsEditingText(state.interactionState.type)) {
         dispatch('moveCursor', 'backward', 'word');
@@ -190,24 +252,16 @@ export default memo(function Canvas() {
         dispatch('moveCursor', 'forward', 'word');
       }
     },
-    ArrowUp: () => {
+    'Shift-Alt-ArrowLeft': () => {
       if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'backward', 'vertical');
-      } else {
-        nudge('Y', -1);
+        dispatch('moveTextSelection', 'backward', 'word');
       }
     },
-    ArrowDown: () => {
+    'Shift-Alt-ArrowRight': () => {
       if (Selectors.getIsEditingText(state.interactionState.type)) {
-        dispatch('moveCursor', 'forward', 'vertical');
-      } else {
-        nudge('Y', 1);
+        dispatch('moveTextSelection', 'forward', 'word');
       }
     },
-    'Shift-ArrowLeft': () => nudge('X', -10),
-    'Shift-ArrowRight': () => nudge('X', 10),
-    'Shift-ArrowUp': () => nudge('Y', -10),
-    'Shift-ArrowDown': () => nudge('Y', 10),
     Backspace: () => dispatch('deleteLayer', state.selectedObjects),
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),

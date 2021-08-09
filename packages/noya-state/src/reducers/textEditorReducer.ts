@@ -29,6 +29,11 @@ export type TextEditorAction =
       direction: TextEditorCursorDirection,
       unit: TextEditorCursorUnit,
     ]
+  | [
+      type: 'moveTextSelection',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ]
   | [type: 'insertText', text: string];
 
 export function textEditorReducer(
@@ -60,8 +65,9 @@ export function textEditorReducer(
         };
       });
     }
+    case 'moveTextSelection':
     case 'moveCursor': {
-      const [, direction, unit] = action;
+      const [type, direction, unit] = action;
 
       if (!state.selectedText) return state;
 
@@ -98,7 +104,37 @@ export function textEditorReducer(
           unit,
         );
 
-        draft.selectedText.range = { anchor: index, head: index, xPosition };
+        const { anchor, head } = range;
+
+        switch (type) {
+          case 'moveCursor':
+            // If we have a selected range, move to one side of it
+            if (unit === 'character' && head !== anchor) {
+              const [min, max] = normalizeRange([head, anchor]);
+              const index = direction === 'forward' ? max : min;
+
+              draft.selectedText.range = {
+                anchor: index,
+                head: index,
+              };
+
+              break;
+            }
+
+            draft.selectedText.range = {
+              anchor: index,
+              head: index,
+              xPosition,
+            };
+            break;
+          case 'moveTextSelection':
+            draft.selectedText.range = {
+              anchor,
+              head: index,
+              xPosition,
+            };
+            break;
+        }
       });
     }
     case 'insertText': {
@@ -148,18 +184,12 @@ function getNextCursorIndex(
   direction: TextEditorCursorDirection,
   unit: TextEditorCursorUnit,
 ): { index: number; xPosition?: number } {
-  const { head, anchor, xPosition } = selectionRange;
+  const { head, xPosition } = selectionRange;
   const directionMultiplier = direction === 'forward' ? 1 : -1;
   const length = string.length;
 
   switch (unit) {
     case 'character': {
-      // If we have a selected range, move to one side of it
-      if (head !== anchor) {
-        const [min, max] = normalizeRange([head, anchor]);
-        return { index: direction === 'forward' ? max : min };
-      }
-
       return { index: clamp(head + directionMultiplier, 0, length) };
     }
     case 'word':
@@ -225,11 +255,17 @@ function getNextCursorIndex(
 
       const shapedLine = metadata.shapedLine;
 
-      if (shapedLine) {
+      // Use the previous xPosition if we have one
+      let nextXPosition = xPosition;
+
+      // If no previous xPosition, try to find the current xPosition
+      if (nextXPosition === undefined && shapedLine) {
         const coordinates = getGlyphCoordinatesForShapedLine(shapedLine);
         const coordinate = coordinates[head - shapedLine.textRange.first];
-        const nextXPosition = xPosition ?? coordinate.x;
+        nextXPosition = coordinate.x;
+      }
 
+      if (nextXPosition !== undefined) {
         return {
           index: paragraph.getGlyphPositionAtCoordinate(
             nextXPosition,

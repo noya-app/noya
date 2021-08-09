@@ -448,6 +448,7 @@ export function applicationReducer(
     case 'setTextSelection':
     case 'selectAllText':
     case 'moveCursor':
+    case 'moveTextSelection':
     case 'insertText':
       return textEditorReducer(state, action, CanvasKit, context);
     default:
