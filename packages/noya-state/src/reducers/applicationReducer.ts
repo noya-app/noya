@@ -19,6 +19,7 @@ import {
   getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
+  TextSelectionRange,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -64,12 +65,6 @@ export type SelectedGradient = {
 };
 
 export type SelectedPointLists = Record<string, number[]>;
-
-export type TextSelectionRange = {
-  head: number;
-  anchor: number;
-  xPosition?: number;
-};
 
 export type SelectedText = {
   layerId: string;
