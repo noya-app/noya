@@ -8,6 +8,13 @@ exports[`replace text insert beyond current string 1`] = `
 └── <StringAttribute> { location: 0, length: 7 }"
 `;
 
+exports[`replace text insert into empty string 1`] = `
+"<AttributedString> \\"\\"
+
+<AttributedString> \\"++\\"
+└── <StringAttribute> { location: 0, length: 2 }"
+`;
+
 exports[`replace text insert multiple attributes at end 1`] = `
 "<AttributedString> \\"helloworld\\"
 ├── <StringAttribute> { location: 0, length: 5 }

@@ -134,6 +134,7 @@ export function textEditorReducer(
           draftLayer.attributedString,
           range,
           text,
+          Selectors.getEncodedStringAttributes(draftLayer.style),
         );
 
         draftLayer.attributedString = attributedString;
@@ -175,6 +176,7 @@ export function textEditorReducer(
             draftLayer.attributedString,
             range,
             '',
+            Selectors.getEncodedStringAttributes(draftLayer.style),
           );
 
           draftLayer.attributedString = attributedString;
@@ -202,6 +204,7 @@ export function textEditorReducer(
             draftLayer.attributedString,
             { head: position.index, anchor: head },
             '',
+            Selectors.getEncodedStringAttributes(draftLayer.style),
           );
 
           draftLayer.attributedString = attributedString;
