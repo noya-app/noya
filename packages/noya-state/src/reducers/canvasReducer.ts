@@ -544,11 +544,7 @@ export function canvasReducer(
 
             if (!gradient) return;
 
-            if (
-              gradient &&
-              gradient.gradientType !== Sketch.GradientType.Angular
-            )
-              fixGradientPositions(gradient);
+            fixGradientPositions(gradient);
             return;
           }
           case 'moveGradientStop': {
@@ -614,37 +610,35 @@ export function canvasReducer(
 
             const isAngular =
               gradient.gradientType === Sketch.GradientType.Angular;
+
             if (stopIndex === 0 && !isAngular) {
               draftGradient.from = transformPointString(gradient.from);
             } else if (stopIndex === gradient.stops.length - 1 && !isAngular) {
               draftGradient.to = transformPointString(gradient.to);
+            } else if (isAngular) {
+              const circunference = getAngularGradientCircunference(state);
+              if (!circunference) return;
+
+              const position = getCircunferencePercentage(
+                current,
+                circunference.center,
+              );
+
+              draftGradient.stops[stopIndex].position = position;
             } else {
-              if (isAngular) {
-                const circunference = getAngularGradientCircunference(state);
-                if (!circunference) return;
+              const from = transform.applyTo(PointString.decode(gradient.from));
+              const to = transform.applyTo(PointString.decode(gradient.to));
+              const stop = gradient.stops[stopIndex];
 
-                const position = getCircunferencePercentage(
-                  current,
-                  circunference.center,
-                );
-                draftGradient.stops[stopIndex].position = position;
-              } else {
-                const from = transform.applyTo(
-                  PointString.decode(gradient.from),
-                );
-                const to = transform.applyTo(PointString.decode(gradient.to));
-                const stop = gradient.stops[stopIndex];
+              const stopPoint = {
+                x: lerp(from.x, to.x, stop.position),
+                y: lerp(from.y, to.y, stop.position),
+              };
+              stopPoint.x += delta.x;
+              stopPoint.y += delta.y;
 
-                const stopPoint = {
-                  x: lerp(from.x, to.x, stop.position),
-                  y: lerp(from.y, to.y, stop.position),
-                };
-                stopPoint.x += delta.x;
-                stopPoint.y += delta.y;
-
-                const position = getLinePercentage(stopPoint, [from, to]);
-                draftGradient.stops[stopIndex].position = position;
-              }
+              const position = getLinePercentage(stopPoint, [from, to]);
+              draftGradient.stops[stopIndex].position = position;
             }
 
             break;

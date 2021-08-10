@@ -133,6 +133,10 @@ export function fixGradientPositions(gradient: Sketch.Gradient) {
 
   const sorted = [...stops].sort((a, b) => a.position - b.position);
 
+  if (gradient.gradientType === Sketch.GradientType.Angular) {
+    gradient.stops = sorted;
+    return;
+  }
   const from = PointString.decode(gradient.from);
   const to = PointString.decode(gradient.to);
 

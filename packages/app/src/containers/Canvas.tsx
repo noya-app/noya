@@ -391,10 +391,17 @@ export default memo(function Canvas() {
 
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
+
             dispatch('interaction', ['maybeMoveGradientStop', point]);
-          } else if (Selectors.isPointerOnGradientLine(state, point)) {
+          } else if (
+            state.selectedGradient &&
+            Selectors.isPointerOnGradientLine(state, point)
+          ) {
             dispatch('addStopToGradient', point);
-          } else if (Selectors.isPointerOnGradientEllipseEditor(state, point)) {
+          } else if (
+            state.selectedGradient &&
+            Selectors.isPointerOnGradientEllipseEditor(state, point)
+          ) {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
