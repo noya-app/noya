@@ -20,6 +20,7 @@ export * from './base64';
 export * from './utf16';
 export * from './fileType';
 export * from './memoize';
+export * from './types';
 export * as delimitedPath from './delimitedPath';
 
 // Consider moving these to a more React-specific package

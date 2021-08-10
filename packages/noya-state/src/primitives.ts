@@ -19,6 +19,7 @@ import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
 
 export * from './primitives/path';
+export * from './primitives/pathCommand';
 
 /**
  * Resize a rect in a compass direction
@@ -322,19 +323,19 @@ export function textHorizontalAlignment(
 
 export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
-export function stringAttribute(
+export function createCanvasKitTextStyle(
   CanvasKit: CanvasKit,
-  attribute: Sketch.StringAttribute,
+  attributes: Sketch.StringAttribute['attributes'],
   decoration: SimpleTextDecoration,
 ): TextStyle {
-  const textColor = attribute.attributes.MSAttributedStringColorAttribute;
-  const font = attribute.attributes.MSAttributedStringFontAttribute;
+  const textColor = attributes.MSAttributedStringColorAttribute;
+  const font = attributes.MSAttributedStringFontAttribute;
 
   return new CanvasKit.TextStyle({
     ...(textColor && { color: color(CanvasKit, textColor) }),
     // fontFamilies: ['Roboto'], // TODO: Font family
     fontSize: font.attributes.size,
-    letterSpacing: attribute.attributes.kerning,
+    letterSpacing: attributes.kerning,
     ...(decoration === 'none'
       ? {}
       : {

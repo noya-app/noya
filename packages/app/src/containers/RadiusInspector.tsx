@@ -1,10 +1,9 @@
 import { InputField, Slider, Spacer } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
+import { getMultiNumberValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 export default memo(function RadiusInspector() {
   const [, dispatch] = useApplicationState();
@@ -52,7 +51,7 @@ export default memo(function RadiusInspector() {
               min={0}
               max={100}
             />
-            <Spacer.Horizontal size={10} />
+            <InspectorPrimitives.HorizontalSeparator />
             <InputField.Root id="radius-input" size={50}>
               <InputField.NumberInput
                 value={roundedValue}

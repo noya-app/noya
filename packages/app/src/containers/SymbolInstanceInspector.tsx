@@ -3,7 +3,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'noya-app-state-context';
 import useShallowArray from '../hooks/useShallowArray';
-import SymbolSelectorRow from '../components/inspector/SymbolSelectorRow';
+import SymbolSelectorRow from '../components/inspector/LinkedSymbolRow';
 import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
 import FillInspector from './FillInspector';

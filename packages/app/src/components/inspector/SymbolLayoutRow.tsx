@@ -75,8 +75,10 @@ export default memo(function SymbolLayoutRow({
 
   return (
     <InspectorPrimitives.Section>
-      <InspectorPrimitives.Title>Layout</InspectorPrimitives.Title>
-      <Spacer.Vertical size={4} />
+      <InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.Title>Layout</InspectorPrimitives.Title>
+      </InspectorPrimitives.SectionHeader>
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           value={isAnchorDisabled ? 'none' : layoutAxis?.toString()}
@@ -103,8 +105,7 @@ export default memo(function SymbolLayoutRow({
           </RadioGroup.Item>
         </RadioGroup.Root>
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={6} />
-
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
           <RadioGroup.Root
@@ -151,12 +152,12 @@ export default memo(function SymbolLayoutRow({
           </RadioGroup.Root>
         </LabeledElementView>
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={6} />
+      <InspectorPrimitives.VerticalSeparator />
       {!isAnchorDisabled && (
         <>
-          <Spacer.Vertical size={6} />
+          <InspectorPrimitives.VerticalSeparator />
           <Divider />
-          <Spacer.Vertical size={6} />
+          <InspectorPrimitives.VerticalSeparator />
           <InspectorPrimitives.Row>
             <InspectorPrimitives.Text>Minimum Width</InspectorPrimitives.Text>
             <Spacer.Horizontal size={75} />

@@ -19,6 +19,8 @@ export * from './reducers/styleReducer';
 export * from './types';
 
 export type { SelectionType } from './utils/selection';
+export * from './utils/getMultiValue';
+export * from './utils/getMultiNumberValue';
 
 export * as Primitives from './primitives';
 export * from './primitives';
@@ -27,6 +29,7 @@ export * from './checkeredBackground';
 export * from './snapping';
 export * from './layers';
 export * from './sketchFile';
+export * from './editableStyles';
 export * from './selectors/transformSelectors';
 export * from './selectors/pointSelectors';
 export * from './selectors/layerSelectors';

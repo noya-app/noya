@@ -145,7 +145,7 @@ export const LayerIcon = memo(function LayerIcon({
     case 'symbolInstance':
       return <ComponentInstanceIcon color={color} />;
     case 'group':
-      return <GroupIcon color={color} />;
+      return <CopyIcon color={color} />;
     case 'slice':
       return <GroupIcon color={color} />;
     case 'bitmap':

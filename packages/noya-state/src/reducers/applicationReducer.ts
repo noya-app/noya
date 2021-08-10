@@ -1,10 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit, FontMgr } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { SketchFile } from 'noya-sketch-file';
+import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
@@ -15,8 +16,10 @@ import {
   getCurrentComponentsTab,
   getCurrentPageIndex,
   getCurrentTab,
+  getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
+  TextSelectionRange,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -35,6 +38,7 @@ import { PageAction, pageReducer } from './pageReducer';
 import { markLayersAsEdited, PointAction, pointReducer } from './pointReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
+import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 
@@ -62,6 +66,11 @@ export type SelectedGradient = {
 
 export type SelectedPointLists = Record<string, number[]>;
 
+export type SelectedText = {
+  layerId: string;
+  range: TextSelectionRange;
+};
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -73,6 +82,7 @@ export type ApplicationState = {
   selectedControlPoint?: SelectedControlPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
   selectedGradient?: SelectedGradient;
+  selectedText?: SelectedText;
   sketch: SketchFile;
 };
 
@@ -91,10 +101,12 @@ export type Action =
   | ThemeAction
   | SymbolsAction
   | ExportAction
-  | PointAction;
+  | PointAction
+  | TextEditorAction;
 
 export type ApplicationReducerContext = {
   canvasSize: Size;
+  fontManager: FontMgr;
 };
 
 export function applicationReducer(
@@ -357,8 +369,34 @@ export function applicationReducer(
     case 'setTextVerticalAlignment':
     case 'setTextAlignment':
     case 'setTextDecoration':
-    case 'setTextTransform':
-      return textStyleReducer(state, action);
+    case 'setTextTransform': {
+      state = textStyleReducer(state, action);
+
+      const indexPaths = Selectors.getSelectedLayerIndexPaths(state);
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+
+      state = produce(state, (draft) => {
+        indexPaths.forEach((indexPath) => {
+          const draftLayer = Layers.access(
+            draft.sketch.pages[pageIndex],
+            indexPath,
+          );
+
+          if (!draftLayer || !Layers.isTextLayer(draftLayer)) return;
+
+          const paragraph = getLayerParagraph(
+            CanvasKit,
+            context.fontManager,
+            draftLayer,
+          );
+
+          draftLayer.frame.width = paragraph.getMaxWidth();
+          draftLayer.frame.height = paragraph.getHeight();
+        });
+      });
+
+      return state;
+    }
     case 'setAdjustContentOnResize':
     case 'setHasBackgroundColor':
     case 'setBackgroundColor':
@@ -403,6 +441,13 @@ export function applicationReducer(
     case 'selectPoint':
     case 'selectControlPoint':
       return pointReducer(state, action, CanvasKit);
+    case 'setTextSelection':
+    case 'selectAllText':
+    case 'moveCursor':
+    case 'moveTextSelection':
+    case 'insertText':
+    case 'deleteText':
+      return textEditorReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);
   }

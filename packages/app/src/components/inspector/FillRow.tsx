@@ -6,19 +6,18 @@ import {
   Select,
   sketchColorToHex,
   SketchPattern,
-  Spacer,
 } from 'noya-designsystem';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { SetNumberMode } from 'noya-state';
+import { memo, ReactNode, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
+import { DimensionValue } from './DimensionsInspector';
 import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,
   PatternFillProps,
 } from './FillInputFieldWithPicker';
-import { PATTERN_FILL_TYPE_OPTIONS, PatternFillType } from './PatternInspector';
-import { DimensionValue } from './DimensionsInspector';
+import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
 
 const GRADIENT_TYPE_OPTIONS = [
   Sketch.GradientType.Linear.toString(),
@@ -141,7 +140,7 @@ export default memo(function FillRow({
               />
               <InputField.Label>#</InputField.Label>
             </InputField.Root>
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <DimensionInput
               id={opacityInputId}
               size={50}
@@ -165,7 +164,7 @@ export default memo(function FillRow({
               getTitle={getGradientTypeTitle}
               onChange={handleSelectGradientType}
             />
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <DimensionInput
               id={opacityInputId}
               size={50}
@@ -192,7 +191,7 @@ export default memo(function FillRow({
               options={PATTERN_FILL_TYPE_OPTIONS}
               onChange={handleSelectPatternSize}
             />
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <DimensionInput
               id={opacityInputId}
               size={50}
@@ -228,7 +227,7 @@ export default memo(function FillRow({
     <InspectorPrimitives.Row id={id}>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
-        {prefix && <Spacer.Horizontal size={8} />}
+        {prefix && <InspectorPrimitives.HorizontalSeparator />}
         <FillInputFieldWithPicker
           id={fillInputId}
           fillType={fillType}
@@ -237,7 +236,7 @@ export default memo(function FillRow({
           gradientProps={gradientProps}
           patternProps={patternProps}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         {fields}
       </LabeledElementView>
     </InspectorPrimitives.Row>

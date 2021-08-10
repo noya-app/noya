@@ -47,6 +47,7 @@ import {
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
+  MAX_TEXT_LAYER_STRING_LENGTH,
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
@@ -230,14 +231,35 @@ export function canvasReducer(
           false,
         );
 
+        if (shapeType === 'text') {
+          if (layer.frame.width < 10) {
+            layer.frame.width = 100;
+          }
+          if (layer.frame.height < 10) {
+            layer.frame.height = 30;
+          }
+        }
+
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
           draft.selectedObjects = [layer.do_objectID];
         }
 
-        draft.interactionState = interactionReducer(draft.interactionState, [
-          'reset',
-        ]);
+        if (shapeType === 'text') {
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'editingText',
+            layer.do_objectID,
+          ]);
+
+          draft.selectedText = {
+            layerId: layer.do_objectID,
+            range: { anchor: 0, head: 0 },
+          };
+        } else {
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'reset',
+          ]);
+        }
       });
     }
     case 'addShapePathLayer': {
@@ -491,9 +513,7 @@ export function canvasReducer(
         const newCurvePoints = Primitives.splitPath(
           segmentPath,
           t,
-        ).map((path) =>
-          Primitives.pathToCurvePoints(CanvasKit, path, draftLayer.frame),
-        );
+        ).map((path) => Primitives.pathToCurvePoints(path, draftLayer.frame));
 
         const start = draftLayer.points.slice(0, segmentIndex + 1);
         const end = draftLayer.points.slice(segmentIndex + 1);
@@ -526,10 +546,27 @@ export function canvasReducer(
           ? [...action[1], page]
           : action[1],
       );
-
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
+
+        if (!Selectors.getIsEditingText(interactionState.type)) {
+          delete draft.selectedText;
+        }
+
         switch (interactionState.type) {
+          case 'editingText': {
+            if (!draft.selectedText) {
+              draft.selectedText = {
+                layerId: interactionState.id,
+                range: {
+                  anchor: 0,
+                  head: MAX_TEXT_LAYER_STRING_LENGTH,
+                },
+              };
+            }
+
+            return;
+          }
           case 'maybeMoveGradientStop': {
             if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
 

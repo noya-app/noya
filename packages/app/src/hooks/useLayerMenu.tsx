@@ -95,9 +95,6 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
     );
   }, [layers]);
 
-  const shouldAskForSymbolName =
-    layers.length > 1 && !Layers.isArtboard(layers[0]);
-
   const newUseAsMaskValue = !layers.every((item) => item.hasClippingMask);
 
   const newIsAlphaMaskValue = !layers.every(
@@ -202,9 +199,10 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           dispatch('ungroupLayers', selectedLayerIds);
           return;
         case 'createSymbol': {
-          const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';
+          const name = prompt('New Symbol Name');
 
           if (!name) return;
+
           dispatch('createSymbol', selectedLayerIds, name);
           return;
         }
@@ -249,7 +247,6 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
       dispatch,
       selectedLayerIds,
       newIsAlphaMaskValue,
-      shouldAskForSymbolName,
       newUseAsMaskValue,
       newIgnoreMasksValue,
       startRenamingLayer,

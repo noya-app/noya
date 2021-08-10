@@ -14,14 +14,15 @@ import {
 } from '../applicationReducer';
 
 let CanvasKit: CanvasKitType;
+let context: ApplicationReducerContext;
 
 beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
+  context = {
+    canvasSize: { width: 1000, height: 1000 },
+    fontManager: CanvasKit.FontMgr.RefDefault(),
+  };
 });
-
-const context: ApplicationReducerContext = {
-  canvasSize: { width: 1000, height: 1000 },
-};
 
 function run(state: ApplicationState, actions: Action[]) {
   return actions.reduce(

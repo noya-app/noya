@@ -1,12 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import {
-  Label,
-  LabeledElementView,
-  RadioGroup,
-  Spacer,
-} from 'noya-designsystem';
-import { memo, ReactNode, useCallback } from 'react';
+import { Label, LabeledElementView, RadioGroup } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
+import { memo, ReactNode, useCallback } from 'react';
 import BorderCenterIcon from '../icons/BorderCenterIcon';
 import BorderInsideIcon from '../icons/BorderInsideIcon';
 import BorderOutsideIcon from '../icons/BorderOutsideIcon';
@@ -100,7 +95,7 @@ export default memo(function BorderRow({
     <InspectorPrimitives.Row>
       <LabeledElementView renderLabel={renderLabel}>
         {prefix}
-        {prefix && <Spacer.Horizontal size={8} />}
+        {prefix && <InspectorPrimitives.HorizontalSeparator />}
         <FillInputFieldWithPicker
           id={colorInputId}
           fillType={fillType}
@@ -109,7 +104,7 @@ export default memo(function BorderRow({
           colorProps={colorProps}
           gradientProps={gradientProps}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <RadioGroup.Root
           id={borderPositionId}
           value={toPositionString(position)}
@@ -125,7 +120,7 @@ export default memo(function BorderRow({
             <BorderOutsideIcon />
           </RadioGroup.Item>
         </RadioGroup.Root>
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <DimensionInput
           id={widthInputId}
           size={50}

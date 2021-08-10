@@ -1,23 +1,15 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Cross1Icon } from '@radix-ui/react-icons';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   InputField,
-  Select,
-  Spacer,
-  LabeledElementView,
   Label,
+  LabeledElementView,
+  Select,
   withSeparatorElements,
 } from 'noya-designsystem';
-import { memo, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import { ExportOptions } from 'noya-state';
-
-const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+import { memo, useCallback, useMemo } from 'react';
+import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 
 export const SUPPORTED_EXPORT_FORMAT_OPTIONS: Sketch.ExportFileFormat[] = [
   Sketch.ExportFileFormat.PNG,
@@ -123,7 +115,7 @@ export default memo(function ExportFormatsRow({
           ],
           [],
         )}
-        buttonId={`${id}-nameingScheme-button`}
+        id={`${id}-naming-scheme-button`}
         onSelect={useCallback(
           (value: string) => onChangeNamingScheme(parseInt(value)),
           [onChangeNamingScheme],
@@ -133,7 +125,7 @@ export default memo(function ExportFormatsRow({
     </InputField.Root>,
     <InputField.Root size={65} id={fileFormatInputId}>
       <Select
-        id={'fileFormat-select'}
+        id={`${id}-file-format-select`}
         value={exportFormat.fileFormat}
         options={SUPPORTED_EXPORT_FORMAT_OPTIONS}
         getTitle={useCallback((id) => id.toUpperCase(), [])}
@@ -144,14 +136,22 @@ export default memo(function ExportFormatsRow({
   ];
 
   return (
-    <Row id={id}>
+    <InspectorPrimitives.Row id={id}>
       {last ? (
         <LabeledElementView renderLabel={renderLabel}>
-          {withSeparatorElements(elements, <Spacer.Horizontal size={6} />)}
+          {withSeparatorElements(
+            elements,
+            <InspectorPrimitives.HorizontalSeparator />,
+          )}
         </LabeledElementView>
       ) : (
-        <>{withSeparatorElements(elements, <Spacer.Horizontal size={6} />)}</>
+        <>
+          {withSeparatorElements(
+            elements,
+            <InspectorPrimitives.HorizontalSeparator />,
+          )}
+        </>
       )}
-    </Row>
+    </InspectorPrimitives.Row>
   );
 });

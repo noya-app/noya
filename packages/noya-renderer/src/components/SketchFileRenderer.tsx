@@ -71,6 +71,7 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
+  const isEditingText = Selectors.getIsEditingText(interactionState.type);
   const isInserting = interactionState.type === 'insert';
   const canvasRect = useMemo(
     () =>
@@ -385,18 +386,19 @@ export default memo(function SketchFileRenderer() {
                     rect={boundingRect}
                     selectionPaint={selectionPaint}
                   />
-                  {boundingPoints.map((points: Point[], index: number) => (
-                    <Polyline
-                      key={index}
-                      points={points}
-                      paint={selectionPaint}
-                    />
-                  ))}
+                  {!isEditingText &&
+                    boundingPoints.map((points: Point[], index: number) => (
+                      <Polyline
+                        key={index}
+                        points={points}
+                        paint={selectionPaint}
+                      />
+                    ))}
                 </>
               )}
-            {!isEditingPath &&
-              !drawingLayer &&
+            {!drawingLayer &&
               !isInserting &&
+              !isEditingText &&
               highlightedSketchLayer}
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
@@ -404,12 +406,8 @@ export default memo(function SketchFileRenderer() {
             {!gradientStopPoints &&
               boundingRect &&
               !drawingLayer &&
-              !isInserting && (
-                <DragHandles
-                  rect={boundingRect}
-                  selectionPaint={selectionPaint}
-                />
-              )}
+              !isInserting &&
+              !isEditingText && <DragHandles rect={boundingRect} />}
           </>
         )}
       </Group>

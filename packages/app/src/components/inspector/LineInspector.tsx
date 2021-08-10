@@ -4,6 +4,7 @@ import { toDegrees } from 'noya-geometry';
 import {
   clampRotation,
   decodeCurvePoint,
+  getMultiNumberValue,
   isPointsLayer,
   PointsLayer,
   Selectors,
@@ -12,10 +13,10 @@ import {
 import { useCallback } from 'react';
 import styled from 'styled-components';
 import useShallowArray from '../../hooks/useShallowArray';
-import getMultiNumberValue from '../../utils/getMultiNumberValue';
 import CoordinatesInspector from './CoordinatesInspector';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 export type DimensionValue = number | undefined;
 
@@ -164,7 +165,7 @@ export default function LineInspector({
           onSetY={handleSetStartY}
         />
       </Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <Row>
         <LabelContainer>End</LabelContainer>
         <Spacer.Horizontal size={16} />
@@ -175,7 +176,7 @@ export default function LineInspector({
           onSetY={handleSetEndY}
         />
       </Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <Row>
         <DimensionInput value={width} onSetValue={onSetWidth} label="↔" />
         <Spacer.Horizontal size={16} />

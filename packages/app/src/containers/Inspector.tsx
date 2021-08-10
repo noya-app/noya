@@ -1,30 +1,36 @@
-import { Divider, Spacer, withSeparatorElements } from 'noya-designsystem';
-import { Layers, Selectors, SetNumberMode, isLine } from 'noya-state';
-import { Fragment, memo, useCallback, useMemo } from 'react';
-import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Divider, withSeparatorElements } from 'noya-designsystem';
+import {
+  getMultiNumberValue,
+  getMultiValue,
+  isLine,
+  Layers,
+  Selectors,
+  SetNumberMode,
+} from 'noya-state';
+import { Fragment, memo, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+import DimensionsInspector from '../components/inspector/DimensionsInspector';
+import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import LineInspector from '../components/inspector/LineInspector';
 import useShallowArray from '../hooks/useShallowArray';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
+import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
-import LayerThemeInspector from './LayerThemeInspector';
+import LayerThemeInspector from './LinkedStyleInspector';
+import ThemeTextInspector from './LinkedTextStyleInspector';
 import OpacityInspector from './OpacityInspector';
 import PointControlsInspector from './PointControlsInspector';
 import PointCoordinatesInspector from './PointCoordinatesInspector';
-import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
-import ThemeTextInspector from './ThemeTextInspector';
-import getMultiValue from '../utils/getMultiValue';
-import LineInspector from '../components/inspector/LineInspector';
-import styled from 'styled-components';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
 
 const PointControlsContainer = styled.div({
   padding: '0 10px',
@@ -165,7 +171,7 @@ export default memo(function Inspector() {
             onSetIsFlippedVertical={handleSetIsFlippedVertical}
           />
         )}
-        <Spacer.Vertical size={10} />
+        <InspectorPrimitives.VerticalSeparator />
       </Fragment>,
       hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
       isEditingPath && <PointControlsInspector />,
