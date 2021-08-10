@@ -45,14 +45,14 @@ export function isPointInLine(point: Point, line: [Point, Point]) {
 
 // TODO: Not really accurate, but works for now.
 // TODO: add a test for this function
-export function isPointInCircunference(point: Point, circle: [Point, number]) {
+export function isPointInCircumference(point: Point, circle: [Point, number]) {
   const center = circle[0];
   const radius = circle[1];
 
   return Math.abs(distance(point, center) - radius) < 2;
 }
 
-export function getCircunferencePercentage(point: Point, center: Point) {
+export function getCircumferencePercentage(point: Point, center: Point) {
   let angle =
     (Math.atan2(point.y - center.y, point.x - center.x) * 180) / Math.PI;
 

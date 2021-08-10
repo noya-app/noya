@@ -70,7 +70,7 @@ export type InteractionAction =
   | [type: 'updateMovingControlPoint', origin: Point, current: Point]
   | [type: 'movingGradientStop', current: Point]
   | [type: 'maybeMoveGradientEllipseLength', origin: Point]
-  | [type: 'movingGradientEllipseLength', current: Point];
+  | [type: 'movingGradientEllipseLength', current: Point]
   | [type: 'editingText', id: UUID]
   | [type: 'maybeSelectText', origin: Point]
   | [type: 'selectingText', current: Point];
@@ -176,7 +176,7 @@ export type InteractionState =
   | {
       type: 'moveGradientEllipseLength';
       current: Point;
-    };
+    }
   | { type: 'editingText'; id: UUID }
   | { type: 'maybeSelectingText'; origin: Point }
   | { type: 'selectingText'; origin: Point; current: Point };
@@ -462,7 +462,7 @@ export function interactionReducer(
       if (
         state.type !== 'maybeMoveGradientEllipseLength' &&
         state.type !== 'moveGradientEllipseLength'
-        ) {
+      ) {
         throw new Error('Bad interaction state');
       }
 

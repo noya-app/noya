@@ -5,7 +5,7 @@ import { useStroke } from 'noya-react-canvaskit';
 import {
   getCurrentPage,
   getSelectedGradient,
-  getAngularGradientCircunference,
+  getAngularGradientCircumference,
   GradientStopPoint,
   Primitives,
   SelectedGradient,
@@ -89,7 +89,7 @@ export default memo(function GradientEditor({
     if (!gradient || gradient.gradientType !== Sketch.GradientType.Angular)
       return null;
 
-    const gradientCircle = getAngularGradientCircunference(state);
+    const gradientCircle = getAngularGradientCircumference(state);
     if (!gradientCircle) return null;
 
     const path = new CanvasKit.Path();

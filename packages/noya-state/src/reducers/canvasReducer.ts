@@ -8,7 +8,7 @@ import {
   createBounds,
   createRect,
   distance,
-  getCircunferencePercentage,
+  getCircumferencePercentage,
   getClosestPointOnLine,
   getLinePercentage,
   insetRect,
@@ -26,7 +26,7 @@ import {
 import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
-  getAngularGradientCircunference,
+  getAngularGradientCircumference,
   getSelectedGradient,
   getSelectedGradientStopPoints,
 } from '../selectors/gradientSelectors';
@@ -653,12 +653,12 @@ export function canvasReducer(
             } else if (stopIndex === gradient.stops.length - 1 && !isAngular) {
               draftGradient.to = transformPointString(gradient.to);
             } else if (isAngular) {
-              const circunference = getAngularGradientCircunference(state);
-              if (!circunference) return;
+              const circumference = getAngularGradientCircumference(state);
+              if (!circumference) return;
 
-              const position = getCircunferencePercentage(
+              const position = getCircumferencePercentage(
                 current,
-                circunference.center,
+                circumference.center,
               );
 
               draftGradient.stops[stopIndex].position = position;

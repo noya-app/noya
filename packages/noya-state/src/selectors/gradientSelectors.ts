@@ -3,9 +3,9 @@ import {
   AffineTransform,
   createBounds,
   distance,
-  getCircunferencePercentage,
+  getCircumferencePercentage,
   getLinePercentage,
-  isPointInCircunference,
+  isPointInCircumference,
   isPointInLine,
   Point,
 } from 'noya-geometry';
@@ -87,12 +87,12 @@ export function getSelectedGradientStopPoints(
     : gradient.stops;
 
   if (gradient.gradientType === Sketch.GradientType.Angular) {
-    const circunference = getAngularGradientCircunference(state);
-    if (!circunference) return;
+    const circumference = getAngularGradientCircumference(state);
+    if (!circumference) return;
 
     return stops.map((stop) => {
       const radians = stop.position * Math.PI * 2;
-      const { center, longitude } = circunference;
+      const { center, longitude } = circumference;
 
       return {
         color: stop.color,
@@ -193,10 +193,10 @@ export function getPercentageOfPointInGradient(
 
   if (!gradient) return 0;
   if (gradient.gradientType === Sketch.GradientType.Angular) {
-    const circunference = getAngularGradientCircunference(state);
-    if (!circunference) return 0;
+    const circumference = getAngularGradientCircumference(state);
+    if (!circumference) return 0;
 
-    const percentage = getCircunferencePercentage(point, circunference.center);
+    const percentage = getCircumferencePercentage(point, circumference.center);
     return percentage;
   }
 
@@ -220,12 +220,12 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
   if (!gradient) return false;
 
   if (gradient.gradientType === Sketch.GradientType.Angular) {
-    const circunference = getAngularGradientCircunference(state);
-    if (!circunference) return false;
+    const circumference = getAngularGradientCircumference(state);
+    if (!circumference) return false;
 
-    return isPointInCircunference(point, [
-      circunference.center,
-      circunference.longitude / 2,
+    return isPointInCircumference(point, [
+      circumference.center,
+      circumference.longitude / 2,
     ]);
   }
 
@@ -241,10 +241,10 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
 export function getEllipseEditorPoint(
   center: Point,
   point: Point,
-  elipseLength: number,
+  ellipseLength: number,
 ): Point {
   const height = distance(center, point) * 2;
-  const width = elipseLength === 0 ? height : height * elipseLength;
+  const width = ellipseLength === 0 ? height : height * ellipseLength;
 
   const theta =
     Math.atan2(point.y - center.y, point.x - center.x) - Math.PI / 2;
@@ -280,7 +280,7 @@ export function isPointerOnGradientEllipseEditor(
   return isPointInRange(point, position, SELECTED_GRADIENT_POINT_RADIUS);
 }
 
-export function getAngularGradientCircunference(state: ApplicationState) {
+export function getAngularGradientCircumference(state: ApplicationState) {
   if (!state.selectedGradient) return;
 
   const { layerId } = state.selectedGradient;

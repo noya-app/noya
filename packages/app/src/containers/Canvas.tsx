@@ -133,6 +133,21 @@ export default memo(function Canvas() {
   const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
 
   useArrowKeyShortcuts();
+  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
+  const nudge = (axis: 'X' | 'Y', amount: number) => {
+    if (isEditingPath && state.selectedControlPoint) {
+      dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
+    } else if (isEditingPath) {
+      dispatch(
+        `setPoint${axis}` as const,
+        state.selectedPointLists,
+        amount,
+        'adjust',
+      );
+    } else {
+      dispatch(`setLayer${axis}` as const, amount, 'adjust');
+    }
+  };
 
   useKeyboardShortcuts({
     ArrowLeft: () => nudge('X', -1),
@@ -146,7 +161,7 @@ export default memo(function Canvas() {
     Backspace: () => {
       if (isEditingText) return FALLTHROUGH;
 
-       if (state.selectedGradient) {
+      if (state.selectedGradient) {
         dispatch('deleteStopToGradient');
       } else {
         dispatch('deleteLayer', state.selectedObjects);
@@ -496,7 +511,7 @@ export default memo(function Canvas() {
 
           if (isMoving(point, origin)) {
             dispatch('interaction', ['movingGradientEllipseLength', point]);
-            }
+          }
 
           containerRef.current?.setPointerCapture(event.pointerId);
           event.preventDefault();
