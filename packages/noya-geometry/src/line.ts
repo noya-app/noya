@@ -51,3 +51,13 @@ export function isPointInCircunference(point: Point, circle: [Point, number]) {
 
   return Math.abs(distance(point, center) - radius) < 2;
 }
+
+export function getCircunferencePercentage(point: Point, center: Point) {
+  let angle =
+    (Math.atan2(point.y - center.y, point.x - center.x) * 180) / Math.PI;
+
+  if (angle < 0) {
+    angle += 360;
+  }
+  return angle / 360;
+}

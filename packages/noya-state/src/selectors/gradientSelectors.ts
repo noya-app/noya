@@ -3,6 +3,7 @@ import {
   AffineTransform,
   createBounds,
   distance,
+  getCircunferencePercentage,
   getLinePercentage,
   isPointInCircunference,
   isPointInLine,
@@ -179,6 +180,22 @@ export function getPercentageOfPointInGradient(
   state: ApplicationState,
   point: Point,
 ) {
+  if (!state.selectedGradient) return 0;
+
+  const gradient = getSelectedGradient(
+    getCurrentPage(state),
+    state.selectedGradient,
+  );
+
+  if (!gradient) return 0;
+  if (gradient.gradientType === Sketch.GradientType.Angular) {
+    const circunference = getAngularGradientCircunference(state);
+    if (!circunference) return 0;
+
+    const percentage = getCircunferencePercentage(point, circunference.center);
+    return percentage;
+  }
+
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
   if (!selectedLayerGradientPoints) return 0;
 
@@ -188,12 +205,17 @@ export function getPercentageOfPointInGradient(
   ]);
 }
 
-export function isPointerOnGradientLine(
-  state: ApplicationState,
-  point: Point,
-  angular = false,
-) {
-  if (angular) {
+export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
+  if (!state.selectedGradient) return false;
+
+  const gradient = getSelectedGradient(
+    getCurrentPage(state),
+    state.selectedGradient,
+  );
+
+  if (!gradient) return false;
+
+  if (gradient.gradientType === Sketch.GradientType.Angular) {
     const circunference = getAngularGradientCircunference(state);
     if (!circunference) return false;
 
@@ -202,6 +224,7 @@ export function isPointerOnGradientLine(
       circunference.longitude / 2,
     ]);
   }
+
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
   if (!selectedLayerGradientPoints) return false;
 

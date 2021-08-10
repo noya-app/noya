@@ -154,7 +154,7 @@ export default memo(function Canvas() {
       } else {
         dispatch('deleteLayer', state.selectedObjects);
       }
-    }, //TODO: Filter? Only works on gradients
+    },
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
     'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
     'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),

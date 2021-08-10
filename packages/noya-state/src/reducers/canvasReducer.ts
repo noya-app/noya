@@ -8,6 +8,7 @@ import {
   createBounds,
   createRect,
   distance,
+  getCircunferencePercentage,
   getClosestPointOnLine,
   getLinePercentage,
   insetRect,
@@ -25,6 +26,7 @@ import {
 import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
+  getAngularGradientCircunference,
   getSelectedGradient,
   getSelectedGradientStopPoints,
 } from '../selectors/gradientSelectors';
@@ -542,7 +544,11 @@ export function canvasReducer(
 
             if (!gradient) return;
 
-            fixGradientPositions(gradient);
+            if (
+              gradient &&
+              gradient.gradientType !== Sketch.GradientType.Angular
+            )
+              fixGradientPositions(gradient);
             return;
           }
           case 'moveGradientStop': {
@@ -606,14 +612,23 @@ export function canvasReducer(
               return PointString.encode(newPoint);
             };
 
-            switch (stopIndex) {
-              case 0:
-                draftGradient.from = transformPointString(gradient.from);
-                break;
-              case gradient.stops.length - 1:
-                draftGradient.to = transformPointString(gradient.to);
-                break;
-              default:
+            const isAngular =
+              gradient.gradientType === Sketch.GradientType.Angular;
+            if (stopIndex === 0 && !isAngular) {
+              draftGradient.from = transformPointString(gradient.from);
+            } else if (stopIndex === gradient.stops.length - 1 && !isAngular) {
+              draftGradient.to = transformPointString(gradient.to);
+            } else {
+              if (isAngular) {
+                const circunference = getAngularGradientCircunference(state);
+                if (!circunference) return;
+
+                const position = getCircunferencePercentage(
+                  current,
+                  circunference.center,
+                );
+                draftGradient.stops[stopIndex].position = position;
+              } else {
                 const from = transform.applyTo(
                   PointString.decode(gradient.from),
                 );
@@ -628,9 +643,8 @@ export function canvasReducer(
                 stopPoint.y += delta.y;
 
                 const position = getLinePercentage(stopPoint, [from, to]);
-
                 draftGradient.stops[stopIndex].position = position;
-                break;
+              }
             }
 
             break;
