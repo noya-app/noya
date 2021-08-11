@@ -133,49 +133,22 @@ export default memo(function Canvas() {
   const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
 
   useArrowKeyShortcuts();
-  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
-  const nudge = (axis: 'X' | 'Y', amount: number) => {
-    if (isEditingPath && state.selectedControlPoint) {
-      dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else if (isEditingPath) {
-      dispatch(
-        `setPoint${axis}` as const,
-        state.selectedPointLists,
-        amount,
-        'adjust',
-      );
+
+  const handleDeleteKey = () => {
+    if (isEditingText) return FALLTHROUGH;
+
+    if (state.selectedGradient) {
+      dispatch('deleteStopToGradient');
     } else {
-      dispatch(`setLayer${axis}` as const, amount, 'adjust');
+      dispatch('deleteLayer', state.selectedObjects);
     }
   };
 
   useKeyboardShortcuts({
-    ArrowLeft: () => nudge('X', -1),
-    ArrowRight: () => nudge('X', 1),
-    ArrowUp: () => nudge('Y', -1),
-    ArrowDown: () => nudge('Y', 1),
-    'Shift-ArrowLeft': () => nudge('X', -10),
-    'Shift-ArrowRight': () => nudge('X', 10),
-    'Shift-ArrowUp': () => nudge('Y', -10),
-    'Shift-ArrowDown': () => nudge('Y', 10),
-    Backspace: () => {
-      if (isEditingText) return FALLTHROUGH;
-
-      if (state.selectedGradient) {
-        dispatch('deleteStopToGradient');
-      } else {
-        dispatch('deleteLayer', state.selectedObjects);
-      }
-    },
+    Backspace: handleDeleteKey,
+    Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
-    Delete: () => {
-      if (state.selectedGradient) {
-        dispatch('deleteStopToGradient');
-      } else {
-        dispatch('deleteLayer', state.selectedObjects);
-      }
-    },
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
     'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
     'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
