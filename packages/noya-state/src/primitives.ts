@@ -149,13 +149,15 @@ export function shader(
             positions.push(1);
           }
 
-          const matrix =
+          const aspectRatio = layerFrame.width / layerFrame.height;
+
+          let matrix = AffineTransform.multiply(
+            unitTransform,
             rotationRadians > 0
-              ? AffineTransform.multiply(
-                  unitTransform,
-                  AffineTransform.rotate(rotationRadians, 0.5, 0.5),
-                )
-              : unitTransform;
+              ? AffineTransform.rotate(rotationRadians, 0.5, 0.5)
+              : AffineTransform.identity,
+            AffineTransform.scale(1 / aspectRatio, 1, { x: 0.5, y: 0.5 }),
+          );
 
           return CanvasKit.Shader.MakeSweepGradient(
             0.5,
