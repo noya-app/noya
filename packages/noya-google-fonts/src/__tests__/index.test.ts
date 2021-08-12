@@ -2,6 +2,7 @@ import {
   decodeFontVariant,
   getFontFamilyList,
   getFontFile,
+  getFontId,
   getFontVariantCollection,
   getFontVariants,
   getFontVariantWeight,
@@ -60,4 +61,11 @@ test('it should get font file', () => {
   expect(getFontFile('Roboto', '500')).toEqual(
     'http://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9vAx05IsDqlA.ttf',
   );
+});
+
+test('it should get font id', () => {
+  expect(getFontId('Noto Sans')).toEqual('notosans');
+  expect(getFontId('NotoSans')).toEqual('notosans');
+  expect(getFontId('Noto-Sans')).toEqual('notosans');
+  expect(getFontId('Noto_Sans')).toEqual('notosans');
 });

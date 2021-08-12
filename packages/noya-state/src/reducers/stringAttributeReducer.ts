@@ -36,7 +36,9 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
       return produce(state, (draft) => {
         const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        const { variant } = Selectors.decodeFontName(attributes.name);
+        const { fontVariant: variant } = Selectors.decodeFontName(
+          attributes.name,
+        );
 
         attributes.name = Selectors.encodeFontName(value, variant);
       });

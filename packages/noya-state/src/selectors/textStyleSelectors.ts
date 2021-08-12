@@ -1,6 +1,9 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchModel } from 'noya-sketch-model';
+import { Layers } from 'noya-state';
 import { SimpleTextDecoration } from '../primitives';
+import { ApplicationState } from '../reducers/applicationReducer';
+import { toTextSpans } from './attributedStringSelectors';
 
 export function getTextDecoration(
   encodedAttributes: Pick<
@@ -19,7 +22,21 @@ export function getTextStyleAttributes(layer: Sketch.Text) {
   const encodedAttributes = layer.style?.textStyle?.encodedAttributes;
   const paragraphStyle = encodedAttributes?.paragraphStyle;
 
+  const spans = toTextSpans(layer.attributedString);
+
+  const fontNames = [
+    ...(encodedAttributes
+      ? [encodedAttributes.MSAttributedStringFontAttribute.attributes.name]
+      : []),
+    ...spans.map(
+      (span) => span.attributes.MSAttributedStringFontAttribute.attributes.name,
+    ),
+  ];
+
   return {
+    fontFamilies: [...new Set(fontNames)].map(
+      (fontName) => decodeFontName(fontName).fontFamily,
+    ),
     fontSize:
       encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ?? 12,
     lineHeight: paragraphStyle?.maximumLineHeight,
@@ -58,8 +75,32 @@ export function encodeFontName(fontFamily: string, variant?: string) {
 
 export function decodeFontName(
   fontName: string,
-): { fontFamily: string; variant?: string } {
-  const [fontFamily, variant] = fontName.split('-');
+): { fontFamily: string; fontVariant?: string } {
+  const [fontFamily, fontVariant] = fontName.split('-');
 
-  return { fontFamily, variant: variant || undefined };
+  return { fontFamily, fontVariant: fontVariant || undefined };
+}
+
+export function getAllFontNames(state: ApplicationState) {
+  const fontNames = state.sketch.pages.flatMap((page) => {
+    const textLayers = Layers.findAll(
+      page,
+      Layers.isTextLayer,
+    ) as Sketch.Text[];
+
+    return textLayers.flatMap((layer) =>
+      layer.style?.textStyle
+        ? [
+            layer.style.textStyle.encodedAttributes
+              .MSAttributedStringFontAttribute.attributes.name,
+            ...toTextSpans(layer.attributedString).map(
+              (span) =>
+                span.attributes.MSAttributedStringFontAttribute.attributes.name,
+            ),
+          ]
+        : [],
+    );
+  });
+
+  return [...new Set(fontNames)];
 }

@@ -1,21 +1,24 @@
+import { StateProvider } from 'noya-app-state-context';
+import { isValidFontVariant } from 'noya-google-fonts';
+import {
+  CanvasKitProvider,
+  FontManagerProvider,
+  ImageCacheProvider,
+  useAddFont,
+  useCanvasKit,
+  useFontManager,
+} from 'noya-renderer';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
+  Selectors,
   WorkspaceAction,
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
 import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import {
-  CanvasKitProvider,
-  FontManagerProvider,
-  ImageCacheProvider,
-  useFontManager,
-} from 'noya-renderer';
 import Workspace from './containers/Workspace';
-import { StateProvider } from 'noya-app-state-context';
-import { useCanvasKit } from 'noya-renderer';
 import { useResource } from './hooks/useResource';
 
 type Action =
@@ -73,6 +76,26 @@ function Contents() {
   const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });
   }, []);
+
+  const addFont = useAddFont();
+
+  // Whenever the sketch file updates, download any new fonts
+  useEffect(() => {
+    if (state.type !== 'success') return;
+
+    const fontNames = Selectors.getAllFontNames(state.value.history.present);
+
+    fontNames.forEach((fontName) => {
+      const font = Selectors.decodeFontName(fontName);
+
+      const fontVariant =
+        font.fontVariant && isValidFontVariant(font.fontVariant)
+          ? font.fontVariant
+          : 'regular';
+
+      addFont(font.fontFamily, fontVariant);
+    });
+  }, [addFont, state]);
 
   if (state.type !== 'success') return null;
 

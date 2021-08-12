@@ -73,6 +73,7 @@ export function getLayerParagraph(
   layer: Sketch.Text,
 ) {
   const {
+    fontFamilies,
     fontSize,
     lineHeight,
     textHorizontalAlignment,
@@ -86,7 +87,7 @@ export function getLayerParagraph(
     // Note: We can put a heightMultiplier in text style, but it has no effect
     textStyle: {
       color: CanvasKit.BLACK,
-      fontFamilies: ['Roboto'],
+      fontFamilies,
       fontSize,
     },
     textAlign: Primitives.textHorizontalAlignment(
@@ -100,7 +101,7 @@ export function getLayerParagraph(
     //
     // For more on struts: https://en.wikipedia.org/wiki/Strut_(typesetting)
     strutStyle: {
-      fontFamilies: ['Roboto'],
+      fontFamilies,
       strutEnabled: true,
       forceStrutHeight: true,
       fontSize,

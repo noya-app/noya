@@ -1,7 +1,7 @@
 const webfontList: WebfontList = require('./fonts.json');
 const fonts = webfontList.items;
 const fontMap = fonts.reduce((result: Record<string, WebfontFamily>, item) => {
-  result[item.family.toLowerCase()] = item;
+  result[getFontId(item.family)] = item;
   return result;
 }, {});
 
@@ -66,7 +66,7 @@ export type ItalicFontVariant =
 
 export type FontVariant = RegularFontVariant | ItalicFontVariant;
 
-interface WebfontFamily {
+export interface WebfontFamily {
   family: string;
   variants: FontVariant[];
   subsets: FontSubset[];
@@ -86,8 +86,16 @@ export function getFontFamilyList() {
   return fonts.map((font) => font.family);
 }
 
+export function getFontIdList() {
+  return fonts.map((font) => getFontId(font.family));
+}
+
 export function hasFontFamily(fontFamily: string) {
-  return getKey(fontFamily) in fontMap;
+  return getFontId(fontFamily) in fontMap;
+}
+
+export function hasFontId(fontId: string) {
+  return fontId in fontMap;
 }
 
 export type FontVariantCollection = {
@@ -103,14 +111,18 @@ function isRegularVariant(variant: FontVariant): variant is RegularFontVariant {
   return !variant.includes('italic');
 }
 
+export function getFontDefinition(fontFamily: string) {
+  return fontMap[getFontId(fontFamily)];
+}
+
 export function getFontVariants(fontFamily: string) {
-  return fontMap[getKey(fontFamily)].variants;
+  return getFontDefinition(fontFamily).variants;
 }
 
 export function getFontVariantCollection(
   fontFamily: string,
 ): FontVariantCollection {
-  const variants = fontMap[getKey(fontFamily)].variants;
+  const variants = getFontDefinition(fontFamily).variants;
   const regular = variants.filter(isRegularVariant);
   const italic = variants.filter(isItalicVariant);
 
@@ -118,14 +130,14 @@ export function getFontVariantCollection(
 }
 
 export function getFontFile(fontFamily: string, variant: FontVariant) {
-  return fontMap[getKey(fontFamily)].files[variant];
+  return getFontDefinition(fontFamily).files[variant];
 }
 
-function getKey(fontFamily: string) {
-  return fontFamily.toLowerCase();
+export function getFontId(fontFamily: string) {
+  return fontFamily.toLowerCase().replace(/[ _-]/g, '');
 }
 
-type FontWeight =
+export type FontWeight =
   | 'ultralight'
   | 'thin'
   | 'light'

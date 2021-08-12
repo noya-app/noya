@@ -21,7 +21,7 @@ export type EditableTextStyle = {
 function getEditableTextStyleProperties(
   textStyle: Sketch.TextStyle,
 ): EditableTextStyle {
-  const { fontFamily, variant: fontVariant } = Selectors.decodeFontName(
+  const { fontFamily, fontVariant } = Selectors.decodeFontName(
     textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes.name,
   );
 

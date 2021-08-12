@@ -9,9 +9,12 @@ import {
 import {
   decodeFontVariant,
   FontVariant,
-  getFontFamilyList,
+  getFontDefinition,
+  getFontId,
+  getFontIdList,
   getFontVariants,
   hasFontFamily,
+  hasFontId,
   isValidFontVariant,
 } from 'noya-google-fonts';
 import { SetNumberMode } from 'noya-state';
@@ -20,6 +23,8 @@ import { useTheme } from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
+
+const MULTIPLE_TYPEFACES = 'Multiple Typefaces';
 
 const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
   6,
@@ -88,7 +93,16 @@ export default memo(function TextStyleRow({
   const paragraphInputId = `paragraph`;
   const fontSizeId = `size`;
 
-  const fontFamilyOptions = getFontFamilyList();
+  const fontId = fontFamily ? getFontId(fontFamily) : undefined;
+  const fontIdOptions = useMemo(() => {
+    const fontIdList = getFontIdList();
+
+    if (!fontId) {
+      return [...fontIdList, MULTIPLE_TYPEFACES];
+    }
+
+    return hasFontId(fontId) ? fontIdList : [...fontIdList, fontId];
+  }, [fontId]);
 
   const fontVariantOptions =
     fontFamily && hasFontFamily(fontFamily)
@@ -124,15 +138,26 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
-          value={fontFamily || ''}
-          options={fontFamilyOptions}
-          getTitle={(name) => name}
-          onChange={useCallback(
-            (familyName: string) => {
-              onChangeFontFamily(familyName);
+          value={fontId || 'Multiple Typefaces'}
+          options={fontIdOptions}
+          getTitle={useCallback(
+            (fontId: string) => {
+              if (fontId === MULTIPLE_TYPEFACES) return fontId;
 
-              if (fontVariant !== undefined && hasFontFamily(familyName)) {
-                const fontVariants = getFontVariants(familyName);
+              if (!hasFontId(fontId)) return fontFamily ?? fontId;
+
+              return getFontDefinition(fontId).family;
+            },
+            [fontFamily],
+          )}
+          onChange={useCallback(
+            (fontId: string) => {
+              const fontFamily = getFontDefinition(fontId).family;
+
+              onChangeFontFamily(fontFamily);
+
+              if (fontVariant !== undefined && hasFontFamily(fontFamily)) {
+                const fontVariants = getFontVariants(fontFamily);
 
                 if (!(fontVariants as string[]).includes(fontVariant)) {
                   onChangeFontVariant(undefined);
@@ -156,8 +181,10 @@ export default memo(function TextStyleRow({
             const { variantName, weight } = decodeFontVariant(variant);
 
             return [
-              upperFirst(variantName),
-              weight !== 'regular' ? upperFirst(weight) : undefined,
+              weight === 'regular' && variantName === 'italic'
+                ? undefined
+                : upperFirst(weight),
+              variantName === 'italic' ? 'Italic' : undefined,
             ]
               .filter((x): x is string => !!x)
               .join(' ');
