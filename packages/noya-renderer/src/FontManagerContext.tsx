@@ -1,4 +1,4 @@
-import { FontMgr } from 'canvaskit';
+import { FontMgr, TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
 import { FontVariant, getFontFile, hasFontFamily } from 'noya-google-fonts';
 import { useCanvasKit } from 'noya-renderer';
@@ -22,6 +22,7 @@ let listeners: (() => void)[] = [];
 const FontManagerContext = createContext<
   | {
       fontManager: FontMgr;
+      typefaceFontProvider: TypefaceFontProvider;
       addFont: (fontFamily: string, fontVariant: FontVariant) => void;
     }
   | undefined
@@ -44,6 +45,24 @@ export const FontManagerProvider = memo(function FontManagerProvider({
   const [id, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const defaultFont = suspendedDefaultFont.getValueOrThrow();
+
+  const typefaceFontProvider = useMemo(
+    () => {
+      const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
+
+      typefaceFontProvider.registerFont(defaultFont, 'system');
+
+      Object.entries(loadedFonts).forEach(([name, data]) => {
+        // console.log('register font', name);
+        typefaceFontProvider.registerFont(data, name);
+      });
+
+      return typefaceFontProvider;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [CanvasKit.FontMgr, defaultFont, id],
+  );
+
   const fontManager = useMemo(
     () => {
       const fonts = Object.values(loadedFonts);
@@ -92,11 +111,11 @@ export const FontManagerProvider = memo(function FontManagerProvider({
         return;
       }
 
-      const fontName = Selectors.encodeFontName(fontFamily, fontVariant);
+      const fontId = Selectors.encodeFontId(fontFamily, fontVariant);
 
-      if (pendingFonts.has(fontName) || fontName in loadedFonts) return;
+      if (pendingFonts.has(fontId) || fontId in loadedFonts) return;
 
-      pendingFonts.add(fontName);
+      pendingFonts.add(fontId);
 
       const url = getFontFile(fontFamily, fontVariant);
 
@@ -105,10 +124,10 @@ export const FontManagerProvider = memo(function FontManagerProvider({
       try {
         data = await fetch(url).then((resp) => resp.arrayBuffer());
       } catch (error) {
-        console.warn('Failed to load font', fontName);
+        console.warn('Failed to load font', fontId);
         return;
       } finally {
-        pendingFonts.delete(fontName);
+        pendingFonts.delete(fontId);
       }
 
       console.info('fetched font', {
@@ -118,7 +137,7 @@ export const FontManagerProvider = memo(function FontManagerProvider({
         data: data.byteLength,
       });
 
-      loadedFonts[fontName] = data;
+      loadedFonts[fontId] = data;
 
       listeners.forEach((l) => l());
     },
@@ -132,9 +151,10 @@ export const FontManagerProvider = memo(function FontManagerProvider({
       value={useMemo(
         () => ({
           fontManager,
+          typefaceFontProvider,
           addFont,
         }),
-        [addFont, fontManager],
+        [addFont, fontManager, typefaceFontProvider],
       )}
     >
       {children}
@@ -160,4 +180,14 @@ export function useAddFont() {
   }
 
   return value.addFont;
+}
+
+export function useTypefaceFontProvider() {
+  const value = useContext(FontManagerContext);
+
+  if (!value) {
+    throw new Error('Missing FontManagerProvider');
+  }
+
+  return value.typefaceFontProvider;
 }

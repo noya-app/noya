@@ -16,7 +16,7 @@ import {
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
-import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { useCanvasKit, useTypefaceFontProvider } from 'noya-renderer';
 import {
   ApplicationState,
   CompassDirection,
@@ -116,7 +116,7 @@ export default memo(function Canvas() {
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const CanvasKit = useCanvasKit();
-  const fontManager = useFontManager();
+  const typefaceFontProvider = useTypefaceFontProvider();
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
@@ -238,7 +238,7 @@ export default memo(function Canvas() {
 
         const characterIndex = Selectors.getCharacterIndexAtPoint(
           CanvasKit,
-          fontManager,
+          typefaceFontProvider,
           state,
           layer.do_objectID,
           point,
@@ -414,7 +414,7 @@ export default memo(function Canvas() {
         case 'none': {
           const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
-            fontManager,
+            typefaceFontProvider,
             state,
             point,
             'bounded',
@@ -495,9 +495,9 @@ export default memo(function Canvas() {
       state,
       selectedLayers,
       CanvasKit,
-      fontManager,
       dispatch,
       insets,
+      typefaceFontProvider,
     ],
   );
 
@@ -525,7 +525,7 @@ export default memo(function Canvas() {
 
           const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
-            fontManager,
+            typefaceFontProvider,
             state,
             point,
             'unbounded',
@@ -777,7 +777,7 @@ export default memo(function Canvas() {
       state,
       dispatch,
       CanvasKit,
-      fontManager,
+      typefaceFontProvider,
       selectedLayers,
       insets,
       highlightedLayer?.id,
@@ -816,7 +816,7 @@ export default memo(function Canvas() {
 
           const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
-            fontManager,
+            typefaceFontProvider,
             state,
             point,
             'bounded',
@@ -926,7 +926,14 @@ export default memo(function Canvas() {
           break;
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, fontManager, insets],
+    [
+      offsetEventPoint,
+      state,
+      CanvasKit,
+      typefaceFontProvider,
+      dispatch,
+      insets,
+    ],
   );
 
   const handleDirection =

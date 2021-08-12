@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, FontMgr } from 'canvaskit';
+import { CanvasKit, TypefaceFontProvider } from 'canvaskit';
 import {
   AffineTransform,
   insetRect,
@@ -69,11 +69,11 @@ export function applyTextTransform(
 
 export function getLayerParagraph(
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  typefaceFontProvider: TypefaceFontProvider,
   layer: Sketch.Text,
 ) {
   const {
-    fontFamilies,
+    fontIds,
     fontSize,
     lineHeight,
     textHorizontalAlignment,
@@ -83,11 +83,13 @@ export function getLayerParagraph(
 
   const heightMultiplier = lineHeight ? lineHeight / fontSize : undefined;
 
+  const fontIdsWithSystemFont = [...fontIds, 'system'];
+
   const paragraphStyle = new CanvasKit.ParagraphStyle({
     // Note: We can put a heightMultiplier in text style, but it has no effect
     textStyle: {
       color: CanvasKit.BLACK,
-      fontFamilies,
+      fontFamilies: fontIdsWithSystemFont,
       fontSize,
     },
     textAlign: Primitives.textHorizontalAlignment(
@@ -101,7 +103,7 @@ export function getLayerParagraph(
     //
     // For more on struts: https://en.wikipedia.org/wiki/Strut_(typesetting)
     strutStyle: {
-      fontFamilies,
+      fontFamilies: fontIdsWithSystemFont,
       strutEnabled: true,
       forceStrutHeight: true,
       fontSize,
@@ -109,7 +111,10 @@ export function getLayerParagraph(
     },
   });
 
-  const builder = CanvasKit.ParagraphBuilder.Make(paragraphStyle, fontManager);
+  const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
+    paragraphStyle,
+    typefaceFontProvider,
+  );
 
   toTextSpans(layer.attributedString).forEach((span) => {
     const style = Primitives.createCanvasKitTextStyle(
@@ -133,7 +138,7 @@ export function getLayerParagraph(
 
 export function getCharacterIndexAtPoint(
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  typefaceFontProvider: TypefaceFontProvider,
   state: ApplicationState,
   layerId: string,
   point: Point,
@@ -158,7 +163,7 @@ export function getCharacterIndexAtPoint(
 
   const paragraph = Selectors.getLayerParagraph(
     CanvasKit,
-    fontManager,
+    typefaceFontProvider,
     textLayer,
   );
 
@@ -172,7 +177,7 @@ export function getCharacterIndexAtPoint(
 
 export function getCharacterIndexAtPointInSelectedLayer(
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  typefaceFontProvider: TypefaceFontProvider,
   state: ApplicationState,
   point: Point,
   mode: 'bounded' | 'unbounded',
@@ -183,7 +188,7 @@ export function getCharacterIndexAtPointInSelectedLayer(
 
   return getCharacterIndexAtPoint(
     CanvasKit,
-    fontManager,
+    typefaceFontProvider,
     state,
     selection.layerId,
     point,

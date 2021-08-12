@@ -1,4 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { getFontId } from 'noya-google-fonts';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { SimpleTextDecoration } from '../primitives';
@@ -33,10 +34,20 @@ export function getTextStyleAttributes(layer: Sketch.Text) {
     ),
   ];
 
+  const uniqueFontNames = [...new Set(fontNames)];
+
+  // const font = Selectors.decodeFontName(fontName);
+
+  // const fontVariant =
+  //   font.fontVariant && isValidFontVariant(font.fontVariant)
+  //     ? font.fontVariant
+  //     : 'regular';
+
   return {
-    fontFamilies: [...new Set(fontNames)].map(
-      (fontName) => decodeFontName(fontName).fontFamily,
-    ),
+    fontIds: uniqueFontNames.map((fontName) => {
+      const font = decodeFontName(fontName);
+      return encodeFontId(font.fontFamily, font.fontVariant);
+    }),
     fontSize:
       encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ?? 12,
     lineHeight: paragraphStyle?.maximumLineHeight,
@@ -71,6 +82,10 @@ export function getEncodedStringAttributes(
 
 export function encodeFontName(fontFamily: string, variant?: string) {
   return variant ? `${fontFamily}-${variant}` : fontFamily;
+}
+
+export function encodeFontId(fontFamily: string, variant: string = 'regular') {
+  return `${getFontId(fontFamily)}:${variant}`;
 }
 
 export function decodeFontName(

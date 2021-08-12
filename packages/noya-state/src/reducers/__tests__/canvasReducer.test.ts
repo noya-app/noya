@@ -21,6 +21,7 @@ beforeAll(async () => {
   context = {
     canvasSize: { width: 1000, height: 1000 },
     fontManager: CanvasKit.FontMgr.RefDefault(),
+    typefaceFontProvider: CanvasKit.TypefaceFontProvider.Make(),
   };
 });
 

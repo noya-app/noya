@@ -99,7 +99,7 @@ export function textEditorReducer(
 
         const paragraph = Selectors.getLayerParagraph(
           CanvasKit,
-          context.fontManager,
+          context.typefaceFontProvider,
           draftLayer,
         );
 
@@ -184,7 +184,7 @@ export function textEditorReducer(
 
         const paragraph = Selectors.getLayerParagraph(
           CanvasKit,
-          context.fontManager,
+          context.typefaceFontProvider,
           draftLayer,
         );
 
@@ -293,7 +293,7 @@ export function textEditorReducer(
         } else {
           const paragraph = Selectors.getLayerParagraph(
             CanvasKit,
-            context.fontManager,
+            context.typefaceFontProvider,
             draftLayer,
           );
 

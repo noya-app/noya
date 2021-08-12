@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, FontMgr } from 'canvaskit';
+import { CanvasKit, FontMgr, TypefaceFontProvider } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { Size } from 'noya-geometry';
@@ -100,6 +100,7 @@ export type Action =
 export type ApplicationReducerContext = {
   canvasSize: Size;
   fontManager: FontMgr;
+  typefaceFontProvider: TypefaceFontProvider;
 };
 
 export function applicationReducer(
@@ -379,7 +380,7 @@ export function applicationReducer(
 
           const paragraph = getLayerParagraph(
             CanvasKit,
-            context.fontManager,
+            context.typefaceFontProvider,
             draftLayer,
           );
 

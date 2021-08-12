@@ -7,6 +7,7 @@ import {
   useAddFont,
   useCanvasKit,
   useFontManager,
+  useTypefaceFontProvider,
 } from 'noya-renderer';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
@@ -28,6 +29,7 @@ type Action =
 function Contents() {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
+  const typefaceFontProvider = useTypefaceFontProvider();
 
   const sketchFileData = useResource<ArrayBuffer>(
     '/Demo.sketch',
@@ -55,6 +57,7 @@ function Contents() {
                   action.value,
                   CanvasKit,
                   fontManager,
+                  typefaceFontProvider,
                 ),
               };
             } else {
@@ -62,7 +65,7 @@ function Contents() {
             }
         }
       },
-    [CanvasKit, fontManager],
+    [CanvasKit, fontManager, typefaceFontProvider],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });

@@ -23,7 +23,7 @@ import {
 } from 'noya-google-fonts';
 import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
-import { decodeFontName } from './selectors/textStyleSelectors';
+import { decodeFontName, encodeFontId } from './selectors/textStyleSelectors';
 
 export * from './primitives/path';
 export * from './primitives/pathCommand';
@@ -366,13 +366,14 @@ export function createCanvasKitTextStyle(
   const { fontFamily, fontVariant } = decodeFontName(
     attributes.MSAttributedStringFontAttribute.attributes.name,
   );
+  const fontId = encodeFontId(fontFamily, fontVariant);
   const { variantName, weight } = decodeFontVariant(
     fontVariant && isValidFontVariant(fontVariant) ? fontVariant : 'regular',
   );
 
   return new CanvasKit.TextStyle({
     ...(textColor && { color: color(CanvasKit, textColor) }),
-    fontFamilies: [fontFamily],
+    fontFamilies: [fontId, 'system'],
     fontSize: font.attributes.size,
     fontStyle: {
       slant:

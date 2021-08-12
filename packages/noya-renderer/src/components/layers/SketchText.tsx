@@ -3,10 +3,11 @@ import { CanvasKit, Paragraph } from 'canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
-import { Group, Rect, Text, useCanvasKit, useFontManager } from 'noya-renderer';
+import { Group, Rect, Text, useCanvasKit } from 'noya-renderer';
 import { Selectors, TextSelectionRange } from 'noya-state';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
+import { useTypefaceFontProvider } from '../../FontManagerContext';
 
 interface Props {
   layer: Sketch.Text;
@@ -14,11 +15,11 @@ interface Props {
 
 export function useTextLayerParagraph(layer: Sketch.Text) {
   const CanvasKit = useCanvasKit();
-  const fontManager = useFontManager();
+  const typefaceFontProvider = useTypefaceFontProvider();
 
   const paragraph = useMemo(
-    () => Selectors.getLayerParagraph(CanvasKit, fontManager, layer),
-    [CanvasKit, fontManager, layer],
+    () => Selectors.getLayerParagraph(CanvasKit, typefaceFontProvider, layer),
+    [CanvasKit, typefaceFontProvider, layer],
   );
 
   useDeletable(paragraph);
