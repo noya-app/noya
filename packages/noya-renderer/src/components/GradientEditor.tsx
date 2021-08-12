@@ -1,19 +1,89 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { CanvasKit } from 'canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
-import { AffineTransform, distance } from 'noya-geometry';
+import { AffineTransform, Point } from 'noya-geometry';
 import { useStroke } from 'noya-react-canvaskit';
 import {
   getCurrentPage,
   getSelectedGradient,
-  getAngularGradientCircumference,
+  getAngularGradientCircle,
   GradientStopPoint,
   Primitives,
   SelectedGradient,
   Selectors,
+  getCircleTangentSquare,
 } from 'noya-state';
 import { Fragment, memo, useMemo } from 'react';
 import { Group, Path, Polyline, Rect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
+
+const AngularGradientEditor = ({ CanvasKit }: { CanvasKit: CanvasKit }) => {
+  const [state] = useApplicationState();
+
+  const gradientLineStroke = useStroke({ color: '#FFF' });
+
+  const gradientCircle = getAngularGradientCircle(state);
+  if (!gradientCircle) return null;
+
+  const path = new CanvasKit.Path();
+  path.addOval(
+    CanvasKit.XYWHRect(
+      gradientCircle.center.x - gradientCircle.radius,
+      gradientCircle.center.y - gradientCircle.radius,
+      gradientCircle.radius * 2,
+      gradientCircle.radius * 2,
+    ),
+  );
+
+  return <Path path={path} paint={gradientLineStroke} />;
+};
+
+const RadialGradientEditor = ({
+  center,
+  point,
+  ellipseLength,
+  CanvasKit,
+}: {
+  center: Point;
+  point: Point;
+  ellipseLength: number;
+  CanvasKit: CanvasKit;
+}) => {
+  const gradientLineStroke = useStroke({ color: '#FFF' });
+  const { rectangle, theta } = getCircleTangentSquare(
+    center,
+    point,
+    ellipseLength,
+  );
+
+  const path = new CanvasKit.Path();
+  path.addOval(
+    CanvasKit.XYWHRect(
+      rectangle.x,
+      rectangle.y,
+      rectangle.width,
+      rectangle.height,
+    ),
+  );
+
+  const ellipseEquare = CanvasKit.XYWHRect(
+    rectangle.x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
+    center.y + rectangle.width / 2,
+    Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+    Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+  );
+
+  const paint = new CanvasKit.Paint();
+  paint.setColor(CanvasKit.parseColorString('#fef'));
+
+  path.addRect(ellipseEquare); // Small frame around the square
+  return (
+    <Group transform={AffineTransform.rotate(theta, center.x, center.y)}>
+      <Rect rect={ellipseEquare} paint={paint} />
+      <Path path={path} paint={gradientLineStroke} />
+    </Group>
+  );
+};
 
 export default memo(function GradientEditor({
   gradientStopPoints,
@@ -44,67 +114,6 @@ export default memo(function GradientEditor({
   const { stopIndex } = selectedGradient;
 
   const gradient = getSelectedGradient(getCurrentPage(state), selectedGradient);
-
-  const radialGradient = useMemo(() => {
-    if (!gradient || gradient.gradientType !== Sketch.GradientType.Radial)
-      return null;
-
-    const center = gradientStopPoints[0].point;
-    const point = gradientStopPoints[gradientStopPoints.length - 1].point;
-    const len = distance(center, point);
-
-    const height = len * 2;
-    const width =
-      gradient.elipseLength === 0 ? height : height * gradient.elipseLength;
-
-    const x = center.x - width / 2;
-    const y = center.y - len;
-
-    const theta =
-      Math.atan2(point.y - center.y, point.x - center.x) - Math.PI / 2;
-
-    const path = new CanvasKit.Path();
-    path.addOval(CanvasKit.XYWHRect(x, y, width, height));
-    const rectangle = CanvasKit.XYWHRect(
-      x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
-      center.y,
-      Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-      Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-    );
-
-    path.addRect(rectangle);
-
-    const paint = new CanvasKit.Paint();
-    paint.setColor(CanvasKit.parseColorString('#fef'));
-
-    return (
-      <Group transform={AffineTransform.rotate(theta, center.x, center.y)}>
-        <Rect rect={rectangle} paint={paint} />
-        <Path path={path} paint={gradientLineStroke} />
-      </Group>
-    );
-  }, [gradient, CanvasKit, gradientLineStroke, gradientStopPoints]);
-
-  const angularGradient = useMemo(() => {
-    if (!gradient || gradient.gradientType !== Sketch.GradientType.Angular)
-      return null;
-
-    const gradientCircle = getAngularGradientCircumference(state);
-    if (!gradientCircle) return null;
-
-    const path = new CanvasKit.Path();
-    path.addOval(
-      CanvasKit.XYWHRect(
-        gradientCircle.corner.x,
-        gradientCircle.corner.y,
-        gradientCircle.longitude,
-        gradientCircle.longitude,
-      ),
-    );
-
-    return <Path path={path} paint={gradientLineStroke} />;
-  }, [CanvasKit, state, gradient, gradientLineStroke]);
-
   if (!gradient) return null;
 
   return (
@@ -118,8 +127,17 @@ export default memo(function GradientEditor({
           paint={gradientLineStroke}
         />
       )}
-      {angularGradient}
-      {radialGradient}
+      {gradient.gradientType === Sketch.GradientType.Radial && (
+        <RadialGradientEditor
+          CanvasKit={CanvasKit}
+          center={gradientStopPoints[0].point}
+          point={gradientStopPoints[gradientStopPoints.length - 1].point}
+          ellipseLength={gradient.elipseLength}
+        />
+      )}
+      {gradient.gradientType === Sketch.GradientType.Angular && (
+        <AngularGradientEditor CanvasKit={CanvasKit} />
+      )}
       {gradientStopPoints.map(({ point, color }, index) => {
         const path = new CanvasKit.Path();
 

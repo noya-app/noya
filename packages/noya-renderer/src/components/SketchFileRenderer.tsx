@@ -21,7 +21,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import React, { Fragment, memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
@@ -378,7 +378,7 @@ export default memo(function SketchFileRenderer() {
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
               boundingRect &&
-              !gradientStopPoints &&
+              !state.selectedGradient &&
               !drawingLayer &&
               !isInserting && (
                 <>
@@ -403,7 +403,7 @@ export default memo(function SketchFileRenderer() {
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {!gradientStopPoints &&
+            {!state.selectedGradient &&
               boundingRect &&
               !drawingLayer &&
               !isInserting &&

@@ -8,7 +8,7 @@ import {
   createBounds,
   createRect,
   distance,
-  getCircumferencePercentage,
+  getCirclePercentage,
   getClosestPointOnLine,
   getLinePercentage,
   insetRect,
@@ -26,7 +26,7 @@ import {
 import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
-  getAngularGradientCircumference,
+  getAngularGradientCircle,
   getSelectedGradient,
   getSelectedGradientStopPoints,
 } from '../selectors/gradientSelectors';
@@ -648,34 +648,40 @@ export function canvasReducer(
             const isAngular =
               gradient.gradientType === Sketch.GradientType.Angular;
 
-            if (stopIndex === 0 && !isAngular) {
-              draftGradient.from = transformPointString(gradient.from);
-            } else if (stopIndex === gradient.stops.length - 1 && !isAngular) {
-              draftGradient.to = transformPointString(gradient.to);
-            } else if (isAngular) {
-              const circumference = getAngularGradientCircumference(state);
-              if (!circumference) return;
+            if (isAngular) {
+              const circle = getAngularGradientCircle(state);
+              if (!circle) return;
 
-              const position = getCircumferencePercentage(
-                current,
-                circumference.center,
-              );
-
+              const position = getCirclePercentage(current, circle.center);
               draftGradient.stops[stopIndex].position = position;
             } else {
-              const from = transform.applyTo(PointString.decode(gradient.from));
-              const to = transform.applyTo(PointString.decode(gradient.to));
-              const stop = gradient.stops[stopIndex];
+              switch (stopIndex) {
+                case 0: {
+                  draftGradient.from = transformPointString(gradient.from);
+                  break;
+                }
+                case gradient.stops.length - 1: {
+                  draftGradient.to = transformPointString(gradient.to);
+                  break;
+                }
+                default: {
+                  const from = transform.applyTo(
+                    PointString.decode(gradient.from),
+                  );
+                  const to = transform.applyTo(PointString.decode(gradient.to));
+                  const stop = gradient.stops[stopIndex];
 
-              const stopPoint = {
-                x: lerp(from.x, to.x, stop.position),
-                y: lerp(from.y, to.y, stop.position),
-              };
-              stopPoint.x += delta.x;
-              stopPoint.y += delta.y;
+                  const stopPoint = {
+                    x: lerp(from.x, to.x, stop.position),
+                    y: lerp(from.y, to.y, stop.position),
+                  };
+                  stopPoint.x += delta.x;
+                  stopPoint.y += delta.y;
 
-              const position = getLinePercentage(stopPoint, [from, to]);
-              draftGradient.stops[stopIndex].position = position;
+                  const position = getLinePercentage(stopPoint, [from, to]);
+                  draftGradient.stops[stopIndex].position = position;
+                }
+              }
             }
 
             break;

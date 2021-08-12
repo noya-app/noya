@@ -1,5 +1,6 @@
 import { clamp } from 'noya-utils';
 import { distance } from './point';
+import { toDegrees } from './radians';
 import { Point } from './types';
 
 // http://paulbourke.net/geometry/pointlineplane/
@@ -44,17 +45,17 @@ export function isPointInLine(point: Point, line: [Point, Point]) {
 }
 
 // TODO: Not really accurate, but works for now.
-// TODO: add a test for this function
-export function isPointInCircumference(point: Point, circle: [Point, number]) {
-  const center = circle[0];
-  const radius = circle[1];
+export function isPointInCircle(
+  point: Point,
+  circle: { center: Point; radius: number },
+) {
+  const { center, radius } = circle;
 
   return Math.abs(distance(point, center) - radius) < 2;
 }
 
-export function getCircumferencePercentage(point: Point, center: Point) {
-  let angle =
-    (Math.atan2(point.y - center.y, point.x - center.x) * 180) / Math.PI;
+export function getCirclePercentage(point: Point, center: Point) {
+  let angle = toDegrees(Math.atan2(point.y - center.y, point.x - center.x));
 
   if (angle < 0) {
     angle += 360;

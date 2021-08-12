@@ -866,6 +866,8 @@ export default memo(function Canvas() {
         case 'maybeMoveGradientStop':
         case 'maybeMoveGradientEllipseLength':
         case 'moveGradientEllipseLength': {
+          //if (!state.interactionState.type)
+          // dispatch('interaction', ['maybeMoveGradientStop', point]);
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);

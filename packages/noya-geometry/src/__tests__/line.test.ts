@@ -2,8 +2,8 @@ import {
   getLinePercentage,
   getClosestPointOnLine,
   isPointInLine,
-  isPointInCircumference,
-  getCircumferencePercentage,
+  isPointInCircle,
+  getCirclePercentage,
 } from '../line';
 import { Point } from '../types';
 
@@ -132,25 +132,15 @@ describe('is point in line', () => {
 
 describe('is point in circumference', () => {
   test('circumference', () => {
-    const circumference: [Point, number] = [{ x: 0, y: 0 }, 5];
+    const circumference = { center: { x: 0, y: 0 }, radius: 5 };
 
-    expect(isPointInCircumference({ x: 0, y: 5 }, circumference)).toEqual(true);
-    expect(isPointInCircumference({ x: -5, y: 0 }, circumference)).toEqual(
-      true,
-    );
-    expect(isPointInCircumference({ x: 0, y: -5 }, circumference)).toEqual(
-      true,
-    );
+    expect(isPointInCircle({ x: 0, y: 5 }, circumference)).toEqual(true);
+    expect(isPointInCircle({ x: -5, y: 0 }, circumference)).toEqual(true);
+    expect(isPointInCircle({ x: 0, y: -5 }, circumference)).toEqual(true);
 
-    expect(isPointInCircumference({ x: 0, y: 0 }, circumference)).toEqual(
-      false,
-    );
-    expect(isPointInCircumference({ x: -5, y: 5 }, circumference)).toEqual(
-      false,
-    );
-    expect(isPointInCircumference({ x: 5, y: 5 }, circumference)).toEqual(
-      false,
-    );
+    expect(isPointInCircle({ x: 0, y: 0 }, circumference)).toEqual(false);
+    expect(isPointInCircle({ x: -5, y: 5 }, circumference)).toEqual(false);
+    expect(isPointInCircle({ x: 5, y: 5 }, circumference)).toEqual(false);
   });
 });
 
@@ -158,9 +148,9 @@ describe('percent on circumference', () => {
   test('circumference', () => {
     const center = { x: 5, y: 0 };
 
-    expect(getCircumferencePercentage({ x: 10, y: 0 }, center)).toEqual(0);
-    expect(getCircumferencePercentage({ x: 5, y: 5 }, center)).toEqual(0.25);
-    expect(getCircumferencePercentage({ x: 0, y: 0 }, center)).toEqual(0.5);
-    expect(getCircumferencePercentage({ x: 5, y: -5 }, center)).toEqual(0.75);
+    expect(getCirclePercentage({ x: 10, y: 0 }, center)).toEqual(0);
+    expect(getCirclePercentage({ x: 5, y: 5 }, center)).toEqual(0.25);
+    expect(getCirclePercentage({ x: 0, y: 0 }, center)).toEqual(0.5);
+    expect(getCirclePercentage({ x: 5, y: -5 }, center)).toEqual(0.75);
   });
 });

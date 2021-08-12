@@ -3,9 +3,9 @@ import {
   AffineTransform,
   createBounds,
   distance,
-  getCircumferencePercentage,
+  getCirclePercentage,
   getLinePercentage,
-  isPointInCircumference,
+  isPointInCircle,
   isPointInLine,
   Point,
 } from 'noya-geometry';
@@ -21,6 +21,7 @@ import {
   ApplicationState,
   SelectedGradient,
 } from '../reducers/applicationReducer';
+import { getParentLayer } from './layerSelectors';
 import { SELECTED_GRADIENT_POINT_RADIUS } from './pointSelectors';
 
 export function getSelectedGradient(
@@ -78,44 +79,44 @@ export function getSelectedGradientStopPoints(
   const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
 
   if (!gradient) return;
-
-  const from = PointString.decode(gradient.from);
-  const to = PointString.decode(gradient.to);
-
   const stops = sorted
     ? [...gradient.stops].sort((a, b) => a.position - b.position)
     : gradient.stops;
 
   if (gradient.gradientType === Sketch.GradientType.Angular) {
-    const circumference = getAngularGradientCircumference(state);
-    if (!circumference) return;
+    const circle = getAngularGradientCircle(state);
+    if (!circle) return;
 
     return stops.map((stop) => {
       const radians = stop.position * Math.PI * 2;
-      const { center, longitude } = circumference;
+
+      const { center, radius } = circle;
 
       return {
         color: stop.color,
         point: {
-          x: (longitude / 2) * Math.cos(radians) + center.x,
-          y: (longitude / 2) * Math.sin(radians) + center.y,
+          x: radius * Math.cos(radians) + center.x,
+          y: radius * Math.sin(radians) + center.y,
         },
       };
     });
+  } else {
+    const from = PointString.decode(gradient.from);
+    const to = PointString.decode(gradient.to);
+
+    const extremePoints = {
+      from: transform.applyTo(from),
+      to: transform.applyTo(to),
+    };
+
+    return stops.map((stop) => ({
+      color: stop.color,
+      point: {
+        x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
+        y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
+      },
+    }));
   }
-
-  const extremePoints = {
-    from: transform.applyTo(from),
-    to: transform.applyTo(to),
-  };
-
-  return stops.map((stop) => ({
-    color: stop.color,
-    point: {
-      x: lerp(extremePoints.from.x, extremePoints.to.x, stop.position),
-      y: lerp(extremePoints.from.y, extremePoints.to.y, stop.position),
-    },
-  }));
 }
 
 /**
@@ -133,10 +134,6 @@ export function fixGradientPositions(gradient: Sketch.Gradient) {
 
   const sorted = [...stops].sort((a, b) => a.position - b.position);
 
-  if (gradient.gradientType === Sketch.GradientType.Angular) {
-    gradient.stops = sorted;
-    return;
-  }
   const from = PointString.decode(gradient.from);
   const to = PointString.decode(gradient.to);
 
@@ -155,13 +152,18 @@ export function fixGradientPositions(gradient: Sketch.Gradient) {
 
   gradient.from = PointString.encode(newFrom);
   gradient.to = PointString.encode(newTo);
-  gradient.stops = stopPoints.map((stopPoint) => {
-    return {
-      _class: Sketch.ClassValue.GradientStop,
-      color: stopPoint.color,
-      position: getLinePercentage(stopPoint.point, [newFrom, newTo]),
-    };
-  });
+
+  if (gradient.gradientType === Sketch.GradientType.Angular) {
+    gradient.stops = sorted;
+  } else {
+    gradient.stops = stopPoints.map((stopPoint) => {
+      return {
+        _class: Sketch.ClassValue.GradientStop,
+        color: stopPoint.color,
+        position: getLinePercentage(stopPoint.point, [newFrom, newTo]),
+      };
+    });
+  }
 }
 
 export function getGradientStopIndexAtPoint(
@@ -193,10 +195,10 @@ export function getPercentageOfPointInGradient(
 
   if (!gradient) return 0;
   if (gradient.gradientType === Sketch.GradientType.Angular) {
-    const circumference = getAngularGradientCircumference(state);
-    if (!circumference) return 0;
+    const circle = getAngularGradientCircle(state);
+    if (!circle) return 0;
 
-    const percentage = getCircumferencePercentage(point, circumference.center);
+    const percentage = getCirclePercentage(point, circle.center);
     return percentage;
   }
 
@@ -220,13 +222,10 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
   if (!gradient) return false;
 
   if (gradient.gradientType === Sketch.GradientType.Angular) {
-    const circumference = getAngularGradientCircumference(state);
-    if (!circumference) return false;
+    const circle = getAngularGradientCircle(state);
+    if (!circle) return false;
 
-    return isPointInCircumference(point, [
-      circumference.center,
-      circumference.longitude / 2,
-    ]);
+    return isPointInCircle(point, circle);
   }
 
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
@@ -238,21 +237,26 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
   ]);
 }
 
-export function getEllipseEditorPoint(
+export function getCircleTangentSquare(
   center: Point,
   point: Point,
   ellipseLength: number,
-): Point {
+) {
   const height = distance(center, point) * 2;
   const width = ellipseLength === 0 ? height : height * ellipseLength;
 
   const theta =
     Math.atan2(point.y - center.y, point.x - center.x) - Math.PI / 2;
 
-  return AffineTransform.rotate(theta, center.x, center.y).applyTo({
-    x: center.x - width / 2,
-    y: center.y,
-  });
+  return {
+    rectangle: {
+      x: center.x - width / 2,
+      y: center.y,
+      height,
+      width,
+    },
+    theta,
+  };
 }
 
 export function isPointerOnGradientEllipseEditor(
@@ -271,16 +275,21 @@ export function isPointerOnGradientEllipseEditor(
   const lastPoint =
     selectedLayerGradientPoints[selectedLayerGradientPoints.length - 1].point;
 
-  const position = getEllipseEditorPoint(
+  const { rectangle, theta } = getCircleTangentSquare(
     center,
     lastPoint,
     selectedGradient.elipseLength,
   );
 
+  const position = AffineTransform.rotate(theta, center.x, center.y).applyTo({
+    x: rectangle.x,
+    y: rectangle.y,
+  });
+
   return isPointInRange(point, position, SELECTED_GRADIENT_POINT_RADIUS);
 }
 
-export function getAngularGradientCircumference(state: ApplicationState) {
+export function getAngularGradientCircle(state: ApplicationState) {
   if (!state.selectedGradient) return;
 
   const { layerId } = state.selectedGradient;
@@ -292,34 +301,21 @@ export function getAngularGradientCircumference(state: ApplicationState) {
 
   if (!indexPath) return;
 
-  const layer = Layers.access(page, indexPath);
-  const bounds = createBounds(layer.frame);
+  const parent = getParentLayer(page, indexPath);
+  const frame = { ...Layers.access(page, indexPath).frame };
 
-  const horizontalDistance = distance(
-    { x: bounds.minX, y: bounds.minY },
-    { x: bounds.maxX, y: bounds.minY },
-  );
-  const verticalDistance = distance(
-    { x: bounds.minX, y: bounds.minY },
-    { x: bounds.minX, y: bounds.maxY },
-  );
+  if (parent) {
+    frame.x += parent.frame.x;
+    frame.y += parent.frame.y;
+  }
+
+  const bounds = createBounds(frame);
+  const radius = Math.max(frame.width, frame.height) / 2;
 
   const center = { x: bounds.midX, y: bounds.midY };
-  const point =
-    horizontalDistance < verticalDistance
-      ? { x: bounds.maxX, y: bounds.midY }
-      : { x: bounds.midX, y: bounds.minY };
-
-  const longitude = distance(center, point) * 2;
-
-  const corner =
-    horizontalDistance < verticalDistance
-      ? { x: bounds.minX, y: bounds.midY - longitude / 2 }
-      : { x: bounds.midX - longitude / 2, y: bounds.minY };
 
   return {
-    corner,
     center,
-    longitude,
+    radius,
   };
 }
