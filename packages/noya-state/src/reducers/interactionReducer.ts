@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
 import { Point, Rect } from 'noya-geometry';
-import { UUID } from 'noya-state';
+import { TextSelectionRange, UUID } from 'noya-state';
 
 export const cardinalDirections = ['n', 'e', 's', 'w'] as const;
 export const ordinalDirections = ['ne', 'se', 'sw', 'nw'] as const;
@@ -69,7 +69,7 @@ export type InteractionAction =
   | [type: 'updateMovingPoint', origin: Point, current: Point]
   | [type: 'updateMovingControlPoint', origin: Point, current: Point]
   | [type: 'movingGradientStop', current: Point]
-  | [type: 'editingText', id: UUID]
+  | [type: 'editingText', id: UUID, range: TextSelectionRange]
   | [type: 'maybeSelectText', origin: Point]
   | [type: 'selectingText', current: Point];
 
@@ -167,9 +167,20 @@ export type InteractionState =
       current: Point;
       pageSnapshot: Sketch.Page;
     }
-  | { type: 'editingText'; id: UUID }
-  | { type: 'maybeSelectingText'; origin: Point }
-  | { type: 'selectingText'; origin: Point; current: Point };
+  | { type: 'editingText'; layerId: UUID; range: TextSelectionRange }
+  | {
+      type: 'maybeSelectingText';
+      origin: Point;
+      layerId: UUID;
+      range: TextSelectionRange;
+    }
+  | {
+      type: 'selectingText';
+      origin: Point;
+      current: Point;
+      layerId: UUID;
+      range: TextSelectionRange;
+    };
 
 export type InteractionType = InteractionState['type'];
 
@@ -439,19 +450,26 @@ export function interactionReducer(
       };
     }
     case 'editingText': {
-      const [, id] = action;
+      const [, layerId, range] = action;
 
       return {
         type: 'editingText',
-        id,
+        layerId,
+        range,
       };
     }
     case 'maybeSelectText': {
       const [, origin] = action;
 
+      if (state.type !== 'editingText') {
+        throw new Error('Bad interaction state');
+      }
+
       return {
         type: 'maybeSelectingText',
         origin,
+        layerId: state.layerId,
+        range: state.range,
       };
     }
     case 'selectingText': {
@@ -468,6 +486,8 @@ export function interactionReducer(
         type: 'selectingText',
         origin: state.origin,
         current,
+        layerId: state.layerId,
+        range: state.range,
       };
     }
     case 'reset': {
