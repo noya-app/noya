@@ -2,21 +2,27 @@ import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import {
   Layers,
-  MAX_TEXT_LAYER_STRING_LENGTH,
   Selectors,
   TextEditorCursorDirection,
   TextEditorCursorUnit,
   TextSelectionRange,
 } from 'noya-state';
+import { UUID } from '../types';
 import {
   ApplicationReducerContext,
   ApplicationState,
 } from './applicationReducer';
+import { interactionReducer } from './interactionReducer';
 
 export type TextEditorAction =
   | [type: 'setTextSelection', range: TextSelectionRange]
-  | [type: 'selectAllText']
-  | [type: 'selectContainingText', index: number, unit: 'word' | 'line']
+  | [type: 'selectAllText', layerId?: UUID]
+  | [
+      type: 'selectContainingText',
+      layerId: UUID,
+      index: number,
+      unit: 'word' | 'line',
+    ]
   | [
       type: 'moveCursor',
       direction: TextEditorCursorDirection,
@@ -45,30 +51,36 @@ export function textEditorReducer(
       const [, range] = action;
 
       return produce(state, (draft) => {
-        if (!draft.selectedText) return;
+        if (!Selectors.hasTextSelection(draft.interactionState)) return;
 
-        draft.selectedText.range = range;
+        draft.interactionState.range = range;
       });
     }
     case 'selectAllText': {
-      return produce(state, (draft) => {
-        if (!draft.selectedText) return;
+      const [, layerId] = action;
 
-        draft.selectedText = {
-          layerId: draft.selectedText.layerId,
-          range: {
-            anchor: 0,
-            head: MAX_TEXT_LAYER_STRING_LENGTH,
-          },
-        };
+      const id = layerId ?? Selectors.getTextSelection(state)?.layerId;
+
+      if (id === undefined) return state;
+
+      const layer = Layers.find(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === id,
+      );
+
+      if (!layer || !Layers.isTextLayer(layer)) return state;
+
+      return produce(state, (draft) => {
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'editingText',
+          id,
+          { anchor: 0, head: layer.attributedString.string.length },
+        ]);
       });
     }
     case 'selectContainingText': {
-      const [, index, unit] = action;
+      const [, layerId, index, unit] = action;
 
-      if (!state.selectedText) return state;
-
-      const { layerId } = state.selectedText;
       const pageIndex = Selectors.getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
         Selectors.getCurrentPage(state),
@@ -78,8 +90,6 @@ export function textEditorReducer(
       if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        if (!draft.selectedText) return;
-
         const draftLayer = Layers.access(
           draft.sketch.pages[pageIndex],
           indexPath,
@@ -97,10 +107,17 @@ export function textEditorReducer(
           case 'word': {
             const boundary = paragraph.getWordBoundary(index);
 
-            draft.selectedText.range = {
-              anchor: boundary.start,
-              head: boundary.end,
-            };
+            draft.interactionState = interactionReducer(
+              draft.interactionState,
+              [
+                'editingText',
+                layerId,
+                {
+                  anchor: boundary.start,
+                  head: boundary.end,
+                },
+              ],
+            );
 
             break;
           }
@@ -123,10 +140,17 @@ export function textEditorReducer(
               unit,
             ).index;
 
-            draft.selectedText.range = {
-              anchor: backwardIndex,
-              head: forwardIndex,
-            };
+            draft.interactionState = interactionReducer(
+              draft.interactionState,
+              [
+                'editingText',
+                layerId,
+                {
+                  anchor: backwardIndex,
+                  head: forwardIndex,
+                },
+              ],
+            );
 
             break;
           }
@@ -137,9 +161,11 @@ export function textEditorReducer(
     case 'moveCursor': {
       const [type, direction, unit] = action;
 
-      if (!state.selectedText) return state;
+      const selectedText = Selectors.getTextSelection(state);
 
-      const { layerId, range } = state.selectedText;
+      if (!selectedText) return state;
+
+      const { layerId, range } = selectedText;
       const pageIndex = Selectors.getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
         Selectors.getCurrentPage(state),
@@ -149,8 +175,6 @@ export function textEditorReducer(
       if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        if (!draft.selectedText) return;
-
         const draftLayer = Layers.access(
           draft.sketch.pages[pageIndex],
           indexPath,
@@ -164,7 +188,7 @@ export function textEditorReducer(
           draftLayer,
         );
 
-        draft.selectedText.range = Selectors.getNextCursorRange(
+        const newRange = Selectors.getNextCursorRange(
           paragraph,
           draftLayer.attributedString.string,
           range,
@@ -172,14 +196,22 @@ export function textEditorReducer(
           unit,
           type === 'moveCursor' ? 'move' : 'select',
         );
+
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'editingText',
+          layerId,
+          newRange,
+        ]);
       });
     }
     case 'insertText': {
       const [, text] = action;
 
-      if (!state.selectedText) return state;
+      const selectedText = Selectors.getTextSelection(state);
 
-      const { layerId, range } = state.selectedText;
+      if (!selectedText) return state;
+
+      const { layerId, range } = selectedText;
       const pageIndex = Selectors.getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
         Selectors.getCurrentPage(state),
@@ -189,8 +221,6 @@ export function textEditorReducer(
       if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        if (!draft.selectedText) return;
-
         const draftLayer = Layers.access(
           draft.sketch.pages[pageIndex],
           indexPath,
@@ -209,15 +239,21 @@ export function textEditorReducer(
         );
 
         draftLayer.attributedString = attributedString;
-        draft.selectedText.range = newRange;
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'editingText',
+          layerId,
+          newRange,
+        ]);
       });
     }
     case 'deleteText': {
       const [, direction, unit] = action;
 
-      if (!state.selectedText) return state;
+      const selectedText = Selectors.getTextSelection(state);
 
-      const { layerId, range } = state.selectedText;
+      if (!selectedText) return state;
+
+      const { layerId, range } = selectedText;
       const pageIndex = Selectors.getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
         Selectors.getCurrentPage(state),
@@ -227,8 +263,6 @@ export function textEditorReducer(
       if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        if (!draft.selectedText) return;
-
         const draftLayer = Layers.access(
           draft.sketch.pages[pageIndex],
           indexPath,
@@ -251,7 +285,11 @@ export function textEditorReducer(
           );
 
           draftLayer.attributedString = attributedString;
-          draft.selectedText.range = newRange;
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'editingText',
+            layerId,
+            newRange,
+          ]);
         } else {
           const paragraph = Selectors.getLayerParagraph(
             CanvasKit,
@@ -279,7 +317,11 @@ export function textEditorReducer(
           );
 
           draftLayer.attributedString = attributedString;
-          draft.selectedText.range = newRange;
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'editingText',
+            layerId,
+            newRange,
+          ]);
         }
       });
     }

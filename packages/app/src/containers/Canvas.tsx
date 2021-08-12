@@ -246,14 +246,19 @@ export default memo(function Canvas() {
         );
 
         if (state.interactionState.type === 'none') {
-          dispatch('interaction', ['editingText', layer.do_objectID]);
+          dispatch('interaction', [
+            'editingText',
+            layer.do_objectID,
+            { anchor: 0, head: layer.attributedString.string.length },
+          ]);
         }
 
         if (characterIndex === undefined) {
-          dispatch('selectAllText');
+          dispatch('selectAllText', layer.do_objectID);
         } else {
           dispatch(
             'selectContainingText',
+            layer.do_objectID,
             characterIndex,
             clickCount % 2 === 0 ? 'word' : 'line',
           );
@@ -501,6 +506,8 @@ export default memo(function Canvas() {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
         case 'maybeSelectingText': {
           const { origin } = state.interactionState;
@@ -514,7 +521,7 @@ export default memo(function Canvas() {
           break;
         }
         case 'selectingText': {
-          if (!state.selectedText) return;
+          if (!textSelection) return;
 
           const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
@@ -526,7 +533,7 @@ export default memo(function Canvas() {
 
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
-              anchor: state.selectedText.range.anchor,
+              anchor: textSelection.range.anchor,
               head: characterIndex,
             });
             return;
@@ -783,20 +790,26 @@ export default memo(function Canvas() {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
         case 'maybeSelectingText': {
-          if (!state.selectedText) {
+          if (!textSelection) {
             dispatch('interaction', ['reset']);
             return;
           }
 
-          dispatch('interaction', ['editingText', state.selectedText.layerId]);
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
         case 'selectingText':
-          if (!state.selectedText) {
+          if (!textSelection) {
             dispatch('interaction', ['reset']);
             return;
           }
@@ -809,14 +822,18 @@ export default memo(function Canvas() {
             'bounded',
           );
 
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
+
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
-              anchor: state.selectedText.range.anchor,
+              anchor: textSelection.range.anchor,
               head: characterIndex,
             });
           }
-
-          dispatch('interaction', ['editingText', state.selectedText.layerId]);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;

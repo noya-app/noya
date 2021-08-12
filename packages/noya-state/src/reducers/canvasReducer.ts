@@ -40,7 +40,6 @@ import {
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
   getSymbols,
-  MAX_TEXT_LAYER_STRING_LENGTH,
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
@@ -241,12 +240,8 @@ export function canvasReducer(
           draft.interactionState = interactionReducer(draft.interactionState, [
             'editingText',
             layer.do_objectID,
+            { anchor: 0, head: 0 },
           ]);
-
-          draft.selectedText = {
-            layerId: layer.do_objectID,
-            range: { anchor: 0, head: 0 },
-          };
         } else {
           draft.interactionState = interactionReducer(draft.interactionState, [
             'reset',
@@ -501,27 +496,11 @@ export function canvasReducer(
           ? [...action[1], page]
           : action[1],
       );
+
       return produce(state, (draft) => {
         draft.interactionState = interactionState;
 
-        if (!Selectors.getIsEditingText(interactionState.type)) {
-          delete draft.selectedText;
-        }
-
         switch (interactionState.type) {
-          case 'editingText': {
-            if (!draft.selectedText) {
-              draft.selectedText = {
-                layerId: interactionState.id,
-                range: {
-                  anchor: 0,
-                  head: MAX_TEXT_LAYER_STRING_LENGTH,
-                },
-              };
-            }
-
-            return;
-          }
           case 'maybeMoveGradientStop': {
             if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
 

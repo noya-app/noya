@@ -19,7 +19,6 @@ import {
   getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
-  TextSelectionRange,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -66,11 +65,6 @@ export type SelectedGradient = {
 
 export type SelectedPointLists = Record<string, number[]>;
 
-export type SelectedText = {
-  layerId: string;
-  range: TextSelectionRange;
-};
-
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
@@ -82,7 +76,6 @@ export type ApplicationState = {
   selectedControlPoint?: SelectedControlPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
   selectedGradient?: SelectedGradient;
-  selectedText?: SelectedText;
   sketch: SketchFile;
 };
 

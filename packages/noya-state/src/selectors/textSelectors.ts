@@ -6,7 +6,13 @@ import {
   Point,
   rectContainsPoint,
 } from 'noya-geometry';
-import { InteractionState, Layers, Primitives, Selectors } from 'noya-state';
+import {
+  InteractionState,
+  Layers,
+  Primitives,
+  Selectors,
+  TextSelectionRange,
+} from 'noya-state';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
@@ -18,6 +24,34 @@ export const getIsEditingText = (type: InteractionState['type']): boolean => {
     type === 'selectingText'
   );
 };
+
+export const hasTextSelection = (
+  interactionState: InteractionState,
+): interactionState is Extract<
+  InteractionState,
+  { type: 'editingText' | 'maybeSelectingText' | 'selectingText' }
+> => {
+  return (
+    interactionState.type === 'editingText' ||
+    interactionState.type === 'maybeSelectingText' ||
+    interactionState.type === 'selectingText'
+  );
+};
+
+export type TextSelection = {
+  layerId: string;
+  range: TextSelectionRange;
+};
+
+export function getTextSelection(
+  state: ApplicationState,
+): TextSelection | undefined {
+  if (!Selectors.hasTextSelection(state.interactionState)) return;
+
+  const { layerId, range } = state.interactionState;
+
+  return { layerId, range };
+}
 
 export function applyTextTransform(
   text: string,
@@ -142,13 +176,15 @@ export function getCharacterIndexAtPointInSelectedLayer(
   point: Point,
   mode: 'bounded' | 'unbounded',
 ) {
-  if (!state.selectedText) return;
+  const selection = getTextSelection(state);
+
+  if (!selection) return;
 
   return getCharacterIndexAtPoint(
     CanvasKit,
     fontManager,
     state,
-    state.selectedText.layerId,
+    selection.layerId,
     point,
     mode,
   );
