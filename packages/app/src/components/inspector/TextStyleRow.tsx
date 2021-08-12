@@ -6,6 +6,14 @@ import {
   MenuItem,
   Select,
 } from 'noya-designsystem';
+import {
+  decodeFontVariant,
+  FontVariant,
+  getFontFamilyList,
+  getFontVariants,
+  hasFontFamily,
+  isValidFontVariant,
+} from 'noya-google-fonts';
 import { SetNumberMode } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -37,16 +45,22 @@ const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
     title: value,
   }));
 
+const DEFAULT_FONT_VARIANT_OPTIONS: FontVariant[] = ['regular'];
+
+const upperFirst = (string: string) =>
+  string.slice(0, 1).toUpperCase() + string.slice(1);
+
 interface TextStyleRowProps {
   fontSize?: number;
   fontFamily?: string;
+  fontVariant?: string;
   fontColor?: Sketch.Color;
   lineSpacing?: number;
   letterSpacing?: number;
   paragraphSpacing?: number;
   onChangeFontSize: (value: number, mode: SetNumberMode) => void;
   onChangeFontFamily: (value: string) => void;
-  onChangeFontWeight: (value: string) => void;
+  onChangeFontVariant: (value?: string) => void;
   onChangeFontColor: (color: Sketch.Color) => void;
   onChangeLineSpacing: (value: number, mode: SetNumberMode) => void;
   onChangeLetterSpacing: (value: number, mode: SetNumberMode) => void;
@@ -57,13 +71,14 @@ export default memo(function TextStyleRow({
   fontColor,
   fontSize,
   fontFamily,
+  fontVariant,
   lineSpacing,
   letterSpacing,
   paragraphSpacing,
   onChangeFontColor,
   onChangeFontSize,
   onChangeFontFamily,
-  onChangeFontWeight,
+  onChangeFontVariant,
   onChangeLineSpacing,
   onChangeLetterSpacing,
   onChangeParagraphSpacing,
@@ -73,33 +88,12 @@ export default memo(function TextStyleRow({
   const paragraphInputId = `paragraph`;
   const fontSizeId = `size`;
 
-  // const [family, size] = useMemo(
-  //   () => fontFamily.replace('MT', '').split('-'),
-  //   [fontFamily],
-  // );
+  const fontFamilyOptions = getFontFamilyList();
 
-  // This it's for testing
-  const fontFamilies = [
-    'Arial',
-    'Helvetica',
-    'Verdana',
-    'Trebuchet MS',
-    'Times',
-    'SegoeUI',
-  ];
-  const fontSizes = useMemo(
-    () => [
-      { id: '', text: 'Regular' },
-      { id: 'Oblique', text: 'Oblique' },
-      { id: 'LightOblique', text: 'Light Oblique' },
-      { id: 'Light', text: 'Light' },
-      { id: 'Bold', text: 'Bold' },
-      { id: 'SemiBold', text: 'Semi Bold' },
-      { id: 'BoldOblique', text: 'Bold Oblique' },
-      { id: 'Italic', text: 'Italic' },
-    ],
-    [],
-  );
+  const fontVariantOptions =
+    fontFamily && hasFontFamily(fontFamily)
+      ? getFontVariants(fontFamily)
+      : DEFAULT_FONT_VARIANT_OPTIONS;
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -119,15 +113,6 @@ export default memo(function TextStyleRow({
     [characterInputId, fontSizeId, lineInputId, paragraphInputId],
   );
 
-  const textSizeOptions = useMemo(
-    () => [...fontSizes.map((style) => style.id)],
-    [fontSizes],
-  );
-  const getTextSizeTitle = useCallback(
-    (id) => fontSizes.find((size) => size.id === id)!.text,
-    [fontSizes],
-  );
-
   const { horizontalSeparator } = useTheme().sizes.inspector;
 
   return (
@@ -139,21 +124,45 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
-          value={fontFamily ?? ''}
-          options={fontFamilies}
+          value={fontFamily || ''}
+          options={fontFamilyOptions}
           getTitle={(name) => name}
-          onChange={onChangeFontFamily}
+          onChange={useCallback(
+            (familyName: string) => {
+              onChangeFontFamily(familyName);
+
+              if (fontVariant !== undefined && hasFontFamily(familyName)) {
+                const fontVariants = getFontVariants(familyName);
+
+                if (!(fontVariants as string[]).includes(fontVariant)) {
+                  onChangeFontVariant(undefined);
+                }
+              }
+            },
+            [fontVariant, onChangeFontFamily, onChangeFontVariant],
+          )}
         />
       </InspectorPrimitives.Row>
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Select
-          id="font-weight"
+          id="font-variant"
           flex={`0 0 calc(75% - ${(horizontalSeparator * 1) / 4}px)`}
-          value={'Regular'}
-          options={textSizeOptions}
-          getTitle={getTextSizeTitle}
-          onChange={onChangeFontWeight}
+          value={fontVariant || 'regular'}
+          options={fontVariantOptions}
+          getTitle={useCallback((variant) => {
+            if (!isValidFontVariant(variant)) return variant;
+
+            const { variantName, weight } = decodeFontVariant(variant);
+
+            return [
+              upperFirst(variantName),
+              weight !== 'regular' ? upperFirst(weight) : undefined,
+            ]
+              .filter((x): x is string => !!x)
+              .join(' ');
+          }, [])}
+          onChange={onChangeFontVariant}
         />
         <InspectorPrimitives.HorizontalSeparator />
         <FillInputFieldWithPicker

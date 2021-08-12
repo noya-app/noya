@@ -51,3 +51,15 @@ export function getEncodedStringAttributes(
     paragraphStyle: encodedAttributes?.paragraphStyle,
   };
 }
+
+export function encodeFontName(fontFamily: string, variant?: string) {
+  return variant ? `${fontFamily}-${variant}` : fontFamily;
+}
+
+export function decodeFontName(
+  fontName: string,
+): { fontFamily: string; variant?: string } {
+  const [fontFamily, variant] = fontName.split('-');
+
+  return { fontFamily, variant: variant || undefined };
+}

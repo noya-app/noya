@@ -353,6 +353,7 @@ export function applicationReducer(
     }
     case 'setTextColor':
     case 'setTextFontName':
+    case 'setTextFontVariant':
     case 'setTextFontSize':
     case 'setTextLineSpacing':
     case 'setTextLetterSpacing':

@@ -6,6 +6,7 @@ import { SimpleTextDecoration } from './primitives';
 
 export type EditableTextStyle = {
   fontFamily?: string;
+  fontVariant?: string;
   fontColor?: Sketch.Color;
   fontSize?: number;
   letterSpacing?: number;
@@ -20,10 +21,13 @@ export type EditableTextStyle = {
 function getEditableTextStyleProperties(
   textStyle: Sketch.TextStyle,
 ): EditableTextStyle {
+  const { fontFamily, variant: fontVariant } = Selectors.decodeFontName(
+    textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes.name,
+  );
+
   return {
-    fontFamily:
-      textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes
-        .name,
+    fontFamily,
+    fontVariant,
     fontColor: textStyle.encodedAttributes.MSAttributedStringColorAttribute,
     fontSize:
       textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes
@@ -49,6 +53,9 @@ export function getEditableTextStyle(
   return {
     fontFamily: getMultiValue(
       properties.map((textStyle) => textStyle.fontFamily),
+    ),
+    fontVariant: getMultiValue(
+      properties.map((textStyle) => textStyle.fontVariant),
     ),
     fontColor: getMultiValue(
       properties.map((textStyle) => textStyle.fontColor),

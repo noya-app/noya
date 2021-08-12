@@ -1,10 +1,12 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { Selectors } from 'noya-state';
 import { SetNumberMode } from './styleReducer';
 
 export type StringAttributeAction =
   | [type: 'setTextColor', value: Sketch.Color]
   | [type: 'setTextFontName', value: string]
+  | [type: 'setTextFontVariant', value?: string]
   | [type: 'setTextFontSize', value: number, mode: SetNumberMode]
   | [type: 'setTextLetterSpacing', value: number, mode: SetNumberMode]
   | [type: 'setTextLineSpacing', value: number, mode: SetNumberMode]
@@ -34,13 +36,20 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
       return produce(state, (draft) => {
         const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        // This logic is temporary and will be replaced when we handle fonts
-        const split = attributes.name.split('-');
-        const face = split[1] ? '-' + split[1] : '';
+        const { variant } = Selectors.decodeFontName(attributes.name);
 
-        attributes.name = value.startsWith('-')
-          ? split[0] + value
-          : value + face;
+        attributes.name = Selectors.encodeFontName(value, variant);
+      });
+    }
+    case 'setTextFontVariant': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        const attributes = draft.MSAttributedStringFontAttribute.attributes;
+
+        const { fontFamily } = Selectors.decodeFontName(attributes.name);
+
+        attributes.name = Selectors.encodeFontName(fontFamily, value);
       });
     }
     case 'setTextFontSize': {
