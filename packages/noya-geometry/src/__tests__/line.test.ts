@@ -159,6 +159,7 @@ describe('percent on circumference', () => {
     const center = { x: 5, y: 0 };
 
     expect(getCirclePercentage({ x: 10, y: 0 }, center)).toEqual(0);
+    expect(getCirclePercentage({ x: 10, y: 0 }, center, Math.PI)).toEqual(0.5);
     expect(getCirclePercentage({ x: 5, y: 5 }, center)).toEqual(0.25);
     expect(getCirclePercentage({ x: 0, y: 0 }, center)).toEqual(0.5);
     expect(getCirclePercentage({ x: 5, y: -5 }, center)).toEqual(0.75);

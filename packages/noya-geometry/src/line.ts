@@ -1,6 +1,5 @@
 import { clamp } from 'noya-utils';
 import { distance } from './point';
-import { toDegrees } from './radians';
 import { Point } from './types';
 
 // http://paulbourke.net/geometry/pointlineplane/
@@ -54,11 +53,17 @@ export function isPointOnCircumference(
   return Math.abs(distance(point, center) - radius) < 2;
 }
 
-export function getCirclePercentage(point: Point, center: Point) {
-  let angle = toDegrees(Math.atan2(point.y - center.y, point.x - center.x));
+export function getCirclePercentage(
+  point: Point,
+  center: Point,
+  extraRotation: number = 0,
+) {
+  let angle =
+    Math.atan2(point.y - center.y, point.x - center.x) + extraRotation;
 
   if (angle < 0) {
-    angle += 360;
+    angle += Math.PI * 2;
   }
-  return angle / 360;
+
+  return angle / (Math.PI * 2);
 }

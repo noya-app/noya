@@ -90,6 +90,7 @@ export function getSelectedGradientStopPoints(
     const circle = getAngularGradientCircle(state);
 
     if (!circle) return;
+
     const { center, radius, rotation } = circle;
 
     return stops.map((stop) => {
@@ -197,12 +198,13 @@ export function getPercentageOfPointInGradient(
   );
 
   if (!gradient) return 0;
+
   if (gradient.gradientType === Sketch.GradientType.Angular) {
     const circle = getAngularGradientCircle(state);
+
     if (!circle) return 0;
 
-    const percentage = getCirclePercentage(point, circle.center);
-    return percentage;
+    return getCirclePercentage(point, circle.center);
   }
 
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
@@ -226,6 +228,7 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
 
   if (gradient.gradientType === Sketch.GradientType.Angular) {
     const circle = getAngularGradientCircle(state);
+
     if (!circle) return false;
 
     return isPointOnCircumference(point, circle);

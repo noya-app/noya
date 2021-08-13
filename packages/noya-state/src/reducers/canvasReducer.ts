@@ -650,9 +650,15 @@ export function canvasReducer(
 
             if (isAngular) {
               const circle = getAngularGradientCircle(state);
+
               if (!circle) return;
 
-              const position = getCirclePercentage(current, circle.center);
+              const position = getCirclePercentage(
+                current,
+                circle.center,
+                -circle.rotation,
+              );
+
               draftGradient.stops[stopIndex].position = position;
             } else {
               switch (stopIndex) {

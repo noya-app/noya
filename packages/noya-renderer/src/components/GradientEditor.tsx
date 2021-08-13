@@ -23,6 +23,7 @@ const AngularGradientEditor = () => {
   const gradientLineStroke = useStroke({ color: '#FFF' });
 
   const gradientCircle = getAngularGradientCircle(state);
+
   if (!gradientCircle) return null;
 
   const path = new CanvasKit.Path();
