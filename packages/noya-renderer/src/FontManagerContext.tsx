@@ -1,4 +1,4 @@
-import { FontMgr, TypefaceFontProvider } from 'canvaskit';
+import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
 import { FontFamilyID, FontVariant, getFontFile } from 'noya-google-fonts';
 import { useCanvasKit } from 'noya-renderer';
@@ -60,6 +60,14 @@ export class FontManager extends Emitter {
     const url = getFontFile(fontFamily, fontVariant);
     const fontId = FontID.make(fontFamily, fontVariant);
 
+    if (
+      this.pendingFonts.has(fontId.toString()) ||
+      this.loadedFonts.has(fontId.toString())
+    )
+      return;
+
+    this.pendingFonts.add(fontId.toString());
+
     let data: ArrayBuffer;
 
     try {
@@ -88,7 +96,6 @@ export class FontManager extends Emitter {
 
 const FontManagerContext = createContext<
   | {
-      fontManager: FontMgr;
       typefaceFontProvider: TypefaceFontProvider;
       addFont: (fontFamily: FontFamilyID, fontVariant: FontVariant) => void;
     }
@@ -129,14 +136,6 @@ export const FontManagerProvider = memo(function FontManagerProvider({
     [CanvasKit.FontMgr, defaultFont, id],
   );
 
-  const fontManager = useMemo(
-    () =>
-      CanvasKit.FontMgr.FromData(defaultFont, ...FontManager.shared.values) ??
-      CanvasKit.FontMgr.RefDefault(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [CanvasKit.FontMgr, defaultFont, id],
-  );
-
   useEffect(() => {
     const listener = () => forceUpdate();
 
@@ -156,29 +155,15 @@ export const FontManagerProvider = memo(function FontManagerProvider({
 
   return (
     <FontManagerContext.Provider
-      value={useMemo(
-        () => ({
-          fontManager,
-          typefaceFontProvider,
-          addFont,
-        }),
-        [addFont, fontManager, typefaceFontProvider],
-      )}
+      value={useMemo(() => ({ typefaceFontProvider, addFont }), [
+        addFont,
+        typefaceFontProvider,
+      ])}
     >
       {children}
     </FontManagerContext.Provider>
   );
 });
-
-export function useFontManager(): FontMgr {
-  const value = useContext(FontManagerContext);
-
-  if (!value) {
-    throw new Error('Missing FontManagerProvider');
-  }
-
-  return value.fontManager;
-}
 
 export function useAddFont() {
   const value = useContext(FontManagerContext);

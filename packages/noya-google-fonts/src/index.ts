@@ -66,10 +66,6 @@ export function getFontFamilyIdList(): FontFamilyID[] {
   return fontRegistry.fontFamilyIds;
 }
 
-// export function hasFontFamily(fontFamily: string) {
-//   return hasFontFamilyId(new FontFamilyID(fontFamily));
-// }
-
 export function hasFontFamilyId(fontFamilyId: FontFamilyID) {
   return fontRegistry.hasFont(fontFamilyId);
 }

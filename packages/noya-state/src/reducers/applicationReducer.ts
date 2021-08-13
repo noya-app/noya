@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, FontMgr, TypefaceFontProvider } from 'canvaskit';
+import { CanvasKit, TypefaceFontProvider } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { Size } from 'noya-geometry';
@@ -99,7 +99,6 @@ export type Action =
 
 export type ApplicationReducerContext = {
   canvasSize: Size;
-  fontManager: FontMgr;
   typefaceFontProvider: TypefaceFontProvider;
 };
 

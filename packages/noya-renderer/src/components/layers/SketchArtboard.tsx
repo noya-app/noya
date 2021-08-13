@@ -7,17 +7,12 @@ import {
   usePaint,
 } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
-import {
-  Group,
-  Rect as RCKRect,
-  Text,
-  useCanvasKit,
-  useFontManager,
-} from 'noya-renderer';
+import { Group, Rect as RCKRect, Text, useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import SketchGroup from './SketchGroup';
 import { useRenderingMode } from '../../RenderingModeContext';
+import { useTypefaceFontProvider } from '../../FontManagerContext';
 
 interface ArtboardLabelProps {
   text: string;
@@ -31,23 +26,23 @@ const ArtboardLabel = memo(function ArtboardLabel({
   isSymbolMaster,
 }: ArtboardLabelProps) {
   const CanvasKit = useCanvasKit();
+  const typefaceFontProvider = useTypefaceFontProvider();
   const { colors } = useTheme();
   const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
-  const fontManager = useFontManager();
 
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
         color: CanvasKit.parseColorString(textColor),
         fontSize: 11,
-        fontFamilies: ['Roboto'],
+        fontFamilies: ['system'],
         letterSpacing: 0.2,
       },
     });
 
-    const builder = CanvasKit.ParagraphBuilder.Make(
+    const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
       paragraphStyle,
-      fontManager,
+      typefaceFontProvider,
     );
     builder.addText(text);
 
@@ -57,7 +52,7 @@ const ArtboardLabel = memo(function ArtboardLabel({
     builder.delete();
 
     return paragraph;
-  }, [CanvasKit, fontManager, text, textColor]);
+  }, [CanvasKit, typefaceFontProvider, text, textColor]);
 
   useDeletable(paragraph);
 
