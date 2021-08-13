@@ -49,7 +49,6 @@ export function getSelectedGradient(
 
 export type GradientStopPoint = { point: Point; color: Sketch.Color };
 
-//return angular position of the point on the gradient line
 export function getSelectedGradientStopPoints(
   state: ApplicationState,
   sorted = false,
@@ -72,16 +71,10 @@ export function getSelectedGradientStopPoints(
   )
     return;
 
-  const transform = getLayerTransformAtIndexPath(
-    page,
-    indexPath,
-    AffineTransform.identity,
-    'includeLast',
-  ).scale(layer.frame.width, layer.frame.height);
-
   const gradient = layer.style?.[styleType]?.[fillIndex].gradient;
 
   if (!gradient) return;
+
   const stops = sorted
     ? [...gradient.stops].sort((a, b) => a.position - b.position)
     : gradient.stops;
@@ -105,6 +98,13 @@ export function getSelectedGradientStopPoints(
       };
     });
   } else {
+    const transform = getLayerTransformAtIndexPath(
+      page,
+      indexPath,
+      AffineTransform.identity,
+      'includeLast',
+    ).scale(layer.frame.width, layer.frame.height);
+
     const from = PointString.decode(gradient.from);
     const to = PointString.decode(gradient.to);
 

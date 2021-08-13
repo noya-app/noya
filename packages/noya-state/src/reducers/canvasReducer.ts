@@ -624,27 +624,6 @@ export function canvasReducer(
 
             if (!gradient || !draftGradient) return;
 
-            const transform = getLayerTransformAtIndexPath(
-              pageSnapshot,
-              indexPath,
-              AffineTransform.identity,
-              'includeLast',
-            ).scale(layer.frame.width, layer.frame.height);
-
-            const delta = {
-              x: current.x - origin.x,
-              y: current.y - origin.y,
-            };
-
-            const transformPointString = (pointString: string) => {
-              const originalPoint = PointString.decode(pointString);
-              const transformedPoint = transform.applyTo(originalPoint);
-              transformedPoint.x += delta.x;
-              transformedPoint.y += delta.y;
-              const newPoint = transform.invert().applyTo(transformedPoint);
-              return PointString.encode(newPoint);
-            };
-
             const isAngular =
               gradient.gradientType === Sketch.GradientType.Angular;
 
@@ -661,6 +640,27 @@ export function canvasReducer(
 
               draftGradient.stops[stopIndex].position = position;
             } else {
+              const transform = getLayerTransformAtIndexPath(
+                pageSnapshot,
+                indexPath,
+                AffineTransform.identity,
+                'includeLast',
+              ).scale(layer.frame.width, layer.frame.height);
+
+              const delta = {
+                x: current.x - origin.x,
+                y: current.y - origin.y,
+              };
+
+              const transformPointString = (pointString: string) => {
+                const originalPoint = PointString.decode(pointString);
+                const transformedPoint = transform.applyTo(originalPoint);
+                transformedPoint.x += delta.x;
+                transformedPoint.y += delta.y;
+                const newPoint = transform.invert().applyTo(transformedPoint);
+                return PointString.encode(newPoint);
+              };
+
               switch (stopIndex) {
                 case 0: {
                   draftGradient.from = transformPointString(gradient.from);
