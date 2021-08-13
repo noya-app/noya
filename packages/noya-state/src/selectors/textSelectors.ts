@@ -6,7 +6,13 @@ import {
   Point,
   rectContainsPoint,
 } from 'noya-geometry';
-import { InteractionState, Layers, Primitives, Selectors } from 'noya-state';
+import {
+  InteractionState,
+  Layers,
+  Primitives,
+  Selectors,
+  TextSelectionRange,
+} from 'noya-state';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
@@ -18,6 +24,34 @@ export const getIsEditingText = (type: InteractionState['type']): boolean => {
     type === 'selectingText'
   );
 };
+
+export const hasTextSelection = (
+  interactionState: InteractionState,
+): interactionState is Extract<
+  InteractionState,
+  { type: 'editingText' | 'maybeSelectingText' | 'selectingText' }
+> => {
+  return (
+    interactionState.type === 'editingText' ||
+    interactionState.type === 'maybeSelectingText' ||
+    interactionState.type === 'selectingText'
+  );
+};
+
+export type TextSelection = {
+  layerId: string;
+  range: TextSelectionRange;
+};
+
+export function getTextSelection(
+  state: ApplicationState,
+): TextSelection | undefined {
+  if (!Selectors.hasTextSelection(state.interactionState)) return;
+
+  const { layerId, range } = state.interactionState;
+
+  return { layerId, range };
+}
 
 export function applyTextTransform(
   text: string,
@@ -100,16 +134,12 @@ export function getCharacterIndexAtPoint(
   CanvasKit: CanvasKit,
   fontManager: FontMgr,
   state: ApplicationState,
+  layerId: string,
   point: Point,
   mode: 'bounded' | 'unbounded',
 ) {
-  if (!state.selectedText) return;
-
   const page = Selectors.getCurrentPage(state);
-  const textLayer = Layers.find(
-    page,
-    (layer) => layer.do_objectID === state.selectedText?.layerId,
-  );
+  const textLayer = Layers.find(page, (layer) => layer.do_objectID === layerId);
 
   if (!textLayer || !Layers.isTextLayer(textLayer)) return;
 
@@ -137,4 +167,25 @@ export function getCharacterIndexAtPoint(
   );
 
   return position.pos;
+}
+
+export function getCharacterIndexAtPointInSelectedLayer(
+  CanvasKit: CanvasKit,
+  fontManager: FontMgr,
+  state: ApplicationState,
+  point: Point,
+  mode: 'bounded' | 'unbounded',
+) {
+  const selection = getTextSelection(state);
+
+  if (!selection) return;
+
+  return getCharacterIndexAtPoint(
+    CanvasKit,
+    fontManager,
+    state,
+    selection.layerId,
+    point,
+    mode,
+  );
 }

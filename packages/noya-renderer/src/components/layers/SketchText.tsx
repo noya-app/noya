@@ -149,20 +149,19 @@ export default memo(function SketchText({ layer }: Props) {
 
   const transform = AffineTransform.translate(layer.frame.x, layer.frame.y);
 
+  const selectedText = Selectors.getTextSelection(state);
+
   return (
     <Group opacity={opacity} transform={transform}>
-      {state.selectedText?.layerId === layer.do_objectID && (
+      {selectedText?.layerId === layer.do_objectID && (
         <TextSelection
           paragraph={paragraph}
-          selectedRange={state.selectedText.range}
+          selectedRange={selectedText.range}
         />
       )}
       <Text paragraph={paragraph} rect={rect} />
-      {state.selectedText?.layerId === layer.do_objectID && (
-        <TextCursor
-          paragraph={paragraph}
-          index={state.selectedText.range.head}
-        />
+      {selectedText?.layerId === layer.do_objectID && (
+        <TextCursor paragraph={paragraph} index={selectedText.range.head} />
       )}
     </Group>
   );

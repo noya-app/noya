@@ -1,11 +1,11 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import {
   Layers,
-  MAX_TEXT_LAYER_STRING_LENGTH,
   Overrides,
   PageLayer,
   Primitives,
@@ -14,7 +14,6 @@ import {
 } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
-import { useApplicationState } from 'noya-app-state-context';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';
 
@@ -95,7 +94,7 @@ const Symbol = memo(function Symbol({
             case 'stringValue':
               override.layer.attributedString = replaceTextInRange(
                 override.layer.attributedString,
-                [0, MAX_TEXT_LAYER_STRING_LENGTH],
+                [0, override.layer.attributedString.string.length],
                 override.value,
                 Selectors.getEncodedStringAttributes(override.layer.style),
               );

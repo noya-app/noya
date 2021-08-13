@@ -42,6 +42,7 @@ import styled, { useTheme } from 'styled-components';
 import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
 import useLayerMenu from '../hooks/useLayerMenu';
+import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
@@ -226,23 +227,52 @@ export default memo(function Canvas() {
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
-  const handleDoubleClick = useCallback(
-    (event: React.MouseEvent) => {
-      if (selectedLayers.length === 0) return;
-
-      const layer = selectedLayers[0];
-
-      if (Layers.isTextLayer(layer) && state.interactionState.type === 'none') {
-        dispatch('interaction', ['editingText', layer.do_objectID]);
-      }
-    },
-    [dispatch, selectedLayers, state.interactionState.type],
-  );
+  const getClickCount = useMultipleClickCount();
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
+
+      const clickCount = getClickCount(point);
+
+      if (clickCount >= 2) {
+        if (selectedLayers.length === 0) return;
+
+        const layer = selectedLayers[0];
+
+        if (!Layers.isTextLayer(layer)) return;
+
+        const characterIndex = Selectors.getCharacterIndexAtPoint(
+          CanvasKit,
+          fontManager,
+          state,
+          layer.do_objectID,
+          point,
+          'bounded',
+        );
+
+        if (state.interactionState.type === 'none') {
+          dispatch('interaction', [
+            'editingText',
+            layer.do_objectID,
+            { anchor: 0, head: layer.attributedString.string.length },
+          ]);
+        }
+
+        if (characterIndex === undefined) {
+          dispatch('selectAllText', layer.do_objectID);
+        } else {
+          dispatch(
+            'selectContainingText',
+            layer.do_objectID,
+            characterIndex,
+            clickCount % 2 === 0 ? 'word' : 'line',
+          );
+        }
+
+        return;
+      }
 
       if (MouseEvent.isRightButtonClicked(event)) {
         const layer = Selectors.getLayerAtPoint(
@@ -389,7 +419,7 @@ export default memo(function Canvas() {
         case 'hoverHandle':
         case 'editingText':
         case 'none': {
-          const characterIndex = Selectors.getCharacterIndexAtPoint(
+          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
             fontManager,
             state,
@@ -470,13 +500,24 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, CanvasKit, insets, dispatch, fontManager],
+    [
+      offsetEventPoint,
+      getClickCount,
+      state,
+      selectedLayers,
+      CanvasKit,
+      fontManager,
+      dispatch,
+      insets,
+    ],
   );
 
   const handleMouseMove = useCallback(
     (event: React.PointerEvent) => {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
+
+      const textSelection = Selectors.getTextSelection(state);
 
       switch (state.interactionState.type) {
         case 'maybeMoveGradientEllipseLength': {
@@ -507,9 +548,9 @@ export default memo(function Canvas() {
           break;
         }
         case 'selectingText': {
-          if (!state.selectedText) return;
+          if (!textSelection) return;
 
-          const characterIndex = Selectors.getCharacterIndexAtPoint(
+          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
             fontManager,
             state,
@@ -519,7 +560,7 @@ export default memo(function Canvas() {
 
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
-              anchor: state.selectedText.range.anchor,
+              anchor: textSelection.range.anchor,
               head: characterIndex,
             });
             return;
@@ -775,25 +816,31 @@ export default memo(function Canvas() {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
         case 'maybeSelectingText': {
-          if (!state.selectedText) {
+          if (!textSelection) {
             dispatch('interaction', ['reset']);
             return;
           }
 
-          dispatch('interaction', ['editingText', state.selectedText.layerId]);
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
         }
         case 'selectingText':
-          if (!state.selectedText) {
+          if (!textSelection) {
             dispatch('interaction', ['reset']);
             return;
           }
 
-          const characterIndex = Selectors.getCharacterIndexAtPoint(
+          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
             CanvasKit,
             fontManager,
             state,
@@ -801,14 +848,18 @@ export default memo(function Canvas() {
             'bounded',
           );
 
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
+
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
-              anchor: state.selectedText.range.anchor,
+              anchor: textSelection.range.anchor,
               head: characterIndex,
             });
           }
-
-          dispatch('interaction', ['editingText', state.selectedText.layerId]);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
           break;
@@ -943,6 +994,10 @@ export default memo(function Canvas() {
       case 'movingControlPoint':
       case 'movingPoint':
         return 'move';
+      case 'editingText':
+      case 'selectingText':
+      case 'maybeSelectingText':
+        return 'text';
       default:
         return 'default';
     }
@@ -1033,7 +1088,6 @@ export default memo(function Canvas() {
           id="canvas-container"
           ref={containerRef}
           cursor={cursor}
-          onDoubleClick={handleDoubleClick}
           {...mergeEventHandlers(bind(), {
             onPointerDown: handleMouseDown,
             onPointerMove: handleMouseMove,
