@@ -1,6 +1,5 @@
 import {
   decodeFontVariant,
-  FontFamilyID,
   getFontFamilyList,
   getFontFile,
   getFontFamilyId,
@@ -10,10 +9,6 @@ import {
 } from '../index';
 
 const robotoFamilyID = getFontFamilyId('roboto')!;
-
-test('it creates font family ids', () => {
-  expect(new FontFamilyID('Roboto').toString()).toEqual('roboto');
-});
 
 test('it should get font id', () => {
   expect(getFontFamilyId('Noto Sans')?.toString()).toEqual('notosans');

@@ -40,3 +40,5 @@ export function setPathToWasm(path: string) {
 }
 
 export { v4 as uuid } from 'uuid';
+
+export type Brand<K, T> = K & { __brand: T };

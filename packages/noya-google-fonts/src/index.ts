@@ -1,4 +1,10 @@
 import {
+  FontFamilyID,
+  FontProvider,
+  FontWeight,
+  formatFontFamilyID,
+} from 'noya-fonts';
+import {
   FontVariant,
   ItalicFontVariant,
   RegularFontVariant,
@@ -7,19 +13,6 @@ import {
 } from './types';
 
 export * from './types';
-
-function formatFontFamilyID(fontFamily: string) {
-  return fontFamily.toLowerCase().replace(/[ _-]/g, '');
-}
-
-export class FontFamilyID extends String {
-  constructor(fontFamily: string) {
-    super(formatFontFamilyID(fontFamily));
-  }
-
-  // Enforce typechecking. Without this, TypeScript will allow string literals
-  __tag: any;
-}
 
 export class FontRegistry {
   constructor(webfonts: WebfontFamily[]) {
@@ -36,10 +29,10 @@ export class FontRegistry {
     return this.fontMap.get(id.toString());
   }
 
-  findFontFamilyID(fontFamily: string) {
+  findFontFamilyID(fontFamily: string): FontFamilyID | undefined {
     const formatted = formatFontFamilyID(fontFamily);
     return this.fontMap.has(formatted)
-      ? new FontFamilyID(formatted)
+      ? (formatted as FontFamilyID)
       : undefined;
   }
 
@@ -50,7 +43,7 @@ export class FontRegistry {
   addFont(font: WebfontFamily) {
     const formatted = formatFontFamilyID(font.family);
     this.fontMap.set(formatted, font);
-    this.fontFamilyIds.push(new FontFamilyID(formatted));
+    this.fontFamilyIds.push(formatted as FontFamilyID);
   }
 }
 
@@ -108,17 +101,6 @@ export function getFontFile(fontFamilyID: FontFamilyID, variant: FontVariant) {
 export function getFontFamilyId(fontFamily: string): FontFamilyID | undefined {
   return fontRegistry.findFontFamilyID(fontFamily);
 }
-
-export type FontWeight =
-  | 'ultralight'
-  | 'thin'
-  | 'light'
-  | 'regular'
-  | 'medium'
-  | 'semibold'
-  | 'bold'
-  | 'heavy'
-  | 'black';
 
 export function getFontVariantWeight(variant: FontVariant) {
   switch (variant) {
@@ -189,3 +171,38 @@ export function decodeFontVariant(
     variantName: isItalicVariant(variant) ? 'italic' : 'regular',
   };
 }
+
+export function encodeFontVariant(
+  fontVariantName: 'regular' | 'italic',
+  fontWeight: FontWeight,
+): FontVariant {
+  const suffix = fontVariantName === 'regular' ? '' : 'italic';
+
+  switch (fontWeight) {
+    case 'ultralight':
+      return `100${suffix}`;
+    case 'thin':
+      return `200${suffix}`;
+    case 'light':
+      return `300${suffix}`;
+    case 'regular':
+      return fontVariantName;
+    case 'medium':
+      return `500${suffix}`;
+    case 'semibold':
+      return `600${suffix}`;
+    case 'bold':
+      return `700${suffix}`;
+    case 'heavy':
+      return `800${suffix}`;
+    case 'black':
+      return `900${suffix}`;
+  }
+}
+
+export const GoogleFontProvider: FontProvider = {
+  getFontFileUrl(fontFamilyId, fontVariantName, fontWeight) {
+    const fontVariant = encodeFontVariant(fontVariantName, fontWeight);
+    return getFontFile(fontFamilyId, fontVariant);
+  },
+};

@@ -8,7 +8,7 @@ import type {
   TextAlign,
   TextStyle,
 } from 'canvaskit';
-import { decodeFontName } from 'noya-fonts';
+import { decodeFontName, FontWeight } from 'noya-fonts';
 import {
   AffineTransform,
   createBounds,
@@ -17,11 +17,7 @@ import {
   Rect,
   resize,
 } from 'noya-geometry';
-import {
-  decodeFontVariant,
-  FontWeight,
-  isValidFontVariant,
-} from 'noya-google-fonts';
+import { decodeFontVariant, isValidFontVariant } from 'noya-google-fonts';
 import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
 import { encodeFontId } from './selectors/textStyleSelectors';

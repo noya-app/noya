@@ -1,7 +1,7 @@
 import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
-import { FontManager } from 'noya-fonts';
-import { FontFamilyID, FontVariant } from 'noya-google-fonts';
+import { FontFamilyID, FontManager } from 'noya-fonts';
+import { FontVariant, GoogleFontProvider } from 'noya-google-fonts';
 import { useCanvasKit } from 'noya-renderer';
 import { SuspendedValue } from 'noya-utils';
 import {
@@ -25,10 +25,14 @@ const FontManagerContext = createContext<
 
 const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
   fetch(
-    'http://fonts.gstatic.com/s/comicneue/v2/4UaHrEJDsxBrF37olUeDx63j5pN1MwI.ttf',
-    // 'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
+    // 'http://fonts.gstatic.com/s/comicneue/v2/4UaHrEJDsxBrF37olUeDx63j5pN1MwI.ttf',
+    'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
   ).then((resp) => resp.arrayBuffer()),
 );
+
+const sharedFontManager = new FontManager({
+  providers: [GoogleFontProvider],
+});
 
 export const FontManagerProvider = memo(function FontManagerProvider({
   children,
@@ -47,7 +51,7 @@ export const FontManagerProvider = memo(function FontManagerProvider({
 
       typefaceFontProvider.registerFont(defaultFont, 'system');
 
-      FontManager.shared.entries.forEach(([name, data]) => {
+      sharedFontManager.entries.forEach(([name, data]) => {
         typefaceFontProvider.registerFont(data, name.toString());
       });
 
@@ -60,16 +64,16 @@ export const FontManagerProvider = memo(function FontManagerProvider({
   useEffect(() => {
     const listener = () => forceUpdate();
 
-    FontManager.shared.addListener(listener);
+    sharedFontManager.addListener(listener);
 
     return () => {
-      FontManager.shared.removeListener(listener);
+      sharedFontManager.removeListener(listener);
     };
   }, []);
 
   const addFont = useCallback(
     async (fontFamily: FontFamilyID, fontVariant: FontVariant) => {
-      FontManager.shared.addFont(fontFamily, fontVariant);
+      sharedFontManager.addFont(fontFamily, fontVariant);
     },
     [],
   );
