@@ -248,7 +248,8 @@ export function getCircleTangentSquare(
   point: Point,
   ellipseLength: number,
 ) {
-  const height = distance(center, point) * 2;
+  const len = distance(center, point);
+  const height = len * 2;
   const width = ellipseLength === 0 ? height : height * ellipseLength;
 
   const theta =
@@ -257,7 +258,7 @@ export function getCircleTangentSquare(
   return {
     rectangle: {
       x: center.x - width / 2,
-      y: center.y,
+      y: center.y - len,
       height,
       width,
     },
@@ -289,7 +290,7 @@ export function isPointerOnGradientEllipseEditor(
 
   const position = AffineTransform.rotate(theta, center.x, center.y).applyTo({
     x: rectangle.x,
-    y: rectangle.y,
+    y: center.y,
   });
 
   return isPointInRange(point, position, SELECTED_GRADIENT_POINT_RADIUS);

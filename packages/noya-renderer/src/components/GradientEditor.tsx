@@ -49,6 +49,7 @@ const RadialGradientEditor = ({
   ellipseLength: number;
 }) => {
   const gradientLineStroke = useStroke({ color: '#FFF' });
+
   const { rectangle, theta } = getCircleTangentSquare(
     center,
     point,
@@ -68,14 +69,14 @@ const RadialGradientEditor = ({
 
   const ellipseSquare = CanvasKit.XYWHRect(
     rectangle.x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
-    center.y + rectangle.width / 2,
+    center.y,
     Selectors.SELECTED_GRADIENT_POINT_RADIUS,
     Selectors.SELECTED_GRADIENT_POINT_RADIUS,
   );
 
   const paint = new CanvasKit.Paint();
-  paint.setColor(CanvasKit.parseColorString('#fef'));
 
+  paint.setColor(CanvasKit.parseColorString('#fef'));
   path.addRect(ellipseSquare); // Small frame around the square
   return (
     <Group transform={AffineTransform.rotate(theta, center.x, center.y)}>
