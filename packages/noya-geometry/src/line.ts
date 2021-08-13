@@ -45,7 +45,7 @@ export function isPointInLine(point: Point, line: [Point, Point]) {
 }
 
 // TODO: Not really accurate, but works for now.
-export function isPointInCircle(
+export function isPointOnCircumference(
   point: Point,
   circle: { center: Point; radius: number },
 ) {

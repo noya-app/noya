@@ -2,7 +2,7 @@ import {
   getLinePercentage,
   getClosestPointOnLine,
   isPointInLine,
-  isPointInCircle,
+  isPointOnCircumference,
   getCirclePercentage,
 } from '../line';
 import { Point } from '../types';
@@ -134,13 +134,23 @@ describe('is point in circumference', () => {
   test('circumference', () => {
     const circumference = { center: { x: 0, y: 0 }, radius: 5 };
 
-    expect(isPointInCircle({ x: 0, y: 5 }, circumference)).toEqual(true);
-    expect(isPointInCircle({ x: -5, y: 0 }, circumference)).toEqual(true);
-    expect(isPointInCircle({ x: 0, y: -5 }, circumference)).toEqual(true);
+    expect(isPointOnCircumference({ x: 0, y: 5 }, circumference)).toEqual(true);
+    expect(isPointOnCircumference({ x: -5, y: 0 }, circumference)).toEqual(
+      true,
+    );
+    expect(isPointOnCircumference({ x: 0, y: -5 }, circumference)).toEqual(
+      true,
+    );
 
-    expect(isPointInCircle({ x: 0, y: 0 }, circumference)).toEqual(false);
-    expect(isPointInCircle({ x: -5, y: 5 }, circumference)).toEqual(false);
-    expect(isPointInCircle({ x: 5, y: 5 }, circumference)).toEqual(false);
+    expect(isPointOnCircumference({ x: 0, y: 0 }, circumference)).toEqual(
+      false,
+    );
+    expect(isPointOnCircumference({ x: -5, y: 5 }, circumference)).toEqual(
+      false,
+    );
+    expect(isPointOnCircumference({ x: 5, y: 5 }, circumference)).toEqual(
+      false,
+    );
   });
 });
 

@@ -5,7 +5,7 @@ import {
   distance,
   getCirclePercentage,
   getLinePercentage,
-  isPointInCircle,
+  isPointOnCircumference,
   isPointInLine,
   Point,
 } from 'noya-geometry';
@@ -21,8 +21,11 @@ import {
   ApplicationState,
   SelectedGradient,
 } from '../reducers/applicationReducer';
-import { getParentLayer } from './layerSelectors';
 import { SELECTED_GRADIENT_POINT_RADIUS } from './pointSelectors';
+import {
+  getLayerFlipTransform,
+  getLayerRotationTransform,
+} from './transformSelectors';
 
 export function getSelectedGradient(
   page: Sketch.Page,
@@ -85,12 +88,12 @@ export function getSelectedGradientStopPoints(
 
   if (gradient.gradientType === Sketch.GradientType.Angular) {
     const circle = getAngularGradientCircle(state);
+
     if (!circle) return;
+    const { center, radius, rotation } = circle;
 
     return stops.map((stop) => {
-      const radians = stop.position * Math.PI * 2;
-
-      const { center, radius } = circle;
+      const radians = stop.position * Math.PI * 2 + rotation;
 
       return {
         color: stop.color,
@@ -225,7 +228,7 @@ export function isPointerOnGradientLine(state: ApplicationState, point: Point) {
     const circle = getAngularGradientCircle(state);
     if (!circle) return false;
 
-    return isPointInCircle(point, circle);
+    return isPointOnCircumference(point, circle);
   }
 
   const selectedLayerGradientPoints = getSelectedGradientStopPoints(state);
@@ -301,21 +304,21 @@ export function getAngularGradientCircle(state: ApplicationState) {
 
   if (!indexPath) return;
 
-  const parent = getParentLayer(page, indexPath);
-  const frame = { ...Layers.access(page, indexPath).frame };
+  const layer = Layers.access(page, indexPath);
+  const transform = getLayerTransformAtIndexPath(page, indexPath)
+    .transform(getLayerFlipTransform(layer))
+    .transform(getLayerRotationTransform(layer));
+  const bounds = createBounds(layer.frame);
+  const center = transform.applyTo({ x: bounds.midX, y: bounds.midY });
 
-  if (parent) {
-    frame.x += parent.frame.x;
-    frame.y += parent.frame.y;
-  }
+  const radius = Math.max(layer.frame.width, layer.frame.height) / 2;
 
-  const bounds = createBounds(frame);
-  const radius = Math.max(frame.width, frame.height) / 2;
-
-  const center = { x: bounds.midX, y: bounds.midY };
+  const line = transform.applyTo({ x: bounds.maxX, y: bounds.midY });
+  const rotation = Math.atan2(line.y - center.y, line.x - center.x);
 
   return {
     center,
     radius,
+    rotation,
   };
 }
