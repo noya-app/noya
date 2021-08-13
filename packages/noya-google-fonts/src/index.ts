@@ -1,101 +1,77 @@
+import {
+  FontVariant,
+  ItalicFontVariant,
+  RegularFontVariant,
+  WebfontFamily,
+  WebfontList,
+} from './types';
+
+export * from './types';
+
+function formatFontFamilyID(fontFamily: string) {
+  return fontFamily.toLowerCase().replace(/[ _-]/g, '');
+}
+
+export class FontFamilyID extends String {
+  constructor(fontFamily: string) {
+    super(formatFontFamilyID(fontFamily));
+  }
+
+  // Enforce typechecking. Without this, TypeScript will allow string literals
+  __tag: any;
+}
+
+export class FontRegistry {
+  constructor(webfonts: WebfontFamily[]) {
+    webfonts.forEach((font) => {
+      this.addFont(font);
+    });
+  }
+
+  private fontMap = new Map<string, WebfontFamily>();
+
+  fontFamilyIds: FontFamilyID[] = [];
+
+  getFont(id: FontFamilyID) {
+    return this.fontMap.get(id.toString());
+  }
+
+  findFontFamilyID(fontFamily: string) {
+    const formatted = formatFontFamilyID(fontFamily);
+    return this.fontMap.has(formatted)
+      ? new FontFamilyID(formatted)
+      : undefined;
+  }
+
+  hasFont(id: FontFamilyID) {
+    return this.fontMap.has(id.toString());
+  }
+
+  addFont(font: WebfontFamily) {
+    const formatted = formatFontFamilyID(font.family);
+    this.fontMap.set(formatted, font);
+    this.fontFamilyIds.push(new FontFamilyID(formatted));
+  }
+}
+
 const webfontList: WebfontList = require('./fonts.json');
 const fonts = webfontList.items;
-const fontMap = fonts.reduce((result: Record<string, WebfontFamily>, item) => {
-  result[getFontId(item.family)] = item;
-  return result;
-}, {});
-
-type FontCategory =
-  | 'sans-serif'
-  | 'serif'
-  | 'display'
-  | 'handwriting'
-  | 'monospace';
-
-type FontSubset =
-  | 'latin'
-  | 'latin-ext'
-  | 'sinhala'
-  | 'greek'
-  | 'kannada'
-  | 'telugu'
-  | 'vietnamese'
-  | 'hebrew'
-  | 'cyrillic'
-  | 'cyrillic-ext'
-  | 'greek-ext'
-  | 'arabic'
-  | 'devanagari'
-  | 'khmer'
-  | 'tamil'
-  | 'thai'
-  | 'bengali'
-  | 'gujarati'
-  | 'oriya'
-  | 'malayalam'
-  | 'gurmukhi'
-  | 'korean'
-  | 'japanese'
-  | 'tibetan'
-  | 'chinese-simplified'
-  | 'chinese-hongkong'
-  | 'chinese-traditional'
-  | 'myanmar';
-
-export type RegularFontVariant =
-  | '100'
-  | '200'
-  | '300'
-  | 'regular'
-  | '500'
-  | '600'
-  | '700'
-  | '800'
-  | '900';
-
-export type ItalicFontVariant =
-  | '100italic'
-  | '200italic'
-  | '300italic'
-  | 'italic'
-  | '500italic'
-  | '600italic'
-  | '700italic'
-  | '800italic'
-  | '900italic';
-
-export type FontVariant = RegularFontVariant | ItalicFontVariant;
-
-export interface WebfontFamily {
-  family: string;
-  variants: FontVariant[];
-  subsets: FontSubset[];
-  version: string;
-  lastModified: string;
-  files: Record<FontVariant, string>;
-  category: FontCategory;
-  kind: 'webfonts#webfont';
-}
-
-interface WebfontList {
-  items: WebfontFamily[];
-  kind: 'webfonts#webfontList';
-}
+const fontRegistry = new FontRegistry(fonts);
 
 export function getFontFamilyList() {
   return fonts.map((font) => font.family);
 }
 
-export function getFontIdList() {
-  return fonts.map((font) => getFontId(font.family));
+export function getFontFamilyIdList(): FontFamilyID[] {
+  return fontRegistry.fontFamilyIds;
 }
 
-export function hasFontFamily(fontFamily: string) {
-  return getFontId(fontFamily) in fontMap;
-}
+// export function hasFontFamily(fontFamily: string) {
+//   return hasFontFamilyId(new FontFamilyID(fontFamily));
+// }
 
-export function hasFontId(fontId: string) {
-  return fontId in fontMap;
+export function hasFontFamilyId(fontFamilyId: FontFamilyID) {
+  return fontRegistry.hasFont(fontFamilyId);
 }
 
 export type FontVariantCollection = {
@@ -111,30 +87,30 @@ function isRegularVariant(variant: FontVariant): variant is RegularFontVariant {
   return !variant.includes('italic');
 }
 
-export function getFontDefinition(fontFamily: string) {
-  return fontMap[getFontId(fontFamily)];
+export function getFontDefinition(fontFamilyID: FontFamilyID) {
+  return fontRegistry.getFont(fontFamilyID)!;
 }
 
-export function getFontVariants(fontFamily: string) {
-  return getFontDefinition(fontFamily).variants;
+export function getFontVariants(fontFamilyID: FontFamilyID) {
+  return getFontDefinition(fontFamilyID).variants;
 }
 
 export function getFontVariantCollection(
-  fontFamily: string,
+  fontFamilyID: FontFamilyID,
 ): FontVariantCollection {
-  const variants = getFontDefinition(fontFamily).variants;
+  const variants = getFontDefinition(fontFamilyID).variants;
   const regular = variants.filter(isRegularVariant);
   const italic = variants.filter(isItalicVariant);
 
   return { regular, italic };
 }
 
-export function getFontFile(fontFamily: string, variant: FontVariant) {
-  return getFontDefinition(fontFamily).files[variant];
+export function getFontFile(fontFamilyID: FontFamilyID, variant: FontVariant) {
+  return getFontDefinition(fontFamilyID).files[variant];
 }
 
-export function getFontId(fontFamily: string) {
-  return fontFamily.toLowerCase().replace(/[ _-]/g, '');
+export function getFontFamilyId(fontFamily: string): FontFamilyID | undefined {
+  return fontRegistry.findFontFamilyID(fontFamily);
 }
 
 export type FontWeight =

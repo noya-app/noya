@@ -1,5 +1,5 @@
 import { StateProvider } from 'noya-app-state-context';
-import { isValidFontVariant } from 'noya-google-fonts';
+import { getFontFamilyId, isValidFontVariant } from 'noya-google-fonts';
 import {
   CanvasKitProvider,
   FontManagerProvider,
@@ -89,14 +89,15 @@ function Contents() {
     const fontNames = Selectors.getAllFontNames(state.value.history.present);
 
     fontNames.forEach((fontName) => {
-      const font = Selectors.decodeFontName(fontName);
+      const { fontFamily, fontVariant = 'regular' } = Selectors.decodeFontName(
+        fontName,
+      );
 
-      const fontVariant =
-        font.fontVariant && isValidFontVariant(font.fontVariant)
-          ? font.fontVariant
-          : 'regular';
+      const fontFamilyId = getFontFamilyId(fontFamily);
 
-      addFont(font.fontFamily, fontVariant);
+      if (!fontFamilyId || !isValidFontVariant(fontVariant)) return;
+
+      addFont(fontFamilyId, fontVariant);
     });
   }, [addFont, state]);
 

@@ -373,7 +373,7 @@ export function createCanvasKitTextStyle(
 
   return new CanvasKit.TextStyle({
     ...(textColor && { color: color(CanvasKit, textColor) }),
-    fontFamilies: [fontId, 'system'],
+    fontFamilies: fontId ? [fontId.toString(), 'system'] : ['system'],
     fontSize: font.attributes.size,
     fontStyle: {
       slant:

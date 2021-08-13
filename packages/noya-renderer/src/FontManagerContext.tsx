@@ -1,8 +1,7 @@
 import { FontMgr, TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
-import { FontVariant, getFontFile, hasFontFamily } from 'noya-google-fonts';
+import { FontFamilyID, FontVariant, getFontFile } from 'noya-google-fonts';
 import { useCanvasKit } from 'noya-renderer';
-import { Selectors } from 'noya-state';
 import { SuspendedValue } from 'noya-utils';
 import {
   createContext,
@@ -15,15 +14,83 @@ import {
   useReducer,
 } from 'react';
 
-const loadedFonts: Record<string, ArrayBuffer> = {};
-const pendingFonts: Set<string> = new Set();
-let listeners: (() => void)[] = [];
+export class FontID extends String {
+  // Enforce typechecking. Without this, TypeScript will allow string literals
+  __tag: any;
+
+  static make(fontFamilyID: FontFamilyID, fontVariant: FontVariant) {
+    return new FontID(`${fontFamilyID}-${fontVariant}`);
+  }
+}
+
+class Emitter {
+  private listeners: (() => void)[] = [];
+
+  addListener(f: () => void) {
+    this.listeners.push(f);
+  }
+
+  removeListener(f: () => void) {
+    const index = this.listeners.indexOf(f);
+
+    if (index === -1) return;
+
+    this.listeners.splice(index, 1);
+  }
+
+  emit() {
+    this.listeners.forEach((l) => l());
+  }
+}
+
+export class FontManager extends Emitter {
+  get entries() {
+    return [...this.loadedFonts.entries()];
+  }
+
+  get values() {
+    return [...this.loadedFonts.values()];
+  }
+
+  private loadedFonts: Map<string, ArrayBuffer> = new Map();
+
+  private pendingFonts: Set<string> = new Set();
+
+  async addFont(fontFamily: FontFamilyID, fontVariant: FontVariant) {
+    const url = getFontFile(fontFamily, fontVariant);
+    const fontId = FontID.make(fontFamily, fontVariant);
+
+    let data: ArrayBuffer;
+
+    try {
+      data = await fetch(url).then((resp) => resp.arrayBuffer());
+    } catch (error) {
+      console.warn('Failed to load font', fontId);
+      return;
+    } finally {
+      this.pendingFonts.delete(fontId.toString());
+    }
+
+    console.info('fetched font', {
+      fontFamily,
+      fontVariant,
+      url,
+      data: data.byteLength,
+    });
+
+    this.loadedFonts.set(fontId.toString(), data);
+
+    this.emit();
+  }
+
+  static shared = new FontManager();
+}
 
 const FontManagerContext = createContext<
   | {
       fontManager: FontMgr;
       typefaceFontProvider: TypefaceFontProvider;
-      addFont: (fontFamily: string, fontVariant: FontVariant) => void;
+      addFont: (fontFamily: FontFamilyID, fontVariant: FontVariant) => void;
     }
   | undefined
 >(undefined);
@@ -52,9 +119,8 @@ export const FontManagerProvider = memo(function FontManagerProvider({
 
       typefaceFontProvider.registerFont(defaultFont, 'system');
 
-      Object.entries(loadedFonts).forEach(([name, data]) => {
-        // console.log('register font', name);
-        typefaceFontProvider.registerFont(data, name);
+      FontManager.shared.entries.forEach(([name, data]) => {
+        typefaceFontProvider.registerFont(data, name.toString());
       });
 
       return typefaceFontProvider;
@@ -64,87 +130,29 @@ export const FontManagerProvider = memo(function FontManagerProvider({
   );
 
   const fontManager = useMemo(
-    () => {
-      const fonts = Object.values(loadedFonts);
-
-      // console.log('creating font manager', defaultFont, ...fonts);
-
-      const manager = CanvasKit.FontMgr.FromData(defaultFont, ...fonts);
-
-      if (!manager) {
-        console.error('Failed to create font manager');
-        return CanvasKit.FontMgr.RefDefault();
-      }
-
-      // let count = manager.countFamilies();
-
-      // console.log('font family count', count);
-
-      // for (let i = 0; i < count; i++) {
-      //   console.log('family', i, manager.getFamilyName(i));
-      // }
-
-      return manager;
-    },
+    () =>
+      CanvasKit.FontMgr.FromData(defaultFont, ...FontManager.shared.values) ??
+      CanvasKit.FontMgr.RefDefault(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [CanvasKit.FontMgr, defaultFont, id],
   );
 
   useEffect(() => {
-    const listener = () => {
-      forceUpdate();
-    };
+    const listener = () => forceUpdate();
 
-    listeners.push(listener);
+    FontManager.shared.addListener(listener);
 
     return () => {
-      listeners = listeners.filter((l) => l !== listener);
+      FontManager.shared.removeListener(listener);
     };
   }, []);
 
   const addFont = useCallback(
-    async (fontFamily: string, fontVariant: FontVariant) => {
-      if (!hasFontFamily(fontFamily)) {
-        // console.info(
-        //   `Ignore loading unrecognized font: ${fontFamily}, ${fontVariant}`,
-        // );
-        return;
-      }
-
-      const fontId = Selectors.encodeFontId(fontFamily, fontVariant);
-
-      if (pendingFonts.has(fontId) || fontId in loadedFonts) return;
-
-      pendingFonts.add(fontId);
-
-      const url = getFontFile(fontFamily, fontVariant);
-
-      let data: ArrayBuffer;
-
-      try {
-        data = await fetch(url).then((resp) => resp.arrayBuffer());
-      } catch (error) {
-        console.warn('Failed to load font', fontId);
-        return;
-      } finally {
-        pendingFonts.delete(fontId);
-      }
-
-      console.info('fetched font', {
-        fontFamily,
-        fontVariant,
-        url,
-        data: data.byteLength,
-      });
-
-      loadedFonts[fontId] = data;
-
-      listeners.forEach((l) => l());
+    async (fontFamily: FontFamilyID, fontVariant: FontVariant) => {
+      FontManager.shared.addFont(fontFamily, fontVariant);
     },
     [],
   );
-
-  // console.log('re', fontManager.countFamilies(), loadedFonts);
 
   return (
     <FontManagerContext.Provider

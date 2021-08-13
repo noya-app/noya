@@ -1,19 +1,33 @@
 import {
   decodeFontVariant,
+  FontFamilyID,
   getFontFamilyList,
   getFontFile,
-  getFontId,
+  getFontFamilyId,
   getFontVariantCollection,
   getFontVariants,
   getFontVariantWeight,
 } from '../index';
+
+const robotoFamilyID = getFontFamilyId('roboto')!;
+
+test('it creates font family ids', () => {
+  expect(new FontFamilyID('Roboto').toString()).toEqual('roboto');
+});
+
+test('it should get font id', () => {
+  expect(getFontFamilyId('Noto Sans')?.toString()).toEqual('notosans');
+  expect(getFontFamilyId('NotoSans')?.toString()).toEqual('notosans');
+  expect(getFontFamilyId('Noto-Sans')?.toString()).toEqual('notosans');
+  expect(getFontFamilyId('Noto_Sans')?.toString()).toEqual('notosans');
+});
 
 test('it should get all font families', () => {
   expect(getFontFamilyList().length).toEqual(1075);
 });
 
 test('it should get font variants', () => {
-  expect(getFontVariants('Roboto')).toEqual([
+  expect(getFontVariants(robotoFamilyID)).toEqual([
     '100',
     '100italic',
     '300',
@@ -30,7 +44,7 @@ test('it should get font variants', () => {
 });
 
 test('it should get a font variant collection', () => {
-  expect(getFontVariantCollection('Roboto')).toEqual({
+  expect(getFontVariantCollection(robotoFamilyID)).toEqual({
     regular: ['100', '300', 'regular', '500', '700', '900'],
     italic: [
       '100italic',
@@ -58,14 +72,7 @@ test('it should decode font variant', () => {
 });
 
 test('it should get font file', () => {
-  expect(getFontFile('Roboto', '500')).toEqual(
+  expect(getFontFile(robotoFamilyID, '500')).toEqual(
     'http://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9vAx05IsDqlA.ttf',
   );
-});
-
-test('it should get font id', () => {
-  expect(getFontId('Noto Sans')).toEqual('notosans');
-  expect(getFontId('NotoSans')).toEqual('notosans');
-  expect(getFontId('Noto-Sans')).toEqual('notosans');
-  expect(getFontId('Noto_Sans')).toEqual('notosans');
 });

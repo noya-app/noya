@@ -10,11 +10,10 @@ import {
   decodeFontVariant,
   FontVariant,
   getFontDefinition,
-  getFontId,
-  getFontIdList,
+  getFontFamilyId,
+  getFontFamilyIdList,
   getFontVariants,
-  hasFontFamily,
-  hasFontId,
+  hasFontFamilyId,
   isValidFontVariant,
 } from 'noya-google-fonts';
 import { SetNumberMode } from 'noya-state';
@@ -93,21 +92,23 @@ export default memo(function TextStyleRow({
   const paragraphInputId = `paragraph`;
   const fontSizeId = `size`;
 
-  const fontId = fontFamily ? getFontId(fontFamily) : undefined;
-  const fontIdOptions = useMemo(() => {
-    const fontIdList = getFontIdList();
+  const fontFamilyId = fontFamily ? getFontFamilyId(fontFamily) : undefined;
 
-    if (!fontId) {
-      return [...fontIdList, MULTIPLE_TYPEFACES];
-    }
+  const fontFamilyIdOptions = useMemo(() => {
+    const fontIdList = getFontFamilyIdList();
 
-    return hasFontId(fontId) ? fontIdList : [...fontIdList, fontId];
-  }, [fontId]);
+    const combinedList = !fontFamilyId
+      ? [...fontIdList, MULTIPLE_TYPEFACES]
+      : hasFontFamilyId(fontFamilyId)
+      ? fontIdList
+      : [...fontIdList, fontFamilyId];
 
-  const fontVariantOptions =
-    fontFamily && hasFontFamily(fontFamily)
-      ? getFontVariants(fontFamily)
-      : DEFAULT_FONT_VARIANT_OPTIONS;
+    return combinedList.map((id) => id.toString());
+  }, [fontFamilyId]);
+
+  const fontVariantOptions = fontFamilyId
+    ? getFontVariants(fontFamilyId)
+    : DEFAULT_FONT_VARIANT_OPTIONS;
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -138,26 +139,34 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
-          value={fontId || 'Multiple Typefaces'}
-          options={fontIdOptions}
+          value={fontFamilyId?.toString() || 'Multiple Typefaces'}
+          options={fontFamilyIdOptions}
           getTitle={useCallback(
-            (fontId: string) => {
-              if (fontId === MULTIPLE_TYPEFACES) return fontId;
+            (value: string) => {
+              if (value === MULTIPLE_TYPEFACES) return value;
 
-              if (!hasFontId(fontId)) return fontFamily ?? fontId;
+              const fontFamilyId = getFontFamilyId(value);
 
-              return getFontDefinition(fontId).family;
+              if (!fontFamilyId) return fontFamily ?? value;
+
+              return getFontDefinition(fontFamilyId).family;
             },
             [fontFamily],
           )}
           onChange={useCallback(
-            (fontId: string) => {
-              const fontFamily = getFontDefinition(fontId).family;
+            (value: string) => {
+              if (value === MULTIPLE_TYPEFACES) return;
+
+              const fontFamilyId = getFontFamilyId(value);
+
+              if (!fontFamilyId) return;
+
+              const fontFamily = getFontDefinition(fontFamilyId).family;
 
               onChangeFontFamily(fontFamily);
 
-              if (fontVariant !== undefined && hasFontFamily(fontFamily)) {
-                const fontVariants = getFontVariants(fontFamily);
+              if (fontVariant !== undefined && fontFamilyId) {
+                const fontVariants = getFontVariants(fontFamilyId);
 
                 if (!(fontVariants as string[]).includes(fontVariant)) {
                   onChangeFontVariant(undefined);

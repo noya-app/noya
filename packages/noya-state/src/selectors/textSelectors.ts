@@ -83,13 +83,16 @@ export function getLayerParagraph(
 
   const heightMultiplier = lineHeight ? lineHeight / fontSize : undefined;
 
-  const fontIdsWithSystemFont = [...fontIds, 'system'];
+  const registeredFontFamilies = [
+    ...fontIds.map((fontId) => fontId.toString()),
+    'system',
+  ];
 
   const paragraphStyle = new CanvasKit.ParagraphStyle({
     // Note: We can put a heightMultiplier in text style, but it has no effect
     textStyle: {
       color: CanvasKit.BLACK,
-      fontFamilies: fontIdsWithSystemFont,
+      fontFamilies: registeredFontFamilies,
       fontSize,
     },
     textAlign: Primitives.textHorizontalAlignment(
@@ -103,7 +106,7 @@ export function getLayerParagraph(
     //
     // For more on struts: https://en.wikipedia.org/wiki/Strut_(typesetting)
     strutStyle: {
-      fontFamilies: fontIdsWithSystemFont,
+      fontFamilies: registeredFontFamilies,
       strutEnabled: true,
       forceStrutHeight: true,
       fontSize,
