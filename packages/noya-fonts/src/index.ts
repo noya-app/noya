@@ -1,4 +1,5 @@
 import { FontFamilyID, FontVariant, getFontFile } from 'noya-google-fonts';
+import { Emitter } from './Emitter';
 
 export class FontID extends String {
   // Enforce typechecking. Without this, TypeScript will allow string literals
@@ -6,26 +7,6 @@ export class FontID extends String {
 
   static make(fontFamilyID: FontFamilyID, fontVariant: FontVariant) {
     return new FontID(`${fontFamilyID}-${fontVariant}`);
-  }
-}
-
-class Emitter {
-  private listeners: (() => void)[] = [];
-
-  addListener(f: () => void) {
-    this.listeners.push(f);
-  }
-
-  removeListener(f: () => void) {
-    const index = this.listeners.indexOf(f);
-
-    if (index === -1) return;
-
-    this.listeners.splice(index, 1);
-  }
-
-  emit() {
-    this.listeners.forEach((l) => l());
   }
 }
 
@@ -78,4 +59,22 @@ export class FontManager extends Emitter {
   }
 
   static shared = new FontManager();
+}
+
+/**
+ * Split a font name into a font family and variant
+ */
+export function decodeFontName(
+  fontName: string,
+): { fontFamily: string; fontVariant?: string } {
+  const [fontFamily, fontVariant] = fontName.split('-');
+
+  return { fontFamily, fontVariant: fontVariant || undefined };
+}
+
+/**
+ * Combine a font family and variant into a font name
+ */
+export function encodeFontName(fontFamily: string, variant?: string) {
+  return variant ? `${fontFamily}-${variant}` : fontFamily;
 }

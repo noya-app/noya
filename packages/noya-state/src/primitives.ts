@@ -1,20 +1,21 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type {
   CanvasKit,
+  FontWeight as CKFontWeight,
   Paint,
   Path,
   Shader,
   TextAlign,
   TextStyle,
-  FontWeight as CKFontWeight,
 } from 'canvaskit';
+import { decodeFontName } from 'noya-fonts';
 import {
   AffineTransform,
   createBounds,
   distance,
-  resize,
   Point,
   Rect,
+  resize,
 } from 'noya-geometry';
 import {
   decodeFontVariant,
@@ -23,7 +24,7 @@ import {
 } from 'noya-google-fonts';
 import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
-import { decodeFontName, encodeFontId } from './selectors/textStyleSelectors';
+import { encodeFontId } from './selectors/textStyleSelectors';
 
 export * from './primitives/path';
 export * from './primitives/pathCommand';

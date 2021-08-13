@@ -1,5 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { FontID } from 'noya-fonts';
+import { decodeFontName, FontID } from 'noya-fonts';
 import { getFontFamilyId, isValidFontVariant } from 'noya-google-fonts';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
@@ -82,10 +82,6 @@ export function getEncodedStringAttributes(
   };
 }
 
-export function encodeFontName(fontFamily: string, variant?: string) {
-  return variant ? `${fontFamily}-${variant}` : fontFamily;
-}
-
 export function encodeFontId(
   fontFamily: string,
   fontVariant: string = 'regular',
@@ -95,14 +91,6 @@ export function encodeFontId(
   if (!fontFamilyId || !isValidFontVariant(fontVariant)) return;
 
   return FontID.make(fontFamilyId, fontVariant);
-}
-
-export function decodeFontName(
-  fontName: string,
-): { fontFamily: string; fontVariant?: string } {
-  const [fontFamily, fontVariant] = fontName.split('-');
-
-  return { fontFamily, fontVariant: fontVariant || undefined };
 }
 
 export function getAllFontNames(state: ApplicationState) {

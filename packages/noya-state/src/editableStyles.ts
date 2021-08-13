@@ -1,5 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchPattern } from 'noya-designsystem';
+import { decodeFontName } from 'noya-fonts';
 import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
 import { SimpleTextDecoration } from './primitives';
@@ -21,7 +22,7 @@ export type EditableTextStyle = {
 function getEditableTextStyleProperties(
   textStyle: Sketch.TextStyle,
 ): EditableTextStyle {
-  const { fontFamily, fontVariant } = Selectors.decodeFontName(
+  const { fontFamily, fontVariant } = decodeFontName(
     textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes.name,
   );
 

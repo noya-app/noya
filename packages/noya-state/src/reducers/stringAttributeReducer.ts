@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
-import { Selectors } from 'noya-state';
+import { decodeFontName, encodeFontName } from 'noya-fonts';
 import { SetNumberMode } from './styleReducer';
 
 export type StringAttributeAction =
@@ -36,11 +36,9 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
       return produce(state, (draft) => {
         const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        const { fontVariant: variant } = Selectors.decodeFontName(
-          attributes.name,
-        );
+        const { fontVariant: variant } = decodeFontName(attributes.name);
 
-        attributes.name = Selectors.encodeFontName(value, variant);
+        attributes.name = encodeFontName(value, variant);
       });
     }
     case 'setTextFontVariant': {
@@ -49,9 +47,9 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
       return produce(state, (draft) => {
         const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        const { fontFamily } = Selectors.decodeFontName(attributes.name);
+        const { fontFamily } = decodeFontName(attributes.name);
 
-        attributes.name = Selectors.encodeFontName(fontFamily, value);
+        attributes.name = encodeFontName(fontFamily, value);
       });
     }
     case 'setTextFontSize': {
