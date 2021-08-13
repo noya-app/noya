@@ -1,6 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { FontID } from 'noya-fonts';
 import { getFontFamilyId, isValidFontVariant } from 'noya-google-fonts';
-import { FontID } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { SimpleTextDecoration } from '../primitives';
