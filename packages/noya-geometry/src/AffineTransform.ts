@@ -131,8 +131,22 @@ export class AffineTransform implements Transformable {
     return this.transform(AffineTransform.rotate(...args));
   };
 
-  static scale(sx: number, sy: number = sx): AffineTransform {
-    return new AffineTransform([sx, 0, 0, 0, sy, 0]);
+  static scale(
+    sx: number,
+    sy: number = sx,
+    origin: Point = { x: 0, y: 0 },
+  ): AffineTransform {
+    const scale = new AffineTransform([sx, 0, 0, 0, sy, 0]);
+
+    if (origin.x !== 0 || origin.y !== 0) {
+      return AffineTransform.multiply(
+        AffineTransform.translate(origin.x, origin.y),
+        scale,
+        AffineTransform.translate(-origin.x, -origin.y),
+      );
+    }
+
+    return scale;
   }
 
   scale: typeof AffineTransform['scale'] = (...args) => {

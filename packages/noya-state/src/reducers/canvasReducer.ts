@@ -7,6 +7,9 @@ import {
   AffineTransform,
   createBounds,
   createRect,
+  distance,
+  getCirclePercentage,
+  getClosestPointOnLine,
   getLinePercentage,
   insetRect,
   Point,
@@ -22,7 +25,11 @@ import {
 } from 'noya-state';
 import { clamp, lerp, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import { getSelectedGradient } from '../selectors/gradientSelectors';
+import {
+  getAngularGradientCircle,
+  getSelectedGradient,
+  getSelectedGradientStopPoints,
+} from '../selectors/gradientSelectors';
 import {
   addToParentLayer,
   computeNewBoundingRect,
@@ -71,6 +78,7 @@ export type CanvasAction =
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
   | [type: 'addStopToGradient', point: Point]
+  | [type: 'deleteStopToGradient']
   | [
       type: 'insertBitmap',
       file: ArrayBuffer,
@@ -384,6 +392,44 @@ export function canvasReducer(
         return;
       });
     }
+    case 'deleteStopToGradient': {
+      const pageIndex = getCurrentPageIndex(state);
+
+      if (!state.selectedGradient) return state;
+      const {
+        layerId,
+        fillIndex,
+        stopIndex,
+        styleType,
+      } = state.selectedGradient;
+
+      const page = getCurrentPage(state);
+      const indexPath = Layers.findIndexPath(
+        page,
+        (layer) => layer.do_objectID === layerId,
+      );
+
+      if (!indexPath) return state;
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+
+        if (
+          layer.style?.[styleType]?.[fillIndex].fillType !==
+          Sketch.FillType.Gradient
+        )
+          return state;
+
+        const gradientStops =
+          layer.style?.[styleType]?.[fillIndex].gradient.stops;
+
+        if (!gradientStops || gradientStops.length <= 2) return;
+        gradientStops.splice(stopIndex, 1);
+
+        if (!draft.selectedGradient) return state;
+        draft.selectedGradient.stopIndex = Math.max(stopIndex - 1, 0);
+      });
+    }
     case 'pan': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
@@ -485,7 +531,6 @@ export function canvasReducer(
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
-
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ||
@@ -516,7 +561,6 @@ export function canvasReducer(
             if (!gradient) return;
 
             fixGradientPositions(gradient);
-
             return;
           }
           case 'moveGradientStop': {
@@ -559,55 +603,114 @@ export function canvasReducer(
 
             if (!gradient || !draftGradient) return;
 
-            const transform = getLayerTransformAtIndexPath(
-              pageSnapshot,
-              indexPath,
-              AffineTransform.identity,
-              'includeLast',
-            ).scale(layer.frame.width, layer.frame.height);
+            const isAngular =
+              gradient.gradientType === Sketch.GradientType.Angular;
 
-            const delta = {
-              x: current.x - origin.x,
-              y: current.y - origin.y,
-            };
+            if (isAngular) {
+              const circle = getAngularGradientCircle(state);
 
-            const transformPointString = (pointString: string) => {
-              const originalPoint = PointString.decode(pointString);
-              const transformedPoint = transform.applyTo(originalPoint);
-              transformedPoint.x += delta.x;
-              transformedPoint.y += delta.y;
-              const newPoint = transform.invert().applyTo(transformedPoint);
-              return PointString.encode(newPoint);
-            };
+              if (!circle) return;
 
-            switch (stopIndex) {
-              case 0:
-                draftGradient.from = transformPointString(gradient.from);
-                break;
-              case gradient.stops.length - 1:
-                draftGradient.to = transformPointString(gradient.to);
-                break;
-              default:
-                const from = transform.applyTo(
-                  PointString.decode(gradient.from),
-                );
-                const to = transform.applyTo(PointString.decode(gradient.to));
-                const stop = gradient.stops[stopIndex];
+              const position = getCirclePercentage(
+                current,
+                circle.center,
+                -circle.rotation,
+              );
 
-                const stopPoint = {
-                  x: lerp(from.x, to.x, stop.position),
-                  y: lerp(from.y, to.y, stop.position),
-                };
-                stopPoint.x += delta.x;
-                stopPoint.y += delta.y;
+              draftGradient.stops[stopIndex].position = position;
+            } else {
+              const transform = getLayerTransformAtIndexPath(
+                pageSnapshot,
+                indexPath,
+                AffineTransform.identity,
+                'includeLast',
+              ).scale(layer.frame.width, layer.frame.height);
 
-                const position = getLinePercentage(stopPoint, [from, to]);
+              const delta = {
+                x: current.x - origin.x,
+                y: current.y - origin.y,
+              };
 
-                draftGradient.stops[stopIndex].position = position;
-                break;
+              const transformPointString = (pointString: string) => {
+                const originalPoint = PointString.decode(pointString);
+                const transformedPoint = transform.applyTo(originalPoint);
+                transformedPoint.x += delta.x;
+                transformedPoint.y += delta.y;
+                const newPoint = transform.invert().applyTo(transformedPoint);
+                return PointString.encode(newPoint);
+              };
+
+              switch (stopIndex) {
+                case 0: {
+                  draftGradient.from = transformPointString(gradient.from);
+                  break;
+                }
+                case gradient.stops.length - 1: {
+                  draftGradient.to = transformPointString(gradient.to);
+                  break;
+                }
+                default: {
+                  const from = transform.applyTo(
+                    PointString.decode(gradient.from),
+                  );
+                  const to = transform.applyTo(PointString.decode(gradient.to));
+                  const stop = gradient.stops[stopIndex];
+
+                  const stopPoint = {
+                    x: lerp(from.x, to.x, stop.position),
+                    y: lerp(from.y, to.y, stop.position),
+                  };
+                  stopPoint.x += delta.x;
+                  stopPoint.y += delta.y;
+
+                  const position = getLinePercentage(stopPoint, [from, to]);
+                  draftGradient.stops[stopIndex].position = position;
+                }
+              }
             }
 
             break;
+          }
+          case 'moveGradientEllipseLength': {
+            const { current } = interactionState;
+            if (!state.selectedGradient) return;
+
+            const { layerId, fillIndex } = state.selectedGradient;
+
+            const indexPath = Layers.findIndexPath(
+              page,
+              (layer) => layer.do_objectID === layerId,
+            );
+
+            if (!indexPath) return;
+
+            const draftLayer = Layers.access(
+              draft.sketch.pages[pageIndex],
+              indexPath,
+            );
+
+            if (
+              draftLayer.style?.fills?.[fillIndex]?.fillType !==
+                Sketch.FillType.Gradient &&
+              draftLayer.style?.fills?.[fillIndex]?.gradient.gradientType !==
+                Sketch.GradientType.Radial
+            )
+              return;
+
+            const gradient = draftLayer.style?.fills?.[fillIndex]?.gradient;
+            const points = getSelectedGradientStopPoints(state);
+            if (!points) return;
+            const center = points[0].point;
+            const lastPoint = points[points.length - 1].point;
+
+            const radius = distance(center, lastPoint);
+            const length = distance(
+              current,
+              getClosestPointOnLine(current, [center, lastPoint]),
+            );
+
+            gradient.elipseLength = length / radius;
+            return;
           }
           case 'editPath': {
             if (action[1][0] === 'resetEditPath') break;

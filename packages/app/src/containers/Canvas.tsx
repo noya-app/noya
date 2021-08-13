@@ -135,12 +135,19 @@ export default memo(function Canvas() {
 
   useArrowKeyShortcuts();
 
-  useKeyboardShortcuts({
-    Backspace: () => {
-      if (isEditingText) return FALLTHROUGH;
+  const handleDeleteKey = () => {
+    if (isEditingText) return FALLTHROUGH;
 
+    if (state.selectedGradient) {
+      dispatch('deleteStopToGradient');
+    } else {
       dispatch('deleteLayer', state.selectedObjects);
-    },
+    }
+  };
+
+  useKeyboardShortcuts({
+    Backspace: handleDeleteKey,
+    Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
@@ -456,16 +463,20 @@ export default memo(function Canvas() {
             point,
           );
 
-          const isPointerOnGradientLine =
-            selectedGradientStopIndex === -1
-              ? Selectors.isPointerOnGradientLine(state, point)
-              : false;
-
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
+
             dispatch('interaction', ['maybeMoveGradientStop', point]);
-          } else if (isPointerOnGradientLine) {
+          } else if (
+            state.selectedGradient &&
+            Selectors.isPointerOnGradientLine(state, point)
+          ) {
             dispatch('addStopToGradient', point);
+          } else if (
+            state.selectedGradient &&
+            Selectors.isPointerOnGradientEllipseEditor(state, point)
+          ) {
+            dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
@@ -509,6 +520,17 @@ export default memo(function Canvas() {
       const textSelection = Selectors.getTextSelection(state);
 
       switch (state.interactionState.type) {
+        case 'maybeMoveGradientEllipseLength': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientEllipseLength', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
         case 'maybeSelectingText': {
           const { origin } = state.interactionState;
 
@@ -517,6 +539,11 @@ export default memo(function Canvas() {
           }
 
           containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'moveGradientEllipseLength': {
+          dispatch('interaction', ['movingGradientEllipseLength', point]);
           event.preventDefault();
           break;
         }
@@ -538,7 +565,6 @@ export default memo(function Canvas() {
             });
             return;
           }
-
           break;
         }
         case 'maybeMoveGradientStop': {
@@ -888,7 +914,9 @@ export default memo(function Canvas() {
         case 'maybeMove':
         case 'maybeScale':
         case 'moveGradientStop':
-        case 'maybeMoveGradientStop': {
+        case 'maybeMoveGradientStop':
+        case 'maybeMoveGradientEllipseLength':
+        case 'moveGradientEllipseLength': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
