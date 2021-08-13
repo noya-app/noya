@@ -1,3 +1,4 @@
+import { SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   distance,
@@ -10,7 +11,7 @@ import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect, Text } from '..';
-import { useTypefaceFontProvider } from '../FontManagerContext';
+import { useFontManager } from '../FontManagerContext';
 
 const PADDING = {
   width: 6,
@@ -36,21 +37,21 @@ export function DistanceMeasurementLabel({ points }: Props) {
 
   const measurementColor = useTheme().colors.canvas.measurement;
   const CanvasKit = useCanvasKit();
-  const typespaceFontProvider = useTypefaceFontProvider();
+  const fontManager = useFontManager();
 
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
         color: CanvasKit.parseColorString('rgb(255,255,225)'),
         fontSize: 11,
-        fontFamilies: ['system'],
+        fontFamilies: [SYSTEM_FONT_ID],
         letterSpacing: 0.2,
       },
     });
 
     const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
       paragraphStyle,
-      typespaceFontProvider,
+      fontManager.getTypefaceFontProvider(),
     );
     builder.addText(text);
 
@@ -58,7 +59,7 @@ export function DistanceMeasurementLabel({ points }: Props) {
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, typespaceFontProvider, text]);
+  }, [CanvasKit, fontManager, text]);
 
   const paragraphSize = useMemo(
     () => ({

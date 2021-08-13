@@ -7,7 +7,7 @@ import { Group, Rect, Text, useCanvasKit } from 'noya-renderer';
 import { Selectors, TextSelectionRange } from 'noya-state';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
-import { useTypefaceFontProvider } from '../../FontManagerContext';
+import { useFontManager } from '../../FontManagerContext';
 
 interface Props {
   layer: Sketch.Text;
@@ -15,11 +15,11 @@ interface Props {
 
 export function useTextLayerParagraph(layer: Sketch.Text) {
   const CanvasKit = useCanvasKit();
-  const typefaceFontProvider = useTypefaceFontProvider();
+  const fontManager = useFontManager();
 
   const paragraph = useMemo(
-    () => Selectors.getLayerParagraph(CanvasKit, typefaceFontProvider, layer),
-    [CanvasKit, typefaceFontProvider, layer],
+    () => Selectors.getLayerParagraph(CanvasKit, fontManager, layer),
+    [CanvasKit, fontManager, layer],
   );
 
   useDeletable(paragraph);

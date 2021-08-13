@@ -1,10 +1,11 @@
+import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { Point, Size } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { Rect, Text } from '..';
-import { useTypefaceFontProvider } from '../FontManagerContext';
+import { useFontManager } from '../FontManagerContext';
 
 interface Props {
   origin: Point;
@@ -23,21 +24,21 @@ export function AreaMeasurementLabel({
   },
 }: Props) {
   const CanvasKit = useCanvasKit();
-  const typespaceFontProvider = useTypefaceFontProvider();
+  const fontManager = useFontManager();
 
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
         color: CanvasKit.parseColorString('rgb(255,255,225)'),
         fontSize,
-        fontFamilies: ['system'],
+        fontFamilies: [SYSTEM_FONT_ID],
         letterSpacing: 0.2,
       },
     });
 
     const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
       paragraphStyle,
-      typespaceFontProvider,
+      fontManager.getTypefaceFontProvider(),
     );
     builder.addText(text);
 
@@ -45,7 +46,7 @@ export function AreaMeasurementLabel({
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, typespaceFontProvider, fontSize, text]);
+  }, [CanvasKit, fontManager, fontSize, text]);
 
   const paragraphSize = useMemo(
     () => ({

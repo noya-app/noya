@@ -1,7 +1,8 @@
 import type { FileSystemHandle } from 'browser-fs-access';
-import { CanvasKit, TypefaceFontProvider } from 'canvaskit';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { Insets, Size } from 'noya-geometry';
+import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
@@ -57,7 +58,7 @@ export function workspaceReducer(
   state: WorkspaceState,
   action: WorkspaceAction,
   CanvasKit: CanvasKit,
-  typefaceFontProvider: TypefaceFontProvider,
+  fontManager: IFontManager,
 ): WorkspaceState {
   switch (action[0]) {
     case 'newFile': {
@@ -131,7 +132,7 @@ export function workspaceReducer(
       return produce(state, (draft) => {
         draft.history = historyReducer(state.history, action, CanvasKit, {
           canvasSize: state.canvasSize,
-          typefaceFontProvider,
+          fontManager,
         });
       });
     }

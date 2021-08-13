@@ -1,11 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, TypefaceFontProvider } from 'canvaskit';
+import { CanvasKit } from 'canvaskit';
+import { SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   insetRect,
   Point,
   rectContainsPoint,
 } from 'noya-geometry';
+import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,
   Layers,
@@ -69,11 +71,11 @@ export function applyTextTransform(
 
 export function getLayerParagraph(
   CanvasKit: CanvasKit,
-  typefaceFontProvider: TypefaceFontProvider,
+  fontManager: IFontManager,
   layer: Sketch.Text,
 ) {
   const {
-    fontIds,
+    fontNames,
     fontSize,
     lineHeight,
     textHorizontalAlignment,
@@ -84,8 +86,11 @@ export function getLayerParagraph(
   const heightMultiplier = lineHeight ? lineHeight / fontSize : undefined;
 
   const registeredFontFamilies = [
-    ...fontIds.map((fontId) => fontId.toString()),
-    'system',
+    ...fontNames.flatMap((fontName) => {
+      const id = fontManager.getFontId(fontName);
+      return id ? [id] : [];
+    }),
+    SYSTEM_FONT_ID,
   ];
 
   const paragraphStyle = new CanvasKit.ParagraphStyle({
@@ -116,12 +121,15 @@ export function getLayerParagraph(
 
   const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
     paragraphStyle,
-    typefaceFontProvider,
+    fontManager.getTypefaceFontProvider(),
   );
 
   toTextSpans(layer.attributedString).forEach((span) => {
     const style = Primitives.createCanvasKitTextStyle(
       CanvasKit,
+      fontManager.getFontId(
+        span.attributes.MSAttributedStringFontAttribute.attributes.name,
+      ) ?? SYSTEM_FONT_ID,
       span.attributes,
       textDecoration,
     );
@@ -141,7 +149,7 @@ export function getLayerParagraph(
 
 export function getCharacterIndexAtPoint(
   CanvasKit: CanvasKit,
-  typefaceFontProvider: TypefaceFontProvider,
+  fontManager: IFontManager,
   state: ApplicationState,
   layerId: string,
   point: Point,
@@ -166,7 +174,7 @@ export function getCharacterIndexAtPoint(
 
   const paragraph = Selectors.getLayerParagraph(
     CanvasKit,
-    typefaceFontProvider,
+    fontManager,
     textLayer,
   );
 
@@ -180,7 +188,7 @@ export function getCharacterIndexAtPoint(
 
 export function getCharacterIndexAtPointInSelectedLayer(
   CanvasKit: CanvasKit,
-  typefaceFontProvider: TypefaceFontProvider,
+  fontManager: IFontManager,
   state: ApplicationState,
   point: Point,
   mode: 'bounded' | 'unbounded',
@@ -191,7 +199,7 @@ export function getCharacterIndexAtPointInSelectedLayer(
 
   return getCharacterIndexAtPoint(
     CanvasKit,
-    typefaceFontProvider,
+    fontManager,
     state,
     selection.layerId,
     point,

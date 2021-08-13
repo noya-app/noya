@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { decodeFontName, FontID } from 'noya-fonts';
-import { getFontFamilyId, isValidFontVariant } from 'noya-google-fonts';
+import { FontId } from 'noya-fonts';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { SimpleTextDecoration } from '../primitives';
@@ -35,21 +34,8 @@ export function getTextStyleAttributes(layer: Sketch.Text) {
     ),
   ];
 
-  const uniqueFontNames = [...new Set(fontNames)];
-
-  // const font = Selectors.decodeFontName(fontName);
-
-  // const fontVariant =
-  //   font.fontVariant && isValidFontVariant(font.fontVariant)
-  //     ? font.fontVariant
-  //     : 'regular';
-
   return {
-    fontIds: uniqueFontNames.flatMap((fontName) => {
-      const font = decodeFontName(fontName);
-      const fontId = encodeFontId(font.fontFamily, font.fontVariant);
-      return fontId ? [fontId] : [];
-    }),
+    fontNames: [...new Set(fontNames)],
     fontSize:
       encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ?? 12,
     lineHeight: paragraphStyle?.maximumLineHeight,
@@ -85,12 +71,14 @@ export function getEncodedStringAttributes(
 export function encodeFontId(
   fontFamily: string,
   fontVariant: string = 'regular',
-): FontID | undefined {
-  const fontFamilyId = getFontFamilyId(fontFamily);
+): FontId | undefined {
+  // const fontFamilyId = getFontFamilyId(fontFamily);
 
-  if (!fontFamilyId || !isValidFontVariant(fontVariant)) return;
+  // if (!fontFamilyId || !isValidFontVariant(fontVariant)) return;
 
-  return FontID.make(fontFamilyId, fontVariant);
+  // return formatFontId(fontFamilyId, fontVariant);
+
+  return undefined;
 }
 
 export function getAllFontNames(state: ApplicationState) {

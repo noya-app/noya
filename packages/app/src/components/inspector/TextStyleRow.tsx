@@ -5,17 +5,15 @@ import {
   LabeledElementView,
   MenuItem,
   Select,
+  SelectOption,
 } from 'noya-designsystem';
 import {
-  decodeFontVariant,
-  GoogleFontVariant,
-  getFontDefinition,
-  getFontFamilyId,
-  getFontFamilyIdList,
-  getFontVariants,
-  hasFontFamilyId,
-  isValidFontVariant,
-} from 'noya-google-fonts';
+  encodeFontName,
+  encodeFontTraits,
+  FontTraits,
+  getTraitsDisplayName,
+} from 'noya-fonts';
+import { useFontManager } from 'noya-renderer';
 import { SetNumberMode } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -49,22 +47,18 @@ const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
     title: value,
   }));
 
-const DEFAULT_FONT_VARIANT_OPTIONS: GoogleFontVariant[] = ['regular'];
-
-const upperFirst = (string: string) =>
-  string.slice(0, 1).toUpperCase() + string.slice(1);
+// const DEFAULT_FONT_VARIANT_OPTIONS: GoogleFontVariant[] = ['regular'];
 
 interface TextStyleRowProps {
   fontSize?: number;
   fontFamily?: string;
-  fontVariant?: string;
+  fontTraits?: FontTraits;
   fontColor?: Sketch.Color;
   lineSpacing?: number;
   letterSpacing?: number;
   paragraphSpacing?: number;
   onChangeFontSize: (value: number, mode: SetNumberMode) => void;
-  onChangeFontFamily: (value: string) => void;
-  onChangeFontVariant: (value?: string) => void;
+  onChangeFontName: (value: string) => void;
   onChangeFontColor: (color: Sketch.Color) => void;
   onChangeLineSpacing: (value: number, mode: SetNumberMode) => void;
   onChangeLetterSpacing: (value: number, mode: SetNumberMode) => void;
@@ -75,40 +69,35 @@ export default memo(function TextStyleRow({
   fontColor,
   fontSize,
   fontFamily,
-  fontVariant,
+  fontTraits,
   lineSpacing,
   letterSpacing,
   paragraphSpacing,
   onChangeFontColor,
   onChangeFontSize,
-  onChangeFontFamily,
-  onChangeFontVariant,
+  onChangeFontName,
   onChangeLineSpacing,
   onChangeLetterSpacing,
   onChangeParagraphSpacing,
 }: TextStyleRowProps) {
+  const fontManager = useFontManager();
+
   const characterInputId = `char`;
   const lineInputId = `line`;
   const paragraphInputId = `paragraph`;
   const fontSizeId = `size`;
 
-  const fontFamilyId = fontFamily ? getFontFamilyId(fontFamily) : undefined;
+  const fontFamilyId = fontFamily
+    ? fontManager.getFontFamilyId(fontFamily)
+    : undefined;
 
-  const fontFamilyIdOptions = useMemo(() => {
-    const fontIdList = getFontFamilyIdList();
-
-    const combinedList = !fontFamilyId
-      ? [...fontIdList, MULTIPLE_TYPEFACES]
-      : hasFontFamilyId(fontFamilyId)
-      ? fontIdList
-      : [...fontIdList, fontFamilyId];
-
-    return combinedList.map((id) => id.toString());
-  }, [fontFamilyId]);
-
-  const fontVariantOptions = fontFamilyId
-    ? getFontVariants(fontFamilyId)
-    : DEFAULT_FONT_VARIANT_OPTIONS;
+  const fontTraitsList: FontTraits[] = useMemo(
+    () =>
+      fontFamilyId
+        ? fontManager.getFontDescriptorsForFamily(fontFamilyId)
+        : [{ fontSlant: 'upright', fontWeight: 'regular' }],
+    [fontFamilyId, fontManager],
+  );
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -139,67 +128,67 @@ export default memo(function TextStyleRow({
       <InspectorPrimitives.Row>
         <Select
           id="font-family"
-          value={fontFamilyId?.toString() || 'Multiple Typefaces'}
-          options={fontFamilyIdOptions}
-          getTitle={useCallback(
-            (value: string) => {
-              if (value === MULTIPLE_TYPEFACES) return value;
+          value={fontFamilyId?.toString() || MULTIPLE_TYPEFACES}
+        >
+          {!fontFamily ? (
+            <SelectOption
+              value={MULTIPLE_TYPEFACES}
+              title={MULTIPLE_TYPEFACES}
+            />
+          ) : !fontFamilyId ? (
+            <SelectOption
+              value={fontFamily}
+              title={`${fontFamily} (missing)`}
+            />
+          ) : null}
+          {fontManager.getFontFamilyIdList().map((id) => (
+            <SelectOption
+              key={id}
+              value={id}
+              title={fontManager.getFontFamilyName(id) ?? id}
+              onSelect={() => {
+                const descriptor = fontManager.getBestFontDescriptor(id);
 
-              const fontFamilyId = getFontFamilyId(value);
+                if (!descriptor) return;
 
-              if (!fontFamilyId) return fontFamily ?? value;
-
-              return getFontDefinition(fontFamilyId).family;
-            },
-            [fontFamily],
-          )}
-          onChange={useCallback(
-            (value: string) => {
-              if (value === MULTIPLE_TYPEFACES) return;
-
-              const fontFamilyId = getFontFamilyId(value);
-
-              if (!fontFamilyId) return;
-
-              const fontFamily = getFontDefinition(fontFamilyId).family;
-
-              onChangeFontFamily(fontFamily);
-
-              if (fontVariant !== undefined && fontFamilyId) {
-                const fontVariants = getFontVariants(fontFamilyId);
-
-                if (!(fontVariants as string[]).includes(fontVariant)) {
-                  onChangeFontVariant(undefined);
-                }
-              }
-            },
-            [fontVariant, onChangeFontFamily, onChangeFontVariant],
-          )}
-        />
+                onChangeFontName(
+                  encodeFontName(descriptor.fontFamilyId, {
+                    fontSlant: descriptor.fontSlant,
+                    fontWeight: descriptor.fontWeight,
+                  }),
+                );
+              }}
+            />
+          ))}
+        </Select>
       </InspectorPrimitives.Row>
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <Select
           id="font-variant"
           flex={`0 0 calc(75% - ${(horizontalSeparator * 1) / 4}px)`}
-          value={fontVariant || 'regular'}
-          options={fontVariantOptions}
-          getTitle={useCallback((variant) => {
-            if (!isValidFontVariant(variant)) return variant;
+          value={encodeFontTraits(
+            fontTraits ?? { fontSlant: 'upright', fontWeight: 'regular' },
+          )}
+        >
+          {fontTraitsList.map((traits) => {
+            const value = encodeFontTraits(traits);
+            const title = getTraitsDisplayName(traits);
 
-            const { variantName, weight } = decodeFontVariant(variant);
+            return (
+              <SelectOption
+                key={value}
+                value={value}
+                title={title}
+                onSelect={() => {
+                  if (!fontFamilyId) return;
 
-            return [
-              weight === 'regular' && variantName === 'italic'
-                ? undefined
-                : upperFirst(weight),
-              variantName === 'italic' ? 'Italic' : undefined,
-            ]
-              .filter((x): x is string => !!x)
-              .join(' ');
-          }, [])}
-          onChange={onChangeFontVariant}
-        />
+                  onChangeFontName(encodeFontName(fontFamilyId, traits));
+                }}
+              />
+            );
+          })}
+        </Select>
         <InspectorPrimitives.HorizontalSeparator />
         <FillInputFieldWithPicker
           id="font-color"

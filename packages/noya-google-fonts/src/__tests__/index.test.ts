@@ -1,11 +1,9 @@
 import {
-  decodeFontVariant,
-  getFontFamilyList,
-  getFontFile,
   getFontFamilyId,
+  getFontFamilyList,
+  getFontFileUrl,
   getFontVariantCollection,
   getFontVariants,
-  getFontVariantWeight,
 } from '../index';
 
 const robotoFamilyID = getFontFamilyId('roboto')!;
@@ -52,22 +50,8 @@ test('it should get a font variant collection', () => {
   });
 });
 
-test('it should get font variant weight', () => {
-  expect(getFontVariantWeight('100')).toEqual('ultralight');
-  expect(getFontVariantWeight('100italic')).toEqual('ultralight');
-  expect(getFontVariantWeight('regular')).toEqual('regular');
-  expect(getFontVariantWeight('italic')).toEqual('regular');
-});
-
-test('it should decode font variant', () => {
-  expect(decodeFontVariant('100italic')).toEqual({
-    weight: 'ultralight',
-    variantName: 'italic',
-  });
-});
-
 test('it should get font file', () => {
-  expect(getFontFile(robotoFamilyID, '500')).toEqual(
+  expect(getFontFileUrl(robotoFamilyID, '500')).toEqual(
     'http://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmEU9vAx05IsDqlA.ttf',
   );
 });

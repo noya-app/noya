@@ -27,7 +27,6 @@ export function textStyleReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'setTextFontName':
-    case 'setTextFontVariant':
     case 'setTextFontSize':
     case 'setTextColor':
     case 'setTextLineSpacing':

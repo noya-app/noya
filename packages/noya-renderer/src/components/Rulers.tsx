@@ -1,4 +1,5 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { Point } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
@@ -6,26 +7,26 @@ import { Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Rect, Text } from '..';
-import { useTypefaceFontProvider } from '../FontManagerContext';
+import { useFontManager } from '../FontManagerContext';
 
 function RulerLabel({ text, origin }: { text: string; origin: Point }) {
   const CanvasKit = useCanvasKit();
   const textColor = useTheme().colors.textMuted;
-  const typespaceFontProvider = useTypefaceFontProvider();
+  const fontManager = useFontManager();
 
   const paragraph = useMemo(() => {
     const paragraphStyle = new CanvasKit.ParagraphStyle({
       textStyle: {
         color: CanvasKit.parseColorString(textColor),
         fontSize: 11,
-        fontFamilies: ['system'],
+        fontFamilies: [SYSTEM_FONT_ID],
         letterSpacing: 0.2,
       },
     });
 
     const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
       paragraphStyle,
-      typespaceFontProvider,
+      fontManager.getTypefaceFontProvider(),
     );
     builder.addText(text);
 
@@ -33,7 +34,7 @@ function RulerLabel({ text, origin }: { text: string; origin: Point }) {
     paragraph.layout(10000);
 
     return paragraph;
-  }, [CanvasKit, typespaceFontProvider, text, textColor]);
+  }, [CanvasKit, fontManager, text, textColor]);
 
   const labelRect = useMemo(
     () =>

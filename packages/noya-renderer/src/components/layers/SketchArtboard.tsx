@@ -12,7 +12,8 @@ import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import SketchGroup from './SketchGroup';
 import { useRenderingMode } from '../../RenderingModeContext';
-import { useTypefaceFontProvider } from '../../FontManagerContext';
+import { SYSTEM_FONT_ID } from 'noya-fonts';
+import { useFontManager } from '../../FontManagerContext';
 
 interface ArtboardLabelProps {
   text: string;
@@ -26,7 +27,7 @@ const ArtboardLabel = memo(function ArtboardLabel({
   isSymbolMaster,
 }: ArtboardLabelProps) {
   const CanvasKit = useCanvasKit();
-  const typefaceFontProvider = useTypefaceFontProvider();
+  const fontManager = useFontManager();
   const { colors } = useTheme();
   const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
 
@@ -35,14 +36,14 @@ const ArtboardLabel = memo(function ArtboardLabel({
       textStyle: {
         color: CanvasKit.parseColorString(textColor),
         fontSize: 11,
-        fontFamilies: ['system'],
+        fontFamilies: [SYSTEM_FONT_ID],
         letterSpacing: 0.2,
       },
     });
 
     const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
       paragraphStyle,
-      typefaceFontProvider,
+      fontManager.getTypefaceFontProvider(),
     );
     builder.addText(text);
 
@@ -52,7 +53,7 @@ const ArtboardLabel = memo(function ArtboardLabel({
     builder.delete();
 
     return paragraph;
-  }, [CanvasKit, typefaceFontProvider, text, textColor]);
+  }, [CanvasKit, fontManager, text, textColor]);
 
   useDeletable(paragraph);
 

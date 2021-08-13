@@ -1,13 +1,12 @@
 import { StateProvider } from 'noya-app-state-context';
 import { decodeFontName } from 'noya-fonts';
-import { getFontFamilyId, isValidFontVariant } from 'noya-google-fonts';
 import {
   CanvasKitProvider,
   FontManagerProvider,
   ImageCacheProvider,
-  useAddFont,
   useCanvasKit,
-  useTypefaceFontProvider,
+  useDownloadFont,
+  useFontManager,
 } from 'noya-renderer';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
@@ -28,7 +27,7 @@ type Action =
 
 function Contents() {
   const CanvasKit = useCanvasKit();
-  const typefaceFontProvider = useTypefaceFontProvider();
+  const fontManager = useFontManager();
 
   const sketchFileData = useResource<ArrayBuffer>(
     '/Demo.sketch',
@@ -55,8 +54,7 @@ function Contents() {
                   state.value,
                   action.value,
                   CanvasKit,
-
-                  typefaceFontProvider,
+                  fontManager,
                 ),
               };
             } else {
@@ -64,7 +62,7 @@ function Contents() {
             }
         }
       },
-    [CanvasKit, typefaceFontProvider],
+    [CanvasKit, fontManager],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });
@@ -79,7 +77,7 @@ function Contents() {
     dispatch({ type: 'update', value: action });
   }, []);
 
-  const addFont = useAddFont();
+  const downloadFont = useDownloadFont();
 
   // Whenever the sketch file updates, download any new fonts
   useEffect(() => {
@@ -88,15 +86,14 @@ function Contents() {
     const fontNames = Selectors.getAllFontNames(state.value.history.present);
 
     fontNames.forEach((fontName) => {
-      const { fontFamily, fontVariant = 'regular' } = decodeFontName(fontName);
+      const { fontFamily, fontTraits } = decodeFontName(fontName);
+      const fontFamilyId = fontManager.getFontFamilyId(fontFamily);
 
-      const fontFamilyId = getFontFamilyId(fontFamily);
+      if (!fontFamilyId) return;
 
-      if (!fontFamilyId || !isValidFontVariant(fontVariant)) return;
-
-      addFont(fontFamilyId, fontVariant);
+      downloadFont({ fontFamilyId, ...fontTraits });
     });
-  }, [addFont, state]);
+  }, [downloadFont, fontManager, state]);
 
   if (state.type !== 'success') return null;
 

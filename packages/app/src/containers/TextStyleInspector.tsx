@@ -37,18 +37,14 @@ export default memo(function TextStyleInspector() {
     <>
       <TextStyleRow
         fontFamily={editableTextStyle.fontFamily}
-        fontVariant={editableTextStyle.fontVariant}
+        fontTraits={editableTextStyle.fontTraits}
         fontSize={editableTextStyle.fontSize}
         fontColor={editableTextStyle.fontColor}
         letterSpacing={editableTextStyle.letterSpacing}
         lineSpacing={editableTextStyle.lineSpacing}
         paragraphSpacing={editableTextStyle.paragraphSpacing}
-        onChangeFontFamily={useCallback(
+        onChangeFontName={useCallback(
           (value) => dispatch('setTextFontName', value),
-          [dispatch],
-        )}
-        onChangeFontVariant={useCallback(
-          (value) => dispatch('setTextFontVariant', value),
           [dispatch],
         )}
         onChangeFontColor={useCallback(

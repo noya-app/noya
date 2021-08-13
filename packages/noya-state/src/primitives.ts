@@ -1,14 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type {
   CanvasKit,
-  FontWeight as CKFontWeight,
   Paint,
   Path,
   Shader,
   TextAlign,
   TextStyle,
 } from 'canvaskit';
-import { decodeFontName, FontWeight } from 'noya-fonts';
+import { FontId, SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   createBounds,
@@ -17,10 +16,9 @@ import {
   Rect,
   resize,
 } from 'noya-geometry';
-import { decodeFontVariant, isValidFontVariant } from 'noya-google-fonts';
+// import { decodeFontVariant, isValidFontVariant } from 'noya-google-fonts';
 import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
-import { encodeFontId } from './selectors/textStyleSelectors';
 
 export * from './primitives/path';
 export * from './primitives/pathCommand';
@@ -327,58 +325,54 @@ export function textHorizontalAlignment(
 
 export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
-function getCanvasKitFontWeight(
-  CanvasKit: CanvasKit,
-  weight: FontWeight,
-): CKFontWeight {
-  switch (weight) {
-    case 'ultralight':
-      return CanvasKit.FontWeight.ExtraLight;
-    case 'thin':
-      return CanvasKit.FontWeight.Thin;
-    case 'light':
-      return CanvasKit.FontWeight.Light;
-    case 'regular':
-      return CanvasKit.FontWeight.Normal;
-    case 'medium':
-      return CanvasKit.FontWeight.Medium;
-    case 'semibold':
-      return CanvasKit.FontWeight.SemiBold;
-    case 'bold':
-      return CanvasKit.FontWeight.Bold;
-    case 'heavy':
-      return CanvasKit.FontWeight.ExtraBold;
-    case 'black':
-      return CanvasKit.FontWeight.Black;
-  }
-}
+// function getCanvasKitFontWeight(
+//   CanvasKit: CanvasKit,
+//   weight: FontWeight,
+// ): CKFontWeight {
+//   switch (weight) {
+//     case 'ultralight':
+//       return CanvasKit.FontWeight.ExtraLight;
+//     case 'thin':
+//       return CanvasKit.FontWeight.Thin;
+//     case 'light':
+//       return CanvasKit.FontWeight.Light;
+//     case 'regular':
+//       return CanvasKit.FontWeight.Normal;
+//     case 'medium':
+//       return CanvasKit.FontWeight.Medium;
+//     case 'semibold':
+//       return CanvasKit.FontWeight.SemiBold;
+//     case 'bold':
+//       return CanvasKit.FontWeight.Bold;
+//     case 'heavy':
+//       return CanvasKit.FontWeight.ExtraBold;
+//     case 'black':
+//       return CanvasKit.FontWeight.Black;
+//   }
+// }
 
 export function createCanvasKitTextStyle(
   CanvasKit: CanvasKit,
+  fontId: FontId,
   attributes: Sketch.StringAttribute['attributes'],
   decoration: SimpleTextDecoration,
 ): TextStyle {
   const textColor = attributes.MSAttributedStringColorAttribute;
   const font = attributes.MSAttributedStringFontAttribute;
-  const { fontFamily, fontVariant } = decodeFontName(
-    attributes.MSAttributedStringFontAttribute.attributes.name,
-  );
-  const fontId = encodeFontId(fontFamily, fontVariant);
-  const { variantName, weight } = decodeFontVariant(
-    fontVariant && isValidFontVariant(fontVariant) ? fontVariant : 'regular',
-  );
 
   return new CanvasKit.TextStyle({
     ...(textColor && { color: color(CanvasKit, textColor) }),
-    fontFamilies: fontId ? [fontId.toString(), 'system'] : ['system'],
+    fontFamilies: fontId
+      ? [fontId.toString(), SYSTEM_FONT_ID]
+      : [SYSTEM_FONT_ID],
     fontSize: font.attributes.size,
-    fontStyle: {
-      slant:
-        variantName === 'italic'
-          ? CanvasKit.FontSlant.Italic
-          : CanvasKit.FontSlant.Upright,
-      weight: getCanvasKitFontWeight(CanvasKit, weight),
-    },
+    // fontStyle: {
+    //   slant:
+    //     variantName === 'italic'
+    //       ? CanvasKit.FontSlant.Italic
+    //       : CanvasKit.FontSlant.Upright,
+    //   weight: getCanvasKitFontWeight(CanvasKit, weight),
+    // },
     letterSpacing: attributes.kerning,
     ...(decoration === 'none'
       ? {}

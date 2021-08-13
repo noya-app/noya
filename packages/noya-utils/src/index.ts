@@ -21,6 +21,7 @@ export * from './utf16';
 export * from './fileType';
 export * from './memoize';
 export * from './types';
+export * from './upperFirst';
 export * as delimitedPath from './delimitedPath';
 
 // Consider moving these to a more React-specific package
@@ -40,5 +41,3 @@ export function setPathToWasm(path: string) {
 }
 
 export { v4 as uuid } from 'uuid';
-
-export type Brand<K, T> = K & { __brand: T };

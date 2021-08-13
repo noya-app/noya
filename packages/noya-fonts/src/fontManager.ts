@@ -1,56 +1,64 @@
-import { FontWeight, FontFamilyID } from 'noya-fonts';
-import { GoogleFontVariant, getFontFile } from 'noya-google-fonts';
+import { FontFamilyID } from 'noya-fonts';
+import { Brand } from 'noya-utils';
 import { Emitter } from './Emitter';
-
-export type FontVariantName = 'regular' | 'italic';
+import { descriptorToFontId, FontDescriptor } from './fontDescriptor';
+import { decodeFontName } from './fontTraits';
 
 export interface FontProvider {
-  getFontFileUrl(
-    fontFamily: FontFamilyID,
-    fontVariantName: FontVariantName,
-    fontWeight: FontWeight,
-  ): string;
+  getFontFamilyIdList(): FontFamilyID[];
+  getFontFamilyId(fontFamily: string): FontFamilyID | undefined;
+  getFontFamilyName(fontFamilyId: FontFamilyID): string | undefined;
+  getFontFileUrl(descriptor: FontDescriptor): string | undefined;
+  getFontDescriptorsForFamily(fontFamily: FontFamilyID): FontDescriptor[];
 }
 
-export class FontID extends String {
-  // Enforce typechecking. Without this, TypeScript will allow string literals
-  __tag: any;
+export type FontId = Brand<string, 'fontId'>;
 
-  static make(fontFamilyID: FontFamilyID, fontVariant: GoogleFontVariant) {
-    return new FontID(`${fontFamilyID}-${fontVariant}`);
-  }
-}
-
-type FontManagerOptions = { providers?: FontProvider[] };
+export const SYSTEM_FONT_ID = 'system' as FontId;
 
 export class FontManager extends Emitter {
-  constructor(options: FontManagerOptions = {}) {
+  constructor(public provider: FontProvider) {
     super();
-
-    this.fontProviders = options.providers ?? [];
   }
 
-  private fontProviders: FontProvider[];
+  getFontFamilyIdList = this.provider.getFontFamilyIdList;
+  getFontFamilyId = this.provider.getFontFamilyId;
+  getFontFamilyName = this.provider.getFontFamilyName;
+  getFontFileUrl = this.provider.getFontFileUrl;
+  getFontDescriptorsForFamily = this.provider.getFontDescriptorsForFamily;
 
-  registerProvider(provider: FontProvider) {
-    this.fontProviders.push(provider);
-  }
+  /**
+   * Get a canonical ID for a font, given a name
+   *
+   * @param fontName A string like "Roboto-BoldItalic"
+   * @returns The canonical ID or `undefined`
+   */
+  getFontId = (fontName: string): FontId | undefined => {
+    const { fontFamily, fontTraits } = decodeFontName(fontName);
+    const fontFamilyId = this.getFontFamilyId(fontFamily);
 
-  get entries() {
-    return [...this.loadedFonts.entries()];
-  }
+    if (!fontFamilyId) return;
 
-  get values() {
-    return [...this.loadedFonts.values()];
-  }
+    return descriptorToFontId({ fontFamilyId, ...fontTraits });
+  };
 
-  private loadedFonts: Map<string, ArrayBuffer> = new Map();
+  getBestFontDescriptor = (fontName: string): FontDescriptor | undefined => {
+    const { fontFamily } = decodeFontName(fontName);
+    const fontFamilyId = this.getFontFamilyId(fontFamily);
 
-  private pendingFonts: Set<string> = new Set();
+    if (!fontFamilyId) return;
 
-  async addFont(fontFamily: FontFamilyID, fontVariant: GoogleFontVariant) {
-    const url = getFontFile(fontFamily, fontVariant);
-    const fontId = FontID.make(fontFamily, fontVariant);
+    const descriptors = this.getFontDescriptorsForFamily(fontFamilyId);
+
+    return descriptors[0];
+  };
+
+  downloadFont = async (fontDescriptor: FontDescriptor) => {
+    const url = this.getFontFileUrl(fontDescriptor);
+
+    if (!url) return;
+
+    const fontId = descriptorToFontId(fontDescriptor);
 
     if (
       this.pendingFonts.has(fontId.toString()) ||
@@ -72,8 +80,7 @@ export class FontManager extends Emitter {
     }
 
     console.info('fetched font', {
-      fontFamily,
-      fontVariant,
+      fontDescriptor,
       url,
       data: data.byteLength,
     });
@@ -81,5 +88,17 @@ export class FontManager extends Emitter {
     this.loadedFonts.set(fontId.toString(), data);
 
     this.emit();
+  };
+
+  get entries() {
+    return [...this.loadedFonts.entries()];
   }
+
+  get values() {
+    return [...this.loadedFonts.values()];
+  }
+
+  private loadedFonts: Map<string, ArrayBuffer> = new Map();
+
+  private pendingFonts: Set<string> = new Set();
 }
