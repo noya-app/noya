@@ -5,23 +5,23 @@ import {
   formatFontFamilyID,
 } from 'noya-fonts';
 import {
-  FontVariant,
-  ItalicFontVariant,
-  RegularFontVariant,
-  WebfontFamily,
-  WebfontList,
+  GoogleFontVariant,
+  GoogleItalicFontVariant,
+  GoogleRegularFontVariant,
+  GoogleFontFamily,
+  GoogleFontList,
 } from './types';
 
 export * from './types';
 
 export class FontRegistry {
-  constructor(webfonts: WebfontFamily[]) {
+  constructor(webfonts: GoogleFontFamily[]) {
     webfonts.forEach((font) => {
       this.addFont(font);
     });
   }
 
-  private fontMap = new Map<string, WebfontFamily>();
+  private fontMap = new Map<string, GoogleFontFamily>();
 
   fontFamilyIds: FontFamilyID[] = [];
 
@@ -40,14 +40,14 @@ export class FontRegistry {
     return this.fontMap.has(id.toString());
   }
 
-  addFont(font: WebfontFamily) {
+  addFont(font: GoogleFontFamily) {
     const formatted = formatFontFamilyID(font.family);
     this.fontMap.set(formatted, font);
     this.fontFamilyIds.push(formatted as FontFamilyID);
   }
 }
 
-const webfontList: WebfontList = require('./fonts.json');
+const webfontList: GoogleFontList = require('./fonts.json');
 const fonts = webfontList.items;
 const fontRegistry = new FontRegistry(fonts);
 
@@ -64,15 +64,19 @@ export function hasFontFamilyId(fontFamilyId: FontFamilyID) {
 }
 
 export type FontVariantCollection = {
-  regular: RegularFontVariant[];
-  italic: ItalicFontVariant[];
+  regular: GoogleRegularFontVariant[];
+  italic: GoogleItalicFontVariant[];
 };
 
-function isItalicVariant(variant: FontVariant): variant is ItalicFontVariant {
+function isItalicVariant(
+  variant: GoogleFontVariant,
+): variant is GoogleItalicFontVariant {
   return variant.includes('italic');
 }
 
-function isRegularVariant(variant: FontVariant): variant is RegularFontVariant {
+function isRegularVariant(
+  variant: GoogleFontVariant,
+): variant is GoogleRegularFontVariant {
   return !variant.includes('italic');
 }
 
@@ -94,7 +98,10 @@ export function getFontVariantCollection(
   return { regular, italic };
 }
 
-export function getFontFile(fontFamilyID: FontFamilyID, variant: FontVariant) {
+export function getFontFile(
+  fontFamilyID: FontFamilyID,
+  variant: GoogleFontVariant,
+) {
   return getFontDefinition(fontFamilyID).files[variant];
 }
 
@@ -102,7 +109,7 @@ export function getFontFamilyId(fontFamily: string): FontFamilyID | undefined {
   return fontRegistry.findFontFamilyID(fontFamily);
 }
 
-export function getFontVariantWeight(variant: FontVariant) {
+export function getFontVariantWeight(variant: GoogleFontVariant) {
   switch (variant) {
     case '100':
     case '100italic':
@@ -134,7 +141,9 @@ export function getFontVariantWeight(variant: FontVariant) {
   }
 }
 
-export function isValidFontVariant(string: string): string is FontVariant {
+export function isValidFontVariant(
+  string: string,
+): string is GoogleFontVariant {
   switch (string) {
     case '100':
     case '100italic':
@@ -161,7 +170,7 @@ export function isValidFontVariant(string: string): string is FontVariant {
 }
 
 export function decodeFontVariant(
-  variant: FontVariant,
+  variant: GoogleFontVariant,
 ): {
   weight: FontWeight;
   variantName: 'regular' | 'italic';
@@ -175,7 +184,7 @@ export function decodeFontVariant(
 export function encodeFontVariant(
   fontVariantName: 'regular' | 'italic',
   fontWeight: FontWeight,
-): FontVariant {
+): GoogleFontVariant {
   const suffix = fontVariantName === 'regular' ? '' : 'italic';
 
   switch (fontWeight) {

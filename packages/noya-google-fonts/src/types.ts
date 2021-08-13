@@ -1,11 +1,11 @@
-export type FontCategory =
+export type GoogleFontCategory =
   | 'sans-serif'
   | 'serif'
   | 'display'
   | 'handwriting'
   | 'monospace';
 
-export type FontSubset =
+export type GoogleFontSubset =
   | 'latin'
   | 'latin-ext'
   | 'sinhala'
@@ -35,7 +35,7 @@ export type FontSubset =
   | 'chinese-traditional'
   | 'myanmar';
 
-export type RegularFontVariant =
+export type GoogleRegularFontVariant =
   | '100'
   | '200'
   | '300'
@@ -46,7 +46,7 @@ export type RegularFontVariant =
   | '800'
   | '900';
 
-export type ItalicFontVariant =
+export type GoogleItalicFontVariant =
   | '100italic'
   | '200italic'
   | '300italic'
@@ -57,20 +57,22 @@ export type ItalicFontVariant =
   | '800italic'
   | '900italic';
 
-export type FontVariant = RegularFontVariant | ItalicFontVariant;
+export type GoogleFontVariant =
+  | GoogleRegularFontVariant
+  | GoogleItalicFontVariant;
 
-export interface WebfontFamily {
+export interface GoogleFontFamily {
   family: string;
-  variants: FontVariant[];
-  subsets: FontSubset[];
+  variants: GoogleFontVariant[];
+  subsets: GoogleFontSubset[];
   version: string;
   lastModified: string;
-  files: Record<FontVariant, string>;
-  category: FontCategory;
+  files: Record<GoogleFontVariant, string>;
+  category: GoogleFontCategory;
   kind: 'webfonts#webfont';
 }
 
-export interface WebfontList {
-  items: WebfontFamily[];
+export interface GoogleFontList {
+  items: GoogleFontFamily[];
   kind: 'webfonts#webfontList';
 }

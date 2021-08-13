@@ -1,7 +1,7 @@
 import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
 import { FontFamilyID, FontManager } from 'noya-fonts';
-import { FontVariant, GoogleFontProvider } from 'noya-google-fonts';
+import { GoogleFontVariant, GoogleFontProvider } from 'noya-google-fonts';
 import { useCanvasKit } from 'noya-renderer';
 import { SuspendedValue } from 'noya-utils';
 import {
@@ -18,7 +18,10 @@ import {
 const FontManagerContext = createContext<
   | {
       typefaceFontProvider: TypefaceFontProvider;
-      addFont: (fontFamily: FontFamilyID, fontVariant: FontVariant) => void;
+      addFont: (
+        fontFamily: FontFamilyID,
+        fontVariant: GoogleFontVariant,
+      ) => void;
     }
   | undefined
 >(undefined);
@@ -72,7 +75,7 @@ export const FontManagerProvider = memo(function FontManagerProvider({
   }, []);
 
   const addFont = useCallback(
-    async (fontFamily: FontFamilyID, fontVariant: FontVariant) => {
+    async (fontFamily: FontFamilyID, fontVariant: GoogleFontVariant) => {
       sharedFontManager.addFont(fontFamily, fontVariant);
     },
     [],

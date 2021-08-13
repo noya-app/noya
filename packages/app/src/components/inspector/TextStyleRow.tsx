@@ -8,7 +8,7 @@ import {
 } from 'noya-designsystem';
 import {
   decodeFontVariant,
-  FontVariant,
+  GoogleFontVariant,
   getFontDefinition,
   getFontFamilyId,
   getFontFamilyIdList,
@@ -49,7 +49,7 @@ const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
     title: value,
   }));
 
-const DEFAULT_FONT_VARIANT_OPTIONS: FontVariant[] = ['regular'];
+const DEFAULT_FONT_VARIANT_OPTIONS: GoogleFontVariant[] = ['regular'];
 
 const upperFirst = (string: string) =>
   string.slice(0, 1).toUpperCase() + string.slice(1);

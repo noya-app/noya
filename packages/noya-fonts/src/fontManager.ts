@@ -1,5 +1,5 @@
 import { FontWeight, FontFamilyID } from 'noya-fonts';
-import { FontVariant, getFontFile } from 'noya-google-fonts';
+import { GoogleFontVariant, getFontFile } from 'noya-google-fonts';
 import { Emitter } from './Emitter';
 
 export type FontVariantName = 'regular' | 'italic';
@@ -16,7 +16,7 @@ export class FontID extends String {
   // Enforce typechecking. Without this, TypeScript will allow string literals
   __tag: any;
 
-  static make(fontFamilyID: FontFamilyID, fontVariant: FontVariant) {
+  static make(fontFamilyID: FontFamilyID, fontVariant: GoogleFontVariant) {
     return new FontID(`${fontFamilyID}-${fontVariant}`);
   }
 }
@@ -48,7 +48,7 @@ export class FontManager extends Emitter {
 
   private pendingFonts: Set<string> = new Set();
 
-  async addFont(fontFamily: FontFamilyID, fontVariant: FontVariant) {
+  async addFont(fontFamily: FontFamilyID, fontVariant: GoogleFontVariant) {
     const url = getFontFile(fontFamily, fontVariant);
     const fontId = FontID.make(fontFamily, fontVariant);
 
