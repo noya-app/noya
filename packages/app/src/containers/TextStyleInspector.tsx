@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
 import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextLayoutRow from '../components/inspector/TextLayoutRow';
+import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
 import useShallowArray from '../hooks/useShallowArray';
 
@@ -36,22 +36,15 @@ export default memo(function TextStyleInspector() {
   return (
     <>
       <TextStyleRow
-        fontColor={editableTextStyle.fontColor}
         fontFamily={editableTextStyle.fontFamily}
+        fontTraits={editableTextStyle.fontTraits}
         fontSize={editableTextStyle.fontSize}
+        fontColor={editableTextStyle.fontColor}
         letterSpacing={editableTextStyle.letterSpacing}
         lineSpacing={editableTextStyle.lineSpacing}
         paragraphSpacing={editableTextStyle.paragraphSpacing}
-        onChangeFontFamily={useCallback(
-          (value) => {
-            dispatch('setTextFontName', value);
-          },
-          [dispatch],
-        )}
-        onChangeFontWeight={useCallback(
-          (value) => {
-            dispatch('setTextFontName', '-' + value);
-          },
+        onChangeFontName={useCallback(
+          (value) => dispatch('setTextFontName', value),
           [dispatch],
         )}
         onChangeFontColor={useCallback(

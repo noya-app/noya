@@ -20,7 +20,7 @@ export * as darkTheme from './theme/dark';
 // Components
 export { default as Button } from './components/Button';
 export * as Label from './components/Label';
-export { default as Select } from './components/Select';
+export { default as Select, SelectOption } from './components/Select';
 export { default as FillInputField } from './components/FillInputField';
 export * from './components/FillPreviewBackground';
 export { default as LabeledElementView } from './components/LabeledElementView';

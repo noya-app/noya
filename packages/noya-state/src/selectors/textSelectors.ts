@@ -1,11 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, FontMgr } from 'canvaskit';
+import { CanvasKit } from 'canvaskit';
+import { SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   insetRect,
   Point,
   rectContainsPoint,
 } from 'noya-geometry';
+import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,
   Layers,
@@ -13,6 +15,7 @@ import {
   Selectors,
   TextSelectionRange,
 } from 'noya-state';
+import { unique } from 'noya-utils';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
@@ -69,10 +72,11 @@ export function applyTextTransform(
 
 export function getLayerParagraph(
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  fontManager: IFontManager,
   layer: Sketch.Text,
 ) {
   const {
+    fontNames,
     fontSize,
     lineHeight,
     textHorizontalAlignment,
@@ -82,11 +86,19 @@ export function getLayerParagraph(
 
   const heightMultiplier = lineHeight ? lineHeight / fontSize : undefined;
 
+  const registeredFontFamilies = unique([
+    ...fontNames.flatMap((fontName) => {
+      const id = fontManager.getFontId(fontName);
+      return id ? [id] : [];
+    }),
+    SYSTEM_FONT_ID,
+  ]);
+
   const paragraphStyle = new CanvasKit.ParagraphStyle({
     // Note: We can put a heightMultiplier in text style, but it has no effect
     textStyle: {
       color: CanvasKit.BLACK,
-      fontFamilies: ['Roboto'],
+      fontFamilies: registeredFontFamilies,
       fontSize,
     },
     textAlign: Primitives.textHorizontalAlignment(
@@ -100,7 +112,7 @@ export function getLayerParagraph(
     //
     // For more on struts: https://en.wikipedia.org/wiki/Strut_(typesetting)
     strutStyle: {
-      fontFamilies: ['Roboto'],
+      fontFamilies: registeredFontFamilies,
       strutEnabled: true,
       forceStrutHeight: true,
       fontSize,
@@ -108,11 +120,17 @@ export function getLayerParagraph(
     },
   });
 
-  const builder = CanvasKit.ParagraphBuilder.Make(paragraphStyle, fontManager);
+  const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
+    paragraphStyle,
+    fontManager.getTypefaceFontProvider(),
+  );
 
   toTextSpans(layer.attributedString).forEach((span) => {
     const style = Primitives.createCanvasKitTextStyle(
       CanvasKit,
+      fontManager.getFontId(
+        span.attributes.MSAttributedStringFontAttribute.attributes.name,
+      ) ?? SYSTEM_FONT_ID,
       span.attributes,
       textDecoration,
     );
@@ -132,7 +150,7 @@ export function getLayerParagraph(
 
 export function getCharacterIndexAtPoint(
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  fontManager: IFontManager,
   state: ApplicationState,
   layerId: string,
   point: Point,
@@ -171,7 +189,7 @@ export function getCharacterIndexAtPoint(
 
 export function getCharacterIndexAtPointInSelectedLayer(
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  fontManager: IFontManager,
   state: ApplicationState,
   point: Point,
   mode: 'bounded' | 'unbounded',

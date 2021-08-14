@@ -7,6 +7,7 @@ import type {
   TextAlign,
   TextStyle,
 } from 'canvaskit';
+import { FontId, SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   createBounds,
@@ -346,6 +347,7 @@ export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
 export function createCanvasKitTextStyle(
   CanvasKit: CanvasKit,
+  fontId: FontId,
   attributes: Sketch.StringAttribute['attributes'],
   decoration: SimpleTextDecoration,
 ): TextStyle {
@@ -354,7 +356,9 @@ export function createCanvasKitTextStyle(
 
   return new CanvasKit.TextStyle({
     ...(textColor && { color: color(CanvasKit, textColor) }),
-    // fontFamilies: ['Roboto'], // TODO: Font family
+    fontFamilies: fontId
+      ? [fontId.toString(), SYSTEM_FONT_ID]
+      : [SYSTEM_FONT_ID],
     fontSize: font.attributes.size,
     letterSpacing: attributes.kerning,
     ...(decoration === 'none'

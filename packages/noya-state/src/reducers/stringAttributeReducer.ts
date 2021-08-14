@@ -34,13 +34,7 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
       return produce(state, (draft) => {
         const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        // This logic is temporary and will be replaced when we handle fonts
-        const split = attributes.name.split('-');
-        const face = split[1] ? '-' + split[1] : '';
-
-        attributes.name = value.startsWith('-')
-          ? split[0] + value
-          : value + face;
+        attributes.name = value;
       });
     }
     case 'setTextFontSize': {

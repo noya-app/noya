@@ -1,9 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CanvasKit, FontMgr } from 'canvaskit';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
+import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
@@ -99,7 +100,7 @@ export type Action =
 
 export type ApplicationReducerContext = {
   canvasSize: Size;
-  fontManager: FontMgr;
+  fontManager: IFontManager;
 };
 
 export function applicationReducer(

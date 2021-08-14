@@ -1,11 +1,13 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { SketchPattern } from 'noya-designsystem';
+import { decodeFontName, FontTraits } from 'noya-fonts';
 import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
 import { SimpleTextDecoration } from './primitives';
 
 export type EditableTextStyle = {
   fontFamily?: string;
+  fontTraits?: FontTraits;
   fontColor?: Sketch.Color;
   fontSize?: number;
   letterSpacing?: number;
@@ -20,10 +22,13 @@ export type EditableTextStyle = {
 function getEditableTextStyleProperties(
   textStyle: Sketch.TextStyle,
 ): EditableTextStyle {
+  const { fontFamily, fontTraits } = decodeFontName(
+    textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes.name,
+  );
+
   return {
-    fontFamily:
-      textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes
-        .name,
+    fontFamily,
+    fontTraits,
     fontColor: textStyle.encodedAttributes.MSAttributedStringColorAttribute,
     fontSize:
       textStyle.encodedAttributes.MSAttributedStringFontAttribute.attributes
@@ -49,6 +54,10 @@ export function getEditableTextStyle(
   return {
     fontFamily: getMultiValue(
       properties.map((textStyle) => textStyle.fontFamily),
+    ),
+    fontTraits: getMultiValue(
+      properties.map((textStyle) => textStyle.fontTraits),
+      isDeepEqual,
     ),
     fontColor: getMultiValue(
       properties.map((textStyle) => textStyle.fontColor),

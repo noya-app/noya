@@ -204,7 +204,7 @@ function fontDescriptor(
 ): Sketch.FontDescriptor {
   return {
     attributes: {
-      name: 'Helvetica',
+      name: 'Roboto',
       size: 18,
     },
     ...options,

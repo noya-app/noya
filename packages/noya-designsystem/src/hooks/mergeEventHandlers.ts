@@ -1,9 +1,6 @@
 import { useGesture } from 'react-use-gesture';
 import { composeEventHandlers } from '@radix-ui/primitive';
-
-function unique<T>(array: T[]) {
-  return [...new Set(array)];
-}
+import { unique } from 'noya-utils';
 
 function composeAllEventHandlers<E>(...handlers: ((e: E) => void)[]) {
   const [first, ...rest] = handlers;

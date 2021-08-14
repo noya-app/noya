@@ -1,7 +1,8 @@
 import type { FileSystemHandle } from 'browser-fs-access';
-import { CanvasKit, FontMgr } from 'canvaskit';
+import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { Insets, Size } from 'noya-geometry';
+import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
@@ -57,7 +58,7 @@ export function workspaceReducer(
   state: WorkspaceState,
   action: WorkspaceAction,
   CanvasKit: CanvasKit,
-  fontManager: FontMgr,
+  fontManager: IFontManager,
 ): WorkspaceState {
   switch (action[0]) {
     case 'newFile': {

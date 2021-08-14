@@ -506,9 +506,9 @@ export default memo(function Canvas() {
       state,
       selectedLayers,
       CanvasKit,
-      fontManager,
       dispatch,
       insets,
+      fontManager,
     ],
   );
 
@@ -954,7 +954,7 @@ export default memo(function Canvas() {
           break;
       }
     },
-    [offsetEventPoint, state, dispatch, CanvasKit, fontManager, insets],
+    [offsetEventPoint, state, CanvasKit, fontManager, dispatch, insets],
   );
 
   const handleDirection =

@@ -1,21 +1,24 @@
+import { StateProvider } from 'noya-app-state-context';
+import { decodeFontName } from 'noya-fonts';
+import {
+  CanvasKitProvider,
+  FontManagerProvider,
+  ImageCacheProvider,
+  useCanvasKit,
+  useDownloadFont,
+  useFontManager,
+} from 'noya-renderer';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
+  Selectors,
   WorkspaceAction,
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
 import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import {
-  CanvasKitProvider,
-  FontManagerProvider,
-  ImageCacheProvider,
-  useFontManager,
-} from 'noya-renderer';
 import Workspace from './containers/Workspace';
-import { StateProvider } from 'noya-app-state-context';
-import { useCanvasKit } from 'noya-renderer';
 import { useResource } from './hooks/useResource';
 
 type Action =
@@ -73,6 +76,24 @@ function Contents() {
   const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });
   }, []);
+
+  const downloadFont = useDownloadFont();
+
+  // Whenever the sketch file updates, download any new fonts
+  useEffect(() => {
+    if (state.type !== 'success') return;
+
+    const fontNames = Selectors.getAllFontNames(state.value.history.present);
+
+    fontNames.forEach((fontName) => {
+      const { fontFamily, fontTraits } = decodeFontName(fontName);
+      const fontFamilyId = fontManager.getFontFamilyId(fontFamily);
+
+      if (!fontFamilyId) return;
+
+      downloadFont({ fontFamilyId, ...fontTraits });
+    });
+  }, [downloadFont, fontManager, state]);
 
   if (state.type !== 'success') return null;
 
