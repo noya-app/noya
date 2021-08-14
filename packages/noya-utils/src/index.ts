@@ -22,6 +22,7 @@ export * from './fileType';
 export * from './memoize';
 export * from './types';
 export * from './upperFirst';
+export * from './unique';
 export * as delimitedPath from './delimitedPath';
 
 // Consider moving these to a more React-specific package

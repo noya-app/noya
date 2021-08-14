@@ -15,6 +15,7 @@ import {
   Selectors,
   TextSelectionRange,
 } from 'noya-state';
+import { unique } from 'noya-utils';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
@@ -85,13 +86,13 @@ export function getLayerParagraph(
 
   const heightMultiplier = lineHeight ? lineHeight / fontSize : undefined;
 
-  const registeredFontFamilies = [
+  const registeredFontFamilies = unique([
     ...fontNames.flatMap((fontName) => {
       const id = fontManager.getFontId(fontName);
       return id ? [id] : [];
     }),
     SYSTEM_FONT_ID,
-  ];
+  ]);
 
   const paragraphStyle = new CanvasKit.ParagraphStyle({
     // Note: We can put a heightMultiplier in text style, but it has no effect

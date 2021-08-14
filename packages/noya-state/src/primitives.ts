@@ -16,7 +16,6 @@ import {
   Rect,
   resize,
 } from 'noya-geometry';
-// import { decodeFontVariant, isValidFontVariant } from 'noya-google-fonts';
 import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
 
@@ -325,32 +324,6 @@ export function textHorizontalAlignment(
 
 export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
-// function getCanvasKitFontWeight(
-//   CanvasKit: CanvasKit,
-//   weight: FontWeight,
-// ): CKFontWeight {
-//   switch (weight) {
-//     case 'ultralight':
-//       return CanvasKit.FontWeight.ExtraLight;
-//     case 'thin':
-//       return CanvasKit.FontWeight.Thin;
-//     case 'light':
-//       return CanvasKit.FontWeight.Light;
-//     case 'regular':
-//       return CanvasKit.FontWeight.Normal;
-//     case 'medium':
-//       return CanvasKit.FontWeight.Medium;
-//     case 'semibold':
-//       return CanvasKit.FontWeight.SemiBold;
-//     case 'bold':
-//       return CanvasKit.FontWeight.Bold;
-//     case 'heavy':
-//       return CanvasKit.FontWeight.ExtraBold;
-//     case 'black':
-//       return CanvasKit.FontWeight.Black;
-//   }
-// }
-
 export function createCanvasKitTextStyle(
   CanvasKit: CanvasKit,
   fontId: FontId,
@@ -366,13 +339,6 @@ export function createCanvasKitTextStyle(
       ? [fontId.toString(), SYSTEM_FONT_ID]
       : [SYSTEM_FONT_ID],
     fontSize: font.attributes.size,
-    // fontStyle: {
-    //   slant:
-    //     variantName === 'italic'
-    //       ? CanvasKit.FontSlant.Italic
-    //       : CanvasKit.FontSlant.Upright,
-    //   weight: getCanvasKitFontWeight(CanvasKit, weight),
-    // },
     letterSpacing: attributes.kerning,
     ...(decoration === 'none'
       ? {}

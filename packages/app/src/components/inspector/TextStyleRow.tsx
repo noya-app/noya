@@ -8,6 +8,7 @@ import {
   SelectOption,
 } from 'noya-designsystem';
 import {
+  DEFAULT_FONT_TRAITS,
   encodeFontName,
   encodeFontTraits,
   FontTraits,
@@ -46,8 +47,6 @@ const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
     value,
     title: value,
   }));
-
-// const DEFAULT_FONT_VARIANT_OPTIONS: GoogleFontVariant[] = ['regular'];
 
 interface TextStyleRowProps {
   fontSize?: number;
@@ -90,14 +89,6 @@ export default memo(function TextStyleRow({
   const fontFamilyId = fontFamily
     ? fontManager.getFontFamilyId(fontFamily)
     : undefined;
-
-  const fontTraitsList: FontTraits[] = useMemo(
-    () =>
-      fontFamilyId
-        ? fontManager.getFontDescriptorsForFamily(fontFamilyId)
-        : [{ fontSlant: 'upright', fontWeight: 'regular' }],
-    [fontFamilyId, fontManager],
-  );
 
   const renderLabel = useCallback(
     ({ id }) => {
@@ -167,11 +158,12 @@ export default memo(function TextStyleRow({
         <Select
           id="font-variant"
           flex={`0 0 calc(75% - ${(horizontalSeparator * 1) / 4}px)`}
-          value={encodeFontTraits(
-            fontTraits ?? { fontSlant: 'upright', fontWeight: 'regular' },
-          )}
+          value={encodeFontTraits(fontTraits ?? DEFAULT_FONT_TRAITS)}
         >
-          {fontTraitsList.map((traits) => {
+          {(fontFamilyId
+            ? fontManager.getFontDescriptorsForFamily(fontFamilyId)
+            : [DEFAULT_FONT_TRAITS]
+          ).map((traits) => {
             const value = encodeFontTraits(traits);
             const title = getTraitsDisplayName(traits);
 

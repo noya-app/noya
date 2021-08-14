@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { FontId } from 'noya-fonts';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
+import { unique } from 'noya-utils';
 import { SimpleTextDecoration } from '../primitives';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
@@ -35,7 +35,7 @@ export function getTextStyleAttributes(layer: Sketch.Text) {
   ];
 
   return {
-    fontNames: [...new Set(fontNames)],
+    fontNames: unique(fontNames),
     fontSize:
       encodedAttributes?.MSAttributedStringFontAttribute.attributes.size ?? 12,
     lineHeight: paragraphStyle?.maximumLineHeight,
@@ -68,19 +68,6 @@ export function getEncodedStringAttributes(
   };
 }
 
-export function encodeFontId(
-  fontFamily: string,
-  fontVariant: string = 'regular',
-): FontId | undefined {
-  // const fontFamilyId = getFontFamilyId(fontFamily);
-
-  // if (!fontFamilyId || !isValidFontVariant(fontVariant)) return;
-
-  // return formatFontId(fontFamilyId, fontVariant);
-
-  return undefined;
-}
-
 export function getAllFontNames(state: ApplicationState) {
   const fontNames = state.sketch.pages.flatMap((page) => {
     const textLayers = Layers.findAll(
@@ -102,5 +89,5 @@ export function getAllFontNames(state: ApplicationState) {
     );
   });
 
-  return [...new Set(fontNames)];
+  return unique(fontNames);
 }

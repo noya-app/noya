@@ -2,6 +2,11 @@ import { upperFirst } from 'noya-utils';
 import { FontSlant, FontTraits } from './fontDescriptor';
 import { ALL_FONT_WEIGHTS, isValidFontWeight } from './fontWeight';
 
+export const DEFAULT_FONT_TRAITS: FontTraits = {
+  fontSlant: 'upright',
+  fontWeight: 'regular',
+};
+
 function decodeFontTraits(fontTraits: string): FontTraits {
   const lowercase = fontTraits.toLowerCase();
 
@@ -22,7 +27,7 @@ function decodeFontTraits(fontTraits: string): FontTraits {
 }
 
 export function encodeFontTraits(fontTraits: FontTraits): string {
-  return getTraitsDisplayName(fontTraits);
+  return getTraitsDisplayName(fontTraits).replace(' ', '');
 }
 
 /**
@@ -38,12 +43,7 @@ export function decodeFontName(
 
   return {
     fontFamily,
-    fontTraits: fontTraits
-      ? decodeFontTraits(fontTraits)
-      : {
-          fontSlant: 'upright',
-          fontWeight: 'regular',
-        },
+    fontTraits: fontTraits ? decodeFontTraits(fontTraits) : DEFAULT_FONT_TRAITS,
   };
 }
 

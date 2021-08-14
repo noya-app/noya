@@ -77,10 +77,11 @@ export class FontManager extends Emitter {
     try {
       data = await fetch(url).then((resp) => resp.arrayBuffer());
     } catch (error) {
+      // For now, we don't retry downloading fonts (i.e. the font stays pending on failure).
+      // A naive approach could make a lot of unnecessary network requests and hit the server
+      // pretty hard.
       console.warn('Failed to load font', fontId);
       return;
-    } finally {
-      this.pendingFonts.delete(fontId.toString());
     }
 
     console.info('fetched font', {
@@ -89,6 +90,7 @@ export class FontManager extends Emitter {
       data: data.byteLength,
     });
 
+    this.pendingFonts.delete(fontId.toString());
     this.loadedFonts.set(fontId.toString(), data);
 
     this.emit();
