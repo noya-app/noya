@@ -79,7 +79,7 @@ const RadialGradientEditor = ({
   paint.setColor(CanvasKit.parseColorString('#fef'));
   path.addRect(ellipseSquare); // Small frame around the square
   return (
-    <Group transform={AffineTransform.rotate(theta, center.x, center.y)}>
+    <Group transform={AffineTransform.rotate(theta, center)}>
       <Rect rect={ellipseSquare} paint={paint} />
       <Path path={path} paint={gradientLineStroke} />
     </Group>

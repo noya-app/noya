@@ -133,8 +133,7 @@ export function shader(
           // We scale the coordinate system along the x axis to render an ellipse
           const coordinateSystemTransform = AffineTransform.rotate(
             theta,
-            transformedCenter.x,
-            transformedCenter.y,
+            transformedCenter,
           ).scale(fill.gradient.elipseLength || 1, 1, transformedCenter);
 
           return CanvasKit.Shader.MakeRadialGradient(
@@ -174,7 +173,7 @@ export function shader(
           let matrix = AffineTransform.multiply(
             unitTransform,
             rotationRadians > 0
-              ? AffineTransform.rotate(rotationRadians, 0.5, 0.5)
+              ? AffineTransform.rotate(rotationRadians, { x: 0.5, y: 0.5 })
               : AffineTransform.identity,
             AffineTransform.scale(1 / aspectRatio, 1, { x: 0.5, y: 0.5 }),
           );

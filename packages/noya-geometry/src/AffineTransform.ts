@@ -102,11 +102,7 @@ export class AffineTransform implements Transformable {
     return new AffineTransform([1, 0, 0, 0, 1, 0]);
   }
 
-  static rotate(
-    theta: number,
-    rx: number = 0,
-    ry: number = 0,
-  ): AffineTransform {
+  static rotate(theta: number, origin?: Point): AffineTransform {
     const rotation = new AffineTransform([
       Math.cos(theta),
       -Math.sin(theta),
@@ -116,11 +112,11 @@ export class AffineTransform implements Transformable {
       0,
     ]);
 
-    if (rx !== 0 || ry !== 0) {
+    if (origin && (origin.x !== 0 || origin.y !== 0)) {
       return AffineTransform.multiply(
-        AffineTransform.translate(rx, ry),
+        AffineTransform.translate(origin.x, origin.y),
         rotation,
-        AffineTransform.translate(-rx, -ry),
+        AffineTransform.translate(-origin.x, -origin.y),
       );
     }
 

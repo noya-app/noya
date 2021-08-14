@@ -45,7 +45,7 @@ export function getLayerRotationTransform(
   const midpoint = { x: bounds.midX, y: bounds.midY };
   const rotation = getLayerRotationRadians(layer);
 
-  return AffineTransform.rotate(rotation, midpoint.x, midpoint.y);
+  return AffineTransform.rotate(rotation, midpoint);
 }
 
 export function getLayerTransformAtIndexPath(

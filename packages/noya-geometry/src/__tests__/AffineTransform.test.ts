@@ -21,7 +21,7 @@ test('matches canvaskit', () => {
     CanvasKit.Matrix.rotated(toRadians(90)),
   );
   expect(
-    AffineTransform.rotate(toRadians(90), 2, 3).array.map((x) =>
+    AffineTransform.rotate(toRadians(90), { x: 2, y: 3 }).array.map((x) =>
       x.toPrecision(6),
     ),
   ).toEqual(
@@ -81,12 +81,14 @@ test('rotate', () => {
 
 test('rotate around point', () => {
   const point = { x: 1, y: 1 };
-  const rotated90 = AffineTransform.rotate(toRadians(90), 10, 10).applyTo(
-    point,
-  );
-  const rotated180 = AffineTransform.rotate(toRadians(180), 10, 10).applyTo(
-    point,
-  );
+  const rotated90 = AffineTransform.rotate(toRadians(90), {
+    x: 10,
+    y: 10,
+  }).applyTo(point);
+  const rotated180 = AffineTransform.rotate(toRadians(180), {
+    x: 10,
+    y: 10,
+  }).applyTo(point);
 
   expect(rotated90.x).toBeCloseTo(19);
   expect(rotated90.y).toBeCloseTo(1);

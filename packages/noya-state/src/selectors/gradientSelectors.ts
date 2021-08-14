@@ -288,7 +288,7 @@ export function isPointerOnGradientEllipseEditor(
     selectedGradient.elipseLength,
   );
 
-  const position = AffineTransform.rotate(theta, center.x, center.y).applyTo({
+  const position = AffineTransform.rotate(theta, center).applyTo({
     x: rectangle.x,
     y: center.y,
   });
