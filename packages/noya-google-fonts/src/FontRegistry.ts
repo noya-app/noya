@@ -4,7 +4,7 @@ import { GoogleFontFamily } from './types';
 export class FontRegistry {
   constructor(webfonts: GoogleFontFamily[]) {
     webfonts.forEach((font) => {
-      this.downloadFont(font);
+      this.addFont(font);
     });
   }
 
@@ -23,11 +23,7 @@ export class FontRegistry {
       : undefined;
   }
 
-  hasFont(id: FontFamilyId) {
-    return this.fontMap.has(id.toString());
-  }
-
-  downloadFont(font: GoogleFontFamily) {
+  addFont(font: GoogleFontFamily) {
     const formatted = formatFontFamilyId(font.family);
     this.fontMap.set(formatted, font);
     this.fontFamilyIds.push(formatted as FontFamilyId);

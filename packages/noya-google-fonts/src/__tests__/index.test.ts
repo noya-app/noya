@@ -32,6 +32,6 @@ test('it should get font file', () => {
       fontWeight: 'bold',
     }),
   ).toEqual(
-    'http://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf',
+    'https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf',
   );
 });

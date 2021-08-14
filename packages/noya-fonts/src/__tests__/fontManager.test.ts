@@ -23,6 +23,6 @@ test('get font family name', () => {
 
 test('get font file url', () => {
   expect(fontManager.getFontFileUrl(robotoDescriptor)).toEqual(
-    'http://fonts.gstatic.com/s/roboto/v27/KFOjCnqEu92Fr1Mu51TzBhc9AMX6lJBP.ttf',
+    'https://fonts.gstatic.com/s/roboto/v27/KFOjCnqEu92Fr1Mu51TzBhc9AMX6lJBP.ttf',
   );
 });
