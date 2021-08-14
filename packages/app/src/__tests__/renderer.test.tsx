@@ -35,8 +35,8 @@ beforeAll(async () => {
   };
 });
 
-function panToFit(workspaceState: WorkspaceState) {
-  const page = workspaceState.history.present.sketch.pages[0];
+function panToFit(workspaceState: WorkspaceState, pageIndex: number) {
+  const page = workspaceState.history.present.sketch.pages[pageIndex];
 
   const boundingRect = Selectors.getPageContentBoundingRect(page);
 
@@ -64,28 +64,32 @@ function panToFit(workspaceState: WorkspaceState) {
   };
 }
 
-async function generatePageImage(workspaceState: WorkspaceState) {
-  const { size, workspaceState: updatedState } = panToFit(workspaceState);
+async function generatePageImage(
+  workspaceState: WorkspaceState,
+  pageIndex: number,
+) {
+  const { size, workspaceState: updatedState } = panToFit(
+    workspaceState,
+    pageIndex,
+  );
 
-  let imagePromise: Promise<Uint8Array | undefined> | undefined;
-
-  act(() => {
-    imagePromise = generateImage(
-      CanvasKit,
-      size.width,
-      size.height,
-      darkTheme,
-      updatedState,
-      'png',
-      () => (
-        <RenderingModeProvider value="interactive">
-          <SketchFileRenderer />
-        </RenderingModeProvider>
-      ),
-    );
+  const image = await new Promise<Uint8Array | undefined>((resolve) => {
+    act(() => {
+      generateImage(
+        CanvasKit,
+        size.width,
+        size.height,
+        darkTheme,
+        updatedState,
+        'png',
+        () => (
+          <RenderingModeProvider value="interactive">
+            <SketchFileRenderer />
+          </RenderingModeProvider>
+        ),
+      ).then(resolve);
+    });
   });
-
-  const image = await imagePromise;
 
   if (!image) {
     throw new Error('Failed to render image');
@@ -102,28 +106,58 @@ async function getSketchFile(filename: string) {
   return await decode(file);
 }
 
-async function generateSketchFileImage(filename: string) {
+async function generateSketchFileImage(filename: string, pageIndex: number) {
   const sketch = await getSketchFile(filename);
   const workspaceState = createInitialWorkspaceState(sketch);
-  return await generatePageImage(workspaceState);
+  return await generatePageImage(workspaceState, pageIndex);
 }
 
 test('Demo', async () => {
-  const image = await generateSketchFileImage('Demo.sketch');
+  const image = await generateSketchFileImage('Demo.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
 test('AlphaMasks', async () => {
-  const image = await generateSketchFileImage('AlphaMasks.sketch');
+  const image = await generateSketchFileImage('AlphaMasks.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
 test('Image', async () => {
-  const image = await generateSketchFileImage('Image.sketch');
+  const image = await generateSketchFileImage('Image.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('ImageFills', async () => {
+  const image = await generateSketchFileImage('ImageFills.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
 test('Gradient', async () => {
-  const image = await generateSketchFileImage('Gradient.sketch');
+  const image = await generateSketchFileImage('Gradient.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
+
+test('Rotation 0', async () => {
+  const image = await generateSketchFileImage('Rotation.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('Rotation 1', async () => {
+  const image = await generateSketchFileImage('Rotation.sketch', 1);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('Masks', async () => {
+  const image = await generateSketchFileImage('Masks.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('Shadows', async () => {
+  const image = await generateSketchFileImage('Shadows.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+// test('Symbols', async () => {
+//   const image = await generateSketchFileImage('Symbols.sketch', 0);
+//   expect(Buffer.from(image)).toMatchImageSnapshot();
+// });
