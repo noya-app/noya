@@ -1,24 +1,22 @@
-import { decodeFontName, encodeFontName, formatFontFamilyID } from 'noya-fonts';
+import { decodeFontName, encodeFontName, formatFontFamilyId } from 'noya-fonts';
+import { FontTraits } from '../fontDescriptor';
+
+const fontTraits: FontTraits = {
+  fontSlant: 'upright',
+  fontWeight: 'bold',
+};
 
 test('decode font name', () => {
   expect(decodeFontName('Roboto-Bold')).toEqual({
     fontFamily: 'Roboto',
-    traits: {
-      fontSlant: 'upright',
-      fontWeight: 'bold',
-    },
+    fontTraits,
   });
 });
 
 test('encode font name', () => {
-  expect(
-    encodeFontName('Roboto', {
-      fontSlant: 'upright',
-      fontWeight: 'bold',
-    }),
-  ).toEqual('Roboto-Bold');
+  expect(encodeFontName('Roboto', fontTraits)).toEqual('Roboto-Bold');
 });
 
 test('it creates font family ids', () => {
-  expect(formatFontFamilyID('Roboto')).toEqual('roboto');
+  expect(formatFontFamilyId('Roboto')).toEqual('roboto');
 });

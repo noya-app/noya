@@ -1,4 +1,4 @@
-import { FontFamilyID, formatFontFamilyID } from 'noya-fonts';
+import { FontFamilyId, formatFontFamilyId } from 'noya-fonts';
 import { GoogleFontFamily } from './types';
 
 export class FontRegistry {
@@ -10,26 +10,26 @@ export class FontRegistry {
 
   private fontMap = new Map<string, GoogleFontFamily>();
 
-  fontFamilyIds: FontFamilyID[] = [];
+  fontFamilyIds: FontFamilyId[] = [];
 
-  getFont(id: FontFamilyID) {
+  getFont(id: FontFamilyId) {
     return this.fontMap.get(id.toString());
   }
 
-  findFontFamilyID(fontFamily: string): FontFamilyID | undefined {
-    const formatted = formatFontFamilyID(fontFamily);
+  findFontFamilyId(fontFamily: string): FontFamilyId | undefined {
+    const formatted = formatFontFamilyId(fontFamily);
     return this.fontMap.has(formatted)
-      ? (formatted as FontFamilyID)
+      ? (formatted as FontFamilyId)
       : undefined;
   }
 
-  hasFont(id: FontFamilyID) {
+  hasFont(id: FontFamilyId) {
     return this.fontMap.has(id.toString());
   }
 
   downloadFont(font: GoogleFontFamily) {
-    const formatted = formatFontFamilyID(font.family);
+    const formatted = formatFontFamilyId(font.family);
     this.fontMap.set(formatted, font);
-    this.fontFamilyIds.push(formatted as FontFamilyID);
+    this.fontFamilyIds.push(formatted as FontFamilyId);
   }
 }

@@ -1,15 +1,15 @@
-import { FontFamilyID } from 'noya-fonts';
+import { FontFamilyId } from 'noya-fonts';
 import { Brand } from 'noya-utils';
 import { Emitter } from './Emitter';
 import { descriptorToFontId, FontDescriptor } from './fontDescriptor';
 import { decodeFontName } from './fontTraits';
 
 export interface FontProvider {
-  getFontFamilyIdList(): FontFamilyID[];
-  getFontFamilyId(fontFamily: string): FontFamilyID | undefined;
-  getFontFamilyName(fontFamilyId: FontFamilyID): string | undefined;
+  getFontFamilyIdList(): FontFamilyId[];
+  getFontFamilyId(fontFamily: string): FontFamilyId | undefined;
+  getFontFamilyName(fontFamilyId: FontFamilyId): string | undefined;
   getFontFileUrl(descriptor: FontDescriptor): string | undefined;
-  getFontDescriptorsForFamily(fontFamily: FontFamilyID): FontDescriptor[];
+  getFontDescriptorsForFamily(fontFamily: FontFamilyId): FontDescriptor[];
 }
 
 export type FontId = Brand<string, 'fontId'>;
@@ -43,14 +43,18 @@ export class FontManager extends Emitter {
   };
 
   getBestFontDescriptor = (fontName: string): FontDescriptor | undefined => {
-    const { fontFamily } = decodeFontName(fontName);
+    const { fontFamily, fontTraits } = decodeFontName(fontName);
     const fontFamilyId = this.getFontFamilyId(fontFamily);
 
     if (!fontFamilyId) return;
 
     const descriptors = this.getFontDescriptorsForFamily(fontFamilyId);
 
-    return descriptors[0];
+    return filterBestMatch(descriptors, [
+      (d) => d.fontSlant === fontTraits.fontSlant,
+      (d) => d.fontWeight === fontTraits.fontWeight,
+      (d) => d.fontWeight === 'regular',
+    ]);
   };
 
   downloadFont = async (fontDescriptor: FontDescriptor) => {
@@ -101,4 +105,11 @@ export class FontManager extends Emitter {
   private loadedFonts: Map<string, ArrayBuffer> = new Map();
 
   private pendingFonts: Set<string> = new Set();
+}
+
+function filterBestMatch<T>(items: T[], filters: ((item: T) => boolean)[]) {
+  return filters.reduce((result, filter) => {
+    const filtered = result.filter(filter);
+    return filtered.length > 0 ? filtered : items;
+  }, items)[0];
 }

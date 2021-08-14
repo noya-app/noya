@@ -1,4 +1,4 @@
-import { FontFamilyID } from 'noya-fonts';
+import { FontFamilyId } from 'noya-fonts';
 import {
   descriptorToFontId,
   FontDescriptor,
@@ -7,7 +7,7 @@ import {
 
 test('encode and decodes descriptor', () => {
   const descriptor: FontDescriptor = {
-    fontFamilyId: 'roboto' as FontFamilyID,
+    fontFamilyId: 'roboto' as FontFamilyId,
     fontSlant: 'italic',
     fontWeight: 'bold',
   };

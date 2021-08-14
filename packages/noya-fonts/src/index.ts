@@ -5,8 +5,8 @@ export * from './fontDescriptor';
 export * from './fontManager';
 export * from './fontWeight';
 
-export function formatFontFamilyID(fontFamily: string) {
+export function formatFontFamilyId(fontFamily: string) {
   return fontFamily.toLowerCase().replace(/[ _-]/g, '');
 }
 
-export type FontFamilyID = Brand<string, 'fontFamily'>;
+export type FontFamilyId = Brand<string, 'fontFamily'>;
