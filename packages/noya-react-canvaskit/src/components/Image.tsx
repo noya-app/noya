@@ -21,13 +21,10 @@ export default memo(function Image(props: ImageProps) {
 
   const rect = useRect(props.rect);
   const paint = usePaint(props.paint);
-  const image = useMemo(
-    () =>
-      props.image instanceof ArrayBuffer
-        ? decodeImage(CanvasKit, props.image)
-        : props.image,
-    [CanvasKit, props.image],
-  );
+  const image = useMemo(() => decodeImage(CanvasKit, props.image), [
+    CanvasKit,
+    props.image,
+  ]);
 
   const elementProps: ImageComponentProps | undefined = useMemo(
     () =>

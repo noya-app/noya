@@ -9,6 +9,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from 'react';
 import { useApplicationState } from 'noya-app-state-context';
 
@@ -36,8 +37,19 @@ export const ImageCacheProvider = memo(function ImageCacheProvider({
 }) {
   const [id, forceUpdate] = useReducer((x) => x + 1, 0);
 
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const addImageToCache = useCallback((key: string, value: ArrayBuffer) => {
     globalImageCache[key] = value;
+
+    if (!isMounted.current) return;
+
     forceUpdate();
   }, []);
 

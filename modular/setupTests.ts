@@ -8,6 +8,28 @@ import path from 'path';
 import fs from 'fs';
 import { setPathToWasm } from 'noya-utils';
 import nock from 'nock';
+import { toMatchImageSnapshot } from 'jest-image-snapshot';
+import util from 'util';
+
+expect.extend({ toMatchImageSnapshot });
+
+// https://reactjs.org/docs/testing-environments.html#mocking-a-rendering-surface
+jest.mock('scheduler', () => require('scheduler/unstable_mock'));
+
+// Polyfills for node
+window.TextEncoder = window.TextEncoder ?? util.TextEncoder;
+File.prototype.arrayBuffer = File.prototype.arrayBuffer || arrayBuffer;
+Blob.prototype.arrayBuffer = Blob.prototype.arrayBuffer || arrayBuffer;
+
+function arrayBuffer(this: Blob) {
+  return new Promise((resolve) => {
+    const fileReader = new FileReader();
+    fileReader.onload = () => {
+      resolve(fileReader.result);
+    };
+    fileReader.readAsArrayBuffer(this);
+  });
+}
 
 const pathToWasm = path.join(
   __dirname,

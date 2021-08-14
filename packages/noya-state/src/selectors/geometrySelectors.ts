@@ -328,3 +328,11 @@ export function getBoundingRectMap(
 
   return rectMap;
 }
+
+export function getPageContentBoundingRect(page: Sketch.Page) {
+  return getBoundingRect(
+    page,
+    AffineTransform.identity,
+    Layers.findAll(page, () => true).map((l) => l.do_objectID),
+  );
+}
