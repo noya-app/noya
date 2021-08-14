@@ -30,7 +30,11 @@ export const GoogleFontProvider: FontProvider = {
       descriptor.fontWeight,
     );
 
-    return getFontDefinition(descriptor.fontFamilyId)?.files[fontVariant];
+    const url = getFontDefinition(descriptor.fontFamilyId)?.files[fontVariant];
+
+    if (!url) return;
+
+    return url.replace(/^http:\/\//, 'https://');
   },
 
   getFontDescriptorsForFamily(fontFamilyId: FontFamilyId) {
