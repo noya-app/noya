@@ -16,10 +16,13 @@ export type FontId = Brand<string, 'fontId'>;
 
 export const SYSTEM_FONT_ID = 'system' as FontId;
 
-export class FontManager extends Emitter {
-  constructor(public provider: FontProvider) {
-    super();
-  }
+export class FontManager {
+  constructor(public provider: FontProvider) {}
+
+  private emitter = new Emitter<[FontId, ArrayBuffer]>();
+
+  addDownloadedFontListener = this.emitter.addListener;
+  removeDownloadedFontListener = this.emitter.removeListener;
 
   getFontFamilyIdList = this.provider.getFontFamilyIdList;
   getFontFamilyId = this.provider.getFontFamilyId;
@@ -93,7 +96,7 @@ export class FontManager extends Emitter {
     this.pendingFonts.delete(fontId.toString());
     this.loadedFonts.set(fontId.toString(), data);
 
-    this.emit();
+    this.emitter.emit(fontId, data);
   };
 
   get entries() {
