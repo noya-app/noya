@@ -131,19 +131,19 @@ describe('layers in group', () => {
 });
 
 describe('layers in artboard', () => {
-  test('one layer', () => {
-    const page = SketchModel.page({
-      layers: [
-        SketchModel.artboard({
-          do_objectID: 'a1',
-          frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
-          layers: [r1, r3],
-        }),
-      ],
-    });
+  const page = SketchModel.page({
+    layers: [
+      SketchModel.artboard({
+        do_objectID: 'a1',
+        frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
+        layers: [r1, r3],
+      }),
+    ],
+  });
 
-    const state = createInitialState(createSketchFile(page));
+  const state = createInitialState(createSketchFile(page));
 
+  test('select one layer', () => {
     expect(getBoundingRect(page, ['r1'])).toEqual({
       x: 50,
       y: 50,
@@ -156,9 +156,9 @@ describe('layers in artboard', () => {
         (layer) => layer.do_objectID,
       ),
     ).toEqual(['r1']);
+  });
 
-    // Selecting artboards
-
+  test('select artboard layer', () => {
     expect(getBoundingRect(page, ['a1'])).toEqual({
       x: 50,
       y: 50,
@@ -171,17 +171,17 @@ describe('layers in artboard', () => {
         artboards: 'artboardOnly',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['a1']);
+  });
 
-    // Selecting artboards and children
-
+  test('select artboard layer and children', () => {
     expect(
       getLayersInRect(state, page, insets, marqueeRect, {
         artboards: 'artboardAndChildren',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['a1', 'r1']);
+  });
 
-    // Layer outside artboard's bounds
-
+  test('select nothing outside artboard bounds', () => {
     expect(
       getLayersInRect(state, page, insets, {
         x: 10000,
