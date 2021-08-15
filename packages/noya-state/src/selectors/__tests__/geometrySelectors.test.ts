@@ -1,11 +1,7 @@
 import { Insets, Rect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile } from 'noya-state';
-import {
-  getBoundingRect,
-  getLayersInRect,
-  LayerTraversalOptions,
-} from '../geometrySelectors';
+import { getBoundingRect, getLayersInRect } from '../geometrySelectors';
 
 const insets: Insets = {
   top: 0,
@@ -103,11 +99,13 @@ describe('layers in group', () => {
       ),
     ).toEqual(['g1']);
 
-    const clickThroughGroupsOptions: LayerTraversalOptions = {
-      clickThroughGroups: true,
-    };
+    // Click through groups
 
-    expect(getBoundingRect(page, ['r1'], clickThroughGroupsOptions)).toEqual({
+    expect(
+      getBoundingRect(page, ['r1'], {
+        clickThroughGroups: true,
+      }),
+    ).toEqual({
       x: 50,
       y: 50,
       width: 100,
@@ -115,13 +113,9 @@ describe('layers in group', () => {
     });
 
     expect(
-      getLayersInRect(
-        state,
-        page,
-        insets,
-        marqueeRect,
-        clickThroughGroupsOptions,
-      ).map((layer) => layer.do_objectID),
+      getLayersInRect(state, page, insets, marqueeRect, {
+        clickThroughGroups: true,
+      }).map((layer) => layer.do_objectID),
     ).toEqual(['r1']);
   });
 });
@@ -153,9 +147,7 @@ describe('layers in artboard', () => {
       ),
     ).toEqual(['r1']);
 
-    const includeArtboardOptions: LayerTraversalOptions = {
-      artboards: 'artboardOnly',
-    };
+    // Selecting artboards
 
     expect(getBoundingRect(page, ['a1'])).toEqual({
       x: 50,
@@ -165,13 +157,9 @@ describe('layers in artboard', () => {
     });
 
     expect(
-      getLayersInRect(
-        state,
-        page,
-        insets,
-        marqueeRect,
-        includeArtboardOptions,
-      ).map((layer) => layer.do_objectID),
+      getLayersInRect(state, page, insets, marqueeRect, {
+        artboards: 'artboardOnly',
+      }).map((layer) => layer.do_objectID),
     ).toEqual(['a1']);
   });
 });
