@@ -14,7 +14,7 @@ import {
 } from 'noya-geometry';
 import * as Primitives from 'noya-state';
 import { getRectDragHandles } from 'noya-state';
-import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
+import { SKIP, STOP, VisitOptions } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
@@ -49,9 +49,8 @@ function shouldClickThrough(
 
 function visitLayersReversed(
   rootLayer: Sketch.AnyLayer,
-  ctm: AffineTransform,
   options: LayerTraversalOptions,
-  onEnter: (layer: Sketch.AnyLayer, ctm: AffineTransform) => EnterReturnValue,
+  onEnter: NonNullable<VisitOptions<Sketch.AnyLayer>['onEnter']>,
 ) {
   visitReversed(rootLayer, {
     onEnter: (layer, indexPath) => {
@@ -59,13 +58,7 @@ function visitLayersReversed(
 
       if (!layer.isVisible && !options.includeHiddenLayers) return SKIP;
 
-      const transform = getLayerTransformAtIndexPathReversed(
-        rootLayer,
-        indexPath,
-        ctm,
-      );
-
-      const result = onEnter(layer, transform);
+      const result = onEnter(layer, indexPath);
 
       if (result === STOP) return result;
 
@@ -96,29 +89,32 @@ export function getLayersInRect(
   const screenTransform = getScreenTransform(insets);
   const screenRect = transformRect(rect, screenTransform);
 
-  visitLayersReversed(
-    page,
-    getCanvasTransform(state, insets),
-    options,
-    (layer, ctm) => {
-      // TODO: Handle rotated rectangle collision
-      const hasIntersect = rectsIntersect(
-        transformRect(layer.frame, ctm),
-        screenRect,
-      );
+  const canvasTransform = getCanvasTransform(state, insets);
 
-      if (!hasIntersect) return SKIP;
+  visitLayersReversed(page, options, (layer, indexPath) => {
+    const transform = getLayerTransformAtIndexPathReversed(
+      page,
+      indexPath,
+      canvasTransform,
+    );
 
-      const includeArtboard =
-        layer._class === 'artboard' &&
-        options.includeArtboardLayers === 'includeAndClickThrough';
+    // TODO: Handle rotated rectangle collision
+    const hasIntersect = rectsIntersect(
+      transformRect(layer.frame, transform),
+      screenRect,
+    );
 
-      // Artboards can't be selected themselves, unless we enable that option
-      if (!includeArtboard && shouldClickThrough(layer, options)) return;
+    if (!hasIntersect) return SKIP;
 
-      found.push(layer);
-    },
-  );
+    const includeArtboard =
+      layer._class === 'artboard' &&
+      options.includeArtboardLayers === 'includeAndClickThrough';
+
+    // Artboards can't be selected themselves, unless we enable that option
+    if (!includeArtboard && shouldClickThrough(layer, options)) return;
+
+    found.push(layer);
+  });
 
   return found as PageLayer[];
 }
@@ -146,9 +142,9 @@ export function getLayerAtPoint(
 
   const screenPoint = screenTransform.applyTo(point);
 
-  visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
+  visitLayersReversed(page, options, (layer, indexPath) => {
     const transform = AffineTransform.multiply(
-      ctm,
+      getLayerTransformAtIndexPathReversed(page, indexPath, canvasTransform),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
@@ -214,11 +210,11 @@ export function getBoundingRect(
     maxY: -Infinity,
   };
 
-  visitLayersReversed(rootLayer, ctm, options, (layer, ctm) => {
+  visitLayersReversed(rootLayer, options, (layer, indexPath) => {
     if (!layerIds.includes(layer.do_objectID)) return;
 
     const transform = AffineTransform.multiply(
-      ctm,
+      getLayerTransformAtIndexPathReversed(rootLayer, indexPath, ctm),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
@@ -255,11 +251,11 @@ export function getBoundingPoints(
 
   let points: Point[] = [];
 
-  visitLayersReversed(rootLayer, ctm, options, (layer, ctm) => {
+  visitLayersReversed(rootLayer, options, (layer, indexPath) => {
     if (layerId !== layer.do_objectID) return;
 
     const transform = AffineTransform.multiply(
-      ctm,
+      getLayerTransformAtIndexPathReversed(rootLayer, indexPath, ctm),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
