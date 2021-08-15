@@ -239,7 +239,6 @@ export function getBoundingRect(
 
 export function getBoundingPoints(
   rootLayer: Sketch.AnyLayer,
-  ctm: AffineTransform,
   layerId: string,
   options?: LayerTraversalOptions,
 ): Point[] {
@@ -255,7 +254,7 @@ export function getBoundingPoints(
     if (layerId !== layer.do_objectID) return;
 
     const transform = AffineTransform.multiply(
-      getLayerTransformAtIndexPathReversed(rootLayer, indexPath, ctm),
+      getLayerTransformAtIndexPathReversed(rootLayer, indexPath),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );

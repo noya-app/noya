@@ -115,7 +115,7 @@ export default memo(function SketchFileRenderer() {
   const boundingPoints = useMemo(
     () =>
       state.selectedObjects.map((id: string) =>
-        Selectors.getBoundingPoints(page, AffineTransform.identity, id, {
+        Selectors.getBoundingPoints(page, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
           includeArtboardLayers: false,
