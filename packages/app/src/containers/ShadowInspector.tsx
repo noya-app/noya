@@ -8,7 +8,7 @@ import {
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function ShadowInspector() {
   const dispatch = useDispatch();

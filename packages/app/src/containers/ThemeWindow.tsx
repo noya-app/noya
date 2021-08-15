@@ -5,7 +5,7 @@ import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 import TextStylesGrid from '../components/theme/TextStylesGrid';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
 import SymbolsGrid from '../components/theme/SymbolsGrid';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import styled from 'styled-components';
 
 const Container = styled.main(({ theme }) => ({

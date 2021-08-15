@@ -3,7 +3,7 @@ import { getMultiNumberValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function RadiusInspector() {
   const [, dispatch] = useApplicationState();

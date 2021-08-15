@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BorderInspector from './BorderInspector';

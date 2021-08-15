@@ -17,7 +17,7 @@ import { DrawableLayerType, InteractionType, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import { LayerIcon } from './LayerList';
 
 const Row = styled.div(({ theme }) => ({

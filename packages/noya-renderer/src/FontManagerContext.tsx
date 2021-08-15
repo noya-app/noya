@@ -2,6 +2,7 @@ import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
 import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
+import { useMutableState } from 'noya-react-utils';
 import { useCanvasKit } from 'noya-renderer';
 import { SuspendedValue } from 'noya-utils';
 import {
@@ -11,7 +12,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from 'react';
 
 export type IFontManager = Pick<
@@ -53,34 +53,33 @@ export const FontManagerProvider = memo(function FontManagerProvider({
 
   const defaultFont = suspendedDefaultFont.getValueOrThrow();
 
-  // When the component mounts, register all downloaded fonts.
-  // We wrap the provider in a ref-like object so that setting state will trigger a re-render.
-  const [typefaceFontProvider, setTypefaceFontProvider] = useState(() => {
-    const provider = CanvasKit.TypefaceFontProvider.Make();
-    provider.registerFont(defaultFont, SYSTEM_FONT_ID);
-    sharedFontManager.entries.forEach(([name, data]) => {
-      provider.registerFont(data, name);
-    });
-    return { current: provider };
-  });
+  const [typefaceFontProvider, updateTypefaceFontProvider] = useMutableState(
+    () => {
+      const provider = CanvasKit.TypefaceFontProvider.Make();
+      provider.registerFont(defaultFont, SYSTEM_FONT_ID);
+      sharedFontManager.entries.forEach(([name, data]) => {
+        provider.registerFont(data, name);
+      });
+      return provider;
+    },
+  );
 
   useEffect(() => {
     // Register any fonts that get downloaded and trigger a re-render
     const listener = (fontId: FontId, data: ArrayBuffer) => {
-      setTypefaceFontProvider((wrapped) => {
-        wrapped.current.registerFont(data, fontId);
-        return { current: wrapped.current };
+      updateTypefaceFontProvider((provider) => {
+        provider.registerFont(data, fontId);
       });
     };
 
     sharedFontManager.addDownloadedFontListener(listener);
 
     return () => sharedFontManager.removeDownloadedFontListener(listener);
-  }, []);
+  }, [updateTypefaceFontProvider]);
 
   const contextValue = useMemo(
     (): FontManagerContextValue => ({
-      getTypefaceFontProvider: () => typefaceFontProvider.current,
+      getTypefaceFontProvider: () => typefaceFontProvider,
       ...createInlineWrapperFunctions(sharedFontManager),
     }),
     [typefaceFontProvider],

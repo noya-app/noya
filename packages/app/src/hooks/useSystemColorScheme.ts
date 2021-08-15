@@ -1,5 +1,5 @@
+import { useLazyValue } from 'noya-react-utils';
 import { useEffect, useState } from 'react';
-import useLazyValue from './useLazyValue';
 
 const preferDarkQuery = '(prefers-color-scheme: dark)';
 

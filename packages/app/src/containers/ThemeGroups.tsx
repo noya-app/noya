@@ -5,7 +5,7 @@ import { TreeView } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { sortBy } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import { createThemeGroups } from '../utils/themeTree';
 
 type ThemeGroupType = Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster;

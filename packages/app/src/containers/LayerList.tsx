@@ -42,9 +42,9 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import useDeepArray from '../hooks/useDeepArray';
+import { useDeepArray } from 'noya-react-utils';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
