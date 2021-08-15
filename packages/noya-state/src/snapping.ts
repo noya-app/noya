@@ -52,8 +52,8 @@ export function getPossibleTargetSnapLayers(
     { left: 0, right: 0, top: 0, bottom: 0 },
     { x: 0, y: 0, width: canvasSize.width, height: canvasSize.height },
     {
-      includeArtboardLayers:
-        sourceIndexPaths.length === 0 ? 'includeArtboardAndChildren' : true,
+      artboards:
+        sourceIndexPaths.length === 0 ? 'artboardAndChildren' : 'artboardOnly',
     },
   );
 

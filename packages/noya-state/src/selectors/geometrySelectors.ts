@@ -31,16 +31,18 @@ import {
 export type LayerTraversalOptions = {
   includeHiddenLayers?: boolean;
   clickThroughGroups?: boolean;
-  includeArtboardLayers?: boolean | 'includeArtboardAndChildren';
+  artboards?: 'artboardOnly' | 'childrenOnly' | 'artboardAndChildren';
 };
 
-function shouldClickThrough(
+function shouldVisitChildren(
   layer: Sketch.AnyLayer,
   options: LayerTraversalOptions,
 ) {
+  const artboardsOption = options.artboards ?? 'childrenOnly';
+
   return (
     layer._class === 'symbolMaster' ||
-    (layer._class === 'artboard' && options.includeArtboardLayers !== true) ||
+    (layer._class === 'artboard' && artboardsOption !== 'artboardOnly') ||
     (layer._class === 'slice' && options.clickThroughGroups) ||
     (layer._class === 'group' &&
       (layer.hasClickThrough || options.clickThroughGroups))
@@ -62,11 +64,9 @@ function visitLayersReversed(
 
       if (result === STOP) return result;
 
-      if (shouldClickThrough(layer, options)) {
-        return result;
-      } else {
-        return SKIP;
-      }
+      if (!shouldVisitChildren(layer, options)) return SKIP;
+
+      return result;
     },
   });
 }
@@ -101,11 +101,10 @@ export function getLayersInRect(
     if (!hasIntersect) return SKIP;
 
     const includeArtboard =
-      Layers.isArtboard(layer) &&
-      options.includeArtboardLayers === 'includeArtboardAndChildren';
+      Layers.isArtboard(layer) && options.artboards === 'artboardAndChildren';
 
     // Artboards can't be selected themselves, unless we enable that option
-    if (!includeArtboard && shouldClickThrough(layer, options)) return;
+    if (!includeArtboard && shouldVisitChildren(layer, options)) return;
 
     found.push(layer);
   });
@@ -145,7 +144,7 @@ export function getLayerAtPoint(
     if (!containsPoint) return SKIP;
 
     // Artboards can't be selected themselves, and instead only update the ctm
-    if (shouldClickThrough(layer, options)) return;
+    if (shouldVisitChildren(layer, options)) return;
 
     switch (layer._class) {
       case 'rectangle':

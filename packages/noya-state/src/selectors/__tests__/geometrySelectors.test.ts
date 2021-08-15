@@ -154,7 +154,7 @@ describe('layers in artboard', () => {
     ).toEqual(['r1']);
 
     const includeArtboardOptions: LayerTraversalOptions = {
-      includeArtboardLayers: true,
+      artboards: 'artboardOnly',
     };
 
     expect(getBoundingRect(page, ['a1'])).toEqual({
