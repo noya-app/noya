@@ -340,11 +340,7 @@ export function canvasReducer(
         const boundingRect = getBoundingRect(
           draft.sketch.pages[pageIndex],
           [layer.do_objectID],
-          {
-            clickThroughGroups: true,
-            includeHiddenLayers: false,
-            includeArtboardLayers: false,
-          },
+          { clickThroughGroups: true },
         );
 
         if (!boundingRect || !layer || !Layers.isPointsLayer(layer)) return;
@@ -787,8 +783,6 @@ export function canvasReducer(
 
             const sourceRect = getBoundingRect(pageSnapshot, layerIds, {
               clickThroughGroups: true,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
             });
 
             if (!sourceRect) {

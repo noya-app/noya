@@ -29,9 +29,9 @@ import {
 } from './transformSelectors';
 
 export type LayerTraversalOptions = {
-  includeHiddenLayers: boolean;
-  clickThroughGroups: boolean;
-  includeArtboardLayers: boolean | 'includeAndClickThrough';
+  includeHiddenLayers?: boolean;
+  clickThroughGroups?: boolean;
+  includeArtboardLayers?: boolean | 'includeArtboardAndChildren';
 };
 
 function shouldClickThrough(
@@ -76,14 +76,8 @@ export function getLayersInRect(
   page: Sketch.Page,
   insets: Insets,
   rect: Rect,
-  traversalOptions?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): PageLayer[] {
-  const options = traversalOptions ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
-
   let found: Sketch.AnyLayer[] = [];
 
   const screenTransform = getScreenTransform(insets);
@@ -107,8 +101,8 @@ export function getLayersInRect(
     if (!hasIntersect) return SKIP;
 
     const includeArtboard =
-      layer._class === 'artboard' &&
-      options.includeArtboardLayers === 'includeAndClickThrough';
+      Layers.isArtboard(layer) &&
+      options.includeArtboardLayers === 'includeArtboardAndChildren';
 
     // Artboards can't be selected themselves, unless we enable that option
     if (!includeArtboard && shouldClickThrough(layer, options)) return;
@@ -124,17 +118,11 @@ export function getLayerAtPoint(
   state: ApplicationState,
   insets: Insets,
   point: Point,
-  traversalOptions?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
   const canvasTransform = getCanvasTransform(state, insets);
   const screenTransform = getScreenTransform(insets);
-
-  const options = traversalOptions ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
 
   // TODO: check if we're clicking the title of an artboard
 
@@ -194,14 +182,8 @@ export function getLayerAtPoint(
 export function getBoundingRect(
   rootLayer: Sketch.AnyLayer,
   layerIds: string[],
-  options?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): Rect | undefined {
-  options = options ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
-
   let bounds = {
     minX: Infinity,
     minY: Infinity,
@@ -239,14 +221,8 @@ export function getBoundingRect(
 export function getBoundingPoints(
   rootLayer: Sketch.AnyLayer,
   layerId: string,
-  options?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): Point[] {
-  options = options ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
-
   let points: Point[] = [];
 
   visitLayersReversed(rootLayer, options, (layer, indexPath) => {

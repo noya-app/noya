@@ -105,8 +105,6 @@ describe('layers in group', () => {
 
     const clickThroughGroupsOptions: LayerTraversalOptions = {
       clickThroughGroups: true,
-      includeArtboardLayers: false,
-      includeHiddenLayers: false,
     };
 
     expect(getBoundingRect(page, ['r1'], clickThroughGroupsOptions)).toEqual({
@@ -156,9 +154,7 @@ describe('layers in artboard', () => {
     ).toEqual(['r1']);
 
     const includeArtboardOptions: LayerTraversalOptions = {
-      clickThroughGroups: false,
       includeArtboardLayers: true,
-      includeHiddenLayers: false,
     };
 
     expect(getBoundingRect(page, ['a1'])).toEqual({

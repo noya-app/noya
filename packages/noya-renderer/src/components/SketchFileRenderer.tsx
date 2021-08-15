@@ -96,7 +96,6 @@ export default memo(function SketchFileRenderer() {
       Selectors.getBoundingRect(page, state.selectedObjects, {
         clickThroughGroups: true,
         includeHiddenLayers: true,
-        includeArtboardLayers: false,
       }),
     [page, state.selectedObjects],
   );
@@ -107,7 +106,6 @@ export default memo(function SketchFileRenderer() {
         Selectors.getBoundingPoints(page, id, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
-          includeArtboardLayers: false,
         }),
       ),
     [page, state.selectedObjects],
@@ -137,7 +135,6 @@ export default memo(function SketchFileRenderer() {
       {
         clickThroughGroups: true,
         includeHiddenLayers: true,
-        includeArtboardLayers: false,
       },
     );
 

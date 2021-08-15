@@ -62,11 +62,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   const targetLayerBoundingRectMap = Selectors.getBoundingRectMap(
     page,
     snaps.map((pair) => pair.targetId),
-    {
-      clickThroughGroups: true,
-      includeHiddenLayers: false,
-      includeArtboardLayers: false,
-    },
+    { clickThroughGroups: true },
   );
 
   const getMinGuideDistance = (guides: Guides[]) =>
@@ -156,7 +152,6 @@ export default memo(function SnapGuides() {
         const rect = Selectors.getBoundingRect(page, state.selectedObjects, {
           clickThroughGroups: true,
           includeHiddenLayers: true,
-          includeArtboardLayers: false,
         });
 
         if (!rect) return;

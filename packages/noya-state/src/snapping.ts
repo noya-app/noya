@@ -52,10 +52,8 @@ export function getPossibleTargetSnapLayers(
     { left: 0, right: 0, top: 0, bottom: 0 },
     { x: 0, y: 0, width: canvasSize.width, height: canvasSize.height },
     {
-      clickThroughGroups: false,
-      includeHiddenLayers: false,
       includeArtboardLayers:
-        sourceIndexPaths.length === 0 ? 'includeAndClickThrough' : true,
+        sourceIndexPaths.length === 0 ? 'includeArtboardAndChildren' : true,
     },
   );
 
@@ -116,11 +114,7 @@ export function getLayerSnapValues(
   layerId: string,
   axis: Axis,
 ): number[] {
-  const rect = getBoundingRect(page, [layerId], {
-    clickThroughGroups: true,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  });
+  const rect = getBoundingRect(page, [layerId], { clickThroughGroups: true });
 
   return rect ? getSnapValues(rect, axis) : [];
 }
