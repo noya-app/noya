@@ -12,7 +12,7 @@ import {
 } from 'noya-state';
 import { useCallback } from 'react';
 import styled from 'styled-components';
-import useShallowArray from '../../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import CoordinatesInspector from './CoordinatesInspector';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';

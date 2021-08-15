@@ -6,7 +6,7 @@ import { memo, useCallback, useMemo } from 'react';
 import TextLayoutRow from '../components/inspector/TextLayoutRow';
 import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function TextStyleInspector() {
   const dispatch = useDispatch();

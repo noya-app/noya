@@ -11,7 +11,7 @@ import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 const NO_TEXT_STYLE = 'none';
 

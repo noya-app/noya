@@ -4,7 +4,7 @@ import { Button, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import useShallowArray from '../../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {

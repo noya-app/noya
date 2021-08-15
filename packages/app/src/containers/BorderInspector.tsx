@@ -9,7 +9,7 @@ import {
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import BorderRow from '../components/inspector/BorderRow';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function BorderInspector() {
   const [state, dispatch] = useApplicationState();

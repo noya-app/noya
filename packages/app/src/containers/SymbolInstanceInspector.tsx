@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'noya-app-state-context';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 import SymbolSelectorRow from '../components/inspector/LinkedSymbolRow';
 import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
 import { Divider, withSeparatorElements } from 'noya-designsystem';

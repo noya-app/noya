@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-export default function useLazyValue<T>(f: () => T): T {
+export function useLazyValue<T>(f: () => T): T {
   const didInitialize = useRef(false);
   const value = useRef<T | undefined>(undefined);
 
