@@ -63,7 +63,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   name: string,
   indexPaths: IndexPath[],
 ): T | undefined => {
-  const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
+  const boundingRect = getBoundingRect(page, ids, {
     clickThroughGroups: true,
     includeHiddenLayers: true,
     includeArtboardLayers: false,

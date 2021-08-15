@@ -1,6 +1,5 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  AffineTransform,
   Axis,
   createBounds,
   createRect,
@@ -117,7 +116,7 @@ export function getLayerSnapValues(
   layerId: string,
   axis: Axis,
 ): number[] {
-  const rect = getBoundingRect(page, AffineTransform.identity, [layerId], {
+  const rect = getBoundingRect(page, [layerId], {
     clickThroughGroups: true,
     includeHiddenLayers: false,
     includeArtboardLayers: false,

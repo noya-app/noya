@@ -1,7 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
-  AffineTransform,
   Axis,
   createBounds,
   createRect,
@@ -154,16 +153,11 @@ export default memo(function SnapGuides() {
     | undefined => {
     switch (interactionState.type) {
       case 'moving': {
-        const rect = Selectors.getBoundingRect(
-          page,
-          AffineTransform.identity,
-          state.selectedObjects,
-          {
-            clickThroughGroups: true,
-            includeHiddenLayers: true,
-            includeArtboardLayers: false,
-          },
-        );
+        const rect = Selectors.getBoundingRect(page, state.selectedObjects, {
+          clickThroughGroups: true,
+          includeHiddenLayers: true,
+          includeArtboardLayers: false,
+        });
 
         if (!rect) return;
 
@@ -182,7 +176,6 @@ export default memo(function SnapGuides() {
 
         const originalBoundingRect = Selectors.getBoundingRect(
           pageSnapshot,
-          AffineTransform.identity,
           state.selectedObjects,
         )!;
 

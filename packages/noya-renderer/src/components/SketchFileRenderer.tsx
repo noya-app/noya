@@ -2,13 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import {
-  AffineTransform,
-  createRect,
-  insetRect,
-  Point,
-  Rect,
-} from 'noya-geometry';
+import { createRect, insetRect, Point, Rect } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -99,16 +93,11 @@ export default memo(function SketchFileRenderer() {
 
   const boundingRect = useMemo(
     () =>
-      Selectors.getBoundingRect(
-        page,
-        AffineTransform.identity,
-        state.selectedObjects,
-        {
-          clickThroughGroups: true,
-          includeHiddenLayers: true,
-          includeArtboardLayers: false,
-        },
-      ),
+      Selectors.getBoundingRect(page, state.selectedObjects, {
+        clickThroughGroups: true,
+        includeHiddenLayers: true,
+        includeArtboardLayers: false,
+      }),
     [page, state.selectedObjects],
   );
 
@@ -144,7 +133,6 @@ export default memo(function SketchFileRenderer() {
 
     const highlightedBoundingRect = Selectors.getBoundingRect(
       page,
-      AffineTransform.identity,
       [highlightedLayer.id],
       {
         clickThroughGroups: true,

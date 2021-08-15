@@ -193,7 +193,6 @@ export function getLayerAtPoint(
  */
 export function getBoundingRect(
   rootLayer: Sketch.AnyLayer,
-  ctm: AffineTransform,
   layerIds: string[],
   options?: LayerTraversalOptions,
 ): Rect | undefined {
@@ -214,7 +213,7 @@ export function getBoundingRect(
     if (!layerIds.includes(layer.do_objectID)) return;
 
     const transform = AffineTransform.multiply(
-      getLayerTransformAtIndexPathReversed(rootLayer, indexPath, ctm),
+      getLayerTransformAtIndexPathReversed(rootLayer, indexPath),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
@@ -273,11 +272,7 @@ export function getScaleDirectionAtPoint(
   point: Point,
 ): CompassDirection | undefined {
   const page = getCurrentPage(state);
-  const boundingRect = getBoundingRect(
-    page,
-    AffineTransform.identity,
-    state.selectedObjects,
-  );
+  const boundingRect = getBoundingRect(page, state.selectedObjects);
 
   if (!boundingRect) return;
 
@@ -296,7 +291,7 @@ export const getSelectedRect = (state: ApplicationState): Rect => {
   const layerIds = layerIndexPaths.map(
     (indexPath) => Layers.access(page, indexPath).do_objectID,
   );
-  return getBoundingRect(page, AffineTransform.identity, layerIds)!;
+  return getBoundingRect(page, layerIds)!;
 };
 
 export function getBoundingRectMap(
@@ -309,12 +304,7 @@ export function getBoundingRectMap(
   layerIds.forEach((layerId) => {
     if (layerId in rectMap) return;
 
-    const rect = getBoundingRect(
-      rootLayer,
-      AffineTransform.identity,
-      [layerId],
-      options,
-    );
+    const rect = getBoundingRect(rootLayer, [layerId], options);
 
     if (!rect) return;
 
@@ -327,7 +317,6 @@ export function getBoundingRectMap(
 export function getPageContentBoundingRect(page: Sketch.Page) {
   return getBoundingRect(
     page,
-    AffineTransform.identity,
     Layers.findAll(page, () => true).map((l) => l.do_objectID),
   );
 }
