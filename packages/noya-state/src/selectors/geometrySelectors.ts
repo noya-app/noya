@@ -45,20 +45,45 @@ export type LayerTraversalOptions = {
   artboards?: 'artboardOnly' | 'childrenOnly' | 'artboardAndChildren';
 };
 
+const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
+  includeHiddenLayers: false,
+  groups: 'groupOnly',
+  artboards: 'childrenOnly',
+};
+
 function shouldVisitChildren(
   layer: Sketch.AnyLayer,
-  options: LayerTraversalOptions,
+  traversalOptions: LayerTraversalOptions,
 ) {
-  const artboardsOption = options.artboards ?? 'childrenOnly';
-  const groupsOption = options.groups ?? 'groupOnly';
+  const options: Required<LayerTraversalOptions> = {
+    ...DEFAULT_TRAVERSAL_OPTIONS,
+    ...traversalOptions,
+  };
 
-  return (
-    layer._class === 'symbolMaster' ||
-    (layer._class === 'artboard' && artboardsOption !== 'artboardOnly') ||
-    (layer._class === 'slice' && groupsOption !== 'groupOnly') ||
-    (layer._class === 'group' &&
-      (groupsOption !== 'groupOnly' || layer.hasClickThrough))
-  );
+  switch (layer._class) {
+    case 'symbolMaster':
+      return true;
+    case 'artboard':
+      return options.artboards !== 'artboardOnly';
+    case 'group':
+      return options.groups !== 'groupOnly' || layer.hasClickThrough;
+    case 'slice':
+      return options.groups !== 'groupOnly';
+    default:
+      return false;
+  }
+}
+
+function shouldVisitLayer(
+  layer: Sketch.AnyLayer,
+  traversalOptions: LayerTraversalOptions,
+) {
+  const options: Required<LayerTraversalOptions> = {
+    ...DEFAULT_TRAVERSAL_OPTIONS,
+    ...traversalOptions,
+  };
+
+  return layer.isVisible || options.includeHiddenLayers;
 }
 
 function visitLayersReversed(
@@ -70,7 +95,7 @@ function visitLayersReversed(
     onEnter: (layer, indexPath) => {
       if (Layers.isPageLayer(layer)) return;
 
-      if (!layer.isVisible && !options.includeHiddenLayers) return SKIP;
+      if (!shouldVisitLayer(layer, options)) return SKIP;
 
       const result = onEnter(layer, indexPath);
 

@@ -37,6 +37,16 @@ const r2 = SketchModel.rectangle({
   }),
 });
 
+const r3 = SketchModel.rectangle({
+  do_objectID: 'r3',
+  frame: SketchModel.rect({
+    x: 10000,
+    y: 10000,
+    width: 100,
+    height: 100,
+  }),
+});
+
 describe('top level layers', () => {
   test('one layer', () => {
     const page = SketchModel.page({ layers: [r1] });
@@ -127,7 +137,7 @@ describe('layers in artboard', () => {
         SketchModel.artboard({
           do_objectID: 'a1',
           frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
-          layers: [r1],
+          layers: [r1, r3],
         }),
       ],
     });
@@ -161,5 +171,24 @@ describe('layers in artboard', () => {
         artboards: 'artboardOnly',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['a1']);
+
+    // Selecting artboards and children
+
+    expect(
+      getLayersInRect(state, page, insets, marqueeRect, {
+        artboards: 'artboardAndChildren',
+      }).map((layer) => layer.do_objectID),
+    ).toEqual(['a1', 'r1']);
+
+    // Layer outside artboard's bounds
+
+    expect(
+      getLayersInRect(state, page, insets, {
+        x: 10000,
+        y: 10000,
+        width: 1000,
+        height: 1000,
+      }).map((layer) => layer.do_objectID),
+    ).toEqual([]);
   });
 });
