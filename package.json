@@ -35,6 +35,7 @@
     "@shopify/eslint-plugin": "^40.1.0",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.3",
+    "@testing-library/react-hooks": "^7.0.1",
     "@testing-library/user-event": "^12.6.2",
     "@types/jest": "^26.0.20",
     "@types/jest-image-snapshot": "^4.3.1",
