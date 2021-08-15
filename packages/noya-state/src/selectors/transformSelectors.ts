@@ -65,7 +65,7 @@ export function getLayerTransformAtIndexPath(
 export function getLayerTransformAtIndexPathReversed(
   node: Sketch.AnyLayer,
   indexPath: IndexPath,
-  ctm: AffineTransform,
+  ctm: AffineTransform = AffineTransform.identity,
 ): AffineTransform {
   const path = Layers.accessPathReversed(node, indexPath).slice(1, -1);
 

@@ -280,11 +280,7 @@ export default memo(function Canvas() {
           state,
           insets,
           rawPoint,
-          {
-            clickThroughGroups: event.metaKey,
-            includeHiddenLayers: false,
-            includeArtboardLayers: false,
-          },
+          { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
         );
 
         if (!layer) {
@@ -332,11 +328,7 @@ export default memo(function Canvas() {
           const boundingRects = Selectors.getBoundingRectMap(
             Selectors.getCurrentPage(state),
             state.selectedObjects,
-            {
-              clickThroughGroups: true,
-              includeArtboardLayers: false,
-              includeHiddenLayers: false,
-            },
+            { groups: 'childrenOnly' },
           );
 
           const selectedPointsLayers = Selectors.getSelectedLayers(
@@ -451,11 +443,7 @@ export default memo(function Canvas() {
             state,
             insets,
             rawPoint,
-            {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
+            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
           );
 
           const selectedGradientStopIndex = Selectors.getGradientStopIndexAtPoint(
@@ -730,11 +718,7 @@ export default memo(function Canvas() {
             getCurrentPage(state),
             insets,
             createRect(origin, current),
-            {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
+            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
           );
 
           dispatch(
@@ -763,11 +747,7 @@ export default memo(function Canvas() {
             state,
             insets,
             rawPoint,
-            {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
+            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
           );
 
           // For perf, check that we actually need to update the highlight.
@@ -895,11 +875,7 @@ export default memo(function Canvas() {
             getCurrentPage(state),
             insets,
             createRect(origin, current),
-            {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
-            },
+            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
           );
 
           dispatch(

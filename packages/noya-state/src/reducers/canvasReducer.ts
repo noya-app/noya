@@ -339,13 +339,8 @@ export function canvasReducer(
 
         const boundingRect = getBoundingRect(
           draft.sketch.pages[pageIndex],
-          AffineTransform.identity,
           [layer.do_objectID],
-          {
-            clickThroughGroups: true,
-            includeHiddenLayers: false,
-            includeArtboardLayers: false,
-          },
+          { groups: 'childrenOnly' },
         );
 
         if (!boundingRect || !layer || !Layers.isPointsLayer(layer)) return;
@@ -786,16 +781,9 @@ export function canvasReducer(
           case 'moving': {
             const { origin, current, pageSnapshot } = interactionState;
 
-            const sourceRect = getBoundingRect(
-              pageSnapshot,
-              AffineTransform.identity,
-              layerIds,
-              {
-                clickThroughGroups: true,
-                includeHiddenLayers: false,
-                includeArtboardLayers: false,
-              },
-            );
+            const sourceRect = getBoundingRect(pageSnapshot, layerIds, {
+              groups: 'childrenOnly',
+            });
 
             if (!sourceRect) {
               console.info('No selected rect');
@@ -905,7 +893,6 @@ export function canvasReducer(
 
             const originalBoundingRect = getBoundingRect(
               pageSnapshot,
-              AffineTransform.identity,
               layerIds,
             )!;
 

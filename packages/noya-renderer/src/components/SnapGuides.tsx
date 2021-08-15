@@ -1,7 +1,6 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
-  AffineTransform,
   Axis,
   createBounds,
   createRect,
@@ -63,11 +62,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   const targetLayerBoundingRectMap = Selectors.getBoundingRectMap(
     page,
     snaps.map((pair) => pair.targetId),
-    {
-      clickThroughGroups: true,
-      includeHiddenLayers: false,
-      includeArtboardLayers: false,
-    },
+    { groups: 'childrenOnly' },
   );
 
   const getMinGuideDistance = (guides: Guides[]) =>
@@ -154,16 +149,10 @@ export default memo(function SnapGuides() {
     | undefined => {
     switch (interactionState.type) {
       case 'moving': {
-        const rect = Selectors.getBoundingRect(
-          page,
-          AffineTransform.identity,
-          state.selectedObjects,
-          {
-            clickThroughGroups: true,
-            includeHiddenLayers: true,
-            includeArtboardLayers: false,
-          },
-        );
+        const rect = Selectors.getBoundingRect(page, state.selectedObjects, {
+          groups: 'childrenOnly',
+          includeHiddenLayers: true,
+        });
 
         if (!rect) return;
 
@@ -182,7 +171,6 @@ export default memo(function SnapGuides() {
 
         const originalBoundingRect = Selectors.getBoundingRect(
           pageSnapshot,
-          AffineTransform.identity,
           state.selectedObjects,
         )!;
 

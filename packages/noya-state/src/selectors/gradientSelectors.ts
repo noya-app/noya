@@ -310,8 +310,8 @@ export function getAngularGradientCircle(state: ApplicationState) {
 
   const layer = Layers.access(page, indexPath);
   const transform = getLayerTransformAtIndexPath(page, indexPath)
-    .transform(getLayerFlipTransform(layer))
-    .transform(getLayerRotationTransform(layer));
+    .prepend(getLayerFlipTransform(layer))
+    .prepend(getLayerRotationTransform(layer));
   const bounds = createBounds(layer.frame);
   const center = transform.applyTo({ x: bounds.midX, y: bounds.midY });
 

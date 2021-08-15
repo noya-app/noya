@@ -1,12 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
-import {
-  AffineTransform,
-  insetRect,
-  Point,
-  rectContainsPoint,
-} from 'noya-geometry';
+import { insetRect, Point, rectContainsPoint } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,
@@ -161,11 +156,7 @@ export function getCharacterIndexAtPoint(
 
   if (!textLayer || !Layers.isTextLayer(textLayer)) return;
 
-  const boundingRect = Selectors.getBoundingRect(
-    page,
-    AffineTransform.identity,
-    [textLayer.do_objectID],
-  );
+  const boundingRect = Selectors.getBoundingRect(page, [textLayer.do_objectID]);
 
   if (!boundingRect) return;
 
