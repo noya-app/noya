@@ -94,7 +94,7 @@ export default memo(function SketchFileRenderer() {
   const boundingRect = useMemo(
     () =>
       Selectors.getBoundingRect(page, state.selectedObjects, {
-        clickThroughGroups: true,
+        groups: 'childrenOnly',
         includeHiddenLayers: true,
       }),
     [page, state.selectedObjects],
@@ -104,7 +104,7 @@ export default memo(function SketchFileRenderer() {
     () =>
       state.selectedObjects.map((id: string) =>
         Selectors.getBoundingPoints(page, id, {
-          clickThroughGroups: true,
+          groups: 'childrenOnly',
           includeHiddenLayers: true,
         }),
       ),
@@ -133,7 +133,7 @@ export default memo(function SketchFileRenderer() {
       page,
       [highlightedLayer.id],
       {
-        clickThroughGroups: true,
+        groups: 'childrenOnly',
         includeHiddenLayers: true,
       },
     );

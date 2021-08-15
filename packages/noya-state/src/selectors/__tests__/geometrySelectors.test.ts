@@ -103,7 +103,7 @@ describe('layers in group', () => {
 
     expect(
       getBoundingRect(page, ['r1'], {
-        clickThroughGroups: true,
+        groups: 'childrenOnly',
       }),
     ).toEqual({
       x: 50,
@@ -114,7 +114,7 @@ describe('layers in group', () => {
 
     expect(
       getLayersInRect(state, page, insets, marqueeRect, {
-        clickThroughGroups: true,
+        groups: 'childrenOnly',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['r1']);
   });

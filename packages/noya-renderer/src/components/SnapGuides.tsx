@@ -62,7 +62,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   const targetLayerBoundingRectMap = Selectors.getBoundingRectMap(
     page,
     snaps.map((pair) => pair.targetId),
-    { clickThroughGroups: true },
+    { groups: 'childrenOnly' },
   );
 
   const getMinGuideDistance = (guides: Guides[]) =>
@@ -150,7 +150,7 @@ export default memo(function SnapGuides() {
     switch (interactionState.type) {
       case 'moving': {
         const rect = Selectors.getBoundingRect(page, state.selectedObjects, {
-          clickThroughGroups: true,
+          groups: 'childrenOnly',
           includeHiddenLayers: true,
         });
 

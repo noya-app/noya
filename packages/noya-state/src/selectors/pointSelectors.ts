@@ -76,7 +76,7 @@ const getSelectedPointsFromPointLists = (
   const boundingRects = getBoundingRectMap(
     getCurrentPage(state),
     Object.keys(pointLists),
-    { clickThroughGroups: true },
+    { groups: 'childrenOnly' },
   );
 
   const points: DecodedCurvePoint[] = [];

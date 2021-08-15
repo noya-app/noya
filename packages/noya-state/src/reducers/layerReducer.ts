@@ -64,7 +64,7 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   indexPaths: IndexPath[],
 ): T | undefined => {
   const boundingRect = getBoundingRect(page, ids, {
-    clickThroughGroups: true,
+    groups: 'childrenOnly',
     includeHiddenLayers: true,
   });
 

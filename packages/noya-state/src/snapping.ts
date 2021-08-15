@@ -114,7 +114,7 @@ export function getLayerSnapValues(
   layerId: string,
   axis: Axis,
 ): number[] {
-  const rect = getBoundingRect(page, [layerId], { clickThroughGroups: true });
+  const rect = getBoundingRect(page, [layerId], { groups: 'childrenOnly' });
 
   return rect ? getSnapValues(rect, axis) : [];
 }

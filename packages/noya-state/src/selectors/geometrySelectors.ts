@@ -29,8 +29,19 @@ import {
 } from './transformSelectors';
 
 export type LayerTraversalOptions = {
+  /**
+   * The default is false
+   */
   includeHiddenLayers?: boolean;
-  clickThroughGroups?: boolean;
+
+  /**
+   * The default is `groupOnly`
+   */
+  groups?: 'groupOnly' | 'childrenOnly';
+
+  /**
+   * The default is `childrenOnly`
+   */
   artboards?: 'artboardOnly' | 'childrenOnly' | 'artboardAndChildren';
 };
 
@@ -39,13 +50,14 @@ function shouldVisitChildren(
   options: LayerTraversalOptions,
 ) {
   const artboardsOption = options.artboards ?? 'childrenOnly';
+  const groupsOption = options.groups ?? 'groupOnly';
 
   return (
     layer._class === 'symbolMaster' ||
     (layer._class === 'artboard' && artboardsOption !== 'artboardOnly') ||
-    (layer._class === 'slice' && options.clickThroughGroups) ||
+    (layer._class === 'slice' && groupsOption !== 'groupOnly') ||
     (layer._class === 'group' &&
-      (layer.hasClickThrough || options.clickThroughGroups))
+      (groupsOption !== 'groupOnly' || layer.hasClickThrough))
   );
 }
 
