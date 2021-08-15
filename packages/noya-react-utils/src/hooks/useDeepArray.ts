@@ -2,9 +2,12 @@ import { useRef } from 'react';
 import { isDeepEqual, isShallowEqual } from 'noya-utils';
 
 function deepEqualArray<T>(a: T[], b: T[]) {
+  // TODO: This shallow comparison probably shouldn't be here.
+  // The behavior could be different, in the case where a mutable
+  // object was passed accidentally. But we'll need to test that
+  // we're not relying on this behavior.
   if (isShallowEqual(a, b)) return true;
 
-  // return JSON.stringify(a) === JSON.stringify(b);
   return isDeepEqual(a, b);
 }
 

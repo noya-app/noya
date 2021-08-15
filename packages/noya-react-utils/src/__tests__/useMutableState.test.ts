@@ -26,9 +26,15 @@ test('uses mutable object', () => {
 test('uses mutable object with initializer', () => {
   const object = { a: 1 };
 
-  const { result } = renderHook(() => useMutableState(() => object));
+  const initializer = jest.fn(() => object);
+
+  const { result, rerender } = renderHook(() => useMutableState(initializer));
 
   const proxy = result.current[0];
   expect(proxy).not.toBe(object);
   expect(proxy).toEqual(object);
+
+  rerender();
+
+  expect(initializer).toBeCalledTimes(1);
 });
