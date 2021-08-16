@@ -282,7 +282,7 @@ export default memo(function Canvas() {
           rawPoint,
           {
             groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
-            artboards: 'emptyOrContainedArtboardAndChildren',
+            artboards: 'emptyOrContainedArtboardOrChildren',
           },
         );
 
@@ -448,7 +448,7 @@ export default memo(function Canvas() {
             rawPoint,
             {
               groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardAndChildren',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -726,7 +726,7 @@ export default memo(function Canvas() {
             createRect(origin, current),
             {
               groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardAndChildren',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -758,7 +758,7 @@ export default memo(function Canvas() {
             rawPoint,
             {
               groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardAndChildren',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -889,7 +889,7 @@ export default memo(function Canvas() {
             createRect(origin, current),
             {
               groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardAndChildren',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 

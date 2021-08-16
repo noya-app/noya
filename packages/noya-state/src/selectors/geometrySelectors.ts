@@ -47,7 +47,7 @@ export type LayerTraversalOptions = {
     | 'artboardOnly'
     | 'childrenOnly'
     | 'artboardAndChildren'
-    | 'emptyOrContainedArtboardAndChildren';
+    | 'emptyOrContainedArtboardOrChildren';
 };
 
 const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
@@ -143,7 +143,7 @@ export function getLayersInRect(
     const includeArtboard =
       Layers.isArtboard(layer) &&
       (options.artboards === 'artboardAndChildren' ||
-        (options.artboards === 'emptyOrContainedArtboardAndChildren' &&
+        (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
           (layer.layers.length === 0 ||
             rectsContainsRect(screenRect, transformedFrame))));
 
@@ -190,7 +190,7 @@ export function getLayerAtPoint(
     const includeArtboard =
       Layers.isArtboard(layer) &&
       (options.artboards === 'artboardAndChildren' ||
-        (options.artboards === 'emptyOrContainedArtboardAndChildren' &&
+        (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
           layer.layers.length === 0));
 
     // Traverse into children and return one of them, instead of returning this layer

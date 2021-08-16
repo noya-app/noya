@@ -208,7 +208,7 @@ describe('selecting artboards', () => {
 
     expect(
       getLayersInRect(state, page, insets, marqueeRect, {
-        artboards: 'emptyOrContainedArtboardAndChildren',
+        artboards: 'emptyOrContainedArtboardOrChildren',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['a1']);
   });
@@ -238,7 +238,7 @@ describe('selecting artboards', () => {
           height: 200,
         },
         {
-          artboards: 'emptyOrContainedArtboardAndChildren',
+          artboards: 'emptyOrContainedArtboardOrChildren',
         },
       ).map((layer) => layer.do_objectID),
     ).toEqual([]);
@@ -259,7 +259,7 @@ describe('selecting artboards', () => {
 
     expect(
       getLayersInRect(state, page, insets, marqueeRect, {
-        artboards: 'emptyOrContainedArtboardAndChildren',
+        artboards: 'emptyOrContainedArtboardOrChildren',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['a1']);
   });
