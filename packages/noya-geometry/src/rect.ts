@@ -127,6 +127,18 @@ export function rectsIntersect(a: Rect, b: Rect): boolean {
   return x1 < x2 && y1 < y2;
 }
 
+export function rectsContainsRect(outer: Rect, inner: Rect): boolean {
+  const outerBounds = createBounds(outer);
+  const innerBounds = createBounds(inner);
+
+  return (
+    outerBounds.minX <= innerBounds.minX &&
+    innerBounds.maxX <= outerBounds.maxX &&
+    outerBounds.minY <= innerBounds.minY &&
+    innerBounds.maxY <= outerBounds.maxY
+  );
+}
+
 /**
  * Ensure a rect has a non-negative width and height
  */

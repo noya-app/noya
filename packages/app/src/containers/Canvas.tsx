@@ -280,7 +280,10 @@ export default memo(function Canvas() {
           state,
           insets,
           rawPoint,
-          { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
+          {
+            groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+            artboards: 'emptyOrContainedArtboardOrChildren',
+          },
         );
 
         if (!layer) {
@@ -443,7 +446,10 @@ export default memo(function Canvas() {
             state,
             insets,
             rawPoint,
-            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
+            {
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+            },
           );
 
           const selectedGradientStopIndex = Selectors.getGradientStopIndexAtPoint(
@@ -718,7 +724,10 @@ export default memo(function Canvas() {
             getCurrentPage(state),
             insets,
             createRect(origin, current),
-            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
+            {
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+            },
           );
 
           dispatch(
@@ -747,7 +756,10 @@ export default memo(function Canvas() {
             state,
             insets,
             rawPoint,
-            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
+            {
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+            },
           );
 
           // For perf, check that we actually need to update the highlight.
@@ -875,7 +887,10 @@ export default memo(function Canvas() {
             getCurrentPage(state),
             insets,
             createRect(origin, current),
-            { groups: event.metaKey ? 'childrenOnly' : 'groupOnly' },
+            {
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+            },
           );
 
           dispatch(
