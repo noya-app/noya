@@ -8,6 +8,7 @@ import {
   Point,
   Rect,
   rectContainsPoint,
+  rectsContainsRect,
   rectsIntersect,
   rotatedRectContainsPoint,
   transformRect,
@@ -42,7 +43,11 @@ export type LayerTraversalOptions = {
   /**
    * The default is `childrenOnly`
    */
-  artboards?: 'artboardOnly' | 'childrenOnly' | 'artboardAndChildren';
+  artboards?:
+    | 'artboardOnly'
+    | 'childrenOnly'
+    | 'artboardAndChildren'
+    | 'emptyOrContainedArtboardAndChildren';
 };
 
 const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
@@ -128,19 +133,21 @@ export function getLayersInRect(
       indexPath,
       canvasTransform,
     );
+    const transformedFrame = transformRect(layer.frame, transform);
 
     // TODO: Handle rotated rectangle collision
-    const hasIntersect = rectsIntersect(
-      transformRect(layer.frame, transform),
-      screenRect,
-    );
+    const hasIntersect = rectsIntersect(transformedFrame, screenRect);
 
     if (!hasIntersect) return SKIP;
 
     const includeArtboard =
-      Layers.isArtboard(layer) && options.artboards === 'artboardAndChildren';
+      Layers.isArtboard(layer) &&
+      (options.artboards === 'artboardAndChildren' ||
+        (options.artboards === 'emptyOrContainedArtboardAndChildren' &&
+          (layer.layers.length === 0 ||
+            rectsContainsRect(screenRect, transformedFrame))));
 
-    // Artboards can't be selected themselves, unless we enable that option
+    // Traverse into children and return some of them, instead of returning this layer
     if (!includeArtboard && shouldVisitChildren(layer, options)) return;
 
     found.push(layer);
@@ -180,8 +187,14 @@ export function getLayerAtPoint(
 
     if (!containsPoint) return SKIP;
 
-    // Artboards can't be selected themselves, and instead only update the ctm
-    if (shouldVisitChildren(layer, options)) return;
+    const includeArtboard =
+      Layers.isArtboard(layer) &&
+      (options.artboards === 'artboardAndChildren' ||
+        (options.artboards === 'emptyOrContainedArtboardAndChildren' &&
+          layer.layers.length === 0));
+
+    // Traverse into children and return one of them, instead of returning this layer
+    if (!includeArtboard && shouldVisitChildren(layer, options)) return;
 
     switch (layer._class) {
       case 'rectangle':

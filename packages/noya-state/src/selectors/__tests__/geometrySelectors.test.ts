@@ -192,3 +192,75 @@ describe('layers in artboard', () => {
     ).toEqual([]);
   });
 });
+
+describe('selecting artboards', () => {
+  test('select empty artboard', () => {
+    const page = SketchModel.page({
+      layers: [
+        SketchModel.artboard({
+          do_objectID: 'a1',
+          frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
+        }),
+      ],
+    });
+
+    const state = createInitialState(createSketchFile(page));
+
+    expect(
+      getLayersInRect(state, page, insets, marqueeRect, {
+        artboards: 'emptyOrContainedArtboardAndChildren',
+      }).map((layer) => layer.do_objectID),
+    ).toEqual(['a1']);
+  });
+
+  test("don't select non-empty artboard", () => {
+    const page = SketchModel.page({
+      layers: [
+        SketchModel.artboard({
+          do_objectID: 'a1',
+          frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
+          layers: [r3],
+        }),
+      ],
+    });
+
+    const state = createInitialState(createSketchFile(page));
+
+    expect(
+      getLayersInRect(
+        state,
+        page,
+        insets,
+        {
+          x: 100,
+          y: 100,
+          width: 200,
+          height: 200,
+        },
+        {
+          artboards: 'emptyOrContainedArtboardAndChildren',
+        },
+      ).map((layer) => layer.do_objectID),
+    ).toEqual([]);
+  });
+
+  test('select artboard fully enclosed in marquee', () => {
+    const page = SketchModel.page({
+      layers: [
+        SketchModel.artboard({
+          do_objectID: 'a1',
+          frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
+          layers: [r3],
+        }),
+      ],
+    });
+
+    const state = createInitialState(createSketchFile(page));
+
+    expect(
+      getLayersInRect(state, page, insets, marqueeRect, {
+        artboards: 'emptyOrContainedArtboardAndChildren',
+      }).map((layer) => layer.do_objectID),
+    ).toEqual(['a1']);
+  });
+});
