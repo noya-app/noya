@@ -448,6 +448,7 @@ export default memo(function LayerList() {
     <TreeView.Root
       items={items}
       renderItem={renderItem}
+      getItemKey={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
       onClick={useCallback(() => dispatch('selectLayer', undefined), [

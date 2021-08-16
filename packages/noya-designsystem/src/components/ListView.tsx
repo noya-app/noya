@@ -1,4 +1,5 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
+import { range } from 'noya-utils';
 import {
   Children,
   createContext,
@@ -365,6 +366,7 @@ type ChildrenProps<T> =
   | {
       items: T[];
       renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
+      getItemKey: (item: T) => string;
     };
 
 type ListViewRootProps<T> = ChildrenProps<T> & {
@@ -400,24 +402,24 @@ function ListViewRoot<T = any>({
     [onClick],
   );
 
-  const flattened =
+  const ids: string[] =
+    'items' in props ? props.items.map(props.getItemKey) : [];
+
+  const childrenLength =
+    'items' in props ? props.items.length : Children.count(props.children);
+
+  const getChild = (index: number): ReactNode =>
     'items' in props
-      ? props.items.map((item, index) =>
-          props.renderItem(item, index, { isDragging: false }),
-        )
-      : Children.toArray(props.children);
+      ? props.renderItem(props.items[index], index, { isDragging: false })
+      : Children.toArray(props.children)[index];
 
-  const ids: string[] = flattened.flatMap((current) =>
-    isValidElement(current) && typeof current.props.id === 'string'
-      ? [current.props.id]
-      : [],
-  );
+  const getWrappedChild = (i: number) => {
+    const current = getChild(i);
 
-  const getWrappedChild = (current: ReactNode, i: number) => {
     if (!isValidElement(current)) return current;
 
-    const prev = flattened[i - 1];
-    const next = flattened[i + 1];
+    const prev = i - 1 >= 0 && getChild(i - 1);
+    const next = i + 1 < childrenLength && getChild(i + 1);
 
     const nextItem =
       isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
@@ -463,14 +465,6 @@ function ListViewRoot<T = any>({
     );
   };
 
-  const wrappedChildren = flattened.map(getWrappedChild);
-
-  if (sortable && ids.length !== wrappedChildren.length) {
-    throw new Error(
-      'Bad ListView props: each row element needs an id to be sortable',
-    );
-  }
-
   const renderItem = 'items' in props ? props.renderItem : undefined;
   const items = 'items' in props ? props.items : undefined;
 
@@ -484,6 +478,8 @@ function ListViewRoot<T = any>({
         : undefined,
     [renderItem, items],
   );
+
+  const wrappedChildren = range(0, childrenLength).map(getWrappedChild);
 
   const content = sortable ? (
     <Sortable.Root
