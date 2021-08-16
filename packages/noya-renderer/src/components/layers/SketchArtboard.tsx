@@ -6,14 +6,13 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
-import { Primitives } from 'noya-state';
 import { Group, Rect as RCKRect, Text, useCanvasKit } from 'noya-renderer';
+import { Primitives, Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import SketchGroup from './SketchGroup';
-import { useRenderingMode } from '../../RenderingModeContext';
-import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { useFontManager } from '../../FontManagerContext';
+import { useRenderingMode } from '../../RenderingModeContext';
+import SketchGroup from './SketchGroup';
 
 interface ArtboardLabelProps {
   text: string;
@@ -31,40 +30,34 @@ const ArtboardLabel = memo(function ArtboardLabel({
   const { colors } = useTheme();
   const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
 
-  const paragraph = useMemo(() => {
-    const paragraphStyle = new CanvasKit.ParagraphStyle({
-      textStyle: {
-        color: CanvasKit.parseColorString(textColor),
-        fontSize: 11,
-        fontFamilies: [SYSTEM_FONT_ID],
-        letterSpacing: 0.2,
-      },
-    });
+  const paragraph = useMemo(
+    () =>
+      Selectors.getArtboardLabelParagraph(
+        CanvasKit,
+        fontManager,
+        text,
+        textColor,
+      ),
+    [CanvasKit, fontManager, text, textColor],
+  );
 
-    const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
-      paragraphStyle,
-      fontManager.getTypefaceFontProvider(),
-    );
-    builder.addText(text);
-
-    const paragraph = builder.build();
-    paragraph.layout(10000);
-
-    builder.delete();
-
-    return paragraph;
-  }, [CanvasKit, fontManager, text, textColor]);
+  const rect = useMemo(
+    () =>
+      Selectors.getArtboardLabelRect(layerFrame, {
+        height: paragraph.getHeight(),
+        width: paragraph.getMinIntrinsicWidth(),
+      }),
+    [layerFrame, paragraph],
+  );
 
   useDeletable(paragraph);
 
-  const labelRect = Primitives.rect(CanvasKit, {
-    x: layerFrame.x + 3,
-    y: layerFrame.y - paragraph.getHeight() - 3,
-    width: layerFrame.width,
-    height: layerFrame.height,
-  });
-
-  return <Text rect={labelRect} paragraph={paragraph} />;
+  return (
+    <Text
+      rect={useMemo(() => Primitives.rect(CanvasKit, rect), [CanvasKit, rect])}
+      paragraph={paragraph}
+    />
+  );
 });
 
 interface ArtboardBlurProps {
