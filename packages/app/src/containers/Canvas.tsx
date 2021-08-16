@@ -277,6 +277,7 @@ export default memo(function Canvas() {
       if (MouseEvent.isRightButtonClicked(event)) {
         const layer = Selectors.getLayerAtPoint(
           CanvasKit,
+          fontManager,
           state,
           insets,
           rawPoint,
@@ -443,6 +444,7 @@ export default memo(function Canvas() {
 
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
+            fontManager,
             state,
             insets,
             rawPoint,
@@ -753,6 +755,7 @@ export default memo(function Canvas() {
         case 'none': {
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
+            fontManager,
             state,
             insets,
             rawPoint,

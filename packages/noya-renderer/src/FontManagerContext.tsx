@@ -109,9 +109,7 @@ export function useFontManager(): IFontManager {
     throw new Error('Missing FontManagerProvider');
   }
 
-  const { downloadFont, ...rest } = value;
-
-  return rest;
+  return value;
 }
 
 /**

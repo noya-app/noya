@@ -1,7 +1,7 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
-import { insetRect, Point, rectContainsPoint } from 'noya-geometry';
+import { insetRect, Point, Rect, rectContainsPoint, Size } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,
@@ -10,7 +10,7 @@ import {
   Selectors,
   TextSelectionRange,
 } from 'noya-state';
-import { unique } from 'noya-utils';
+import { memoize, unique } from 'noya-utils';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
@@ -197,4 +197,64 @@ export function getCharacterIndexAtPointInSelectedLayer(
     point,
     mode,
   );
+}
+
+export function getArtboardLabelParagraph(
+  CanvasKit: CanvasKit,
+  fontManager: IFontManager,
+  text: string,
+  textColor: string = 'black',
+) {
+  const paragraphStyle = new CanvasKit.ParagraphStyle({
+    textStyle: {
+      color: CanvasKit.parseColorString(textColor),
+      fontSize: 11,
+      fontFamilies: [SYSTEM_FONT_ID],
+      letterSpacing: 0.2,
+    },
+  });
+
+  const builder = CanvasKit.ParagraphBuilder.MakeFromFontProvider(
+    paragraphStyle,
+    fontManager.getTypefaceFontProvider(),
+  );
+  builder.addText(text);
+
+  const paragraph = builder.build();
+  paragraph.layout(10000);
+
+  builder.delete();
+
+  return paragraph;
+}
+
+export const getArtboardLabelParagraphSize = memoize(
+  function getArtboardLabelParagraphSize(
+    CanvasKit: CanvasKit,
+    fontManager: IFontManager,
+    text: string,
+  ): Size {
+    const paragraph = getArtboardLabelParagraph(CanvasKit, fontManager, text);
+
+    const size = {
+      width: paragraph.getMaxIntrinsicWidth(),
+      height: paragraph.getHeight(),
+    };
+
+    paragraph.delete();
+
+    return size;
+  },
+);
+
+export function getArtboardLabelRect(
+  layerFrame: Rect,
+  paragraphSize: Size,
+): Rect {
+  return {
+    x: layerFrame.x + 3,
+    y: layerFrame.y - paragraphSize.height - 3,
+    width: paragraphSize.width,
+    height: paragraphSize.height,
+  };
 }

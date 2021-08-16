@@ -13,6 +13,7 @@ import {
   rotatedRectContainsPoint,
   transformRect,
 } from 'noya-geometry';
+import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { getRectDragHandles } from 'noya-state';
 import { SKIP, STOP, VisitOptions } from 'tree-visit';
@@ -21,6 +22,10 @@ import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
+import {
+  getArtboardLabelParagraphSize,
+  getArtboardLabelRect,
+} from './textSelectors';
 import {
   getCanvasTransform,
   getLayerFlipTransform,
@@ -42,6 +47,10 @@ export type LayerTraversalOptions = {
 
   /**
    * The default is `childrenOnly`
+   *
+   * We use `emptyOrContainedArtboardOrChildren` when we're working with user interactions.
+   * This will select empty artboards, artboards fully contained by the user's marquee, or
+   * artboards where the label contains the mouse.
    */
   artboards?:
     | 'artboardOnly'
@@ -156,8 +165,29 @@ export function getLayersInRect(
   return found as PageLayer[];
 }
 
+export function artboardLabelContainsPoint(
+  CanvasKit: CanvasKit,
+  fontManager: IFontManager,
+  layer: Sketch.Artboard,
+  canvasTransform: AffineTransform,
+  screenPoint: Point,
+): boolean {
+  const paragraphSize = getArtboardLabelParagraphSize(
+    CanvasKit,
+    fontManager,
+    layer.name,
+  );
+
+  const rect = getArtboardLabelRect(layer.frame, paragraphSize);
+
+  const labelRect = transformRect(rect, canvasTransform);
+
+  return rectContainsPoint(labelRect, screenPoint);
+}
+
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
+  fontManager: IFontManager,
   state: ApplicationState,
   insets: Insets,
   point: Point,
@@ -183,9 +213,30 @@ export function getLayerAtPoint(
     const framePoints = getRectCornerPoints(layer.frame);
     const localPoints = framePoints.map((point) => transform.applyTo(point));
 
-    const containsPoint = rotatedRectContainsPoint(localPoints, screenPoint);
+    const frameContainsPoint = rotatedRectContainsPoint(
+      localPoints,
+      screenPoint,
+    );
 
-    if (!containsPoint) return SKIP;
+    if (!frameContainsPoint) {
+      if (
+        Layers.isArtboard(layer) &&
+        options.artboards === 'emptyOrContainedArtboardOrChildren' &&
+        artboardLabelContainsPoint(
+          CanvasKit,
+          fontManager,
+          layer,
+          canvasTransform,
+          screenPoint,
+        )
+      ) {
+        found = layer;
+
+        return STOP;
+      }
+
+      return SKIP;
+    }
 
     const includeArtboard =
       Layers.isArtboard(layer) &&
