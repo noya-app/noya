@@ -41,8 +41,10 @@ export default memo(function SymbolSourceRow({
 
   return (
     <InspectorPrimitives.Section>
-      <InspectorPrimitives.Title>Symbol Source</InspectorPrimitives.Title>
-      <Spacer.Vertical size={4} />
+      <InspectorPrimitives.SectionHeader>
+        <InspectorPrimitives.Title>Symbol Source</InspectorPrimitives.Title>
+      </InspectorPrimitives.SectionHeader>
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <InspectorPrimitives.Checkbox
           type="checkbox"
@@ -52,11 +54,12 @@ export default memo(function SymbolSourceRow({
             [setAdjustContentOnResize],
           )}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <InspectorPrimitives.Text>
           Adjust content on resize
         </InspectorPrimitives.Text>
       </InspectorPrimitives.Row>
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <InspectorPrimitives.Checkbox
           type="checkbox"
@@ -66,9 +69,9 @@ export default memo(function SymbolSourceRow({
             [setHasBackgroundColor],
           )}
         />
-        <Spacer.Horizontal size={8} />
+        <InspectorPrimitives.HorizontalSeparator />
         <InspectorPrimitives.Text>Background color</InspectorPrimitives.Text>
-        <Spacer.Horizontal size={65} />
+        <Spacer.Horizontal />
         <FillInputFieldWithPicker
           id={'colorInputId'}
           colorProps={useMemo(
@@ -89,7 +92,7 @@ export default memo(function SymbolSourceRow({
               checked={includeBackgroundColorInExport}
               onChange={setIncludeBackgroundInExportCallback}
             />
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <InspectorPrimitives.Text>
               Include in Export
             </InspectorPrimitives.Text>
@@ -101,7 +104,7 @@ export default memo(function SymbolSourceRow({
               checked={includeBackgroundColorInInstance}
               onChange={setIncludeBackgroundInInstancesCallback}
             />
-            <Spacer.Horizontal size={8} />
+            <InspectorPrimitives.HorizontalSeparator />
             <InspectorPrimitives.Text>
               Include in Instances
             </InspectorPrimitives.Text>

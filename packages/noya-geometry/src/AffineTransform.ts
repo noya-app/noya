@@ -1,16 +1,12 @@
 import { Point } from './types';
 
-export interface Transformable {
-  transform(affineTransform: AffineTransform): this;
-}
-
 /**
  * For more details:
  *
  * https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
  * https://people.cs.clemson.edu/~dhouse/courses/401/notes/affines-matrices.pdf
  */
-export class AffineTransform implements Transformable {
+export class AffineTransform {
   m00: number;
   m01: number;
   m02: number;
@@ -42,7 +38,7 @@ export class AffineTransform implements Transformable {
     };
   }
 
-  transform(other: AffineTransform): this {
+  prepend(other: AffineTransform): AffineTransform {
     return new AffineTransform([
       this.m00 * other.m00 + this.m01 * other.m10, // m00
       this.m00 * other.m01 + this.m01 * other.m11, // m01
@@ -50,7 +46,18 @@ export class AffineTransform implements Transformable {
       this.m10 * other.m00 + this.m11 * other.m10, // m10
       this.m10 * other.m01 + this.m11 * other.m11, // m11
       this.m10 * other.m02 + this.m11 * other.m12 + this.m12, // m12
-    ]) as this;
+    ]);
+  }
+
+  append(other: AffineTransform): AffineTransform {
+    return new AffineTransform([
+      other.m00 * this.m00 + other.m01 * this.m10, // m00
+      other.m00 * this.m01 + other.m01 * this.m11, // m01
+      other.m00 * this.m02 + other.m01 * this.m12 + other.m02, // m02
+      other.m10 * this.m00 + other.m11 * this.m10, // m10
+      other.m10 * this.m01 + other.m11 * this.m11, // m11
+      other.m10 * this.m02 + other.m11 * this.m12 + other.m12, // m12
+    ]);
   }
 
   get determinant() {
@@ -102,11 +109,7 @@ export class AffineTransform implements Transformable {
     return new AffineTransform([1, 0, 0, 0, 1, 0]);
   }
 
-  static rotate(
-    theta: number,
-    rx: number = 0,
-    ry: number = 0,
-  ): AffineTransform {
+  static rotate(theta: number, origin?: Point): AffineTransform {
     const rotation = new AffineTransform([
       Math.cos(theta),
       -Math.sin(theta),
@@ -116,11 +119,11 @@ export class AffineTransform implements Transformable {
       0,
     ]);
 
-    if (rx !== 0 || ry !== 0) {
+    if (origin && (origin.x !== 0 || origin.y !== 0)) {
       return AffineTransform.multiply(
-        AffineTransform.translate(rx, ry),
+        AffineTransform.translate(origin.x, origin.y),
         rotation,
-        AffineTransform.translate(-rx, -ry),
+        AffineTransform.translate(-origin.x, -origin.y),
       );
     }
 
@@ -128,15 +131,29 @@ export class AffineTransform implements Transformable {
   }
 
   rotate: typeof AffineTransform['rotate'] = (...args) => {
-    return this.transform(AffineTransform.rotate(...args));
+    return this.prepend(AffineTransform.rotate(...args));
   };
 
-  static scale(sx: number, sy: number = sx): AffineTransform {
-    return new AffineTransform([sx, 0, 0, 0, sy, 0]);
+  static scale(
+    sx: number,
+    sy: number = sx,
+    origin: Point = { x: 0, y: 0 },
+  ): AffineTransform {
+    const scale = new AffineTransform([sx, 0, 0, 0, sy, 0]);
+
+    if (origin.x !== 0 || origin.y !== 0) {
+      return AffineTransform.multiply(
+        AffineTransform.translate(origin.x, origin.y),
+        scale,
+        AffineTransform.translate(-origin.x, -origin.y),
+      );
+    }
+
+    return scale;
   }
 
   scale: typeof AffineTransform['scale'] = (...args) => {
-    return this.transform(AffineTransform.scale(...args));
+    return this.prepend(AffineTransform.scale(...args));
   };
 
   static translate(tx: number, ty: number): AffineTransform {
@@ -144,7 +161,7 @@ export class AffineTransform implements Transformable {
   }
 
   translate: typeof AffineTransform['translate'] = (...args) => {
-    return this.transform(AffineTransform.translate(...args));
+    return this.prepend(AffineTransform.translate(...args));
   };
 
   /**
@@ -153,6 +170,6 @@ export class AffineTransform implements Transformable {
   static multiply(...[first, ...rest]: AffineTransform[]): AffineTransform {
     if (!first) return AffineTransform.identity;
 
-    return rest.reduce((result, item) => result.transform(item), first);
+    return rest.reduce((result, item) => result.prepend(item), first);
   }
 }

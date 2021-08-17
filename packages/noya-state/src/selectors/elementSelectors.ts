@@ -76,11 +76,7 @@ export function getPathElementAtPoint(
   const boundingRects = getBoundingRectMap(
     getCurrentPage(state),
     state.selectedObjects,
-    {
-      clickThroughGroups: true,
-      includeArtboardLayers: false,
-      includeHiddenLayers: false,
-    },
+    { groups: 'childrenOnly' },
   );
 
   getSelectedLayers(state)

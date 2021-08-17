@@ -1,9 +1,8 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { GridView, MenuItem } from 'noya-designsystem';
-import { AffineTransform } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
-import { Layers, Selectors } from 'noya-state';
+import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import CanvasGridItem from '../components/theme/CanvasGridItem';
 
@@ -14,15 +13,9 @@ interface PageGridItemProps {
 }
 
 const PageGridItem = memo(function PageGridItem({ page }: PageGridItemProps) {
-  const frame = useMemo(
-    () =>
-      Selectors.getBoundingRect(
-        page,
-        AffineTransform.identity,
-        Layers.findAll(page, () => true).map((l) => l.do_objectID),
-      ),
-    [page],
-  );
+  const frame = useMemo(() => Selectors.getPageContentBoundingRect(page), [
+    page,
+  ]);
 
   return (
     <CanvasGridItem

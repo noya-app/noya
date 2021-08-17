@@ -1,12 +1,11 @@
 import { Divider } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
+import { getMultiValue, Selectors } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import ColorInspector from '../components/inspector/ColorInspector';
 import NameInspector from '../components/inspector/NameInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import useShallowArray from '../hooks/useShallowArray';
-import getMultiValue from '../utils/getMultiValue';
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function SwatchesInspectors() {
   const [state, dispatch] = useApplicationState();

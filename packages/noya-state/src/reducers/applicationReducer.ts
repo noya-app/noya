@@ -4,7 +4,9 @@ import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import { Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
+import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
+import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
@@ -15,6 +17,7 @@ import {
   getCurrentComponentsTab,
   getCurrentPageIndex,
   getCurrentTab,
+  getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
 } from '../selectors/selectors';
@@ -35,6 +38,7 @@ import { PageAction, pageReducer } from './pageReducer';
 import { markLayersAsEdited, PointAction, pointReducer } from './pointReducer';
 import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
+import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
 
@@ -91,10 +95,12 @@ export type Action =
   | ThemeAction
   | SymbolsAction
   | ExportAction
-  | PointAction;
+  | PointAction
+  | TextEditorAction;
 
 export type ApplicationReducerContext = {
   canvasSize: Size;
+  fontManager: IFontManager;
 };
 
 export function applicationReducer(
@@ -165,6 +171,7 @@ export function applicationReducer(
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':
     case 'addStopToGradient':
+    case 'deleteStopToGradient':
       return canvasReducer(state, action, CanvasKit, context);
     case 'setLayerVisible':
     case 'setLayerName':
@@ -356,8 +363,34 @@ export function applicationReducer(
     case 'setTextVerticalAlignment':
     case 'setTextAlignment':
     case 'setTextDecoration':
-    case 'setTextTransform':
-      return textStyleReducer(state, action);
+    case 'setTextTransform': {
+      state = textStyleReducer(state, action);
+
+      const indexPaths = Selectors.getSelectedLayerIndexPaths(state);
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+
+      state = produce(state, (draft) => {
+        indexPaths.forEach((indexPath) => {
+          const draftLayer = Layers.access(
+            draft.sketch.pages[pageIndex],
+            indexPath,
+          );
+
+          if (!draftLayer || !Layers.isTextLayer(draftLayer)) return;
+
+          const paragraph = getLayerParagraph(
+            CanvasKit,
+            context.fontManager,
+            draftLayer,
+          );
+
+          draftLayer.frame.width = paragraph.getMaxWidth();
+          draftLayer.frame.height = paragraph.getHeight();
+        });
+      });
+
+      return state;
+    }
     case 'setAdjustContentOnResize':
     case 'setHasBackgroundColor':
     case 'setBackgroundColor':
@@ -402,6 +435,14 @@ export function applicationReducer(
     case 'selectPoint':
     case 'selectControlPoint':
       return pointReducer(state, action, CanvasKit);
+    case 'setTextSelection':
+    case 'selectAllText':
+    case 'selectContainingText':
+    case 'moveCursor':
+    case 'moveTextSelection':
+    case 'insertText':
+    case 'deleteText':
+      return textEditorReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);
   }

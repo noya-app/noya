@@ -9,6 +9,7 @@ interface Props {
   onSetValue: (value: number, mode: SetNumberMode) => void;
   label?: string;
   size?: number;
+  placeholder?: string;
 }
 
 export default memo(function DimensionInput({
@@ -17,6 +18,7 @@ export default memo(function DimensionInput({
   onSetValue,
   label,
   size,
+  placeholder = 'multi',
 }: Props) {
   const handleNudgeValue = useCallback(
     (value: number) => onSetValue(value, 'adjust'),
@@ -31,7 +33,7 @@ export default memo(function DimensionInput({
     <InputField.Root id={id} size={size}>
       <InputField.NumberInput
         value={value}
-        placeholder={value === undefined ? 'multi' : undefined}
+        placeholder={value === undefined ? placeholder : undefined}
         onNudge={handleNudgeValue}
         onSubmit={handleSetValue}
       />

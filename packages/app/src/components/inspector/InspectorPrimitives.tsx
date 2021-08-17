@@ -1,5 +1,6 @@
+import { Spacer } from 'noya-designsystem';
 import { memo, ReactNode } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 export const Section = styled.div(({ theme }) => ({
   flex: '0 0 auto',
@@ -41,6 +42,14 @@ export const Checkbox = styled.input(({ theme }) => ({
 export const Text = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
 }));
+
+export const VerticalSeparator = () => (
+  <Spacer.Vertical size={useTheme().sizes.inspector.verticalSeparator} />
+);
+
+export const HorizontalSeparator = () => (
+  <Spacer.Horizontal size={useTheme().sizes.inspector.horizontalSeparator} />
+);
 
 const SliderRowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,

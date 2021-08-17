@@ -1,10 +1,38 @@
+import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
-import { FontMgr } from 'canvaskit';
+import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
+import { GoogleFontProvider } from 'noya-google-fonts';
+import { useMutableState } from 'noya-react-utils';
 import { useCanvasKit } from 'noya-renderer';
 import { SuspendedValue } from 'noya-utils';
-import { createContext, memo, ReactNode, useContext, useMemo } from 'react';
+import {
+  createContext,
+  memo,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react';
 
-const FontManagerContext = createContext<FontMgr | undefined>(undefined);
+export type IFontManager = Pick<
+  FontManager,
+  | 'getFontId'
+  | 'getFontFamilyId'
+  | 'getFontFamilyName'
+  | 'getFontDescriptorsForFamily'
+  | 'getFontFamilyIdList'
+  | 'getBestFontDescriptor'
+> & {
+  getTypefaceFontProvider: () => TypefaceFontProvider;
+};
+
+type FontManagerContextValue = IFontManager & {
+  downloadFont: FontManager['downloadFont'];
+};
+
+const FontManagerContext = createContext<FontManagerContextValue | undefined>(
+  undefined,
+);
 
 const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
   fetch(
@@ -12,28 +40,69 @@ const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
   ).then((resp) => resp.arrayBuffer()),
 );
 
+const sharedFontManager = new FontManager(GoogleFontProvider);
+
+interface Props {
+  children?: ReactNode;
+}
+
 export const FontManagerProvider = memo(function FontManagerProvider({
   children,
-}: {
-  children?: ReactNode;
-}) {
+}: Props) {
   const CanvasKit = useCanvasKit();
 
   const defaultFont = suspendedDefaultFont.getValueOrThrow();
-  const fontManager = useMemo(
-    () =>
-      CanvasKit.FontMgr.FromData(defaultFont) ?? CanvasKit.FontMgr.RefDefault(),
-    [CanvasKit.FontMgr, defaultFont],
+
+  const [typefaceFontProvider, updateTypefaceFontProvider] = useMutableState(
+    () => {
+      const provider = CanvasKit.TypefaceFontProvider.Make();
+      provider.registerFont(defaultFont, SYSTEM_FONT_ID);
+      sharedFontManager.entries.forEach(([name, data]) => {
+        provider.registerFont(data, name);
+      });
+      return provider;
+    },
+  );
+
+  useEffect(() => {
+    // Register any fonts that get downloaded and trigger a re-render
+    const listener = (fontId: FontId, data: ArrayBuffer) => {
+      updateTypefaceFontProvider((provider) => {
+        provider.registerFont(data, fontId);
+      });
+    };
+
+    sharedFontManager.addDownloadedFontListener(listener);
+
+    return () => sharedFontManager.removeDownloadedFontListener(listener);
+  }, [updateTypefaceFontProvider]);
+
+  const contextValue = useMemo(
+    (): FontManagerContextValue => ({
+      getTypefaceFontProvider: () => typefaceFontProvider,
+      ...createInlineWrapperFunctions(sharedFontManager),
+    }),
+    [typefaceFontProvider],
   );
 
   return (
-    <FontManagerContext.Provider value={fontManager}>
+    <FontManagerContext.Provider value={contextValue}>
       {children}
     </FontManagerContext.Provider>
   );
 });
 
-export function useFontManager(): FontMgr {
+export function useDownloadFont() {
+  const value = useContext(FontManagerContext);
+
+  if (!value) {
+    throw new Error('Missing FontManagerProvider');
+  }
+
+  return value.downloadFont;
+}
+
+export function useFontManager(): IFontManager {
   const value = useContext(FontManagerContext);
 
   if (!value) {
@@ -41,4 +110,19 @@ export function useFontManager(): FontMgr {
   }
 
   return value;
+}
+
+/**
+ * Create an inline wrapper around each function so that it doesn't get memoized.
+ * We use this to expose a public API of a mutable object to the React world.
+ */
+function createInlineWrapperFunctions<T extends object>(object: T): T {
+  const pairs = Object.entries(object).map(([key, value]) => {
+    return [
+      key,
+      typeof value === 'function' ? (...args: any[]) => value(...args) : value,
+    ] as const;
+  });
+
+  return Object.fromEntries(pairs) as T;
 }

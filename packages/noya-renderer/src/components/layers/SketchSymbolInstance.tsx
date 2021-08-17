@@ -1,12 +1,19 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
-import { Layers, Overrides, PageLayer, Primitives } from 'noya-state';
+import {
+  Layers,
+  Overrides,
+  PageLayer,
+  Primitives,
+  replaceTextInRange,
+  Selectors,
+} from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
-import { useApplicationState } from 'noya-app-state-context';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';
 
@@ -85,7 +92,12 @@ const Symbol = memo(function Symbol({
 
           switch (override.type) {
             case 'stringValue':
-              override.layer.attributedString.string = override.value;
+              override.layer.attributedString = replaceTextInRange(
+                override.layer.attributedString,
+                [0, override.layer.attributedString.string.length],
+                override.value,
+                Selectors.getEncodedStringAttributes(override.layer.style),
+              );
               break;
             case 'symbolID':
               override.layer.symbolID = override.value;

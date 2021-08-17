@@ -3,6 +3,7 @@ import { SetNumberMode } from 'noya-state';
 import styled from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 export type DimensionValue = number | undefined;
 
@@ -56,7 +57,7 @@ export default function DimensionsInspector({
         <Spacer.Horizontal size={16} />
         <DimensionInput value={rotation} onSetValue={onSetRotation} label="°" />
       </Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <Row>
         <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
         <Spacer.Horizontal size={16} />

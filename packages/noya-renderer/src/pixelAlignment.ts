@@ -1,4 +1,11 @@
-import { getLineOrientation, Orientation, Point } from 'noya-geometry';
+import {
+  createBounds,
+  createRectFromBounds,
+  getLineOrientation,
+  Orientation,
+  Point,
+  Rect,
+} from 'noya-geometry';
 import { round } from 'noya-utils';
 
 export function pixelAlignPoint(
@@ -22,4 +29,15 @@ export function pixelAlignPoints(
     pixelAlignPoint(points[0], orientation, lineThickness),
     pixelAlignPoint(points[1], orientation, lineThickness),
   ];
+}
+
+export function pixelAlignRect(rect: Rect) {
+  const bounds = createBounds(rect);
+
+  return createRectFromBounds({
+    minX: round(bounds.minX),
+    maxX: round(bounds.maxX),
+    minY: round(bounds.minY),
+    maxY: round(bounds.maxY),
+  });
 }

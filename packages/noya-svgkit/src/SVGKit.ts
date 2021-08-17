@@ -488,7 +488,7 @@ export const SVGKit: CanvasKit = {
 // readonly RuntimeEffect: RuntimeEffectFactory;
 // readonly Shader: ShaderFactory;
 // readonly TextBlob: TextBlobFactory;
-// readonly TypefaceFontProvider: TypefaceFontProviderFactory;
+// readonly fontManager: IFontManagerFactory;
 
 // Misc
 // readonly ColorMatrix: ColorMatrixHelpers;

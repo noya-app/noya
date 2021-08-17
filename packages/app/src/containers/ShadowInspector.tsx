@@ -1,23 +1,14 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Selectors } from 'noya-state';
-import { isDeepEqual, zipLongest } from 'noya-utils';
+import { useDispatch, useSelector } from 'noya-app-state-context';
+import {
+  EditableShadow,
+  getEditableShadow,
+  getEditableStyles,
+  Selectors,
+} from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
-import { useDispatch, useSelector } from 'noya-app-state-context';
-import useShallowArray from '../hooks/useShallowArray';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
-import getMultiValue from '../utils/getMultiValue';
-
-type EditableShadow = {
-  // TODO: Indeterminate `isEnabled` state
-  isEnabled: boolean;
-  blurRadius?: number;
-  color?: Sketch.Color;
-  offsetX?: number;
-  offsetY?: number;
-  spread?: number;
-};
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function ShadowInspector() {
   const dispatch = useDispatch();
@@ -26,31 +17,13 @@ export default memo(function ShadowInspector() {
     useSelector(Selectors.getSelectedStyles),
   );
 
-  const layerShadowLists = useShallowArray(
+  const shadowMatrix = useShallowArray(
     selectedStyles.map((style) => style?.shadows ?? []),
   );
 
   const editableShadows: EditableShadow[] = useMemo(
-    () =>
-      zipLongest(undefined, ...layerShadowLists).map((shadows) => {
-        const filtered = shadows.flatMap((shadow) => (shadow ? [shadow] : []));
-
-        return {
-          isEnabled:
-            getMultiValue(filtered.map((shadow) => shadow.isEnabled)) ?? true,
-          blurRadius: getMultiNumberValue(
-            filtered.map((shadow) => shadow.blurRadius),
-          ),
-          color: getMultiValue(
-            filtered.map((shadow) => shadow.color),
-            isDeepEqual,
-          ),
-          offsetX: getMultiValue(filtered.map((shadow) => shadow.offsetX)),
-          offsetY: getMultiValue(filtered.map((shadow) => shadow.offsetY)),
-          spread: getMultiValue(filtered.map((shadow) => shadow.spread)),
-        };
-      }),
-    [layerShadowLists],
+    () => getEditableStyles(shadowMatrix, getEditableShadow),
+    [shadowMatrix],
   );
 
   return (

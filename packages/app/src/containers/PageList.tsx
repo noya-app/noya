@@ -26,7 +26,7 @@ import React, {
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
-import useDeepArray from '../hooks/useDeepArray';
+import { useDeepArray } from 'noya-react-utils';
 
 const Container = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   ...(expanded ? { height: '200px' } : { flex: '0 0 auto' }),

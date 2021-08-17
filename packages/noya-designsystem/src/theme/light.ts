@@ -47,6 +47,7 @@ export const colors = {
   get dragOutline() {
     return colors.primary;
   },
+  selection: 'rgb(179,215,254)',
 };
 
 export const fonts = {
@@ -124,6 +125,10 @@ export const sizes = {
   toolbar: {
     height: 46,
     itemSeparator: 8,
+  },
+  inspector: {
+    horizontalSeparator: 8,
+    verticalSeparator: 10,
   },
   spacing: {
     nano: 2,

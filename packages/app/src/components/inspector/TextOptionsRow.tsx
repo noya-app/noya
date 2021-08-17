@@ -9,7 +9,6 @@ import {
   LabeledElementView,
   RadioGroup,
   Select,
-  Spacer,
 } from 'noya-designsystem';
 import { SimpleTextDecoration } from 'noya-state';
 import { memo, useCallback } from 'react';
@@ -56,7 +55,7 @@ export default memo(function TextOptionsRow({
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Text Options</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <LabeledElementView renderLabel={renderLabel}>
           <Select<SimpleTextDecoration>
@@ -66,7 +65,7 @@ export default memo(function TextOptionsRow({
             getTitle={capitalize}
             onChange={onChangeTextDecoration}
           />
-          <Spacer.Horizontal size={8} />
+          <InspectorPrimitives.HorizontalSeparator />
           <RadioGroup.Root
             id={transformInputId}
             value={textTransform !== undefined ? textTransform.toString() : ''}

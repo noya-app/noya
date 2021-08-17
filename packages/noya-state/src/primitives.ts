@@ -7,13 +7,14 @@ import type {
   TextAlign,
   TextStyle,
 } from 'canvaskit';
+import { FontId, SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
   createBounds,
   distance,
-  resize,
   Point,
   Rect,
+  resize,
 } from 'noya-geometry';
 import { CompassDirection, getCardinalDirections } from 'noya-state';
 import * as PathUtils from './primitives/path';
@@ -95,6 +96,8 @@ export function shader(
       const fromPoint = parsePoint(fill.gradient.from);
       const toPoint = parsePoint(fill.gradient.to);
 
+      const aspectRatio = layerFrame.width / layerFrame.height;
+
       // CanvasKit draws gradients in absolute coordinates, while Sketch draws them
       // relative to the layer's frame. This function returns a matrix that converts
       // absolute coordinates into the range (0, 1).
@@ -105,23 +108,41 @@ export function shader(
 
       switch (fill.gradient.gradientType) {
         case Sketch.GradientType.Linear: {
+          const transformedFrom = unitTransform.applyTo(fromPoint);
+          const transformedTo = unitTransform.applyTo(toPoint);
+
           return CanvasKit.Shader.MakeLinearGradient(
-            point(fromPoint),
-            point(toPoint),
+            point(transformedFrom),
+            point(transformedTo),
             colors,
             positions,
             CanvasKit.TileMode.Clamp,
-            unitTransform.float32Array,
           );
         }
         case Sketch.GradientType.Radial: {
+          const transformedCenter = unitTransform.applyTo(fromPoint);
+          const transformedTo = unitTransform.applyTo(toPoint);
+
+          const theta =
+            Math.atan2(
+              transformedTo.y - transformedCenter.y,
+              transformedTo.x - transformedCenter.x,
+            ) -
+            Math.PI / 2;
+
+          // We scale the coordinate system along the x axis to render an ellipse
+          const coordinateSystemTransform = AffineTransform.rotate(
+            theta,
+            transformedCenter,
+          ).scale(fill.gradient.elipseLength || 1, 1, transformedCenter);
+
           return CanvasKit.Shader.MakeRadialGradient(
-            point(fromPoint),
-            distance(toPoint, fromPoint),
+            point(transformedCenter),
+            distance(transformedTo, transformedCenter),
             colors,
             positions,
             CanvasKit.TileMode.Clamp,
-            unitTransform.float32Array,
+            coordinateSystemTransform.float32Array,
           );
         }
         case Sketch.GradientType.Angular: {
@@ -149,13 +170,13 @@ export function shader(
             positions.push(1);
           }
 
-          const matrix =
+          let matrix = AffineTransform.multiply(
+            unitTransform,
             rotationRadians > 0
-              ? AffineTransform.multiply(
-                  unitTransform,
-                  AffineTransform.rotate(rotationRadians, 0.5, 0.5),
-                )
-              : unitTransform;
+              ? AffineTransform.rotate(rotationRadians, { x: 0.5, y: 0.5 })
+              : AffineTransform.identity,
+            AffineTransform.scale(1 / aspectRatio, 1, { x: 0.5, y: 0.5 }),
+          );
 
           return CanvasKit.Shader.MakeSweepGradient(
             0.5,
@@ -323,19 +344,22 @@ export function textHorizontalAlignment(
 
 export type SimpleTextDecoration = 'none' | 'underline' | 'strikethrough';
 
-export function stringAttribute(
+export function createCanvasKitTextStyle(
   CanvasKit: CanvasKit,
-  attribute: Sketch.StringAttribute,
+  fontId: FontId,
+  attributes: Sketch.StringAttribute['attributes'],
   decoration: SimpleTextDecoration,
 ): TextStyle {
-  const textColor = attribute.attributes.MSAttributedStringColorAttribute;
-  const font = attribute.attributes.MSAttributedStringFontAttribute;
+  const textColor = attributes.MSAttributedStringColorAttribute;
+  const font = attributes.MSAttributedStringFontAttribute;
 
   return new CanvasKit.TextStyle({
     ...(textColor && { color: color(CanvasKit, textColor) }),
-    // fontFamilies: ['Roboto'], // TODO: Font family
+    fontFamilies: fontId
+      ? [fontId.toString(), SYSTEM_FONT_ID]
+      : [SYSTEM_FONT_ID],
     fontSize: font.attributes.size,
-    letterSpacing: attribute.attributes.kerning,
+    letterSpacing: attributes.kerning,
     ...(decoration === 'none'
       ? {}
       : {

@@ -3,7 +3,7 @@ import { createSectionedMenu, MenuItem } from 'noya-designsystem';
 import { Layers } from 'noya-state';
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useWorkspace } from 'noya-app-state-context';
-import useShallowArray from './useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -94,9 +94,6 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
         layers.every((item) => !Layers.isArtboard(item)))
     );
   }, [layers]);
-
-  const shouldAskForSymbolName =
-    layers.length > 1 && !Layers.isArtboard(layers[0]);
 
   const newUseAsMaskValue = !layers.every((item) => item.hasClippingMask);
 
@@ -202,9 +199,10 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
           dispatch('ungroupLayers', selectedLayerIds);
           return;
         case 'createSymbol': {
-          const name = shouldAskForSymbolName ? prompt('New Symbol Name') : ' ';
+          const name = prompt('New Symbol Name');
 
           if (!name) return;
+
           dispatch('createSymbol', selectedLayerIds, name);
           return;
         }
@@ -249,7 +247,6 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
       dispatch,
       selectedLayerIds,
       newIsAlphaMaskValue,
-      shouldAskForSymbolName,
       newUseAsMaskValue,
       newIgnoreMasksValue,
       startRenamingLayer,

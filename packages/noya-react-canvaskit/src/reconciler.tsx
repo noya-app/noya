@@ -403,12 +403,12 @@ const hostConfig: ReactCanvasKitHostConfig = {
   },
 };
 
-const canvaskitReconciler = ReactReconciler(hostConfig);
+const canvasKitReconciler = ReactReconciler(hostConfig);
 
-canvaskitReconciler.injectIntoDevTools({
+canvasKitReconciler.injectIntoDevTools({
   bundleType: 1, // 0 for PROD, 1 for DEV
   version: '0.0.1', // version for your renderer
-  rendererPackageName: 'react-canvaskit', // package name
+  rendererPackageName: 'noya-react-canvaskit', // package name
 });
 
 type ExtendedSurface = Surface & { _container: any };
@@ -421,7 +421,7 @@ function getContainerForSurface(
 
   if (!extendedSurface._container) {
     const root: RootComponent = { surface, context, children: [] };
-    const container = canvaskitReconciler.createContainer(root, 2, false, null);
+    const container = canvasKitReconciler.createContainer(root, 2, false, null);
 
     extendedSurface._container = container;
   }
@@ -442,7 +442,7 @@ export function render(
 
   const container = getContainerForSurface(surface, context);
 
-  canvaskitReconciler.updateContainer(element, container, null, () => {
+  canvasKitReconciler.updateContainer(element, container, null, () => {
     callback?.();
   });
 }
@@ -450,7 +450,7 @@ export function render(
 export function unmount(surface: Surface, callback?: () => void) {
   const container = (surface as ExtendedSurface)._container;
 
-  canvaskitReconciler.updateContainer(null, container, null, () => {
+  canvasKitReconciler.updateContainer(null, container, null, () => {
     callback?.();
   });
 }

@@ -8,18 +8,24 @@ import {
   Point,
   Rect,
   rectContainsPoint,
+  rectsContainsRect,
   rectsIntersect,
   rotatedRectContainsPoint,
   transformRect,
 } from 'noya-geometry';
+import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { getRectDragHandles } from 'noya-state';
-import { EnterReturnValue, SKIP, STOP } from 'tree-visit';
+import { SKIP, STOP, VisitOptions } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import { getCurrentPage } from './pageSelectors';
+import {
+  getArtboardLabelParagraphSize,
+  getArtboardLabelRect,
+} from './textSelectors';
 import {
   getCanvasTransform,
   getLayerFlipTransform,
@@ -29,51 +35,89 @@ import {
 } from './transformSelectors';
 
 export type LayerTraversalOptions = {
-  includeHiddenLayers: boolean;
-  clickThroughGroups: boolean;
-  includeArtboardLayers: boolean | 'includeAndClickThrough';
+  /**
+   * The default is false
+   */
+  includeHiddenLayers?: boolean;
+
+  /**
+   * The default is `groupOnly`
+   */
+  groups?: 'groupOnly' | 'childrenOnly';
+
+  /**
+   * The default is `childrenOnly`
+   *
+   * We use `emptyOrContainedArtboardOrChildren` when we're working with user interactions.
+   * This will select empty artboards, artboards fully contained by the user's marquee, or
+   * artboards where the label contains the mouse.
+   */
+  artboards?:
+    | 'artboardOnly'
+    | 'childrenOnly'
+    | 'artboardAndChildren'
+    | 'emptyOrContainedArtboardOrChildren';
 };
 
-function shouldClickThrough(
+const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
+  includeHiddenLayers: false,
+  groups: 'groupOnly',
+  artboards: 'childrenOnly',
+};
+
+function shouldVisitChildren(
   layer: Sketch.AnyLayer,
-  options: LayerTraversalOptions,
+  traversalOptions: LayerTraversalOptions,
 ) {
-  return (
-    layer._class === 'symbolMaster' ||
-    (layer._class === 'artboard' && options.includeArtboardLayers !== true) ||
-    (layer._class === 'slice' && options.clickThroughGroups) ||
-    (layer._class === 'group' &&
-      (layer.hasClickThrough || options.clickThroughGroups))
-  );
+  const options: Required<LayerTraversalOptions> = {
+    ...DEFAULT_TRAVERSAL_OPTIONS,
+    ...traversalOptions,
+  };
+
+  switch (layer._class) {
+    case 'symbolMaster':
+      return true;
+    case 'artboard':
+      return options.artboards !== 'artboardOnly';
+    case 'group':
+      return options.groups !== 'groupOnly' || layer.hasClickThrough;
+    case 'slice':
+      return options.groups !== 'groupOnly';
+    default:
+      return false;
+  }
+}
+
+function shouldVisitLayer(
+  layer: Sketch.AnyLayer,
+  traversalOptions: LayerTraversalOptions,
+) {
+  const options: Required<LayerTraversalOptions> = {
+    ...DEFAULT_TRAVERSAL_OPTIONS,
+    ...traversalOptions,
+  };
+
+  return layer.isVisible || options.includeHiddenLayers;
 }
 
 function visitLayersReversed(
   rootLayer: Sketch.AnyLayer,
-  ctm: AffineTransform,
   options: LayerTraversalOptions,
-  onEnter: (layer: Sketch.AnyLayer, ctm: AffineTransform) => EnterReturnValue,
+  onEnter: NonNullable<VisitOptions<Sketch.AnyLayer>['onEnter']>,
 ) {
   visitReversed(rootLayer, {
     onEnter: (layer, indexPath) => {
       if (Layers.isPageLayer(layer)) return;
 
-      if (!layer.isVisible && !options.includeHiddenLayers) return SKIP;
+      if (!shouldVisitLayer(layer, options)) return SKIP;
 
-      const transform = getLayerTransformAtIndexPathReversed(
-        rootLayer,
-        indexPath,
-        ctm,
-      );
-
-      const result = onEnter(layer, transform);
+      const result = onEnter(layer, indexPath);
 
       if (result === STOP) return result;
 
-      if (shouldClickThrough(layer, options)) {
-        return result;
-      } else {
-        return SKIP;
-      }
+      if (!shouldVisitChildren(layer, options)) return SKIP;
+
+      return result;
     },
   });
 }
@@ -83,62 +127,75 @@ export function getLayersInRect(
   page: Sketch.Page,
   insets: Insets,
   rect: Rect,
-  traversalOptions?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): PageLayer[] {
-  const options = traversalOptions ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
-
   let found: Sketch.AnyLayer[] = [];
 
   const screenTransform = getScreenTransform(insets);
   const screenRect = transformRect(rect, screenTransform);
 
-  visitLayersReversed(
-    page,
-    getCanvasTransform(state, insets),
-    options,
-    (layer, ctm) => {
-      // TODO: Handle rotated rectangle collision
-      const hasIntersect = rectsIntersect(
-        transformRect(layer.frame, ctm),
-        screenRect,
-      );
+  const canvasTransform = getCanvasTransform(state, insets);
 
-      if (!hasIntersect) return SKIP;
+  visitLayersReversed(page, options, (layer, indexPath) => {
+    const transform = getLayerTransformAtIndexPathReversed(
+      page,
+      indexPath,
+      canvasTransform,
+    );
+    const transformedFrame = transformRect(layer.frame, transform);
 
-      const includeArtboard =
-        layer._class === 'artboard' &&
-        options.includeArtboardLayers === 'includeAndClickThrough';
+    // TODO: Handle rotated rectangle collision
+    const hasIntersect = rectsIntersect(transformedFrame, screenRect);
 
-      // Artboards can't be selected themselves, unless we enable that option
-      if (!includeArtboard && shouldClickThrough(layer, options)) return;
+    if (!hasIntersect) return SKIP;
 
-      found.push(layer);
-    },
-  );
+    const includeArtboard =
+      Layers.isArtboard(layer) &&
+      (options.artboards === 'artboardAndChildren' ||
+        (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
+          (layer.layers.length === 0 ||
+            rectsContainsRect(screenRect, transformedFrame))));
+
+    // Traverse into children and return some of them, instead of returning this layer
+    if (!includeArtboard && shouldVisitChildren(layer, options)) return;
+
+    found.push(layer);
+  });
 
   return found as PageLayer[];
 }
 
+export function artboardLabelContainsPoint(
+  CanvasKit: CanvasKit,
+  fontManager: IFontManager,
+  layer: Sketch.Artboard,
+  canvasTransform: AffineTransform,
+  screenPoint: Point,
+): boolean {
+  const paragraphSize = getArtboardLabelParagraphSize(
+    CanvasKit,
+    fontManager,
+    layer.name,
+  );
+
+  const rect = getArtboardLabelRect(layer.frame, paragraphSize);
+
+  const labelRect = transformRect(rect, canvasTransform);
+
+  return rectContainsPoint(labelRect, screenPoint);
+}
+
 export function getLayerAtPoint(
   CanvasKit: CanvasKit,
+  fontManager: IFontManager,
   state: ApplicationState,
   insets: Insets,
   point: Point,
-  traversalOptions?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
   const canvasTransform = getCanvasTransform(state, insets);
   const screenTransform = getScreenTransform(insets);
-
-  const options = traversalOptions ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
 
   // TODO: check if we're clicking the title of an artboard
 
@@ -146,9 +203,9 @@ export function getLayerAtPoint(
 
   const screenPoint = screenTransform.applyTo(point);
 
-  visitLayersReversed(page, canvasTransform, options, (layer, ctm) => {
+  visitLayersReversed(page, options, (layer, indexPath) => {
     const transform = AffineTransform.multiply(
-      ctm,
+      getLayerTransformAtIndexPathReversed(page, indexPath, canvasTransform),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
@@ -156,12 +213,39 @@ export function getLayerAtPoint(
     const framePoints = getRectCornerPoints(layer.frame);
     const localPoints = framePoints.map((point) => transform.applyTo(point));
 
-    const containsPoint = rotatedRectContainsPoint(localPoints, screenPoint);
+    const frameContainsPoint = rotatedRectContainsPoint(
+      localPoints,
+      screenPoint,
+    );
 
-    if (!containsPoint) return SKIP;
+    if (!frameContainsPoint) {
+      if (
+        Layers.isArtboard(layer) &&
+        options.artboards === 'emptyOrContainedArtboardOrChildren' &&
+        artboardLabelContainsPoint(
+          CanvasKit,
+          fontManager,
+          layer,
+          canvasTransform,
+          screenPoint,
+        )
+      ) {
+        found = layer;
 
-    // Artboards can't be selected themselves, and instead only update the ctm
-    if (shouldClickThrough(layer, options)) return;
+        return STOP;
+      }
+
+      return SKIP;
+    }
+
+    const includeArtboard =
+      Layers.isArtboard(layer) &&
+      (options.artboards === 'artboardAndChildren' ||
+        (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
+          layer.layers.length === 0));
+
+    // Traverse into children and return one of them, instead of returning this layer
+    if (!includeArtboard && shouldVisitChildren(layer, options)) return;
 
     switch (layer._class) {
       case 'rectangle':
@@ -197,16 +281,9 @@ export function getLayerAtPoint(
  */
 export function getBoundingRect(
   rootLayer: Sketch.AnyLayer,
-  ctm: AffineTransform,
   layerIds: string[],
-  options?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): Rect | undefined {
-  options = options ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
-
   let bounds = {
     minX: Infinity,
     minY: Infinity,
@@ -214,11 +291,11 @@ export function getBoundingRect(
     maxY: -Infinity,
   };
 
-  visitLayersReversed(rootLayer, ctm, options, (layer, ctm) => {
+  visitLayersReversed(rootLayer, options, (layer, indexPath) => {
     if (!layerIds.includes(layer.do_objectID)) return;
 
     const transform = AffineTransform.multiply(
-      ctm,
+      getLayerTransformAtIndexPathReversed(rootLayer, indexPath),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
@@ -243,23 +320,16 @@ export function getBoundingRect(
 
 export function getBoundingPoints(
   rootLayer: Sketch.AnyLayer,
-  ctm: AffineTransform,
   layerId: string,
-  options?: LayerTraversalOptions,
+  options: LayerTraversalOptions = {},
 ): Point[] {
-  options = options ?? {
-    clickThroughGroups: false,
-    includeHiddenLayers: false,
-    includeArtboardLayers: false,
-  };
-
   let points: Point[] = [];
 
-  visitLayersReversed(rootLayer, ctm, options, (layer, ctm) => {
+  visitLayersReversed(rootLayer, options, (layer, indexPath) => {
     if (layerId !== layer.do_objectID) return;
 
     const transform = AffineTransform.multiply(
-      ctm,
+      getLayerTransformAtIndexPathReversed(rootLayer, indexPath),
       getLayerFlipTransform(layer),
       getLayerRotationTransform(layer),
     );
@@ -278,11 +348,7 @@ export function getScaleDirectionAtPoint(
   point: Point,
 ): CompassDirection | undefined {
   const page = getCurrentPage(state);
-  const boundingRect = getBoundingRect(
-    page,
-    AffineTransform.identity,
-    state.selectedObjects,
-  );
+  const boundingRect = getBoundingRect(page, state.selectedObjects);
 
   if (!boundingRect) return;
 
@@ -301,7 +367,7 @@ export const getSelectedRect = (state: ApplicationState): Rect => {
   const layerIds = layerIndexPaths.map(
     (indexPath) => Layers.access(page, indexPath).do_objectID,
   );
-  return getBoundingRect(page, AffineTransform.identity, layerIds)!;
+  return getBoundingRect(page, layerIds)!;
 };
 
 export function getBoundingRectMap(
@@ -314,12 +380,7 @@ export function getBoundingRectMap(
   layerIds.forEach((layerId) => {
     if (layerId in rectMap) return;
 
-    const rect = getBoundingRect(
-      rootLayer,
-      AffineTransform.identity,
-      [layerId],
-      options,
-    );
+    const rect = getBoundingRect(rootLayer, [layerId], options);
 
     if (!rect) return;
 
@@ -327,4 +388,11 @@ export function getBoundingRectMap(
   });
 
   return rectMap;
+}
+
+export function getPageContentBoundingRect(page: Sketch.Page) {
+  return getBoundingRect(
+    page,
+    Layers.findAll(page, () => true).map((l) => l.do_objectID),
+  );
 }

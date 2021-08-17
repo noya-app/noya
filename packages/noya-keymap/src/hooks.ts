@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { createKeyMap } from './keyMap';
+import { createKeyMap, FALLTHROUGH } from './keyMap';
 import { getCurrentPlatform } from './platform';
 import { getEventShortcutNames } from './shortcuts';
+
+export const IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS = 'ignore-global-events';
 
 type KeyEventName = 'keydown' | 'keyup' | 'keypress';
 
@@ -56,7 +58,11 @@ export function useKeyboardShortcuts(
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement) return;
+      if (
+        event.target instanceof HTMLInputElement &&
+        !event.target.classList.contains(IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS)
+      )
+        return;
 
       const eventShortcutNames = getEventShortcutNames(event, platformName);
 
@@ -66,12 +72,14 @@ export function useKeyboardShortcuts(
 
       if (!matchingName) return;
 
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
       const command = keyMapRef.current[matchingName];
 
-      command();
+      const result = command();
+
+      if (result !== FALLTHROUGH) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
     };
 
     const listenerElement = eventRef;

@@ -1,20 +1,24 @@
+import { StateProvider } from 'noya-app-state-context';
+import { decodeFontName } from 'noya-fonts';
+import {
+  CanvasKitProvider,
+  FontManagerProvider,
+  ImageCacheProvider,
+  useCanvasKit,
+  useDownloadFont,
+  useFontManager,
+} from 'noya-renderer';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
+  Selectors,
   WorkspaceAction,
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
 import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
-import {
-  CanvasKitProvider,
-  FontManagerProvider,
-  ImageCacheProvider,
-} from 'noya-renderer';
 import Workspace from './containers/Workspace';
-import { StateProvider } from 'noya-app-state-context';
-import { useCanvasKit } from 'noya-renderer';
 import { useResource } from './hooks/useResource';
 
 type Action =
@@ -23,6 +27,7 @@ type Action =
 
 function Contents() {
   const CanvasKit = useCanvasKit();
+  const fontManager = useFontManager();
 
   const sketchFileData = useResource<ArrayBuffer>(
     '/Demo.sketch',
@@ -45,14 +50,19 @@ function Contents() {
             if (state.type === 'success') {
               return {
                 type: 'success',
-                value: workspaceReducer(state.value, action.value, CanvasKit),
+                value: workspaceReducer(
+                  state.value,
+                  action.value,
+                  CanvasKit,
+                  fontManager,
+                ),
               };
             } else {
               return state;
             }
         }
       },
-    [CanvasKit],
+    [CanvasKit, fontManager],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });
@@ -67,14 +77,30 @@ function Contents() {
     dispatch({ type: 'update', value: action });
   }, []);
 
+  const downloadFont = useDownloadFont();
+
+  // Whenever the sketch file updates, download any new fonts
+  useEffect(() => {
+    if (state.type !== 'success') return;
+
+    const fontNames = Selectors.getAllFontNames(state.value.history.present);
+
+    fontNames.forEach((fontName) => {
+      const { fontFamily, fontTraits } = decodeFontName(fontName);
+      const fontFamilyId = fontManager.getFontFamilyId(fontFamily);
+
+      if (!fontFamilyId) return;
+
+      downloadFont({ fontFamilyId, ...fontTraits });
+    });
+  }, [downloadFont, fontManager, state]);
+
   if (state.type !== 'success') return null;
 
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
       <ImageCacheProvider>
-        <FontManagerProvider>
-          <Workspace />
-        </FontManagerProvider>
+        <Workspace />
       </ImageCacheProvider>
     </StateProvider>
   );
@@ -83,7 +109,9 @@ function Contents() {
 export default function App() {
   return (
     <CanvasKitProvider>
-      <Contents />
+      <FontManagerProvider>
+        <Contents />
+      </FontManagerProvider>
     </CanvasKitProvider>
   );
 }

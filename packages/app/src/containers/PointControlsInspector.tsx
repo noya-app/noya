@@ -7,12 +7,15 @@ import {
   Select,
   Spacer,
 } from 'noya-designsystem';
-import { Layers, Selectors } from 'noya-state';
+import {
+  getMultiNumberValue,
+  getMultiValue,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useApplicationState } from 'noya-app-state-context';
-import getMultiNumberValue from '../utils/getMultiNumberValue';
-import getMultiValue from '../utils/getMultiValue';
 
 const CURVE_MODE_OPTIONS = [
   'Straight' as const,
@@ -124,7 +127,7 @@ export default memo(function PointControlsInspector() {
               [dispatch],
             )}
           />
-          <Spacer.Horizontal size={10} />
+          <InspectorPrimitives.HorizontalSeparator />
           <InputField.Root id={pointRadiusInputId} size={50}>
             <InputField.NumberInput
               value={cornerRadius}
@@ -135,7 +138,7 @@ export default memo(function PointControlsInspector() {
           </InputField.Root>
         </LabeledElementView>
       </InspectorPrimitives.Row>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <InspectorPrimitives.Column>
           <Button

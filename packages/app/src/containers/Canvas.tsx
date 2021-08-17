@@ -11,8 +11,12 @@ import {
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
-import { useKeyboardShortcuts } from 'noya-keymap';
-import { useCanvasKit } from 'noya-renderer';
+import {
+  FALLTHROUGH,
+  IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
+  useKeyboardShortcuts,
+} from 'noya-keymap';
+import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   ApplicationState,
   CompassDirection,
@@ -36,7 +40,9 @@ import {
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
+import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
 import useLayerMenu from '../hooks/useLayerMenu';
+import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
@@ -50,6 +56,11 @@ const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
   left: -insets.left,
   zIndex: -1,
 }));
+
+const HiddenInputTarget = styled.input({
+  position: 'absolute',
+  top: '-200px',
+});
 
 function getCursorForDirection(
   direction: CompassDirection,
@@ -105,6 +116,7 @@ export default memo(function Canvas() {
   const [state, dispatch] = useApplicationState();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const CanvasKit = useCanvasKit();
+  const fontManager = useFontManager();
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
@@ -114,32 +126,28 @@ export default memo(function Canvas() {
     },
   });
 
-  const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
-  const nudge = (axis: 'X' | 'Y', amount: number) => {
-    if (isEditingPath && state.selectedControlPoint) {
-      dispatch(`setControlPoint${axis}` as const, amount, 'adjust');
-    } else if (isEditingPath) {
-      dispatch(
-        `setPoint${axis}` as const,
-        state.selectedPointLists,
-        amount,
-        'adjust',
-      );
+  const isPanning =
+    state.interactionState.type === 'panMode' ||
+    state.interactionState.type === 'maybePan' ||
+    state.interactionState.type === 'panning';
+
+  const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
+
+  useArrowKeyShortcuts();
+
+  const handleDeleteKey = () => {
+    if (isEditingText) return FALLTHROUGH;
+
+    if (state.selectedGradient) {
+      dispatch('deleteStopToGradient');
     } else {
-      dispatch(`setLayer${axis}` as const, amount, 'adjust');
+      dispatch('deleteLayer', state.selectedObjects);
     }
   };
 
   useKeyboardShortcuts({
-    ArrowLeft: () => nudge('X', -1),
-    ArrowRight: () => nudge('X', 1),
-    ArrowUp: () => nudge('Y', -1),
-    ArrowDown: () => nudge('Y', 1),
-    'Shift-ArrowLeft': () => nudge('X', -10),
-    'Shift-ArrowRight': () => nudge('X', 10),
-    'Shift-ArrowUp': () => nudge('Y', -10),
-    'Shift-ArrowDown': () => nudge('Y', 10),
-    Backspace: () => dispatch('deleteLayer', state.selectedObjects),
+    Backspace: handleDeleteKey,
+    Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
     'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
@@ -150,10 +158,29 @@ export default memo(function Canvas() {
     'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
     'Mod-0': () => dispatch('setZoom', 1),
+    'Mod-a': () => {
+      if (isEditingText) {
+        dispatch('selectAllText');
+      } else {
+        dispatch('selectAllLayers');
+      }
+    },
+    Space: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      if (state.interactionState.type !== 'none') return;
+
+      dispatch('interaction', ['enablePanMode']);
+    },
   });
 
   useKeyboardShortcuts(
     {
+      Space: () => {
+        if (!isPanning) return;
+
+        dispatch('interaction', ['reset']);
+      },
       Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
     },
     { eventName: 'keyup' },
@@ -200,21 +227,63 @@ export default memo(function Canvas() {
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
+  const getClickCount = useMultipleClickCount();
+
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
+      const clickCount = getClickCount(point);
+
+      if (clickCount >= 2) {
+        if (selectedLayers.length === 0) return;
+
+        const layer = selectedLayers[0];
+
+        if (!Layers.isTextLayer(layer)) return;
+
+        const characterIndex = Selectors.getCharacterIndexAtPoint(
+          CanvasKit,
+          fontManager,
+          state,
+          layer.do_objectID,
+          point,
+          'bounded',
+        );
+
+        if (state.interactionState.type === 'none') {
+          dispatch('interaction', [
+            'editingText',
+            layer.do_objectID,
+            { anchor: 0, head: layer.attributedString.string.length },
+          ]);
+        }
+
+        if (characterIndex === undefined) {
+          dispatch('selectAllText', layer.do_objectID);
+        } else {
+          dispatch(
+            'selectContainingText',
+            layer.do_objectID,
+            characterIndex,
+            clickCount % 2 === 0 ? 'word' : 'line',
+          );
+        }
+
+        return;
+      }
+
       if (MouseEvent.isRightButtonClicked(event)) {
         const layer = Selectors.getLayerAtPoint(
           CanvasKit,
+          fontManager,
           state,
           insets,
           rawPoint,
           {
-            clickThroughGroups: event.metaKey,
-            includeHiddenLayers: false,
-            includeArtboardLayers: false,
+            groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+            artboards: 'emptyOrContainedArtboardOrChildren',
           },
         );
 
@@ -263,11 +332,7 @@ export default memo(function Canvas() {
           const boundingRects = Selectors.getBoundingRectMap(
             Selectors.getCurrentPage(state),
             state.selectedObjects,
-            {
-              clickThroughGroups: true,
-              includeArtboardLayers: false,
-              includeHiddenLayers: false,
-            },
+            { groups: 'childrenOnly' },
           );
 
           const selectedPointsLayers = Selectors.getSelectedLayers(
@@ -348,7 +413,25 @@ export default memo(function Canvas() {
           break;
         }
         case 'hoverHandle':
+        case 'editingText':
         case 'none': {
+          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
+            CanvasKit,
+            fontManager,
+            state,
+            point,
+            'bounded',
+          );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: characterIndex,
+              head: characterIndex,
+            });
+            dispatch('interaction', ['maybeSelectText', point]);
+            return;
+          }
+
           if (state.selectedObjects.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
@@ -361,13 +444,13 @@ export default memo(function Canvas() {
 
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
+            fontManager,
             state,
             insets,
             rawPoint,
             {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -376,16 +459,20 @@ export default memo(function Canvas() {
             point,
           );
 
-          const isPointerOnGradientLine =
-            selectedGradientStopIndex === -1
-              ? Selectors.isPointerOnGradientLine(state, point)
-              : false;
-
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
+
             dispatch('interaction', ['maybeMoveGradientStop', point]);
-          } else if (isPointerOnGradientLine) {
+          } else if (
+            state.selectedGradient &&
+            Selectors.isPointerOnGradientLine(state, point)
+          ) {
             dispatch('addStopToGradient', point);
+          } else if (
+            state.selectedGradient &&
+            Selectors.isPointerOnGradientEllipseEditor(state, point)
+          ) {
+            dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
             if (state.selectedObjects.includes(layer.do_objectID)) {
               if (event.shiftKey && state.selectedObjects.length !== 1) {
@@ -402,7 +489,6 @@ export default memo(function Canvas() {
             dispatch('interaction', ['maybeMove', point]);
           } else {
             dispatch('selectLayer', undefined);
-
             dispatch('interaction', ['startMarquee', rawPoint]);
           }
 
@@ -410,7 +496,16 @@ export default memo(function Canvas() {
         }
       }
     },
-    [offsetEventPoint, state, CanvasKit, insets, dispatch],
+    [
+      offsetEventPoint,
+      getClickCount,
+      state,
+      selectedLayers,
+      CanvasKit,
+      dispatch,
+      insets,
+      fontManager,
+    ],
   );
 
   const handleMouseMove = useCallback(
@@ -418,7 +513,56 @@ export default memo(function Canvas() {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
+        case 'maybeMoveGradientEllipseLength': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientEllipseLength', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'maybeSelectingText': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['selectingText', point]);
+          }
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          break;
+        }
+        case 'moveGradientEllipseLength': {
+          dispatch('interaction', ['movingGradientEllipseLength', point]);
+          event.preventDefault();
+          break;
+        }
+        case 'selectingText': {
+          if (!textSelection) return;
+
+          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
+            CanvasKit,
+            fontManager,
+            state,
+            point,
+            'unbounded',
+          );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: textSelection.range.anchor,
+              head: characterIndex,
+            });
+            return;
+          }
+          break;
+        }
         case 'maybeMoveGradientStop': {
           const { origin } = state.interactionState;
 
@@ -583,9 +727,8 @@ export default memo(function Canvas() {
             insets,
             createRect(origin, current),
             {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -612,13 +755,13 @@ export default memo(function Canvas() {
         case 'none': {
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
+            fontManager,
             state,
             insets,
             rawPoint,
             {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -655,6 +798,7 @@ export default memo(function Canvas() {
       state,
       dispatch,
       CanvasKit,
+      fontManager,
       selectedLayers,
       insets,
       highlightedLayer?.id,
@@ -667,7 +811,53 @@ export default memo(function Canvas() {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
+        case 'maybeSelectingText': {
+          if (!textSelection) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+          break;
+        }
+        case 'selectingText':
+          if (!textSelection) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
+          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
+            CanvasKit,
+            fontManager,
+            state,
+            point,
+            'bounded',
+          );
+
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: textSelection.range.anchor,
+              head: characterIndex,
+            });
+          }
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+          break;
         case 'maybePan':
           dispatch('interaction', ['enablePanMode']);
 
@@ -701,9 +891,8 @@ export default memo(function Canvas() {
             insets,
             createRect(origin, current),
             {
-              clickThroughGroups: event.metaKey,
-              includeHiddenLayers: false,
-              includeArtboardLayers: false,
+              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
 
@@ -719,7 +908,9 @@ export default memo(function Canvas() {
         case 'maybeMove':
         case 'maybeScale':
         case 'moveGradientStop':
-        case 'maybeMoveGradientStop': {
+        case 'maybeMoveGradientStop':
+        case 'maybeMoveGradientEllipseLength':
+        case 'moveGradientEllipseLength': {
           dispatch('interaction', ['reset']);
 
           containerRef.current?.releasePointerCapture(event.pointerId);
@@ -757,7 +948,7 @@ export default memo(function Canvas() {
           break;
       }
     },
-    [offsetEventPoint, state, dispatch, insets],
+    [offsetEventPoint, state, CanvasKit, fontManager, dispatch, insets],
   );
 
   const handleDirection =
@@ -797,6 +988,10 @@ export default memo(function Canvas() {
       case 'movingControlPoint':
       case 'movingPoint':
         return 'move';
+      case 'editingText':
+      case 'selectingText':
+      case 'maybeSelectingText':
+        return 'text';
       default:
         return 'default';
     }
@@ -842,6 +1037,41 @@ export default memo(function Canvas() {
     [CanvasKit, dispatch, offsetEventPoint],
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+
+    if (!input) return;
+
+    const handler = (event: InputEvent) => {
+      if (typeof event.data === 'string') {
+        dispatch('insertText', event.data);
+      } else {
+        switch (event.inputType) {
+          case 'deleteContent':
+          case 'deleteContentForward':
+          case 'deleteContentBackward':
+          case 'deleteEntireSoftLine':
+          case 'deleteHardLineBackward':
+          case 'deleteSoftLineBackward':
+          case 'deleteHardLineForward':
+          case 'deleteSoftLineForward':
+          case 'deleteWordBackward':
+          case 'deleteWordForward':
+            dispatch(
+              'deleteText',
+              ...Selectors.getDeletionParametersForInputEvent(event.inputType),
+            );
+        }
+      }
+    };
+
+    input.addEventListener('beforeinput', handler);
+
+    return () => input.removeEventListener('beforeinput', handler);
+  }, [dispatch]);
+
   return (
     <ImageDropTarget
       onDropFile={onDropFile}
@@ -857,7 +1087,14 @@ export default memo(function Canvas() {
             onPointerMove: handleMouseMove,
             onPointerUp: handleMouseUp,
           })}
+          tabIndex={0}
+          onFocus={() => inputRef.current?.focus()}
         >
+          <HiddenInputTarget
+            className={IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS}
+            ref={inputRef}
+            type="text"
+          />
           <InsetContainer insets={insets}>
             {canvasSizeWithInsets && (
               // <SVGRenderer size={canvasSizeWithInsets}>

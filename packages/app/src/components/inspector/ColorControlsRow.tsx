@@ -1,4 +1,4 @@
-import { InputField, Slider, Spacer } from 'noya-designsystem';
+import { InputField, Slider } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
@@ -36,7 +36,7 @@ function ColorControlInput({
         min={-100}
         max={100}
       />
-      <Spacer.Horizontal size={10} />
+      <InspectorPrimitives.HorizontalSeparator />
       <InputField.Root id={`${id}-input`} size={50}>
         <InputField.NumberInput
           value={value}

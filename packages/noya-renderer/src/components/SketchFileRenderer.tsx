@@ -2,13 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import {
-  AffineTransform,
-  createRect,
-  insetRect,
-  Point,
-  Rect,
-} from 'noya-geometry';
+import { createRect, insetRect, Point, Rect } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -21,13 +15,14 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import React, { Fragment, memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import { Group, Path, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
+import GradientEditor from './GradientEditor';
 import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
 import { InsertPointOverlay } from './InsertPointOverlay';
@@ -70,6 +65,7 @@ export default memo(function SketchFileRenderer() {
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
+  const isEditingText = Selectors.getIsEditingText(interactionState.type);
   const isInserting = interactionState.type === 'insert';
   const canvasRect = useMemo(
     () =>
@@ -97,26 +93,19 @@ export default memo(function SketchFileRenderer() {
 
   const boundingRect = useMemo(
     () =>
-      Selectors.getBoundingRect(
-        page,
-        AffineTransform.identity,
-        state.selectedObjects,
-        {
-          clickThroughGroups: true,
-          includeHiddenLayers: true,
-          includeArtboardLayers: false,
-        },
-      ),
+      Selectors.getBoundingRect(page, state.selectedObjects, {
+        groups: 'childrenOnly',
+        includeHiddenLayers: true,
+      }),
     [page, state.selectedObjects],
   );
 
   const boundingPoints = useMemo(
     () =>
       state.selectedObjects.map((id: string) =>
-        Selectors.getBoundingPoints(page, AffineTransform.identity, id, {
-          clickThroughGroups: true,
+        Selectors.getBoundingPoints(page, id, {
+          groups: 'childrenOnly',
           includeHiddenLayers: true,
-          includeArtboardLayers: false,
         }),
       ),
     [page, state.selectedObjects],
@@ -142,12 +131,10 @@ export default memo(function SketchFileRenderer() {
 
     const highlightedBoundingRect = Selectors.getBoundingRect(
       page,
-      AffineTransform.identity,
       [highlightedLayer.id],
       {
-        clickThroughGroups: true,
+        groups: 'childrenOnly',
         includeHiddenLayers: true,
-        includeArtboardLayers: false,
       },
     );
 
@@ -329,75 +316,6 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
-  const gradientLineStroke = useStroke({ color: '#FFF' });
-  const gradientStopStroke = useStroke({ color: '#FFF', strokeWidth: 1.5 });
-  const gradientEditorShadow = useMemo(
-    () =>
-      CanvasKit.ImageFilter.MakeDropShadowOnly(
-        0,
-        0,
-        2,
-        2,
-        CanvasKit.Color(0, 0, 0, 0.5),
-        null,
-      ),
-
-    [CanvasKit],
-  );
-
-  const gradientPoints = useMemo(() => {
-    const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
-
-    if (!gradientStopPoints || !state.selectedGradient) return null;
-
-    const { stopIndex } = state.selectedGradient;
-
-    return (
-      <Group imageFilter={gradientEditorShadow}>
-        <Polyline
-          points={[
-            gradientStopPoints[0].point,
-            gradientStopPoints[gradientStopPoints.length - 1].point,
-          ]}
-          paint={gradientLineStroke}
-        />
-        {gradientStopPoints.map(({ point, color }, index) => {
-          const path = new CanvasKit.Path();
-
-          const radius =
-            index === stopIndex
-              ? Selectors.POINT_RADIUS * 1.5
-              : Selectors.POINT_RADIUS;
-
-          path.addOval(
-            CanvasKit.XYWHRect(
-              point.x - radius,
-              point.y - radius,
-              radius * 2,
-              radius * 2,
-            ),
-          );
-
-          const paint = new CanvasKit.Paint();
-          paint.setColor(Primitives.color(CanvasKit, color));
-
-          return (
-            <Fragment key={index}>
-              <Path path={path} paint={paint} />
-              <Path path={path} paint={gradientStopStroke} />
-            </Fragment>
-          );
-        })}
-      </Group>
-    );
-  }, [
-    state,
-    gradientEditorShadow,
-    gradientLineStroke,
-    CanvasKit,
-    gradientStopStroke,
-  ]);
-
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
@@ -418,12 +336,19 @@ export default memo(function SketchFileRenderer() {
         )
       : undefined;
 
+  const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
+
   return (
     <>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
-        {gradientPoints}
+        {gradientStopPoints && state.selectedGradient && (
+          <GradientEditor
+            gradientStopPoints={gradientStopPoints}
+            selectedGradient={state.selectedGradient}
+          />
+        )}
         {symbol && <SketchArtboardContent layer={symbol} />}
         {interactionState.type === 'drawingShapePath' ? (
           penToolPseudoElements
@@ -438,7 +363,7 @@ export default memo(function SketchFileRenderer() {
             {(state.selectedObjects.length > 1 ||
               !Selectors.getSelectedLineLayer(state)) &&
               boundingRect &&
-              !gradientPoints &&
+              !state.selectedGradient &&
               !drawingLayer &&
               !isInserting && (
                 <>
@@ -446,31 +371,28 @@ export default memo(function SketchFileRenderer() {
                     rect={boundingRect}
                     selectionPaint={selectionPaint}
                   />
-                  {boundingPoints.map((points: Point[], index: number) => (
-                    <Polyline
-                      key={index}
-                      points={points}
-                      paint={selectionPaint}
-                    />
-                  ))}
+                  {!isEditingText &&
+                    boundingPoints.map((points: Point[], index: number) => (
+                      <Polyline
+                        key={index}
+                        points={points}
+                        paint={selectionPaint}
+                      />
+                    ))}
                 </>
               )}
-            {!isEditingPath &&
-              !drawingLayer &&
+            {!drawingLayer &&
               !isInserting &&
+              !isEditingText &&
               highlightedSketchLayer}
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
             <SnapGuides />
             {quickMeasureGuides}
-            {!gradientPoints &&
+            {!state.selectedGradient &&
               boundingRect &&
               !drawingLayer &&
-              !isInserting && (
-                <DragHandles
-                  rect={boundingRect}
-                  selectionPaint={selectionPaint}
-                />
-              )}
+              !isInserting &&
+              !isEditingText && <DragHandles rect={boundingRect} />}
           </>
         )}
       </Group>

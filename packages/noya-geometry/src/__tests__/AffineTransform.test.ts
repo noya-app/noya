@@ -21,7 +21,7 @@ test('matches canvaskit', () => {
     CanvasKit.Matrix.rotated(toRadians(90)),
   );
   expect(
-    AffineTransform.rotate(toRadians(90), 2, 3).array.map((x) =>
+    AffineTransform.rotate(toRadians(90), { x: 2, y: 3 }).array.map((x) =>
       x.toPrecision(6),
     ),
   ).toEqual(
@@ -81,12 +81,14 @@ test('rotate', () => {
 
 test('rotate around point', () => {
   const point = { x: 1, y: 1 };
-  const rotated90 = AffineTransform.rotate(toRadians(90), 10, 10).applyTo(
-    point,
-  );
-  const rotated180 = AffineTransform.rotate(toRadians(180), 10, 10).applyTo(
-    point,
-  );
+  const rotated90 = AffineTransform.rotate(toRadians(90), {
+    x: 10,
+    y: 10,
+  }).applyTo(point);
+  const rotated180 = AffineTransform.rotate(toRadians(180), {
+    x: 10,
+    y: 10,
+  }).applyTo(point);
 
   expect(rotated90.x).toBeCloseTo(19);
   expect(rotated90.y).toBeCloseTo(1);
@@ -95,16 +97,20 @@ test('rotate around point', () => {
   expect(rotated180.y).toBeCloseTo(19);
 });
 
-test('transform', () => {
-  expect(
-    AffineTransform.multiply(
-      AffineTransform.rotate(toRadians(90)),
-      AffineTransform.translate(2, 3),
-    ).array,
-  ).toEqual(
-    AffineTransform.rotate(toRadians(90)).transform(
-      AffineTransform.translate(2, 3),
-    ).array,
+test('prepend and append', () => {
+  const translate = AffineTransform.translate(10, 5);
+  const scale = AffineTransform.scale(2, 3);
+
+  expect(translate.prepend(scale).array).toEqual([2, 0, 10, 0, 3, 5, 0, 0, 1]);
+  expect(translate.append(scale).array).toEqual([2, 0, 20, 0, 3, 15, 0, 0, 1]);
+});
+
+test('multiply performs prepend', () => {
+  const translate = AffineTransform.translate(10, 5);
+  const scale = AffineTransform.scale(2, 3);
+
+  expect(AffineTransform.multiply(scale, translate).array).toEqual(
+    scale.prepend(translate).array,
   );
 });
 

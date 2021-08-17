@@ -1,13 +1,14 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import produce from 'immer';
+import { SetNumberMode } from './styleReducer';
 
 export type StringAttributeAction =
   | [type: 'setTextColor', value: Sketch.Color]
   | [type: 'setTextFontName', value: string]
-  | [type: 'setTextFontSize', value: number]
-  | [type: 'setTextLetterSpacing', value: number]
-  | [type: 'setTextLineSpacing', value: number]
-  | [type: 'setTextParagraphSpacing', value: number]
+  | [type: 'setTextFontSize', value: number, mode: SetNumberMode]
+  | [type: 'setTextLetterSpacing', value: number, mode: SetNumberMode]
+  | [type: 'setTextLineSpacing', value: number, mode: SetNumberMode]
+  | [type: 'setTextParagraphSpacing', value: number, mode: SetNumberMode]
   | [type: 'setTextHorizontalAlignment', value: number]
   | [type: 'setTextVerticalAlignment', value: number];
 
@@ -33,31 +34,36 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
       return produce(state, (draft) => {
         const attributes = draft.MSAttributedStringFontAttribute.attributes;
 
-        // This logic is temporary and will be replaced when we handle fonts
-        const split = attributes.name.split('-');
-        const face = split[1] ? '-' + split[1] : '';
-
-        attributes.name = value.startsWith('-')
-          ? split[0] + value
-          : value + face;
+        attributes.name = value;
       });
     }
     case 'setTextFontSize': {
-      const [, value] = action;
+      const [, value, mode] = action;
 
       return produce(state, (draft) => {
-        draft.MSAttributedStringFontAttribute.attributes.size = value;
+        const newValue =
+          mode === 'replace'
+            ? value
+            : value + draft.MSAttributedStringFontAttribute.attributes.size;
+
+        draft.MSAttributedStringFontAttribute.attributes.size = Math.max(
+          newValue,
+          1,
+        );
       });
     }
     case 'setTextLetterSpacing': {
-      const [, value] = action;
+      const [, value, mode] = action;
 
       return produce(state, (draft) => {
-        draft.kerning = value;
+        const newValue =
+          mode === 'replace' ? value : value + (draft.kerning ?? 0);
+
+        draft.kerning = newValue;
       });
     }
     case 'setTextLineSpacing': {
-      const [, value] = action;
+      const [, value, mode] = action;
 
       return produce(state, (draft) => {
         draft.paragraphStyle = draft.paragraphStyle ?? {
@@ -65,12 +71,17 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
           alignment: 0,
         };
 
-        draft.paragraphStyle.maximumLineHeight = value;
-        draft.paragraphStyle.maximumLineHeight = value;
+        const newValue =
+          mode === 'replace'
+            ? value
+            : value + (draft.paragraphStyle.maximumLineHeight ?? 0);
+
+        draft.paragraphStyle.minimumLineHeight = newValue;
+        draft.paragraphStyle.maximumLineHeight = newValue;
       });
     }
     case 'setTextParagraphSpacing': {
-      const [, value] = action;
+      const [, value, mode] = action;
 
       return produce(state, (draft) => {
         draft.paragraphStyle = draft.paragraphStyle ?? {
@@ -78,7 +89,12 @@ export function stringAttributeReducer<T extends CommonStringAttributes>(
           alignment: 0,
         };
 
-        draft.paragraphStyle.paragraphSpacing = value;
+        const newValue =
+          mode === 'replace'
+            ? value
+            : value + (draft.paragraphStyle.paragraphSpacing ?? 0);
+
+        draft.paragraphStyle.paragraphSpacing = newValue;
       });
     }
     case 'setTextHorizontalAlignment': {

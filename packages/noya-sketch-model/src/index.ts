@@ -204,7 +204,7 @@ function fontDescriptor(
 ): Sketch.FontDescriptor {
   return {
     attributes: {
-      name: 'Helvetica',
+      name: 'Roboto',
       size: 18,
     },
     ...options,
@@ -714,6 +714,7 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
 
 export const SketchModel = {
   artboard,
+  attributedString,
   bitmap,
   border,
   borderOptions,
@@ -744,6 +745,7 @@ export const SketchModel = {
   shapeGroup,
   shapePath,
   slice,
+  stringAttribute,
   style,
   symbolInstance,
   symbolMaster,

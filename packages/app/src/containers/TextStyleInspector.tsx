@@ -1,60 +1,50 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
-import { Selectors, TextStyleSelectors } from 'noya-state';
+import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import TextAlignmentRow from '../components/inspector/TextLayoutRow';
+import TextLayoutRow from '../components/inspector/TextLayoutRow';
 import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
-import useShallowArray from '../hooks/useShallowArray';
+import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function TextStyleInspector() {
-  const [state, dispatch] = useApplicationState();
+  const dispatch = useDispatch();
 
-  const textLayer = useShallowArray(
+  const textLayers = useShallowArray(
     useSelector(Selectors.getSelectedTextLayers),
   );
-  const textStyles = useShallowArray(useSelector(Selectors.getSelectedStyles));
-  const currentTab = Selectors.getCurrentTab(state);
 
-  const seletedText = currentTab === 'canvas' ? textLayer : textStyles;
+  const textBehavior = getMultiValue(
+    textLayers.map((layer) => layer.textBehaviour),
+  );
 
-  const {
-    fontColor,
-    fontAlignment,
-    verticalAlignment,
-    textTransform,
-    textDecoration,
-    horizontalAlignment,
-    paragraphSpacing,
-    fontFamily,
-    fontSize,
-    lineHeight,
-    letterSpacing,
-  } = useMemo(() => TextStyleSelectors.getTextStyleAttributes(seletedText), [
-    seletedText,
+  const selectedStyles = useShallowArray(
+    useSelector(Selectors.getSelectedStyles),
+  );
+
+  const textStyles = useShallowArray(
+    selectedStyles.flatMap((style) =>
+      style.textStyle ? [style.textStyle] : [],
+    ),
+  );
+
+  const editableTextStyle = useMemo(() => getEditableTextStyle(textStyles), [
+    textStyles,
   ]);
 
-  // default value for the spacing (?)
   return (
     <>
       <TextStyleRow
-        fontColor={fontColor}
-        fontFamily={fontFamily}
-        fontSize={fontSize}
-        letterSpacing={letterSpacing}
-        lineSpacing={lineHeight}
-        paragraphSpacing={paragraphSpacing}
-        onChangeFontFamily={useCallback(
-          (value) => {
-            dispatch('setTextFontName', value);
-          },
-          [dispatch],
-        )}
-        onChangeFontWeight={useCallback(
-          (value) => {
-            dispatch('setTextFontName', '-' + value);
-          },
+        fontFamily={editableTextStyle.fontFamily}
+        fontTraits={editableTextStyle.fontTraits}
+        fontSize={editableTextStyle.fontSize}
+        fontColor={editableTextStyle.fontColor}
+        letterSpacing={editableTextStyle.letterSpacing}
+        lineSpacing={editableTextStyle.lineSpacing}
+        paragraphSpacing={editableTextStyle.paragraphSpacing}
+        onChangeFontName={useCallback(
+          (value) => dispatch('setTextFontName', value),
           [dispatch],
         )}
         onChangeFontColor={useCallback(
@@ -62,27 +52,27 @@ export default memo(function TextStyleInspector() {
           [dispatch],
         )}
         onChangeFontSize={useCallback(
-          (value) => dispatch('setTextFontSize', value),
+          (value, mode) => dispatch('setTextFontSize', value, mode),
           [dispatch],
         )}
         onChangeLineSpacing={useCallback(
-          (value) => dispatch('setTextLetterSpacing', value),
+          (value, mode) => dispatch('setTextLetterSpacing', value, mode),
           [dispatch],
         )}
         onChangeLetterSpacing={useCallback(
-          (value) => dispatch('setTextLineSpacing', value),
+          (value, mode) => dispatch('setTextLineSpacing', value, mode),
           [dispatch],
         )}
-        onChagenParagraphSpacing={useCallback(
-          (value) => dispatch('setTextParagraphSpacing', value),
+        onChangeParagraphSpacing={useCallback(
+          (value, mode) => dispatch('setTextParagraphSpacing', value, mode),
           [dispatch],
         )}
       />
       <Divider />
-      <TextAlignmentRow
-        textLayout={currentTab === 'canvas' ? fontAlignment : undefined}
-        textVerticalAlignment={verticalAlignment}
-        textHorizontalAlignment={horizontalAlignment}
+      <TextLayoutRow
+        textLayout={textBehavior}
+        textVerticalAlignment={editableTextStyle.verticalAlignment}
+        textHorizontalAlignment={editableTextStyle.horizontalAlignment}
         onChangeTextLayout={useCallback(
           (value: Sketch.TextBehaviour) => {
             dispatch('setTextAlignment', value);
@@ -104,8 +94,8 @@ export default memo(function TextStyleInspector() {
       />
       <Divider />
       <TextOptionsRow
-        textTransform={textTransform}
-        textDecoration={textDecoration}
+        textTransform={editableTextStyle.textTransform}
+        textDecoration={editableTextStyle.textDecoration}
         onChangeTextDecoration={useCallback(
           (value) => dispatch('setTextDecoration', value),
           [dispatch],

@@ -1038,7 +1038,7 @@ Object {
           "MSAttributedStringFontAttribute": Object {
             "_class": "fontDescriptor",
             "attributes": Object {
-              "name": "Helvetica",
+              "name": "Roboto",
               "size": 18,
             },
           },
@@ -1144,7 +1144,7 @@ Object {
         "MSAttributedStringFontAttribute": Object {
           "_class": "fontDescriptor",
           "attributes": Object {
-            "name": "Helvetica",
+            "name": "Roboto",
             "size": 18,
           },
         },

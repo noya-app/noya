@@ -1,4 +1,6 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import { FontManager } from 'noya-fonts';
+import { GoogleFontProvider } from 'noya-google-fonts';
 import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';
@@ -14,14 +16,19 @@ import {
 } from '../applicationReducer';
 
 let CanvasKit: CanvasKitType;
+let context: ApplicationReducerContext;
 
 beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
+  const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
+  context = {
+    canvasSize: { width: 1000, height: 1000 },
+    fontManager: {
+      ...new FontManager(GoogleFontProvider),
+      getTypefaceFontProvider: () => typefaceFontProvider,
+    },
+  };
 });
-
-const context: ApplicationReducerContext = {
-  canvasSize: { width: 1000, height: 1000 },
-};
 
 function run(state: ApplicationState, actions: Action[]) {
   return actions.reduce(

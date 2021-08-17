@@ -2,7 +2,7 @@ import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
-  ColorInputField,
+  FillInputField,
   Divider,
   Select,
   SketchPattern,
@@ -10,7 +10,7 @@ import {
 } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled, { CSSProperties } from 'styled-components';
 import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
@@ -287,6 +287,7 @@ export type PatternFillProps = {
 
 interface Props {
   id: string;
+  flex?: CSSProperties['flex'];
   fillType?: Sketch.FillType;
   onChangeType?: (type: Sketch.FillType) => void;
   hasMultipleFills?: boolean;
@@ -297,6 +298,7 @@ interface Props {
 
 export default memo(function FillInputFieldWithPicker({
   id,
+  flex,
   fillType,
   onChangeType,
   hasMultipleFills = false,
@@ -355,7 +357,11 @@ export default memo(function FillInputFieldWithPicker({
       }}
     >
       <Popover.Trigger as={Slot}>
-        <ColorInputField id={id} value={hasMultipleFills ? undefined : value} />
+        <FillInputField
+          id={id}
+          flex={flex}
+          value={hasMultipleFills ? undefined : value}
+        />
       </Popover.Trigger>
       <Content
         side="bottom"

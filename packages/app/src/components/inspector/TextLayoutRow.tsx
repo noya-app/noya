@@ -40,7 +40,7 @@ export default memo(function TextLayoutRowRow({
       <InspectorPrimitives.SectionHeader>
         <InspectorPrimitives.Title>Alignment</InspectorPrimitives.Title>
       </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={10} />
+      <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
         <LabeledElementView
           renderLabel={() => <Label.Label>Auto Height</Label.Label>}

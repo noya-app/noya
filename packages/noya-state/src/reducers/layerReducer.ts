@@ -63,10 +63,9 @@ const createGroup = <T extends Sketch.Group | Sketch.SymbolMaster>(
   name: string,
   indexPaths: IndexPath[],
 ): T | undefined => {
-  const boundingRect = getBoundingRect(page, AffineTransform.identity, ids, {
-    clickThroughGroups: true,
+  const boundingRect = getBoundingRect(page, ids, {
+    groups: 'childrenOnly',
     includeHiddenLayers: true,
-    includeArtboardLayers: false,
   });
 
   if (!boundingRect) {
@@ -440,7 +439,6 @@ export function layerReducer(
         });
       });
     }
-
     default:
       return state;
   }

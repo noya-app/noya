@@ -85,20 +85,20 @@ const DropdownContainer = styled.span(({ theme }) => ({
 }));
 
 interface InputFieldDropdownProps<T extends string> {
+  id: string;
   items: MenuItem<T>[];
-  buttonId: string;
   onSelect: (value: T) => void;
 }
 
 function InputFieldDropdownMenu<T extends string>({
+  id,
   items,
-  buttonId,
   onSelect,
 }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
       <NoyaDropdownMenu<T> items={items} onSelect={onSelect}>
-        <Button id={buttonId} variant="thin">
+        <Button id={id} variant="thin">
           <CaretDownIcon />
         </Button>
       </NoyaDropdownMenu>
