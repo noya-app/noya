@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get Gradient Point angular gradient 1`] = `undefined`;
+
+exports[`get Gradient Point linear gradient / radial gradient 1`] = `undefined`;
+
+exports[`get Gradient Point sorted points 1`] = `undefined`;
