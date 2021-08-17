@@ -10,6 +10,7 @@ import {
 const angularGradientStyle = SketchModel.style({
   fills: [
     SketchModel.fill({
+      fillType: Sketch.FillType.Gradient,
       gradient: SketchModel.gradient({
         gradientType: Sketch.GradientType.Angular,
       }),
@@ -20,6 +21,7 @@ const angularGradientStyle = SketchModel.style({
 const linearGradienStyle = SketchModel.style({
   fills: [
     SketchModel.fill({
+      fillType: Sketch.FillType.Gradient,
       gradient: SketchModel.gradient(),
     }),
   ],
