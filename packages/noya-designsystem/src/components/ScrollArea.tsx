@@ -60,8 +60,8 @@ export default function ScrollArea({ children }: Props) {
               : null
             : children}
         </StyledViewport>
-        <StyledScrollbar orientation="vertical">
-          <StyledThumb />
+        <StyledScrollbar orientation="vertical" className="scroll-component">
+          <StyledThumb className="scroll-component" />
         </StyledScrollbar>
       </StyledScrollArea>
     </Container>

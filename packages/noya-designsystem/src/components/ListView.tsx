@@ -409,6 +409,7 @@ const VirtualizedList = memo(function VirtualizedList<T>({
           <div ref={registerChild}>
             <List
               id="my-list"
+              autoHeight
               key={virtualizedListViewKey}
               style={listStyle}
               isScrolling={isScrolling}
@@ -495,6 +496,12 @@ const ListViewRoot = memo(function ListViewRoot<T>({
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
+
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.classList.contains('scroll-component')
+      )
+        return;
 
       onClick?.();
     },
