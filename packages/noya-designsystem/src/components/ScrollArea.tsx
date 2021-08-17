@@ -1,6 +1,6 @@
-import styled from 'styled-components';
 import * as RadixScrollArea from '@radix-ui/react-scroll-area';
-import { ReactNode } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 const SCROLLBAR_SIZE = 10;
 
@@ -39,14 +39,27 @@ const Container = styled.div({
 });
 
 interface Props {
-  children?: ReactNode;
+  children?: ReactNode | ((scrollElementRef: HTMLDivElement) => ReactNode);
 }
 
 export default function ScrollArea({ children }: Props) {
+  const [
+    scrollElementRef,
+    setScrollElementRef,
+  ] = useState<HTMLDivElement | null>(null);
+
   return (
     <Container>
       <StyledScrollArea>
-        <StyledViewport>{children}</StyledViewport>
+        <StyledViewport
+          ref={useCallback((ref) => setScrollElementRef(ref), [])}
+        >
+          {typeof children === 'function'
+            ? scrollElementRef
+              ? children(scrollElementRef)
+              : null
+            : children}
+        </StyledViewport>
         <StyledScrollbar orientation="vertical">
           <StyledThumb />
         </StyledScrollbar>

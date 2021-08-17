@@ -4,10 +4,12 @@ import { range } from 'noya-utils';
 import {
   Children,
   createContext,
+  CSSProperties,
   ForwardedRef,
   forwardRef,
   isValidElement,
   memo,
+  ReactElement,
   ReactNode,
   Ref,
   useCallback,
@@ -15,8 +17,9 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
-import { List } from 'react-virtualized';
+import { List, WindowScroller } from 'react-virtualized';
 import styled from 'styled-components';
 import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
@@ -99,12 +102,12 @@ function ListViewEditableRowTitle({
 }
 
 function getPositionMargin(position: ListRowPosition) {
-  return { top: 0, bottom: 0 };
+  // return { top: 0, bottom: 0 };
 
-  // return {
-  //   top: position === 'first' || position === 'only' ? 8 : 0,
-  //   bottom: position === 'last' || position === 'only' ? 8 : 0,
-  // };
+  return {
+    top: position === 'first' || position === 'only' ? 8 : 0,
+    bottom: position === 'last' || position === 'only' ? 8 : 0,
+  };
 }
 
 /* ----------------------------------------------------------------------------
@@ -335,6 +338,106 @@ const ListViewRow = forwardRef(function ListViewRow<
 });
 
 /* ----------------------------------------------------------------------------
+ * VirtualizedList
+ * ------------------------------------------------------------------------- */
+
+interface VirtualizedListProps<T> {
+  size: Size;
+  scrollElement: HTMLDivElement;
+  items: T[];
+  getItemHeight: (index: number) => number;
+  renderItem: (index: number) => ReactNode;
+}
+
+const VirtualizedList = memo(function VirtualizedList<T>({
+  size,
+  scrollElement,
+  items,
+  getItemHeight,
+  renderItem,
+}: VirtualizedListProps<T>) {
+  const [virtualizedListViewKey, setVirtualizedListViewKey] = useState(0);
+
+  useLayoutEffect(() => {
+    setVirtualizedListViewKey((key) => key + 1);
+  }, [
+    // When items change, we need to re-render the virtualized list,
+    // since it doesn't currently support row height changes
+    items,
+  ]);
+
+  // Internally, react-virtualized updates these properties. We always want
+  // to use our custom scroll element, so we override them. It may update
+  // overflowX/Y individually in addition to `overflow`, so we include all 3.
+  const listStyle = useMemo(
+    (): CSSProperties => ({
+      overflowX: 'initial',
+      overflowY: 'initial',
+      overflow: 'initial',
+    }),
+    [],
+  );
+
+  const onRowHeight = useCallback(
+    ({ index }: { index: number }) => getItemHeight(index),
+    [getItemHeight],
+  );
+
+  const onRowRender = useCallback(
+    ({
+      index,
+      style,
+      key,
+    }: {
+      index: number;
+      style: CSSProperties;
+      key: string;
+    }) => (
+      <div key={key} style={style}>
+        {renderItem(index)}
+      </div>
+    ),
+    [renderItem],
+  );
+
+  return (
+    <WindowScroller
+      scrollElement={scrollElement}
+      style={useMemo(() => ({ flex: '1 1 auto' }), [])}
+    >
+      {useCallback(
+        ({ isScrolling, registerChild, onChildScroll, scrollTop }) => (
+          <div ref={registerChild}>
+            <List
+              id="my-list"
+              key={virtualizedListViewKey}
+              style={listStyle}
+              isScrolling={isScrolling}
+              onScroll={onChildScroll}
+              scrollTop={scrollTop}
+              width={size.width}
+              height={size.height}
+              rowCount={items.length}
+              rowHeight={onRowHeight}
+              rowRenderer={onRowRender}
+            />
+          </div>
+        ),
+        [
+          onRowHeight,
+          onRowRender,
+          items.length,
+          listStyle,
+          size.height,
+          size.width,
+          virtualizedListViewKey,
+        ],
+      )}
+    </WindowScroller>
+  );
+});
+
+/* ----------------------------------------------------------------------------
  * Root
  * ------------------------------------------------------------------------- */
 
@@ -345,7 +448,6 @@ const RootContainer = styled.div<{ scrollable?: boolean }>(
     flexDirection: 'column',
     flexWrap: 'nowrap',
     color: theme.colors.textMuted,
-    padding: '8px 0',
   }),
 );
 
@@ -353,19 +455,19 @@ export type ItemInfo = {
   isDragging: boolean;
 };
 
-type ChildrenProps<T> =
-  | {
-      children: ReactNode;
-    }
-  | {
-      items: T[];
-      renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
-      getItemKey: (item: T) => string;
-      sortable?: boolean;
-      virtualized?: Size;
-    };
+type ChildrenProps = {
+  children: ReactNode;
+};
 
-type ListViewRootProps<T> = ChildrenProps<T> & {
+type RenderProps<T> = {
+  items: T[];
+  renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
+  getItemKey: (item: T, index: number) => string;
+  sortable?: boolean;
+  virtualized?: Size;
+};
+
+type ListViewRootProps = {
   onClick?: () => void;
   scrollable?: boolean;
   expandable?: boolean;
@@ -378,15 +480,19 @@ type ListViewRootProps<T> = ChildrenProps<T> & {
   acceptsDrop?: Sortable.DropValidator;
 };
 
-function ListViewRoot<T = any>({
+const ListViewRoot = memo(function ListViewRoot<T>({
   onClick,
   scrollable = false,
   expandable = true,
+  sortable = false,
   onMoveItem,
   indentation = 12,
   acceptsDrop,
-  ...props
-}: ListViewRootProps<T>) {
+  items,
+  renderItem,
+  getItemKey,
+  virtualized,
+}: RenderProps<T> & ListViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -396,151 +502,174 @@ function ListViewRoot<T = any>({
     [onClick],
   );
 
-  const sortable = 'sortable' in props && props.sortable === true;
+  const renderChild = useCallback(
+    (index: number) => renderItem(items[index], index, { isDragging: false }),
+    [items, renderItem],
+  );
 
-  const ids: string[] =
-    'items' in props ? props.items.map(props.getItemKey) : [];
-
-  const childrenLength =
-    'items' in props ? props.items.length : Children.count(props.children);
-
-  const getChild = (index: number): ReactNode =>
-    'items' in props
-      ? props.renderItem(props.items[index], index, { isDragging: false })
-      : Children.toArray(props.children)[index];
-
-  const getItemContextValue = (i: number): ListRowContextValue | undefined => {
-    const current = getChild(i);
-
-    if (!isValidElement(current)) return;
-
-    const prev = i - 1 >= 0 && getChild(i - 1);
-    const next = i + 1 < childrenLength && getChild(i + 1);
-
-    const nextItem =
-      isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
-    const prevItem =
-      isValidElement(prev) && !prev.props.isSectionHeader ? prev : undefined;
-
-    let position: ListRowPosition = 'only';
-    let selectedPosition: ListRowPosition = 'only';
-
-    if (nextItem && prevItem) {
-      position = 'middle';
-    } else if (nextItem && !prevItem) {
-      position = 'first';
-    } else if (!nextItem && prevItem) {
-      position = 'last';
-    }
-
-    if (current.props.selected) {
-      const nextSelected = nextItem && nextItem.props.selected;
-      const prevSelected = prevItem && prevItem.props.selected;
-
-      if (nextSelected && prevSelected) {
-        selectedPosition = 'middle';
-      } else if (nextSelected && !prevSelected) {
-        selectedPosition = 'first';
-      } else if (!nextSelected && prevSelected) {
-        selectedPosition = 'last';
-      }
-    }
-
-    return {
-      position,
-      selectedPosition,
-      sortable,
-      expandable,
-      indentation,
-    };
-  };
-
-  const getWrappedChild = (i: number) => {
-    const contextValue = getItemContextValue(i);
-    const current = getChild(i);
-
-    if (!contextValue || !isValidElement(current)) return null;
-
-    return (
-      <ListRowContext.Provider key={current.key} value={contextValue}>
-        {current}
-      </ListRowContext.Provider>
-    );
-  };
-
-  const renderItem = 'items' in props ? props.renderItem : undefined;
-  const items = 'items' in props ? props.items : undefined;
-
-  const renderOverlay = useMemo(
-    () =>
-      renderItem && items
-        ? (index: number) =>
-            renderItem(items[index], index, {
-              isDragging: true,
-            })
-        : undefined,
+  const renderOverlay = useCallback(
+    (index: number) => renderItem(items[index], index, { isDragging: true }),
     [renderItem, items],
   );
 
-  const getWrappedChildren = () =>
-    range(0, childrenLength).map(getWrappedChild);
+  const getItemContextValue = useCallback(
+    (i: number): ListRowContextValue | undefined => {
+      const current = renderChild(i);
 
-  const content = sortable ? (
-    <Sortable.Root
-      onMoveItem={onMoveItem}
-      keys={ids}
-      renderOverlay={renderOverlay}
-      acceptsDrop={acceptsDrop}
-    >
-      {'virtualized' in props && props.virtualized ? (
-        <List
-          onRowsRendered={() => {}}
-          width={props.virtualized.width}
-          height={props.virtualized.height - 16}
-          rowCount={props.items.length}
-          rowHeight={31}
-          // rowHeight={({ index }) => {
-          //   const child = getItemContextValue(index);
-          //   const margin = child?.position
-          //     ? getPositionMargin(child.position)
-          //     : { top: 0, bottom: 0 };
-          //   const height = margin.top + 31 + margin.bottom;
+      if (!isValidElement(current)) return;
 
-          //   console.log(index, height);
+      const prev = i - 1 >= 0 && renderChild(i - 1);
+      const next = i + 1 < items.length && renderChild(i + 1);
 
-          //   return height;
-          // }}
-          rowRenderer={({ index, style, key }) => {
-            return (
-              <div key={key} style={style}>
-                {getWrappedChild(index)}
-              </div>
-            );
-          }}
-        />
-      ) : (
-        getWrappedChildren()
-      )}
-    </Sortable.Root>
-  ) : (
-    getWrappedChildren()
+      const nextItem =
+        isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
+      const prevItem =
+        isValidElement(prev) && !prev.props.isSectionHeader ? prev : undefined;
+
+      let position: ListRowPosition = 'only';
+      let selectedPosition: ListRowPosition = 'only';
+
+      if (nextItem && prevItem) {
+        position = 'middle';
+      } else if (nextItem && !prevItem) {
+        position = 'first';
+      } else if (!nextItem && prevItem) {
+        position = 'last';
+      }
+
+      if (current.props.selected) {
+        const nextSelected = nextItem && nextItem.props.selected;
+        const prevSelected = prevItem && prevItem.props.selected;
+
+        if (nextSelected && prevSelected) {
+          selectedPosition = 'middle';
+        } else if (nextSelected && !prevSelected) {
+          selectedPosition = 'first';
+        } else if (!nextSelected && prevSelected) {
+          selectedPosition = 'last';
+        }
+      }
+
+      return {
+        position,
+        selectedPosition,
+        sortable,
+        expandable,
+        indentation,
+      };
+    },
+    [expandable, renderChild, indentation, items.length, sortable],
   );
 
-  const scrollableContent =
-    scrollable && !('virtualized' in props && props.virtualized) ? (
-      <ScrollArea>{content}</ScrollArea>
+  const renderWrappedChild = useCallback(
+    (index: number) => {
+      const contextValue = getItemContextValue(index);
+      const current = renderChild(index);
+
+      if (!contextValue || !isValidElement(current)) return null;
+
+      return (
+        <ListRowContext.Provider key={current.key} value={contextValue}>
+          {current}
+        </ListRowContext.Provider>
+      );
+    },
+    [getItemContextValue, renderChild],
+  );
+
+  const ids = useMemo(() => items.map(getItemKey), [getItemKey, items]);
+
+  const withSortable = (children: ReactNode) =>
+    sortable ? (
+      <Sortable.Root
+        onMoveItem={onMoveItem}
+        keys={ids}
+        renderOverlay={renderOverlay}
+        acceptsDrop={acceptsDrop}
+      >
+        {children}
+      </Sortable.Root>
     ) : (
-      content
+      children
     );
+
+  const withScrollable = (
+    children: (scrollElementRef: HTMLDivElement | null) => ReactNode,
+  ) => (scrollable ? <ScrollArea>{children}</ScrollArea> : children(null));
+
+  const getItemHeight = useCallback(
+    (index: number) => {
+      const child = getItemContextValue(index);
+      const margin = child?.position
+        ? getPositionMargin(child.position)
+        : { top: 0, bottom: 0 };
+      const height = margin.top + 31 + margin.bottom;
+      return height;
+    },
+    [getItemContextValue],
+  );
 
   return (
     <RootContainer onClick={handleClick} scrollable={scrollable}>
-      {scrollableContent}
+      {withScrollable((scrollElementRef: HTMLDivElement | null) =>
+        withSortable(
+          virtualized ? (
+            <VirtualizedList
+              scrollElement={scrollElementRef!}
+              items={items}
+              size={virtualized}
+              getItemHeight={getItemHeight}
+              renderItem={renderWrappedChild}
+            />
+          ) : (
+            range(0, items.length).map(renderWrappedChild)
+          ),
+        ),
+      )}
     </RootContainer>
   );
-}
+});
+
+const ChildrenListView = memo(function ChildrenListView({
+  children,
+  ...rest
+}: ChildrenProps & ListViewRootProps) {
+  const items: ReactElement[] = useMemo(
+    () =>
+      Children.toArray(children).flatMap((child) =>
+        isValidElement(child) ? [child] : [],
+      ),
+    [children],
+  );
+
+  return (
+    <ListViewRoot
+      {...rest}
+      items={items}
+      getItemKey={useCallback(
+        ({ key }: { key: string | number | null }, index: number) =>
+          typeof key === 'string' ? key : (key ?? index).toString(),
+        [],
+      )}
+      renderItem={useCallback((item: ReactElement) => item, [])}
+    />
+  );
+});
+
+/**
+ * A ListView can be created either with `children` or render props
+ */
+const SimpleListView = memo(function SimpleListView<T = any>(
+  props: (ChildrenProps | RenderProps<T>) & ListViewRootProps,
+) {
+  if ('children' in props) {
+    return <ChildrenListView {...props} />;
+  } else {
+    return <ListViewRoot {...props} />;
+  }
+});
 
 export const RowTitle = memo(ListViewRowTitle);
 export const EditableRowTitle = memo(ListViewEditableRowTitle);
 export const Row = memo(ListViewRow);
-export const Root = memo(ListViewRoot);
+export const Root = memo(SimpleListView);
