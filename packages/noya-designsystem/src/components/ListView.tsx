@@ -1,4 +1,5 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
+import { Size } from 'noya-geometry';
 import { range } from 'noya-utils';
 import {
   Children,
@@ -15,7 +16,8 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import styled, { CSSObject } from 'styled-components';
+import { List } from 'react-virtualized';
+import styled from 'styled-components';
 import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
 import ContextMenu from './ContextMenu';
@@ -24,19 +26,6 @@ import ScrollArea from './ScrollArea';
 import * as Sortable from './Sortable';
 
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
-
-const listReset: CSSObject = {
-  marginTop: 0,
-  marginRight: 0,
-  marginBottom: 0,
-  marginLeft: 0,
-  paddingTop: 0,
-  paddingRight: 0,
-  paddingBottom: 0,
-  paddingLeft: 0,
-  textIndent: 0,
-  listStyleType: 'none',
-};
 
 type ListRowContextValue = {
   position: ListRowPosition;
@@ -109,11 +98,20 @@ function ListViewEditableRowTitle({
   );
 }
 
+function getPositionMargin(position: ListRowPosition) {
+  return { top: 0, bottom: 0 };
+
+  // return {
+  //   top: position === 'first' || position === 'only' ? 8 : 0,
+  //   bottom: position === 'last' || position === 'only' ? 8 : 0,
+  // };
+}
+
 /* ----------------------------------------------------------------------------
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled.li<{
+const RowContainer = styled.div<{
   position: ListRowPosition;
   selected: boolean;
   selectedPosition: ListRowPosition;
@@ -129,59 +127,55 @@ const RowContainer = styled.li<{
     disabled,
     hovered,
     isSectionHeader,
-  }) => ({
-    ...listReset,
-    ...theme.textStyles.small,
-    ...(isSectionHeader && { fontWeight: 500 }),
-    flex: '0 0 auto',
-    userSelect: 'none',
-    cursor: 'default',
-    borderTopRightRadius: '4px',
-    borderTopLeftRadius: '4px',
-    borderBottomRightRadius: '4px',
-    borderBottomLeftRadius: '4px',
-    paddingTop: '6px',
-    paddingRight: '12px',
-    paddingBottom: '6px',
-    paddingLeft: '12px',
-    marginLeft: '8px',
-    marginRight: '8px',
-    color: theme.colors.textMuted,
-    ...(isSectionHeader && {
-      backgroundColor: theme.colors.listView.raisedBackground,
-    }),
-    ...(disabled && {
-      color: theme.colors.textDisabled,
-    }),
-    ...(selected && {
-      color: 'white',
-      backgroundColor: theme.colors.primary,
-    }),
-    display: 'flex',
-    alignItems: 'center',
-    ...((position === 'first' || position === 'only') && {
-      marginTop: '8px',
-    }),
-    ...((position === 'last' || position === 'only') && {
-      marginBottom: '8px',
-    }),
-    ...(selected &&
-      !isSectionHeader &&
-      (selectedPosition === 'middle' || selectedPosition === 'last') && {
-        borderTopRightRadius: '0px',
-        borderTopLeftRadius: '0px',
+  }) => {
+    const positionMargin = getPositionMargin(position);
+
+    return {
+      ...theme.textStyles.small,
+      ...(isSectionHeader && { fontWeight: 500 }),
+      flex: '0 0 auto',
+      userSelect: 'none',
+      cursor: 'default',
+      borderRadius: '4px',
+      paddingTop: '6px',
+      paddingRight: '12px',
+      paddingBottom: '6px',
+      paddingLeft: '12px',
+      marginLeft: '8px',
+      marginRight: '8px',
+      marginTop: `${positionMargin.top}px`,
+      marginBottom: `${positionMargin.bottom}px`,
+      color: theme.colors.textMuted,
+      ...(isSectionHeader && {
+        backgroundColor: theme.colors.listView.raisedBackground,
       }),
-    ...(selected &&
-      !isSectionHeader &&
-      (selectedPosition === 'middle' || selectedPosition === 'first') && {
-        borderBottomRightRadius: '0px',
-        borderBottomLeftRadius: '0px',
+      ...(disabled && {
+        color: theme.colors.textDisabled,
       }),
-    position: 'relative',
-    ...(hovered && {
-      boxShadow: `0 0 0 1px ${theme.colors.primary}`,
-    }),
-  }),
+      ...(selected && {
+        color: 'white',
+        backgroundColor: theme.colors.primary,
+      }),
+      display: 'flex',
+      alignItems: 'center',
+      ...(selected &&
+        !isSectionHeader &&
+        (selectedPosition === 'middle' || selectedPosition === 'last') && {
+          borderTopRightRadius: '0px',
+          borderTopLeftRadius: '0px',
+        }),
+      ...(selected &&
+        !isSectionHeader &&
+        (selectedPosition === 'middle' || selectedPosition === 'first') && {
+          borderBottomRightRadius: '0px',
+          borderBottomLeftRadius: '0px',
+        }),
+      position: 'relative',
+      ...(hovered && {
+        boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+      }),
+    };
+  },
 );
 
 export const DragIndicatorElement = styled.div<{
@@ -344,14 +338,14 @@ const ListViewRow = forwardRef(function ListViewRow<
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.ul<{ scrollable?: boolean }>(
+const RootContainer = styled.div<{ scrollable?: boolean }>(
   ({ theme, scrollable }) => ({
-    ...listReset,
     flex: scrollable ? '1 0 0' : '0 0 auto',
     display: 'flex',
     flexDirection: 'column',
     flexWrap: 'nowrap',
     color: theme.colors.textMuted,
+    padding: '8px 0',
   }),
 );
 
@@ -368,6 +362,7 @@ type ChildrenProps<T> =
       renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
       getItemKey: (item: T) => string;
       sortable?: boolean;
+      virtualized?: Size;
     };
 
 type ListViewRootProps<T> = ChildrenProps<T> & {
@@ -414,10 +409,10 @@ function ListViewRoot<T = any>({
       ? props.renderItem(props.items[index], index, { isDragging: false })
       : Children.toArray(props.children)[index];
 
-  const getWrappedChild = (i: number) => {
+  const getItemContextValue = (i: number): ListRowContextValue | undefined => {
     const current = getChild(i);
 
-    if (!isValidElement(current)) return current;
+    if (!isValidElement(current)) return;
 
     const prev = i - 1 >= 0 && getChild(i - 1);
     const next = i + 1 < childrenLength && getChild(i + 1);
@@ -451,13 +446,20 @@ function ListViewRoot<T = any>({
       }
     }
 
-    const contextValue = {
+    return {
       position,
       selectedPosition,
       sortable,
       expandable,
       indentation,
     };
+  };
+
+  const getWrappedChild = (i: number) => {
+    const contextValue = getItemContextValue(i);
+    const current = getChild(i);
+
+    if (!contextValue || !isValidElement(current)) return null;
 
     return (
       <ListRowContext.Provider key={current.key} value={contextValue}>
@@ -480,7 +482,8 @@ function ListViewRoot<T = any>({
     [renderItem, items],
   );
 
-  const wrappedChildren = range(0, childrenLength).map(getWrappedChild);
+  const getWrappedChildren = () =>
+    range(0, childrenLength).map(getWrappedChild);
 
   const content = sortable ? (
     <Sortable.Root
@@ -489,17 +492,46 @@ function ListViewRoot<T = any>({
       renderOverlay={renderOverlay}
       acceptsDrop={acceptsDrop}
     >
-      {wrappedChildren}
+      {'virtualized' in props && props.virtualized ? (
+        <List
+          onRowsRendered={() => {}}
+          width={props.virtualized.width}
+          height={props.virtualized.height - 16}
+          rowCount={props.items.length}
+          rowHeight={31}
+          // rowHeight={({ index }) => {
+          //   const child = getItemContextValue(index);
+          //   const margin = child?.position
+          //     ? getPositionMargin(child.position)
+          //     : { top: 0, bottom: 0 };
+          //   const height = margin.top + 31 + margin.bottom;
+
+          //   console.log(index, height);
+
+          //   return height;
+          // }}
+          rowRenderer={({ index, style, key }) => {
+            return (
+              <div key={key} style={style}>
+                {getWrappedChild(index)}
+              </div>
+            );
+          }}
+        />
+      ) : (
+        getWrappedChildren()
+      )}
     </Sortable.Root>
   ) : (
-    wrappedChildren
+    getWrappedChildren()
   );
 
-  const scrollableContent = scrollable ? (
-    <ScrollArea>{content}</ScrollArea>
-  ) : (
-    content
-  );
+  const scrollableContent =
+    scrollable && !('virtualized' in props && props.virtualized) ? (
+      <ScrollArea>{content}</ScrollArea>
+    ) : (
+      content
+    );
 
   return (
     <RootContainer onClick={handleClick} scrollable={scrollable}>

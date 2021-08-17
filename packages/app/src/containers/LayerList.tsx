@@ -45,6 +45,7 @@ import { visit } from 'tree-visit';
 import { useDeepArray } from 'noya-react-utils';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 import { useShallowArray } from 'noya-react-utils';
+import { Size } from 'noya-geometry';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -274,7 +275,7 @@ const LayerRow = memo(
   }),
 );
 
-export default memo(function LayerList() {
+export default memo(function LayerList({ size }: { size: Size }) {
   const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const getStateSnapshot = useGetStateSnapshot();
@@ -446,6 +447,7 @@ export default memo(function LayerList() {
 
   return (
     <TreeView.Root
+      virtualized={size}
       items={items}
       renderItem={renderItem}
       getItemKey={useCallback((item: LayerListItem) => item.id, [])}
