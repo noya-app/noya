@@ -367,11 +367,11 @@ type ChildrenProps<T> =
       items: T[];
       renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
       getItemKey: (item: T) => string;
+      sortable?: boolean;
     };
 
 type ListViewRootProps<T> = ChildrenProps<T> & {
   onClick?: () => void;
-  sortable?: boolean;
   scrollable?: boolean;
   expandable?: boolean;
   onMoveItem?: (
@@ -385,7 +385,6 @@ type ListViewRootProps<T> = ChildrenProps<T> & {
 
 function ListViewRoot<T = any>({
   onClick,
-  sortable = false,
   scrollable = false,
   expandable = true,
   onMoveItem,
@@ -401,6 +400,8 @@ function ListViewRoot<T = any>({
     },
     [onClick],
   );
+
+  const sortable = 'sortable' in props && props.sortable === true;
 
   const ids: string[] =
     'items' in props ? props.items.map(props.getItemKey) : [];
