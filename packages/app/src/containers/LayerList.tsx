@@ -448,9 +448,9 @@ export default memo(function LayerList({ size }: { size: Size }) {
   return (
     <TreeView.Root
       virtualized={size}
-      items={items}
+      data={items}
       renderItem={renderItem}
-      getItemKey={useCallback((item: LayerListItem) => item.id, [])}
+      keyExtractor={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
       onClick={useCallback(() => dispatch('selectLayer', undefined), [

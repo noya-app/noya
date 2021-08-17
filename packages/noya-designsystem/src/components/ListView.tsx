@@ -460,9 +460,9 @@ type ChildrenProps = {
 };
 
 type RenderProps<T> = {
-  items: T[];
+  data: T[];
   renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
-  getItemKey: (item: T, index: number) => string;
+  keyExtractor: (item: T, index: number) => string;
   sortable?: boolean;
   virtualized?: Size;
 };
@@ -488,9 +488,9 @@ const ListViewRoot = memo(function ListViewRoot<T>({
   onMoveItem,
   indentation = 12,
   acceptsDrop,
-  items,
+  data,
   renderItem,
-  getItemKey,
+  keyExtractor,
   virtualized,
 }: RenderProps<T> & ListViewRootProps) {
   const handleClick = useCallback(
@@ -503,13 +503,13 @@ const ListViewRoot = memo(function ListViewRoot<T>({
   );
 
   const renderChild = useCallback(
-    (index: number) => renderItem(items[index], index, { isDragging: false }),
-    [items, renderItem],
+    (index: number) => renderItem(data[index], index, { isDragging: false }),
+    [data, renderItem],
   );
 
   const renderOverlay = useCallback(
-    (index: number) => renderItem(items[index], index, { isDragging: true }),
-    [renderItem, items],
+    (index: number) => renderItem(data[index], index, { isDragging: true }),
+    [renderItem, data],
   );
 
   const getItemContextValue = useCallback(
@@ -519,7 +519,7 @@ const ListViewRoot = memo(function ListViewRoot<T>({
       if (!isValidElement(current)) return;
 
       const prev = i - 1 >= 0 && renderChild(i - 1);
-      const next = i + 1 < items.length && renderChild(i + 1);
+      const next = i + 1 < data.length && renderChild(i + 1);
 
       const nextItem =
         isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
@@ -558,7 +558,7 @@ const ListViewRoot = memo(function ListViewRoot<T>({
         indentation,
       };
     },
-    [expandable, renderChild, indentation, items.length, sortable],
+    [expandable, renderChild, indentation, data.length, sortable],
   );
 
   const renderWrappedChild = useCallback(
@@ -577,7 +577,7 @@ const ListViewRoot = memo(function ListViewRoot<T>({
     [getItemContextValue, renderChild],
   );
 
-  const ids = useMemo(() => items.map(getItemKey), [getItemKey, items]);
+  const ids = useMemo(() => data.map(keyExtractor), [keyExtractor, data]);
 
   const withSortable = (children: ReactNode) =>
     sortable ? (
@@ -616,13 +616,13 @@ const ListViewRoot = memo(function ListViewRoot<T>({
           virtualized ? (
             <VirtualizedList
               scrollElement={scrollElementRef!}
-              items={items}
+              items={data}
               size={virtualized}
               getItemHeight={getItemHeight}
               renderItem={renderWrappedChild}
             />
           ) : (
-            range(0, items.length).map(renderWrappedChild)
+            range(0, data.length).map(renderWrappedChild)
           ),
         ),
       )}
@@ -645,8 +645,8 @@ const ChildrenListView = memo(function ChildrenListView({
   return (
     <ListViewRoot
       {...rest}
-      items={items}
-      getItemKey={useCallback(
+      data={items}
+      keyExtractor={useCallback(
         ({ key }: { key: string | number | null }, index: number) =>
           typeof key === 'string' ? key : (key ?? index).toString(),
         [],

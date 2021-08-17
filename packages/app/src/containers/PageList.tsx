@@ -174,8 +174,8 @@ const PageListContent = memo(function PageListContent({
           },
           [dispatch, lastIndex],
         )}
-        items={pages}
-        getItemKey={useCallback((item: PageInfo) => item.id, [])}
+        data={pages}
+        keyExtractor={useCallback((item: PageInfo) => item.id, [])}
         renderItem={useCallback(
           (page: PageInfo, index, { isDragging }) => {
             const selected =
