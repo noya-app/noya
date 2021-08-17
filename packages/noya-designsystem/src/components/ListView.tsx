@@ -28,10 +28,11 @@ import { MenuItem } from './internal/Menu';
 import ScrollArea from './ScrollArea';
 import * as Sortable from './Sortable';
 
+export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
 type ListRowContextValue = {
-  position: ListRowPosition;
+  marginType: ListRowMarginType;
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
@@ -39,7 +40,7 @@ type ListRowContextValue = {
 };
 
 export const ListRowContext = createContext<ListRowContextValue>({
-  position: 'only',
+  marginType: 'none',
   selectedPosition: 'only',
   sortable: false,
   expandable: true,
@@ -101,12 +102,10 @@ function ListViewEditableRowTitle({
   );
 }
 
-function getPositionMargin(position: ListRowPosition) {
-  // return { top: 0, bottom: 0 };
-
+function getPositionMargin(marginType: ListRowMarginType) {
   return {
-    top: position === 'first' || position === 'only' ? 8 : 0,
-    bottom: position === 'last' || position === 'only' ? 8 : 0,
+    top: marginType === 'top' || marginType === 'vertical' ? 8 : 0,
+    bottom: marginType === 'bottom' || marginType === 'vertical' ? 8 : 0,
   };
 }
 
@@ -115,7 +114,7 @@ function getPositionMargin(position: ListRowPosition) {
  * ------------------------------------------------------------------------- */
 
 const RowContainer = styled.div<{
-  position: ListRowPosition;
+  marginType: ListRowMarginType;
   selected: boolean;
   selectedPosition: ListRowPosition;
   disabled: boolean;
@@ -124,14 +123,14 @@ const RowContainer = styled.div<{
 }>(
   ({
     theme,
-    position,
+    marginType,
     selected,
     selectedPosition,
     disabled,
     hovered,
     isSectionHeader,
   }) => {
-    const positionMargin = getPositionMargin(position);
+    const margin = getPositionMargin(marginType);
 
     return {
       ...theme.textStyles.small,
@@ -146,8 +145,8 @@ const RowContainer = styled.div<{
       paddingLeft: '12px',
       marginLeft: '8px',
       marginRight: '8px',
-      marginTop: `${positionMargin.top}px`,
-      marginBottom: `${positionMargin.bottom}px`,
+      marginTop: `${margin.top}px`,
+      marginBottom: `${margin.bottom}px`,
       color: theme.colors.textMuted,
       ...(isSectionHeader && {
         backgroundColor: theme.colors.listView.raisedBackground,
@@ -248,7 +247,7 @@ const ListViewRow = forwardRef(function ListViewRow<
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
-  const { position, selectedPosition, sortable, indentation } = useContext(
+  const { marginType, selectedPosition, sortable, indentation } = useContext(
     ListRowContext,
   );
   const { hoverProps } = useHover({
@@ -291,7 +290,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         {...hoverProps}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
-        position={position}
+        marginType={marginType}
         disabled={disabled}
         hovered={hovered}
         selected={selected}
@@ -518,28 +517,37 @@ const ListViewRoot = memo(function ListViewRoot<T>({
 
       if (!isValidElement(current)) return;
 
-      const prev = i - 1 >= 0 && renderChild(i - 1);
-      const next = i + 1 < data.length && renderChild(i + 1);
+      const prevChild = i - 1 >= 0 && renderChild(i - 1);
+      const nextChild = i + 1 < data.length && renderChild(i + 1);
 
-      const nextItem =
-        isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
-      const prevItem =
-        isValidElement(prev) && !prev.props.isSectionHeader ? prev : undefined;
+      const next = isValidElement(nextChild) ? nextChild : undefined;
+      const prev = isValidElement(prevChild) ? prevChild : undefined;
 
-      let position: ListRowPosition = 'only';
-      let selectedPosition: ListRowPosition = 'only';
+      const hasMarginTop = !prev;
+      const hasMarginBottom =
+        !next ||
+        current.props.isSectionHeader ||
+        (next && next.props.isSectionHeader);
 
-      if (nextItem && prevItem) {
-        position = 'middle';
-      } else if (nextItem && !prevItem) {
-        position = 'first';
-      } else if (!nextItem && prevItem) {
-        position = 'last';
+      let marginType: ListRowMarginType;
+
+      if (hasMarginTop && hasMarginBottom) {
+        marginType = 'vertical';
+      } else if (hasMarginBottom) {
+        marginType = 'bottom';
+      } else if (hasMarginTop) {
+        marginType = 'top';
+      } else {
+        marginType = 'none';
       }
 
+      let selectedPosition: ListRowPosition = 'only';
+
       if (current.props.selected) {
-        const nextSelected = nextItem && nextItem.props.selected;
-        const prevSelected = prevItem && prevItem.props.selected;
+        const nextSelected =
+          next && !next.props.isSectionHeader && next.props.selected;
+        const prevSelected =
+          prev && !prev.props.isSectionHeader && prev.props.selected;
 
         if (nextSelected && prevSelected) {
           selectedPosition = 'middle';
@@ -551,7 +559,7 @@ const ListViewRoot = memo(function ListViewRoot<T>({
       }
 
       return {
-        position,
+        marginType: marginType,
         selectedPosition,
         sortable,
         expandable,
@@ -600,8 +608,8 @@ const ListViewRoot = memo(function ListViewRoot<T>({
   const getItemHeight = useCallback(
     (index: number) => {
       const child = getItemContextValue(index);
-      const margin = child?.position
-        ? getPositionMargin(child.position)
+      const margin = child?.marginType
+        ? getPositionMargin(child.marginType)
         : { top: 0, bottom: 0 };
       const height = margin.top + 31 + margin.bottom;
       return height;
