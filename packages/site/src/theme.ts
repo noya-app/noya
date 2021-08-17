@@ -1,7 +1,7 @@
-import { lightTheme, mediaQuery, Theme } from 'noya-designsystem';
+import { lightTheme } from 'noya-designsystem';
 import { CSSObject } from 'styled-components';
 
-export const colors: Theme['colors'] = {
+export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
   textDisabled: 'rgb(160, 160, 160)',
@@ -23,10 +23,10 @@ export const colors: Theme['colors'] = {
   listView: {
     raisedBackground: 'rgba(255,255,255,0.8)',
   },
-  canvas: {
-    background: 'rgb(249,249,249)',
-    dragHandleStroke: 'rgba(180,180,180,0.5)',
-  },
+  // canvas: {
+  //   background: 'rgb(249,249,249)',
+  //   dragHandleStroke: 'rgba(180,180,180,0.5)',
+  // },
   sidebar: {
     background: 'rgba(252,252,252,0.85)',
   },
@@ -48,84 +48,44 @@ export const colors: Theme['colors'] = {
 };
 
 export const fonts = {
-  normal: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+  normal: "'Inter', Helvetica, Arial, sans-serif",
   monospace: "Menlo, Monaco, Consolas, 'Courier New', monospace",
 };
 
-// TODO: need to make a marketing theme with its own scale
-const typeScale = [10, 4, 1.8, 1.4, 1, 0.85];
+const typeScale = [5, 4, 3, 2, 1, 0.85];
 
-export const textStyles: Theme['textStyles'] = {
-  title: {
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[0]}rem`,
-    fontWeight: 'bold',
-    lineHeight: '1.4',
-    [mediaQuery.small]: {
-      fontSize: '36px',
-    },
-  } as CSSObject,
-  subtitle: {
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[3]}rem`,
-    fontWeight: 500,
-    lineHeight: '1.75',
-    [mediaQuery.small]: {
-      fontSize: '18px',
-    },
-  } as CSSObject,
+export const textStyles: {
+  [key: string]: CSSObject;
+} = {
   heading1: {
-    // fontFamily: fonts.normal,
     fontSize: `${typeScale[0]}rem`,
     fontWeight: 700,
-    lineHeight: '1',
-  } as CSSObject,
+    lineHeight: '1.15',
+  },
   heading2: {
-    // fontFamily: fonts.normal,
     fontSize: `${typeScale[1]}rem`,
     fontWeight: 500,
     lineHeight: '1.2',
-  } as CSSObject,
+  },
   heading3: {
-    // fontFamily: fonts.normal,
     fontSize: `${typeScale[2]}rem`,
     fontWeight: 500,
     lineHeight: '1.75',
-  } as CSSObject,
+  },
   body1: {
-    // fontFamily: fonts.normal,
     fontSize: `${typeScale[3]}rem`,
     fontWeight: 400,
-    lineHeight: '1.75',
-  } as CSSObject,
-  bodyAlternate: {
-    color: '#c388f5',
-  } as CSSObject,
-  body: {
-    // TODO: body2
-    // fontFamily: fonts.normal,
+    lineHeight: '1.5',
+  },
+  body2: {
     fontSize: `${typeScale[4]}rem`,
     fontWeight: 400,
     lineHeight: '1.75',
-  } as CSSObject,
-  small: {
-    // body3?
-    fontFamily: fonts.normal,
-    fontSize: `${typeScale[5]}rem`,
-    fontWeight: 400,
-    lineHeight: '1.4',
-  } as CSSObject,
-  code: {
-    fontFamily: fonts.monospace,
-    fontSize: '90%',
-    lineHeight: '1.5',
-  } as CSSObject,
-  mark: {
-    background: 'none',
-    color: '#e0bcfe',
   },
-  link: {
-    color: 'pink',
+  mark: {
+    background: 'linear-gradient(180deg, #E3BEFF, #A734FF)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
   },
 };
 

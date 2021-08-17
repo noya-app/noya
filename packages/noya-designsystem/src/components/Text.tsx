@@ -16,19 +16,15 @@ const elements = {
   heading1: 'h1',
   heading2: 'h2',
   heading3: 'h3',
+  body1: 'p',
+  body2: 'p',
   mark: 'mark',
 };
 
 const TextAncestorContext = createContext(false);
 
 const Text = styled(
-  ({
-    as: Element = 'p',
-    alignment,
-    variant = 'body',
-    className,
-    children,
-  }: TextProps) => {
+  ({ as: Element = 'p', variant = 'body', className, children }: TextProps) => {
     const hasTextAncestor = useContext(TextAncestorContext);
     // @ts-ignore
     const propElement = elements[variant];
@@ -44,12 +40,11 @@ const Text = styled(
       </TextAncestorContext.Provider>
     );
   },
-)<TextProps>(({ theme, width, alignment, variant }) => ({
-  ...(theme.textStyles[variant || 'body'] ?? {}),
+)<TextProps>(({ theme, width, alignment, variant = 'body' }) => ({
   margin: 0,
-  lineHeight: 1,
   width,
   textAlign: alignment,
+  ...(theme.textStyles[variant] ?? {}),
 }));
 
 export default Text;

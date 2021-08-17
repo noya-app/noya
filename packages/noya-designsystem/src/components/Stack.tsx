@@ -1,21 +1,6 @@
 import styled from 'styled-components';
 import { Colors } from '../theme';
 
-const alignments = {
-  start: 'flex-start',
-  center: 'center',
-  end: 'flex-end',
-  stretch: 'stretch',
-};
-
-const distributions = {
-  start: 'flex-start',
-  center: 'center',
-  end: 'flex-end',
-  'space-between': 'space-between',
-  'space-evenly': 'space-evenly',
-};
-
 export type StackProps = {
   axis: 'x' | 'y';
   alignment?: keyof typeof alignments;
@@ -41,10 +26,8 @@ const Stack = styled.div<StackProps>(
   (props) => ({
     display: 'flex',
     flexDirection: props.axis === 'x' ? 'row' : 'column',
-    width: props.width,
     minWidth: props.minWidth ?? 0,
     maxWidth: props.maxWidth,
-    height: props.height,
     minHeight: props.minHeight ?? 0,
     maxHeight: props.maxHeight,
     padding: props.padding,
@@ -63,11 +46,46 @@ const Stack = styled.div<StackProps>(
         ? distributions[props.distribution]
         : undefined,
     background: props.background,
+    ...getSize('width', props.width),
+    ...getSize('height', props.height),
   }),
   (props) =>
     props.distribution === 'fill' && {
       '& > *': { flex: '1 0 0px' },
     },
 );
+
+const alignments = {
+  start: 'flex-start',
+  center: 'center',
+  end: 'flex-end',
+  stretch: 'stretch',
+};
+
+const distributions = {
+  start: 'flex-start',
+  center: 'center',
+  end: 'flex-end',
+  'space-between': 'space-between',
+  'space-evenly': 'space-evenly',
+};
+
+const getSize = (
+  side: 'width' | 'height',
+  value: string | number | undefined,
+) => {
+  if (typeof value === 'string' && value.includes('fr')) {
+    const fractionalValue = parseInt(value, 10);
+    return {
+      flexGrow: fractionalValue,
+      flexShrink: fractionalValue,
+      flexBasis: '0',
+    };
+  } else {
+    return {
+      [side]: value,
+    };
+  }
+};
 
 export default Stack;
