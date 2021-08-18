@@ -1,4 +1,5 @@
 import { act } from '@testing-library/react';
+import Sketch from '@sketch-hq/sketch-file-format-ts';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';
@@ -11,9 +12,11 @@ import {
   SketchFileRenderer,
 } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
+import { SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,
   createInitialWorkspaceState,
+  createSketchFile,
   Selectors,
   workspaceReducer,
   WorkspaceState,
@@ -35,7 +38,11 @@ beforeAll(async () => {
   };
 });
 
-function panToFit(workspaceState: WorkspaceState, pageIndex: number) {
+function panToFit(
+  workspaceState: WorkspaceState,
+  pageIndex: number,
+  padding: number = 0,
+) {
   const page = workspaceState.history.present.sketch.pages[pageIndex];
 
   workspaceState = workspaceReducer(
@@ -56,14 +63,14 @@ function panToFit(workspaceState: WorkspaceState, pageIndex: number) {
   );
 
   const delta = {
-    x: boundingRect.x + scrollOrigin.x,
-    y: boundingRect.y + scrollOrigin.y,
+    x: boundingRect.x + scrollOrigin.x - padding,
+    y: boundingRect.y + scrollOrigin.y - padding,
   };
 
   return {
     size: {
-      width: Math.round(boundingRect.width),
-      height: Math.round(boundingRect.height),
+      width: Math.round(boundingRect.width + padding * 2),
+      height: Math.round(boundingRect.height + padding * 2),
     },
     workspaceState: workspaceReducer(
       workspaceState,
@@ -77,10 +84,12 @@ function panToFit(workspaceState: WorkspaceState, pageIndex: number) {
 async function generatePageImage(
   workspaceState: WorkspaceState,
   pageIndex: number,
+  padding?: number,
 ) {
   const { size, workspaceState: updatedState } = panToFit(
     workspaceState,
     pageIndex,
+    padding,
   );
 
   const image = await new Promise<Uint8Array | undefined>((resolve) => {
@@ -158,6 +167,77 @@ test('ImageFills', async () => {
 test('Gradient', async () => {
   const image = await generateSketchFileImage('Gradient.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+const red = SketchModel.color({ red: 1, green: 0, blue: 0, alpha: 1 });
+const green = SketchModel.color({ red: 0, green: 1, blue: 0, alpha: 1 });
+const blue = SketchModel.color({ red: 0, green: 0, blue: 1, alpha: 1 });
+
+const gradientStops = [
+  SketchModel.gradientStop({ position: 0, color: red }),
+  SketchModel.gradientStop({ position: 0.5, color: green }),
+  SketchModel.gradientStop({ position: 1, color: blue }),
+];
+
+describe('gradient editor', () => {
+  test('linear gradient', async () => {
+    const rectangle = SketchModel.rectangle({
+      frame: SketchModel.rect({ x: 100, y: 100, width: 200, height: 200 }),
+      style: SketchModel.style({
+        fills: [
+          SketchModel.fill({
+            fillType: Sketch.FillType.Gradient,
+            gradient: SketchModel.gradient({ stops: gradientStops }),
+          }),
+        ],
+      }),
+    });
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+
+    workspaceState.history.present.selectedGradient = {
+      layerId: rectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 1,
+      styleType: 'fills',
+    };
+
+    const image = await generatePageImage(workspaceState, 0, 10);
+    expect(Buffer.from(image)).toMatchImageSnapshot();
+  });
+
+  test('radial gradient', async () => {
+    const rectangle = SketchModel.rectangle({
+      frame: SketchModel.rect({ x: 100, y: 100, width: 200, height: 200 }),
+      style: SketchModel.style({
+        fills: [
+          SketchModel.fill({
+            fillType: Sketch.FillType.Gradient,
+            gradient: SketchModel.gradient({
+              gradientType: Sketch.GradientType.Radial,
+              stops: gradientStops,
+            }),
+          }),
+        ],
+      }),
+    });
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+
+    workspaceState.history.present.selectedGradient = {
+      layerId: rectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 1,
+      styleType: 'fills',
+    };
+
+    const image = await generatePageImage(workspaceState, 0, 200);
+    expect(Buffer.from(image)).toMatchImageSnapshot();
+  });
 });
 
 test('Rotation 0', async () => {
