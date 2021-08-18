@@ -231,3 +231,8 @@ test('Tints', async () => {
   const image = await generateSketchFileImage('Tints.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
+
+test('WindingRule', async () => {
+  const image = await generateSketchFileImage('WindingRule.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});

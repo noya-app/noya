@@ -387,6 +387,18 @@ export function pathOp(
     case Sketch.BooleanOperation.Intersection:
       return CanvasKit.PathOp.Intersect;
     case Sketch.BooleanOperation.Difference:
-      return CanvasKit.PathOp.XOR;
+      return undefined;
+  }
+}
+
+export function pathFillType(
+  CanvasKit: CanvasKit,
+  windingRule: Sketch.WindingRule,
+) {
+  switch (windingRule) {
+    case Sketch.WindingRule.EvenOdd:
+      return CanvasKit.FillType.EvenOdd;
+    case Sketch.WindingRule.NonZero:
+      return CanvasKit.FillType.Winding;
   }
 }

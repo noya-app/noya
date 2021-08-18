@@ -174,7 +174,9 @@ export default memo(function SketchShape({ layer, path: inputPath }: Props) {
     inputPath ??
     Primitives.path(CanvasKit, layer.points, layer.frame, layer.isClosed);
 
-  path.setFillType(CanvasKit.FillType.EvenOdd);
+  path.setFillType(
+    Primitives.pathFillType(CanvasKit, layer.style!.windingRule),
+  );
 
   if (!layer.style) return null;
 

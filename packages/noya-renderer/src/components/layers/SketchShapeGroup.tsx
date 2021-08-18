@@ -1,5 +1,4 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { Path } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { Group, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -21,28 +20,36 @@ export default memo(function SketchShapeGroup({ layer }: Props) {
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 
-  const path = [...layer.layers]
-    .filter(Layers.isPointsLayer)
-    .map((layer) => ({
-      path: Primitives.path(
-        CanvasKit,
-        layer.points,
-        layer.frame,
-        layer.isClosed,
-      ),
-      op: layer.booleanOperation,
-    }))
-    .reduce((result: Path, item) => {
-      const op = Primitives.pathOp(CanvasKit, item.op);
+  const paths = layer.layers.filter(Layers.isPointsLayer).map((child) => {
+    let path = Primitives.path(
+      CanvasKit,
+      child.points,
+      child.frame,
+      child.isClosed,
+    );
 
-      if (op) {
-        result.op(item.path, op);
-      } else {
-        result.addPath(item.path);
-      }
+    return {
+      name: child.name,
+      path,
+      op: child.booleanOperation,
+    };
+  });
 
-      return result;
-    }, new CanvasKit.Path());
+  const [first, ...rest] = paths;
+
+  if (!first) return null;
+
+  const path = rest.reduce((result, item) => {
+    const op = Primitives.pathOp(CanvasKit, item.op);
+
+    if (op) {
+      result.op(item.path, op);
+    } else {
+      result.addPath(item.path);
+    }
+
+    return result;
+  }, first.path);
 
   const newLayer = SketchModel.shapePath({
     ...layer,
