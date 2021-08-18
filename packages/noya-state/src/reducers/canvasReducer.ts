@@ -544,12 +544,10 @@ export function canvasReducer(
           case 'maybeMoveGradientStop': {
             if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
 
-            const { pageSnapshot } = draft.interactionState;
-
             if (!state.selectedGradient) return;
 
             const gradient = getSelectedGradient(
-              pageSnapshot,
+              draft.sketch.pages[pageIndex],
               state.selectedGradient,
             );
 
@@ -953,17 +951,22 @@ export function canvasReducer(
               const width = roundedMax.x - roundedMin.x;
               const height = roundedMax.y - roundedMin.y;
 
-              const newLayer = resizeLayerFrame(
+              let newLayer = resizeLayerFrame(
                 layer,
                 createRect(roundedMin, roundedMax),
               );
 
-              newLayer.isFlippedHorizontal =
-                width < 0
-                  ? !layer.isFlippedHorizontal
-                  : layer.isFlippedHorizontal;
-              newLayer.isFlippedVertical =
-                height < 0 ? !layer.isFlippedVertical : layer.isFlippedVertical;
+              newLayer = produce(newLayer, (draft) => {
+                draft.isFlippedHorizontal =
+                  width < 0
+                    ? !layer.isFlippedHorizontal
+                    : layer.isFlippedHorizontal;
+
+                draft.isFlippedVertical =
+                  height < 0
+                    ? !layer.isFlippedVertical
+                    : layer.isFlippedVertical;
+              });
 
               Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });

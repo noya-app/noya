@@ -1,11 +1,15 @@
 import { composeRefs } from '@radix-ui/react-compose-refs';
+import { Size } from 'noya-geometry';
+import { range } from 'noya-utils';
 import {
   Children,
   createContext,
+  CSSProperties,
   ForwardedRef,
   forwardRef,
   isValidElement,
   memo,
+  ReactElement,
   ReactNode,
   Ref,
   useCallback,
@@ -13,8 +17,10 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
-import styled, { CSSObject } from 'styled-components';
+import { List, WindowScroller } from 'react-virtualized';
+import styled from 'styled-components';
 import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
 import ContextMenu from './ContextMenu';
@@ -22,23 +28,11 @@ import { MenuItem } from './internal/Menu';
 import ScrollArea from './ScrollArea';
 import * as Sortable from './Sortable';
 
+export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
-const listReset: CSSObject = {
-  marginTop: 0,
-  marginRight: 0,
-  marginBottom: 0,
-  marginLeft: 0,
-  paddingTop: 0,
-  paddingRight: 0,
-  paddingBottom: 0,
-  paddingLeft: 0,
-  textIndent: 0,
-  listStyleType: 'none',
-};
-
 type ListRowContextValue = {
-  position: ListRowPosition;
+  marginType: ListRowMarginType;
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
@@ -46,7 +40,7 @@ type ListRowContextValue = {
 };
 
 export const ListRowContext = createContext<ListRowContextValue>({
-  position: 'only',
+  marginType: 'none',
   selectedPosition: 'only',
   sortable: false,
   expandable: true,
@@ -108,12 +102,19 @@ function ListViewEditableRowTitle({
   );
 }
 
+function getPositionMargin(marginType: ListRowMarginType) {
+  return {
+    top: marginType === 'top' || marginType === 'vertical' ? 8 : 0,
+    bottom: marginType === 'bottom' || marginType === 'vertical' ? 8 : 0,
+  };
+}
+
 /* ----------------------------------------------------------------------------
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled.li<{
-  position: ListRowPosition;
+const RowContainer = styled.div<{
+  marginType: ListRowMarginType;
   selected: boolean;
   selectedPosition: ListRowPosition;
   disabled: boolean;
@@ -122,65 +123,61 @@ const RowContainer = styled.li<{
 }>(
   ({
     theme,
-    position,
+    marginType,
     selected,
     selectedPosition,
     disabled,
     hovered,
     isSectionHeader,
-  }) => ({
-    ...listReset,
-    ...theme.textStyles.small,
-    ...(isSectionHeader && { fontWeight: 500 }),
-    flex: '0 0 auto',
-    userSelect: 'none',
-    cursor: 'default',
-    borderTopRightRadius: '4px',
-    borderTopLeftRadius: '4px',
-    borderBottomRightRadius: '4px',
-    borderBottomLeftRadius: '4px',
-    paddingTop: '6px',
-    paddingRight: '12px',
-    paddingBottom: '6px',
-    paddingLeft: '12px',
-    marginLeft: '8px',
-    marginRight: '8px',
-    color: theme.colors.textMuted,
-    ...(isSectionHeader && {
-      backgroundColor: theme.colors.listView.raisedBackground,
-    }),
-    ...(disabled && {
-      color: theme.colors.textDisabled,
-    }),
-    ...(selected && {
-      color: 'white',
-      backgroundColor: theme.colors.primary,
-    }),
-    display: 'flex',
-    alignItems: 'center',
-    ...((position === 'first' || position === 'only') && {
-      marginTop: '8px',
-    }),
-    ...((position === 'last' || position === 'only') && {
-      marginBottom: '8px',
-    }),
-    ...(selected &&
-      !isSectionHeader &&
-      (selectedPosition === 'middle' || selectedPosition === 'last') && {
-        borderTopRightRadius: '0px',
-        borderTopLeftRadius: '0px',
+  }) => {
+    const margin = getPositionMargin(marginType);
+
+    return {
+      ...theme.textStyles.small,
+      ...(isSectionHeader && { fontWeight: 500 }),
+      flex: '0 0 auto',
+      userSelect: 'none',
+      cursor: 'default',
+      borderRadius: '4px',
+      paddingTop: '6px',
+      paddingRight: '12px',
+      paddingBottom: '6px',
+      paddingLeft: '12px',
+      marginLeft: '8px',
+      marginRight: '8px',
+      marginTop: `${margin.top}px`,
+      marginBottom: `${margin.bottom}px`,
+      color: theme.colors.textMuted,
+      ...(isSectionHeader && {
+        backgroundColor: theme.colors.listView.raisedBackground,
       }),
-    ...(selected &&
-      !isSectionHeader &&
-      (selectedPosition === 'middle' || selectedPosition === 'first') && {
-        borderBottomRightRadius: '0px',
-        borderBottomLeftRadius: '0px',
+      ...(disabled && {
+        color: theme.colors.textDisabled,
       }),
-    position: 'relative',
-    ...(hovered && {
-      boxShadow: `0 0 0 1px ${theme.colors.primary}`,
-    }),
-  }),
+      ...(selected && {
+        color: 'white',
+        backgroundColor: theme.colors.primary,
+      }),
+      display: 'flex',
+      alignItems: 'center',
+      ...(selected &&
+        !isSectionHeader &&
+        (selectedPosition === 'middle' || selectedPosition === 'last') && {
+          borderTopRightRadius: '0px',
+          borderTopLeftRadius: '0px',
+        }),
+      ...(selected &&
+        !isSectionHeader &&
+        (selectedPosition === 'middle' || selectedPosition === 'first') && {
+          borderBottomRightRadius: '0px',
+          borderBottomLeftRadius: '0px',
+        }),
+      position: 'relative',
+      ...(hovered && {
+        boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+      }),
+    };
+  },
 );
 
 export const DragIndicatorElement = styled.div<{
@@ -250,7 +247,7 @@ const ListViewRow = forwardRef(function ListViewRow<
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
-  const { position, selectedPosition, sortable, indentation } = useContext(
+  const { marginType, selectedPosition, sortable, indentation } = useContext(
     ListRowContext,
   );
   const { hoverProps } = useHover({
@@ -293,7 +290,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         {...hoverProps}
         onClick={handleClick}
         onDoubleClick={handleDoubleClick}
-        position={position}
+        marginType={marginType}
         disabled={disabled}
         hovered={hovered}
         selected={selected}
@@ -340,12 +337,112 @@ const ListViewRow = forwardRef(function ListViewRow<
 });
 
 /* ----------------------------------------------------------------------------
+ * VirtualizedList
+ * ------------------------------------------------------------------------- */
+
+interface VirtualizedListProps<T> {
+  size: Size;
+  scrollElement: HTMLDivElement;
+  items: T[];
+  getItemHeight: (index: number) => number;
+  renderItem: (index: number) => ReactNode;
+}
+
+const VirtualizedList = memo(function VirtualizedList<T>({
+  size,
+  scrollElement,
+  items,
+  getItemHeight,
+  renderItem,
+}: VirtualizedListProps<T>) {
+  const [virtualizedListViewKey, setVirtualizedListViewKey] = useState(0);
+
+  useLayoutEffect(() => {
+    setVirtualizedListViewKey((key) => key + 1);
+  }, [
+    // When items change, we need to re-render the virtualized list,
+    // since it doesn't currently support row height changes
+    items,
+  ]);
+
+  // Internally, react-virtualized updates these properties. We always want
+  // to use our custom scroll element, so we override them. It may update
+  // overflowX/Y individually in addition to `overflow`, so we include all 3.
+  const listStyle = useMemo(
+    (): CSSProperties => ({
+      overflowX: 'initial',
+      overflowY: 'initial',
+      overflow: 'initial',
+    }),
+    [],
+  );
+
+  const onRowHeight = useCallback(
+    ({ index }: { index: number }) => getItemHeight(index),
+    [getItemHeight],
+  );
+
+  const onRowRender = useCallback(
+    ({
+      index,
+      style,
+      key,
+    }: {
+      index: number;
+      style: CSSProperties;
+      key: string;
+    }) => (
+      <div key={key} style={style}>
+        {renderItem(index)}
+      </div>
+    ),
+    [renderItem],
+  );
+
+  return (
+    <WindowScroller
+      scrollElement={scrollElement}
+      style={useMemo(() => ({ flex: '1 1 auto' }), [])}
+    >
+      {useCallback(
+        ({ isScrolling, registerChild, onChildScroll, scrollTop }) => (
+          <div ref={registerChild}>
+            <List
+              id="my-list"
+              autoHeight
+              key={virtualizedListViewKey}
+              style={listStyle}
+              isScrolling={isScrolling}
+              onScroll={onChildScroll}
+              scrollTop={scrollTop}
+              width={size.width}
+              height={size.height}
+              rowCount={items.length}
+              rowHeight={onRowHeight}
+              rowRenderer={onRowRender}
+            />
+          </div>
+        ),
+        [
+          onRowHeight,
+          onRowRender,
+          items.length,
+          listStyle,
+          size.height,
+          size.width,
+          virtualizedListViewKey,
+        ],
+      )}
+    </WindowScroller>
+  );
+});
+
+/* ----------------------------------------------------------------------------
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.ul<{ scrollable?: boolean }>(
+const RootContainer = styled.div<{ scrollable?: boolean }>(
   ({ theme, scrollable }) => ({
-    ...listReset,
     flex: scrollable ? '1 0 0' : '0 0 auto',
     display: 'flex',
     flexDirection: 'column',
@@ -358,18 +455,20 @@ export type ItemInfo = {
   isDragging: boolean;
 };
 
-type ChildrenProps<T> =
-  | {
-      children: ReactNode;
-    }
-  | {
-      items: T[];
-      renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
-    };
+type ChildrenProps = {
+  children: ReactNode;
+};
 
-type ListViewRootProps<T> = ChildrenProps<T> & {
-  onClick?: () => void;
+type RenderProps<T> = {
+  data: T[];
+  renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
+  keyExtractor: (item: T, index: number) => string;
   sortable?: boolean;
+  virtualized?: Size;
+};
+
+type ListViewRootProps = {
+  onClick?: () => void;
   scrollable?: boolean;
   expandable?: boolean;
   onMoveItem?: (
@@ -381,137 +480,211 @@ type ListViewRootProps<T> = ChildrenProps<T> & {
   acceptsDrop?: Sortable.DropValidator;
 };
 
-function ListViewRoot<T = any>({
+const ListViewRoot = memo(function ListViewRoot<T>({
   onClick,
-  sortable = false,
   scrollable = false,
   expandable = true,
+  sortable = false,
   onMoveItem,
   indentation = 12,
   acceptsDrop,
-  ...props
-}: ListViewRootProps<T>) {
+  data,
+  renderItem,
+  keyExtractor,
+  virtualized,
+}: RenderProps<T> & ListViewRootProps) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
+
+      if (
+        event.target instanceof HTMLElement &&
+        event.target.classList.contains('scroll-component')
+      )
+        return;
 
       onClick?.();
     },
     [onClick],
   );
 
-  const flattened =
-    'items' in props
-      ? props.items.map((item, index) =>
-          props.renderItem(item, index, { isDragging: false }),
-        )
-      : Children.toArray(props.children);
-
-  const ids: string[] = flattened.flatMap((current) =>
-    isValidElement(current) && typeof current.props.id === 'string'
-      ? [current.props.id]
-      : [],
+  const renderChild = useCallback(
+    (index: number) => renderItem(data[index], index, { isDragging: false }),
+    [data, renderItem],
   );
 
-  const getWrappedChild = (current: ReactNode, i: number) => {
-    if (!isValidElement(current)) return current;
+  const renderOverlay = useCallback(
+    (index: number) => renderItem(data[index], index, { isDragging: true }),
+    [renderItem, data],
+  );
 
-    const prev = flattened[i - 1];
-    const next = flattened[i + 1];
+  const getItemContextValue = useCallback(
+    (i: number): ListRowContextValue | undefined => {
+      const current = renderChild(i);
 
-    const nextItem =
-      isValidElement(next) && !next.props.isSectionHeader ? next : undefined;
-    const prevItem =
-      isValidElement(prev) && !prev.props.isSectionHeader ? prev : undefined;
+      if (!isValidElement(current)) return;
 
-    let position: ListRowPosition = 'only';
-    let selectedPosition: ListRowPosition = 'only';
+      const prevChild = i - 1 >= 0 && renderChild(i - 1);
+      const nextChild = i + 1 < data.length && renderChild(i + 1);
 
-    if (nextItem && prevItem) {
-      position = 'middle';
-    } else if (nextItem && !prevItem) {
-      position = 'first';
-    } else if (!nextItem && prevItem) {
-      position = 'last';
-    }
+      const next = isValidElement(nextChild) ? nextChild : undefined;
+      const prev = isValidElement(prevChild) ? prevChild : undefined;
 
-    if (current.props.selected) {
-      const nextSelected = nextItem && nextItem.props.selected;
-      const prevSelected = prevItem && prevItem.props.selected;
+      const hasMarginTop = !prev;
+      const hasMarginBottom =
+        !next ||
+        current.props.isSectionHeader ||
+        (next && next.props.isSectionHeader);
 
-      if (nextSelected && prevSelected) {
-        selectedPosition = 'middle';
-      } else if (nextSelected && !prevSelected) {
-        selectedPosition = 'first';
-      } else if (!nextSelected && prevSelected) {
-        selectedPosition = 'last';
+      let marginType: ListRowMarginType;
+
+      if (hasMarginTop && hasMarginBottom) {
+        marginType = 'vertical';
+      } else if (hasMarginBottom) {
+        marginType = 'bottom';
+      } else if (hasMarginTop) {
+        marginType = 'top';
+      } else {
+        marginType = 'none';
       }
-    }
 
-    const contextValue = {
-      position,
-      selectedPosition,
-      sortable,
-      expandable,
-      indentation,
-    };
+      let selectedPosition: ListRowPosition = 'only';
 
-    return (
-      <ListRowContext.Provider key={current.key} value={contextValue}>
-        {current}
-      </ListRowContext.Provider>
-    );
-  };
+      if (current.props.selected) {
+        const nextSelected =
+          next && !next.props.isSectionHeader && next.props.selected;
+        const prevSelected =
+          prev && !prev.props.isSectionHeader && prev.props.selected;
 
-  const wrappedChildren = flattened.map(getWrappedChild);
+        if (nextSelected && prevSelected) {
+          selectedPosition = 'middle';
+        } else if (nextSelected && !prevSelected) {
+          selectedPosition = 'first';
+        } else if (!nextSelected && prevSelected) {
+          selectedPosition = 'last';
+        }
+      }
 
-  if (sortable && ids.length !== wrappedChildren.length) {
-    throw new Error(
-      'Bad ListView props: each row element needs an id to be sortable',
-    );
-  }
-
-  const renderItem = 'items' in props ? props.renderItem : undefined;
-  const items = 'items' in props ? props.items : undefined;
-
-  const renderOverlay = useMemo(
-    () =>
-      renderItem && items
-        ? (index: number) =>
-            renderItem(items[index], index, {
-              isDragging: true,
-            })
-        : undefined,
-    [renderItem, items],
+      return {
+        marginType: marginType,
+        selectedPosition,
+        sortable,
+        expandable,
+        indentation,
+      };
+    },
+    [expandable, renderChild, indentation, data.length, sortable],
   );
 
-  const content = sortable ? (
-    <Sortable.Root
-      onMoveItem={onMoveItem}
-      keys={ids}
-      renderOverlay={renderOverlay}
-      acceptsDrop={acceptsDrop}
-    >
-      {wrappedChildren}
-    </Sortable.Root>
-  ) : (
-    wrappedChildren
+  const renderWrappedChild = useCallback(
+    (index: number) => {
+      const contextValue = getItemContextValue(index);
+      const current = renderChild(index);
+
+      if (!contextValue || !isValidElement(current)) return null;
+
+      return (
+        <ListRowContext.Provider key={current.key} value={contextValue}>
+          {current}
+        </ListRowContext.Provider>
+      );
+    },
+    [getItemContextValue, renderChild],
   );
 
-  const scrollableContent = scrollable ? (
-    <ScrollArea>{content}</ScrollArea>
-  ) : (
-    content
+  const ids = useMemo(() => data.map(keyExtractor), [keyExtractor, data]);
+
+  const withSortable = (children: ReactNode) =>
+    sortable ? (
+      <Sortable.Root
+        onMoveItem={onMoveItem}
+        keys={ids}
+        renderOverlay={renderOverlay}
+        acceptsDrop={acceptsDrop}
+      >
+        {children}
+      </Sortable.Root>
+    ) : (
+      children
+    );
+
+  const withScrollable = (
+    children: (scrollElementRef: HTMLDivElement | null) => ReactNode,
+  ) => (scrollable ? <ScrollArea>{children}</ScrollArea> : children(null));
+
+  const getItemHeight = useCallback(
+    (index: number) => {
+      const child = getItemContextValue(index);
+      const margin = child?.marginType
+        ? getPositionMargin(child.marginType)
+        : { top: 0, bottom: 0 };
+      const height = margin.top + 31 + margin.bottom;
+      return height;
+    },
+    [getItemContextValue],
   );
 
   return (
     <RootContainer onClick={handleClick} scrollable={scrollable}>
-      {scrollableContent}
+      {withScrollable((scrollElementRef: HTMLDivElement | null) =>
+        withSortable(
+          virtualized ? (
+            <VirtualizedList
+              scrollElement={scrollElementRef!}
+              items={data}
+              size={virtualized}
+              getItemHeight={getItemHeight}
+              renderItem={renderWrappedChild}
+            />
+          ) : (
+            range(0, data.length).map(renderWrappedChild)
+          ),
+        ),
+      )}
     </RootContainer>
   );
-}
+});
+
+const ChildrenListView = memo(function ChildrenListView({
+  children,
+  ...rest
+}: ChildrenProps & ListViewRootProps) {
+  const items: ReactElement[] = useMemo(
+    () =>
+      Children.toArray(children).flatMap((child) =>
+        isValidElement(child) ? [child] : [],
+      ),
+    [children],
+  );
+
+  return (
+    <ListViewRoot
+      {...rest}
+      data={items}
+      keyExtractor={useCallback(
+        ({ key }: { key: string | number | null }, index: number) =>
+          typeof key === 'string' ? key : (key ?? index).toString(),
+        [],
+      )}
+      renderItem={useCallback((item: ReactElement) => item, [])}
+    />
+  );
+});
+
+/**
+ * A ListView can be created either with `children` or render props
+ */
+const SimpleListView = memo(function SimpleListView<T = any>(
+  props: (ChildrenProps | RenderProps<T>) & ListViewRootProps,
+) {
+  if ('children' in props) {
+    return <ChildrenListView {...props} />;
+  } else {
+    return <ListViewRoot {...props} />;
+  }
+});
 
 export const RowTitle = memo(ListViewRowTitle);
 export const EditableRowTitle = memo(ListViewEditableRowTitle);
 export const Row = memo(ListViewRow);
-export const Root = memo(ListViewRoot);
+export const Root = memo(SimpleListView);

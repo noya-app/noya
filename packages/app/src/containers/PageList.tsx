@@ -54,7 +54,7 @@ const PlusIconContainer = styled.span({
 type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
 type PageInfo = {
-  do_objectID: string;
+  id: string;
   name: string;
   type: 'header' | 'design' | 'theme';
 };
@@ -140,9 +140,8 @@ const PageListContent = memo(function PageListContent({
 
   const lastIndex = pageInfo.length - 1;
   const pages = isExpanded ? pageInfo : pageInfo.slice(0, 1);
-  const selectedPageName = pageInfo.find(
-    (info) => info.do_objectID === selectedPageId,
-  )?.name;
+  const selectedPageName = pageInfo.find((info) => info.id === selectedPageId)
+    ?.name;
 
   // Limit the container size when we have enough pages
   const scrollable = pages.length > 5;
@@ -175,7 +174,8 @@ const PageListContent = memo(function PageListContent({
           },
           [dispatch, lastIndex],
         )}
-        items={pages}
+        data={pages}
+        keyExtractor={useCallback((item: PageInfo) => item.id, [])}
         renderItem={useCallback(
           (page: PageInfo, index, { isDragging }) => {
             const selected =
@@ -184,7 +184,7 @@ const PageListContent = memo(function PageListContent({
                 (page.type === 'header' && currentTab === 'pages') ||
                 (page.type === 'design' &&
                   currentTab === 'canvas' &&
-                  selectedPageId === page.do_objectID));
+                  selectedPageId === page.id));
 
             const IconComponent =
               page.type === 'theme'
@@ -195,8 +195,8 @@ const PageListContent = memo(function PageListContent({
 
             return (
               <TreeView.Row<MenuItemType>
-                id={page.do_objectID}
-                key={page.do_objectID}
+                id={page.id}
+                key={page.id}
                 isSectionHeader={page.type === 'header'}
                 expanded={page.type === 'header' ? isExpanded : undefined}
                 selected={selected}
@@ -212,7 +212,7 @@ const PageListContent = memo(function PageListContent({
                       break;
                     case 'design':
                       dispatch('setTab', 'canvas');
-                      dispatch('selectPage', page.do_objectID);
+                      dispatch('selectPage', page.id);
                       break;
                     case 'theme':
                       dispatch('setTab', 'theme');
@@ -222,14 +222,14 @@ const PageListContent = memo(function PageListContent({
                 onDoubleClick={() => {
                   if (page.type !== 'design') return;
 
-                  startRenamingPage(page.do_objectID);
+                  startRenamingPage(page.id);
                 }}
                 menuItems={page.type === 'design' ? pageMenuItems : undefined}
                 onSelectMenuItem={handleSelectMenuItem}
                 onContextMenu={() => {
                   if (page.type !== 'design') return;
 
-                  dispatch('selectPage', page.do_objectID);
+                  dispatch('selectPage', page.id);
                 }}
                 icon={
                   page.type !== 'header' && (
@@ -239,7 +239,7 @@ const PageListContent = memo(function PageListContent({
                   )
                 }
               >
-                {page.do_objectID === editingPage ? (
+                {page.id === editingPage ? (
                   <TreeView.EditableRowTitle
                     autoFocus
                     value={page.name}
@@ -248,7 +248,7 @@ const PageListContent = memo(function PageListContent({
 
                       if (!name) return;
 
-                      dispatch('setPageName', page.do_objectID, name);
+                      dispatch('setPageName', page.id, name);
                     }}
                   />
                 ) : page.type === 'header' &&
@@ -302,17 +302,17 @@ export default function PageList() {
 
   const pageInfo = useDeepArray([
     {
-      do_objectID: 'header',
+      id: 'header',
       name: 'Pages',
       type: 'header' as const,
     },
     ...state.sketch.pages.map((page) => ({
-      do_objectID: page.do_objectID,
+      id: page.do_objectID,
       name: page.name,
       type: 'design' as const,
     })),
     {
-      do_objectID: 'theme',
+      id: 'theme',
       name: 'Theme',
       type: 'theme' as const,
     },
