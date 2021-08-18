@@ -126,8 +126,11 @@ export function canvasReducer(
           (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
         ).applyTo(viewportCenter);
 
-        draftUser[pageId].scrollOrigin = PointString.encode(newScrollOrigin);
-        draftUser[pageId].zoomValue = newValue;
+        draftUser[pageId] = {
+          ...draftUser[pageId],
+          zoomValue: newValue,
+          scrollOrigin: PointString.encode(newScrollOrigin),
+        };
       });
     }
     case 'insertArtboard': {
@@ -433,7 +436,7 @@ export function canvasReducer(
       return produce(state, (draft) => {
         const meta: EncodedPageMetadata = draft.sketch.user[currentPageId] ?? {
           zoomValue: 1,
-          scrollOrigin: '{100,100}',
+          scrollOrigin: '{0,0}',
         };
 
         const parsed = Primitives.parsePoint(meta.scrollOrigin);
@@ -985,7 +988,7 @@ export function canvasReducer(
               currentPageId
             ] ?? {
               zoomValue: 1,
-              scrollOrigin: '{100,100}',
+              scrollOrigin: '{0,0}',
             };
 
             const parsed = Primitives.parsePoint(meta.scrollOrigin);

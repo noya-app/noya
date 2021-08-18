@@ -514,4 +514,20 @@ describe('setZoom', () => {
       scrollOrigin: { x: 0, y: 0 },
     });
   });
+
+  test('zoom when no user metadata exists for a page', () => {
+    const state = createInitialState(createSketchFile());
+    const page = SketchModel.page();
+    state.sketch.pages = [page];
+    state.selectedPage = page.do_objectID;
+
+    expect(state.sketch.user[page.do_objectID]).toEqual(undefined);
+
+    const updated = run(state, [['setZoom', 2, 'multiply']]);
+
+    expect(getCurrentPageMetadata(updated)).toEqual({
+      zoomValue: 2,
+      scrollOrigin: { x: -500, y: -500 },
+    });
+  });
 });

@@ -60,7 +60,7 @@ export const getCurrentPageMetadata = (
     currentPage.do_objectID
   ] ?? {
     zoomValue: 1,
-    scrollOrigin: '{100,100}',
+    scrollOrigin: '{0,0}',
   };
 
   return decodePageMetadata(meta);
