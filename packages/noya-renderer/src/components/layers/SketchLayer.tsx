@@ -7,10 +7,9 @@ import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
+import SketchSlice from './SketchSlice';
 import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
-import SketchShapeGroup from './SketchShapeGroup';
-import SketchSlice from './SketchSlice';
 
 interface Props {
   layer: PageLayer | Sketch.Page;
@@ -44,10 +43,8 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'star':
     case 'polygon':
     case 'shapePath':
-      element = <SketchShape layer={layer} />;
-      break;
     case 'shapeGroup':
-      element = <SketchShapeGroup layer={layer} />;
+      element = <SketchShape layer={layer} />;
       break;
     case 'symbolInstance':
       element = <SketchSymbolInstance layer={layer} />;

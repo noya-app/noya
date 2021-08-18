@@ -8,6 +8,8 @@ import { memo, useMemo } from 'react';
 import { Primitives, getStrokedPath } from 'noya-state';
 import { useSketchImage } from '../../ImageCache';
 import SketchBorder from '../effects/SketchBorder';
+import useLayerPath from '../../hooks/useLayerPath';
+import { SketchModel } from 'noya-sketch-model';
 
 const SketchFill = memo(function SketchFill({
   path,
@@ -163,26 +165,20 @@ interface Props {
     | Sketch.Triangle
     | Sketch.Star
     | Sketch.Polygon
-    | Sketch.ShapePath;
-  path?: CanvasKit.Path;
+    | Sketch.ShapePath
+    | Sketch.ShapeGroup;
 }
 
-export default memo(function SketchShape({ layer, path: inputPath }: Props) {
-  const CanvasKit = useCanvasKit();
+export default memo(function SketchShape({ layer }: Props) {
+  const path = useLayerPath(layer);
 
-  const path =
-    inputPath ??
-    Primitives.path(CanvasKit, layer.points, layer.frame, layer.isClosed);
+  const style = useMemo(() => layer.style ?? SketchModel.style(), [
+    layer.style,
+  ]);
 
-  path.setFillType(
-    Primitives.pathFillType(CanvasKit, layer.style!.windingRule),
-  );
-
-  if (!layer.style) return null;
-
-  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled);
-  const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
-  const shadows = (layer.style.shadows ?? []).filter((x) => x.isEnabled);
+  const fills = (style.fills ?? []).filter((x) => x.isEnabled);
+  const borders = (style.borders ?? []).filter((x) => x.isEnabled);
+  const shadows = (style.shadows ?? []).filter((x) => x.isEnabled);
   const borderWidth = Math.max(0, ...borders.map((border) => border.thickness));
   const borderPosition =
     borders.length > 0 ? borders[0].position : Sketch.BorderPosition.Inside;
