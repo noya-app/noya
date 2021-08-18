@@ -544,12 +544,10 @@ export function canvasReducer(
           case 'maybeMoveGradientStop': {
             if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
 
-            const { pageSnapshot } = draft.interactionState;
-
             if (!state.selectedGradient) return;
 
             const gradient = getSelectedGradient(
-              pageSnapshot,
+              draft.sketch.pages[pageIndex],
               state.selectedGradient,
             );
 
