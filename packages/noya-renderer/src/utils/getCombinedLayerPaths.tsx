@@ -1,26 +1,30 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
-import { AffineTransform } from 'noya-geometry';
 import { Layers, Primitives } from 'noya-state';
 
 export function getCombinedLayerPaths(
   CanvasKit: CanvasKit,
   layer: Sketch.ShapeGroup,
 ) {
-  const paths = layer.layers.filter(Layers.isPointsLayer).map((child) => {
-    let path = Primitives.path(
-      CanvasKit,
-      child.points,
-      child.frame,
-      child.isClosed,
-    );
+  const paths = layer.layers
+    .filter(Layers.isPointsLayer)
+    .filter((layer) => layer.isVisible)
+    .map((child) => {
+      let path = Primitives.path(
+        CanvasKit,
+        child.points,
+        child.frame,
+        child.isClosed,
+      );
 
-    return {
-      name: child.name, // For debugging
-      path,
-      op: child.booleanOperation,
-    };
-  });
+      const result = {
+        name: child.name, // For debugging
+        path,
+        op: child.booleanOperation,
+      };
+
+      return result;
+    });
 
   const [first, ...rest] = paths;
 
@@ -38,5 +42,5 @@ export function getCombinedLayerPaths(
 
       return result;
     }, first.path)
-    .transform(AffineTransform.translate(layer.frame.x, layer.frame.y).array);
+    .offset(layer.frame.x, layer.frame.y);
 }
