@@ -3,7 +3,6 @@ import { debugDescription, SketchModel } from 'noya-sketch-model';
 
 import { fixGroupFrame, resizeLayerFrame } from '../layerSelectors';
 
-// Layer Selectors
 describe('fix group frame', () => {
   test('single layer', () => {
     const group = SketchModel.group({

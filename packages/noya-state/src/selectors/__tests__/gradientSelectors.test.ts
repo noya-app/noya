@@ -13,21 +13,49 @@ const angularGradientStyle = SketchModel.style({
       fillType: Sketch.FillType.Gradient,
       gradient: SketchModel.gradient({
         gradientType: Sketch.GradientType.Angular,
+        stops: [
+          ...SketchModel.gradient().stops,
+          {
+            _class: 'gradientStop',
+            color: {
+              _class: 'color',
+              alpha: 0.5,
+              blue: 0.5,
+              green: 0.5,
+              red: 0.5,
+            },
+            position: 0.5,
+          },
+        ],
       }),
     }),
   ],
 });
 
-const linearGradienStyle = SketchModel.style({
+const linearGradientStyle = SketchModel.style({
   fills: [
     SketchModel.fill({
       fillType: Sketch.FillType.Gradient,
-      gradient: SketchModel.gradient(),
+      gradient: SketchModel.gradient({
+        stops: [
+          ...SketchModel.gradient().stops,
+          {
+            _class: 'gradientStop',
+            color: {
+              _class: 'color',
+              alpha: 0.5,
+              blue: 0.5,
+              green: 0.5,
+              red: 0.5,
+            },
+            position: 0.5,
+          },
+        ],
+      }),
     }),
   ],
 });
 
-// Gradient Selector
 describe('set angular gradient circle', () => {
   const rectangle = SketchModel.rectangle({
     frame: SketchModel.rect({
@@ -56,8 +84,46 @@ describe('set angular gradient circle', () => {
       rotation: 0,
     });
   });
-  test('fliped layer', () => {
-    const rotatedRectangle = { ...rectangle, isFlippedHorizontal: true };
+  test('flipped layer horizontal', () => {
+    const flippedRectangle = { ...rectangle, isFlippedHorizontal: true };
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [flippedRectangle] })),
+    );
+    state.selectedGradient = {
+      layerId: flippedRectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 0,
+      styleType: 'fills',
+    };
+
+    expect(getAngularGradientCircle(state)).toEqual({
+      center: { x: 50, y: 50 },
+      radius: 50,
+      rotation: Math.PI,
+    });
+  });
+  test('flipped layer vertical', () => {
+    const flippedRectangle = { ...rectangle, isFlippedVertical: true };
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [flippedRectangle] })),
+    );
+    state.selectedGradient = {
+      layerId: flippedRectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 0,
+      styleType: 'fills',
+    };
+
+    expect(getAngularGradientCircle(state)).toEqual({
+      center: { x: 50, y: 50 },
+      radius: 50,
+      rotation: 0,
+    });
+  });
+  test('rotated layer', () => {
+    const rotatedRectangle = { ...rectangle, rotation: 1 };
 
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rotatedRectangle] })),
@@ -69,11 +135,7 @@ describe('set angular gradient circle', () => {
       styleType: 'fills',
     };
 
-    expect(getAngularGradientCircle(state)).toEqual({
-      center: { x: 50, y: 50 },
-      radius: 50,
-      rotation: Math.PI.valueOf(),
-    });
+    expect(getAngularGradientCircle(state)).toMatchSnapshot();
   });
   test('no selected gradient', () => {
     const state = createInitialState(
@@ -131,7 +193,6 @@ describe('set angular gradient circle', () => {
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
 
-    state.selectedObjects = [rectangle.do_objectID];
     state.selectedGradient = {
       layerId: rectangle.do_objectID,
       fillIndex: 0,
@@ -155,7 +216,7 @@ describe('get Gradient Point', () => {
       width: 100,
       height: 100,
     }),
-    style: linearGradienStyle,
+    style: linearGradientStyle,
   });
 
   test('linear gradient / radial gradient', () => {
@@ -197,7 +258,7 @@ describe('get Gradient Point', () => {
     );
 
     state.selectedGradient = {
-      layerId: linearGradienStyle.do_objectID,
+      layerId: linearGradientRectangle.do_objectID,
       fillIndex: 0,
       stopIndex: 0,
       styleType: 'fills',
@@ -213,5 +274,58 @@ describe('get Gradient Point', () => {
     state.selectedGradient = undefined;
 
     expect(getSelectedGradientStopPoints(state)).toEqual(undefined);
+  });
+  test('layer in artboard', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 450,
+        y: 450,
+        width: 300,
+        height: 300,
+      }),
+      layers: [linearGradientRectangle],
+    });
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+    state.selectedGradient = {
+      layerId: linearGradientRectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 0,
+      styleType: 'fills',
+    };
+
+    expect(getSelectedGradientStopPoints(state, true)).toMatchSnapshot();
+  });
+  test('layer in group in artboard', () => {
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 450,
+        y: 450,
+        width: 300,
+        height: 300,
+      }),
+      layers: [
+        SketchModel.group({
+          do_objectID: 'g1',
+          frame: SketchModel.rect({ x: 50, y: 50, width: 100, height: 100 }),
+          layers: [linearGradientRectangle],
+        }),
+      ],
+    });
+
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+
+    state.selectedGradient = {
+      layerId: linearGradientRectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 0,
+      styleType: 'fills',
+    };
+
+    expect(getSelectedGradientStopPoints(state, true)).toMatchSnapshot();
   });
 });
