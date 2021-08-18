@@ -164,17 +164,15 @@ interface Props {
     | Sketch.Star
     | Sketch.Polygon
     | Sketch.ShapePath;
+  path?: CanvasKit.Path;
 }
 
-export default memo(function SketchShape({ layer }: Props) {
+export default memo(function SketchShape({ layer, path: inputPath }: Props) {
   const CanvasKit = useCanvasKit();
 
-  const path = Primitives.path(
-    CanvasKit,
-    layer.points,
-    layer.frame,
-    layer.isClosed,
-  );
+  const path =
+    inputPath ??
+    Primitives.path(CanvasKit, layer.points, layer.frame, layer.isClosed);
 
   path.setFillType(CanvasKit.FillType.EvenOdd);
 

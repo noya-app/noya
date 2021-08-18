@@ -132,6 +132,11 @@ test('AlphaMasks', async () => {
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
+test('BooleanOperations', async () => {
+  const image = await generateSketchFileImage('BooleanOperations.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
 test('Image', async () => {
   const image = await generateSketchFileImage('Image.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
