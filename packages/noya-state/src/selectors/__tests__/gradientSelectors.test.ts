@@ -7,26 +7,33 @@ import {
   getSelectedGradientStopPoints,
 } from '../gradientSelectors';
 
+const gradientStops = [
+  SketchModel.gradientStop({
+    position: 0,
+    color: SketchModel.color({ red: 1, green: 1, blue: 1, alpha: 1 }),
+  }),
+  SketchModel.gradientStop({
+    position: 1,
+    color: SketchModel.color({ red: 0, green: 0, blue: 0, alpha: 1 }),
+  }),
+  SketchModel.gradientStop({
+    position: 0.5,
+    color: SketchModel.color({
+      red: 0.5,
+      green: 0.5,
+      blue: 0.5,
+      alpha: 0.5,
+    }),
+  }),
+];
+
 const angularGradientStyle = SketchModel.style({
   fills: [
     SketchModel.fill({
       fillType: Sketch.FillType.Gradient,
       gradient: SketchModel.gradient({
         gradientType: Sketch.GradientType.Angular,
-        stops: [
-          ...SketchModel.gradient().stops,
-          {
-            _class: 'gradientStop',
-            color: {
-              _class: 'color',
-              alpha: 0.5,
-              blue: 0.5,
-              green: 0.5,
-              red: 0.5,
-            },
-            position: 0.5,
-          },
-        ],
+        stops: gradientStops,
       }),
     }),
   ],
@@ -37,20 +44,7 @@ const linearGradientStyle = SketchModel.style({
     SketchModel.fill({
       fillType: Sketch.FillType.Gradient,
       gradient: SketchModel.gradient({
-        stops: [
-          ...SketchModel.gradient().stops,
-          {
-            _class: 'gradientStop',
-            color: {
-              _class: 'color',
-              alpha: 0.5,
-              blue: 0.5,
-              green: 0.5,
-              red: 0.5,
-            },
-            position: 0.5,
-          },
-        ],
+        stops: gradientStops,
       }),
     }),
   ],
@@ -84,6 +78,7 @@ describe('set angular gradient circle', () => {
       rotation: 0,
     });
   });
+
   test('flipped layer horizontal', () => {
     const flippedRectangle = { ...rectangle, isFlippedHorizontal: true };
 
@@ -103,6 +98,7 @@ describe('set angular gradient circle', () => {
       rotation: Math.PI,
     });
   });
+
   test('flipped layer vertical', () => {
     const flippedRectangle = { ...rectangle, isFlippedVertical: true };
 
@@ -122,6 +118,7 @@ describe('set angular gradient circle', () => {
       rotation: 0,
     });
   });
+
   test('rotated layer', () => {
     const rotatedRectangle = { ...rectangle, rotation: 1 };
 
@@ -137,6 +134,7 @@ describe('set angular gradient circle', () => {
 
     expect(getAngularGradientCircle(state)).toMatchSnapshot();
   });
+
   test('no selected gradient', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
@@ -145,6 +143,7 @@ describe('set angular gradient circle', () => {
 
     expect(getAngularGradientCircle(state)).toEqual(undefined);
   });
+
   test('layer in artboard', () => {
     const artboard = SketchModel.artboard({
       frame: SketchModel.rect({
@@ -172,6 +171,7 @@ describe('set angular gradient circle', () => {
       rotation: 0,
     });
   });
+
   test('layer in group in artboard', () => {
     const artboard = SketchModel.artboard({
       frame: SketchModel.rect({
@@ -233,6 +233,7 @@ describe('get Gradient Point', () => {
 
     expect(getSelectedGradientStopPoints(state)).toMatchSnapshot();
   });
+
   test('angular gradient', () => {
     const rectangle = {
       ...linearGradientRectangle,
@@ -252,6 +253,7 @@ describe('get Gradient Point', () => {
 
     expect(getSelectedGradientStopPoints(state)).toMatchSnapshot();
   });
+
   test('sorted points', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [linearGradientRectangle] })),
@@ -266,6 +268,7 @@ describe('get Gradient Point', () => {
 
     expect(getSelectedGradientStopPoints(state, true)).toMatchSnapshot();
   });
+
   test('no selected gradient', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [linearGradientRectangle] })),
@@ -275,6 +278,7 @@ describe('get Gradient Point', () => {
 
     expect(getSelectedGradientStopPoints(state)).toEqual(undefined);
   });
+
   test('layer in artboard', () => {
     const artboard = SketchModel.artboard({
       frame: SketchModel.rect({
@@ -298,6 +302,7 @@ describe('get Gradient Point', () => {
 
     expect(getSelectedGradientStopPoints(state, true)).toMatchSnapshot();
   });
+
   test('layer in group in artboard', () => {
     const artboard = SketchModel.artboard({
       frame: SketchModel.rect({
