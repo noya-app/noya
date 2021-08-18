@@ -7,18 +7,22 @@ import {
   FontManagerProvider,
   ImageCacheProvider,
   RenderingModeProvider,
+  RootScaleProvider,
   SketchFileRenderer,
   useCanvasKit,
 } from 'noya-renderer';
 import { memo, useLayoutEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
+import { usePixelRatio } from 'noya-react-utils';
 
-const CanvasComponent = styled.canvas({
+const CanvasComponent = styled.canvas<{ size: Size }>(({ size }) => ({
   position: 'absolute',
   inset: 0,
   zIndex: -1,
-});
+  width: `${size.width}px`,
+  height: `${size.height}px`,
+}));
 
 interface Props {
   size: Size;
@@ -30,6 +34,7 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
   const [surface, setSurface] = useState<Surface | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
+  const pixelRatio = usePixelRatio();
 
   // Update the canvas size and recreate the surface whenever the window is resized
   useLayoutEffect(() => {
@@ -37,8 +42,8 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
 
     if (!canvasElement) return;
 
-    canvasElement.width = size.width;
-    canvasElement.height = size.height;
+    canvasElement.width = size.width * pixelRatio;
+    canvasElement.height = size.height * pixelRatio;
 
     const newSurface = CanvasKit.MakeCanvasSurface(canvasElement);
 
@@ -52,7 +57,7 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
     return () => {
       newSurface?.delete();
     };
-  }, [CanvasKit, size]);
+  }, [CanvasKit, pixelRatio, size]);
 
   // We use `useLayoutEffect` so that the canvas updates as soon as possible,
   // even at the expense of the UI stuttering slightly.
@@ -70,7 +75,9 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
                 <FontManagerProvider>
                   <ComponentsProvider value={Components}>
                     <RenderingModeProvider value="interactive">
-                      <SketchFileRenderer />
+                      <RootScaleProvider value={pixelRatio}>
+                        <SketchFileRenderer />
+                      </RootScaleProvider>
                     </RenderingModeProvider>
                   </ComponentsProvider>
                 </FontManagerProvider>
@@ -90,7 +97,7 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, workspaceState, theme, surface]);
+  }, [CanvasKit, workspaceState, theme, surface, pixelRatio]);
 
-  return <CanvasComponent ref={canvasRef} />;
+  return <CanvasComponent size={size} ref={canvasRef} />;
 });

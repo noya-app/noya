@@ -2,7 +2,13 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { createRect, insetRect, Point, Rect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createRect,
+  insetRect,
+  Point,
+  Rect,
+} from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -19,6 +25,7 @@ import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
+import { useRootScale } from '../RootScaleContext';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -338,8 +345,13 @@ export default memo(function SketchFileRenderer() {
 
   const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
 
+  const rootScale = useRootScale();
+  const rootScaleTransform = useMemo(() => AffineTransform.scale(rootScale), [
+    rootScale,
+  ]);
+
   return (
-    <>
+    <Group transform={rootScaleTransform}>
       <RCKRect rect={canvasRect} paint={backgroundFill} />
       <Group transform={canvasTransform}>
         <SketchGroup layer={page} />
@@ -404,6 +416,6 @@ export default memo(function SketchFileRenderer() {
         )}
         {showRulers && <HorizontalRuler />}
       </Group>
-    </>
+    </Group>
   );
 });
