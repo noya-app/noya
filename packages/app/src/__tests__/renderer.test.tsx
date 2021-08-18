@@ -132,6 +132,19 @@ test('AlphaMasks', async () => {
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
+test('BooleanOperations', async () => {
+  const image = await generateSketchFileImage('BooleanOperations.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('BooleanOperationsAdvanced', async () => {
+  const image = await generateSketchFileImage(
+    'BooleanOperationsAdvanced.sketch',
+    0,
+  );
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
 test('Image', async () => {
   const image = await generateSketchFileImage('Image.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
@@ -224,5 +237,10 @@ test('TextLayers', async () => {
 
 test('Tints', async () => {
   const image = await generateSketchFileImage('Tints.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('WindingRule', async () => {
+  const image = await generateSketchFileImage('WindingRule.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });

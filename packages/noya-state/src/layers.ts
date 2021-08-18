@@ -68,6 +68,12 @@ export const isGroup = (layer: Sketch.AnyLayer): layer is Sketch.Group => {
   return layer._class === 'group';
 };
 
+export const isShapeGroup = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.ShapeGroup => {
+  return layer._class === 'shapeGroup';
+};
+
 export const isSymbolMaster = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolMaster => {

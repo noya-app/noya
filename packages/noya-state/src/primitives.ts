@@ -372,3 +372,33 @@ export function createCanvasKitTextStyle(
         }),
   });
 }
+
+export function pathOp(
+  CanvasKit: CanvasKit,
+  booleanOperation: Sketch.BooleanOperation,
+) {
+  switch (booleanOperation) {
+    case Sketch.BooleanOperation.None:
+      return undefined;
+    case Sketch.BooleanOperation.Union:
+      return CanvasKit.PathOp.Union;
+    case Sketch.BooleanOperation.Subtract:
+      return CanvasKit.PathOp.Difference;
+    case Sketch.BooleanOperation.Intersection:
+      return CanvasKit.PathOp.Intersect;
+    case Sketch.BooleanOperation.Difference:
+      return undefined;
+  }
+}
+
+export function pathFillType(
+  CanvasKit: CanvasKit,
+  windingRule: Sketch.WindingRule,
+) {
+  switch (windingRule) {
+    case Sketch.WindingRule.EvenOdd:
+      return CanvasKit.FillType.EvenOdd;
+    case Sketch.WindingRule.NonZero:
+      return CanvasKit.FillType.Winding;
+  }
+}

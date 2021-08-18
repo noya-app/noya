@@ -1,11 +1,17 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
 import * as CanvasKit from 'canvaskit';
-import { Rect, AffineTransform } from 'noya-geometry';
-import { ClipProps, useDeletable, usePaint } from 'noya-react-canvaskit';
-import { PaintParameters } from 'noya-react-canvaskit';
+import { AffineTransform, Rect } from 'noya-geometry';
+import {
+  ClipProps,
+  PaintParameters,
+  useDeletable,
+  usePaint,
+} from 'noya-react-canvaskit';
 import { Group, Path, useCanvasKit } from 'noya-renderer';
+import { SketchModel } from 'noya-sketch-model';
+import { getStrokedPath, Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
-import { Primitives, getStrokedPath } from 'noya-state';
+import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
 import SketchBorder from '../effects/SketchBorder';
 
@@ -163,26 +169,20 @@ interface Props {
     | Sketch.Triangle
     | Sketch.Star
     | Sketch.Polygon
-    | Sketch.ShapePath;
+    | Sketch.ShapePath
+    | Sketch.ShapeGroup;
 }
 
 export default memo(function SketchShape({ layer }: Props) {
-  const CanvasKit = useCanvasKit();
+  const path = useLayerPath(layer);
 
-  const path = Primitives.path(
-    CanvasKit,
-    layer.points,
-    layer.frame,
-    layer.isClosed,
-  );
+  const style = useMemo(() => layer.style ?? SketchModel.style(), [
+    layer.style,
+  ]);
 
-  path.setFillType(CanvasKit.FillType.EvenOdd);
-
-  if (!layer.style) return null;
-
-  const fills = (layer.style.fills ?? []).filter((x) => x.isEnabled);
-  const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
-  const shadows = (layer.style.shadows ?? []).filter((x) => x.isEnabled);
+  const fills = (style.fills ?? []).filter((x) => x.isEnabled);
+  const borders = (style.borders ?? []).filter((x) => x.isEnabled);
+  const shadows = (style.shadows ?? []).filter((x) => x.isEnabled);
   const borderWidth = Math.max(0, ...borders.map((border) => border.thickness));
   const borderPosition =
     borders.length > 0 ? borders[0].position : Sketch.BorderPosition.Inside;
