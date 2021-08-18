@@ -6,7 +6,7 @@ export function getCombinedLayerPaths(
   CanvasKit: CanvasKit,
   layer: Sketch.ShapeGroup,
 ) {
-  const paths = layer.layers
+  const layers = layer.layers
     .filter(Layers.isPointsLayer)
     .filter((layer) => layer.isVisible)
     .map((child) => {
@@ -17,16 +17,13 @@ export function getCombinedLayerPaths(
         child.isClosed,
       );
 
-      const result = {
-        name: child.name, // For debugging
+      return {
         path,
         op: child.booleanOperation,
       };
-
-      return result;
     });
 
-  const [first, ...rest] = paths;
+  const [first, ...rest] = layers;
 
   if (!first) return new CanvasKit.Path();
 
