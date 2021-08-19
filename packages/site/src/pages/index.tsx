@@ -1,5 +1,12 @@
+import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { Stack, Text, Spacer } from 'noya-designsystem';
+import { Grid, Stack, Text, Spacer } from 'noya-designsystem';
+import {
+  motion,
+  useTransform,
+  useElementScroll,
+  useViewportScroll,
+} from 'framer-motion';
 import logoSrc from '../assets/logo.svg';
 import * as theme from '../theme';
 
@@ -40,7 +47,7 @@ export default function App() {
         <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
           <img src={logoSrc} alt="logo" width="100px" />
           <span style={{ justifySelf: 'end' }}>
-            <Stack as="nav" axis="x" spacing={8}>
+            <Stack as="nav" axis="x" gap={8}>
               <GitHubIcon />
             </Stack>
           </span>
@@ -48,8 +55,8 @@ export default function App() {
 
         <Spacer.Vertical size="4rem" />
 
-        <Stack axis="x" distribution="fill">
-          <Stack axis="y" spacing="2rem">
+        <Stack axis="x" justifyContent="fill">
+          <Stack axis="y" gap="2rem">
             <Text variant="heading1">
               Build Your Own <Text variant="mark">Design Tool</Text>
             </Text>
@@ -58,22 +65,22 @@ export default function App() {
               project.
             </Text>
           </Stack>
-          <Stack axis="y" alignment="center" distribution="center">
+          <Stack axis="y" alignItems="center" justifyContent="center">
             Demo Here
           </Stack>
         </Stack>
 
         <Spacer.Vertical size="12rem" />
 
-        <Stack axis="x" alignment="center" distribution="fill" spacing="2rem">
-          <Stack axis="y" height="328px">
+        <Stack axis="x" alignItems="center" justifyContent="fill" gap="2rem">
+          <Grid columns="1fr 1fr" gap="1rem">
             {features.map((feature) => (
               <Stack key={feature.name} axis="x" padding="1rem">
                 <Text variant="body1">{feature.name}</Text>
               </Stack>
             ))}
-          </Stack>
-          <Stack axis="y" spacing="2.5rem">
+          </Grid>
+          <Stack axis="y" gap="2.5rem">
             <Text variant="heading2">
               All Of The Features You’re Used To{' '}
               <Text variant="mark">{preventTextOprhan('And More')}</Text>
@@ -83,6 +90,55 @@ export default function App() {
               specific needs.
             </Text>
           </Stack>
+        </Stack>
+
+        <Spacer.Vertical size="12rem" />
+
+        <Stack axis="y" alignItems="center">
+          <Text variant="heading2" align="center" width="12ch">
+            Use Our Tool Or{' '}
+            <Text variant="mark">Build {preventTextOprhan('Your Own')}</Text>
+          </Text>
+          <Spacer.Vertical size="2.5rem" />
+          <Text variant="body1" align="center" width="32ch">
+            Noya is built on a modular set of packages that can be used on their
+            own or altogether in our featured app.
+          </Text>
+          <Spacer.Vertical size="6rem" />
+          <Features>
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+            <Feature
+              heading="App"
+              content="A full featured design application built on Noya utilities."
+            />
+          </Features>
         </Stack>
       </Stack>
     </ThemeProvider>
@@ -105,5 +161,64 @@ function GitHubIcon() {
         fill="white"
       />
     </svg>
+  );
+}
+
+function Features({ children }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const { scrollYProgress: viewportScrollYProgress } = useViewportScroll();
+  const { scrollYProgress: elementScrollYProgress } = useElementScroll(ref);
+  const x = useTransform(viewportScrollYProgress, [0, 1], [300, 0]);
+  const scale = useTransform(elementScrollYProgress, [0, 1], [0, 1]);
+  return (
+    <motion.div style={{ width: '100%', overflow: 'hidden' }}>
+      <motion.div
+        ref={ref}
+        style={{
+          display: 'flex',
+          // overflow: 'auto',
+          // x,
+        }}
+      >
+        {React.Children.map(children, (child, index) =>
+          React.cloneElement(child, {
+            active: activeIndex === index,
+            setIndex: () => setActiveIndex(index),
+          }),
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function Feature({
+  heading,
+  content,
+  active,
+  setIndex,
+}: {
+  heading: string;
+  content: string;
+  active?: boolean;
+  setIndex?: () => void;
+}) {
+  return (
+    <Stack
+      axis="y"
+      width="32rem"
+      padding="4rem"
+      gap="2rem"
+      background="rgba(255,255,255,0.1)"
+      onClick={setIndex}
+      style={{
+        flexShrink: 0,
+        borderRadius: '2rem',
+        transform: active ? undefined : 'scale(0.85)',
+      }}
+    >
+      <Text variant="heading3">{heading}</Text>
+      <Text variant="body1">{content}</Text>
+    </Stack>
   );
 }

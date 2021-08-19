@@ -70,7 +70,7 @@ export const textStyles: {
   heading3: {
     fontSize: `${typeScale[2]}rem`,
     fontWeight: 500,
-    lineHeight: '1.75',
+    lineHeight: '1.2',
   },
   body1: {
     fontSize: `${typeScale[3]}rem`,
@@ -80,7 +80,7 @@ export const textStyles: {
   body2: {
     fontSize: `${typeScale[4]}rem`,
     fontWeight: 400,
-    lineHeight: '1.75',
+    lineHeight: '1.5',
   },
   mark: {
     background: 'linear-gradient(180deg, #E3BEFF, #A734FF)',

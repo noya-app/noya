@@ -5,6 +5,7 @@
 }
 
 body {
+  margin: 0;
   font-family: 'Inter', sans-serif;
   background: #2d0e46;
   color: white;

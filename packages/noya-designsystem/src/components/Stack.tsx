@@ -3,8 +3,8 @@ import { Colors } from '../theme';
 
 export type StackProps = {
   axis: 'x' | 'y';
-  alignment?: keyof typeof alignments;
-  distribution?: keyof typeof distributions | 'fill';
+  alignItems?: keyof typeof alignments;
+  justifyContent?: keyof typeof distributions | 'fill';
   width?: number | string;
   minWidth?: number | string;
   maxWidth?: number | string;
@@ -18,7 +18,7 @@ export type StackProps = {
   paddingY?: number | string;
   paddingYStart?: number | string;
   paddingYEnd?: number | string;
-  spacing?: number | string;
+  gap?: number | string;
   background?: keyof Colors;
 };
 
@@ -37,20 +37,20 @@ const Stack = styled.div<StackProps>(
     paddingBlock: props.paddingY,
     paddingBlockStart: props.paddingYStart,
     paddingBlockEnd: props.paddingYEnd,
-    gap: props.spacing,
-    alignItems: props.alignment ? alignments[props.alignment] : undefined,
+    gap: props.gap,
+    alignItems: props.alignItems ? alignments[props.alignItems] : undefined,
     justifyContent:
-      props.distribution === 'fill'
+      props.justifyContent === 'fill'
         ? undefined
-        : props.distribution
-        ? distributions[props.distribution]
+        : props.justifyContent
+        ? distributions[props.justifyContent]
         : undefined,
     background: props.background,
     ...getSize('width', props.width),
     ...getSize('height', props.height),
   }),
   (props) =>
-    props.distribution === 'fill' && {
+    props.justifyContent === 'fill' && {
       '& > *': { flex: '1 0 0px' },
     },
 );

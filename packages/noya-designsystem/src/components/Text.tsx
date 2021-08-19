@@ -8,7 +8,7 @@ export type TextProps = {
   variant?: keyof Theme['textStyles'];
   className?: string;
   children: ReactNode;
-  alignment?: 'start' | 'center' | 'end';
+  align?: 'start' | 'center' | 'end';
   width?: string | number;
 };
 
@@ -40,7 +40,7 @@ const Text = styled(
       </TextAncestorContext.Provider>
     );
   },
-)<TextProps>(({ theme, width, alignment, variant = 'body' }) => ({
+)<TextProps>(({ theme, width, align: alignment, variant = 'body' }) => ({
   margin: 0,
   width,
   textAlign: alignment,
