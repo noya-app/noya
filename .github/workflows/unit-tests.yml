@@ -12,7 +12,3 @@ jobs:
           node-version: '14.x'
       - run: yarn
       - run: yarn test
-
-      - name: Ensure GraphQL server builds
-        run: yarn build:dev
-        working-directory: './packages/noya-graphql-server'
