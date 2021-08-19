@@ -3,6 +3,7 @@ import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
 import { Group } from '../..';
+import { useIsLayerVisible } from '../../VisibleLayerContext';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
@@ -16,7 +17,9 @@ interface Props {
 }
 
 export default memo(function SketchLayer({ layer }: Props) {
-  if (!layer.isVisible) return null;
+  const isVisible = useIsLayerVisible(layer.do_objectID);
+
+  if (!isVisible || !layer.isVisible) return null;
 
   let element: JSX.Element;
 
