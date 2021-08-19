@@ -67,17 +67,28 @@ function panToFit(
     y: boundingRect.y + scrollOrigin.y - padding,
   };
 
+  const canvasSize = {
+    width: Math.round(boundingRect.width + padding * 2),
+    height: Math.round(boundingRect.height + padding * 2),
+  };
+
+  workspaceState = workspaceReducer(
+    workspaceState,
+    ['setCanvasSize', canvasSize, { top: 0, right: 0, bottom: 0, left: 0 }],
+    CanvasKit,
+    context.fontManager,
+  );
+
+  workspaceState = workspaceReducer(
+    workspaceState,
+    ['pan', delta],
+    CanvasKit,
+    context.fontManager,
+  );
+
   return {
-    size: {
-      width: Math.round(boundingRect.width + padding * 2),
-      height: Math.round(boundingRect.height + padding * 2),
-    },
-    workspaceState: workspaceReducer(
-      workspaceState,
-      ['pan', delta],
-      CanvasKit,
-      context.fontManager,
-    ),
+    size: canvasSize,
+    workspaceState,
   };
 }
 
