@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import http from 'http';
+import { sleep } from 'noya-utils';
 import path from 'path';
 import webpack from 'webpack';
 
@@ -10,9 +11,16 @@ const webpackConfig = require('../../webpack.config.js');
 
 function compile(env: unknown) {
   return new Promise<void>((resolve, reject) => {
-    webpack(webpackConfig(env), (error) => {
+    webpack(webpackConfig(env), (error, stats) => {
       if (error) {
         reject(error);
+        // } else if (stats?.hasErrors()) {
+        //   reject(
+        //     stats.toString({
+        //       chunks: false, // Makes the build much quieter
+        //       colors: true, // Shows colors in the console
+        //     }),
+        //   );
       } else {
         resolve();
       }
@@ -51,6 +59,8 @@ test('server runs', async () => {
   await compile({ production: true });
 
   const process = exec('npm run start', { cwd: root });
+
+  await sleep(4000);
 
   const data = await makeGraphQLQuery({ query: '{ colors { id } }' });
 
