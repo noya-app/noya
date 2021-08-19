@@ -1,6 +1,6 @@
-import { exec } from 'child_process';
+import { execSync, fork } from 'child_process';
 import http from 'http';
-// import { sleep } from 'noya-utils';
+import { sleep } from 'noya-utils';
 import path from 'path';
 // import webpack from 'webpack';
 
@@ -31,7 +31,7 @@ const root = path.join(__dirname, '../..');
 function makeGraphQLQuery({ query }: { query: string }) {
   return new Promise<unknown>((resolve, reject) => {
     const options: http.RequestOptions = {
-      host: '127.0.0.1',
+      host: 'localhost',
       port: 4000,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,15 +56,32 @@ function makeGraphQLQuery({ query }: { query: string }) {
 }
 
 test('server runs', async () => {
+  console.info('compiling...');
+
+  execSync('npm run build', { cwd: root });
+
   // await compile({ production: true });
 
-  const process = exec('npm run dev', { cwd: root });
+  console.info('launching server...');
 
-  // await sleep(10000);
+  const process = fork(path.join(root, 'build', 'bundle.js'), {
+    cwd: root,
+    silent: true,
+  });
+
+  // const process = exec('npm run start', { cwd: root });
+
+  await sleep(4000);
+
+  console.info('making request');
 
   const data = await makeGraphQLQuery({ query: '{ colors { id } }' });
 
+  console.info('cleaning up...');
+
   process.kill();
+
+  await sleep(4000);
 
   expect(data).toEqual({
     data: {
