@@ -17,6 +17,7 @@ import {
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
+  getClippedLayerMap,
   Layers,
   Primitives,
   Selectors,
@@ -25,7 +26,9 @@ import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
+import { useRenderingMode } from '../RenderingModeContext';
 import { useRootScale } from '../RootScaleContext';
+import { ClippedLayerProvider } from '../ClippedLayerContext';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -68,6 +71,7 @@ export default memo(function SketchFileRenderer() {
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
   const CanvasKit = useCanvasKit();
+  const renderingMode = useRenderingMode();
   const page = Selectors.getCurrentPage(state);
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
@@ -350,72 +354,83 @@ export default memo(function SketchFileRenderer() {
     rootScale,
   ]);
 
+  const clippedLayerMap = useMemo(() => {
+    if (renderingMode === 'static') return {};
+
+    return getClippedLayerMap(state, canvasSize, canvasInsets);
+  }, [canvasInsets, canvasSize, renderingMode, state]);
+
   return (
-    <Group transform={rootScaleTransform}>
-      <RCKRect rect={canvasRect} paint={backgroundFill} />
-      <Group transform={canvasTransform}>
-        <SketchGroup layer={page} />
-        {gradientStopPoints && state.selectedGradient && (
-          <GradientEditor
-            gradientStopPoints={gradientStopPoints}
-            selectedGradient={state.selectedGradient}
-          />
-        )}
-        {symbol && <SketchArtboardContent layer={symbol} />}
-        {interactionState.type === 'drawingShapePath' ? (
-          penToolPseudoElements
-        ) : isEditingPath ? (
-          <>
-            {editablePaths}
-            {editPathPseudoElements}
-            <InsertPointOverlay />
-          </>
-        ) : (
-          <>
-            {(state.selectedObjects.length > 1 ||
-              !Selectors.getSelectedLineLayer(state)) &&
-              boundingRect &&
-              !state.selectedGradient &&
-              !drawingLayer &&
-              !isInserting && (
-                <>
-                  <BoundingRect
-                    rect={boundingRect}
-                    selectionPaint={selectionPaint}
-                  />
-                  {!isEditingText &&
-                    boundingPoints.map((points: Point[], index: number) => (
-                      <Polyline
-                        key={index}
-                        points={points}
-                        paint={selectionPaint}
-                      />
-                    ))}
-                </>
+    <ClippedLayerProvider value={clippedLayerMap}>
+      <Group transform={rootScaleTransform}>
+        <RCKRect rect={canvasRect} paint={backgroundFill} />
+        <Group transform={canvasTransform}>
+          <SketchGroup layer={page} />
+          {gradientStopPoints && state.selectedGradient && (
+            <GradientEditor
+              gradientStopPoints={gradientStopPoints}
+              selectedGradient={state.selectedGradient}
+            />
+          )}
+          {symbol && <SketchArtboardContent layer={symbol} />}
+          {interactionState.type === 'drawingShapePath' ? (
+            penToolPseudoElements
+          ) : isEditingPath ? (
+            <>
+              {editablePaths}
+              {editPathPseudoElements}
+              <InsertPointOverlay />
+            </>
+          ) : (
+            <>
+              {(state.selectedObjects.length > 1 ||
+                !Selectors.getSelectedLineLayer(state)) &&
+                boundingRect &&
+                !state.selectedGradient &&
+                !drawingLayer &&
+                !isInserting && (
+                  <>
+                    <BoundingRect
+                      rect={boundingRect}
+                      selectionPaint={selectionPaint}
+                    />
+                    {!isEditingText &&
+                      boundingPoints.map((points: Point[], index: number) => (
+                        <Polyline
+                          key={index}
+                          points={points}
+                          paint={selectionPaint}
+                        />
+                      ))}
+                  </>
+                )}
+              {!drawingLayer &&
+                !isInserting &&
+                !isEditingText &&
+                highlightedSketchLayer}
+              {drawingLayer && <SketchLayer layer={drawingLayer} />}
+              <SnapGuides />
+              {quickMeasureGuides}
+              {!state.selectedGradient &&
+                boundingRect &&
+                !drawingLayer &&
+                !isInserting &&
+                !isEditingText && <DragHandles rect={boundingRect} />}
+            </>
+          )}
+        </Group>
+        <Group transform={screenTransform}>
+          {interactionState.type === 'marquee' && (
+            <Marquee
+              rect={createRect(
+                interactionState.origin,
+                interactionState.current,
               )}
-            {!drawingLayer &&
-              !isInserting &&
-              !isEditingText &&
-              highlightedSketchLayer}
-            {drawingLayer && <SketchLayer layer={drawingLayer} />}
-            <SnapGuides />
-            {quickMeasureGuides}
-            {!state.selectedGradient &&
-              boundingRect &&
-              !drawingLayer &&
-              !isInserting &&
-              !isEditingText && <DragHandles rect={boundingRect} />}
-          </>
-        )}
+            />
+          )}
+          {showRulers && <HorizontalRuler />}
+        </Group>
       </Group>
-      <Group transform={screenTransform}>
-        {interactionState.type === 'marquee' && (
-          <Marquee
-            rect={createRect(interactionState.origin, interactionState.current)}
-          />
-        )}
-        {showRulers && <HorizontalRuler />}
-      </Group>
-    </Group>
+    </ClippedLayerProvider>
   );
 });
