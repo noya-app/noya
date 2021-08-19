@@ -13,7 +13,7 @@ export function emscriptenRequireInterop<T>(requireFunction: () => T) {
 
     amdDefine['amd'] = true;
 
-    (window as any).define = amdDefine;
+    (globalThis as any).define = amdDefine;
 
     const result = requireFunction();
 

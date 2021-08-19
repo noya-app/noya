@@ -5,14 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    container:
+      image: node:14.17
+      env:
+        CI: true
+
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
       - run: yarn
       - run: yarn test
-
-      - name: Ensure GraphQL server builds
-        run: yarn build:dev
-        working-directory: './packages/noya-graphql-server'
