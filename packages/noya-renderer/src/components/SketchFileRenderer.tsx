@@ -17,7 +17,7 @@ import {
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
-  getVisibleLayerMap,
+  getClippedLayerMap,
   Layers,
   Primitives,
   Selectors,
@@ -28,7 +28,7 @@ import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { useRenderingMode } from '../RenderingModeContext';
 import { useRootScale } from '../RootScaleContext';
-import { VisibleLayerProvider } from '../VisibleLayerContext';
+import { ClippedLayerProvider } from '../ClippedLayerContext';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -354,14 +354,14 @@ export default memo(function SketchFileRenderer() {
     rootScale,
   ]);
 
-  const visibleLayerMap = useMemo(() => {
+  const clippedLayerMap = useMemo(() => {
     if (renderingMode === 'static') return {};
 
-    return getVisibleLayerMap(state, canvasSize, canvasInsets);
+    return getClippedLayerMap(state, canvasSize, canvasInsets);
   }, [canvasInsets, canvasSize, renderingMode, state]);
 
   return (
-    <VisibleLayerProvider value={visibleLayerMap}>
+    <ClippedLayerProvider value={clippedLayerMap}>
       <Group transform={rootScaleTransform}>
         <RCKRect rect={canvasRect} paint={backgroundFill} />
         <Group transform={canvasTransform}>
@@ -431,6 +431,6 @@ export default memo(function SketchFileRenderer() {
           {showRulers && <HorizontalRuler />}
         </Group>
       </Group>
-    </VisibleLayerProvider>
+    </ClippedLayerProvider>
   );
 });

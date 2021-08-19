@@ -399,7 +399,7 @@ export function getPageContentBoundingRect(page: Sketch.Page) {
   );
 }
 
-export function getVisibleLayerMap(
+export function getClippedLayerMap(
   state: ApplicationState,
   canvasSize: Size,
   canvasInsets: Insets,
@@ -432,11 +432,11 @@ export function getVisibleLayerMap(
   const result: Record<string, boolean> = {};
 
   allLayerIds.forEach((id) => {
-    result[id] = false;
+    result[id] = true;
   });
 
   visibleLayerSet.forEach((id) => {
-    result[id] = true;
+    result[id] = false;
   });
 
   return result;

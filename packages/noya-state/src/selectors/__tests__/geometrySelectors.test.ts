@@ -4,7 +4,7 @@ import { createInitialState, createSketchFile } from 'noya-state';
 import {
   getBoundingRect,
   getLayersInRect,
-  getVisibleLayerMap,
+  getClippedLayerMap,
 } from '../geometrySelectors';
 
 const insets: Insets = {
@@ -269,8 +269,8 @@ describe('selecting artboards', () => {
   });
 });
 
-describe('get visible layers', () => {
-  test('select visible top-level layers', () => {
+describe('get clipped layers', () => {
+  test('get clipped top-level layers', () => {
     const page = SketchModel.page({
       layers: [r1, r2, r3],
     });
@@ -278,15 +278,15 @@ describe('get visible layers', () => {
     const state = createInitialState(createSketchFile(page));
 
     expect(
-      getVisibleLayerMap(state, { width: 1000, height: 1000 }, insets),
+      getClippedLayerMap(state, { width: 1000, height: 1000 }, insets),
     ).toEqual({
-      r1: true,
-      r2: true,
-      r3: false,
+      r1: false,
+      r2: false,
+      r3: true,
     });
   });
 
-  test('select visible layers in artboard', () => {
+  test('get clipped layers in artboard', () => {
     const a1 = SketchModel.artboard({
       do_objectID: 'a1',
       frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
@@ -300,12 +300,12 @@ describe('get visible layers', () => {
     const state = createInitialState(createSketchFile(page));
 
     expect(
-      getVisibleLayerMap(state, { width: 1000, height: 1000 }, insets),
+      getClippedLayerMap(state, { width: 1000, height: 1000 }, insets),
     ).toEqual({
-      a1: true,
-      r1: true,
-      r2: true,
-      r3: false,
+      a1: false,
+      r1: false,
+      r2: false,
+      r3: true,
     });
   });
 });
