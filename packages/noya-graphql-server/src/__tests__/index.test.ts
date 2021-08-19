@@ -1,6 +1,5 @@
 import { execSync, fork } from 'child_process';
 import http from 'http';
-import { sleep } from 'noya-utils';
 import path from 'path';
 // import webpack from 'webpack';
 
@@ -56,32 +55,35 @@ function makeGraphQLQuery({ query }: { query: string }) {
 }
 
 test('server runs', async () => {
-  console.info('compiling...');
+  // console.info('compiling...');
 
-  execSync('npm run build', { cwd: root });
+  execSync('npm run build --scripts-prepend-node-path', { cwd: root });
 
   // await compile({ production: true });
 
-  console.info('launching server...');
+  // console.info('launching server...');
 
-  const process = fork(path.join(root, 'build', 'bundle.js'), {
+  const child = fork(path.join(root, 'build', 'bundle.js'), {
     cwd: root,
-    silent: true,
   });
 
-  // const process = exec('npm run start', { cwd: root });
+  await new Promise<void>((resolve) => {
+    child.on('message', (message) => {
+      if (message === 'ready') {
+        resolve();
+      }
+    });
+  });
 
-  await sleep(4000);
-
-  console.info('making request');
+  // console.info('making request');
 
   const data = await makeGraphQLQuery({ query: '{ colors { id } }' });
 
-  console.info('cleaning up...');
+  // console.info('cleaning up...');
 
-  process.kill();
+  child.kill();
 
-  await sleep(4000);
+  // await sleep(4000);
 
   expect(data).toEqual({
     data: {

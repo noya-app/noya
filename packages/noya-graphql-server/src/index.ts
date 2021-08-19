@@ -117,6 +117,8 @@ async function main() {
 
   server.listen().then(({ url }) => {
     console.info(`🚀  Server ready at ${url}`);
+
+    process.send?.('ready');
   });
 }
 
