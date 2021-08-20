@@ -28,6 +28,7 @@ import {
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
+  InsertedImage,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
 import {
@@ -1011,24 +1012,28 @@ export default memo(function Canvas() {
       if (file.type === 'image/svg+xml') {
         const svgString = await file.text();
         const name = file.name.replace(/\.svg$/, '');
-        dispatch('importSvg', point, name, svgString);
-        return;
+        const image: InsertedImage = {
+          name,
+          extension: 'svg',
+          svgString,
+        };
+
+        dispatch('importImage', [image], point, insertTarget);
+      } else {
+        const data = await file.arrayBuffer();
+        const decodedImage = CanvasKit.MakeImageFromEncoded(data);
+
+        if (!decodedImage) return;
+
+        const size = {
+          width: decodedImage.width(),
+          height: decodedImage.height(),
+        };
+        const extension = getFileExtensionForType(file.type);
+        const image: InsertedImage = { data, name: file.name, extension, size };
+
+        dispatch('importImage', [image], point, insertTarget);
       }
-
-      const data = await file.arrayBuffer();
-      const image = CanvasKit.MakeImageFromEncoded(data);
-
-      if (!image) return;
-
-      const size = { width: image.width(), height: image.height() };
-      const extension = getFileExtensionForType(file.type);
-
-      dispatch(
-        'importImage',
-        [{ data, name: file.name, extension, size }],
-        point,
-        insertTarget,
-      );
     },
     [CanvasKit, dispatch, offsetEventPoint],
   );

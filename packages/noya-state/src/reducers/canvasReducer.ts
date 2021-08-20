@@ -16,6 +16,7 @@ import {
   rectContainsPoint,
   Size,
 } from 'noya-geometry';
+import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -71,12 +72,17 @@ import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
 export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
 
-export type InsertedImage = {
-  data: ArrayBuffer;
-  name: string;
-  extension: 'png' | 'jpg' | 'webp' | 'pdf';
-  size: Size;
-};
+export type InsertedImage = { name: string } & (
+  | {
+      extension: 'png' | 'jpg' | 'webp' | 'pdf';
+      data: ArrayBuffer;
+      size: Size;
+    }
+  | {
+      extension: 'svg';
+      svgString: string;
+    }
+);
 
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
@@ -1054,13 +1060,28 @@ export function canvasReducer(
       state = produce(state, (draft) => {
         draft.selectedObjects = [];
 
-        zip(images, layerIds).forEach(
-          ([{ data, size, name, extension }, layerId]) => {
+        zip(images, layerIds).forEach(([image, layerId]) => {
+          let layer: Sketch.AnyLayer;
+
+          if (image.extension === 'svg') {
+            const { name, svgString } = image;
+
+            layer = svgToLayer(name, svgString);
+
+            layer.do_objectID = layerId;
+            layer.frame = {
+              ...layer.frame,
+              x: insertAt.x - layer.frame.width / 2,
+              y: insertAt.y - layer.frame.height / 2,
+            };
+          } else {
+            const { name, extension, size, data } = image;
+
             const _ref = `images/${uuid()}.${extension}`;
 
             draft.sketch.images[_ref] = data;
 
-            const layer = SketchModel.bitmap({
+            layer = SketchModel.bitmap({
               do_objectID: layerId,
               name: name.replace(`.${extension}`, ''),
               image: SketchModel.fileReference({ _ref }),
@@ -1071,11 +1092,11 @@ export function canvasReducer(
                 height: size.height,
               }),
             });
+          }
 
-            draft.sketch.pages[pageIndex].layers.push(layer);
-            draft.selectedObjects = [layerId];
-          },
-        );
+          draft.sketch.pages[pageIndex].layers.push(layer);
+          draft.selectedObjects = [layerId];
+        });
       });
 
       if (parentLayer) {
