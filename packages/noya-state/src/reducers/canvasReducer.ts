@@ -1089,6 +1089,11 @@ export function canvasReducer(
                 width: size.width,
                 height: size.height,
               }),
+              style: SketchModel.style({
+                colorControls: SketchModel.colorControls({
+                  isEnabled: false,
+                }),
+              }),
             });
           }
 
