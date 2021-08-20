@@ -26,35 +26,28 @@ export default memo(function ImageDropTarget<T extends string>({
   supportedFileTypes,
 }: Props<T>) {
   const handleImageFile = useCallback(
-    (e: DragEvent) => {
-      e.preventDefault();
+    (event: DragEvent) => {
+      event.preventDefault();
 
-      if (!e.dataTransfer) return;
+      [...event.dataTransfer.files].forEach((file) => {
+        if (!isSupportedFile(file, supportedFileTypes)) {
+          alert(
+            `Files of type ${
+              file.type
+            } aren't supported. The following types are supported: ${supportedFileTypes.join(
+              ', ',
+            )}`,
+          );
+          return;
+        }
 
-      const file = e.dataTransfer.files[0];
+        const offsetPoint = {
+          offsetX: event.nativeEvent.offsetX,
+          offsetY: event.nativeEvent.offsetY,
+        };
 
-      if (!file) {
-        alert('Unable to read file');
-        return;
-      }
-
-      if (!isSupportedFile(file, supportedFileTypes)) {
-        alert(
-          `Files of type ${
-            file.type
-          } aren't supported. The following types are supported: ${supportedFileTypes.join(
-            ', ',
-          )}`,
-        );
-        return;
-      }
-
-      const offsetPoint = {
-        offsetX: e.nativeEvent.offsetX,
-        offsetY: e.nativeEvent.offsetY,
-      };
-
-      onDropFile(file, offsetPoint);
+        onDropFile(file, offsetPoint);
+      });
     },
     [onDropFile, supportedFileTypes],
   );
