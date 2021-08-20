@@ -24,7 +24,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { clamp, lerp, uuid } from 'noya-utils';
+import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   getAngularGradientCircle,
@@ -69,7 +69,14 @@ import {
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
-export type FileInsertTarget = 'selectedArtboard' | 'nearestArtboard';
+export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
+
+export type InsertedImage = {
+  data: ArrayBuffer;
+  name: string;
+  extension: 'png' | 'jpg' | 'webp' | 'pdf';
+  size: Size;
+};
 
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
@@ -83,13 +90,10 @@ export type CanvasAction =
   | [type: 'addStopToGradient', point: Point]
   | [type: 'deleteStopToGradient']
   | [
-      type: 'insertBitmap',
-      data: ArrayBuffer,
-      name: string,
-      extension: string,
-      size: Size,
+      type: 'importImage',
+      images: InsertedImage[],
       insertAt: Point,
-      insertInto: FileInsertTarget,
+      insertInto: ImportedImageTarget,
     ]
   | [type: 'addPointToPath', point: Point]
   | [type: 'insertPointInPath', point: Point]
@@ -1013,8 +1017,8 @@ export function canvasReducer(
         }
       });
     }
-    case 'insertBitmap': {
-      const [, data, name, extension, size, insertAt, insertInto] = action;
+    case 'importImage': {
+      const [, images, insertAt, insertInto] = action;
       const pageIndex = getCurrentPageIndex(state);
 
       let parentLayer: Layers.ParentLayer | undefined;
@@ -1045,31 +1049,37 @@ export function canvasReducer(
         }
       }
 
-      const layerId = uuid();
+      const layerIds = images.map(() => uuid());
 
       state = produce(state, (draft) => {
-        const _ref = `images/${uuid()}.${extension}`;
+        draft.selectedObjects = [];
 
-        draft.sketch.images[_ref] = data;
+        zip(images, layerIds).forEach(
+          ([{ data, size, name, extension }, layerId]) => {
+            const _ref = `images/${uuid()}.${extension}`;
 
-        const layer = SketchModel.bitmap({
-          do_objectID: layerId,
-          name: name.replace(`.${extension}`, ''),
-          image: SketchModel.fileReference({ _ref }),
-          frame: SketchModel.rect({
-            x: insertAt.x - size.width / 2,
-            y: insertAt.y - size.height / 2,
-            width: size.width,
-            height: size.height,
-          }),
-        });
+            draft.sketch.images[_ref] = data;
 
-        draft.sketch.pages[pageIndex].layers.push(layer);
-        draft.selectedObjects = [layerId];
+            const layer = SketchModel.bitmap({
+              do_objectID: layerId,
+              name: name.replace(`.${extension}`, ''),
+              image: SketchModel.fileReference({ _ref }),
+              frame: SketchModel.rect({
+                x: insertAt.x - size.width / 2,
+                y: insertAt.y - size.height / 2,
+                width: size.width,
+                height: size.height,
+              }),
+            });
+
+            draft.sketch.pages[pageIndex].layers.push(layer);
+            draft.selectedObjects = [layerId];
+          },
+        );
       });
 
       if (parentLayer) {
-        state = moveLayer(state, layerId, parentLayer.do_objectID, 'inside');
+        state = moveLayer(state, layerIds, parentLayer.do_objectID, 'inside');
       }
 
       return state;

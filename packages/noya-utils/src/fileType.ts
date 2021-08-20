@@ -12,14 +12,21 @@ const FILE_TYPE_TO_EXTENSION = {
 
 const FILE_EXTENSION_TO_TYPE = invert(FILE_TYPE_TO_EXTENSION);
 
+type FileTypeMap = typeof FILE_TYPE_TO_EXTENSION;
+type FileExtensionMap = typeof FILE_EXTENSION_TO_TYPE;
+
 export type FileType = keyof typeof FILE_TYPE_TO_EXTENSION;
 export type FileExtension = typeof FILE_TYPE_TO_EXTENSION[FileType];
 
-export function getFileExtensionForType(type: FileType) {
+export function getFileExtensionForType<K extends keyof FileTypeMap>(
+  type: K,
+): FileTypeMap[K] {
   return FILE_TYPE_TO_EXTENSION[type];
 }
 
-export function getFileTypeForExtension(type: FileExtension) {
+export function getFileTypeForExtension<K extends keyof FileExtensionMap>(
+  type: K,
+): FileExtensionMap[K] {
   return FILE_EXTENSION_TO_TYPE[type];
 }
 

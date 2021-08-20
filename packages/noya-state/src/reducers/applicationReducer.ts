@@ -167,7 +167,7 @@ export function applicationReducer(
     case 'addSymbolLayer':
     case 'addPointToPath':
     case 'pan':
-    case 'insertBitmap':
+    case 'importImage':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':

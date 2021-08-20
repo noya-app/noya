@@ -21,7 +21,7 @@ import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
-  FileInsertTarget,
+  ImportedImageTarget,
   getCurrentPage,
   getSelectedLineLayer,
   Layers,
@@ -1002,7 +1002,7 @@ export default memo(function Canvas() {
   const onInsertImage = useCallback(
     async (
       file: TypedFile<SupportedImageUploadType>,
-      insertTarget: FileInsertTarget,
+      insertTarget: ImportedImageTarget,
       offsetPoint: OffsetPoint,
     ) => {
       const rawPoint = getPoint(offsetPoint);
@@ -1020,17 +1020,12 @@ export default memo(function Canvas() {
 
       if (!image) return;
 
-      const size = {
-        width: image.width(),
-        height: image.height(),
-      };
+      const size = { width: image.width(), height: image.height() };
+      const extension = getFileExtensionForType(file.type);
 
       dispatch(
-        'insertBitmap',
-        data,
-        file.name,
-        getFileExtensionForType(file.type),
-        size,
+        'importImage',
+        [{ data, name: file.name, extension, size }],
         point,
         insertTarget,
       );

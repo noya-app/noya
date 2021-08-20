@@ -174,8 +174,8 @@ export function layerReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       return produce(state, (draft) => {
-        const page = draft.sketch.pages[pageIndex];
-        page.layers.push(layer);
+        draft.sketch.pages[pageIndex].layers.push(layer);
+        draft.selectedObjects = [layer.do_objectID];
       });
     }
     case 'moveLayer': {
