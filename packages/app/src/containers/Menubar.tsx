@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   Spacer,
 } from 'noya-designsystem';
+import { useKeyboardShortcuts } from 'noya-keymap';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
@@ -55,6 +56,39 @@ const MenubarContent = memo(function MenubarContent({
   undoDisabled,
 }: Props) {
   const dispatch = useDispatch();
+
+  const handleSave = useCallback(
+    async (action: 'save' | 'saveAs') => {
+      const data = await encode(getStateSnapshot().sketch);
+
+      const file = new File([data], fileHandle?.name ?? 'Untitled.sketch', {
+        type: 'application/zip',
+      });
+
+      const newFileHandle = await fileSave(
+        file,
+        { fileName: file.name, extensions: ['.sketch'] },
+        action === 'save' ? fileHandle : undefined,
+        false,
+      );
+
+      dispatch('setFileHandle', newFileHandle);
+    },
+    [dispatch, fileHandle, getStateSnapshot],
+  );
+
+  useKeyboardShortcuts({
+    // TODO: Enable in desktop app
+    // 'Mod-n': () => {
+    //   dispatch('newFile');
+    // },
+    'Mod-s': () => {
+      handleSave('save');
+    },
+    'Mod-Shift-s': () => {
+      handleSave('saveAs');
+    },
+  });
 
   const menuItems = useMemo(
     () =>
@@ -102,20 +136,7 @@ const MenubarContent = memo(function MenubarContent({
         }
         case 'save':
         case 'saveAs': {
-          const data = await encode(getStateSnapshot().sketch);
-
-          const file = new File([data], fileHandle?.name ?? 'Untitled.sketch', {
-            type: 'application/zip',
-          });
-
-          const newFileHandle = await fileSave(
-            file,
-            { fileName: file.name, extensions: ['.sketch'] },
-            value === 'save' ? fileHandle : undefined,
-            false,
-          );
-
-          dispatch('setFileHandle', newFileHandle);
+          handleSave(value);
           return;
         }
         case 'undo':
@@ -129,7 +150,7 @@ const MenubarContent = memo(function MenubarContent({
           return;
       }
     },
-    [dispatch, fileHandle, getStateSnapshot, setShowRulers, showRulers],
+    [dispatch, handleSave, setShowRulers, showRulers],
   );
 
   return (
