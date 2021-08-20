@@ -19,7 +19,7 @@ import {
   useMemo,
   useRef,
 } from 'react';
-import { WindowScroller } from 'react-virtualized/dist/es/WindowScroller';
+import { WindowScroller } from 'react-virtualized';
 import { VariableSizeList } from 'react-window';
 import styled from 'styled-components';
 import { InputField, Spacer } from '..';
