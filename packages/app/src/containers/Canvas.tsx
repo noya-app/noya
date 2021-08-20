@@ -175,6 +175,46 @@ export default memo(function Canvas() {
 
       dispatch('interaction', ['enablePanMode']);
     },
+    Enter: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      switch (state.interactionState.type) {
+        case 'editPath': {
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
+        case 'none': {
+          const selectedLayers = Selectors.getSelectedLayers(state);
+
+          if (selectedLayers.length > 0) {
+            const firstLayer = selectedLayers[0];
+
+            if (Layers.isTextLayer(firstLayer)) {
+              dispatch('selectLayer', firstLayer.do_objectID);
+              dispatch('interaction', [
+                'editingText',
+                firstLayer.do_objectID,
+                {
+                  anchor: 0,
+                  head: firstLayer.attributedString.string.length,
+                },
+              ]);
+            } else if (Layers.isPointsLayer(firstLayer)) {
+              dispatch(
+                'selectLayer',
+                selectedLayers
+                  .filter(Layers.isPointsLayer)
+                  .map((layer) => layer.do_objectID),
+              );
+              dispatch('interaction', ['editPath']);
+            }
+
+            break;
+          }
+        }
+      }
+    },
   });
 
   useKeyboardShortcuts(
@@ -1072,6 +1112,10 @@ export default memo(function Canvas() {
         dispatch('insertText', event.data);
       } else {
         switch (event.inputType) {
+          case 'insertLineBreak':
+            dispatch('insertText', '\n');
+            break;
+          // Delete
           case 'deleteContent':
           case 'deleteContentForward':
           case 'deleteContentBackward':

@@ -13,18 +13,22 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { FALLTHROUGH, KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
-import { DrawableLayerType, InteractionType, Selectors } from 'noya-state';
+import {
+  DrawableLayerType,
+  InteractionType,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
-import { useShallowArray } from 'noya-react-utils';
 import { LayerIcon } from './LayerList';
 
-const Row = styled.div(({ theme }) => ({
+const DropdownContainer = styled.div({
   display: 'flex',
   alignItems: 'center',
   minWidth: '50px',
-}));
+});
 
 type InteractionStateProjection =
   | {
@@ -35,7 +39,7 @@ type InteractionStateProjection =
 
 interface Props {
   interactionStateProjection: InteractionStateProjection;
-  selectedLayerIds: string[];
+  canStartEditingPath: boolean;
 }
 
 type InsertMenuLayerType =
@@ -51,7 +55,7 @@ const SYMBOL_ITEM_PREFIX = 'symbol:';
 
 const ToolbarContent = memo(function ToolbarContent({
   interactionStateProjection,
-  selectedLayerIds,
+  canStartEditingPath,
 }: Props) {
   const dispatch = useDispatch();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
@@ -225,7 +229,7 @@ const ToolbarContent = memo(function ToolbarContent({
   return (
     <>
       <Spacer.Horizontal size={itemSeparatorSize} />
-      <Row>
+      <DropdownContainer>
         <DropdownMenu<string> items={menuItems} onSelect={handleInsertSymbol}>
           <Button id="insert-stymbol">
             {useMemo(
@@ -240,14 +244,14 @@ const ToolbarContent = memo(function ToolbarContent({
             )}
           </Button>
         </DropdownMenu>
-      </Row>
+      </DropdownContainer>
       <Spacer.Horizontal size={8} />
       <Spacer.Horizontal size={itemSeparatorSize} />
       <Button
         id="edit-path"
         tooltip="Edit path"
         active={isEditingPath}
-        disabled={selectedLayerIds.length === 0}
+        disabled={!(isEditingPath || canStartEditingPath)}
         onClick={useCallback(() => {
           if (!isEditingPath) {
             dispatch('interaction', ['editPath']);
@@ -269,7 +273,6 @@ const ToolbarContent = memo(function ToolbarContent({
 
 export default function Toolbar() {
   const [state] = useApplicationState();
-  const selectedLayerIds = useShallowArray(state.selectedObjects);
 
   const layerType =
     state.interactionState.type === 'insert'
@@ -284,10 +287,14 @@ export default function Toolbar() {
     [state.interactionState.type, layerType],
   );
 
+  const canStartEditingPath =
+    state.interactionState.type === 'none' &&
+    Selectors.getSelectedLayers(state).filter(Layers.isPointsLayer).length > 0;
+
   return (
     <ToolbarContent
       interactionStateProjection={projection}
-      selectedLayerIds={selectedLayerIds}
+      canStartEditingPath={canStartEditingPath}
     />
   );
 }
