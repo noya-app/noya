@@ -46,6 +46,8 @@ import { useDeepArray } from 'noya-react-utils';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 import { useShallowArray } from 'noya-react-utils';
 import { Size } from 'noya-geometry';
+import { useRef } from 'react';
+import { useEffect } from 'react';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -445,8 +447,21 @@ export default memo(function LayerList({ size }: { size: Size }) {
     ],
   );
 
+  const ref = useRef<ListView.IVirtualizedList | null>(null);
+
+  const scrollToIndex =
+    items.findIndex((item) => item.id === selectedObjects[0]) ?? -1;
+
+  // Whenever selection changes, scroll the first selected layer into view
+  useEffect(() => {
+    if (scrollToIndex === -1) return;
+
+    ref.current?.scrollToIndex(scrollToIndex);
+  }, [scrollToIndex]);
+
   return (
     <TreeView.Root
+      ref={ref}
       virtualized={size}
       data={items}
       renderItem={renderItem}
