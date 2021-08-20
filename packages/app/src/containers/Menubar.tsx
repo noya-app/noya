@@ -57,6 +57,19 @@ const MenubarContent = memo(function MenubarContent({
 }: Props) {
   const dispatch = useDispatch();
 
+  const handleOpen = useCallback(async () => {
+    const file = await fileOpen({
+      extensions: ['.sketch'],
+      mimeTypes: ['application/zip'],
+    });
+
+    const data = await file.arrayBuffer();
+
+    const sketch = await decode(data);
+
+    dispatch('setFile', sketch, file.handle);
+  }, [dispatch]);
+
   const handleSave = useCallback(
     async (action: 'save' | 'saveAs') => {
       const data = await encode(getStateSnapshot().sketch);
@@ -88,6 +101,9 @@ const MenubarContent = memo(function MenubarContent({
     'Mod-Shift-s': () => {
       handleSave('saveAs');
     },
+    'Mod-o': () => {
+      handleOpen();
+    },
   });
 
   const menuItems = useMemo(
@@ -115,23 +131,14 @@ const MenubarContent = memo(function MenubarContent({
   );
 
   const onSelectMenuItem = useCallback(
-    async (value: MenuItemType) => {
+    (value: MenuItemType) => {
       switch (value) {
         case 'new': {
           dispatch('newFile');
           return;
         }
         case 'open': {
-          const file = await fileOpen({
-            extensions: ['.sketch'],
-            mimeTypes: ['application/zip'],
-          });
-
-          const data = await file.arrayBuffer();
-
-          const sketch = await decode(data);
-
-          dispatch('setFile', sketch, file.handle);
+          handleOpen();
           return;
         }
         case 'save':
@@ -150,7 +157,7 @@ const MenubarContent = memo(function MenubarContent({
           return;
       }
     },
-    [dispatch, handleSave, setShowRulers, showRulers],
+    [dispatch, handleOpen, handleSave, setShowRulers, showRulers],
   );
 
   return (
