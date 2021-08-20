@@ -62,7 +62,7 @@ interface Props {
   onChangeContrast: (value: number, mode: SetNumberMode) => void;
 }
 
-export default memo(function FillRow({
+export default memo(function ColorControlsRow({
   id,
   hue,
   saturation,

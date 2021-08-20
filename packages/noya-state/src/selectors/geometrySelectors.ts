@@ -199,8 +199,6 @@ export function getLayerAtPoint(
   const canvasTransform = getCanvasTransform(state, insets);
   const screenTransform = getScreenTransform(insets);
 
-  // TODO: check if we're clicking the title of an artboard
-
   let found: Sketch.AnyLayer | undefined;
 
   const screenPoint = screenTransform.applyTo(point);

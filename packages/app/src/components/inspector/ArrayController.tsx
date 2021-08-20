@@ -83,7 +83,7 @@ function ArrayController<Item>({
 
   const renderRow = (index: number) => {
     return (
-      <ElementRow>
+      <ElementRow key={keys[index]}>
         {renderItem({ item: items[index], index: index })}
       </ElementRow>
     );

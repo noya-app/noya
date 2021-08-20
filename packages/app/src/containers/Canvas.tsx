@@ -21,6 +21,7 @@ import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
+  FileInsertTarget,
   getCurrentPage,
   getSelectedLineLayer,
   Layers,
@@ -41,6 +42,7 @@ import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
+import { useImagePasteHandler } from '../hooks/useImagePasteHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
@@ -1000,6 +1002,7 @@ export default memo(function Canvas() {
   const onDropFile = useCallback(
     async (
       file: TypedFile<SupportedImageUploadType>,
+      insertTarget: FileInsertTarget,
       offsetPoint: OffsetPoint,
     ) => {
       const rawPoint = getPoint(offsetPoint);
@@ -1022,20 +1025,24 @@ export default memo(function Canvas() {
         height: image.height(),
       };
 
-      const frame = {
-        ...size,
-        x: point.x - size.width / 2,
-        y: point.y - size.height / 2,
-      };
-
-      dispatch('insertBitmap', data, {
-        name: file.name,
-        frame: frame,
-        extension: getFileExtensionForType(file.type),
-      });
+      dispatch(
+        'insertBitmap',
+        data,
+        file.name,
+        getFileExtensionForType(file.type),
+        size,
+        point,
+        insertTarget,
+      );
     },
     [CanvasKit, dispatch, offsetEventPoint],
   );
+
+  useImagePasteHandler({
+    canvasSize: containerSize,
+    onDropFile,
+    supportedFileTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
 

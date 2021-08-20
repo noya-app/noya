@@ -13,7 +13,8 @@ import {
   getLinePercentage,
   insetRect,
   Point,
-  Rect,
+  rectContainsPoint,
+  Size,
 } from 'noya-geometry';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
@@ -68,6 +69,8 @@ import {
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
+export type FileInsertTarget = 'selectedArtboard' | 'nearestArtboard';
+
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
   | [
@@ -81,8 +84,12 @@ export type CanvasAction =
   | [type: 'deleteStopToGradient']
   | [
       type: 'insertBitmap',
-      file: ArrayBuffer,
-      details: { name: string; frame: Rect; extension: string },
+      data: ArrayBuffer,
+      name: string,
+      extension: string,
+      size: Size,
+      insertAt: Point,
+      insertInto: FileInsertTarget,
     ]
   | [type: 'addPointToPath', point: Point]
   | [type: 'insertPointInPath', point: Point]
@@ -1007,22 +1014,65 @@ export function canvasReducer(
       });
     }
     case 'insertBitmap': {
-      const [, file, { name, frame, extension }] = action;
+      const [, data, name, extension, size, insertAt, insertInto] = action;
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (draft) => {
+      let parentLayer: Layers.ParentLayer | undefined;
+
+      switch (insertInto) {
+        case 'selectedArtboard': {
+          const selectedLayers = Selectors.getSelectedLayers(state);
+
+          if (
+            selectedLayers.length > 0 &&
+            Layers.isArtboard(selectedLayers[0])
+          ) {
+            parentLayer = selectedLayers[0];
+          }
+
+          break;
+        }
+        case 'nearestArtboard': {
+          const targetLayer = state.sketch.pages[pageIndex].layers.find(
+            (layer) =>
+              Layers.isArtboard(layer) &&
+              rectContainsPoint(layer.frame, insertAt),
+          );
+
+          if (targetLayer && Layers.isArtboard(targetLayer)) {
+            parentLayer = targetLayer;
+          }
+        }
+      }
+
+      const layerId = uuid();
+
+      state = produce(state, (draft) => {
         const _ref = `images/${uuid()}.${extension}`;
 
-        draft.sketch.images[_ref] = file;
+        draft.sketch.images[_ref] = data;
 
         const layer = SketchModel.bitmap({
+          do_objectID: layerId,
           name: name.replace(`.${extension}`, ''),
           image: SketchModel.fileReference({ _ref }),
-          frame: SketchModel.rect(frame),
+          frame: SketchModel.rect({
+            x: insertAt.x - size.width / 2,
+            y: insertAt.y - size.height / 2,
+            width: size.width,
+            height: size.height,
+          }),
         });
 
-        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
+        draft.sketch.pages[pageIndex].layers.push(layer);
+        draft.selectedObjects = [layerId];
       });
+
+      if (parentLayer) {
+        state = moveLayer(state, layerId, parentLayer.do_objectID, 'inside');
+      }
+
+      return state;
     }
     default:
       return state;

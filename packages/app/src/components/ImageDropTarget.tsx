@@ -1,3 +1,4 @@
+import { FileInsertTarget } from 'noya-state';
 import { DragEvent, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { OffsetPoint } from '../containers/Canvas';
@@ -14,7 +15,11 @@ export function isSupportedFile<T extends string>(
 
 interface Props<T extends string> {
   children: ReactNode | ((isActive: boolean) => ReactNode);
-  onDropFile: (file: TypedFile<T>, event: OffsetPoint) => void;
+  onDropFile: (
+    file: TypedFile<T>,
+    insertTarget: FileInsertTarget,
+    offsetPoint: OffsetPoint,
+  ) => void;
   supportedFileTypes: T[];
 }
 
@@ -54,7 +59,7 @@ export default memo(function ImageDropTarget<T extends string>({
         offsetY: e.nativeEvent.offsetY,
       };
 
-      onDropFile(file, offsetPoint);
+      onDropFile(file, 'nearestArtboard', offsetPoint);
     },
     [onDropFile, supportedFileTypes],
   );

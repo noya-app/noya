@@ -30,6 +30,7 @@ beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
   const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
   context = {
+    canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
     canvasSize: { width: 1000, height: 1000 },
     fontManager: {
       ...new FontManager(GoogleFontProvider),
