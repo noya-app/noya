@@ -13,8 +13,10 @@ import {
   getLinePercentage,
   insetRect,
   Point,
-  Rect,
+  rectContainsPoint,
+  Size,
 } from 'noya-geometry';
+import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -23,7 +25,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { clamp, lerp, uuid } from 'noya-utils';
+import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   getAngularGradientCircle,
@@ -68,6 +70,20 @@ import {
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
+export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
+
+export type InsertedImage = { name: string } & (
+  | {
+      extension: 'png' | 'jpg' | 'webp' | 'pdf';
+      data: ArrayBuffer;
+      size: Size;
+    }
+  | {
+      extension: 'svg';
+      svgString: string;
+    }
+);
+
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
   | [
@@ -80,9 +96,10 @@ export type CanvasAction =
   | [type: 'addStopToGradient', point: Point]
   | [type: 'deleteStopToGradient']
   | [
-      type: 'insertBitmap',
-      file: ArrayBuffer,
-      details: { name: string; frame: Rect; extension: string },
+      type: 'importImage',
+      images: InsertedImage[],
+      insertAt: Point,
+      insertInto: ImportedImageTarget,
     ]
   | [type: 'addPointToPath', point: Point]
   | [type: 'insertPointInPath', point: Point]
@@ -1006,23 +1023,86 @@ export function canvasReducer(
         }
       });
     }
-    case 'insertBitmap': {
-      const [, file, { name, frame, extension }] = action;
+    case 'importImage': {
+      const [, images, insertAt, insertInto] = action;
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (draft) => {
-        const _ref = `images/${uuid()}.${extension}`;
+      let parentLayer: Layers.ParentLayer | undefined;
 
-        draft.sketch.images[_ref] = file;
+      switch (insertInto) {
+        case 'selectedArtboard': {
+          const selectedLayers = Selectors.getSelectedLayers(state);
 
-        const layer = SketchModel.bitmap({
-          name: name.replace(`.${extension}`, ''),
-          image: SketchModel.fileReference({ _ref }),
-          frame: SketchModel.rect(frame),
+          if (
+            selectedLayers.length > 0 &&
+            Layers.isArtboard(selectedLayers[0])
+          ) {
+            parentLayer = selectedLayers[0];
+          }
+
+          break;
+        }
+        case 'nearestArtboard': {
+          const targetLayer = state.sketch.pages[pageIndex].layers.find(
+            (layer) =>
+              Layers.isArtboard(layer) &&
+              rectContainsPoint(layer.frame, insertAt),
+          );
+
+          if (targetLayer && Layers.isArtboard(targetLayer)) {
+            parentLayer = targetLayer;
+          }
+        }
+      }
+
+      const layerIds = images.map(() => uuid());
+
+      state = produce(state, (draft) => {
+        zip(images, layerIds).forEach(([image, layerId]) => {
+          let layer: Sketch.AnyLayer;
+
+          if (image.extension === 'svg') {
+            const { name, svgString } = image;
+
+            layer = svgToLayer(svgString);
+            layer.name = name;
+            layer.do_objectID = layerId;
+            layer.frame = {
+              ...layer.frame,
+              x: insertAt.x - layer.frame.width / 2,
+              y: insertAt.y - layer.frame.height / 2,
+            };
+          } else {
+            const { name, extension, size, data } = image;
+
+            const _ref = `images/${uuid()}.${extension}`;
+
+            draft.sketch.images[_ref] = data;
+
+            layer = SketchModel.bitmap({
+              do_objectID: layerId,
+              name,
+              image: SketchModel.fileReference({ _ref }),
+              frame: SketchModel.rect({
+                x: insertAt.x - size.width / 2,
+                y: insertAt.y - size.height / 2,
+                width: size.width,
+                height: size.height,
+              }),
+            });
+          }
+
+          draft.sketch.pages[pageIndex].layers.push(layer);
         });
 
-        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
+        draft.selectedObjects = layerIds;
       });
+
+      if (parentLayer) {
+        state = moveLayer(state, layerIds, parentLayer.do_objectID, 'inside');
+      }
+
+      return state;
     }
     default:
       return state;

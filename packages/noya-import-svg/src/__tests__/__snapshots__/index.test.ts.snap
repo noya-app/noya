@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`makes demo layers 1`] = `
-"<Group> svg { x: 0, y: 0, w: 517, h: 517.96 }
+"<Group> Group { x: 0, y: 0, w: 517, h: 517.96 }
 ├── <ShapeGroup> Path { x: 0, y: 290.75, w: 133.82, h: 92.42 }
 │   └── <ShapePath> Path { x: 0, y: 0, w: 133.82, h: 92.42 }
 ├── <ShapeGroup> Path { x: 0, y: 290.75, w: 133.82, h: 92.42 }
@@ -31,7 +31,7 @@ exports[`makes demo layers 1`] = `
 `;
 
 exports[`makes layers 1`] = `
-"<Group> svg { x: 0, y: 0, w: 90, h: 90 }
+"<Group> Group { x: 0, y: 0, w: 90, h: 90 }
 ├── <Style>
 └── <ShapeGroup> Path { x: 0, y: 0, w: 90, h: 90 }
     ├── <Style>
@@ -49,7 +49,7 @@ exports[`makes layers 1`] = `
 `;
 
 exports[`makes multiple shapePaths in a shapeGroup 1`] = `
-"<Group> svg { x: 0, y: 0, w: 200, h: 200 }
+"<Group> Group { x: 0, y: 0, w: 200, h: 200 }
 └── <ShapeGroup> Path { x: 0, y: 0, w: 200, h: 200 }
     ├── <ShapePath> Path { x: 0, y: 0, w: 200, h: 200 }
     │   ├── <CurvePoint> { x: 0.5, y: 1 } (Straight)
@@ -62,7 +62,7 @@ exports[`makes multiple shapePaths in a shapeGroup 1`] = `
 `;
 
 exports[`uses viewbox 1`] = `
-"<Group> svg { x: 0, y: 0, w: 80, h: 80 }
+"<Group> Group { x: 0, y: 0, w: 80, h: 80 }
 └── <ShapeGroup> Path { x: 0, y: 0, w: 80, h: 80 }
     ├── <ShapePath> Path { x: 0, y: 0, w: 80, h: 80 }
     │   ├── <CurvePoint> { x: 0.5, y: 1 } (Straight)

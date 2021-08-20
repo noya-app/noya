@@ -2,7 +2,7 @@ import Sketch from '@sketch-hq/sketch-file-format-ts';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { Size } from 'noya-geometry';
+import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
@@ -99,6 +99,7 @@ export type Action =
   | TextEditorAction;
 
 export type ApplicationReducerContext = {
+  canvasInsets: Insets;
   canvasSize: Size;
   fontManager: IFontManager;
 };
@@ -166,7 +167,7 @@ export function applicationReducer(
     case 'addSymbolLayer':
     case 'addPointToPath':
     case 'pan':
-    case 'insertBitmap':
+    case 'importImage':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':
@@ -190,7 +191,6 @@ export function applicationReducer(
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
       return layerPropertyReducer(state, action, CanvasKit);
-    case 'importSvg':
     case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':

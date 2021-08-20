@@ -131,6 +131,7 @@ export function workspaceReducer(
     default: {
       return produce(state, (draft) => {
         draft.history = historyReducer(state.history, action, CanvasKit, {
+          canvasInsets: state.canvasInsets,
           canvasSize: state.canvasSize,
           fontManager,
         });

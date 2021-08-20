@@ -14,49 +14,51 @@ export function isSupportedFile<T extends string>(
 
 interface Props<T extends string> {
   children: ReactNode | ((isActive: boolean) => ReactNode);
-  onDropFile: (file: TypedFile<T>, event: OffsetPoint) => void;
+  onDropFiles: (file: TypedFile<T>[], offsetPoint: OffsetPoint) => void;
   supportedFileTypes: T[];
 }
 
 const Container = styled.div(() => ({ display: 'flex', flex: 1 }));
 
-export default memo(function ImageDropTarget<T extends string>({
+export default memo(function FileDropTarget<T extends string>({
   children,
-  onDropFile,
+  onDropFiles,
   supportedFileTypes,
 }: Props<T>) {
   const handleImageFile = useCallback(
-    (e: DragEvent) => {
-      e.preventDefault();
+    (event: DragEvent) => {
+      event.preventDefault();
 
-      if (!e.dataTransfer) return;
+      const offsetPoint = {
+        offsetX: event.nativeEvent.offsetX,
+        offsetY: event.nativeEvent.offsetY,
+      };
 
-      const file = e.dataTransfer.files[0];
+      const unsupportedTypes = [...event.dataTransfer.files].flatMap((file) => {
+        if (!isSupportedFile(file, supportedFileTypes)) {
+          return [file.type];
+        } else {
+          return [];
+        }
+      });
 
-      if (!file) {
-        alert('Unable to read file');
-        return;
-      }
-
-      if (!isSupportedFile(file, supportedFileTypes)) {
+      if (unsupportedTypes.length > 0) {
         alert(
-          `Files of type ${
-            file.type
-          } aren't supported. The following types are supported: ${supportedFileTypes.join(
+          `Files of type ${unsupportedTypes.join(
+            ', ',
+          )} aren't supported. The following types are supported: ${supportedFileTypes.join(
             ', ',
           )}`,
         );
-        return;
       }
 
-      const offsetPoint = {
-        offsetX: e.nativeEvent.offsetX,
-        offsetY: e.nativeEvent.offsetY,
-      };
+      const files = [...event.dataTransfer.files].flatMap((file) =>
+        isSupportedFile(file, supportedFileTypes) ? [file] : [],
+      );
 
-      onDropFile(file, offsetPoint);
+      onDropFiles(files, offsetPoint);
     },
-    [onDropFile, supportedFileTypes],
+    [onDropFiles, supportedFileTypes],
   );
 
   const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
