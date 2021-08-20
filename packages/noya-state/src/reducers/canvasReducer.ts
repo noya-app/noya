@@ -1058,16 +1058,14 @@ export function canvasReducer(
       const layerIds = images.map(() => uuid());
 
       state = produce(state, (draft) => {
-        draft.selectedObjects = [];
-
         zip(images, layerIds).forEach(([image, layerId]) => {
           let layer: Sketch.AnyLayer;
 
           if (image.extension === 'svg') {
             const { name, svgString } = image;
 
-            layer = svgToLayer(name, svgString);
-
+            layer = svgToLayer(svgString);
+            layer.name = name;
             layer.do_objectID = layerId;
             layer.frame = {
               ...layer.frame,
@@ -1083,7 +1081,7 @@ export function canvasReducer(
 
             layer = SketchModel.bitmap({
               do_objectID: layerId,
-              name: name.replace(`.${extension}`, ''),
+              name,
               image: SketchModel.fileReference({ _ref }),
               frame: SketchModel.rect({
                 x: insertAt.x - size.width / 2,
@@ -1095,8 +1093,9 @@ export function canvasReducer(
           }
 
           draft.sketch.pages[pageIndex].layers.push(layer);
-          draft.selectedObjects = [layerId];
         });
+
+        draft.selectedObjects = layerIds;
       });
 
       if (parentLayer) {

@@ -41,9 +41,9 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
+import ImageDropTarget, { TypedFile } from '../components/FileDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
-import { useImagePasteHandler } from '../hooks/useImagePasteHandler';
+import { useImagePasteHandler } from '../hooks/useFilePasteHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
@@ -1000,40 +1000,53 @@ export default memo(function Canvas() {
     }
   }, [state, handleDirection]);
 
-  const onInsertImage = useCallback(
+  const onImportImages = useCallback(
     async (
-      file: TypedFile<SupportedImageUploadType>,
+      files: TypedFile<SupportedImageUploadType>[],
       insertTarget: ImportedImageTarget,
       offsetPoint: OffsetPoint,
     ) => {
       const rawPoint = getPoint(offsetPoint);
       const point = offsetEventPoint(rawPoint);
 
-      if (file.type === 'image/svg+xml') {
-        const svgString = await file.text();
-        const name = file.name.replace(/\.svg$/, '');
-        const image: InsertedImage = {
-          name,
-          extension: 'svg',
-          svgString,
-        };
+      const images = await Promise.all(
+        files.map(
+          async (file): Promise<InsertedImage | void> => {
+            if (file.type === 'image/svg+xml') {
+              const svgString = await file.text();
 
-        dispatch('importImage', [image], point, insertTarget);
-      } else {
-        const data = await file.arrayBuffer();
-        const decodedImage = CanvasKit.MakeImageFromEncoded(data);
+              return {
+                name: file.name.replace(/\.svg$/, ''),
+                extension: 'svg',
+                svgString,
+              };
+            } else {
+              const data = await file.arrayBuffer();
+              const decodedImage = CanvasKit.MakeImageFromEncoded(data);
 
-        if (!decodedImage) return;
+              if (!decodedImage) return;
 
-        const size = {
-          width: decodedImage.width(),
-          height: decodedImage.height(),
-        };
-        const extension = getFileExtensionForType(file.type);
-        const image: InsertedImage = { data, name: file.name, extension, size };
+              const size = {
+                width: decodedImage.width(),
+                height: decodedImage.height(),
+              };
 
-        dispatch('importImage', [image], point, insertTarget);
-      }
+              const extension = getFileExtensionForType(file.type);
+
+              return {
+                name: file.name.replace(new RegExp(`\\.${extension}$`), ''),
+                extension,
+                size,
+                data,
+              };
+            }
+          },
+        ),
+      );
+
+      const validImages = images.flatMap((image) => (image ? [image] : []));
+
+      dispatch('importImage', validImages, point, insertTarget);
     },
     [CanvasKit, dispatch, offsetEventPoint],
   );
@@ -1041,9 +1054,9 @@ export default memo(function Canvas() {
   useImagePasteHandler<SupportedImageUploadType>({
     supportedFileTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
     canvasSize: containerSize,
-    onPasteImage: useCallback(
-      (file, point) => onInsertImage(file, 'selectedArtboard', point),
-      [onInsertImage],
+    onPasteImages: useCallback(
+      (files, point) => onImportImages(files, 'selectedArtboard', point),
+      [onImportImages],
     ),
   });
 
@@ -1085,9 +1098,9 @@ export default memo(function Canvas() {
   return (
     <ImageDropTarget<SupportedImageUploadType>
       supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
-      onDropFile={useCallback(
-        (file, point) => onInsertImage(file, 'nearestArtboard', point),
-        [onInsertImage],
+      onDropFiles={useCallback(
+        (file, point) => onImportImages(file, 'nearestArtboard', point),
+        [onImportImages],
       )}
     >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>

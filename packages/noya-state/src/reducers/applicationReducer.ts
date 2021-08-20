@@ -191,7 +191,6 @@ export function applicationReducer(
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
       return layerPropertyReducer(state, action, CanvasKit);
-    case 'importSvg':
     case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':
