@@ -1,20 +1,15 @@
 import { Size } from 'noya-geometry';
-import { FileInsertTarget } from 'noya-state';
 import { useEffect } from 'react';
 import { isSupportedFile, TypedFile } from '../components/ImageDropTarget';
 import { OffsetPoint } from '../containers/Canvas';
 
 export function useImagePasteHandler<T extends string>({
   canvasSize,
-  onDropFile,
+  onPasteImage,
   supportedFileTypes,
 }: {
   canvasSize: Size | undefined;
-  onDropFile: (
-    file: TypedFile<T>,
-    insertTarget: FileInsertTarget,
-    offsetPoint: OffsetPoint,
-  ) => void;
+  onPasteImage: (file: TypedFile<T>, offsetPoint: OffsetPoint) => void;
   supportedFileTypes: T[];
 }) {
   useEffect(() => {
@@ -30,7 +25,7 @@ export function useImagePasteHandler<T extends string>({
 
           const offsetSize = canvasSize ?? { width: 0, height: 0 };
 
-          onDropFile(file, 'selectedArtboard', {
+          onPasteImage(file, {
             offsetX: offsetSize.width / 2,
             offsetY: offsetSize.height / 2,
           });
@@ -40,5 +35,5 @@ export function useImagePasteHandler<T extends string>({
     document.addEventListener('paste', handler);
 
     return () => document.removeEventListener('paste', handler);
-  }, [canvasSize, onDropFile, supportedFileTypes]);
+  }, [canvasSize, onPasteImage, supportedFileTypes]);
 }

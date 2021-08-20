@@ -999,7 +999,7 @@ export default memo(function Canvas() {
     }
   }, [state, handleDirection]);
 
-  const onDropFile = useCallback(
+  const onInsertImage = useCallback(
     async (
       file: TypedFile<SupportedImageUploadType>,
       insertTarget: FileInsertTarget,
@@ -1038,10 +1038,13 @@ export default memo(function Canvas() {
     [CanvasKit, dispatch, offsetEventPoint],
   );
 
-  useImagePasteHandler({
-    canvasSize: containerSize,
-    onDropFile,
+  useImagePasteHandler<SupportedImageUploadType>({
     supportedFileTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
+    canvasSize: containerSize,
+    onPasteImage: useCallback(
+      (file, point) => onInsertImage(file, 'selectedArtboard', point),
+      [onInsertImage],
+    ),
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1080,9 +1083,12 @@ export default memo(function Canvas() {
   }, [dispatch]);
 
   return (
-    <ImageDropTarget
-      onDropFile={onDropFile}
+    <ImageDropTarget<SupportedImageUploadType>
       supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
+      onDropFile={useCallback(
+        (file, point) => onInsertImage(file, 'nearestArtboard', point),
+        [onInsertImage],
+      )}
     >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container
