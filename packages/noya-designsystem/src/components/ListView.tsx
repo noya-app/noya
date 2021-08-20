@@ -14,12 +14,13 @@ import {
   Ref,
   useCallback,
   useContext,
+  useImperativeHandle,
   useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react';
-import { List, WindowScroller } from 'react-virtualized';
+import { WindowScroller } from 'react-virtualized';
+import { VariableSizeList } from 'react-window';
 import styled from 'styled-components';
 import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
@@ -345,20 +346,35 @@ interface VirtualizedListProps<T> {
   scrollElement: HTMLDivElement;
   items: T[];
   getItemHeight: (index: number) => number;
+  keyExtractor: (index: number) => string;
   renderItem: (index: number) => ReactNode;
 }
 
-const VirtualizedList = memo(function VirtualizedList<T>({
-  size,
-  scrollElement,
-  items,
-  getItemHeight,
-  renderItem,
-}: VirtualizedListProps<T>) {
-  const [virtualizedListViewKey, setVirtualizedListViewKey] = useState(0);
+export interface IVirtualizedList {
+  scrollToIndex(index: number): void;
+}
+
+const VirtualizedListInner = forwardRef(function VirtualizedListInner<T>(
+  {
+    size,
+    scrollElement,
+    items,
+    getItemHeight,
+    keyExtractor,
+    renderItem,
+  }: VirtualizedListProps<T>,
+  ref: ForwardedRef<IVirtualizedList>,
+) {
+  const listRef = useRef<VariableSizeList<T> | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    scrollToIndex(index) {
+      listRef.current?.scrollToItem(index);
+    },
+  }));
 
   useLayoutEffect(() => {
-    setVirtualizedListViewKey((key) => key + 1);
+    listRef.current?.resetAfterIndex(0);
   }, [
     // When items change, we need to re-render the virtualized list,
     // since it doesn't currently support row height changes
@@ -377,24 +393,9 @@ const VirtualizedList = memo(function VirtualizedList<T>({
     [],
   );
 
-  const onRowHeight = useCallback(
-    ({ index }: { index: number }) => getItemHeight(index),
-    [getItemHeight],
-  );
-
-  const onRowRender = useCallback(
-    ({
-      index,
-      style,
-      key,
-    }: {
-      index: number;
-      style: CSSProperties;
-      key: string;
-    }) => (
-      <div key={key} style={style}>
-        {renderItem(index)}
-      </div>
+  const children = useCallback(
+    ({ index, style }: { index: number; style: CSSProperties }) => (
+      <div style={style}>{renderItem(index)}</div>
     ),
     [renderItem],
   );
@@ -405,37 +406,45 @@ const VirtualizedList = memo(function VirtualizedList<T>({
       style={useMemo(() => ({ flex: '1 1 auto' }), [])}
     >
       {useCallback(
-        ({ isScrolling, registerChild, onChildScroll, scrollTop }) => (
+        ({ registerChild, onChildScroll, scrollTop }) => (
           <div ref={registerChild}>
-            <List
-              id="my-list"
-              autoHeight
-              key={virtualizedListViewKey}
+            <VariableSizeList<T>
+              ref={listRef}
+              // The list won't update on scroll unless we force it to by changing key
+              key={scrollTop}
               style={listStyle}
-              isScrolling={isScrolling}
-              onScroll={onChildScroll}
-              scrollTop={scrollTop}
+              itemKey={keyExtractor}
+              onScroll={({ scrollOffset }) => {
+                onChildScroll({ scrollTop: scrollOffset });
+              }}
+              initialScrollOffset={scrollTop}
               width={size.width}
               height={size.height}
-              rowCount={items.length}
-              rowHeight={onRowHeight}
-              rowRenderer={onRowRender}
-            />
+              itemCount={items.length}
+              itemSize={getItemHeight}
+              estimatedItemSize={31}
+            >
+              {children}
+            </VariableSizeList>
           </div>
         ),
         [
-          onRowHeight,
-          onRowRender,
-          items.length,
           listStyle,
-          size.height,
+          keyExtractor,
           size.width,
-          virtualizedListViewKey,
+          size.height,
+          items.length,
+          getItemHeight,
+          children,
         ],
       )}
     </WindowScroller>
   );
 });
+
+const VirtualizedList = memo(
+  VirtualizedListInner,
+) as typeof VirtualizedListInner;
 
 /* ----------------------------------------------------------------------------
  * Root
@@ -480,19 +489,22 @@ type ListViewRootProps = {
   acceptsDrop?: Sortable.DropValidator;
 };
 
-const ListViewRoot = memo(function ListViewRoot<T>({
-  onClick,
-  scrollable = false,
-  expandable = true,
-  sortable = false,
-  onMoveItem,
-  indentation = 12,
-  acceptsDrop,
-  data,
-  renderItem,
-  keyExtractor,
-  virtualized,
-}: RenderProps<T> & ListViewRootProps) {
+const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
+  {
+    onClick,
+    scrollable = false,
+    expandable = true,
+    sortable = false,
+    onMoveItem,
+    indentation = 12,
+    acceptsDrop,
+    data,
+    renderItem,
+    keyExtractor,
+    virtualized,
+  }: RenderProps<T> & ListViewRootProps,
+  forwardedRef: ForwardedRef<IVirtualizedList>,
+) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
@@ -624,16 +636,23 @@ const ListViewRoot = memo(function ListViewRoot<T>({
     [getItemContextValue],
   );
 
+  const getKey = useCallback(
+    (index: number) => keyExtractor(data[index], index),
+    [data, keyExtractor],
+  );
+
   return (
     <RootContainer onClick={handleClick} scrollable={scrollable}>
       {withScrollable((scrollElementRef: HTMLDivElement | null) =>
         withSortable(
           virtualized ? (
-            <VirtualizedList
+            <VirtualizedList<T>
+              ref={forwardedRef}
               scrollElement={scrollElementRef!}
               items={data}
               size={virtualized}
               getItemHeight={getItemHeight}
+              keyExtractor={getKey}
               renderItem={renderWrappedChild}
             />
           ) : (
@@ -645,10 +664,12 @@ const ListViewRoot = memo(function ListViewRoot<T>({
   );
 });
 
-const ChildrenListView = memo(function ChildrenListView({
-  children,
-  ...rest
-}: ChildrenProps & ListViewRootProps) {
+const ListViewRoot = memo(ListViewRootInner) as typeof ListViewRootInner;
+
+const ChildrenListViewInner = forwardRef(function ChildrenListViewInner(
+  { children, ...rest }: ChildrenProps & ListViewRootProps,
+  forwardedRef: ForwardedRef<IVirtualizedList>,
+) {
   const items: ReactElement[] = useMemo(
     () =>
       Children.toArray(children).flatMap((child) =>
@@ -659,6 +680,7 @@ const ChildrenListView = memo(function ChildrenListView({
 
   return (
     <ListViewRoot
+      ref={forwardedRef}
       {...rest}
       data={items}
       keyExtractor={useCallback(
@@ -671,18 +693,23 @@ const ChildrenListView = memo(function ChildrenListView({
   );
 });
 
+const ChildrenListView = memo(ChildrenListViewInner);
+
+const SimpleListViewInner = forwardRef(function SimpleListView<T = any>(
+  props: (ChildrenProps | RenderProps<T>) & ListViewRootProps,
+  forwardedRef: ForwardedRef<IVirtualizedList>,
+) {
+  if ('children' in props) {
+    return <ChildrenListView ref={forwardedRef} {...props} />;
+  } else {
+    return <ListViewRoot ref={forwardedRef} {...props} />;
+  }
+});
+
 /**
  * A ListView can be created either with `children` or render props
  */
-const SimpleListView = memo(function SimpleListView<T = any>(
-  props: (ChildrenProps | RenderProps<T>) & ListViewRootProps,
-) {
-  if ('children' in props) {
-    return <ChildrenListView {...props} />;
-  } else {
-    return <ListViewRoot {...props} />;
-  }
-});
+const SimpleListView = memo(SimpleListViewInner);
 
 export const RowTitle = memo(ListViewRowTitle);
 export const EditableRowTitle = memo(ListViewEditableRowTitle);
