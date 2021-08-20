@@ -15,7 +15,8 @@ export const SectionHeader = styled.div(({ theme }) => ({
 }));
 
 export const Title = styled.div(({ theme }) => ({
-  ...theme.textStyles.small,
+  ...theme.textStyles.label,
+  color: theme.colors.textSubtle,
   fontWeight: 'bold',
   display: 'flex',
   flexDirection: 'row',
