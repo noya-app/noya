@@ -1,14 +1,45 @@
+const path = require('path');
+
+const workspacePath = path.join(__dirname, '..');
+const workspaceNodeModulesPath = path.resolve(__dirname, '../../node_modules');
+
+/**
+ * @type import('webpack').Configuration
+ */
 module.exports = {
-  /**
-   * This is the main entry point for your application, it's the first file
-   * that runs in the main process.
-   */
   entry: './src/index.ts',
-  // Put your normal webpack config below here
-  module: {
-    rules: require('./webpack.rules'),
-  },
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
+    modules: [workspaceNodeModulesPath, 'node_modules'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.node$/,
+        use: 'node-loader',
+      },
+      {
+        test: /\.(m?js|node)$/,
+        parser: { amd: false },
+        use: {
+          loader: '@vercel/webpack-asset-relocator-loader',
+          options: {
+            outputAssetBase: 'native_modules',
+          },
+        },
+      },
+      {
+        test: /\.(js|jsx|ts|tsx)$/,
+        include: [workspacePath],
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            cacheDirectory: true,
+            presets: ['next/babel'],
+          },
+        },
+      },
+    ],
   },
 };
