@@ -2,7 +2,7 @@
   "name": "noya-desktop",
   "productName": "noya-desktop",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Noya wrapped with electron",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -12,10 +12,6 @@
     "lint": "eslint --ext .ts,.tsx ."
   },
   "keywords": [],
-  "author": {
-    "name": "Devin Abbott",
-    "email": "devinabbott@gmail.com"
-  },
   "license": "MIT",
   "config": {
     "forge": {
@@ -82,7 +78,6 @@
     "ts-loader": "^9.2.2"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "typescript": "^4.0.2"
+    "electron-squirrel-startup": "^1.0.0"
   }
 }

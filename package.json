@@ -2,7 +2,6 @@
   "name": "noya",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Devin Abbott <devinabbott@gmail.com>",
   "license": "MIT",
   "private": true,
   "workspaces": {
