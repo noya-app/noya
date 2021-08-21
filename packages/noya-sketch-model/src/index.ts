@@ -716,6 +716,7 @@ export const SketchModel = {
   artboard,
   attributedString,
   bitmap,
+  blur,
   border,
   borderOptions,
   color,

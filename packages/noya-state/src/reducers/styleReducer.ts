@@ -8,6 +8,7 @@ import {
 import { clamp } from 'noya-utils';
 import { SketchModel } from 'noya-sketch-model';
 import { moveArrayItem } from '../utils/moveArrayItem';
+import { BlurAction, blurReducer } from './blurReducer';
 
 export const defaultBorderColor = SketchModel.color({
   red: 0.6,
@@ -83,7 +84,8 @@ export type StyleAction =
       mode?: SetNumberMode,
     ]
   | GradientAction
-  | ColorControlsAction;
+  | ColorControlsAction
+  | BlurAction;
 
 export function styleReducer(
   state: Sketch.Style,
@@ -392,6 +394,12 @@ export function styleReducer(
     case 'setContrast':
       return produce(state, (draft) => {
         draft.colorControls = colorControlsReducer(draft.colorControls, action);
+      });
+    case 'setBlurEnabled':
+    case 'setBlurRadius':
+    case 'setBlurType':
+      return produce(state, (draft) => {
+        draft.blur = blurReducer(draft.blur, action);
       });
     case 'setPatternFillType': {
       const [, index, value] = action;

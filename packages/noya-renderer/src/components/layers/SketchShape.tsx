@@ -174,6 +174,7 @@ interface Props {
 }
 
 export default memo(function SketchShape({ layer }: Props) {
+  const CanvasKit = useCanvasKit();
   const path = useLayerPath(layer);
 
   const style = useMemo(() => layer.style ?? SketchModel.style(), [
@@ -230,5 +231,44 @@ export default memo(function SketchShape({ layer }: Props) {
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 
-  return opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements;
+  const blur = useMemo(
+    () => style.blur ?? SketchModel.blur({ isEnabled: false }),
+    [style.blur],
+  );
+
+  const imageFilter = useMemo(() => {
+    if (!blur.isEnabled || !blur.radius) return;
+
+    return CanvasKit.ImageFilter.MakeBlur(
+      blur.radius,
+      blur.radius,
+      CanvasKit.TileMode.Clamp,
+      null,
+    );
+  }, [CanvasKit.ImageFilter, CanvasKit.TileMode.Clamp, blur]);
+
+  return opacity < 1 || imageFilter ? (
+    <Group
+      imageFilter={
+        blur.isEnabled && blur.type === Sketch.BlurType.Gaussian
+          ? imageFilter
+          : undefined
+      }
+      clip={
+        blur.isEnabled && blur.type === Sketch.BlurType.Background
+          ? { op: CanvasKit.ClipOp.Intersect, path }
+          : undefined
+      }
+      backdropImageFilter={
+        blur.isEnabled && blur.type === Sketch.BlurType.Background
+          ? imageFilter
+          : undefined
+      }
+      opacity={opacity}
+    >
+      {elements}
+    </Group>
+  ) : (
+    elements
+  );
 });

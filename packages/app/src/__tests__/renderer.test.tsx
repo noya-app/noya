@@ -137,10 +137,14 @@ async function getSketchFile(filename: string) {
   return await decode(file);
 }
 
-async function generateSketchFileImage(filename: string, pageIndex: number) {
+async function generateSketchFileImage(
+  filename: string,
+  pageIndex: number,
+  padding?: number,
+) {
   const sketch = await getSketchFile(filename);
   const workspaceState = createInitialWorkspaceState(sketch);
-  return await generatePageImage(workspaceState, pageIndex);
+  return await generatePageImage(workspaceState, pageIndex, padding);
 }
 
 test('Demo', async () => {
@@ -150,6 +154,11 @@ test('Demo', async () => {
 
 test('AlphaMasks', async () => {
   const image = await generateSketchFileImage('AlphaMasks.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('BackdropFilter', async () => {
+  const image = await generateSketchFileImage('BackdropFilter.sketch', 0, 20);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 

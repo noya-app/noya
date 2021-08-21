@@ -177,6 +177,29 @@ export const hasInspectableFill = (layer: Sketch.AnyLayer): boolean => {
   }
 };
 
+export const hasInspectableBlur = (layer: Sketch.AnyLayer): boolean => {
+  switch (layer._class) {
+    case 'bitmap':
+    case 'oval':
+    case 'polygon':
+    case 'rectangle':
+    case 'shapeGroup':
+    case 'shapePath':
+    case 'star':
+    case 'triangle':
+    case 'text':
+      return true;
+    case 'group':
+    case 'symbolInstance':
+    case 'page':
+    case 'artboard':
+    case 'MSImmutableHotspotLayer':
+    case 'slice':
+    case 'symbolMaster':
+      return false;
+  }
+};
+
 export const getChildren = <T extends Sketch.AnyLayer>(layer: T): T[] => {
   return isParentLayer(layer) ? (layer.layers as T[]) : [];
 };
