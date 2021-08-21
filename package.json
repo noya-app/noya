@@ -19,6 +19,7 @@
   "scripts": {
     "start": "PORT=1234 modular start app",
     "build": "modular build app",
+    "build:desktop": "cd ./packages/noya-desktop && yarn make",
     "test": "modular test",
     "test:clean": "JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
     "lint": "eslint . --ext .js,.ts,.tsx",
