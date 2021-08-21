@@ -11,9 +11,9 @@ import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
-import { getSaturationMatrix } from '../../colorMatrix';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
+import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
 
 const SketchFill = memo(function SketchFill({
@@ -175,7 +175,6 @@ interface Props {
 }
 
 export default memo(function SketchShape({ layer }: Props) {
-  const CanvasKit = useCanvasKit();
   const path = useLayerPath(layer);
 
   const style = useMemo(() => layer.style ?? SketchModel.style(), [
@@ -237,55 +236,9 @@ export default memo(function SketchShape({ layer }: Props) {
     [style.blur],
   );
 
-  const imageFilter = useMemo(() => {
-    if (!blur.isEnabled) return;
-
-    const radius = blur.radius ?? 0;
-
-    // The blur is different from Sketch. Multiplying radius by `1.2` gets pretty close
-    const blurFilter = CanvasKit.ImageFilter.MakeBlur(
-      radius * 1.2,
-      radius * 1.2,
-      CanvasKit.TileMode.Clamp,
-      null,
-    );
-
-    if (blur.type === Sketch.BlurType.Background && blur.saturation !== 1) {
-      const colorFilter = CanvasKit.ImageFilter.MakeColorFilter(
-        CanvasKit.ColorFilter.MakeMatrix(getSaturationMatrix(blur.saturation)),
-        blurFilter,
-      );
-
-      return colorFilter;
-    } else {
-      if (radius === 0) return;
-
-      return blurFilter;
-    }
-  }, [CanvasKit, blur.isEnabled, blur.radius, blur.saturation, blur.type]);
-
-  return opacity < 1 || imageFilter ? (
-    <Group
-      imageFilter={
-        blur.isEnabled && blur.type === Sketch.BlurType.Gaussian
-          ? imageFilter
-          : undefined
-      }
-      clip={
-        blur.isEnabled && blur.type === Sketch.BlurType.Background
-          ? { op: CanvasKit.ClipOp.Intersect, path }
-          : undefined
-      }
-      backdropImageFilter={
-        blur.isEnabled && blur.type === Sketch.BlurType.Background
-          ? imageFilter
-          : undefined
-      }
-      opacity={opacity}
-    >
-      {elements}
-    </Group>
-  ) : (
-    elements
+  return (
+    <BlurGroup blur={blur} clippingPath={path}>
+      {opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements}
+    </BlurGroup>
   );
 });

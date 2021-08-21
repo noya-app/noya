@@ -4,10 +4,12 @@ import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Group, Rect, Text, useCanvasKit } from 'noya-renderer';
+import { SketchModel } from 'noya-sketch-model';
 import { Selectors, TextSelectionRange } from 'noya-state';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
 import { useFontManager } from '../../FontManagerContext';
+import BlurGroup from '../effects/BlurGroup';
 
 interface Props {
   layer: Sketch.Text;
@@ -152,18 +154,25 @@ export default memo(function SketchText({ layer }: Props) {
 
   const selectedText = Selectors.getTextSelection(state);
 
+  const blur = useMemo(
+    () => layer.style?.blur ?? SketchModel.blur({ isEnabled: false }),
+    [layer.style?.blur],
+  );
+
   return (
-    <Group opacity={opacity} transform={transform}>
-      {selectedText?.layerId === layer.do_objectID && (
-        <TextSelection
-          paragraph={paragraph}
-          selectedRange={selectedText.range}
-        />
-      )}
-      <Text paragraph={paragraph} rect={rect} />
-      {selectedText?.layerId === layer.do_objectID && (
-        <TextCursor paragraph={paragraph} index={selectedText.range.head} />
-      )}
-    </Group>
+    <BlurGroup blur={blur}>
+      <Group opacity={opacity} transform={transform}>
+        {selectedText?.layerId === layer.do_objectID && (
+          <TextSelection
+            paragraph={paragraph}
+            selectedRange={selectedText.range}
+          />
+        )}
+        <Text paragraph={paragraph} rect={rect} />
+        {selectedText?.layerId === layer.do_objectID && (
+          <TextCursor paragraph={paragraph} index={selectedText.range.head} />
+        )}
+      </Group>
+    </BlurGroup>
   );
 });
