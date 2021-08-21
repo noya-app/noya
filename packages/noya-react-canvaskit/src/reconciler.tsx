@@ -306,6 +306,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
               clip,
               colorFilter,
               imageFilter,
+              backdropImageFilter,
             } = element.props;
 
             const saveCount = canvas.getSaveCount();
@@ -326,7 +327,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
 
             // If we need to apply effects to the group as a whole, we need
             // to draw the elements on a separate bitmap using `saveLayer`
-            const needsLayer = opacity < 1 || colorFilter || imageFilter;
+            const needsLayer =
+              opacity < 1 || colorFilter || imageFilter || backdropImageFilter;
 
             if (needsLayer) {
               const layerPaint = new CanvasKit.Paint();
@@ -343,7 +345,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
                 layerPaint.setImageFilter(imageFilter);
               }
 
-              canvas.saveLayer(layerPaint);
+              canvas.saveLayer(layerPaint, null, backdropImageFilter);
             }
 
             element._elements.forEach(draw);

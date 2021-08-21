@@ -13,6 +13,7 @@ import { getStrokedPath, Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
+import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
 
 const SketchFill = memo(function SketchFill({
@@ -230,5 +231,14 @@ export default memo(function SketchShape({ layer }: Props) {
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 
-  return opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements;
+  const blur = useMemo(
+    () => style.blur ?? SketchModel.blur({ isEnabled: false }),
+    [style.blur],
+  );
+
+  return (
+    <BlurGroup blur={blur} clippingPath={path}>
+      {opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements}
+    </BlurGroup>
+  );
 });

@@ -1090,6 +1090,8 @@ export function canvasReducer(
                 height: size.height,
               }),
               style: SketchModel.style({
+                fills: [],
+                borders: [],
                 colorControls: SketchModel.colorControls({
                   isEnabled: false,
                 }),

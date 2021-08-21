@@ -251,6 +251,10 @@ export function applicationReducer(
     case 'setSaturation':
     case 'setBrightness':
     case 'setContrast':
+    case 'setBlurEnabled':
+    case 'setBlurRadius':
+    case 'setBlurType':
+    case 'setBlurSaturation':
     case 'setPatternFillType':
     case 'setPatternTileScale':
     case 'setFillImage':

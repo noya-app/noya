@@ -8,6 +8,8 @@ import { useSketchImage } from '../../ImageCache';
 import ColorControlsGroup from '../effects/ColorControlsGroup';
 import DropShadowGroup from '../effects/DropShadowGroup';
 import SketchBorder from '../effects/SketchBorder';
+import BlurGroup from '../effects/BlurGroup';
+import { SketchModel } from 'noya-sketch-model';
 
 interface Props {
   layer: Sketch.Bitmap;
@@ -27,6 +29,11 @@ export default memo(function SketchBitmap({ layer }: Props) {
 
     return path;
   }, [CanvasKit, layer.frame]);
+
+  const blur = useMemo(
+    () => layer.style?.blur ?? SketchModel.blur({ isEnabled: false }),
+    [layer.style?.blur],
+  );
 
   if (!layer.style || !image) return null;
 
@@ -63,7 +70,12 @@ export default memo(function SketchBitmap({ layer }: Props) {
   );
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
+
   const needsGroup = opacity < 1 || shadows.length > 0;
 
-  return needsGroup ? <Group opacity={opacity}>{element}</Group> : element;
+  return (
+    <BlurGroup blur={blur}>
+      {needsGroup ? <Group opacity={opacity}>{element}</Group> : element}
+    </BlurGroup>
+  );
 });
