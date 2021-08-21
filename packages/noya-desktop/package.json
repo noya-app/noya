@@ -12,6 +12,10 @@
     "clean": "rm -rf .webpack out"
   },
   "keywords": [],
+  "author": {
+    "name": "Devin Abbott",
+    "email": "dabbott@noyasoftware.com"
+  },
   "license": "MIT",
   "config": {
     "forge": {
