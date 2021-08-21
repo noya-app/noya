@@ -3,12 +3,17 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  build_on_linux:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@main
         with:
-          node-version: 14
+          node-version: 14.17.0
       - run: yarn
       - run: yarn build:desktop
