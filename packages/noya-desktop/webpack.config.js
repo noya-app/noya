@@ -1,6 +1,6 @@
 const path = require('path');
 
-const workspacePath = path.join(__dirname, '..');
+const workspacePackagesPath = path.join(__dirname, '..');
 const workspaceNodeModulesPath = path.resolve(__dirname, '../../node_modules');
 
 /**
@@ -30,7 +30,7 @@ module.exports = {
       },
       {
         test: /\.(js|jsx|ts|tsx)$/,
-        include: [workspacePath],
+        include: [workspacePackagesPath],
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
