@@ -14,9 +14,11 @@ export default memo(function BlurInspector() {
     Layers.hasInspectableBlur,
   );
 
-  // Bitmap layers don't support background blur
+  // Bitmap & text layers don't support background blur
   const supportsBackgroundBlur =
-    selectedLayers.filter(Layers.isBitmapLayer).length === 0;
+    selectedLayers.filter(
+      (layer) => Layers.isBitmapLayer(layer) || Layers.isTextLayer(layer),
+    ).length === 0;
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),

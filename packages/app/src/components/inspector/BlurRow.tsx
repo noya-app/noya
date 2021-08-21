@@ -58,20 +58,21 @@ export default memo(function BlursRow({
         max={50}
         onChange={onChangeBlurRadius}
       />
-      {blurType === Sketch.BlurType.Background && (
-        <>
-          <InspectorPrimitives.VerticalSeparator />
-          <DimensionSliderRow
-            id="blur-saturation-input"
-            label="Saturation"
-            value={blurSaturation}
-            min={-100}
-            max={100}
-            inputFieldLabel="%"
-            onChange={onChangeBlurSaturation}
-          />
-        </>
-      )}
+      {supportedBlurTypes.includes('Background') &&
+        blurType === Sketch.BlurType.Background && (
+          <>
+            <InspectorPrimitives.VerticalSeparator />
+            <DimensionSliderRow
+              id="blur-saturation-input"
+              label="Saturation"
+              value={blurSaturation}
+              min={-100}
+              max={100}
+              inputFieldLabel="%"
+              onChange={onChangeBlurSaturation}
+            />
+          </>
+        )}
     </InspectorPrimitives.Column>
   );
 });
