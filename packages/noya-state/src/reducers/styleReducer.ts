@@ -398,6 +398,7 @@ export function styleReducer(
     case 'setBlurEnabled':
     case 'setBlurRadius':
     case 'setBlurType':
+    case 'setBlurSaturation':
       return produce(state, (draft) => {
         draft.blur = blurReducer(draft.blur, action);
       });

@@ -10,6 +10,7 @@ interface Props {
   value: DimensionValue;
   min: number;
   max: number;
+  inputFieldLabel?: string;
   onChange: (value: number, mode: SetNumberMode) => void;
 }
 
@@ -19,6 +20,7 @@ export const DimensionSliderRow = memo(function DimensionSliderRow({
   value,
   min,
   max,
+  inputFieldLabel,
   onChange,
 }: Props) {
   const handleSubmit = useCallback(
@@ -48,7 +50,9 @@ export const DimensionSliderRow = memo(function DimensionSliderRow({
           onSubmit={handleSubmit}
           onNudge={handleNudge}
         />
-        <InputField.Label>%</InputField.Label>
+        {inputFieldLabel && (
+          <InputField.Label>{inputFieldLabel}</InputField.Label>
+        )}
       </InputField.Root>
     </InspectorPrimitives.LabeledSliderRow>
   );

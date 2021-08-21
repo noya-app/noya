@@ -238,17 +238,19 @@ export default memo(function SketchShape({ layer }: Props) {
   );
 
   const imageFilter = useMemo(() => {
-    if (!blur.isEnabled || !blur.radius) return;
+    if (!blur.isEnabled) return;
+
+    const radius = blur.radius ?? 0;
 
     // The blur is different from Sketch. Multiplying radius by `1.2` gets pretty close
     const blurFilter = CanvasKit.ImageFilter.MakeBlur(
-      blur.radius * 1.2,
-      blur.radius * 1.2,
+      radius * 1.2,
+      radius * 1.2,
       CanvasKit.TileMode.Clamp,
       null,
     );
 
-    if (blur.type === Sketch.BlurType.Background && blur.saturation) {
+    if (blur.type === Sketch.BlurType.Background && blur.saturation !== 1) {
       const colorFilter = CanvasKit.ImageFilter.MakeColorFilter(
         CanvasKit.ColorFilter.MakeMatrix(getSaturationMatrix(blur.saturation)),
         blurFilter,
@@ -256,6 +258,8 @@ export default memo(function SketchShape({ layer }: Props) {
 
       return colorFilter;
     } else {
+      if (radius === 0) return;
+
       return blurFilter;
     }
   }, [CanvasKit, blur.isEnabled, blur.radius, blur.saturation, blur.type]);

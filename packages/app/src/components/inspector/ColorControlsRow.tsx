@@ -35,6 +35,7 @@ export default memo(function ColorControlsRow({
         value={hue}
         min={-100}
         max={100}
+        inputFieldLabel="%"
         onChange={onChangeHue}
       />
       <DimensionSliderRow
@@ -43,6 +44,7 @@ export default memo(function ColorControlsRow({
         value={saturation}
         min={-100}
         max={100}
+        inputFieldLabel="%"
         onChange={onChangeSaturation}
       />
       <DimensionSliderRow
@@ -51,6 +53,7 @@ export default memo(function ColorControlsRow({
         value={brightness}
         min={-100}
         max={100}
+        inputFieldLabel="%"
         onChange={onChangeBrightness}
       />
       <DimensionSliderRow
@@ -59,6 +62,7 @@ export default memo(function ColorControlsRow({
         value={contrast}
         min={-100}
         max={100}
+        inputFieldLabel="%"
         onChange={onChangeContrast}
       />
     </InspectorPrimitives.Column>

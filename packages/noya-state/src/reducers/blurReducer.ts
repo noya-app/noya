@@ -7,7 +7,8 @@ import { SetNumberMode } from '..';
 export type BlurAction =
   | [type: 'setBlurEnabled', isEnabled: boolean]
   | [type: 'setBlurType', value: Sketch.BlurType]
-  | [type: 'setBlurRadius', value: number, mode: SetNumberMode];
+  | [type: 'setBlurRadius', value: number, mode: SetNumberMode]
+  | [type: 'setBlurSaturation', value: number, mode: SetNumberMode];
 
 export function blurReducer(
   state: Sketch.Blur | undefined,
@@ -35,9 +36,19 @@ export function blurReducer(
 
       return produce(state, (draft) => {
         const newValue =
-          mode === 'replace' ? amount : draft.saturation + amount;
+          mode === 'replace' ? amount : (draft.radius ?? 0) + amount;
 
         draft.radius = clamp(newValue, 0, 50);
+      });
+    }
+    case 'setBlurSaturation': {
+      const [, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        const newValue =
+          mode === 'replace' ? amount : draft.saturation + amount;
+
+        draft.saturation = clamp(newValue, 0, 2);
       });
     }
     default:

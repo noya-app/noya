@@ -3,7 +3,6 @@ import { Select } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { invert } from 'noya-utils';
 import { memo, useCallback } from 'react';
-import { DimensionValue } from './DimensionsInspector';
 import { DimensionSliderRow } from './DimensionSliderRow';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -20,9 +19,11 @@ interface Props {
   id: string;
   supportedBlurTypes: (keyof typeof BLUR_NAME_TO_ENUM)[];
   blurType: Sketch.BlurType;
-  blurRadius: DimensionValue;
+  blurRadius: number;
+  blurSaturation: number;
   onChangeBlurType: (value: Sketch.BlurType) => void;
   onChangeBlurRadius: (value: number, mode: SetNumberMode) => void;
+  onChangeBlurSaturation: (value: number, mode: SetNumberMode) => void;
 }
 
 export default memo(function BlursRow({
@@ -30,8 +31,10 @@ export default memo(function BlursRow({
   supportedBlurTypes,
   blurType,
   blurRadius,
+  blurSaturation,
   onChangeBlurType,
   onChangeBlurRadius,
+  onChangeBlurSaturation,
 }: Props) {
   return (
     <InspectorPrimitives.Column id={id}>
@@ -55,6 +58,20 @@ export default memo(function BlursRow({
         max={50}
         onChange={onChangeBlurRadius}
       />
+      {blurType === Sketch.BlurType.Background && (
+        <>
+          <InspectorPrimitives.VerticalSeparator />
+          <DimensionSliderRow
+            id="blur-saturation-input"
+            label="Saturation"
+            value={blurSaturation}
+            min={-100}
+            max={100}
+            inputFieldLabel="%"
+            onChange={onChangeBlurSaturation}
+          />
+        </>
+      )}
     </InspectorPrimitives.Column>
   );
 });

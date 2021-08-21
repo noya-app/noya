@@ -1,10 +1,11 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 import { SketchModel } from 'noya-sketch-model';
-import { Layers, Selectors } from 'noya-state';
+import { Layers, Selectors, SetNumberMode } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import BlurRow from '../components/inspector/BlurRow';
 import EnableableElementController from '../components/inspector/EnableableElementController';
+import { saturationInterpolator } from './ColorControlsInspector';
 
 export default memo(function BlurInspector() {
   const [state, dispatch] = useApplicationState();
@@ -54,16 +55,24 @@ export default memo(function BlurInspector() {
         )}
         blurType={firstBlur.type}
         blurRadius={firstBlur.radius ?? 0}
+        blurSaturation={saturationInterpolator.toDisplay(firstBlur.saturation)}
         onChangeBlurType={useCallback(
-          (value) => {
-            dispatch('setBlurType', value);
-          },
+          (value) => dispatch('setBlurType', value),
           [dispatch],
         )}
         onChangeBlurRadius={useCallback(
-          (value, mode) => {
-            dispatch('setBlurRadius', value, mode);
-          },
+          (value, mode) => dispatch('setBlurRadius', value, mode),
+          [dispatch],
+        )}
+        onChangeBlurSaturation={useCallback(
+          (value: number, mode: SetNumberMode) =>
+            dispatch(
+              'setBlurSaturation',
+              mode === 'adjust'
+                ? value / 100
+                : saturationInterpolator.fromDisplay(value),
+              mode,
+            ),
           [dispatch],
         )}
       />
