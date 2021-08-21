@@ -11,6 +11,7 @@ import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
+import { getSaturationMatrix } from '../../colorMatrix';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
 import SketchBorder from '../effects/SketchBorder';
@@ -239,13 +240,25 @@ export default memo(function SketchShape({ layer }: Props) {
   const imageFilter = useMemo(() => {
     if (!blur.isEnabled || !blur.radius) return;
 
-    return CanvasKit.ImageFilter.MakeBlur(
-      blur.radius,
-      blur.radius,
+    // The blur is different from Sketch. Multiplying radius by `1.2` gets pretty close
+    const blurFilter = CanvasKit.ImageFilter.MakeBlur(
+      blur.radius * 1.2,
+      blur.radius * 1.2,
       CanvasKit.TileMode.Clamp,
       null,
     );
-  }, [CanvasKit.ImageFilter, CanvasKit.TileMode.Clamp, blur]);
+
+    if (blur.type === Sketch.BlurType.Background && blur.saturation) {
+      const colorFilter = CanvasKit.ImageFilter.MakeColorFilter(
+        CanvasKit.ColorFilter.MakeMatrix(getSaturationMatrix(blur.saturation)),
+        blurFilter,
+      );
+
+      return colorFilter;
+    } else {
+      return blurFilter;
+    }
+  }, [CanvasKit, blur.isEnabled, blur.radius, blur.saturation, blur.type]);
 
   return opacity < 1 || imageFilter ? (
     <Group
