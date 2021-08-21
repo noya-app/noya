@@ -16,7 +16,7 @@ const createWindow = (): void => {
     app.isPackaged ? 'https://noya.design' : 'http://localhost:1234',
   );
 
-  // Open the DevTools.
+  // Automatically open the DevTools
   // mainWindow.webContents.openDevTools();
 };
 
