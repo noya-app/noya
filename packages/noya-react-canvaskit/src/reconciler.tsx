@@ -287,8 +287,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
               image,
               CanvasKit.XYWHRect(0, 0, image.width(), image.height()),
               rect,
-              0,
-              0,
+              1 / 3,
+              1 / 3,
               paint,
             );
             break;

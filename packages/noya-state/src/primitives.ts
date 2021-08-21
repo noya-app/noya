@@ -203,8 +203,8 @@ export function shader(
           return canvasImage.makeShaderCubic(
             CanvasKit.TileMode.Repeat,
             CanvasKit.TileMode.Repeat,
-            0,
-            0,
+            1 / 3,
+            1 / 3,
             CanvasKit.Matrix.multiply(
               CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
               CanvasKit.Matrix.scaled(
@@ -235,8 +235,8 @@ export function shader(
           return canvasImage.makeShaderCubic(
             CanvasKit.TileMode.Decal,
             CanvasKit.TileMode.Decal,
-            0,
-            0,
+            1 / 3,
+            1 / 3,
             CanvasKit.Matrix.multiply(
               CanvasKit.Matrix.translated(
                 bounds.midX - scaledRect.width / 2,
