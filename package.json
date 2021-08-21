@@ -5,9 +5,15 @@
   "author": "Devin Abbott <devinabbott@gmail.com>",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/electron-squirrel-startup",
+      "**/electron-squirrel-startup/**"
+    ]
+  },
   "modular": {
     "type": "root"
   },

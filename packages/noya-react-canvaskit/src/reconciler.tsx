@@ -34,7 +34,7 @@ function createElementInstance<K extends keyof ElementTypeMap>(
   type: K,
   props: ElementTypeMap[K]['props'],
 ): ElementTypeMap[K] {
-  const instance = ({ type, props } as unknown) as ElementTypeMap[K];
+  const instance = { type, props } as unknown as ElementTypeMap[K];
 
   if (isContainerElement(instance)) {
     instance._elements = [];
@@ -76,8 +76,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
   scheduleTimeout: setTimeout,
   cancelTimeout: clearTimeout,
   noTimeout: -1,
-  queueMicrotask:
-    typeof queueMicrotask !== 'undefined' ? queueMicrotask : setTimeout,
+  // queueMicrotask:
+  //   typeof queueMicrotask !== 'undefined' ? queueMicrotask : setTimeout,
   now: (typeof performance !== 'undefined' ? performance : Date).now,
   supportsMutation: false,
   supportsPersistence: true,
