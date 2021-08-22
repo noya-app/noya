@@ -16,6 +16,7 @@ import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,
   PatternFillProps,
+  ShaderFillProps,
 } from './FillInputFieldWithPicker';
 import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
 
@@ -38,6 +39,7 @@ interface Props {
   colorProps: ColorFillProps;
   gradientProps: GradientFillProps;
   patternProps: PatternFillProps;
+  shaderProps: ShaderFillProps;
 }
 
 export default memo(function FillRow({
@@ -51,6 +53,7 @@ export default memo(function FillRow({
   colorProps,
   gradientProps,
   patternProps,
+  shaderProps,
 }: Props) {
   const fillInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
@@ -237,6 +240,7 @@ export default memo(function FillRow({
           colorProps={colorProps}
           gradientProps={gradientProps}
           patternProps={patternProps}
+          shaderProps={shaderProps}
         />
         <InspectorPrimitives.HorizontalSeparator />
         {fields}

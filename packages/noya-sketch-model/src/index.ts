@@ -88,6 +88,26 @@ function gradient(options?: ModelOptions<Sketch.Gradient>): Sketch.Gradient {
   };
 }
 
+function shaderVariable(
+  options?: ModelOptions<Sketch.ShaderVariable>,
+): Sketch.ShaderVariable {
+  return {
+    name: '',
+    value: 0,
+    ...options,
+    _class: Sketch.ClassValue.ShaderVariable,
+  };
+}
+
+function shader(options?: ModelOptions<Sketch.Shader>): Sketch.Shader {
+  return {
+    shaderString: '',
+    variables: [],
+    ...options,
+    _class: Sketch.ClassValue.Shader,
+  };
+}
+
 function border(options?: ModelOptions<Sketch.Border>): Sketch.Border {
   return {
     isEnabled: true,
@@ -742,6 +762,8 @@ export const SketchModel = {
   paragraphStyle,
   rect,
   rectangle,
+  shader,
+  shaderVariable,
   shadow,
   shapeGroup,
   shapePath,

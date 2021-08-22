@@ -42,9 +42,10 @@ export default memo(function FillInspector({
       key={title}
       value={editableFills}
       onClickPlus={allowMoreThanOne ? handleClickPlus : undefined}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledFills'), [
-        dispatch,
-      ])}
+      onClickTrash={useCallback(
+        () => dispatch('deleteDisabledFills'),
+        [dispatch],
+      )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveFill', sourceIndex, destinationIndex),
@@ -112,6 +113,14 @@ export default memo(function FillInspector({
                 dispatch('setPatternFillType', index, value),
               onChangePatternTileScale: (value) =>
                 dispatch('setPatternTileScale', index, value),
+            }}
+            shaderProps={{
+              shader: item.shader,
+              onAddShaderVariable: () => {},
+              onChangeShaderString: () => {},
+              onChangeShaderVariableName: () => {},
+              onChangeShaderVariableValue: (name, value) =>
+                dispatch('setShaderVariableValue', index, name, value),
             }}
           />
         ),

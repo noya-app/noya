@@ -19,16 +19,20 @@ import PatternInspector from './PatternInspector';
 import PickerGradients from './PickerGradients';
 import PickerPatterns from './PickerPatterns';
 import ColorPickerSwatches from './PickerSwatches';
+import ShaderInspector from './ShaderInspector';
 
-const Content = styled(Popover.Content)(({ theme }) => ({
-  width: '240px',
-  borderRadius: 4,
-  fontSize: 14,
-  backgroundColor: theme.colors.popover.background,
-  boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
-  maxHeight: '600px',
-  overflowY: 'auto',
-}));
+const Content = styled(Popover.Content)<{ variant: 'normal' | 'large' }>(
+  ({ theme, variant }) => ({
+    width: variant === 'large' ? '480px' : '240px',
+    borderRadius: 4,
+    fontSize: 14,
+    backgroundColor: theme.colors.popover.background,
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
+    maxHeight: '600px',
+    overflowY: 'auto',
+    color: theme.colors.textMuted,
+  }),
+);
 
 type FillOption =
   | 'Solid Color'
@@ -292,6 +296,17 @@ export type PatternFillProps = {
   onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
 };
 
+export type ShaderFillProps = {
+  shader: Sketch.Shader;
+  onChangeShaderString: (value: string) => void;
+  onAddShaderVariable: () => void;
+  onChangeShaderVariableValue: (
+    name: string,
+    value: Sketch.ShaderVariable['value'],
+  ) => void;
+  onChangeShaderVariableName: (oldName: string, newName: string) => void;
+};
+
 interface Props {
   id: string;
   flex?: CSSProperties['flex'];
@@ -301,6 +316,7 @@ interface Props {
   colorProps: ColorFillProps;
   gradientProps?: GradientFillProps;
   patternProps?: PatternFillProps;
+  shaderProps?: ShaderFillProps;
 }
 
 export default memo(function FillInputFieldWithPicker({
@@ -312,6 +328,7 @@ export default memo(function FillInputFieldWithPicker({
   colorProps,
   gradientProps,
   patternProps,
+  shaderProps,
 }: Props) {
   const [, dispatch] = useApplicationState();
   const picker = useMemo(() => {
@@ -324,11 +341,15 @@ export default memo(function FillInputFieldWithPicker({
         return patternProps ? (
           <PatternFillPicker id={id} {...patternProps} />
         ) : null;
+      case Sketch.FillType.Shader:
+        return shaderProps ? (
+          <ShaderInspector id={id} {...shaderProps} />
+        ) : null;
       case Sketch.FillType.Color:
       case undefined:
         return <ColorFillPicker id={id} {...colorProps} />;
     }
-  }, [id, fillType, colorProps, gradientProps, patternProps]);
+  }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
 
   const value = useMemo(() => {
     switch (fillType) {
@@ -371,6 +392,10 @@ export default memo(function FillInputFieldWithPicker({
         />
       </Popover.Trigger>
       <Content
+        onPointerMove={(event) => {
+          event.stopPropagation();
+        }}
+        variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
         side="bottom"
         align="center"
         onInteractOutside={useCallback((event) => {
