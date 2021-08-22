@@ -30,28 +30,19 @@ const SketchFill = memo(function SketchFill({
   const image = useSketchImage(fill.image);
 
   const runtimeEffect = useMemo(() => {
-    if (fill.fillType !== Sketch.FillType.Shader) return;
+    if (fill.fillType !== Sketch.FillType.Shader || !fill.shader) return;
 
-    const prog = `
-uniform float iTime;
-uniform float2 in_center;
-uniform float4 in_colors0;
-uniform float4 in_colors1;
+    const { shaderString, variables } = fill.shader;
 
-half4 main(float2 p) {
-    float2 pp = p - in_center;
-    float radius = sqrt(dot(pp, pp)) * 100;
-    radius = sqrt(radius);
-    float angle = atan(pp.y / pp.x);
-    float t = (angle + 3.1415926/2) / (3.1415926);
-    t += radius * cos(iTime / 2000) / 5;
-    t = fract(t);
-    return half4(mix(in_colors0, in_colors1, t));
-}
-`;
+    const uniforms = [
+      'uniform float iTime;',
+      ...variables.map((variable) => `uniform float4 ${variable.name};`),
+    ].join('\n');
 
-    return CanvasKit.RuntimeEffect.Make(prog) ?? undefined;
-  }, [CanvasKit.RuntimeEffect, fill.fillType]);
+    const sksl = [uniforms, shaderString].join('\n\n');
+
+    return CanvasKit.RuntimeEffect.Make(sksl) ?? undefined;
+  }, [CanvasKit.RuntimeEffect, fill.fillType, fill.shader]);
 
   // useDeletable(runtimeEffect);
 
@@ -69,26 +60,31 @@ half4 main(float2 p) {
     };
   }, [fill.fillType, time]);
 
-  // console.log(Math.sin(time / 2000));
-
   // TODO: Delete internal gradient shaders on unmount
-  const paint = useMemo(
-    () =>
-      Primitives.fill(CanvasKit, fill, frame, image, runtimeEffect, [
-        time,
-        0.5,
-        0.5,
-        1,
-        0,
-        0,
-        1,
-        0,
-        1,
-        0,
-        1,
-      ]),
-    [CanvasKit, fill, frame, image, runtimeEffect, time],
-  );
+  const paint = useMemo(() => {
+    const uniforms = [
+      time,
+      ...(fill.shader?.variables ?? []).flatMap((variable) => {
+        if (typeof variable.value === 'number') {
+          return [variable.value];
+        } else if (variable.value._class === 'color') {
+          const { red, green, blue, alpha } = variable.value;
+          return [red, green, blue, alpha];
+        } else {
+          throw new Error('Bad variable type');
+        }
+      }),
+    ];
+
+    return Primitives.fill(
+      CanvasKit,
+      fill,
+      frame,
+      image,
+      runtimeEffect,
+      uniforms,
+    );
+  }, [CanvasKit, fill, frame, image, runtimeEffect, time]);
 
   useDeletable(paint);
 

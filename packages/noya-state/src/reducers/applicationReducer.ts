@@ -20,6 +20,7 @@ import {
   getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
+  setNewShaderFill,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -272,12 +273,16 @@ export function applicationReducer(
             (layer) => {
               if (!layer.style) return;
 
-              if (
-                action[0] === 'setFillFillType' &&
-                action[2] === Sketch.FillType.Pattern &&
-                layer.style.fills
-              )
-                setNewPatternFill(layer.style.fills, action[1], draft);
+              if (action[0] === 'setFillFillType' && layer.style.fills) {
+                switch (action[2]) {
+                  case Sketch.FillType.Pattern:
+                    setNewPatternFill(layer.style.fills, action[1], draft);
+                    break;
+                  case Sketch.FillType.Shader:
+                    setNewShaderFill(layer.style.fills, action[1]);
+                    break;
+                }
+              }
 
               if (
                 action[0] === 'setFillGradientPosition' ||
@@ -334,12 +339,16 @@ export function applicationReducer(
 
             style.value = styleReducer(style.value, action);
 
-            if (
-              action[0] === 'setFillFillType' &&
-              action[2] === Sketch.FillType.Pattern &&
-              style.value.fills
-            )
-              setNewPatternFill(style.value.fills, action[1], draft);
+            if (action[0] === 'setFillFillType' && style.value.fills) {
+              switch (action[2]) {
+                case Sketch.FillType.Pattern:
+                  setNewPatternFill(style.value.fills, action[1], draft);
+                  break;
+                case Sketch.FillType.Shader:
+                  setNewShaderFill(style.value.fills, action[1]);
+                  break;
+              }
+            }
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(

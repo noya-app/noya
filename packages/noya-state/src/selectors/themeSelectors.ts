@@ -7,6 +7,7 @@ import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
 import { getCurrentTab } from './workspaceSelectors';
 import { uuid } from 'noya-utils';
 import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
+import { SketchModel } from 'noya-sketch-model';
 
 export type ComponentsTypes =
   | Sketch.Swatch
@@ -159,4 +160,37 @@ export const setNewPatternFill = (
     _ref_class: 'MSImageData',
   };
   draft.sketch.images[_ref] = CHECKERED_BACKGROUND_BYTES;
+};
+
+export const setNewShaderFill = (fills: Sketch.Fill[], index: number) => {
+  if (fills[index].shader) return;
+
+  fills[index].shader = {
+    _class: 'shader',
+    shaderString: `
+half4 main(float2 p) {
+  float2 in_center = float2(0.5, 0.5);
+  float2 pp = p - in_center;
+  float radius = sqrt(dot(pp, pp)) * 100;
+  radius = sqrt(radius);
+  float angle = atan(pp.y / pp.x);
+  float t = (angle + 3.1415926/2) / (3.1415926);
+  t += radius * cos(iTime / 2000) / 5;
+  t = fract(t);
+  return half4(mix(color1, color2, t));
+}
+`,
+    variables: [
+      {
+        _class: 'shaderVariable',
+        name: 'color1',
+        value: SketchModel.color({ red: 1, green: 0, blue: 0 }),
+      },
+      {
+        _class: 'shaderVariable',
+        name: 'color2',
+        value: SketchModel.color({ red: 0, green: 0, blue: 1 }),
+      },
+    ],
+  };
 };

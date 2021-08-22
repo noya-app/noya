@@ -179,7 +179,7 @@ export enum FillType {
   Color = 0,
   Gradient = 1,
   Pattern = 4,
-  Shader = -1,
+  Shader = -101,
 }
 /**
  * Enumeration of border positions
@@ -299,6 +299,15 @@ export enum PatternFillType {
 export type Shader = {
   _class: 'shader';
   shaderString: string;
+  variables: ShaderVariable[];
+};
+/**
+ * Defines a variable to be passed to the shader as a uniform
+ */
+export type ShaderVariable = {
+  _class: 'shaderVariable';
+  name: string;
+  value: number | Color;
 };
 /**
  * Enumeration of the possible types of vector line endings
@@ -1621,6 +1630,7 @@ export type AnyObject =
   | Blur
   | Fill
   | Shader
+  | ShaderVariable
   | TextStyle
   | ParagraphStyle
   | FontDescriptor
@@ -1716,6 +1726,7 @@ export enum ClassValue {
   Rectangle = 'rectangle',
   RulerData = 'rulerData',
   Shader = 'shader',
+  ShaderVariable = 'shaderVariable',
   Shadow = 'shadow',
   ShapeGroup = 'shapeGroup',
   ShapePath = 'shapePath',
@@ -1759,6 +1770,7 @@ export type ClassMap = {
   shapePath: ShapePath;
   shapeGroup: ShapeGroup;
   shadow: Shadow;
+  shaderVariable: ShaderVariable;
   shader: Shader;
   rulerData: RulerData;
   rectangle: Rectangle;
