@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  publish:
+  release:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -19,6 +19,6 @@ jobs:
         with:
           node-version: 14.17
       - run: yarn
-      - run: yarn publish:desktop
+      - run: yarn release:desktop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
