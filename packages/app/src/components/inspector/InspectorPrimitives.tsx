@@ -1,6 +1,6 @@
 import { Spacer } from 'noya-designsystem';
 import { memo, ReactNode } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled, { CSSProperties, useTheme } from 'styled-components';
 
 export const Section = styled.div(({ theme }) => ({
   flex: '0 0 auto',
@@ -23,12 +23,14 @@ export const Title = styled.div(({ theme }) => ({
   userSelect: 'none',
 }));
 
-export const Row = styled.div(({ theme }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-}));
+export const Row = styled.div<{ alignItems?: CSSProperties['alignItems'] }>(
+  ({ theme, alignItems }) => ({
+    flex: '1',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: alignItems ?? 'center',
+  }),
+);
 
 export const Column = styled.div(({ theme }) => ({
   flex: '1',

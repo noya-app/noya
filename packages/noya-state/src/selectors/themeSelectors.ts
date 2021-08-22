@@ -167,10 +167,9 @@ export const setNewShaderFill = (fills: Sketch.Fill[], index: number) => {
 
   fills[index].shader = {
     _class: 'shader',
-    shaderString: `
-half4 main(float2 p) {
+    shaderString: `half4 main(float2 position) {
   float2 in_center = float2(0.5, 0.5);
-  float2 pp = p - in_center;
+  float2 pp = position - in_center;
   float radius = sqrt(dot(pp, pp)) * 100;
   radius = sqrt(radius);
   float angle = atan(pp.y / pp.x);

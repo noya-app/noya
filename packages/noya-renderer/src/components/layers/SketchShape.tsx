@@ -36,7 +36,13 @@ const SketchFill = memo(function SketchFill({
 
     const uniforms = [
       'uniform float iTime;',
-      ...variables.map((variable) => `uniform float4 ${variable.name};`),
+      ...variables.map((variable) => {
+        if (typeof variable.value === 'number') {
+          return `uniform float ${variable.name};`;
+        } else {
+          return `uniform float4 ${variable.name};`;
+        }
+      }),
     ].join('\n');
 
     const sksl = [uniforms, shaderString].join('\n\n');

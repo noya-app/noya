@@ -116,9 +116,13 @@ export default memo(function FillInspector({
             }}
             shaderProps={{
               shader: item.shader,
-              onAddShaderVariable: () => {},
-              onChangeShaderString: () => {},
-              onChangeShaderVariableName: () => {},
+              onAddShaderVariable: () => dispatch('addShaderVariable', index),
+              onDeleteShaderVariable: (name) =>
+                dispatch('deleteShaderVariable', index, name),
+              onChangeShaderString: (value) =>
+                dispatch('setShaderString', index, value),
+              onChangeShaderVariableName: (oldName, newName) =>
+                dispatch('setShaderVariableName', index, oldName, newName),
               onChangeShaderVariableValue: (name, value) =>
                 dispatch('setShaderVariableValue', index, name, value),
             }}

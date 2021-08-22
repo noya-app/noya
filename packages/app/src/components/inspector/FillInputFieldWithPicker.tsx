@@ -23,7 +23,7 @@ import ShaderInspector from './ShaderInspector';
 
 const Content = styled(Popover.Content)<{ variant: 'normal' | 'large' }>(
   ({ theme, variant }) => ({
-    width: variant === 'large' ? '480px' : '240px',
+    width: variant === 'large' ? '680px' : '240px',
     borderRadius: 4,
     fontSize: 14,
     backgroundColor: theme.colors.popover.background,
@@ -300,11 +300,12 @@ export type ShaderFillProps = {
   shader: Sketch.Shader;
   onChangeShaderString: (value: string) => void;
   onAddShaderVariable: () => void;
+  onDeleteShaderVariable: (name: string) => void;
+  onChangeShaderVariableName: (oldName: string, newName: string) => void;
   onChangeShaderVariableValue: (
     name: string,
     value: Sketch.ShaderVariable['value'],
   ) => void;
-  onChangeShaderVariableName: (oldName: string, newName: string) => void;
 };
 
 interface Props {
@@ -392,9 +393,8 @@ export default memo(function FillInputFieldWithPicker({
         />
       </Popover.Trigger>
       <Content
-        onPointerMove={(event) => {
-          event.stopPropagation();
-        }}
+        // Stop propagation on pointer events to prevent dndkit from triggering
+        onPointerDown={useCallback((event) => event.stopPropagation(), [])}
         variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
         side="bottom"
         align="center"

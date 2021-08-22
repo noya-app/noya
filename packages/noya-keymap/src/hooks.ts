@@ -45,10 +45,10 @@ export function useKeyboardShortcuts(
 
   const platformName = getCurrentPlatform(navigator);
 
-  const keyMap = useMemo(() => createKeyMap(shortcuts, platformName), [
-    platformName,
-    shortcuts,
-  ]);
+  const keyMap = useMemo(
+    () => createKeyMap(shortcuts, platformName),
+    [platformName, shortcuts],
+  );
 
   const keyMapRef = useRef(keyMap);
 
@@ -59,7 +59,8 @@ export function useKeyboardShortcuts(
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (
-        event.target instanceof HTMLInputElement &&
+        (event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement) &&
         !event.target.classList.contains(IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS)
       )
         return;

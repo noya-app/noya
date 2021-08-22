@@ -404,7 +404,11 @@ export function styleReducer(
       return produce(state, (draft) => {
         draft.blur = blurReducer(draft.blur, action);
       });
+    case 'setShaderString':
+    case 'setShaderVariableName':
     case 'setShaderVariableValue':
+    case 'addShaderVariable':
+    case 'deleteShaderVariable':
       const [, index] = action;
 
       return produce(state, (draft) => {

@@ -264,7 +264,11 @@ export function applicationReducer(
     case 'setBorderGradientFrom':
     case 'setFillGradientTo':
     case 'setBorderGradientTo':
-    case 'setShaderVariableValue': {
+    case 'setShaderString':
+    case 'setShaderVariableName':
+    case 'setShaderVariableValue':
+    case 'addShaderVariable':
+    case 'deleteShaderVariable': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
