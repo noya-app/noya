@@ -10,7 +10,7 @@ import {
 import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
 import BlurGroup from '../effects/BlurGroup';
@@ -29,10 +29,65 @@ const SketchFill = memo(function SketchFill({
 
   const image = useSketchImage(fill.image);
 
+  const runtimeEffect = useMemo(() => {
+    if (fill.fillType !== Sketch.FillType.Shader) return;
+
+    const prog = `
+uniform float iTime;
+uniform float2 in_center;
+uniform float4 in_colors0;
+uniform float4 in_colors1;
+
+half4 main(float2 p) {
+    float2 pp = p - in_center;
+    float radius = sqrt(dot(pp, pp)) * 100;
+    radius = sqrt(radius);
+    float angle = atan(pp.y / pp.x);
+    float t = (angle + 3.1415926/2) / (3.1415926);
+    t += radius * cos(iTime / 2000) / 5;
+    t = fract(t);
+    return half4(mix(in_colors0, in_colors1, t));
+}
+`;
+
+    return CanvasKit.RuntimeEffect.Make(prog) ?? undefined;
+  }, [CanvasKit.RuntimeEffect, fill.fillType]);
+
+  // useDeletable(runtimeEffect);
+
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    if (fill.fillType !== Sketch.FillType.Shader) return;
+
+    const id = requestAnimationFrame(() => {
+      setTime(performance.now());
+    });
+
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  }, [fill.fillType, time]);
+
+  // console.log(Math.sin(time / 2000));
+
   // TODO: Delete internal gradient shaders on unmount
   const paint = useMemo(
-    () => Primitives.fill(CanvasKit, fill, frame, image),
-    [CanvasKit, fill, frame, image],
+    () =>
+      Primitives.fill(CanvasKit, fill, frame, image, runtimeEffect, [
+        time,
+        0.5,
+        0.5,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0,
+        1,
+      ]),
+    [CanvasKit, fill, frame, image, runtimeEffect, time],
   );
 
   useDeletable(paint);

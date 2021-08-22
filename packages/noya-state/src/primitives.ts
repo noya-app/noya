@@ -3,6 +3,7 @@ import type {
   CanvasKit,
   Paint,
   Path,
+  RuntimeEffect,
   Shader,
   TextAlign,
   TextStyle,
@@ -75,8 +76,23 @@ export function shader(
   fill: Sketch.Fill | Sketch.Border,
   layerFrame: Rect,
   image?: ArrayBuffer,
+  runtimeEffect?: RuntimeEffect,
+  uniforms?: number[],
 ): Shader | undefined {
   switch (fill.fillType) {
+    case Sketch.FillType.Shader:
+      const unitTransform = AffineTransform.multiply(
+        AffineTransform.translate(layerFrame.x, layerFrame.y),
+        AffineTransform.scale(layerFrame.width, layerFrame.height),
+      );
+
+      const shader = runtimeEffect?.makeShader(
+        uniforms ?? [],
+        true,
+        unitTransform.float32Array,
+      );
+
+      return shader;
     case Sketch.FillType.Color:
       const fillColor = fill.color
         ? color(CanvasKit, fill.color)
@@ -259,6 +275,8 @@ export function fill(
   fill: Sketch.Fill | Sketch.Border,
   layerFrame: Rect,
   image?: ArrayBuffer,
+  runtimeEffect?: RuntimeEffect,
+  uniforms?: number[],
 ): Paint {
   const paint = new CanvasKit.Paint();
 
@@ -269,8 +287,16 @@ export function fill(
       );
       break;
     case Sketch.FillType.Gradient:
-    case Sketch.FillType.Pattern: {
-      const fillShader = shader(CanvasKit, fill, layerFrame, image);
+    case Sketch.FillType.Pattern:
+    case Sketch.FillType.Shader: {
+      const fillShader = shader(
+        CanvasKit,
+        fill,
+        layerFrame,
+        image,
+        runtimeEffect,
+        uniforms,
+      );
 
       if (!fillShader) {
         paint.setColor(clearColor(CanvasKit));

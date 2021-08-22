@@ -35,7 +35,8 @@ type FillOption =
   | 'Linear Gradient'
   | 'Radial Gradient'
   | 'Angular Gradient'
-  | 'Pattern Fill';
+  | 'Pattern Fill'
+  | 'Shader';
 
 function ColorFillPicker({
   id,
@@ -207,6 +208,7 @@ function FillOptionSelect({
           ]
         : []),
       ...(supportsPatterns ? ['Pattern Fill' as const] : []),
+      'Shader' as const,
     ],
     [supportsGradients, supportsPatterns],
   );
@@ -220,6 +222,8 @@ function FillOptionSelect({
         return `${gradientTypeString} Gradient` as FillOption;
       case Sketch.FillType.Color:
         return 'Solid Color';
+      case Sketch.FillType.Shader:
+        return 'Shader';
     }
   }, [fillType, gradientType]);
 
@@ -246,6 +250,9 @@ function FillOptionSelect({
           break;
         case 'Pattern Fill':
           onChangeType(Sketch.FillType.Pattern);
+          break;
+        case 'Shader':
+          onChangeType(Sketch.FillType.Shader);
           break;
       }
     },

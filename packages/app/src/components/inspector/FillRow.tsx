@@ -66,6 +66,8 @@ export default memo(function FillRow({
         return 'Gradient';
       case Sketch.FillType.Pattern:
         return 'Image';
+      case Sketch.FillType.Shader:
+        return 'Shader';
     }
   }, [fillType]);
 

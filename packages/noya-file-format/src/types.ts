@@ -179,6 +179,7 @@ export enum FillType {
   Color = 0,
   Gradient = 1,
   Pattern = 4,
+  Shader = -1,
 }
 /**
  * Enumeration of border positions
@@ -281,6 +282,7 @@ export type Fill = {
   contextSettings: GraphicsContextSettings;
   gradient: Gradient;
   image?: FileRef | DataRef;
+  shader?: Shader;
 };
 /**
  * Enumeration of pattern fill types
@@ -291,6 +293,13 @@ export enum PatternFillType {
   Stretch = 2,
   Fit = 3,
 }
+/**
+ * Defines a shader
+ */
+export type Shader = {
+  _class: 'shader';
+  shaderString: string;
+};
 /**
  * Enumeration of the possible types of vector line endings
  */
@@ -1611,6 +1620,7 @@ export type AnyObject =
   | BorderOptions
   | Blur
   | Fill
+  | Shader
   | TextStyle
   | ParagraphStyle
   | FontDescriptor
@@ -1705,6 +1715,7 @@ export enum ClassValue {
   Rect = 'rect',
   Rectangle = 'rectangle',
   RulerData = 'rulerData',
+  Shader = 'shader',
   Shadow = 'shadow',
   ShapeGroup = 'shapeGroup',
   ShapePath = 'shapePath',
@@ -1748,6 +1759,7 @@ export type ClassMap = {
   shapePath: ShapePath;
   shapeGroup: ShapeGroup;
   shadow: Shadow;
+  shader: Shader;
   rulerData: RulerData;
   rectangle: Rectangle;
   rect: Rect;
