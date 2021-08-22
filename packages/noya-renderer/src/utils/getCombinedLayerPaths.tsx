@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import { Layers, Primitives } from 'noya-state';
 

@@ -1,5 +1,5 @@
 import * as AspectRatio from '@radix-ui/react-aspect-ratio';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { PageLayer } from 'noya-state';
 import { memo, useCallback } from 'react';

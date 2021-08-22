@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { round } from 'noya-utils';
 import { diagram } from 'tree-visit';
 import { PointString } from './PointString';

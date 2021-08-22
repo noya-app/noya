@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
 import { distance, Point, Rect } from 'noya-geometry';

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { SimpleTextDecoration } from 'noya-state';
 import { uuid } from 'noya-utils';
@@ -86,10 +86,11 @@ export function textStyleReducer(
             )
               return;
 
-            sharedTextStyle.value.textStyle.encodedAttributes = stringAttributeReducer(
-              sharedTextStyle.value.textStyle.encodedAttributes,
-              action,
-            );
+            sharedTextStyle.value.textStyle.encodedAttributes =
+              stringAttributeReducer(
+                sharedTextStyle.value.textStyle.encodedAttributes,
+                action,
+              );
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { sketchColorToRgba } from 'noya-designsystem';
 import { center, Size } from 'noya-geometry';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';

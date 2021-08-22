@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { memo, useMemo, useCallback, Fragment } from 'react';
 import { GridView } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { Bounds, createBounds, transformRect } from 'noya-geometry';
 import { sum } from 'noya-utils';

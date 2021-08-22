@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   Axis,
   createBounds,
@@ -144,10 +144,9 @@ export function getSnaps(
   targetValues: number[],
   targetId: string,
 ): Snap[] {
-  return cartesianProduct(
-    sourceValues,
-    targetValues,
-  ).map(([source, target]) => ({ source, target, targetId }));
+  return cartesianProduct(sourceValues, targetValues).map(
+    ([source, target]) => ({ source, target, targetId }),
+  );
 }
 
 export function getSnapAdjustmentForVisibleLayers(

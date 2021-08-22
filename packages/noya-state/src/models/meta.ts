@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 
 const app = Sketch.BundleId.PublicRelease;
 const build = 109185;

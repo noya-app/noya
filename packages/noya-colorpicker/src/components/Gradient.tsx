@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { sketchColorToRgba, getGradientBackground } from 'noya-designsystem';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';

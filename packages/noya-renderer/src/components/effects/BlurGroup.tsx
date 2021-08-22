@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
 import { Group, useCanvasKit } from 'noya-renderer';
 import { memo, ReactNode, useMemo } from 'react';

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { GroupLayouts, Layers, SetNumberMode } from '..';
 import { getSelectedLayers } from '../selectors/layerSelectors';

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit, Paragraph } from 'canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
@@ -61,12 +61,12 @@ function getRectsForRange(
   start: number,
   end: number,
 ) {
-  return (paragraph.getRectsForRange(
+  return paragraph.getRectsForRange(
     start,
     end,
     CanvasKit.RectHeightStyle.Max,
     CanvasKit.RectWidthStyle.Max,
-  ) as unknown) as Float32Array[];
+  ) as unknown as Float32Array[];
 }
 
 function getCursorRect(

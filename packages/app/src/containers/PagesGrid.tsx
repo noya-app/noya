@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { GridView, MenuItem } from 'noya-designsystem';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
@@ -13,9 +13,10 @@ interface PageGridItemProps {
 }
 
 const PageGridItem = memo(function PageGridItem({ page }: PageGridItemProps) {
-  const frame = useMemo(() => Selectors.getPageContentBoundingRect(page), [
-    page,
-  ]);
+  const frame = useMemo(
+    () => Selectors.getPageContentBoundingRect(page),
+    [page],
+  );
 
   return (
     <CanvasGridItem

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import { toDegrees } from 'noya-geometry';
 import { useCanvasKit } from 'noya-renderer';

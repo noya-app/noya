@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';

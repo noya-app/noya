@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Spacer } from 'noya-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';

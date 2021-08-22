@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   useApplicationState,
   useSelector,
@@ -409,9 +409,8 @@ export default memo(function Canvas() {
             });
           });
 
-          const indexPathOfOpenShapeLayer = Selectors.getIndexPathOfOpenShapeLayer(
-            state,
-          );
+          const indexPathOfOpenShapeLayer =
+            Selectors.getIndexPathOfOpenShapeLayer(state);
 
           if (selectedPoint) {
             if (Selectors.canClosePath(state, selectedPoint) && !shiftKey) {
@@ -458,13 +457,14 @@ export default memo(function Canvas() {
         case 'hoverHandle':
         case 'editingText':
         case 'none': {
-          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
-            CanvasKit,
-            fontManager,
-            state,
-            point,
-            'bounded',
-          );
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'bounded',
+            );
 
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
@@ -497,10 +497,8 @@ export default memo(function Canvas() {
             },
           );
 
-          const selectedGradientStopIndex = Selectors.getGradientStopIndexAtPoint(
-            state,
-            point,
-          );
+          const selectedGradientStopIndex =
+            Selectors.getGradientStopIndexAtPoint(state, point);
 
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
@@ -589,13 +587,14 @@ export default memo(function Canvas() {
         case 'selectingText': {
           if (!textSelection) return;
 
-          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
-            CanvasKit,
-            fontManager,
-            state,
-            point,
-            'unbounded',
-          );
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'unbounded',
+            );
 
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
@@ -878,13 +877,14 @@ export default memo(function Canvas() {
             return;
           }
 
-          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
-            CanvasKit,
-            fontManager,
-            state,
-            point,
-            'bounded',
-          );
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'bounded',
+            );
 
           dispatch('interaction', [
             'editingText',
@@ -1050,38 +1050,36 @@ export default memo(function Canvas() {
       const point = offsetEventPoint(rawPoint);
 
       const images = await Promise.all(
-        files.map(
-          async (file): Promise<InsertedImage | void> => {
-            if (file.type === 'image/svg+xml') {
-              const svgString = await file.text();
+        files.map(async (file): Promise<InsertedImage | void> => {
+          if (file.type === 'image/svg+xml') {
+            const svgString = await file.text();
 
-              return {
-                name: file.name.replace(/\.svg$/, ''),
-                extension: 'svg',
-                svgString,
-              };
-            } else {
-              const data = await file.arrayBuffer();
-              const decodedImage = CanvasKit.MakeImageFromEncoded(data);
+            return {
+              name: file.name.replace(/\.svg$/, ''),
+              extension: 'svg',
+              svgString,
+            };
+          } else {
+            const data = await file.arrayBuffer();
+            const decodedImage = CanvasKit.MakeImageFromEncoded(data);
 
-              if (!decodedImage) return;
+            if (!decodedImage) return;
 
-              const size = {
-                width: decodedImage.width(),
-                height: decodedImage.height(),
-              };
+            const size = {
+              width: decodedImage.width(),
+              height: decodedImage.height(),
+            };
 
-              const extension = getFileExtensionForType(file.type);
+            const extension = getFileExtensionForType(file.type);
 
-              return {
-                name: file.name.replace(new RegExp(`\\.${extension}$`), ''),
-                extension,
-                size,
-                data,
-              };
-            }
-          },
-        ),
+            return {
+              name: file.name.replace(new RegExp(`\\.${extension}$`), ''),
+              extension,
+              size,
+              data,
+            };
+          }
+        }),
       );
 
       const validImages = images.flatMap((image) => (image ? [image] : []));
