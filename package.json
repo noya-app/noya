@@ -1,6 +1,6 @@
 {
   "name": "noya",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -10,7 +10,9 @@
     ],
     "nohoist": [
       "**/electron-squirrel-startup",
-      "**/electron-squirrel-startup/**"
+      "**/electron-squirrel-startup/**",
+      "**/@electron-forge/publisher-github",
+      "**/@electron-forge/publisher-github/**"
     ]
   },
   "modular": {
@@ -20,6 +22,7 @@
     "start": "PORT=1234 modular start app",
     "build": "modular build app",
     "build:desktop": "cd ./packages/noya-desktop && yarn make",
+    "publish:desktop": "cd ./packages/noya-desktop && yarn publish",
     "test": "modular test",
     "test:clean": "JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
     "lint": "eslint . --ext .js,.ts,.tsx",
