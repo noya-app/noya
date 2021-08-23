@@ -732,7 +732,14 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
   };
 }
 
+const WHITE = color({ red: 1, green: 1, blue: 1, alpha: 1 });
+const BLACK = color({ red: 0, green: 0, blue: 0, alpha: 1 });
+const TRANSPARENT = color({ red: 0, green: 0, blue: 0, alpha: 0 });
+
 export const SketchModel = {
+  WHITE,
+  BLACK,
+  TRANSPARENT,
   artboard,
   attributedString,
   bitmap,

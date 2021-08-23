@@ -30,7 +30,12 @@ const SketchFill = memo(function SketchFill({
   const image = useSketchImage(fill.image);
 
   const runtimeEffect = useMemo(() => {
-    if (fill.fillType !== Sketch.FillType.Shader || !fill.shader) return;
+    if (
+      fill.fillType !== Sketch.FillType.Shader ||
+      !fill.shader ||
+      !fill.shader.shaderString
+    )
+      return;
 
     const { shaderString, variables } = fill.shader;
 

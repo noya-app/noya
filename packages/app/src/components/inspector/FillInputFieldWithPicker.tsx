@@ -1,17 +1,17 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
-import Sketch from 'noya-file-format';
+import { useApplicationState } from 'noya-app-state-context';
 import {
-  FillInputField,
   Divider,
+  FillInputField,
   Select,
   SketchPattern,
   useGlobalInputBlurListener,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
-import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
@@ -191,6 +191,7 @@ interface FillOptionSelectProps {
   onChangeGradientType?: (type: Sketch.GradientType) => void;
   supportsGradients: boolean;
   supportsPatterns: boolean;
+  supportsShaders: boolean;
 }
 
 function FillOptionSelect({
@@ -200,6 +201,7 @@ function FillOptionSelect({
   onChangeGradientType,
   supportsGradients,
   supportsPatterns,
+  supportsShaders,
 }: FillOptionSelectProps) {
   const fillOptions: FillOption[] = useMemo(
     () => [
@@ -212,9 +214,9 @@ function FillOptionSelect({
           ]
         : []),
       ...(supportsPatterns ? ['Pattern Fill' as const] : []),
-      'Shader' as const,
+      ...(supportsShaders ? ['Shader' as const] : []),
     ],
-    [supportsGradients, supportsPatterns],
+    [supportsGradients, supportsPatterns, supportsShaders],
   );
 
   const value: FillOption = useMemo(() => {
@@ -268,6 +270,10 @@ function FillOptionSelect({
       id="fill-options"
       value={value}
       options={fillOptions}
+      getTitle={useCallback(
+        (option) => (option === 'Shader' ? 'Shader (beta)' : option),
+        [],
+      )}
       onChange={handleChange}
     />
   );
@@ -418,6 +424,7 @@ export default memo(function FillInputFieldWithPicker({
                 <FillOptionSelect
                   supportsGradients={!!gradientProps}
                   supportsPatterns={!!patternProps}
+                  supportsShaders={!!shaderProps}
                   fillType={fillType ?? Sketch.FillType.Color}
                   gradientType={
                     gradientProps?.gradient.gradientType ??
