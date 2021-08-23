@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Grid, Stack, Text, Spacer } from 'noya-designsystem';
-import {
-  motion,
-  useTransform,
-  useElementScroll,
-  useViewportScroll,
-} from 'framer-motion';
+import { PagerView, View } from '../components/PagerView';
 import logoSrc from '../assets/logo.svg';
 import * as theme from '../theme';
 
@@ -165,30 +160,26 @@ function GitHubIcon() {
 }
 
 function Features({ children }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const { scrollYProgress: viewportScrollYProgress } = useViewportScroll();
-  const { scrollYProgress: elementScrollYProgress } = useElementScroll(ref);
-  const x = useTransform(viewportScrollYProgress, [0, 1], [300, 0]);
-  const scale = useTransform(elementScrollYProgress, [0, 1], [0, 1]);
+  const colors = [
+    '#8d2fd8',
+    '#be6dff',
+    '#8d2fd8',
+    '#be6dff',
+    '#8d2fd8',
+    '#be6dff',
+    '#8d2fd8',
+    '#be6dff',
+    '#8d2fd8',
+    '#be6dff',
+    '#8d2fd8',
+    '#be6dff',
+  ];
   return (
-    <motion.div style={{ width: '100%', overflow: 'hidden' }}>
-      <motion.div
-        ref={ref}
-        style={{
-          display: 'flex',
-          // overflow: 'auto',
-          // x,
-        }}
-      >
-        {React.Children.map(children, (child, index) =>
-          React.cloneElement(child, {
-            active: activeIndex === index,
-            setIndex: () => setActiveIndex(index),
-          }),
-        )}
-      </motion.div>
-    </motion.div>
+    <PagerView>
+      {colors.map((color, index) => (
+        <View key={index} color={color} />
+      ))}
+    </PagerView>
   );
 }
 
