@@ -307,7 +307,19 @@ export type Shader = {
 export type ShaderVariable = {
   _class: 'shaderVariable';
   name: string;
-  value: number | Color;
+  value:
+    | {
+        type: 'integer';
+        data: number;
+      }
+    | {
+        type: 'float';
+        data: number;
+      }
+    | {
+        type: 'color';
+        data: Color;
+      };
 };
 /**
  * Enumeration of the possible types of vector line endings

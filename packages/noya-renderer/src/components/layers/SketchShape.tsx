@@ -36,11 +36,16 @@ const SketchFill = memo(function SketchFill({
 
     const uniforms = [
       'uniform float iTime;',
-      ...variables.map((variable) => {
-        if (typeof variable.value === 'number') {
-          return `uniform float ${variable.name};`;
-        } else {
-          return `uniform float4 ${variable.name};`;
+      ...variables.flatMap(({ name, value }) => {
+        switch (value.type) {
+          case 'integer':
+            return [`uniform int ${name};`];
+          case 'float':
+            return [`uniform float ${name};`];
+          case 'color':
+            return [`uniform float4 ${name};`];
+          default:
+            return [];
         }
       }),
     ].join('\n');
@@ -70,14 +75,16 @@ const SketchFill = memo(function SketchFill({
   const paint = useMemo(() => {
     const uniforms = [
       time,
-      ...(fill.shader?.variables ?? []).flatMap((variable) => {
-        if (typeof variable.value === 'number') {
-          return [variable.value];
-        } else if (variable.value._class === 'color') {
-          const { red, green, blue, alpha } = variable.value;
-          return [red, green, blue, alpha];
-        } else {
-          throw new Error('Bad variable type');
+      ...(fill.shader?.variables ?? []).flatMap(({ value }) => {
+        switch (value.type) {
+          case 'integer':
+          case 'float':
+            return [value.data];
+          case 'color':
+            const { red, green, blue, alpha } = value.data;
+            return [red, green, blue, alpha];
+          default:
+            return [];
         }
       }),
     ];

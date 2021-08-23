@@ -7,6 +7,7 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
+import { upperFirst } from 'noya-utils';
 import { memo } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
@@ -14,8 +15,6 @@ import FillInputFieldWithPicker, {
   ShaderFillProps,
 } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
-
-type VariableType = 'Number' | 'Color';
 
 const ShaderVariableRow = memo(function ShaderVariableRow({
   id,
@@ -35,32 +34,33 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
   const typeInputId = `${id}-type`;
 
   let editor;
-  let variableType: VariableType;
 
-  if (typeof variable.value === 'number') {
-    variableType = 'Number';
-    editor = (
-      <InputField.Root size={50} id={valueInputId}>
-        <InputField.NumberInput
-          value={variable.value}
-          onChange={onChangeValue}
-        />
-      </InputField.Root>
-    );
-  } else {
-    switch (variable.value._class) {
-      case 'color':
-        variableType = 'Color';
-        editor = (
-          <FillInputFieldWithPicker
-            id={valueInputId}
-            colorProps={{
-              color: variable.value,
-              onChangeColor: onChangeValue,
-            }}
+  switch (variable.value.type) {
+    case 'integer':
+    case 'float': {
+      const type = variable.value.type;
+      editor = (
+        <InputField.Root size={50} id={valueInputId}>
+          <InputField.NumberInput
+            value={variable.value.data}
+            onChange={(data) => onChangeValue({ type, data })}
           />
-        );
-        break;
+        </InputField.Root>
+      );
+      break;
+    }
+    case 'color': {
+      const type = variable.value.type;
+      editor = (
+        <FillInputFieldWithPicker
+          id={valueInputId}
+          colorProps={{
+            color: variable.value.data,
+            onChangeColor: (data) => onChangeValue({ type, data }),
+          }}
+        />
+      );
+      break;
     }
   }
 
@@ -70,7 +70,9 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
         renderLabel={({ id }) => {
           switch (id) {
             case valueInputId:
-              return <Label.Label>{variableType}</Label.Label>;
+              return (
+                <Label.Label>{upperFirst(variable.value.type)}</Label.Label>
+              );
             case nameInputId:
               return <Label.Label>Name</Label.Label>;
             case typeInputId:
@@ -84,17 +86,25 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
         <InspectorPrimitives.HorizontalSeparator />
         <Select
           id={typeInputId}
-          value={variableType}
-          options={['Number', 'Color']}
+          value={variable.value.type}
+          getTitle={upperFirst}
+          options={['integer', 'float', 'color']}
           onChange={(type) => {
             switch (type) {
-              case 'Number':
-                onChangeValue(0);
+              case 'integer':
+              case 'float':
+                onChangeValue({ type, data: 0 });
                 break;
-              case 'Color':
-                onChangeValue(
-                  SketchModel.color({ red: 0, green: 0, blue: 0, alpha: 1 }),
-                );
+              case 'color':
+                onChangeValue({
+                  type,
+                  data: SketchModel.color({
+                    red: 0,
+                    green: 0,
+                    blue: 0,
+                    alpha: 1,
+                  }),
+                });
                 break;
             }
           }}

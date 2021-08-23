@@ -93,7 +93,7 @@ function shaderVariable(
 ): Sketch.ShaderVariable {
   return {
     name: '',
-    value: 0,
+    value: { type: 'float', data: 0 },
     ...options,
     _class: Sketch.ClassValue.ShaderVariable,
   };

@@ -167,28 +167,28 @@ export const setNewShaderFill = (fills: Sketch.Fill[], index: number) => {
 
   fills[index].shader = {
     _class: 'shader',
-    shaderString: `half4 main(float2 position) {
-  float2 in_center = float2(0.5, 0.5);
-  float2 pp = position - in_center;
-  float radius = sqrt(dot(pp, pp)) * 100;
-  radius = sqrt(radius);
-  float angle = atan(pp.y / pp.x);
-  float t = (angle + 3.1415926/2) / (3.1415926);
-  t += radius * cos(iTime / 2000) / 5;
-  t = fract(t);
-  return half4(mix(color1, color2, t));
-}
+    shaderString: `float4 main(float2 position) {
+  float x = floor(position.x * 10) / 10;
+  float y = floor(position.y * 10) / 10;
+  return mix(color1, color2, (x + y) / 2);
+}   
 `,
     variables: [
       {
         _class: 'shaderVariable',
         name: 'color1',
-        value: SketchModel.color({ red: 1, green: 0, blue: 0 }),
+        value: {
+          type: 'color',
+          data: SketchModel.color({ red: 1, green: 0, blue: 0 }),
+        },
       },
       {
         _class: 'shaderVariable',
         name: 'color2',
-        value: SketchModel.color({ red: 0, green: 0, blue: 1 }),
+        value: {
+          type: 'color',
+          data: SketchModel.color({ red: 0, green: 0, blue: 1 }),
+        },
       },
     ],
   };
