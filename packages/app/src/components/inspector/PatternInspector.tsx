@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { fileOpen } from 'browser-fs-access';
 import {
   InputField,

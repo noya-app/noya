@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { sketchColorToRgbaString } from 'noya-designsystem';
 import { Size } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';

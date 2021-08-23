@@ -16,7 +16,7 @@ import {
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   useApplicationState,
   useGetStateSnapshot,
@@ -468,9 +468,10 @@ export default memo(function LayerList({ size }: { size: Size }) {
       keyExtractor={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
-      onClick={useCallback(() => dispatch('selectLayer', undefined), [
-        dispatch,
-      ])}
+      onClick={useCallback(
+        () => dispatch('selectLayer', undefined),
+        [dispatch],
+      )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
           const sourceId = items[sourceIndex].id;

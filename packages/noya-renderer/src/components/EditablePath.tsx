@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Paint } from 'canvaskit';
 import { AffineTransform, Point } from 'noya-geometry';
 import { useDeletable, useFill, useStroke } from 'noya-react-canvaskit';

@@ -3144,11 +3144,6 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@sketch-hq/sketch-file-format-ts@^6.1.1":
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/@sketch-hq/sketch-file-format-ts/-/sketch-file-format-ts-6.1.1.tgz#959432a9b156e78f8afce7e6ca997969f8b7f682"
-  integrity sha512-nYCJV89IKRH+JOod38QfY7WsAZoYxMrbeFyslaGiIYrq+4YgATz4HY998vHlQqcLWk678Bi6604dmhK5zQT3xQ==
-
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/@surma/rollup-plugin-off-main-thread/-/rollup-plugin-off-main-thread-1.4.2.tgz#e6786b6af5799f82f7ab3a82e53f6182d2b91a58"

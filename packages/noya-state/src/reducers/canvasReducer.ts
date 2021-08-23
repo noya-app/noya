@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { interpolateRgba } from 'noya-colorpicker';
@@ -411,12 +411,8 @@ export function canvasReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       if (!state.selectedGradient) return state;
-      const {
-        layerId,
-        fillIndex,
-        stopIndex,
-        styleType,
-      } = state.selectedGradient;
+      const { layerId, fillIndex, stopIndex, styleType } =
+        state.selectedGradient;
 
       const page = getCurrentPage(state);
       const indexPath = Layers.findIndexPath(
@@ -520,10 +516,9 @@ export function canvasReducer(
 
         const { segmentIndex, segmentPath, t } = splitParameters;
 
-        const newCurvePoints = Primitives.splitPath(
-          segmentPath,
-          t,
-        ).map((path) => Primitives.pathToCurvePoints(path, draftLayer.frame));
+        const newCurvePoints = Primitives.splitPath(segmentPath, t).map(
+          (path) => Primitives.pathToCurvePoints(path, draftLayer.frame),
+        );
 
         const start = draftLayer.points.slice(0, segmentIndex + 1);
         const end = draftLayer.points.slice(segmentIndex + 1);
@@ -539,9 +534,8 @@ export function canvasReducer(
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
-        state,
-      );
+      const layerIndexPaths =
+        getSelectedLayerIndexPathsExcludingDescendants(state);
 
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
@@ -581,12 +575,8 @@ export function canvasReducer(
 
             if (!state.selectedGradient) return;
 
-            const {
-              layerId,
-              fillIndex,
-              stopIndex,
-              styleType,
-            } = state.selectedGradient;
+            const { layerId, fillIndex, stopIndex, styleType } =
+              state.selectedGradient;
 
             const indexPath = Layers.findIndexPath(
               pageSnapshot,
@@ -897,12 +887,8 @@ export function canvasReducer(
             break;
           }
           case 'scaling': {
-            const {
-              origin,
-              current,
-              pageSnapshot,
-              direction,
-            } = interactionState;
+            const { origin, current, pageSnapshot, direction } =
+              interactionState;
 
             const delta = {
               x: current.x - origin.x,

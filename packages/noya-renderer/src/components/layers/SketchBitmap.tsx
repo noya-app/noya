@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { getRectCornerPoints } from 'noya-geometry';
 import { Primitives } from 'noya-state';
 import { makePath } from 'noya-react-canvaskit';

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit, ImageFilter, Shader } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable } from 'noya-react-canvaskit';

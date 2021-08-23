@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Draft } from 'immer';
 import { Point } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';

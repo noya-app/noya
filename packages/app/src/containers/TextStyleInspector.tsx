@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
 import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
@@ -29,9 +29,10 @@ export default memo(function TextStyleInspector() {
     ),
   );
 
-  const editableTextStyle = useMemo(() => getEditableTextStyle(textStyles), [
-    textStyles,
-  ]);
+  const editableTextStyle = useMemo(
+    () => getEditableTextStyle(textStyles),
+    [textStyles],
+  );
 
   return (
     <>

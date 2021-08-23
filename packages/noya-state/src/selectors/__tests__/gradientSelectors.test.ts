@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { createInitialState } from '../../reducers/applicationReducer';
 import { createSketchFile } from '../../sketchFile';

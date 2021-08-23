@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   InputField,
   Label,
@@ -25,22 +25,7 @@ import * as InspectorPrimitives from './InspectorPrimitives';
 const MULTIPLE_TYPEFACES = 'Multiple Typefaces';
 
 const FONT_SIZE_DROPDOWN_OPTIONS: MenuItem<string>[] = [
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  14,
-  16,
-  18,
-  21,
-  24,
-  36,
-  48,
-  60,
-  72,
+  6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72,
 ]
   .map((size) => size.toString())
   .map((value) => ({

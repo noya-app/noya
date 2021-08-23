@@ -6,7 +6,7 @@ import {
   parseCSSColor,
   PathWithoutQuadratics,
 } from '@lona/svg-model';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   computeBoundsFromPoints,

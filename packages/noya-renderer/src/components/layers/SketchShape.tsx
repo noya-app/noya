@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
 import { AffineTransform, Rect } from 'noya-geometry';
 import {
@@ -30,12 +30,10 @@ const SketchFill = memo(function SketchFill({
   const image = useSketchImage(fill.image);
 
   // TODO: Delete internal gradient shaders on unmount
-  const paint = useMemo(() => Primitives.fill(CanvasKit, fill, frame, image), [
-    CanvasKit,
-    fill,
-    frame,
-    image,
-  ]);
+  const paint = useMemo(
+    () => Primitives.fill(CanvasKit, fill, frame, image),
+    [CanvasKit, fill, frame, image],
+  );
 
   useDeletable(paint);
 
@@ -177,9 +175,10 @@ interface Props {
 export default memo(function SketchShape({ layer }: Props) {
   const path = useLayerPath(layer);
 
-  const style = useMemo(() => layer.style ?? SketchModel.style(), [
-    layer.style,
-  ]);
+  const style = useMemo(
+    () => layer.style ?? SketchModel.style(),
+    [layer.style],
+  );
 
   const fills = (style.fills ?? []).filter((x) => x.isEnabled);
   const borders = (style.borders ?? []).filter((x) => x.isEnabled);

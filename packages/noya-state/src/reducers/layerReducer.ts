@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
 import { AffineTransform, transformRect } from 'noya-geometry';
@@ -175,10 +175,8 @@ export function layerReducer(
         ids.includes(layer.do_objectID),
       );
 
-      const symbolsInstancesIndexPaths = getSelectedSymbols(
-        state,
-      ).flatMap((symbol) =>
-        getSymbolsInstancesIndexPaths(state, symbol.symbolID),
+      const symbolsInstancesIndexPaths = getSelectedSymbols(state).flatMap(
+        (symbol) => getSymbolsInstancesIndexPaths(state, symbol.symbolID),
       );
 
       return produce(state, (draft) => {

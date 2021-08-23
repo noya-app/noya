@@ -1,5 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
-import { CurvePoint } from '@sketch-hq/sketch-file-format-ts/dist/cjs/types';
+import Sketch from 'noya-file-format';
 import { useStroke } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React from 'react';
@@ -8,7 +7,7 @@ import { Path, useCanvasKit } from '..';
 
 interface EditablePathPointProps {
   frame: Sketch.Rect;
-  points: CurvePoint[];
+  points: Sketch.CurvePoint[];
 }
 
 export default function PseudoPathLine({

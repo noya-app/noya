@@ -1,5 +1,5 @@
 import { CommandWithoutQuadratics } from '@lona/svg-model';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Point } from 'noya-geometry';
 import { PointString, SketchModel } from 'noya-sketch-model';
 

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { rgbaToHex } from 'noya-colorpicker';
 import { GridView, sketchColorToRgba } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';

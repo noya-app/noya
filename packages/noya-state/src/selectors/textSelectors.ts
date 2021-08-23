@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { insetRect, Point, Rect, rectContainsPoint, Size } from 'noya-geometry';

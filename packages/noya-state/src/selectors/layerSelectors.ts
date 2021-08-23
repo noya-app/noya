@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 import produce, { Draft } from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
 import {
@@ -65,9 +65,11 @@ export const getSelectedLayersWithContextSettings = (
 ): PageLayer[] => {
   const page = getCurrentPage(state);
 
-  return (Layers.findAll(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
-  ) as PageLayer[]).filter(
+  return (
+    Layers.findAll(page, (layer) =>
+      state.selectedObjects.includes(layer.do_objectID),
+    ) as PageLayer[]
+  ).filter(
     (layer) => layer._class !== 'artboard' && layer.style?.contextSettings,
   );
 };
@@ -112,7 +114,7 @@ export const getParentLayer = (page: Sketch.AnyLayer, indexPath: IndexPath) =>
   Layers.access(page, indexPath.slice(0, -1)) as Layers.ParentLayer;
 
 export const addSiblingLayer = <
-  T extends Exclude<Sketch.AnyLayer, { _class: 'page' }>
+  T extends Exclude<Sketch.AnyLayer, { _class: 'page' }>,
 >(
   page: Sketch.AnyLayer,
   indexPath: IndexPath,

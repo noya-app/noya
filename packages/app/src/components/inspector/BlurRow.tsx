@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Select } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { invert } from 'noya-utils';
