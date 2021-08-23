@@ -306,6 +306,7 @@ export type ShaderFillProps = {
     name: string,
     value: Sketch.ShaderVariable['value'],
   ) => void;
+  onNudgeShaderVariableValue: (name: string, value: number) => void;
 };
 
 interface Props {

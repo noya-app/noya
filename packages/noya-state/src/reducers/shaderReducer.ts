@@ -16,6 +16,12 @@ export type ShaderAction =
       name: string,
       value: Sketch.ShaderVariable['value'],
     ]
+  | [
+      type: 'nudgeShaderVariableValue',
+      index: number,
+      name: string,
+      amount: number,
+    ]
   | [type: 'addShaderVariable', index: number]
   | [type: 'deleteShaderVariable', index: number, name: string];
 
@@ -57,6 +63,27 @@ export function shaderReducer(
 
       return produce(state, (draft) => {
         draft.variables[index].value = value;
+      });
+    }
+    case 'nudgeShaderVariableValue': {
+      const [, , name, amount] = action;
+
+      const index = state.variables.findIndex(
+        (variable) => variable.name === name,
+      );
+
+      if (index === -1) return state;
+
+      return produce(state, (draft) => {
+        const value = draft.variables[index].value;
+        switch (value.type) {
+          case 'float':
+          case 'integer':
+            value.data += amount;
+            break;
+          default:
+            break;
+        }
       });
     }
     case 'addShaderVariable': {

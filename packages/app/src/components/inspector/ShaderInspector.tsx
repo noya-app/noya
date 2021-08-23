@@ -20,6 +20,7 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
   id,
   variable,
   onChangeValue,
+  onNudge,
   onChangeName,
   onClickDelete,
 }: {
@@ -27,6 +28,7 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
   variable: Sketch.ShaderVariable;
   onChangeName: (name: string) => void;
   onChangeValue: (value: Sketch.ShaderVariable['value']) => void;
+  onNudge: (value: number) => void;
   onClickDelete: () => void;
 }) {
   const valueInputId = `${id}-value`;
@@ -43,7 +45,8 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
         <InputField.Root size={50} id={valueInputId}>
           <InputField.NumberInput
             value={variable.value.data}
-            onChange={(data) => onChangeValue({ type, data })}
+            onSubmit={(data) => onChangeValue({ type, data })}
+            onNudge={onNudge}
           />
         </InputField.Root>
       );
@@ -135,6 +138,7 @@ export default memo(function ShaderInspector({
   onAddShaderVariable,
   onDeleteShaderVariable,
   onChangeShaderVariableValue,
+  onNudgeShaderVariableValue,
   onChangeShaderVariableName,
 }: ShaderFillProps & { id: string }) {
   return (
@@ -157,6 +161,9 @@ export default memo(function ShaderInspector({
                 variable={item}
                 onChangeValue={(value) =>
                   onChangeShaderVariableValue(item.name, value)
+                }
+                onNudge={(value) =>
+                  onNudgeShaderVariableValue(item.name, value)
                 }
                 onClickDelete={() => onDeleteShaderVariable(item.name)}
                 onChangeName={(name) =>

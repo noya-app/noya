@@ -267,6 +267,7 @@ export function applicationReducer(
     case 'setShaderString':
     case 'setShaderVariableName':
     case 'setShaderVariableValue':
+    case 'nudgeShaderVariableValue':
     case 'addShaderVariable':
     case 'deleteShaderVariable': {
       if (getCurrentTab(state) === 'canvas') {

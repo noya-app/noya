@@ -125,6 +125,8 @@ export default memo(function FillInspector({
                 dispatch('setShaderVariableName', index, oldName, newName),
               onChangeShaderVariableValue: (name, value) =>
                 dispatch('setShaderVariableValue', index, name, value),
+              onNudgeShaderVariableValue: (name, value) =>
+                dispatch('nudgeShaderVariableValue', index, name, value),
             }}
           />
         ),

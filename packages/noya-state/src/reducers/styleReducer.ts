@@ -407,6 +407,7 @@ export function styleReducer(
     case 'setShaderString':
     case 'setShaderVariableName':
     case 'setShaderVariableValue':
+    case 'nudgeShaderVariableValue':
     case 'addShaderVariable':
     case 'deleteShaderVariable':
       const [, index] = action;
