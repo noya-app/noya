@@ -1,4 +1,4 @@
-import { Cross1Icon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import Sketch from 'noya-file-format';
 import {
   InputField,
@@ -132,7 +132,7 @@ export default memo(function ExportFormatsRow({
         onChange={onChangeFileFormat}
       />
     </InputField.Root>,
-    <Cross1Icon onClick={onDelete} cursor={'pointer'} />,
+    <Cross2Icon onClick={onDelete} cursor={'pointer'} />,
   ];
 
   return (

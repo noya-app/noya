@@ -63,7 +63,7 @@ export function shaderReducer(
       return produce(state, (draft) => {
         draft.variables.push(
           SketchModel.shaderVariable({
-            name: `variable${draft.variables.length}`,
+            name: `variable${draft.variables.length + 1}`,
           }),
         );
       });

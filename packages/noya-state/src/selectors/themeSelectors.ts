@@ -176,18 +176,18 @@ export const setNewShaderFill = (fills: Sketch.Fill[], index: number) => {
     variables: [
       {
         _class: 'shaderVariable',
-        name: 'color1',
-        value: {
-          type: 'color',
-          data: SketchModel.color({ red: 1, green: 0, blue: 0 }),
-        },
-      },
-      {
-        _class: 'shaderVariable',
         name: 'color2',
         value: {
           type: 'color',
           data: SketchModel.color({ red: 0, green: 0, blue: 1 }),
+        },
+      },
+      {
+        _class: 'shaderVariable',
+        name: 'color1',
+        value: {
+          type: 'color',
+          data: SketchModel.color({ red: 1, green: 0, blue: 0 }),
         },
       },
     ],

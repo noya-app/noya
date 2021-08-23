@@ -1,4 +1,4 @@
-import { Cross1Icon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
 import {
   InputField,
   Label,
@@ -115,7 +115,7 @@ const ShaderVariableRow = memo(function ShaderVariableRow({
           <InputField.Input onSubmit={onChangeName} value={variable.name} />
         </InputField.Root>
         <InspectorPrimitives.HorizontalSeparator />
-        <Cross1Icon onClick={onClickDelete} />
+        <Cross2Icon onClick={onClickDelete} />
       </LabeledElementView>
     </InspectorPrimitives.Row>
   );
