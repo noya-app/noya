@@ -1,10 +1,11 @@
-import { ScrollArea } from 'noya-designsystem';
+import { ScrollArea, Select } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
 import { ShaderFillProps } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
+import { PatternFillType } from './PatternInspector';
 import { ShaderVariableRow } from './ShaderVariableRow';
 
 const VerticalDivider = styled.div(({ theme }) => ({
@@ -38,6 +39,8 @@ const TextEditor = styled.textarea(({ theme }) => ({
 export default memo(function ShaderInspector({
   id,
   shader,
+  fillType,
+  onChangeFillType,
   onChangeShaderString,
   onAddShaderVariable,
   onDeleteShaderVariable,
@@ -49,6 +52,29 @@ export default memo(function ShaderInspector({
     <InspectorPrimitives.Row>
       <Sidebar>
         <ScrollArea>
+          <InspectorPrimitives.Section>
+            <InspectorPrimitives.SectionHeader>
+              <InspectorPrimitives.Title>Settings</InspectorPrimitives.Title>
+            </InspectorPrimitives.SectionHeader>
+            <InspectorPrimitives.VerticalSeparator />
+            <InspectorPrimitives.LabeledRow label={'Size'}>
+              <Select<'Fill' | 'Stretch'>
+                id={`${id}-resize-mode`}
+                value={
+                  fillType === Sketch.PatternFillType.Stretch
+                    ? 'Stretch'
+                    : 'Fill'
+                }
+                options={useMemo(() => ['Fill', 'Stretch'], [])}
+                onChange={useCallback(
+                  (value: PatternFillType) => {
+                    onChangeFillType(Sketch.PatternFillType[value]);
+                  },
+                  [onChangeFillType],
+                )}
+              />
+            </InspectorPrimitives.LabeledRow>
+          </InspectorPrimitives.Section>
           <ArrayController<Sketch.ShaderVariable>
             id="shader-variables"
             title="Variables"

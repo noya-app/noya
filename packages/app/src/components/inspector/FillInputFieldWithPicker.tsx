@@ -15,7 +15,7 @@ import styled, { CSSProperties } from 'styled-components';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
-import PatternInspector from './PatternInspector';
+import PatternInspector, { PatternFillType } from './PatternInspector';
 import PickerGradients from './PickerGradients';
 import PickerPatterns from './PickerPatterns';
 import ColorPickerSwatches from './PickerSwatches';
@@ -304,6 +304,8 @@ export type PatternFillProps = {
 
 export type ShaderFillProps = {
   shader: Sketch.Shader;
+  fillType: Sketch.PatternFillType;
+  onChangeFillType: (value: Sketch.PatternFillType) => void;
   onChangeShaderString: (value: string) => void;
   onAddShaderVariable: () => void;
   onDeleteShaderVariable: (name: string) => void;

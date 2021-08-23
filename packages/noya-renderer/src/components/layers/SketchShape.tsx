@@ -15,6 +15,28 @@ import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
 import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
+import { getSkiaShaderString, getUniformValues } from '../../shaders';
+
+/**
+ * A clock that contains the current time, and updates every animation frame
+ */
+function useClock({ enabled }: { enabled: boolean }) {
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const id = requestAnimationFrame(() => {
+      setTime(performance.now());
+    });
+
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  }, [enabled, time]);
+
+  return time;
+}
 
 const SketchFill = memo(function SketchFill({
   path,
@@ -29,6 +51,7 @@ const SketchFill = memo(function SketchFill({
 
   const image = useSketchImage(fill.image);
 
+  // TODO: Delete unused shaders
   const runtimeEffect = useMemo(() => {
     if (
       fill.fillType !== Sketch.FillType.Shader ||
@@ -37,62 +60,35 @@ const SketchFill = memo(function SketchFill({
     )
       return;
 
-    const { shaderString, variables } = fill.shader;
-
-    const uniforms = [
-      'uniform float iTime;',
-      ...variables.flatMap(({ name, value }) => {
-        switch (value.type) {
-          case 'integer':
-            return [`uniform int ${name};`];
-          case 'float':
-            return [`uniform float ${name};`];
-          case 'color':
-            return [`uniform float4 ${name};`];
-          default:
-            return [];
-        }
-      }),
-    ].join('\n');
-
-    const sksl = [uniforms, shaderString].join('\n\n');
-
-    return CanvasKit.RuntimeEffect.Make(sksl) ?? undefined;
+    return (
+      CanvasKit.RuntimeEffect.Make(
+        getSkiaShaderString(fill.shader.shaderString, [
+          ...fill.shader.variables,
+          SketchModel.shaderVariable({
+            name: 'iTime',
+            value: { type: 'float', data: 0 },
+          }),
+        ]),
+      ) ?? undefined
+    );
   }, [CanvasKit.RuntimeEffect, fill.fillType, fill.shader]);
 
-  // useDeletable(runtimeEffect);
-
-  const [time, setTime] = useState(0);
-
-  useEffect(() => {
-    if (fill.fillType !== Sketch.FillType.Shader) return;
-
-    const id = requestAnimationFrame(() => {
-      setTime(performance.now());
-    });
-
-    return () => {
-      cancelAnimationFrame(id);
-    };
-  }, [fill.fillType, time]);
+  const time = useClock({
+    enabled: fill.fillType === Sketch.FillType.Shader,
+  });
 
   // TODO: Delete internal gradient shaders on unmount
   const paint = useMemo(() => {
-    const uniforms = [
-      time,
-      ...(fill.shader?.variables ?? []).flatMap(({ value }) => {
-        switch (value.type) {
-          case 'integer':
-          case 'float':
-            return [value.data];
-          case 'color':
-            const { red, green, blue, alpha } = value.data;
-            return [red, green, blue, alpha];
-          default:
-            return [];
-        }
-      }),
-    ];
+    const uniforms =
+      fill.shader && runtimeEffect
+        ? getUniformValues([
+            ...fill.shader.variables,
+            SketchModel.shaderVariable({
+              name: 'iTime',
+              value: { type: 'float', data: time },
+            }),
+          ])
+        : undefined;
 
     return Primitives.fill(
       CanvasKit,

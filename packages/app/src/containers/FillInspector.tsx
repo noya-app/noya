@@ -116,6 +116,9 @@ export default memo(function FillInspector({
             }}
             shaderProps={{
               shader: item.shader,
+              fillType: item.pattern.patternFillType,
+              onChangeFillType: (value) =>
+                dispatch('setPatternFillType', index, value),
               onAddShaderVariable: () => dispatch('addShaderVariable', index),
               onDeleteShaderVariable: (name) =>
                 dispatch('deleteShaderVariable', index, name),
