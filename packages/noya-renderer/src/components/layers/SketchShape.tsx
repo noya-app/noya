@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { AffineTransform, Rect } from 'noya-geometry';
 import {
   ClipProps,
@@ -11,11 +11,12 @@ import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
 import { memo, useEffect, useMemo, useState } from 'react';
+import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
+import { getUniformValues } from '../../shaders';
 import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
-import { getSkiaShaderString, getUniformValues } from '../../shaders';
 
 /**
  * A clock that contains the current time, and updates every animation frame
@@ -60,18 +61,10 @@ const SketchFill = memo(function SketchFill({
     )
       return;
 
-    return (
-      CanvasKit.RuntimeEffect.Make(
-        getSkiaShaderString(fill.shader.shaderString, [
-          ...fill.shader.variables,
-          SketchModel.shaderVariable({
-            name: 'iTime',
-            value: { type: 'float', data: 0 },
-          }),
-        ]),
-      ) ?? undefined
-    );
-  }, [CanvasKit.RuntimeEffect, fill.fillType, fill.shader]);
+    const compiled = compileShader(CanvasKit, fill.shader);
+
+    return compiled.type === 'ok' ? compiled.value : undefined;
+  }, [CanvasKit, fill.fillType, fill.shader]);
 
   const time = useClock({
     enabled: fill.fillType === Sketch.FillType.Shader,

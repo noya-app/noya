@@ -1,5 +1,6 @@
 import { ScrollArea, Select } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { useCompileShader } from 'noya-renderer';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
@@ -23,6 +24,15 @@ const Sidebar = styled.div(({ theme }) => ({
   position: 'relative',
 }));
 
+const ErrorSection = styled.div(({ theme }) => ({
+  ...theme.textStyles.code,
+  background: 'black',
+  color: 'red',
+  fontWeight: 'bold',
+  padding: '4px',
+  borderRadius: '4px',
+}));
+
 const TextEditor = styled.textarea(({ theme }) => ({
   ...theme.textStyles.code,
   color: theme.colors.text,
@@ -34,6 +44,7 @@ const TextEditor = styled.textarea(({ theme }) => ({
   height: 300,
   borderRadius: '4px',
   resize: 'none',
+  whiteSpace: 'pre',
 }));
 
 export default memo(function ShaderInspector({
@@ -48,11 +59,20 @@ export default memo(function ShaderInspector({
   onNudgeShaderVariableValue,
   onChangeShaderVariableName,
 }: ShaderFillProps & { id: string }) {
+  const compiled = useCompileShader(shader);
+
+  // We only compile the shader here to detect errors, so cleanup memory immediately
+  compiled.delete();
+
   return (
     <InspectorPrimitives.Row>
       <Sidebar>
         <ScrollArea>
           <InspectorPrimitives.Section>
+            {compiled.type === 'error' && (
+              <ErrorSection>{compiled.value}</ErrorSection>
+            )}
+            <InspectorPrimitives.VerticalSeparator />
             <InspectorPrimitives.SectionHeader>
               <InspectorPrimitives.Title>Settings</InspectorPrimitives.Title>
             </InspectorPrimitives.SectionHeader>
@@ -118,6 +138,10 @@ export default memo(function ShaderInspector({
       <VerticalDivider />
       <InspectorPrimitives.Column>
         <TextEditor
+          spellCheck={false}
+          autoComplete="off"
+          autoCapitalize="off"
+          autoCorrect="off"
           value={shader.shaderString}
           onChange={useCallback(
             (event) => onChangeShaderString(event.target.value),
