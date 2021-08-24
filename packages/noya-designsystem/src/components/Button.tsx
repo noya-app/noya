@@ -8,7 +8,7 @@ import {
 import styled from 'styled-components';
 import { Tooltip } from '..';
 
-type ButtonVariant = 'normal' | 'thin';
+type ButtonVariant = 'normal' | 'thin' | 'none';
 
 /* ----------------------------------------------------------------------------
  * Element
@@ -24,18 +24,25 @@ const ButtonElement = styled.button<{
   position: 'relative',
   border: '0',
   outline: 'none',
-  minWidth: variant === 'thin' ? undefined : '31px',
+  minWidth: variant === 'normal' ? '31px' : undefined,
   textAlign: 'left',
   borderRadius: '4px',
-  paddingTop: '4px',
-  paddingRight: variant === 'thin' ? '1px' : '6px',
-  paddingBottom: variant === 'thin' ? '0px' : '4px',
-  paddingLeft: variant === 'thin' ? '1px' : '6px',
-  background: active ? theme.colors.primary : theme.colors.inputBackground,
+  paddingTop: variant === 'none' ? '0px' : '4px',
+  paddingRight: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
+  paddingBottom: variant === 'none' ? '0px' : '4px',
+  paddingLeft: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
+  background: active
+    ? theme.colors.primary
+    : variant === 'none'
+    ? 'transparent'
+    : theme.colors.inputBackground,
   color: active ? 'white' : theme.colors.text,
   opacity: disabled ? 0.25 : 1,
   '&:focus': {
     boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+  },
+  '&:active': {
+    background: theme.colors.activeBackground,
   },
   display: 'flex',
   alignItems: 'center',
@@ -62,7 +69,7 @@ const ButtonContent = styled.span(({ theme }) => ({
  * Root
  * ------------------------------------------------------------------------- */
 
-interface ButtonRootProps {
+export interface ButtonRootProps {
   id: string;
   flex?: CSSProperties['flex'];
   children: ReactNode;

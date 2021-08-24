@@ -15,6 +15,7 @@ export const colors = {
   codeBackground: 'rgb(250, 250, 250)',
   selectedBackground: 'rgb(242, 245, 250)',
   transparentChecker: 'rgba(255,255,255,0.8)',
+  activeBackground: 'rgba(0,0,0,0.1)',
   scrollbar: 'rgba(199,199,199,0.8)',
   placeholderDots: 'rgba(0,0,0,0.3)',
   listView: {

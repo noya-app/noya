@@ -1,11 +1,11 @@
 import * as InspectorPrimitives from './InspectorPrimitives';
-import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import {
   Sortable,
   Spacer,
   ListView,
   RelativeDropPosition,
   withSeparatorElements,
+  IconButton,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -97,9 +97,21 @@ function ArrayController<Item>({
         {withSeparatorElements(
           [
             onClickTrash && (
-              <TrashIcon color={iconColor} onClick={onClickTrash} />
+              <IconButton
+                id={`${id}-trash`}
+                iconName="TrashIcon"
+                color={iconColor}
+                onClick={onClickTrash}
+              />
             ),
-            onClickPlus && <PlusIcon color={iconColor} onClick={onClickPlus} />,
+            onClickPlus && (
+              <IconButton
+                id={`${id}-add`}
+                iconName="PlusIcon"
+                color={iconColor}
+                onClick={onClickPlus}
+              />
+            ),
           ],
           <Spacer.Horizontal size={12} />,
         )}
