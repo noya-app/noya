@@ -134,7 +134,22 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
         />
         <InspectorPrimitives.HorizontalSeparator />
         <InputField.Root id={nameInputId}>
-          <InputField.Input onSubmit={onChangeName} value={variable.name} />
+          <InputField.Input
+            onSubmit={useCallback(
+              (name, reset) => {
+                name = name.replace(/[^_a-zA-Z0-9]/, '');
+
+                if (!name.match(/^[_a-zA-Z][_a-zA-Z0-9]*$/)) {
+                  reset();
+                  return;
+                }
+
+                onChangeName(name);
+              },
+              [onChangeName],
+            )}
+            value={variable.name}
+          />
         </InputField.Root>
         <InspectorPrimitives.HorizontalSeparator />
         <Cross2Icon onClick={onClickDelete} />
