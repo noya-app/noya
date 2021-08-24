@@ -229,7 +229,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
 }
 
 const ListViewRow = forwardRef(function ListViewRow<
-  MenuItemType extends string
+  MenuItemType extends string,
 >(
   {
     id,
@@ -248,9 +248,8 @@ const ListViewRow = forwardRef(function ListViewRow<
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
-  const { marginType, selectedPosition, sortable, indentation } = useContext(
-    ListRowContext,
-  );
+  const { marginType, selectedPosition, sortable, indentation } =
+    useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
   });

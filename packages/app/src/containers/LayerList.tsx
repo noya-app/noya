@@ -255,21 +255,28 @@ const LayerRow = memo(
               isLocked ? (
                 <IconButton
                   iconName="LockClosedIcon"
+                  selected={selected}
                   onClick={handleSetUnlocked}
                 />
               ) : hovered ? (
                 <IconButton
                   iconName="LockOpen1Icon"
+                  selected={selected}
                   onClick={handleSetLocked}
                 />
               ) : null,
               !visible ? (
                 <IconButton
                   iconName="EyeClosedIcon"
+                  selected={selected}
                   onClick={handleSetVisible}
                 />
               ) : hovered ? (
-                <IconButton iconName="EyeOpenIcon" onClick={handleSetHidden} />
+                <IconButton
+                  iconName="EyeOpenIcon"
+                  selected={selected}
+                  onClick={handleSetHidden}
+                />
               ) : isLocked ? (
                 <Spacer.Horizontal size={15} />
               ) : null,
