@@ -1,8 +1,10 @@
 import Sketch from '@sketch-hq/sketch-file-format-ts';
+import { hexToRgba } from 'noya-colorpicker';
 import {
   InputField,
   Label,
   LabeledElementView,
+  rgbaToSketchColor,
   Select,
   sketchColorToHex,
   SketchPattern,
@@ -136,7 +138,20 @@ export default memo(function FillRow({
                     : ''
                 }
                 placeholder={colorProps.color ? undefined : 'multiple'}
-                onSubmit={() => {}}
+                onSubmit={(value, reset) => {
+                  if (
+                    (value.length === 6 && /^[0-9A-F]{6}$/i.test(value)) ||
+                    (value.length === 3 && /^[0-9A-F]{3}$/i.test(value))
+                  ) {
+                    colorProps.onChangeColor(
+                      rgbaToSketchColor(
+                        hexToRgba(value, colorProps.color?.alpha),
+                      ),
+                    );
+                  }
+
+                  reset();
+                }}
               />
               <InputField.Label>#</InputField.Label>
             </InputField.Root>
@@ -207,7 +222,7 @@ export default memo(function FillRow({
         );
     }
   }, [
-    colorProps.color,
+    colorProps,
     contextOpacity,
     fillType,
     getGradientTypeTitle,
