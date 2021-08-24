@@ -1,5 +1,5 @@
-import { Cross2Icon } from '@radix-ui/react-icons';
 import {
+  IconButton,
   InputField,
   Label,
   LabeledElementView,
@@ -152,7 +152,11 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
           />
         </InputField.Root>
         <InspectorPrimitives.HorizontalSeparator />
-        <Cross2Icon onClick={onClickDelete} />
+        <IconButton
+          id={`${id}-delete`}
+          iconName="Cross2Icon"
+          onClick={onClickDelete}
+        />
       </LabeledElementView>
     </InspectorPrimitives.Row>
   );

@@ -6,6 +6,7 @@ import {
   RelativeDropPosition,
   withSeparatorElements,
   IconButton,
+  Button,
 } from 'noya-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -92,7 +93,9 @@ function ArrayController<Item>({
   return (
     <InspectorPrimitives.Section id={id}>
       <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
+        <Button variant="none" onClick={onClickPlus}>
+          <InspectorPrimitives.Title>{title}</InspectorPrimitives.Title>
+        </Button>
         <Spacer.Horizontal />
         {withSeparatorElements(
           [

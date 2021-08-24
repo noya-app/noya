@@ -1,4 +1,4 @@
-import {
+import React, {
   CSSProperties,
   ForwardedRef,
   forwardRef,
@@ -38,9 +38,11 @@ const ButtonElement = styled.button<{
     : theme.colors.inputBackground,
   color: active ? 'white' : theme.colors.text,
   opacity: disabled ? 0.25 : 1,
-  '&:focus': {
-    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
-  },
+  ...(variant === 'normal' && {
+    '&:focus': {
+      boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+    },
+  }),
   '&:active': {
     background: theme.colors.activeBackground,
   },
@@ -70,14 +72,14 @@ const ButtonContent = styled.span(({ theme }) => ({
  * ------------------------------------------------------------------------- */
 
 export interface ButtonRootProps {
-  id: string;
+  id?: string;
   flex?: CSSProperties['flex'];
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;
   variant?: ButtonVariant;
   tooltip?: ReactNode;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 const Button = forwardRef(function Button(
