@@ -174,6 +174,7 @@ describe('editable fills', () => {
         image: undefined,
       },
       contextOpacity: 1,
+      shader: SketchModel.shader(),
     });
   });
 
@@ -196,6 +197,7 @@ describe('editable fills', () => {
         image: undefined,
       },
       contextOpacity: 1,
+      shader: SketchModel.shader(),
     });
   });
 
@@ -218,6 +220,7 @@ describe('editable fills', () => {
         image: undefined,
       },
       contextOpacity: undefined,
+      shader: SketchModel.shader(),
     });
   });
 });

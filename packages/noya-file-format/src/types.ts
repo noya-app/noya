@@ -179,6 +179,7 @@ export enum FillType {
   Color = 0,
   Gradient = 1,
   Pattern = 4,
+  Shader = -101,
 }
 /**
  * Enumeration of border positions
@@ -281,6 +282,7 @@ export type Fill = {
   contextSettings: GraphicsContextSettings;
   gradient: Gradient;
   image?: FileRef | DataRef;
+  shader?: Shader;
 };
 /**
  * Enumeration of pattern fill types
@@ -291,6 +293,34 @@ export enum PatternFillType {
   Stretch = 2,
   Fit = 3,
 }
+/**
+ * Defines a shader
+ */
+export type Shader = {
+  _class: 'shader';
+  shaderString: string;
+  variables: ShaderVariable[];
+};
+/**
+ * Defines a variable to be passed to the shader as a uniform
+ */
+export type ShaderVariable = {
+  _class: 'shaderVariable';
+  name: string;
+  value:
+    | {
+        type: 'integer';
+        data: number;
+      }
+    | {
+        type: 'float';
+        data: number;
+      }
+    | {
+        type: 'color';
+        data: Color;
+      };
+};
 /**
  * Enumeration of the possible types of vector line endings
  */
@@ -1611,6 +1641,8 @@ export type AnyObject =
   | BorderOptions
   | Blur
   | Fill
+  | Shader
+  | ShaderVariable
   | TextStyle
   | ParagraphStyle
   | FontDescriptor
@@ -1705,6 +1737,8 @@ export enum ClassValue {
   Rect = 'rect',
   Rectangle = 'rectangle',
   RulerData = 'rulerData',
+  Shader = 'shader',
+  ShaderVariable = 'shaderVariable',
   Shadow = 'shadow',
   ShapeGroup = 'shapeGroup',
   ShapePath = 'shapePath',
@@ -1748,6 +1782,8 @@ export type ClassMap = {
   shapePath: ShapePath;
   shapeGroup: ShapeGroup;
   shadow: Shadow;
+  shaderVariable: ShaderVariable;
+  shader: Shader;
   rulerData: RulerData;
   rectangle: Rectangle;
   rect: Rect;

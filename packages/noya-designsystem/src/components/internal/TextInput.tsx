@@ -153,6 +153,10 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       onBlur={handleSubmit}
       onFocus={handleFocus}
       onClick={onClick}
+      autoComplete="off"
+      autoCapitalize="off"
+      autoCorrect="off"
+      spellCheck={false}
     />
   );
 });

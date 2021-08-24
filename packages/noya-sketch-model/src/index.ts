@@ -88,6 +88,26 @@ function gradient(options?: ModelOptions<Sketch.Gradient>): Sketch.Gradient {
   };
 }
 
+function shaderVariable(
+  options?: ModelOptions<Sketch.ShaderVariable>,
+): Sketch.ShaderVariable {
+  return {
+    name: '',
+    value: { type: 'float', data: 0 },
+    ...options,
+    _class: Sketch.ClassValue.ShaderVariable,
+  };
+}
+
+function shader(options?: ModelOptions<Sketch.Shader>): Sketch.Shader {
+  return {
+    shaderString: '',
+    variables: [],
+    ...options,
+    _class: Sketch.ClassValue.Shader,
+  };
+}
+
 function border(options?: ModelOptions<Sketch.Border>): Sketch.Border {
   return {
     isEnabled: true,
@@ -712,7 +732,14 @@ function user(options?: ModelOptions<Sketch.User>): Sketch.User {
   };
 }
 
+const WHITE = color({ red: 1, green: 1, blue: 1, alpha: 1 });
+const BLACK = color({ red: 0, green: 0, blue: 0, alpha: 1 });
+const TRANSPARENT = color({ red: 0, green: 0, blue: 0, alpha: 0 });
+
 export const SketchModel = {
+  WHITE,
+  BLACK,
+  TRANSPARENT,
   artboard,
   attributedString,
   bitmap,
@@ -742,6 +769,8 @@ export const SketchModel = {
   paragraphStyle,
   rect,
   rectangle,
+  shader,
+  shaderVariable,
   shadow,
   shapeGroup,
   shapePath,

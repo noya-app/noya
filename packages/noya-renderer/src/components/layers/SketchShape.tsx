@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { AffineTransform, Rect } from 'noya-geometry';
 import {
   ClipProps,
@@ -10,11 +10,34 @@ import {
 import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
+import { getUniformValues } from '../../shaders';
 import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
+
+/**
+ * A clock that contains the current time, and updates every animation frame
+ */
+function useClock({ enabled }: { enabled: boolean }) {
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const id = requestAnimationFrame(() => {
+      setTime(performance.now());
+    });
+
+    return () => {
+      cancelAnimationFrame(id);
+    };
+  }, [enabled, time]);
+
+  return time;
+}
 
 const SketchFill = memo(function SketchFill({
   path,
@@ -29,11 +52,46 @@ const SketchFill = memo(function SketchFill({
 
   const image = useSketchImage(fill.image);
 
+  // TODO: Delete unused shaders
+  const runtimeEffect = useMemo(() => {
+    if (
+      fill.fillType !== Sketch.FillType.Shader ||
+      !fill.shader ||
+      !fill.shader.shaderString
+    )
+      return;
+
+    const compiled = compileShader(CanvasKit, fill.shader);
+
+    return compiled.type === 'ok' ? compiled.value : undefined;
+  }, [CanvasKit, fill.fillType, fill.shader]);
+
+  const time = useClock({
+    enabled: fill.fillType === Sketch.FillType.Shader,
+  });
+
   // TODO: Delete internal gradient shaders on unmount
-  const paint = useMemo(
-    () => Primitives.fill(CanvasKit, fill, frame, image),
-    [CanvasKit, fill, frame, image],
-  );
+  const paint = useMemo(() => {
+    const uniforms =
+      fill.shader && runtimeEffect
+        ? getUniformValues([
+            ...fill.shader.variables,
+            SketchModel.shaderVariable({
+              name: 'iTime',
+              value: { type: 'float', data: time },
+            }),
+          ])
+        : undefined;
+
+    return Primitives.fill(
+      CanvasKit,
+      fill,
+      frame,
+      image,
+      runtimeEffect,
+      uniforms,
+    );
+  }, [CanvasKit, fill, frame, image, runtimeEffect, time]);
 
   useDeletable(paint);
 

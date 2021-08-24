@@ -321,6 +321,11 @@ test('SamplePath 5', async () => {
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
+test('Shaders', async () => {
+  const image = await generateSketchFileImage('Shaders.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
 test('Shadows', async () => {
   const image = await generateSketchFileImage('Shadows.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();

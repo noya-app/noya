@@ -1,41 +1,46 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
-import Sketch from 'noya-file-format';
+import { useApplicationState } from 'noya-app-state-context';
 import {
-  FillInputField,
   Divider,
+  FillInputField,
   Select,
   SketchPattern,
   useGlobalInputBlurListener,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
-import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
-import PatternInspector from './PatternInspector';
+import PatternInspector, { PatternFillType } from './PatternInspector';
 import PickerGradients from './PickerGradients';
 import PickerPatterns from './PickerPatterns';
 import ColorPickerSwatches from './PickerSwatches';
+import ShaderInspector from './ShaderInspector';
 
-const Content = styled(Popover.Content)(({ theme }) => ({
-  width: '240px',
-  borderRadius: 4,
-  fontSize: 14,
-  backgroundColor: theme.colors.popover.background,
-  boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
-  maxHeight: '600px',
-  overflowY: 'auto',
-}));
+const Content = styled(Popover.Content)<{ variant: 'normal' | 'large' }>(
+  ({ theme, variant }) => ({
+    width: variant === 'large' ? '680px' : '240px',
+    borderRadius: 4,
+    fontSize: 14,
+    backgroundColor: theme.colors.popover.background,
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
+    maxHeight: '600px',
+    overflowY: 'auto',
+    color: theme.colors.textMuted,
+  }),
+);
 
 type FillOption =
   | 'Solid Color'
   | 'Linear Gradient'
   | 'Radial Gradient'
   | 'Angular Gradient'
-  | 'Pattern Fill';
+  | 'Pattern Fill'
+  | 'Shader';
 
 function ColorFillPicker({
   id,
@@ -186,6 +191,7 @@ interface FillOptionSelectProps {
   onChangeGradientType?: (type: Sketch.GradientType) => void;
   supportsGradients: boolean;
   supportsPatterns: boolean;
+  supportsShaders: boolean;
 }
 
 function FillOptionSelect({
@@ -195,6 +201,7 @@ function FillOptionSelect({
   onChangeGradientType,
   supportsGradients,
   supportsPatterns,
+  supportsShaders,
 }: FillOptionSelectProps) {
   const fillOptions: FillOption[] = useMemo(
     () => [
@@ -207,8 +214,9 @@ function FillOptionSelect({
           ]
         : []),
       ...(supportsPatterns ? ['Pattern Fill' as const] : []),
+      ...(supportsShaders ? ['Shader' as const] : []),
     ],
-    [supportsGradients, supportsPatterns],
+    [supportsGradients, supportsPatterns, supportsShaders],
   );
 
   const value: FillOption = useMemo(() => {
@@ -220,6 +228,8 @@ function FillOptionSelect({
         return `${gradientTypeString} Gradient` as FillOption;
       case Sketch.FillType.Color:
         return 'Solid Color';
+      case Sketch.FillType.Shader:
+        return 'Shader';
     }
   }, [fillType, gradientType]);
 
@@ -247,6 +257,9 @@ function FillOptionSelect({
         case 'Pattern Fill':
           onChangeType(Sketch.FillType.Pattern);
           break;
+        case 'Shader':
+          onChangeType(Sketch.FillType.Shader);
+          break;
       }
     },
     [onChangeType, onChangeGradientType],
@@ -257,6 +270,10 @@ function FillOptionSelect({
       id="fill-options"
       value={value}
       options={fillOptions}
+      getTitle={useCallback(
+        (option) => (option === 'Shader' ? 'Shader (beta)' : option),
+        [],
+      )}
       onChange={handleChange}
     />
   );
@@ -285,6 +302,21 @@ export type PatternFillProps = {
   onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;
 };
 
+export type ShaderFillProps = {
+  shader: Sketch.Shader;
+  fillType: Sketch.PatternFillType;
+  onChangeFillType: (value: Sketch.PatternFillType) => void;
+  onChangeShaderString: (value: string) => void;
+  onAddShaderVariable: () => void;
+  onDeleteShaderVariable: (name: string) => void;
+  onChangeShaderVariableName: (oldName: string, newName: string) => void;
+  onChangeShaderVariableValue: (
+    name: string,
+    value: Sketch.ShaderVariable['value'],
+  ) => void;
+  onNudgeShaderVariableValue: (name: string, value: number) => void;
+};
+
 interface Props {
   id: string;
   flex?: CSSProperties['flex'];
@@ -294,6 +326,7 @@ interface Props {
   colorProps: ColorFillProps;
   gradientProps?: GradientFillProps;
   patternProps?: PatternFillProps;
+  shaderProps?: ShaderFillProps;
 }
 
 export default memo(function FillInputFieldWithPicker({
@@ -305,6 +338,7 @@ export default memo(function FillInputFieldWithPicker({
   colorProps,
   gradientProps,
   patternProps,
+  shaderProps,
 }: Props) {
   const [, dispatch] = useApplicationState();
   const picker = useMemo(() => {
@@ -317,11 +351,15 @@ export default memo(function FillInputFieldWithPicker({
         return patternProps ? (
           <PatternFillPicker id={id} {...patternProps} />
         ) : null;
+      case Sketch.FillType.Shader:
+        return shaderProps ? (
+          <ShaderInspector id={id} {...shaderProps} />
+        ) : null;
       case Sketch.FillType.Color:
       case undefined:
         return <ColorFillPicker id={id} {...colorProps} />;
     }
-  }, [id, fillType, colorProps, gradientProps, patternProps]);
+  }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
 
   const value = useMemo(() => {
     switch (fillType) {
@@ -364,6 +402,9 @@ export default memo(function FillInputFieldWithPicker({
         />
       </Popover.Trigger>
       <Content
+        // Stop propagation on pointer events to prevent dndkit from triggering
+        onPointerDown={useCallback((event) => event.stopPropagation(), [])}
+        variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
         side="bottom"
         align="center"
         onInteractOutside={useCallback((event) => {
@@ -385,6 +426,7 @@ export default memo(function FillInputFieldWithPicker({
                 <FillOptionSelect
                   supportsGradients={!!gradientProps}
                   supportsPatterns={!!patternProps}
+                  supportsShaders={!!shaderProps}
                   fillType={fillType ?? Sketch.FillType.Color}
                   gradientType={
                     gradientProps?.gradient.gradientType ??

@@ -168,9 +168,8 @@ const InputFieldInput = forwardRef(function InputFieldInput(
   props: TextInputProps & { textAlign?: Property.TextAlign; variant?: 'bare' },
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
-  const { labelPosition, labelSize, hasDropdown, hasLabel } = useContext(
-    InputFieldContext,
-  );
+  const { labelPosition, labelSize, hasDropdown, hasLabel } =
+    useContext(InputFieldContext);
 
   return (
     <InputElement
@@ -263,16 +262,19 @@ function InputFieldNumberInput(props: InputFieldNumberInputProps) {
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled.div<{ size?: number }>(({ theme, size }) => ({
-  flex: '1',
-  display: 'flex',
-  flexDirection: 'row',
-  position: 'relative',
-  maxWidth: typeof size === 'number' ? `${size}px` : undefined,
-}));
+const RootContainer = styled.div<{ size?: number; flex?: string }>(
+  ({ theme, flex, size }) => ({
+    flex: flex ?? '1',
+    display: 'flex',
+    flexDirection: 'row',
+    position: 'relative',
+    maxWidth: typeof size === 'number' ? `${size}px` : undefined,
+  }),
+);
 
 interface InputFieldRootProps {
   id?: string;
+  flex?: string;
   children?: ReactNode;
   size?: number;
   labelPosition?: LabelPosition;
@@ -282,6 +284,7 @@ interface InputFieldRootProps {
 
 function InputFieldRoot({
   id,
+  flex,
   children,
   size,
   labelPosition = 'end',
@@ -303,7 +306,7 @@ function InputFieldRoot({
 
   return (
     <InputFieldContext.Provider value={contextValue}>
-      <RootContainer id={id} size={size}>
+      <RootContainer id={id} size={size} flex={flex}>
         {children}
       </RootContainer>
     </InputFieldContext.Provider>
