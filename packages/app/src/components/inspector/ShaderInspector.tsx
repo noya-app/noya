@@ -1,5 +1,6 @@
 import { ScrollArea, Select } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { useDeletable } from 'noya-react-canvaskit';
 import { useCompileShader } from 'noya-renderer';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -62,7 +63,7 @@ export default memo(function ShaderInspector({
   const compiled = useCompileShader(shader);
 
   // We only compile the shader here to detect errors, so cleanup memory immediately
-  compiled.delete();
+  useDeletable(compiled.type === 'ok' ? compiled.value : undefined);
 
   return (
     <InspectorPrimitives.Row>
@@ -70,9 +71,11 @@ export default memo(function ShaderInspector({
         <ScrollArea>
           <InspectorPrimitives.Section>
             {compiled.type === 'error' && (
-              <ErrorSection>{compiled.value}</ErrorSection>
+              <>
+                <ErrorSection>{compiled.value}</ErrorSection>
+                <InspectorPrimitives.VerticalSeparator />
+              </>
             )}
-            <InspectorPrimitives.VerticalSeparator />
             <InspectorPrimitives.SectionHeader>
               <InspectorPrimitives.Title>Settings</InspectorPrimitives.Title>
             </InspectorPrimitives.SectionHeader>
@@ -99,7 +102,6 @@ export default memo(function ShaderInspector({
             id="shader-variables"
             title="Variables"
             items={shader.variables}
-            sortable
             renderItem={useCallback(
               ({
                 item,

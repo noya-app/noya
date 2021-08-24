@@ -23,6 +23,7 @@ interface ValueProps {
   value: Sketch.ShaderVariable['value'];
   onChange: (value: Sketch.ShaderVariable['value']) => void;
   onNudge: (amount: number) => void;
+  flex?: string;
 }
 
 export const ShaderVariableValueInput = memo(function ShaderVariableValueInput({
@@ -30,12 +31,13 @@ export const ShaderVariableValueInput = memo(function ShaderVariableValueInput({
   value,
   onChange,
   onNudge,
+  flex,
 }: ValueProps) {
   switch (value.type) {
     case 'integer':
     case 'float': {
       return (
-        <InputField.Root size={50} id={id}>
+        <InputField.Root id={id} flex={flex}>
           <InputField.NumberInput
             value={value.data}
             onSubmit={(data) => onChange({ type: value.type, data })}
@@ -48,6 +50,7 @@ export const ShaderVariableValueInput = memo(function ShaderVariableValueInput({
       return (
         <FillInputFieldWithPicker
           id={id}
+          flex={flex}
           colorProps={{
             color: value.data,
             onChangeColor: (data) => onChange({ type: value.type, data }),
@@ -115,6 +118,7 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
       <LabeledElementView renderLabel={renderLabel}>
         <ShaderVariableValueInput
           id={valueInputId}
+          flex="0 0 50px"
           onChange={onChangeValue}
           onNudge={onNudge}
           value={variable.value}

@@ -97,7 +97,7 @@ export function shader(
 
       const shader = runtimeEffect?.makeShader(
         uniforms ?? [],
-        true,
+        false,
         unitTransform.float32Array,
       );
 

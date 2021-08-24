@@ -4,10 +4,9 @@ import { getSkiaShaderString, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { useMemo } from 'react';
 
-type CompiledShader = { delete: () => void } & (
+type CompiledShader =
   | { type: 'ok'; value: RuntimeEffect }
-  | { type: 'error'; value: string }
-);
+  | { type: 'error'; value: string };
 
 export function compileShader(
   CanvasKit: CanvasKit,
@@ -25,17 +24,15 @@ export function compileShader(
         }),
       ]),
       (errors) => {
-        compilerErrors = errors;
+        compilerErrors = errors
+          .replace('1 error', '')
+          .replace(/error: \d+: /, '');
       },
     ) ?? undefined;
 
-  const cleanup = () => {
-    runtimeEffect?.delete();
-  };
-
   return runtimeEffect
-    ? { type: 'ok', value: runtimeEffect, delete: cleanup }
-    : { type: 'error', value: compilerErrors, delete: cleanup };
+    ? { type: 'ok', value: runtimeEffect }
+    : { type: 'error', value: compilerErrors };
 }
 
 export function useCompileShader(shader: Sketch.Shader): CompiledShader {
