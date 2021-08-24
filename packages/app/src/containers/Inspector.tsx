@@ -16,6 +16,7 @@ import * as InspectorPrimitives from '../components/inspector/InspectorPrimitive
 import LineInspector from '../components/inspector/LineInspector';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
+import BlurInspector from './BlurInspector';
 import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
@@ -188,6 +189,7 @@ export default memo(function Inspector() {
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
+      selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);

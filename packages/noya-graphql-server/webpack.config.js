@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 
-const workspacePath = path.join(__dirname, '..');
+const workspacePackagesPath = path.join(__dirname, '..');
 const entryPath = path.join(__dirname, 'src', 'index.ts');
 const buildPath = path.join(__dirname, 'build');
 
@@ -29,7 +29,7 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.(js|jsx|ts|tsx)$/,
-          include: [workspacePath],
+          include: [workspacePackagesPath],
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',

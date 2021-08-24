@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
@@ -350,9 +350,10 @@ export default memo(function SketchFileRenderer() {
   const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
 
   const rootScale = useRootScale();
-  const rootScaleTransform = useMemo(() => AffineTransform.scale(rootScale), [
-    rootScale,
-  ]);
+  const rootScaleTransform = useMemo(
+    () => AffineTransform.scale(rootScale),
+    [rootScale],
+  );
 
   const clippedLayerMap = useMemo(() => {
     if (renderingMode === 'static') return {};

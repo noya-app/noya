@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';
@@ -137,10 +137,14 @@ async function getSketchFile(filename: string) {
   return await decode(file);
 }
 
-async function generateSketchFileImage(filename: string, pageIndex: number) {
+async function generateSketchFileImage(
+  filename: string,
+  pageIndex: number,
+  padding?: number,
+) {
   const sketch = await getSketchFile(filename);
   const workspaceState = createInitialWorkspaceState(sketch);
-  return await generatePageImage(workspaceState, pageIndex);
+  return await generatePageImage(workspaceState, pageIndex, padding);
 }
 
 test('Demo', async () => {
@@ -150,6 +154,11 @@ test('Demo', async () => {
 
 test('AlphaMasks', async () => {
   const image = await generateSketchFileImage('AlphaMasks.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('BackdropFilter', async () => {
+  const image = await generateSketchFileImage('BackdropFilter.sketch', 0, 20);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
@@ -309,6 +318,11 @@ test('SamplePath 4', async () => {
 
 test('SamplePath 5', async () => {
   const image = await generateSketchFileImage('SamplePath.sketch', 5);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('Shaders', async () => {
+  const image = await generateSketchFileImage('Shaders.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 

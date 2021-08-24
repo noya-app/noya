@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useCanvasKit } from 'noya-renderer';
 import { Layers, Primitives } from 'noya-state';
 import { CanvasKit } from 'canvaskit';
@@ -26,10 +26,10 @@ export default function useLayerPath(
 ) {
   const CanvasKit = useCanvasKit();
 
-  const path = useMemo(() => getLayerPath(CanvasKit, layer), [
-    CanvasKit,
-    layer,
-  ]);
+  const path = useMemo(
+    () => getLayerPath(CanvasKit, layer),
+    [CanvasKit, layer],
+  );
 
   useDeletable(path);
 

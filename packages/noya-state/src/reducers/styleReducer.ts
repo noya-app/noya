@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { GradientAction, gradientReducer } from './gradientReducer';
 import {
@@ -8,6 +8,8 @@ import {
 import { clamp } from 'noya-utils';
 import { SketchModel } from 'noya-sketch-model';
 import { moveArrayItem } from '../utils/moveArrayItem';
+import { BlurAction, blurReducer } from './blurReducer';
+import { ShaderAction, shaderReducer } from './shaderReducer';
 
 export const defaultBorderColor = SketchModel.color({
   red: 0.6,
@@ -83,7 +85,9 @@ export type StyleAction =
       mode?: SetNumberMode,
     ]
   | GradientAction
-  | ColorControlsAction;
+  | ColorControlsAction
+  | BlurAction
+  | ShaderAction;
 
 export function styleReducer(
   state: Sketch.Style,
@@ -392,6 +396,29 @@ export function styleReducer(
     case 'setContrast':
       return produce(state, (draft) => {
         draft.colorControls = colorControlsReducer(draft.colorControls, action);
+      });
+    case 'setBlurEnabled':
+    case 'setBlurRadius':
+    case 'setBlurType':
+    case 'setBlurSaturation':
+      return produce(state, (draft) => {
+        draft.blur = blurReducer(draft.blur, action);
+      });
+    case 'setShaderString':
+    case 'setShaderVariableName':
+    case 'setShaderVariableValue':
+    case 'nudgeShaderVariableValue':
+    case 'addShaderVariable':
+    case 'deleteShaderVariable':
+      const [, index] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.fills?.[index].shader) return;
+
+        draft.fills[index].shader = shaderReducer(
+          draft.fills[index].shader,
+          action,
+        );
       });
     case 'setPatternFillType': {
       const [, index, value] = action;

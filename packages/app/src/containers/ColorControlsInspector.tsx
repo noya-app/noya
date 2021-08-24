@@ -22,7 +22,7 @@ const hueInterpolator = makeInterpolator({
   outputRange: [-100, 100],
 });
 
-const saturationInterpolator = makeInterpolator({
+export const saturationInterpolator = makeInterpolator({
   inputRange: [0, 2],
   outputRange: [-100, 100],
 });

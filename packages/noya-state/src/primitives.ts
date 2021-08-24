@@ -1,8 +1,9 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import type {
   CanvasKit,
   Paint,
   Path,
+  RuntimeEffect,
   Shader,
   TextAlign,
   TextStyle,
@@ -75,8 +76,32 @@ export function shader(
   fill: Sketch.Fill | Sketch.Border,
   layerFrame: Rect,
   image?: ArrayBuffer,
+  runtimeEffect?: RuntimeEffect,
+  uniforms?: number[],
 ): Shader | undefined {
   switch (fill.fillType) {
+    case Sketch.FillType.Shader:
+      const fillScale =
+        fill._class === 'fill'
+          ? fill.patternFillType
+          : Sketch.PatternFillType.Fill;
+
+      const aspectRatio = layerFrame.width / layerFrame.height;
+      const unitTransform = AffineTransform.multiply(
+        AffineTransform.translate(layerFrame.x, layerFrame.y),
+        AffineTransform.scale(layerFrame.width, layerFrame.height),
+        fillScale === Sketch.PatternFillType.Stretch
+          ? AffineTransform.identity
+          : AffineTransform.scale(1 / aspectRatio, 1, { x: 0.5, y: 0.5 }),
+      );
+
+      const shader = runtimeEffect?.makeShader(
+        uniforms ?? [],
+        false,
+        unitTransform.float32Array,
+      );
+
+      return shader;
     case Sketch.FillType.Color:
       const fillColor = fill.color
         ? color(CanvasKit, fill.color)
@@ -203,8 +228,8 @@ export function shader(
           return canvasImage.makeShaderCubic(
             CanvasKit.TileMode.Repeat,
             CanvasKit.TileMode.Repeat,
-            0,
-            0,
+            1 / 3,
+            1 / 3,
             CanvasKit.Matrix.multiply(
               CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
               CanvasKit.Matrix.scaled(
@@ -235,8 +260,8 @@ export function shader(
           return canvasImage.makeShaderCubic(
             CanvasKit.TileMode.Decal,
             CanvasKit.TileMode.Decal,
-            0,
-            0,
+            1 / 3,
+            1 / 3,
             CanvasKit.Matrix.multiply(
               CanvasKit.Matrix.translated(
                 bounds.midX - scaledRect.width / 2,
@@ -259,6 +284,8 @@ export function fill(
   fill: Sketch.Fill | Sketch.Border,
   layerFrame: Rect,
   image?: ArrayBuffer,
+  runtimeEffect?: RuntimeEffect,
+  uniforms?: number[],
 ): Paint {
   const paint = new CanvasKit.Paint();
 
@@ -269,8 +296,16 @@ export function fill(
       );
       break;
     case Sketch.FillType.Gradient:
-    case Sketch.FillType.Pattern: {
-      const fillShader = shader(CanvasKit, fill, layerFrame, image);
+    case Sketch.FillType.Pattern:
+    case Sketch.FillType.Shader: {
+      const fillShader = shader(
+        CanvasKit,
+        fill,
+        layerFrame,
+        image,
+        runtimeEffect,
+        uniforms,
+      );
 
       if (!fillShader) {
         paint.setColor(clearColor(CanvasKit));

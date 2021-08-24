@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Label, LabeledElementView, RadioGroup } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';

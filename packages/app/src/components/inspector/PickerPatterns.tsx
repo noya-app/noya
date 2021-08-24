@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Divider, PatternPreviewBackground, Select } from 'noya-designsystem';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';

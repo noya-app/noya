@@ -34,7 +34,7 @@ function createElementInstance<K extends keyof ElementTypeMap>(
   type: K,
   props: ElementTypeMap[K]['props'],
 ): ElementTypeMap[K] {
-  const instance = ({ type, props } as unknown) as ElementTypeMap[K];
+  const instance = { type, props } as unknown as ElementTypeMap[K];
 
   if (isContainerElement(instance)) {
     instance._elements = [];
@@ -76,8 +76,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
   scheduleTimeout: setTimeout,
   cancelTimeout: clearTimeout,
   noTimeout: -1,
-  queueMicrotask:
-    typeof queueMicrotask !== 'undefined' ? queueMicrotask : setTimeout,
+  // queueMicrotask:
+  //   typeof queueMicrotask !== 'undefined' ? queueMicrotask : setTimeout,
   now: (typeof performance !== 'undefined' ? performance : Date).now,
   supportsMutation: false,
   supportsPersistence: true,
@@ -287,8 +287,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
               image,
               CanvasKit.XYWHRect(0, 0, image.width(), image.height()),
               rect,
-              0,
-              0,
+              1 / 3,
+              1 / 3,
               paint,
             );
             break;
@@ -306,6 +306,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
               clip,
               colorFilter,
               imageFilter,
+              backdropImageFilter,
             } = element.props;
 
             const saveCount = canvas.getSaveCount();
@@ -326,7 +327,8 @@ const hostConfig: ReactCanvasKitHostConfig = {
 
             // If we need to apply effects to the group as a whole, we need
             // to draw the elements on a separate bitmap using `saveLayer`
-            const needsLayer = opacity < 1 || colorFilter || imageFilter;
+            const needsLayer =
+              opacity < 1 || colorFilter || imageFilter || backdropImageFilter;
 
             if (needsLayer) {
               const layerPaint = new CanvasKit.Paint();
@@ -343,7 +345,7 @@ const hostConfig: ReactCanvasKitHostConfig = {
                 layerPaint.setImageFilter(imageFilter);
               }
 
-              canvas.saveLayer(layerPaint);
+              canvas.saveLayer(layerPaint, null, backdropImageFilter);
             }
 
             element._elements.forEach(draw);

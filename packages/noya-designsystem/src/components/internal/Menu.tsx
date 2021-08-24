@@ -49,6 +49,9 @@ export const styles = {
       color: 'white',
       backgroundColor: theme.colors.primary,
     },
+    '&:active': {
+      background: theme.colors.primaryDark,
+    },
     display: 'flex',
     alignItems: 'center',
   }),

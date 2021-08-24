@@ -4,19 +4,14 @@ import {
   Component1Icon,
   ComponentInstanceIcon,
   CopyIcon,
-  EyeClosedIcon,
-  EyeOpenIcon,
   FrameIcon,
   GroupIcon,
   ImageIcon,
-  LockClosedIcon,
-  LockOpen1Icon,
   MaskOnIcon,
   Share1Icon,
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   useApplicationState,
   useGetStateSnapshot,
@@ -24,12 +19,16 @@ import {
   useWorkspace,
 } from 'noya-app-state-context';
 import {
+  IconButton,
   ListView,
   RelativeDropPosition,
   Spacer,
   TreeView,
   withSeparatorElements,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { Size } from 'noya-geometry';
+import { useDeepArray, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
 import React, {
@@ -37,17 +36,14 @@ import React, {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import { useDeepArray } from 'noya-react-utils';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
-import { useShallowArray } from 'noya-react-utils';
-import { Size } from 'noya-geometry';
-import { useRef } from 'react';
-import { useEffect } from 'react';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -257,14 +253,30 @@ const LayerRow = memo(
             [
               titleElement,
               isLocked ? (
-                <LockClosedIcon onClick={handleSetUnlocked} />
+                <IconButton
+                  iconName="LockClosedIcon"
+                  selected={selected}
+                  onClick={handleSetUnlocked}
+                />
               ) : hovered ? (
-                <LockOpen1Icon onClick={handleSetLocked} />
+                <IconButton
+                  iconName="LockOpen1Icon"
+                  selected={selected}
+                  onClick={handleSetLocked}
+                />
               ) : null,
               !visible ? (
-                <EyeClosedIcon onClick={handleSetVisible} />
+                <IconButton
+                  iconName="EyeClosedIcon"
+                  selected={selected}
+                  onClick={handleSetVisible}
+                />
               ) : hovered ? (
-                <EyeOpenIcon onClick={handleSetHidden} />
+                <IconButton
+                  iconName="EyeOpenIcon"
+                  selected={selected}
+                  onClick={handleSetHidden}
+                />
               ) : isLocked ? (
                 <Spacer.Horizontal size={15} />
               ) : null,
@@ -468,9 +480,10 @@ export default memo(function LayerList({ size }: { size: Size }) {
       keyExtractor={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
-      onClick={useCallback(() => dispatch('selectLayer', undefined), [
-        dispatch,
-      ])}
+      onClick={useCallback(
+        () => dispatch('selectLayer', undefined),
+        [dispatch],
+      )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
           const sourceId = items[sourceIndex].id;

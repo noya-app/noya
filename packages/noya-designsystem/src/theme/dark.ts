@@ -19,6 +19,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.scrollbar = 'rgba(199,199,199,0.2)';
   colors.placeholderDots = 'rgba(255,255,255,0.3)';
   colors.dragOutline = 'white';
+  colors.activeBackground = 'rgba(255,255,255,0.1)';
 });
 export const textStyles = lightTheme.textStyles;
 export const fonts = lightTheme.fonts;

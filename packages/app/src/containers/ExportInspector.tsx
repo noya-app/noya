@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
 import {

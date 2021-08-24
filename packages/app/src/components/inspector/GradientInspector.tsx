@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
 import { hexToRgba } from 'noya-colorpicker';
 import {

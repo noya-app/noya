@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import {
   EditableBorder,
@@ -35,9 +35,10 @@ export default memo(function BorderInspector() {
       key="borders"
       value={editableBorders}
       onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledBorders'), [
-        dispatch,
-      ])}
+      onClickTrash={useCallback(
+        () => dispatch('deleteDisabledBorders'),
+        [dispatch],
+      )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveBorder', sourceIndex, destinationIndex),

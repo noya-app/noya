@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { GridView } from 'noya-designsystem';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { SelectionType } from 'noya-state';

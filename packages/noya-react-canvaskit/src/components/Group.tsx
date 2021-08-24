@@ -10,6 +10,7 @@ interface GroupProps {
   clip?: ClipProps;
   colorFilter?: ColorFilter;
   imageFilter?: ImageFilter;
+  backdropImageFilter?: ImageFilter;
 }
 
 export default memo(function Group(props: GroupProps) {
@@ -26,6 +27,7 @@ export default memo(function Group(props: GroupProps) {
       clip: props.clip,
       colorFilter: props.colorFilter,
       imageFilter: props.imageFilter,
+      backdropImageFilter: props.backdropImageFilter,
     }),
     [
       transform,
@@ -34,6 +36,7 @@ export default memo(function Group(props: GroupProps) {
       props.clip,
       props.colorFilter,
       props.imageFilter,
+      props.backdropImageFilter,
     ],
   );
 

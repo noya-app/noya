@@ -1,4 +1,3 @@
-import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import {
   ForwardedRef,
   forwardRef,
@@ -7,7 +6,7 @@ import {
   useCallback,
   useContext,
 } from 'react';
-import styled from 'styled-components';
+import IconButton from './IconButton';
 import * as ListView from './ListView';
 import { ListViewRowProps } from './ListView';
 import * as Spacer from './Spacer';
@@ -22,14 +21,8 @@ type TreeRowBaseProps = {
   onClickChevron?: () => void;
 };
 
-const ChevronContainer = styled.span({
-  display: 'flex',
-  alignItems: 'center',
-});
-
-export type TreeRowProps<
-  MenuItemType extends string
-> = ListViewRowProps<MenuItemType> & TreeRowBaseProps;
+export type TreeRowProps<MenuItemType extends string> =
+  ListViewRowProps<MenuItemType> & TreeRowBaseProps;
 
 const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
   {
@@ -58,9 +51,11 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
           {expanded === undefined ? (
             <Spacer.Horizontal size={15} />
           ) : (
-            <ChevronContainer onClick={handleClickChevron}>
-              {expanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-            </ChevronContainer>
+            <IconButton
+              iconName={expanded ? 'ChevronDownIcon' : 'ChevronRightIcon'}
+              onClick={handleClickChevron}
+              selected={rest.selected}
+            />
           )}
           <Spacer.Horizontal size={6} />
         </>

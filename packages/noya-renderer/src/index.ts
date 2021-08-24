@@ -11,6 +11,8 @@ export * from './FontManagerContext';
 export * from './RootScaleContext';
 export * from './RenderingModeContext';
 export * from './hooks/useCanvasKit';
+export * from './hooks/useCompileShader';
+export * from './shaders';
 export { ImageCacheProvider, useSketchImage } from './ImageCache';
 export type { Context };
 export { useTextLayerParagraph } from './components/layers/SketchText';

@@ -1,19 +1,28 @@
 {
   "name": "noya",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "main": "index.js",
-  "author": "Devin Abbott <devinabbott@gmail.com>",
   "license": "MIT",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/electron-squirrel-startup",
+      "**/electron-squirrel-startup/**",
+      "**/@electron-forge/publisher-github",
+      "**/@electron-forge/publisher-github/**"
+    ]
+  },
   "modular": {
     "type": "root"
   },
   "scripts": {
-    "start": "modular start app",
+    "start": "PORT=1234 modular start app",
     "build": "modular build app",
+    "build:desktop": "cd ./packages/noya-desktop && yarn make",
+    "release:desktop": "cd ./packages/noya-desktop && yarn release",
     "test": "modular test",
     "test:clean": "JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
     "lint": "eslint . --ext .js,.ts,.tsx",

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
 import { Rect } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
@@ -17,11 +17,10 @@ export default memo(function SketchBorder({
 }) {
   const CanvasKit = useCanvasKit();
 
-  const paint = useMemo(() => Primitives.fill(CanvasKit, border, frame), [
-    CanvasKit,
-    border,
-    frame,
-  ]);
+  const paint = useMemo(
+    () => Primitives.fill(CanvasKit, border, frame),
+    [CanvasKit, border, frame],
+  );
 
   const strokedPath = useMemo(
     () =>

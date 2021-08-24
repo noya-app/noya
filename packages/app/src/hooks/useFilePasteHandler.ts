@@ -23,6 +23,12 @@ export function useImagePasteHandler<T extends string>({
 
   useEffect(() => {
     const handler = (event: ClipboardEvent) => {
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      )
+        return;
+
       const items = [...(event.clipboardData ?? new DataTransfer()).items];
 
       const files = items.flatMap((item) => {

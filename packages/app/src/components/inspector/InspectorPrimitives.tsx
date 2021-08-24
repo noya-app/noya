@@ -61,7 +61,7 @@ const SliderRowLabel = styled.span(({ theme }) => ({
 const RowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
   color: theme.colors.textMuted,
-  marginBottom: '2px',
+  marginBottom: '4px',
 }));
 
 export const LabeledRow = memo(function LabeledRow({
