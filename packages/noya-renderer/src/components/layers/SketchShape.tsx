@@ -233,10 +233,9 @@ interface Props {
 export default memo(function SketchShape({ layer }: Props) {
   const path = useLayerPath(layer);
 
-  const style = useMemo(
-    () => layer.style ?? SketchModel.style(),
-    [layer.style],
-  );
+  const style = useMemo(() => layer.style ?? SketchModel.style(), [
+    layer.style,
+  ]);
 
   const fills = (style.fills ?? []).filter((x) => x.isEnabled);
   const borders = (style.borders ?? []).filter((x) => x.isEnabled);
