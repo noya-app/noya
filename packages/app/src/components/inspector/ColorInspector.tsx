@@ -1,5 +1,5 @@
 import type Sketch from 'noya-file-format';
-import { hexToRgba } from 'noya-colorpicker';
+import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   ColorPicker,
   InputField,
@@ -93,10 +93,7 @@ export default memo(function ColorInspector({
                 value={color ? sketchColorToHex(displayColor).slice(1) : ''}
                 placeholder={color ? '' : 'multiple'}
                 onSubmit={(value, reset) => {
-                  if (
-                    (value.length === 6 && /^[0-9A-F]{6}$/i.test(value)) ||
-                    (value.length === 3 && /^[0-9A-F]{3}$/i.test(value))
-                  ) {
+                  if (validHex(value)) {
                     onChangeColor(
                       rgbaToSketchColor(hexToRgba(value, color?.alpha)),
                     );

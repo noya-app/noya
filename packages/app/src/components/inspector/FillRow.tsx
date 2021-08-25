@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { hexToRgba } from 'noya-colorpicker';
+import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   InputField,
   Label,
@@ -152,10 +152,7 @@ export default memo(function FillRow({
                 }
                 placeholder={colorProps.color ? undefined : 'multiple'}
                 onSubmit={(value, reset) => {
-                  if (
-                    (value.length === 6 && /^[0-9A-F]{6}$/i.test(value)) ||
-                    (value.length === 3 && /^[0-9A-F]{3}$/i.test(value))
-                  ) {
+                  if (validHex(value)) {
                     colorProps.onChangeColor(
                       rgbaToSketchColor(
                         hexToRgba(value, colorProps.color?.alpha),
