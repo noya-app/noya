@@ -1,6 +1,6 @@
 import type Sketch from 'noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
-import { hexToRgba } from 'noya-colorpicker';
+import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   GradientPicker,
   InputField,
@@ -151,10 +151,7 @@ export default memo(function GradientInspector({
                 value={hexValue ?? ''}
                 placeholder={hexValue ? '' : 'Multiple'}
                 onSubmit={(value) => {
-                  if (
-                    (value.length === 6 && /^[0-9A-F]{6}$/i.test(value)) ||
-                    (value.length === 3 && /^[0-9A-F]{3}$/i.test(value))
-                  ) {
+                  if (validHex(value)) {
                     handleChangeColor(
                       rgbaToSketchColor(hexToRgba(value, selectedcolor.alpha)),
                     );
