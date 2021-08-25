@@ -14,6 +14,7 @@ import {
   insetRect,
   Point,
   rectContainsPoint,
+  resize,
   Size,
 } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
@@ -86,6 +87,7 @@ export type InsertedImage = { name: string } & (
 
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
+  | [type: 'zoomToFit', target: 'canvas' | 'selection']
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -117,6 +119,54 @@ export function canvasReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'zoomToFit': {
+      const [, target] = action;
+
+      const page = Selectors.getCurrentPage(state);
+      let boundingRect =
+        target === 'canvas'
+          ? Selectors.getPageContentBoundingRect(page)
+          : Selectors.getBoundingRect(page, state.selectedObjects);
+
+      if (!boundingRect) return state;
+
+      const padding = 20;
+      boundingRect = insetRect(boundingRect, -padding, -padding);
+
+      const bounds = createBounds(boundingRect);
+      const pageId = getCurrentPage(state).do_objectID;
+
+      const croppedRect = resize(
+        boundingRect,
+        context.canvasSize,
+        'scaleAspectFit',
+      );
+
+      const newZoom = Math.min(
+        croppedRect.width / boundingRect.width,
+        croppedRect.height / boundingRect.height,
+      );
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        const newScrollOrigin = {
+          x: viewportCenter.x - bounds.midX * newZoom,
+          y: viewportCenter.y - bounds.midY * newZoom,
+        };
+
+        draftUser[pageId] = {
+          ...draftUser[pageId],
+          zoomValue: newZoom,
+          scrollOrigin: PointString.encode(newScrollOrigin),
+        };
+      });
+    }
     case 'setZoom': {
       const [, value, mode] = action;
       const pageId = getCurrentPage(state).do_objectID;

@@ -162,6 +162,7 @@ export function applicationReducer(
       return pageReducer(state, action);
     }
     case 'setZoom':
+    case 'zoomToFit':
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'addShapePathLayer':

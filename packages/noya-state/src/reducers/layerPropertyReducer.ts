@@ -20,7 +20,12 @@ export type LayerPropertyAction =
   | [type: 'setLayerName', layerId: string, name: string]
   | [type: 'setLayerVisible', layerId: string | string[], visible: boolean]
   | [type: 'setLayerIsLocked', layerId: string | string[], isLocked: boolean]
-  | [type: 'setExpandedInLayerList', layerId: string, expanded: boolean]
+  | [
+      type: 'setExpandedInLayerList',
+      layerId: string,
+      expanded: boolean,
+      target: 'self' | 'recursive',
+    ]
   | [type: 'setLayerX', value: number, mode?: SetNumberMode]
   | [type: 'setLayerY', value: number, mode?: SetNumberMode]
   | [type: 'setLayerWidth', value: number, mode?: SetNumberMode]
@@ -83,7 +88,7 @@ export function layerPropertyReducer(
       });
     }
     case 'setExpandedInLayerList': {
-      const [, id, expanded] = action;
+      const [, id, expanded, target] = action;
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
@@ -95,11 +100,22 @@ export function layerPropertyReducer(
       if (!indexPath) return state;
 
       return produce(state, (draft) => {
-        const layer = Layers.access(draft.sketch.pages[pageIndex], indexPath);
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
 
-        layer.layerListExpandedType = expanded
+        const newState = expanded
           ? Sketch.LayerListExpanded.Expanded
           : Sketch.LayerListExpanded.Collapsed;
+
+        draftLayer.layerListExpandedType = newState;
+
+        if (target === 'recursive') {
+          Layers.visit(draftLayer, (nestedDraftLayer) => {
+            nestedDraftLayer.layerListExpandedType = newState;
+          });
+        }
       });
     }
     case 'setFixedRadius': {

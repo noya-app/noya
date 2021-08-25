@@ -1,15 +1,16 @@
+import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
+import { CheckIcon } from '@radix-ui/react-icons';
+import { Slot } from '@radix-ui/react-slot';
 import { memo, ReactElement, ReactNode } from 'react';
 import styled from 'styled-components';
-import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import {
-  SEPARATOR_ITEM,
-  MenuItem,
-  styles,
-  CHECKBOX_WIDTH,
-  CHECKBOX_RIGHT_INSET,
-} from './internal/Menu';
-import { CheckIcon } from '@radix-ui/react-icons';
 import { Spacer } from '..';
+import {
+  CHECKBOX_RIGHT_INSET,
+  CHECKBOX_WIDTH,
+  MenuItem,
+  SEPARATOR_ITEM,
+  styles,
+} from './internal/Menu';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -93,8 +94,6 @@ interface Props<T extends string> {
   onSelect?: (value: T) => void;
 }
 
-// Using a Slot for the menu currently doesn't work with custom elements,
-// so we use a span. Check for fixes in library updates in the future.
 function DropdownMenuRoot<T extends string>({
   items,
   children,
@@ -106,7 +105,7 @@ function DropdownMenuRoot<T extends string>({
 
   return (
     <RadixDropdownMenu.Root>
-      <RadixDropdownMenu.Trigger as={'span'}>
+      <RadixDropdownMenu.Trigger as={Slot}>
         {children}
       </RadixDropdownMenu.Trigger>
       <RootElement sideOffset={4}>

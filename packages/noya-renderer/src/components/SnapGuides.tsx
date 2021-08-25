@@ -18,7 +18,7 @@ import {
   getSnapValues,
   Selectors,
 } from 'noya-state';
-import { groupBy } from 'noya-utils';
+import { groupBy, round } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import {
   AXES,
@@ -228,7 +228,7 @@ export default memo(function SnapGuides() {
           x: interactionState.current.x + 20,
           y: interactionState.current.y + 20,
         }}
-        text={`${areaSize.width} × ${areaSize.height}`}
+        text={`${round(areaSize.width, 2)} × ${round(areaSize.height, 2)}`}
         fontSize={12}
         padding={{
           width: 8,
