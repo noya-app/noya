@@ -115,25 +115,34 @@ const MenubarContent = memo(function MenubarContent({
 
   const menuItems = useMemo(
     () =>
-      createSectionedMenu<MenuItemType>(
-        [
-          { value: 'new', title: 'File: New' },
-          { value: 'open', title: 'File: Open' },
-          { value: 'save', title: 'File: Save' },
-          { value: 'saveAs', title: 'File: Save As...' },
-        ],
-        [
-          { value: 'undo', title: 'Edit: Undo', disabled: undoDisabled },
-          { value: 'redo', title: 'Edit: Redo', disabled: redoDisabled },
-        ],
-        [
-          {
-            value: 'showRulers',
-            title: 'Preferences: Rulers',
-            checked: showRulers,
-          },
-        ],
-      ),
+      createSectionedMenu<MenuItemType>([
+        {
+          title: 'File',
+          items: [
+            { value: 'new', title: 'New' },
+            { value: 'open', title: 'Open' },
+            { value: 'save', title: 'Save' },
+            { value: 'saveAs', title: 'Save As...' },
+          ],
+        },
+        {
+          title: 'Edit',
+          items: [
+            { value: 'undo', title: 'Edit: Undo', disabled: undoDisabled },
+            { value: 'redo', title: 'Edit: Redo', disabled: redoDisabled },
+          ],
+        },
+        {
+          title: 'Preferences',
+          items: [
+            {
+              value: 'showRulers',
+              title: 'Preferences: Rulers',
+              checked: showRulers,
+            },
+          ],
+        },
+      ]),
     [redoDisabled, showRulers, undoDisabled],
   );
 

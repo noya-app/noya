@@ -5,11 +5,12 @@ import { Theme } from '../../theme';
 export const SEPARATOR_ITEM = 'separator';
 
 export type RegularMenuItem<T extends string> = {
-  value: T;
+  value?: T;
   title: string;
   checked?: boolean;
   disabled?: boolean;
   icon?: ReactElement;
+  items?: MenuItem<T>[];
 };
 
 export type MenuItem<T extends string> =

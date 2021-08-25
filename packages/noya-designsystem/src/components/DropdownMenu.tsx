@@ -1,7 +1,8 @@
+import { ChevronRightIcon } from '@radix-ui/react-icons';
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
-import { memo, ReactElement, ReactNode } from 'react';
+import { memo, ReactElement, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Spacer } from '..';
 import {
@@ -30,33 +31,43 @@ const CheckboxItemElement = styled(RadixDropdownMenu.CheckboxItem)(
   styles.itemStyle,
 );
 
-interface ContextMenuItemProps {
+interface ContextMenuItemProps<T extends string> {
+  value?: T;
   children: ReactNode;
-  onSelect: () => void;
+  onSelect: (value: T) => void;
   checked: boolean;
   disabled: boolean;
   indented: boolean;
   icon?: ReactElement;
+  items?: MenuItem<T>[];
 }
 
 const StyledItemIndicator = styled(RadixDropdownMenu.ItemIndicator)(
   styles.itemIndicatorStyle,
 );
 
-const DropdownMenuItem = memo(function ContextMenuItem({
+const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
+  value,
   children,
   onSelect,
   checked,
   disabled,
   indented,
   icon,
-}: ContextMenuItemProps) {
+  items,
+}: ContextMenuItemProps<T>) {
+  const handleSelectItem = useCallback(() => {
+    if (!value) return;
+
+    onSelect(value);
+  }, [onSelect, value]);
+
   if (checked) {
     return (
       <CheckboxItemElement
         checked={checked}
         disabled={disabled}
-        onSelect={onSelect}
+        onSelect={handleSelectItem}
       >
         <StyledItemIndicator>
           <CheckIcon />
@@ -64,21 +75,37 @@ const DropdownMenuItem = memo(function ContextMenuItem({
         {children}
       </CheckboxItemElement>
     );
-  } else {
+  }
+
+  const element = (
+    <ItemElement disabled={disabled} onSelect={handleSelectItem}>
+      {indented && (
+        <Spacer.Horizontal size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
+      )}
+      {icon && (
+        <>
+          {icon}
+          <Spacer.Horizontal size={8} />
+        </>
+      )}
+      {children}
+      {items && items.length > 0 && (
+        <>
+          <Spacer.Horizontal />
+          <ChevronRightIcon />
+        </>
+      )}
+    </ItemElement>
+  );
+
+  if (items && items.length > 0) {
     return (
-      <ItemElement disabled={disabled} onSelect={onSelect}>
-        {indented && (
-          <Spacer.Horizontal size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
-        )}
-        {icon && (
-          <>
-            {icon}
-            <Spacer.Horizontal size={8} />
-          </>
-        )}
-        {children}
-      </ItemElement>
+      <DropdownMenuRoot isNested items={items} onSelect={onSelect}>
+        {element}
+      </DropdownMenuRoot>
     );
+  } else {
+    return element;
   }
 });
 
@@ -91,13 +118,15 @@ const RootElement = styled(RadixDropdownMenu.Content)(styles.contentStyle);
 interface Props<T extends string> {
   children: ReactNode;
   items: MenuItem<T>[];
-  onSelect?: (value: T) => void;
+  onSelect: (value: T) => void;
+  isNested?: boolean;
 }
 
 function DropdownMenuRoot<T extends string>({
   items,
   children,
   onSelect,
+  isNested,
 }: Props<T>) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
@@ -105,21 +134,29 @@ function DropdownMenuRoot<T extends string>({
 
   return (
     <RadixDropdownMenu.Root>
-      <RadixDropdownMenu.Trigger as={Slot}>
-        {children}
-      </RadixDropdownMenu.Trigger>
+      {isNested ? (
+        <RadixDropdownMenu.TriggerItem as={Slot}>
+          {children}
+        </RadixDropdownMenu.TriggerItem>
+      ) : (
+        <RadixDropdownMenu.Trigger as={Slot}>
+          {children}
+        </RadixDropdownMenu.Trigger>
+      )}
       <RootElement sideOffset={4}>
         {items.map((item, index) =>
           item === SEPARATOR_ITEM ? (
             <SeparatorElement key={index} />
           ) : (
             <DropdownMenuItem
-              key={item.value}
+              key={item.value ?? index}
+              value={item.value}
               indented={hasCheckedItem}
               checked={item.checked ?? false}
               disabled={item.disabled ?? false}
               icon={item.icon}
-              onSelect={() => onSelect?.(item.value)}
+              onSelect={onSelect}
+              items={item.items}
             >
               {item.title}
             </DropdownMenuItem>
