@@ -144,7 +144,7 @@ export default memo(function Canvas() {
     if (state.selectedGradient) {
       dispatch('deleteStopToGradient');
     } else {
-      dispatch('deleteLayer', state.selectedObjects);
+      dispatch('deleteLayer', state.selectedLayerIds);
     }
   };
 
@@ -153,9 +153,9 @@ export default memo(function Canvas() {
     Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
-    'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
-    'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
-    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
+    'Mod-d': () => dispatch('duplicateLayer', state.selectedLayerIds),
+    'Mod-g': () => dispatch('groupLayers', state.selectedLayerIds),
+    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedLayerIds),
     'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
     'Mod-+': () => dispatch('setZoom', 2, 'multiply'),
     'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
@@ -332,7 +332,7 @@ export default memo(function Canvas() {
 
         if (!layer) {
           dispatch('selectLayer', undefined);
-        } else if (!state.selectedObjects.includes(layer.do_objectID)) {
+        } else if (!state.selectedLayerIds.includes(layer.do_objectID)) {
           dispatch('selectLayer', layer.do_objectID);
         }
 
@@ -374,7 +374,7 @@ export default memo(function Canvas() {
 
           const boundingRects = Selectors.getBoundingRectMap(
             Selectors.getCurrentPage(state),
-            state.selectedObjects,
+            state.selectedLayerIds,
             { groups: 'childrenOnly' },
           );
 
@@ -475,7 +475,7 @@ export default memo(function Canvas() {
             return;
           }
 
-          if (state.selectedObjects.length > 0) {
+          if (state.selectedLayerIds.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction && !state.selectedGradient) {
@@ -515,8 +515,8 @@ export default memo(function Canvas() {
           ) {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
-            if (state.selectedObjects.includes(layer.do_objectID)) {
-              if (event.shiftKey && state.selectedObjects.length !== 1) {
+            if (state.selectedLayerIds.includes(layer.do_objectID)) {
+              if (event.shiftKey && state.selectedLayerIds.length !== 1) {
                 dispatch('selectLayer', layer.do_objectID, 'difference');
               }
             } else {
@@ -821,7 +821,7 @@ export default memo(function Canvas() {
             );
           }
 
-          if (state.selectedObjects.length > 0) {
+          if (state.selectedLayerIds.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction && !state.selectedGradient) {

@@ -104,22 +104,22 @@ export default memo(function SketchFileRenderer() {
 
   const boundingRect = useMemo(
     () =>
-      Selectors.getBoundingRect(page, state.selectedObjects, {
+      Selectors.getBoundingRect(page, state.selectedLayerIds, {
         groups: 'childrenOnly',
         includeHiddenLayers: true,
       }),
-    [page, state.selectedObjects],
+    [page, state.selectedLayerIds],
   );
 
   const boundingPoints = useMemo(
     () =>
-      state.selectedObjects.map((id: string) =>
+      state.selectedLayerIds.map((id: string) =>
         Selectors.getBoundingPoints(page, id, {
           groups: 'childrenOnly',
           includeHiddenLayers: true,
         }),
       ),
-    [page, state.selectedObjects],
+    [page, state.selectedLayerIds],
   );
 
   const quickMeasureGuides = useMemo(() => {
@@ -127,8 +127,8 @@ export default memo(function SketchFileRenderer() {
       !highlightedLayer ||
       !highlightedLayer.isMeasured ||
       !boundingRect ||
-      state.selectedObjects.length === 0 ||
-      state.selectedObjects.includes(highlightedLayer.id)
+      state.selectedLayerIds.length === 0 ||
+      state.selectedLayerIds.includes(highlightedLayer.id)
     ) {
       return;
     }
@@ -175,13 +175,13 @@ export default memo(function SketchFileRenderer() {
         ))}
       </>
     );
-  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+  }, [highlightedLayer, page, state.selectedLayerIds, boundingRect]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
       // Don't draw a highlight when hovering over a selected layer on the canvas
-      (state.selectedObjects.includes(highlightedLayer.id) &&
+      (state.selectedLayerIds.includes(highlightedLayer.id) &&
         highlightedLayer.precedence === 'belowSelection')
     ) {
       return;
@@ -209,7 +209,7 @@ export default memo(function SketchFileRenderer() {
         />
       )
     );
-  }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
+  }, [highlightPaint, highlightedLayer, page, state.selectedLayerIds]);
 
   const penToolPseudoElements = useMemo(() => {
     if (interactionState.type !== 'drawingShapePath' || !interactionState.point)
@@ -384,7 +384,7 @@ export default memo(function SketchFileRenderer() {
             </>
           ) : (
             <>
-              {(state.selectedObjects.length > 1 ||
+              {(state.selectedLayerIds.length > 1 ||
                 !Selectors.getSelectedLineLayer(state)) &&
                 boundingRect &&
                 !state.selectedGradient &&

@@ -126,7 +126,7 @@ export function canvasReducer(
       let boundingRect =
         target === 'canvas'
           ? Selectors.getPageContentBoundingRect(page)
-          : Selectors.getBoundingRect(page, state.selectedObjects);
+          : Selectors.getBoundingRect(page, state.selectedLayerIds);
 
       if (!boundingRect) return state;
 
@@ -222,7 +222,7 @@ export function canvasReducer(
         draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
-        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedLayerIds = [layer.do_objectID];
       });
     }
     case 'addStopToGradient': {
@@ -311,7 +311,7 @@ export function canvasReducer(
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
-          draft.selectedObjects = [layer.do_objectID];
+          draft.selectedLayerIds = [layer.do_objectID];
         }
 
         if (shapeType === 'text') {
@@ -365,7 +365,7 @@ export function canvasReducer(
         const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
         layer.points = [encodedPoint];
 
-        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedLayerIds = [layer.do_objectID];
         draft.selectedPointLists = { [layer.do_objectID]: [0] };
       });
     }
@@ -389,7 +389,7 @@ export function canvasReducer(
 
       return produce(state, (draft) => {
         addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
-        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedLayerIds = [layer.do_objectID];
       });
     }
     case 'addPointToPath': {
@@ -533,7 +533,7 @@ export function canvasReducer(
       )
         return state;
 
-      return moveLayer(state, state.selectedObjects, parentId, 'inside');
+      return moveLayer(state, state.selectedLayerIds, parentId, 'inside');
     }
     case 'insertPointInPath': {
       const [, point] = action;
@@ -1138,7 +1138,7 @@ export function canvasReducer(
           draft.sketch.pages[pageIndex].layers.push(layer);
         });
 
-        draft.selectedObjects = layerIds;
+        draft.selectedLayerIds = layerIds;
       });
 
       if (parentLayer) {

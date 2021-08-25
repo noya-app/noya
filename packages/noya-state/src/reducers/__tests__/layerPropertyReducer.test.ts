@@ -55,7 +55,7 @@ describe('setLayerWidth', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [group] })),
     );
-    state.selectedObjects = [group.do_objectID];
+    state.selectedLayerIds = [group.do_objectID];
 
     const updated = layerPropertyReducer(
       state,

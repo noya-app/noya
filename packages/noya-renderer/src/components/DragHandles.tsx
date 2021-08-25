@@ -25,7 +25,7 @@ export default memo(function DragHandles({ rect }: Props) {
   const lineLayer = Selectors.getSelectedLineLayer(state);
 
   const dragHandles =
-    lineLayer && state.selectedObjects.length === 1
+    lineLayer && state.selectedLayerIds.length === 1
       ? getLineDragHandles(lineLayer.frame, lineLayer.points, lineLayer)
       : getRectDragHandles(rect);
 

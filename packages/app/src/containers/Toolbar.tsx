@@ -350,7 +350,7 @@ const ToolbarContent = memo(function ToolbarContent({
 export default function Toolbar() {
   const [state] = useApplicationState();
   const { zoomValue } = Selectors.getCurrentPageMetadata(state);
-  const hasSelectedLayer = state.selectedObjects.length > 0;
+  const hasSelectedLayer = state.selectedLayerIds.length > 0;
 
   const layerType =
     state.interactionState.type === 'insert'

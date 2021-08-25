@@ -73,7 +73,7 @@ export type ApplicationState = {
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
   selectedPage: string;
-  selectedObjects: string[];
+  selectedLayerIds: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
@@ -500,7 +500,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
       shiftKey: false,
     },
     selectedPage: sketch.pages[0].do_objectID,
-    selectedObjects: [],
+    selectedLayerIds: [],
     selectedPointLists: {},
     selectedControlPoint: undefined,
     selectedThemeTab: {

@@ -348,7 +348,7 @@ export function getScaleDirectionAtPoint(
   point: Point,
 ): CompassDirection | undefined {
   const page = getCurrentPage(state);
-  const boundingRect = getBoundingRect(page, state.selectedObjects);
+  const boundingRect = getBoundingRect(page, state.selectedLayerIds);
 
   if (!boundingRect) return;
 

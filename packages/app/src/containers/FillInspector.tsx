@@ -18,7 +18,7 @@ export default memo(function FillInspector({
   allowMoreThanOne: boolean;
 }) {
   const [state, dispatch] = useApplicationState();
-  const selectLayerId = state.selectedObjects[0];
+  const selectLayerId = state.selectedLayerIds[0];
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),

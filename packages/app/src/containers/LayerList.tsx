@@ -71,7 +71,7 @@ type LayerListItem = {
 
 function flattenLayerList(
   page: Sketch.Page,
-  selectedObjects: string[],
+  selectedLayerIds: string[],
   filteredLayerIds: Set<string>,
 ): LayerListItem[] {
   const flattened: LayerListItem[] = [];
@@ -102,7 +102,7 @@ function flattenLayerList(
         depth: indexPath.length - 1,
         expanded:
           layer.layerListExpandedType !== Sketch.LayerListExpanded.Collapsed,
-        selected: selectedObjects.includes(layer.do_objectID),
+        selected: selectedLayerIds.includes(layer.do_objectID),
         visible: layer.isVisible,
         hasClippingMask: layer.hasClippingMask ?? false,
         shouldBreakMaskChain: layer.shouldBreakMaskChain,
@@ -306,7 +306,7 @@ export default memo(function LayerList({
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
 
   const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
-  const selectedObjects = useShallowArray(state.selectedObjects);
+  const selectedLayerIds = useShallowArray(state.selectedLayerIds);
   const filteredLayerIds = useMemo(
     () =>
       Layers.getFilteredLayerAndAncestorIds(page, (layer) =>
@@ -315,7 +315,7 @@ export default memo(function LayerList({
     [filter, page],
   );
   const items = useDeepArray(
-    flattenLayerList(page, selectedObjects, filteredLayerIds),
+    flattenLayerList(page, selectedLayerIds, filteredLayerIds),
   );
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
@@ -357,11 +357,11 @@ export default memo(function LayerList({
           dispatch(
             'selectLayer',
             id,
-            selectedObjects.includes(id) ? 'difference' : 'intersection',
+            selectedLayerIds.includes(id) ? 'difference' : 'intersection',
           );
-        } else if (shiftKey && selectedObjects.length > 0) {
+        } else if (shiftKey && selectedLayerIds.length > 0) {
           const lastSelectedIndex = items.findIndex(
-            (item) => item.id === selectedObjects[selectedObjects.length - 1],
+            (item) => item.id === selectedLayerIds[selectedLayerIds.length - 1],
           );
 
           const first = Math.min(index, lastSelectedIndex);
@@ -477,7 +477,7 @@ export default memo(function LayerList({
       items,
       menuItems,
       onSelectMenuItem,
-      selectedObjects,
+      selectedLayerIds,
       startRenamingLayer,
     ],
   );
@@ -485,7 +485,7 @@ export default memo(function LayerList({
   const ref = useRef<ListView.IVirtualizedList | null>(null);
 
   const scrollToIndex =
-    items.findIndex((item) => item.id === selectedObjects[0]) ?? -1;
+    items.findIndex((item) => item.id === selectedLayerIds[0]) ?? -1;
 
   // Whenever selection changes, scroll the first selected layer into view
   useEffect(() => {
@@ -510,8 +510,8 @@ export default memo(function LayerList({
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
           const sourceId = items[sourceIndex].id;
-          const sourceIds = selectedObjects.includes(sourceId)
-            ? selectedObjects
+          const sourceIds = selectedLayerIds.includes(sourceId)
+            ? selectedLayerIds
             : sourceId;
 
           dispatch(
@@ -521,7 +521,7 @@ export default memo(function LayerList({
             position,
           );
         },
-        [dispatch, items, selectedObjects],
+        [dispatch, items, selectedLayerIds],
       )}
       acceptsDrop={useCallback(
         (
@@ -529,8 +529,8 @@ export default memo(function LayerList({
           destinationId: string,
           relationDropPosition: RelativeDropPosition,
         ) => {
-          const sourceIds = selectedObjects.includes(sourceId)
-            ? selectedObjects
+          const sourceIds = selectedLayerIds.includes(sourceId)
+            ? selectedLayerIds
             : sourceId;
 
           const state = getStateSnapshot();
@@ -594,7 +594,7 @@ export default memo(function LayerList({
 
           return true;
         },
-        [getStateSnapshot, selectedObjects],
+        [getStateSnapshot, selectedLayerIds],
       )}
     />
   );

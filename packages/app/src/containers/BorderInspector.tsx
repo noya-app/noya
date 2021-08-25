@@ -13,7 +13,7 @@ import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function BorderInspector() {
   const [state, dispatch] = useApplicationState();
-  const selectLayerId = state.selectedObjects[0];
+  const selectLayerId = state.selectedLayerIds[0];
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),

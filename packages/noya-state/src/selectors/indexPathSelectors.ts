@@ -36,7 +36,7 @@ export const getSelectedLayerIndexPaths = (
   const page = getCurrentPage(state);
 
   return Layers.findAllIndexPaths(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
+    state.selectedLayerIds.includes(layer.do_objectID),
   );
 };
 
@@ -60,7 +60,7 @@ export const getLayerIndexPathsExcludingDescendants = (
 export const getSelectedLayerIndexPathsExcludingDescendants = (
   state: ApplicationState,
 ): IndexPath[] => {
-  return getLayerIndexPathsExcludingDescendants(state, state.selectedObjects);
+  return getLayerIndexPathsExcludingDescendants(state, state.selectedLayerIds);
 };
 
 export const getIndexPathsForGroup = (

@@ -61,7 +61,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 10, y: 10 }]],
@@ -80,7 +80,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID, oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 10, y: 10 }]],
@@ -99,7 +99,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const mouseOriginX = 10;
 
@@ -133,7 +133,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 460, y: 460 }]],
@@ -154,7 +154,7 @@ describe('movingPoint', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -186,7 +186,7 @@ describe('movingPoint', () => {
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
 
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -209,7 +209,7 @@ describe('movingControlPoint', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [oval] })),
     );
-    state.selectedObjects = [oval.do_objectID];
+    state.selectedLayerIds = [oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -241,7 +241,7 @@ describe('movingControlPoint', () => {
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
 
-    state.selectedObjects = [oval.do_objectID];
+    state.selectedLayerIds = [oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -264,7 +264,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -283,7 +283,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'ne']],
@@ -302,7 +302,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'nw']],
@@ -321,7 +321,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'sw']],
@@ -340,7 +340,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID, oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -368,7 +368,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -396,7 +396,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [artboard, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID, oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],

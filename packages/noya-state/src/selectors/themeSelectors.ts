@@ -117,7 +117,7 @@ export const getSelectedSymbols = (
 
   const filter =
     getCurrentTab(state) === 'canvas'
-      ? state.selectedObjects
+      ? state.selectedLayerIds
       : state.selectedThemeTab.symbols.ids;
 
   return symbols.filter((symbol) => filter.includes(symbol.do_objectID));

@@ -56,7 +56,7 @@ export const getSelectedLayers = (
   const page = getCurrentPage(state);
 
   return Layers.findAll(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
+    state.selectedLayerIds.includes(layer.do_objectID),
   ) as PageLayer[];
 };
 
@@ -67,7 +67,7 @@ export const getSelectedLayersWithContextSettings = (
 
   return (
     Layers.findAll(page, (layer) =>
-      state.selectedObjects.includes(layer.do_objectID),
+      state.selectedLayerIds.includes(layer.do_objectID),
     ) as PageLayer[]
   ).filter(
     (layer) => layer._class !== 'artboard' && layer.style?.contextSettings,
@@ -80,7 +80,7 @@ export const getSelectedLayersWithFixedRadius = (
   const page = getCurrentPage(state);
 
   return Layers.findAll(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
+    state.selectedLayerIds.includes(layer.do_objectID),
   ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
 };
 
@@ -173,7 +173,7 @@ export function getSelectedLineLayer(
   const page = Selectors.getCurrentPage(state);
   const indexPath = Layers.findIndexPath(
     page,
-    (layer) => layer.do_objectID === state.selectedObjects[0],
+    (layer) => layer.do_objectID === state.selectedLayerIds[0],
   );
   if (!indexPath) return undefined;
 
@@ -356,7 +356,7 @@ export function insertLayerAtIndexPath(
   // the `destinationIndexPath`
   state = produce(state, (draft) => {
     draft.sketch.pages[pageIndex].layers.push(...layers);
-    draft.selectedObjects = ids;
+    draft.selectedLayerIds = ids;
   });
 
   // Move the layers into their target position

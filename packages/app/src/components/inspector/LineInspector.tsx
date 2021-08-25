@@ -116,41 +116,41 @@ export default function LineInspector({
   const handleSetStartX = useCallback(
     (value: number, mode: SetNumberMode) => {
       const selectedPointList = Object.fromEntries(
-        state.selectedObjects.map((layerId) => [layerId, [0]]),
+        state.selectedLayerIds.map((layerId) => [layerId, [0]]),
       );
       dispatch('setPointX', selectedPointList, value, mode);
     },
-    [dispatch, state.selectedObjects],
+    [dispatch, state.selectedLayerIds],
   );
 
   const handleSetStartY = useCallback(
     (value: number, mode: SetNumberMode) => {
       const selectedPointList = Object.fromEntries(
-        state.selectedObjects.map((layerId) => [layerId, [0]]),
+        state.selectedLayerIds.map((layerId) => [layerId, [0]]),
       );
       dispatch('setPointY', selectedPointList, value, mode);
     },
-    [dispatch, state.selectedObjects],
+    [dispatch, state.selectedLayerIds],
   );
 
   const handleSetEndX = useCallback(
     (value: number, mode: SetNumberMode) => {
       const selectedPointList = Object.fromEntries(
-        state.selectedObjects.map((layerId) => [layerId, [1]]),
+        state.selectedLayerIds.map((layerId) => [layerId, [1]]),
       );
       dispatch('setPointX', selectedPointList, value, mode);
     },
-    [dispatch, state.selectedObjects],
+    [dispatch, state.selectedLayerIds],
   );
 
   const handleSetEndY = useCallback(
     (value: number, mode: SetNumberMode) => {
       const selectedPointList = Object.fromEntries(
-        state.selectedObjects.map((layerId) => [layerId, [1]]),
+        state.selectedLayerIds.map((layerId) => [layerId, [1]]),
       );
       dispatch('setPointY', selectedPointList, value, mode);
     },
-    [dispatch, state.selectedObjects],
+    [dispatch, state.selectedLayerIds],
   );
 
   return (

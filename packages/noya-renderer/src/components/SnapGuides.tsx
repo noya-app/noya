@@ -148,7 +148,7 @@ export default memo(function SnapGuides() {
     | undefined => {
     switch (interactionState.type) {
       case 'moving': {
-        const rect = Selectors.getBoundingRect(page, state.selectedObjects, {
+        const rect = Selectors.getBoundingRect(page, state.selectedLayerIds, {
           groups: 'childrenOnly',
           includeHiddenLayers: true,
         });
@@ -170,7 +170,7 @@ export default memo(function SnapGuides() {
 
         const originalBoundingRect = Selectors.getBoundingRect(
           pageSnapshot,
-          state.selectedObjects,
+          state.selectedLayerIds,
         )!;
 
         const newBoundingRect = getScaledSnapBoundingRect(
