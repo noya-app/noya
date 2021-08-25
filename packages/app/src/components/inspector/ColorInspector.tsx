@@ -92,14 +92,12 @@ export default memo(function ColorInspector({
               <InputField.Input
                 value={color ? sketchColorToHex(displayColor).slice(1) : ''}
                 placeholder={color ? '' : 'multiple'}
-                onSubmit={(value, reset) => {
+                onSubmit={(value) => {
                   if (validHex(value)) {
                     onChangeColor(
                       rgbaToSketchColor(hexToRgba(value, color?.alpha)),
                     );
                   }
-
-                  reset();
                 }}
               />
               <InputField.Label>#</InputField.Label>

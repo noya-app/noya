@@ -150,7 +150,7 @@ export default memo(function GradientInspector({
               <InputField.Input
                 value={hexValue ?? ''}
                 placeholder={hexValue ? '' : 'Multiple'}
-                onSubmit={(value, reset) => {
+                onSubmit={(value) => {
                   if (
                     (value.length === 6 && /^[0-9A-F]{6}$/i.test(value)) ||
                     (value.length === 3 && /^[0-9A-F]{3}$/i.test(value))
@@ -159,8 +159,6 @@ export default memo(function GradientInspector({
                       rgbaToSketchColor(hexToRgba(value, selectedcolor.alpha)),
                     );
                   }
-
-                  reset();
                 }}
               />
               <InputField.Label>#</InputField.Label>

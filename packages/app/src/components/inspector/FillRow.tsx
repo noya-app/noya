@@ -151,7 +151,7 @@ export default memo(function FillRow({
                     : ''
                 }
                 placeholder={colorProps.color ? undefined : 'multiple'}
-                onSubmit={(value, reset) => {
+                onSubmit={(value) => {
                   if (validHex(value)) {
                     colorProps.onChangeColor(
                       rgbaToSketchColor(
@@ -159,8 +159,6 @@ export default memo(function FillRow({
                       ),
                     );
                   }
-
-                  reset();
                 }}
               />
               <InputField.Label>#</InputField.Label>
