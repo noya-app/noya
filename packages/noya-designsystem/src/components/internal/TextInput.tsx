@@ -94,7 +94,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   const latestValue = useRef(value);
   latestValue.current = value;
 
-  const isBlurTriggeredByEscapeKey = useRef(false);
+  const isSubmitTriggeredByEscapeKey = useRef(false);
 
   const [internalValue, setInternalValue] = useState('');
 
@@ -103,16 +103,17 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   }, [value]);
 
   const handleSubmit = useCallback(() => {
-    // If escape triggered this submission, we want to submit the original value.
-    let submitWithOriginalValue = isBlurTriggeredByEscapeKey.current;
+    // If this submission was triggered with Escape, we attempt to submit the original value.
+    // This will only actually call `onSubmit` if `allowSubmittingWithSameValue` is also true.
+    const submissionValue = isSubmitTriggeredByEscapeKey.current
+      ? value
+      : internalValue;
 
-    if (isBlurTriggeredByEscapeKey.current) {
-      isBlurTriggeredByEscapeKey.current = false;
-    }
+    isSubmitTriggeredByEscapeKey.current = false;
 
-    if (value === internalValue && !allowSubmittingWithSameValue) return;
+    if (submissionValue === value && !allowSubmittingWithSameValue) return;
 
-    onSubmit(submitWithOriginalValue ? value : internalValue);
+    onSubmit(submissionValue);
 
     setInternalValue(latestValue.current);
   }, [allowSubmittingWithSameValue, value, internalValue, onSubmit]);
@@ -127,7 +128,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
         event.preventDefault();
         event.stopPropagation();
       } else if (event.key === 'Escape') {
-        isBlurTriggeredByEscapeKey.current = true;
+        isSubmitTriggeredByEscapeKey.current = true;
 
         ref.current?.blur();
       } else {
