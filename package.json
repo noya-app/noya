@@ -19,12 +19,12 @@
     "type": "root"
   },
   "scripts": {
-    "start": "PORT=1234 modular start app",
+    "start": "cross-env PORT=1234 modular start app",
     "build": "modular build app",
     "build:desktop": "cd ./packages/noya-desktop && yarn make",
     "release:desktop": "cd ./packages/noya-desktop && yarn release",
     "test": "modular test",
-    "test:clean": "JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
+    "test:clean": "cross-env JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
     "lint": "eslint . --ext .js,.ts,.tsx",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
@@ -75,5 +75,8 @@
     "transformIgnorePatterns": [
       "node_modules/(?!browser-fs-access)"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }
