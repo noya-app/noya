@@ -78,12 +78,10 @@ export default memo(function ExportFormatsRow({
         disabled={!canChangeScale}
         value={scaleString}
         onSubmit={useCallback(
-          (value, reset) => {
+          (value) => {
             const parseScale = ExportOptions.parseScale(value);
-            if (!parseScale) {
-              reset();
-              return;
-            }
+
+            if (!parseScale) return;
 
             onChangeScale(parseScale);
           },

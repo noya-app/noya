@@ -65,7 +65,7 @@ const ListViewRowTitle = styled.span(({ theme }) => ({
 
 interface EditableRowProps {
   value: string;
-  onSubmitEditing: (value: string, reset: () => void) => void;
+  onSubmitEditing: (value: string) => void;
   autoFocus: boolean;
 }
 
@@ -96,6 +96,7 @@ function ListViewEditableRowTitle({
       variant="bare"
       value={value}
       onSubmit={onSubmitEditing}
+      allowSubmittingWithSameValue
       onClick={(e) => {
         e.stopPropagation();
       }}
