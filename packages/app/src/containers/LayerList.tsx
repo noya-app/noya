@@ -38,6 +38,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -71,6 +72,7 @@ type LayerListItem = {
 function flattenLayerList(
   page: Sketch.Page,
   selectedObjects: string[],
+  filteredLayerIds: Set<string>,
 ): LayerListItem[] {
   const flattened: LayerListItem[] = [];
 
@@ -83,7 +85,8 @@ function flattenLayerList(
       return Layers.getChildren(layer).slice().reverse();
     },
     onEnter(layer, indexPath) {
-      if (Layers.isPageLayer(layer)) return;
+      if (Layers.isPageLayer(layer) || !filteredLayerIds.has(layer.do_objectID))
+        return;
 
       const currentIndex = indexPath[indexPath.length - 1];
 
@@ -289,7 +292,13 @@ const LayerRow = memo(
   }),
 );
 
-export default memo(function LayerList({ size }: { size: Size }) {
+export default memo(function LayerList({
+  size,
+  filter,
+}: {
+  size: Size;
+  filter: string;
+}) {
   const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const getStateSnapshot = useGetStateSnapshot();
@@ -298,7 +307,16 @@ export default memo(function LayerList({ size }: { size: Size }) {
 
   const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const selectedObjects = useShallowArray(state.selectedObjects);
-  const items = useDeepArray(flattenLayerList(page, selectedObjects));
+  const filteredLayerIds = useMemo(
+    () =>
+      Layers.getFilteredLayerAndAncestorIds(page, (layer) =>
+        layer.name.toLowerCase().includes(filter.toLowerCase()),
+      ),
+    [filter, page],
+  );
+  const items = useDeepArray(
+    flattenLayerList(page, selectedObjects, filteredLayerIds),
+  );
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
@@ -367,8 +385,13 @@ export default memo(function LayerList({ size }: { size: Size }) {
         );
       };
 
-      const handleClickChevron = () =>
-        dispatch('setExpandedInLayerList', id, !expanded);
+      const handleClickChevron = ({ altKey }: { altKey: boolean }) =>
+        dispatch(
+          'setExpandedInLayerList',
+          id,
+          !expanded,
+          altKey ? 'recursive' : 'self',
+        );
 
       const handleChangeVisible = (value: boolean) =>
         dispatch('setLayerVisible', id, value);

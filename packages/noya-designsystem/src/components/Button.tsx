@@ -65,6 +65,8 @@ const ButtonContent = styled.span(({ theme }) => ({
   minHeight: '19px',
   display: 'flex',
   alignItems: 'center',
+  flex: '1',
+  justifyContent: 'center',
 }));
 
 /* ----------------------------------------------------------------------------
@@ -92,6 +94,7 @@ const Button = forwardRef(function Button(
     variant = 'normal',
     onClick,
     children,
+    ...rest // Propagate any other props so this component works as a Slot
   }: ButtonRootProps,
   forwardedRef: ForwardedRef<HTMLButtonElement>,
 ) {
@@ -104,6 +107,7 @@ const Button = forwardRef(function Button(
       disabled={disabled}
       variant={variant}
       onClick={onClick}
+      {...rest}
     >
       <ButtonContent>{children}</ButtonContent>
     </ButtonElement>

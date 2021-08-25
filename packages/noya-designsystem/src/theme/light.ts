@@ -19,7 +19,7 @@ export const colors = {
   scrollbar: 'rgba(199,199,199,0.8)',
   placeholderDots: 'rgba(0,0,0,0.3)',
   listView: {
-    raisedBackground: 'rgba(255,255,255,0.8)',
+    raisedBackground: 'rgba(0,0,0,0.03)',
   },
   canvas: {
     background: 'rgb(249,249,249)',

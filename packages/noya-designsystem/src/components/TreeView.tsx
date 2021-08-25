@@ -18,7 +18,7 @@ import * as Spacer from './Spacer';
 type TreeRowBaseProps = {
   icon?: ReactNode;
   expanded?: boolean;
-  onClickChevron?: () => void;
+  onClickChevron?: ({ altKey }: { altKey: boolean }) => void;
 };
 
 export type TreeRowProps<MenuItemType extends string> =
@@ -37,9 +37,9 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
   const { expandable } = useContext(ListView.ListRowContext);
 
   const handleClickChevron = useCallback(
-    (event) => {
+    (event: React.MouseEvent) => {
       event.stopPropagation();
-      onClickChevron?.();
+      onClickChevron?.({ altKey: event.altKey });
     },
     [onClickChevron],
   );

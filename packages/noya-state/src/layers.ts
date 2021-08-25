@@ -346,3 +346,14 @@ export function isWithinMaskChain(
 
   return isMasked;
 }
+
+export function getFilteredLayerAndAncestorIds(
+  root: Sketch.AnyLayer,
+  predicate: (layer: Sketch.AnyLayer) => boolean,
+) {
+  return new Set<string>(
+    findAllLayerIndexPaths(root, predicate)
+      .flatMap((indexPath) => accessPath(root, indexPath))
+      .map((layer) => layer.do_objectID),
+  );
+}

@@ -8,12 +8,10 @@ import {
   ScrollArea,
   Spacer,
 } from 'noya-designsystem';
-import { Size } from 'noya-geometry';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import { memo, useMemo, useRef } from 'react';
 import { ReactNode, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
-import { useSize } from '../hooks/useSize';
+import { AutoSizer } from '../components/AutoSizer';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
@@ -82,34 +80,6 @@ const ToolbarContainer = styled.header(({ theme }) => ({
   backdropFilter: BACKDROP_FILTER,
 }));
 
-const AutoSizer = memo(function AutoSizer({
-  children,
-}: {
-  children: (size: Size) => ReactNode;
-}) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const containerSize = useSize(containerRef);
-
-  return (
-    <div
-      ref={containerRef}
-      style={useMemo(
-        () => ({
-          display: 'flex',
-          flex: '1 0 0',
-          flexDirection: 'column',
-        }),
-        [],
-      )}
-    >
-      {containerSize &&
-        containerSize.width > 0 &&
-        containerSize.height > 0 &&
-        children(containerSize)}
-    </div>
-  );
-});
-
 function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
   const currentTab = useSelector(Selectors.getCurrentTab);
 
@@ -127,23 +97,30 @@ export default function Workspace() {
         <PageList />
         <Divider />
         {useTabElement({
-          canvas: <AutoSizer>{(size) => <LayerList size={size} />}</AutoSizer>,
+          canvas: (
+            <>
+              <AutoSizer>
+                {(size) => <LayerList size={size} filter={layersFilter} />}
+              </AutoSizer>
+              <FilterContainer>
+                <InputField.Root labelPosition="start" labelSize={14}>
+                  <InputField.Input
+                    value={layersFilter}
+                    onChange={setLayersFilter}
+                    placeholder="Filter layers"
+                    type="search"
+                  />
+                  <InputField.Label>
+                    <MagnifyingGlassIcon />
+                  </InputField.Label>
+                </InputField.Root>
+              </FilterContainer>
+              <Spacer.Vertical size={8} />
+            </>
+          ),
           pages: <Spacer.Vertical />,
           theme: <ThemeGroups />,
         })}
-        <FilterContainer>
-          <InputField.Root labelPosition="start" labelSize={14}>
-            <InputField.Input
-              value={layersFilter}
-              onChange={setLayersFilter}
-              placeholder="Filter layers"
-            />
-            <InputField.Label>
-              <MagnifyingGlassIcon />
-            </InputField.Label>
-          </InputField.Root>
-        </FilterContainer>
-        <Spacer.Vertical size={8} />
       </LeftSidebar>
       <MainView>
         <ToolbarContainer>

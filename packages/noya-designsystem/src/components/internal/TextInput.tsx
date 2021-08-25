@@ -13,6 +13,7 @@ type Props = {
   id?: string;
   style?: any;
   className?: string;
+  type?: 'text' | 'search';
   disabled?: boolean;
   value: string;
   placeholder?: string;
@@ -29,6 +30,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
     id,
     style,
     className,
+    type,
     placeholder,
     disabled,
     onKeyDown,
@@ -58,7 +60,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
       id={id}
       style={style}
       className={className}
-      type="text"
+      type={type ?? 'text'}
       disabled={disabled ?? false}
       value={value}
       placeholder={placeholder}
@@ -79,6 +81,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     id,
     style,
     className,
+    type,
     placeholder,
     onKeyDown,
     value,
@@ -151,7 +154,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       id={id}
       style={style}
       className={className}
-      type="text"
+      type={type ?? 'text'}
       disabled={disabled ?? false}
       value={internalValue}
       placeholder={placeholder}
