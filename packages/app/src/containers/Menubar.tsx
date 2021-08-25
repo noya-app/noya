@@ -17,16 +17,24 @@ import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
-  minHeight: `${theme.sizes.toolbar.height}px`,
+  minHeight: `${theme.sizes.toolbar.height - (theme.isElectron ? 8 : 0)}px`,
   display: 'flex',
   flexDirection: 'column',
-  borderBottom: `1px solid ${theme.colors.divider}`,
+  borderBottom: `1px solid ${
+    theme.isElectron ? 'transparent' : theme.colors.dividerStrong
+  }`,
+  borderRight: `1px solid ${
+    theme.isElectron ? theme.colors.dividerStrong : 'transparent'
+  }`,
   alignItems: 'stretch',
   justifyContent: 'center',
   color: theme.colors.textMuted,
+  WebkitAppRegion: 'drag',
+  background: theme.isElectron ? 'rgba(255,255,255,0.02)' : 'none',
 }));
 
 type MenuItemType =
@@ -91,10 +99,9 @@ const MenubarContent = memo(function MenubarContent({
   );
 
   useKeyboardShortcuts({
-    // TODO: Enable in desktop app
-    // 'Mod-n': () => {
-    //   dispatch('newFile');
-    // },
+    'Mod-n': () => {
+      dispatch('newFile');
+    },
     'Mod-s': () => {
       handleSave('save');
     },
@@ -160,18 +167,22 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch, handleOpen, handleSave, setShowRulers, showRulers],
   );
 
+  const isElectron = useEnvironmentParameter('isElectron');
+
   return (
     <Container>
       <InspectorPrimitives.Row>
         <Spacer.Horizontal size={8} />
-        <DropdownMenu<MenuItemType>
-          items={menuItems}
-          onSelect={onSelectMenuItem}
-        >
-          <Button id="menu">
-            <HamburgerMenuIcon />
-          </Button>
-        </DropdownMenu>
+        {!isElectron && (
+          <DropdownMenu<MenuItemType>
+            items={menuItems}
+            onSelect={onSelectMenuItem}
+          >
+            <Button id="menu">
+              <HamburgerMenuIcon />
+            </Button>
+          </DropdownMenu>
+        )}
         <Spacer.Horizontal size={8} />
       </InspectorPrimitives.Row>
     </Container>

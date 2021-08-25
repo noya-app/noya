@@ -19,6 +19,7 @@ const ButtonElement = styled.button<{
   variant: ButtonVariant;
   flex?: CSSProperties['flex'];
 }>(({ theme, active, disabled, variant, flex }) => ({
+  WebkitAppRegion: 'no-drag',
   ...theme.textStyles.small,
   flex: flex ?? '0 0 auto',
   position: 'relative',

@@ -303,7 +303,7 @@ const ToolbarContent = memo(function ToolbarContent({
           )}
         </Button>
       </DropdownMenu>
-      <Spacer.Horizontal size={8} />
+      <Spacer.Horizontal size={itemSeparatorSize} />
       <DropdownMenu<ZoomMenuType>
         items={zoomMenuItems}
         onSelect={handleZoomMenuItem}
@@ -321,7 +321,6 @@ const ToolbarContent = memo(function ToolbarContent({
           )}
         </Button>
       </DropdownMenu>
-      <Spacer.Horizontal size={8} />
       <Spacer.Horizontal size={itemSeparatorSize} />
       <Button
         id="edit-path"

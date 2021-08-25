@@ -24,3 +24,4 @@ export const colors = produce(lightTheme.colors, (colors) => {
 export const textStyles = lightTheme.textStyles;
 export const fonts = lightTheme.fonts;
 export const sizes = lightTheme.sizes;
+export const isElectron = lightTheme.isElectron;

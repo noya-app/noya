@@ -10,10 +10,14 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    titleBarStyle: 'hiddenInset',
   });
 
+  const urlHash = '#isElectron=true';
   mainWindow.loadURL(
-    app.isPackaged ? 'https://noya.design' : 'http://localhost:1234',
+    app.isPackaged
+      ? `https://noya.design${urlHash}`
+      : `http://localhost:1234${urlHash}`,
   );
 
   // Automatically open the DevTools
