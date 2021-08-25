@@ -198,7 +198,7 @@ type InputFieldNumberInputProps = Omit<
         onChange: (value: number) => void;
       }
     | {
-        onSubmit: (value: number, reset: () => void) => void;
+        onSubmit: (value: number) => void;
       }
   );
 
@@ -212,13 +212,11 @@ function InputFieldNumberInput(props: InputFieldNumberInputProps) {
   const onChange = 'onChange' in props ? props.onChange : undefined;
 
   const handleSubmit = useCallback(
-    (value: string, reset: () => void) => {
+    (value: string) => {
       const newValue = parseNumber(value);
 
-      if (isNaN(newValue)) {
-        reset();
-      } else {
-        onSubmit?.(newValue, reset);
+      if (!isNaN(newValue)) {
+        onSubmit?.(newValue);
       }
     },
     [onSubmit],

@@ -136,13 +136,10 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
         <InputField.Root id={nameInputId}>
           <InputField.Input
             onSubmit={useCallback(
-              (name, reset) => {
+              (name) => {
                 name = name.replace(/[^_a-zA-Z0-9]/, '');
 
-                if (!name.match(/^[_a-zA-Z][_a-zA-Z0-9]*$/)) {
-                  reset();
-                  return;
-                }
+                if (!name.match(/^[_a-zA-Z][_a-zA-Z0-9]*$/)) return;
 
                 onChangeName(name);
               },
