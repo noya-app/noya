@@ -54,6 +54,7 @@ const MenubarContent = memo(function MenubarContent({
   redoDisabled,
   undoDisabled,
 }: Props) {
+  const isElectron = useEnvironmentParameter('isElectron');
   const dispatch = useDispatch();
 
   const handleOpen = useCallback(async () => {
@@ -103,33 +104,57 @@ const MenubarContent = memo(function MenubarContent({
         },
         {
           title: 'Edit',
-          items: [
-            {
-              value: 'undo',
-              title: 'Undo',
-              disabled: undoDisabled,
-              shortcut: 'Mod-z',
-            },
-            {
-              value: 'redo',
-              title: 'Redo',
-              disabled: redoDisabled,
-              shortcut: 'Mod-Shift-z',
-            },
-          ],
+          items: createSectionedMenu<ApplicationMenuItemType>(
+            [
+              {
+                value: 'undo',
+                title: 'Undo',
+                disabled: undoDisabled,
+                shortcut: 'Mod-z',
+                role: 'undo',
+              },
+              {
+                value: 'redo',
+                title: 'Redo',
+                disabled: redoDisabled,
+                shortcut: 'Mod-Shift-z',
+                role: 'redo',
+              },
+            ],
+            isElectron && [
+              {
+                value: 'cut',
+                title: 'Cut',
+                role: 'cut',
+                shortcut: 'Mod-x',
+              },
+              {
+                value: 'copy',
+                title: 'Copy',
+                role: 'copy',
+                shortcut: 'Mod-c',
+              },
+              {
+                value: 'paste',
+                title: 'Paste',
+                role: 'paste',
+                shortcut: 'Mod-v',
+              },
+            ],
+          ),
         },
         {
           title: 'Preferences',
           items: [
             {
               value: 'showRulers',
-              title: 'Preferences: Rulers',
+              title: 'Rulers',
               checked: showRulers,
             },
           ],
         },
       ]),
-    [redoDisabled, showRulers, undoDisabled],
+    [isElectron, redoDisabled, showRulers, undoDisabled],
   );
 
   const onSelectMenuItem = useCallback(
@@ -171,8 +196,6 @@ const MenubarContent = memo(function MenubarContent({
     };
   }, [menuItems, onSelectMenuItem]);
 
-  const isElectron = useEnvironmentParameter('isElectron');
-
   return (
     <Container>
       <InspectorPrimitives.Row>
@@ -181,6 +204,7 @@ const MenubarContent = memo(function MenubarContent({
           <DropdownMenu<ApplicationMenuItemType>
             items={menuItems}
             onSelect={onSelectMenuItem}
+            shouldBindKeyboardShortcuts={false}
           >
             <Button id="menu">
               <HamburgerMenuIcon />

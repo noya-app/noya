@@ -5,26 +5,96 @@ import { Emitter } from 'noya-fonts';
 import { getCurrentPlatform, normalizeKeyName } from 'noya-keymap';
 import { hostApp } from './hostApp';
 
+export type ApplicationMenuItemType =
+  // File
+  | 'new'
+  | 'open'
+  | 'save'
+  | 'saveAs'
+  // Edit
+  | 'undo'
+  | 'redo'
+  | 'cut'
+  | 'copy'
+  | 'paste'
+  // Preferences
+  | 'showRulers';
+
+export type ApplicationMenuItem = Electron.MenuItemConstructorOptions;
+
 /**
  * Electron accelerator names are separated with "+" instead of "-".
  * We also need to normalize the shortcut in case they use our custom "Mod".
  */
 function shortcutToAccelerator(shortcut: string): string {
-  const normalized = normalizeKeyName(shortcut, getCurrentPlatform(navigator));
+  const platform = getCurrentPlatform(navigator);
+  const normalized = normalizeKeyName(shortcut, platform);
   const accelerator = normalized.replaceAll('-', '+');
   return accelerator;
 }
 
-export type ApplicationMenuItemType =
-  | 'new'
-  | 'open'
-  | 'save'
-  | 'saveAs'
-  | 'undo'
-  | 'redo'
-  | 'showRulers';
+function getApplicationMenuItem(
+  item: MenuItem<ApplicationMenuItemType>,
+): ApplicationMenuItem {
+  if (item === SEPARATOR_ITEM) {
+    return { type: 'separator' };
+  } else {
+    return {
+      id: item.value,
+      label: item.title,
+      enabled: !item.disabled,
+      ...(item.shortcut && {
+        accelerator: shortcutToAccelerator(item.shortcut),
+      }),
+      ...(item.items && {
+        submenu: item.items.map(getApplicationMenuItem),
+      }),
+    };
+  }
+}
 
-export type ApplicationMenuItem = Electron.MenuItemConstructorOptions;
+const aboutMenu: ApplicationMenuItem = {
+  label: 'Noya',
+  submenu: [
+    {
+      label: 'About Noya',
+      role: 'about',
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Services',
+      role: 'services',
+      submenu: [],
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Hide Noya',
+      accelerator: 'Command+H',
+      role: 'hide',
+    },
+    {
+      label: 'Hide Others',
+      accelerator: 'Command+Shift+H',
+      role: 'hideOthers',
+    },
+    {
+      label: 'Show All',
+      role: 'unhide',
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Quit',
+      accelerator: 'Command+Q',
+      role: 'quit',
+    },
+  ],
+};
 
 class ApplicationMenu extends Emitter<[ApplicationMenuItemType]> {
   constructor() {
@@ -38,45 +108,12 @@ class ApplicationMenu extends Emitter<[ApplicationMenuItemType]> {
   }
 
   setMenu = (menuItems: MenuItem<ApplicationMenuItemType>[]) => {
-    const getApplicationMenuItem = (
-      item: MenuItem<ApplicationMenuItemType>,
-    ): ApplicationMenuItem => {
-      if (item === SEPARATOR_ITEM) {
-        return { type: 'separator' };
-      } else {
-        return {
-          id: item.value,
-          label: item.title,
-          enabled: !item.disabled,
-          ...(item.shortcut && {
-            accelerator: shortcutToAccelerator(item.shortcut),
-          }),
-          ...(item.items && {
-            submenu: item.items.map(getApplicationMenuItem),
-          }),
-        };
-      }
-    };
+    const platform = getCurrentPlatform(navigator);
 
     const data: MessageFromEmbedded = {
       type: 'setMenu',
       value: [
-        {
-          label: 'Noya',
-          submenu: [
-            {
-              label: 'About Noya',
-              role: 'about',
-            },
-            {
-              type: 'separator',
-            },
-            {
-              label: 'Quit',
-              role: 'quit',
-            },
-          ],
-        },
+        ...(platform === 'mac' ? [aboutMenu] : []),
         ...menuItems.map(getApplicationMenuItem),
       ],
     };

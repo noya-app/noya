@@ -1,3 +1,4 @@
+import { ApplicationMenuItem } from 'noya-embedded';
 import { ReactElement } from 'react';
 import { CSSObject } from 'styled-components';
 import { Theme } from '../../theme';
@@ -12,6 +13,7 @@ export type RegularMenuItem<T extends string> = {
   disabled?: boolean;
   icon?: ReactElement;
   items?: MenuItem<T>[];
+  role?: ApplicationMenuItem['role'];
 };
 
 export type MenuItem<T extends string> =

@@ -1,19 +1,22 @@
-import { ChevronRightIcon } from '@radix-ui/react-icons';
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
+import {
+  getCurrentPlatform,
+  getDisplayName,
+  useKeyboardShortcuts,
+} from 'noya-keymap';
 import { memo, ReactElement, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Spacer } from '..';
 import {
   CHECKBOX_RIGHT_INSET,
   CHECKBOX_WIDTH,
+  getKeyboardShortcutsForMenuItems,
   MenuItem,
   SEPARATOR_ITEM,
   styles,
-  getKeyboardShortcutsForMenuItems,
 } from './internal/Menu';
-import { useKeyboardShortcuts } from 'noya-keymap';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -96,14 +99,14 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
       {shortcut && (
         <>
           <Spacer.Horizontal />
-          <Spacer.Horizontal size={8} />
-          {shortcut}
+          <Spacer.Horizontal size={16} />
+          {getDisplayName(shortcut, getCurrentPlatform(navigator))}
         </>
       )}
       {items && items.length > 0 && (
         <>
           <Spacer.Horizontal />
-          <Spacer.Horizontal size={8} />
+          <Spacer.Horizontal size={16} />
           <ChevronRightIcon />
         </>
       )}
