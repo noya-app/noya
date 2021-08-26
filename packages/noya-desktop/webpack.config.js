@@ -7,7 +7,7 @@ const workspaceNodeModulesPath = path.resolve(__dirname, '../../node_modules');
  * @type import('webpack').Configuration
  */
 module.exports = {
-  entry: './src/index.ts',
+  entry: './src/main.ts',
   resolve: {
     modules: [workspaceNodeModulesPath, 'node_modules'],
     extensions: ['.ts', '.tsx', '.js', '.jsx'],

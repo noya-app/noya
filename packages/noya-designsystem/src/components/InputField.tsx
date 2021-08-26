@@ -1,4 +1,7 @@
 import { CaretDownIcon } from '@radix-ui/react-icons';
+import { Property } from 'csstype';
+import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
+import { memoize } from 'noya-utils';
 import {
   Children,
   createContext,
@@ -11,13 +14,10 @@ import {
   useContext,
   useMemo,
 } from 'react';
-import { Property } from 'csstype';
 import styled from 'styled-components';
 import handleNudge from '../utils/handleNudge';
-import TextInput, { TextInputProps } from './internal/TextInput';
-import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
 import Button from './Button';
-import { memoize } from 'noya-utils';
+import TextInput, { TextInputProps } from './internal/TextInput';
 
 type LabelPosition = 'start' | 'end';
 
@@ -98,7 +98,7 @@ function InputFieldDropdownMenu<T extends string>({
 }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu<T> items={items} onSelect={onSelect}>
+      <NoyaDropdownMenu<T> items={items} onSelect={onSelect} platform="key">
         <Button id={id} variant="thin">
           <CaretDownIcon />
         </Button>

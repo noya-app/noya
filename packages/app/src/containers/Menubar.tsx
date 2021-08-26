@@ -11,32 +11,31 @@ import {
   DropdownMenu,
   Spacer,
 } from 'noya-designsystem';
-import { useKeyboardShortcuts } from 'noya-keymap';
+import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
-  minHeight: `${theme.sizes.toolbar.height}px`,
+  minHeight: `${theme.sizes.toolbar.height - (theme.showMenubar ? 8 : 0)}px`,
   display: 'flex',
   flexDirection: 'column',
-  borderBottom: `1px solid ${theme.colors.divider}`,
+  borderBottom: `1px solid ${
+    theme.showMenubar ? 'transparent' : theme.colors.dividerStrong
+  }`,
+  borderRight: `1px solid ${
+    theme.showMenubar ? theme.colors.dividerStrong : 'transparent'
+  }`,
   alignItems: 'stretch',
   justifyContent: 'center',
   color: theme.colors.textMuted,
+  WebkitAppRegion: 'drag',
+  background: theme.showMenubar ? 'rgba(255,255,255,0.02)' : 'none',
 }));
-
-type MenuItemType =
-  | 'new'
-  | 'open'
-  | 'save'
-  | 'saveAs'
-  | 'undo'
-  | 'redo'
-  | 'showRulers';
 
 interface Props {
   fileHandle?: FileSystemHandle;
@@ -55,6 +54,8 @@ const MenubarContent = memo(function MenubarContent({
   redoDisabled,
   undoDisabled,
 }: Props) {
+  const isElectron = useEnvironmentParameter('isElectron');
+  const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
 
   const handleOpen = useCallback(async () => {
@@ -90,48 +91,75 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch, fileHandle, getStateSnapshot],
   );
 
-  useKeyboardShortcuts({
-    // TODO: Enable in desktop app
-    // 'Mod-n': () => {
-    //   dispatch('newFile');
-    // },
-    'Mod-s': () => {
-      handleSave('save');
-    },
-    'Mod-Shift-s': () => {
-      handleSave('saveAs');
-    },
-    'Mod-o': () => {
-      handleOpen();
-    },
-  });
-
   const menuItems = useMemo(
     () =>
-      createSectionedMenu<MenuItemType>(
-        [
-          { value: 'new', title: 'File: New' },
-          { value: 'open', title: 'File: Open' },
-          { value: 'save', title: 'File: Save' },
-          { value: 'saveAs', title: 'File: Save As...' },
-        ],
-        [
-          { value: 'undo', title: 'Edit: Undo', disabled: undoDisabled },
-          { value: 'redo', title: 'Edit: Redo', disabled: redoDisabled },
-        ],
-        [
-          {
-            value: 'showRulers',
-            title: 'Preferences: Rulers',
-            checked: showRulers,
-          },
-        ],
-      ),
-    [redoDisabled, showRulers, undoDisabled],
+      createSectionedMenu<ApplicationMenuItemType>([
+        {
+          title: 'File',
+          items: [
+            { value: 'new', title: 'New', shortcut: 'Mod-n' },
+            { value: 'open', title: 'Open...', shortcut: 'Mod-o' },
+            { value: 'save', title: 'Save', shortcut: 'Mod-s' },
+            { value: 'saveAs', title: 'Save As...', shortcut: 'Mod-Shift-s' },
+          ],
+        },
+        {
+          title: 'Edit',
+          items: createSectionedMenu<ApplicationMenuItemType>(
+            [
+              {
+                value: 'undo',
+                title: 'Undo',
+                disabled: undoDisabled,
+                shortcut: 'Mod-z',
+                role: 'undo',
+              },
+              {
+                value: 'redo',
+                title: 'Redo',
+                disabled: redoDisabled,
+                shortcut: 'Mod-Shift-z',
+                role: 'redo',
+              },
+            ],
+            isElectron && [
+              {
+                value: 'cut',
+                title: 'Cut',
+                role: 'cut',
+                shortcut: 'Mod-x',
+              },
+              {
+                value: 'copy',
+                title: 'Copy',
+                role: 'copy',
+                shortcut: 'Mod-c',
+              },
+              {
+                value: 'paste',
+                title: 'Paste',
+                role: 'paste',
+                shortcut: 'Mod-v',
+              },
+            ],
+          ),
+        },
+        {
+          title: 'Preferences',
+          items: [
+            {
+              value: 'showRulers',
+              title: 'Rulers',
+              checked: showRulers,
+            },
+          ],
+        },
+      ]),
+    [isElectron, redoDisabled, showRulers, undoDisabled],
   );
 
   const onSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
+    (value: ApplicationMenuItemType) => {
       switch (value) {
         case 'new': {
           dispatch('newFile');
@@ -160,18 +188,30 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch, handleOpen, handleSave, setShowRulers, showRulers],
   );
 
+  useEffect(() => {
+    applicationMenu.setMenu(menuItems);
+    applicationMenu.addListener(onSelectMenuItem);
+
+    return () => {
+      applicationMenu.removeListener(onSelectMenuItem);
+    };
+  }, [menuItems, onSelectMenuItem]);
+
   return (
     <Container>
       <InspectorPrimitives.Row>
         <Spacer.Horizontal size={8} />
-        <DropdownMenu<MenuItemType>
-          items={menuItems}
-          onSelect={onSelectMenuItem}
-        >
-          <Button id="menu">
-            <HamburgerMenuIcon />
-          </Button>
-        </DropdownMenu>
+        {!isElectron && (
+          <DropdownMenu<ApplicationMenuItemType>
+            items={menuItems}
+            onSelect={onSelectMenuItem}
+            platform={platform}
+          >
+            <Button id="menu">
+              <HamburgerMenuIcon />
+            </Button>
+          </DropdownMenu>
+        )}
         <Spacer.Horizontal size={8} />
       </InspectorPrimitives.Row>
     </Container>

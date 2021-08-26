@@ -1,5 +1,6 @@
 import { Brand } from 'noya-utils';
 
+export * from './Emitter';
 export * from './fontTraits';
 export * from './fontDescriptor';
 export * from './fontManager';

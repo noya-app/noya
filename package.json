@@ -20,6 +20,7 @@
   },
   "scripts": {
     "start": "cross-env PORT=1234 modular start app",
+    "start:desktop": "cd ./packages/noya-desktop && yarn start",
     "build": "modular build app",
     "build:desktop": "cd ./packages/noya-desktop && yarn make",
     "release:desktop": "cd ./packages/noya-desktop && yarn release",

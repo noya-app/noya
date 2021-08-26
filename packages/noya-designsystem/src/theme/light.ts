@@ -1,6 +1,8 @@
 import mediaQuery from '../mediaQuery';
 import { CSSObject } from 'styled-components';
 
+export const showMenubar: boolean = false;
+
 export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
@@ -10,6 +12,7 @@ export const colors = {
   dividerStrong: 'rgba(0, 0, 0, 0.09)',
   primary: 'rgb(132, 63, 255)',
   primaryDark: 'rgb(116, 36, 255)',
+  primaryLight: 'rgb(147, 86, 255)',
   neutralBackground: 'rgb(222,223,232)',
   inputBackground: 'rgb(240, 240, 242)',
   codeBackground: 'rgb(250, 250, 250)',
