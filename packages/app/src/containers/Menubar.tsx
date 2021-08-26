@@ -12,7 +12,6 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useEffect, useMemo } from 'react';
@@ -90,38 +89,33 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch, fileHandle, getStateSnapshot],
   );
 
-  useKeyboardShortcuts({
-    'Mod-n': () => {
-      dispatch('newFile');
-    },
-    'Mod-s': () => {
-      handleSave('save');
-    },
-    'Mod-Shift-s': () => {
-      handleSave('saveAs');
-    },
-    'Mod-o': () => {
-      handleOpen();
-    },
-  });
-
   const menuItems = useMemo(
     () =>
       createSectionedMenu<ApplicationMenuItemType>([
         {
           title: 'File',
           items: [
-            { value: 'new', title: 'New' },
-            { value: 'open', title: 'Open' },
-            { value: 'save', title: 'Save' },
-            { value: 'saveAs', title: 'Save As...' },
+            { value: 'new', title: 'New', shortcut: 'Mod-n' },
+            { value: 'open', title: 'Open...', shortcut: 'Mod-o' },
+            { value: 'save', title: 'Save', shortcut: 'Mod-s' },
+            { value: 'saveAs', title: 'Save As...', shortcut: 'Mod-Shift-s' },
           ],
         },
         {
           title: 'Edit',
           items: [
-            { value: 'undo', title: 'Edit: Undo', disabled: undoDisabled },
-            { value: 'redo', title: 'Edit: Redo', disabled: redoDisabled },
+            {
+              value: 'undo',
+              title: 'Undo',
+              disabled: undoDisabled,
+              shortcut: 'Mod-z',
+            },
+            {
+              value: 'redo',
+              title: 'Redo',
+              disabled: redoDisabled,
+              shortcut: 'Mod-Shift-z',
+            },
           ],
         },
         {

@@ -7,6 +7,7 @@ export const SEPARATOR_ITEM = 'separator';
 export type RegularMenuItem<T extends string> = {
   value?: T;
   title: string;
+  shortcut?: string;
   checked?: boolean;
   disabled?: boolean;
   icon?: ReactElement;
@@ -74,3 +75,26 @@ export const styles = {
     border: `1px solid ${theme.colors.divider}`,
   }),
 };
+
+function getKeyboardShortcuts<T extends string>(
+  item: MenuItem<T>,
+): [string, T][] {
+  if (item === SEPARATOR_ITEM) return [];
+
+  if (item.items) return item.items.flatMap(getKeyboardShortcuts);
+
+  if (item.disabled || !item.value || !item.shortcut) return [];
+
+  return [[item.shortcut, item.value]];
+}
+
+export function getKeyboardShortcutsForMenuItems<T extends string>(
+  menuItems: MenuItem<T>[],
+  onSelect: (type: T) => void,
+): Record<string, () => void> {
+  return Object.fromEntries(
+    menuItems
+      .flatMap(getKeyboardShortcuts)
+      .map(([key, value]) => [key, () => onSelect(value)]),
+  );
+}

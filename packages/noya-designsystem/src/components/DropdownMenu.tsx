@@ -11,7 +11,9 @@ import {
   MenuItem,
   SEPARATOR_ITEM,
   styles,
+  getKeyboardShortcutsForMenuItems,
 } from './internal/Menu';
+import { useKeyboardShortcuts } from 'noya-keymap';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -38,6 +40,7 @@ interface ContextMenuItemProps<T extends string> {
   checked: boolean;
   disabled: boolean;
   indented: boolean;
+  shortcut?: string;
   icon?: ReactElement;
   items?: MenuItem<T>[];
 }
@@ -55,6 +58,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
   indented,
   icon,
   items,
+  shortcut,
 }: ContextMenuItemProps<T>) {
   const handleSelectItem = useCallback(() => {
     if (!value) return;
@@ -89,6 +93,13 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
         </>
       )}
       {children}
+      {shortcut && (
+        <>
+          <Spacer.Horizontal />
+          <Spacer.Horizontal size={8} />
+          {shortcut}
+        </>
+      )}
       {items && items.length > 0 && (
         <>
           <Spacer.Horizontal />
@@ -121,6 +132,7 @@ interface Props<T extends string> {
   items: MenuItem<T>[];
   onSelect: (value: T) => void;
   isNested?: boolean;
+  shouldBindKeyboardShortcuts?: boolean;
 }
 
 function DropdownMenuRoot<T extends string>({
@@ -128,9 +140,16 @@ function DropdownMenuRoot<T extends string>({
   children,
   onSelect,
   isNested,
+  shouldBindKeyboardShortcuts,
 }: Props<T>) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
+  );
+
+  useKeyboardShortcuts(
+    isNested || shouldBindKeyboardShortcuts === false
+      ? {}
+      : getKeyboardShortcutsForMenuItems(items, onSelect),
   );
 
   return (
@@ -158,6 +177,7 @@ function DropdownMenuRoot<T extends string>({
               icon={item.icon}
               onSelect={onSelect}
               items={item.items}
+              shortcut={item.shortcut}
             >
               {item.title}
             </DropdownMenuItem>

@@ -2,7 +2,18 @@ import type * as Electron from 'electron';
 import { MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
 import { Emitter } from 'noya-fonts';
+import { getCurrentPlatform, normalizeKeyName } from 'noya-keymap';
 import { hostApp } from './hostApp';
+
+/**
+ * Electron accelerator names are separated with "+" instead of "-".
+ * We also need to normalize the shortcut in case they use our custom "Mod".
+ */
+function shortcutToAccelerator(shortcut: string): string {
+  const normalized = normalizeKeyName(shortcut, getCurrentPlatform(navigator));
+  const accelerator = normalized.replaceAll('-', '+');
+  return accelerator;
+}
 
 export type ApplicationMenuItemType =
   | 'new'
@@ -37,6 +48,9 @@ class ApplicationMenu extends Emitter<[ApplicationMenuItemType]> {
           id: item.value,
           label: item.title,
           enabled: !item.disabled,
+          ...(item.shortcut && {
+            accelerator: shortcutToAccelerator(item.shortcut),
+          }),
           ...(item.items && {
             submenu: item.items.map(getApplicationMenuItem),
           }),
@@ -53,6 +67,13 @@ class ApplicationMenu extends Emitter<[ApplicationMenuItemType]> {
             {
               label: 'About Noya',
               role: 'about',
+            },
+            {
+              type: 'separator',
+            },
+            {
+              label: 'Quit',
+              role: 'quit',
             },
           ],
         },
