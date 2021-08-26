@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { ApplicationMenuItemType, MessageFromHost } from 'noya-embedded';
 import { visit } from 'tree-visit';
-import { ApplicationMenuItemType, MessageFromMainProcess } from './types';
 
 app.commandLine.appendSwitch('enable-features', '--no-user-gesture-required');
 
@@ -71,7 +71,7 @@ ipcMain.on('rendererProcessMessage', (event, data) => {
           onEnter: (options) => {
             if (!options.id) return;
 
-            const message: MessageFromMainProcess = {
+            const message: MessageFromHost = {
               type: 'menuCommand',
               value: options.id as ApplicationMenuItemType,
             };

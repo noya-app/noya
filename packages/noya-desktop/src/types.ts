@@ -1,55 +1,25 @@
-import type * as Electron from 'electron';
+import { MessageFromHost, MessageFromEmbedded } from 'noya-embedded';
 
 declare global {
   namespace Electron {
     interface IpcMain {
       on(
         type: 'rendererProcessMessage',
-        callback: (
-          event: IpcMainEvent,
-          data: MessageFromRendererProcess,
-        ) => void,
+        callback: (event: IpcMainEvent, data: MessageFromEmbedded) => void,
       ): void;
     }
 
     interface WebContents extends NodeJS.EventEmitter {
-      send(channel: 'mainProcessMessage', data: MessageFromMainProcess): void;
+      send(channel: 'mainProcessMessage', data: MessageFromHost): void;
     }
 
     interface IpcRenderer {
       on(
         type: 'mainProcessMessage',
-        callback: (
-          event: IpcRendererEvent,
-          data: MessageFromMainProcess,
-        ) => void,
+        callback: (event: IpcRendererEvent, data: MessageFromHost) => void,
       ): void;
 
-      send(
-        channel: 'rendererProcessMessage',
-        data: MessageFromRendererProcess,
-      ): void;
+      send(channel: 'rendererProcessMessage', data: MessageFromEmbedded): void;
     }
   }
 }
-
-export type ApplicationMenuItemType =
-  | 'new'
-  | 'open'
-  | 'save'
-  | 'saveAs'
-  | 'undo'
-  | 'redo'
-  | 'showRulers';
-
-export type MessageFromRendererProcess = {
-  type: 'setMenu';
-  value: Electron.MenuItemConstructorOptions[];
-};
-
-export type MessageFromMainProcess = {
-  type: 'menuCommand';
-  value: ApplicationMenuItemType;
-};
-
-export type ApplicationMenuItem = Electron.MenuItemConstructorOptions;

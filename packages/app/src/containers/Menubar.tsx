@@ -9,26 +9,17 @@ import {
   Button,
   createSectionedMenu,
   DropdownMenu,
-  MenuItem,
-  SEPARATOR_ITEM,
   Spacer,
 } from 'noya-designsystem';
-import {
-  ApplicationMenuItem,
-  ApplicationMenuItemType,
-  MessageFromMainProcess,
-  MessageFromRendererProcess,
-} from 'noya-desktop';
+import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
-import { useEffect } from 'react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useHistory } from '../hooks/useHistory';
-import { embeddedApp } from '../utils/hostApp';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height - (theme.isElectron ? 8 : 0)}px`,
@@ -178,51 +169,11 @@ const MenubarContent = memo(function MenubarContent({
   );
 
   useEffect(() => {
-    const getApplicationMenuItem = (
-      item: MenuItem<ApplicationMenuItemType>,
-    ): ApplicationMenuItem => {
-      if (item === SEPARATOR_ITEM) {
-        return { type: 'separator' };
-      } else {
-        return {
-          id: item.value,
-          label: item.title,
-          enabled: !item.disabled,
-          ...(item.items && {
-            submenu: item.items.map(getApplicationMenuItem),
-          }),
-        };
-      }
-    };
-
-    const handler = (data: MessageFromMainProcess) => {
-      switch (data.type) {
-        case 'menuCommand':
-          onSelectMenuItem(data.value);
-      }
-    };
-
-    const data: MessageFromRendererProcess = {
-      type: 'setMenu',
-      value: [
-        {
-          label: 'Noya',
-          submenu: [
-            {
-              label: 'About Noya',
-              role: 'about',
-            },
-          ],
-        },
-        ...menuItems.map(getApplicationMenuItem),
-      ],
-    };
-
-    embeddedApp.sendMessageToHost(data);
-    embeddedApp.addListener(handler);
+    applicationMenu.setMenu(menuItems);
+    applicationMenu.addListener(onSelectMenuItem);
 
     return () => {
-      embeddedApp.removeListener(handler);
+      applicationMenu.removeListener(onSelectMenuItem);
     };
   }, [menuItems, onSelectMenuItem]);
 

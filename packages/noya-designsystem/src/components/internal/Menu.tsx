@@ -51,7 +51,7 @@ export const styles = {
       backgroundColor: theme.colors.primary,
     },
     '&:active': {
-      background: theme.colors.primaryDark,
+      background: theme.colors.primaryLight,
     },
     display: 'flex',
     alignItems: 'center',
