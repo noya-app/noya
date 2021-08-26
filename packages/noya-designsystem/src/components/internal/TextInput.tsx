@@ -121,7 +121,13 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     setInternalValue(latestValue.current);
   }, [allowSubmittingWithSameValue, value, internalValue, onSubmit]);
 
-  useGlobalInputBlurListener(handleSubmit);
+  useGlobalInputBlurListener(
+    useCallback(() => {
+      if (ref.current !== document.activeElement) return;
+
+      handleSubmit();
+    }, [handleSubmit]),
+  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
