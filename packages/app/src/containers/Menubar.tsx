@@ -55,6 +55,7 @@ const MenubarContent = memo(function MenubarContent({
   undoDisabled,
 }: Props) {
   const isElectron = useEnvironmentParameter('isElectron');
+  const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
 
   const handleOpen = useCallback(async () => {
@@ -205,6 +206,7 @@ const MenubarContent = memo(function MenubarContent({
             items={menuItems}
             onSelect={onSelectMenuItem}
             shouldBindKeyboardShortcuts={false}
+            platform={platform}
           >
             <Button id="menu">
               <HamburgerMenuIcon />

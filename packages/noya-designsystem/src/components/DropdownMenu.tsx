@@ -2,8 +2,8 @@ import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
 import {
-  getCurrentPlatform,
   getDisplayName,
+  PlatformName,
   useKeyboardShortcuts,
 } from 'noya-keymap';
 import { memo, ReactElement, ReactNode, useCallback } from 'react';
@@ -46,6 +46,7 @@ interface ContextMenuItemProps<T extends string> {
   shortcut?: string;
   icon?: ReactElement;
   items?: MenuItem<T>[];
+  platform: PlatformName;
 }
 
 const StyledItemIndicator = styled(RadixDropdownMenu.ItemIndicator)(
@@ -62,6 +63,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
   icon,
   items,
   shortcut,
+  platform,
 }: ContextMenuItemProps<T>) {
   const handleSelectItem = useCallback(() => {
     if (!value) return;
@@ -100,7 +102,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
         <>
           <Spacer.Horizontal />
           <Spacer.Horizontal size={16} />
-          {getDisplayName(shortcut, getCurrentPlatform(navigator))}
+          {getDisplayName(shortcut, platform)}
         </>
       )}
       {items && items.length > 0 && (
@@ -115,7 +117,12 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
 
   if (items && items.length > 0) {
     return (
-      <DropdownMenuRoot isNested items={items} onSelect={onSelect}>
+      <DropdownMenuRoot
+        isNested
+        items={items}
+        onSelect={onSelect}
+        platform={platform}
+      >
         {element}
       </DropdownMenuRoot>
     );
@@ -135,6 +142,7 @@ interface Props<T extends string> {
   items: MenuItem<T>[];
   onSelect: (value: T) => void;
   isNested?: boolean;
+  platform: PlatformName;
   shouldBindKeyboardShortcuts?: boolean;
 }
 
@@ -143,6 +151,7 @@ function DropdownMenuRoot<T extends string>({
   children,
   onSelect,
   isNested,
+  platform,
   shouldBindKeyboardShortcuts,
 }: Props<T>) {
   const hasCheckedItem = items.some(
@@ -181,6 +190,7 @@ function DropdownMenuRoot<T extends string>({
               onSelect={onSelect}
               items={item.items}
               shortcut={item.shortcut}
+              platform={platform}
             >
               {item.title}
             </DropdownMenuItem>

@@ -23,6 +23,7 @@ import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
+import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
@@ -63,6 +64,7 @@ const ToolbarContent = memo(function ToolbarContent({
   zoomValue,
   hasSelectedLayer,
 }: Props) {
+  const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
 
@@ -289,6 +291,7 @@ const ToolbarContent = memo(function ToolbarContent({
       <DropdownMenu<string>
         items={insertMenuItems}
         onSelect={handleInsertSymbol}
+        platform={platform}
       >
         <Button id="insert-symbol">
           {useMemo(
@@ -307,6 +310,7 @@ const ToolbarContent = memo(function ToolbarContent({
       <DropdownMenu<ZoomMenuType>
         items={zoomMenuItems}
         onSelect={handleZoomMenuItem}
+        platform={platform}
       >
         <Button id="zoom-dropdown" flex="0 0 80px">
           {useMemo(

@@ -53,6 +53,9 @@ export function getDisplayName(name: string, platform: PlatformName) {
       .replaceAll('-', '')
       .toUpperCase();
   } else {
-    return normalized.replaceAll('-', '+');
+    const parts = normalized.split('-');
+    return [...parts.slice(0, -1), parts[parts.length - 1].toUpperCase()].join(
+      '+',
+    );
   }
 }

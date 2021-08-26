@@ -1,5 +1,6 @@
 import { StateProvider } from 'noya-app-state-context';
 import { decodeFontName } from 'noya-fonts';
+import { getCurrentPlatform, PlatformName } from 'noya-keymap';
 import {
   CanvasKitProvider,
   FontManagerProvider,
@@ -119,8 +120,15 @@ export default function App() {
   const environmentParameters = useMemo(
     (): EnvironmentParameters => ({
       isElectron: castHashParameter(urlHashParameters.isElectron, 'boolean'),
+      platform:
+        'platform' in urlHashParameters
+          ? (castHashParameter(
+              urlHashParameters.platform,
+              'string',
+            ) as PlatformName)
+          : getCurrentPlatform(navigator),
     }),
-    [urlHashParameters.isElectron],
+    [urlHashParameters],
   );
 
   return (

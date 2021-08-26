@@ -1,7 +1,9 @@
+import { PlatformName } from 'noya-keymap';
 import { createContext, useContext } from 'react';
 
 export type EnvironmentParameters = {
   isElectron: boolean;
+  platform: PlatformName;
 };
 
 const EnvironmentParametersContext = createContext<
