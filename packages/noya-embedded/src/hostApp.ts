@@ -6,13 +6,11 @@ class HostApp extends Emitter<[MessageFromHost]> {
     super();
 
     window.addEventListener('message', ({ data }: MessageEvent) => {
-      // console.log('from host', data);
       this.emit(data as MessageFromHost);
     });
   }
 
   sendMessage = (data: MessageFromEmbedded) => {
-    // console.log('to host', data);
     postMessage(data, window.location.origin);
   };
 }

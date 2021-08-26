@@ -6,7 +6,7 @@ import {
   PlatformName,
   useKeyboardShortcuts,
 } from 'noya-keymap';
-import { memo, ReactElement, ReactNode, useCallback } from 'react';
+import { memo, ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Spacer } from '..';
 import {
@@ -25,6 +25,12 @@ import {
 const SeparatorElement = styled(RadixDropdownMenu.Separator)(
   styles.separatorStyle,
 );
+
+/* ----------------------------------------------------------------------------
+ * Shortcut
+ * ------------------------------------------------------------------------- */
+
+const ShortcutElement = styled.kbd(styles.shortcutStyle);
 
 /* ----------------------------------------------------------------------------
  * Item
@@ -102,7 +108,9 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
         <>
           <Spacer.Horizontal />
           <Spacer.Horizontal size={16} />
-          {getDisplayName(shortcut, platform)}
+          <ShortcutElement>
+            {getDisplayName(shortcut, platform)}
+          </ShortcutElement>
         </>
       )}
       {items && items.length > 0 && (
@@ -158,11 +166,15 @@ function DropdownMenuRoot<T extends string>({
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
 
-  useKeyboardShortcuts(
-    isNested || shouldBindKeyboardShortcuts === false
-      ? {}
-      : getKeyboardShortcutsForMenuItems(items, onSelect),
+  const keymap = useMemo(
+    () =>
+      isNested || shouldBindKeyboardShortcuts === false
+        ? {}
+        : getKeyboardShortcutsForMenuItems(items, onSelect),
+    [isNested, items, onSelect, shouldBindKeyboardShortcuts],
   );
+
+  useKeyboardShortcuts(keymap);
 
   return (
     <RadixDropdownMenu.Root>

@@ -104,7 +104,7 @@ export default function Workspace() {
     return produce(baseTheme, (draft) => {
       if (!isElectron) return;
 
-      draft.isElectron = true;
+      draft.showMenubar = true;
       draft.sizes.toolbar.height = 53;
       draft.sizes.toolbar.itemSeparator = 12;
     });

@@ -21,20 +21,20 @@ import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
-  minHeight: `${theme.sizes.toolbar.height - (theme.isElectron ? 8 : 0)}px`,
+  minHeight: `${theme.sizes.toolbar.height - (theme.showMenubar ? 8 : 0)}px`,
   display: 'flex',
   flexDirection: 'column',
   borderBottom: `1px solid ${
-    theme.isElectron ? 'transparent' : theme.colors.dividerStrong
+    theme.showMenubar ? 'transparent' : theme.colors.dividerStrong
   }`,
   borderRight: `1px solid ${
-    theme.isElectron ? theme.colors.dividerStrong : 'transparent'
+    theme.showMenubar ? theme.colors.dividerStrong : 'transparent'
   }`,
   alignItems: 'stretch',
   justifyContent: 'center',
   color: theme.colors.textMuted,
   WebkitAppRegion: 'drag',
-  background: theme.isElectron ? 'rgba(255,255,255,0.02)' : 'none',
+  background: theme.showMenubar ? 'rgba(255,255,255,0.02)' : 'none',
 }));
 
 interface Props {
@@ -205,7 +205,6 @@ const MenubarContent = memo(function MenubarContent({
           <DropdownMenu<ApplicationMenuItemType>
             items={menuItems}
             onSelect={onSelectMenuItem}
-            shouldBindKeyboardShortcuts={false}
             platform={platform}
           >
             <Button id="menu">
