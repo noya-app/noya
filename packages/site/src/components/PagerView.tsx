@@ -25,12 +25,8 @@ const usePagerContext = () => {
 const viewSize = 300;
 
 export function View({ color }: { color: string }) {
-  const {
-    initialOffset,
-    frameSize,
-    trackSize,
-    trackXOffset,
-  } = usePagerContext();
+  const { initialOffset, frameSize, trackSize, trackXOffset } =
+    usePagerContext();
   const getViewTarget = (value: number) => {
     const align = 0.5;
     const alignOffset = (frameSize - viewSize) * align;
@@ -96,7 +92,9 @@ export function PagerView({ children }: { children: React.ReactNode }) {
   );
 
   React.useLayoutEffect(() => {
-    setFrameSize(ref.current.offsetWidth);
+    if (ref.current) {
+      setFrameSize(ref.current.offsetWidth);
+    }
   }, []);
 
   return (

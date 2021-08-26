@@ -100,40 +100,7 @@ export default function App() {
             own or altogether in our featured app.
           </Text>
           <Spacer.Vertical size="6rem" />
-          <Features>
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-            <Feature
-              heading="App"
-              content="A full featured design application built on Noya utilities."
-            />
-          </Features>
+          <Packages />
         </Stack>
       </Stack>
     </ThemeProvider>
@@ -159,7 +126,8 @@ function GitHubIcon() {
   );
 }
 
-function Features({ children }) {
+// TODO: grep packages directory and generate from package.json name + description
+function Packages() {
   const colors = [
     '#8d2fd8',
     '#be6dff',
@@ -183,33 +151,33 @@ function Features({ children }) {
   );
 }
 
-function Feature({
-  heading,
-  content,
-  active,
-  setIndex,
-}: {
-  heading: string;
-  content: string;
-  active?: boolean;
-  setIndex?: () => void;
-}) {
-  return (
-    <Stack
-      axis="y"
-      width="32rem"
-      padding="4rem"
-      gap="2rem"
-      background="rgba(255,255,255,0.1)"
-      onClick={setIndex}
-      style={{
-        flexShrink: 0,
-        borderRadius: '2rem',
-        transform: active ? undefined : 'scale(0.85)',
-      }}
-    >
-      <Text variant="heading3">{heading}</Text>
-      <Text variant="body1">{content}</Text>
-    </Stack>
-  );
-}
+// function Package({
+//   heading,
+//   content,
+//   active,
+//   setIndex,
+// }: {
+//   heading: string;
+//   content: string;
+//   active?: boolean;
+//   setIndex?: () => void;
+// }) {
+//   return (
+//     <Stack
+//       axis="y"
+//       width="32rem"
+//       padding="4rem"
+//       gap="2rem"
+//       background="rgba(255,255,255,0.1)"
+//       onClick={setIndex}
+//       style={{
+//         flexShrink: 0,
+//         borderRadius: '2rem',
+//         transform: active ? undefined : 'scale(0.85)',
+//       }}
+//     >
+//       <Text variant="heading3">{heading}</Text>
+//       <Text variant="body1">{content}</Text>
+//     </Stack>
+//   );
+// }
