@@ -1,7 +1,7 @@
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 import styled from 'styled-components';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import {
   SEPARATOR_ITEM,
@@ -116,14 +116,26 @@ function ContextMenuRoot<T extends string>({
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
 
+  // Disable radix-ui's long-press-to-open behavior
+  // https://github.com/radix-ui/primitives/issues/748#issuecomment-869502837
+  const onPointerDown = useCallback((event: React.PointerEvent) => {
+    if (event.pointerType === 'pen') event.preventDefault();
+  }, []);
+
   return (
     <RadixContextMenu.Root>
       {isNested ? (
-        <RadixContextMenu.TriggerItem as={Slot}>
+        <RadixContextMenu.TriggerItem
+          as={Slot as any}
+          onPointerDown={onPointerDown}
+        >
           {children}
         </RadixContextMenu.TriggerItem>
       ) : (
-        <RadixContextMenu.Trigger as={Slot}>
+        <RadixContextMenu.Trigger
+          as={Slot as any}
+          onPointerDown={onPointerDown}
+        >
           {children}
         </RadixContextMenu.Trigger>
       )}

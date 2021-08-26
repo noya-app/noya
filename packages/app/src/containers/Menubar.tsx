@@ -9,16 +9,26 @@ import {
   Button,
   createSectionedMenu,
   DropdownMenu,
+  MenuItem,
+  SEPARATOR_ITEM,
   Spacer,
 } from 'noya-designsystem';
+import {
+  ApplicationMenuItem,
+  ApplicationMenuItemType,
+  MessageFromMainProcess,
+  MessageFromRendererProcess,
+} from 'noya-desktop';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
+import { useEffect } from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useHistory } from '../hooks/useHistory';
+import { embeddedApp } from '../utils/hostApp';
 
 const Container = styled.header(({ theme }) => ({
   minHeight: `${theme.sizes.toolbar.height - (theme.isElectron ? 8 : 0)}px`,
@@ -36,15 +46,6 @@ const Container = styled.header(({ theme }) => ({
   WebkitAppRegion: 'drag',
   background: theme.isElectron ? 'rgba(255,255,255,0.02)' : 'none',
 }));
-
-type MenuItemType =
-  | 'new'
-  | 'open'
-  | 'save'
-  | 'saveAs'
-  | 'undo'
-  | 'redo'
-  | 'showRulers';
 
 interface Props {
   fileHandle?: FileSystemHandle;
@@ -115,7 +116,7 @@ const MenubarContent = memo(function MenubarContent({
 
   const menuItems = useMemo(
     () =>
-      createSectionedMenu<MenuItemType>([
+      createSectionedMenu<ApplicationMenuItemType>([
         {
           title: 'File',
           items: [
@@ -147,7 +148,7 @@ const MenubarContent = memo(function MenubarContent({
   );
 
   const onSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
+    (value: ApplicationMenuItemType) => {
       switch (value) {
         case 'new': {
           dispatch('newFile');
@@ -176,6 +177,55 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch, handleOpen, handleSave, setShowRulers, showRulers],
   );
 
+  useEffect(() => {
+    const getApplicationMenuItem = (
+      item: MenuItem<ApplicationMenuItemType>,
+    ): ApplicationMenuItem => {
+      if (item === SEPARATOR_ITEM) {
+        return { type: 'separator' };
+      } else {
+        return {
+          id: item.value,
+          label: item.title,
+          enabled: !item.disabled,
+          ...(item.items && {
+            submenu: item.items.map(getApplicationMenuItem),
+          }),
+        };
+      }
+    };
+
+    const handler = (data: MessageFromMainProcess) => {
+      switch (data.type) {
+        case 'menuCommand':
+          onSelectMenuItem(data.value);
+      }
+    };
+
+    const data: MessageFromRendererProcess = {
+      type: 'setMenu',
+      value: [
+        {
+          label: 'Noya',
+          submenu: [
+            {
+              label: 'About Noya',
+              role: 'about',
+            },
+          ],
+        },
+        ...menuItems.map(getApplicationMenuItem),
+      ],
+    };
+
+    embeddedApp.sendMessageToHost(data);
+    embeddedApp.addListener(handler);
+
+    return () => {
+      embeddedApp.removeListener(handler);
+    };
+  }, [menuItems, onSelectMenuItem]);
+
   const isElectron = useEnvironmentParameter('isElectron');
 
   return (
@@ -183,7 +233,7 @@ const MenubarContent = memo(function MenubarContent({
       <InspectorPrimitives.Row>
         <Spacer.Horizontal size={8} />
         {!isElectron && (
-          <DropdownMenu<MenuItemType>
+          <DropdownMenu<ApplicationMenuItemType>
             items={menuItems}
             onSelect={onSelectMenuItem}
           >

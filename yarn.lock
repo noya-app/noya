@@ -2865,7 +2865,7 @@
     "@radix-ui/react-use-controllable-state" "0.0.1"
     "@radix-ui/react-use-size" "0.0.1"
 
-"@radix-ui/react-slot@0.0.12":
+"@radix-ui/react-slot@0.0.12", "@radix-ui/react-slot@^0.0.12":
   version "0.0.12"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-slot/-/react-slot-0.0.12.tgz#c4d8a75fffca561aeeca2ed9603384d86757f60a"
   integrity sha512-Em8P/xYyh3O/32IhrmARJNH+J/XCAVnw6h2zGu6oeReliIX7ktU67pMSeyyIZiU2hNXzaXYB/xDdixizQe/DGA==
@@ -2880,15 +2880,6 @@
   dependencies:
     "@radix-ui/primitive" "0.0.1"
     "@radix-ui/react-compose-refs" "0.0.1"
-
-"@radix-ui/react-slot@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-slot/-/react-slot-0.0.10.tgz#27a17cad7064872117aeb68113fa934bc5d34c37"
-  integrity sha512-p0jJj6lTz1RV2imavnclk8Gda002ZSDR4/zPJ4EQBhspGnx7Y8l6G59c8lxJrT7c7F46F2eRNjpTTjFqqir6EQ==
-  dependencies:
-    "@babel/runtime" "^7.13.10"
-    "@radix-ui/primitive" "0.0.5"
-    "@radix-ui/react-compose-refs" "0.0.5"
 
 "@radix-ui/react-tooltip@^0.0.8":
   version "0.0.8"

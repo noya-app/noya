@@ -92,6 +92,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
       {items && items.length > 0 && (
         <>
           <Spacer.Horizontal />
+          <Spacer.Horizontal size={8} />
           <ChevronRightIcon />
         </>
       )}
