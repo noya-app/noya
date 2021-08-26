@@ -7,7 +7,9 @@ import {
 import {
   ContextMenu,
   mergeEventHandlers,
+  SupportedCanvasUploadType,
   SupportedImageUploadType,
+  SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
 } from 'noya-designsystem';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
@@ -41,7 +43,7 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import ImageDropTarget, { TypedFile } from '../components/FileDropTarget';
+import DropTarget, { TypedFile } from '../components/FileDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
 import { useImagePasteHandler } from '../hooks/useFilePasteHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
@@ -49,6 +51,7 @@ import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
 import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
+import { decode } from 'noya-sketch-file';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -1042,7 +1045,7 @@ export default memo(function Canvas() {
 
   const onImportImages = useCallback(
     async (
-      files: TypedFile<SupportedImageUploadType>[],
+      files: TypedFile<SupportedCanvasUploadType>[],
       insertTarget: ImportedImageTarget,
       offsetPoint: OffsetPoint,
     ) => {
@@ -1069,6 +1072,8 @@ export default memo(function Canvas() {
               width: decodedImage.width(),
               height: decodedImage.height(),
             };
+
+            if (file.type === '') return;
 
             const extension = getFileExtensionForType(file.type);
 
@@ -1137,12 +1142,32 @@ export default memo(function Canvas() {
     return () => input.removeEventListener('beforeinput', handler);
   }, [dispatch]);
 
+  const onImportSketchFile = useCallback(
+    async (file: TypedFile<SupportedCanvasUploadType>) => {
+      const data = await file.arrayBuffer();
+      const sketch = await decode(data);
+
+      dispatch('setFile', sketch);
+    },
+    [dispatch],
+  );
+
   return (
-    <ImageDropTarget<SupportedImageUploadType>
-      supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
+    <DropTarget<SupportedCanvasUploadType>
+      supportedFileTypes={SUPPORTED_CANVAS_UPLOAD_TYPES}
       onDropFiles={useCallback(
-        (file, point) => onImportImages(file, 'nearestArtboard', point),
-        [onImportImages],
+        (file, point) => {
+          const sketchFileIndex = file.findIndex(({ name }) =>
+            name.endsWith('.sketch'),
+          );
+
+          if (sketchFileIndex !== -1) {
+            onImportSketchFile(file[sketchFileIndex]);
+          } else {
+            onImportImages(file, 'nearestArtboard', point);
+          }
+        },
+        [onImportImages, onImportSketchFile],
       )}
     >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
@@ -1173,6 +1198,6 @@ export default memo(function Canvas() {
           </InsetContainer>
         </Container>
       </ContextMenu>
-    </ImageDropTarget>
+    </DropTarget>
   );
 });

@@ -9,7 +9,10 @@ export function isSupportedFile<T extends string>(
   file: File,
   supportedFileTypes: T[],
 ): file is TypedFile<T> {
-  return supportedFileTypes.includes(file.type as T);
+  return (
+    (supportedFileTypes.includes(file.type as T) && file.type !== '') ||
+    file.name.endsWith('.sketch')
+  );
 }
 
 interface Props<T extends string> {
@@ -25,7 +28,7 @@ export default memo(function FileDropTarget<T extends string>({
   onDropFiles,
   supportedFileTypes,
 }: Props<T>) {
-  const handleImageFile = useCallback(
+  const handleFile = useCallback(
     (event: DragEvent) => {
       event.preventDefault();
 
@@ -61,9 +64,7 @@ export default memo(function FileDropTarget<T extends string>({
     [onDropFiles, supportedFileTypes],
   );
 
-  const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
-    handleImageFile,
-  );
+  const { dropTargetProps, isDropTargetActive } = useFileDropTarget(handleFile);
 
   return (
     <Container {...dropTargetProps}>
