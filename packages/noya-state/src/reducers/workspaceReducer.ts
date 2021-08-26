@@ -62,6 +62,11 @@ export function workspaceReducer(
 ): WorkspaceState {
   switch (action[0]) {
     case 'newFile': {
+      const answer = window.confirm(
+        'Opening a new file will replace your current file. Are you sure?',
+      );
+      if (answer === false) return state;
+
       return produce(state, (draft) => {
         draft.fileHandle = undefined;
         draft.history = createInitialHistoryState(
@@ -75,6 +80,11 @@ export function workspaceReducer(
     }
     case 'setFile': {
       const [, sketchFile, fileHandle] = action;
+
+      const answer = window.confirm(
+        'Opening a new file will replace your current file. Are you sure?',
+      );
+      if (answer === false) return state;
 
       return produce(state, (draft) => {
         draft.fileHandle = fileHandle;
