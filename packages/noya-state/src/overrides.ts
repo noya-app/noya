@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 import { Layers, PageLayer } from '.';
 
 // Names are encoded as, e.g. "id1/id2/id3_stringValue"

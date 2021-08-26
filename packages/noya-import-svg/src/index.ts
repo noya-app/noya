@@ -6,7 +6,7 @@ import {
   parseCSSColor,
   PathWithoutQuadratics,
 } from '@lona/svg-model';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   computeBoundsFromPoints,
@@ -143,7 +143,7 @@ function makeLayerFromPathElement(
 
 // Loosely based on the react-sketchapp (MIT) implementation (which I wrote)
 // https://github.com/airbnb/react-sketchapp/blob/b238e69c6f1e65ec6b1d8a908a91fbd9a8cc43a7/src/jsonUtils/makeSvgLayer/index.ts#L81
-export function svgToLayer(name: string, svgString: string) {
+export function svgToLayer(svgString: string) {
   const { viewBox, width, height, children } = convert(svgString, {
     convertQuadraticsToCubics: true,
   });
@@ -184,7 +184,6 @@ export function svgToLayer(name: string, svgString: string) {
       x: 0,
       y: 0,
     }),
-    name,
     layers,
   });
 }

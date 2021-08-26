@@ -1,7 +1,3 @@
-import { setAutoFreeze } from 'immer';
-
-setAutoFreeze(false);
-
 export * as Overrides from './overrides';
 export * as Layers from './layers';
 export * as GroupLayouts from './groupLayouts';

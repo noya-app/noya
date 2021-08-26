@@ -1,16 +1,16 @@
 import { useCallback, useState, DragEvent } from 'react';
 
-export function useFileDropTarget(dropEvent: (e: DragEvent) => void) {
+export function useFileDropTarget(dropEvent: (event: DragEvent) => void) {
   const [isDropTargetActive, setIsDropTargetActive] = useState(false);
 
-  const handleDragEvent = useCallback((e: DragEvent, on?: boolean) => {
+  const handleDragEvent = useCallback((event: DragEvent, on?: boolean) => {
     if (on !== undefined) setIsDropTargetActive(on);
-    e.preventDefault();
+    event.preventDefault();
   }, []);
 
   const handleDropEvent = useCallback(
-    (e: DragEvent) => {
-      dropEvent(e);
+    (event: DragEvent) => {
+      dropEvent(event);
       setIsDropTargetActive(false);
     },
     [dropEvent, setIsDropTargetActive],
@@ -19,8 +19,8 @@ export function useFileDropTarget(dropEvent: (e: DragEvent) => void) {
   return {
     dropTargetProps: {
       onDragOver: handleDragEvent,
-      onDragEnter: (e: DragEvent) => handleDragEvent(e, true),
-      onDragLeave: (e: DragEvent) => handleDragEvent(e, false),
+      onDragEnter: (event: DragEvent) => handleDragEvent(event, true),
+      onDragLeave: (event: DragEvent) => handleDragEvent(event, false),
       onDrop: handleDropEvent,
     },
     isDropTargetActive,

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform } from 'noya-geometry';
@@ -40,10 +40,10 @@ const Symbol = memo(function Symbol({
   );
   const fill = useFill(backgroundFillProperties);
 
-  const rect = useMemo(() => Primitives.rect(CanvasKit, symbolMaster.frame), [
-    CanvasKit,
-    symbolMaster.frame,
-  ]);
+  const rect = useMemo(
+    () => Primitives.rect(CanvasKit, symbolMaster.frame),
+    [CanvasKit, symbolMaster.frame],
+  );
 
   const transform = useMemo(
     () =>

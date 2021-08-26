@@ -20,6 +20,7 @@ export * from './mediaQuery';
 
 // Components
 export { default as Button } from './components/Button';
+export { default as IconButton } from './components/IconButton';
 export * as Label from './components/Label';
 export { default as Select, SelectOption } from './components/Select';
 export { default as FillInputField } from './components/FillInputField';

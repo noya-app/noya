@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { center, Size } from 'noya-geometry';
 import { SketchLayer } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';

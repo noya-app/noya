@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
@@ -11,6 +11,7 @@ import {
   rectsContainsRect,
   rectsIntersect,
   rotatedRectContainsPoint,
+  Size,
   transformRect,
 } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
@@ -43,7 +44,7 @@ export type LayerTraversalOptions = {
   /**
    * The default is `groupOnly`
    */
-  groups?: 'groupOnly' | 'childrenOnly';
+  groups?: 'groupOnly' | 'childrenOnly' | 'groupAndChildren';
 
   /**
    * The default is `childrenOnly`
@@ -149,15 +150,16 @@ export function getLayersInRect(
 
     if (!hasIntersect) return SKIP;
 
-    const includeArtboard =
-      Layers.isArtboard(layer) &&
-      (options.artboards === 'artboardAndChildren' ||
-        (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
-          (layer.layers.length === 0 ||
-            rectsContainsRect(screenRect, transformedFrame))));
+    const includeSelf =
+      (Layers.isGroup(layer) && options.groups === 'groupAndChildren') ||
+      (Layers.isArtboard(layer) &&
+        (options.artboards === 'artboardAndChildren' ||
+          (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
+            (layer.layers.length === 0 ||
+              rectsContainsRect(screenRect, transformedFrame)))));
 
     // Traverse into children and return some of them, instead of returning this layer
-    if (!includeArtboard && shouldVisitChildren(layer, options)) return;
+    if (!includeSelf && shouldVisitChildren(layer, options)) return;
 
     found.push(layer);
   });
@@ -196,8 +198,6 @@ export function getLayerAtPoint(
   const page = getCurrentPage(state);
   const canvasTransform = getCanvasTransform(state, insets);
   const screenTransform = getScreenTransform(insets);
-
-  // TODO: check if we're clicking the title of an artboard
 
   let found: Sketch.AnyLayer | undefined;
 
@@ -348,7 +348,7 @@ export function getScaleDirectionAtPoint(
   point: Point,
 ): CompassDirection | undefined {
   const page = getCurrentPage(state);
-  const boundingRect = getBoundingRect(page, state.selectedObjects);
+  const boundingRect = getBoundingRect(page, state.selectedLayerIds);
 
   if (!boundingRect) return;
 
@@ -395,4 +395,47 @@ export function getPageContentBoundingRect(page: Sketch.Page) {
     page,
     Layers.findAll(page, () => true).map((l) => l.do_objectID),
   );
+}
+
+export function getClippedLayerMap(
+  state: ApplicationState,
+  canvasSize: Size,
+  canvasInsets: Insets,
+) {
+  const page = getCurrentPage(state);
+
+  const allLayerIds = Layers.findAll(
+    page,
+    (layer) => !Layers.isPageLayer(layer),
+  ).map((layer) => layer.do_objectID);
+
+  const visibleRect = {
+    x: -canvasInsets.left,
+    y: -canvasInsets.top,
+    width: canvasSize.width + canvasInsets.left + canvasInsets.right,
+    height: canvasSize.height + canvasInsets.top + canvasInsets.bottom,
+  };
+
+  const visibleLayerSet = getLayersInRect(
+    state,
+    page,
+    canvasInsets,
+    visibleRect,
+    {
+      groups: 'groupAndChildren',
+      artboards: 'artboardAndChildren',
+    },
+  ).map((layer) => layer.do_objectID);
+
+  const result: Record<string, boolean> = {};
+
+  allLayerIds.forEach((id) => {
+    result[id] = true;
+  });
+
+  visibleLayerSet.forEach((id) => {
+    result[id] = false;
+  });
+
+  return result;
 }

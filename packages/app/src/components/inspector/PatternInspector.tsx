@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { fileOpen } from 'browser-fs-access';
 import {
   InputField,
@@ -13,10 +13,7 @@ import {
 import { getFileExtensionForType, uuid } from 'noya-utils';
 import { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import ImageDropTarget, {
-  isSupportedFile,
-  TypedFile,
-} from '../ImageDropTarget';
+import ImageDropTarget, { isSupportedFile, TypedFile } from '../FileDropTarget';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const Container = styled.div<{
@@ -127,8 +124,15 @@ const PatternPreview = memo(
     }, [handleImageFile]);
 
     return (
-      <ImageDropTarget
-        onDropFile={handleImageFile}
+      <ImageDropTarget<SupportedImageUploadType>
+        onDropFiles={useCallback(
+          (files) => {
+            if (files.length === 0) return;
+
+            handleImageFile(files[0]);
+          },
+          [handleImageFile],
+        )}
         supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
       >
         {(isDropTargetActive: boolean) => (

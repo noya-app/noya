@@ -1,5 +1,5 @@
 import { GroupIcon } from '@radix-ui/react-icons';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { TreeView } from 'noya-designsystem';
 import { Selectors } from 'noya-state';

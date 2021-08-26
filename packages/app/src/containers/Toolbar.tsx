@@ -13,18 +13,18 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { FALLTHROUGH, KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
-import { DrawableLayerType, InteractionType, Selectors } from 'noya-state';
+import {
+  DrawableLayerType,
+  InteractionType,
+  Layers,
+  Selectors,
+} from 'noya-state';
+import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
+import { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
-import { useShallowArray } from 'noya-react-utils';
+import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { LayerIcon } from './LayerList';
-
-const Row = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  minWidth: '50px',
-}));
 
 type InteractionStateProjection =
   | {
@@ -32,11 +32,6 @@ type InteractionStateProjection =
       layerType: DrawableLayerType;
     }
   | { type: Exclude<InteractionType, 'insert'> };
-
-interface Props {
-  interactionStateProjection: InteractionStateProjection;
-  selectedLayerIds: string[];
-}
 
 type InsertMenuLayerType =
   | 'artboard'
@@ -47,12 +42,29 @@ type InsertMenuLayerType =
   | 'text'
   | 'slice';
 
+type ZoomMenuType =
+  | 'zoomIn'
+  | 'zoomOut'
+  | 'zoomActualSize'
+  | 'zoomToFitCanvas'
+  | 'zoomToFitSelection';
+
 const SYMBOL_ITEM_PREFIX = 'symbol:';
+
+interface Props {
+  interactionStateProjection: InteractionStateProjection;
+  canStartEditingPath: boolean;
+  zoomValue: number;
+  hasSelectedLayer: boolean;
+}
 
 const ToolbarContent = memo(function ToolbarContent({
   interactionStateProjection,
-  selectedLayerIds,
+  canStartEditingPath,
+  zoomValue,
+  hasSelectedLayer,
 }: Props) {
+  const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
 
@@ -79,9 +91,37 @@ const ToolbarContent = memo(function ToolbarContent({
     { title: 'Slice', value: 'slice', icon: <LayerIcon type="slice" /> },
   ];
 
-  const menuItems: MenuItem<string>[] = createSectionedMenu(
+  const insertMenuItems: MenuItem<string>[] = createSectionedMenu(
     shapeMenuItems,
     symbolsMenuItems,
+  );
+
+  const zoomMenuItems: MenuItem<ZoomMenuType>[] = createSectionedMenu(
+    [
+      {
+        title: 'Zoom In',
+        value: 'zoomIn',
+      },
+      {
+        title: 'Zoom Out',
+        value: 'zoomOut',
+      },
+    ],
+    [
+      {
+        title: 'Actual Size',
+        value: 'zoomActualSize',
+      },
+      {
+        title: 'Fit Canvas',
+        value: 'zoomToFitCanvas',
+      },
+      {
+        title: 'Fit Selection',
+        value: 'zoomToFitSelection',
+        disabled: !hasSelectedLayer,
+      },
+    ],
   );
 
   const interactionType = interactionStateProjection.type;
@@ -204,6 +244,29 @@ const ToolbarContent = memo(function ToolbarContent({
     [dispatch],
   );
 
+  const handleZoomMenuItem = useCallback(
+    (type: ZoomMenuType) => {
+      switch (type) {
+        case 'zoomIn':
+          dispatch('setZoom', 2, 'multiply');
+          break;
+        case 'zoomOut':
+          dispatch('setZoom', 0.5, 'multiply');
+          break;
+        case 'zoomActualSize':
+          dispatch('setZoom', 1);
+          break;
+        case 'zoomToFitCanvas':
+          dispatch('zoomToFit', 'canvas');
+          break;
+        case 'zoomToFitSelection':
+          dispatch('zoomToFit', 'selection');
+          break;
+      }
+    },
+    [dispatch],
+  );
+
   const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
 
   const handleRedo = useCallback(() => dispatch('redo'), [dispatch]);
@@ -225,29 +288,49 @@ const ToolbarContent = memo(function ToolbarContent({
   return (
     <>
       <Spacer.Horizontal size={itemSeparatorSize} />
-      <Row>
-        <DropdownMenu<string> items={menuItems} onSelect={handleInsertSymbol}>
-          <Button id="insert-stymbol">
-            {useMemo(
-              () => (
-                <>
-                  Insert
-                  <Spacer.Horizontal size={8} />
-                  <ChevronDownIcon />
-                </>
-              ),
-              [],
-            )}
-          </Button>
-        </DropdownMenu>
-      </Row>
-      <Spacer.Horizontal size={8} />
+      <DropdownMenu<string>
+        items={insertMenuItems}
+        onSelect={handleInsertSymbol}
+        platform={platform}
+      >
+        <Button id="insert-symbol">
+          {useMemo(
+            () => (
+              <>
+                Insert
+                <Spacer.Horizontal size={12} />
+                <ChevronDownIcon />
+              </>
+            ),
+            [],
+          )}
+        </Button>
+      </DropdownMenu>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <DropdownMenu<ZoomMenuType>
+        items={zoomMenuItems}
+        onSelect={handleZoomMenuItem}
+        platform={platform}
+      >
+        <Button id="zoom-dropdown" flex="0 0 80px">
+          {useMemo(
+            () => (
+              <>
+                {round(zoomValue * 100).toString()}%
+                <Spacer.Horizontal />
+                <ChevronDownIcon />
+              </>
+            ),
+            [zoomValue],
+          )}
+        </Button>
+      </DropdownMenu>
       <Spacer.Horizontal size={itemSeparatorSize} />
       <Button
         id="edit-path"
         tooltip="Edit path"
         active={isEditingPath}
-        disabled={selectedLayerIds.length === 0}
+        disabled={!(isEditingPath || canStartEditingPath)}
         onClick={useCallback(() => {
           if (!isEditingPath) {
             dispatch('interaction', ['editPath']);
@@ -269,7 +352,8 @@ const ToolbarContent = memo(function ToolbarContent({
 
 export default function Toolbar() {
   const [state] = useApplicationState();
-  const selectedLayerIds = useShallowArray(state.selectedObjects);
+  const { zoomValue } = Selectors.getCurrentPageMetadata(state);
+  const hasSelectedLayer = state.selectedLayerIds.length > 0;
 
   const layerType =
     state.interactionState.type === 'insert'
@@ -284,10 +368,16 @@ export default function Toolbar() {
     [state.interactionState.type, layerType],
   );
 
+  const canStartEditingPath =
+    state.interactionState.type === 'none' &&
+    Selectors.getSelectedLayers(state).filter(Layers.isPointsLayer).length > 0;
+
   return (
     <ToolbarContent
       interactionStateProjection={projection}
-      selectedLayerIds={selectedLayerIds}
+      canStartEditingPath={canStartEditingPath}
+      zoomValue={zoomValue}
+      hasSelectedLayer={hasSelectedLayer}
     />
   );
 }

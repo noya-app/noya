@@ -41,3 +41,21 @@ export function prependModifiers(
   if (useShift !== false && event.shiftKey) name = 'Shift-' + name;
   return name;
 }
+
+export function getDisplayName(name: string, platform: PlatformName) {
+  const normalized = normalizeKeyName(name, platform);
+
+  if (platform === 'mac') {
+    return normalized
+      .replace('Meta', '⌘')
+      .replace('Shift', '⇧')
+      .replace('Alt', '⌥')
+      .replaceAll('-', '')
+      .toUpperCase();
+  } else {
+    const parts = normalized.split('-');
+    return [...parts.slice(0, -1), parts[parts.length - 1].toUpperCase()].join(
+      '+',
+    );
+  }
+}

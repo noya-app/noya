@@ -1,4 +1,5 @@
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import produce from 'immer';
 import { useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
@@ -9,8 +10,10 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
+import { AutoSizer } from '../components/AutoSizer';
+import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
@@ -29,13 +32,19 @@ const BACKDROP_FILTER = 'blur(10px)';
 const LeftSidebar = styled.div(({ theme }) => ({
   flex: `0 0 ${theme.sizes.sidebarWidth}px`,
   maxWidth: `${theme.sizes.sidebarWidth}px`,
-  borderRight: `1px solid ${theme.colors.dividerStrong}`,
   display: 'flex',
   flexDirection: 'column',
   backgroundColor: theme.colors.sidebar.background,
   color: theme.colors.textMuted,
   WebkitBackdropFilter: BACKDROP_FILTER,
   backdropFilter: BACKDROP_FILTER,
+}));
+
+const LeftSidebarBorderedContent = styled.div(({ theme }) => ({
+  flex: '1 1 0',
+  borderRight: `1px solid ${theme.colors.dividerStrong}`,
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 const RightSidebar = styled.div(({ theme }) => ({
@@ -77,6 +86,7 @@ const ToolbarContainer = styled.header(({ theme }) => ({
   color: theme.colors.textMuted,
   WebkitBackdropFilter: BACKDROP_FILTER,
   backdropFilter: BACKDROP_FILTER,
+  WebkitAppRegion: 'drag',
 }));
 
 function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
@@ -88,31 +98,51 @@ function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
 export default function Workspace() {
   const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
+  const isElectron = useEnvironmentParameter('isElectron');
+  const theme = useMemo(() => {
+    const baseTheme = colorScheme === 'dark' ? darkTheme : lightTheme;
+    return produce(baseTheme, (draft) => {
+      if (!isElectron) return;
+
+      draft.showMenubar = true;
+      draft.sizes.toolbar.height = 53;
+      draft.sizes.toolbar.itemSeparator = 12;
+    });
+  }, [colorScheme, isElectron]);
 
   return (
-    <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
+    <ThemeProvider theme={theme}>
       <LeftSidebar>
         <Menubar />
-        <PageList />
-        <Divider />
-        {useTabElement({
-          canvas: <LayerList />,
-          pages: <Spacer.Vertical />,
-          theme: <ThemeGroups />,
-        })}
-        <FilterContainer>
-          <InputField.Root labelPosition="start" labelSize={14}>
-            <InputField.Input
-              value={layersFilter}
-              onChange={setLayersFilter}
-              placeholder="Filter layers"
-            />
-            <InputField.Label>
-              <MagnifyingGlassIcon />
-            </InputField.Label>
-          </InputField.Root>
-        </FilterContainer>
-        <Spacer.Vertical size={8} />
+        <LeftSidebarBorderedContent>
+          <PageList />
+          <Divider />
+          {useTabElement({
+            canvas: (
+              <>
+                <AutoSizer>
+                  {(size) => <LayerList size={size} filter={layersFilter} />}
+                </AutoSizer>
+                <FilterContainer>
+                  <InputField.Root labelPosition="start" labelSize={14}>
+                    <InputField.Input
+                      value={layersFilter}
+                      onChange={setLayersFilter}
+                      placeholder="Filter layers"
+                      type="search"
+                    />
+                    <InputField.Label>
+                      <MagnifyingGlassIcon />
+                    </InputField.Label>
+                  </InputField.Root>
+                </FilterContainer>
+                <Spacer.Vertical size={8} />
+              </>
+            ),
+            pages: <Spacer.Vertical />,
+            theme: <ThemeGroups />,
+          })}
+        </LeftSidebarBorderedContent>
       </LeftSidebar>
       <MainView>
         <ToolbarContainer>

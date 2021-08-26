@@ -1,7 +1,11 @@
 import { Insets, Rect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile } from 'noya-state';
-import { getBoundingRect, getLayersInRect } from '../geometrySelectors';
+import {
+  getBoundingRect,
+  getLayersInRect,
+  getClippedLayerMap,
+} from '../geometrySelectors';
 
 const insets: Insets = {
   top: 0,
@@ -262,5 +266,46 @@ describe('selecting artboards', () => {
         artboards: 'emptyOrContainedArtboardOrChildren',
       }).map((layer) => layer.do_objectID),
     ).toEqual(['a1']);
+  });
+});
+
+describe('get clipped layers', () => {
+  test('get clipped top-level layers', () => {
+    const page = SketchModel.page({
+      layers: [r1, r2, r3],
+    });
+
+    const state = createInitialState(createSketchFile(page));
+
+    expect(
+      getClippedLayerMap(state, { width: 1000, height: 1000 }, insets),
+    ).toEqual({
+      r1: false,
+      r2: false,
+      r3: true,
+    });
+  });
+
+  test('get clipped layers in artboard', () => {
+    const a1 = SketchModel.artboard({
+      do_objectID: 'a1',
+      frame: SketchModel.rect({ x: 50, y: 50, width: 500, height: 500 }),
+      layers: [r1, r2, r3],
+    });
+
+    const page = SketchModel.page({
+      layers: [a1],
+    });
+
+    const state = createInitialState(createSketchFile(page));
+
+    expect(
+      getClippedLayerMap(state, { width: 1000, height: 1000 }, insets),
+    ).toEqual({
+      a1: false,
+      r1: false,
+      r2: false,
+      r3: true,
+    });
   });
 });

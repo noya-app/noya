@@ -1,11 +1,14 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
+import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   InputField,
   Label,
   LabeledElementView,
+  rgbaToSketchColor,
   Select,
   sketchColorToHex,
   SketchPattern,
+  withSeparatorElements,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
@@ -16,8 +19,10 @@ import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,
   PatternFillProps,
+  ShaderFillProps,
 } from './FillInputFieldWithPicker';
 import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
+import { ShaderVariableValueInput } from './ShaderVariableRow';
 
 const GRADIENT_TYPE_OPTIONS = [
   Sketch.GradientType.Linear.toString(),
@@ -38,6 +43,7 @@ interface Props {
   colorProps: ColorFillProps;
   gradientProps: GradientFillProps;
   patternProps: PatternFillProps;
+  shaderProps: ShaderFillProps;
 }
 
 export default memo(function FillRow({
@@ -51,12 +57,14 @@ export default memo(function FillRow({
   colorProps,
   gradientProps,
   patternProps,
+  shaderProps,
 }: Props) {
   const fillInputId = `${id}-color`;
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;
   const gradientTypeId = `${id}-gradient-type`;
   const patternSizeId = `${id}-pattern-type`;
+  const shaderVariableId = `${id}-shader-variable`;
 
   const fillLabel = useMemo(() => {
     switch (fillType) {
@@ -66,11 +74,17 @@ export default memo(function FillRow({
         return 'Gradient';
       case Sketch.FillType.Pattern:
         return 'Image';
+      case Sketch.FillType.Shader:
+        return 'Shader';
     }
   }, [fillType]);
 
   const renderLabel = useCallback(
-    ({ id }) => {
+    ({ id }: { id: string }) => {
+      if (id.startsWith(shaderVariableId)) {
+        return <Label.Label>{id.split('_')[1]}</Label.Label>;
+      }
+
       switch (id) {
         case fillInputId:
           return <Label.Label>{fillLabel}</Label.Label>;
@@ -87,6 +101,7 @@ export default memo(function FillRow({
       }
     },
     [
+      shaderVariableId,
       fillInputId,
       fillLabel,
       hexInputId,
@@ -136,7 +151,15 @@ export default memo(function FillRow({
                     : ''
                 }
                 placeholder={colorProps.color ? undefined : 'multiple'}
-                onSubmit={() => {}}
+                onSubmit={(value) => {
+                  if (validHex(value)) {
+                    colorProps.onChangeColor(
+                      rgbaToSketchColor(
+                        hexToRgba(value, colorProps.color?.alpha),
+                      ),
+                    );
+                  }
+                }}
               />
               <InputField.Label>#</InputField.Label>
             </InputField.Root>
@@ -205,9 +228,30 @@ export default memo(function FillRow({
             />
           </>
         );
+      case Sketch.FillType.Shader:
+        return withSeparatorElements(
+          shaderProps.shader.variables
+            .map((variable, index) => (
+              <ShaderVariableValueInput
+                key={`${variable.name}-${index}`}
+                flex="1"
+                id={`${shaderVariableId}_${variable.name}`}
+                value={variable.value}
+                onChange={(value) =>
+                  shaderProps.onChangeShaderVariableValue(variable.name, value)
+                }
+                onNudge={(value) =>
+                  shaderProps.onNudgeShaderVariableValue(variable.name, value)
+                }
+              />
+            ))
+            .reverse()
+            .slice(0, 3),
+          <InspectorPrimitives.HorizontalSeparator />,
+        );
     }
   }, [
-    colorProps.color,
+    colorProps,
     contextOpacity,
     fillType,
     getGradientTypeTitle,
@@ -221,6 +265,8 @@ export default memo(function FillRow({
     opacityInputId,
     patternProps.pattern.patternFillType,
     patternSizeId,
+    shaderProps,
+    shaderVariableId,
   ]);
 
   return (
@@ -235,6 +281,7 @@ export default memo(function FillRow({
           colorProps={colorProps}
           gradientProps={gradientProps}
           patternProps={patternProps}
+          shaderProps={shaderProps}
         />
         <InspectorPrimitives.HorizontalSeparator />
         {fields}

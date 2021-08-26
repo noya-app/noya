@@ -1,11 +1,10 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { useShallowArray } from 'noya-react-utils';
 import { getMultiNumberValue, Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
-import ArrayController from '../components/inspector/ArrayController';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
-import { useShallowArray } from 'noya-react-utils';
+import EnableableElementController from '../components/inspector/EnableableElementController';
 
 function makeInterpolator(options: InterpolateOptions) {
   return {
@@ -23,7 +22,7 @@ const hueInterpolator = makeInterpolator({
   outputRange: [-100, 100],
 });
 
-const saturationInterpolator = makeInterpolator({
+export const saturationInterpolator = makeInterpolator({
   inputRange: [0, 2],
   outputRange: [-100, 100],
 });
@@ -89,15 +88,6 @@ export default memo(function ColorControlsInspector() {
       ? contrastInterpolator.toDisplay(contrast)
       : undefined;
 
-  const handleClickPlus = useCallback(() => {
-    dispatch('setColorControlsEnabled', true);
-  }, [dispatch]);
-
-  const handleClickTrash = useCallback(
-    () => dispatch('setColorControlsEnabled', false),
-    [dispatch],
-  );
-
   const handleChangeHue = useCallback(
     (value: number, mode: SetNumberMode) =>
       dispatch('setHue', hueInterpolator.fromDisplay(value), mode),
@@ -148,42 +138,26 @@ export default memo(function ColorControlsInspector() {
   );
 
   return (
-    <ArrayController<Sketch.ColorControls>
-      title="Color Adjust"
+    <EnableableElementController
       id="color-adjust"
-      items={firstColorControls}
-      onClickPlus={isEnabled ? undefined : handleClickPlus}
-      onClickTrash={isEnabled ? handleClickTrash : undefined}
-      onMoveItem={useCallback(
-        (sourceIndex, destinationIndex) =>
-          dispatch('moveFill', sourceIndex, destinationIndex),
+      title="Color Adjust"
+      isEnabled={isEnabled}
+      onChangeIsEnabled={useCallback(
+        (isEnabled) => dispatch('setColorControlsEnabled', isEnabled),
         [dispatch],
       )}
-      renderItem={useCallback(
-        () => (
-          <ColorControlsRow
-            id={'color-controls'}
-            hue={interpolatedHue}
-            saturation={interpolatedSaturation}
-            brightness={interpolatedBrightness}
-            contrast={interpolatedContrast}
-            onChangeHue={handleChangeHue}
-            onChangeSaturation={handleChangeSaturation}
-            onChangeBrightness={handleChangeBrightness}
-            onChangeContrast={handleChangeContrast}
-          />
-        ),
-        [
-          handleChangeBrightness,
-          handleChangeContrast,
-          handleChangeHue,
-          handleChangeSaturation,
-          interpolatedBrightness,
-          interpolatedContrast,
-          interpolatedHue,
-          interpolatedSaturation,
-        ],
-      )}
-    />
+    >
+      <ColorControlsRow
+        id={'color-controls'}
+        hue={interpolatedHue}
+        saturation={interpolatedSaturation}
+        brightness={interpolatedBrightness}
+        contrast={interpolatedContrast}
+        onChangeHue={handleChangeHue}
+        onChangeSaturation={handleChangeSaturation}
+        onChangeBrightness={handleChangeBrightness}
+        onChangeContrast={handleChangeContrast}
+      />
+    </EnableableElementController>
   );
 });

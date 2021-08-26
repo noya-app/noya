@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { interpolateRgba } from 'noya-colorpicker';
@@ -13,8 +13,11 @@ import {
   getLinePercentage,
   insetRect,
   Point,
-  Rect,
+  rectContainsPoint,
+  resize,
+  Size,
 } from 'noya-geometry';
+import { svgToLayer } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -23,7 +26,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { clamp, lerp, uuid } from 'noya-utils';
+import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
 import {
   getAngularGradientCircle,
@@ -68,8 +71,23 @@ import {
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
 
+export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
+
+export type InsertedImage = { name: string } & (
+  | {
+      extension: 'png' | 'jpg' | 'webp' | 'pdf';
+      data: ArrayBuffer;
+      size: Size;
+    }
+  | {
+      extension: 'svg';
+      svgString: string;
+    }
+);
+
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
+  | [type: 'zoomToFit', target: 'canvas' | 'selection']
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -80,9 +98,10 @@ export type CanvasAction =
   | [type: 'addStopToGradient', point: Point]
   | [type: 'deleteStopToGradient']
   | [
-      type: 'insertBitmap',
-      file: ArrayBuffer,
-      details: { name: string; frame: Rect; extension: string },
+      type: 'importImage',
+      images: InsertedImage[],
+      insertAt: Point,
+      insertInto: ImportedImageTarget,
     ]
   | [type: 'addPointToPath', point: Point]
   | [type: 'insertPointInPath', point: Point]
@@ -100,6 +119,54 @@ export function canvasReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'zoomToFit': {
+      const [, target] = action;
+
+      const page = Selectors.getCurrentPage(state);
+      let boundingRect =
+        target === 'canvas'
+          ? Selectors.getPageContentBoundingRect(page)
+          : Selectors.getBoundingRect(page, state.selectedLayerIds);
+
+      if (!boundingRect) return state;
+
+      const padding = 20;
+      boundingRect = insetRect(boundingRect, -padding, -padding);
+
+      const bounds = createBounds(boundingRect);
+      const pageId = getCurrentPage(state).do_objectID;
+
+      const croppedRect = resize(
+        boundingRect,
+        context.canvasSize,
+        'scaleAspectFit',
+      );
+
+      const newZoom = Math.min(
+        croppedRect.width / boundingRect.width,
+        croppedRect.height / boundingRect.height,
+      );
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        const newScrollOrigin = {
+          x: viewportCenter.x - bounds.midX * newZoom,
+          y: viewportCenter.y - bounds.midY * newZoom,
+        };
+
+        draftUser[pageId] = {
+          ...draftUser[pageId],
+          zoomValue: newZoom,
+          scrollOrigin: PointString.encode(newScrollOrigin),
+        };
+      });
+    }
     case 'setZoom': {
       const [, value, mode] = action;
       const pageId = getCurrentPage(state).do_objectID;
@@ -126,8 +193,11 @@ export function canvasReducer(
           (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
         ).applyTo(viewportCenter);
 
-        draftUser[pageId].scrollOrigin = PointString.encode(newScrollOrigin);
-        draftUser[pageId].zoomValue = newValue;
+        draftUser[pageId] = {
+          ...draftUser[pageId],
+          zoomValue: newValue,
+          scrollOrigin: PointString.encode(newScrollOrigin),
+        };
       });
     }
     case 'insertArtboard': {
@@ -152,7 +222,7 @@ export function canvasReducer(
         draft.interactionState = interactionReducer(draft.interactionState, [
           'reset',
         ]);
-        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedLayerIds = [layer.do_objectID];
       });
     }
     case 'addStopToGradient': {
@@ -241,7 +311,7 @@ export function canvasReducer(
 
         if (layer.frame.width > 0 && layer.frame.height > 0) {
           addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
-          draft.selectedObjects = [layer.do_objectID];
+          draft.selectedLayerIds = [layer.do_objectID];
         }
 
         if (shapeType === 'text') {
@@ -295,7 +365,7 @@ export function canvasReducer(
         const encodedPoint = encodeCurvePoint(decodedPoint, layer.frame);
         layer.points = [encodedPoint];
 
-        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedLayerIds = [layer.do_objectID];
         draft.selectedPointLists = { [layer.do_objectID]: [0] };
       });
     }
@@ -319,7 +389,7 @@ export function canvasReducer(
 
       return produce(state, (draft) => {
         addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
-        draft.selectedObjects = [layer.do_objectID];
+        draft.selectedLayerIds = [layer.do_objectID];
       });
     }
     case 'addPointToPath': {
@@ -391,12 +461,8 @@ export function canvasReducer(
       const pageIndex = getCurrentPageIndex(state);
 
       if (!state.selectedGradient) return state;
-      const {
-        layerId,
-        fillIndex,
-        stopIndex,
-        styleType,
-      } = state.selectedGradient;
+      const { layerId, fillIndex, stopIndex, styleType } =
+        state.selectedGradient;
 
       const page = getCurrentPage(state);
       const indexPath = Layers.findIndexPath(
@@ -433,7 +499,7 @@ export function canvasReducer(
       return produce(state, (draft) => {
         const meta: EncodedPageMetadata = draft.sketch.user[currentPageId] ?? {
           zoomValue: 1,
-          scrollOrigin: '{100,100}',
+          scrollOrigin: '{0,0}',
         };
 
         const parsed = Primitives.parsePoint(meta.scrollOrigin);
@@ -467,7 +533,7 @@ export function canvasReducer(
       )
         return state;
 
-      return moveLayer(state, state.selectedObjects, parentId, 'inside');
+      return moveLayer(state, state.selectedLayerIds, parentId, 'inside');
     }
     case 'insertPointInPath': {
       const [, point] = action;
@@ -500,10 +566,9 @@ export function canvasReducer(
 
         const { segmentIndex, segmentPath, t } = splitParameters;
 
-        const newCurvePoints = Primitives.splitPath(
-          segmentPath,
-          t,
-        ).map((path) => Primitives.pathToCurvePoints(path, draftLayer.frame));
+        const newCurvePoints = Primitives.splitPath(segmentPath, t).map(
+          (path) => Primitives.pathToCurvePoints(path, draftLayer.frame),
+        );
 
         const start = draftLayer.points.slice(0, segmentIndex + 1);
         const end = draftLayer.points.slice(segmentIndex + 1);
@@ -519,9 +584,8 @@ export function canvasReducer(
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
       const pageIndex = getCurrentPageIndex(state);
-      const layerIndexPaths = getSelectedLayerIndexPathsExcludingDescendants(
-        state,
-      );
+      const layerIndexPaths =
+        getSelectedLayerIndexPathsExcludingDescendants(state);
 
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
@@ -544,12 +608,10 @@ export function canvasReducer(
           case 'maybeMoveGradientStop': {
             if (draft.interactionState.type !== 'maybeMoveGradientStop') return;
 
-            const { pageSnapshot } = draft.interactionState;
-
             if (!state.selectedGradient) return;
 
             const gradient = getSelectedGradient(
-              pageSnapshot,
+              draft.sketch.pages[pageIndex],
               state.selectedGradient,
             );
 
@@ -563,12 +625,8 @@ export function canvasReducer(
 
             if (!state.selectedGradient) return;
 
-            const {
-              layerId,
-              fillIndex,
-              stopIndex,
-              styleType,
-            } = state.selectedGradient;
+            const { layerId, fillIndex, stopIndex, styleType } =
+              state.selectedGradient;
 
             const indexPath = Layers.findIndexPath(
               pageSnapshot,
@@ -879,12 +937,8 @@ export function canvasReducer(
             break;
           }
           case 'scaling': {
-            const {
-              origin,
-              current,
-              pageSnapshot,
-              direction,
-            } = interactionState;
+            const { origin, current, pageSnapshot, direction } =
+              interactionState;
 
             const delta = {
               x: current.x - origin.x,
@@ -953,17 +1007,22 @@ export function canvasReducer(
               const width = roundedMax.x - roundedMin.x;
               const height = roundedMax.y - roundedMin.y;
 
-              const newLayer = resizeLayerFrame(
+              let newLayer = resizeLayerFrame(
                 layer,
                 createRect(roundedMin, roundedMax),
               );
 
-              newLayer.isFlippedHorizontal =
-                width < 0
-                  ? !layer.isFlippedHorizontal
-                  : layer.isFlippedHorizontal;
-              newLayer.isFlippedVertical =
-                height < 0 ? !layer.isFlippedVertical : layer.isFlippedVertical;
+              newLayer = produce(newLayer, (draft) => {
+                draft.isFlippedHorizontal =
+                  width < 0
+                    ? !layer.isFlippedHorizontal
+                    : layer.isFlippedHorizontal;
+
+                draft.isFlippedVertical =
+                  height < 0
+                    ? !layer.isFlippedVertical
+                    : layer.isFlippedVertical;
+              });
 
               Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });
@@ -982,7 +1041,7 @@ export function canvasReducer(
               currentPageId
             ] ?? {
               zoomValue: 1,
-              scrollOrigin: '{100,100}',
+              scrollOrigin: '{0,0}',
             };
 
             const parsed = Primitives.parsePoint(meta.scrollOrigin);
@@ -1000,23 +1059,93 @@ export function canvasReducer(
         }
       });
     }
-    case 'insertBitmap': {
-      const [, file, { name, frame, extension }] = action;
+    case 'importImage': {
+      const [, images, insertAt, insertInto] = action;
       const pageIndex = getCurrentPageIndex(state);
 
-      return produce(state, (draft) => {
-        const _ref = `images/${uuid()}.${extension}`;
+      let parentLayer: Layers.ParentLayer | undefined;
 
-        draft.sketch.images[_ref] = file;
+      switch (insertInto) {
+        case 'selectedArtboard': {
+          const selectedLayers = Selectors.getSelectedLayers(state);
 
-        const layer = SketchModel.bitmap({
-          name: name.replace(`.${extension}`, ''),
-          image: SketchModel.fileReference({ _ref }),
-          frame: SketchModel.rect(frame),
+          if (
+            selectedLayers.length > 0 &&
+            Layers.isArtboard(selectedLayers[0])
+          ) {
+            parentLayer = selectedLayers[0];
+          }
+
+          break;
+        }
+        case 'nearestArtboard': {
+          const targetLayer = state.sketch.pages[pageIndex].layers.find(
+            (layer) =>
+              Layers.isArtboard(layer) &&
+              rectContainsPoint(layer.frame, insertAt),
+          );
+
+          if (targetLayer && Layers.isArtboard(targetLayer)) {
+            parentLayer = targetLayer;
+          }
+        }
+      }
+
+      const layerIds = images.map(() => uuid());
+
+      state = produce(state, (draft) => {
+        zip(images, layerIds).forEach(([image, layerId]) => {
+          let layer: Sketch.AnyLayer;
+
+          if (image.extension === 'svg') {
+            const { name, svgString } = image;
+
+            layer = svgToLayer(svgString);
+            layer.name = name;
+            layer.do_objectID = layerId;
+            layer.frame = {
+              ...layer.frame,
+              x: insertAt.x - layer.frame.width / 2,
+              y: insertAt.y - layer.frame.height / 2,
+            };
+          } else {
+            const { name, extension, size, data } = image;
+
+            const _ref = `images/${uuid()}.${extension}`;
+
+            draft.sketch.images[_ref] = data;
+
+            layer = SketchModel.bitmap({
+              do_objectID: layerId,
+              name,
+              image: SketchModel.fileReference({ _ref }),
+              frame: SketchModel.rect({
+                x: insertAt.x - size.width / 2,
+                y: insertAt.y - size.height / 2,
+                width: size.width,
+                height: size.height,
+              }),
+              style: SketchModel.style({
+                fills: [],
+                borders: [],
+                colorControls: SketchModel.colorControls({
+                  isEnabled: false,
+                }),
+              }),
+            });
+          }
+
+          draft.sketch.pages[pageIndex].layers.push(layer);
         });
 
-        addToParentLayer(draft.sketch.pages[pageIndex].layers, layer);
+        draft.selectedLayerIds = layerIds;
       });
+
+      if (parentLayer) {
+        state = moveLayer(state, layerIds, parentLayer.do_objectID, 'inside');
+      }
+
+      return state;
     }
     default:
       return state;

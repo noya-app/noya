@@ -116,7 +116,11 @@ async function main() {
   const server = new ApolloServer({ typeDefs, resolvers });
 
   server.listen().then(({ url }) => {
-    console.info(`🚀  Server ready at ${url}`);
+    if (process.send) {
+      process.send('ready');
+    } else {
+      console.info(`🚀  Server ready at ${url}`);
+    }
   });
 }
 

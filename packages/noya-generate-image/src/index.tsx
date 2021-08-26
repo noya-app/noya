@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import type { CanvasKit, Image } from 'canvaskit';
 import { Theme } from 'noya-designsystem';
 import { Components, render, unmount } from 'noya-react-canvaskit';

@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
 import { AffineTransform, Point } from 'noya-geometry';
 import { useStroke } from 'noya-react-canvaskit';

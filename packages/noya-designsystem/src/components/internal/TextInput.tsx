@@ -1,8 +1,10 @@
+import { composeRefs } from '@radix-ui/react-compose-refs';
 import React, {
   ForwardedRef,
   forwardRef,
   useCallback,
-  useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
 import { useGlobalInputBlurListener } from '../../contexts/GlobalInputBlurContext';
@@ -11,6 +13,7 @@ type Props = {
   id?: string;
   style?: any;
   className?: string;
+  type?: 'text' | 'search';
   disabled?: boolean;
   value: string;
   placeholder?: string;
@@ -27,6 +30,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
     id,
     style,
     className,
+    type,
     placeholder,
     disabled,
     onKeyDown,
@@ -56,7 +60,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
       id={id}
       style={style}
       className={className}
-      type="text"
+      type={type ?? 'text'}
       disabled={disabled ?? false}
       value={value}
       placeholder={placeholder}
@@ -68,7 +72,8 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
 });
 
 type SubmittableProps = Props & {
-  onSubmit: (value: string, reset: () => void) => void;
+  onSubmit: (value: string) => void;
+  allowSubmittingWithSameValue?: boolean;
 };
 
 const SubmittableTextInput = forwardRef(function SubmittableTextInput(
@@ -76,42 +81,53 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     id,
     style,
     className,
+    type,
     placeholder,
     onKeyDown,
     value,
     disabled,
     onSubmit,
     onClick,
+    allowSubmittingWithSameValue = false,
   }: SubmittableProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
+  const ref = React.useRef<HTMLInputElement>(null);
+
+  const latestValue = useRef(value);
+  latestValue.current = value;
+
+  const isSubmitTriggeredByEscapeKey = useRef(false);
+
   const [internalValue, setInternalValue] = useState('');
 
-  // Only trigger a submit event on blur if the value changed
-  const [initialFocusValue, setInitialFocusValue] = useState<
-    string | undefined
-  >(undefined);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     setInternalValue(value);
   }, [value]);
 
   const handleSubmit = useCallback(() => {
-    if (initialFocusValue === internalValue) return;
+    // If this submission was triggered with Escape, we attempt to submit the original value.
+    // This will only actually call `onSubmit` if `allowSubmittingWithSameValue` is also true.
+    const submissionValue = isSubmitTriggeredByEscapeKey.current
+      ? value
+      : internalValue;
 
-    let didReset = false;
+    isSubmitTriggeredByEscapeKey.current = false;
 
-    onSubmit(internalValue, () => {
-      didReset = true;
-      setInternalValue(value);
-    });
+    if (submissionValue === value && !allowSubmittingWithSameValue) return;
 
-    if (!didReset) {
-      setInitialFocusValue(internalValue);
-    }
-  }, [onSubmit, internalValue, initialFocusValue, value]);
+    onSubmit(submissionValue);
 
-  useGlobalInputBlurListener(handleSubmit);
+    setInternalValue(latestValue.current);
+  }, [allowSubmittingWithSameValue, value, internalValue, onSubmit]);
+
+  useGlobalInputBlurListener(
+    useCallback(() => {
+      if (ref.current !== document.activeElement) return;
+
+      handleSubmit();
+    }, [handleSubmit]),
+  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,6 +136,10 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
 
         event.preventDefault();
         event.stopPropagation();
+      } else if (event.key === 'Escape') {
+        isSubmitTriggeredByEscapeKey.current = true;
+
+        ref.current?.blur();
       } else {
         onKeyDown?.(event);
       }
@@ -134,25 +154,24 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     [],
   );
 
-  const handleFocus = useCallback(() => {
-    setInitialFocusValue(internalValue);
-  }, [internalValue]);
-
   return (
     <input
-      ref={forwardedRef}
+      ref={composeRefs(ref, forwardedRef)}
       id={id}
       style={style}
       className={className}
-      type="text"
+      type={type ?? 'text'}
       disabled={disabled ?? false}
       value={internalValue}
       placeholder={placeholder}
       onKeyDown={handleKeyDown}
       onChange={handleChange}
       onBlur={handleSubmit}
-      onFocus={handleFocus}
       onClick={onClick}
+      autoComplete="off"
+      autoCapitalize="off"
+      autoCorrect="off"
+      spellCheck={false}
     />
   );
 });

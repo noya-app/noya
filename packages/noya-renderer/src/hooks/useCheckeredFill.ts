@@ -17,8 +17,8 @@ export default function useCheckeredFill() {
     const imageShader = image.makeShaderCubic(
       CanvasKit.TileMode.Repeat,
       CanvasKit.TileMode.Repeat,
-      0,
-      0,
+      1 / 3,
+      1 / 3,
       CanvasKit.Matrix.scaled(0.5, 0.5),
     );
 

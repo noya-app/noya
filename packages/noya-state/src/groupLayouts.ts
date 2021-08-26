@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 
 export const isInferredLayout = (
   groupLayout: Sketch.FreeformGroupLayout | Sketch.InferredGroupLayout,

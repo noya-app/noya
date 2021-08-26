@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   BaseOptions,
   IndexPath,
@@ -66,6 +66,12 @@ export const isBitmapLayer = (
 
 export const isGroup = (layer: Sketch.AnyLayer): layer is Sketch.Group => {
   return layer._class === 'group';
+};
+
+export const isShapeGroup = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.ShapeGroup => {
+  return layer._class === 'shapeGroup';
 };
 
 export const isSymbolMaster = (
@@ -149,6 +155,29 @@ export const hasInspectableBorder = (layer: Sketch.AnyLayer): boolean => {
 };
 
 export const hasInspectableFill = (layer: Sketch.AnyLayer): boolean => {
+  switch (layer._class) {
+    case 'bitmap':
+    case 'oval':
+    case 'polygon':
+    case 'rectangle':
+    case 'shapeGroup':
+    case 'shapePath':
+    case 'star':
+    case 'triangle':
+    case 'text':
+      return true;
+    case 'group':
+    case 'symbolInstance':
+    case 'page':
+    case 'artboard':
+    case 'MSImmutableHotspotLayer':
+    case 'slice':
+    case 'symbolMaster':
+      return false;
+  }
+};
+
+export const hasInspectableBlur = (layer: Sketch.AnyLayer): boolean => {
   switch (layer._class) {
     case 'bitmap':
     case 'oval':
@@ -316,4 +345,15 @@ export function isWithinMaskChain(
   }
 
   return isMasked;
+}
+
+export function getFilteredLayerAndAncestorIds(
+  root: Sketch.AnyLayer,
+  predicate: (layer: Sketch.AnyLayer) => boolean,
+) {
+  return new Set<string>(
+    findAllLayerIndexPaths(root, predicate)
+      .flatMap((indexPath) => accessPath(root, indexPath))
+      .map((layer) => layer.do_objectID),
+  );
 }

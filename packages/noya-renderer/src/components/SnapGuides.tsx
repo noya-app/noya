@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import {
   Axis,
@@ -18,7 +18,7 @@ import {
   getSnapValues,
   Selectors,
 } from 'noya-state';
-import { groupBy } from 'noya-utils';
+import { groupBy, round } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
 import {
   AXES,
@@ -89,36 +89,35 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
   const groupedSnaps = groupBy(snaps, (value) => value.source);
   const selectedBounds = createBounds(sourceRect);
 
-  const alignmentGuides = Object.values(groupedSnaps).map((pairs): [
-    Point,
-    Point,
-  ] => {
-    const targetBounds = pairs
-      .map(({ targetId }) => targetLayerBoundingRectMap[targetId])
-      .map(createBounds);
+  const alignmentGuides = Object.values(groupedSnaps).map(
+    (pairs): [Point, Point] => {
+      const targetBounds = pairs
+        .map(({ targetId }) => targetLayerBoundingRectMap[targetId])
+        .map(createBounds);
 
-    const m = axis;
-    const c = axis === 'x' ? 'y' : 'x';
+      const m = axis;
+      const c = axis === 'x' ? 'y' : 'x';
 
-    const [minC, , maxC] = getAxisProperties(c, '+');
+      const [minC, , maxC] = getAxisProperties(c, '+');
 
-    return [
-      {
-        [m]: pairs[0].target,
-        [c]: Math.min(
-          selectedBounds[minC],
-          ...targetBounds.map((bounds) => bounds[minC]),
-        ),
-      } as Point,
-      {
-        [m]: pairs[0].target,
-        [c]: Math.max(
-          selectedBounds[maxC],
-          ...targetBounds.map((bounds) => bounds[maxC]),
-        ),
-      } as Point,
-    ];
-  });
+      return [
+        {
+          [m]: pairs[0].target,
+          [c]: Math.min(
+            selectedBounds[minC],
+            ...targetBounds.map((bounds) => bounds[minC]),
+          ),
+        } as Point,
+        {
+          [m]: pairs[0].target,
+          [c]: Math.max(
+            selectedBounds[maxC],
+            ...targetBounds.map((bounds) => bounds[maxC]),
+          ),
+        } as Point,
+      ];
+    },
+  );
 
   return (
     <>
@@ -149,7 +148,7 @@ export default memo(function SnapGuides() {
     | undefined => {
     switch (interactionState.type) {
       case 'moving': {
-        const rect = Selectors.getBoundingRect(page, state.selectedObjects, {
+        const rect = Selectors.getBoundingRect(page, state.selectedLayerIds, {
           groups: 'childrenOnly',
           includeHiddenLayers: true,
         });
@@ -171,7 +170,7 @@ export default memo(function SnapGuides() {
 
         const originalBoundingRect = Selectors.getBoundingRect(
           pageSnapshot,
-          state.selectedObjects,
+          state.selectedLayerIds,
         )!;
 
         const newBoundingRect = getScaledSnapBoundingRect(
@@ -229,7 +228,7 @@ export default memo(function SnapGuides() {
           x: interactionState.current.x + 20,
           y: interactionState.current.y + 20,
         }}
-        text={`${areaSize.width} × ${areaSize.height}`}
+        text={`${round(areaSize.width, 2)} × ${round(areaSize.height, 2)}`}
         fontSize={12}
         padding={{
           width: 8,

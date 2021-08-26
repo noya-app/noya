@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import {
   EditableBorder,
@@ -13,7 +13,7 @@ import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function BorderInspector() {
   const [state, dispatch] = useApplicationState();
-  const selectLayerId = state.selectedObjects[0];
+  const selectLayerId = state.selectedLayerIds[0];
 
   const selectedStyles = useShallowArray(
     useSelector(Selectors.getSelectedStyles),
@@ -35,9 +35,10 @@ export default memo(function BorderInspector() {
       key="borders"
       value={editableBorders}
       onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
-      onClickTrash={useCallback(() => dispatch('deleteDisabledBorders'), [
-        dispatch,
-      ])}
+      onClickTrash={useCallback(
+        () => dispatch('deleteDisabledBorders'),
+        [dispatch],
+      )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveBorder', sourceIndex, destinationIndex),

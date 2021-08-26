@@ -1,5 +1,6 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
+import { useShallowArray } from 'noya-react-utils';
 import {
   getMultiNumberValue,
   getMultiValue,
@@ -13,9 +14,9 @@ import styled from 'styled-components';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
-import { useShallowArray } from 'noya-react-utils';
 import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
+import BlurInspector from './BlurInspector';
 import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
@@ -32,7 +33,7 @@ import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
 
-const PointControlsContainer = styled.div({
+const HorizontalPaddingContainer = styled.div({
   padding: '0 10px',
 });
 
@@ -141,13 +142,13 @@ export default memo(function Inspector() {
       <Fragment key="layout">
         <AlignmentInspector />
         {isEditingPath ? (
-          <PointControlsContainer>
+          <HorizontalPaddingContainer>
             {isEditingControlPoint ? (
               <ControlPointCoordinatesInspector />
             ) : (
               <PointCoordinatesInspector />
             )}
-          </PointControlsContainer>
+          </HorizontalPaddingContainer>
         ) : hasLineLayer ? (
           <LineInspector
             {...dimensionsInspectorProps}
@@ -188,11 +189,17 @@ export default memo(function Inspector() {
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
+      selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
-    return withSeparatorElements(views, <Divider />);
+    return withSeparatorElements(
+      views,
+      <HorizontalPaddingContainer>
+        <Divider />
+      </HorizontalPaddingContainer>,
+    );
   }, [
     selectedLayers,
     isEditingPath,

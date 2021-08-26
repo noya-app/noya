@@ -11,5 +11,6 @@ export { Alpha, Hue, Gradient, Pointer, HexColorInput, Saturation, ColorPicker }
 export * from './components/Interactive';
 export * from './utils/convert';
 export * from './utils/compare';
+export * from './utils/validate';
 export * from './utils/interpolateRgba';
 export * from './types';

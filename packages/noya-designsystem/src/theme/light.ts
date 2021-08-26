@@ -1,27 +1,28 @@
 import { mediaQuery } from '../mediaQuery';
 import { CSSObject } from 'styled-components';
 
+export const showMenubar: boolean = false;
+
 export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
+  textSubtle: 'rgb(121, 121, 121)',
   textDisabled: 'rgb(160, 160, 160)',
-  textDecorativeLight: 'rgb(168, 185, 212)',
-  // textLink: 'rgb(51, 122, 183)',
-  textLink: 'rgb(58, 108, 234)',
-  textLinkFocused: 'rgb(35, 82, 124)',
   divider: 'rgba(0, 0, 0, 0.07)',
   dividerStrong: 'rgba(0, 0, 0, 0.09)',
   primary: 'rgb(132, 63, 255)',
   primaryDark: 'rgb(116, 36, 255)',
+  primaryLight: 'rgb(147, 86, 255)',
   neutralBackground: 'rgb(222,223,232)',
   inputBackground: 'rgb(240, 240, 242)',
   codeBackground: 'rgb(250, 250, 250)',
   selectedBackground: 'rgb(242, 245, 250)',
   transparentChecker: 'rgba(255,255,255,0.8)',
+  activeBackground: 'rgba(0,0,0,0.1)',
   scrollbar: 'rgba(199,199,199,0.8)',
   placeholderDots: 'rgba(0,0,0,0.3)',
   listView: {
-    raisedBackground: 'rgba(255,255,255,0.8)',
+    raisedBackground: 'rgba(0,0,0,0.03)',
   },
   canvas: {
     background: 'rgb(249,249,249)',
@@ -112,7 +113,14 @@ export const textStyles = {
     fontSize: '90%',
     lineHeight: '1.5',
   } as CSSObject,
-
+  label: {
+    fontFamily: fonts.normal,
+    fontSize: '0.62rem',
+    fontWeight: 400,
+    lineHeight: '1.4',
+    textTransform: 'uppercase',
+    letterSpacing: '0.4px',
+  } as CSSObject,
   // Site
   body1: {} as CSSObject,
   bodyAlternate: {} as CSSObject,

@@ -1,8 +1,7 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
-import { AffineTransform, Point, transformRect } from 'noya-geometry';
-import { svgToLayer } from 'noya-import-svg';
+import { AffineTransform, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
@@ -35,7 +34,6 @@ import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
 
 export type LayerAction =
-  | [type: 'importSvg', point: Point, name: string, svgString: string]
   | [
       type: 'moveLayer',
       layerId: string | string[],
@@ -160,24 +158,6 @@ export function layerReducer(
   action: LayerAction,
 ): ApplicationState {
   switch (action[0]) {
-    case 'importSvg': {
-      const [, point, name, svgString] = action;
-
-      const layer = svgToLayer(name, svgString);
-
-      layer.frame = {
-        ...layer.frame,
-        x: point.x - layer.frame.width / 2,
-        y: point.y - layer.frame.height / 2,
-      };
-
-      const pageIndex = getCurrentPageIndex(state);
-
-      return produce(state, (draft) => {
-        const page = draft.sketch.pages[pageIndex];
-        page.layers.push(layer);
-      });
-    }
     case 'moveLayer': {
       const [, id, destinationId, rawPosition] = action;
 
@@ -195,10 +175,8 @@ export function layerReducer(
         ids.includes(layer.do_objectID),
       );
 
-      const symbolsInstancesIndexPaths = getSelectedSymbols(
-        state,
-      ).flatMap((symbol) =>
-        getSymbolsInstancesIndexPaths(state, symbol.symbolID),
+      const symbolsInstancesIndexPaths = getSelectedSymbols(state).flatMap(
+        (symbol) => getSymbolsInstancesIndexPaths(state, symbol.symbolID),
       );
 
       return produce(state, (draft) => {
@@ -261,11 +239,11 @@ export function layerReducer(
 
         return produce(state, (draft) => {
           updateSelection(
-            draft.selectedObjects,
+            draft.selectedLayerIds,
             groupLayer.do_objectID,
             'difference',
           );
-          updateSelection(draft.selectedObjects, childrenIds, 'intersection');
+          updateSelection(draft.selectedLayerIds, childrenIds, 'intersection');
         });
       }, state);
     }
@@ -285,7 +263,7 @@ export function layerReducer(
         symbolToGroup(draftPage, state, parent, indexPaths);
 
         if (!Layers.isPageLayer(parent)) {
-          draft.selectedObjects = [parent.do_objectID];
+          draft.selectedLayerIds = [parent.do_objectID];
         }
       });
     }
@@ -293,7 +271,7 @@ export function layerReducer(
       const [, id, selectionType = 'replace'] = action;
 
       return produce(state, (draft) => {
-        updateSelection(draft.selectedObjects, id, selectionType);
+        updateSelection(draft.selectedLayerIds, id, selectionType);
       });
     }
     case 'selectAllLayers': {
@@ -301,7 +279,7 @@ export function layerReducer(
       const ids = page.layers.map((layer) => layer.do_objectID);
 
       return produce(state, (draft) => {
-        updateSelection(draft.selectedObjects, ids, 'replace');
+        updateSelection(draft.selectedLayerIds, ids, 'replace');
       });
     }
     case 'createSymbol': {
@@ -317,7 +295,7 @@ export function layerReducer(
           const pages = draft.sketch.pages;
 
           deleteLayers(indexPathsArtboards, pages[pageIndex]);
-          draft.selectedObjects = [];
+          draft.selectedLayerIds = [];
           indexPathsArtboards.forEach((indexPath: IndexPath) => {
             const artboard = Layers.access(page, indexPath) as Sketch.Artboard;
 
@@ -326,8 +304,8 @@ export function layerReducer(
             });
 
             addSiblingLayer(pages[pageIndex], indexPath, symbolMaster);
-            draft.selectedObjects = [
-              ...draft.selectedObjects,
+            draft.selectedLayerIds = [
+              ...draft.selectedLayerIds,
               symbolMaster.do_objectID,
             ];
           });
@@ -375,7 +353,7 @@ export function layerReducer(
         symbolsPage.layers = [...symbolsPage.layers, symbolMaster];
         addSiblingLayer(pages[pageIndex], indexPaths[0], symbolInstance);
 
-        draft.selectedObjects = [symbolInstance.do_objectID];
+        draft.selectedLayerIds = [symbolInstance.do_objectID];
       });
     }
     case 'duplicateLayer': {
@@ -406,7 +384,7 @@ export function layerReducer(
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[pageIndex];
 
-        draft.selectedObjects = [];
+        draft.selectedLayerIds = [];
 
         parentIndexPaths.forEach((indexPath) => {
           const originalParent = Layers.access(
@@ -433,7 +411,7 @@ export function layerReducer(
           // Insert "above" the original in the layer list
           draftParent.layers.splice(lastIndex + 1, 0, ...copiedLayers);
 
-          draft.selectedObjects.push(
+          draft.selectedLayerIds.push(
             ...copiedLayers.map((layer) => layer.do_objectID),
           );
         });

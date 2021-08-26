@@ -1,4 +1,5 @@
 import { act } from '@testing-library/react';
+import Sketch from 'noya-file-format';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';
@@ -11,9 +12,11 @@ import {
   SketchFileRenderer,
 } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
+import { SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,
   createInitialWorkspaceState,
+  createSketchFile,
   Selectors,
   workspaceReducer,
   WorkspaceState,
@@ -27,6 +30,7 @@ beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
   const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
   context = {
+    canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
     canvasSize: { width: 1000, height: 1000 },
     fontManager: {
       ...new FontManager(GoogleFontProvider),
@@ -35,7 +39,11 @@ beforeAll(async () => {
   };
 });
 
-function panToFit(workspaceState: WorkspaceState, pageIndex: number) {
+function panToFit(
+  workspaceState: WorkspaceState,
+  pageIndex: number,
+  padding: number = 0,
+) {
   const page = workspaceState.history.present.sketch.pages[pageIndex];
 
   workspaceState = workspaceReducer(
@@ -56,31 +64,44 @@ function panToFit(workspaceState: WorkspaceState, pageIndex: number) {
   );
 
   const delta = {
-    x: boundingRect.x + scrollOrigin.x,
-    y: boundingRect.y + scrollOrigin.y,
+    x: boundingRect.x + scrollOrigin.x - padding,
+    y: boundingRect.y + scrollOrigin.y - padding,
   };
 
+  const canvasSize = {
+    width: Math.round(boundingRect.width + padding * 2),
+    height: Math.round(boundingRect.height + padding * 2),
+  };
+
+  workspaceState = workspaceReducer(
+    workspaceState,
+    ['setCanvasSize', canvasSize, { top: 0, right: 0, bottom: 0, left: 0 }],
+    CanvasKit,
+    context.fontManager,
+  );
+
+  workspaceState = workspaceReducer(
+    workspaceState,
+    ['pan', delta],
+    CanvasKit,
+    context.fontManager,
+  );
+
   return {
-    size: {
-      width: Math.round(boundingRect.width),
-      height: Math.round(boundingRect.height),
-    },
-    workspaceState: workspaceReducer(
-      workspaceState,
-      ['pan', delta],
-      CanvasKit,
-      context.fontManager,
-    ),
+    size: canvasSize,
+    workspaceState,
   };
 }
 
 async function generatePageImage(
   workspaceState: WorkspaceState,
   pageIndex: number,
+  padding?: number,
 ) {
   const { size, workspaceState: updatedState } = panToFit(
     workspaceState,
     pageIndex,
+    padding,
   );
 
   const image = await new Promise<Uint8Array | undefined>((resolve) => {
@@ -116,10 +137,14 @@ async function getSketchFile(filename: string) {
   return await decode(file);
 }
 
-async function generateSketchFileImage(filename: string, pageIndex: number) {
+async function generateSketchFileImage(
+  filename: string,
+  pageIndex: number,
+  padding?: number,
+) {
   const sketch = await getSketchFile(filename);
   const workspaceState = createInitialWorkspaceState(sketch);
-  return await generatePageImage(workspaceState, pageIndex);
+  return await generatePageImage(workspaceState, pageIndex, padding);
 }
 
 test('Demo', async () => {
@@ -129,6 +154,24 @@ test('Demo', async () => {
 
 test('AlphaMasks', async () => {
   const image = await generateSketchFileImage('AlphaMasks.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('BackdropFilter', async () => {
+  const image = await generateSketchFileImage('BackdropFilter.sketch', 0, 20);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('BooleanOperations', async () => {
+  const image = await generateSketchFileImage('BooleanOperations.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('BooleanOperationsAdvanced', async () => {
+  const image = await generateSketchFileImage(
+    'BooleanOperationsAdvanced.sketch',
+    0,
+  );
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
@@ -145,6 +188,77 @@ test('ImageFills', async () => {
 test('Gradient', async () => {
   const image = await generateSketchFileImage('Gradient.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+const red = SketchModel.color({ red: 1, green: 0, blue: 0, alpha: 1 });
+const green = SketchModel.color({ red: 0, green: 1, blue: 0, alpha: 1 });
+const blue = SketchModel.color({ red: 0, green: 0, blue: 1, alpha: 1 });
+
+const gradientStops = [
+  SketchModel.gradientStop({ position: 0, color: red }),
+  SketchModel.gradientStop({ position: 0.5, color: green }),
+  SketchModel.gradientStop({ position: 1, color: blue }),
+];
+
+describe('gradient editor', () => {
+  test('linear gradient', async () => {
+    const rectangle = SketchModel.rectangle({
+      frame: SketchModel.rect({ x: 100, y: 100, width: 200, height: 200 }),
+      style: SketchModel.style({
+        fills: [
+          SketchModel.fill({
+            fillType: Sketch.FillType.Gradient,
+            gradient: SketchModel.gradient({ stops: gradientStops }),
+          }),
+        ],
+      }),
+    });
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+
+    workspaceState.history.present.selectedGradient = {
+      layerId: rectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 1,
+      styleType: 'fills',
+    };
+
+    const image = await generatePageImage(workspaceState, 0, 10);
+    expect(Buffer.from(image)).toMatchImageSnapshot();
+  });
+
+  test('radial gradient', async () => {
+    const rectangle = SketchModel.rectangle({
+      frame: SketchModel.rect({ x: 100, y: 100, width: 200, height: 200 }),
+      style: SketchModel.style({
+        fills: [
+          SketchModel.fill({
+            fillType: Sketch.FillType.Gradient,
+            gradient: SketchModel.gradient({
+              gradientType: Sketch.GradientType.Radial,
+              stops: gradientStops,
+            }),
+          }),
+        ],
+      }),
+    });
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+    );
+
+    workspaceState.history.present.selectedGradient = {
+      layerId: rectangle.do_objectID,
+      fillIndex: 0,
+      stopIndex: 1,
+      styleType: 'fills',
+    };
+
+    const image = await generatePageImage(workspaceState, 0, 200);
+    expect(Buffer.from(image)).toMatchImageSnapshot();
+  });
 });
 
 test('Rotation 0', async () => {
@@ -207,6 +321,11 @@ test('SamplePath 5', async () => {
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
+test('Shaders', async () => {
+  const image = await generateSketchFileImage('Shaders.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
 test('Shadows', async () => {
   const image = await generateSketchFileImage('Shadows.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
@@ -224,5 +343,10 @@ test('TextLayers', async () => {
 
 test('Tints', async () => {
   const image = await generateSketchFileImage('Tints.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
+test('WindingRule', async () => {
+  const image = await generateSketchFileImage('WindingRule.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });

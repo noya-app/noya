@@ -1,9 +1,11 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
+import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
   ColorPicker,
   InputField,
   Label,
   LabeledElementView,
+  rgbaToSketchColor,
   sketchColorToHex,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
@@ -90,7 +92,13 @@ export default memo(function ColorInspector({
               <InputField.Input
                 value={color ? sketchColorToHex(displayColor).slice(1) : ''}
                 placeholder={color ? '' : 'multiple'}
-                onSubmit={useCallback(() => {}, [])}
+                onSubmit={(value) => {
+                  if (validHex(value)) {
+                    onChangeColor(
+                      rgbaToSketchColor(hexToRgba(value, color?.alpha)),
+                    );
+                  }
+                }}
               />
               <InputField.Label>#</InputField.Label>
             </InputField.Root>

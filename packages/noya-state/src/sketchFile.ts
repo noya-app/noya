@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 

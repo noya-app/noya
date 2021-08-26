@@ -1,8 +1,8 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 import {
-  hsvaToHex,
   hsvaToRgbaString,
   RgbaColor,
+  rgbaToHex,
   rgbaToHsva,
 } from 'noya-colorpicker';
 
@@ -30,5 +30,5 @@ export function rgbaToSketchColor(value: RgbaColor): Sketch.Color {
 }
 
 export function sketchColorToHex(value: Sketch.Color): string {
-  return hsvaToHex(rgbaToHsva(sketchColorToRgba(value))).toUpperCase();
+  return rgbaToHex(sketchColorToRgba(value)).toUpperCase();
 }

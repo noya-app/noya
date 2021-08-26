@@ -66,6 +66,7 @@ export interface GroupComponentProps {
   clip?: ClipProps;
   colorFilter?: ColorFilter;
   imageFilter?: ImageFilter;
+  backdropImageFilter?: ImageFilter;
 }
 
 interface GroupComponent {

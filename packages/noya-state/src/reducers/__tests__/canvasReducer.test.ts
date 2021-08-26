@@ -22,6 +22,7 @@ beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
   const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
   context = {
+    canvasInsets: { top: 0, right: 0, bottom: 0, left: 0 },
     canvasSize: { width: 1000, height: 1000 },
     fontManager: {
       ...new FontManager(GoogleFontProvider),
@@ -60,7 +61,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 10, y: 10 }]],
@@ -79,7 +80,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID, oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 10, y: 10 }]],
@@ -98,7 +99,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const mouseOriginX = 10;
 
@@ -132,7 +133,7 @@ describe('move', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeMove', { x: 460, y: 460 }]],
@@ -153,7 +154,7 @@ describe('movingPoint', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -185,7 +186,7 @@ describe('movingPoint', () => {
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
 
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -208,7 +209,7 @@ describe('movingControlPoint', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [oval] })),
     );
-    state.selectedObjects = [oval.do_objectID];
+    state.selectedLayerIds = [oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -240,7 +241,7 @@ describe('movingControlPoint', () => {
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
 
-    state.selectedObjects = [oval.do_objectID];
+    state.selectedLayerIds = [oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['editPath']],
@@ -263,7 +264,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -282,7 +283,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'ne']],
@@ -301,7 +302,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'nw']],
@@ -320,7 +321,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'sw']],
@@ -339,7 +340,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID, oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -367,7 +368,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
-    state.selectedObjects = [rectangle.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -395,7 +396,7 @@ describe('scale', () => {
     const state = createInitialState(
       createSketchFile(SketchModel.page({ layers: [artboard, oval] })),
     );
-    state.selectedObjects = [rectangle.do_objectID, oval.do_objectID];
+    state.selectedLayerIds = [rectangle.do_objectID, oval.do_objectID];
 
     const updated = run(state, [
       ['interaction', ['maybeScale', { x: 100, y: 100 }, 'se']],
@@ -512,6 +513,22 @@ describe('setZoom', () => {
     expect(getCurrentPageMetadata(updated)).toEqual({
       zoomValue: 1,
       scrollOrigin: { x: 0, y: 0 },
+    });
+  });
+
+  test('zoom when no user metadata exists for a page', () => {
+    const state = createInitialState(createSketchFile());
+    const page = SketchModel.page();
+    state.sketch.pages = [page];
+    state.selectedPage = page.do_objectID;
+
+    expect(state.sketch.user[page.do_objectID]).toEqual(undefined);
+
+    const updated = run(state, [['setZoom', 2, 'multiply']]);
+
+    expect(getCurrentPageMetadata(updated)).toEqual({
+      zoomValue: 2,
+      scrollOrigin: { x: -500, y: -500 },
     });
   });
 });

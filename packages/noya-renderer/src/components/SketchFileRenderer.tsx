@@ -1,8 +1,14 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { createRect, insetRect, Point, Rect } from 'noya-geometry';
+import {
+  AffineTransform,
+  createRect,
+  insetRect,
+  Point,
+  Rect,
+} from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -11,6 +17,7 @@ import {
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
+  getClippedLayerMap,
   Layers,
   Primitives,
   Selectors,
@@ -19,6 +26,9 @@ import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
+import { useRenderingMode } from '../RenderingModeContext';
+import { useRootScale } from '../RootScaleContext';
+import { ClippedLayerProvider } from '../ClippedLayerContext';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -61,6 +71,7 @@ export default memo(function SketchFileRenderer() {
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
   const CanvasKit = useCanvasKit();
+  const renderingMode = useRenderingMode();
   const page = Selectors.getCurrentPage(state);
   const screenTransform = Selectors.getScreenTransform(canvasInsets);
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
@@ -93,22 +104,22 @@ export default memo(function SketchFileRenderer() {
 
   const boundingRect = useMemo(
     () =>
-      Selectors.getBoundingRect(page, state.selectedObjects, {
+      Selectors.getBoundingRect(page, state.selectedLayerIds, {
         groups: 'childrenOnly',
         includeHiddenLayers: true,
       }),
-    [page, state.selectedObjects],
+    [page, state.selectedLayerIds],
   );
 
   const boundingPoints = useMemo(
     () =>
-      state.selectedObjects.map((id: string) =>
+      state.selectedLayerIds.map((id: string) =>
         Selectors.getBoundingPoints(page, id, {
           groups: 'childrenOnly',
           includeHiddenLayers: true,
         }),
       ),
-    [page, state.selectedObjects],
+    [page, state.selectedLayerIds],
   );
 
   const quickMeasureGuides = useMemo(() => {
@@ -116,8 +127,8 @@ export default memo(function SketchFileRenderer() {
       !highlightedLayer ||
       !highlightedLayer.isMeasured ||
       !boundingRect ||
-      state.selectedObjects.length === 0 ||
-      state.selectedObjects.includes(highlightedLayer.id)
+      state.selectedLayerIds.length === 0 ||
+      state.selectedLayerIds.includes(highlightedLayer.id)
     ) {
       return;
     }
@@ -164,13 +175,13 @@ export default memo(function SketchFileRenderer() {
         ))}
       </>
     );
-  }, [highlightedLayer, page, state.selectedObjects, boundingRect]);
+  }, [highlightedLayer, page, state.selectedLayerIds, boundingRect]);
 
   const highlightedSketchLayer = useMemo(() => {
     if (
       !highlightedLayer ||
       // Don't draw a highlight when hovering over a selected layer on the canvas
-      (state.selectedObjects.includes(highlightedLayer.id) &&
+      (state.selectedLayerIds.includes(highlightedLayer.id) &&
         highlightedLayer.precedence === 'belowSelection')
     ) {
       return;
@@ -198,7 +209,7 @@ export default memo(function SketchFileRenderer() {
         />
       )
     );
-  }, [highlightPaint, highlightedLayer, page, state.selectedObjects]);
+  }, [highlightPaint, highlightedLayer, page, state.selectedLayerIds]);
 
   const penToolPseudoElements = useMemo(() => {
     if (interactionState.type !== 'drawingShapePath' || !interactionState.point)
@@ -338,72 +349,89 @@ export default memo(function SketchFileRenderer() {
 
   const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
 
+  const rootScale = useRootScale();
+  const rootScaleTransform = useMemo(
+    () => AffineTransform.scale(rootScale),
+    [rootScale],
+  );
+
+  const clippedLayerMap = useMemo(() => {
+    if (renderingMode === 'static') return {};
+
+    return getClippedLayerMap(state, canvasSize, canvasInsets);
+  }, [canvasInsets, canvasSize, renderingMode, state]);
+
   return (
-    <>
-      <RCKRect rect={canvasRect} paint={backgroundFill} />
-      <Group transform={canvasTransform}>
-        <SketchGroup layer={page} />
-        {gradientStopPoints && state.selectedGradient && (
-          <GradientEditor
-            gradientStopPoints={gradientStopPoints}
-            selectedGradient={state.selectedGradient}
-          />
-        )}
-        {symbol && <SketchArtboardContent layer={symbol} />}
-        {interactionState.type === 'drawingShapePath' ? (
-          penToolPseudoElements
-        ) : isEditingPath ? (
-          <>
-            {editablePaths}
-            {editPathPseudoElements}
-            <InsertPointOverlay />
-          </>
-        ) : (
-          <>
-            {(state.selectedObjects.length > 1 ||
-              !Selectors.getSelectedLineLayer(state)) &&
-              boundingRect &&
-              !state.selectedGradient &&
-              !drawingLayer &&
-              !isInserting && (
-                <>
-                  <BoundingRect
-                    rect={boundingRect}
-                    selectionPaint={selectionPaint}
-                  />
-                  {!isEditingText &&
-                    boundingPoints.map((points: Point[], index: number) => (
-                      <Polyline
-                        key={index}
-                        points={points}
-                        paint={selectionPaint}
-                      />
-                    ))}
-                </>
+    <ClippedLayerProvider value={clippedLayerMap}>
+      <Group transform={rootScaleTransform}>
+        <RCKRect rect={canvasRect} paint={backgroundFill} />
+        <Group transform={canvasTransform}>
+          <SketchGroup layer={page} />
+          {gradientStopPoints && state.selectedGradient && (
+            <GradientEditor
+              gradientStopPoints={gradientStopPoints}
+              selectedGradient={state.selectedGradient}
+            />
+          )}
+          {symbol && <SketchArtboardContent layer={symbol} />}
+          {interactionState.type === 'drawingShapePath' ? (
+            penToolPseudoElements
+          ) : isEditingPath ? (
+            <>
+              {editablePaths}
+              {editPathPseudoElements}
+              <InsertPointOverlay />
+            </>
+          ) : (
+            <>
+              {(state.selectedLayerIds.length > 1 ||
+                !Selectors.getSelectedLineLayer(state)) &&
+                boundingRect &&
+                !state.selectedGradient &&
+                !drawingLayer &&
+                !isInserting && (
+                  <>
+                    <BoundingRect
+                      rect={boundingRect}
+                      selectionPaint={selectionPaint}
+                    />
+                    {!isEditingText &&
+                      boundingPoints.map((points: Point[], index: number) => (
+                        <Polyline
+                          key={index}
+                          points={points}
+                          paint={selectionPaint}
+                        />
+                      ))}
+                  </>
+                )}
+              {!drawingLayer &&
+                !isInserting &&
+                !isEditingText &&
+                highlightedSketchLayer}
+              {drawingLayer && <SketchLayer layer={drawingLayer} />}
+              <SnapGuides />
+              {quickMeasureGuides}
+              {!state.selectedGradient &&
+                boundingRect &&
+                !drawingLayer &&
+                !isInserting &&
+                !isEditingText && <DragHandles rect={boundingRect} />}
+            </>
+          )}
+        </Group>
+        <Group transform={screenTransform}>
+          {interactionState.type === 'marquee' && (
+            <Marquee
+              rect={createRect(
+                interactionState.origin,
+                interactionState.current,
               )}
-            {!drawingLayer &&
-              !isInserting &&
-              !isEditingText &&
-              highlightedSketchLayer}
-            {drawingLayer && <SketchLayer layer={drawingLayer} />}
-            <SnapGuides />
-            {quickMeasureGuides}
-            {!state.selectedGradient &&
-              boundingRect &&
-              !drawingLayer &&
-              !isInserting &&
-              !isEditingText && <DragHandles rect={boundingRect} />}
-          </>
-        )}
+            />
+          )}
+          {showRulers && <HorizontalRuler />}
+        </Group>
       </Group>
-      <Group transform={screenTransform}>
-        {interactionState.type === 'marquee' && (
-          <Marquee
-            rect={createRect(interactionState.origin, interactionState.current)}
-          />
-        )}
-        {showRulers && <HorizontalRuler />}
-      </Group>
-    </>
+    </ClippedLayerProvider>
   );
 });

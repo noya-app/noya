@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'noya-app-state-context';

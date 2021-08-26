@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { transformRect } from 'noya-geometry';
 import { Layers, Selectors } from 'noya-state';
 import { useMemo } from 'react';

@@ -1,4 +1,4 @@
-import {
+import React, {
   CSSProperties,
   ForwardedRef,
   forwardRef,
@@ -8,7 +8,7 @@ import {
 import styled from 'styled-components';
 import { Tooltip } from '..';
 
-type ButtonVariant = 'normal' | 'thin';
+type ButtonVariant = 'normal' | 'thin' | 'none';
 
 /* ----------------------------------------------------------------------------
  * Element
@@ -19,23 +19,33 @@ const ButtonElement = styled.button<{
   variant: ButtonVariant;
   flex?: CSSProperties['flex'];
 }>(({ theme, active, disabled, variant, flex }) => ({
+  WebkitAppRegion: 'no-drag',
   ...theme.textStyles.small,
   flex: flex ?? '0 0 auto',
   position: 'relative',
   border: '0',
   outline: 'none',
-  minWidth: variant === 'thin' ? undefined : '31px',
+  minWidth: variant === 'normal' ? '31px' : undefined,
   textAlign: 'left',
   borderRadius: '4px',
-  paddingTop: '4px',
-  paddingRight: variant === 'thin' ? '1px' : '6px',
-  paddingBottom: variant === 'thin' ? '0px' : '4px',
-  paddingLeft: variant === 'thin' ? '1px' : '6px',
-  background: active ? theme.colors.primary : theme.colors.inputBackground,
+  paddingTop: variant === 'none' ? '0px' : '4px',
+  paddingRight: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
+  paddingBottom: variant === 'none' ? '0px' : '4px',
+  paddingLeft: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
+  background: active
+    ? theme.colors.primary
+    : variant === 'none'
+    ? 'transparent'
+    : theme.colors.inputBackground,
   color: active ? 'white' : theme.colors.text,
   opacity: disabled ? 0.25 : 1,
-  '&:focus': {
-    boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+  ...(variant === 'normal' && {
+    '&:focus': {
+      boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
+    },
+  }),
+  '&:active': {
+    background: theme.colors.activeBackground,
   },
   display: 'flex',
   alignItems: 'center',
@@ -56,21 +66,23 @@ const ButtonContent = styled.span(({ theme }) => ({
   minHeight: '19px',
   display: 'flex',
   alignItems: 'center',
+  flex: '1',
+  justifyContent: 'center',
 }));
 
 /* ----------------------------------------------------------------------------
  * Root
  * ------------------------------------------------------------------------- */
 
-interface ButtonRootProps {
-  id: string;
+export interface ButtonRootProps {
+  id?: string;
   flex?: CSSProperties['flex'];
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;
   variant?: ButtonVariant;
   tooltip?: ReactNode;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent) => void;
 }
 
 const Button = forwardRef(function Button(
@@ -83,6 +95,7 @@ const Button = forwardRef(function Button(
     variant = 'normal',
     onClick,
     children,
+    ...rest // Propagate any other props so this component works as a Slot
   }: ButtonRootProps,
   forwardedRef: ForwardedRef<HTMLButtonElement>,
 ) {
@@ -95,6 +108,7 @@ const Button = forwardRef(function Button(
       disabled={disabled}
       variant={variant}
       onClick={onClick}
+      {...rest}
     >
       <ButtonContent>{children}</ButtonContent>
     </ButtonElement>

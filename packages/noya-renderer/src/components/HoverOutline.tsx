@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Paint } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
 import { Layers, Selectors } from 'noya-state';
@@ -8,7 +8,7 @@ import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
 
 interface HoverOutlinePathProps {
-  layer: Layers.PointsLayer;
+  layer: Layers.PointsLayer | Sketch.ShapeGroup;
   paint: Paint;
 }
 
@@ -60,7 +60,8 @@ export default function HoverOutline({ layer, paint, transform }: Props) {
     case 'polygon':
     case 'shapePath':
     case 'rectangle':
-    case 'oval': {
+    case 'oval':
+    case 'shapeGroup': {
       element = <HoverOutlinePath layer={layer} paint={paint} />;
       break;
     }

@@ -1,0 +1,232 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`get Gradient Point angular gradient 1`] = `
+Array [
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 1,
+      "green": 1,
+      "red": 1,
+    },
+    "point": Object {
+      "x": 100,
+      "y": 50,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 0,
+      "green": 0,
+      "red": 0,
+    },
+    "point": Object {
+      "x": 100,
+      "y": 49.999999999999986,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 0.5,
+      "blue": 0.5,
+      "green": 0.5,
+      "red": 0.5,
+    },
+    "point": Object {
+      "x": 0,
+      "y": 50.00000000000001,
+    },
+  },
+]
+`;
+
+exports[`get Gradient Point layer in artboard 1`] = `
+Array [
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 1,
+      "green": 1,
+      "red": 1,
+    },
+    "point": Object {
+      "x": 500,
+      "y": 450,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 0.5,
+      "blue": 0.5,
+      "green": 0.5,
+      "red": 0.5,
+    },
+    "point": Object {
+      "x": 500,
+      "y": 500,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 0,
+      "green": 0,
+      "red": 0,
+    },
+    "point": Object {
+      "x": 500,
+      "y": 550,
+    },
+  },
+]
+`;
+
+exports[`get Gradient Point layer in group in artboard 1`] = `
+Array [
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 1,
+      "green": 1,
+      "red": 1,
+    },
+    "point": Object {
+      "x": 550,
+      "y": 500,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 0.5,
+      "blue": 0.5,
+      "green": 0.5,
+      "red": 0.5,
+    },
+    "point": Object {
+      "x": 550,
+      "y": 550,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 0,
+      "green": 0,
+      "red": 0,
+    },
+    "point": Object {
+      "x": 550,
+      "y": 600,
+    },
+  },
+]
+`;
+
+exports[`get Gradient Point linear gradient / radial gradient 1`] = `
+Array [
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 1,
+      "green": 1,
+      "red": 1,
+    },
+    "point": Object {
+      "x": 50,
+      "y": 0,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 0,
+      "green": 0,
+      "red": 0,
+    },
+    "point": Object {
+      "x": 50,
+      "y": 100,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 0.5,
+      "blue": 0.5,
+      "green": 0.5,
+      "red": 0.5,
+    },
+    "point": Object {
+      "x": 50,
+      "y": 50,
+    },
+  },
+]
+`;
+
+exports[`get Gradient Point sorted points 1`] = `
+Array [
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 1,
+      "green": 1,
+      "red": 1,
+    },
+    "point": Object {
+      "x": 50,
+      "y": 0,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 0.5,
+      "blue": 0.5,
+      "green": 0.5,
+      "red": 0.5,
+    },
+    "point": Object {
+      "x": 50,
+      "y": 50,
+    },
+  },
+  Object {
+    "color": Object {
+      "_class": "color",
+      "alpha": 1,
+      "blue": 0,
+      "green": 0,
+      "red": 0,
+    },
+    "point": Object {
+      "x": 50,
+      "y": 100,
+    },
+  },
+]
+`;
+
+exports[`set angular gradient circle rotated layer 1`] = `
+Object {
+  "center": Object {
+    "x": 50,
+    "y": 50,
+  },
+  "radius": 50,
+  "rotation": -0.017453292519943295,
+}
+`;

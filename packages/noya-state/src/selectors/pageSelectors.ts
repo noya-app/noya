@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { Draft } from 'immer';
 import { Point } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
@@ -60,7 +60,7 @@ export const getCurrentPageMetadata = (
     currentPage.do_objectID
   ] ?? {
     zoomValue: 1,
-    scrollOrigin: '{100,100}',
+    scrollOrigin: '{0,0}',
   };
 
   return decodePageMetadata(meta);

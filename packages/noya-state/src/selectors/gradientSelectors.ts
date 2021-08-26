@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -312,6 +312,7 @@ export function getAngularGradientCircle(state: ApplicationState) {
   const transform = getLayerTransformAtIndexPath(page, indexPath)
     .prepend(getLayerFlipTransform(layer))
     .prepend(getLayerRotationTransform(layer));
+
   const bounds = createBounds(layer.frame);
   const center = transform.applyTo({ x: bounds.midX, y: bounds.midY });
 

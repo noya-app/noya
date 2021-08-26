@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 import produce, { Draft } from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
 import {
@@ -56,7 +56,7 @@ export const getSelectedLayers = (
   const page = getCurrentPage(state);
 
   return Layers.findAll(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
+    state.selectedLayerIds.includes(layer.do_objectID),
   ) as PageLayer[];
 };
 
@@ -65,9 +65,11 @@ export const getSelectedLayersWithContextSettings = (
 ): PageLayer[] => {
   const page = getCurrentPage(state);
 
-  return (Layers.findAll(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
-  ) as PageLayer[]).filter(
+  return (
+    Layers.findAll(page, (layer) =>
+      state.selectedLayerIds.includes(layer.do_objectID),
+    ) as PageLayer[]
+  ).filter(
     (layer) => layer._class !== 'artboard' && layer.style?.contextSettings,
   );
 };
@@ -78,7 +80,7 @@ export const getSelectedLayersWithFixedRadius = (
   const page = getCurrentPage(state);
 
   return Layers.findAll(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
+    state.selectedLayerIds.includes(layer.do_objectID),
   ).filter((layer): layer is Sketch.Rectangle => layer._class === 'rectangle');
 };
 
@@ -112,7 +114,7 @@ export const getParentLayer = (page: Sketch.AnyLayer, indexPath: IndexPath) =>
   Layers.access(page, indexPath.slice(0, -1)) as Layers.ParentLayer;
 
 export const addSiblingLayer = <
-  T extends Exclude<Sketch.AnyLayer, { _class: 'page' }>
+  T extends Exclude<Sketch.AnyLayer, { _class: 'page' }>,
 >(
   page: Sketch.AnyLayer,
   indexPath: IndexPath,
@@ -171,7 +173,7 @@ export function getSelectedLineLayer(
   const page = Selectors.getCurrentPage(state);
   const indexPath = Layers.findIndexPath(
     page,
-    (layer) => layer.do_objectID === state.selectedObjects[0],
+    (layer) => layer.do_objectID === state.selectedLayerIds[0],
   );
   if (!indexPath) return undefined;
 
@@ -354,7 +356,7 @@ export function insertLayerAtIndexPath(
   // the `destinationIndexPath`
   state = produce(state, (draft) => {
     draft.sketch.pages[pageIndex].layers.push(...layers);
-    draft.selectedObjects = ids;
+    draft.selectedLayerIds = ids;
   });
 
   // Move the layers into their target position

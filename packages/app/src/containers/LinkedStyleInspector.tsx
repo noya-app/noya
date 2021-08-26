@@ -5,7 +5,7 @@ import {
   ResetIcon,
   UpdateIcon,
 } from '@radix-ui/react-icons';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Button, Select } from 'noya-designsystem';
 import { getMultiValue, Selectors } from 'noya-state';

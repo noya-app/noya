@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   useApplicationState,
   useSelector,
@@ -21,12 +21,14 @@ import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
+  ImportedImageTarget,
   getCurrentPage,
   getSelectedLineLayer,
   Layers,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
+  InsertedImage,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
 import {
@@ -39,8 +41,9 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import ImageDropTarget, { TypedFile } from '../components/ImageDropTarget';
+import ImageDropTarget, { TypedFile } from '../components/FileDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
+import { useImagePasteHandler } from '../hooks/useFilePasteHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
@@ -141,7 +144,7 @@ export default memo(function Canvas() {
     if (state.selectedGradient) {
       dispatch('deleteStopToGradient');
     } else {
-      dispatch('deleteLayer', state.selectedObjects);
+      dispatch('deleteLayer', state.selectedLayerIds);
     }
   };
 
@@ -150,9 +153,9 @@ export default memo(function Canvas() {
     Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
-    'Mod-d': () => dispatch('duplicateLayer', state.selectedObjects),
-    'Mod-g': () => dispatch('groupLayers', state.selectedObjects),
-    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedObjects),
+    'Mod-d': () => dispatch('duplicateLayer', state.selectedLayerIds),
+    'Mod-g': () => dispatch('groupLayers', state.selectedLayerIds),
+    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedLayerIds),
     'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
     'Mod-+': () => dispatch('setZoom', 2, 'multiply'),
     'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
@@ -171,6 +174,46 @@ export default memo(function Canvas() {
       if (state.interactionState.type !== 'none') return;
 
       dispatch('interaction', ['enablePanMode']);
+    },
+    Enter: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      switch (state.interactionState.type) {
+        case 'editPath': {
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
+        case 'none': {
+          const selectedLayers = Selectors.getSelectedLayers(state);
+
+          if (selectedLayers.length > 0) {
+            const firstLayer = selectedLayers[0];
+
+            if (Layers.isTextLayer(firstLayer)) {
+              dispatch('selectLayer', firstLayer.do_objectID);
+              dispatch('interaction', [
+                'editingText',
+                firstLayer.do_objectID,
+                {
+                  anchor: 0,
+                  head: firstLayer.attributedString.string.length,
+                },
+              ]);
+            } else if (Layers.isPointsLayer(firstLayer)) {
+              dispatch(
+                'selectLayer',
+                selectedLayers
+                  .filter(Layers.isPointsLayer)
+                  .map((layer) => layer.do_objectID),
+              );
+              dispatch('interaction', ['editPath']);
+            }
+
+            break;
+          }
+        }
+      }
     },
   });
 
@@ -289,7 +332,7 @@ export default memo(function Canvas() {
 
         if (!layer) {
           dispatch('selectLayer', undefined);
-        } else if (!state.selectedObjects.includes(layer.do_objectID)) {
+        } else if (!state.selectedLayerIds.includes(layer.do_objectID)) {
           dispatch('selectLayer', layer.do_objectID);
         }
 
@@ -331,7 +374,7 @@ export default memo(function Canvas() {
 
           const boundingRects = Selectors.getBoundingRectMap(
             Selectors.getCurrentPage(state),
-            state.selectedObjects,
+            state.selectedLayerIds,
             { groups: 'childrenOnly' },
           );
 
@@ -366,9 +409,8 @@ export default memo(function Canvas() {
             });
           });
 
-          const indexPathOfOpenShapeLayer = Selectors.getIndexPathOfOpenShapeLayer(
-            state,
-          );
+          const indexPathOfOpenShapeLayer =
+            Selectors.getIndexPathOfOpenShapeLayer(state);
 
           if (selectedPoint) {
             if (Selectors.canClosePath(state, selectedPoint) && !shiftKey) {
@@ -415,13 +457,14 @@ export default memo(function Canvas() {
         case 'hoverHandle':
         case 'editingText':
         case 'none': {
-          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
-            CanvasKit,
-            fontManager,
-            state,
-            point,
-            'bounded',
-          );
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'bounded',
+            );
 
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
@@ -432,7 +475,7 @@ export default memo(function Canvas() {
             return;
           }
 
-          if (state.selectedObjects.length > 0) {
+          if (state.selectedLayerIds.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction && !state.selectedGradient) {
@@ -454,10 +497,8 @@ export default memo(function Canvas() {
             },
           );
 
-          const selectedGradientStopIndex = Selectors.getGradientStopIndexAtPoint(
-            state,
-            point,
-          );
+          const selectedGradientStopIndex =
+            Selectors.getGradientStopIndexAtPoint(state, point);
 
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
@@ -474,8 +515,8 @@ export default memo(function Canvas() {
           ) {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
-            if (state.selectedObjects.includes(layer.do_objectID)) {
-              if (event.shiftKey && state.selectedObjects.length !== 1) {
+            if (state.selectedLayerIds.includes(layer.do_objectID)) {
+              if (event.shiftKey && state.selectedLayerIds.length !== 1) {
                 dispatch('selectLayer', layer.do_objectID, 'difference');
               }
             } else {
@@ -546,13 +587,14 @@ export default memo(function Canvas() {
         case 'selectingText': {
           if (!textSelection) return;
 
-          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
-            CanvasKit,
-            fontManager,
-            state,
-            point,
-            'unbounded',
-          );
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'unbounded',
+            );
 
           if (characterIndex !== undefined) {
             dispatch('setTextSelection', {
@@ -779,7 +821,7 @@ export default memo(function Canvas() {
             );
           }
 
-          if (state.selectedObjects.length > 0) {
+          if (state.selectedLayerIds.length > 0) {
             const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
             if (direction && !state.selectedGradient) {
@@ -835,13 +877,14 @@ export default memo(function Canvas() {
             return;
           }
 
-          const characterIndex = Selectors.getCharacterIndexAtPointInSelectedLayer(
-            CanvasKit,
-            fontManager,
-            state,
-            point,
-            'bounded',
-          );
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'bounded',
+            );
 
           dispatch('interaction', [
             'editingText',
@@ -997,45 +1040,63 @@ export default memo(function Canvas() {
     }
   }, [state, handleDirection]);
 
-  const onDropFile = useCallback(
+  const onImportImages = useCallback(
     async (
-      file: TypedFile<SupportedImageUploadType>,
+      files: TypedFile<SupportedImageUploadType>[],
+      insertTarget: ImportedImageTarget,
       offsetPoint: OffsetPoint,
     ) => {
       const rawPoint = getPoint(offsetPoint);
       const point = offsetEventPoint(rawPoint);
 
-      if (file.type === 'image/svg+xml') {
-        const svgString = await file.text();
-        const name = file.name.replace(/\.svg$/, '');
-        dispatch('importSvg', point, name, svgString);
-        return;
-      }
+      const images = await Promise.all(
+        files.map(async (file): Promise<InsertedImage | void> => {
+          if (file.type === 'image/svg+xml') {
+            const svgString = await file.text();
 
-      const data = await file.arrayBuffer();
-      const image = CanvasKit.MakeImageFromEncoded(data);
+            return {
+              name: file.name.replace(/\.svg$/, ''),
+              extension: 'svg',
+              svgString,
+            };
+          } else {
+            const data = await file.arrayBuffer();
+            const decodedImage = CanvasKit.MakeImageFromEncoded(data);
 
-      if (!image) return;
+            if (!decodedImage) return;
 
-      const size = {
-        width: image.width(),
-        height: image.height(),
-      };
+            const size = {
+              width: decodedImage.width(),
+              height: decodedImage.height(),
+            };
 
-      const frame = {
-        ...size,
-        x: point.x - size.width / 2,
-        y: point.y - size.height / 2,
-      };
+            const extension = getFileExtensionForType(file.type);
 
-      dispatch('insertBitmap', data, {
-        name: file.name,
-        frame: frame,
-        extension: getFileExtensionForType(file.type),
-      });
+            return {
+              name: file.name.replace(new RegExp(`\\.${extension}$`), ''),
+              extension,
+              size,
+              data,
+            };
+          }
+        }),
+      );
+
+      const validImages = images.flatMap((image) => (image ? [image] : []));
+
+      dispatch('importImage', validImages, point, insertTarget);
     },
     [CanvasKit, dispatch, offsetEventPoint],
   );
+
+  useImagePasteHandler<SupportedImageUploadType>({
+    supportedFileTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
+    canvasSize: containerSize,
+    onPasteImages: useCallback(
+      (files, point) => onImportImages(files, 'selectedArtboard', point),
+      [onImportImages],
+    ),
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -1049,6 +1110,10 @@ export default memo(function Canvas() {
         dispatch('insertText', event.data);
       } else {
         switch (event.inputType) {
+          case 'insertLineBreak':
+            dispatch('insertText', '\n');
+            break;
+          // Delete
           case 'deleteContent':
           case 'deleteContentForward':
           case 'deleteContentBackward':
@@ -1073,9 +1138,12 @@ export default memo(function Canvas() {
   }, [dispatch]);
 
   return (
-    <ImageDropTarget
-      onDropFile={onDropFile}
+    <ImageDropTarget<SupportedImageUploadType>
       supportedFileTypes={SUPPORTED_IMAGE_UPLOAD_TYPES}
+      onDropFiles={useCallback(
+        (file, point) => onImportImages(file, 'nearestArtboard', point),
+        [onImportImages],
+      )}
     >
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container

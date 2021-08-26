@@ -1,8 +1,8 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { Size } from 'noya-geometry';
+import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
@@ -20,6 +20,7 @@ import {
   getLayerParagraph,
   getSelectedLayerIndexPaths,
   setNewPatternFill,
+  setNewShaderFill,
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
@@ -72,7 +73,7 @@ export type ApplicationState = {
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
   selectedPage: string;
-  selectedObjects: string[];
+  selectedLayerIds: string[];
   selectedPointLists: SelectedPointLists;
   selectedControlPoint?: SelectedControlPoint;
   selectedThemeTab: Record<ThemeTab, ThemeSelection>;
@@ -99,6 +100,7 @@ export type Action =
   | TextEditorAction;
 
 export type ApplicationReducerContext = {
+  canvasInsets: Insets;
   canvasSize: Size;
   fontManager: IFontManager;
 };
@@ -160,13 +162,14 @@ export function applicationReducer(
       return pageReducer(state, action);
     }
     case 'setZoom':
+    case 'zoomToFit':
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'addShapePathLayer':
     case 'addSymbolLayer':
     case 'addPointToPath':
     case 'pan':
-    case 'insertBitmap':
+    case 'importImage':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':
     case 'insertPointInPath':
@@ -190,7 +193,6 @@ export function applicationReducer(
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
       return layerPropertyReducer(state, action, CanvasKit);
-    case 'importSvg':
     case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':
@@ -251,6 +253,10 @@ export function applicationReducer(
     case 'setSaturation':
     case 'setBrightness':
     case 'setContrast':
+    case 'setBlurEnabled':
+    case 'setBlurRadius':
+    case 'setBlurType':
+    case 'setBlurSaturation':
     case 'setPatternFillType':
     case 'setPatternTileScale':
     case 'setFillImage':
@@ -258,7 +264,13 @@ export function applicationReducer(
     case 'setFillGradientFrom':
     case 'setBorderGradientFrom':
     case 'setFillGradientTo':
-    case 'setBorderGradientTo': {
+    case 'setBorderGradientTo':
+    case 'setShaderString':
+    case 'setShaderVariableName':
+    case 'setShaderVariableValue':
+    case 'nudgeShaderVariableValue':
+    case 'addShaderVariable':
+    case 'deleteShaderVariable': {
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
@@ -268,12 +280,16 @@ export function applicationReducer(
             (layer) => {
               if (!layer.style) return;
 
-              if (
-                action[0] === 'setFillFillType' &&
-                action[2] === Sketch.FillType.Pattern &&
-                layer.style.fills
-              )
-                setNewPatternFill(layer.style.fills, action[1], draft);
+              if (action[0] === 'setFillFillType' && layer.style.fills) {
+                switch (action[2]) {
+                  case Sketch.FillType.Pattern:
+                    setNewPatternFill(layer.style.fills, action[1], draft);
+                    break;
+                  case Sketch.FillType.Shader:
+                    setNewShaderFill(layer.style.fills, action[1]);
+                    break;
+                }
+              }
 
               if (
                 action[0] === 'setFillGradientPosition' ||
@@ -330,12 +346,16 @@ export function applicationReducer(
 
             style.value = styleReducer(style.value, action);
 
-            if (
-              action[0] === 'setFillFillType' &&
-              action[2] === Sketch.FillType.Pattern &&
-              style.value.fills
-            )
-              setNewPatternFill(style.value.fills, action[1], draft);
+            if (action[0] === 'setFillFillType' && style.value.fills) {
+              switch (action[2]) {
+                case Sketch.FillType.Pattern:
+                  setNewPatternFill(style.value.fills, action[1], draft);
+                  break;
+                case Sketch.FillType.Shader:
+                  setNewShaderFill(style.value.fills, action[1]);
+                  break;
+              }
+            }
 
             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
               accessPageLayers(
@@ -480,7 +500,7 @@ export function createInitialState(sketch: SketchFile): ApplicationState {
       shiftKey: false,
     },
     selectedPage: sketch.pages[0].do_objectID,
-    selectedObjects: [],
+    selectedLayerIds: [],
     selectedPointLists: {},
     selectedControlPoint: undefined,
     selectedThemeTab: {

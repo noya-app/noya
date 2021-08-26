@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { useObjectURL } from '../hooks/useObjectURL';

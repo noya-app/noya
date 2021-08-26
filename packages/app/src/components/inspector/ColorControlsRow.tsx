@@ -1,54 +1,8 @@
-import { InputField, Slider } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { DimensionValue } from './DimensionsInspector';
-
-interface ColorControlInputProps {
-  id: string;
-  label: string;
-  value: DimensionValue;
-  onChange: (value: number, mode: SetNumberMode) => void;
-}
-
-function ColorControlInput({
-  id,
-  label,
-  value,
-  onChange,
-}: ColorControlInputProps) {
-  const handleSubmit = useCallback(
-    (value: number) => onChange(value, 'replace'),
-    [onChange],
-  );
-
-  const handleNudge = useCallback(
-    (value: number) => onChange(value, 'adjust'),
-    [onChange],
-  );
-
-  return (
-    <InspectorPrimitives.LabeledRow label={label}>
-      <Slider
-        id={`${id}-slider`}
-        value={value ?? 0}
-        onValueChange={handleSubmit}
-        min={-100}
-        max={100}
-      />
-      <InspectorPrimitives.HorizontalSeparator />
-      <InputField.Root id={`${id}-input`} size={50}>
-        <InputField.NumberInput
-          value={value}
-          placeholder={value === undefined ? 'multi' : undefined}
-          onSubmit={handleSubmit}
-          onNudge={handleNudge}
-        />
-        <InputField.Label>%</InputField.Label>
-      </InputField.Root>
-    </InspectorPrimitives.LabeledRow>
-  );
-}
+import { DimensionSliderRow } from './DimensionSliderRow';
 
 interface Props {
   id: string;
@@ -62,7 +16,7 @@ interface Props {
   onChangeContrast: (value: number, mode: SetNumberMode) => void;
 }
 
-export default memo(function FillRow({
+export default memo(function ColorControlsRow({
   id,
   hue,
   saturation,
@@ -75,28 +29,40 @@ export default memo(function FillRow({
 }: Props) {
   return (
     <InspectorPrimitives.Column id={id}>
-      <ColorControlInput
+      <DimensionSliderRow
         id={id}
         label="Hue"
         value={hue}
+        min={-100}
+        max={100}
+        inputFieldLabel="%"
         onChange={onChangeHue}
       />
-      <ColorControlInput
+      <DimensionSliderRow
         id={id}
         label="Saturation"
         value={saturation}
+        min={-100}
+        max={100}
+        inputFieldLabel="%"
         onChange={onChangeSaturation}
       />
-      <ColorControlInput
+      <DimensionSliderRow
         id={id}
         label="Brightness"
         value={brightness}
+        min={-100}
+        max={100}
+        inputFieldLabel="%"
         onChange={onChangeBrightness}
       />
-      <ColorControlInput
+      <DimensionSliderRow
         id={id}
         label="Contrast"
         value={contrast}
+        min={-100}
+        max={100}
+        inputFieldLabel="%"
         onChange={onChangeContrast}
       />
     </InspectorPrimitives.Column>

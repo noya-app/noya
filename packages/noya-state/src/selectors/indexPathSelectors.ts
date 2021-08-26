@@ -1,4 +1,4 @@
-import type Sketch from '@sketch-hq/sketch-file-format-ts';
+import type Sketch from 'noya-file-format';
 import { IndexPath } from 'tree-visit';
 import { ApplicationState, Layers } from '../index';
 import { findIndexPath, INCLUDE_AND_SKIP } from '../layers';
@@ -36,7 +36,7 @@ export const getSelectedLayerIndexPaths = (
   const page = getCurrentPage(state);
 
   return Layers.findAllIndexPaths(page, (layer) =>
-    state.selectedObjects.includes(layer.do_objectID),
+    state.selectedLayerIds.includes(layer.do_objectID),
   );
 };
 
@@ -60,18 +60,16 @@ export const getLayerIndexPathsExcludingDescendants = (
 export const getSelectedLayerIndexPathsExcludingDescendants = (
   state: ApplicationState,
 ): IndexPath[] => {
-  return getLayerIndexPathsExcludingDescendants(state, state.selectedObjects);
+  return getLayerIndexPathsExcludingDescendants(state, state.selectedLayerIds);
 };
 
 export const getIndexPathsForGroup = (
   state: ApplicationState,
   ids: string[],
 ) => {
-  return getLayerIndexPathsExcludingDescendants(
-    state,
-    ids,
-  ).filter((indexPath) =>
-    Layers.isChildLayer(Layers.access(getCurrentPage(state), indexPath)),
+  return getLayerIndexPathsExcludingDescendants(state, ids).filter(
+    (indexPath) =>
+      Layers.isChildLayer(Layers.access(getCurrentPage(state), indexPath)),
   );
 };
 
@@ -79,10 +77,8 @@ export const getIndexPathsOfArtboardLayers = (
   state: ApplicationState,
   ids: string[],
 ) => {
-  return getLayerIndexPathsExcludingDescendants(
-    state,
-    ids,
-  ).filter((indexPath) =>
-    Layers.isArtboard(Layers.access(getCurrentPage(state), indexPath)),
+  return getLayerIndexPathsExcludingDescendants(state, ids).filter(
+    (indexPath) =>
+      Layers.isArtboard(Layers.access(getCurrentPage(state), indexPath)),
   );
 };

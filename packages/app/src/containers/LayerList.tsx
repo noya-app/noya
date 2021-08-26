@@ -4,19 +4,14 @@ import {
   Component1Icon,
   ComponentInstanceIcon,
   CopyIcon,
-  EyeClosedIcon,
-  EyeOpenIcon,
   FrameIcon,
   GroupIcon,
   ImageIcon,
-  LockClosedIcon,
-  LockOpen1Icon,
   MaskOnIcon,
   Share1Icon,
   SquareIcon,
   TextIcon,
 } from '@radix-ui/react-icons';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
 import {
   useApplicationState,
   useGetStateSnapshot,
@@ -24,12 +19,16 @@ import {
   useWorkspace,
 } from 'noya-app-state-context';
 import {
+  IconButton,
   ListView,
   RelativeDropPosition,
   Spacer,
   TreeView,
   withSeparatorElements,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { Size } from 'noya-geometry';
+import { useDeepArray, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
 import React, {
@@ -37,14 +36,15 @@ import React, {
   forwardRef,
   memo,
   useCallback,
+  useEffect,
   useLayoutEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import { useDeepArray } from 'noya-react-utils';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
-import { useShallowArray } from 'noya-react-utils';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -71,7 +71,8 @@ type LayerListItem = {
 
 function flattenLayerList(
   page: Sketch.Page,
-  selectedObjects: string[],
+  selectedLayerIds: string[],
+  filteredLayerIds: Set<string>,
 ): LayerListItem[] {
   const flattened: LayerListItem[] = [];
 
@@ -84,7 +85,8 @@ function flattenLayerList(
       return Layers.getChildren(layer).slice().reverse();
     },
     onEnter(layer, indexPath) {
-      if (Layers.isPageLayer(layer)) return;
+      if (Layers.isPageLayer(layer) || !filteredLayerIds.has(layer.do_objectID))
+        return;
 
       const currentIndex = indexPath[indexPath.length - 1];
 
@@ -100,7 +102,7 @@ function flattenLayerList(
         depth: indexPath.length - 1,
         expanded:
           layer.layerListExpandedType !== Sketch.LayerListExpanded.Collapsed,
-        selected: selectedObjects.includes(layer.do_objectID),
+        selected: selectedLayerIds.includes(layer.do_objectID),
         visible: layer.isVisible,
         hasClippingMask: layer.hasClippingMask ?? false,
         shouldBreakMaskChain: layer.shouldBreakMaskChain,
@@ -254,14 +256,30 @@ const LayerRow = memo(
             [
               titleElement,
               isLocked ? (
-                <LockClosedIcon onClick={handleSetUnlocked} />
+                <IconButton
+                  iconName="LockClosedIcon"
+                  selected={selected}
+                  onClick={handleSetUnlocked}
+                />
               ) : hovered ? (
-                <LockOpen1Icon onClick={handleSetLocked} />
+                <IconButton
+                  iconName="LockOpen1Icon"
+                  selected={selected}
+                  onClick={handleSetLocked}
+                />
               ) : null,
               !visible ? (
-                <EyeClosedIcon onClick={handleSetVisible} />
+                <IconButton
+                  iconName="EyeClosedIcon"
+                  selected={selected}
+                  onClick={handleSetVisible}
+                />
               ) : hovered ? (
-                <EyeOpenIcon onClick={handleSetHidden} />
+                <IconButton
+                  iconName="EyeOpenIcon"
+                  selected={selected}
+                  onClick={handleSetHidden}
+                />
               ) : isLocked ? (
                 <Spacer.Horizontal size={15} />
               ) : null,
@@ -274,7 +292,13 @@ const LayerRow = memo(
   }),
 );
 
-export default memo(function LayerList() {
+export default memo(function LayerList({
+  size,
+  filter,
+}: {
+  size: Size;
+  filter: string;
+}) {
   const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const getStateSnapshot = useGetStateSnapshot();
@@ -282,8 +306,17 @@ export default memo(function LayerList() {
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
 
   const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
-  const selectedObjects = useShallowArray(state.selectedObjects);
-  const items = useDeepArray(flattenLayerList(page, selectedObjects));
+  const selectedLayerIds = useShallowArray(state.selectedLayerIds);
+  const filteredLayerIds = useMemo(
+    () =>
+      Layers.getFilteredLayerAndAncestorIds(page, (layer) =>
+        layer.name.toLowerCase().includes(filter.toLowerCase()),
+      ),
+    [filter, page],
+  );
+  const items = useDeepArray(
+    flattenLayerList(page, selectedLayerIds, filteredLayerIds),
+  );
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
 
@@ -324,11 +357,11 @@ export default memo(function LayerList() {
           dispatch(
             'selectLayer',
             id,
-            selectedObjects.includes(id) ? 'difference' : 'intersection',
+            selectedLayerIds.includes(id) ? 'difference' : 'intersection',
           );
-        } else if (shiftKey && selectedObjects.length > 0) {
+        } else if (shiftKey && selectedLayerIds.length > 0) {
           const lastSelectedIndex = items.findIndex(
-            (item) => item.id === selectedObjects[selectedObjects.length - 1],
+            (item) => item.id === selectedLayerIds[selectedLayerIds.length - 1],
           );
 
           const first = Math.min(index, lastSelectedIndex);
@@ -352,8 +385,13 @@ export default memo(function LayerList() {
         );
       };
 
-      const handleClickChevron = () =>
-        dispatch('setExpandedInLayerList', id, !expanded);
+      const handleClickChevron = ({ altKey }: { altKey: boolean }) =>
+        dispatch(
+          'setExpandedInLayerList',
+          id,
+          !expanded,
+          altKey ? 'recursive' : 'self',
+        );
 
       const handleChangeVisible = (value: boolean) =>
         dispatch('setLayerVisible', id, value);
@@ -439,25 +477,41 @@ export default memo(function LayerList() {
       items,
       menuItems,
       onSelectMenuItem,
-      selectedObjects,
+      selectedLayerIds,
       startRenamingLayer,
     ],
   );
 
+  const ref = useRef<ListView.IVirtualizedList | null>(null);
+
+  const scrollToIndex =
+    items.findIndex((item) => item.id === selectedLayerIds[0]) ?? -1;
+
+  // Whenever selection changes, scroll the first selected layer into view
+  useEffect(() => {
+    if (scrollToIndex === -1) return;
+
+    ref.current?.scrollToIndex(scrollToIndex);
+  }, [scrollToIndex]);
+
   return (
     <TreeView.Root
-      items={items}
+      ref={ref}
+      virtualized={size}
+      data={items}
       renderItem={renderItem}
+      keyExtractor={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
-      onClick={useCallback(() => dispatch('selectLayer', undefined), [
-        dispatch,
-      ])}
+      onClick={useCallback(
+        () => dispatch('selectLayer', undefined),
+        [dispatch],
+      )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
           const sourceId = items[sourceIndex].id;
-          const sourceIds = selectedObjects.includes(sourceId)
-            ? selectedObjects
+          const sourceIds = selectedLayerIds.includes(sourceId)
+            ? selectedLayerIds
             : sourceId;
 
           dispatch(
@@ -467,7 +521,7 @@ export default memo(function LayerList() {
             position,
           );
         },
-        [dispatch, items, selectedObjects],
+        [dispatch, items, selectedLayerIds],
       )}
       acceptsDrop={useCallback(
         (
@@ -475,8 +529,8 @@ export default memo(function LayerList() {
           destinationId: string,
           relationDropPosition: RelativeDropPosition,
         ) => {
-          const sourceIds = selectedObjects.includes(sourceId)
-            ? selectedObjects
+          const sourceIds = selectedLayerIds.includes(sourceId)
+            ? selectedLayerIds
             : sourceId;
 
           const state = getStateSnapshot();
@@ -540,7 +594,7 @@ export default memo(function LayerList() {
 
           return true;
         },
-        [getStateSnapshot, selectedObjects],
+        [getStateSnapshot, selectedLayerIds],
       )}
     />
   );

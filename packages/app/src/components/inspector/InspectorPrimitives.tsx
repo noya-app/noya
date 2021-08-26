@@ -15,7 +15,8 @@ export const SectionHeader = styled.div(({ theme }) => ({
 }));
 
 export const Title = styled.div(({ theme }) => ({
-  ...theme.textStyles.small,
+  ...theme.textStyles.label,
+  color: theme.colors.textSubtle,
   fontWeight: 'bold',
   display: 'flex',
   flexDirection: 'row',
@@ -60,7 +61,7 @@ const SliderRowLabel = styled.span(({ theme }) => ({
 const RowLabel = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
   color: theme.colors.textMuted,
-  marginBottom: '2px',
+  marginBottom: '4px',
 }));
 
 export const LabeledRow = memo(function LabeledRow({

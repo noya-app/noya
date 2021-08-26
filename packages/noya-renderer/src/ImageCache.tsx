@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
 import { generateImageFromPDF } from 'noya-pdf';
 import { useIsMounted, useMutableState } from 'noya-react-utils';

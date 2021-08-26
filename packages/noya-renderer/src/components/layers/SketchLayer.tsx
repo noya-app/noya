@@ -1,23 +1,25 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { memo } from 'react';
 import { Group } from '../..';
+import { useIsLayerClipped } from '../../ClippedLayerContext';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
+import SketchSlice from './SketchSlice';
 import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
-import SketchShapeGroup from './SketchShapeGroup';
-import SketchSlice from './SketchSlice';
 
 interface Props {
   layer: PageLayer | Sketch.Page;
 }
 
 export default memo(function SketchLayer({ layer }: Props) {
-  if (!layer.isVisible) return null;
+  const isClipped = useIsLayerClipped(layer.do_objectID);
+
+  if (isClipped || !layer.isVisible) return null;
 
   let element: JSX.Element;
 
@@ -44,10 +46,8 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'star':
     case 'polygon':
     case 'shapePath':
-      element = <SketchShape layer={layer} />;
-      break;
     case 'shapeGroup':
-      element = <SketchShapeGroup layer={layer} />;
+      element = <SketchShape layer={layer} />;
       break;
     case 'symbolInstance':
       element = <SketchSymbolInstance layer={layer} />;

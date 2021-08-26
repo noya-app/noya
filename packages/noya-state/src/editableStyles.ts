@@ -1,9 +1,10 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import { SketchPattern } from 'noya-designsystem';
 import { decodeFontName, FontTraits } from 'noya-fonts';
 import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
 import { SimpleTextDecoration } from './primitives';
+import { SketchModel } from 'noya-sketch-model';
 
 export type EditableTextStyle = {
   fontFamily?: string;
@@ -162,6 +163,7 @@ export type EditableFill = {
   contextOpacity?: number;
   gradient: Sketch.Gradient;
   pattern: SketchPattern;
+  shader: Sketch.Shader;
 };
 
 export function getEditableFill(fills: Sketch.Fill[]): EditableFill {
@@ -199,6 +201,11 @@ export function getEditableFill(fills: Sketch.Fill[]): EditableFill {
     ),
     gradient: gradient ?? fills[0].gradient,
     pattern: getMultiValue(patterns, isDeepEqual) ?? patterns[0],
+    shader:
+      getMultiValue(
+        fills.map((fill) => fill.shader),
+        isDeepEqual,
+      ) ?? SketchModel.shader(),
   };
 }
 

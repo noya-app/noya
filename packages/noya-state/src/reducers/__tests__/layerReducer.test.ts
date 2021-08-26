@@ -337,7 +337,7 @@ describe('grouping', () => {
       (layer) => layer._class === 'group',
     )!;
 
-    expect(groupedState.selectedObjects).toEqual([group.do_objectID]);
+    expect(groupedState.selectedLayerIds).toEqual([group.do_objectID]);
 
     const ungroupedState = layerReducer(groupedState, [
       'ungroupLayers',
@@ -351,7 +351,7 @@ describe('grouping', () => {
       ]),
     ).toMatchSnapshot();
 
-    expect(ungroupedState.selectedObjects).toEqual([
+    expect(ungroupedState.selectedLayerIds).toEqual([
       rectangle.do_objectID,
       oval.do_objectID,
     ]);
@@ -416,7 +416,7 @@ describe('grouping', () => {
       (layer) => layer._class === 'group',
     )!;
 
-    expect(groupedState.selectedObjects).toEqual([group.do_objectID]);
+    expect(groupedState.selectedLayerIds).toEqual([group.do_objectID]);
 
     const ungroupedState = layerReducer(groupedState, [
       'ungroupLayers',
@@ -430,7 +430,7 @@ describe('grouping', () => {
       ]),
     ).toMatchSnapshot();
 
-    expect(ungroupedState.selectedObjects).toEqual([
+    expect(ungroupedState.selectedLayerIds).toEqual([
       rectangle.do_objectID,
       oval.do_objectID,
     ]);
@@ -463,7 +463,7 @@ describe('grouping', () => {
       ),
     );
 
-    state.selectedObjects = [
+    state.selectedLayerIds = [
       rectangle.do_objectID,
       oval.do_objectID,
       group1.do_objectID,
@@ -472,7 +472,7 @@ describe('grouping', () => {
 
     const updated = layerReducer(state, [
       'ungroupLayers',
-      state.selectedObjects,
+      state.selectedLayerIds,
     ]);
 
     expect(
@@ -482,7 +482,7 @@ describe('grouping', () => {
       ]),
     ).toMatchSnapshot();
 
-    expect(updated.selectedObjects).toEqual([
+    expect(updated.selectedLayerIds).toEqual([
       rectangle.do_objectID,
       oval.do_objectID,
       rect1.do_objectID,

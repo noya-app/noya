@@ -1,21 +1,17 @@
-import {
-  FileIcon,
-  PlusIcon,
-  StackIcon,
-  TokensIcon,
-} from '@radix-ui/react-icons';
+import { FileIcon, StackIcon, TokensIcon } from '@radix-ui/react-icons';
 import {
   useApplicationState,
   useDispatch,
   useWorkspace,
 } from 'noya-app-state-context';
 import {
+  IconButton,
   MenuItem,
   RelativeDropPosition,
   Spacer,
-  Tooltip,
   TreeView,
 } from 'noya-designsystem';
+import { useDeepArray } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';
 import React, {
@@ -26,7 +22,6 @@ import React, {
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useDeepArray } from 'noya-react-utils';
 
 const Container = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   ...(expanded ? { height: '200px' } : { flex: '0 0 auto' }),
@@ -40,21 +35,10 @@ const TitlePrefix = styled.span({
   whiteSpace: 'pre',
 });
 
-// Icon components can't have tooltips (no ref) so need a container.
-// We use padding to expand the hit target a little.
-const PlusIconContainer = styled.span({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '2px',
-  position: 'relative',
-  left: '2px',
-});
-
 type MenuItemType = 'duplicate' | 'rename' | 'delete';
 
 type PageInfo = {
-  do_objectID: string;
+  id: string;
   name: string;
   type: 'header' | 'design' | 'theme';
 };
@@ -79,10 +63,8 @@ const PageListContent = memo(function PageListContent({
   didHandleFocus,
 }: Props) {
   const dispatch = useDispatch();
-  const {
-    icon: iconColor,
-    iconSelected: iconSelectedColor,
-  } = useTheme().colors;
+  const { icon: iconColor, iconSelected: iconSelectedColor } =
+    useTheme().colors;
   const [editingPage, setEditingPage] = useState<string | undefined>();
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -141,7 +123,7 @@ const PageListContent = memo(function PageListContent({
   const lastIndex = pageInfo.length - 1;
   const pages = isExpanded ? pageInfo : pageInfo.slice(0, 1);
   const selectedPageName = pageInfo.find(
-    (info) => info.do_objectID === selectedPageId,
+    (info) => info.id === selectedPageId,
   )?.name;
 
   // Limit the container size when we have enough pages
@@ -175,7 +157,8 @@ const PageListContent = memo(function PageListContent({
           },
           [dispatch, lastIndex],
         )}
-        items={pages}
+        data={pages}
+        keyExtractor={useCallback((item: PageInfo) => item.id, [])}
         renderItem={useCallback(
           (page: PageInfo, index, { isDragging }) => {
             const selected =
@@ -184,7 +167,7 @@ const PageListContent = memo(function PageListContent({
                 (page.type === 'header' && currentTab === 'pages') ||
                 (page.type === 'design' &&
                   currentTab === 'canvas' &&
-                  selectedPageId === page.do_objectID));
+                  selectedPageId === page.id));
 
             const IconComponent =
               page.type === 'theme'
@@ -195,8 +178,8 @@ const PageListContent = memo(function PageListContent({
 
             return (
               <TreeView.Row<MenuItemType>
-                id={page.do_objectID}
-                key={page.do_objectID}
+                id={page.id}
+                key={page.id}
                 isSectionHeader={page.type === 'header'}
                 expanded={page.type === 'header' ? isExpanded : undefined}
                 selected={selected}
@@ -212,7 +195,7 @@ const PageListContent = memo(function PageListContent({
                       break;
                     case 'design':
                       dispatch('setTab', 'canvas');
-                      dispatch('selectPage', page.do_objectID);
+                      dispatch('selectPage', page.id);
                       break;
                     case 'theme':
                       dispatch('setTab', 'theme');
@@ -222,14 +205,14 @@ const PageListContent = memo(function PageListContent({
                 onDoubleClick={() => {
                   if (page.type !== 'design') return;
 
-                  startRenamingPage(page.do_objectID);
+                  startRenamingPage(page.id);
                 }}
                 menuItems={page.type === 'design' ? pageMenuItems : undefined}
                 onSelectMenuItem={handleSelectMenuItem}
                 onContextMenu={() => {
                   if (page.type !== 'design') return;
 
-                  dispatch('selectPage', page.do_objectID);
+                  dispatch('selectPage', page.id);
                 }}
                 icon={
                   page.type !== 'header' && (
@@ -239,7 +222,7 @@ const PageListContent = memo(function PageListContent({
                   )
                 }
               >
-                {page.do_objectID === editingPage ? (
+                {page.id === editingPage ? (
                   <TreeView.EditableRowTitle
                     autoFocus
                     value={page.name}
@@ -248,7 +231,7 @@ const PageListContent = memo(function PageListContent({
 
                       if (!name) return;
 
-                      dispatch('setPageName', page.do_objectID, name);
+                      dispatch('setPageName', page.id, name);
                     }}
                   />
                 ) : page.type === 'header' &&
@@ -265,11 +248,13 @@ const PageListContent = memo(function PageListContent({
                   <>
                     <Spacer.Horizontal />
                     <Spacer.Horizontal size={10} />
-                    <Tooltip content="Add a new page">
-                      <PlusIconContainer id="add-page" onClick={handleAddPage}>
-                        <PlusIcon />
-                      </PlusIconContainer>
-                    </Tooltip>
+                    <IconButton
+                      id="add-page"
+                      iconName="PlusIcon"
+                      tooltip="Add a new page"
+                      onClick={handleAddPage}
+                      selected={selected}
+                    />
                   </>
                 )}
               </TreeView.Row>
@@ -302,17 +287,17 @@ export default function PageList() {
 
   const pageInfo = useDeepArray([
     {
-      do_objectID: 'header',
+      id: 'header',
       name: 'Pages',
       type: 'header' as const,
     },
     ...state.sketch.pages.map((page) => ({
-      do_objectID: page.do_objectID,
+      id: page.do_objectID,
       name: page.name,
       type: 'design' as const,
     })),
     {
-      do_objectID: 'theme',
+      id: 'theme',
       name: 'Theme',
       type: 'theme' as const,
     },

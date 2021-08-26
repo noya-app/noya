@@ -1,5 +1,6 @@
 import { StateProvider } from 'noya-app-state-context';
 import { decodeFontName } from 'noya-fonts';
+import { getCurrentPlatform, PlatformName } from 'noya-keymap';
 import {
   CanvasKitProvider,
   FontManagerProvider,
@@ -19,7 +20,15 @@ import {
 import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
+import {
+  EnvironmentParameters,
+  EnvironmentParametersProvider,
+} from './hooks/useEnvironmentParameters';
 import { useResource } from './hooks/useResource';
+import {
+  castHashParameter,
+  useUrlHashParameters,
+} from './hooks/useUrlHashParameters';
 
 type Action =
   | { type: 'set'; value: SketchFile }
@@ -107,11 +116,28 @@ function Contents() {
 }
 
 export default function App() {
+  const urlHashParameters = useUrlHashParameters();
+  const environmentParameters = useMemo(
+    (): EnvironmentParameters => ({
+      isElectron: castHashParameter(urlHashParameters.isElectron, 'boolean'),
+      platform:
+        'platform' in urlHashParameters
+          ? (castHashParameter(
+              urlHashParameters.platform,
+              'string',
+            ) as PlatformName)
+          : getCurrentPlatform(navigator),
+    }),
+    [urlHashParameters],
+  );
+
   return (
-    <CanvasKitProvider>
-      <FontManagerProvider>
-        <Contents />
-      </FontManagerProvider>
-    </CanvasKitProvider>
+    <EnvironmentParametersProvider value={environmentParameters}>
+      <CanvasKitProvider>
+        <FontManagerProvider>
+          <Contents />
+        </FontManagerProvider>
+      </CanvasKitProvider>
+    </EnvironmentParametersProvider>
   );
 }

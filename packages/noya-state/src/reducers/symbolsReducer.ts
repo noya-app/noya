@@ -1,4 +1,4 @@
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { GroupLayouts, Layers, SetNumberMode } from '..';
 import { getSelectedLayers } from '../selectors/layerSelectors';
@@ -210,7 +210,7 @@ export function symbolsReducer(
         if (!page) return;
 
         draft.selectedPage = page.do_objectID;
-        draft.selectedObjects = [symbolMaster.do_objectID];
+        draft.selectedLayerIds = [symbolMaster.do_objectID];
       });
     }
     case 'setOverrideValue': {

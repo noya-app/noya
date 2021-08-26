@@ -3,7 +3,7 @@ import {
   LetterCaseLowercaseIcon,
   LetterCaseUppercaseIcon,
 } from '@radix-ui/react-icons';
-import Sketch from '@sketch-hq/sketch-file-format-ts';
+import Sketch from 'noya-file-format';
 import {
   Label,
   LabeledElementView,
