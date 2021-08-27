@@ -1,3 +1,4 @@
+import path from 'path';
 import { dialog } from 'electron';
 import { writeFileSync } from 'fs';
 import { MessageFromEmbedded } from 'noya-embedded';
@@ -7,9 +8,18 @@ export function saveFile(
   data: Extract<MessageFromEmbedded, { type: 'saveFile' }>,
   context: ActionContext,
 ) {
-  const name = dialog.showSaveDialogSync(context.browserWindow);
+  const filename =
+    data.path ??
+    dialog.showSaveDialogSync(
+      context.browserWindow,
+      data.extensions
+        ? {
+            filters: [{ name: 'Files', extensions: data.extensions }],
+          }
+        : {},
+    );
 
-  if (!name) {
+  if (!filename) {
     context.sendMessage({
       type: 'didSaveFile',
       id: data.id,
@@ -21,7 +31,7 @@ export function saveFile(
   const buffer = Buffer.from(data.base64, 'base64');
 
   try {
-    writeFileSync(name, buffer);
+    writeFileSync(filename, buffer);
   } catch (e) {
     console.error(e);
 
@@ -36,6 +46,9 @@ export function saveFile(
   context.sendMessage({
     type: 'didSaveFile',
     id: data.id,
-    name,
+    file: {
+      name: path.basename(filename),
+      path: filename,
+    },
   });
 }

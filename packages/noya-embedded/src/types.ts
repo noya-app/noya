@@ -8,11 +8,18 @@ export type MessageFromEmbedded =
   | {
       type: 'openFile';
       id: number;
+      extensions?: string[];
     }
   | {
       type: 'saveFile';
       id: number;
       base64: string;
+      /**
+       * If a path is passed, we save the file to that path. Otherwise,
+       * we show a save dialog and let the user choose a path.
+       */
+      path?: string;
+      extensions?: string[];
     };
 
 export type MessageFromHost =
@@ -23,10 +30,17 @@ export type MessageFromHost =
   | {
       type: 'didOpenFile';
       id: number;
-      base64?: string;
+      file?: {
+        name: string;
+        path: string;
+        base64: string;
+      };
     }
   | {
       type: 'didSaveFile';
       id: number;
-      name?: string;
+      file?: {
+        name: string;
+        path: string;
+      };
     };
