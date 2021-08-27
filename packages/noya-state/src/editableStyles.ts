@@ -99,22 +99,8 @@ export type EditableShadow = {
   spread?: number;
 };
 
-export function getEditableShadow(shadows: Sketch.Shadow[]): EditableShadow {
-  return {
-    isEnabled: getMultiValue(shadows.map((shadow) => shadow.isEnabled)) ?? true,
-    blurRadius: getMultiNumberValue(shadows.map((shadow) => shadow.blurRadius)),
-    color: getMultiValue(
-      shadows.map((shadow) => shadow.color),
-      isDeepEqual,
-    ),
-    offsetX: getMultiValue(shadows.map((shadow) => shadow.offsetX)),
-    offsetY: getMultiValue(shadows.map((shadow) => shadow.offsetY)),
-    spread: getMultiValue(shadows.map((shadow) => shadow.spread)),
-  };
-}
-
-export function getEditableInnerShadow(
-  shadows: Sketch.InnerShadow[],
+export function getEditableShadow(
+  shadows: (Sketch.Shadow | Sketch.InnerShadow)[],
 ): EditableShadow {
   return {
     isEnabled: getMultiValue(shadows.map((shadow) => shadow.isEnabled)) ?? true,

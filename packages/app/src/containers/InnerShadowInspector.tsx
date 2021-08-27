@@ -1,13 +1,13 @@
 import { useDispatch, useSelector } from 'noya-app-state-context';
+import { useShallowArray } from 'noya-react-utils';
 import {
   EditableShadow,
-  getEditableInnerShadow,
+  getEditableShadow,
   getEditableStyles,
   Selectors,
 } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
-import { useShallowArray } from 'noya-react-utils';
 import ShadowRow from '../components/inspector/ShadowRow';
 
 export default memo(function InnerShadowInspector() {
@@ -22,13 +22,13 @@ export default memo(function InnerShadowInspector() {
   );
 
   const editableShadows: EditableShadow[] = useMemo(
-    () => getEditableStyles(shadowMatrix, getEditableInnerShadow),
+    () => getEditableStyles(shadowMatrix, getEditableShadow),
     [shadowMatrix],
   );
 
   return (
     <CheckboxArrayController<EditableShadow>
-      title="Inner Shadow"
+      title="Inner Shadows"
       id="inner-shadow"
       key="inner-shadow"
       value={editableShadows}

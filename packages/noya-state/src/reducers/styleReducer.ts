@@ -360,6 +360,32 @@ export function styleReducer(
         draft.innerShadows[index].offsetX = newValue;
       });
     }
+    case 'setShadowY': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.shadows || !draft.shadows[index]) return;
+
+        const newValue =
+          mode === 'replace' ? amount : draft.shadows[index].offsetY + amount;
+
+        draft.shadows[index].offsetY = newValue;
+      });
+    }
+    case 'setInnerShadowY': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.innerShadows || !draft.innerShadows[index]) return;
+
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.innerShadows[index].offsetY + amount;
+
+        draft.innerShadows[index].offsetY = newValue;
+      });
+    }
     case 'setShadowBlur': {
       const [, index, amount, mode = 'replace'] = action;
 
