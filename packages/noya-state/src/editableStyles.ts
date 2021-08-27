@@ -99,7 +99,9 @@ export type EditableShadow = {
   spread?: number;
 };
 
-export function getEditableShadow(shadows: Sketch.Shadow[]): EditableShadow {
+export function getEditableShadow(
+  shadows: (Sketch.Shadow | Sketch.InnerShadow)[],
+): EditableShadow {
   return {
     isEnabled: getMultiValue(shadows.map((shadow) => shadow.isEnabled)) ?? true,
     blurRadius: getMultiNumberValue(shadows.map((shadow) => shadow.blurRadius)),

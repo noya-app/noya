@@ -1,5 +1,6 @@
-import { Spacer } from 'noya-designsystem';
+import { IconButton, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
+import { useCallback } from 'react';
 import styled from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';
@@ -23,6 +24,7 @@ export interface Props {
   rotation: DimensionValue;
   isFlippedVertical: boolean;
   isFlippedHorizontal: boolean;
+  constrainProportions: boolean;
   onSetX: (value: number, mode: SetNumberMode) => void;
   onSetY: (value: number, mode: SetNumberMode) => void;
   onSetWidth: (value: number, mode: SetNumberMode) => void;
@@ -30,6 +32,7 @@ export interface Props {
   onSetRotation: (value: number, mode: SetNumberMode) => void;
   onSetIsFlippedVertical: (value: boolean) => void;
   onSetIsFlippedHorizontal: (value: boolean) => void;
+  onSetConstraintProportions: (value: boolean) => void;
 }
 
 export default function DimensionsInspector({
@@ -40,6 +43,7 @@ export default function DimensionsInspector({
   rotation,
   isFlippedVertical,
   isFlippedHorizontal,
+  constrainProportions,
   onSetX,
   onSetY,
   onSetWidth,
@@ -47,6 +51,7 @@ export default function DimensionsInspector({
   onSetRotation,
   onSetIsFlippedVertical,
   onSetIsFlippedHorizontal,
+  onSetConstraintProportions,
 }: Props) {
   return (
     <>
@@ -60,7 +65,16 @@ export default function DimensionsInspector({
       <InspectorPrimitives.VerticalSeparator />
       <Row>
         <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
-        <Spacer.Horizontal size={16} />
+        <Spacer.Horizontal size={2} />
+        <IconButton
+          iconName={constrainProportions ? 'LockClosedIcon' : 'LockOpen1Icon'}
+          size={12}
+          onClick={useCallback(
+            () => onSetConstraintProportions(!constrainProportions),
+            [constrainProportions, onSetConstraintProportions],
+          )}
+        />
+        <Spacer.Horizontal size={2} />
         <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
         <Spacer.Horizontal size={16} />
         <FlipControls

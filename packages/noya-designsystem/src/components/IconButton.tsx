@@ -7,11 +7,12 @@ type Props = Omit<ButtonRootProps, 'children' | 'variant' | 'flex'> & {
   iconName: keyof typeof Icons;
   selected?: boolean;
   color?: string;
+  size?: number;
 };
 
 export default memo(
   forwardRef(function IconButton(
-    { selected, iconName, color, ...props }: Props,
+    { selected, iconName, color, size, ...props }: Props,
     forwardedRef: ForwardedRef<HTMLButtonElement>,
   ) {
     const { icon: iconColor, iconSelected: iconSelectedColor } =
@@ -21,7 +22,10 @@ export default memo(
 
     return (
       <Button ref={forwardedRef} {...props} variant="none">
-        <Icon color={color ?? (selected ? iconSelectedColor : iconColor)} />
+        <Icon
+          color={color ?? (selected ? iconSelectedColor : iconColor)}
+          {...(size && { width: size, height: size })}
+        />
       </Button>
     );
   }),

@@ -194,8 +194,14 @@ export function getScaledSnapBoundingRect(
   delta: Point,
   canvasSize: Size,
   direction: CompassDirection,
+  constrain: boolean,
 ): Rect {
-  const newBoundingRectBeforeSnap = resizeRect(boundingRect, delta, direction);
+  const newBoundingRectBeforeSnap = resizeRect(
+    boundingRect,
+    delta,
+    direction,
+    constrain,
+  );
 
   const extentPoint = getRectExtentPoint(newBoundingRectBeforeSnap, direction);
 
@@ -214,5 +220,6 @@ export function getScaledSnapBoundingRect(
       y: delta.y - snapAdjustment.y,
     },
     direction,
+    constrain,
   );
 }

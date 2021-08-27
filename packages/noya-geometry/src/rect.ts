@@ -2,7 +2,11 @@ import { AffineTransform } from 'noya-geometry';
 import { isNumberEqual } from 'noya-utils';
 import { Bounds, Point, Rect } from './types';
 
-export function transformRect(rect: Rect, transform: AffineTransform): Rect {
+export function transformRect(
+  rect: Rect,
+  transform: AffineTransform,
+  normalized: boolean = true,
+): Rect {
   const bounds = createBounds(rect);
   const p1 = transform.applyTo({
     x: bounds.minX,
@@ -12,19 +16,32 @@ export function transformRect(rect: Rect, transform: AffineTransform): Rect {
     x: bounds.maxX,
     y: bounds.maxY,
   });
-  return createRect(p1, p2);
+  return createRect(p1, p2, normalized);
 }
 
 /**
  * Create a rectangle with a non-negative width and height
  */
-export function createRect(initialPoint: Point, finalPoint: Point): Rect {
-  return {
-    width: Math.abs(finalPoint.x - initialPoint.x),
-    height: Math.abs(finalPoint.y - initialPoint.y),
-    x: Math.min(finalPoint.x, initialPoint.x),
-    y: Math.min(finalPoint.y, initialPoint.y),
-  };
+export function createRect(
+  initialPoint: Point,
+  finalPoint: Point,
+  normalized: boolean = true,
+): Rect {
+  if (normalized) {
+    return {
+      x: Math.min(finalPoint.x, initialPoint.x),
+      y: Math.min(finalPoint.y, initialPoint.y),
+      width: Math.abs(finalPoint.x - initialPoint.x),
+      height: Math.abs(finalPoint.y - initialPoint.y),
+    };
+  } else {
+    return {
+      x: initialPoint.x,
+      y: initialPoint.y,
+      width: finalPoint.x - initialPoint.x,
+      height: finalPoint.y - initialPoint.y,
+    };
+  }
 }
 
 export function createRectFromBounds(

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 interface Props {
-  size?: number;
+  size?: number | string;
 }
 
 /* ----------------------------------------------------------------------------

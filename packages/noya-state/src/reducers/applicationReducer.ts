@@ -180,6 +180,7 @@ export function applicationReducer(
     case 'setLayerName':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
+    case 'setConstrainProportions':
     case 'setFixedRadius':
     case 'setLayerX':
     case 'setLayerY':
@@ -211,29 +212,39 @@ export function applicationReducer(
     case 'addNewBorder':
     case 'addNewFill':
     case 'addNewShadow':
+    case 'addNewInnerShadow':
     case 'setBorderEnabled':
     case 'setFillEnabled':
     case 'setShadowEnabled':
+    case 'setInnerShadowEnabled':
     case 'deleteBorder':
     case 'deleteFill':
     case 'deleteShadow':
+    case 'deleteInnerShadow':
     case 'moveBorder':
     case 'moveFill':
     case 'moveShadow':
+    case 'moveInnerShadow':
     case 'deleteDisabledBorders':
     case 'deleteDisabledFills':
     case 'deleteDisabledShadows':
+    case 'deleteDisabledInnerShadows':
     case 'setBorderColor':
     case 'setFillColor':
     case 'setShadowColor':
+    case 'setInnerShadowColor':
     case 'setBorderWidth':
     case 'setFillOpacity':
     case 'setOpacity':
     case 'setShadowX':
     case 'setShadowY':
     case 'setShadowBlur':
-    case 'setBorderPosition':
     case 'setShadowSpread':
+    case 'setInnerShadowX':
+    case 'setInnerShadowY':
+    case 'setInnerShadowBlur':
+    case 'setInnerShadowSpread':
+    case 'setBorderPosition':
     case 'setFillFillType':
     case 'setBorderFillType':
     case 'setFillGradientColor':

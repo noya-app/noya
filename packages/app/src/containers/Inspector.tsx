@@ -22,6 +22,7 @@ import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
+import InnerShadowInspector from './InnerShadowInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
 import OpacityInspector from './OpacityInspector';
@@ -92,12 +93,22 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
+  const handleSetConstrainProportions = useCallback(
+    (value: boolean) => dispatch('setConstrainProportions', value),
+    [dispatch],
+  );
+
   const isFlippedVertical =
     getMultiValue(selectedLayers.map((layer) => layer.isFlippedVertical)) ??
     false;
   const isFlippedHorizontal =
     getMultiValue(selectedLayers.map((layer) => layer.isFlippedHorizontal)) ??
     false;
+
+  const constrainProportions =
+    getMultiValue(
+      selectedLayers.map((layer) => layer.frame.constrainProportions),
+    ) ?? true;
 
   const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
 
@@ -163,6 +174,7 @@ export default memo(function Inspector() {
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}
             isFlippedVertical={isFlippedVertical}
+            constrainProportions={constrainProportions}
             onSetRotation={handleSetRotation}
             onSetX={handleSetX}
             onSetY={handleSetY}
@@ -170,6 +182,7 @@ export default memo(function Inspector() {
             onSetHeight={handleSetHeight}
             onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
             onSetIsFlippedVertical={handleSetIsFlippedVertical}
+            onSetConstraintProportions={handleSetConstrainProportions}
           />
         )}
         <InspectorPrimitives.VerticalSeparator />
@@ -189,6 +202,9 @@ export default memo(function Inspector() {
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
+      selectedLayers.every(Layers.hasInspectableInnerShadow) && (
+        <InnerShadowInspector />
+      ),
       selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,
@@ -206,13 +222,15 @@ export default memo(function Inspector() {
     isEditingControlPoint,
     isFlippedHorizontal,
     isFlippedVertical,
+    handleSetWidth,
+    handleSetIsFlippedHorizontal,
+    handleSetIsFlippedVertical,
+    constrainProportions,
     handleSetRotation,
     handleSetX,
     handleSetY,
-    handleSetWidth,
     handleSetHeight,
-    handleSetIsFlippedHorizontal,
-    handleSetIsFlippedVertical,
+    handleSetConstrainProportions,
     hasFixedRadiusLayers,
     hasContextSettingsLayers,
   ]);
