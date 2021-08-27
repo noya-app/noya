@@ -11,11 +11,13 @@ import {
 } from 'noya-geometry';
 import {
   getLayerSnapValues,
+  getMultiValue,
   getPossibleTargetSnapLayers,
   getRectExtentPoint,
   getScaledSnapBoundingRect,
   getSnaps,
   getSnapValues,
+  Layers,
   Selectors,
 } from 'noya-state';
 import { groupBy, round } from 'noya-utils';
@@ -173,6 +175,17 @@ export default memo(function SnapGuides() {
           state.selectedLayerIds,
         )!;
 
+        const selectedIndexPaths =
+          Selectors.getSelectedLayerIndexPathsExcludingDescendants(state);
+
+        const constrain =
+          getMultiValue(
+            selectedIndexPaths.map(
+              (indexPath) =>
+                Layers.access(page, indexPath).frame.constrainProportions,
+            ),
+          ) ?? true;
+
         const newBoundingRect = getScaledSnapBoundingRect(
           state,
           pageSnapshot,
@@ -180,6 +193,7 @@ export default memo(function SnapGuides() {
           delta,
           canvasSize,
           direction,
+          constrain,
         );
 
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);

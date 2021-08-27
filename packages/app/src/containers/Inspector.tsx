@@ -92,12 +92,22 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
+  const handleSetConstrainProportions = useCallback(
+    (value: boolean) => dispatch('setConstrainProportions', value),
+    [dispatch],
+  );
+
   const isFlippedVertical =
     getMultiValue(selectedLayers.map((layer) => layer.isFlippedVertical)) ??
     false;
   const isFlippedHorizontal =
     getMultiValue(selectedLayers.map((layer) => layer.isFlippedHorizontal)) ??
     false;
+
+  const constrainProportions =
+    getMultiValue(
+      selectedLayers.map((layer) => layer.frame.constrainProportions),
+    ) ?? true;
 
   const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
 
@@ -163,6 +173,7 @@ export default memo(function Inspector() {
             {...dimensionsInspectorProps}
             isFlippedHorizontal={isFlippedHorizontal}
             isFlippedVertical={isFlippedVertical}
+            constrainProportions={constrainProportions}
             onSetRotation={handleSetRotation}
             onSetX={handleSetX}
             onSetY={handleSetY}
@@ -170,6 +181,7 @@ export default memo(function Inspector() {
             onSetHeight={handleSetHeight}
             onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
             onSetIsFlippedVertical={handleSetIsFlippedVertical}
+            onSetConstraintProportions={handleSetConstrainProportions}
           />
         )}
         <InspectorPrimitives.VerticalSeparator />
@@ -206,13 +218,15 @@ export default memo(function Inspector() {
     isEditingControlPoint,
     isFlippedHorizontal,
     isFlippedVertical,
+    handleSetWidth,
+    handleSetIsFlippedHorizontal,
+    handleSetIsFlippedVertical,
+    constrainProportions,
     handleSetRotation,
     handleSetX,
     handleSetY,
-    handleSetWidth,
     handleSetHeight,
-    handleSetIsFlippedHorizontal,
-    handleSetIsFlippedVertical,
+    handleSetConstrainProportions,
     hasFixedRadiusLayers,
     hasContextSettingsLayers,
   ]);

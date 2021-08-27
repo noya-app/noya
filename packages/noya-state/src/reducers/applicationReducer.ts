@@ -180,6 +180,7 @@ export function applicationReducer(
     case 'setLayerName':
     case 'setLayerIsLocked':
     case 'setExpandedInLayerList':
+    case 'setConstrainProportions':
     case 'setFixedRadius':
     case 'setLayerX':
     case 'setLayerY':

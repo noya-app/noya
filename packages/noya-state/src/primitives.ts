@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import type {
   CanvasKit,
   Paint,
@@ -8,6 +7,7 @@ import type {
   TextAlign,
   TextStyle,
 } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { FontId, SYSTEM_FONT_ID } from 'noya-fonts';
 import {
   AffineTransform,
@@ -16,12 +16,22 @@ import {
   Point,
   Rect,
   resize,
+  transformRect,
 } from 'noya-geometry';
-import { CompassDirection, getCardinalDirections } from 'noya-state';
+import { CompassDirection } from 'noya-state';
 import * as PathUtils from './primitives/path';
+import {
+  compassDirectionMap,
+  getOppositeDirection,
+  getRectExtentPoint,
+} from './selection';
 
 export * from './primitives/path';
 export * from './primitives/pathCommand';
+
+function sign(number: number) {
+  return number > 0 ? 1 : number < 0 ? -1 : 0;
+}
 
 /**
  * Resize a rect in a compass direction
@@ -30,29 +40,58 @@ export function resizeRect(
   rect: Rect,
   offset: Point,
   direction: CompassDirection,
+  constrain: boolean,
 ): Rect {
-  const newRect = { ...rect };
+  const oppositeDirection = getOppositeDirection(direction);
 
-  getCardinalDirections(direction).forEach((cardinalDirection) => {
-    switch (cardinalDirection) {
-      case 'e':
-        newRect.width += offset.x;
-        break;
-      case 'w':
-        newRect.width -= offset.x;
-        newRect.x += offset.x;
-        break;
-      case 's':
-        newRect.height += offset.y;
-        break;
-      case 'n':
-        newRect.height -= offset.y;
-        newRect.y += offset.y;
-        break;
-    }
-  });
+  const extent = getRectExtentPoint(rect, direction);
+  const oppositeExtent = getRectExtentPoint(rect, oppositeDirection);
 
-  return newRect;
+  const newExtent = { x: extent.x + offset.x, y: extent.y + offset.y };
+
+  const multiplier = {
+    x: compassDirectionMap[direction].x * 2 - 1,
+    y: compassDirectionMap[direction].y * 2 - 1,
+  };
+
+  const newSize = {
+    width: newExtent.x - oppositeExtent.x,
+    height: newExtent.y - oppositeExtent.y,
+  };
+
+  const scaleX = (multiplier.x * newSize.width) / rect.width;
+  const scaleY = (multiplier.y * newSize.height) / rect.height;
+
+  const largestMagnitude =
+    Math.abs(scaleX) > Math.abs(scaleY) ? scaleX : scaleY;
+
+  const scale = constrain
+    ? { x: largestMagnitude, y: largestMagnitude }
+    : {
+        x: extent.x === oppositeExtent.x ? 1 : scaleX,
+        y: extent.y === oppositeExtent.y ? 1 : scaleY,
+      };
+
+  // Adjust the sign of the scale:
+  // - If scaling along a single axis, ensure a positive sign so we don't flip along the opposite axis
+  // - If scaling opposite corners, ensure the rect remains in the correct quadrant
+  if (extent.y === oppositeExtent.y) {
+    scale.y = Math.abs(scale.y);
+  } else if (sign(scale.y) !== sign(scaleY)) {
+    scale.y *= -1;
+  }
+
+  if (extent.x === oppositeExtent.x) {
+    scale.x = Math.abs(scale.x);
+  } else if (sign(scale.x) !== sign(scaleX)) {
+    scale.x *= -1;
+  }
+
+  return transformRect(
+    rect,
+    AffineTransform.scale(scale.x, scale.y, oppositeExtent),
+    false,
+  );
 }
 
 export function point(point: Point): number[] {
