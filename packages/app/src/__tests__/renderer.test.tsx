@@ -336,6 +336,11 @@ test('Symbols', async () => {
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
+test('Symbols 2', async () => {
+  const image = await generateSketchFileImage('Symbols.sketch', 2);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
 test('TextLayers', async () => {
   const image = await generateSketchFileImage('TextLayers.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();
