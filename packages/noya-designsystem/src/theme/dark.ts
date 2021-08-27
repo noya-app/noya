@@ -22,4 +22,4 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.activeBackground = 'rgba(255,255,255,0.1)';
 });
 
-export { textStyles, fonts, sizes, showMenubar } from './light';
+export { textStyles, fonts, sizes } from './light';

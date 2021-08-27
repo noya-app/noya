@@ -20,6 +20,9 @@ export type MessageFromEmbedded =
        */
       path?: string;
       extensions?: string[];
+    }
+  | {
+      type: 'doubleClickToolbar';
     };
 
 export type MessageFromHost =

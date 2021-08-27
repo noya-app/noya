@@ -3,6 +3,7 @@ import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
 import { saveFile } from './actions/saveFile';
 import { openFile } from './actions/openFile';
 import { setMenu } from './actions/setMenu';
+import { doubleClickToolbar } from './actions/doubleClickToolbar';
 import { ActionContext } from './types';
 
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -65,10 +66,11 @@ const actions: ActionMap<MessageFromEmbedded> = {
   setMenu,
   openFile,
   saveFile,
+  doubleClickToolbar,
 };
 
 ipcMain.on('rendererProcessMessage', (event, data) => {
-  const browserWindow = BrowserWindow.fromId(event.sender.id);
+  const browserWindow = BrowserWindow.fromWebContents(event.sender);
 
   if (!browserWindow) return;
 

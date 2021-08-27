@@ -1,8 +1,6 @@
 import { mediaQuery } from '../mediaQuery';
 import { CSSObject } from 'styled-components';
 
-export const showMenubar: boolean = false;
-
 export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',

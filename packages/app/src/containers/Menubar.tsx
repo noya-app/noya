@@ -15,28 +15,10 @@ import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useEffect, useMemo } from 'react';
-import styled from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useFileManager } from '../hooks/useFileManager';
 import { useHistory } from '../hooks/useHistory';
-
-const Container = styled.header(({ theme }) => ({
-  minHeight: `${theme.sizes.toolbar.height - (theme.showMenubar ? 8 : 0)}px`,
-  display: 'flex',
-  flexDirection: 'column',
-  borderBottom: `1px solid ${
-    theme.showMenubar ? 'transparent' : theme.colors.dividerStrong
-  }`,
-  borderRight: `1px solid ${
-    theme.showMenubar ? theme.colors.dividerStrong : 'transparent'
-  }`,
-  alignItems: 'stretch',
-  justifyContent: 'center',
-  color: theme.colors.textMuted,
-  WebkitAppRegion: 'drag',
-  background: theme.showMenubar ? 'rgba(255,255,255,0.02)' : 'none',
-}));
 
 interface Props {
   fileHandle?: FileSystemHandle;
@@ -207,23 +189,21 @@ const MenubarContent = memo(function MenubarContent({
   }, [menuItems, onSelectMenuItem]);
 
   return (
-    <Container>
-      <InspectorPrimitives.Row>
-        <Spacer.Horizontal size={8} />
-        {!isElectron && (
-          <DropdownMenu<ApplicationMenuItemType>
-            items={menuItems}
-            onSelect={onSelectMenuItem}
-            platform={platform}
-          >
-            <Button id="menu">
-              <HamburgerMenuIcon />
-            </Button>
-          </DropdownMenu>
-        )}
-        <Spacer.Horizontal size={8} />
-      </InspectorPrimitives.Row>
-    </Container>
+    <InspectorPrimitives.Row>
+      <Spacer.Horizontal size={8} />
+      {!isElectron && (
+        <DropdownMenu<ApplicationMenuItemType>
+          items={menuItems}
+          onSelect={onSelectMenuItem}
+          platform={platform}
+        >
+          <Button id="menu">
+            <HamburgerMenuIcon />
+          </Button>
+        </DropdownMenu>
+      )}
+      <Spacer.Horizontal size={8} />
+    </InspectorPrimitives.Row>
   );
 });
 
