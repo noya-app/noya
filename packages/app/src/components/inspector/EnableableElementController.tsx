@@ -16,13 +16,15 @@ export default memo(function EnableableElementController({
   onChangeIsEnabled,
   children,
 }: Props) {
-  const setEnabled = useCallback(() => onChangeIsEnabled(true), [
-    onChangeIsEnabled,
-  ]);
+  const setEnabled = useCallback(
+    () => onChangeIsEnabled(true),
+    [onChangeIsEnabled],
+  );
 
-  const setDisabled = useCallback(() => onChangeIsEnabled(false), [
-    onChangeIsEnabled,
-  ]);
+  const setDisabled = useCallback(
+    () => onChangeIsEnabled(false),
+    [onChangeIsEnabled],
+  );
 
   const childrenArray = useMemo(
     () => (isEnabled ? Children.toArray(children) : []),

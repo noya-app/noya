@@ -61,9 +61,8 @@ export default memo(function FileDropTarget<T extends string>({
     [onDropFiles, supportedFileTypes],
   );
 
-  const { dropTargetProps, isDropTargetActive } = useFileDropTarget(
-    handleImageFile,
-  );
+  const { dropTargetProps, isDropTargetActive } =
+    useFileDropTarget(handleImageFile);
 
   return (
     <Container {...dropTargetProps}>

@@ -21,8 +21,10 @@
   "scripts": {
     "start": "cross-env PORT=1234 modular start app",
     "start:desktop": "cd ./packages/noya-desktop && yarn start",
+    "start:site": "yarn workspace site start",
     "build": "modular build app",
     "build:desktop": "cd ./packages/noya-desktop && yarn make",
+    "build:site": "yarn workspace site build",
     "release:desktop": "cd ./packages/noya-desktop && yarn release",
     "test": "modular test",
     "test:clean": "cross-env JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
