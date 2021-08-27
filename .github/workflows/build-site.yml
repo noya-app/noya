@@ -1,0 +1,15 @@
+name: Build Site
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@main
+        with:
+          node-version: 14.17
+      - run: yarn
+      - run: yarn build:site
