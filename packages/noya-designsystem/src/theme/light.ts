@@ -1,4 +1,4 @@
-import mediaQuery from '../mediaQuery';
+import { mediaQuery } from '../mediaQuery';
 import { CSSObject } from 'styled-components';
 
 export const showMenubar: boolean = false;
@@ -121,6 +121,11 @@ export const textStyles = {
     textTransform: 'uppercase',
     letterSpacing: '0.4px',
   } as CSSObject,
+  // Site
+  body1: {} as CSSObject,
+  bodyAlternate: {} as CSSObject,
+  mark: {} as CSSObject,
+  link: {} as CSSObject,
 };
 
 export const sizes = {

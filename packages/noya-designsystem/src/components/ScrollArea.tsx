@@ -43,10 +43,8 @@ interface Props {
 }
 
 export default function ScrollArea({ children }: Props) {
-  const [
-    scrollElementRef,
-    setScrollElementRef,
-  ] = useState<HTMLDivElement | null>(null);
+  const [scrollElementRef, setScrollElementRef] =
+    useState<HTMLDivElement | null>(null);
 
   return (
     <Container>

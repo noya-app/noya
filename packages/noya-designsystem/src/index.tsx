@@ -16,6 +16,7 @@ declare module 'react' {
 export * from './theme';
 export * as lightTheme from './theme/light';
 export * as darkTheme from './theme/dark';
+export * from './mediaQuery';
 
 // Components
 export { default as Button } from './components/Button';
@@ -31,6 +32,7 @@ export { default as Divider } from './components/Divider';
 export { default as ColorPicker } from './components/ColorPicker';
 export { default as GradientPicker } from './components/GradientPicker';
 export * as ListView from './components/ListView';
+export { default as Grid } from './components/Grid';
 export * as GridView from './components/GridView';
 export * as Sortable from './components/Sortable';
 export type { RelativeDropPosition } from './components/Sortable';
@@ -41,6 +43,8 @@ export { default as Tooltip } from './components/Tooltip';
 export { default as ContextMenu } from './components/ContextMenu';
 export { default as DropdownMenu } from './components/DropdownMenu';
 export { default as ScrollArea } from './components/ScrollArea';
+export { default as Stack } from './components/Stack';
+export { default as Text } from './components/Text';
 export { SEPARATOR_ITEM } from './components/internal/Menu';
 export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 
