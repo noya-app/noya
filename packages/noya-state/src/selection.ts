@@ -94,3 +94,18 @@ export function getRectExtentPoint(rect: Rect, direction: CompassDirection) {
 
   return { x, y };
 }
+
+const oppositeDirectionMap: Record<CompassDirection, CompassDirection> = {
+  n: 's',
+  ne: 'sw',
+  e: 'w',
+  se: 'nw',
+  s: 'n',
+  sw: 'ne',
+  w: 'e',
+  nw: 'se',
+};
+
+export function getOppositeDirection(direction: CompassDirection) {
+  return oppositeDirectionMap[direction];
+}

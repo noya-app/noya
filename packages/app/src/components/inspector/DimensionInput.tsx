@@ -1,5 +1,6 @@
 import { InputField } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
+import { round } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import { DimensionValue } from './DimensionsInspector';
 
@@ -25,14 +26,15 @@ export default memo(function DimensionInput({
     [onSetValue],
   );
 
-  const handleSetValue = useCallback((value) => onSetValue(value, 'replace'), [
-    onSetValue,
-  ]);
+  const handleSetValue = useCallback(
+    (value) => onSetValue(value, 'replace'),
+    [onSetValue],
+  );
 
   return (
     <InputField.Root id={id} size={size}>
       <InputField.NumberInput
-        value={value}
+        value={value === undefined ? value : round(value, 2)}
         placeholder={value === undefined ? placeholder : undefined}
         onNudge={handleNudgeValue}
         onSubmit={handleSetValue}

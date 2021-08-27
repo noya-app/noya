@@ -26,6 +26,7 @@ export type LayerPropertyAction =
       expanded: boolean,
       target: 'self' | 'recursive',
     ]
+  | [type: 'setConstrainProportions', value: boolean]
   | [type: 'setLayerX', value: number, mode?: SetNumberMode]
   | [type: 'setLayerY', value: number, mode?: SetNumberMode]
   | [type: 'setLayerWidth', value: number, mode?: SetNumberMode]
@@ -137,6 +138,17 @@ export function layerPropertyReducer(
         });
       });
     }
+    case 'setConstrainProportions': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          layer.frame.constrainProportions = value;
+        });
+      });
+    }
     case 'setLayerRotation': {
       const [, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
@@ -186,6 +198,8 @@ export function layerPropertyReducer(
 
       const property =
         type === 'setLayerWidth' ? ('width' as const) : ('height' as const);
+      const otherProperty =
+        type === 'setLayerWidth' ? ('height' as const) : ('width' as const);
 
       return produce(state, (draft) => {
         indexPaths.forEach((indexPath) => {
@@ -193,15 +207,23 @@ export function layerPropertyReducer(
           const draftLayer = Layers.access(draftPage, indexPath);
 
           const value = draftLayer.frame[property];
+          const otherValue = draftLayer.frame[otherProperty];
+          const aspectRatio = value / otherValue;
+
           const newValue = Math.max(
             mode === 'replace' ? amount : value + amount,
             0.5,
           );
 
-          const newLayer = resizeLayerFrame(draftLayer, {
+          const newFrame = {
             ...draftLayer.frame,
             [property]: newValue,
-          });
+            ...(draftLayer.frame.constrainProportions && {
+              [otherProperty]: newValue / aspectRatio,
+            }),
+          };
+
+          const newLayer = resizeLayerFrame(draftLayer, newFrame);
 
           Layers.assign(draftPage, indexPath, newLayer);
 

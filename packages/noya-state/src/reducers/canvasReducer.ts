@@ -70,6 +70,7 @@ import {
   SnapshotInteractionAction,
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
+import { getMultiValue } from '../utils/getMultiValue';
 
 export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
 
@@ -950,6 +951,15 @@ export function canvasReducer(
               layerIds,
             )!;
 
+            const constrain =
+              getMultiValue(
+                layerIndexPaths.map(
+                  (indexPath) =>
+                    Layers.access(pageSnapshot, indexPath).frame
+                      .constrainProportions,
+                ),
+              ) ?? true;
+
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
               pageSnapshot,
@@ -957,6 +967,7 @@ export function canvasReducer(
               delta,
               context.canvasSize,
               direction,
+              constrain,
             );
 
             const originalTransform = AffineTransform.translate(
