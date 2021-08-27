@@ -77,7 +77,6 @@ function shouldVisitChildren(
 
   switch (layer._class) {
     case 'symbolMaster':
-      return true;
     case 'artboard':
       return options.artboards !== 'artboardOnly';
     case 'group':
@@ -152,7 +151,7 @@ export function getLayersInRect(
 
     const includeSelf =
       (Layers.isGroup(layer) && options.groups === 'groupAndChildren') ||
-      (Layers.isArtboard(layer) &&
+      (Layers.isSymbolMasterOrArtboard(layer) &&
         (options.artboards === 'artboardAndChildren' ||
           (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
             (layer.layers.length === 0 ||
@@ -170,7 +169,7 @@ export function getLayersInRect(
 export function artboardLabelContainsPoint(
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
-  layer: Sketch.Artboard,
+  layer: Sketch.Artboard | Sketch.SymbolMaster,
   canvasTransform: AffineTransform,
   screenPoint: Point,
 ): boolean {
@@ -220,7 +219,7 @@ export function getLayerAtPoint(
 
     if (!frameContainsPoint) {
       if (
-        Layers.isArtboard(layer) &&
+        Layers.isSymbolMasterOrArtboard(layer) &&
         options.artboards === 'emptyOrContainedArtboardOrChildren' &&
         artboardLabelContainsPoint(
           CanvasKit,
@@ -239,7 +238,7 @@ export function getLayerAtPoint(
     }
 
     const includeArtboard =
-      Layers.isArtboard(layer) &&
+      Layers.isSymbolMasterOrArtboard(layer) &&
       (options.artboards === 'artboardAndChildren' ||
         (options.artboards === 'emptyOrContainedArtboardOrChildren' &&
           layer.layers.length === 0));
