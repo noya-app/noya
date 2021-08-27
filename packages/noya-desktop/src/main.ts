@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
-import { ApplicationMenuItemType, MessageFromHost } from 'noya-embedded';
-import { visit } from 'tree-visit';
-
-app.commandLine.appendSwitch('enable-features', '--no-user-gesture-required');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
+import { saveFile } from './actions/saveFile';
+import { openFile } from './actions/openFile';
+import { setMenu } from './actions/setMenu';
+import { ActionContext } from './types';
 
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
@@ -53,51 +54,31 @@ app.on('activate', () => {
   }
 });
 
+type ActionMap<T extends { type: string }> = {
+  [Property in T['type']]: (
+    action: Extract<T, { type: Property }>,
+    context: ActionContext,
+  ) => void;
+};
+
+const actions: ActionMap<MessageFromEmbedded> = {
+  setMenu,
+  openFile,
+  saveFile,
+};
+
 ipcMain.on('rendererProcessMessage', (event, data) => {
-  switch (data.type) {
-    case 'setMenu': {
-      visit<Electron.MenuItemConstructorOptions>(
-        {
-          submenu: data.value,
-        },
-        {
-          getChildren: (options) => {
-            if (Array.isArray(options.submenu)) {
-              return options.submenu;
-            } else {
-              return [];
-            }
-          },
-          onEnter: (options) => {
-            if (!options.id) return;
+  const browserWindow = BrowserWindow.fromId(event.sender.id);
 
-            const message: MessageFromHost = {
-              type: 'menuCommand',
-              value: options.id as ApplicationMenuItemType,
-            };
+  if (!browserWindow) return;
 
-            options.click = () =>
-              event.sender.send('mainProcessMessage', message);
-          },
-        },
-      );
+  const context: ActionContext = {
+    browserWindow,
+    sendMessage: (message: MessageFromHost) =>
+      event.sender.send('mainProcessMessage', message),
+  };
 
-      data.value.push({
-        label: 'View',
-        submenu: [
-          { role: 'reload' },
-          { role: 'forceReload' },
-          { role: 'toggleDevTools' },
-          { type: 'separator' },
-          { role: 'resetZoom' },
-          { role: 'zoomIn' },
-          { role: 'zoomOut' },
-          { type: 'separator' },
-          { role: 'togglefullscreen' },
-        ],
-      });
+  if (!(data.type in actions)) return;
 
-      Menu.setApplicationMenu(Menu.buildFromTemplate(data.value));
-    }
-  }
+  actions[data.type](data as any, context);
 });

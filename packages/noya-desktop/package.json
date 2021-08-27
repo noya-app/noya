@@ -1,6 +1,6 @@
 {
   "name": "noya-desktop",
-  "productName": "noya-desktop",
+  "productName": "Noya",
   "version": "0.0.1",
   "description": "Noya wrapped with electron",
   "main": ".webpack/main",

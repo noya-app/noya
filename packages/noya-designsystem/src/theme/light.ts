@@ -52,7 +52,8 @@ export const colors = {
 };
 
 export const fonts = {
-  normal: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+  normal:
+    "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
   monospace: "Menlo, Monaco, Consolas, 'Courier New', monospace",
 };
 
