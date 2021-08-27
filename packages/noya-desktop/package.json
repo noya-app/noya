@@ -1,5 +1,6 @@
 {
   "name": "Noya",
+  "private": true,
   "productName": "Noya",
   "version": "0.0.1",
   "description": "Noya wrapped with electron",
