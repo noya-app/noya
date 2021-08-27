@@ -75,7 +75,6 @@ export function workspaceReducer(
     }
     case 'setFile': {
       const [, sketchFile, fileHandle] = action;
-
       return produce(state, (draft) => {
         draft.fileHandle = fileHandle;
         draft.history = createInitialHistoryState(sketchFile);
