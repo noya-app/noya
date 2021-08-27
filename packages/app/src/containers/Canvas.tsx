@@ -1144,6 +1144,11 @@ export default memo(function Canvas() {
 
   const onImportSketchFile = useCallback(
     async (file: TypedFile<SupportedCanvasUploadType>) => {
+      const answer = window.confirm(
+        'Opening a new file will replace your current file. Are you sure?',
+      );
+      if (answer === false) return;
+
       const data = await file.arrayBuffer();
       const sketch = await decode(data);
 

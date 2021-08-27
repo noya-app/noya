@@ -10,8 +10,8 @@ export function isSupportedFile<T extends string>(
   supportedFileTypes: T[],
 ): file is TypedFile<T> {
   return (
-    (supportedFileTypes.includes(file.type as T) && file.type !== '') ||
-    file.name.endsWith('.sketch')
+    supportedFileTypes.includes(file.type as T) ||
+    (file.type === '' && file.name.endsWith('.sketch'))
   );
 }
 

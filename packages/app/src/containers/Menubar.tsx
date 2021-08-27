@@ -64,10 +64,13 @@ const MenubarContent = memo(function MenubarContent({
       mimeTypes: ['application/zip'],
     });
 
+    const answer = window.confirm(
+      'Opening a new file will replace your current file. Are you sure?',
+    );
+    if (answer === false) return;
+
     const data = await file.arrayBuffer();
-
     const sketch = await decode(data);
-
     dispatch('setFile', sketch, file.handle);
   }, [dispatch]);
 
@@ -162,6 +165,10 @@ const MenubarContent = memo(function MenubarContent({
     (value: ApplicationMenuItemType) => {
       switch (value) {
         case 'new': {
+          const answer = window.confirm(
+            'Opening a new file will replace your current file. Are you sure?',
+          );
+          if (answer === false) return;
           dispatch('newFile');
           return;
         }
