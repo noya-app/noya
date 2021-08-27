@@ -1,16 +1,16 @@
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import {
   EditableShadow,
-  getEditableShadow,
+  getEditableInnerShadow,
   getEditableStyles,
   Selectors,
 } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
-import ShadowRow from '../components/inspector/ShadowRow';
 import { useShallowArray } from 'noya-react-utils';
+import ShadowRow from '../components/inspector/ShadowRow';
 
-export default memo(function ShadowInspector() {
+export default memo(function InnerShadowInspector() {
   const dispatch = useDispatch();
 
   const selectedStyles = useShallowArray(
@@ -18,32 +18,32 @@ export default memo(function ShadowInspector() {
   );
 
   const shadowMatrix = useShallowArray(
-    selectedStyles.map((style) => style?.shadows ?? []),
+    selectedStyles.map((style) => style?.innerShadows ?? []),
   );
 
   const editableShadows: EditableShadow[] = useMemo(
-    () => getEditableStyles(shadowMatrix, getEditableShadow),
+    () => getEditableStyles(shadowMatrix, getEditableInnerShadow),
     [shadowMatrix],
   );
 
   return (
     <CheckboxArrayController<EditableShadow>
-      title="Shadows"
-      id="shadows"
-      key="shadows"
+      title="Inner Shadow"
+      id="inner-shadow"
+      key="inner-shadow"
       value={editableShadows}
-      onClickPlus={useCallback(() => dispatch('addNewShadow'), [dispatch])}
+      onClickPlus={useCallback(() => dispatch('addNewInnerShadow'), [dispatch])}
       onClickTrash={useCallback(
-        () => dispatch('deleteDisabledShadows'),
+        () => dispatch('deleteDisabledInnerShadows'),
         [dispatch],
       )}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
-          dispatch('moveShadow', sourceIndex, destinationIndex),
+          dispatch('moveInnerShadow', sourceIndex, destinationIndex),
         [dispatch],
       )}
       onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setShadowEnabled', index, checked),
+        (index, checked) => dispatch('setInnerShadowEnabled', index, checked),
         [dispatch],
       )}
       renderItem={useCallback(
@@ -57,24 +57,28 @@ export default memo(function ShadowInspector() {
           checkbox: ReactNode;
         }) => (
           <ShadowRow
-            id={`shadow-${index}`}
+            id={`inner-shadow-${index}`}
             prefix={checkbox}
             x={item.offsetX}
             y={item.offsetY}
             blur={item.blurRadius}
             spread={item.spread}
-            onSetX={(value, mode) => dispatch('setShadowX', index, value, mode)}
-            onSetY={(value, mode) => dispatch('setShadowY', index, value, mode)}
+            onSetX={(value, mode) =>
+              dispatch('setInnerShadowX', index, value, mode)
+            }
+            onSetY={(value, mode) =>
+              dispatch('setInnerShadowY', index, value, mode)
+            }
             onSetBlur={(value, mode) =>
-              dispatch('setShadowBlur', index, value, mode)
+              dispatch('setInnerShadowBlur', index, value, mode)
             }
             onSetSpread={(value, mode) =>
-              dispatch('setShadowSpread', index, value, mode)
+              dispatch('setInnerShadowSpread', index, value, mode)
             }
             colorProps={{
               color: item.color,
               onChangeColor: (value) =>
-                dispatch('setShadowColor', index, value),
+                dispatch('setInnerShadowColor', index, value),
             }}
           />
         ),

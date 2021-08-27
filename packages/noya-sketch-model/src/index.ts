@@ -152,6 +152,22 @@ function shadow(options?: ModelOptions<Sketch.Shadow>): Sketch.Shadow {
   };
 }
 
+function innerShadow(
+  options?: ModelOptions<Sketch.InnerShadow>,
+): Sketch.InnerShadow {
+  return {
+    isEnabled: true,
+    color: color(),
+    contextSettings: graphicsContextSettings(),
+    blurRadius: 0,
+    offsetX: 0,
+    offsetY: 0,
+    spread: 0,
+    ...options,
+    _class: Sketch.ClassValue.InnerShadow,
+  };
+}
+
 function blur(options?: ModelOptions<Sketch.Blur>): Sketch.Blur {
   return {
     isEnabled: false,
@@ -763,6 +779,7 @@ export const SketchModel = {
   graphicsContextSettings,
   group,
   inferredGroupLayout,
+  innerShadow,
   meta,
   oval,
   page,

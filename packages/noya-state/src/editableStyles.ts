@@ -113,6 +113,22 @@ export function getEditableShadow(shadows: Sketch.Shadow[]): EditableShadow {
   };
 }
 
+export function getEditableInnerShadow(
+  shadows: Sketch.InnerShadow[],
+): EditableShadow {
+  return {
+    isEnabled: getMultiValue(shadows.map((shadow) => shadow.isEnabled)) ?? true,
+    blurRadius: getMultiNumberValue(shadows.map((shadow) => shadow.blurRadius)),
+    color: getMultiValue(
+      shadows.map((shadow) => shadow.color),
+      isDeepEqual,
+    ),
+    offsetX: getMultiValue(shadows.map((shadow) => shadow.offsetX)),
+    offsetY: getMultiValue(shadows.map((shadow) => shadow.offsetY)),
+    spread: getMultiValue(shadows.map((shadow) => shadow.spread)),
+  };
+}
+
 export type EditableBorder = {
   // TODO: Indeterminate `isEnabled` state
   isEnabled: boolean;
