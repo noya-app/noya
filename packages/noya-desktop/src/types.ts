@@ -1,3 +1,4 @@
+import { BrowserWindow } from 'electron';
 import { MessageFromHost, MessageFromEmbedded } from 'noya-embedded';
 
 declare global {
@@ -23,3 +24,8 @@ declare global {
     }
   }
 }
+
+export type ActionContext = {
+  browserWindow: BrowserWindow;
+  sendMessage: (message: MessageFromHost) => void;
+};

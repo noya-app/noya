@@ -1,5 +1,5 @@
 import { HamburgerMenuIcon } from '@radix-ui/react-icons';
-import { fileOpen, fileSave, FileSystemHandle } from 'browser-fs-access';
+import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
   useGetStateSnapshot,
@@ -18,6 +18,7 @@ import { memo, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
+import { useFileManager } from '../hooks/useFileManager';
 import { useHistory } from '../hooks/useHistory';
 
 const Container = styled.header(({ theme }) => ({
@@ -54,12 +55,13 @@ const MenubarContent = memo(function MenubarContent({
   redoDisabled,
   undoDisabled,
 }: Props) {
+  const fileManager = useFileManager();
   const isElectron = useEnvironmentParameter('isElectron');
   const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
 
   const handleOpen = useCallback(async () => {
-    const file = await fileOpen({
+    const file = await fileManager.open({
       extensions: ['.sketch'],
       mimeTypes: ['application/zip'],
     });
@@ -72,7 +74,7 @@ const MenubarContent = memo(function MenubarContent({
     const data = await file.arrayBuffer();
     const sketch = await decode(data);
     dispatch('setFile', sketch, file.handle);
-  }, [dispatch]);
+  }, [dispatch, fileManager]);
 
   const handleSave = useCallback(
     async (action: 'save' | 'saveAs') => {
@@ -82,7 +84,7 @@ const MenubarContent = memo(function MenubarContent({
         type: 'application/zip',
       });
 
-      const newFileHandle = await fileSave(
+      const newFileHandle = await fileManager.save(
         file,
         { fileName: file.name, extensions: ['.sketch'] },
         action === 'save' ? fileHandle : undefined,
@@ -91,7 +93,7 @@ const MenubarContent = memo(function MenubarContent({
 
       dispatch('setFileHandle', newFileHandle);
     },
-    [dispatch, fileHandle, getStateSnapshot],
+    [dispatch, fileHandle, fileManager, getStateSnapshot],
   );
 
   const menuItems = useMemo(

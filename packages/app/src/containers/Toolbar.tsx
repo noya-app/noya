@@ -1,8 +1,10 @@
 import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { FileSystemHandle } from 'browser-fs-access';
 import {
   useApplicationState,
   useDispatch,
   useSelector,
+  useWorkspaceState,
 } from 'noya-app-state-context';
 import {
   Button,
@@ -11,6 +13,7 @@ import {
   MenuItem,
   RegularMenuItem,
   Spacer,
+  Tooltip,
 } from 'noya-designsystem';
 import { FALLTHROUGH, KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
@@ -21,7 +24,7 @@ import {
 } from 'noya-state';
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
-import { useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { LayerIcon } from './LayerList';
@@ -51,11 +54,23 @@ type ZoomMenuType =
 
 const SYMBOL_ITEM_PREFIX = 'symbol:';
 
+const DocumentTitle = styled.span(({ theme }) => ({
+  ...theme.textStyles.small,
+  fontWeight: 'bold',
+  flex: '0 0 200px',
+  maxWidth: '200px',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'pre',
+  userSelect: 'none',
+}));
+
 interface Props {
   interactionStateProjection: InteractionStateProjection;
   canStartEditingPath: boolean;
   zoomValue: number;
   hasSelectedLayer: boolean;
+  fileHandle?: FileSystemHandle;
 }
 
 const ToolbarContent = memo(function ToolbarContent({
@@ -63,6 +78,7 @@ const ToolbarContent = memo(function ToolbarContent({
   canStartEditingPath,
   zoomValue,
   hasSelectedLayer,
+  fileHandle,
 }: Props) {
   const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
@@ -285,8 +301,14 @@ const ToolbarContent = memo(function ToolbarContent({
     'Mod-Shift-z': handleRedo,
   });
 
+  const fileName = fileHandle?.name ?? 'Untitled.sketch';
+
   return (
     <>
+      <Spacer.Horizontal size={itemSeparatorSize * 1.5} />
+      <Tooltip content={fileName}>
+        <DocumentTitle>{fileName.replace(/\.sketch$/, '')}</DocumentTitle>
+      </Tooltip>
       <Spacer.Horizontal size={itemSeparatorSize} />
       <DropdownMenu<string>
         items={insertMenuItems}
@@ -352,6 +374,7 @@ const ToolbarContent = memo(function ToolbarContent({
 
 export default function Toolbar() {
   const [state] = useApplicationState();
+  const { fileHandle } = useWorkspaceState();
   const { zoomValue } = Selectors.getCurrentPageMetadata(state);
   const hasSelectedLayer = state.selectedLayerIds.length > 0;
 
@@ -378,6 +401,7 @@ export default function Toolbar() {
       canStartEditingPath={canStartEditingPath}
       zoomValue={zoomValue}
       hasSelectedLayer={hasSelectedLayer}
+      fileHandle={fileHandle}
     />
   );
 }

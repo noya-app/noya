@@ -1,8 +1,16 @@
 export class Emitter<T extends any[] = []> {
   private listeners: ((...args: T) => void)[] = [];
 
-  addListener = (f: (...args: T) => void) => {
-    this.listeners.push(f);
+  addListener = (f: (...args: T) => void, options: { once?: boolean } = {}) => {
+    if (options.once) {
+      const handler = (...args: T) => {
+        this.removeListener(handler);
+        return f(...args);
+      };
+      this.listeners.push(handler);
+    } else {
+      this.listeners.push(f);
+    }
   };
 
   removeListener = (f: (...args: T) => void) => {

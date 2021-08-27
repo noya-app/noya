@@ -5,5 +5,5 @@ window.addEventListener('message', (event: MessageEvent) => {
 });
 
 ipcRenderer.on('mainProcessMessage', (event, data) => {
-  window.postMessage(data, '*');
+  window.postMessage(data, window.location.origin);
 });
