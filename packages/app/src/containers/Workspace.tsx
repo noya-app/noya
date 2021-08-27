@@ -9,6 +9,7 @@ import {
   ScrollArea,
   Spacer,
 } from 'noya-designsystem';
+import { doubleClickToolbar } from 'noya-embedded';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { ReactNode, useMemo, useState } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
@@ -89,6 +90,27 @@ const ToolbarContainer = styled.header(({ theme }) => ({
   WebkitAppRegion: 'drag',
 }));
 
+const MenubarContainer = styled.header<{ showApplicationMenu: boolean }>(
+  ({ theme, showApplicationMenu }) => ({
+    minHeight: `${
+      theme.sizes.toolbar.height - (showApplicationMenu ? 8 : 0)
+    }px`,
+    display: 'flex',
+    flexDirection: 'column',
+    borderBottom: `1px solid ${
+      showApplicationMenu ? 'transparent' : theme.colors.dividerStrong
+    }`,
+    borderRight: `1px solid ${
+      showApplicationMenu ? theme.colors.dividerStrong : 'transparent'
+    }`,
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    color: theme.colors.textMuted,
+    background: showApplicationMenu ? 'rgba(255,255,255,0.02)' : 'none',
+    WebkitAppRegion: 'drag',
+  }),
+);
+
 function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
   const currentTab = useSelector(Selectors.getCurrentTab);
 
@@ -101,10 +123,10 @@ export default function Workspace() {
   const isElectron = useEnvironmentParameter('isElectron');
   const theme = useMemo(() => {
     const baseTheme = colorScheme === 'dark' ? darkTheme : lightTheme;
+
     return produce(baseTheme, (draft) => {
       if (!isElectron) return;
 
-      draft.showMenubar = true;
       draft.sizes.toolbar.height = 53;
       draft.sizes.toolbar.itemSeparator = 12;
     });
@@ -113,7 +135,12 @@ export default function Workspace() {
   return (
     <ThemeProvider theme={theme}>
       <LeftSidebar>
-        <Menubar />
+        <MenubarContainer
+          showApplicationMenu={isElectron}
+          onDoubleClick={doubleClickToolbar}
+        >
+          <Menubar />
+        </MenubarContainer>
         <LeftSidebarBorderedContent>
           <PageList />
           <Divider />
@@ -145,7 +172,7 @@ export default function Workspace() {
         </LeftSidebarBorderedContent>
       </LeftSidebar>
       <MainView>
-        <ToolbarContainer>
+        <ToolbarContainer onDoubleClick={doubleClickToolbar}>
           {useTabElement({
             canvas: <Toolbar />,
             pages: null,
