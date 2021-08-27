@@ -22,6 +22,7 @@ import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
+import InnerShadowInspector from './InnerShadowInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
 import OpacityInspector from './OpacityInspector';
@@ -201,6 +202,9 @@ export default memo(function Inspector() {
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
+      selectedLayers.every(Layers.hasInspectableInnerShadow) && (
+        <InnerShadowInspector />
+      ),
       selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       selectedLayers.length === 1 && <ExportInspector />,

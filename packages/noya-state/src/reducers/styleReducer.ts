@@ -25,7 +25,7 @@ export const defaultFillColor = SketchModel.color({
 
 export type SetNumberMode = 'replace' | 'adjust';
 
-export type StyleElementType = 'Fill' | 'Border' | 'Shadow';
+export type StyleElementType = 'Fill' | 'Border' | 'Shadow' | 'InnerShadow';
 
 export type StyleShadowProperty = 'X' | 'Y' | 'Blur' | 'Spread';
 
@@ -58,11 +58,17 @@ export type StyleAction =
       amount: number,
       mode?: SetNumberMode,
     ]
+  | [
+      type: `setInnerShadow${StyleShadowProperty}`,
+      index: number,
+      amount: number,
+      mode?: SetNumberMode,
+    ]
   | [type: 'setOpacity', amount: number, mode?: SetNumberMode]
   | [type: 'setFixedRadius', amount: number, mode?: SetNumberMode]
   | [type: `set${StyleElementType}Color`, index: number, value: Sketch.Color]
   | [
-      type: `set${Exclude<StyleElementType, 'Shadow'>}FillType`,
+      type: `set${Exclude<StyleElementType, 'Shadow' | 'InnerShadow'>}FillType`,
       index: number,
       value: Sketch.FillType,
     ]
@@ -118,7 +124,7 @@ export function styleReducer(
           draft.fills = [fill];
         }
       });
-    case 'addNewShadow':
+    case 'addNewShadow': {
       const shadow = SketchModel.shadow({
         color: SketchModel.color({ alpha: 0.5 }),
         offsetY: 2,
@@ -132,6 +138,22 @@ export function styleReducer(
           draft.shadows = [shadow];
         }
       });
+    }
+    case 'addNewInnerShadow': {
+      const shadow = SketchModel.innerShadow({
+        color: SketchModel.color({ alpha: 0.5 }),
+        offsetY: 2,
+        blurRadius: 4,
+      });
+
+      return produce(state, (draft) => {
+        if (draft.innerShadows) {
+          draft.innerShadows.push(shadow);
+        } else {
+          draft.innerShadows = [shadow];
+        }
+      });
+    }
     case 'setBorderEnabled': {
       const [, index, isEnabled] = action;
       return produce(state, (draft) => {
@@ -156,6 +178,14 @@ export function styleReducer(
         }
       });
     }
+    case 'setInnerShadowEnabled': {
+      const [, index, isEnabled] = action;
+      return produce(state, (draft) => {
+        if (draft.innerShadows && draft.innerShadows[index]) {
+          draft.innerShadows[index].isEnabled = isEnabled;
+        }
+      });
+    }
     case 'deleteBorder':
       return produce(state, (draft) => {
         if (draft.borders) {
@@ -172,6 +202,12 @@ export function styleReducer(
       return produce(state, (draft) => {
         if (draft.shadows) {
           draft.shadows.splice(action[1], 1);
+        }
+      });
+    case 'deleteInnerShadow':
+      return produce(state, (draft) => {
+        if (draft.innerShadows) {
+          draft.innerShadows.splice(action[1], 1);
         }
       });
     case 'moveBorder': {
@@ -198,6 +234,14 @@ export function styleReducer(
         moveArrayItem(draft.shadows, sourceIndex, destinationIndex);
       });
     }
+    case 'moveInnerShadow': {
+      const [, sourceIndex, destinationIndex] = action;
+      return produce(state, (draft) => {
+        if (!draft.innerShadows) return;
+
+        moveArrayItem(draft.innerShadows, sourceIndex, destinationIndex);
+      });
+    }
     case 'deleteDisabledBorders':
       return produce(state, (draft) => {
         if (draft.borders) {
@@ -214,6 +258,14 @@ export function styleReducer(
       return produce(state, (draft) => {
         if (draft.shadows) {
           draft.shadows = draft.shadows.filter((fill) => fill.isEnabled);
+        }
+      });
+    case 'deleteDisabledInnerShadows':
+      return produce(state, (draft) => {
+        if (draft.innerShadows) {
+          draft.innerShadows = draft.innerShadows.filter(
+            (fill) => fill.isEnabled,
+          );
         }
       });
     case 'setBorderColor': {
@@ -237,6 +289,14 @@ export function styleReducer(
       return produce(state, (draft) => {
         if (draft.shadows && draft.shadows[index]) {
           draft.shadows[index].color = color;
+        }
+      });
+    }
+    case 'setInnerShadowColor': {
+      const [, index, color] = action;
+      return produce(state, (draft) => {
+        if (draft.innerShadows && draft.innerShadows[index]) {
+          draft.innerShadows[index].color = color;
         }
       });
     }
@@ -286,6 +346,20 @@ export function styleReducer(
         draft.shadows[index].offsetX = newValue;
       });
     }
+    case 'setInnerShadowX': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.innerShadows || !draft.innerShadows[index]) return;
+
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.innerShadows[index].offsetX + amount;
+
+        draft.innerShadows[index].offsetX = newValue;
+      });
+    }
     case 'setShadowY': {
       const [, index, amount, mode = 'replace'] = action;
 
@@ -296,6 +370,20 @@ export function styleReducer(
           mode === 'replace' ? amount : draft.shadows[index].offsetY + amount;
 
         draft.shadows[index].offsetY = newValue;
+      });
+    }
+    case 'setInnerShadowY': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.innerShadows || !draft.innerShadows[index]) return;
+
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.innerShadows[index].offsetY + amount;
+
+        draft.innerShadows[index].offsetY = newValue;
       });
     }
     case 'setShadowBlur': {
@@ -312,6 +400,20 @@ export function styleReducer(
         draft.shadows[index].blurRadius = newValue;
       });
     }
+    case 'setInnerShadowBlur': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.innerShadows || !draft.innerShadows[index]) return;
+
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.innerShadows[index].blurRadius + amount;
+
+        draft.innerShadows[index].blurRadius = newValue;
+      });
+    }
     case 'setShadowSpread': {
       const [, index, amount, mode = 'replace'] = action;
 
@@ -322,6 +424,20 @@ export function styleReducer(
           mode === 'replace' ? amount : draft.shadows[index].spread + amount;
 
         draft.shadows[index].spread = newValue;
+      });
+    }
+    case 'setInnerShadowSpread': {
+      const [, index, amount, mode = 'replace'] = action;
+
+      return produce(state, (draft) => {
+        if (!draft.innerShadows || !draft.innerShadows[index]) return;
+
+        const newValue =
+          mode === 'replace'
+            ? amount
+            : draft.innerShadows[index].spread + amount;
+
+        draft.innerShadows[index].spread = newValue;
       });
     }
     case 'setBorderPosition': {
