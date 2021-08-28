@@ -83,12 +83,8 @@ export default memo(function SymbolLayoutRow({
         <RadioGroup.Root
           value={isAnchorDisabled ? 'none' : layoutAxis?.toString()}
           onValueChange={useCallback(
-            (event) =>
-              setLayoutAxis(
-                event.target.value === 'none'
-                  ? undefined
-                  : parseInt(event.target.value),
-              ),
+            (value: string) =>
+              setLayoutAxis(value === 'none' ? undefined : parseInt(value)),
             [setLayoutAxis],
           )}
         >
@@ -112,7 +108,7 @@ export default memo(function SymbolLayoutRow({
             id={`${layoutAxis}-${layoutAnchor}`}
             value={isAnchorDisabled ? '' : layoutAnchor?.toString()}
             onValueChange={useCallback(
-              (event) => setLayoutAnchor(parseInt(event.target.value)),
+              (value: string) => setLayoutAnchor(parseInt(value)),
               [setLayoutAnchor],
             )}
           >

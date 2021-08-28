@@ -34,25 +34,26 @@ export default function SwatchesToolbar() {
   const componentsTab = useSelector(Selectors.getCurrentComponentsTab);
 
   const handleChangeTab = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch('setThemeTab', event.target.value as ThemeTab);
-    },
+    (value: string) => dispatch('setThemeTab', value as ThemeTab),
     [dispatch],
   );
 
   const addSwatch = useCallback(() => dispatch('addSwatch'), [dispatch]);
-  const addThemeStyle = useCallback(() => dispatch('addThemeStyle'), [
-    dispatch,
-  ]);
+  const addThemeStyle = useCallback(
+    () => dispatch('addThemeStyle'),
+    [dispatch],
+  );
   const addTextStyle = useCallback(() => dispatch('addTextStyle'), [dispatch]);
 
   const removeSwatch = useCallback(() => dispatch('removeSwatch'), [dispatch]);
-  const removeTextStyle = useCallback(() => dispatch('removeTextStyle'), [
-    dispatch,
-  ]);
-  const removeThemeStyle = useCallback(() => dispatch('removeThemeStyle'), [
-    dispatch,
-  ]);
+  const removeTextStyle = useCallback(
+    () => dispatch('removeTextStyle'),
+    [dispatch],
+  );
+  const removeThemeStyle = useCallback(
+    () => dispatch('removeThemeStyle'),
+    [dispatch],
+  );
 
   const addComponent = useCallback(() => {
     switch (componentsTab) {

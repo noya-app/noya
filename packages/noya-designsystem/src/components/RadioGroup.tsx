@@ -1,9 +1,9 @@
-import * as RadixRadioGroup from '@radix-ui/react-radio-group';
-import { memo, ReactNode } from 'react';
+import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
+import { ComponentProps, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Tooltip } from '..';
 
-const RadioRoot = styled(RadixRadioGroup.Root)(({ theme }) => ({
+const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
   appearance: 'none',
   width: '0px', // Reset intrinsic width
   flex: '1 1 0px',
@@ -23,7 +23,7 @@ const RadioRoot = styled(RadixRadioGroup.Root)(({ theme }) => ({
   minHeight: '27px',
 }));
 
-const StyledItem = styled(RadixRadioGroup.Item)(({ theme }) => ({
+const StyledItem = styled(ToggleGroupPrimitive.Item)(({ theme }) => ({
   position: 'relative',
   flex: '1 1 0',
   appearance: 'none',
@@ -41,30 +41,11 @@ const StyledItem = styled(RadixRadioGroup.Item)(({ theme }) => ({
     outline: 'none',
     boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
   },
+  '&[aria-pressed="true"]': {
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+  },
 }));
-
-const StyledIndicator = styled(RadixRadioGroup.Indicator)(({ theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.primary,
-  height: '100%',
-  borderRadius: '4px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  verticalAlign: 'middle',
-  color: 'white',
-}));
-
-const IndicatorContainer = styled.div({
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  bottom: 0,
-  left: 0,
-  display: 'flex',
-  alignItems: 'stretch',
-  justifyContent: 'center',
-});
 
 interface Props {
   value: string;
@@ -73,13 +54,15 @@ interface Props {
   disabled?: boolean;
 }
 
-function RadioItem({ value, tooltip, children, disabled = false }: Props) {
+function ToggleGroupItem({
+  value,
+  tooltip,
+  children,
+  disabled = false,
+}: Props) {
   const itemElement = (
     <StyledItem value={value} disabled={disabled}>
       {children}
-      <IndicatorContainer>
-        <StyledIndicator>{children}</StyledIndicator>
-      </IndicatorContainer>
     </StyledItem>
   );
 
@@ -90,5 +73,24 @@ function RadioItem({ value, tooltip, children, disabled = false }: Props) {
   );
 }
 
-export const Root = RadioRoot;
-export const Item = memo(RadioItem);
+function ToggleGroupRoot({
+  onValueChange,
+  ...props
+}: Omit<ComponentProps<typeof StyledRoot>, 'type'>) {
+  return (
+    <StyledRoot
+      {...props}
+      type="single"
+      onValueChange={useCallback(
+        (value: string) => {
+          if (!value) return;
+          onValueChange?.(value);
+        },
+        [onValueChange],
+      )}
+    />
+  );
+}
+
+export const Root = memo(ToggleGroupRoot);
+export const Item = memo(ToggleGroupItem);

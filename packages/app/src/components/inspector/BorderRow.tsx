@@ -85,9 +85,7 @@ export default memo(function BorderRow({
   );
 
   const handleChangePosition = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChangePosition(toPositionEnum(event.target.value));
-    },
+    (value: string) => onChangePosition(toPositionEnum(value)),
     [onChangePosition],
   );
 
