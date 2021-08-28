@@ -12,3 +12,14 @@ ReactDOM.render(
   </StrictMode>,
   document.getElementById('root'),
 );
+
+// Disable native context menu on non-input element
+document.oncontextmenu = (event) => {
+  if (
+    event.target instanceof HTMLInputElement ||
+    event.target instanceof HTMLTextAreaElement
+  )
+    return;
+
+  event.preventDefault();
+};

@@ -1,7 +1,7 @@
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 import styled from 'styled-components';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
-import { memo, ReactNode, useCallback } from 'react';
+import React, { memo, ReactNode, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import {
   SEPARATOR_ITEM,
@@ -52,6 +52,13 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
   children,
   onSelect,
 }: ContextMenuItemProps<T>) {
+  // The pointer event within the context menu will bubble outside of the
+  // context menu unless we stop it here.
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent) => event.stopPropagation(),
+    [],
+  );
+
   if (checked) {
     return (
       <CheckboxItemElement
@@ -68,7 +75,10 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
   }
 
   const element = (
-    <ItemElement onSelect={items && items.length > 0 ? undefined : onSelect}>
+    <ItemElement
+      onSelect={items && items.length > 0 ? undefined : onSelect}
+      onPointerDown={handlePointerDown}
+    >
       {indented && (
         <Spacer.Horizontal size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
       )}
@@ -116,10 +126,12 @@ function ContextMenuRoot<T extends string>({
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
 
-  // Disable radix-ui's long-press-to-open behavior
-  // https://github.com/radix-ui/primitives/issues/748#issuecomment-869502837
+  // We call preventDefault both to:
+  // - Disable radix-ui's long-press-to-open behavior
+  //   https://github.com/radix-ui/primitives/issues/748#issuecomment-869502837
+  // - Mark the event as handled, so our ListView root doesn't handle it (a hack)
   const onPointerDown = useCallback((event: React.PointerEvent) => {
-    if (event.pointerType === 'pen') event.preventDefault();
+    event.preventDefault();
   }, []);
 
   return (

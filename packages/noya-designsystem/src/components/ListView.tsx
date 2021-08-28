@@ -275,7 +275,10 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   const handlePress = useCallback(
     (event: React.MouseEvent) => {
-      event.stopPropagation();
+      // We use preventDefault as a hack to mark this event as handled. We check for
+      // this in the ListView.Root. We can't stopPropagation here or existing ContextMenus
+      // won't close (onPointerDownOutside won't fire).
+      event.preventDefault();
 
       onPress?.(event);
     },
@@ -546,15 +549,17 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
 ) {
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
-      event.stopPropagation();
-
       if (
         event.target instanceof HTMLElement &&
         event.target.classList.contains('scroll-component')
       )
         return;
 
-      onPress?.();
+      // As a hack, we call preventDefault in a row if the event was handled.
+      // If the event wasn't handled already, we call onPress here.
+      if (!event.isDefaultPrevented()) {
+        onPress?.();
+      }
     },
     [onPress],
   );
