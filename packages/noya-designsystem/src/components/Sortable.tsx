@@ -92,6 +92,7 @@ type UseSortableReturnType = ReturnType<typeof useSortable>;
 
 interface ItemProps<T> {
   id: string;
+  disabled?: boolean;
   children: (
     props: {
       ref: Ref<T>;
@@ -101,11 +102,14 @@ interface ItemProps<T> {
   ) => JSX.Element;
 }
 
-function SortableItem<T extends HTMLElement>({ id, children }: ItemProps<T>) {
-  const { position, acceptsDrop, setActivatorEvent } = useContext(
-    SortableItemContext,
-  );
-  const sortable = useSortable({ id });
+function SortableItem<T extends HTMLElement>({
+  id,
+  disabled,
+  children,
+}: ItemProps<T>) {
+  const { position, acceptsDrop, setActivatorEvent } =
+    useContext(SortableItemContext);
+  const sortable = useSortable({ id, disabled });
 
   const {
     active,

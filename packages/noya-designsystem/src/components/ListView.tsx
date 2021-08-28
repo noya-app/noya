@@ -230,6 +230,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   selected?: boolean;
   depth?: number;
   disabled?: boolean;
+  draggable?: boolean;
   hovered?: boolean;
   sortable?: boolean;
   onPress?: (info: ListViewClickInfo) => void;
@@ -252,6 +253,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     disabled = false,
     hovered = false,
     isSectionHeader = false,
+    sortable: overrideSortable,
     onPress,
     onDoubleClick,
     onHoverChange,
@@ -351,7 +353,7 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   if (sortable && id) {
     return (
-      <Sortable.Item<HTMLElement> id={id}>
+      <Sortable.Item<HTMLElement> id={id} disabled={overrideSortable === false}>
         {({ ref: sortableRef, ...sortableProps }) =>
           renderContent(sortableProps, composeRefs(sortableRef, forwardedRef))
         }

@@ -134,6 +134,22 @@ const PageListContent = memo(function PageListContent({
       <TreeView.Root
         sortable={!editingPage}
         scrollable={scrollable}
+        acceptsDrop={useCallback(
+          (
+            sourceId: string,
+            destinationId: string,
+            relationDropPosition: RelativeDropPosition,
+          ) => {
+            if (relationDropPosition === 'inside') return false;
+
+            const destinationItem = pageInfo.find(
+              (info) => destinationId === info.id,
+            );
+
+            return destinationItem?.type === 'design';
+          },
+          [pageInfo],
+        )}
         onMoveItem={useCallback(
           (
             sourceIndex: number,
@@ -181,6 +197,7 @@ const PageListContent = memo(function PageListContent({
                 id={page.id}
                 key={page.id}
                 isSectionHeader={page.type === 'header'}
+                sortable={page.type === 'design'}
                 expanded={page.type === 'header' ? isExpanded : undefined}
                 selected={selected}
                 onClickChevron={() => {
