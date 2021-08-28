@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "next dev -p 4000",
-    "build": "next build"
+    "build": "next build && next export"
   },
   "dependencies": {
     "@popmotion/popcorn": "^0.4.4",
