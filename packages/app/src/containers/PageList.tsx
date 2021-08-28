@@ -186,7 +186,7 @@ const PageListContent = memo(function PageListContent({
                 onClickChevron={() => {
                   setIsExpanded(!isExpanded);
                 }}
-                onClick={() => {
+                onPress={() => {
                   dispatch('interaction', ['reset']);
 
                   switch (page.type) {

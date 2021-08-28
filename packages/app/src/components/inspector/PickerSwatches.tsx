@@ -35,7 +35,7 @@ const SwatchesList = memo(function SwatchesList({
           id={item.do_objectID}
           key={item.do_objectID}
           selected={selectedId === item.do_objectID}
-          onClick={() => {
+          onPress={() => {
             onSelect(item.do_objectID);
           }}
         >

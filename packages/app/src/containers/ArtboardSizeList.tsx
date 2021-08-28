@@ -105,7 +105,7 @@ export default function ArtboardSizeList() {
             <TreeView.Row
               depth={1}
               key={name}
-              onClick={() => {
+              onPress={() => {
                 dispatch('insertArtboard', { name, width, height });
               }}
             >

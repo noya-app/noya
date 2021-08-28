@@ -44,7 +44,7 @@ const ThemeGroup = memo(function ThemeGroup({
             key={group.name}
             depth={group.depth}
             isSectionHeader={isRoot}
-            onClick={() => onClick(group.path)}
+            onPress={() => onClick(group.path)}
             selected={selectedGroup === group.path}
             icon={!isRoot && <GroupIcon />}
           >

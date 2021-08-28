@@ -19,6 +19,7 @@ type Props = {
   placeholder?: string;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onClick?: (event: React.MouseEvent) => void;
+  onPointerDown?: (event: React.PointerEvent) => void;
 };
 
 type ControlledProps = Props & {
@@ -37,6 +38,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
     value,
     onChange,
     onClick,
+    onPointerDown,
   }: ControlledProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
@@ -67,6 +69,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
       onKeyDown={handleKeyDown}
       onChange={handleChange}
       onClick={onClick}
+      onPointerDown={onPointerDown}
     />
   );
 });
@@ -88,6 +91,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     disabled,
     onSubmit,
     onClick,
+    onPointerDown,
     allowSubmittingWithSameValue = false,
   }: SubmittableProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
@@ -168,6 +172,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       onChange={handleChange}
       onBlur={handleSubmit}
       onClick={onClick}
+      onPointerDown={onPointerDown}
       autoComplete="off"
       autoCapitalize="off"
       autoCorrect="off"

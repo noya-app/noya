@@ -340,7 +340,7 @@ export default memo(function FillInputFieldWithPicker({
   patternProps,
   shaderProps,
 }: Props) {
-  const [, dispatch] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
   const picker = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Gradient:
@@ -379,7 +379,9 @@ export default memo(function FillInputFieldWithPicker({
   ]);
 
   useGlobalInputBlurListener(() => {
-    dispatch('setSelectedGradient', undefined);
+    if (state.selectedGradient) {
+      dispatch('setSelectedGradient', undefined);
+    }
   });
 
   return (
