@@ -20,7 +20,7 @@ import {
   useRef,
 } from 'react';
 import { WindowScroller } from 'react-virtualized';
-import { VariableSizeList } from 'react-window';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import styled from 'styled-components';
 import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
@@ -338,6 +338,27 @@ const ListViewRow = forwardRef(function ListViewRow<
 });
 
 /* ----------------------------------------------------------------------------
+ * VirtualizedListRow
+ * ------------------------------------------------------------------------- */
+
+const RenderItemContext = createContext<(index: number) => ReactNode>(
+  () => null,
+);
+
+const VirtualizedListRow = memo(function VirtualizedListRow({
+  index,
+  style,
+}: ListChildComponentProps) {
+  const renderItem = useContext(RenderItemContext);
+
+  return (
+    <div key={index} style={style}>
+      {renderItem(index)}
+    </div>
+  );
+});
+
+/* ----------------------------------------------------------------------------
  * VirtualizedList
  * ------------------------------------------------------------------------- */
 
@@ -393,52 +414,46 @@ const VirtualizedListInner = forwardRef(function VirtualizedListInner<T>(
     [],
   );
 
-  const children = useCallback(
-    ({ index, style }: { index: number; style: CSSProperties }) => (
-      <div style={style}>{renderItem(index)}</div>
-    ),
-    [renderItem],
-  );
-
   return (
-    <WindowScroller
-      scrollElement={scrollElement}
-      style={useMemo(() => ({ flex: '1 1 auto' }), [])}
-    >
-      {useCallback(
-        ({ registerChild, onChildScroll, scrollTop }) => (
-          <div ref={registerChild}>
-            <VariableSizeList<T>
-              ref={listRef}
-              // The list won't update on scroll unless we force it to by changing key
-              key={scrollTop}
-              style={listStyle}
-              itemKey={keyExtractor}
-              onScroll={({ scrollOffset }) => {
-                onChildScroll({ scrollTop: scrollOffset });
-              }}
-              initialScrollOffset={scrollTop}
-              width={size.width}
-              height={size.height}
-              itemCount={items.length}
-              itemSize={getItemHeight}
-              estimatedItemSize={31}
-            >
-              {children}
-            </VariableSizeList>
-          </div>
-        ),
-        [
-          listStyle,
-          keyExtractor,
-          size.width,
-          size.height,
-          items.length,
-          getItemHeight,
-          children,
-        ],
-      )}
-    </WindowScroller>
+    <RenderItemContext.Provider value={renderItem}>
+      <WindowScroller
+        scrollElement={scrollElement}
+        style={useMemo(() => ({ flex: '1 1 auto' }), [])}
+      >
+        {useCallback(
+          ({ registerChild, onChildScroll, scrollTop }) => (
+            <div ref={registerChild}>
+              <VariableSizeList<T>
+                ref={listRef}
+                // The list won't update on scroll unless we force it to by changing key
+                key={scrollTop}
+                style={listStyle}
+                itemKey={keyExtractor}
+                onScroll={({ scrollOffset }) => {
+                  onChildScroll({ scrollTop: scrollOffset });
+                }}
+                initialScrollOffset={scrollTop}
+                width={size.width}
+                height={size.height}
+                itemCount={items.length}
+                itemSize={getItemHeight}
+                estimatedItemSize={31}
+              >
+                {VirtualizedListRow}
+              </VariableSizeList>
+            </div>
+          ),
+          [
+            listStyle,
+            keyExtractor,
+            size.width,
+            size.height,
+            items.length,
+            getItemHeight,
+          ],
+        )}
+      </WindowScroller>
+    </RenderItemContext.Provider>
   );
 });
 

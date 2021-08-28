@@ -4,6 +4,7 @@ import React, {
   forwardRef,
   memo,
   ReactNode,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
 import { Tooltip } from '..';
@@ -108,6 +109,10 @@ const Button = forwardRef(function Button(
       disabled={disabled}
       variant={variant}
       onClick={onClick}
+      // Prevent double clicking a button from triggering any callbacks in ancestors
+      onDoubleClick={useCallback((event: React.MouseEvent) => {
+        event.stopPropagation();
+      }, [])}
       {...rest}
     >
       <ButtonContent>{children}</ButtonContent>

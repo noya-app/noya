@@ -56,7 +56,7 @@ const SYMBOL_ITEM_PREFIX = 'symbol:';
 
 const DocumentTitle = styled.span(({ theme }) => ({
   ...theme.textStyles.small,
-  fontWeight: 'bold',
+  fontWeight: 600,
   flex: '0 0 200px',
   maxWidth: '200px',
   overflow: 'hidden',
