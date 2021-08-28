@@ -2,6 +2,10 @@ import { composeRefs } from '@radix-ui/react-compose-refs';
 import React, {
   ForwardedRef,
   forwardRef,
+  InputHTMLAttributes,
+  KeyboardEventHandler,
+  MouseEventHandler,
+  PointerEventHandler,
   useCallback,
   useLayoutEffect,
   useRef,
@@ -17,59 +21,33 @@ type Props = {
   disabled?: boolean;
   value: string;
   placeholder?: string;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  onClick?: (event: React.MouseEvent) => void;
-  onPointerDown?: (event: React.PointerEvent) => void;
-};
+  onKeyDown?: KeyboardEventHandler;
+  onClick?: MouseEventHandler;
+  onPointerDown?: PointerEventHandler;
+} & Pick<
+  InputHTMLAttributes<HTMLInputElement>,
+  'autoComplete' | 'autoCapitalize' | 'autoCorrect' | 'spellCheck'
+>;
 
 type ControlledProps = Props & {
   onChange: (value: string) => void;
 };
 
 const ControlledTextInput = forwardRef(function ControlledTextInput(
-  {
-    id,
-    style,
-    className,
-    type,
-    placeholder,
-    disabled,
-    onKeyDown,
-    value,
-    onChange,
-    onClick,
-    onPointerDown,
-  }: ControlledProps,
+  { onKeyDown, value, onChange, ...rest }: ControlledProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      onKeyDown?.(event);
-    },
-    [onKeyDown],
-  );
-
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(event.target.value);
-    },
-    [onChange],
-  );
-
   return (
     <input
       ref={forwardedRef}
-      id={id}
-      style={style}
-      className={className}
-      type={type ?? 'text'}
-      disabled={disabled ?? false}
+      {...rest}
       value={value}
-      placeholder={placeholder}
-      onKeyDown={handleKeyDown}
-      onChange={handleChange}
-      onClick={onClick}
-      onPointerDown={onPointerDown}
+      onKeyDown={onKeyDown}
+      onChange={useCallback(
+        (event: React.ChangeEvent<HTMLInputElement>) =>
+          onChange(event.target.value),
+        [onChange],
+      )}
     />
   );
 });
@@ -81,18 +59,11 @@ type SubmittableProps = Props & {
 
 const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   {
-    id,
-    style,
-    className,
-    type,
-    placeholder,
     onKeyDown,
     value,
-    disabled,
     onSubmit,
-    onClick,
-    onPointerDown,
     allowSubmittingWithSameValue = false,
+    ...rest
   }: SubmittableProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
@@ -161,22 +132,11 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   return (
     <input
       ref={composeRefs(ref, forwardedRef)}
-      id={id}
-      style={style}
-      className={className}
-      type={type ?? 'text'}
-      disabled={disabled ?? false}
+      {...rest}
       value={internalValue}
-      placeholder={placeholder}
       onKeyDown={handleKeyDown}
       onChange={handleChange}
       onBlur={handleSubmit}
-      onClick={onClick}
-      onPointerDown={onPointerDown}
-      autoComplete="off"
-      autoCapitalize="off"
-      autoCorrect="off"
-      spellCheck={false}
     />
   );
 });
@@ -190,9 +150,21 @@ export default forwardRef(function TextInput(
   props: TextInputProps,
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
-  if ('onChange' in props) {
-    return <ControlledTextInput ref={forwardedRef} {...props} />;
+  const commonProps: TextInputProps = {
+    onPointerDown: useCallback((event) => event.stopPropagation(), []),
+    onClick: useCallback((event) => event.stopPropagation(), []),
+    autoComplete: 'off',
+    autoCapitalize: 'off',
+    autoCorrect: 'off',
+    spellCheck: false,
+    type: 'text',
+    disabled: false,
+    ...props,
+  };
+
+  if ('onChange' in commonProps) {
+    return <ControlledTextInput ref={forwardedRef} {...commonProps} />;
   } else {
-    return <SubmittableTextInput ref={forwardedRef} {...props} />;
+    return <SubmittableTextInput ref={forwardedRef} {...commonProps} />;
   }
 });

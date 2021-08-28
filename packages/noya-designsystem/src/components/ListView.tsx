@@ -102,8 +102,6 @@ function ListViewEditableRowTitle({
       value={value}
       onSubmit={onSubmitEditing}
       allowSubmittingWithSameValue
-      onClick={useCallback((e) => e.stopPropagation(), [])}
-      onPointerDown={useCallback((e) => e.stopPropagation(), [])}
     />
   );
 }
