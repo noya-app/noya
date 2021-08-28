@@ -70,7 +70,7 @@ export default memo(function TextOptionsRow({
             id={transformInputId}
             value={textTransform !== undefined ? textTransform.toString() : ''}
             onValueChange={useCallback(
-              (event) => onChangeTextTransform(parseInt(event.target.value)),
+              (value: string) => onChangeTextTransform(parseInt(value)),
               [onChangeTextTransform],
             )}
           >

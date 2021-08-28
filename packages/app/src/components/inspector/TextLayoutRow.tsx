@@ -46,10 +46,10 @@ export default memo(function TextLayoutRowRow({
           renderLabel={() => <Label.Label>Auto Height</Label.Label>}
         >
           <RadioGroup.Root
-            id={'text-alignment'}
+            id="text-alignment"
             value={textLayout !== undefined ? textLayout.toString() : ''}
-            onValueChange={(event) =>
-              onChangeTextLayout(parseInt(event.target.value))
+            onValueChange={(value: string) =>
+              onChangeTextLayout(parseInt(value))
             }
           >
             <RadioGroup.Item
@@ -77,14 +77,14 @@ export default memo(function TextLayoutRowRow({
       <Spacer.Vertical size={8} />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
-          id={'text-horizontal-aligment'}
+          id="text-horizontal-aligment"
           value={
             textHorizontalAlignment !== undefined
               ? textHorizontalAlignment.toString()
               : ''
           }
-          onValueChange={(event) =>
-            onChangeTextHorizontalAlignment(parseInt(event.target.value))
+          onValueChange={(value: string) =>
+            onChangeTextHorizontalAlignment(parseInt(value))
           }
         >
           <RadioGroup.Item
@@ -117,14 +117,14 @@ export default memo(function TextLayoutRowRow({
       <Spacer.Vertical size={8} />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
-          id={'text-vertical-aligment'}
+          id="text-vertical-aligment"
           value={
             textVerticalAlignment !== undefined
               ? textVerticalAlignment.toString()
               : ''
           }
-          onValueChange={(event) =>
-            onChangeTextVerticalAlignment(parseInt(event.target.value))
+          onValueChange={(value: string) =>
+            onChangeTextVerticalAlignment(parseInt(value))
           }
         >
           <RadioGroup.Item

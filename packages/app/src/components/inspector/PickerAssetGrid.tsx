@@ -43,11 +43,10 @@ export const LayoutRadioGroup = memo(
   }) => (
     <RadioGroupContainer>
       <RadioGroup.Root
-        id={'layout'}
+        id="layout"
         value={layout}
         onValueChange={useCallback(
-          (event: React.ChangeEvent<HTMLInputElement>) =>
-            setLayout(event.target.value as LayoutType),
+          (value: string) => setLayout(value as LayoutType),
           [setLayout],
         )}
       >
