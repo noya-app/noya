@@ -503,6 +503,7 @@ export default memo(function LayerList({
       keyExtractor={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
+      pressEventName="onPointerDown"
       onPress={useCallback(
         () => dispatch('selectLayer', undefined),
         [dispatch],

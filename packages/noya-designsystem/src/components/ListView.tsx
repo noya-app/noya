@@ -33,12 +33,15 @@ import * as Sortable from './Sortable';
 export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
+type PressEventName = 'onClick' | 'onPointerDown';
+
 type ListRowContextValue = {
   marginType: ListRowMarginType;
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
   indentation: number;
+  pressEventName: PressEventName;
 };
 
 export const ListRowContext = createContext<ListRowContextValue>({
@@ -47,6 +50,7 @@ export const ListRowContext = createContext<ListRowContextValue>({
   sortable: false,
   expandable: true,
   indentation: 12,
+  pressEventName: 'onClick',
 });
 
 /* ----------------------------------------------------------------------------
@@ -122,6 +126,7 @@ const RowContainer = styled.div<{
   disabled: boolean;
   hovered: boolean;
   isSectionHeader: boolean;
+  showsActiveState: boolean;
 }>(
   ({
     theme,
@@ -131,6 +136,7 @@ const RowContainer = styled.div<{
     disabled,
     hovered,
     isSectionHeader,
+    showsActiveState,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -177,6 +183,13 @@ const RowContainer = styled.div<{
       position: 'relative',
       ...(hovered && {
         boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+      }),
+      ...(showsActiveState && {
+        '&:active': {
+          backgroundColor: selected
+            ? theme.colors.primaryLight
+            : theme.colors.activeBackground,
+        },
       }),
     };
   },
@@ -249,8 +262,13 @@ const ListViewRow = forwardRef(function ListViewRow<
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
-  const { marginType, selectedPosition, sortable, indentation } =
-    useContext(ListRowContext);
+  const {
+    marginType,
+    selectedPosition,
+    sortable,
+    indentation,
+    pressEventName,
+  } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
   });
@@ -295,11 +313,12 @@ const ListViewRow = forwardRef(function ListViewRow<
         hovered={hovered}
         selected={selected}
         selectedPosition={selectedPosition}
+        showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
         {...renderProps}
         {...mergeEventHandlers(
           { onPointerDown: renderProps.onPointerDown },
-          { onPointerDown: handlePress },
+          { [pressEventName]: handlePress },
         )}
       >
         {relativeDropPosition && (
@@ -505,6 +524,7 @@ type ListViewRootProps = {
   ) => void;
   indentation?: number;
   acceptsDrop?: Sortable.DropValidator;
+  pressEventName?: PressEventName;
 };
 
 const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
@@ -520,6 +540,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     renderItem,
     keyExtractor,
     virtualized,
+    pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
 ) {
@@ -596,14 +617,22 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       }
 
       return {
-        marginType: marginType,
+        marginType,
         selectedPosition,
         sortable,
         expandable,
         indentation,
+        pressEventName,
       };
     },
-    [expandable, renderChild, indentation, data.length, sortable],
+    [
+      renderChild,
+      data.length,
+      sortable,
+      expandable,
+      indentation,
+      pressEventName,
+    ],
   );
 
   const renderWrappedChild = useCallback(
@@ -660,7 +689,12 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
   );
 
   return (
-    <RootContainer onPointerDown={handleClick} scrollable={scrollable}>
+    <RootContainer
+      {...{
+        [pressEventName]: handleClick,
+      }}
+      scrollable={scrollable}
+    >
       {withScrollable((scrollElementRef: HTMLDivElement | null) =>
         withSortable(
           virtualized ? (
