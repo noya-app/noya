@@ -24,6 +24,7 @@ import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import styled from 'styled-components';
 import { InputField, Spacer } from '..';
 import { useHover } from '../hooks/useHover';
+import { mergeEventHandlers } from '../hooks/mergeEventHandlers';
 import ContextMenu from './ContextMenu';
 import { MenuItem } from './internal/Menu';
 import ScrollArea from './ScrollArea';
@@ -32,12 +33,15 @@ import * as Sortable from './Sortable';
 export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
 
+type PressEventName = 'onClick' | 'onPointerDown';
+
 type ListRowContextValue = {
   marginType: ListRowMarginType;
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
   indentation: number;
+  pressEventName: PressEventName;
 };
 
 export const ListRowContext = createContext<ListRowContextValue>({
@@ -46,6 +50,7 @@ export const ListRowContext = createContext<ListRowContextValue>({
   sortable: false,
   expandable: true,
   indentation: 12,
+  pressEventName: 'onClick',
 });
 
 /* ----------------------------------------------------------------------------
@@ -97,9 +102,8 @@ function ListViewEditableRowTitle({
       value={value}
       onSubmit={onSubmitEditing}
       allowSubmittingWithSameValue
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
+      onClick={useCallback((e) => e.stopPropagation(), [])}
+      onPointerDown={useCallback((e) => e.stopPropagation(), [])}
     />
   );
 }
@@ -122,6 +126,7 @@ const RowContainer = styled.div<{
   disabled: boolean;
   hovered: boolean;
   isSectionHeader: boolean;
+  showsActiveState: boolean;
 }>(
   ({
     theme,
@@ -131,6 +136,7 @@ const RowContainer = styled.div<{
     disabled,
     hovered,
     isSectionHeader,
+    showsActiveState,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -178,6 +184,13 @@ const RowContainer = styled.div<{
       ...(hovered && {
         boxShadow: `0 0 0 1px ${theme.colors.primary}`,
       }),
+      ...(showsActiveState && {
+        '&:active': {
+          backgroundColor: selected
+            ? theme.colors.primaryLight
+            : theme.colors.activeBackground,
+        },
+      }),
     };
   },
 );
@@ -219,7 +232,7 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   disabled?: boolean;
   hovered?: boolean;
   sortable?: boolean;
-  onClick?: (info: ListViewClickInfo) => void;
+  onPress?: (info: ListViewClickInfo) => void;
   onDoubleClick?: () => void;
   onHoverChange?: (isHovering: boolean) => void;
   children?: ReactNode;
@@ -239,7 +252,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     disabled = false,
     hovered = false,
     isSectionHeader = false,
-    onClick,
+    onPress,
     onDoubleClick,
     onHoverChange,
     children,
@@ -249,19 +262,24 @@ const ListViewRow = forwardRef(function ListViewRow<
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
-  const { marginType, selectedPosition, sortable, indentation } =
-    useContext(ListRowContext);
+  const {
+    marginType,
+    selectedPosition,
+    sortable,
+    indentation,
+    pressEventName,
+  } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
   });
 
-  const handleClick = useCallback(
+  const handlePress = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
 
-      onClick?.(event);
+      onPress?.(event);
     },
-    [onClick],
+    [onPress],
   );
 
   const handleDoubleClick = useCallback(
@@ -289,15 +307,19 @@ const ListViewRow = forwardRef(function ListViewRow<
         isSectionHeader={isSectionHeader}
         id={id}
         {...hoverProps}
-        onClick={handleClick}
         onDoubleClick={handleDoubleClick}
         marginType={marginType}
         disabled={disabled}
         hovered={hovered}
         selected={selected}
         selectedPosition={selectedPosition}
+        showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
         {...renderProps}
+        {...mergeEventHandlers(
+          { onPointerDown: renderProps.onPointerDown },
+          { [pressEventName]: handlePress },
+        )}
       >
         {relativeDropPosition && (
           <DragIndicatorElement
@@ -492,7 +514,7 @@ type RenderProps<T> = {
 };
 
 type ListViewRootProps = {
-  onClick?: () => void;
+  onPress?: () => void;
   scrollable?: boolean;
   expandable?: boolean;
   onMoveItem?: (
@@ -502,11 +524,12 @@ type ListViewRootProps = {
   ) => void;
   indentation?: number;
   acceptsDrop?: Sortable.DropValidator;
+  pressEventName?: PressEventName;
 };
 
 const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
   {
-    onClick,
+    onPress,
     scrollable = false,
     expandable = true,
     sortable = false,
@@ -517,6 +540,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     renderItem,
     keyExtractor,
     virtualized,
+    pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
 ) {
@@ -530,9 +554,9 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       )
         return;
 
-      onClick?.();
+      onPress?.();
     },
-    [onClick],
+    [onPress],
   );
 
   const renderChild = useCallback(
@@ -593,14 +617,22 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       }
 
       return {
-        marginType: marginType,
+        marginType,
         selectedPosition,
         sortable,
         expandable,
         indentation,
+        pressEventName,
       };
     },
-    [expandable, renderChild, indentation, data.length, sortable],
+    [
+      renderChild,
+      data.length,
+      sortable,
+      expandable,
+      indentation,
+      pressEventName,
+    ],
   );
 
   const renderWrappedChild = useCallback(
@@ -657,7 +689,12 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
   );
 
   return (
-    <RootContainer onClick={handleClick} scrollable={scrollable}>
+    <RootContainer
+      {...{
+        [pressEventName]: handleClick,
+      }}
+      scrollable={scrollable}
+    >
       {withScrollable((scrollElementRef: HTMLDivElement | null) =>
         withSortable(
           virtualized ? (

@@ -56,7 +56,7 @@ const GradientsList = memo(function GradientsList({
             <ListView.Row
               id={do_objectID}
               onContextMenu={() => setGradientId(do_objectID)}
-              onClick={() => onSelectGradientAsset(gradient)}
+              onPress={() => onSelectGradientAsset(gradient)}
             >
               <Square background={colorString} />
               <Spacer.Horizontal size={8} />

@@ -348,7 +348,7 @@ export default memo(function LayerList({
       index: number,
       { isDragging }: ListView.ItemInfo,
     ) => {
-      const handleClick = (info: TreeView.TreeViewClickInfo) => {
+      const handlePress = (info: TreeView.TreeViewClickInfo) => {
         const { metaKey, shiftKey } = info;
 
         dispatch('interaction', ['reset']);
@@ -437,7 +437,7 @@ export default memo(function LayerList({
           isDragging={isDragging}
           depth={depth}
           selected={selected}
-          onClick={handleClick}
+          onPress={handlePress}
           onDoubleClick={handleRename}
           onHoverChange={handleHoverChange}
           onChangeVisible={handleChangeVisible}
@@ -503,7 +503,8 @@ export default memo(function LayerList({
       keyExtractor={useCallback((item: LayerListItem) => item.id, [])}
       scrollable
       sortable={!editingLayer}
-      onClick={useCallback(
+      pressEventName="onPointerDown"
+      onPress={useCallback(
         () => dispatch('selectLayer', undefined),
         [dispatch],
       )}
