@@ -438,6 +438,7 @@ export function resizeLayerFrame<T extends Sketch.AnyLayer>(
       ...newFrame,
     };
 
+    // When a group is resized, we scale its children
     if (Layers.isGroup(draft)) {
       const scaleTransform = AffineTransform.scale(
         newFrame.width / originalFrame.width,
@@ -448,6 +449,21 @@ export function resizeLayerFrame<T extends Sketch.AnyLayer>(
         resizeLayerFrame(
           childLayer,
           transformRect(childLayer.frame, scaleTransform),
+        ),
+      );
+    }
+
+    // When an artboard is resized, we preserve the visual translation of its children
+    if (Layers.isSymbolMasterOrArtboard(draft)) {
+      const translationTransform = AffineTransform.translate(
+        originalFrame.x - newFrame.x,
+        originalFrame.y - newFrame.y,
+      );
+
+      draft.layers = draft.layers.map((childLayer) =>
+        resizeLayerFrame(
+          childLayer,
+          transformRect(childLayer.frame, translationTransform),
         ),
       );
     }

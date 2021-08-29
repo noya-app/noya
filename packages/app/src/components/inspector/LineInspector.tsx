@@ -187,6 +187,7 @@ export default function LineInspector({
         />
         <Spacer.Horizontal size={16} />
         <FlipControls
+          supportsFlipping
           isFlippedVertical={isFlippedVertical}
           isFlippedHorizontal={isFlippedHorizontal}
           onSetIsFlippedVertical={onSetIsFlippedVertical}

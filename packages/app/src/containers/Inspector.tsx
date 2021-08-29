@@ -98,12 +98,15 @@ export default memo(function Inspector() {
     [dispatch],
   );
 
-  const isFlippedVertical =
-    getMultiValue(selectedLayers.map((layer) => layer.isFlippedVertical)) ??
-    false;
-  const isFlippedHorizontal =
-    getMultiValue(selectedLayers.map((layer) => layer.isFlippedHorizontal)) ??
-    false;
+  const supportsFlipping = selectedLayers.some(
+    (layer) => !Layers.isSymbolMasterOrArtboard(layer),
+  );
+  const isFlippedVertical = selectedLayers.some(
+    (layer) => layer.isFlippedVertical,
+  );
+  const isFlippedHorizontal = selectedLayers.some(
+    (layer) => layer.isFlippedHorizontal,
+  );
 
   const constrainProportions =
     getMultiValue(
@@ -172,6 +175,7 @@ export default memo(function Inspector() {
         ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
+            supportsFlipping={supportsFlipping}
             isFlippedHorizontal={isFlippedHorizontal}
             isFlippedVertical={isFlippedVertical}
             constrainProportions={constrainProportions}
@@ -225,6 +229,7 @@ export default memo(function Inspector() {
     handleSetWidth,
     handleSetIsFlippedHorizontal,
     handleSetIsFlippedVertical,
+    supportsFlipping,
     constrainProportions,
     handleSetRotation,
     handleSetX,

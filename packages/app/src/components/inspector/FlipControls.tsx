@@ -13,6 +13,7 @@ const FlipButtonContainer = styled.div(({ theme }) => ({
 }));
 
 export interface Props {
+  supportsFlipping: boolean;
   isFlippedVertical: boolean;
   isFlippedHorizontal: boolean;
   onSetIsFlippedVertical: (value: boolean) => void;
@@ -20,15 +21,14 @@ export interface Props {
 }
 
 export default function FlipButtonElements({
+  supportsFlipping,
   isFlippedVertical,
   isFlippedHorizontal,
   onSetIsFlippedVertical,
   onSetIsFlippedHorizontal,
 }: Props) {
-  const {
-    icon: iconColor,
-    iconSelected: iconSelectedColor,
-  } = useTheme().colors;
+  const { icon: iconColor, iconSelected: iconSelectedColor } =
+    useTheme().colors;
 
   const handleSetIsFlippedVertical = useCallback(
     () => onSetIsFlippedVertical(!isFlippedVertical),
@@ -47,6 +47,7 @@ export default function FlipButtonElements({
         tooltip="Flip horizontally"
         onClick={handleSetIsFlippedHorizontal}
         active={isFlippedHorizontal}
+        disabled={!supportsFlipping}
       >
         <FlipHorizontalIcon
           color={isFlippedHorizontal ? iconSelectedColor : iconColor}
@@ -58,6 +59,7 @@ export default function FlipButtonElements({
         tooltip="Flip vertically"
         onClick={handleSetIsFlippedVertical}
         active={isFlippedVertical}
+        disabled={!supportsFlipping}
       >
         <FlipVerticalIcon
           color={isFlippedVertical ? iconSelectedColor : iconColor}

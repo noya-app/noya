@@ -35,6 +35,8 @@ export function getSnapValues(rect: Rect, axis: Axis): number[] {
   }
 }
 
+// If we're snapping a layer that's currently being drawn, but hasn't
+// been added to the document, the `sourceIndexPaths` will be empty.
 export function getPossibleTargetSnapLayers(
   state: ApplicationState,
   page: Sketch.Page,
@@ -66,6 +68,10 @@ export function getPossibleTargetSnapLayers(
   }
 
   // Are all selected ids in the same artboard?
+  //
+  // We get the first layer in the layer path of the first selected layer.
+  // We check if that layer is an artboard, and if every other index path also
+  // has that same layer as the first in its layer path
   const inSameArtboard =
     Layers.isSymbolMasterOrArtboard(page.layers[sourceIndexPaths[0][0]]) &&
     sourceIndexPaths.every((indexPath) => indexPath.length > 1) &&
@@ -99,6 +105,16 @@ export function getPossibleTargetSnapLayers(
     ) as ParentLayer;
 
     groupLayers.push(...parent.layers);
+  }
+
+  // If the only selection is a single artboard, we allow snapping to layers within the artboard.
+  // This is useful for scaling an artboard to fit the contents within.
+  if (sourceIndexPaths.length === 1) {
+    const firstLayer = page.layers[sourceIndexPaths[0][0]];
+
+    if (Layers.isArtboard(firstLayer)) {
+      groupLayers.push(...firstLayer.layers);
+    }
   }
 
   const visibleLayers =

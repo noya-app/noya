@@ -25,6 +25,7 @@ export interface Props {
   isFlippedVertical: boolean;
   isFlippedHorizontal: boolean;
   constrainProportions: boolean;
+  supportsFlipping: boolean;
   onSetX: (value: number, mode: SetNumberMode) => void;
   onSetY: (value: number, mode: SetNumberMode) => void;
   onSetWidth: (value: number, mode: SetNumberMode) => void;
@@ -44,6 +45,7 @@ export default function DimensionsInspector({
   isFlippedVertical,
   isFlippedHorizontal,
   constrainProportions,
+  supportsFlipping,
   onSetX,
   onSetY,
   onSetWidth,
@@ -78,6 +80,7 @@ export default function DimensionsInspector({
         <DimensionInput value={height} onSetValue={onSetHeight} label="H" />
         <Spacer.Horizontal size={16} />
         <FlipControls
+          supportsFlipping={supportsFlipping}
           isFlippedVertical={isFlippedVertical}
           isFlippedHorizontal={isFlippedHorizontal}
           onSetIsFlippedVertical={onSetIsFlippedVertical}

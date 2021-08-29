@@ -1023,17 +1023,19 @@ export function canvasReducer(
                 createRect(roundedMin, roundedMax),
               );
 
-              newLayer = produce(newLayer, (draft) => {
-                draft.isFlippedHorizontal =
-                  width < 0
-                    ? !layer.isFlippedHorizontal
-                    : layer.isFlippedHorizontal;
+              if (!Layers.isSymbolMasterOrArtboard(newLayer)) {
+                newLayer = produce(newLayer, (draft) => {
+                  draft.isFlippedHorizontal =
+                    width < 0
+                      ? !layer.isFlippedHorizontal
+                      : layer.isFlippedHorizontal;
 
-                draft.isFlippedVertical =
-                  height < 0
-                    ? !layer.isFlippedVertical
-                    : layer.isFlippedVertical;
-              });
+                  draft.isFlippedVertical =
+                    height < 0
+                      ? !layer.isFlippedVertical
+                      : layer.isFlippedVertical;
+                });
+              }
 
               Layers.assign(draft.sketch.pages[pageIndex], indexPath, newLayer);
             });

@@ -156,6 +156,8 @@ export function layerPropertyReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (Layers.isSymbolMasterOrArtboard(layer)) return;
+
           const rotation = getLayerRotation(layer);
           const newValue = mode === 'replace' ? amount : rotation + amount;
 
@@ -264,6 +266,8 @@ export function layerPropertyReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (Layers.isSymbolMasterOrArtboard(layer)) return;
+
           layer.isFlippedVertical = value;
         });
       });
@@ -275,6 +279,8 @@ export function layerPropertyReducer(
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (Layers.isSymbolMasterOrArtboard(layer)) return;
+
           layer.isFlippedHorizontal = value;
         });
       });
