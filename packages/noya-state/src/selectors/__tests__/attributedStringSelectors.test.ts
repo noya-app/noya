@@ -4,6 +4,7 @@ import {
   toTextSpans,
   replaceTextInRange,
   setAttributesInRange,
+  getAttributesInRange,
 } from '../attributedStringSelectors';
 import { getEncodedStringAttributes } from '../textStyleSelectors';
 
@@ -228,5 +229,73 @@ describe('set attributes', () => {
     expect(
       debugDescription([helloWorld12345, updated], options),
     ).toMatchSnapshot();
+  });
+});
+
+describe('get attributes', () => {
+  test('into empty string', () => {
+    const updated = getAttributesInRange(empty, [0, 0]);
+
+    expect(updated).toEqual([]);
+  });
+
+  test('one attribute at start', () => {
+    const updated = getAttributesInRange(hello, [0, 2]);
+
+    expect(updated).toEqual(hello.attributes);
+  });
+
+  test('one attribute in middle', () => {
+    const updated = getAttributesInRange(hello, [2, 3]);
+
+    expect(updated).toEqual(hello.attributes);
+  });
+
+  test('one attribute at end', () => {
+    const updated = getAttributesInRange(hello, [3, 5]);
+
+    expect(updated).toEqual(hello.attributes);
+  });
+
+  test('multiple attributes at start', () => {
+    const updated = getAttributesInRange(helloWorld, [0, 2]);
+
+    expect(updated).toEqual(helloWorld.attributes.slice(0, 1));
+  });
+
+  test('multiple attributes in middle', () => {
+    const updated = getAttributesInRange(helloWorld, [3, 7]);
+
+    expect(updated).toEqual(helloWorld.attributes);
+  });
+
+  test('multiple attributes at end', () => {
+    const updated = getAttributesInRange(helloWorld, [7, 10]);
+
+    expect(updated).toEqual(helloWorld.attributes.slice(1));
+  });
+
+  test('spanning entire attributes', () => {
+    const updated = getAttributesInRange(helloWorld12345, [3, 12]);
+
+    expect(updated).toEqual(helloWorld12345.attributes);
+  });
+
+  test('empty cursor at start', () => {
+    const updated = getAttributesInRange(helloWorld, [0, 0]);
+
+    expect(updated).toEqual(helloWorld.attributes.slice(0, 1));
+  });
+
+  test('empty cursor in middle', () => {
+    const updated = getAttributesInRange(helloWorld, [5, 5]);
+
+    expect(updated).toEqual(helloWorld.attributes.slice(1));
+  });
+
+  test('empty cursor at end', () => {
+    const updated = getAttributesInRange(helloWorld, [10, 10]);
+
+    expect(updated).toEqual(helloWorld.attributes.slice(1));
   });
 });
