@@ -179,10 +179,6 @@ function ContextMenuRoot<T extends string>({
   // - Mark the event as handled, so our ListView root doesn't handle it (a hack)
   const onPointerDown = useCallback((event: React.PointerEvent) => {
     event.preventDefault();
-
-    if (event.pointerType === 'pen') {
-      document.body.style.pointerEvents = '';
-    }
   }, []);
 
   return (
