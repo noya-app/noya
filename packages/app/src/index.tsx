@@ -14,7 +14,7 @@ ReactDOM.render(
 );
 
 // Disable native context menu on non-input element
-document.oncontextmenu = (event) => {
+document.oncontextmenu = (event: MouseEvent) => {
   if (
     event.target instanceof HTMLInputElement ||
     event.target instanceof HTMLTextAreaElement
@@ -22,4 +22,8 @@ document.oncontextmenu = (event) => {
     return;
 
   event.preventDefault();
+
+  // This lets us open another context menu when one is currently open.
+  // This may only be needed if the pointer is a pen.
+  document.body.style.pointerEvents = '';
 };

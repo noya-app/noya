@@ -20,8 +20,12 @@ function withSeparators<T>(elements: T[], separator: T) {
   return result;
 }
 
+export type MenuConfig<T extends string> = Optional<
+  Optional<RegularMenuItem<T>>[]
+>[];
+
 export function createSectionedMenu<T extends string>(
-  ...sections: Optional<Optional<RegularMenuItem<T>>[]>[]
+  ...sections: MenuConfig<T>
 ): MenuItem<T>[] {
   const nonEmptySections = sections
     .flatMap((section) => (section ? [section] : []))

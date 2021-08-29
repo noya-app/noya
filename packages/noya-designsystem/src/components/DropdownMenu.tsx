@@ -1,19 +1,16 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
-import {
-  getDisplayName,
-  PlatformName,
-  useKeyboardShortcuts,
-} from 'noya-keymap';
-import { memo, ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import { useKeyboardShortcuts } from 'noya-keymap';
+import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Spacer } from '..';
+import { MenuItemProps, MenuProps } from './ContextMenu';
 import {
   CHECKBOX_RIGHT_INSET,
   CHECKBOX_WIDTH,
   getKeyboardShortcutsForMenuItems,
-  MenuItem,
+  KeyboardShortcut,
   SEPARATOR_ITEM,
   styles,
 } from './internal/Menu';
@@ -27,12 +24,6 @@ const SeparatorElement = styled(RadixDropdownMenu.Separator)(
 );
 
 /* ----------------------------------------------------------------------------
- * Shortcut
- * ------------------------------------------------------------------------- */
-
-const ShortcutElement = styled.kbd(styles.shortcutStyle);
-
-/* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
 
@@ -41,19 +32,6 @@ const ItemElement = styled(RadixDropdownMenu.Item)(styles.itemStyle);
 const CheckboxItemElement = styled(RadixDropdownMenu.CheckboxItem)(
   styles.itemStyle,
 );
-
-interface ContextMenuItemProps<T extends string> {
-  value?: T;
-  children: ReactNode;
-  onSelect: (value: T) => void;
-  checked: boolean;
-  disabled: boolean;
-  indented: boolean;
-  shortcut?: string;
-  icon?: ReactElement;
-  items?: MenuItem<T>[];
-  platform: PlatformName;
-}
 
 const StyledItemIndicator = styled(RadixDropdownMenu.ItemIndicator)(
   styles.itemIndicatorStyle,
@@ -69,8 +47,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
   icon,
   items,
   shortcut,
-  platform,
-}: ContextMenuItemProps<T>) {
+}: MenuItemProps<T>) {
   const handleSelectItem = useCallback(() => {
     if (!value) return;
 
@@ -107,10 +84,8 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
       {shortcut && (
         <>
           <Spacer.Horizontal />
-          <Spacer.Horizontal size={16} />
-          <ShortcutElement>
-            {getDisplayName(shortcut, platform)}
-          </ShortcutElement>
+          <Spacer.Horizontal size={24} />
+          <KeyboardShortcut shortcut={shortcut} />
         </>
       )}
       {items && items.length > 0 && (
@@ -125,12 +100,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
 
   if (items && items.length > 0) {
     return (
-      <DropdownMenuRoot
-        isNested
-        items={items}
-        onSelect={onSelect}
-        platform={platform}
-      >
+      <DropdownMenuRoot isNested items={items} onSelect={onSelect}>
         {element}
       </DropdownMenuRoot>
     );
@@ -145,23 +115,13 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
 
 const RootElement = styled(RadixDropdownMenu.Content)(styles.contentStyle);
 
-interface Props<T extends string> {
-  children: ReactNode;
-  items: MenuItem<T>[];
-  onSelect: (value: T) => void;
-  isNested?: boolean;
-  platform: PlatformName;
-  shouldBindKeyboardShortcuts?: boolean;
-}
-
 function DropdownMenuRoot<T extends string>({
   items,
   children,
   onSelect,
   isNested,
-  platform,
   shouldBindKeyboardShortcuts,
-}: Props<T>) {
+}: MenuProps<T>) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
@@ -187,7 +147,18 @@ function DropdownMenuRoot<T extends string>({
           {children}
         </RadixDropdownMenu.Trigger>
       )}
-      <RootElement sideOffset={4}>
+      <RootElement
+        sideOffset={4}
+        onCloseAutoFocus={useCallback((event) => {
+          // Prevent the trigger from being focused, which interferes with
+          // keyboard shortcuts going to the canvas
+          event.preventDefault();
+
+          // Workaround radix-ui issue where all pointerEvents become blocked
+          // until the body is clicked again
+          document.body.style.pointerEvents = '';
+        }, [])}
+      >
         {items.map((item, index) =>
           item === SEPARATOR_ITEM ? (
             <SeparatorElement key={index} />
@@ -202,7 +173,6 @@ function DropdownMenuRoot<T extends string>({
               onSelect={onSelect}
               items={item.items}
               shortcut={item.shortcut}
-              platform={platform}
             >
               {item.title}
             </DropdownMenuItem>

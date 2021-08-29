@@ -1,21 +1,21 @@
-import type Sketch from 'noya-file-format';
 import {
-  Spacer,
-  Select,
-  ListView,
   Button,
-  Divider,
   ContextMenu,
+  Divider,
   getGradientBackground,
+  ListView,
   MenuItem,
+  Select,
+  Spacer,
 } from 'noya-designsystem';
-import { memo, useState, useCallback } from 'react';
+import type Sketch from 'noya-file-format';
+import { memo, useCallback, useState } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {
   GridSmall,
-  Square,
-  LayoutType,
   LayoutRadioGroup,
+  LayoutType,
+  Square,
 } from './PickerAssetGrid';
 
 export type MenuItemType = 'rename' | 'delete';

@@ -335,7 +335,7 @@ const ListViewRow = forwardRef(function ListViewRow<
       </RowContainer>
     );
 
-    if (menuItems) {
+    if (menuItems && onSelectMenuItem) {
       return (
         <ContextMenu<MenuItemType>
           items={menuItems}

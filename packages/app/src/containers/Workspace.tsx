@@ -3,6 +3,7 @@ import produce from 'immer';
 import { useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
+  DesignSystemConfigurationProvider,
   Divider,
   InputField,
   lightTheme,
@@ -12,7 +13,7 @@ import {
 import { doubleClickToolbar } from 'noya-embedded';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { ReactNode, useMemo, useState } from 'react';
-import styled, { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
 import { AutoSizer } from '../components/AutoSizer';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
@@ -121,6 +122,7 @@ export default function Workspace() {
   const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
   const isElectron = useEnvironmentParameter('isElectron');
+  const platform = useEnvironmentParameter('platform');
   const theme = useMemo(() => {
     const baseTheme = colorScheme === 'dark' ? darkTheme : lightTheme;
 
@@ -133,7 +135,7 @@ export default function Workspace() {
   }, [colorScheme, isElectron]);
 
   return (
-    <ThemeProvider theme={theme}>
+    <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       <LeftSidebar>
         <MenubarContainer
           showApplicationMenu={isElectron}
@@ -196,6 +198,6 @@ export default function Workspace() {
           </RightSidebar>
         </ContentArea>
       </MainView>
-    </ThemeProvider>
+    </DesignSystemConfigurationProvider>
   );
 }

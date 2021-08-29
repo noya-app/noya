@@ -1,17 +1,25 @@
-import { ChevronRightIcon } from '@radix-ui/react-icons';
-import styled from 'styled-components';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
-import React, { memo, ReactNode, useCallback } from 'react';
+import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { Slot } from '@radix-ui/react-slot';
-import {
-  SEPARATOR_ITEM,
-  MenuItem,
-  styles,
-  CHECKBOX_WIDTH,
-  CHECKBOX_RIGHT_INSET,
-} from './internal/Menu';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { useKeyboardShortcuts } from 'noya-keymap';
+import React, {
+  memo,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from 'react';
+import styled from 'styled-components';
 import { Spacer } from '..';
+import {
+  CHECKBOX_RIGHT_INSET,
+  CHECKBOX_WIDTH,
+  getKeyboardShortcutsForMenuItems,
+  KeyboardShortcut,
+  MenuItem,
+  SEPARATOR_ITEM,
+  styles,
+} from './internal/Menu';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -35,23 +43,29 @@ const StyledItemIndicator = styled(RadixContextMenu.ItemIndicator)(
   styles.itemIndicatorStyle,
 );
 
-interface ContextMenuItemProps<T extends string> {
+export interface MenuItemProps<T extends string> {
+  value?: T;
   children: ReactNode;
-  onSelect?: () => void;
+  onSelect: (value: T) => void;
   checked: boolean;
   disabled: boolean;
   indented: boolean;
+  shortcut?: string;
+  icon?: ReactElement;
   items?: MenuItem<T>[];
 }
 
 const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
-  indented,
-  checked,
-  disabled,
-  items,
+  value,
   children,
   onSelect,
-}: ContextMenuItemProps<T>) {
+  checked,
+  disabled,
+  indented,
+  icon,
+  items,
+  shortcut,
+}: MenuItemProps<T>) {
   // The pointer event within the context menu will bubble outside of the
   // context menu unless we stop it here.
   const handlePointerDown = useCallback(
@@ -59,12 +73,18 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
     [],
   );
 
+  const handleSelectItem = useCallback(() => {
+    if (!value) return;
+
+    onSelect(value);
+  }, [onSelect, value]);
+
   if (checked) {
     return (
       <CheckboxItemElement
         checked={checked}
         disabled={disabled}
-        onSelect={onSelect}
+        onSelect={handleSelectItem}
       >
         <StyledItemIndicator>
           <CheckIcon />
@@ -76,16 +96,31 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
 
   const element = (
     <ItemElement
-      onSelect={items && items.length > 0 ? undefined : onSelect}
+      disabled={disabled}
+      onSelect={handleSelectItem}
       onPointerDown={handlePointerDown}
     >
       {indented && (
         <Spacer.Horizontal size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
       )}
+      {icon && (
+        <>
+          {icon}
+          <Spacer.Horizontal size={8} />
+        </>
+      )}
       {children}
+      {shortcut && (
+        <>
+          <Spacer.Horizontal />
+          <Spacer.Horizontal size={24} />
+          <KeyboardShortcut shortcut={shortcut} />
+        </>
+      )}
       {items && items.length > 0 && (
         <>
           <Spacer.Horizontal />
+          <Spacer.Horizontal size={16} />
           <ChevronRightIcon />
         </>
       )}
@@ -109,11 +144,12 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
 
 const RootElement = styled(RadixContextMenu.Content)(styles.contentStyle);
 
-interface Props<T extends string> {
+export interface MenuProps<T extends string> {
   children: ReactNode;
   items: MenuItem<T>[];
-  onSelect?: (value: T) => void;
+  onSelect: (value: T) => void;
   isNested?: boolean;
+  shouldBindKeyboardShortcuts?: boolean;
 }
 
 function ContextMenuRoot<T extends string>({
@@ -121,10 +157,21 @@ function ContextMenuRoot<T extends string>({
   children,
   onSelect,
   isNested,
-}: Props<T>) {
+  shouldBindKeyboardShortcuts,
+}: MenuProps<T>) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
+
+  const keymap = useMemo(
+    () =>
+      isNested || shouldBindKeyboardShortcuts === false
+        ? {}
+        : getKeyboardShortcutsForMenuItems(items, onSelect),
+    [isNested, items, onSelect, shouldBindKeyboardShortcuts],
+  );
+
+  useKeyboardShortcuts(keymap);
 
   // We call preventDefault both to:
   // - Disable radix-ui's long-press-to-open behavior
@@ -157,12 +204,15 @@ function ContextMenuRoot<T extends string>({
             <SeparatorElement key={index} />
           ) : (
             <ContextMenuItem
-              key={item.value}
+              key={item.value ?? index}
+              value={item.value}
               indented={hasCheckedItem}
               checked={item.checked ?? false}
               disabled={item.disabled ?? false}
-              onSelect={item.value ? () => onSelect?.(item.value!) : undefined}
+              icon={item.icon}
+              onSelect={onSelect}
               items={item.items}
+              shortcut={item.shortcut}
             >
               {item.title}
             </ContextMenuItem>

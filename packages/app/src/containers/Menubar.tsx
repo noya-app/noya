@@ -39,7 +39,6 @@ const MenubarContent = memo(function MenubarContent({
 }: Props) {
   const fileManager = useFileManager();
   const isElectron = useEnvironmentParameter('isElectron');
-  const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
 
   const handleOpen = useCallback(async () => {
@@ -84,7 +83,11 @@ const MenubarContent = memo(function MenubarContent({
         {
           title: 'File',
           items: [
-            { value: 'new', title: 'New', shortcut: 'Mod-n' },
+            {
+              value: 'new',
+              title: 'New',
+              shortcut: isElectron ? 'Mod-n' : undefined, // Browsers don't allow overriding
+            },
             { value: 'open', title: 'Open...', shortcut: 'Mod-o' },
             { value: 'save', title: 'Save', shortcut: 'Mod-s' },
             { value: 'saveAs', title: 'Save As...', shortcut: 'Mod-Shift-s' },
@@ -195,7 +198,6 @@ const MenubarContent = memo(function MenubarContent({
         <DropdownMenu<ApplicationMenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
-          platform={platform}
         >
           <Button id="menu">
             <HamburgerMenuIcon />
