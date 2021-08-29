@@ -152,3 +152,85 @@ exports[`replace text remove spanning entire attributes 1`] = `
 ├── <StringAttribute> { location: 0, length: 3 }
 └── <StringAttribute> { location: 3, length: 3 }"
 `;
+
+exports[`set attributes into empty string 1`] = `
+"<AttributedString> \\"\\"
+
+<AttributedString> \\"\\""
+`;
+
+exports[`set attributes multiple attributes at end 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 5, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 5, length: 2, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 7, length: 3, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }"
+`;
+
+exports[`set attributes multiple attributes at start 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 5, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 2, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 5, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }"
+`;
+
+exports[`set attributes multiple attributes in middle 1`] = `
+"<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 5, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"helloworld\\"
+├── <StringAttribute> { location: 0, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 3, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 5, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 7, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }"
+`;
+
+exports[`set attributes one attribute at end 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"hello\\"
+├── <StringAttribute> { location: 0, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 3, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }"
+`;
+
+exports[`set attributes one attribute at start 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"hello\\"
+├── <StringAttribute> { location: 0, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 2, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }"
+`;
+
+exports[`set attributes one attribute in middle 1`] = `
+"<AttributedString> \\"hello\\"
+└── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"hello\\"
+├── <StringAttribute> { location: 0, length: 2, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 2, length: 1, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 3, length: 2, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }"
+`;
+
+exports[`set attributes spanning entire attributes 1`] = `
+"<AttributedString> \\"helloworld12345\\"
+├── <StringAttribute> { location: 0, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 5, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 10, length: 5, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+
+<AttributedString> \\"helloworld12345\\"
+├── <StringAttribute> { location: 0, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 3, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 5, length: 5, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+├── <StringAttribute> { location: 10, length: 2, color: { red: 1, green: 1, blue: 1, alpha: 1, _class: \\"color\\" } }
+└── <StringAttribute> { location: 12, length: 3, color: { red: 0, green: 0, blue: 0, alpha: 1, _class: \\"color\\" } }"
+`;

@@ -93,6 +93,52 @@ export function replaceTextInRange(
   return fromTextSpans(updated);
 }
 
+export function setAttributesInRange(
+  attributedString: Sketch.AttributedString,
+  range: [number, number],
+  attributesOrUpdater:
+    | Partial<Sketch.StringAttribute['attributes']>
+    | ((
+        attributes: Sketch.StringAttribute['attributes'],
+      ) => Sketch.StringAttribute['attributes']),
+) {
+  range = normalizeRange(range);
+
+  const spans = toTextSpansWithPositions(attributedString);
+
+  const updated = spans
+    .flatMap((span) => {
+      const start = range[0] - span.location;
+      const end = range[1] - span.location;
+
+      const clampedStart = Math.max(start, 0);
+      const clampedEnd = Math.max(end, 0);
+
+      return [
+        {
+          attributes: span.attributes,
+          string: span.string.slice(0, clampedStart),
+        },
+        {
+          attributes: {
+            ...span.attributes,
+            ...(typeof attributesOrUpdater === 'function'
+              ? attributesOrUpdater(span.attributes)
+              : attributesOrUpdater),
+          },
+          string: span.string.slice(clampedStart, clampedEnd),
+        },
+        {
+          attributes: span.attributes,
+          string: span.string.slice(clampedEnd),
+        },
+      ];
+    })
+    .filter((span) => span.string !== '');
+
+  return fromTextSpans(updated);
+}
+
 export function replaceTextAndUpdateSelectionRange(
   attributedString: Sketch.AttributedString,
   selectionRange: TextSelectionRange,

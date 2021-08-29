@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { SimpleTextDecoration } from 'noya-state';
+import { Selectors, SimpleTextDecoration } from 'noya-state';
 import { uuid } from 'noya-utils';
 import * as Layers from '../layers';
 import {
@@ -38,6 +38,8 @@ export function textStyleReducer(
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
+        const selectedText = Selectors.getTextSelection(state);
+
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
@@ -51,17 +53,21 @@ export function textStyleReducer(
                 }
               }
 
+              const { anchor, head } = selectedText?.range ?? {
+                anchor: 0,
+                head: layer.attributedString.string.length,
+              };
+
+              layer.attributedString = Selectors.setAttributesInRange(
+                layer.attributedString,
+                [anchor, head],
+                (attributes) => stringAttributeReducer(attributes, action),
+              );
+
               layer.style.textStyle.encodedAttributes = stringAttributeReducer(
                 layer.style.textStyle.encodedAttributes,
                 action,
               );
-
-              layer.attributedString.attributes.forEach((attribute) => {
-                attribute.attributes = stringAttributeReducer(
-                  attribute.attributes,
-                  action,
-                );
-              });
             },
           );
         });
