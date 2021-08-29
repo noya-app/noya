@@ -74,6 +74,12 @@ export const isShapeGroup = (
   return layer._class === 'shapeGroup';
 };
 
+export const isShapePath = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.ShapePath => {
+  return layer._class === 'shapePath';
+};
+
 export const isSymbolMaster = (
   layer: Sketch.AnyLayer,
 ): layer is Sketch.SymbolMaster => {

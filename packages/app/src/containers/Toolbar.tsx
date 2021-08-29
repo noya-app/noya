@@ -131,7 +131,7 @@ const ToolbarContent = memo(function ToolbarContent({
       value: 'line',
       shortcut: 'l',
       disabled: isEditingText,
-      icon: <LayerIcon type="shapePath" />,
+      icon: <LayerIcon type="line" />,
     },
     {
       title: 'Vector',

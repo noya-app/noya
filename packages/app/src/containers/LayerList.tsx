@@ -44,6 +44,7 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
+import LineIcon from '../components/icons/LineIcon';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const IconContainer = styled.span(({ theme }) => ({
@@ -56,7 +57,7 @@ const IconContainer = styled.span(({ theme }) => ({
 type LayerType = PageLayer['_class'];
 
 type LayerListItem = {
-  type: LayerType;
+  type: LayerType | 'line';
   id: string;
   name: string;
   depth: number;
@@ -96,7 +97,10 @@ function flattenLayerList(
       ) as Layers.ParentLayer;
 
       flattened.push({
-        type: layer._class,
+        type:
+          Layers.isShapePath(layer) && Selectors.isLine(layer.points)
+            ? 'line'
+            : layer._class,
         id: layer.do_objectID,
         name: layer.name,
         depth: indexPath.length - 1,
@@ -120,7 +124,7 @@ export const LayerIcon = memo(function LayerIcon({
   selected,
   variant,
 }: {
-  type: LayerType;
+  type: LayerType | 'line';
   selected?: boolean;
   variant?: 'primary';
 }) {
@@ -156,6 +160,8 @@ export const LayerIcon = memo(function LayerIcon({
       return <CopyIcon color={color} />;
     case 'shapePath':
       return <Share1Icon color={color} />;
+    case 'line':
+      return <LineIcon color={color} />;
     default:
       return null;
   }
