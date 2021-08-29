@@ -98,7 +98,7 @@ function InputFieldDropdownMenu<T extends string>({
 }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
-      <NoyaDropdownMenu<T> items={items} onSelect={onSelect} platform="key">
+      <NoyaDropdownMenu<T> items={items} onSelect={onSelect}>
         <Button id={id} variant="thin">
           <CaretDownIcon />
         </Button>
@@ -120,7 +120,20 @@ const createCrossSVGString = memoize(
 
 type InputFieldVariant = 'normal' | 'bare';
 
-export const InputElement = styled(TextInput)<{
+const ignoredProps = new Set([
+  'labelPosition',
+  'labelSize',
+  'hasLabel',
+  'hasDropdown',
+  'textAlign',
+  'disabled',
+  'variant',
+  'onNudge',
+]);
+
+export const InputElement = styled(TextInput).withConfig({
+  shouldForwardProp: (prop) => (ignoredProps.has(prop) ? false : true),
+})<{
   labelPosition: LabelPosition;
   labelSize: number;
   hasLabel: boolean;

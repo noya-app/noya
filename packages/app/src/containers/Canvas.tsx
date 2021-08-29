@@ -156,21 +156,6 @@ export default memo(function Canvas() {
     Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
-    'Mod-d': () => dispatch('duplicateLayer', state.selectedLayerIds),
-    'Mod-g': () => dispatch('groupLayers', state.selectedLayerIds),
-    'Shift-Mod-g': () => dispatch('ungroupLayers', state.selectedLayerIds),
-    'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
-    'Mod-+': () => dispatch('setZoom', 2, 'multiply'),
-    'Mod--': () => dispatch('setZoom', 0.5, 'multiply'),
-    'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
-    'Mod-0': () => dispatch('setZoom', 1),
-    'Mod-a': () => {
-      if (isEditingText) {
-        dispatch('selectAllText');
-      } else {
-        dispatch('selectAllLayers');
-      }
-    },
     Space: () => {
       if (isEditingText) return FALLTHROUGH;
 
@@ -271,12 +256,17 @@ export default memo(function Canvas() {
   );
 
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
-  const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
+  const [menuItems, onSelectMenuItem] = useLayerMenu(
+    selectedLayers,
+    state.interactionState.type,
+  );
 
   const getClickCount = useMultipleClickCount();
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
+      inputRef.current?.focus();
+
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
@@ -1189,6 +1179,7 @@ export default memo(function Canvas() {
           onFocus={() => inputRef.current?.focus()}
         >
           <HiddenInputTarget
+            id="hidden-canvas-input"
             className={IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS}
             ref={inputRef}
             type="text"

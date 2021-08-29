@@ -1,9 +1,14 @@
-import Sketch from 'noya-file-format';
-import { createSectionedMenu, MenuItem } from 'noya-designsystem';
-import { Layers } from 'noya-state';
-import { useCallback, useMemo } from 'react';
 import { useDispatch, useWorkspace } from 'noya-app-state-context';
+import {
+  createSectionedMenu,
+  MenuConfig,
+  MenuItem,
+  RegularMenuItem,
+} from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
+import { InteractionType, Layers, Selectors } from 'noya-state';
+import { useCallback, useMemo } from 'react';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -68,9 +73,13 @@ export type LayerMenuItemType =
   | 'hide'
   | 'show';
 
-export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
+export default function useLayerMenu(
+  layers: Sketch.AnyLayer[],
+  interactionType: InteractionType,
+) {
   const dispatch = useDispatch();
   const { startRenamingLayer } = useWorkspace();
+  const isEditingText = Selectors.getIsEditingText(interactionType);
 
   const hasSelectedLayers = layers.length > 0;
 
@@ -107,72 +116,81 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
 
   const canUnlock = layers.some((layer) => layer.isLocked);
 
-  const canLock =
-    !canUnlock &&
-    layers.every((layer) => !Layers.isSymbolMasterOrArtboard(layer));
-
   const canShow = layers.some((item) => !item.isVisible);
 
+  const menuConfig: MenuConfig<LayerMenuItemType> = useMemo(() => {
+    const selectAllSection: RegularMenuItem<LayerMenuItemType>[] = [
+      { value: 'selectAll', title: 'Select All', shortcut: 'Mod-a' },
+    ];
+
+    if (!hasSelectedLayers) return [selectAllSection];
+
+    return [
+      [
+        canBeSymbol && {
+          value: 'createSymbol',
+          title: 'Create Symbol',
+        },
+        canDetach && {
+          value: 'detachSymbol',
+          title: 'Detach Symbol',
+        },
+      ],
+      [
+        { value: 'rename', title: 'Rename' },
+        { value: 'group', title: 'Group', shortcut: 'Mod-g' },
+        canUngroup && {
+          value: 'ungroup',
+          title: 'Ungroup',
+          shortcut: 'Mod-Shift-g',
+        },
+      ],
+      [{ value: 'duplicate', title: 'Duplicate', shortcut: 'Mod-d' }],
+      [{ value: 'delete', title: 'Delete' }],
+      [
+        canUnlock
+          ? { value: 'unlock', title: 'Unlock', shortcut: 'Mod-Shift-l' }
+          : { value: 'lock', title: 'Lock', shortcut: 'Mod-Shift-l' },
+        canShow
+          ? { value: 'show', title: 'Show', shortcut: 'Mod-Shift-h' }
+          : { value: 'hide', title: 'Hide', shortcut: 'Mod-Shift-h' },
+      ],
+      [
+        canBeMask && {
+          value: 'useAsMask',
+          title: 'Use as mask',
+          checked: !newUseAsMaskValue,
+        },
+        canBeMask && {
+          value: 'isAlphaMask',
+          title: 'Mask using alpha',
+          checked: !newIsAlphaMaskValue,
+        },
+        canBeMaskChainBreaker && {
+          value: 'ignoreMasks',
+          title: 'Ignore masks',
+          checked: !newIgnoreMasksValue,
+        },
+      ],
+      selectAllSection,
+    ];
+  }, [
+    canBeMask,
+    canBeMaskChainBreaker,
+    canBeSymbol,
+    canDetach,
+    canShow,
+    canUngroup,
+    canUnlock,
+    hasSelectedLayers,
+    newIgnoreMasksValue,
+    newIsAlphaMaskValue,
+    newUseAsMaskValue,
+  ]);
+
   const menuItems: MenuItem<LayerMenuItemType>[] = useMemo(
-    () =>
-      hasSelectedLayers
-        ? createSectionedMenu(
-            [
-              canBeSymbol && {
-                value: 'createSymbol',
-                title: 'Create Symbol',
-              },
-              canDetach && {
-                value: 'detachSymbol',
-                title: 'Detach Symbol',
-              },
-            ],
-            [
-              { value: 'rename', title: 'Rename' },
-              { value: 'group', title: 'Group' },
-              canUngroup && { value: 'ungroup', title: 'Ungroup' },
-            ],
-            [{ value: 'duplicate', title: 'Duplicate' }],
-            [{ value: 'delete', title: 'Delete' }],
-            [
-              canUnlock && { value: 'unlock', title: 'Unlock' },
-              canLock && { value: 'lock', title: 'Lock' },
-              canShow && { value: 'show', title: 'Show' },
-              !canShow && { value: 'hide', title: 'Hide' },
-            ],
-            [
-              canBeMask && {
-                value: 'useAsMask',
-                title: 'Use as mask',
-                checked: !newUseAsMaskValue,
-              },
-              canBeMask && {
-                value: 'isAlphaMask',
-                title: 'Mask using alpha',
-                checked: !newIsAlphaMaskValue,
-              },
-              canBeMaskChainBreaker && {
-                value: 'ignoreMasks',
-                title: 'Ignore masks',
-                checked: !newIgnoreMasksValue,
-              },
-            ],
-          )
-        : [{ value: 'selectAll', title: 'Select All' }],
-    [
-      canBeMask,
-      canBeMaskChainBreaker,
-      canBeSymbol,
-      canDetach,
-      canLock,
-      canShow,
-      canUngroup,
-      canUnlock,
-      hasSelectedLayers,
-      newIsAlphaMaskValue,
-      newIgnoreMasksValue,
-      newUseAsMaskValue,
-    ],
+    () => createSectionedMenu(...menuConfig),
+    [menuConfig],
   );
 
   const selectedLayerIds = useShallowArray(
@@ -183,7 +201,11 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
     (value: LayerMenuItemType) => {
       switch (value) {
         case 'selectAll':
-          dispatch('selectAllLayers');
+          if (isEditingText) {
+            dispatch('selectAllText');
+          } else {
+            dispatch('selectAllLayers');
+          }
           return;
         case 'delete':
           dispatch('deleteLayer', selectedLayerIds);
@@ -244,6 +266,7 @@ export default function useLayerMenu(layers: Sketch.AnyLayer[]) {
       }
     },
     [
+      isEditingText,
       dispatch,
       selectedLayerIds,
       newIsAlphaMaskValue,

@@ -15,7 +15,7 @@ import {
   Spacer,
   Tooltip,
 } from 'noya-designsystem';
-import { FALLTHROUGH, KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
+import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
   InteractionType,
@@ -26,7 +26,6 @@ import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import PointModeIcon from '../components/icons/PointModeIcon';
-import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
@@ -80,65 +79,9 @@ const ToolbarContent = memo(function ToolbarContent({
   hasSelectedLayer,
   fileHandle,
 }: Props) {
-  const platform = useEnvironmentParameter('platform');
   const dispatch = useDispatch();
+
   const itemSeparatorSize = useTheme().sizes.toolbar.itemSeparator;
-
-  const symbolsMenuItems = useSelector(Selectors.getSymbols).map((symbol) => ({
-    title: symbol.name,
-    value: `${SYMBOL_ITEM_PREFIX}${symbol.do_objectID}`,
-  }));
-
-  const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
-    {
-      title: 'Artboard',
-      value: 'artboard',
-      icon: <LayerIcon type="artboard" />,
-    },
-    {
-      title: 'Rectangle',
-      value: 'rectangle',
-      icon: <LayerIcon type="rectangle" />,
-    },
-    { title: 'Oval', value: 'oval', icon: <LayerIcon type="oval" /> },
-    { title: 'Line', value: 'line', icon: <LayerIcon type="shapePath" /> },
-    { title: 'Vector', value: 'vector', icon: <LayerIcon type="shapePath" /> },
-    { title: 'Text', value: 'text', icon: <LayerIcon type="text" /> },
-    { title: 'Slice', value: 'slice', icon: <LayerIcon type="slice" /> },
-  ];
-
-  const insertMenuItems: MenuItem<string>[] = createSectionedMenu(
-    shapeMenuItems,
-    symbolsMenuItems,
-  );
-
-  const zoomMenuItems: MenuItem<ZoomMenuType>[] = createSectionedMenu(
-    [
-      {
-        title: 'Zoom In',
-        value: 'zoomIn',
-      },
-      {
-        title: 'Zoom Out',
-        value: 'zoomOut',
-      },
-    ],
-    [
-      {
-        title: 'Actual Size',
-        value: 'zoomActualSize',
-      },
-      {
-        title: 'Fit Canvas',
-        value: 'zoomToFitCanvas',
-      },
-      {
-        title: 'Fit Selection',
-        value: 'zoomToFitSelection',
-        disabled: !hasSelectedLayer,
-      },
-    ],
-  );
 
   const interactionType = interactionStateProjection.type;
   const isInsertingLayerType =
@@ -156,75 +99,100 @@ const ToolbarContent = memo(function ToolbarContent({
   const isEditingText = Selectors.getIsEditingText(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
-  const handleInsertArtboard: KeyCommand = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
+  const symbolsMenuItems = useSelector(Selectors.getSymbols).map((symbol) => ({
+    title: symbol.name,
+    value: `${SYMBOL_ITEM_PREFIX}${symbol.do_objectID}`,
+  }));
 
-    if (isInsertArtboard) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'artboard']);
-    }
-  }, [dispatch, isEditingText, isInsertArtboard]);
+  const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
+    {
+      title: 'Artboard',
+      value: 'artboard',
+      shortcut: 'a',
+      disabled: isEditingText,
+      icon: <LayerIcon type="artboard" />,
+    },
+    {
+      title: 'Rectangle',
+      value: 'rectangle',
+      shortcut: 'r',
+      disabled: isEditingText,
+      icon: <LayerIcon type="rectangle" />,
+    },
+    {
+      title: 'Oval',
+      value: 'oval',
+      shortcut: 'o',
+      disabled: isEditingText,
+      icon: <LayerIcon type="oval" />,
+    },
+    {
+      title: 'Line',
+      value: 'line',
+      shortcut: 'l',
+      disabled: isEditingText,
+      icon: <LayerIcon type="shapePath" />,
+    },
+    {
+      title: 'Vector',
+      value: 'vector',
+      shortcut: 'v',
+      disabled: isEditingText,
+      icon: <LayerIcon type="shapePath" />,
+    },
+    {
+      title: 'Text',
+      value: 'text',
+      shortcut: 't',
+      disabled: isEditingText,
+      icon: <LayerIcon type="text" />,
+    },
+    {
+      title: 'Slice',
+      value: 'slice',
+      shortcut: 's',
+      disabled: isEditingText,
+      icon: <LayerIcon type="slice" />,
+    },
+  ];
 
-  const handleInsertRectangle: KeyCommand = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
+  const insertMenuItems: MenuItem<string>[] = createSectionedMenu(
+    shapeMenuItems,
+    symbolsMenuItems,
+  );
 
-    if (isInsertRectangle) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'rectangle']);
-    }
-  }, [isEditingText, isInsertRectangle, dispatch]);
-
-  const handleInsertOval = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
-
-    if (isInsertOval) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'oval']);
-    }
-  }, [isEditingText, isInsertOval, dispatch]);
-
-  const handleInsertLine = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
-
-    if (isInsertLine) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'line']);
-    }
-  }, [isEditingText, isInsertLine, dispatch]);
-
-  const handleInsertText = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
-
-    if (isInsertText) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'text']);
-    }
-  }, [isEditingText, isInsertText, dispatch]);
-
-  const handleInsertSlice = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
-
-    if (isInsertSlice) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'slice']);
-    }
-  }, [isEditingText, isInsertSlice, dispatch]);
-
-  const handleEnablePenTool = useCallback(() => {
-    if (isEditingText) return FALLTHROUGH;
-
-    if (isCreatingPath) {
-      dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['drawingShapePath']);
-    }
-  }, [isEditingText, isCreatingPath, dispatch]);
+  const zoomMenuItems: MenuItem<ZoomMenuType>[] = createSectionedMenu(
+    [
+      {
+        title: 'Zoom In',
+        value: 'zoomIn',
+        shortcut: 'Mod-+',
+      },
+      {
+        title: 'Zoom Out',
+        value: 'zoomOut',
+        shortcut: 'Mod--',
+      },
+    ],
+    [
+      {
+        title: 'Actual Size',
+        value: 'zoomActualSize',
+        shortcut: 'Mod-0',
+      },
+      {
+        title: 'Fit Canvas',
+        value: 'zoomToFitCanvas',
+        shortcut: 'Mod-1',
+      },
+      {
+        title: 'Fit Selection',
+        value: 'zoomToFitSelection',
+        disabled: !hasSelectedLayer,
+        shortcut: 'Mod-2',
+      },
+    ],
+  );
 
   const handleInsertSymbol = useCallback(
     (value: string) => {
@@ -234,22 +202,46 @@ const ToolbarContent = memo(function ToolbarContent({
       } else {
         switch (value as InsertMenuLayerType) {
           case 'artboard':
-            dispatch('interaction', ['insert', 'artboard']);
+            if (isInsertArtboard) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'artboard']);
+            }
             break;
           case 'rectangle':
-            dispatch('interaction', ['insert', 'rectangle']);
+            if (isInsertRectangle) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'rectangle']);
+            }
             break;
           case 'oval':
-            dispatch('interaction', ['insert', 'oval']);
+            if (isInsertOval) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'oval']);
+            }
             break;
           case 'line':
-            dispatch('interaction', ['insert', 'line']);
+            if (isInsertLine) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'line']);
+            }
             break;
           case 'text':
-            dispatch('interaction', ['insert', 'text']);
+            if (isInsertText) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'text']);
+            }
             break;
           case 'slice':
-            dispatch('interaction', ['insert', 'slice']);
+            if (isInsertSlice) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'slice']);
+            }
             break;
           case 'vector':
             dispatch('interaction', ['drawingShapePath']);
@@ -257,7 +249,15 @@ const ToolbarContent = memo(function ToolbarContent({
         }
       }
     },
-    [dispatch],
+    [
+      dispatch,
+      isInsertArtboard,
+      isInsertLine,
+      isInsertOval,
+      isInsertRectangle,
+      isInsertSlice,
+      isInsertText,
+    ],
   );
 
   const handleZoomMenuItem = useCallback(
@@ -283,22 +283,31 @@ const ToolbarContent = memo(function ToolbarContent({
     [dispatch],
   );
 
-  const handleUndo = useCallback(() => dispatch('undo'), [dispatch]);
+  const handleInsertArtboard: KeyCommand = useCallback(() => {
+    if (isInsertArtboard) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['insert', 'artboard']);
+    }
+  }, [dispatch, isInsertArtboard]);
 
-  const handleRedo = useCallback(() => dispatch('redo'), [dispatch]);
+  const handleEnablePenTool = useCallback(() => {
+    if (isCreatingPath) {
+      dispatch('interaction', ['reset']);
+    } else {
+      dispatch('interaction', ['drawingShapePath']);
+    }
+  }, [isCreatingPath, dispatch]);
 
   useKeyboardShortcuts({
-    a: handleInsertArtboard,
-    f: handleInsertArtboard,
-    r: handleInsertRectangle,
-    o: handleInsertOval,
-    l: handleInsertLine,
-    t: handleInsertText,
-    s: handleInsertSlice,
-    p: handleEnablePenTool,
-    v: handleEnablePenTool,
-    'Mod-z': handleUndo,
-    'Mod-Shift-z': handleRedo,
+    'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
+    'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
+    ...(isEditingText
+      ? {}
+      : {
+          f: handleInsertArtboard,
+          p: handleEnablePenTool,
+        }),
   });
 
   const fileName = fileHandle?.name ?? 'Untitled.sketch';
@@ -313,7 +322,6 @@ const ToolbarContent = memo(function ToolbarContent({
       <DropdownMenu<string>
         items={insertMenuItems}
         onSelect={handleInsertSymbol}
-        platform={platform}
       >
         <Button id="insert-symbol">
           {useMemo(
@@ -332,7 +340,6 @@ const ToolbarContent = memo(function ToolbarContent({
       <DropdownMenu<ZoomMenuType>
         items={zoomMenuItems}
         onSelect={handleZoomMenuItem}
-        platform={platform}
       >
         <Button id="zoom-dropdown" flex="0 0 80px">
           {useMemo(

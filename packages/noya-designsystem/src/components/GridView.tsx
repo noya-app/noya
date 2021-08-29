@@ -98,7 +98,7 @@ interface ItemProps<MenuItemType extends string = string> {
 }
 
 const GridViewItem = forwardRef(function GridViewItem<
-  MenuItemType extends string
+  MenuItemType extends string,
 >(
   {
     id,
@@ -140,7 +140,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     </GridContainer>
   );
 
-  if (menuItems) {
+  if (menuItems && onSelectMenuItem) {
     return (
       <ContextMenu<MenuItemType> items={menuItems} onSelect={onSelectMenuItem}>
         {element}

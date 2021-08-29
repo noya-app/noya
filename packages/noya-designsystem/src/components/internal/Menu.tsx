@@ -1,7 +1,11 @@
+import styled from 'styled-components';
 import { ApplicationMenuItem } from 'noya-embedded';
-import { ReactElement } from 'react';
+import { memo, ReactElement } from 'react';
 import { CSSObject } from 'styled-components';
 import { Theme } from '../../theme';
+import { useDesignSystemConfiguration } from 'noya-designsystem';
+import { getShortcutDisplayParts } from 'noya-keymap';
+import withSeparatorElements from '../../utils/withSeparatorElements';
 
 export const SEPARATOR_ITEM = 'separator';
 
@@ -80,11 +84,6 @@ export const styles = {
     padding: '4px',
     border: `1px solid ${theme.colors.divider}`,
   }),
-
-  shortcutStyle: ({ theme }: { theme: Theme }): CSSObject => ({
-    fontFamily: 'inherit',
-    color: theme.colors.textDisabled,
-  }),
 };
 
 function getKeyboardShortcuts<T extends string>(
@@ -109,3 +108,50 @@ export function getKeyboardShortcutsForMenuItems<T extends string>(
       .map(([key, value]) => [key, () => onSelect(value)]),
   );
 }
+
+const ShortcutElement = styled.kbd(
+  ({
+    theme,
+    fixedWidth,
+  }: {
+    theme: Theme;
+    fixedWidth?: boolean;
+  }): CSSObject => ({
+    ...theme.textStyles.small,
+    color: theme.colors.textDisabled,
+    ...(fixedWidth && {
+      width: '0.9rem',
+      textAlign: 'center',
+    }),
+  }),
+);
+
+export const KeyboardShortcut = memo(function KeyboardShortcut({
+  shortcut,
+}: {
+  shortcut: string;
+}) {
+  const platform = useDesignSystemConfiguration().platform;
+
+  const { keys, separator } = getShortcutDisplayParts(shortcut, platform);
+
+  const keyElements = keys.map((key) => (
+    <ShortcutElement
+      key={key}
+      fixedWidth={platform === 'mac' && key.length === 1}
+    >
+      {key}
+    </ShortcutElement>
+  ));
+
+  return (
+    <>
+      {separator
+        ? withSeparatorElements(
+            keyElements,
+            <ShortcutElement>{separator}</ShortcutElement>,
+          )
+        : keyElements}
+    </>
+  );
+});

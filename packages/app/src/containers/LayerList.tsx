@@ -318,7 +318,10 @@ export default memo(function LayerList({
     flattenLayerList(page, selectedLayerIds, filteredLayerIds),
   );
 
-  const [menuItems, onSelectMenuItem] = useLayerMenu(selectedLayers);
+  const [menuItems, onSelectMenuItem] = useLayerMenu(
+    selectedLayers,
+    state.interactionState.type,
+  );
 
   const [editingLayer, setEditingLayer] = useState<string | undefined>();
 
