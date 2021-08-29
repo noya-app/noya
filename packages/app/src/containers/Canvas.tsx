@@ -265,7 +265,9 @@ export default memo(function Canvas() {
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
-      inputRef.current?.focus();
+      if (!state.selectedGradient) {
+        inputRef.current?.focus();
+      }
 
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
