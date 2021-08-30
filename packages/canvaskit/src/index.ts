@@ -3209,6 +3209,13 @@ export interface ImageFilterFactory {
      */
     MakeShader(shader: Shader): ImageFilter;
 
+    MakeArithmetic(k1: number, k2: number, k3: number, k4: number, enforcePMColor: boolean,
+                    background: ImageFilter | null, foreground: ImageFilter | null): ImageFilter;
+
+    MakeErode(radiusX: number, radiusY: number, input: ImageFilter | null): ImageFilter;
+
+    MakeOffset(dx: number, dy: number, input: ImageFilter | null): ImageFilter;
+
     /**
      *  Create a blend of two image filters.
      *  @param blendMode - BlendMode combining the two filters
