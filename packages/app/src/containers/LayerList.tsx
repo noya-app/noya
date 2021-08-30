@@ -28,7 +28,7 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
-import { useDeepArray, useShallowArray } from 'noya-react-utils';
+import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
 import React, {
@@ -320,7 +320,7 @@ export default memo(function LayerList({
       ),
     [filter, page],
   );
-  const items = useDeepArray(
+  const items = useDeepMemo(
     flattenLayerList(page, selectedLayerIds, filteredLayerIds),
   );
 

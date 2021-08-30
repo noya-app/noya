@@ -93,6 +93,93 @@ export function replaceTextInRange(
   return fromTextSpans(updated);
 }
 
+export function setAttributesInRange(
+  attributedString: Sketch.AttributedString,
+  range: [number, number],
+  attributesOrUpdater:
+    | Partial<Sketch.StringAttribute['attributes']>
+    | ((
+        attributes: Sketch.StringAttribute['attributes'],
+      ) => Sketch.StringAttribute['attributes']),
+) {
+  range = normalizeRange(range);
+
+  const spans = toTextSpansWithPositions(attributedString);
+
+  const updated = spans
+    .flatMap((span) => {
+      const start = range[0] - span.location;
+      const end = range[1] - span.location;
+
+      const clampedStart = Math.max(start, 0);
+      const clampedEnd = Math.max(end, 0);
+
+      return [
+        {
+          attributes: span.attributes,
+          string: span.string.slice(0, clampedStart),
+        },
+        {
+          attributes: {
+            ...span.attributes,
+            ...(typeof attributesOrUpdater === 'function'
+              ? attributesOrUpdater(span.attributes)
+              : attributesOrUpdater),
+          },
+          string: span.string.slice(clampedStart, clampedEnd),
+        },
+        {
+          attributes: span.attributes,
+          string: span.string.slice(clampedEnd),
+        },
+      ];
+    })
+    .filter((span) => span.string !== '');
+
+  return fromTextSpans(updated);
+}
+
+export function getAttributesInRange(
+  attributedString: Sketch.AttributedString,
+  range: [number, number],
+) {
+  range = normalizeRange(range);
+
+  const spans = toTextSpansWithPositions(attributedString);
+
+  const updated = spans.filter((span, i) => {
+    const start = range[0] - span.location;
+    const end = range[1] - span.location;
+
+    // If empty range
+    if (range[0] === range[1]) {
+      return (
+        // Span start is within range
+        (start >= 0 && start < span.length) ||
+        // Cursor is after last span
+        (i === spans.length - 1 && end === span.length)
+      );
+    }
+
+    return (
+      // Span start is within range
+      (start >= 0 && start < span.length) ||
+      // Entire span is between range
+      (start < 0 && end > span.length) ||
+      // Span end is within range
+      (end > 0 && end < span.length)
+    );
+  });
+
+  return updated.map((span) =>
+    SketchModel.stringAttribute({
+      attributes: span.attributes,
+      location: span.location,
+      length: span.string.length,
+    }),
+  );
+}
+
 export function replaceTextAndUpdateSelectionRange(
   attributedString: Sketch.AttributedString,
   selectionRange: TextSelectionRange,

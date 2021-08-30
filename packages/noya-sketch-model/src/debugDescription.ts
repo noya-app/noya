@@ -93,8 +93,15 @@ export function describeObject(
     case Sketch.ClassValue.AttributedString:
       return `${className} ${describeValue(object.string)}`;
     case Sketch.ClassValue.StringAttribute:
-      const { length, location } = object;
-      return `${className} ${describeValue({ location, length })}`;
+      const { length, location, attributes } = object;
+      const value = {
+        location,
+        length,
+        ...(options?.attributedStringColors && {
+          color: attributes.MSAttributedStringColorAttribute,
+        }),
+      };
+      return `${className} ${describeValue(value)}`;
     default:
       return className;
   }
@@ -107,6 +114,7 @@ type DescribeOptions = {
   points?: boolean;
   frames?: boolean;
   flip?: boolean;
+  attributedStringColors?: boolean;
 };
 
 export function debugDescription(

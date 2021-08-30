@@ -1,18 +1,33 @@
-import Sketch from 'noya-file-format';
-import { useDispatch, useSelector } from 'noya-app-state-context';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import TextLayoutRow from '../components/inspector/TextLayoutRow';
 import TextOptionsRow from '../components/inspector/TextOptionsRow';
 import TextStyleRow from '../components/inspector/TextStyleRow';
-import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function TextStyleInspector() {
-  const dispatch = useDispatch();
+  const [state, dispatch] = useApplicationState();
+
+  const selectedText = useDeepMemo(Selectors.getTextSelection(state));
 
   const textLayers = useShallowArray(
     useSelector(Selectors.getSelectedTextLayers),
+  );
+
+  const stringAttributes = useMemo(
+    () =>
+      selectedText
+        ? Selectors.getAttributesInRange(textLayers[0].attributedString, [
+            selectedText.range.anchor,
+            selectedText.range.head,
+          ])
+        : textLayers
+            .map((layer) => layer.attributedString)
+            .flatMap((attributedString) => attributedString.attributes),
+    [selectedText, textLayers],
   );
 
   const textBehavior = getMultiValue(
@@ -30,8 +45,12 @@ export default memo(function TextStyleInspector() {
   );
 
   const editableTextStyle = useMemo(
-    () => getEditableTextStyle(textStyles),
-    [textStyles],
+    () =>
+      getEditableTextStyle(
+        selectedText ? [] : textStyles,
+        stringAttributes.map((string) => string.attributes),
+      ),
+    [stringAttributes, selectedText, textStyles],
   );
 
   return (

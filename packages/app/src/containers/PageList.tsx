@@ -11,7 +11,7 @@ import {
   Spacer,
   TreeView,
 } from 'noya-designsystem';
-import { useDeepArray } from 'noya-react-utils';
+import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';
 import React, {
@@ -302,7 +302,7 @@ export default function PageList() {
   const { renamingPage, startRenamingPage, didHandleFocus } = useWorkspace();
   const currentTab = Selectors.getCurrentTab(state);
 
-  const pageInfo = useDeepArray([
+  const pageInfo = useDeepMemo([
     {
       id: 'header',
       name: 'Pages',

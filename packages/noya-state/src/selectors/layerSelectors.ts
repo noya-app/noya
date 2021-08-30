@@ -45,9 +45,18 @@ export const getSelectedLayersExcludingDescendants = (
 export const getSelectedTextLayers = (
   state: ApplicationState,
 ): Sketch.Text[] => {
-  return getSelectedLayers(state).filter(
-    (layer): layer is Sketch.Text => layer._class === 'text',
-  );
+  const selectedText = Selectors.getTextSelection(state);
+
+  if (selectedText) {
+    const layer = Layers.find(
+      Selectors.getCurrentPage(state),
+      (layer) => layer.do_objectID === selectedText.layerId,
+    );
+
+    return layer && Layers.isTextLayer(layer) ? [layer] : [];
+  }
+
+  return getSelectedLayers(state).filter(Layers.isTextLayer);
 };
 
 export const getSelectedLayers = (

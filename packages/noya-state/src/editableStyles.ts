@@ -47,10 +47,35 @@ function getEditableTextStyleProperties(
   };
 }
 
+function getEditableStringAttributeProperties(
+  attributes: Sketch.StringAttribute['attributes'],
+): EditableTextStyle {
+  const { fontFamily, fontTraits } = decodeFontName(
+    attributes.MSAttributedStringFontAttribute.attributes.name,
+  );
+
+  return {
+    fontFamily,
+    fontTraits,
+    fontColor: attributes.MSAttributedStringColorAttribute,
+    fontSize: attributes.MSAttributedStringFontAttribute.attributes.size,
+    lineSpacing: attributes.paragraphStyle?.maximumLineHeight,
+    letterSpacing: attributes.kerning,
+    paragraphSpacing: attributes.paragraphStyle?.paragraphSpacing,
+    verticalAlignment: attributes.textStyleVerticalAlignmentKey,
+    horizontalAlignment: attributes.paragraphStyle?.alignment,
+  };
+}
+
 export function getEditableTextStyle(
   textStyles: Sketch.TextStyle[],
+  stringAttributes: Sketch.StringAttribute['attributes'][],
 ): EditableTextStyle {
-  const properties = textStyles.map(getEditableTextStyleProperties);
+  const styleProperties = textStyles.map(getEditableTextStyleProperties);
+  const attributeProperties = stringAttributes.map(
+    getEditableStringAttributeProperties,
+  );
+  const properties = [...styleProperties, ...attributeProperties];
 
   return {
     fontFamily: getMultiValue(
