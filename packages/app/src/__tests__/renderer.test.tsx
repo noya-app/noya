@@ -185,6 +185,11 @@ test('ImageFills', async () => {
   expect(Buffer.from(image)).toMatchImageSnapshot();
 });
 
+test('InnerShadows', async () => {
+  const image = await generateSketchFileImage('InnerShadows.sketch', 0);
+  expect(Buffer.from(image)).toMatchImageSnapshot();
+});
+
 test('Gradient', async () => {
   const image = await generateSketchFileImage('Gradient.sketch', 0);
   expect(Buffer.from(image)).toMatchImageSnapshot();

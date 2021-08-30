@@ -4,6 +4,7 @@ import { AffineTransform, Rect } from 'noya-geometry';
 import {
   ClipProps,
   PaintParameters,
+  useColorFill,
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
@@ -219,6 +220,65 @@ const SketchFillShadow = memo(function SketchFillShadow({
   );
 });
 
+const SketchInnerShadow = memo(function SketchInnerShadow({
+  path,
+  innerShadow,
+}: {
+  path: CanvasKit.Path;
+  innerShadow: Sketch.InnerShadow;
+}) {
+  const CanvasKit = useCanvasKit();
+
+  const fillPaint = useColorFill(
+    Primitives.color(CanvasKit, innerShadow.color),
+  );
+
+  const imageFilter = useMemo(() => {
+    const erodeFilter = CanvasKit.ImageFilter.MakeErode(
+      innerShadow.spread,
+      innerShadow.spread,
+      null,
+    );
+
+    const blurFilter = CanvasKit.ImageFilter.MakeBlur(
+      innerShadow.blurRadius / 2,
+      innerShadow.blurRadius / 2,
+      CanvasKit.TileMode.Clamp,
+      erodeFilter,
+    );
+
+    const offsetFilter = CanvasKit.ImageFilter.MakeOffset(
+      innerShadow.offsetX,
+      innerShadow.offsetY,
+      blurFilter,
+    );
+
+    const arithmeticFilter = CanvasKit.ImageFilter.MakeArithmetic(
+      0,
+      -1,
+      1,
+      0,
+      false,
+      null,
+      offsetFilter,
+    );
+
+    return arithmeticFilter;
+  }, [
+    CanvasKit,
+    innerShadow.blurRadius,
+    innerShadow.offsetX,
+    innerShadow.offsetY,
+    innerShadow.spread,
+  ]);
+
+  return (
+    <Group imageFilter={imageFilter}>
+      <Path path={path} paint={fillPaint} />
+    </Group>
+  );
+});
+
 interface Props {
   layer:
     | Sketch.Rectangle
@@ -241,6 +301,7 @@ export default memo(function SketchShape({ layer }: Props) {
   const fills = (style.fills ?? []).filter((x) => x.isEnabled);
   const borders = (style.borders ?? []).filter((x) => x.isEnabled);
   const shadows = (style.shadows ?? []).filter((x) => x.isEnabled);
+  const innerShadows = (style.innerShadows ?? []).filter((x) => x.isEnabled);
   const borderWidth = Math.max(0, ...borders.map((border) => border.thickness));
   const borderPosition =
     borders.length > 0 ? borders[0].position : Sketch.BorderPosition.Inside;
@@ -273,6 +334,13 @@ export default memo(function SketchShape({ layer }: Props) {
           fill={fill}
           path={path}
           frame={layer.frame}
+        />
+      ))}
+      {innerShadows.map((innerShadow, index) => (
+        <SketchInnerShadow
+          key={`innerShadow-${index}`}
+          innerShadow={innerShadow}
+          path={path}
         />
       ))}
       {borders.map((border, index) => (
