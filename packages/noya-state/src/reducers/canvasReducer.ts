@@ -28,7 +28,7 @@ import {
 } from 'noya-state';
 import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
-import { ScalingOriginMode } from '../primitives';
+import { ScalingOptions } from '../primitives';
 import {
   getAngularGradientCircle,
   getSelectedGradient,
@@ -299,8 +299,10 @@ export function canvasReducer(
           draft.interactionState.origin,
           draft.interactionState.current,
           false,
-          state.keyModifiers.shiftKey,
-          state.keyModifiers.altKey ? 'center' : 'extent',
+          {
+            constrainProportions: state.keyModifiers.shiftKey,
+            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+          },
         );
 
         if (shapeType === 'text') {
@@ -953,12 +955,6 @@ export function canvasReducer(
               layerIds,
             )!;
 
-            const constrain = Selectors.getConstrainedScaling(
-              state,
-              pageSnapshot,
-              layerIndexPaths,
-            );
-
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
               pageSnapshot,
@@ -966,8 +962,16 @@ export function canvasReducer(
               delta,
               context.canvasSize,
               direction,
-              constrain,
-              state.keyModifiers.altKey ? 'center' : 'extent',
+              {
+                constrainProportions: Selectors.getConstrainedScaling(
+                  state,
+                  pageSnapshot,
+                  layerIndexPaths,
+                ),
+                scalingOriginMode: state.keyModifiers.altKey
+                  ? 'center'
+                  : 'extent',
+              },
             );
 
             const originalTransform = AffineTransform.translate(
@@ -1171,8 +1175,7 @@ export function createDrawingLayer(
   origin: Point,
   current: Point,
   pixelAlign: boolean,
-  constrain: boolean,
-  scalingOriginMode: ScalingOriginMode,
+  { scalingOriginMode, constrainProportions }: ScalingOptions,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -1180,7 +1183,7 @@ export function createDrawingLayer(
   | Sketch.Artboard
   | Sketch.Slice
   | Sketch.ShapePath {
-  if (constrain) {
+  if (constrainProportions) {
     const delta = {
       x: current.x - origin.x,
       y: current.y - origin.y,

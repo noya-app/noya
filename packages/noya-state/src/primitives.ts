@@ -35,6 +35,11 @@ export function sign(number: number) {
 
 export type ScalingOriginMode = 'extent' | 'center';
 
+export type ScalingOptions = {
+  constrainProportions: boolean;
+  scalingOriginMode: ScalingOriginMode;
+};
+
 /**
  * Resize a rect in a compass direction
  */
@@ -42,8 +47,7 @@ export function resizeRect(
   rect: Rect,
   offset: Point,
   direction: CompassDirection,
-  constrain: boolean,
-  scalingOriginMode: ScalingOriginMode,
+  { scalingOriginMode, constrainProportions }: ScalingOptions,
 ): Rect {
   const oppositeDirection = getOppositeDirection(direction);
 
@@ -75,7 +79,7 @@ export function resizeRect(
   const largestMagnitude =
     Math.abs(scaleX) > Math.abs(scaleY) ? scaleX : scaleY;
 
-  const scale = constrain
+  const scale = constrainProportions
     ? { x: largestMagnitude, y: largestMagnitude }
     : {
         x: extent.x === oppositeExtent.x ? 1 : scaleX,

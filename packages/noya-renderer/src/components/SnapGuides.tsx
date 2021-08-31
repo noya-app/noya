@@ -176,12 +176,6 @@ export default memo(function SnapGuides() {
         const selectedIndexPaths =
           Selectors.getSelectedLayerIndexPathsExcludingDescendants(state);
 
-        const constrain = Selectors.getConstrainedScaling(
-          state,
-          pageSnapshot,
-          selectedIndexPaths,
-        );
-
         const newBoundingRect = getScaledSnapBoundingRect(
           state,
           pageSnapshot,
@@ -189,8 +183,14 @@ export default memo(function SnapGuides() {
           delta,
           canvasSize,
           direction,
-          constrain,
-          state.keyModifiers.altKey ? 'center' : 'extent',
+          {
+            constrainProportions: Selectors.getConstrainedScaling(
+              state,
+              pageSnapshot,
+              selectedIndexPaths,
+            ),
+            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+          },
         );
 
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
