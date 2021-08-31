@@ -33,6 +33,8 @@ function sign(number: number) {
   return number > 0 ? 1 : number < 0 ? -1 : 0;
 }
 
+export type ScalingOriginMode = 'extent' | 'center';
+
 /**
  * Resize a rect in a compass direction
  */
@@ -41,11 +43,19 @@ export function resizeRect(
   offset: Point,
   direction: CompassDirection,
   constrain: boolean,
+  scalingOriginMode: ScalingOriginMode,
 ): Rect {
   const oppositeDirection = getOppositeDirection(direction);
 
   const extent = getRectExtentPoint(rect, direction);
   const oppositeExtent = getRectExtentPoint(rect, oppositeDirection);
+
+  if (scalingOriginMode === 'center') {
+    offset = {
+      x: offset.x * 2,
+      y: offset.y * 2,
+    };
+  }
 
   const newExtent = { x: extent.x + offset.x, y: extent.y + offset.y };
 
@@ -87,11 +97,25 @@ export function resizeRect(
     scale.x *= -1;
   }
 
-  return transformRect(
-    rect,
-    AffineTransform.scale(scale.x, scale.y, oppositeExtent),
-    false,
-  );
+  switch (scalingOriginMode) {
+    case 'extent':
+      return transformRect(
+        rect,
+        AffineTransform.scale(scale.x, scale.y, oppositeExtent),
+        false,
+      );
+    case 'center':
+      const bounds = createBounds(rect);
+
+      return transformRect(
+        rect,
+        AffineTransform.scale(scale.x, scale.y, {
+          x: bounds.midX,
+          y: bounds.midY,
+        }),
+        false,
+      );
+  }
 }
 
 export function point(point: Point): number[] {

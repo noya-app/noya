@@ -16,6 +16,7 @@ import {
 import { IndexPath } from 'tree-visit';
 import {
   ApplicationState,
+  getMultiValue,
   isLine,
   isPointsLayer,
   Layers,
@@ -477,4 +478,23 @@ export function resizeLayerFrame<T extends Sketch.AnyLayer>(
       );
     }
   });
+}
+
+// If the shift key is held, or if any layer has `constrainProportions`,
+// we do constrained scaling
+export function getConstrainedScaling(
+  state: ApplicationState,
+  page: Sketch.Page,
+  indexPaths: IndexPath[],
+) {
+  return (
+    state.keyModifiers.shiftKey === true ||
+    (getMultiValue(
+      indexPaths.map(
+        (indexPath) =>
+          Layers.access(page, indexPath).frame.constrainProportions,
+      ),
+    ) ??
+      true)
+  );
 }

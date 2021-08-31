@@ -17,7 +17,7 @@ describe('resizeRect', () => {
         const rect = { x: 0, y: 0, width: 100, height: 100 };
 
         expect(
-          roundRect(resizeRect(rect, { x: 5, y: 10 }, 'se', false)),
+          roundRect(resizeRect(rect, { x: 5, y: 10 }, 'se', false, 'extent')),
         ).toEqual({
           x: 0,
           y: 0,
@@ -30,7 +30,7 @@ describe('resizeRect', () => {
         const rect = { x: 0, y: 0, width: 100, height: 100 };
 
         expect(
-          roundRect(resizeRect(rect, { x: 5, y: -200 }, 'se', false)),
+          roundRect(resizeRect(rect, { x: 5, y: -200 }, 'se', false, 'extent')),
         ).toEqual({
           x: 0,
           y: 0,
@@ -43,7 +43,9 @@ describe('resizeRect', () => {
         const rect = { x: 0, y: 0, width: 100, height: 100 };
 
         expect(
-          roundRect(resizeRect(rect, { x: -200, y: 10 }, 'se', false)),
+          roundRect(
+            resizeRect(rect, { x: -200, y: 10 }, 'se', false, 'extent'),
+          ),
         ).toEqual({
           x: 0,
           y: 0,
@@ -58,7 +60,7 @@ describe('resizeRect', () => {
         const rect = { x: 0, y: 0, width: 100, height: 100 };
 
         expect(
-          roundRect(resizeRect(rect, { x: 5, y: 10 }, 'se', true)),
+          roundRect(resizeRect(rect, { x: 5, y: 10 }, 'se', true, 'extent')),
         ).toEqual({
           x: 0,
           y: 0,
@@ -71,7 +73,7 @@ describe('resizeRect', () => {
         const rect = { x: 0, y: 0, width: 100, height: 100 };
 
         expect(
-          roundRect(resizeRect(rect, { x: 5, y: -200 }, 'se', true)),
+          roundRect(resizeRect(rect, { x: 5, y: -200 }, 'se', true, 'extent')),
         ).toEqual({
           x: 0,
           y: 0,
@@ -84,7 +86,7 @@ describe('resizeRect', () => {
         const rect = { x: 0, y: 0, width: 100, height: 100 };
 
         expect(
-          roundRect(resizeRect(rect, { x: -200, y: 10 }, 'se', true)),
+          roundRect(resizeRect(rect, { x: -200, y: 10 }, 'se', true, 'extent')),
         ).toEqual({
           x: 0,
           y: 0,
@@ -98,7 +100,7 @@ describe('resizeRect', () => {
   // test('resize rect e', () => {
   //   const rect = { x: 0, y: 0, width: 100, height: 100 };
 
-  //   expect(roundRect(resizeRect(rect, { x: 10, y: 10 }, 'e', false))).toEqual({
+  //   expect(roundRect(resizeRect(rect, { x: 10, y: 10 }, 'e', false, 'extent'))).toEqual({
   //     x: 0,
   //     y: 0,
   //     width: 110,

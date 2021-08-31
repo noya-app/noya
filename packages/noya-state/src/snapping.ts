@@ -11,6 +11,7 @@ import { cartesianProduct, isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { getRectExtentPoint, Layers, resizeRect } from '.';
 import { ParentLayer } from './layers';
+import { ScalingOriginMode } from './primitives';
 import { ApplicationState } from './reducers/applicationReducer';
 import { CompassDirection } from './reducers/interactionReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
@@ -211,12 +212,14 @@ export function getScaledSnapBoundingRect(
   canvasSize: Size,
   direction: CompassDirection,
   constrain: boolean,
+  scalingOriginMode: ScalingOriginMode,
 ): Rect {
   const newBoundingRectBeforeSnap = resizeRect(
     boundingRect,
     delta,
     direction,
     constrain,
+    scalingOriginMode,
   );
 
   const extentPoint = getRectExtentPoint(newBoundingRectBeforeSnap, direction);
@@ -237,5 +240,6 @@ export function getScaledSnapBoundingRect(
     },
     direction,
     constrain,
+    scalingOriginMode,
   );
 }

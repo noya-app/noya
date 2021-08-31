@@ -1,8 +1,8 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { interpolateRgba } from 'noya-colorpicker';
 import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -70,7 +70,6 @@ import {
   SnapshotInteractionAction,
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
-import { getMultiValue } from '../utils/getMultiValue';
 
 export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
 
@@ -951,14 +950,11 @@ export function canvasReducer(
               layerIds,
             )!;
 
-            const constrain =
-              getMultiValue(
-                layerIndexPaths.map(
-                  (indexPath) =>
-                    Layers.access(pageSnapshot, indexPath).frame
-                      .constrainProportions,
-                ),
-              ) ?? true;
+            const constrain = Selectors.getConstrainedScaling(
+              state,
+              pageSnapshot,
+              layerIndexPaths,
+            );
 
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
@@ -968,6 +964,7 @@ export function canvasReducer(
               context.canvasSize,
               direction,
               constrain,
+              state.keyModifiers.altKey ? 'center' : 'extent',
             );
 
             const originalTransform = AffineTransform.translate(

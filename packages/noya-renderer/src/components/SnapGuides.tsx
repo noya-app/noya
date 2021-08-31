@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import Sketch from 'noya-file-format';
 import {
   Axis,
   createBounds,
@@ -11,13 +11,11 @@ import {
 } from 'noya-geometry';
 import {
   getLayerSnapValues,
-  getMultiValue,
   getPossibleTargetSnapLayers,
   getRectExtentPoint,
   getScaledSnapBoundingRect,
   getSnaps,
   getSnapValues,
-  Layers,
   Selectors,
 } from 'noya-state';
 import { groupBy, round } from 'noya-utils';
@@ -178,13 +176,11 @@ export default memo(function SnapGuides() {
         const selectedIndexPaths =
           Selectors.getSelectedLayerIndexPathsExcludingDescendants(state);
 
-        const constrain =
-          getMultiValue(
-            selectedIndexPaths.map(
-              (indexPath) =>
-                Layers.access(page, indexPath).frame.constrainProportions,
-            ),
-          ) ?? true;
+        const constrain = Selectors.getConstrainedScaling(
+          state,
+          pageSnapshot,
+          selectedIndexPaths,
+        );
 
         const newBoundingRect = getScaledSnapBoundingRect(
           state,
@@ -194,6 +190,7 @@ export default memo(function SnapGuides() {
           canvasSize,
           direction,
           constrain,
+          state.keyModifiers.altKey ? 'center' : 'extent',
         );
 
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
