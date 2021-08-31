@@ -28,6 +28,7 @@ import {
 } from 'noya-state';
 import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
+import { ScalingOriginMode } from '../primitives';
 import {
   getAngularGradientCircle,
   getSelectedGradient,
@@ -298,6 +299,8 @@ export function canvasReducer(
           draft.interactionState.origin,
           draft.interactionState.current,
           false,
+          state.keyModifiers.shiftKey,
+          state.keyModifiers.altKey ? 'center' : 'extent',
         );
 
         if (shapeType === 'text') {
@@ -805,7 +808,7 @@ export function canvasReducer(
             break;
           }
           case 'drawing': {
-            const { origin, current } = interactionState;
+            let { origin, current } = interactionState;
 
             const originAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
@@ -1168,6 +1171,8 @@ export function createDrawingLayer(
   origin: Point,
   current: Point,
   pixelAlign: boolean,
+  constrain: boolean,
+  scalingOriginMode: ScalingOriginMode,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -1175,6 +1180,32 @@ export function createDrawingLayer(
   | Sketch.Artboard
   | Sketch.Slice
   | Sketch.ShapePath {
+  if (constrain) {
+    const delta = {
+      x: current.x - origin.x,
+      y: current.y - origin.y,
+    };
+
+    const max = Math.max(Math.abs(delta.x), Math.abs(delta.y));
+
+    current = {
+      x: origin.x + (delta.x < 0 ? -max : max),
+      y: origin.y + (delta.y < 0 ? -max : max),
+    };
+  }
+
+  if (scalingOriginMode === 'center') {
+    const delta = {
+      x: current.x - origin.x,
+      y: current.y - origin.y,
+    };
+
+    origin = {
+      x: origin.x - delta.x,
+      y: origin.y - delta.y,
+    };
+  }
+
   const rect = createRect(origin, current);
   let frame = SketchModel.rect(rect);
 

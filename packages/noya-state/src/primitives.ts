@@ -29,7 +29,7 @@ import {
 export * from './primitives/path';
 export * from './primitives/pathCommand';
 
-function sign(number: number) {
+export function sign(number: number) {
   return number > 0 ? 1 : number < 0 ? -1 : 0;
 }
 

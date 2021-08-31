@@ -344,6 +344,8 @@ export default memo(function SketchFileRenderer() {
           interactionState.origin,
           interactionState.current,
           true,
+          state.keyModifiers.shiftKey,
+          state.keyModifiers.altKey ? 'center' : 'extent',
         )
       : undefined;
 
