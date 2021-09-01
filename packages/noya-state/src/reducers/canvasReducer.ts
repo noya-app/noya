@@ -1,8 +1,8 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { interpolateRgba } from 'noya-colorpicker';
 import { rgbaToSketchColor, sketchColorToRgba } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -28,6 +28,7 @@ import {
 } from 'noya-state';
 import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
+import { ScalingOptions } from '../primitives';
 import {
   getAngularGradientCircle,
   getSelectedGradient,
@@ -70,7 +71,6 @@ import {
   SnapshotInteractionAction,
 } from './interactionReducer';
 import { defaultBorderColor, defaultFillColor } from './styleReducer';
-import { getMultiValue } from '../utils/getMultiValue';
 
 export type ImportedImageTarget = 'selectedArtboard' | 'nearestArtboard';
 
@@ -299,6 +299,10 @@ export function canvasReducer(
           draft.interactionState.origin,
           draft.interactionState.current,
           false,
+          {
+            constrainProportions: state.keyModifiers.shiftKey,
+            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+          },
         );
 
         if (shapeType === 'text') {
@@ -806,7 +810,7 @@ export function canvasReducer(
             break;
           }
           case 'drawing': {
-            const { origin, current } = interactionState;
+            let { origin, current } = interactionState;
 
             const originAdjustment = getSnapAdjustmentForVisibleLayers(
               state,
@@ -951,15 +955,6 @@ export function canvasReducer(
               layerIds,
             )!;
 
-            const constrain =
-              getMultiValue(
-                layerIndexPaths.map(
-                  (indexPath) =>
-                    Layers.access(pageSnapshot, indexPath).frame
-                      .constrainProportions,
-                ),
-              ) ?? true;
-
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
               pageSnapshot,
@@ -967,7 +962,16 @@ export function canvasReducer(
               delta,
               context.canvasSize,
               direction,
-              constrain,
+              {
+                constrainProportions: Selectors.getConstrainedScaling(
+                  state,
+                  pageSnapshot,
+                  layerIndexPaths,
+                ),
+                scalingOriginMode: state.keyModifiers.altKey
+                  ? 'center'
+                  : 'extent',
+              },
             );
 
             const originalTransform = AffineTransform.translate(
@@ -1171,6 +1175,7 @@ export function createDrawingLayer(
   origin: Point,
   current: Point,
   pixelAlign: boolean,
+  scalingOptions: ScalingOptions,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -1178,12 +1183,13 @@ export function createDrawingLayer(
   | Sketch.Artboard
   | Sketch.Slice
   | Sketch.ShapePath {
-  const rect = createRect(origin, current);
-  let frame = SketchModel.rect(rect);
+  let rect = Selectors.getDrawnLayerRect(origin, current, scalingOptions);
 
   if (pixelAlign) {
-    frame = insetRect(frame, 0.5);
+    rect = insetRect(rect, 0.5);
   }
+
+  const frame = SketchModel.rect(rect);
 
   switch (shapeType) {
     case 'oval':

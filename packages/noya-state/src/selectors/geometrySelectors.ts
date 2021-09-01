@@ -2,6 +2,7 @@ import Sketch from 'noya-file-format';
 import type { CanvasKit } from 'canvaskit';
 import {
   AffineTransform,
+  createRect,
   createRectFromBounds,
   getRectCornerPoints,
   Insets,
@@ -16,7 +17,7 @@ import {
 } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
-import { getRectDragHandles } from 'noya-state';
+import { getRectDragHandles, ScalingOptions } from 'noya-state';
 import { SKIP, STOP, VisitOptions } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
@@ -437,4 +438,38 @@ export function getClippedLayerMap(
   });
 
   return result;
+}
+
+export function getDrawnLayerRect(
+  origin: Point,
+  current: Point,
+  { scalingOriginMode, constrainProportions }: ScalingOptions,
+): Rect {
+  if (constrainProportions) {
+    const delta = {
+      x: current.x - origin.x,
+      y: current.y - origin.y,
+    };
+
+    const max = Math.max(Math.abs(delta.x), Math.abs(delta.y));
+
+    current = {
+      x: origin.x + (delta.x < 0 ? -max : max),
+      y: origin.y + (delta.y < 0 ? -max : max),
+    };
+  }
+
+  if (scalingOriginMode === 'center') {
+    const delta = {
+      x: current.x - origin.x,
+      y: current.y - origin.y,
+    };
+
+    origin = {
+      x: origin.x - delta.x,
+      y: origin.y - delta.y,
+    };
+  }
+
+  return createRect(origin, current);
 }

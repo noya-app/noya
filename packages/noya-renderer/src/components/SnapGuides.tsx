@@ -1,23 +1,22 @@
-import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import Sketch from 'noya-file-format';
 import {
   Axis,
   createBounds,
   createRect,
   distance,
+  normalizeRect,
   Point,
   Rect,
   Size,
 } from 'noya-geometry';
 import {
   getLayerSnapValues,
-  getMultiValue,
   getPossibleTargetSnapLayers,
   getRectExtentPoint,
   getScaledSnapBoundingRect,
   getSnaps,
   getSnapValues,
-  Layers,
   Selectors,
 } from 'noya-state';
 import { groupBy, round } from 'noya-utils';
@@ -178,14 +177,6 @@ export default memo(function SnapGuides() {
         const selectedIndexPaths =
           Selectors.getSelectedLayerIndexPathsExcludingDescendants(state);
 
-        const constrain =
-          getMultiValue(
-            selectedIndexPaths.map(
-              (indexPath) =>
-                Layers.access(page, indexPath).frame.constrainProportions,
-            ),
-          ) ?? true;
-
         const newBoundingRect = getScaledSnapBoundingRect(
           state,
           pageSnapshot,
@@ -193,14 +184,21 @@ export default memo(function SnapGuides() {
           delta,
           canvasSize,
           direction,
-          constrain,
+          {
+            constrainProportions: Selectors.getConstrainedScaling(
+              state,
+              pageSnapshot,
+              selectedIndexPaths,
+            ),
+            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+          },
         );
 
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
 
         return {
           snapRect: createRect(newExtentPoint, newExtentPoint),
-          areaSize: newBoundingRect,
+          areaSize: normalizeRect(newBoundingRect),
         };
       }
       case 'insert': {
@@ -217,9 +215,14 @@ export default memo(function SnapGuides() {
 
         if (!current) return;
 
+        const rect = Selectors.getDrawnLayerRect(origin, current, {
+          constrainProportions: state.keyModifiers.shiftKey,
+          scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+        });
+
         return {
           snapRect: createRect(current, current),
-          areaSize: createRect(origin, current),
+          areaSize: rect,
         };
       }
     }

@@ -156,6 +156,7 @@ export default memo(function Canvas() {
     Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
     Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
+    Alt: () => dispatch('setKeyModifier', 'altKey', true),
     Space: () => {
       if (isEditingText) return FALLTHROUGH;
 
@@ -213,6 +214,7 @@ export default memo(function Canvas() {
         dispatch('interaction', ['reset']);
       },
       Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
+      Alt: () => dispatch('setKeyModifier', 'altKey', false),
     },
     { eventName: 'keyup' },
   );
