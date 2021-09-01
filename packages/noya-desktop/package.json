@@ -2,7 +2,7 @@
   "name": "Noya",
   "private": true,
   "productName": "Noya",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "Noya wrapped with electron",
   "main": ".webpack/main",
   "scripts": {
