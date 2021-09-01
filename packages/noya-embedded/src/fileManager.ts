@@ -1,4 +1,4 @@
-import { FileWithHandle, FileSystemHandle, fileSave } from 'browser-fs-access';
+import { fileSave, FileSystemHandle, FileWithHandle } from 'browser-fs-access';
 import { Base64 } from 'noya-utils';
 import { hostApp } from './hostApp';
 
@@ -23,6 +23,7 @@ class FileManager {
 
   open = async (
     options: {
+      path?: string;
       extensions?: string[];
       mimeTypes?: string[];
     } = {},
@@ -32,6 +33,7 @@ class FileManager {
         type: 'openFile',
         id: this.requestId++,
         extensions: options.extensions,
+        path: options.path,
       },
       'didOpenFile',
     );

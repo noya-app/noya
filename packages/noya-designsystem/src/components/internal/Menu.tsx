@@ -17,7 +17,10 @@ export type RegularMenuItem<T extends string> = {
   disabled?: boolean;
   icon?: ReactElement;
   items?: MenuItem<T>[];
-  role?: ApplicationMenuItem['role'];
+  role?:
+    | ApplicationMenuItem['role']
+    | 'recentdocuments'
+    | 'clearrecentdocuments';
 };
 
 export type MenuItem<T extends string> =

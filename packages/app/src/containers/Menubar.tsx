@@ -9,6 +9,7 @@ import {
   Button,
   createSectionedMenu,
   DropdownMenu,
+  MenuItem,
   Spacer,
 } from 'noya-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
@@ -77,76 +78,95 @@ const MenubarContent = memo(function MenubarContent({
     [dispatch, fileHandle, fileManager, getStateSnapshot],
   );
 
-  const menuItems = useMemo(
-    () =>
-      createSectionedMenu<ApplicationMenuItemType>([
+  const menuItems = useMemo(() => {
+    const recentDocumentsMenuItem: MenuItem<ApplicationMenuItemType> = {
+      value: 'openRecent',
+      title: 'Open Recent',
+      role: 'recentdocuments',
+      items: [
         {
-          title: 'File',
-          items: [
+          value: 'clearRecent',
+          title: 'Clear Recent',
+          role: 'clearrecentdocuments',
+        },
+      ],
+    };
+
+    const closeWindowMenuItem: MenuItem<ApplicationMenuItemType> = {
+      value: 'close',
+      title: 'Close Window',
+      role: 'close',
+    };
+
+    return createSectionedMenu<ApplicationMenuItemType>([
+      {
+        title: 'File',
+        items: [
+          {
+            value: 'new',
+            title: 'New',
+            shortcut: isElectron ? 'Mod-n' : undefined, // Browsers don't allow overriding
+          },
+          { value: 'open', title: 'Open...', shortcut: 'Mod-o' },
+          ...(isElectron ? [recentDocumentsMenuItem] : []),
+          { value: 'save', title: 'Save', shortcut: 'Mod-s' },
+          { value: 'saveAs', title: 'Save As...', shortcut: 'Mod-Shift-s' },
+          ...(isElectron ? [closeWindowMenuItem] : []),
+        ],
+      },
+      {
+        title: 'Edit',
+        items: createSectionedMenu<ApplicationMenuItemType>(
+          [
             {
-              value: 'new',
-              title: 'New',
-              shortcut: isElectron ? 'Mod-n' : undefined, // Browsers don't allow overriding
+              value: 'undo',
+              title: 'Undo',
+              disabled: undoDisabled,
+              shortcut: 'Mod-z',
+              role: 'undo',
             },
-            { value: 'open', title: 'Open...', shortcut: 'Mod-o' },
-            { value: 'save', title: 'Save', shortcut: 'Mod-s' },
-            { value: 'saveAs', title: 'Save As...', shortcut: 'Mod-Shift-s' },
-          ],
-        },
-        {
-          title: 'Edit',
-          items: createSectionedMenu<ApplicationMenuItemType>(
-            [
-              {
-                value: 'undo',
-                title: 'Undo',
-                disabled: undoDisabled,
-                shortcut: 'Mod-z',
-                role: 'undo',
-              },
-              {
-                value: 'redo',
-                title: 'Redo',
-                disabled: redoDisabled,
-                shortcut: 'Mod-Shift-z',
-                role: 'redo',
-              },
-            ],
-            isElectron && [
-              {
-                value: 'cut',
-                title: 'Cut',
-                role: 'cut',
-                shortcut: 'Mod-x',
-              },
-              {
-                value: 'copy',
-                title: 'Copy',
-                role: 'copy',
-                shortcut: 'Mod-c',
-              },
-              {
-                value: 'paste',
-                title: 'Paste',
-                role: 'paste',
-                shortcut: 'Mod-v',
-              },
-            ],
-          ),
-        },
-        {
-          title: 'Preferences',
-          items: [
             {
-              value: 'showRulers',
-              title: 'Rulers',
-              checked: showRulers,
+              value: 'redo',
+              title: 'Redo',
+              disabled: redoDisabled,
+              shortcut: 'Mod-Shift-z',
+              role: 'redo',
             },
           ],
-        },
-      ]),
-    [isElectron, redoDisabled, showRulers, undoDisabled],
-  );
+          isElectron && [
+            {
+              value: 'cut',
+              title: 'Cut',
+              role: 'cut',
+              shortcut: 'Mod-x',
+            },
+            {
+              value: 'copy',
+              title: 'Copy',
+              role: 'copy',
+              shortcut: 'Mod-c',
+            },
+            {
+              value: 'paste',
+              title: 'Paste',
+              role: 'paste',
+              shortcut: 'Mod-v',
+            },
+          ],
+        ),
+      },
+      {
+        title: 'Preferences',
+        items: [
+          {
+            value: 'showRulers',
+            title: 'Rulers',
+            checked: showRulers,
+          },
+        ],
+      },
+    ]);
+  }, [isElectron, redoDisabled, showRulers, undoDisabled]);
 
   const onSelectMenuItem = useCallback(
     (value: ApplicationMenuItemType) => {

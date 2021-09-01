@@ -27,7 +27,7 @@ export function parseUrl(url: string) {
   return { pathname, query: search.slice(1), fragment: hash.slice(1) };
 }
 
-export function parseQueryParameters(
+export function decodeQueryParameters(
   encodedParameters: string,
 ): Record<string, string> {
   if (!encodedParameters) return {};
@@ -39,4 +39,16 @@ export function parseQueryParameters(
   }, {} as Record<string, string>);
 
   return params;
+}
+
+export function encodeQueryParameters(
+  parameters: Record<string, string | number | boolean>,
+) {
+  const encoded = [];
+
+  for (let key in parameters) {
+    encoded.push(`${key}=${encodeURIComponent(parameters[key])}`);
+  }
+
+  return encoded.join('&');
 }

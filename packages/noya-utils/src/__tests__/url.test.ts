@@ -1,4 +1,4 @@
-import { parseQueryParameters, parseUrl } from '../url';
+import { decodeQueryParameters, parseUrl } from '../url';
 
 test('parse url', () => {
   const result = parseUrl('https://noya.design?foo=bar&a=123#hello');
@@ -12,7 +12,7 @@ test('parse url', () => {
 
 test('parse query parameters', () => {
   const result = parseUrl('https://noya.design?foo=bar&a=123#hello');
-  const parameters = parseQueryParameters(result.query);
+  const parameters = decodeQueryParameters(result.query);
 
   expect(parameters).toEqual({
     foo: 'bar',

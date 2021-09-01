@@ -1,11 +1,11 @@
-import { parseQueryParameters } from 'noya-utils';
+import { decodeQueryParameters } from 'noya-utils';
 import { useEffect, useState } from 'react';
 
 export type UrlHashParameters = Record<string, string>;
 
 export function getUrlHashParameters(): UrlHashParameters {
   try {
-    return parseQueryParameters(window.location.hash.slice(1));
+    return decodeQueryParameters(window.location.hash.slice(1));
   } catch (e) {
     console.warn(e);
     return {};

@@ -9,8 +9,11 @@ export type ApplicationMenuItemType =
   // File
   | 'new'
   | 'open'
+  | 'openRecent'
+  | 'clearRecent'
   | 'save'
   | 'saveAs'
+  | 'close'
   // Edit
   | 'undo'
   | 'redo'
@@ -49,6 +52,7 @@ function getApplicationMenuItem(
       ...(item.items && {
         submenu: item.items.map(getApplicationMenuItem),
       }),
+      role: item.role as ApplicationMenuItem['role'],
     };
   }
 }
