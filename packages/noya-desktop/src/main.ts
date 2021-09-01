@@ -1,10 +1,11 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
 import contextMenu from 'electron-context-menu';
-import { saveFile } from './actions/saveFile';
-import { openFile } from './actions/openFile';
-import { setMenu } from './actions/setMenu';
+import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
+import { encodeQueryParameters } from 'noya-utils';
 import { doubleClickToolbar } from './actions/doubleClickToolbar';
+import { openFile } from './actions/openFile';
+import { saveFile } from './actions/saveFile';
+import { setMenu } from './actions/setMenu';
 import { ActionContext } from './types';
 
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -19,7 +20,7 @@ contextMenu({
   showSearchWithGoogle: false,
 });
 
-const createWindow = (): void => {
+const createWindow = (filename?: string) => {
   const mainWindow = new BrowserWindow({
     height: 800,
     width: 1200,
@@ -30,18 +31,26 @@ const createWindow = (): void => {
     },
   });
 
-  const urlHash = '#isElectron=true';
+  const hashString = encodeQueryParameters({
+    isElectron: true,
+    ...(filename && { documentPath: filename }),
+  });
+
   mainWindow.loadURL(
     app.isPackaged
-      ? `https://noya.design${urlHash}`
-      : `http://localhost:1234${urlHash}`,
+      ? `https://noya.design#${hashString}`
+      : `http://localhost:1234#${hashString}`,
   );
 
   // Automatically open the DevTools
   // mainWindow.webContents.openDevTools();
+
+  return mainWindow;
 };
 
-app.on('ready', createWindow);
+app.on('ready', () => {
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -88,4 +97,8 @@ ipcMain.on('rendererProcessMessage', (event, data) => {
   if (!(data.type in actions)) return;
 
   actions[data.type](data as any, context);
+});
+
+app.on('open-file', (event, filename) => {
+  createWindow(filename);
 });

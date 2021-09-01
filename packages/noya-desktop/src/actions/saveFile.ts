@@ -1,7 +1,7 @@
-import path from 'path';
-import { dialog } from 'electron';
+import { app, dialog } from 'electron';
 import { writeFileSync } from 'fs';
 import { MessageFromEmbedded } from 'noya-embedded';
+import path from 'path';
 import { ActionContext } from '../types';
 
 export function saveFile(
@@ -32,6 +32,8 @@ export function saveFile(
 
   try {
     writeFileSync(filename, buffer);
+
+    app.addRecentDocument(filename);
   } catch (e) {
     console.error(e);
 

@@ -8,6 +8,11 @@ export type MessageFromEmbedded =
   | {
       type: 'openFile';
       id: number;
+      /**
+       * If a path is passed, we open the file at that path. Otherwise,
+       * we show an open dialog and let the user choose a path.
+       */
+      path?: string;
       extensions?: string[];
     }
   | {
@@ -25,25 +30,31 @@ export type MessageFromEmbedded =
       type: 'doubleClickToolbar';
     };
 
+type HostFileMetadata = {
+  name: string;
+  path: string;
+};
+
+export type HostFile = HostFileMetadata & {
+  base64: string;
+};
+
 export type MessageFromHost =
   | {
       type: 'menuCommand';
       value: ApplicationMenuItemType;
     }
   | {
+      type: 'didOpenRecentFile';
+      file: HostFile;
+    }
+  | {
       type: 'didOpenFile';
       id: number;
-      file?: {
-        name: string;
-        path: string;
-        base64: string;
-      };
+      file?: HostFile;
     }
   | {
       type: 'didSaveFile';
       id: number;
-      file?: {
-        name: string;
-        path: string;
-      };
+      file?: HostFileMetadata;
     };

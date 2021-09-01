@@ -40,3 +40,15 @@ export function parseQueryParameters(
 
   return params;
 }
+
+export function encodeQueryParameters(
+  parameters: Record<string, string | number | boolean>,
+) {
+  const encoded = [];
+
+  for (let key in parameters) {
+    encoded.push(`${key}=${encodeURIComponent(parameters[key])}`);
+  }
+
+  return encoded.join('&');
+}

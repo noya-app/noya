@@ -1,4 +1,14 @@
+type EmitterConfiguration = {
+  bufferEventsIfNoListeners: boolean;
+};
+
 export class Emitter<T extends any[] = []> {
+  constructor(options: Partial<EmitterConfiguration> = {}) {
+    this.bufferEventsIfNoListeners = options.bufferEventsIfNoListeners ?? false;
+  }
+
+  private bufferEventsIfNoListeners: boolean;
+
   private listeners: ((...args: T) => void)[] = [];
 
   addListener = (f: (...args: T) => void, options: { once?: boolean } = {}) => {
@@ -11,6 +21,18 @@ export class Emitter<T extends any[] = []> {
     } else {
       this.listeners.push(f);
     }
+
+    if (this.bufferedEvents.length > 0) {
+      const eventsToEmit = this.bufferedEvents;
+
+      this.bufferedEvents = [];
+
+      eventsToEmit.forEach((event) => {
+        this.emit(...event);
+      });
+    }
+
+    return () => this.removeListener(f);
   };
 
   removeListener = (f: (...args: T) => void) => {
@@ -22,6 +44,14 @@ export class Emitter<T extends any[] = []> {
   };
 
   emit = (...args: T) => {
+    if (this.listeners.length === 0) {
+      this.bufferedEvents.push(args);
+
+      return;
+    }
+
     this.listeners.forEach((l) => l(...args));
   };
+
+  private bufferedEvents: T[] = [];
 }

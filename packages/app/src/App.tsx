@@ -1,4 +1,5 @@
 import { StateProvider } from 'noya-app-state-context';
+import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
 import { getCurrentPlatform, PlatformName } from 'noya-keymap';
 import {
@@ -12,6 +13,7 @@ import {
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
+  createSketchFile,
   Selectors,
   WorkspaceAction,
   workspaceReducer,
@@ -23,8 +25,8 @@ import Workspace from './containers/Workspace';
 import {
   EnvironmentParameters,
   EnvironmentParametersProvider,
+  useEnvironmentParameter,
 } from './hooks/useEnvironmentParameters';
-import { useResource } from './hooks/useResource';
 import {
   castHashParameter,
   useUrlHashParameters,
@@ -37,11 +39,7 @@ type Action =
 function Contents() {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-
-  const sketchFileData = useResource<ArrayBuffer>(
-    '/Demo.sketch',
-    'arrayBuffer',
-  );
+  const documentPath = useEnvironmentParameter('documentPath');
 
   const reducer = useMemo(
     () =>
@@ -77,10 +75,23 @@ function Contents() {
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });
 
   useEffect(() => {
-    decode(sketchFileData).then((parsed) => {
-      dispatch({ type: 'set', value: parsed });
-    });
-  }, [sketchFileData]);
+    if (state.type === 'success') return;
+
+    async function loadFile() {
+      const file = await fileManager.open({ path: documentPath });
+      const data = await file.arrayBuffer();
+      const sketch = await decode(data);
+
+      dispatch({ type: 'set', value: sketch });
+      dispatch({ type: 'update', value: ['setFileHandle', file.handle] });
+    }
+
+    if (documentPath) {
+      loadFile();
+    } else {
+      dispatch({ type: 'set', value: createSketchFile() });
+    }
+  }, [documentPath, state.type]);
 
   const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });
@@ -119,6 +130,10 @@ export default function App() {
   const urlHashParameters = useUrlHashParameters();
   const environmentParameters = useMemo(
     (): EnvironmentParameters => ({
+      documentPath:
+        'documentPath' in urlHashParameters
+          ? castHashParameter(urlHashParameters.documentPath, 'string')
+          : undefined,
       isElectron: castHashParameter(urlHashParameters.isElectron, 'boolean'),
       platform:
         'platform' in urlHashParameters
