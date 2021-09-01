@@ -1,7 +1,7 @@
-import path from 'path';
-import { dialog } from 'electron';
+import { app, dialog } from 'electron';
 import { readFileSync } from 'fs';
 import { MessageFromEmbedded } from 'noya-embedded';
+import path from 'path';
 import { ActionContext } from '../types';
 
 export function openFile(
@@ -25,6 +25,8 @@ export function openFile(
       id: data.id,
     });
   } else {
+    app.addRecentDocument(filename);
+
     context.sendMessage({
       type: 'didOpenFile',
       id: data.id,
