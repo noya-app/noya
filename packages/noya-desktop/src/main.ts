@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
+import contextMenu from 'electron-context-menu';
 import { saveFile } from './actions/saveFile';
 import { openFile } from './actions/openFile';
 import { setMenu } from './actions/setMenu';
@@ -13,6 +14,10 @@ if (require('electron-squirrel-startup')) {
   // eslint-disable-line global-require
   app.quit();
 }
+
+contextMenu({
+  showSearchWithGoogle: false,
+});
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
