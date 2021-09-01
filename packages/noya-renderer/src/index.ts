@@ -9,6 +9,7 @@ export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
 export * from './FontManagerContext';
 export * from './RootScaleContext';
+export * from './ZoomContext';
 export * from './RenderingModeContext';
 export * from './hooks/useCanvasKit';
 export * from './hooks/useCompileShader';

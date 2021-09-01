@@ -23,10 +23,15 @@ import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
-import { getCurrentPage } from './pageSelectors';
+import {
+  getCurrentPage,
+  getCurrentPageMetadata,
+  getCurrentPageZoom,
+} from './pageSelectors';
 import {
   getArtboardLabelParagraphSize,
   getArtboardLabelRect,
+  getArtboardLabelTransform,
 } from './textSelectors';
 import {
   getCanvasTransform,
@@ -173,6 +178,7 @@ export function artboardLabelContainsPoint(
   layer: Sketch.Artboard | Sketch.SymbolMaster,
   canvasTransform: AffineTransform,
   screenPoint: Point,
+  zoom: number,
 ): boolean {
   const paragraphSize = getArtboardLabelParagraphSize(
     CanvasKit,
@@ -182,7 +188,9 @@ export function artboardLabelContainsPoint(
 
   const rect = getArtboardLabelRect(layer.frame, paragraphSize);
 
-  const labelRect = transformRect(rect, canvasTransform);
+  const zoomRect = transformRect(rect, getArtboardLabelTransform(rect, zoom));
+
+  const labelRect = transformRect(zoomRect, canvasTransform);
 
   return rectContainsPoint(labelRect, screenPoint);
 }
@@ -196,6 +204,7 @@ export function getLayerAtPoint(
   options: LayerTraversalOptions = {},
 ): PageLayer | undefined {
   const page = getCurrentPage(state);
+  const { zoomValue } = getCurrentPageMetadata(state);
   const canvasTransform = getCanvasTransform(state, insets);
   const screenTransform = getScreenTransform(insets);
 
@@ -228,6 +237,7 @@ export function getLayerAtPoint(
           layer,
           canvasTransform,
           screenPoint,
+          zoomValue,
         )
       ) {
         found = layer;
@@ -352,7 +362,7 @@ export function getScaleDirectionAtPoint(
 
   if (!boundingRect) return;
 
-  const handles = getRectDragHandles(boundingRect);
+  const handles = getRectDragHandles(boundingRect, getCurrentPageZoom(state));
 
   const handle = handles.find((handle) =>
     rectContainsPoint(handle.rect, point),

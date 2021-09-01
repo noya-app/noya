@@ -1,7 +1,15 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
-import { insetRect, Point, Rect, rectContainsPoint, Size } from 'noya-geometry';
+import {
+  AffineTransform,
+  createBounds,
+  insetRect,
+  Point,
+  Rect,
+  rectContainsPoint,
+  Size,
+} from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import {
   InteractionState,
@@ -252,9 +260,18 @@ export function getArtboardLabelRect(
   paragraphSize: Size,
 ): Rect {
   return {
-    x: layerFrame.x + 3,
-    y: layerFrame.y - paragraphSize.height - 3,
+    x: layerFrame.x,
+    y: layerFrame.y - paragraphSize.height,
     width: paragraphSize.width,
     height: paragraphSize.height,
   };
+}
+
+export function getArtboardLabelTransform(rect: Rect, zoom: number) {
+  const bounds = createBounds(rect);
+
+  return AffineTransform.scale(1 / zoom, 1 / zoom, {
+    x: bounds.minX,
+    y: bounds.maxY,
+  }).translate(3, -4);
 }

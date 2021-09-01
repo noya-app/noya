@@ -22,8 +22,10 @@ export const dragHandleSize: number = 7;
 
 export function getRectDragHandles(
   boundingRect: Rect,
-  handleSize: number = dragHandleSize,
+  zoom: number,
 ): DragHandle[] {
+  const handleSize = dragHandleSize / zoom;
+
   return compassDirections.map((compassDirection) => {
     const translationPercent = compassDirectionMap[compassDirection];
 
@@ -49,9 +51,11 @@ export function getLineDragHandles(
   boundingRect: Rect,
   points: Sketch.CurvePoint[],
   layer: Sketch.AnyLayer,
-  handleSize: number = dragHandleSize,
+  zoom: number,
 ): DragHandle[] {
   const transform = Selectors.getLayerFlipTransform(layer);
+
+  const handleSize = dragHandleSize / zoom;
 
   return points
     .map((point) => decodeCurvePoint(point, boundingRect))

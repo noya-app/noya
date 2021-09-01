@@ -6,6 +6,9 @@ import { ReactNode, useMemo } from 'react';
 import { Group, Path, Rect } from '..';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
+import { useCanvasKit } from '../hooks/useCanvasKit';
+import { useStroke } from 'noya-react-canvaskit';
+import { useZoom } from '../ZoomContext';
 
 interface HoverOutlinePathProps {
   layer: Layers.PointsLayer | Sketch.ShapeGroup;
@@ -27,11 +30,18 @@ function HoverOutlineRect({ layer, paint }: HoverOutlineRectProps) {
 
 interface Props {
   layer: Sketch.AnyLayer;
-  paint: Paint;
   transform: AffineTransform;
 }
 
-export default function HoverOutline({ layer, paint, transform }: Props) {
+export default function HoverOutline({ layer, transform }: Props) {
+  const CanvasKit = useCanvasKit();
+  const zoom = useZoom();
+
+  const paint = useStroke({
+    color: CanvasKit.Color(132, 63, 255, 1),
+    strokeWidth: 2 / zoom,
+  });
+
   let localTransform = useMemo(
     () =>
       AffineTransform.multiply(

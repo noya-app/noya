@@ -1,14 +1,7 @@
-import Sketch from 'noya-file-format';
-import * as CanvasKit from 'canvaskit';
 import produce from 'immer';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import {
-  AffineTransform,
-  createRect,
-  insetRect,
-  Point,
-  Rect,
-} from 'noya-geometry';
+import Sketch from 'noya-file-format';
+import { AffineTransform, createRect, insetRect, Rect } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import { Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
@@ -24,11 +17,12 @@ import {
 } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { ClippedLayerProvider } from '../ClippedLayerContext';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { useRenderingMode } from '../RenderingModeContext';
 import { useRootScale } from '../RootScaleContext';
-import { ClippedLayerProvider } from '../ClippedLayerContext';
+import { useZoom, ZoomProvider } from '../ZoomContext';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 import EditablePath from './EditablePath';
@@ -45,20 +39,59 @@ import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
 import SnapGuides from './SnapGuides';
 
-const BoundingRect = memo(function BoundingRect({
-  selectionPaint,
-  rect,
-}: {
-  selectionPaint: CanvasKit.Paint;
-  rect: Rect;
-}) {
+const BoundingRect = memo(function BoundingRect({ rect }: { rect: Rect }) {
+  const {
+    canvas: { dragHandleStroke },
+  } = useTheme().colors;
+  const zoom = useZoom();
+
+  const strokeWidth = 1 / zoom;
+
+  const paint = useStroke({
+    color: dragHandleStroke,
+    strokeWidth,
+  });
+
   const CanvasKit = useCanvasKit();
   const alignedRect = useMemo(
-    () => Primitives.rect(CanvasKit, insetRect(rect, 0.5, 0.5)),
-    [CanvasKit, rect],
+    () =>
+      Primitives.rect(
+        CanvasKit,
+        insetRect(rect, strokeWidth / 2, strokeWidth / 2),
+      ),
+    [CanvasKit, rect, strokeWidth],
   );
 
-  return <>{<RCKRect rect={alignedRect} paint={selectionPaint} />}</>;
+  return <RCKRect rect={alignedRect} paint={paint} />;
+});
+
+const RotatedBoundingRect = memo(function BoundingPoints({
+  layerId,
+}: {
+  layerId: string;
+}) {
+  const [state] = useApplicationState();
+  const {
+    canvas: { dragHandleStroke },
+  } = useTheme().colors;
+  const zoom = useZoom();
+
+  const paint = useStroke({
+    color: dragHandleStroke,
+    strokeWidth: 1 / zoom,
+  });
+
+  const page = Selectors.getCurrentPage(state);
+  const boundingPoints = useMemo(
+    () =>
+      Selectors.getBoundingPoints(page, layerId, {
+        groups: 'childrenOnly',
+        includeHiddenLayers: true,
+      }),
+    [page, layerId],
+  );
+
+  return <Polyline points={boundingPoints} paint={paint} />;
 });
 
 export default memo(function SketchFileRenderer() {
@@ -78,6 +111,7 @@ export default memo(function SketchFileRenderer() {
   const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
   const isEditingText = Selectors.getIsEditingText(interactionState.type);
   const isInserting = interactionState.type === 'insert';
+  const { zoomValue } = Selectors.getCurrentPageMetadata(state);
   const canvasRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
@@ -89,18 +123,9 @@ export default memo(function SketchFileRenderer() {
     [CanvasKit, canvasInsets.left, canvasSize.height, canvasSize.width],
   );
   const {
-    canvas: { background: backgroundColor, dragHandleStroke },
+    canvas: { background: backgroundColor },
   } = useTheme().colors;
   const backgroundFill = useColorFill(backgroundColor);
-
-  const selectionPaint = useStroke({
-    color: dragHandleStroke,
-  });
-
-  const highlightPaint = useStroke({
-    color: CanvasKit.Color(132, 63, 255, 1),
-    strokeWidth: 2,
-  });
 
   const boundingRect = useMemo(
     () =>
@@ -108,17 +133,6 @@ export default memo(function SketchFileRenderer() {
         groups: 'childrenOnly',
         includeHiddenLayers: true,
       }),
-    [page, state.selectedLayerIds],
-  );
-
-  const boundingPoints = useMemo(
-    () =>
-      state.selectedLayerIds.map((id: string) =>
-        Selectors.getBoundingPoints(page, id, {
-          groups: 'childrenOnly',
-          includeHiddenLayers: true,
-        }),
-      ),
     [page, state.selectedLayerIds],
   );
 
@@ -202,14 +216,10 @@ export default memo(function SketchFileRenderer() {
 
     return (
       highlightedLayer && (
-        <HoverOutline
-          transform={layerTransform}
-          layer={layer}
-          paint={highlightPaint}
-        />
+        <HoverOutline transform={layerTransform} layer={layer} />
       )
     );
-  }, [highlightPaint, highlightedLayer, page, state.selectedLayerIds]);
+  }, [highlightedLayer, page, state.selectedLayerIds]);
 
   const penToolPseudoElements = useMemo(() => {
     if (interactionState.type !== 'drawingShapePath' || !interactionState.point)
@@ -351,8 +361,6 @@ export default memo(function SketchFileRenderer() {
         )
       : undefined;
 
-  const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
-
   const rootScale = useRootScale();
   const rootScaleTransform = useMemo(
     () => AffineTransform.scale(rootScale),
@@ -365,77 +373,76 @@ export default memo(function SketchFileRenderer() {
     return getClippedLayerMap(state, canvasSize, canvasInsets);
   }, [canvasInsets, canvasSize, renderingMode, state]);
 
+  const gradient = state.selectedGradient
+    ? Selectors.getSelectedGradient(page, state.selectedGradient)
+    : undefined;
+
   return (
     <ClippedLayerProvider value={clippedLayerMap}>
-      <Group transform={rootScaleTransform}>
-        <RCKRect rect={canvasRect} paint={backgroundFill} />
-        <Group transform={canvasTransform}>
-          <SketchGroup layer={page} />
-          {gradientStopPoints && state.selectedGradient && (
-            <GradientEditor
-              gradientStopPoints={gradientStopPoints}
-              selectedGradient={state.selectedGradient}
-            />
-          )}
-          {symbol && <SketchArtboardContent layer={symbol} />}
-          {interactionState.type === 'drawingShapePath' ? (
-            penToolPseudoElements
-          ) : isEditingPath ? (
-            <>
-              {editablePaths}
-              {editPathPseudoElements}
-              <InsertPointOverlay />
-            </>
-          ) : (
-            <>
-              {(state.selectedLayerIds.length > 1 ||
-                !Selectors.getSelectedLineLayer(state)) &&
-                boundingRect &&
-                !state.selectedGradient &&
-                !drawingLayer &&
-                !isInserting && (
-                  <>
-                    <BoundingRect
-                      rect={boundingRect}
-                      selectionPaint={selectionPaint}
-                    />
-                    {!isEditingText &&
-                      boundingPoints.map((points: Point[], index: number) => (
-                        <Polyline
-                          key={index}
-                          points={points}
-                          paint={selectionPaint}
-                        />
-                      ))}
-                  </>
+      <ZoomProvider value={zoomValue}>
+        <Group transform={rootScaleTransform}>
+          <RCKRect rect={canvasRect} paint={backgroundFill} />
+          <Group transform={canvasTransform}>
+            <SketchGroup layer={page} />
+            {state.selectedGradient && gradient && (
+              <GradientEditor
+                gradient={gradient}
+                selectedStopIndex={state.selectedGradient.stopIndex}
+              />
+            )}
+            {symbol && <SketchArtboardContent layer={symbol} />}
+            {interactionState.type === 'drawingShapePath' ? (
+              penToolPseudoElements
+            ) : isEditingPath ? (
+              <>
+                {editablePaths}
+                {editPathPseudoElements}
+                <InsertPointOverlay />
+              </>
+            ) : (
+              <>
+                {(state.selectedLayerIds.length > 1 ||
+                  !Selectors.getSelectedLineLayer(state)) &&
+                  boundingRect &&
+                  !state.selectedGradient &&
+                  !drawingLayer &&
+                  !isInserting && (
+                    <>
+                      <BoundingRect rect={boundingRect} />
+                      {!isEditingText &&
+                        state.selectedLayerIds.map((layerId) => (
+                          <RotatedBoundingRect layerId={layerId} />
+                        ))}
+                    </>
+                  )}
+                {!drawingLayer &&
+                  !isInserting &&
+                  !isEditingText &&
+                  highlightedSketchLayer}
+                {drawingLayer && <SketchLayer layer={drawingLayer} />}
+                <SnapGuides />
+                {quickMeasureGuides}
+                {!state.selectedGradient &&
+                  boundingRect &&
+                  !drawingLayer &&
+                  !isInserting &&
+                  !isEditingText && <DragHandles rect={boundingRect} />}
+              </>
+            )}
+          </Group>
+          <Group transform={screenTransform}>
+            {interactionState.type === 'marquee' && (
+              <Marquee
+                rect={createRect(
+                  interactionState.origin,
+                  interactionState.current,
                 )}
-              {!drawingLayer &&
-                !isInserting &&
-                !isEditingText &&
-                highlightedSketchLayer}
-              {drawingLayer && <SketchLayer layer={drawingLayer} />}
-              <SnapGuides />
-              {quickMeasureGuides}
-              {!state.selectedGradient &&
-                boundingRect &&
-                !drawingLayer &&
-                !isInserting &&
-                !isEditingText && <DragHandles rect={boundingRect} />}
-            </>
-          )}
+              />
+            )}
+            {showRulers && <HorizontalRuler />}
+          </Group>
         </Group>
-        <Group transform={screenTransform}>
-          {interactionState.type === 'marquee' && (
-            <Marquee
-              rect={createRect(
-                interactionState.origin,
-                interactionState.current,
-              )}
-            />
-          )}
-          {showRulers && <HorizontalRuler />}
-        </Group>
-      </Group>
+      </ZoomProvider>
     </ClippedLayerProvider>
   );
 });
