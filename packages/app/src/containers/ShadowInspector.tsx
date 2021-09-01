@@ -10,7 +10,13 @@ import CheckboxArrayController from '../components/inspector/CheckboxArrayContro
 import ShadowRow from '../components/inspector/ShadowRow';
 import { useShallowArray } from 'noya-react-utils';
 
-export default memo(function ShadowInspector() {
+export default memo(function ShadowInspector({
+  allowMoreThanOne = true,
+  supportsSpread = true,
+}: {
+  allowMoreThanOne?: boolean;
+  supportsSpread?: boolean;
+}) {
   const dispatch = useDispatch();
 
   const selectedStyles = useShallowArray(
@@ -26,13 +32,22 @@ export default memo(function ShadowInspector() {
     [shadowMatrix],
   );
 
+  const handleAddShadow = useCallback(
+    () => dispatch('addNewShadow'),
+    [dispatch],
+  );
+
   return (
     <CheckboxArrayController<EditableShadow>
       title="Shadows"
       id="shadows"
       key="shadows"
       value={editableShadows}
-      onClickPlus={useCallback(() => dispatch('addNewShadow'), [dispatch])}
+      onClickPlus={
+        allowMoreThanOne || editableShadows.length === 0
+          ? handleAddShadow
+          : undefined
+      }
       onClickTrash={useCallback(
         () => dispatch('deleteDisabledShadows'),
         [dispatch],
@@ -63,6 +78,7 @@ export default memo(function ShadowInspector() {
             y={item.offsetY}
             blur={item.blurRadius}
             spread={item.spread}
+            supportsSpread={supportsSpread}
             onSetX={(value, mode) => dispatch('setShadowX', index, value, mode)}
             onSetY={(value, mode) => dispatch('setShadowY', index, value, mode)}
             onSetBlur={(value, mode) =>
@@ -78,7 +94,7 @@ export default memo(function ShadowInspector() {
             }}
           />
         ),
-        [dispatch],
+        [dispatch, supportsSpread],
       )}
     />
   );

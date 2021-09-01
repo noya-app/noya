@@ -63,6 +63,7 @@ export default memo(function InnerShadowInspector() {
             y={item.offsetY}
             blur={item.blurRadius}
             spread={item.spread}
+            supportsSpread
             onSetX={(value, mode) =>
               dispatch('setInnerShadowX', index, value, mode)
             }

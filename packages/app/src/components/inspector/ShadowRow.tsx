@@ -15,6 +15,7 @@ interface Props {
   y: DimensionValue;
   blur: DimensionValue;
   spread: DimensionValue;
+  supportsSpread: boolean;
   onSetX: (value: number, mode: SetNumberMode) => void;
   onSetY: (value: number, mode: SetNumberMode) => void;
   onSetBlur: (value: number, mode: SetNumberMode) => void;
@@ -29,6 +30,7 @@ export default memo(function FillRow({
   y,
   blur,
   spread,
+  supportsSpread,
   onSetX,
   onSetY,
   onSetBlur,
@@ -92,6 +94,7 @@ export default memo(function FillRow({
         <DimensionInput
           id={spreadInputId}
           size={50}
+          disabled={!supportsSpread}
           value={spread !== undefined ? Math.round(spread) : spread}
           onSetValue={onSetSpread}
         />

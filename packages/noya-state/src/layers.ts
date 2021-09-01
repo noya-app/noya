@@ -147,10 +147,10 @@ export const hasInspectableInnerShadow = (layer: Sketch.AnyLayer): boolean => {
     case 'shapePath':
     case 'star':
     case 'triangle':
-    case 'group':
-    case 'symbolInstance':
     case 'text':
       return true;
+    case 'group':
+    case 'symbolInstance':
     case 'page':
     case 'artboard':
     case 'MSImmutableHotspotLayer':

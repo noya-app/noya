@@ -126,7 +126,6 @@ const ignoredProps = new Set([
   'hasLabel',
   'hasDropdown',
   'textAlign',
-  'disabled',
   'variant',
   'onNudge',
 ]);

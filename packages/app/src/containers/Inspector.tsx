@@ -140,12 +140,9 @@ export default memo(function Inspector() {
       (l) => Layers.isPointsLayer(l) && isLine(l.points),
     );
     const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
-    const hasSymbolMaster = selectedLayers.some((l) =>
-      Layers.isSymbolMaster(l),
-    );
-    const hasSymbolInstance = selectedLayers.some((l) =>
-      Layers.isSymbolInstance(l),
-    );
+    const hasGroup = selectedLayers.some(Layers.isGroup);
+    const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
+    const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
     const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
     const hasOneSymbolInstance =
       selectedLayers.length === 1 && hasSymbolInstance;
@@ -205,7 +202,12 @@ export default memo(function Inspector() {
         <FillInspector title="Fills" allowMoreThanOne />
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
-      selectedLayers.every(Layers.hasInspectableShadow) && <ShadowInspector />,
+      selectedLayers.every(Layers.hasInspectableShadow) && (
+        <ShadowInspector
+          allowMoreThanOne={!hasGroup}
+          supportsSpread={!hasGroup}
+        />
+      ),
       selectedLayers.every(Layers.hasInspectableInnerShadow) && (
         <InnerShadowInspector />
       ),

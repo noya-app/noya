@@ -8,6 +8,7 @@ import { chunkBy } from 'noya-utils';
 import { memo, ReactNode, useMemo } from 'react';
 import { Group } from '../..';
 import SketchLayer from './SketchLayer';
+import DropShadowGroup from '../effects/DropShadowGroup';
 
 function composeImageFilters(
   CanvasKit: CanvasKit,
@@ -139,9 +140,19 @@ export default memo(function SketchGroup({ layer }: Props) {
     );
   });
 
-  return (
+  const groupElement = (
     <Group opacity={opacity} transform={transform}>
       {elements}
     </Group>
   );
+
+  if (layer.style?.shadows && layer.style.shadows[0]?.isEnabled) {
+    return (
+      <DropShadowGroup shadow={layer.style.shadows[0]}>
+        {groupElement}
+      </DropShadowGroup>
+    );
+  }
+
+  return groupElement;
 });
