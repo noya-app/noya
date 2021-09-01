@@ -17,6 +17,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Set MacOS signing certs
+        if: matrix.os == 'macOS-latest'
+        run: |
+          chmod +x ./packages/noya-desktop/tools/add-macos-cert.sh
+          ./packages/noya-desktop/tools/add-macos-cert.sh
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
       - uses: actions/setup-node@main
         with:
           node-version: 14.17

@@ -75,7 +75,7 @@ function notarizeMaybe() {
     return;
   }
 
-  if (!process.env.CI) {
+  if (!process.env.CI && !process.env.FORCE_NOTARIZE) {
     console.info(`Not in CI, skipping notarization`);
     return;
   }
