@@ -94,6 +94,7 @@
     "node-loader": "^2.0.0"
   },
   "dependencies": {
+    "electron-context-menu": "^3.1.1",
     "electron-squirrel-startup": "^1.0.0"
   }
 }
