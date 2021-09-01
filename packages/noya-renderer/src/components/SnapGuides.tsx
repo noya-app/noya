@@ -5,6 +5,7 @@ import {
   createBounds,
   createRect,
   distance,
+  normalizeRect,
   Point,
   Rect,
   Size,
@@ -197,7 +198,7 @@ export default memo(function SnapGuides() {
 
         return {
           snapRect: createRect(newExtentPoint, newExtentPoint),
-          areaSize: newBoundingRect,
+          areaSize: normalizeRect(newBoundingRect),
         };
       }
       case 'insert': {
@@ -214,9 +215,14 @@ export default memo(function SnapGuides() {
 
         if (!current) return;
 
+        const rect = Selectors.getDrawnLayerRect(origin, current, {
+          constrainProportions: state.keyModifiers.shiftKey,
+          scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+        });
+
         return {
           snapRect: createRect(current, current),
-          areaSize: createRect(origin, current),
+          areaSize: rect,
         };
       }
     }

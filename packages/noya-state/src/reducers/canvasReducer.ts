@@ -1175,7 +1175,7 @@ export function createDrawingLayer(
   origin: Point,
   current: Point,
   pixelAlign: boolean,
-  { scalingOriginMode, constrainProportions }: ScalingOptions,
+  scalingOptions: ScalingOptions,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -1183,38 +1183,13 @@ export function createDrawingLayer(
   | Sketch.Artboard
   | Sketch.Slice
   | Sketch.ShapePath {
-  if (constrainProportions) {
-    const delta = {
-      x: current.x - origin.x,
-      y: current.y - origin.y,
-    };
-
-    const max = Math.max(Math.abs(delta.x), Math.abs(delta.y));
-
-    current = {
-      x: origin.x + (delta.x < 0 ? -max : max),
-      y: origin.y + (delta.y < 0 ? -max : max),
-    };
-  }
-
-  if (scalingOriginMode === 'center') {
-    const delta = {
-      x: current.x - origin.x,
-      y: current.y - origin.y,
-    };
-
-    origin = {
-      x: origin.x - delta.x,
-      y: origin.y - delta.y,
-    };
-  }
-
-  const rect = createRect(origin, current);
-  let frame = SketchModel.rect(rect);
+  let rect = Selectors.getDrawnLayerRect(origin, current, scalingOptions);
 
   if (pixelAlign) {
-    frame = insetRect(frame, 0.5);
+    rect = insetRect(rect, 0.5);
   }
+
+  const frame = SketchModel.rect(rect);
 
   switch (shapeType) {
     case 'oval':
