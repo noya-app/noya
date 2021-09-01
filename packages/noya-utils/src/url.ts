@@ -27,7 +27,7 @@ export function parseUrl(url: string) {
   return { pathname, query: search.slice(1), fragment: hash.slice(1) };
 }
 
-export function parseQueryParameters(
+export function decodeQueryParameters(
   encodedParameters: string,
 ): Record<string, string> {
   if (!encodedParameters) return {};
