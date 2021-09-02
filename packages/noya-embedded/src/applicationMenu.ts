@@ -68,6 +68,13 @@ const aboutMenu: ApplicationMenuItem = {
       type: 'separator',
     },
     {
+      id: 'checkForUpdates',
+      label: 'Check for Updates...',
+    },
+    {
+      type: 'separator',
+    },
+    {
       label: 'Services',
       role: 'services',
       submenu: [],

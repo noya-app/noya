@@ -1,4 +1,4 @@
-import { Menu } from 'electron';
+import { autoUpdater, Menu } from 'electron';
 import { ApplicationMenuItemType, MessageFromEmbedded } from 'noya-embedded';
 import { visit } from 'tree-visit';
 import { ActionContext } from '../types';
@@ -26,11 +26,17 @@ export function setMenu(
   visitMenuItems(menu, (options) => {
     if (!options.id) return;
 
-    options.click = () =>
+    options.click = () => {
+      if (options.id === 'checkForUpdates') {
+        autoUpdater.checkForUpdates();
+        return;
+      }
+
       context.sendMessage({
         type: 'menuCommand',
         value: options.id as ApplicationMenuItemType,
       });
+    };
   });
 
   menu.push({
