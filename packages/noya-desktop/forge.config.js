@@ -22,7 +22,6 @@ const config = {
           owner: 'noya-app',
           name: 'noya',
         },
-        prerelease: true,
         draft: true,
       },
     },
