@@ -4,6 +4,8 @@ import { createContext, useContext } from 'react';
 export type EnvironmentParameters = {
   isElectron: boolean;
   platform: PlatformName;
+  hostName?: string;
+  hostVersion?: string;
   documentPath?: string;
 };
 

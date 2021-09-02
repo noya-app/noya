@@ -142,6 +142,14 @@ export default function App() {
               'string',
             ) as PlatformName)
           : getCurrentPlatform(navigator),
+      hostName:
+        'hostName' in urlHashParameters
+          ? castHashParameter(urlHashParameters.hostName, 'string')
+          : undefined,
+      hostVersion:
+        'hostVersion' in urlHashParameters
+          ? castHashParameter(urlHashParameters.hostVersion, 'string')
+          : undefined,
     }),
     [urlHashParameters],
   );

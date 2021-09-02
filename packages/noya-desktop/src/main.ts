@@ -7,6 +7,7 @@ import { openFile } from './actions/openFile';
 import { saveFile } from './actions/saveFile';
 import { setMenu } from './actions/setMenu';
 import { ActionContext } from './types';
+import { getAppVersion } from './version';
 
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
@@ -22,6 +23,8 @@ contextMenu({
   showSearchWithGoogle: false,
 });
 
+const version = getAppVersion();
+
 const createWindow = (filename?: string) => {
   const mainWindow = new BrowserWindow({
     height: 800,
@@ -35,6 +38,8 @@ const createWindow = (filename?: string) => {
 
   const hashString = encodeQueryParameters({
     isElectron: true,
+    hostName: 'noya-desktop',
+    ...(version && { hostVersion: version }),
     ...(filename && { documentPath: filename }),
   });
 
