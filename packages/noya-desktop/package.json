@@ -13,6 +13,11 @@
     "clean": "rm -rf .webpack out"
   },
   "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noya-app/noya.git",
+    "directory": "packages/noya-desktop"
+  },
   "author": {
     "name": "Devin Abbott",
     "email": "dabbott@noyasoftware.com"
@@ -35,6 +40,7 @@
   },
   "dependencies": {
     "electron-context-menu": "^3.1.1",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "update-electron-app": "^2.0.1"
   }
 }
