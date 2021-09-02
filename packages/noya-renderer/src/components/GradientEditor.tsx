@@ -1,24 +1,21 @@
-import Sketch from 'noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
+import Sketch from 'noya-file-format';
 import { AffineTransform, Point } from 'noya-geometry';
-import { useStroke } from 'noya-react-canvaskit';
+import { useColorFill, useStroke } from 'noya-react-canvaskit';
 import {
-  getCurrentPage,
-  getSelectedGradient,
   getAngularGradientCircle,
-  GradientStopPoint,
-  Primitives,
-  SelectedGradient,
-  Selectors,
   getCircleTangentSquare,
+  Primitives,
+  Selectors,
 } from 'noya-state';
 import { Fragment, memo, useMemo } from 'react';
-import { Group, Path, Polyline, Rect } from '../ComponentsContext';
+import { Group, Polyline, Rect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
+import { useZoom } from '../ZoomContext';
+import { Oval } from './Oval';
 
 const AngularGradientEditor = () => {
   const [state] = useApplicationState();
-  const CanvasKit = useCanvasKit();
 
   const gradientLineStroke = useStroke({ color: '#FFF' });
 
@@ -26,17 +23,13 @@ const AngularGradientEditor = () => {
 
   if (!gradientCircle) return null;
 
-  const path = new CanvasKit.Path();
-  path.addOval(
-    CanvasKit.XYWHRect(
-      gradientCircle.center.x - gradientCircle.radius,
-      gradientCircle.center.y - gradientCircle.radius,
-      gradientCircle.radius * 2,
-      gradientCircle.radius * 2,
-    ),
+  return (
+    <Oval
+      center={gradientCircle.center}
+      radius={gradientCircle.radius}
+      paint={gradientLineStroke}
+    />
   );
-
-  return <Path path={path} paint={gradientLineStroke} />;
 };
 
 const RadialGradientEditor = ({
@@ -48,45 +41,47 @@ const RadialGradientEditor = ({
   point: Point;
   ellipseLength: number;
 }) => {
-  const gradientLineStroke = useStroke({ color: '#FFF' });
+  const CanvasKit = useCanvasKit();
+  const zoom = useZoom();
+
+  const gradientLineStroke = useStroke({
+    color: '#FFF',
+    strokeWidth: 1 / zoom,
+  });
+  const handleFill = useColorFill('#FFF');
 
   const { rectangle, theta } = getCircleTangentSquare(
     center,
     point,
     ellipseLength,
   );
-  const CanvasKit = useCanvasKit();
 
-  const path = new CanvasKit.Path();
-  path.addOval(
-    CanvasKit.XYWHRect(
-      rectangle.x,
-      rectangle.y,
-      rectangle.width,
-      rectangle.height,
-    ),
-  );
-
-  const ellipseSquare = CanvasKit.XYWHRect(
-    rectangle.x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / 2,
+  const handleRect = CanvasKit.XYWHRect(
+    rectangle.x - Selectors.SELECTED_GRADIENT_POINT_RADIUS / (2 * zoom),
     center.y,
-    Selectors.SELECTED_GRADIENT_POINT_RADIUS,
-    Selectors.SELECTED_GRADIENT_POINT_RADIUS,
+    Selectors.SELECTED_GRADIENT_POINT_RADIUS / zoom,
+    Selectors.SELECTED_GRADIENT_POINT_RADIUS / zoom,
   );
 
-  const paint = new CanvasKit.Paint();
-
-  paint.setColor(CanvasKit.parseColorString('#fef'));
-  path.addRect(ellipseSquare); // Small frame around the square
   return (
     <Group transform={AffineTransform.rotate(theta, center)}>
-      <Rect rect={ellipseSquare} paint={paint} />
-      <Path path={path} paint={gradientLineStroke} />
+      <Rect rect={handleRect} paint={handleFill} />
+      <Oval
+        center={center}
+        radius={useMemo(
+          () => ({
+            x: rectangle.width / 2,
+            y: rectangle.height / 2,
+          }),
+          [rectangle.height, rectangle.width],
+        )}
+        paint={gradientLineStroke}
+      />
     </Group>
   );
 };
 
-const StopPoint = ({
+const StopPoint = memo(function StopPoint({
   point,
   color,
   selected,
@@ -94,62 +89,59 @@ const StopPoint = ({
   point: Point;
   color: Sketch.Color;
   selected: boolean;
-}) => {
+}) {
   const CanvasKit = useCanvasKit();
-  const path = new CanvasKit.Path();
-  const gradientStopStroke = useStroke({ color: '#FFF', strokeWidth: 1.5 });
+  const zoom = useZoom();
 
-  const radius = selected
-    ? Selectors.POINT_RADIUS * 1.5
-    : Selectors.POINT_RADIUS;
+  const strokePaint = useStroke({
+    color: '#FFF',
+    strokeWidth: 1.5 / zoom,
+  });
 
-  path.addOval(
-    CanvasKit.XYWHRect(
-      point.x - radius,
-      point.y - radius,
-      radius * 2,
-      radius * 2,
-    ),
-  );
+  const fillPaint = useColorFill(Primitives.color(CanvasKit, color));
 
-  const paint = new CanvasKit.Paint();
-  paint.setColor(Primitives.color(CanvasKit, color));
+  const radius =
+    (selected ? Selectors.POINT_RADIUS * 1.5 : Selectors.POINT_RADIUS) / zoom;
 
   return (
     <Fragment>
-      <Path path={path} paint={paint} />
-      <Path path={path} paint={gradientStopStroke} />
+      <Oval center={point} radius={radius} paint={fillPaint} />
+      <Oval center={point} radius={radius} paint={strokePaint} />
     </Fragment>
   );
-};
+});
 
 export default memo(function GradientEditor({
-  selectedGradient,
-  gradientStopPoints,
+  gradient,
+  selectedStopIndex,
 }: {
-  selectedGradient: SelectedGradient;
-  gradientStopPoints: GradientStopPoint[];
+  gradient: Sketch.Gradient;
+  selectedStopIndex: number;
 }) {
-  const [state] = useApplicationState();
   const CanvasKit = useCanvasKit();
+  const [state] = useApplicationState();
+  const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
+  const zoom = useZoom();
 
-  const gradientLineStroke = useStroke({ color: '#FFF' });
+  const gradientLineStroke = useStroke({
+    color: '#FFF',
+    strokeWidth: 1 / zoom,
+  });
   const gradientEditorShadow = useMemo(
     () =>
       CanvasKit.ImageFilter.MakeDropShadowOnly(
         0,
         0,
-        2,
-        2,
+        2 / zoom,
+        2 / zoom,
         CanvasKit.Color(0, 0, 0, 0.5),
         null,
       ),
 
-    [CanvasKit],
+    [CanvasKit, zoom],
   );
 
-  const gradient = getSelectedGradient(getCurrentPage(state), selectedGradient);
-  if (!gradient) return null;
+  if (!gradientStopPoints) return null;
 
   const from = gradientStopPoints[0].point;
   const to = gradientStopPoints[gradientStopPoints.length - 1].point;
@@ -174,7 +166,7 @@ export default memo(function GradientEditor({
           key={index}
           point={point}
           color={color}
-          selected={index === selectedGradient.stopIndex}
+          selected={index === selectedStopIndex}
         />
       ))}
     </Group>

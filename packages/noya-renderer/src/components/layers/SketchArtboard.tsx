@@ -6,7 +6,13 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
-import { Group, Rect as RCKRect, Text, useCanvasKit } from 'noya-renderer';
+import {
+  Group,
+  Rect as RCKRect,
+  Text,
+  useCanvasKit,
+  useZoom,
+} from 'noya-renderer';
 import { Primitives, Selectors } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
@@ -27,6 +33,8 @@ const ArtboardLabel = memo(function ArtboardLabel({
 }: ArtboardLabelProps) {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
+  const zoom = useZoom();
+
   const { colors } = useTheme();
   const textColor = isSymbolMaster ? colors.primary : colors.textMuted;
 
@@ -53,10 +61,15 @@ const ArtboardLabel = memo(function ArtboardLabel({
   useDeletable(paragraph);
 
   return (
-    <Text
-      rect={useMemo(() => Primitives.rect(CanvasKit, rect), [CanvasKit, rect])}
-      paragraph={paragraph}
-    />
+    <Group transform={Selectors.getArtboardLabelTransform(rect, zoom)}>
+      <Text
+        rect={useMemo(
+          () => Primitives.rect(CanvasKit, rect),
+          [CanvasKit, rect],
+        )}
+        paragraph={paragraph}
+      />
+    </Group>
   );
 });
 

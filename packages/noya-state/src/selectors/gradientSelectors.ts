@@ -314,11 +314,17 @@ export function getAngularGradientCircle(state: ApplicationState) {
     .prepend(getLayerRotationTransform(layer));
 
   const bounds = createBounds(layer.frame);
-  const center = transform.applyTo({ x: bounds.midX, y: bounds.midY });
+  const center = transform.applyTo({
+    x: bounds.midX,
+    y: bounds.midY,
+  });
 
   const radius = Math.max(layer.frame.width, layer.frame.height) / 2;
 
-  const line = transform.applyTo({ x: bounds.maxX, y: bounds.midY });
+  const line = transform.applyTo({
+    x: bounds.maxX,
+    y: bounds.midY,
+  });
   const rotation = Math.atan2(line.y - center.y, line.x - center.x);
 
   return {

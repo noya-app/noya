@@ -1,7 +1,7 @@
 import { useApplicationState } from 'noya-app-state-context';
 import { Rect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { useCanvasKit, useZoom } from 'noya-renderer';
 import {
   getLineDragHandles,
   getRectDragHandles,
@@ -19,6 +19,7 @@ interface Props {
 export default memo(function DragHandles({ rect }: Props) {
   const CanvasKit = useCanvasKit();
   const [state] = useApplicationState();
+  const zoom = useZoom();
 
   const dragHandleFill = useColorFill('#FFF');
 
@@ -26,21 +27,21 @@ export default memo(function DragHandles({ rect }: Props) {
 
   const dragHandles =
     lineLayer && state.selectedLayerIds.length === 1
-      ? getLineDragHandles(lineLayer.frame, lineLayer.points, lineLayer)
-      : getRectDragHandles(rect);
+      ? getLineDragHandles(lineLayer.frame, lineLayer.points, lineLayer, zoom)
+      : getRectDragHandles(rect, zoom);
 
   const dropShadow = useMemo(
     () =>
       CanvasKit.ImageFilter.MakeDropShadowOnly(
         0,
         0,
-        1,
-        1,
+        1 / zoom,
+        1 / zoom,
         CanvasKit.Color(0, 0, 0, 0.5),
         null,
       ),
 
-    [CanvasKit],
+    [CanvasKit, zoom],
   );
 
   return (
@@ -48,7 +49,7 @@ export default memo(function DragHandles({ rect }: Props) {
       {dragHandles.map((handle, index) => (
         <React.Fragment key={index}>
           <RCKRect
-            rect={Primitives.rect(CanvasKit, pixelAlignRect(handle.rect))}
+            rect={Primitives.rect(CanvasKit, pixelAlignRect(handle.rect, zoom))}
             paint={dragHandleFill}
           />
         </React.Fragment>

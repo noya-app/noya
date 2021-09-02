@@ -31,13 +31,13 @@ export function pixelAlignPoints(
   ];
 }
 
-export function pixelAlignRect(rect: Rect) {
+export function pixelAlignRect(rect: Rect, zoom: number) {
   const bounds = createBounds(rect);
 
   return createRectFromBounds({
-    minX: round(bounds.minX),
-    maxX: round(bounds.maxX),
-    minY: round(bounds.minY),
-    maxY: round(bounds.maxY),
+    minX: round(bounds.minX * zoom) / zoom,
+    maxX: round(bounds.maxX * zoom) / zoom,
+    minY: round(bounds.minY * zoom) / zoom,
+    maxY: round(bounds.maxY * zoom) / zoom,
   });
 }

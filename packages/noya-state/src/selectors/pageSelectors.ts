@@ -66,6 +66,10 @@ export const getCurrentPageMetadata = (
   return decodePageMetadata(meta);
 };
 
+export const getCurrentPageZoom = (state: ApplicationState): number => {
+  return getCurrentPageMetadata(state).zoomValue;
+};
+
 export const getCurrentSymbolPageIndex = (
   state: ApplicationState,
   symbolID: string,
