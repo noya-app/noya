@@ -1,18 +1,84 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit, Paragraph } from 'canvaskit';
 import { useApplicationState } from 'noya-app-state-context';
+import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Group, Rect, Text, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import { Selectors, TextSelectionRange } from 'noya-state';
+import { Layers, Selectors, TextSelectionRange } from 'noya-state';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
+import { getLuminance } from '../../colorMatrix';
 import { useFontManager } from '../../FontManagerContext';
 import BlurGroup from '../effects/BlurGroup';
 
-interface Props {
-  layer: Sketch.Text;
+function useNearestBackgroundColor(layer: Sketch.Text) {
+  const CanvasKit = useCanvasKit();
+  const [state] = useApplicationState();
+  const canvasColor = useTheme().colors.canvas.background;
+
+  return useMemo(() => {
+    const page = Selectors.getCurrentPage(state);
+    const indexPath = Layers.findIndexPath(
+      page,
+      (l) => l.do_objectID === layer.do_objectID,
+    );
+    const parsedBackgroundColor = CanvasKit.parseColorString(canvasColor);
+
+    if (!indexPath) return parsedBackgroundColor;
+
+    const artboard = page.layers[indexPath[0]];
+
+    if (!Layers.isSymbolMasterOrArtboard(artboard))
+      return parsedBackgroundColor;
+
+    const { red, green, blue, alpha } = artboard.backgroundColor;
+
+    return new Float32Array([red, green, blue, alpha]);
+  }, [CanvasKit, canvasColor, layer.do_objectID, state]);
+}
+
+function useCursorColor(layer: Sketch.Text) {
+  const CanvasKit = useCanvasKit();
+
+  const layerTextColor =
+    layer.style?.textStyle?.encodedAttributes
+      .MSAttributedStringColorAttribute ?? SketchModel.BLACK;
+
+  const foregroundColor = useMemo(
+    () =>
+      new Float32Array([
+        layerTextColor.red,
+        layerTextColor.green,
+        layerTextColor.blue,
+        layerTextColor.alpha,
+      ]),
+    [layerTextColor],
+  );
+
+  const backgroundColor = useNearestBackgroundColor(layer);
+
+  const backgroundLuminance = getLuminance(
+    backgroundColor[0],
+    backgroundColor[1],
+    backgroundColor[2],
+  );
+
+  const foregroundLuminance = getLuminance(
+    foregroundColor[0],
+    foregroundColor[1],
+    foregroundColor[2],
+  );
+
+  const contrastRatio =
+    (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) /
+    (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+
+  if (contrastRatio < 2) {
+    return backgroundLuminance < 0.5 ? CanvasKit.WHITE : CanvasKit.BLACK;
+  }
+
+  return foregroundColor;
 }
 
 export function useTextLayerParagraph(layer: Sketch.Text) {
@@ -102,15 +168,18 @@ function getCursorRect(
 }
 
 function TextCursor({
+  layer,
   paragraph,
   index,
 }: {
+  layer: Sketch.Text;
   paragraph: Paragraph;
   index: number;
 }) {
   const CanvasKit = useCanvasKit();
 
-  const cursorPaint = useColorFill(useTheme().colors.text);
+  const cursorColor = useCursorColor(layer);
+  const cursorPaint = useColorFill(cursorColor);
 
   const [cursorVisible, setCursorVisible] = useState(true);
 
@@ -121,12 +190,15 @@ function TextCursor({
   ]);
 
   useEffect(() => {
-    const intervalId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setCursorVisible(!cursorVisible);
     }, 400);
 
-    return () => clearTimeout(intervalId);
-  }, [cursorVisible]);
+    return () => clearTimeout(timeoutId);
+  }, [
+    cursorVisible,
+    index, // When index changes, we clear the timeout
+  ]);
 
   if (!cursorVisible) return null;
 
@@ -137,10 +209,13 @@ function TextCursor({
   return <Rect rect={cursorRect} paint={cursorPaint} />;
 }
 
+interface Props {
+  layer: Sketch.Text;
+}
+
 export default memo(function SketchText({ layer }: Props) {
   const CanvasKit = useCanvasKit();
   const [state] = useApplicationState();
-
   const paragraph = useTextLayerParagraph(layer);
 
   const rect = useMemo(
@@ -170,7 +245,11 @@ export default memo(function SketchText({ layer }: Props) {
         )}
         <Text paragraph={paragraph} rect={rect} />
         {selectedText?.layerId === layer.do_objectID && (
-          <TextCursor paragraph={paragraph} index={selectedText.range.head} />
+          <TextCursor
+            layer={layer}
+            paragraph={paragraph}
+            index={selectedText.range.head}
+          />
         )}
       </Group>
     </BlurGroup>
