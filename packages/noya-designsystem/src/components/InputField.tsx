@@ -1,4 +1,4 @@
-import { CaretDownIcon } from '@radix-ui/react-icons';
+import { CaretDownIcon } from 'noya-icons';
 import { Property } from 'csstype';
 import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
 import { memoize } from 'noya-utils';

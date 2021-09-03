@@ -1,5 +1,5 @@
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
-import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { Slot } from '@radix-ui/react-slot';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {

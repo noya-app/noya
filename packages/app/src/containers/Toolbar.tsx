@@ -1,4 +1,4 @@
-import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { ChevronDownIcon } from 'noya-icons';
 import { FileSystemHandle } from 'browser-fs-access';
 import {
   useApplicationState,
@@ -25,7 +25,7 @@ import {
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import PointModeIcon from '../components/icons/PointModeIcon';
+import { PointModeIcon } from 'noya-icons';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =

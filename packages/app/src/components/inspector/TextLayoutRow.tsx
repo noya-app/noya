@@ -10,7 +10,7 @@ import {
   PinBottomIcon,
   PinTopIcon,
   AlignCenterVerticallyIcon,
-} from '@radix-ui/react-icons';
+} from 'noya-icons';
 import { Label, RadioGroup, LabeledElementView } from 'noya-designsystem';
 import { Spacer } from 'noya-designsystem';
 import { memo } from 'react';

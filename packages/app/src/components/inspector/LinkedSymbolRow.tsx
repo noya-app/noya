@@ -1,4 +1,4 @@
-import { ComponentInstanceIcon, LinkBreak2Icon } from '@radix-ui/react-icons';
+import { ComponentInstanceIcon, LinkBreak2Icon } from 'noya-icons';
 import { useSelector } from 'noya-app-state-context';
 import { Button, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';

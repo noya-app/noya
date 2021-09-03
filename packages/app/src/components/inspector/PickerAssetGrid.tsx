@@ -1,4 +1,4 @@
-import { GridIcon, RowsIcon } from '@radix-ui/react-icons';
+import { GridIcon, RowsIcon } from 'noya-icons';
 import { RadioGroup } from 'noya-designsystem';
 import styled from 'styled-components';
 import { memo, useCallback } from 'react';

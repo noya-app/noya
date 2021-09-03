@@ -1,6 +1,10 @@
 import { IconProps } from '@radix-ui/react-icons/dist/types';
+import { memo } from 'react';
 
-const LineIcon = ({ color = 'currentColor', ...props }: IconProps) => {
+export const PointModeIcon = memo(function PointModeIcon({
+  color = 'currentColor',
+  ...props
+}: IconProps) {
   return (
     <svg
       width="15"
@@ -12,6 +16,7 @@ const LineIcon = ({ color = 'currentColor', ...props }: IconProps) => {
     >
       <rect x="1.5" y="9.5" width="4" height="4" rx="2" stroke={color} />
       <rect x="9.5" y="1.5" width="4" height="4" rx="2" stroke={color} />
+      <circle cx="11.5" cy="3.5" r="0.5" fill={color} />
       <rect
         x="4.67157"
         y="9.62132"
@@ -22,6 +27,4 @@ const LineIcon = ({ color = 'currentColor', ...props }: IconProps) => {
       />
     </svg>
   );
-};
-
-export default LineIcon;
+});

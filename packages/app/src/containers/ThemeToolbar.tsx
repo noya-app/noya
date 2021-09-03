@@ -6,7 +6,7 @@ import {
   MarginIcon,
   PlusIcon,
   TrashIcon,
-} from '@radix-ui/react-icons';
+} from 'noya-icons';
 import React, { useMemo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { useApplicationState, useSelector } from 'noya-app-state-context';

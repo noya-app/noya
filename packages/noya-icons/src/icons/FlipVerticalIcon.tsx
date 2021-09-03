@@ -1,6 +1,10 @@
 import { IconProps } from '@radix-ui/react-icons/dist/types';
+import { memo } from 'react';
 
-const FlipVerticalIcon = ({ color = 'currentColor', ...props }: IconProps) => {
+export const FlipVerticalIcon = memo(function FlipVerticalIcon({
+  color = 'currentColor',
+  ...props
+}: IconProps) {
   return (
     <svg
       width="15"
@@ -21,6 +25,4 @@ const FlipVerticalIcon = ({ color = 'currentColor', ...props }: IconProps) => {
       />
     </svg>
   );
-};
-
-export default FlipVerticalIcon;
+});

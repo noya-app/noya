@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon } from 'noya-icons';
 import produce from 'immer';
 import { useSelector } from 'noya-app-state-context';
 import {

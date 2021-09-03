@@ -2,7 +2,7 @@ import {
   LetterCaseCapitalizeIcon,
   LetterCaseLowercaseIcon,
   LetterCaseUppercaseIcon,
-} from '@radix-ui/react-icons';
+} from 'noya-icons';
 import Sketch from 'noya-file-format';
 import {
   Label,

@@ -11,7 +11,7 @@ import {
   Share1Icon,
   SquareIcon,
   TextIcon,
-} from '@radix-ui/react-icons';
+} from 'noya-icons';
 import {
   useApplicationState,
   useGetStateSnapshot,
@@ -45,7 +45,7 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import LineIcon from '../components/icons/LineIcon';
+import { LineIcon } from 'noya-icons';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const IconContainer = styled.span(({ theme }) => ({

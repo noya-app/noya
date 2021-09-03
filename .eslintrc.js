@@ -7,6 +7,12 @@ module.exports = {
     'no-restricted-imports': [
       'error',
       {
+        paths: [
+          {
+            name: '@radix-ui/react-icons',
+            message: 'Please use "noya-utils" instead.',
+          },
+        ],
         patterns: ['*src*'],
       },
     ],

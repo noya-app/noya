@@ -1,4 +1,4 @@
-import { FileIcon, StackIcon, TokensIcon } from '@radix-ui/react-icons';
+import { FileIcon, StackIcon, TokensIcon } from 'noya-icons';
 import {
   useApplicationState,
   useDispatch,

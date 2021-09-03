@@ -1,4 +1,4 @@
-import { HamburgerMenuIcon } from '@radix-ui/react-icons';
+import { HamburgerMenuIcon } from 'noya-icons';
 import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,

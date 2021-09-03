@@ -1,6 +1,10 @@
 import { IconProps } from '@radix-ui/react-icons/dist/types';
+import { memo } from 'react';
 
-const BorderOutsideIcon = ({ color = 'currentColor', ...props }: IconProps) => {
+export const BorderOutsideIcon = memo(function BorderOutsideIcon({
+  color = 'currentColor',
+  ...props
+}: IconProps) {
   return (
     <svg
       width="15"
@@ -29,6 +33,4 @@ const BorderOutsideIcon = ({ color = 'currentColor', ...props }: IconProps) => {
       <rect x="1.5" y="1.5" width="12" height="12" rx="1" stroke={color} />
     </svg>
   );
-};
-
-export default BorderOutsideIcon;
+});

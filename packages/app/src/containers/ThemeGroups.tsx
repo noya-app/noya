@@ -1,4 +1,4 @@
-import { GroupIcon } from '@radix-ui/react-icons';
+import { GroupIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { TreeView } from 'noya-designsystem';

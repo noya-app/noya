@@ -1,4 +1,4 @@
-import { ResetIcon } from '@radix-ui/react-icons';
+import { ResetIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import {
   InputField,

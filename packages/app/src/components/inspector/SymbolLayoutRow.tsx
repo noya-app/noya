@@ -5,7 +5,7 @@ import {
   PinTopIcon,
   SpaceEvenlyHorizontallyIcon,
   SpaceEvenlyVerticallyIcon,
-} from '@radix-ui/react-icons';
+} from 'noya-icons';
 import Sketch from 'noya-file-format';
 import {
   Divider,

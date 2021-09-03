@@ -1,5 +1,5 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import { CheckIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { Slot } from '@radix-ui/react-slot';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { memo, useCallback, useMemo } from 'react';

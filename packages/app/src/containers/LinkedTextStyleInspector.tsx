@@ -4,7 +4,7 @@ import {
   PlusIcon,
   ResetIcon,
   UpdateIcon,
-} from '@radix-ui/react-icons';
+} from 'noya-icons';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Button, Select } from 'noya-designsystem';
 import { Selectors } from 'noya-state';

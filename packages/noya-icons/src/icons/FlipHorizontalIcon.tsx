@@ -1,9 +1,10 @@
 import { IconProps } from '@radix-ui/react-icons/dist/types';
+import { memo } from 'react';
 
-const FlipHorizontalIcon = ({
+export const FlipHorizontalIcon = memo(function FlipHorizontalIcon({
   color = 'currentColor',
   ...props
-}: IconProps) => {
+}: IconProps) {
   return (
     <svg
       width="15"
@@ -24,6 +25,4 @@ const FlipHorizontalIcon = ({
       />
     </svg>
   );
-};
-
-export default FlipHorizontalIcon;
+});
