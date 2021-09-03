@@ -174,6 +174,11 @@ export default memo(function SnapGuides() {
           state.selectedLayerIds,
         )!;
 
+        const lineLayer = Selectors.getSelectedLineLayer(state);
+
+        // TODO: Snap when moving line layers and points
+        if (lineLayer) return;
+
         const selectedIndexPaths =
           Selectors.getSelectedLayerIndexPathsExcludingDescendants(state);
 

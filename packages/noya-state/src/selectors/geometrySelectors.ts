@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import type { CanvasKit } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createRect,
@@ -17,11 +17,12 @@ import {
 } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
-import { getRectDragHandles, ScalingOptions } from 'noya-state';
+import { ScalingOptions } from 'noya-state';
 import { SKIP, STOP, VisitOptions } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
+import { getDragHandles } from '../selection';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import {
   getCurrentPage,
@@ -371,7 +372,11 @@ export function getScaleDirectionAtPoint(
 
   if (!boundingRect) return;
 
-  const handles = getRectDragHandles(boundingRect, getCurrentPageZoom(state));
+  const handles = getDragHandles(
+    state,
+    boundingRect,
+    getCurrentPageZoom(state),
+  );
 
   const handle = handles.find((handle) =>
     rectContainsPoint(handle.rect, point),

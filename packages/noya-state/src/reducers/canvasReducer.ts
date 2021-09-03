@@ -29,6 +29,7 @@ import {
 import { clamp, lerp, uuid, zip } from 'noya-utils';
 import * as Layers from '../layers';
 import { ScalingOptions } from '../primitives';
+import { getLineDragHandleIndexForDirection } from '../selection';
 import {
   getAngularGradientCircle,
   getSelectedGradient,
@@ -36,7 +37,7 @@ import {
 } from '../selectors/gradientSelectors';
 import {
   addToParentLayer,
-  computeNewBoundingRect,
+  computeCurvePointBoundingRect,
   EncodedPageMetadata,
   fixGradientPositions,
   fixGroupFrameHierarchy,
@@ -283,6 +284,7 @@ export function canvasReducer(
 
         const shapeType = draft.interactionState.shapeType;
         const layer = createDrawingLayer(
+          CanvasKit,
           shapeType,
           SketchModel.style({
             fills: [
@@ -445,7 +447,12 @@ export function canvasReducer(
 
         layer.frame = {
           ...layer.frame,
-          ...computeNewBoundingRect(CanvasKit, newDecodedPoints, layer),
+          ...computeCurvePointBoundingRect(
+            CanvasKit,
+            newDecodedPoints,
+            layer.frame,
+            layer.isClosed,
+          ),
         };
 
         fixZeroLayerDimensions(layer);
@@ -955,6 +962,26 @@ export function canvasReducer(
               layerIds,
             )!;
 
+            const lineLayer = Selectors.getSelectedLineLayer(state);
+
+            if (lineLayer) {
+              moveSelectedPoints(
+                {
+                  [lineLayer.do_objectID]: [
+                    getLineDragHandleIndexForDirection(direction),
+                  ],
+                },
+                layerIndexPaths,
+                delta,
+                'adjust',
+                draft.sketch.pages[pageIndex],
+                pageSnapshot,
+                CanvasKit,
+              );
+
+              return;
+            }
+
             const newBoundingRect = getScaledSnapBoundingRect(
               state,
               pageSnapshot,
@@ -1170,6 +1197,7 @@ export function canvasReducer(
 }
 
 export function createDrawingLayer(
+  CanvasKit: CanvasKit,
   shapeType: DrawableLayerType,
   style: Sketch.Style,
   origin: Point,
@@ -1200,7 +1228,14 @@ export function createDrawingLayer(
       return SketchModel.text({ frame });
     case 'artboard':
       return SketchModel.artboard({ frame });
-    case 'line':
+    case 'slice':
+      return SketchModel.slice({
+        frame,
+        exportOptions: SketchModel.exportOptions({
+          exportFormats: [SketchModel.exportFormat()],
+        }),
+      });
+    case 'line': {
       if (scalingOptions.constrainProportions) {
         const delta = {
           x: current.x - origin.x,
@@ -1227,22 +1262,30 @@ export function createDrawingLayer(
         }
       }
 
-      const createCurvePoint = (point: Point) =>
-        encodeCurvePoint(
-          {
-            curveMode: Sketch.CurveMode.Straight,
-            hasCurveFrom: false,
-            hasCurveTo: false,
-            curveFrom: point,
-            curveTo: point,
-            point: point,
-            cornerRadius: 0,
-            _class: 'curvePoint',
-          },
-          frame,
-        );
+      const createCurvePoint = (point: Point): DecodedCurvePoint => ({
+        curveMode: Sketch.CurveMode.Straight,
+        hasCurveFrom: false,
+        hasCurveTo: false,
+        curveFrom: point,
+        curveTo: point,
+        point: point,
+        cornerRadius: 0,
+        _class: 'curvePoint',
+      });
 
-      return SketchModel.shapePath({
+      const decodedCurvePoints = [
+        createCurvePoint(origin),
+        createCurvePoint(current),
+      ];
+
+      const boundingRect = computeCurvePointBoundingRect(
+        CanvasKit,
+        decodedCurvePoints,
+        frame,
+        false,
+      );
+
+      const layer = SketchModel.shapePath({
         style: SketchModel.style({
           borders: [
             SketchModel.border({
@@ -1250,15 +1293,15 @@ export function createDrawingLayer(
             }),
           ],
         }),
-        frame,
-        points: [createCurvePoint(origin), createCurvePoint(current)],
+        frame: SketchModel.rect(boundingRect),
+        points: decodedCurvePoints.map((curvePoint) =>
+          encodeCurvePoint(curvePoint, boundingRect),
+        ),
       });
-    case 'slice':
-      return SketchModel.slice({
-        frame,
-        exportOptions: SketchModel.exportOptions({
-          exportFormats: [SketchModel.exportFormat()],
-        }),
-      });
+
+      fixZeroLayerDimensions(layer);
+
+      return layer;
+    }
   }
 }

@@ -5,7 +5,9 @@ import {
   compassDirections,
   decodeCurvePoint,
   DragHandle,
+  getSelectedLineLayer,
 } from 'noya-state';
+import { ApplicationState } from './reducers/applicationReducer';
 
 export const compassDirectionMap: Record<CompassDirection, Point> = {
   n: { x: 0.5, y: 0 },
@@ -46,6 +48,16 @@ export function getRectDragHandles(
   });
 }
 
+export function getLineDragHandleDirectionForIndex(index: number): 'n' | 's' {
+  return index === 0 ? 's' : 'n';
+}
+
+export function getLineDragHandleIndexForDirection(
+  direction: CompassDirection,
+) {
+  return direction === 's' ? 0 : 1;
+}
+
 export function getLineDragHandles(
   boundingRect: Rect,
   points: Sketch.CurvePoint[],
@@ -69,7 +81,7 @@ export function getLineDragHandles(
 
   return points
     .map((point) => decodeCurvePoint(point, boundingRect))
-    .map((decodedPoint) => {
+    .map((decodedPoint, index) => {
       const transformedPoint = transform.applyTo(decodedPoint.point);
 
       return {
@@ -79,9 +91,27 @@ export function getLineDragHandles(
           width: handleSize,
           height: handleSize,
         },
-        compassDirection: 'n',
+        compassDirection: getLineDragHandleDirectionForIndex(index),
       };
     });
+}
+
+export function getDragHandles(
+  state: ApplicationState,
+  rect: Rect,
+  zoom: number,
+) {
+  const lineLayer = getSelectedLineLayer(state);
+
+  return lineLayer
+    ? getLineDragHandles(
+        rect,
+        lineLayer.points,
+        lineLayer.isFlippedHorizontal,
+        lineLayer.isFlippedVertical,
+        zoom,
+      )
+    : getRectDragHandles(rect, zoom);
 }
 
 // This function doesn't ensure a positive width/height, since we use it when

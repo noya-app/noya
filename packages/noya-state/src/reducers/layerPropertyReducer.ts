@@ -4,7 +4,7 @@ import produce from 'immer';
 import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
-  computeNewBoundingRect,
+  computeCurvePointBoundingRect,
   fixGroupFrameHierarchy,
   getCurrentPage,
   getCurrentPageIndex,
@@ -249,7 +249,12 @@ export function layerPropertyReducer(
 
           layer.frame = {
             ...layer.frame,
-            ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
+            ...computeCurvePointBoundingRect(
+              CanvasKit,
+              decodedPoints,
+              layer.frame,
+              layer.isClosed,
+            ),
           };
 
           // Transform back to the range [0, 1], using the new bounds

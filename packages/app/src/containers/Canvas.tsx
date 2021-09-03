@@ -74,9 +74,8 @@ function getCursorForDirection(
   direction: CompassDirection,
   state: ApplicationState,
 ): CSSProperties['cursor'] {
-  if (getSelectedLineLayer(state)) {
-    return 'move';
-  }
+  if (getSelectedLineLayer(state)) return 'move';
+
   switch (direction) {
     case 'e':
     case 'w':

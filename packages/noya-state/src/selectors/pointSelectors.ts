@@ -1,7 +1,13 @@
 import Sketch from 'noya-file-format';
 import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
-import { distance, Point, Rect, toDegrees } from 'noya-geometry';
+import {
+  createRectFromBounds,
+  distance,
+  Point,
+  Rect,
+  toDegrees,
+} from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -44,28 +50,29 @@ export function isLine(points: Sketch.CurvePoint[]) {
   );
 }
 
-export const computeNewBoundingRect = (
+export const computeCurvePointBoundingRect = (
   CanvasKit: CanvasKit,
   decodedPoints: DecodedCurvePoint[],
-  layer: PointsLayer,
-) => {
+  frame: Rect,
+  isClosed: boolean,
+): Rect => {
   const [minX, minY, maxX, maxY] = path(
     CanvasKit,
     decodedPoints.map((decodedCurvePoint) =>
-      encodeCurvePoint(decodedCurvePoint, layer.frame),
+      encodeCurvePoint(decodedCurvePoint, frame),
     ),
-    layer.frame,
-    layer.isClosed,
+    frame,
+    isClosed,
   ).computeTightBounds();
 
-  const newRect: Rect = {
-    x: minX,
-    y: minY,
-    width: maxX - minX,
-    height: maxY - minY,
-  };
+  const rect = createRectFromBounds({
+    minX,
+    minY,
+    maxX,
+    maxY,
+  });
 
-  return newRect;
+  return rect;
 };
 
 const getSelectedPointsFromPointLists = (
@@ -293,7 +300,12 @@ export const moveSelectedPoints = (
 
     draftLayer.frame = {
       ...layer.frame,
-      ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
+      ...computeCurvePointBoundingRect(
+        CanvasKit,
+        decodedPoints,
+        layer.frame,
+        layer.isClosed,
+      ),
     };
 
     fixZeroLayerDimensions(draftLayer);
@@ -439,7 +451,12 @@ export const moveControlPoints = (
 
   draftLayer.frame = {
     ...layer.frame,
-    ...computeNewBoundingRect(CanvasKit, decodedPoints, layer),
+    ...computeCurvePointBoundingRect(
+      CanvasKit,
+      decodedPoints,
+      layer.frame,
+      layer.isClosed,
+    ),
   };
 
   // Transform back to the range [0, 1], using the new bounds

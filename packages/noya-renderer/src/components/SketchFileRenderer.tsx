@@ -340,6 +340,7 @@ export default memo(function SketchFileRenderer() {
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
+          CanvasKit,
           interactionState.shapeType === 'oval' ||
             interactionState.shapeType === 'line'
             ? interactionState.shapeType

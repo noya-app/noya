@@ -180,18 +180,18 @@ export function addToParentLayer(
 export function getSelectedLineLayer(
   state: ApplicationState,
 ): Layers.PointsLayer | undefined {
+  if (state.selectedLayerIds.length !== 1) return;
+
   const page = Selectors.getCurrentPage(state);
-  const indexPath = Layers.findIndexPath(
+
+  const layer = Layers.find(
     page,
     (layer) => layer.do_objectID === state.selectedLayerIds[0],
   );
-  if (!indexPath) return undefined;
 
-  const layer = Layers.access(page, indexPath);
+  if (!layer || !isPointsLayer(layer) || !isLine(layer.points)) return;
 
-  if (!isPointsLayer(layer)) return undefined;
-
-  return isLine(layer.points) ? layer : undefined;
+  return layer;
 }
 
 export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {

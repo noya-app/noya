@@ -2,12 +2,7 @@ import { useApplicationState } from 'noya-app-state-context';
 import { Rect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit, useZoom } from 'noya-renderer';
-import {
-  getLineDragHandles,
-  getRectDragHandles,
-  Primitives,
-  Selectors,
-} from 'noya-state';
+import { getDragHandles, Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
 import { pixelAlignRect } from '../pixelAlignment';
@@ -23,18 +18,7 @@ export default memo(function DragHandles({ rect }: Props) {
 
   const dragHandleFill = useColorFill('#FFF');
 
-  const lineLayer = Selectors.getSelectedLineLayer(state);
-
-  const dragHandles =
-    lineLayer && state.selectedLayerIds.length === 1
-      ? getLineDragHandles(
-          rect,
-          lineLayer.points,
-          lineLayer.isFlippedHorizontal,
-          lineLayer.isFlippedVertical,
-          zoom,
-        )
-      : getRectDragHandles(rect, zoom);
+  const dragHandles = getDragHandles(state, rect, zoom);
 
   const dropShadow = useMemo(
     () =>
