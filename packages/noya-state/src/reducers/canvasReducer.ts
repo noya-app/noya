@@ -1201,6 +1201,32 @@ export function createDrawingLayer(
     case 'artboard':
       return SketchModel.artboard({ frame });
     case 'line':
+      if (scalingOptions.constrainProportions) {
+        const delta = {
+          x: current.x - origin.x,
+          y: current.y - origin.y,
+        };
+
+        if (Math.abs(delta.x) > Math.abs(delta.y) * 2) {
+          current = {
+            x: current.x,
+            y: origin.y,
+          };
+        } else if (Math.abs(delta.y) > Math.abs(delta.x) * 2) {
+          current = {
+            x: origin.x,
+            y: current.y,
+          };
+        } else {
+          const max = Math.max(Math.abs(delta.x), Math.abs(delta.y));
+
+          current = {
+            x: origin.x + (delta.x < 0 ? -max : max),
+            y: origin.y + (delta.y < 0 ? -max : max),
+          };
+        }
+      }
+
       const createCurvePoint = (point: Point) =>
         encodeCurvePoint(
           {
