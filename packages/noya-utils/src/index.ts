@@ -25,10 +25,7 @@ export * from './upperFirst';
 export * from './unique';
 export * from './url';
 export * as delimitedPath from './delimitedPath';
-
-// Consider moving these to a more React-specific package
-export * from './PromiseState';
-export * from './SuspendedValue';
+export { v4 as uuid } from 'uuid';
 
 // These are exposed for simpler dependency injection in tests
 // Consider moving to a separate package
@@ -41,5 +38,3 @@ export function getPathToWasm() {
 export function setPathToWasm(path: string) {
   PATH_TO_WASM = path + '/';
 }
-
-export { v4 as uuid } from 'uuid';

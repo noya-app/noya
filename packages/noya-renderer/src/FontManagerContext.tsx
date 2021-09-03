@@ -2,9 +2,8 @@ import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
 import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
-import { useMutableState } from 'noya-react-utils';
+import { SuspendedValue, useMutableState } from 'noya-react-utils';
 import { useCanvasKit } from 'noya-renderer';
-import { SuspendedValue } from 'noya-utils';
 import {
   createContext,
   memo,

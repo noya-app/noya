@@ -1,4 +1,4 @@
-import { PromiseState } from 'noya-utils';
+import { PromiseState } from 'noya-react-utils';
 import { useEffect, useState } from 'react';
 import fetchData, { ResponseEncoding } from '../utils/fetchData';
 

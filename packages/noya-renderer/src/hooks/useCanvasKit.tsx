@@ -1,6 +1,6 @@
 import type { CanvasKit } from 'canvaskit';
+import { SuspendedValue } from 'noya-react-utils';
 import { loadCanvasKit } from 'noya-renderer';
-import { SuspendedValue } from 'noya-utils';
 import { createContext, memo, useContext, ReactNode } from 'react';
 // import loadSVGKit from 'noya-svgkit';
 

@@ -2,6 +2,7 @@ import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
 import { getCurrentPlatform, PlatformName } from 'noya-keymap';
+import { PromiseState } from 'noya-react-utils';
 import {
   CanvasKitProvider,
   FontManagerProvider,
@@ -19,7 +20,6 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { PromiseState } from 'noya-utils';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
 import {
