@@ -1,15 +1,20 @@
 import { Size } from 'noya-geometry';
+import { Base64 } from 'noya-utils';
 import { useEffect, useMemo } from 'react';
 import { isSupportedFile, TypedFile } from '../components/FileDropTarget';
 import { OffsetPoint } from '../containers/Canvas';
 
-export function useImagePasteHandler<T extends string>({
+export const IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS = 'ignore-global-events';
+
+export function usePasteHandler<T extends string>({
   canvasSize,
   onPasteImages,
+  onPasteLayer,
   supportedFileTypes,
 }: {
   canvasSize: Size | undefined;
   onPasteImages: (files: TypedFile<T>[], offsetPoint: OffsetPoint) => void;
+  onPasteLayer: (layer: any) => void;
   supportedFileTypes: T[];
 }) {
   const insertPoint = useMemo((): OffsetPoint => {
@@ -22,14 +27,32 @@ export function useImagePasteHandler<T extends string>({
   }, [canvasSize]);
 
   useEffect(() => {
+    const decoder = new TextDecoder();
+
     const handler = (event: ClipboardEvent) => {
       if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
+        (event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement) &&
+        !event.target.classList.contains(IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS)
       )
         return;
 
       const items = [...(event.clipboardData ?? new DataTransfer()).items];
+      const layerEncripted = event.clipboardData?.getData('text/html');
+
+      if (layerEncripted) {
+        //TODO: store parent layer information in the clipboard
+        const match = layerEncripted.match(/<p>\(noya\)(.*?)<\/p>/);
+        if (!match) return;
+
+        const encoded = match[1];
+
+        const data = decoder.decode(Base64.decode(encoded));
+        const jsonData = JSON.parse(data);
+
+        onPasteLayer(jsonData);
+        return;
+      }
 
       const files = items.flatMap((item) => {
         if (item.kind !== 'file') return [];
@@ -47,5 +70,5 @@ export function useImagePasteHandler<T extends string>({
     document.addEventListener('paste', handler);
 
     return () => document.removeEventListener('paste', handler);
-  }, [insertPoint, onPasteImages, supportedFileTypes]);
+  }, [insertPoint, onPasteImages, onPasteLayer, supportedFileTypes]);
 }

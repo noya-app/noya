@@ -47,6 +47,7 @@ export type LayerAction =
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
   | [type: 'duplicateLayer', ids: string[]]
+  | [type: 'addLayer', data: Sketch.AnyLayer[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -414,6 +415,20 @@ export function layerReducer(
           draft.selectedLayerIds.push(
             ...copiedLayers.map((layer) => layer.do_objectID),
           );
+        });
+      });
+    }
+    case 'addLayer': {
+      const [, layers] = action;
+      const pageIndex = getCurrentPageIndex(state);
+
+      return produce(state, (draft) => {
+        const draftPage = draft.sketch.pages[pageIndex];
+
+        layers.forEach((layer) => {
+          if (layer._class === 'page') return;
+          layer.do_objectID = uuid();
+          draftPage.layers.push(layer);
         });
       });
     }
