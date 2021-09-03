@@ -327,6 +327,7 @@ export default memo(function Canvas() {
           {
             groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'emptyOrContainedArtboardOrChildren',
+            includeLockedLayers: false,
           },
         );
 
@@ -494,6 +495,7 @@ export default memo(function Canvas() {
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
             },
           );
 
@@ -772,6 +774,7 @@ export default memo(function Canvas() {
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
             },
           );
 
@@ -805,6 +808,7 @@ export default memo(function Canvas() {
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
             },
           );
 
@@ -938,6 +942,7 @@ export default memo(function Canvas() {
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
             },
           );
 

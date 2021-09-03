@@ -48,6 +48,11 @@ export type LayerTraversalOptions = {
   includeHiddenLayers?: boolean;
 
   /**
+   * The default is true
+   */
+  includeLockedLayers?: boolean;
+
+  /**
    * The default is `groupOnly`
    */
   groups?: 'groupOnly' | 'childrenOnly' | 'groupAndChildren';
@@ -68,6 +73,7 @@ export type LayerTraversalOptions = {
 
 const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
   includeHiddenLayers: false,
+  includeLockedLayers: true,
   groups: 'groupOnly',
   artboards: 'childrenOnly',
 };
@@ -103,7 +109,10 @@ function shouldVisitLayer(
     ...traversalOptions,
   };
 
-  return layer.isVisible || options.includeHiddenLayers;
+  return (
+    (layer.isVisible || options.includeHiddenLayers) &&
+    (!layer.isLocked || options.includeLockedLayers)
+  );
 }
 
 function visitLayersReversed(
