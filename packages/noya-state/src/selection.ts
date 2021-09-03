@@ -1,11 +1,10 @@
 import Sketch from 'noya-file-format';
-import { Point, Rect } from 'noya-geometry';
+import { AffineTransform, createBounds, Point, Rect } from 'noya-geometry';
 import {
   CompassDirection,
   compassDirections,
   decodeCurvePoint,
   DragHandle,
-  Selectors,
 } from 'noya-state';
 
 export const compassDirectionMap: Record<CompassDirection, Point> = {
@@ -50,10 +49,21 @@ export function getRectDragHandles(
 export function getLineDragHandles(
   boundingRect: Rect,
   points: Sketch.CurvePoint[],
-  layer: Sketch.AnyLayer,
+  isFlippedHorizontal: boolean,
+  isFlippedVertical: boolean,
   zoom: number,
 ): DragHandle[] {
-  const transform = Selectors.getLayerFlipTransform(layer);
+  const bounds = createBounds(boundingRect);
+
+  // Get the flip transform, since the bounding rect doesn't take flip into account
+  const transform = AffineTransform.multiply(
+    AffineTransform.translate(bounds.midX, bounds.midY),
+    AffineTransform.scale(
+      isFlippedHorizontal ? -1 : 1,
+      isFlippedVertical ? -1 : 1,
+    ),
+    AffineTransform.translate(-bounds.midX, -bounds.midY),
+  );
 
   const handleSize = dragHandleSize / zoom;
 

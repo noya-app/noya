@@ -12,11 +12,12 @@ import {
   SketchFileRenderer,
 } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
-import { SketchModel } from 'noya-sketch-model';
+import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   ApplicationReducerContext,
   createInitialWorkspaceState,
   createSketchFile,
+  defaultBorderColor,
   Selectors,
   workspaceReducer,
   WorkspaceState,
@@ -262,6 +263,53 @@ describe('gradient editor', () => {
     };
 
     const image = await generatePageImage(workspaceState, 0, 200);
+    expect(Buffer.from(image)).toMatchImageSnapshot();
+  });
+});
+
+describe('line editor', () => {
+  test('selected line in artboard', async () => {
+    const line = SketchModel.shapePath({
+      points: [
+        SketchModel.curvePoint({
+          point: PointString.encode({ x: 1, y: 1 }),
+        }),
+        SketchModel.curvePoint({
+          point: PointString.encode({ x: 0, y: 0 }),
+        }),
+      ],
+      frame: SketchModel.rect({
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 100,
+      }),
+      style: SketchModel.style({
+        borders: [
+          SketchModel.border({
+            color: defaultBorderColor,
+          }),
+        ],
+      }),
+    });
+
+    const artboard = SketchModel.artboard({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 200,
+        height: 200,
+      }),
+      layers: [line],
+    });
+
+    const workspaceState = createInitialWorkspaceState(
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
+    );
+    workspaceState.history.present.selectedLayerIds = [line.do_objectID];
+
+    const image = await generatePageImage(workspaceState, 0);
+
     expect(Buffer.from(image)).toMatchImageSnapshot();
   });
 });

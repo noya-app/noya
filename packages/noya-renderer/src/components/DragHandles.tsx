@@ -27,7 +27,13 @@ export default memo(function DragHandles({ rect }: Props) {
 
   const dragHandles =
     lineLayer && state.selectedLayerIds.length === 1
-      ? getLineDragHandles(lineLayer.frame, lineLayer.points, lineLayer, zoom)
+      ? getLineDragHandles(
+          rect,
+          lineLayer.points,
+          lineLayer.isFlippedHorizontal,
+          lineLayer.isFlippedVertical,
+          zoom,
+        )
       : getRectDragHandles(rect, zoom);
 
   const dropShadow = useMemo(

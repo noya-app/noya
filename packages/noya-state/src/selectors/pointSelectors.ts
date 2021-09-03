@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
-import { distance, Point, Rect } from 'noya-geometry';
+import { distance, Point, Rect, toDegrees } from 'noya-geometry';
 import { PointString } from 'noya-sketch-model';
 import {
   decodeCurvePoint,
@@ -517,4 +517,21 @@ export function getSplitPathParameters(
     t: pointDistance.t,
     pointOnPath: pointDistance.pointOnPath,
   };
+}
+
+export function getLineRotation(layer: PointsLayer) {
+  if (layer.points.length < 2) return 0;
+
+  const [startPoint, endPoint] = layer.points.map(
+    (point) => decodeCurvePoint(point, layer.frame).point,
+  );
+
+  if (!startPoint || !endPoint) return 0;
+
+  const theta = Math.atan2(
+    endPoint.y - startPoint.y,
+    endPoint.x - startPoint.x,
+  );
+
+  return toDegrees(theta);
 }

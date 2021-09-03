@@ -1,18 +1,16 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Spacer } from 'noya-designsystem';
-import { toDegrees } from 'noya-geometry';
+import { useShallowArray } from 'noya-react-utils';
 import {
   clampRotation,
   decodeCurvePoint,
   getMultiNumberValue,
   isPointsLayer,
-  PointsLayer,
   Selectors,
   SetNumberMode,
 } from 'noya-state';
 import { useCallback } from 'react';
 import styled from 'styled-components';
-import { useShallowArray } from 'noya-react-utils';
 import CoordinatesInspector from './CoordinatesInspector';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';
@@ -78,24 +76,9 @@ export default function LineInspector({
     ),
   );
 
-  const findLineRotation = (layer: PointsLayer) => {
-    const [startPoint, endPoint] = layer.points.map(
-      (point) => decodeCurvePoint(point, layer.frame).point,
-    );
-
-    if (!startPoint || !endPoint) return 0;
-
-    let theta = Math.atan2(
-      endPoint.y - startPoint.y,
-      endPoint.x - startPoint.x,
-    );
-
-    return toDegrees(theta);
-  };
-
   const rotation = getMultiNumberValue(
     selectedLayers.map((layer) => {
-      return clampRotation(findLineRotation(layer) - layer.rotation);
+      return clampRotation(Selectors.getLineRotation(layer) - layer.rotation);
     }),
   );
 
@@ -105,7 +88,7 @@ export default function LineInspector({
       dispatch(
         'setLayerRotation',
         mode === 'replace'
-          ? value - findLineRotation(selectedLayers[0])
+          ? value - Selectors.getLineRotation(selectedLayers[0])
           : value,
         mode,
       );

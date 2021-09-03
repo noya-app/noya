@@ -193,6 +193,7 @@ export function getSelectedLineLayer(
 
   return isLine(layer.points) ? layer : undefined;
 }
+
 export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {
   return page.layers
     .filter(
