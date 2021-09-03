@@ -424,11 +424,13 @@ export function layerReducer(
 
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[pageIndex];
-
+        draft.selectedLayerIds = [];
         layers.forEach((layer) => {
           if (layer._class === 'page') return;
-          layer.do_objectID = uuid();
-          draftPage.layers.push(layer);
+          const newLayer = copyLayer(layer);
+          draftPage.layers.push(newLayer);
+
+          draft.selectedLayerIds.push(newLayer.do_objectID);
         });
       });
     }
