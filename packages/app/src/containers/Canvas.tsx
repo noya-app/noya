@@ -12,6 +12,8 @@ import {
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
   useModKey,
+  isLeftButtonClicked,
+  isRightButtonClicked,
 } from 'noya-designsystem';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
@@ -50,7 +52,6 @@ import { useImagePasteHandler } from '../hooks/useFilePasteHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
-import * as MouseEvent from '../utils/mouseEvent';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 import { decode } from 'noya-sketch-file';
 // import SVGRenderer from './renderer/SVGRenderer';
@@ -316,7 +317,7 @@ export default memo(function Canvas() {
         return;
       }
 
-      if (MouseEvent.isRightButtonClicked(event)) {
+      if (isRightButtonClicked(event)) {
         const layer = Selectors.getLayerAtPoint(
           CanvasKit,
           fontManager,
@@ -338,7 +339,7 @@ export default memo(function Canvas() {
         return;
       }
 
-      if (!MouseEvent.isLeftButtonClicked(event)) return;
+      if (!isLeftButtonClicked(event)) return;
 
       switch (state.interactionState.type) {
         case 'insert': {

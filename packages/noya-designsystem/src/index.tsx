@@ -62,4 +62,5 @@ export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
 export * from './utils/sketchPattern';
+export * from './utils/mouseEvent';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

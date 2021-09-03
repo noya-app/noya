@@ -411,7 +411,10 @@ export default memo(function SketchFileRenderer() {
                       <BoundingRect rect={boundingRect} />
                       {!isEditingText &&
                         state.selectedLayerIds.map((layerId) => (
-                          <RotatedBoundingRect layerId={layerId} />
+                          <RotatedBoundingRect
+                            key={layerId}
+                            layerId={layerId}
+                          />
                         ))}
                     </>
                   )}

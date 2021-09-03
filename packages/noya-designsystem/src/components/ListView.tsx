@@ -29,6 +29,7 @@ import ContextMenu from './ContextMenu';
 import { MenuItem } from './internal/Menu';
 import ScrollArea from './ScrollArea';
 import * as Sortable from './Sortable';
+import { isLeftButtonClicked } from '../utils/mouseEvent';
 
 export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
@@ -280,6 +281,8 @@ const ListViewRow = forwardRef(function ListViewRow<
       // this in the ListView.Root. We can't stopPropagation here or existing ContextMenus
       // won't close (onPointerDownOutside won't fire).
       event.preventDefault();
+
+      if (!isLeftButtonClicked(event)) return;
 
       onPress?.(event);
     },
