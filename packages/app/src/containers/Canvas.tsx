@@ -11,6 +11,7 @@ import {
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
+  useModKey,
 } from 'noya-designsystem';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
@@ -125,6 +126,7 @@ export default memo(function Canvas() {
   const fontManager = useFontManager();
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
+  const modKey = useModKey();
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => {
@@ -322,7 +324,7 @@ export default memo(function Canvas() {
           insets,
           rawPoint,
           {
-            groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+            groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'emptyOrContainedArtboardOrChildren',
           },
         );
@@ -421,7 +423,7 @@ export default memo(function Canvas() {
               dispatch(
                 'selectPoint',
                 selectedPoint,
-                shiftKey || event.metaKey
+                shiftKey || event[modKey]
                   ? alreadySelected
                     ? 'difference'
                     : 'intersection'
@@ -446,7 +448,7 @@ export default memo(function Canvas() {
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
             dispatch('interaction', ['maybeConvertCurveMode', point]);
-          } else if (!(shiftKey || event.metaKey)) {
+          } else if (!(shiftKey || event[modKey])) {
             dispatch('interaction', ['reset']);
           }
           break;
@@ -489,7 +491,7 @@ export default memo(function Canvas() {
             insets,
             rawPoint,
             {
-              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
@@ -535,14 +537,15 @@ export default memo(function Canvas() {
       }
     },
     [
+      state,
       offsetEventPoint,
       getClickCount,
-      state,
       selectedLayers,
       CanvasKit,
+      fontManager,
       dispatch,
       insets,
-      fontManager,
+      modKey,
     ],
   );
 
@@ -766,7 +769,7 @@ export default memo(function Canvas() {
             insets,
             createRect(origin, current),
             {
-              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
@@ -799,7 +802,7 @@ export default memo(function Canvas() {
             insets,
             rawPoint,
             {
-              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
@@ -840,6 +843,7 @@ export default memo(function Canvas() {
       fontManager,
       selectedLayers,
       insets,
+      modKey,
       highlightedLayer?.id,
       highlightLayer,
     ],
@@ -931,7 +935,7 @@ export default memo(function Canvas() {
             insets,
             createRect(origin, current),
             {
-              groups: event.metaKey ? 'childrenOnly' : 'groupOnly',
+              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
             },
           );
@@ -988,7 +992,7 @@ export default memo(function Canvas() {
           break;
       }
     },
-    [offsetEventPoint, state, CanvasKit, fontManager, dispatch, insets],
+    [offsetEventPoint, state, CanvasKit, fontManager, dispatch, insets, modKey],
   );
 
   const handleDirection =

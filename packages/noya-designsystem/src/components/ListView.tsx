@@ -221,6 +221,7 @@ export interface ListViewClickInfo {
   shiftKey: boolean;
   altKey: boolean;
   metaKey: boolean;
+  ctrlKey: boolean;
 }
 
 export interface ListViewRowProps<MenuItemType extends string = string> {

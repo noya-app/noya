@@ -55,6 +55,7 @@ export * from './contexts/DesignSystemConfiguration';
 // Hooks
 export * from './hooks/mergeEventHandlers';
 export * from './hooks/useHover';
+export * from './hooks/useModKey';
 
 // Utils
 export * from './utils/sketchColor';

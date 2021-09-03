@@ -24,6 +24,7 @@ import {
   RelativeDropPosition,
   Spacer,
   TreeView,
+  useModKey,
   withSeparatorElements,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -310,6 +311,7 @@ export default memo(function LayerList({
   const getStateSnapshot = useGetStateSnapshot();
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const modKey = useModKey();
 
   const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const selectedLayerIds = useShallowArray(state.selectedLayerIds);
@@ -358,17 +360,15 @@ export default memo(function LayerList({
       { isDragging }: ListView.ItemInfo,
     ) => {
       const handlePress = (info: TreeView.TreeViewClickInfo) => {
-        const { metaKey, shiftKey } = info;
-
         dispatch('interaction', ['reset']);
 
-        if (metaKey) {
+        if (info[modKey]) {
           dispatch(
             'selectLayer',
             id,
             selectedLayerIds.includes(id) ? 'difference' : 'intersection',
           );
-        } else if (shiftKey && selectedLayerIds.length > 0) {
+        } else if (info.shiftKey && selectedLayerIds.length > 0) {
           const lastSelectedIndex = items.findIndex(
             (item) => item.id === selectedLayerIds[selectedLayerIds.length - 1],
           );
@@ -485,6 +485,7 @@ export default memo(function LayerList({
       highlightLayer,
       items,
       menuItems,
+      modKey,
       onSelectMenuItem,
       selectedLayerIds,
       startRenamingLayer,
