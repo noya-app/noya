@@ -205,7 +205,7 @@ export function applicationReducer(
     case 'deleteSymbol':
     case 'duplicateLayer':
     case 'addLayer':
-      return layerReducer(state, action);
+      return layerReducer(state, action, context);
     case 'distributeLayers':
     case 'alignLayers': {
       return alignmentReducer(state, action);

@@ -34,6 +34,7 @@ import {
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
+import { ApplicationReducerContext, Primitives } from 'noya-state';
 
 export type LayerAction =
   | [
@@ -159,6 +160,7 @@ export const detachSymbolIntances = (
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
+  context?: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'moveLayer': {
@@ -426,6 +428,8 @@ export function layerReducer(
       const selectedLayerIndexPath =
         getSelectedLayerIndexPathsExcludingDescendants(state)[0];
 
+      if (!context) return state;
+
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[currentPageIndex];
         const selectedLayer =
@@ -441,6 +445,18 @@ export function layerReducer(
           parentLayer = selectedLayer;
         }
 
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        const meta = draft.sketch.user[draftPage.do_objectID] ?? {
+          zoomValue: 1,
+          scrollOrigin: '{0,0}',
+        };
+
+        const parsed = Primitives.parsePoint(meta.scrollOrigin);
+
         layers.forEach((layer) => {
           const { pageIndex, indexPaths } = findPageLayerIndexPaths(
             state,
@@ -448,8 +464,17 @@ export function layerReducer(
           )[0];
 
           if (layer._class === 'page') return;
+
           const newLayer = produce(copyLayer(layer), (l) => {
             l.name = layer.name;
+          });
+
+          const centeredLayer = produce(newLayer, (l) => {
+            l.frame = {
+              ...newLayer.frame,
+              x: viewportCenter.x - parsed.x - layer.frame.width / 2,
+              y: viewportCenter.y - parsed.y - layer.frame.height / 2,
+            };
           });
 
           if (parentLayer._class !== 'page') {
@@ -457,9 +482,9 @@ export function layerReducer(
           } else if (currentPageIndex === pageIndex && indexPaths.length > 0) {
             addSiblingLayer(draftPage, indexPaths[0], newLayer);
           } else if (selectedLayer._class !== 'page') {
-            addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+            addSiblingLayer(draftPage, selectedLayerIndexPath, centeredLayer);
           } else {
-            draftPage.layers.push(newLayer);
+            draftPage.layers.push(centeredLayer);
           }
 
           draft.selectedLayerIds.push(newLayer.do_objectID);
