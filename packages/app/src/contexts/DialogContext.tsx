@@ -1,4 +1,4 @@
-import { Button, Dialog, InputField, Spacer } from 'noya-designsystem';
+import { Button, Dialog, IDialog, InputField, Spacer } from 'noya-designsystem';
 import {
   createContext,
   ReactNode,
@@ -27,6 +27,8 @@ export type DialogContextValue = {
     title: string,
     inputValue?: string,
   ): Promise<string | undefined>;
+
+  containsElement(element: HTMLElement): boolean;
 };
 
 const DialogContext = createContext<DialogContextValue | undefined>(undefined);
@@ -80,16 +82,27 @@ export const DialogProvider = function DialogProvider({
     [close, contents?.inputValue],
   );
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<IDialog>(null);
+
+  const containsElement = useCallback((element: HTMLElement) => {
+    if (!dialogRef.current) return false;
+
+    return dialogRef.current.containsElement(element);
+  }, []);
 
   return (
     <>
       <DialogContext.Provider
-        value={useMemo(() => ({ openInputDialog: open }), [open])}
+        value={useMemo(
+          () => ({ openInputDialog: open, containsElement }),
+          [containsElement, open],
+        )}
       >
         {children}
       </DialogContext.Provider>
       <Dialog
+        ref={dialogRef}
         title={contents?.title}
         open={isOpen}
         onOpenChange={useCallback(
@@ -161,4 +174,8 @@ function useDialog(): DialogContextValue {
 
 export function useOpenInputDialog() {
   return useDialog().openInputDialog;
+}
+
+export function useDialogContainsElement() {
+  return useDialog().containsElement;
 }

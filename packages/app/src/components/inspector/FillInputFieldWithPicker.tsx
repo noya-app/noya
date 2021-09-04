@@ -12,7 +12,10 @@ import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
-import { useOpenInputDialog } from '../../contexts/DialogContext';
+import {
+  useDialogContainsElement,
+  useOpenInputDialog,
+} from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
@@ -342,6 +345,8 @@ export default memo(function FillInputFieldWithPicker({
   patternProps,
   shaderProps,
 }: Props) {
+  const dialogContainsElement = useDialogContainsElement();
+
   const [state, dispatch] = useApplicationState();
   const picker = useMemo(() => {
     switch (fillType) {
@@ -406,6 +411,19 @@ export default memo(function FillInputFieldWithPicker({
         />
       </Popover.Trigger>
       <Content
+        // Prevent focus within a dialog from closing the popover
+        onFocusOutside={useCallback(
+          (event) => {
+            if (
+              event.target &&
+              event.target instanceof HTMLElement &&
+              dialogContainsElement(event.target)
+            ) {
+              event.preventDefault();
+            }
+          },
+          [dialogContainsElement],
+        )}
         // Stop propagation on pointer events to prevent dndkit from triggering
         onPointerDown={useCallback((event) => event.stopPropagation(), [])}
         variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}

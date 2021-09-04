@@ -1,11 +1,18 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Spacer } from 'noya-designsystem';
-import { ComponentProps, ReactNode } from 'react';
+import {
+  ComponentProps,
+  ForwardedRef,
+  forwardRef,
+  ReactNode,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
 import IconButton from './IconButton';
 
 const StyledOverlay = styled(DialogPrimitive.Overlay)({
-  backgroundColor: 'rgba(0,0,0,0.3)',
+  backgroundColor: 'rgba(0,0,0,0.5)',
   position: 'fixed',
   inset: 0,
 });
@@ -47,6 +54,10 @@ const CloseButtonContainer = styled.div(({ theme }) => ({
   right: theme.sizes.dialog.padding,
 }));
 
+export interface IDialog {
+  containsElement: (element: HTMLElement) => boolean;
+}
+
 interface Props {
   title?: ReactNode;
   description?: ReactNode;
@@ -58,18 +69,24 @@ interface Props {
   >['onOpenAutoFocus'];
 }
 
-export function Dialog({
-  children,
-  title,
-  description,
-  open,
-  onOpenChange,
-  onOpenAutoFocus,
-}: Props) {
+export const Dialog = forwardRef(function Dialog(
+  { children, title, description, open, onOpenChange, onOpenAutoFocus }: Props,
+  forwardedRef: ForwardedRef<IDialog>,
+) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(forwardedRef, () => ({
+    containsElement(element) {
+      if (!contentRef.current) return false;
+
+      return contentRef.current.contains(element);
+    },
+  }));
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <StyledOverlay />
-      <StyledContent onOpenAutoFocus={onOpenAutoFocus}>
+      <StyledContent ref={contentRef} onOpenAutoFocus={onOpenAutoFocus}>
         <CloseButtonContainer>
           <DialogPrimitive.Close as={IconButton} iconName="Cross1Icon" />
         </CloseButtonContainer>
@@ -90,4 +107,4 @@ export function Dialog({
       </StyledContent>
     </DialogPrimitive.Root>
   );
-}
+});
