@@ -6,6 +6,7 @@ import { delimitedPath, sortBy } from 'noya-utils';
 import { createThemeGroups } from '../../utils/themeTree';
 import { menuItems, ThemeMenuItemType } from './menuItems';
 import ThemeStyle from './ThemeStyle';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
@@ -24,17 +25,21 @@ export default memo(function ThemeStylesGrid({
   onSelectThemeStyle,
   onDuplicateThemeStyle,
 }: Props) {
+  const openDialog = useOpenInputDialog();
+
   const { basename } = delimitedPath;
 
   const handleSelectMenuItem = useCallback(
-    (value: ThemeMenuItemType) => {
+    async (value: ThemeMenuItemType) => {
       switch (value) {
         case 'delete':
           onDeleteThemeStyle();
           break;
         case 'group': {
-          const groupName = prompt('Group Name');
+          const groupName = await openDialog('Group Name');
+
           if (!groupName) return;
+
           onGroupThemeStyle(selectedThemeStyleIds, groupName);
           break;
         }
@@ -49,10 +54,11 @@ export default memo(function ThemeStylesGrid({
     },
     [
       onDeleteThemeStyle,
-      onSelectThemeStyle,
       onGroupThemeStyle,
-      onDuplicateThemeStyle,
       selectedThemeStyleIds,
+      onSelectThemeStyle,
+      onDuplicateThemeStyle,
+      openDialog,
     ],
   );
 

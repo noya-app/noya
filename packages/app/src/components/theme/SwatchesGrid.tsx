@@ -7,6 +7,7 @@ import { Fragment, memo, useCallback, useMemo } from 'react';
 import { createThemeGroups } from '../../utils/themeTree';
 import ColorSwatch from './ColorSwatch';
 import { menuItems, ThemeMenuItemType } from './menuItems';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface Props {
   swatches: Sketch.Swatch[];
@@ -25,10 +26,11 @@ export default memo(function SwatchesGrid({
   onSelectSwatch,
   onDuplicateSwatch,
 }: Props) {
+  const openDialog = useOpenInputDialog();
   const { basename } = delimitedPath;
 
   const handleSelectMenuItem = useCallback(
-    (value: ThemeMenuItemType) => {
+    async (value: ThemeMenuItemType) => {
       switch (value) {
         case 'duplicate':
           onDuplicateSwatch(selectedSwatchIds);
@@ -37,8 +39,10 @@ export default memo(function SwatchesGrid({
           onDeleteSwatch();
           break;
         case 'group': {
-          const groupName = prompt('Group Name');
+          const groupName = await openDialog('Group Name');
+
           if (!groupName) return;
+
           onGroupSwatch(selectedSwatchIds, groupName);
           break;
         }
@@ -49,11 +53,12 @@ export default memo(function SwatchesGrid({
       }
     },
     [
-      onSelectSwatch,
-      onGroupSwatch,
-      onDeleteSwatch,
       onDuplicateSwatch,
       selectedSwatchIds,
+      onDeleteSwatch,
+      onGroupSwatch,
+      onSelectSwatch,
+      openDialog,
     ],
   );
 

@@ -39,6 +39,7 @@ export type { RelativeDropPosition } from './components/Sortable';
 export * as InputField from './components/InputField';
 export * as RadioGroup from './components/RadioGroup';
 export * as Spacer from './components/Spacer';
+export * from './components/Dialog';
 export { default as Tooltip } from './components/Tooltip';
 export { default as ContextMenu } from './components/ContextMenu';
 export { default as DropdownMenu } from './components/DropdownMenu';

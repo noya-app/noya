@@ -13,6 +13,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useShallowArray } from 'noya-react-utils';
+import { useOpenInputDialog } from '../contexts/DialogContext';
 
 const NO_LAYER_STYLE = 'none';
 
@@ -28,6 +29,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
   sharedStyles,
 }: Props) {
   const dispatch = useDispatch();
+  const openDialog = useOpenInputDialog();
 
   const iconColor = useTheme().colors.icon;
 
@@ -51,23 +53,23 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
     [dispatch],
   );
 
-  const onAdd = useCallback(() => {
-    const name = prompt('New style name');
+  const onAdd = useCallback(async () => {
+    const name = await openDialog('New style name');
 
     if (!name) return;
 
     dispatch('addThemeStyle', name, style);
-  }, [dispatch, style]);
+  }, [dispatch, openDialog, style]);
 
-  const onRename = useCallback(() => {
+  const onRename = useCallback(async () => {
     if (!sharedStyleId) return;
 
-    const name = prompt('Rename style');
+    const name = await openDialog('Rename style');
 
     if (!name) return;
 
     dispatch('setThemeStyleName', sharedStyleId, name);
-  }, [sharedStyleId, dispatch]);
+  }, [sharedStyleId, openDialog, dispatch]);
 
   const onDetach = useCallback(() => dispatch('setThemeStyle'), [dispatch]);
 

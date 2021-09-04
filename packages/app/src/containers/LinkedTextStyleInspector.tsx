@@ -12,11 +12,13 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useShallowArray } from 'noya-react-utils';
+import { useOpenInputDialog } from '../contexts/DialogContext';
 
 const NO_TEXT_STYLE = 'none';
 
 export default memo(function ThemeTextInspector() {
   const [, dispatch] = useApplicationState();
+  const openDialog = useOpenInputDialog();
 
   const iconColor = useTheme().colors.icon;
 
@@ -60,21 +62,21 @@ export default memo(function ThemeTextInspector() {
     [dispatch],
   );
 
-  const onAdd = useCallback(() => {
-    const styleName = prompt('New Text Style Name');
+  const onAdd = useCallback(async () => {
+    const styleName = await openDialog('New Text Style Name');
 
     if (!styleName) return;
     dispatch('addTextStyle', styleName, selectedLayers[0].style);
-  }, [selectedLayers, dispatch]);
+  }, [openDialog, dispatch, selectedLayers]);
 
-  const onRename = useCallback(() => {
+  const onRename = useCallback(async () => {
     if (!selectedTextStyleId) return;
 
-    const newName = prompt('Rename Text Style');
+    const newName = await openDialog('Rename Text Style');
 
     if (!newName) return;
     dispatch('setTextStyleName', selectedTextStyleId, newName);
-  }, [selectedTextStyleId, dispatch]);
+  }, [selectedTextStyleId, openDialog, dispatch]);
 
   const onDetach = useCallback(() => dispatch('setTextStyle'), [dispatch]);
 

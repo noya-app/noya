@@ -9,6 +9,7 @@ import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
 import { useCallback, useMemo } from 'react';
+import { useOpenInputDialog } from '../contexts/DialogContext';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -78,6 +79,7 @@ export default function useLayerMenu(
   interactionType: InteractionType,
 ) {
   const dispatch = useDispatch();
+  const openDialog = useOpenInputDialog();
   const { startRenamingLayer } = useWorkspace();
   const isEditingText = Selectors.getIsEditingText(interactionType);
 
@@ -198,7 +200,7 @@ export default function useLayerMenu(
   );
 
   const onSelectMenuItem = useCallback(
-    (value: LayerMenuItemType) => {
+    async (value: LayerMenuItemType) => {
       switch (value) {
         case 'selectAll':
           if (isEditingText) {
@@ -221,7 +223,7 @@ export default function useLayerMenu(
           dispatch('ungroupLayers', selectedLayerIds);
           return;
         case 'createSymbol': {
-          const name = prompt('New Symbol Name');
+          const name = await openDialog('New Symbol Name');
 
           if (!name) return;
 
@@ -270,6 +272,7 @@ export default function useLayerMenu(
       dispatch,
       selectedLayerIds,
       newIsAlphaMaskValue,
+      openDialog,
       newUseAsMaskValue,
       newIgnoreMasksValue,
       startRenamingLayer,

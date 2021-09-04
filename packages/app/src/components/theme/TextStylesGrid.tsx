@@ -6,6 +6,7 @@ import { createThemeGroups } from '../../utils/themeTree';
 import { Fragment, memo, useMemo, useCallback } from 'react';
 import TextStyle from './TextStyle';
 import { menuItems, ThemeMenuItemType } from './menuItems';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
@@ -24,15 +25,19 @@ export default memo(function TextStylesGrid({
   onDeleteTextStyle,
   onSelectTextStyle,
 }: Props) {
+  const openDialog = useOpenInputDialog();
+
   const handleSelectMenuItem = useCallback(
-    (value: ThemeMenuItemType) => {
+    async (value: ThemeMenuItemType) => {
       switch (value) {
         case 'delete':
           onDeleteTextStyle();
           break;
         case 'group': {
-          const groupName = prompt('Group Name');
+          const groupName = await openDialog('Group Name');
+
           if (!groupName) return;
+
           onGroupTextStyle(selectedTextStyles, groupName);
           break;
         }
@@ -48,9 +53,10 @@ export default memo(function TextStylesGrid({
     [
       onDeleteTextStyle,
       onGroupTextStyle,
-      onDuplicateTextStyle,
-      onSelectTextStyle,
       selectedTextStyles,
+      onSelectTextStyle,
+      onDuplicateTextStyle,
+      openDialog,
     ],
   );
 

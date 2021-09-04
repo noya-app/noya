@@ -6,6 +6,7 @@ import { Fragment, memo, useCallback, useMemo } from 'react';
 import { ThemeMenuItemType, menuItems } from './menuItems';
 import Symbol from './Symbol';
 import { createThemeGroups } from '../../utils/themeTree';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface Props {
   symbols: Sketch.SymbolMaster[];
@@ -24,17 +25,20 @@ export default memo(function SymbolsGrid({
   onSelectSymbol,
   onDuplicateSymbol,
 }: Props) {
+  const openDialog = useOpenInputDialog();
   const { basename } = delimitedPath;
 
   const handleSelectMenuItem = useCallback(
-    (value: ThemeMenuItemType) => {
+    async (value: ThemeMenuItemType) => {
       switch (value) {
         case 'delete':
           onDeleteSymbol(selectedSymbolsIds);
           break;
         case 'group': {
-          const groupName = prompt('Group Name');
+          const groupName = await openDialog('Group Name');
+
           if (!groupName) return;
+
           onGroupSymbol(selectedSymbolsIds, groupName);
           break;
         }
@@ -48,11 +52,12 @@ export default memo(function SymbolsGrid({
       }
     },
     [
-      onGroupSymbol,
       onDeleteSymbol,
+      selectedSymbolsIds,
+      onGroupSymbol,
       onSelectSymbol,
       onDuplicateSymbol,
-      selectedSymbolsIds,
+      openDialog,
     ],
   );
 

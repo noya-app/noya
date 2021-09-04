@@ -12,6 +12,10 @@ import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
+import {
+  useDialogContainsElement,
+  useOpenInputDialog,
+} from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
@@ -106,18 +110,19 @@ function GradientFillPicker({
   onDeleteGradientStop,
 }: Omit<GradientFillProps, 'onChangeGradientType'> & { id?: string }) {
   const [state, dispatch] = useApplicationState();
+  const openDialog = useOpenInputDialog();
 
   const gradientAssets = Selectors.getGradientAssets(state);
 
-  const createThemeGradient = useCallback(() => {
+  const createThemeGradient = useCallback(async () => {
     if (!gradient) return;
 
-    const gradientName = prompt('New Gradient Assets Name');
+    const gradientName = await openDialog('New Gradient Asset Name');
 
     if (!gradientName) return;
 
     dispatch('addGradientAsset', gradientName, gradient);
-  }, [dispatch, gradient]);
+  }, [dispatch, gradient, openDialog]);
 
   const onRemoveThemeGradient = useCallback(
     (id: string) => dispatch('removeGradientAsset', id),
@@ -340,6 +345,8 @@ export default memo(function FillInputFieldWithPicker({
   patternProps,
   shaderProps,
 }: Props) {
+  const dialogContainsElement = useDialogContainsElement();
+
   const [state, dispatch] = useApplicationState();
   const picker = useMemo(() => {
     switch (fillType) {
@@ -404,6 +411,19 @@ export default memo(function FillInputFieldWithPicker({
         />
       </Popover.Trigger>
       <Content
+        // Prevent focus within a dialog from closing the popover
+        onFocusOutside={useCallback(
+          (event) => {
+            if (
+              event.target &&
+              event.target instanceof HTMLElement &&
+              dialogContainsElement(event.target)
+            ) {
+              event.preventDefault();
+            }
+          },
+          [dialogContainsElement],
+        )}
         // Stop propagation on pointer events to prevent dndkit from triggering
         onPointerDown={useCallback((event) => event.stopPropagation(), [])}
         variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
