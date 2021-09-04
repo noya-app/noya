@@ -39,47 +39,57 @@ export const DialogProvider = function DialogProvider({
   children: ReactNode;
 }) {
   const [contents, setContents] = useState<
-    { title: string; inputValue?: string } | undefined
+    | {
+        title: string;
+        inputValue: string;
+        resolve: (value: string | undefined) => void;
+      }
+    | undefined
   >();
 
   const isOpen = !!contents;
 
-  const {
-    close,
-    open,
-  }: {
-    close: (value: string | undefined) => void;
-    open: DialogContextValue['openInputDialog'];
-  } = useMemo(() => {
-    const { promise, resolve } = createDeferredPromise<string | undefined>();
+  const close = useCallback(() => {
+    if (!contents) return;
 
-    return {
-      close: (value: string | undefined) => {
-        setContents(undefined);
+    contents.resolve(undefined);
+  }, [contents]);
 
-        resolve(value);
-      },
-      open: (title, inputValue) => {
-        setContents({
-          title: title,
-          inputValue,
-        });
+  const submit = useCallback(() => {
+    if (!contents || !contents.inputValue) return;
 
-        return promise;
-      },
-    };
-  }, []);
+    contents.resolve(contents.inputValue);
+    setContents(undefined);
+  }, [contents]);
+
+  const open: DialogContextValue['openInputDialog'] = useCallback(
+    (title, inputValue = '') => {
+      const { promise, resolve } = createDeferredPromise<string | undefined>();
+
+      setContents({
+        title,
+        inputValue,
+        resolve: (value) => {
+          resolve(value);
+          setContents(undefined);
+        },
+      });
+
+      return promise;
+    },
+    [],
+  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key !== 'Enter' || !contents?.inputValue) return;
+      if (event.key !== 'Enter') return;
 
       event.stopPropagation();
       event.preventDefault();
 
-      close(contents?.inputValue);
+      submit();
     },
-    [close, contents?.inputValue],
+    [submit],
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -108,7 +118,7 @@ export const DialogProvider = function DialogProvider({
         onOpenChange={useCallback(
           (isOpen) => {
             if (!isOpen) {
-              close(undefined);
+              close();
             }
           },
           [close],
@@ -128,7 +138,7 @@ export const DialogProvider = function DialogProvider({
               setContents((contents) =>
                 contents
                   ? {
-                      title: contents.title,
+                      ...contents,
                       inputValue: value,
                     }
                   : undefined,
@@ -140,20 +150,9 @@ export const DialogProvider = function DialogProvider({
         <Spacer.Vertical size={20} />
         <InspectorPrimitives.Row>
           <Spacer.Horizontal />
-          <Button
-            onClick={useCallback(() => {
-              close(undefined);
-            }, [close])}
-          >
-            Cancel
-          </Button>
+          <Button onClick={close}>Cancel</Button>
           <Spacer.Horizontal size={20} />
-          <Button
-            disabled={!contents?.inputValue}
-            onClick={useCallback(() => {
-              close(contents?.inputValue);
-            }, [close, contents?.inputValue])}
-          >
+          <Button disabled={!contents?.inputValue} onClick={submit}>
             Submit
           </Button>
         </InspectorPrimitives.Row>
