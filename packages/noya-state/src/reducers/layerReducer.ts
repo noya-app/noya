@@ -17,6 +17,8 @@ import {
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
   getLayerIndexPathsExcludingDescendants,
+  addToParentLayer,
+  getSelectedLayerIndexPathsExcludingDescendants,
   getLayerTransformAtIndexPath,
   getParentLayer,
   getRightMostLayerBounds,
@@ -420,15 +422,45 @@ export function layerReducer(
     }
     case 'addLayer': {
       const [, layers] = action;
-      const pageIndex = getCurrentPageIndex(state);
+      const currentPageIndex = getCurrentPageIndex(state);
+      const selectedLayerIndexPath =
+        getSelectedLayerIndexPathsExcludingDescendants(state)[0];
 
       return produce(state, (draft) => {
-        const draftPage = draft.sketch.pages[pageIndex];
+        const draftPage = draft.sketch.pages[currentPageIndex];
+        const selectedLayer =
+          selectedLayerIndexPath && selectedLayerIndexPath.length > 0
+            ? Layers.access(draftPage, selectedLayerIndexPath)
+            : draftPage;
+
         draft.selectedLayerIds = [];
+
+        let parentLayer = draftPage as Layers.ParentLayer;
+
+        if (Layers.isParentLayer(selectedLayer)) {
+          parentLayer = selectedLayer;
+        }
+
         layers.forEach((layer) => {
+          const { pageIndex, indexPaths } = findPageLayerIndexPaths(
+            state,
+            (l) => l.do_objectID === layer.do_objectID,
+          )[0];
+
           if (layer._class === 'page') return;
-          const newLayer = copyLayer(layer);
-          draftPage.layers.push(newLayer);
+          const newLayer = produce(copyLayer(layer), (l) => {
+            l.name = layer.name;
+          });
+
+          if (parentLayer._class !== 'page') {
+            addToParentLayer(parentLayer.layers, newLayer);
+          } else if (currentPageIndex === pageIndex && indexPaths.length > 0) {
+            addSiblingLayer(draftPage, indexPaths[0], newLayer);
+          } else if (selectedLayer._class !== 'page') {
+            addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+          } else {
+            draftPage.layers.push(newLayer);
+          }
 
           draft.selectedLayerIds.push(newLayer.do_objectID);
         });

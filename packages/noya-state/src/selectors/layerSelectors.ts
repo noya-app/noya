@@ -70,6 +70,21 @@ export const getSelectedLayers = (
   ) as PageLayer[];
 };
 
+export const getSelectedLayersWithTopLevelCoordinates = (
+  state: Draft<ApplicationState>,
+): PageLayer[] => {
+  const page = getCurrentPage(state);
+
+  const selectedLayers = Layers.findAll(page, (layer) =>
+    state.selectedLayerIds.includes(layer.do_objectID),
+  ) as PageLayer[];
+
+  return selectedLayers.map((layer) => {
+    resizeLayerFrame(layer, page.frame);
+    return layer;
+  });
+};
+
 export const getSelectedLayersWithContextSettings = (
   state: ApplicationState,
 ): PageLayer[] => {

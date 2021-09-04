@@ -1,5 +1,5 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { getSelectedLayers } from 'noya-state';
+import { getSelectedLayersWithTopLevelCoordinates } from 'noya-state';
 import { Base64 } from 'noya-utils';
 import { useEffect } from 'react';
 
@@ -12,7 +12,7 @@ export function useCopyHandler() {
     const handler = (event: ClipboardEvent) => {
       event.preventDefault();
 
-      const selectedLayers = getSelectedLayers(state);
+      const selectedLayers = getSelectedLayersWithTopLevelCoordinates(state);
       if (selectedLayers.length === 0) {
         return;
       }
