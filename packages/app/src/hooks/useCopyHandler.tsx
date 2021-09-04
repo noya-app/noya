@@ -25,25 +25,6 @@ export function useCopyHandler() {
 
     document.addEventListener('copy', handler);
 
-    return () => document.removeEventListener('paste', handler);
+    return () => document.removeEventListener('copy', handler);
   }, [state]);
 }
-
-/*
-
-  const isSafari = /Apple Computer/.test(navigator.vendor);
-  if (isSafari) {
-    const range = document.createRange();
-    range.selectNode(document.body);
-
-    window.getSelection()?.removeAllRanges();
-    window.getSelection()?.addRange(range);
-  }
-
-  document.execCommand('copy');
-
-  if (isSafari) {
-    window.getSelection()?.removeAllRanges();
-  }
-
-*/
