@@ -146,4 +146,7 @@ export const sizes = {
     xlarge: 64,
     xxlarge: 128,
   },
+  dialog: {
+    padding: 20,
+  },
 };

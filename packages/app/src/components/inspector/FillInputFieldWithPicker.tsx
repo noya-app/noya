@@ -12,6 +12,7 @@ import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
@@ -106,18 +107,19 @@ function GradientFillPicker({
   onDeleteGradientStop,
 }: Omit<GradientFillProps, 'onChangeGradientType'> & { id?: string }) {
   const [state, dispatch] = useApplicationState();
+  const openDialog = useOpenInputDialog();
 
   const gradientAssets = Selectors.getGradientAssets(state);
 
-  const createThemeGradient = useCallback(() => {
+  const createThemeGradient = useCallback(async () => {
     if (!gradient) return;
 
-    const gradientName = prompt('New Gradient Assets Name');
+    const gradientName = await openDialog('New Gradient Asset Name');
 
     if (!gradientName) return;
 
     dispatch('addGradientAsset', gradientName, gradient);
-  }, [dispatch, gradient]);
+  }, [dispatch, gradient, openDialog]);
 
   const onRemoveThemeGradient = useCallback(
     (id: string) => dispatch('removeGradientAsset', id),

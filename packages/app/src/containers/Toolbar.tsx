@@ -1,4 +1,3 @@
-import { ChevronDownIcon } from 'noya-icons';
 import { FileSystemHandle } from 'browser-fs-access';
 import {
   useApplicationState,
@@ -15,6 +14,7 @@ import {
   Spacer,
   Tooltip,
 } from 'noya-designsystem';
+import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
@@ -25,7 +25,6 @@ import {
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { PointModeIcon } from 'noya-icons';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =

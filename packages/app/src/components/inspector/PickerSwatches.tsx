@@ -16,6 +16,7 @@ import {
   LayoutType,
   Square,
 } from './PickerAssetGrid';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface SwatchesProps {
   selectedId?: string;
@@ -84,19 +85,20 @@ export default memo(function PickerSwatches({
   onCreate,
   onDetach,
 }: Props) {
+  const openDialog = useOpenInputDialog();
   const [swatchLayout, setSwatchLayout] = useState<LayoutType>('grid');
 
   const isSwatch = swatches.some((e) => e.do_objectID === selectedId);
 
-  const handleCreate = useCallback(() => {
-    const swatchName = prompt('New Theme Color Name');
+  const handleCreate = useCallback(async () => {
+    const swatchName = await openDialog('New Theme Color Name');
 
     if (!swatchName) return;
 
     const id = uuid();
 
     onCreate(id, swatchName);
-  }, [onCreate]);
+  }, [onCreate, openDialog]);
 
   return (
     <>

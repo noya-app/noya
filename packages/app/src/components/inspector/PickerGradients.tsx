@@ -10,6 +10,7 @@ import {
 } from 'noya-designsystem';
 import type Sketch from 'noya-file-format';
 import { memo, useCallback, useState } from 'react';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {
   GridSmall,
@@ -117,16 +118,20 @@ export default memo(function PickerGradients({
   onRename,
   onDelete,
 }: Props) {
+  const openDialog = useOpenInputDialog();
   const [gradientLayout, setGradientLayout] = useState<LayoutType>('grid');
   const [gradientId, setGradientId] = useState<string | undefined>(undefined);
 
   const handleSelectMenuItem = useCallback(
-    (value: MenuItemType) => {
+    async (value: MenuItemType) => {
       if (!gradientId) return;
+
       switch (value) {
         case 'rename': {
-          const name = prompt('New Gradient Name');
+          const name = await openDialog('New Gradient Name');
+
           if (!name) return;
+
           onRename(gradientId, name);
           break;
         }
@@ -136,7 +141,7 @@ export default memo(function PickerGradients({
         }
       }
     },
-    [gradientId, onRename, onDelete],
+    [gradientId, openDialog, onRename, onDelete],
   );
 
   return (
