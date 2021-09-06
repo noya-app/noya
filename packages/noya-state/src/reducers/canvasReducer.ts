@@ -23,6 +23,7 @@ import {
   decodeCurvePoint,
   DecodedCurvePoint,
   encodeCurvePoint,
+  LastEditedTextStyle,
   Primitives,
   Selectors,
 } from 'noya-state';
@@ -305,7 +306,7 @@ export function canvasReducer(
             constrainProportions: state.keyModifiers.shiftKey,
             scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
           },
-          state.lastEditedTextStyle?.textStyle,
+          state.lastEditedTextStyle,
         );
 
         if (shapeType === 'text') {
@@ -1205,7 +1206,7 @@ export function createDrawingLayer(
   current: Point,
   pixelAlign: boolean,
   scalingOptions: ScalingOptions,
-  textStyle?: Sketch.TextStyle,
+  lastEditedTextStyle?: LastEditedTextStyle,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -1229,8 +1230,18 @@ export function createDrawingLayer(
     case 'text':
       return SketchModel.text({
         frame,
+        textBehaviour: lastEditedTextStyle?.textBehaviour,
         style: SketchModel.style({
-          textStyle: textStyle || SketchModel.textStyle(),
+          textStyle: lastEditedTextStyle?.textStyle || SketchModel.textStyle(),
+        }),
+        attributedString: SketchModel.attributedString({
+          attributes: [
+            lastEditedTextStyle
+              ? SketchModel.stringAttribute({
+                  attributes: lastEditedTextStyle.stringAttribute[0].attributes,
+                })
+              : SketchModel.stringAttribute(),
+          ],
         }),
       });
     case 'artboard':
