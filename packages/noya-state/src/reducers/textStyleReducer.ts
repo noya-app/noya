@@ -42,7 +42,7 @@ export function textStyleReducer(
 
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
+            (layer, index) => {
               if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
                 return;
 
@@ -68,6 +68,16 @@ export function textStyleReducer(
                 layer.style.textStyle.encodedAttributes,
                 action,
               );
+
+              if (index === 0) {
+                draft.lastEditedTextStyle = {
+                  textStyle: Object.assign({}, layer.style.textStyle),
+                  stringAttribute: Object.assign(
+                    {},
+                    layer.attributedString.attributes,
+                  ),
+                };
+              }
             },
           );
         });
@@ -126,6 +136,9 @@ export function textStyleReducer(
           if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer)) return;
 
           layer.textBehaviour = action[1];
+
+          if (draft.lastEditedTextStyle)
+            draft.lastEditedTextStyle.textBehaviour = action[1];
         });
       });
     }
@@ -136,7 +149,7 @@ export function textStyleReducer(
 
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
+            (layer, index) => {
               if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
                 return;
 
@@ -145,6 +158,16 @@ export function textStyleReducer(
               attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
               attributes.strikethroughStyle =
                 action[1] === 'strikethrough' ? 1 : 0;
+
+              if (index === 0) {
+                draft.lastEditedTextStyle = {
+                  textStyle: Object.assign({}, layer.style.textStyle),
+                  stringAttribute: Object.assign(
+                    {},
+                    layer.attributedString.attributes,
+                  ),
+                };
+              }
             },
           );
         });
@@ -178,13 +201,23 @@ export function textStyleReducer(
 
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer) => {
+            (layer, index) => {
               if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
                 return;
 
               const attributes = layer.style.textStyle.encodedAttributes;
 
               attributes.MSAttributedStringTextTransformAttribute = action[1];
+
+              if (index === 0) {
+                draft.lastEditedTextStyle = {
+                  textStyle: Object.assign({}, layer.style.textStyle),
+                  stringAttribute: Object.assign(
+                    {},
+                    layer.attributedString.attributes,
+                  ),
+                };
+              }
             },
           );
         });

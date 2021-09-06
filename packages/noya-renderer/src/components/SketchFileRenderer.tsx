@@ -359,6 +359,7 @@ export default memo(function SketchFileRenderer() {
             constrainProportions: state.keyModifiers.shiftKey,
             scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
           },
+          state.lastEditedTextStyle?.textStyle,
         )
       : undefined;
 

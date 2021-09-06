@@ -72,6 +72,11 @@ export type ApplicationState = {
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
+  lastEditedTextStyle?: {
+    textStyle: Sketch.TextStyle;
+    stringAttribute: Sketch.StringAttribute[];
+    textBehaviour?: Sketch.TextBehaviour;
+  };
   selectedPage: string;
   selectedLayerIds: string[];
   selectedPointLists: SelectedPointLists;

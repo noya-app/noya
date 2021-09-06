@@ -305,6 +305,7 @@ export function canvasReducer(
             constrainProportions: state.keyModifiers.shiftKey,
             scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
           },
+          state.lastEditedTextStyle?.textStyle,
         );
 
         if (shapeType === 'text') {
@@ -1204,6 +1205,7 @@ export function createDrawingLayer(
   current: Point,
   pixelAlign: boolean,
   scalingOptions: ScalingOptions,
+  textStyle?: Sketch.TextStyle,
 ):
   | Sketch.Oval
   | Sketch.Rectangle
@@ -1225,7 +1227,12 @@ export function createDrawingLayer(
     case 'rectangle':
       return SketchModel.rectangle({ style, frame });
     case 'text':
-      return SketchModel.text({ frame });
+      return SketchModel.text({
+        frame,
+        style: SketchModel.style({
+          textStyle: textStyle || SketchModel.textStyle(),
+        }),
+      });
     case 'artboard':
       return SketchModel.artboard({ frame });
     case 'slice':
