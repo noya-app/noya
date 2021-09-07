@@ -3,6 +3,8 @@ import { useDrag } from 'react-use-gesture';
 import { animated, SpringValue, useSpring } from 'react-spring';
 import { snap } from '@popmotion/popcorn';
 
+import { useIsomorphicLayoutEffect } from '../hooks/use-isomorphic-layout-effect';
+
 type PagerViewContextProps = {
   initialOffset: number;
   frameSize: number;
@@ -58,7 +60,13 @@ export function View({ color }: { color: string }) {
   );
 }
 
-export function PagerView({ children }: { children: React.ReactNode }) {
+export function PagerView({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [frameSize, setFrameSize] = React.useState(-1);
   const trackSize = React.Children.toArray(children).reduce(
@@ -91,7 +99,7 @@ export function PagerView({ children }: { children: React.ReactNode }) {
     },
   );
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (ref.current) {
       setFrameSize(ref.current.offsetWidth);
     }
@@ -103,6 +111,7 @@ export function PagerView({ children }: { children: React.ReactNode }) {
         {...bind()}
         ref={ref}
         onMouseDown={() => api.stop()}
+        className={className}
         style={{
           display: 'grid',
           gridAutoFlow: 'column',
