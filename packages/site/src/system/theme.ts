@@ -56,6 +56,11 @@ export const cssVariables = {
   '--body1': '2rem',
   '--body2': '1rem',
   // },
+
+  '--header-icon-size': '3rem',
+  [mediaQuery.medium]: {
+    '--header-icon-size': '2rem',
+  },
 };
 
 export const colors = {};

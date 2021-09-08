@@ -97,7 +97,7 @@ export default function App() {
             src={logoSrc}
             alt="logo"
             gridColumn="1"
-            height="2rem"
+            height="var(--header-icon-size)"
           />
 
           <Stack
@@ -111,7 +111,14 @@ export default function App() {
             </Stack>
           </Stack>
 
-          <Spacer size="1rem" />
+          <Spacer
+            css={{
+              minHeight: '6rem',
+              [mediaQuery.medium]: {
+                minHeight: '1rem',
+              },
+            }}
+          />
 
           <Grid
             gridColumn="1 / -1"
@@ -128,9 +135,11 @@ export default function App() {
             <Stack
               gap="2rem"
               css={{
-                gridColumn: '4 / span 6',
+                gridColumn: '2 / span 10',
+                textAlign: 'center',
                 [mediaQuery.medium]: {
                   gridColumn: '1 / span 6',
+                  textAlign: 'left',
                 },
               }}
             >
@@ -196,11 +205,13 @@ export default function App() {
 
             <Stack
               gap="2rem"
-              gridColumn="4 / 10"
+              gridColumn="2 / span 10"
               css={{
                 gridRow: '1',
+                textAlign: 'center',
                 [mediaQuery.medium]: {
                   gridColumn: '7 / span 6',
+                  textAlign: 'left',
                 },
               }}
             >
@@ -217,7 +228,15 @@ export default function App() {
 
           <Spacer size="12rem" />
 
-          <Stack alignItems="center" gridColumn="4 / 10">
+          <Stack
+            alignItems="center"
+            gridColumn="3 / span 8"
+            css={{
+              [mediaQuery.medium]: {
+                gridColumn: '4 / span 6',
+              },
+            }}
+          >
             <Text variant="heading2" alignment="center">
               Use Our Tool Or <br />
               <Text variant="mark">Build {preventTextOprhan('Your Own')}</Text>
@@ -260,7 +279,12 @@ export default function App() {
 
 function GitHubIcon() {
   return (
-    <Stack as="svg" viewBox="0 0 40 40" fill="none" css={{ height: '2rem' }}>
+    <Stack
+      as="svg"
+      viewBox="0 0 40 40"
+      fill="none"
+      css={{ height: 'var(--header-icon-size)' }}
+    >
       <path
         fillRule="evenodd"
         clipRule="evenodd"
