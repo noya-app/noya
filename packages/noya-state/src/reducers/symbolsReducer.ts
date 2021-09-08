@@ -243,6 +243,34 @@ export function symbolsReducer(
               overrideName: name,
               value: value,
             });
+
+            //SmartLayout
+            if (name.includes('stringValue')) {
+              //Calculate padding.
+              // Get text width
+              //add to padding. get new witdh.
+              const symbolMaster = getSymbols(state).find(
+                (symbolMaster) => symbolMaster.symbolID === symbol.symbolID,
+              );
+
+              if (!symbolMaster) return;
+              const layerId = name.split('_')[0];
+              const overridedTextLayer = Layers.findInArray(
+                symbolMaster.layers,
+                (layer) => layer.do_objectID === layerId,
+              ) as Sketch.Text;
+
+              if (!overridedTextLayer) return;
+
+              if (
+                overridedTextLayer.textBehaviour ===
+                Sketch.TextBehaviour.Flexible
+              ) {
+                symbol.frame = {
+                  ...symbol.frame,
+                };
+              }
+            }
           }
         });
       });

@@ -132,9 +132,23 @@ const Symbol = memo(function Symbol({
           }
         }
       });
+
+      draft.layers = draft.layers.map((l) => {
+        const widthScale = layer.frame.width / symbolMaster.frame.width;
+        const heightScale = layer.frame.height / symbolMaster.frame.height;
+
+        l.frame = {
+          ...l.frame,
+          width: widthScale * l.frame.width,
+          height: heightScale * l.frame.height,
+        };
+
+        return l;
+      });
     });
   }, [
     symbolMaster,
+    layer.frame,
     layer.overrideValues,
     layerStyles.objects,
     layerTextStyles.objects,
