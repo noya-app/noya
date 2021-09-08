@@ -56,6 +56,8 @@ import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 import { decode } from 'noya-sketch-file';
 // import SVGRenderer from './renderer/SVGRenderer';
 
+// TODO: Check instance override for symbols render.
+
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
   position: 'absolute',
   top: -insets.top,

@@ -415,8 +415,9 @@ export function applicationReducer(
             draftLayer,
           );
 
-          draftLayer.frame.width = paragraph.getMaxWidth();
-          draftLayer.frame.height = paragraph.getHeight();
+          if (draftLayer.textBehaviour !== Sketch.TextBehaviour.Fixed) {
+            draftLayer.frame.height = paragraph.getHeight();
+          }
         });
       });
 
@@ -472,8 +473,9 @@ export function applicationReducer(
     case 'moveCursor':
     case 'moveTextSelection':
     case 'insertText':
-    case 'deleteText':
+    case 'deleteText': {
       return textEditorReducer(state, action, CanvasKit, context);
+    }
     default:
       return themeReducer(state, action);
   }

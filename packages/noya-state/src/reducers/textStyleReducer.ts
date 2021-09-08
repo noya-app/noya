@@ -17,7 +17,7 @@ import {
 
 export type TextStyleAction =
   | StringAttributeAction
-  | [type: 'setTextAlignment', value: number]
+  | [type: 'setTextAlignment', value: Sketch.TextBehaviour]
   | [type: 'setTextDecoration', value: SimpleTextDecoration]
   | [type: 'setTextTransform', value: number];
 

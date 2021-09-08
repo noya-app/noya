@@ -128,6 +128,9 @@ export function getLayerParagraph(
     fontManager.getTypefaceFontProvider(),
   );
 
+  let stringSize = 0;
+  let paragraphFontSize = fontSize;
+
   toTextSpans(layer.attributedString).forEach((span) => {
     const style = Primitives.createCanvasKitTextStyle(
       CanvasKit,
@@ -137,6 +140,13 @@ export function getLayerParagraph(
       span.attributes,
       textDecoration,
     );
+
+    stringSize += span.string.length;
+    const crrfontSize =
+      span.attributes.MSAttributedStringFontAttribute.attributes.size;
+    paragraphFontSize =
+      crrfontSize > paragraphFontSize ? crrfontSize : paragraphFontSize;
+
     builder.pushStyle(style);
     builder.addText(applyTextTransform(span.string, textTransform));
     builder.pop();
@@ -145,8 +155,14 @@ export function getLayerParagraph(
   const paragraph = builder.build();
 
   builder.delete();
+  if (layer.textBehaviour === Sketch.TextBehaviour.Flexible) {
+    //const rect = getRectsForRange(CanvasKit, paragraph, 0, 2)[0];
+    //const width = Math.abs(rect[3]); //figuring out
 
-  paragraph.layout(layer.frame.width);
+    paragraph.layout(paragraphFontSize * stringSize);
+  } else {
+    paragraph.layout(layer.frame.width);
+  }
 
   return paragraph;
 }

@@ -175,7 +175,6 @@ export default memo(function SketchFileRenderer() {
 
       return result ? [result] : [];
     });
-
     return (
       <>
         {guides.map((guide, index) => (
@@ -276,7 +275,7 @@ export default memo(function SketchFileRenderer() {
 
     return (
       <>
-        {selectedLayerIndexPaths.map((indexPath, index) => {
+        {selectedLayerIndexPaths.map((indexPath) => {
           const layer = Layers.access(page, indexPath);
 
           if (!Layers.isPointsLayer(layer)) return null;

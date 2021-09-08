@@ -512,7 +512,7 @@ function text(options?: ModelOptions<Sketch.Text>): Sketch.Text {
     dontSynchroniseWithSymbol: false,
     glyphBounds: '{{0, 5}, {126, 17}}',
     lineSpacingBehaviour: 3,
-    textBehaviour: Sketch.TextBehaviour.Flexible,
+    textBehaviour: Sketch.TextBehaviour.FixedWidthAndHeight,
     ...options,
     _class: Sketch.ClassValue.Text,
   };
