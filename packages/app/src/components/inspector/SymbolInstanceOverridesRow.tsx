@@ -80,24 +80,36 @@ const TextStyleSelector = ({
 
 const SymbolMasterSelector = ({
   symbols,
+  symbolMaster,
   symbolId,
   onChange,
 }: {
   symbols: Sketch.SymbolMaster[];
+  symbolMaster: Sketch.SymbolMaster;
   symbolId: string;
   onChange: (value: string) => void;
 }) => {
+  const symbolsOptions = useMemo(
+    () =>
+      symbols.filter(
+        (symbol) =>
+          symbol.frame.width === symbolMaster.frame.width &&
+          symbol.frame.height === symbolMaster.frame.height,
+      ),
+    [symbols, symbolMaster],
+  );
+
   const symbolSourceOptions = useMemo(
-    () => ['none', ...symbols.map((symbol) => symbol.symbolID)],
-    [symbols],
+    () => ['none', ...symbolsOptions.map((symbol) => symbol.symbolID)],
+    [symbolsOptions],
   );
 
   const getSymbolMasterTitle = useCallback(
     (id) =>
       id === 'none'
         ? 'No Symbol'
-        : symbols.find((symbol) => symbol.symbolID === id)!.name,
-    [symbols],
+        : symbolsOptions.find((symbol) => symbol.symbolID === id)!.name,
+    [symbolsOptions],
   );
 
   return (
@@ -145,7 +157,12 @@ function getOverrideElements(
           layer.symbolID;
 
         const symbolMaster = Selectors.findSymbolMaster(state, symbolID);
-        if (!symbolMaster && symbolID !== 'none') return [];
+        const originalSymbolMaster = Selectors.findSymbolMaster(
+          state,
+          layer.symbolID,
+        );
+        if ((!symbolMaster && symbolID !== 'none') || !originalSymbolMaster)
+          return [];
 
         const nestedOverrides =
           symbolMaster && symbolMaster.allowsOverrides
@@ -169,6 +186,7 @@ function getOverrideElements(
               <SymbolMasterSelector
                 symbols={Selectors.getSymbols(state)}
                 symbolId={symbolID}
+                symbolMaster={originalSymbolMaster}
                 onChange={(value) =>
                   onSetOverrideValue(symbolIdOverrideName, value)
                 }
