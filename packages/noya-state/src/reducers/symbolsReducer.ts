@@ -243,33 +243,43 @@ export function symbolsReducer(
               overrideName: name,
               value: value,
             });
+          }
 
-            //SmartLayout
-            if (name.includes('stringValue')) {
-              //Calculate padding.
-              // Get text width
-              //add to padding. get new witdh.
-              const symbolMaster = getSymbols(state).find(
-                (symbolMaster) => symbolMaster.symbolID === symbol.symbolID,
-              );
+          // SmartLayout
+          if (name.includes('stringValue')) {
+            const symbolMaster = getSymbols(state).find(
+              (symbolMaster) => symbolMaster.symbolID === symbol.symbolID,
+            );
 
-              if (!symbolMaster) return;
-              const layerId = name.split('_')[0];
-              const overridedTextLayer = Layers.findInArray(
-                symbolMaster.layers,
-                (layer) => layer.do_objectID === layerId,
-              ) as Sketch.Text;
+            if (
+              !symbolMaster ||
+              symbolMaster.groupLayout?._class ===
+                'MSImmutableFreeformGroupLayout'
+            )
+              return;
+            const layerId = name.split('_')[0];
+            const overridedTextLayer = Layers.findInArray(
+              symbolMaster.layers,
+              (layer) => layer.do_objectID === layerId,
+            ) as Sketch.Text;
+            if (!overridedTextLayer) return;
 
-              if (!overridedTextLayer) return;
-
-              if (
-                overridedTextLayer.textBehaviour ===
-                Sketch.TextBehaviour.Flexible
-              ) {
-                symbol.frame = {
-                  ...symbol.frame,
-                };
-              }
+            if (
+              overridedTextLayer.textBehaviour === Sketch.TextBehaviour.Flexible
+            ) {
+              const textWidth =
+                9 *
+                (value?.length ??
+                  overridedTextLayer.attributedString.string.length);
+              const paddingLeft = overridedTextLayer.frame.x;
+              const paddingRight =
+                symbolMaster.frame.width -
+                overridedTextLayer.frame.width +
+                paddingLeft;
+              symbol.frame = {
+                ...symbol.frame,
+                width: textWidth + paddingLeft + paddingRight,
+              };
             }
           }
         });

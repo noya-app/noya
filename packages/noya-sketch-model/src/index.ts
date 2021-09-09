@@ -632,7 +632,7 @@ function symbolMaster(
     name: 'Symbol',
     style: style(),
     hasClickThrough: true,
-    groupLayout: inferredGroupLayout(),
+    groupLayout: freeformGroupLayout(),
     layers: [],
     hasBackgroundColor: false,
     includeBackgroundColorInExport: false,

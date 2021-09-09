@@ -934,11 +934,7 @@ Object {
     "y": 0,
   },
   "groupLayout": Object {
-    "_class": "MSImmutableInferredGroupLayout",
-    "axis": 0,
-    "layoutAnchor": 1,
-    "maxSize": 0,
-    "minSize": 0,
+    "_class": "MSImmutableFreeformGroupLayout",
   },
   "hasBackgroundColor": false,
   "hasClickThrough": true,
@@ -1158,6 +1154,6 @@ Object {
     },
     "windingRule": 1,
   },
-  "textBehaviour": 0,
+  "textBehaviour": 2,
 }
 `;
