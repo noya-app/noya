@@ -1,6 +1,14 @@
 import * as React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { Grid, Stack, Text, Spacer, mediaQuery, cssVariables } from '../system';
+import {
+  Grid,
+  Stack,
+  Text,
+  Spacer,
+  mediaQuery,
+  textStyles,
+  cssVariables,
+} from '../system';
 import { PagerView, View } from '../components/PagerView';
 import logoSrc from '../assets/logo.svg';
 
@@ -34,6 +42,7 @@ const features = [
 ];
 
 const GlobalStyles = createGlobalStyle({
+  ':root': cssVariables,
   '*': {
     boxSizing: 'border-box',
   },
@@ -61,9 +70,10 @@ const GlobalStyles = createGlobalStyle({
   },
 });
 
-export default function App() {
-  const [showGridDebug, setShowGridDebug] = React.useState(true);
+function Layout({ children }: { children: React.ReactNode }) {
+  const [showGridDebug, setShowGridDebug] = React.useState(false);
   const columns = 12;
+  const maxWidth = '1440px';
 
   React.useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -80,183 +90,24 @@ export default function App() {
   return (
     <>
       <GlobalStyles />
-      <Grid gridTemplateColumns="minmax(1rem, 1fr) minmax(auto, 80rem) minmax(1rem, 1fr)">
+      <Grid>
         <Grid
-          gridTemplateColumns={`repeat(${columns}, 1fr)`}
-          gapColumn="1rem"
+          gridTemplateColumns={`minmax(2rem, 1fr) minmax(auto, ${maxWidth}) minmax(2rem, 1fr)`}
           css={{
-            gridArea: '2 / 2',
-            /** Setup tree with respective CSS variables. */
-            ...cssVariables,
+            gridArea: '1 / 1 / 1 / 1',
+            '> *': {
+              gridColumn: 2,
+            },
           }}
         >
-          <Spacer size="1rem" />
-
-          <Stack
-            as="img"
-            src={logoSrc}
-            alt="logo"
-            gridColumn="1"
-            height="var(--header-icon-size)"
-          />
-
-          <Stack
-            as="nav"
-            flexDirection="row"
-            gap={8}
-            css={{ gridColumn: 12, justifySelf: 'end' }}
-          >
-            <Stack as="a" href="https://github.com/noya-app/noya">
-              <GitHubIcon />
-            </Stack>
-          </Stack>
-
-          <Spacer
-            css={{
-              minHeight: '6rem',
-              [mediaQuery.medium]: {
-                minHeight: '1rem',
-              },
-            }}
-          />
-
-          <Grid
-            gridColumn="1 / -1"
-            gridTemplateColumns="repeat(12, 1fr)"
-            gap="1rem"
-            alignItems="center"
-            css={{
-              rowGap: '4rem',
-              [mediaQuery.medium]: {
-                rowGap: '1rem',
-              },
-            }}
-          >
-            <Stack
-              gap="2rem"
-              css={{
-                gridColumn: '2 / span 10',
-                textAlign: 'center',
-                [mediaQuery.medium]: {
-                  gridColumn: '1 / span 6',
-                  textAlign: 'left',
-                },
-              }}
-            >
-              <Text variant="heading1">
-                Build Your Own <br /> <Text variant="mark">Design Tool</Text>
-              </Text>
-              <Text variant="body1">
-                Noya is an ecosystem of design utilities to help with your next
-                project.
-              </Text>
-            </Stack>
-
-            <Stack
-              alignItems="center"
-              justifyContent="center"
-              minHeight="24rem"
-              // @ts-ignore
-              background="rgb(141, 47, 216)"
-              css={{
-                gridColumn: '1 / -1',
-                [mediaQuery.medium]: {
-                  gridColumn: '7 / span 6',
-                  minHeight: '40rem',
-                },
-              }}
-            >
-              Demo Here
-            </Stack>
-          </Grid>
-
-          <Spacer size="12rem" />
-
-          <Grid
-            gridColumn="1 / -1"
-            gridTemplateColumns="repeat(12, 1fr)"
-            gap="1rem"
-            css={{
-              rowGap: '4rem',
-              [mediaQuery.medium]: {
-                rowGap: '1rem',
-              },
-            }}
-          >
-            <Grid
-              gridColumn="1 / -1"
-              gridTemplateColumns="repeat(2, 1fr)"
-              gap="1rem"
-              alignItems="end"
-              css={{
-                gridRow: '2',
-                [mediaQuery.medium]: {
-                  gridRow: '1',
-                  gridColumn: '1 / span 6',
-                },
-              }}
-            >
-              {features.map((feature) => (
-                <Stack key={feature.name} flexDirection="row">
-                  <Text variant="body1">{feature.name}</Text>
-                </Stack>
-              ))}
-            </Grid>
-
-            <Stack
-              gap="2rem"
-              gridColumn="2 / span 10"
-              css={{
-                gridRow: '1',
-                textAlign: 'center',
-                [mediaQuery.medium]: {
-                  gridColumn: '7 / span 6',
-                  textAlign: 'left',
-                },
-              }}
-            >
-              <Text variant="heading2">
-                All Of The Features <br /> You’re Used To <br />
-                <Text variant="mark">{preventTextOprhan('And More')}</Text>
-              </Text>
-              <Text variant="body1">
-                Full-featured while delivering a system that can cater to your
-                specific needs.
-              </Text>
-            </Stack>
-          </Grid>
-
-          <Spacer size="12rem" />
-
-          <Stack
-            alignItems="center"
-            gridColumn="3 / span 8"
-            css={{
-              [mediaQuery.medium]: {
-                gridColumn: '4 / span 6',
-              },
-            }}
-          >
-            <Text variant="heading2" alignment="center">
-              Use Our Tool Or <br />
-              <Text variant="mark">Build {preventTextOprhan('Your Own')}</Text>
-            </Text>
-            <Spacer size="2rem" />
-            <Text variant="body1" alignment="center">
-              Noya is built on a modular set of packages that can be used on
-              their own or altogether in our featured app.
-            </Text>
-            <Spacer size="4rem" />
-          </Stack>
-
-          <Packages />
-
-          <Spacer size="12rem" />
+          {children}
         </Grid>
-
         <Grid
           css={{
-            gridArea: '2 / 2',
+            justifySelf: 'center',
+            width: '100%',
+            maxWidth: maxWidth,
+            gridArea: '1 / 1 / 1 / 1',
             gridTemplateColumns: `repeat(${columns}, 1fr)`,
             gridGap: '1rem',
             backgroundSize: '100% 1rem',
@@ -274,6 +125,306 @@ export default function App() {
         </Grid>
       </Grid>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <Layout>
+      <Spacer size="1rem" />
+
+      <Stack
+        as="header"
+        gridColumn="1 / -1"
+        flexDirection="row"
+        justifyContent="space-between"
+      >
+        <Stack
+          as="img"
+          src={logoSrc}
+          alt="logo"
+          height="var(--header-icon-size)"
+        />
+        <Stack as="nav" flexDirection="row" gap={8}>
+          <Stack as="a" href="https://github.com/noya-app/noya">
+            <GitHubIcon />
+          </Stack>
+        </Stack>
+      </Stack>
+
+      <Spacer
+        css={{
+          minHeight: '6rem',
+          [mediaQuery.medium]: {
+            minHeight: '1rem',
+          },
+        }}
+      />
+
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        alignItems="center"
+        css={{
+          rowGap: '4rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Stack
+          gap="2rem"
+          css={{
+            gridColumn: '2 / span 10',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '1 / span 6',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading1">
+            Build Your Own <br /> <Text variant="mark">Design Tool</Text>
+          </Text>
+          <Text variant="body1">
+            Noya is an ecosystem of design utilities to help with your next
+            project.
+          </Text>
+        </Stack>
+
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          minHeight="24rem"
+          // @ts-ignore
+          background="rgb(141, 47, 216)"
+          css={{
+            gridColumn: '1 / -1',
+            [mediaQuery.medium]: {
+              gridColumn: '7 / span 6',
+              minHeight: '40rem',
+            },
+          }}
+        >
+          Demo Here
+        </Stack>
+      </Grid>
+
+      <Spacer size="12rem" />
+
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        css={{
+          rowGap: '4rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Grid
+          gridColumn="1 / -1"
+          gridTemplateColumns="repeat(2, 1fr)"
+          alignItems="end"
+          css={{
+            gridRow: '2',
+            gap: '4rem',
+            [mediaQuery.medium]: {
+              gridRow: '1',
+              gridColumn: '1 / span 6',
+              gap: '1rem',
+            },
+          }}
+        >
+          {features.map((feature) => (
+            <Stack
+              key={feature.name}
+              alignItems="center"
+              css={{
+                [mediaQuery.medium]: {
+                  flexDirection: 'row',
+                },
+              }}
+            >
+              <Text variant="body1">{feature.name}</Text>
+            </Stack>
+          ))}
+        </Grid>
+
+        <Stack
+          gap="2rem"
+          gridColumn="2 / span 10"
+          css={{
+            gridRow: '1',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '7 / span 6',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading2">
+            All Of The Features <br /> You’re Used To <br />
+            <Text variant="mark">{preventTextOprhan('And More')}</Text>
+          </Text>
+          <Text variant="body1">
+            Full-featured while delivering a system that can cater to your
+            specific needs.
+          </Text>
+        </Stack>
+
+        <Spacer size="12rem" />
+
+        <Stack
+          alignItems="center"
+          gridColumn="3 / span 8"
+          css={{
+            [mediaQuery.medium]: {
+              gridColumn: '4 / span 6',
+            },
+          }}
+        >
+          <Text variant="heading2" alignment="center">
+            Use Our Tool Or <br />
+            <Text variant="mark">Build {preventTextOprhan('Your Own')}</Text>
+          </Text>
+          <Spacer size="2rem" />
+          <Text variant="body1" alignment="center">
+            Noya is built on a modular set of packages that can be used on their
+            own or altogether in our featured app.
+          </Text>
+          <Spacer size="4rem" />
+        </Stack>
+      </Grid>
+
+      <Packages />
+
+      <Spacer size="12rem" />
+
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        css={{
+          rowGap: '4rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Grid
+          gridColumn="1 / -1"
+          gridTemplateColumns="repeat(3, 1fr)"
+          css={{
+            gridRow: '2',
+            gap: '4rem',
+            [mediaQuery.medium]: {
+              gridRow: '1',
+              gridColumn: '1 / span 6',
+              gap: '1rem',
+            },
+          }}
+        >
+          {['Sketch', 'Figma', 'XD'].map((name) => (
+            <Stack
+              key={name}
+              alignItems="center"
+              css={{
+                [mediaQuery.medium]: {
+                  flexDirection: 'row',
+                },
+              }}
+            >
+              <Text variant="body1">{name}</Text>
+            </Stack>
+          ))}
+        </Grid>
+
+        <Stack
+          gap="2rem"
+          gridColumn="2 / span 10"
+          css={{
+            gridRow: '1',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '7 / span 6',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading2">
+            Import and Export <br />
+            <Text variant="mark">{preventTextOprhan('To Multiple Tools')}</Text>
+          </Text>
+          <Text variant="body1">
+            Import design files from Sketch, Figma, and Adobe XD.
+          </Text>
+        </Stack>
+      </Grid>
+
+      <Spacer size="12rem" />
+
+      <Stack alignItems="center" gridColumn="1 / -1">
+        <Text variant="heading2" css={textStyles.mark}>
+          Open Source
+        </Text>
+        <Spacer size="2rem" />
+        <Text variant="body1" alignment="center" width="40ch">
+          The core library is completely free and we are committed to creating a
+          rich ecosystem for designers and developers.
+        </Text>
+      </Stack>
+
+      <Spacer size="12rem" />
+
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        css={{
+          rowGap: '4rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Stack
+          gap="2rem"
+          // gridColumn="2 / span 10"
+          css={{
+            gridRow: '1',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '1 / span 5',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading2">
+            Meet the <br />
+            <Text variant="mark">{preventTextOprhan('Contributors')}</Text>
+          </Text>
+          <Text variant="body1" width="24ch">
+            Noya wouldn’t be possible without these amazing people
+          </Text>
+        </Stack>
+
+        <Stack
+          flexDirection="row"
+          alignItems="center"
+          gridColumn="6 / span 7"
+          gap="4rem"
+        >
+          {['Devin', 'Travis', 'Maria', 'Leanne'].map((contributor) => (
+            <div key={contributor}>{contributor}</div>
+          ))}
+        </Stack>
+      </Grid>
+
+      <Spacer size="12rem" />
+    </Layout>
   );
 }
 
@@ -296,7 +447,7 @@ function GitHubIcon() {
 }
 
 const StyledPagerView = styled(PagerView)({
-  gridColumn: '1 / -1',
+  gridColumn: '1 / -1 !important',
 });
 
 // TODO: grep packages directory and generate from package.json name + description
