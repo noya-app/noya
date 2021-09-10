@@ -11,6 +11,8 @@ import {
 } from '../system';
 import { PagerView, View } from '../components/PagerView';
 import logoSrc from '../assets/logo.svg';
+import blurOneSrc from '../assets/blur-1.svg';
+import waveSrc from '../assets/wave.svg';
 
 const preventTextOprhan = (text: string) => text.replace(/ /g, '\u00a0');
 
@@ -95,8 +97,16 @@ function Layout({ children }: { children: React.ReactNode }) {
           gridTemplateColumns={`minmax(2rem, 1fr) minmax(auto, ${maxWidth}) minmax(2rem, 1fr)`}
           css={{
             gridArea: '1 / 1 / 1 / 1',
+            backgroundRepeat: 'no-repeat, no-repeat',
+            backgroundImage: `url(${blurOneSrc}), url(${waveSrc})`,
+            backgroundPosition: 'center top, center 110rem',
+            backgroundSize: '60rem auto, max(600px, 100vw) auto',
             '> *': {
               gridColumn: 2,
+              zIndex: 1,
+            },
+            [mediaQuery.medium]: {
+              backgroundPosition: '70% top, center 70rem',
             },
           }}
         >
