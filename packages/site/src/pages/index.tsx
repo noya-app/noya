@@ -99,14 +99,14 @@ function Layout({ children }: { children: React.ReactNode }) {
             gridArea: '1 / 1 / 1 / 1',
             backgroundRepeat: 'no-repeat, no-repeat',
             backgroundImage: `url(${blurOneSrc}), url(${waveSrc})`,
-            backgroundPosition: 'center top, center 110rem',
+            backgroundPosition: 'center 12rem, center 116rem',
             backgroundSize: '60rem auto, max(600px, 100vw) auto',
             '> *': {
               gridColumn: 2,
               zIndex: 1,
             },
             [mediaQuery.medium]: {
-              backgroundPosition: '70% top, center 70rem',
+              backgroundPosition: '70% top, center 90rem',
             },
           }}
         >
@@ -221,14 +221,14 @@ export default function App() {
         </Stack>
       </Grid>
 
-      <Spacer size="12rem" />
+      <Spacer size="24rem" />
 
       <Grid
         gridColumn="1 / -1"
         gridTemplateColumns="repeat(12, 1fr)"
         gap="1rem"
         css={{
-          rowGap: '4rem',
+          rowGap: '6rem',
           [mediaQuery.medium]: {
             rowGap: '1rem',
           },
@@ -285,7 +285,14 @@ export default function App() {
           </Text>
         </Stack>
 
-        <Spacer size="12rem" />
+        <Spacer
+          size="6rem"
+          css={{
+            [mediaQuery.medium]: {
+              minHeight: '24rem',
+            },
+          }}
+        />
 
         <Stack
           alignItems="center"
@@ -305,13 +312,14 @@ export default function App() {
             Noya is built on a modular set of packages that can be used on their
             own or altogether in our featured app.
           </Text>
-          <Spacer size="4rem" />
         </Stack>
       </Grid>
 
+      <Spacer size="8rem" />
+
       <Packages />
 
-      <Spacer size="12rem" />
+      <Spacer size="24rem" />
 
       <Grid
         gridColumn="1 / -1"
@@ -369,31 +377,48 @@ export default function App() {
             <Text variant="mark">{preventTextOprhan('To Multiple Tools')}</Text>
           </Text>
           <Text variant="body1">
-            Import design files from Sketch, Figma, and Adobe XD.
+            Import design files from Sketch, and soon Figma, and Adobe XD.
           </Text>
         </Stack>
       </Grid>
 
-      <Spacer size="12rem" />
+      <Spacer size="24rem" />
 
       <Stack alignItems="center" gridColumn="1 / -1">
-        <Text variant="heading2" css={textStyles.mark}>
+        <Text variant="heading2" css={{ ...textStyles.mark, fontSize: '5rem' }}>
           Open Source
         </Text>
-        <Spacer size="2rem" />
-        <Text variant="body1" alignment="center" width="40ch">
+        <Spacer
+          size="2rem"
+          css={{
+            [mediaQuery.medium]: {
+              minHeight: '4rem',
+            },
+          }}
+        />
+        <Text
+          variant="body1"
+          alignment="center"
+          css={{
+            fontSize: '3rem',
+            width: '24ch',
+            [mediaQuery.medium]: {
+              width: '40ch',
+            },
+          }}
+        >
           The core library is completely free and we are committed to creating a
           rich ecosystem for designers and developers.
         </Text>
       </Stack>
 
-      <Spacer size="12rem" />
+      <Spacer size="24rem" />
 
       <Grid
-        gridColumn="1 / -1"
         gridTemplateColumns="repeat(12, 1fr)"
         gap="1rem"
         css={{
+          gridColumn: '1 / -1 !important',
           rowGap: '4rem',
           [mediaQuery.medium]: {
             rowGap: '1rem',
@@ -402,34 +427,61 @@ export default function App() {
       >
         <Stack
           gap="2rem"
-          // gridColumn="2 / span 10"
           css={{
+            gridColumn: '1 / span 12',
             gridRow: '1',
+            alignItems: 'center',
             textAlign: 'center',
             [mediaQuery.medium]: {
-              gridColumn: '1 / span 5',
+              gridColumn: '2 / span 4',
               textAlign: 'left',
+              alignItems: 'start',
             },
           }}
         >
           <Text variant="heading2">
             Meet the <br />
-            <Text variant="mark">{preventTextOprhan('Contributors')}</Text>
+            <Text variant="mark">Contributors</Text>
           </Text>
           <Text variant="body1" width="24ch">
-            Noya wouldn’t be possible without these amazing people
+            Noya wouldn’t be possible without an amazing community.
           </Text>
         </Stack>
 
         <Stack
           flexDirection="row"
           alignItems="center"
-          gridColumn="6 / span 7"
+          gridColumn="1 / span 12"
           gap="4rem"
+          css={{
+            position: 'relative',
+            overflow: 'auto',
+            scrollSnapType: 'x mandatory',
+            paddingLeft: 'calc(50vw - 50px)',
+            paddingBottom: '30px',
+            /** Hide horizontal scrollbar on mobile. */
+            clipPath: 'inset(0 0 30px 0)',
+            [mediaQuery.medium]: {
+              paddingLeft: 0,
+              gridColumn: '6 / span 7',
+            },
+          }}
         >
+          <OverflowGradient />
           {['Devin', 'Travis', 'Maria', 'Leanne'].map((contributor) => (
-            <div key={contributor}>{contributor}</div>
+            <div
+              key={contributor}
+              css={{
+                width: 100,
+                height: 100,
+                flexShrink: 0,
+                background: '#be6dff',
+                borderRadius: '100%',
+              }}
+            />
           ))}
+          {/* Add space to the end of the scroll container */}
+          <div css={{ flex: '0 0 1rem' }} />
         </Stack>
       </Grid>
 
@@ -438,23 +490,19 @@ export default function App() {
   );
 }
 
-function GitHubIcon() {
-  return (
-    <Stack
-      as="svg"
-      viewBox="0 0 40 40"
-      fill="none"
-      css={{ height: 'var(--header-icon-size)' }}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M19.9987 2.26685C10.2075 2.26685 2.26697 10.2063 2.26697 20.0008C2.26697 27.8346 7.34764 34.4818 14.3944 36.8279C15.2816 36.99 15.6049 36.4423 15.6049 35.9722C15.6049 35.5508 15.5897 34.4362 15.581 32.9567C10.6484 34.0279 9.60765 30.5791 9.60765 30.5791C8.80095 28.5303 7.63831 27.9847 7.63831 27.9847C6.0282 26.8852 7.76023 26.9071 7.76023 26.9071C9.54015 27.0322 10.4764 28.7348 10.4764 28.7348C12.0582 31.4444 14.6274 30.6618 15.6376 30.2079C15.7987 29.0626 16.257 28.281 16.7632 27.8378C12.8256 27.3892 8.68556 25.8685 8.68556 19.0733C8.68556 17.1366 9.37685 15.5548 10.5112 14.3148C10.3283 13.8663 9.71978 12.0635 10.6854 9.62168C10.6854 9.62168 12.1735 9.14486 15.5614 11.4386C16.9755 11.0456 18.4931 10.8497 20.0008 10.842C21.5075 10.8497 23.024 11.0456 24.4403 11.4386C27.826 9.14486 29.3118 9.62168 29.3118 9.62168C30.2798 12.0635 29.6713 13.8663 29.4894 14.3148C30.626 15.5548 31.3118 17.1366 31.3118 19.0733C31.3118 25.8859 27.1652 27.385 23.2156 27.8236C23.8514 28.3714 24.4185 29.4535 24.4185 31.1082C24.4185 33.478 24.3968 35.3908 24.3968 35.9722C24.3968 36.4468 24.7168 36.9988 25.616 36.8255C32.6574 34.4754 37.7337 27.8335 37.7337 20.0008C37.7337 10.2063 29.7932 2.26685 19.9987 2.26685Z"
-        fill="white"
-      />
-    </Stack>
-  );
-}
+const OverflowGradient = styled.div({
+  display: 'none',
+  [mediaQuery.medium]: {
+    display: 'block',
+    position: 'sticky',
+    top: 0,
+    left: 0,
+    width: 32,
+    height: '100%',
+    flexShrink: 0,
+    background: 'linear-gradient(to left,rgb(45 14 70 / 0%),rgb(45 14 70))',
+  },
+});
 
 const StyledPagerView = styled(PagerView)({
   gridColumn: '1 / -1 !important',
@@ -515,3 +563,21 @@ function Packages() {
 //     </Stack>
 //   );
 // }
+
+function GitHubIcon() {
+  return (
+    <Stack
+      as="svg"
+      viewBox="0 0 40 40"
+      fill="none"
+      css={{ height: 'var(--header-icon-size)' }}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M19.9987 2.26685C10.2075 2.26685 2.26697 10.2063 2.26697 20.0008C2.26697 27.8346 7.34764 34.4818 14.3944 36.8279C15.2816 36.99 15.6049 36.4423 15.6049 35.9722C15.6049 35.5508 15.5897 34.4362 15.581 32.9567C10.6484 34.0279 9.60765 30.5791 9.60765 30.5791C8.80095 28.5303 7.63831 27.9847 7.63831 27.9847C6.0282 26.8852 7.76023 26.9071 7.76023 26.9071C9.54015 27.0322 10.4764 28.7348 10.4764 28.7348C12.0582 31.4444 14.6274 30.6618 15.6376 30.2079C15.7987 29.0626 16.257 28.281 16.7632 27.8378C12.8256 27.3892 8.68556 25.8685 8.68556 19.0733C8.68556 17.1366 9.37685 15.5548 10.5112 14.3148C10.3283 13.8663 9.71978 12.0635 10.6854 9.62168C10.6854 9.62168 12.1735 9.14486 15.5614 11.4386C16.9755 11.0456 18.4931 10.8497 20.0008 10.842C21.5075 10.8497 23.024 11.0456 24.4403 11.4386C27.826 9.14486 29.3118 9.62168 29.3118 9.62168C30.2798 12.0635 29.6713 13.8663 29.4894 14.3148C30.626 15.5548 31.3118 17.1366 31.3118 19.0733C31.3118 25.8859 27.1652 27.385 23.2156 27.8236C23.8514 28.3714 24.4185 29.4535 24.4185 31.1082C24.4185 33.478 24.3968 35.3908 24.3968 35.9722C24.3968 36.4468 24.7168 36.9988 25.616 36.8255C32.6574 34.4754 37.7337 27.8335 37.7337 20.0008C37.7337 10.2063 29.7932 2.26685 19.9987 2.26685Z"
+        fill="white"
+      />
+    </Stack>
+  );
+}
