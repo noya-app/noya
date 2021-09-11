@@ -99,14 +99,21 @@ function Layout({ children }: { children: React.ReactNode }) {
             gridArea: '1 / 1 / 1 / 1',
             backgroundRepeat: 'no-repeat, no-repeat',
             backgroundImage: `url(${blurOneSrc}), url(${waveSrc})`,
-            backgroundPosition: 'center 12rem, center 116rem',
-            backgroundSize: '60rem auto, max(600px, 100vw) auto',
+            backgroundPosition: 'center 4%, center 42%',
+            backgroundSize: '80rem auto, max(600px, 100vw) auto',
             '> *': {
               gridColumn: 2,
               zIndex: 1,
             },
             [mediaQuery.medium]: {
-              backgroundPosition: '70% top, center 90rem',
+              backgroundPosition: '18vw -2%, center 40%',
+              backgroundSize: '100rem auto, max(600px, 100vw) auto',
+            },
+            [mediaQuery.large]: {
+              backgroundPosition: '18vw ​-5%, center 40%',
+            },
+            [mediaQuery.xlarge]: {
+              backgroundPosition: '18vw -2%, center 40%',
             },
           }}
         >
@@ -166,7 +173,7 @@ export default function App() {
         css={{
           minHeight: '6rem',
           [mediaQuery.medium]: {
-            minHeight: '1rem',
+            minHeight: '8rem',
           },
         }}
       />
@@ -185,10 +192,12 @@ export default function App() {
       >
         <Stack
           gap="2rem"
+          alignItems="center"
           css={{
             gridColumn: '2 / span 10',
             textAlign: 'center',
             [mediaQuery.medium]: {
+              alignItems: 'start',
               gridColumn: '1 / span 6',
               textAlign: 'left',
             },
@@ -197,7 +206,7 @@ export default function App() {
           <Text variant="heading1">
             Build Your Own <br /> <Text variant="mark">Design Tool</Text>
           </Text>
-          <Text variant="body1">
+          <Text variant="body1" width="32ch">
             Noya is an ecosystem of design utilities to help with your next
             project.
           </Text>
@@ -485,7 +494,64 @@ export default function App() {
         </Stack>
       </Grid>
 
-      <Spacer size="12rem" />
+      <Spacer size="24rem" />
+
+      <Stack gridColumn="1 / -1" alignItems="center">
+        <Text variant="heading2">Stay In Touch</Text>
+        <Spacer size="2rem" />
+        <Text
+          variant="body1"
+          alignment="center"
+          css={{
+            width: '24ch',
+            [mediaQuery.medium]: {
+              // width: '40ch',
+            },
+          }}
+        >
+          Get updates on the lastest releases and new features.
+        </Text>
+        <Spacer size="4rem" />
+        <Stack flexDirection="row">
+          <input
+            css={{
+              fontSize: '1.5rem',
+              minWidth: 300,
+              padding: '2rem',
+              outline: 0,
+              border: '1px solid white',
+              borderTopLeftRadius: '1rem',
+              borderBottomLeftRadius: '1rem',
+              ':focus': {
+                border: '1px solid #be6dff',
+              },
+            }}
+          />
+          <button
+            css={{
+              fontSize: '1.5rem',
+              fontWeight: 500,
+              padding: '2rem',
+              border: 'none',
+              borderTopRightRadius: '1rem',
+              borderBottomRightRadius: '1rem',
+              background: 'hsl(273deg 92% 59%)',
+              color: 'white',
+              cursor: 'pointer',
+              ':hover': {
+                background: 'hsl(273deg 90% 61%)',
+              },
+              ':active': {
+                background: 'hsl(273deg 93% 56%)',
+              },
+            }}
+          >
+            Sign Up
+          </button>
+        </Stack>
+      </Stack>
+
+      <Spacer size="24rem" />
     </Layout>
   );
 }

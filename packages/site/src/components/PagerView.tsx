@@ -52,7 +52,7 @@ export function View({ color }: { color: string }) {
         backgroundColor: color,
         transform: trackXOffset.to((x) => `translateX(${getViewTarget(x)}px)`),
         width: viewSize,
-        height: 200,
+        height: '16rem',
       }}
     >
       {initialOffset / viewSize}
@@ -132,7 +132,7 @@ export function PagerView({
           </PagerViewContext.Provider>
         ))}
       </div>
-      <div>
+      <div css={{ height: '2rem' }}>
         <button onClick={() => moveTrackPosition(viewSize)}>Prev</button>
         <button onClick={() => moveTrackPosition(-viewSize)}>Next</button>
       </div>

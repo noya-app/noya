@@ -4,13 +4,13 @@ export const size = {
   medium: '784px',
   large: '960px',
   xlarge: '1280px',
-};
+} as const;
 
 export const mediaQuery = {
   medium: `@media (min-width: ${size.medium})`,
   large: `@media (min-width: ${size.large})`,
   xlarge: `@media (min-width: ${size.xlarge})`,
-};
+} as const;
 
 export const cssVariables = {
   // '--heading1': '2.5rem',
@@ -61,13 +61,11 @@ export const cssVariables = {
   [mediaQuery.medium]: {
     '--header-icon-size': '2rem',
   },
-};
+} as const;
 
-export const colors = {};
+export const colors = {} as const;
 
-export const textStyles: {
-  [key: string]: CSSObject;
-} = {
+export const textStyles = {
   heading1: {
     fontSize: `var(--heading1)`,
     fontWeight: 700,
@@ -98,4 +96,6 @@ export const textStyles: {
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
   },
+} as {
+  [key: string]: CSSObject;
 };
