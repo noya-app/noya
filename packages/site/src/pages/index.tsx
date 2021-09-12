@@ -193,7 +193,6 @@ export default function App() {
         }}
       >
         <Stack
-          gap="2rem"
           alignItems="center"
           css={{
             gridColumn: '2 / span 10',
@@ -208,10 +207,13 @@ export default function App() {
           <Text variant="heading1">
             Build Your Own <br /> <Text variant="mark">Design Tool</Text>
           </Text>
+          <Spacer size="2rem" />
           <Text variant="body1" width="32ch">
             Noya is an ecosystem of design utilities to help with your next
             project.
           </Text>
+          <Spacer size="4rem" />
+          <Button>Open App</Button>
         </Stack>
 
         <Stack
