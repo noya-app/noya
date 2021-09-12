@@ -13,50 +13,11 @@ export const mediaQuery = {
 } as const;
 
 export const cssVariables = {
-  // '--heading1': '2.5rem',
-  // '--heading2': '2rem',
-  // '--heading3': '1.5rem',
-  // '--body1': '1rem',
-  // '--body2': '0.85rem',
-
-  '--space-xxsmall': '0.125rem',
-  '--space-xsmall': '0.25rem',
-  '--space-small': '0.5rem',
-  '--space-medium': '1rem',
-  '--space-large': '2rem',
-  '--space-xlarge': '3rem',
-  '--space-xxlarge': '4rem',
-  '--space-xxxlarge': '6rem',
-
-  '--size-xxsmall': '0.125rem',
-  '--size-xsmall': '0.25rem',
-  '--size-small': '0.5rem',
-  '--size-medium': '1rem',
-  '--size-large': '2rem',
-  '--size-xlarge': '3rem',
-  '--size-xxlarge': '4rem',
-  '--size-xxxlarge': '6rem',
-
-  '--line-length-heading': '12ch',
-  '--line-length-narrow': '24ch',
-  '--line-length-wide': '60ch',
-
-  // [mediaQuery.large]: {
-  //   '--heading1': '3.5rem',
-  //   '--heading2': '3rem',
-  //   '--heading3': '2.5rem',
-  //   '--body1': '1rem',
-  //   '--body2': '0.85rem',
-  // },
-
-  // [mediaQuery.xlarge]: {
   '--heading1': '5rem',
   '--heading2': '4rem',
   '--heading3': '3rem',
   '--body1': '2rem',
   '--body2': '1rem',
-  // },
-
   '--header-icon-size': '3rem',
   [mediaQuery.medium]: {
     '--header-icon-size': '2rem',
