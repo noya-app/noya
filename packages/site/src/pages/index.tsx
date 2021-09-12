@@ -326,7 +326,7 @@ export default function App() {
         </Stack>
       </Grid>
 
-      <Spacer size="8rem" />
+      <Spacer size="6rem" />
 
       <Packages />
 
@@ -536,8 +536,8 @@ export default function App() {
           <InputField />
           <Button
             css={{
-              borderTopRightRadius: '1rem',
-              borderBottomRightRadius: '1rem',
+              borderTopLeftRadius: '0 !important',
+              borderBottomLeftRadius: '0 !important',
             }}
           >
             Sign Up
@@ -587,42 +587,39 @@ function Packages() {
   return (
     <StyledPagerView>
       {colors.map((color, index) => (
-        <View key={index} color={color} />
+        <View key={index}>
+          <Grid
+            padding="3rem"
+            gap="2rem"
+            css={{
+              margin: '2rem',
+              borderRadius: '2rem',
+              background: 'rgba(255,255,255,0.1)',
+              userSelect: 'none',
+            }}
+          >
+            <Text variant="heading3" css={{ gridRow: '1', lineHeight: '1' }}>
+              App
+            </Text>
+            <a
+              href="/"
+              css={{
+                '--header-icon-size': '3rem',
+                gridRow: '1',
+                placeSelf: 'center end',
+              }}
+            >
+              <GitHubIcon />
+            </a>
+            <Text variant="body1" css={{ gridColumn: '1 / span 2' }}>
+              A full featured design application built using Noya packages.
+            </Text>
+          </Grid>
+        </View>
       ))}
     </StyledPagerView>
   );
 }
-
-// function Package({
-//   heading,
-//   content,
-//   active,
-//   setIndex,
-// }: {
-//   heading: string;
-//   content: string;
-//   active?: boolean;
-//   setIndex?: () => void;
-// }) {
-//   return (
-//     <Stack
-//       axis="y"
-//       width="32rem"
-//       padding="4rem"
-//       gap="2rem"
-//       background="rgba(255,255,255,0.1)"
-//       onClick={setIndex}
-//       style={{
-//         flexShrink: 0,
-//         borderRadius: '2rem',
-//         transform: active ? undefined : 'scale(0.85)',
-//       }}
-//     >
-//       <Text variant="heading3">{heading}</Text>
-//       <Text variant="body1">{content}</Text>
-//     </Stack>
-//   );
-// }
 
 function GitHubIcon() {
   return (

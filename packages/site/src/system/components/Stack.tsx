@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { colors } from '../theme';
 
 export type StackProps = {
   gridColumn?: string;
@@ -20,7 +19,7 @@ export type StackProps = {
   paddingYStart?: number | string;
   paddingYEnd?: number | string;
   gap?: number | string;
-  background?: keyof typeof colors;
+  background?: string;
 };
 
 export const Stack = styled.div<StackProps>(

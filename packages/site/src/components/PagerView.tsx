@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useDrag } from 'react-use-gesture';
 import { animated, SpringValue, useSpring } from 'react-spring';
 import { snap } from '@popmotion/popcorn';
+import { Spacer, Stack } from '../system';
 
 import { useIsomorphicLayoutEffect } from '../hooks/use-isomorphic-layout-effect';
 
@@ -24,9 +25,15 @@ const usePagerContext = () => {
   return contextValue;
 };
 
-const viewSize = 300;
+const viewSize = 540;
 
-export function View({ color }: { color: string }) {
+export function View({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   const { initialOffset, frameSize, trackSize, trackXOffset } =
     usePagerContext();
   const getViewTarget = (value: number) => {
@@ -48,15 +55,16 @@ export function View({ color }: { color: string }) {
   return (
     // @ts-ignore
     <animated.div
-      style={{
+      className={className}
+      css={{
         gridArea: '1 / 1',
-        backgroundColor: color,
-        transform: trackXOffset.to((x) => `translateX(${getViewTarget(x)}px)`),
         width: viewSize,
-        height: '16rem',
+      }}
+      style={{
+        transform: trackXOffset.to((x) => `translateX(${getViewTarget(x)}px)`),
       }}
     >
-      {initialOffset / viewSize}
+      {children}
     </animated.div>
   );
 }
@@ -113,7 +121,7 @@ export function PagerView({
         ref={ref}
         onMouseDown={() => api.stop()}
         className={className}
-        style={{
+        css={{
           display: 'grid',
           gridAutoFlow: 'column',
           width: '100%',
@@ -133,10 +141,32 @@ export function PagerView({
           </PagerViewContext.Provider>
         ))}
       </div>
-      <div css={{ height: '2rem' }}>
-        <button onClick={() => moveTrackPosition(viewSize)}>Prev</button>
-        <button onClick={() => moveTrackPosition(-viewSize)}>Next</button>
-      </div>
+      <Spacer size="2rem" />
+      <Stack
+        flexDirection="row"
+        justifyContent="center"
+        height="1rem"
+        gap="1rem"
+        css={{
+          gridColumn: '1 / -1',
+        }}
+      >
+        {React.Children.map(children, (_, index) => (
+          <button
+            key={index}
+            aria-label={`Move to ${index}`}
+            onClick={() => moveTrackPosition(-index * viewSize)}
+            css={{
+              width: '1rem',
+              height: '1rem',
+              padding: 0,
+              border: 'none',
+              borderRadius: '100%',
+              backgroundColor: '#9171a9',
+            }}
+          />
+        ))}
+      </Stack>
     </>
   );
 }
