@@ -22,8 +22,8 @@ export type GridProps = {
   paddingYStart?: number | string;
   paddingYEnd?: number | string;
   gap?: number | string;
-  gapColumn?: number | string;
-  gapRow?: number | string;
+  columnGap?: number | string;
+  rowGap?: number | string;
   background?: keyof typeof colors;
 };
 
@@ -48,7 +48,7 @@ export const Grid = styled.div<GridProps>((props) => ({
   paddingBlockStart: props.paddingYStart,
   paddingBlockEnd: props.paddingYEnd,
   gap: props.gap,
-  gapColumn: props.gapColumn,
-  gapRow: props.gapRow,
+  columnGap: props.columnGap,
+  rowGap: props.rowGap,
   background: props.background,
 }));

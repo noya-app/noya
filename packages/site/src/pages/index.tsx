@@ -1,18 +1,23 @@
 import * as React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import {
+  Button,
   Grid,
+  InputField,
+  Spacer,
   Stack,
   Text,
-  Spacer,
+  cssVariables,
   mediaQuery,
   textStyles,
-  cssVariables,
 } from '../system';
 import { PagerView, View } from '../components/PagerView';
 import logoSrc from '../assets/logo.svg';
 import blurOneSrc from '../assets/blur-1.svg';
 import waveSrc from '../assets/wave.svg';
+import sketchSrc from '../assets/sketch.svg';
+import figmaSrc from '../assets/figma.svg';
+import xdSrc from '../assets/xd.svg';
 
 const preventTextOprhan = (text: string) => text.replace(/ /g, '\u00a0');
 
@@ -99,21 +104,18 @@ function Layout({ children }: { children: React.ReactNode }) {
             gridArea: '1 / 1 / 1 / 1',
             backgroundRepeat: 'no-repeat, no-repeat',
             backgroundImage: `url(${blurOneSrc}), url(${waveSrc})`,
-            backgroundPosition: 'center 4%, center 42%',
+            backgroundPosition: 'center 4%, center 116rem',
             backgroundSize: '80rem auto, max(600px, 100vw) auto',
             '> *': {
               gridColumn: 2,
               zIndex: 1,
             },
             [mediaQuery.medium]: {
-              backgroundPosition: '18vw -2%, center 40%',
+              backgroundPosition: 'calc(50% + 360px) -2%, center 100rem',
               backgroundSize: '100rem auto, max(600px, 100vw) auto',
             },
-            [mediaQuery.large]: {
-              backgroundPosition: '18vw ​-5%, center 40%',
-            },
             [mediaQuery.xlarge]: {
-              backgroundPosition: '18vw -2%, center 40%',
+              backgroundPosition: 'calc(50% + 360px) -2%, center 92rem',
             },
           }}
         >
@@ -334,8 +336,9 @@ export default function App() {
         gridColumn="1 / -1"
         gridTemplateColumns="repeat(12, 1fr)"
         gap="1rem"
+        alignItems="center"
         css={{
-          rowGap: '4rem',
+          rowGap: '6rem',
           [mediaQuery.medium]: {
             rowGap: '1rem',
           },
@@ -344,28 +347,43 @@ export default function App() {
         <Grid
           gridColumn="1 / -1"
           gridTemplateColumns="repeat(3, 1fr)"
+          alignItems="center"
+          justifyItems="center"
           css={{
             gridRow: '2',
-            gap: '4rem',
+            gap: '2rem',
             [mediaQuery.medium]: {
               gridRow: '1',
-              gridColumn: '1 / span 6',
+              gridColumn: '1 / span 5',
               gap: '1rem',
             },
           }}
         >
-          {['Sketch', 'Figma', 'XD'].map((name) => (
-            <Stack
-              key={name}
-              alignItems="center"
-              css={{
-                [mediaQuery.medium]: {
-                  flexDirection: 'row',
-                },
-              }}
-            >
-              <Text variant="body1">{name}</Text>
-            </Stack>
+          {[
+            { name: 'Sketch', source: sketchSrc },
+            { name: 'Figma', source: figmaSrc },
+            { name: 'XD', source: xdSrc },
+          ].map(({ name, source }, index) => (
+            <>
+              <img
+                src={source}
+                alt={name}
+                css={{
+                  gridColumn: index + 1,
+                  gridRow: 1,
+                  height: '10rem',
+                  opacity: name === 'Sketch' ? undefined : 0.5,
+                  [mediaQuery.medium]: {
+                    height: '8rem',
+                  },
+                }}
+              />
+              {name === 'Sketch' ? null : (
+                <Text css={{ gridColumn: index + 1, gridRow: 2 }}>
+                  Coming Soon
+                </Text>
+              )}
+            </>
           ))}
         </Grid>
 
@@ -455,6 +473,8 @@ export default function App() {
           <Text variant="body1" width="24ch">
             Noya wouldn’t be possible without an amazing community.
           </Text>
+          <Spacer size="0.5rem" />
+          <Button>Get started contributing</Button>
         </Stack>
 
         <Stack
@@ -513,41 +533,15 @@ export default function App() {
         </Text>
         <Spacer size="4rem" />
         <Stack flexDirection="row">
-          <input
+          <InputField />
+          <Button
             css={{
-              fontSize: '1.5rem',
-              minWidth: 300,
-              padding: '2rem',
-              outline: 0,
-              border: '1px solid white',
-              borderTopLeftRadius: '1rem',
-              borderBottomLeftRadius: '1rem',
-              ':focus': {
-                border: '1px solid #be6dff',
-              },
-            }}
-          />
-          <button
-            css={{
-              fontSize: '1.5rem',
-              fontWeight: 500,
-              padding: '2rem',
-              border: 'none',
               borderTopRightRadius: '1rem',
               borderBottomRightRadius: '1rem',
-              background: 'hsl(273deg 92% 59%)',
-              color: 'white',
-              cursor: 'pointer',
-              ':hover': {
-                background: 'hsl(273deg 90% 61%)',
-              },
-              ':active': {
-                background: 'hsl(273deg 93% 56%)',
-              },
             }}
           >
             Sign Up
-          </button>
+          </Button>
         </Stack>
       </Stack>
 

@@ -46,6 +46,7 @@ export function View({ color }: { color: string }) {
   };
 
   return (
+    // @ts-ignore
     <animated.div
       style={{
         gridArea: '1 / 1',
