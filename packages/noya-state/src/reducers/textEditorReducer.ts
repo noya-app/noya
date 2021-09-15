@@ -253,6 +253,7 @@ export function textEditorReducer(
 
         if (draftLayer.textBehaviour === Sketch.TextBehaviour.Flexible) {
           draftLayer.frame.width = paragraph.getMaxWidth();
+          draftLayer.frame.height = paragraph.getHeight();
         } else if (draftLayer.textBehaviour === Sketch.TextBehaviour.Fixed) {
           draftLayer.frame.height = paragraph.getHeight();
         }

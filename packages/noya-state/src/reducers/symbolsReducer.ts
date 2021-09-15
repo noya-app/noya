@@ -1,9 +1,16 @@
 import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { GroupLayouts, Layers, SetNumberMode } from '..';
+import {
+  ApplicationReducerContext,
+  getLayerParagraph,
+  GroupLayouts,
+  Layers,
+  SetNumberMode,
+} from '..';
 import { getSelectedLayers } from '../selectors/layerSelectors';
 import { getSelectedSymbols, getSymbols } from '../selectors/themeSelectors';
 import { ApplicationState } from './applicationReducer';
+import { CanvasKit } from 'canvaskit';
 
 export type SymbolsAction =
   | [type: 'setAdjustContentOnResize', value: boolean]
@@ -14,7 +21,7 @@ export type SymbolsAction =
   | [type: 'setLayoutAxis', value: Sketch.InferredLayoutAxis | undefined]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
   | [type: 'setLayoutAnchor', value: Sketch.InferredLayoutAnchor]
-  | [type: 'setMinWidth', amount: number, type: SetNumberMode]
+  | [type: 'setMinSize', amount: number | undefined, type: SetNumberMode]
   | [type: 'setAllowsOverrides', value: boolean]
   | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
   | [type: 'setInstanceSymbolSource', symbolId: string]
@@ -24,6 +31,8 @@ export type SymbolsAction =
 export function symbolsReducer(
   state: ApplicationState,
   action: SymbolsAction,
+  CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'setAdjustContentOnResize': {
@@ -118,7 +127,7 @@ export function symbolsReducer(
         });
       });
     }
-    case 'setMinWidth': {
+    case 'setMinSize': {
       const [, amount, type = 'replace'] = action;
 
       return produce(state, (draft) => {
@@ -130,6 +139,11 @@ export function symbolsReducer(
             !GroupLayouts.isInferredLayout(symbol.groupLayout)
           )
             return;
+
+          if (!amount) {
+            symbol.groupLayout.minSize = undefined;
+            return;
+          }
 
           const value = symbol.groupLayout.minSize || 0;
           symbol.groupLayout.minSize =
@@ -253,34 +267,130 @@ export function symbolsReducer(
 
             if (
               !symbolMaster ||
-              symbolMaster.groupLayout?._class ===
-                'MSImmutableFreeformGroupLayout'
+              !symbolMaster.groupLayout ||
+              !GroupLayouts.isInferredLayout(symbolMaster.groupLayout)
             )
               return;
+
             const layerId = name.split('_')[0];
             const overridedTextLayer = Layers.findInArray(
               symbolMaster.layers,
               (layer) => layer.do_objectID === layerId,
             ) as Sketch.Text;
+
             if (!overridedTextLayer) return;
 
+            const copyTextLayer = produce(overridedTextLayer, (layer) => {
+              layer.attributedString.string = value
+                ? value
+                : layer.attributedString.string;
+              layer.frame.width = Number.MAX_VALUE;
+            });
+
+            const paragraph = getLayerParagraph(
+              CanvasKit,
+              context.fontManager,
+              copyTextLayer,
+            );
+
+            const { axis, layoutAnchor, minSize } = symbolMaster.groupLayout;
+
             if (
+              axis === Sketch.InferredLayoutAxis.Horizontal &&
               overridedTextLayer.textBehaviour === Sketch.TextBehaviour.Flexible
             ) {
-              const textWidth =
-                9 *
-                (value?.length ??
-                  overridedTextLayer.attributedString.string.length);
+              if (minSize !== undefined) {
+                symbol.frame = {
+                  ...symbol.frame,
+                  width: minSize,
+                };
+
+                return;
+              }
+
               const paddingLeft = overridedTextLayer.frame.x;
               const paddingRight =
                 symbolMaster.frame.width -
-                overridedTextLayer.frame.width +
-                paddingLeft;
+                (overridedTextLayer.frame.width + paddingLeft);
+
               symbol.frame = {
                 ...symbol.frame,
-                width: textWidth + paddingLeft + paddingRight,
+                width: paragraph.getMaxWidth() + paddingLeft + paddingRight,
               };
+
+              if (layoutAnchor === Sketch.InferredLayoutAnchor.Middle) {
+                symbol.frame = {
+                  ...symbol.frame,
+                  x: symbol.frame.x,
+                };
+              } else if (layoutAnchor === Sketch.InferredLayoutAnchor.Max) {
+                symbol.frame = {
+                  ...symbol.frame,
+                  x: symbol.frame.x,
+                };
+              }
+            } else if (
+              overridedTextLayer.textBehaviour === Sketch.TextBehaviour.Fixed
+            ) {
+              if (minSize !== undefined) {
+                symbol.frame = {
+                  ...symbol.frame,
+                  height: minSize,
+                };
+                return;
+              }
+              const paddingTop = overridedTextLayer.frame.y;
+              const paddingBottom =
+                symbolMaster.frame.height -
+                overridedTextLayer.frame.height +
+                paddingTop;
+
+              symbol.frame = {
+                ...symbol.frame,
+                height: paragraph.getHeight() + paddingTop + paddingBottom,
+              };
+
+              if (layoutAnchor === Sketch.InferredLayoutAnchor.Middle) {
+                symbol.frame = {
+                  ...symbol.frame,
+                  y: symbol.frame.y,
+                };
+              } else if (layoutAnchor === Sketch.InferredLayoutAnchor.Max) {
+                symbol.frame = {
+                  ...symbol.frame,
+                  y: symbol.frame.y,
+                };
+              }
             }
+          } else if (name.includes('symbolID')) {
+            const symbolMaster = getSymbols(state).find(
+              (symbolMaster) => symbolMaster.symbolID === symbol.symbolID,
+            );
+
+            if (!symbolMaster) return;
+
+            const layerId = name.split('_')[0];
+
+            const overridedSymbolLayer = Layers.findInArray(
+              symbolMaster.layers,
+              (layer) => layer.do_objectID === layerId,
+            ) as Sketch.SymbolInstance;
+
+            if (!overridedSymbolLayer) return;
+
+            // change position of symbol to the rigth / left to move to current x.
+            /*
+            if (value === 'none') {
+              symbol.frame = {
+                ...symbol.frame,
+                width: symbol.frame.width - overridedSymbolLayer.frame.width,
+              };
+            } else {
+              symbol.frame = {
+                ...symbol.frame,
+                width: symbol.frame.width + overridedSymbolLayer.frame.width,
+              };
+            }*/
           }
         });
       });

@@ -11,6 +11,7 @@ import {
   Primitives,
   replaceTextInRange,
   Selectors,
+  GroupLayouts,
 } from 'noya-state';
 import { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
@@ -133,15 +134,75 @@ const Symbol = memo(function Symbol({
         }
       });
 
-      draft.layers = draft.layers.map((l) => {
-        const widthScale = layer.frame.width / symbolMaster.frame.width;
-        const heightScale = layer.frame.height / symbolMaster.frame.height;
+      const textSize = draft.layers.flatMap((l) =>
+        l._class === 'text' ? [[l.frame.width, l.frame.height]] : [],
+      );
+      const textWidth = textSize.reduce(
+        (partial_sum, a) => partial_sum + a[0],
+        0,
+      );
 
-        l.frame = {
-          ...l.frame,
-          width: widthScale * l.frame.width,
-          height: heightScale * l.frame.height,
-        };
+      const textHeight = textSize.reduce(
+        (partial_sum, a) => partial_sum + a[1],
+        0,
+      );
+
+      const widthScale = layer.frame.width / symbolMaster.frame.width;
+      const heightScale = layer.frame.height / symbolMaster.frame.height;
+
+      function getLayerToTheRight(id: string, layers: PageLayer[]) {
+        const sortedLayers = [...layers].sort((a, b) => a.frame.x - b.frame.x);
+        const index = sortedLayers.findIndex((l) => l.do_objectID === id);
+
+        return sortedLayers.length > index + 1
+          ? sortedLayers.slice(index + 1, sortedLayers.length)
+          : null;
+      }
+
+      draft.layers.forEach((layer) => {
+        /// Figure out direction of layout.
+        // Figure out x position of deleted symbol.
+        // Move adjectefe right symbol to x and everything else .
+        if (
+          draft.groupLayout &&
+          GroupLayouts.isInferredLayout(draft.groupLayout)
+        ) {
+          if (layer._class === 'symbolInstance' && layer.symbolID === 'none') {
+            const layers = getLayerToTheRight(layer.do_objectID, draft.layers);
+
+            if (layers && layers.length > 0) {
+              let nextPosition = layer.frame.x;
+              const distance = layers[0].frame.x - nextPosition;
+
+              layers.forEach((l) => {
+                l.frame.x = nextPosition;
+                nextPosition = l.frame.x + distance;
+              });
+            }
+          }
+        }
+      });
+
+      draft.layers = draft.layers.map((l) => {
+        if (l._class !== 'text') {
+          l.frame = {
+            ...l.frame,
+            x: l.frame.x * widthScale,
+            y: l.frame.y * heightScale,
+            width: widthScale * l.frame.width,
+            height: heightScale * l.frame.height,
+          };
+        } else {
+          l.frame = {
+            ...l.frame,
+            x:
+              (l.frame.x * layer.frame.width) /
+              (symbolMaster.frame.width - textWidth),
+            y:
+              (l.frame.y * layer.frame.width) /
+              (symbolMaster.frame.width - textHeight),
+          };
+        }
 
         return l;
       });

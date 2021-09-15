@@ -415,7 +415,10 @@ export function applicationReducer(
             draftLayer,
           );
 
-          if (draftLayer.textBehaviour !== Sketch.TextBehaviour.Fixed) {
+          if (draftLayer.textBehaviour === Sketch.TextBehaviour.Flexible) {
+            draftLayer.frame.width = paragraph.getMaxWidth();
+            draftLayer.frame.height = paragraph.getHeight();
+          } else if (draftLayer.textBehaviour === Sketch.TextBehaviour.Fixed) {
             draftLayer.frame.height = paragraph.getHeight();
           }
         });
@@ -430,13 +433,13 @@ export function applicationReducer(
     case 'setIncludeBackgroundColorInInstance':
     case 'setLayoutAxis':
     case 'setLayoutAnchor':
-    case 'setMinWidth':
+    case 'setMinSize':
     case 'setAllowsOverrides':
     case 'onSetOverrideProperty':
     case 'setInstanceSymbolSource':
     case 'goToSymbolSource':
     case 'setOverrideValue':
-      return symbolsReducer(state, action);
+      return symbolsReducer(state, action, CanvasKit, context);
     case 'moveExportFormat':
     case 'setExportScale':
     case 'setExportName':

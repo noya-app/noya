@@ -31,6 +31,10 @@ export default memo(function SymbolMasterInspector() {
     [dispatch],
   );
 
+  const onAdjustOverrideLayout = useCallback(() => {
+    dispatch('setOverrideValue');
+  }, [dispatch]);
+
   const onResetOverrideValue = useCallback(() => {
     dispatch('setOverrideValue');
   }, [dispatch]);
@@ -60,6 +64,7 @@ export default memo(function SymbolMasterInspector() {
         symbolMaster={symbolMaster}
         onSetOverrideValue={onSetOverrideValue}
         onResetOverrideValue={onResetOverrideValue}
+        onAdjustOverrideLayout={onAdjustOverrideLayout}
       />
     ),
   ];

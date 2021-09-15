@@ -23,12 +23,12 @@ interface Props {
   groupLayout?: Sketch.FreeformGroupLayout | Sketch.InferredGroupLayout;
   setLayoutAxis: (value: Sketch.InferredLayoutAxis | undefined) => void;
   setLayoutAnchor: (value: Sketch.InferredLayoutAnchor) => void;
-  setMinWidth: (value: number, mode: SetNumberMode) => void;
+  setMinSize: (value: number | undefined, mode: SetNumberMode) => void;
 }
 
 export default memo(function SymbolLayoutRow({
   groupLayout,
-  setMinWidth,
+  setMinSize,
   setLayoutAxis,
   setLayoutAnchor,
 }: Props) {
@@ -63,14 +63,15 @@ export default memo(function SymbolLayoutRow({
     }
   }, []);
 
-  const handleNudgeMinWidth = useCallback(
-    (value: number) => setMinWidth(value, 'adjust'),
-    [setMinWidth],
+  // TODO: Allow input number to be undefinded in some cases :thinking:x
+  const handleNudgeMinSize = useCallback(
+    (value: number) => setMinSize(value, 'adjust'),
+    [setMinSize],
   );
 
-  const handleSetMinWidth = useCallback(
-    (value) => setMinWidth(value, 'replace'),
-    [setMinWidth],
+  const handleSetMinSize = useCallback(
+    (value) => setMinSize(value, 'replace'),
+    [setMinSize],
   );
 
   return (
@@ -161,8 +162,8 @@ export default memo(function SymbolLayoutRow({
               <InputField.NumberInput
                 placeholder={'None'}
                 value={minWidth}
-                onSubmit={handleSetMinWidth}
-                onNudge={handleNudgeMinWidth}
+                onSubmit={handleSetMinSize}
+                onNudge={handleNudgeMinSize}
               />
             </InputField.Root>
           </InspectorPrimitives.Row>

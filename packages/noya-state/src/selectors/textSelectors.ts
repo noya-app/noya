@@ -148,7 +148,7 @@ export function getLayerParagraph(
   builder.delete();
   if (layer.textBehaviour === Sketch.TextBehaviour.Flexible) {
     paragraph.layout(Number.MAX_SAFE_INTEGER);
-    paragraph.layout(paragraph.getMinIntrinsicWidth() + 1);
+    paragraph.layout(Math.ceil(paragraph.getMinIntrinsicWidth()));
   } else {
     paragraph.layout(layer.frame.width);
   }

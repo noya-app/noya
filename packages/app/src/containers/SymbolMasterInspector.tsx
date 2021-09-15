@@ -70,9 +70,9 @@ export default memo(function SymbolMasterInspector() {
         },
         [dispatch],
       )}
-      setMinWidth={useCallback(
+      setMinSize={useCallback(
         (value, mode) => {
-          dispatch('setMinWidth', value, mode);
+          dispatch('setMinSize', value, mode);
         },
         [dispatch],
       )}

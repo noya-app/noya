@@ -48,10 +48,10 @@ const MenubarContent = memo(function MenubarContent({
       mimeTypes: ['application/zip'],
     });
 
-    const answer = window.confirm(
+    /*const answer = window.confirm(
       'Opening a new file will replace your current file. Are you sure?',
     );
-    if (answer === false) return;
+    if (answer === false) return;*/
 
     const data = await file.arrayBuffer();
     const sketch = await decode(data);

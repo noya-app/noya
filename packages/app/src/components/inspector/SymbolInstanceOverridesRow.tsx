@@ -1,4 +1,4 @@
-import { ResetIcon } from 'noya-icons';
+import { ResetIcon, SizeIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import {
   InputField,
@@ -17,6 +17,7 @@ interface Props {
   overrideValues: Sketch.OverrideValue[];
   onSetOverrideValue: (overrideName: string, value: string) => void;
   onResetOverrideValue: () => void;
+  onAdjustOverrideLayout: () => void;
 }
 
 const ThemeStyleSelector = ({
@@ -295,6 +296,7 @@ export default memo(function SymbolInstanceOverridesRow({
   overrideValues,
   symbolMaster,
   onResetOverrideValue,
+  onAdjustOverrideLayout,
   onSetOverrideValue,
 }: Props) {
   const [state] = useApplicationState();
@@ -315,7 +317,13 @@ export default memo(function SymbolInstanceOverridesRow({
         <InspectorPrimitives.Row>
           <InspectorPrimitives.Title>Overrides</InspectorPrimitives.Title>
           <Spacer.Horizontal />
-
+          <Button
+            id="reset-symbol-sverrides"
+            tooltip="Reset Overrides"
+            onClick={onAdjustOverrideLayout}
+          >
+            <SizeIcon />
+          </Button>
           <Button
             id="reset-symbol-sverrides"
             tooltip="Reset Overrides"
