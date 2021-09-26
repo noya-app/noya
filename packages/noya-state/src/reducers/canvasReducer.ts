@@ -602,6 +602,7 @@ export function canvasReducer(
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
+
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ||
@@ -1013,6 +1014,7 @@ export function canvasReducer(
 
             layerIndexPaths.forEach((indexPath) => {
               const originalLayer = Layers.access(pageSnapshot, indexPath);
+              if (originalLayer.isLocked) return;
 
               const layerTransform = getLayerTransformAtIndexPath(
                 pageSnapshot,

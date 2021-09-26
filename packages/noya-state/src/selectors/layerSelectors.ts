@@ -271,6 +271,8 @@ export function moveLayer(
     }
 
     layerInfo.forEach(({ layer, transform }, i) => {
+      if (layer.isLocked === true) return;
+
       const parentTransform = getLayerTransformAtIndexPath(
         draftPage,
         parentIndexPath,

@@ -289,7 +289,7 @@ export function applicationReducer(
         return produce(state, (draft) => {
           accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
             (layer) => {
-              if (!layer.style) return;
+              if (!layer.style || layer.isLocked) return;
 
               if (action[0] === 'setFillFillType' && layer.style.fills) {
                 switch (action[2]) {
