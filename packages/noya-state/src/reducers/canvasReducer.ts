@@ -89,7 +89,10 @@ export type InsertedImage = { name: string } & (
 
 export type CanvasAction =
   | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
-  | [type: 'zoomToFit', target: 'canvas' | 'selection']
+  | [
+      type: 'zoomToFit',
+      target: 'canvas' | 'selection' | { type: 'layer'; value: string },
+    ]
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -128,11 +131,15 @@ export function canvasReducer(
       let boundingRect =
         target === 'canvas'
           ? Selectors.getPageContentBoundingRect(page)
-          : Selectors.getBoundingRect(page, state.selectedLayerIds);
+          : target === 'selection'
+          ? Selectors.getBoundingRect(page, state.selectedLayerIds)
+          : Selectors.getBoundingRect(page, [target.value]);
 
       if (!boundingRect) return state;
 
-      const padding = 20;
+      // Padding is 10% of the smallest side of the target
+      const padding = Math.min(boundingRect.width, boundingRect.height) * 0.1;
+
       boundingRect = insetRect(boundingRect, -padding, -padding);
 
       const bounds = createBounds(boundingRect);

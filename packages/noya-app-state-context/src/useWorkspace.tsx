@@ -14,6 +14,7 @@ export function useWorkspace() {
     canvasInsets,
     preferences,
     nextFocusAction,
+    isolatedLayer,
   } = state;
 
   const setCanvasSize = useCallback(
@@ -77,6 +78,7 @@ export function useWorkspace() {
       startRenamingPage,
       renamingLayer,
       startRenamingLayer,
+      isolatedLayer,
     }),
     [
       canvasInsets,
@@ -92,6 +94,7 @@ export function useWorkspace() {
       startRenamingPage,
       renamingLayer,
       startRenamingLayer,
+      isolatedLayer,
     ],
   );
 }

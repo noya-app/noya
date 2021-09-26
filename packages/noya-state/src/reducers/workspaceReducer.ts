@@ -39,6 +39,7 @@ export type WorkspaceState = {
   canvasSize: { width: number; height: number };
   canvasInsets: Insets;
   nextFocusAction?: NextFocusAction;
+  isolatedLayer?: string;
   preferences: {
     showRulers: boolean;
   };
@@ -52,6 +53,7 @@ export type WorkspaceAction =
   | [type: 'setShowRulers', value: boolean]
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
+  | [type: 'setIsolatedLayer', value: string]
   | HistoryAction;
 
 export function workspaceReducer(
@@ -104,6 +106,13 @@ export function workspaceReducer(
       return produce(state, (draft) => {
         draft.canvasSize = size;
         draft.canvasInsets = insets;
+      });
+    }
+    case 'setIsolatedLayer': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.isolatedLayer = value;
       });
     }
     case 'setShowRulers': {

@@ -127,12 +127,24 @@ export default memo(function Canvas() {
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const modKey = useModKey();
-  const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
+  const {
+    setCanvasSize,
+    highlightLayer,
+    highlightedLayer,
+    isolatedLayer,
+    canvasSize,
+  } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => {
       dispatch('pan', { x, y });
     },
   });
+
+  useLayoutEffect(() => {
+    if (!isolatedLayer) return;
+
+    dispatch('zoomToFit', { type: 'layer', value: isolatedLayer });
+  }, [canvasSize, isolatedLayer, dispatch]);
 
   const isPanning =
     state.interactionState.type === 'panMode' ||
