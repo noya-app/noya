@@ -81,11 +81,12 @@ const ArtboardBlur = memo(function ArtboardBlur({
   layerFrame,
 }: ArtboardBlurProps) {
   const CanvasKit = useCanvasKit();
+  const zoom = useZoom();
 
   const maskFilter = useBlurMaskFilter({
     style: CanvasKit.BlurStyle.Normal,
     sigma: 2,
-    respectCTM: true,
+    respectCTM: false,
   });
 
   const blur = usePaint({
@@ -97,7 +98,7 @@ const ArtboardBlur = memo(function ArtboardBlur({
 
   const blurRect = Primitives.rect(CanvasKit, {
     ...layerFrame,
-    y: layerFrame.y + 1,
+    y: layerFrame.y + 1 / zoom,
   });
 
   return <RCKRect rect={blurRect} paint={blur} />;
