@@ -200,26 +200,26 @@ export function textStyleReducer(
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
         return produce(state, (draft) => {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer, index) => {
-              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
-                return;
+          const textLayers = accessPageLayers(
+            draft,
+            pageIndex,
+            layerIndexPaths,
+          ).filter(Layers.isTextLayer);
 
-              const attributes = layer.style.textStyle.encodedAttributes;
+          textLayers.forEach((layer) => {
+            if (!Layers.hasTextStyle(layer)) return;
 
-              attributes.MSAttributedStringTextTransformAttribute = action[1];
+            const attributes = layer.style.textStyle.encodedAttributes;
+            attributes.MSAttributedStringTextTransformAttribute = action[1];
 
-              if (index === 0) {
-                draft.lastEditedTextStyle = {
-                  textStyle: Object.assign({}, layer.style.textStyle),
-                  stringAttribute: Object.assign(
-                    {},
-                    layer.attributedString.attributes,
-                  ),
-                };
-              }
-            },
-          );
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, layer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                layer.attributedString.attributes,
+              ),
+            };
+          });
         });
       } else {
         return produce(state, (draft) => {
