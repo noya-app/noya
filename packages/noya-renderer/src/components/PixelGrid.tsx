@@ -6,6 +6,8 @@ import { range } from 'noya-utils';
 import React from 'react';
 import { useTheme } from 'styled-components';
 
+export const SHOW_PIXELS_ZOOM_THRESHOLD = 5;
+
 export function PixelGrid() {
   const CanvasKit = useCanvasKit();
   const zoom = useZoom();
@@ -18,7 +20,7 @@ export function PixelGrid() {
 
   // If we ever allow a different kind of grid, we still need to check
   // for zoom === 0, so I've left this redundant check as a reminder.
-  if (zoom === 0 || zoom < 10) return <></>;
+  if (zoom === 0 || zoom < SHOW_PIXELS_ZOOM_THRESHOLD) return <></>;
 
   const xOffset = -zoom * Math.floor(scrollOrigin.x / zoom);
   const yOffset = -zoom * Math.floor(scrollOrigin.y / zoom);

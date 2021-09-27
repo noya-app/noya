@@ -2,7 +2,7 @@ import Sketch from 'noya-file-format';
 import { getRectCornerPoints } from 'noya-geometry';
 import { Primitives } from 'noya-state';
 import { makePath } from 'noya-react-canvaskit';
-import { Group, Image, useCanvasKit } from 'noya-renderer';
+import { Group, Image, useCanvasKit, useZoom } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
 import { useSketchImage } from '../../ImageCache';
 import ColorControlsGroup from '../effects/ColorControlsGroup';
@@ -10,6 +10,7 @@ import DropShadowGroup from '../effects/DropShadowGroup';
 import SketchBorder from '../effects/SketchBorder';
 import BlurGroup from '../effects/BlurGroup';
 import { SketchModel } from 'noya-sketch-model';
+import { SHOW_PIXELS_ZOOM_THRESHOLD } from '../PixelGrid';
 
 interface Props {
   layer: Sketch.Bitmap;
@@ -17,6 +18,7 @@ interface Props {
 
 export default memo(function SketchBitmap({ layer }: Props) {
   const CanvasKit = useCanvasKit();
+  const zoom = useZoom();
 
   const image = useSketchImage(layer.image);
 
@@ -42,7 +44,7 @@ export default memo(function SketchBitmap({ layer }: Props) {
       rect={Primitives.rect(CanvasKit, layer.frame)}
       image={image}
       paint={paint}
-      resample={false} // TODO: Make this configurable
+      resample={zoom < SHOW_PIXELS_ZOOM_THRESHOLD} // TODO: Make this configurable
     />
   );
 
