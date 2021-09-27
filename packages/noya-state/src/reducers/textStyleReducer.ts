@@ -41,45 +41,50 @@ export function textStyleReducer(
         const selectedText = Selectors.getTextSelection(state);
 
         return produce(state, (draft) => {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer, index) => {
-              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
-                return;
+          const textLayers = accessPageLayers(
+            draft,
+            pageIndex,
+            layerIndexPaths,
+          ).filter(Layers.isTextLayer);
 
-              switch (action[0]) {
-                case 'setTextVerticalAlignment': {
-                  layer.style.textStyle.verticalAlignment = action[1];
-                  break;
-                }
+          const firstTextLayer = textLayers[0];
+
+          if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, firstTextLayer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                firstTextLayer.attributedString.attributes,
+              ),
+            };
+          }
+
+          textLayers.forEach((layer) => {
+            if (!Layers.hasTextStyle(layer)) return;
+
+            switch (action[0]) {
+              case 'setTextVerticalAlignment': {
+                layer.style.textStyle.verticalAlignment = action[1];
+                break;
               }
+            }
 
-              const { anchor, head } = selectedText?.range ?? {
-                anchor: 0,
-                head: layer.attributedString.string.length,
-              };
+            const { anchor, head } = selectedText?.range ?? {
+              anchor: 0,
+              head: layer.attributedString.string.length,
+            };
 
-              layer.attributedString = Selectors.setAttributesInRange(
-                layer.attributedString,
-                [anchor, head],
-                (attributes) => stringAttributeReducer(attributes, action),
-              );
+            layer.attributedString = Selectors.setAttributesInRange(
+              layer.attributedString,
+              [anchor, head],
+              (attributes) => stringAttributeReducer(attributes, action),
+            );
 
-              layer.style.textStyle.encodedAttributes = stringAttributeReducer(
-                layer.style.textStyle.encodedAttributes,
-                action,
-              );
-
-              if (index === 0) {
-                draft.lastEditedTextStyle = {
-                  textStyle: Object.assign({}, layer.style.textStyle),
-                  stringAttribute: Object.assign(
-                    {},
-                    layer.attributedString.attributes,
-                  ),
-                };
-              }
-            },
-          );
+            layer.style.textStyle.encodedAttributes = stringAttributeReducer(
+              layer.style.textStyle.encodedAttributes,
+              action,
+            );
+          });
         });
       } else {
         const ids = state.selectedThemeTab.textStyles.ids;
@@ -148,28 +153,33 @@ export function textStyleReducer(
         const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
         return produce(state, (draft) => {
-          accessPageLayers(draft, pageIndex, layerIndexPaths).forEach(
-            (layer, index) => {
-              if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer))
-                return;
+          const textLayers = accessPageLayers(
+            draft,
+            pageIndex,
+            layerIndexPaths,
+          ).filter(Layers.isTextLayer);
 
-              const attributes = layer.style.textStyle.encodedAttributes;
+          const firstTextLayer = textLayers[0];
 
-              attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-              attributes.strikethroughStyle =
-                action[1] === 'strikethrough' ? 1 : 0;
+          if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, firstTextLayer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                firstTextLayer.attributedString.attributes,
+              ),
+            };
+          }
 
-              if (index === 0) {
-                draft.lastEditedTextStyle = {
-                  textStyle: Object.assign({}, layer.style.textStyle),
-                  stringAttribute: Object.assign(
-                    {},
-                    layer.attributedString.attributes,
-                  ),
-                };
-              }
-            },
-          );
+          textLayers.forEach((layer) => {
+            if (!Layers.hasTextStyle(layer)) return;
+
+            const attributes = layer.style.textStyle.encodedAttributes;
+
+            attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+            attributes.strikethroughStyle =
+              action[1] === 'strikethrough' ? 1 : 0;
+          });
         });
       } else {
         return produce(state, (draft) => {
@@ -206,19 +216,23 @@ export function textStyleReducer(
             layerIndexPaths,
           ).filter(Layers.isTextLayer);
 
+          const firstTextLayer = textLayers[0];
+
+          if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, firstTextLayer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                firstTextLayer.attributedString.attributes,
+              ),
+            };
+          }
+
           textLayers.forEach((layer) => {
             if (!Layers.hasTextStyle(layer)) return;
 
             const attributes = layer.style.textStyle.encodedAttributes;
             attributes.MSAttributedStringTextTransformAttribute = action[1];
-
-            draft.lastEditedTextStyle = {
-              textStyle: Object.assign({}, layer.style.textStyle),
-              stringAttribute: Object.assign(
-                {},
-                layer.attributedString.attributes,
-              ),
-            };
           });
         });
       } else {
