@@ -241,6 +241,10 @@ export const getIsEditingPath = (type: InteractionState['type']): boolean => {
   );
 };
 
+export const getIsEditingBitmap = (type: InteractionState['type']): boolean => {
+  return type === 'editBitmap';
+};
+
 function getNewValue(value: number, mode: SetNumberMode, delta?: number) {
   return delta === undefined
     ? value

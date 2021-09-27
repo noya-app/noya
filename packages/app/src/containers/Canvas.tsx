@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import {
   useApplicationState,
   useSelector,
@@ -6,15 +5,16 @@ import {
 } from 'noya-app-state-context';
 import {
   ContextMenu,
+  isLeftButtonClicked,
+  isRightButtonClicked,
   mergeEventHandlers,
   SupportedCanvasUploadType,
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
   useModKey,
-  isLeftButtonClicked,
-  isRightButtonClicked,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
@@ -22,18 +22,19 @@ import {
   useKeyboardShortcuts,
 } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { decode } from 'noya-sketch-file';
 import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
-  ImportedImageTarget,
   getCurrentPage,
   getSelectedLineLayer,
+  ImportedImageTarget,
+  InsertedImage,
   Layers,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
-  InsertedImage,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
 import {
@@ -53,7 +54,6 @@ import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
-import { decode } from 'noya-sketch-file';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -379,6 +379,11 @@ export default memo(function Canvas() {
           dispatch('interaction', ['maybeConvertCurveMode', point]);
           break;
         }
+        case 'editBitmap': {
+          dispatch('setPixel', point, state.interactionState.currentColor);
+          dispatch('interaction', ['startDrawingPixels']);
+          break;
+        }
         case 'editPath': {
           const { shiftKey } = state.keyModifiers;
           let selectedPoint: SelectedPoint | undefined = undefined;
@@ -571,6 +576,12 @@ export default memo(function Canvas() {
       const textSelection = Selectors.getTextSelection(state);
 
       switch (state.interactionState.type) {
+        case 'editBitmap': {
+          if (state.interactionState.editBitmapState === 'notStarted') return;
+
+          dispatch('setPixel', point, state.interactionState.currentColor);
+          break;
+        }
         case 'maybeMoveGradientEllipseLength': {
           const { origin } = state.interactionState;
 
@@ -873,6 +884,13 @@ export default memo(function Canvas() {
       const textSelection = Selectors.getTextSelection(state);
 
       switch (state.interactionState.type) {
+        case 'editBitmap': {
+          if (state.interactionState.editBitmapState === 'notStarted') return;
+
+          dispatch('setPixel', point, state.interactionState.currentColor);
+          dispatch('interaction', ['endDrawingPixels']);
+          break;
+        }
         case 'maybeSelectingText': {
           if (!textSelection) {
             dispatch('interaction', ['reset']);

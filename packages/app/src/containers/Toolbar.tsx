@@ -11,20 +11,25 @@ import {
   DropdownMenu,
   MenuItem,
   RegularMenuItem,
+  sketchColorToHex,
   Spacer,
   Tooltip,
 } from 'noya-designsystem';
-import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
+import Sketch from 'noya-file-format';
+import { ChevronDownIcon, Pencil1Icon, PointModeIcon } from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
+import { SketchModel } from 'noya-sketch-model';
 import {
   DrawableLayerType,
+  InteractionState,
   InteractionType,
   Layers,
   Selectors,
 } from 'noya-state';
-import { round } from 'noya-utils';
+import { isDeepEqual, round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import { Square } from '../components/inspector/PickerAssetGrid';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
@@ -32,7 +37,8 @@ type InteractionStateProjection =
       type: 'insert';
       layerType: DrawableLayerType;
     }
-  | { type: Exclude<InteractionType, 'insert'> };
+  | Extract<InteractionState, { type: 'editBitmap' }>
+  | { type: Exclude<InteractionType, 'insert' | 'editBitmap'> };
 
 type InsertMenuLayerType =
   | 'artboard'
@@ -66,14 +72,24 @@ const DocumentTitle = styled.span(({ theme }) => ({
 interface Props {
   interactionStateProjection: InteractionStateProjection;
   canStartEditingPath: boolean;
+  canStartEditingBitmap: boolean;
   zoomValue: number;
   hasSelectedLayer: boolean;
   fileHandle?: FileSystemHandle;
 }
 
+const PIXEL_COLORS: Sketch.Color[] = [
+  SketchModel.color({ red: 0, green: 0, blue: 0 }),
+  SketchModel.color({ red: 1, green: 1, blue: 1 }),
+  SketchModel.color({ red: 1, green: 0, blue: 0 }),
+  SketchModel.color({ red: 0, green: 1, blue: 0 }),
+  SketchModel.color({ red: 0, green: 0, blue: 1 }),
+];
+
 const ToolbarContent = memo(function ToolbarContent({
   interactionStateProjection,
   canStartEditingPath,
+  canStartEditingBitmap,
   zoomValue,
   hasSelectedLayer,
   fileHandle,
@@ -95,6 +111,7 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertText = isInsertingLayerType === 'text';
   const isInsertSlice = isInsertingLayerType === 'slice';
   const isEditingPath = Selectors.getIsEditingPath(interactionType);
+  const isEditingBitmap = Selectors.getIsEditingBitmap(interactionType);
   const isEditingText = Selectors.getIsEditingText(interactionType);
   const isCreatingPath = interactionType === 'drawingShapePath';
 
@@ -374,6 +391,48 @@ const ToolbarContent = memo(function ToolbarContent({
           [],
         )}
       </Button>
+      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Button
+        id="edit-bitmap"
+        tooltip="Edit Bitmap"
+        active={isEditingBitmap}
+        disabled={!(isEditingBitmap || canStartEditingBitmap)}
+        onClick={useCallback(() => {
+          if (!isEditingBitmap) {
+            dispatch('interaction', [
+              'editBitmap',
+              { x: 0, y: 0 },
+              SketchModel.BLACK,
+            ]);
+          } else {
+            dispatch('interaction', ['reset']);
+          }
+        }, [isEditingBitmap, dispatch])}
+      >
+        {useMemo(
+          () => (
+            <Pencil1Icon />
+          ),
+          [],
+        )}
+      </Button>
+      {interactionStateProjection.type === 'editBitmap' && (
+        <>
+          <Spacer.Horizontal size={itemSeparatorSize} />
+          {PIXEL_COLORS.map((color) => (
+            <Square
+              background={sketchColorToHex(color)}
+              selected={isDeepEqual(
+                interactionStateProjection.currentColor,
+                color,
+              )}
+              onClick={() => {
+                dispatch('interaction', ['setPencilColor', color]);
+              }}
+            />
+          ))}
+        </>
+      )}
     </>
   );
 });
@@ -393,18 +452,27 @@ export default function Toolbar() {
     (): InteractionStateProjection =>
       state.interactionState.type === 'insert'
         ? { type: 'insert', layerType: layerType! }
+        : state.interactionState.type === 'editBitmap'
+        ? state.interactionState
         : { type: state.interactionState.type },
-    [state.interactionState.type, layerType],
+    [state.interactionState, layerType],
   );
 
+  const selectedLayers = Selectors.getSelectedLayers(state);
   const canStartEditingPath =
     state.interactionState.type === 'none' &&
-    Selectors.getSelectedLayers(state).filter(Layers.isPointsLayer).length > 0;
+    selectedLayers.filter(Layers.isPointsLayer).length > 0;
+
+  const canStartEditingBitmap =
+    state.interactionState.type === 'none' &&
+    selectedLayers.length === 1 &&
+    Layers.isBitmapLayer(selectedLayers[0]);
 
   return (
     <ToolbarContent
       interactionStateProjection={projection}
       canStartEditingPath={canStartEditingPath}
+      canStartEditingBitmap={canStartEditingBitmap}
       zoomValue={zoomValue}
       hasSelectedLayer={hasSelectedLayer}
       fileHandle={fileHandle}

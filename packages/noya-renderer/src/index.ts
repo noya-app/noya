@@ -15,6 +15,7 @@ export * from './hooks/useCanvasKit';
 export * from './hooks/useCompileShader';
 export * from './shaders';
 export * from './colorMatrix';
+export * from './utils/drawImage';
 export { ImageCacheProvider, useSketchImage } from './ImageCache';
 export type { Context };
 export { useTextLayerParagraph } from './components/layers/SketchText';

@@ -11,6 +11,7 @@ import {
   useEffect,
   useMemo,
 } from 'react';
+import { Base64 } from 'noya-utils';
 
 type ImageCache = Record<string, ArrayBuffer>;
 type ImageCacheContextValue = [
@@ -76,8 +77,16 @@ export function useSketchImage(image?: Sketch.FileRef | Sketch.DataRef) {
   const [state] = useApplicationState();
   const [imageCache, addImageToCache] = useImageCache();
 
+  const base64Data = useMemo(() => {
+    if (image?._class !== 'MSJSONOriginalDataReference') return;
+
+    return Base64.decode(image.data._data);
+  }, [image]);
+
   const imageData = image
-    ? imageCache[image._ref] || state.sketch.images[image._ref]
+    ? image._class === 'MSJSONFileReference'
+      ? imageCache[image._ref] || state.sketch.images[image._ref]
+      : base64Data
     : undefined;
 
   const ref = image?._ref;

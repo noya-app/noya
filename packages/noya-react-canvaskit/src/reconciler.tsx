@@ -282,15 +282,28 @@ const hostConfig: ReactCanvasKitHostConfig = {
             break;
           }
           case 'Image': {
-            const { rect, image, paint } = element.props;
-            canvas.drawImageRectCubic(
-              image,
-              CanvasKit.XYWHRect(0, 0, image.width(), image.height()),
-              rect,
-              1 / 3,
-              1 / 3,
-              paint,
+            const { rect, image, paint, resample } = element.props;
+
+            const inputRect = CanvasKit.XYWHRect(
+              0,
+              0,
+              image.width(),
+              image.height(),
             );
+
+            if (resample) {
+              canvas.drawImageRectCubic(
+                image,
+                inputRect,
+                rect,
+                1 / 3,
+                1 / 3,
+                paint,
+              );
+            } else {
+              canvas.drawImageRect(image, inputRect, rect, paint);
+            }
+
             break;
           }
           case 'Text':

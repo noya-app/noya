@@ -1,13 +1,13 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { Insets, Size } from 'noya-geometry';
+import Sketch from 'noya-file-format';
+import { Insets, Point, rectContainsPoint, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
-import { IFontManager } from 'noya-renderer';
+import { drawBase64PNG, IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
-import { Selectors } from 'noya-state';
-import { uuid } from 'noya-utils';
+import { Primitives, Selectors } from 'noya-state';
+import { Base64, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
@@ -86,6 +86,7 @@ export type Action =
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
   | [type: 'setSelectedGradientStopIndex', value: number]
+  | [type: 'setPixel', point: Point, color: Sketch.Color]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -112,6 +113,73 @@ export function applicationReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setPixel': {
+      const [, point, color] = action;
+
+      const bitmapLayers = Selectors.getSelectedLayers(state).filter(
+        Layers.isBitmapLayer,
+      );
+
+      const firstBitmapLayer = bitmapLayers[0];
+
+      if (!firstBitmapLayer) return state;
+
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === firstBitmapLayer.do_objectID,
+      );
+
+      if (!indexPath) return state;
+
+      const boundingRect = Selectors.getBoundingRect(
+        Selectors.getCurrentPage(state),
+        [firstBitmapLayer.do_objectID],
+        { artboards: 'childrenOnly', groups: 'childrenOnly' },
+      );
+
+      if (!boundingRect || !rectContainsPoint(boundingRect, point))
+        return state;
+
+      const pixel: Point = {
+        x: Math.floor(point.x - boundingRect.x),
+        y: Math.floor(point.y - boundingRect.y),
+      };
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(
+          Selectors.getCurrentPage(draft),
+          indexPath,
+        ) as Sketch.Bitmap;
+
+        if (layer.image._class === 'MSJSONOriginalDataReference') {
+          const originalImage = CanvasKit.MakeImageFromEncoded(
+            Base64.decode(layer.image.data._data),
+          );
+
+          if (!originalImage) return;
+
+          const width = originalImage.width();
+          const height = originalImage.height();
+
+          const data = drawBase64PNG(CanvasKit, { width, height }, (canvas) => {
+            canvas.drawImage(originalImage, 0, 0, new CanvasKit.Paint());
+
+            const pixelPaint = new CanvasKit.Paint();
+
+            pixelPaint.setColor(Primitives.color(CanvasKit, color));
+
+            canvas.drawRect(
+              CanvasKit.XYWHRect(pixel.x, pixel.y, 1, 1),
+              pixelPaint,
+            );
+          });
+
+          if (!data) return;
+
+          layer.image.data._data = data;
+        }
+      });
+    }
     case 'setKeyModifier':
       const [, name, value] = action;
       return produce(state, (draft) => {

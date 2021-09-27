@@ -42,6 +42,7 @@ export default memo(function SketchBitmap({ layer }: Props) {
       rect={Primitives.rect(CanvasKit, layer.frame)}
       image={image}
       paint={paint}
+      resample={false} // TODO: Make this configurable
     />
   );
 

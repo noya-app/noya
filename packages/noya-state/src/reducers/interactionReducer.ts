@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import { Point, Rect } from 'noya-geometry';
 import { TextSelectionRange, UUID } from 'noya-state';
 
@@ -50,10 +50,14 @@ export type InteractionAction =
   | [type: 'insert', layerType: DrawableLayerType, current?: Point]
   | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
+  | [type: 'editBitmap', current: Point, currentColor: Sketch.Color]
+  | [type: 'setPencilColor', color: Sketch.Color]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
   | [type: 'updateDrawing', point: Point]
+  | [type: 'startDrawingPixels']
+  | [type: 'endDrawingPixels']
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
@@ -92,6 +96,12 @@ export type InteractionState =
   | {
       type: 'editPath';
       point?: Point;
+    }
+  | {
+      type: 'editBitmap';
+      point: Point;
+      currentColor: Sketch.Color;
+      editBitmapState: EditBitmapState;
     }
   | {
       type: 'drawingShapePath';
@@ -194,6 +204,8 @@ export type InteractionState =
 
 export type InteractionType = InteractionState['type'];
 
+type EditBitmapState = 'notStarted' | 'drawing';
+
 export function interactionReducer(
   state: InteractionState,
   action:
@@ -201,6 +213,42 @@ export function interactionReducer(
     | Append<SnapshotInteractionAction, [pageSnapshot: Sketch.Page]>,
 ): InteractionState {
   switch (action[0]) {
+    case 'editBitmap': {
+      const [, point, color] = action;
+
+      return {
+        type: 'editBitmap',
+        point: point,
+        currentColor: color,
+        editBitmapState: 'notStarted',
+      };
+    }
+    case 'setPencilColor': {
+      const [, color] = action;
+
+      if (state.type !== 'editBitmap') return state;
+
+      return {
+        ...state,
+        currentColor: color,
+      };
+    }
+    case 'startDrawingPixels': {
+      if (state.type !== 'editBitmap') return state;
+
+      return {
+        ...state,
+        editBitmapState: 'drawing',
+      };
+    }
+    case 'endDrawingPixels': {
+      if (state.type !== 'editBitmap') return state;
+
+      return {
+        ...state,
+        editBitmapState: 'notStarted',
+      };
+    }
     case 'editPath':
     case 'resetEditPath': {
       const [, point] = action;

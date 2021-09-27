@@ -6,28 +6,17 @@ import { Rect, useCanvasKit, useZoom } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { drawImage } from '../utils/drawImage';
 
 function getGridImage(CanvasKit: CanvasKit, size: number, color: string) {
-  const surface = CanvasKit.MakeSurface(size, size);
+  return drawImage(CanvasKit, { width: size, height: size }, (canvas) => {
+    const paint = new CanvasKit.Paint();
 
-  if (!surface) return;
+    paint.setColor(CanvasKit.parseColorString(color));
 
-  const canvas = surface.getCanvas();
-
-  if (!canvas) return;
-
-  const paint = new CanvasKit.Paint();
-
-  paint.setColor(CanvasKit.parseColorString(color));
-
-  canvas.drawRect(CanvasKit.XYWHRect(0, 0, 1, size), paint);
-  canvas.drawRect(CanvasKit.XYWHRect(0, 0, size, 1), paint);
-
-  const image = surface.makeImageSnapshot();
-
-  surface.delete();
-
-  return image;
+    canvas.drawRect(CanvasKit.XYWHRect(0, 0, 1, size), paint);
+    canvas.drawRect(CanvasKit.XYWHRect(0, 0, size, 1), paint);
+  });
 }
 
 export function PixelGrid() {
