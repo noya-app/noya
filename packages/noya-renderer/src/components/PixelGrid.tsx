@@ -1,23 +1,10 @@
-import { CanvasKit, Image } from 'canvaskit';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { AffineTransform } from 'noya-geometry';
-import { useDeletable } from 'noya-react-canvaskit';
+import { useColorFill } from 'noya-react-canvaskit';
 import { Rect, useCanvasKit, useZoom } from 'noya-renderer';
 import { Selectors } from 'noya-state';
-import React, { useMemo } from 'react';
+import { range } from 'noya-utils';
+import React from 'react';
 import { useTheme } from 'styled-components';
-import { drawImage } from '../utils/drawImage';
-
-function getGridImage(CanvasKit: CanvasKit, size: number, color: string) {
-  return drawImage(CanvasKit, { width: size, height: size }, (canvas) => {
-    const paint = new CanvasKit.Paint();
-
-    paint.setColor(CanvasKit.parseColorString(color));
-
-    canvas.drawRect(CanvasKit.XYWHRect(0, 0, 1, size), paint);
-    canvas.drawRect(CanvasKit.XYWHRect(0, 0, size, 1), paint);
-  });
-}
 
 export function PixelGrid() {
   const CanvasKit = useCanvasKit();
@@ -27,50 +14,43 @@ export function PixelGrid() {
   const { canvasSize } = useWorkspace();
   const { scrollOrigin } = Selectors.getCurrentPageMetadata(state);
   const gridColor = useTheme().colors.canvas.grid;
+  const fillPaint = useColorFill(gridColor);
 
-  const gridRect = useMemo(
-    () => CanvasKit.XYWHRect(0, 0, canvasSize.width, canvasSize.height),
-    [CanvasKit, canvasSize.height, canvasSize.width],
-  );
+  // If we ever allow a different kind of grid, we still need to check
+  // for zoom === 0, so I've left this redundant check as a reminder.
+  if (zoom === 0 || zoom < 10) return <></>;
 
-  const roundedZoom = Math.ceil(zoom);
+  const xOffset = -zoom * Math.floor(scrollOrigin.x / zoom);
+  const yOffset = -zoom * Math.floor(scrollOrigin.y / zoom);
 
-  const image = useMemo((): Image | undefined => {
-    if (roundedZoom < 10) return;
-
-    return getGridImage(CanvasKit, roundedZoom, gridColor);
-  }, [CanvasKit, gridColor, roundedZoom]);
-
-  const paint = useMemo(() => {
-    if (!image) return;
-
-    const paint = new CanvasKit.Paint();
-
-    const imageShader = image.makeShaderCubic(
-      CanvasKit.TileMode.Repeat,
-      CanvasKit.TileMode.Repeat,
-      0,
-      0,
-      AffineTransform.scale(zoom / roundedZoom, zoom / roundedZoom).translate(
-        scrollOrigin.x,
-        scrollOrigin.y,
-      ).float32Array,
-    );
-
-    paint.setShader(imageShader);
-
-    return paint;
-  }, [
-    CanvasKit.Paint,
-    CanvasKit.TileMode.Repeat,
-    image,
-    roundedZoom,
-    scrollOrigin.x,
-    scrollOrigin.y,
+  const verticalLineXValues = range(
+    0 + scrollOrigin.x + xOffset,
+    canvasSize.width,
     zoom,
-  ]);
+  ).map(Math.floor);
 
-  useDeletable(paint);
+  const horizontalLineYValues = range(
+    0 + scrollOrigin.y + yOffset,
+    canvasSize.height,
+    zoom,
+  ).map(Math.floor);
 
-  return <>{paint && <Rect rect={gridRect} paint={paint} />}</>;
+  return (
+    <>
+      {verticalLineXValues.map((x, index) => (
+        <Rect
+          key={`x-${index}`}
+          paint={fillPaint}
+          rect={CanvasKit.XYWHRect(x, 0, 1, canvasSize.height)}
+        />
+      ))}
+      {horizontalLineYValues.map((y, index) => (
+        <Rect
+          key={`y-${index}`}
+          paint={fillPaint}
+          rect={CanvasKit.XYWHRect(0, y, canvasSize.width, 1)}
+        />
+      ))}
+    </>
+  );
 }
