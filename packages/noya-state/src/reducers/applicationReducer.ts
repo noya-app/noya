@@ -67,11 +67,18 @@ export type SelectedGradient = {
 
 export type SelectedPointLists = Record<string, number[]>;
 
+export type LastEditedTextStyle = {
+  textStyle: Sketch.TextStyle;
+  stringAttribute: Sketch.StringAttribute[];
+  textBehaviour?: Sketch.TextBehaviour;
+};
+
 export type ApplicationState = {
   currentTab: WorkspaceTab;
   currentThemeTab: ThemeTab;
   interactionState: InteractionState;
   keyModifiers: KeyModifiers;
+  lastEditedTextStyle?: LastEditedTextStyle;
   selectedPage: string;
   selectedLayerIds: string[];
   selectedPointLists: SelectedPointLists;
