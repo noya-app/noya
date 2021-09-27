@@ -1,3 +1,4 @@
+import Sketch from 'noya-file-format';
 import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
@@ -5,13 +6,15 @@ import { getCurrentPlatform, PlatformName } from 'noya-keymap';
 import { PromiseState } from 'noya-react-utils';
 import {
   CanvasKitProvider,
+  drawBase64PNG,
   FontManagerProvider,
   ImageCacheProvider,
   useCanvasKit,
   useDownloadFont,
   useFontManager,
 } from 'noya-renderer';
-import { decode, SketchFile } from 'noya-sketch-file';
+import { decode } from 'noya-sketch-file';
+import { SketchModel } from 'noya-sketch-model';
 import {
   createInitialWorkspaceState,
   createSketchFile,
@@ -31,9 +34,10 @@ import {
   castHashParameter,
   useUrlHashParameters,
 } from './hooks/useUrlHashParameters';
+import { CanvasKit } from 'canvaskit';
 
 type Action =
-  | { type: 'set'; value: SketchFile }
+  | { type: 'set'; value: WorkspaceState }
   | { type: 'update'; value: WorkspaceAction };
 
 function Contents() {
@@ -51,7 +55,7 @@ function Contents() {
           case 'set':
             return {
               type: 'success',
-              value: createInitialWorkspaceState(action.value),
+              value: action.value,
             };
           case 'update':
             if (state.type === 'success') {
@@ -82,16 +86,17 @@ function Contents() {
       const data = await file.arrayBuffer();
       const sketch = await decode(data);
 
-      dispatch({ type: 'set', value: sketch });
+      dispatch({ type: 'set', value: createInitialWorkspaceState(sketch) });
       dispatch({ type: 'update', value: ['setFileHandle', file.handle] });
     }
 
     if (documentPath) {
       loadFile();
     } else {
-      dispatch({ type: 'set', value: createSketchFile() });
+      dispatch({ type: 'set', value: createPixelEditorState(CanvasKit) });
+      // dispatch({ type: 'set', value: createSketchFile() });
     }
-  }, [documentPath, state.type]);
+  }, [CanvasKit, documentPath, state.type]);
 
   const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });
@@ -163,4 +168,72 @@ export default function App() {
       </CanvasKitProvider>
     </EnvironmentParametersProvider>
   );
+}
+
+function createPixelEditorState(CanvasKit: CanvasKit) {
+  const createDefaultImage = (): Sketch.DataRef => {
+    return {
+      _class: 'MSJSONOriginalDataReference',
+      _ref: '',
+      _ref_class: 'MSImageData',
+      data: {
+        _data:
+          drawBase64PNG(CanvasKit, { width: 24, height: 24 }, (canvas) => {
+            canvas.clear(CanvasKit.TRANSPARENT);
+          }) ?? '',
+      },
+      sha1: {
+        _data: '',
+      },
+    };
+  };
+
+  const artboard = SketchModel.artboard({
+    frame: SketchModel.rect({
+      x: 0,
+      y: 0,
+      width: 24,
+      height: 24,
+    }),
+    layers: [
+      SketchModel.bitmap({
+        name: 'Background',
+        style: SketchModel.style({
+          colorControls: SketchModel.colorControls({
+            isEnabled: false,
+          }),
+        }),
+        frame: SketchModel.rect({
+          x: 0,
+          y: 0,
+          width: 24,
+          height: 24,
+        }),
+        image: createDefaultImage(),
+      }),
+      SketchModel.bitmap({
+        name: 'Foreground',
+        style: SketchModel.style({
+          colorControls: SketchModel.colorControls({
+            isEnabled: false,
+          }),
+        }),
+        frame: SketchModel.rect({
+          x: 0,
+          y: 0,
+          width: 24,
+          height: 24,
+        }),
+        image: createDefaultImage(),
+      }),
+    ],
+  });
+
+  const workspaceState = createInitialWorkspaceState(
+    createSketchFile(SketchModel.page({ layers: [artboard] })),
+  );
+  workspaceState.isolatedLayer = artboard.do_objectID;
+  workspaceState.preferences.showPixelGrid = true;
+
+  return workspaceState;
 }
