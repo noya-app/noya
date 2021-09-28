@@ -58,6 +58,7 @@ export type InteractionAction =
   | [type: 'updateDrawing', point: Point]
   | [type: 'startDrawingPixels']
   | [type: 'endDrawingPixels']
+  | [type: 'setBitmapEditingTool', tool: EditBitmapTool]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
@@ -102,6 +103,7 @@ export type InteractionState =
       point: Point;
       currentColor: Sketch.Color;
       editBitmapState: EditBitmapState;
+      editBitmapTool: EditBitmapTool;
     }
   | {
       type: 'drawingShapePath';
@@ -205,6 +207,7 @@ export type InteractionState =
 export type InteractionType = InteractionState['type'];
 
 type EditBitmapState = 'notStarted' | 'drawing';
+type EditBitmapTool = 'pencil' | 'paintBucket';
 
 export function interactionReducer(
   state: InteractionState,
@@ -221,6 +224,17 @@ export function interactionReducer(
         point: point,
         currentColor: color,
         editBitmapState: 'notStarted',
+        editBitmapTool: 'pencil',
+      };
+    }
+    case 'setBitmapEditingTool': {
+      const [, tool] = action;
+
+      if (state.type !== 'editBitmap') return state;
+
+      return {
+        ...state,
+        editBitmapTool: tool,
       };
     }
     case 'setPencilColor': {

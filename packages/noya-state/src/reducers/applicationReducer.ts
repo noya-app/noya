@@ -1,4 +1,4 @@
-import { CanvasKit } from 'canvaskit';
+import { Canvas, CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
 import Sketch from 'noya-file-format';
@@ -7,7 +7,7 @@ import { KeyModifiers } from 'noya-keymap';
 import { drawBase64PNG, IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { Primitives, Selectors } from 'noya-state';
-import { Base64, uuid } from 'noya-utils';
+import { Base64, isDeepEqual, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
@@ -42,6 +42,8 @@ import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
+import { PixelBuffer } from 'pixelbuffer';
+import { PointString } from 'noya-sketch-model';
 
 export type { SetNumberMode };
 
@@ -86,7 +88,12 @@ export type Action =
   | [type: 'setKeyModifier', name: keyof KeyModifiers, value: boolean]
   | [type: 'setSelectedGradient', value: SelectedGradient | undefined]
   | [type: 'setSelectedGradientStopIndex', value: number]
-  | [type: 'setPixel', point: Point, color: Sketch.Color]
+  | [
+      type: 'setPixel',
+      point: Point,
+      color: Sketch.Color,
+      tool: 'pencil' | 'paintBucket',
+    ]
   | PageAction
   | CanvasAction
   | LayerPropertyAction
@@ -114,7 +121,7 @@ export function applicationReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'setPixel': {
-      const [, point, color] = action;
+      const [, point, color, tool] = action;
 
       const bitmapLayers = Selectors.getSelectedLayers(state).filter(
         Layers.isBitmapLayer,
@@ -161,17 +168,93 @@ export function applicationReducer(
           const width = originalImage.width();
           const height = originalImage.height();
 
-          const data = drawBase64PNG(CanvasKit, { width, height }, (canvas) => {
+          const pixelPaint = new CanvasKit.Paint();
+          pixelPaint.setColor(Primitives.color(CanvasKit, color));
+
+          const fillPixel = (canvas: Canvas, pixel: Point) => {
+            const pixelRect = CanvasKit.XYWHRect(pixel.x, pixel.y, 1, 1);
+
+            if (color.alpha < 1) {
+              canvas.save();
+              canvas.clipRect(pixelRect, CanvasKit.ClipOp.Intersect, false);
+              canvas.clear(CanvasKit.TRANSPARENT);
+              canvas.restore();
+            }
+
+            canvas.drawRect(pixelRect, pixelPaint);
+          };
+
+          let data = drawBase64PNG(CanvasKit, { width, height }, (canvas) => {
             canvas.drawImage(originalImage, 0, 0, new CanvasKit.Paint());
 
-            const pixelPaint = new CanvasKit.Paint();
+            switch (tool) {
+              case 'pencil': {
+                fillPixel(canvas, pixel);
 
-            pixelPaint.setColor(Primitives.color(CanvasKit, color));
+                break;
+              }
+              case 'paintBucket': {
+                const colorSpace = originalImage.getColorSpace();
 
-            canvas.drawRect(
-              CanvasKit.XYWHRect(pixel.x, pixel.y, 1, 1),
-              pixelPaint,
-            );
+                const pixels = originalImage.readPixels(0, 0, {
+                  ...originalImage.getImageInfo(),
+                  colorSpace,
+                }) as Uint8Array | null;
+
+                if (!pixels) return;
+
+                const pixelBuffer = PixelBuffer.create(
+                  {
+                    width,
+                    height,
+                    bytesPerPixel: 4,
+                  },
+                  pixels,
+                );
+
+                const existingColor = pixelBuffer.getPixel(pixel);
+
+                const visited = new Set<string>();
+                const pointsToFill: Point[] = [];
+                const pointsToCheck: Point[] = [pixel];
+
+                while (pointsToCheck.length > 0) {
+                  const point = pointsToCheck.pop()!;
+
+                  const pointString = PointString.encode(point);
+                  visited.add(pointString);
+
+                  const colorAtPoint = pixelBuffer.getPixel(point);
+
+                  if (isDeepEqual(colorAtPoint, existingColor)) {
+                    pointsToFill.push(point);
+
+                    const left = { x: point.x - 1, y: point.y };
+                    const right = { x: point.x + 1, y: point.y };
+                    const up = { x: point.x, y: point.y - 1 };
+                    const down = { x: point.x, y: point.y + 1 };
+
+                    [left, right, up, down].forEach((adjacentPoint) => {
+                      if (
+                        adjacentPoint.x >= 0 &&
+                        adjacentPoint.x <= width - 1 &&
+                        adjacentPoint.y >= 0 &&
+                        adjacentPoint.y <= height - 1 &&
+                        !visited.has(PointString.encode(adjacentPoint))
+                      ) {
+                        pointsToCheck.push(adjacentPoint);
+                      }
+                    });
+                  }
+                }
+
+                pointsToFill.forEach((point) => {
+                  fillPixel(canvas, point);
+                });
+
+                break;
+              }
+            }
           });
 
           if (!data) return;

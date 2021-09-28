@@ -5,6 +5,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "immer": "^9.0.5",
+    "pixelbuffer": "^0.0.4",
     "tree-visit": "^0.0.9"
   }
 }

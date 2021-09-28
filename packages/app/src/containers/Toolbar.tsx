@@ -10,13 +10,20 @@ import {
   createSectionedMenu,
   DropdownMenu,
   MenuItem,
+  RadioGroup,
   RegularMenuItem,
-  sketchColorToHex,
+  sketchColorToRgbaString,
   Spacer,
   Tooltip,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { ChevronDownIcon, Pencil1Icon, PointModeIcon } from 'noya-icons';
+import {
+  ChevronDownIcon,
+  PaintBucketIcon,
+  Pencil1Icon,
+  Pencil2Icon,
+  PointModeIcon,
+} from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import { SketchModel } from 'noya-sketch-model';
 import {
@@ -29,6 +36,7 @@ import {
 import { isDeepEqual, round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { Square } from '../components/inspector/PickerAssetGrid';
 import { LayerIcon } from './LayerList';
 
@@ -84,6 +92,7 @@ const PIXEL_COLORS: Sketch.Color[] = [
   SketchModel.color({ red: 1, green: 0, blue: 0 }),
   SketchModel.color({ red: 0, green: 1, blue: 0 }),
   SketchModel.color({ red: 0, green: 0, blue: 1 }),
+  SketchModel.color({ red: 0, green: 0, blue: 0, alpha: 0 }),
 ];
 
 const ToolbarContent = memo(function ToolbarContent({
@@ -411,17 +420,41 @@ const ToolbarContent = memo(function ToolbarContent({
       >
         {useMemo(
           () => (
-            <Pencil1Icon />
+            <Pencil2Icon />
           ),
           [],
         )}
       </Button>
       {interactionStateProjection.type === 'editBitmap' && (
         <>
+          <Spacer.Horizontal size={itemSeparatorSize * 2} />
+          <span style={{ width: '62px' }}>
+            <InspectorPrimitives.Row>
+              <RadioGroup.Root
+                id={'bitmap-editing-tool'}
+                value={interactionStateProjection.editBitmapTool}
+                onValueChange={(value: 'pencil' | 'paintBucket') => {
+                  dispatch('interaction', ['setBitmapEditingTool', value]);
+                }}
+              >
+                <RadioGroup.Item value="pencil" tooltip="Pencil">
+                  <Pencil1Icon />
+                </RadioGroup.Item>
+                <RadioGroup.Item value="paintBucket" tooltip="Paint Bucket">
+                  <PaintBucketIcon />
+                </RadioGroup.Item>
+              </RadioGroup.Root>
+            </InspectorPrimitives.Row>
+          </span>
           <Spacer.Horizontal size={itemSeparatorSize} />
-          {PIXEL_COLORS.map((color) => (
+          {PIXEL_COLORS.map((color, index) => (
             <Square
-              background={sketchColorToHex(color)}
+              key={index}
+              background={
+                color.alpha === 0
+                  ? `linear-gradient(135deg, white 47%, rgba(255,0,0,1) 50%, white 53%)`
+                  : sketchColorToRgbaString(color)
+              }
               selected={isDeepEqual(
                 interactionStateProjection.currentColor,
                 color,
@@ -431,6 +464,7 @@ const ToolbarContent = memo(function ToolbarContent({
               }}
             />
           ))}
+          <Spacer.Horizontal size={itemSeparatorSize} />
         </>
       )}
     </>

@@ -5,6 +5,7 @@ export * from './icons/FlipHorizontalIcon';
 export * from './icons/FlipVerticalIcon';
 export * from './icons/LineIcon';
 export * from './icons/PointModeIcon';
+export * from './icons/PaintBucketIcon';
 
 // All icons should be imported from 'noya-icons'. We don't allow
 // importing radix-ui icons directly outside of this package.

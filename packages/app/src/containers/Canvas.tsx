@@ -380,7 +380,12 @@ export default memo(function Canvas() {
           break;
         }
         case 'editBitmap': {
-          dispatch('setPixel', point, state.interactionState.currentColor);
+          dispatch(
+            'setPixel',
+            point,
+            state.interactionState.currentColor,
+            state.interactionState.editBitmapTool,
+          );
           dispatch('interaction', ['startDrawingPixels']);
           break;
         }
@@ -579,7 +584,12 @@ export default memo(function Canvas() {
         case 'editBitmap': {
           if (state.interactionState.editBitmapState === 'notStarted') return;
 
-          dispatch('setPixel', point, state.interactionState.currentColor);
+          dispatch(
+            'setPixel',
+            point,
+            state.interactionState.currentColor,
+            state.interactionState.editBitmapTool,
+          );
           break;
         }
         case 'maybeMoveGradientEllipseLength': {
@@ -887,7 +897,12 @@ export default memo(function Canvas() {
         case 'editBitmap': {
           if (state.interactionState.editBitmapState === 'notStarted') return;
 
-          dispatch('setPixel', point, state.interactionState.currentColor);
+          dispatch(
+            'setPixel',
+            point,
+            state.interactionState.currentColor,
+            state.interactionState.editBitmapTool,
+          );
           dispatch('interaction', ['endDrawingPixels']);
           break;
         }
