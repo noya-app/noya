@@ -5,6 +5,7 @@ import {
   useSelector,
   useWorkspaceState,
 } from 'noya-app-state-context';
+import { hexToRgba } from 'noya-colorpicker';
 import {
   Button,
   createSectionedMenu,
@@ -12,6 +13,7 @@ import {
   MenuItem,
   RadioGroup,
   RegularMenuItem,
+  rgbaToSketchColor,
   sketchColorToRgbaString,
   Spacer,
   Tooltip,
@@ -39,6 +41,14 @@ import styled, { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { Square } from '../components/inspector/PickerAssetGrid';
 import { LayerIcon } from './LayerList';
+
+const DividerVertical = styled.div(({ theme }) => ({
+  width: '1px',
+  minWidth: '1px',
+  maxWidth: '1px',
+  height: '50%',
+  background: theme.colors.divider,
+}));
 
 type InteractionStateProjection =
   | {
@@ -86,12 +96,15 @@ interface Props {
   fileHandle?: FileSystemHandle;
 }
 
-const PIXEL_COLORS: Sketch.Color[] = [
-  SketchModel.color({ red: 0, green: 0, blue: 0 }),
-  SketchModel.color({ red: 1, green: 1, blue: 1 }),
-  SketchModel.color({ red: 1, green: 0, blue: 0 }),
-  SketchModel.color({ red: 0, green: 1, blue: 0 }),
-  SketchModel.color({ red: 0, green: 0, blue: 1 }),
+const PALETTE = ['#ee8822', '#aa66ee', '#aa2277', '#2266cc', '#33aa88'];
+
+const PALETTE_COLORS: Sketch.Color[] = PALETTE.map((hex) => hexToRgba(hex)).map(
+  rgbaToSketchColor,
+);
+
+const COMMON_COLORS: Sketch.Color[] = [
+  SketchModel.BLACK,
+  SketchModel.WHITE,
   SketchModel.color({ red: 0, green: 0, blue: 0, alpha: 0 }),
 ];
 
@@ -428,6 +441,8 @@ const ToolbarContent = memo(function ToolbarContent({
       {interactionStateProjection.type === 'editBitmap' && (
         <>
           <Spacer.Horizontal size={itemSeparatorSize * 2} />
+          <DividerVertical />
+          <Spacer.Horizontal size={itemSeparatorSize} />
           <span style={{ width: '62px' }}>
             <InspectorPrimitives.Row>
               <RadioGroup.Root
@@ -447,7 +462,29 @@ const ToolbarContent = memo(function ToolbarContent({
             </InspectorPrimitives.Row>
           </span>
           <Spacer.Horizontal size={itemSeparatorSize} />
-          {PIXEL_COLORS.map((color, index) => (
+          <DividerVertical />
+          <Spacer.Horizontal size={itemSeparatorSize} />
+          {COMMON_COLORS.map((color, index) => (
+            <Square
+              key={index}
+              background={
+                color.alpha === 0
+                  ? `linear-gradient(135deg, white 47%, rgba(255,0,0,1) 50%, white 53%)`
+                  : sketchColorToRgbaString(color)
+              }
+              selected={isDeepEqual(
+                interactionStateProjection.currentColor,
+                color,
+              )}
+              onClick={() => {
+                dispatch('interaction', ['setPencilColor', color]);
+              }}
+            />
+          ))}
+          <Spacer.Horizontal size={itemSeparatorSize} />
+          <DividerVertical />
+          <Spacer.Horizontal size={itemSeparatorSize} />
+          {PALETTE_COLORS.map((color, index) => (
             <Square
               key={index}
               background={
