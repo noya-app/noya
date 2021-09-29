@@ -21,15 +21,18 @@ import {
 import Sketch from 'noya-file-format';
 import {
   ChevronDownIcon,
+  CircleIcon,
   PaintBucketIcon,
   Pencil1Icon,
   Pencil2Icon,
   PointModeIcon,
+  SquareIcon,
 } from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import { SketchModel } from 'noya-sketch-model';
 import {
   DrawableLayerType,
+  EditBitmapTool,
   InteractionState,
   InteractionType,
   Layers,
@@ -421,11 +424,7 @@ const ToolbarContent = memo(function ToolbarContent({
         disabled={!(isEditingBitmap || canStartEditingBitmap)}
         onClick={useCallback(() => {
           if (!isEditingBitmap) {
-            dispatch('interaction', [
-              'editBitmap',
-              { x: 0, y: 0 },
-              SketchModel.BLACK,
-            ]);
+            dispatch('interaction', ['editBitmap', SketchModel.BLACK]);
           } else {
             dispatch('interaction', ['reset']);
           }
@@ -443,13 +442,16 @@ const ToolbarContent = memo(function ToolbarContent({
           <Spacer.Horizontal size={itemSeparatorSize * 2} />
           <DividerVertical />
           <Spacer.Horizontal size={itemSeparatorSize} />
-          <span style={{ width: '62px' }}>
+          <span style={{ width: '124px' }}>
             <InspectorPrimitives.Row>
               <RadioGroup.Root
                 id={'bitmap-editing-tool'}
-                value={interactionStateProjection.editBitmapTool}
-                onValueChange={(value: 'pencil' | 'paintBucket') => {
-                  dispatch('interaction', ['setBitmapEditingTool', value]);
+                value={interactionStateProjection.editBitmapTool.type}
+                onValueChange={(value: EditBitmapTool['type']) => {
+                  dispatch('interaction', [
+                    'setBitmapEditingTool',
+                    { type: value },
+                  ]);
                 }}
               >
                 <RadioGroup.Item value="pencil" tooltip="Pencil">
@@ -457,6 +459,12 @@ const ToolbarContent = memo(function ToolbarContent({
                 </RadioGroup.Item>
                 <RadioGroup.Item value="paintBucket" tooltip="Paint Bucket">
                   <PaintBucketIcon />
+                </RadioGroup.Item>
+                <RadioGroup.Item value="circle" tooltip="Circle">
+                  <CircleIcon />
+                </RadioGroup.Item>
+                <RadioGroup.Item value="rectangle" tooltip="Rectangle">
+                  <SquareIcon />
                 </RadioGroup.Item>
               </RadioGroup.Root>
             </InspectorPrimitives.Row>

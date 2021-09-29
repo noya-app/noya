@@ -380,13 +380,11 @@ export default memo(function Canvas() {
           break;
         }
         case 'editBitmap': {
-          dispatch(
-            'setPixel',
-            point,
-            state.interactionState.currentColor,
-            state.interactionState.editBitmapTool,
-          );
-          dispatch('interaction', ['startDrawingPixels']);
+          dispatch('interaction', ['startDrawingPixels', point]);
+
+          if (state.interactionState.editBitmapTool.type !== 'rectangle') {
+            dispatch('setPixel');
+          }
           break;
         }
         case 'editPath': {
@@ -582,14 +580,14 @@ export default memo(function Canvas() {
 
       switch (state.interactionState.type) {
         case 'editBitmap': {
-          if (state.interactionState.editBitmapState === 'notStarted') return;
+          if (state.interactionState.editBitmapState.type === 'notStarted')
+            return;
 
-          dispatch(
-            'setPixel',
-            point,
-            state.interactionState.currentColor,
-            state.interactionState.editBitmapTool,
-          );
+          dispatch('interaction', ['updateDrawingPixels', point]);
+
+          if (state.interactionState.editBitmapTool.type !== 'rectangle') {
+            dispatch('setPixel');
+          }
           break;
         }
         case 'maybeMoveGradientEllipseLength': {
@@ -895,14 +893,11 @@ export default memo(function Canvas() {
 
       switch (state.interactionState.type) {
         case 'editBitmap': {
-          if (state.interactionState.editBitmapState === 'notStarted') return;
+          if (state.interactionState.editBitmapState.type === 'notStarted')
+            return;
 
-          dispatch(
-            'setPixel',
-            point,
-            state.interactionState.currentColor,
-            state.interactionState.editBitmapTool,
-          );
+          dispatch('setPixel');
+
           dispatch('interaction', ['endDrawingPixels']);
           break;
         }

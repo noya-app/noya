@@ -3,18 +3,21 @@ import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform, createRect, insetRect, Rect } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
-import { Polyline, useCanvasKit } from 'noya-renderer';
+import { drawBase64PNG, Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import {
   createDrawingLayer,
   DecodedCurvePoint,
   defaultBorderColor,
   encodeCurvePoint,
+  fillRectPixels,
   getClippedLayerMap,
   Layers,
   Primitives,
+  ScalingOptions,
   Selectors,
 } from 'noya-state';
+import { Base64 } from 'noya-utils';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
@@ -338,6 +341,69 @@ export default memo(function SketchFileRenderer() {
     return symbolInstance;
   }, [state, interactionState]);
 
+  const bitmapLayers = Selectors.getSelectedLayers(state).filter(
+    Layers.isBitmapLayer,
+  );
+
+  const firstBitmapLayer =
+    bitmapLayers.length > 0 ? bitmapLayers[0] : undefined;
+
+  const scalingOptions: ScalingOptions = useMemo(
+    () => ({
+      constrainProportions: state.keyModifiers.shiftKey,
+      scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+    }),
+    [state.keyModifiers.altKey, state.keyModifiers.shiftKey],
+  );
+
+  const bitmapEditPreview = useMemo(() => {
+    if (
+      interactionState.type !== 'editBitmap' ||
+      !firstBitmapLayer ||
+      firstBitmapLayer.image._class !== 'MSJSONOriginalDataReference'
+    )
+      return;
+
+    const {
+      currentColor: color,
+      editBitmapTool: tool,
+      editBitmapState: editState,
+    } = interactionState;
+
+    if (editState.type !== 'drawing' || tool.type !== 'rectangle') return;
+
+    const originalImage = CanvasKit.MakeImageFromEncoded(
+      Base64.decode(firstBitmapLayer.image.data._data),
+    );
+
+    if (!originalImage) return;
+
+    const width = originalImage.width();
+    const height = originalImage.height();
+
+    const pixelPaint = new CanvasKit.Paint();
+    pixelPaint.setColor(Primitives.color(CanvasKit, color));
+
+    let data = drawBase64PNG(CanvasKit, { width, height }, (canvas) => {
+      fillRectPixels(
+        CanvasKit,
+        canvas,
+        { width, height },
+        editState.origin,
+        editState.current,
+        scalingOptions,
+        color.alpha < 1,
+        pixelPaint,
+      );
+    });
+
+    return produce(firstBitmapLayer, (draft) => {
+      if (draft.image._class !== 'MSJSONOriginalDataReference' || !data) return;
+
+      draft.image.data._data = data;
+    });
+  }, [CanvasKit, firstBitmapLayer, interactionState, scalingOptions]);
+
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
@@ -356,12 +422,9 @@ export default memo(function SketchFileRenderer() {
           interactionState.origin,
           interactionState.current,
           true,
-          {
-            constrainProportions: state.keyModifiers.shiftKey,
-            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
-          },
+          scalingOptions,
         )
-      : undefined;
+      : bitmapEditPreview;
 
   const rootScale = useRootScale();
   const rootScaleTransform = useMemo(

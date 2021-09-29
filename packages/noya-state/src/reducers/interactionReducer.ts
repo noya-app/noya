@@ -50,13 +50,14 @@ export type InteractionAction =
   | [type: 'insert', layerType: DrawableLayerType, current?: Point]
   | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
-  | [type: 'editBitmap', current: Point, currentColor: Sketch.Color]
+  | [type: 'editBitmap', currentColor: Sketch.Color]
   | [type: 'setPencilColor', color: Sketch.Color]
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
   | [type: 'updateDrawing', point: Point]
-  | [type: 'startDrawingPixels']
+  | [type: 'startDrawingPixels', point: Point]
+  | [type: 'updateDrawingPixels', point: Point]
   | [type: 'endDrawingPixels']
   | [type: 'setBitmapEditingTool', tool: EditBitmapTool]
   | [type: 'startMarquee', point: Point]
@@ -100,7 +101,6 @@ export type InteractionState =
     }
   | {
       type: 'editBitmap';
-      point: Point;
       currentColor: Sketch.Color;
       editBitmapState: EditBitmapState;
       editBitmapTool: EditBitmapTool;
@@ -206,8 +206,15 @@ export type InteractionState =
 
 export type InteractionType = InteractionState['type'];
 
-type EditBitmapState = 'notStarted' | 'drawing';
-type EditBitmapTool = 'pencil' | 'paintBucket';
+type EditBitmapState =
+  | { type: 'notStarted' }
+  | { type: 'drawing'; origin: Point; current: Point };
+
+export type EditBitmapTool =
+  | { type: 'pencil' }
+  | { type: 'paintBucket' }
+  | { type: 'circle' }
+  | { type: 'rectangle' };
 
 export function interactionReducer(
   state: InteractionState,
@@ -217,14 +224,13 @@ export function interactionReducer(
 ): InteractionState {
   switch (action[0]) {
     case 'editBitmap': {
-      const [, point, color] = action;
+      const [, color] = action;
 
       return {
         type: 'editBitmap',
-        point: point,
         currentColor: color,
-        editBitmapState: 'notStarted',
-        editBitmapTool: 'pencil',
+        editBitmapState: { type: 'notStarted' },
+        editBitmapTool: { type: 'pencil' },
       };
     }
     case 'setBitmapEditingTool': {
@@ -248,11 +254,35 @@ export function interactionReducer(
       };
     }
     case 'startDrawingPixels': {
+      const [, point] = action;
+
       if (state.type !== 'editBitmap') return state;
 
       return {
         ...state,
-        editBitmapState: 'drawing',
+        editBitmapState: {
+          type: 'drawing',
+          origin: point,
+          current: point,
+        },
+      };
+    }
+    case 'updateDrawingPixels': {
+      const [, point] = action;
+
+      if (
+        state.type !== 'editBitmap' ||
+        state.editBitmapState.type !== 'drawing'
+      )
+        return state;
+
+      return {
+        ...state,
+        editBitmapState: {
+          type: 'drawing',
+          origin: state.editBitmapState.origin,
+          current: point,
+        },
       };
     }
     case 'endDrawingPixels': {
@@ -260,7 +290,7 @@ export function interactionReducer(
 
       return {
         ...state,
-        editBitmapState: 'notStarted',
+        editBitmapState: { type: 'notStarted' },
       };
     }
     case 'editPath':
