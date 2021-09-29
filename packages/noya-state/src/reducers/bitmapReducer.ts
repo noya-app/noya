@@ -111,7 +111,8 @@ export function bitmapReducer(
 
                 break;
               }
-              case 'rectangle': {
+              case 'rectangle':
+              case 'circle': {
                 fillRectPixels(
                   CanvasKit,
                   canvas,
@@ -121,6 +122,7 @@ export function bitmapReducer(
                   scalingOptions,
                   color.alpha < 1,
                   pixelPaint,
+                  tool.type,
                 );
 
                 break;
@@ -180,6 +182,7 @@ export function fillRectPixels(
   scalingOptions: ScalingOptions,
   clear: boolean,
   paint: Paint,
+  shape: 'rectangle' | 'circle',
 ) {
   let rect = Selectors.getDrawnLayerRect(origin, current, scalingOptions);
 
@@ -200,7 +203,11 @@ export function fillRectPixels(
 
   const path = new CanvasKit.Path();
 
-  path.addRect(Primitives.rect(CanvasKit, rect));
+  if (shape === 'rectangle') {
+    path.addRect(Primitives.rect(CanvasKit, rect));
+  } else {
+    path.addOval(Primitives.rect(CanvasKit, rect));
+  }
 
   for (let x = 0; x < imageSize.width; x++) {
     for (let y = 0; y < imageSize.height; y++) {

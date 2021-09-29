@@ -382,7 +382,11 @@ export default memo(function Canvas() {
         case 'editBitmap': {
           dispatch('interaction', ['startDrawingPixels', point]);
 
-          if (state.interactionState.editBitmapTool.type !== 'rectangle') {
+          if (
+            !['rectangle', 'circle'].includes(
+              state.interactionState.editBitmapTool.type,
+            )
+          ) {
             dispatch('setPixel');
           }
           break;
@@ -585,7 +589,11 @@ export default memo(function Canvas() {
 
           dispatch('interaction', ['updateDrawingPixels', point]);
 
-          if (state.interactionState.editBitmapTool.type !== 'rectangle') {
+          if (
+            !['rectangle', 'circle'].includes(
+              state.interactionState.editBitmapTool.type,
+            )
+          ) {
             dispatch('setPixel');
           }
           break;

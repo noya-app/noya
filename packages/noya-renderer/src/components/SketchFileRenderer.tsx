@@ -370,7 +370,11 @@ export default memo(function SketchFileRenderer() {
       editBitmapState: editState,
     } = interactionState;
 
-    if (editState.type !== 'drawing' || tool.type !== 'rectangle') return;
+    if (
+      editState.type !== 'drawing' ||
+      (tool.type !== 'rectangle' && tool.type !== 'circle')
+    )
+      return;
 
     const originalImage = CanvasKit.MakeImageFromEncoded(
       Base64.decode(firstBitmapLayer.image.data._data),
@@ -394,6 +398,7 @@ export default memo(function SketchFileRenderer() {
         scalingOptions,
         color.alpha < 1,
         pixelPaint,
+        tool.type,
       );
     });
 
