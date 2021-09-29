@@ -467,26 +467,22 @@ export function layerReducer(
 
           const newLayer = produce(copyLayer(layer), (l) => {
             l.name = layer.name;
-          });
-
-          const centeredLayer = produce(newLayer, (l) => {
             l.frame = {
-              ...newLayer.frame,
+              ...l.frame,
               x: viewportCenter.x - parsed.x - layer.frame.width / 2,
               y: viewportCenter.y - parsed.y - layer.frame.height / 2,
             };
           });
 
-          if (parentLayer._class !== 'page') {
+          if (!Layers.isPageLayer(parentLayer)) {
             addToParentLayer(parentLayer.layers, newLayer);
           } else if (currentPageIndex === pageIndex && indexPaths.length > 0) {
             addSiblingLayer(draftPage, indexPaths[0], newLayer);
-          } else if (selectedLayer._class !== 'page') {
-            addSiblingLayer(draftPage, selectedLayerIndexPath, centeredLayer);
+          } else if (!Layers.isPageLayer(selectedLayer)) {
+            addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
           } else {
-            draftPage.layers.push(centeredLayer);
+            draftPage.layers.push(newLayer);
           }
-
           draft.selectedLayerIds.push(newLayer.do_objectID);
         });
       });

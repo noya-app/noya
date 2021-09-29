@@ -1,10 +1,9 @@
+import { useEffect, useMemo } from 'react';
 import { Size } from 'noya-geometry';
 import { Base64 } from 'noya-utils';
-import { useEffect, useMemo } from 'react';
+import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { isSupportedFile, TypedFile } from '../components/FileDropTarget';
 import { OffsetPoint } from '../containers/Canvas';
-
-export const IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS = 'ignore-global-events';
 
 export function usePasteHandler<T extends string>({
   canvasSize,

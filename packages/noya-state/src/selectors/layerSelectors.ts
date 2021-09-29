@@ -70,21 +70,6 @@ export const getSelectedLayers = (
   ) as PageLayer[];
 };
 
-export const getSelectedLayersWithTopLevelCoordinates = (
-  state: Draft<ApplicationState>,
-): PageLayer[] => {
-  const page = getCurrentPage(state);
-
-  const selectedLayers = Layers.findAll(page, (layer) =>
-    state.selectedLayerIds.includes(layer.do_objectID),
-  ) as PageLayer[];
-
-  return selectedLayers.map((layer) => {
-    resizeLayerFrame(layer, page.frame);
-    return layer;
-  });
-};
-
 export const getSelectedLayersWithContextSettings = (
   state: ApplicationState,
 ): PageLayer[] => {
@@ -177,8 +162,10 @@ export function addToParentLayer(
 ) {
   const parent = layers
     .filter(
-      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
-        Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster | Sketch.Group =>
+        Layers.isArtboard(layer) ||
+        Layers.isSymbolMaster(layer) ||
+        Layers.isGroup(layer),
     )
     .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
 
