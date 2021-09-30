@@ -1099,7 +1099,6 @@ export default memo(function Canvas() {
     onPasteLayer: useCallback(
       (data) => {
         const layers = data as Sketch.AnyLayer[];
-
         dispatch('addLayer', layers);
       },
       [dispatch],

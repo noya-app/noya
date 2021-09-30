@@ -5,6 +5,23 @@ import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { isSupportedFile, TypedFile } from '../components/FileDropTarget';
 import { OffsetPoint } from '../containers/Canvas';
 
+export const pasteLayer = (
+  layer: string,
+  onPasteLayer: (layer: any) => void,
+) => {
+  const decoder = new TextDecoder();
+
+  const match = layer.match(/<p>\(noya\)(.*?)<\/p>/);
+  if (!match) return;
+
+  const encoded = match[1];
+
+  const data = decoder.decode(Base64.decode(encoded));
+  const jsonData = JSON.parse(data);
+
+  onPasteLayer(jsonData);
+};
+
 export function usePasteHandler<T extends string>({
   canvasSize,
   onPasteImages,
@@ -26,8 +43,6 @@ export function usePasteHandler<T extends string>({
   }, [canvasSize]);
 
   useEffect(() => {
-    const decoder = new TextDecoder();
-
     const handler = (event: ClipboardEvent) => {
       if (
         (event.target instanceof HTMLInputElement ||
@@ -40,16 +55,7 @@ export function usePasteHandler<T extends string>({
       const layerEncripted = event.clipboardData?.getData('text/html');
 
       if (layerEncripted) {
-        //TODO: store parent layer information in the clipboard
-        const match = layerEncripted.match(/<p>\(noya\)(.*?)<\/p>/);
-        if (!match) return;
-
-        const encoded = match[1];
-
-        const data = decoder.decode(Base64.decode(encoded));
-        const jsonData = JSON.parse(data);
-
-        onPasteLayer(jsonData);
+        pasteLayer(layerEncripted, onPasteLayer);
         return;
       }
 
