@@ -11,13 +11,13 @@ import styled from 'styled-components';
 import { ContextMenu, Divider, MenuItem, ScrollArea, Spacer } from '..';
 import withSeparatorElements from '../utils/withSeparatorElements';
 
-export type GridViewVariant = 'small' | 'large';
+export type GridViewVariant = 'small' | 'medium' | 'large';
 
 const Grid = styled.div<{ variant: GridViewVariant }>(({ theme, variant }) => ({
   color: theme.colors.text,
   display: 'grid',
   gridTemplateColumns: `repeat(auto-fill, ${
-    variant === 'large' ? 280 : 250
+    variant === 'large' ? 280 : variant === 'small' ? 220 : 250
   }px)`,
   gridAutoRows: variant === 'large' ? '280px' : '170px',
   justifyContent: 'space-between',
@@ -31,22 +31,34 @@ const Container = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
-const ItemContainer = styled.div<{ selected: boolean }>(
-  ({ theme, selected }) => ({
-    display: 'flex',
-    flex: '1',
-    backgroundColor: theme.colors.sidebar.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '12px',
-    border: `2px solid ${selected ? theme.colors.primary : 'transparent'}`,
-    overflow: 'hidden',
-  }),
-);
+type GridItemLayoutType = 'center' | 'fill';
+
+const ItemContainer = styled.div<{
+  selected: boolean;
+  layout: GridItemLayoutType;
+}>(({ theme, selected, layout }) => ({
+  display: 'flex',
+  flex: '1',
+  backgroundColor: theme.colors.sidebar.background,
+  borderRadius: '12px',
+  border: `2px solid ${selected ? theme.colors.primary : 'transparent'}`,
+  overflow: 'hidden',
+  inset: 0,
+  ...(layout === 'fill'
+    ? {
+        alignItems: 'stretch',
+      }
+    : {
+        alignItems: 'center',
+        justifyContent: 'center',
+      }),
+}));
 
 const GridContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
+  alignItems: 'stretch',
 }));
 
 const ItemTitle = styled.span(({ theme }) => ({
@@ -89,6 +101,7 @@ interface ItemProps<MenuItemType extends string = string> {
   title: string;
   subtitle?: string;
   selected: boolean;
+  layout?: GridItemLayoutType;
   onClick?: (event: React.MouseEvent) => void;
   onDoubleClick?: () => void;
   children?: ReactNode;
@@ -111,6 +124,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     menuItems,
     onSelectMenuItem,
     onContextMenu,
+    layout = 'center',
   }: ItemProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLDivElement>,
 ) {
@@ -125,12 +139,26 @@ const GridViewItem = forwardRef(function GridViewItem<
   );
 
   const element = (
-    <GridContainer id={id} ref={forwardedRef}>
+    <GridContainer
+      id={id}
+      ref={forwardedRef}
+      style={
+        layout === 'fill'
+          ? {
+              display: 'flex',
+              flex: '1 1 0%',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+            }
+          : undefined
+      }
+    >
       <ItemContainer
         selected={selected}
         onClick={handleClick}
         onDoubleClick={onDoubleClick}
         onContextMenu={onContextMenu}
+        layout={layout}
       >
         {children}
       </ItemContainer>
@@ -151,12 +179,12 @@ const GridViewItem = forwardRef(function GridViewItem<
   return element;
 });
 
-const GridViewContext = createContext<GridViewVariant>('small');
+const GridViewContext = createContext<GridViewVariant>('medium');
 
 interface GridViewRootProps {
   variant?: GridViewVariant;
   children: ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 function GridViewRoot({ variant, children, onClick }: GridViewRootProps) {
@@ -171,7 +199,7 @@ function GridViewRoot({ variant, children, onClick }: GridViewRootProps) {
   );
 
   return (
-    <GridViewContext.Provider value={variant ?? 'small'}>
+    <GridViewContext.Provider value={variant ?? 'medium'}>
       <Container onClick={handleClick}>
         <ScrollArea>{children}</ScrollArea>
       </Container>

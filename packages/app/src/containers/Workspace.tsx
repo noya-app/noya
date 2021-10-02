@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { useSelector } from 'noya-app-state-context';
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -11,13 +11,14 @@ import {
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
-import { Selectors, WorkspaceTab } from 'noya-state';
-import { ReactNode, useMemo, useState } from 'react';
+import { getIsEditingBitmap, Selectors, WorkspaceTab } from 'noya-state';
+import { memo, ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { AutoSizer } from '../components/AutoSizer';
 import { DialogProvider } from '../contexts/DialogContext';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
+import { BitmapTemplates } from './BitmapTemplates';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
@@ -119,7 +120,13 @@ function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
   return elementMap[currentTab];
 }
 
-export default function Workspace() {
+interface Props {
+  isEditingBitmap: boolean;
+}
+
+const WorkspaceContent = memo(function WorkspaceContent({
+  isEditingBitmap,
+}: Props) {
   const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
   const isElectron = useEnvironmentParameter('isElectron');
@@ -135,6 +142,32 @@ export default function Workspace() {
     });
   }, [colorScheme, isElectron]);
 
+  const tabElement = useTabElement({
+    canvas: (
+      <>
+        <AutoSizer>
+          {(size) => <LayerList size={size} filter={layersFilter} />}
+        </AutoSizer>
+        <FilterContainer>
+          <InputField.Root labelPosition="start" labelSize={14}>
+            <InputField.Input
+              value={layersFilter}
+              onChange={setLayersFilter}
+              placeholder="Filter layers"
+              type="search"
+            />
+            <InputField.Label>
+              <MagnifyingGlassIcon />
+            </InputField.Label>
+          </InputField.Root>
+        </FilterContainer>
+        <Spacer.Vertical size={8} />
+      </>
+    ),
+    pages: <Spacer.Vertical />,
+    theme: <ThemeGroups />,
+  });
+
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       <DialogProvider>
@@ -146,33 +179,15 @@ export default function Workspace() {
             <Menubar />
           </MenubarContainer>
           <LeftSidebarBorderedContent>
-            <PageList />
-            <Divider />
-            {useTabElement({
-              canvas: (
-                <>
-                  <AutoSizer>
-                    {(size) => <LayerList size={size} filter={layersFilter} />}
-                  </AutoSizer>
-                  <FilterContainer>
-                    <InputField.Root labelPosition="start" labelSize={14}>
-                      <InputField.Input
-                        value={layersFilter}
-                        onChange={setLayersFilter}
-                        placeholder="Filter layers"
-                        type="search"
-                      />
-                      <InputField.Label>
-                        <MagnifyingGlassIcon />
-                      </InputField.Label>
-                    </InputField.Root>
-                  </FilterContainer>
-                  <Spacer.Vertical size={8} />
-                </>
-              ),
-              pages: <Spacer.Vertical />,
-              theme: <ThemeGroups />,
-            })}
+            {isEditingBitmap ? (
+              <BitmapTemplates />
+            ) : (
+              <>
+                <PageList />
+                <Divider />
+                {tabElement}
+              </>
+            )}
           </LeftSidebarBorderedContent>
         </LeftSidebar>
         <MainView>
@@ -203,4 +218,14 @@ export default function Workspace() {
       </DialogProvider>
     </DesignSystemConfigurationProvider>
   );
-}
+});
+
+export const Workspace = function Workspace() {
+  const [state] = useApplicationState();
+
+  return (
+    <WorkspaceContent
+      isEditingBitmap={getIsEditingBitmap(state.interactionState.type)}
+    />
+  );
+};
