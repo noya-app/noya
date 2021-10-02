@@ -17,11 +17,18 @@ import {
   ScalingOptions,
   Selectors,
 } from 'noya-state';
-import { Base64, isDeepEqual } from 'noya-utils';
+import { Base64, isDeepEqual, round } from 'noya-utils';
 import { PixelBuffer } from 'pixelbuffer';
 import * as Layers from '../layers';
 
-export type BitmapAction = [type: 'setPixel'];
+export type BitmapAction =
+  | [type: 'setPixel']
+  | [
+      type: 'setPixelTemplate',
+      point: Point,
+      image: ArrayBuffer,
+      mode: 'atop' | 'replace',
+    ];
 
 export function bitmapReducer(
   state: ApplicationState,
@@ -30,6 +37,82 @@ export function bitmapReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setPixelTemplate': {
+      let [, point, arrayBuffer, mode] = action;
+
+      point = Selectors.getOffsetEventPoint(state, point);
+
+      if (state.interactionState.type !== 'editBitmap') return state;
+
+      const bitmapLayers = Selectors.getSelectedLayers(state).filter(
+        Layers.isBitmapLayer,
+      );
+
+      const firstBitmapLayer = bitmapLayers[0];
+
+      if (!firstBitmapLayer) return state;
+
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === firstBitmapLayer.do_objectID,
+      );
+
+      if (!indexPath) return state;
+
+      const boundingRect = Selectors.getBoundingRect(
+        Selectors.getCurrentPage(state),
+        [firstBitmapLayer.do_objectID],
+        { artboards: 'childrenOnly', groups: 'childrenOnly' },
+      );
+
+      if (
+        !boundingRect ||
+        !point /*|| !rectContainsPoint(boundingRect, point) */
+      )
+        return state;
+
+      const pixel: Point = {
+        x: round(point.x - boundingRect.x),
+        y: round(point.y - boundingRect.y),
+      };
+
+      return produce(state, (draft) => {
+        const layer = Layers.access(
+          Selectors.getCurrentPage(draft),
+          indexPath,
+        ) as Sketch.Bitmap;
+
+        if (layer.image._class === 'MSJSONOriginalDataReference') {
+          const image = CanvasKit.MakeImageFromEncoded(arrayBuffer);
+
+          if (!image) return;
+
+          const width = image.width();
+          const height = image.height();
+
+          let data = drawBase64PNG(CanvasKit, { width, height }, (canvas) => {
+            if (
+              mode === 'atop' &&
+              layer.image._class === 'MSJSONOriginalDataReference'
+            ) {
+              const originalImage = CanvasKit.MakeImageFromEncoded(
+                Base64.decode(layer.image.data._data),
+              );
+
+              if (!originalImage) return;
+
+              canvas.drawImage(originalImage, 0, 0, new CanvasKit.Paint());
+            }
+
+            canvas.drawImage(image, pixel.x, pixel.y, new CanvasKit.Paint());
+          });
+
+          if (!data) return;
+
+          layer.image.data._data = data;
+        }
+      });
+    }
     case 'setPixel': {
       if (state.interactionState.type !== 'editBitmap') return state;
 

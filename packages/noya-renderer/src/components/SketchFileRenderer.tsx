@@ -17,11 +17,15 @@ import {
   ScalingOptions,
   Selectors,
 } from 'noya-state';
-import { Base64 } from 'noya-utils';
+import { Base64, round } from 'noya-utils';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
+import {
+  Group,
+  Rect as RCKRect,
+  Image as RCKImage,
+} from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 import { useRenderingMode } from '../RenderingModeContext';
 import { useRootScale } from '../RootScaleContext';
@@ -104,6 +108,7 @@ export default memo(function SketchFileRenderer() {
     canvasInsets,
     preferences: { showRulers, showPixelGrid },
     highlightedLayer,
+    draggedBitmapTemplate,
   } = useWorkspace();
   const [state] = useApplicationState();
   const interactionState = state.interactionState;
@@ -447,6 +452,46 @@ export default memo(function SketchFileRenderer() {
     ? Selectors.getSelectedGradient(page, state.selectedGradient)
     : undefined;
 
+  // const testPaint = useMemo(() => {
+  //   if (!draggedBitmapTemplate) return;
+
+  //   const paint = new CanvasKit.Paint();
+
+  //   paint.setShader(
+  //     draggedBitmapTemplate.image.makeShaderCubic(
+  //       CanvasKit.TileMode.Repeat,
+  //       CanvasKit.TileMode.Repeat,
+  //       0,
+  //       0,
+  //       // AffineTransform.translate(
+  //       //   draggedBitmapTemplate.position.x,
+  //       //   draggedBitmapTemplate.position.y,
+  //       // ).float32Array,
+  //       // canvasTransform.invert().float32Array,
+  //     ),
+  //   );
+
+  //   return paint;
+  // }, [CanvasKit.Paint, CanvasKit.TileMode.Repeat, draggedBitmapTemplate]);
+
+  // console.log(draggedBitmapTemplate);
+
+  const bitmapTemplatePoint = useMemo(() => {
+    if (!draggedBitmapTemplate) return;
+
+    const adjustedPoint = Selectors.getOffsetEventPoint(
+      state,
+      draggedBitmapTemplate.position,
+    );
+
+    return {
+      x: round(adjustedPoint.x),
+      y: round(adjustedPoint.y),
+    };
+  }, [draggedBitmapTemplate, state]);
+
+  // const [bitmapTemplateImage, setBitmapTemplateImage]
+
   return (
     <ClippedLayerProvider value={clippedLayerMap}>
       <ZoomProvider value={zoomValue}>
@@ -501,6 +546,19 @@ export default memo(function SketchFileRenderer() {
                   !isInserting &&
                   !isEditingText && <DragHandles rect={boundingRect} />}
               </>
+            )}
+            {bitmapTemplatePoint && draggedBitmapTemplate && (
+              <RCKImage
+                paint={new CanvasKit.Paint()}
+                image={draggedBitmapTemplate.image}
+                resample={false}
+                rect={CanvasKit.XYWHRect(
+                  bitmapTemplatePoint.x,
+                  bitmapTemplatePoint.y,
+                  24,
+                  24,
+                )}
+              />
             )}
           </Group>
           <Group transform={screenTransform}>

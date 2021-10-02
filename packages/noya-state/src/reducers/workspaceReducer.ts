@@ -1,7 +1,7 @@
 import type { FileSystemHandle } from 'browser-fs-access';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { Insets, Size } from 'noya-geometry';
+import { Insets, Point, Size } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
@@ -22,6 +22,13 @@ export type LayerHighlight = {
 };
 
 export type CanvasInsets = { left: number; right: number };
+
+export type DraggedBitmapTemplate = {
+  // templateUrl: string;
+  image: ArrayBuffer;
+  // image: Image;
+  position: Point;
+};
 
 export type NextFocusAction =
   | { type: 'renamePage'; id: string }
@@ -44,6 +51,7 @@ export type WorkspaceState = {
     showRulers: boolean;
     showPixelGrid: boolean;
   };
+  draggedBitmapTemplate?: DraggedBitmapTemplate;
 };
 
 export type WorkspaceAction =
@@ -55,6 +63,7 @@ export type WorkspaceAction =
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | [type: 'setIsolatedLayer', value: string]
+  | [type: 'setDraggedBitmapTemplate', value: DraggedBitmapTemplate | undefined]
   | HistoryAction;
 
 export function workspaceReducer(
@@ -135,6 +144,13 @@ export function workspaceReducer(
 
       return produce(state, (draft) => {
         draft.nextFocusAction = value;
+      });
+    }
+    case 'setDraggedBitmapTemplate': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.draggedBitmapTemplate = value;
       });
     }
     default: {

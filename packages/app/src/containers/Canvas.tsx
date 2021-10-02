@@ -112,7 +112,24 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   }),
 );
 
+// export const BitmapDragProvider = createContext<Point | undefined>(undefined);
+
 export default memo(function Canvas() {
+  //   {
+  //   bitmapDragPosition,
+  // }: {
+  //   bitmapDragPosition: Point | undefined;
+  // }
+  // const { isOver, setNodeRef } = useDroppable({
+  //   id: 'canvas',
+  // });
+
+  // useLayoutEffect(() => {
+  //   // console.log(bitmapDragPosition);
+  // }, [bitmapDragPosition]);
+
+  // console.log('isOver', isOver);
+
   const theme = useTheme();
   const {
     sizes: {
@@ -1229,7 +1246,10 @@ export default memo(function Canvas() {
       <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
         <Container
           id="canvas-container"
-          ref={containerRef}
+          ref={useCallback((ref) => {
+            containerRef.current = ref;
+            // setNodeRef(ref);
+          }, [])}
           cursor={cursor}
           {...mergeEventHandlers(bind(), {
             onPointerDown: handleMouseDown,
@@ -1237,6 +1257,16 @@ export default memo(function Canvas() {
             onPointerUp: handleMouseUp,
           })}
           tabIndex={0}
+          // onDragOver={(e) => {
+          //   if (e.target instanceof HTMLElement) {
+          //     console.log(e);
+          //     // e.target.style.opacity = '0';
+          //   }
+          //   // console.log(e);
+          //   // const image = new Image();
+          //   // e.dataTransfer.setDragImage(image, 0, 0);
+          //   e.preventDefault();
+          // }}
           onFocus={() => inputRef.current?.focus()}
         >
           <HiddenInputTarget

@@ -1,5 +1,17 @@
+import {
+  closestCenter,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import produce from 'immer';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
+import {
+  useApplicationState,
+  useDispatch,
+  useSelector,
+} from 'noya-app-state-context';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -10,15 +22,21 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
+import { Point } from 'noya-geometry';
 import { MagnifyingGlassIcon } from 'noya-icons';
+import { useCanvasKit } from 'noya-renderer';
 import { getIsEditingBitmap, Selectors, WorkspaceTab } from 'noya-state';
-import { memo, ReactNode, useMemo, useState } from 'react';
+import { memo, ReactNode, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { AutoSizer } from '../components/AutoSizer';
 import { DialogProvider } from '../contexts/DialogContext';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
-import { BitmapTemplates } from './BitmapTemplates';
+import {
+  bitmapTemplates,
+  BitmapTemplates,
+  DraggableBitmapTemplateItem,
+} from './BitmapTemplates';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
@@ -124,9 +142,15 @@ interface Props {
   isEditingBitmap: boolean;
 }
 
+// class CustomSensor extends PointerSensor {
+
+// }
+
 const WorkspaceContent = memo(function WorkspaceContent({
   isEditingBitmap,
 }: Props) {
+  const CanvasKit = useCanvasKit();
+  const dispatch = useDispatch();
   const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
   const isElectron = useEnvironmentParameter('isElectron');
@@ -168,53 +192,183 @@ const WorkspaceContent = memo(function WorkspaceContent({
     theme: <ThemeGroups />,
   });
 
+  const [dragId, setDragId] = useState<string | undefined>();
+  const [dragData, setDragData] = useState<
+    | {
+        initial: Point;
+        current: Point;
+      }
+    | undefined
+  >();
+  const dragTemplate = bitmapTemplates.find(
+    (template) => template.id === dragId,
+  );
+  const [templateImage, setTemplateImage] = useState<ArrayBuffer | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (!dragTemplate) return;
+
+    fetch(dragTemplate.url)
+      .then((response) => response.arrayBuffer())
+      .then((arrayBuffer) => {
+        // const image = CanvasKit.MakeImageFromEncoded(arrayBuffer);
+
+        // if (!image) return;
+
+        setTemplateImage(arrayBuffer);
+      });
+  }, [CanvasKit, dragTemplate]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+      onActivation({ event }: { event: PointerEvent }) {
+        setDragData({
+          initial: {
+            x: event.pageX - event.offsetX,
+            y: event.pageY - event.offsetY,
+          },
+          current: {
+            x: 0,
+            y: 0,
+          },
+        });
+      },
+    }),
+  );
+
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       <DialogProvider>
-        <LeftSidebar>
-          <MenubarContainer
-            showApplicationMenu={isElectron}
-            onDoubleClick={doubleClickToolbar}
-          >
-            <Menubar />
-          </MenubarContainer>
-          <LeftSidebarBorderedContent>
-            {isEditingBitmap ? (
-              <BitmapTemplates />
-            ) : (
-              <>
-                <PageList />
-                <Divider />
-                {tabElement}
-              </>
-            )}
-          </LeftSidebarBorderedContent>
-        </LeftSidebar>
-        <MainView>
-          <ToolbarContainer onDoubleClick={doubleClickToolbar}>
-            {useTabElement({
-              canvas: <Toolbar />,
-              pages: null,
-              theme: <ThemeToolbar />,
-            })}
-          </ToolbarContainer>
-          <ContentArea>
-            {useTabElement({
-              canvas: <Canvas />,
-              pages: <PagesGrid />,
-              theme: <ThemeWindow />,
-            })}
-            <RightSidebar>
-              <ScrollArea>
-                {useTabElement({
-                  canvas: <Inspector />,
-                  pages: null,
-                  theme: <ThemeInspector />,
-                })}
-              </ScrollArea>
-            </RightSidebar>
-          </ContentArea>
-        </MainView>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={(event) => {
+            // console.log(JSON.stringify(event.active.rect.current));
+            setDragId(event.active.id);
+          }}
+          onDragMove={(event) => {
+            // console.log(dragData?.initial, event.delta);
+            // console.log(JSON.stringify(event.over?.rect));
+            // const currentRect = event.active.rect.current;
+            // console.log(currentRect.translated);
+
+            // console.log('hi', dragData, JSON.stringify(event.active.rect));
+
+            if (!dragData) return;
+
+            const current = {
+              x: dragData.initial.x + event.delta.x - 260,
+              y: dragData.initial.y + event.delta.y - 46,
+            };
+
+            // const current = {
+            //   x:
+            //     dragData.initial.x + event.delta.x - event.over.rect.offsetLeft,
+            //   y: dragData.initial.y + event.delta.y - event.over.rect.offsetTop,
+            // };
+
+            // const current = {
+            //   x: dragData.initial.x + event.delta.x,
+            //   y: dragData.initial.y + event.delta.y,
+            // };
+
+            // console.log(current);
+
+            setDragData({
+              initial: dragData.initial,
+              current,
+            });
+
+            if (!templateImage) return;
+
+            dispatch('setDraggedBitmapTemplate', {
+              image: templateImage,
+              position: current,
+            });
+          }}
+          onDragEnd={(event) => {
+            if (templateImage && dragData && dragTemplate) {
+              dispatch(
+                'setPixelTemplate',
+                dragData.current,
+                templateImage,
+                dragTemplate.replacesContents ? 'replace' : 'atop',
+              );
+            }
+
+            setDragData(undefined);
+            setDragId(undefined);
+            dispatch('setDraggedBitmapTemplate', undefined);
+          }}
+        >
+          <LeftSidebar>
+            <MenubarContainer
+              showApplicationMenu={isElectron}
+              onDoubleClick={doubleClickToolbar}
+            >
+              <Menubar />
+            </MenubarContainer>
+            <LeftSidebarBorderedContent>
+              {isEditingBitmap ? (
+                <BitmapTemplates />
+              ) : (
+                <>
+                  <PageList />
+                  <Divider />
+                  {tabElement}
+                </>
+              )}
+            </LeftSidebarBorderedContent>
+          </LeftSidebar>
+          <MainView>
+            <ToolbarContainer onDoubleClick={doubleClickToolbar}>
+              {useTabElement({
+                canvas: <Toolbar />,
+                pages: null,
+                theme: <ThemeToolbar />,
+              })}
+            </ToolbarContainer>
+            <ContentArea>
+              {useTabElement({
+                canvas: <Canvas />,
+                // canvas: <Canvas bitmapDragPosition={dragData?.current} />,
+                pages: <PagesGrid />,
+                theme: <ThemeWindow />,
+              })}
+              <RightSidebar>
+                <ScrollArea>
+                  {useTabElement({
+                    canvas: <Inspector />,
+                    pages: null,
+                    theme: <ThemeInspector />,
+                  })}
+                </ScrollArea>
+              </RightSidebar>
+            </ContentArea>
+          </MainView>
+          <DragOverlay>
+            {dragTemplate && dragData && dragData.current.x < -120 ? (
+              <div
+                style={{
+                  width: '220px',
+                  height: '120px',
+                  display: 'flex',
+                  alignItems: 'stretch',
+                }}
+              >
+                <DraggableBitmapTemplateItem
+                  id={'drag-template-overlay'}
+                  url={dragTemplate.url}
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </DialogProvider>
     </DesignSystemConfigurationProvider>
   );

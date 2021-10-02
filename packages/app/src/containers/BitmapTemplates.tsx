@@ -1,9 +1,9 @@
-// import { useApplicationState } from 'noya-app-state-context';
+import { useDraggable } from '@dnd-kit/core';
 import { GridView } from 'noya-designsystem';
 import { memo } from 'react';
 import styled from 'styled-components';
-
 import template1 from '../assets/bitmapTemplate1.png';
+import shades from '../assets/shades.png';
 
 const TemplateItem = styled.div({
   flex: '1 1 0%',
@@ -12,6 +12,45 @@ const TemplateItem = styled.div({
   justifyContent: 'center',
 });
 
+type BitmapTemplate = {
+  id: string;
+  url: string;
+  title: string;
+  replacesContents: boolean;
+};
+
+export const bitmapTemplates: BitmapTemplate[] = [
+  { id: 'template1', url: template1, title: 'Boxes', replacesContents: true },
+  { id: 'template2', url: shades, title: 'Shades', replacesContents: false },
+];
+
+export function DraggableBitmapTemplateItem({
+  id,
+  url,
+}: {
+  id: string;
+  url: string;
+}) {
+  const { attributes, isDragging, listeners, setNodeRef } = useDraggable({
+    id,
+  });
+
+  return (
+    <div
+      id={id}
+      ref={setNodeRef}
+      style={{
+        width: '120px',
+        height: '120px',
+        opacity: isDragging ? 0.5 : undefined,
+        background: `center / cover url("${url}")`,
+      }}
+      {...attributes}
+      {...listeners}
+    />
+  );
+}
+
 export const BitmapTemplates = memo(function BitmapTemplates() {
   // const [state, dispatch] = useApplicationState();
 
@@ -19,16 +58,22 @@ export const BitmapTemplates = memo(function BitmapTemplates() {
     <GridView.Root variant="small">
       <GridView.SectionHeader title={'Templates'} />
       <GridView.Section>
-        <GridView.Item
-          id="template1"
-          title="Test"
-          selected={false}
-          layout="fill"
-        >
-          <TemplateItem>
-            <img src={template1} width={'auto'} height={'100%'} alt="" />
-          </TemplateItem>
-        </GridView.Item>
+        {bitmapTemplates.map((template) => (
+          <GridView.Item
+            key={template.id}
+            id={`grid-item-${template.id}`}
+            title={template.title}
+            selected={false}
+            layout="fill"
+          >
+            <TemplateItem>
+              <DraggableBitmapTemplateItem
+                id={template.id}
+                url={template.url}
+              />
+            </TemplateItem>
+          </GridView.Item>
+        ))}
       </GridView.Section>
     </GridView.Root>
   );

@@ -114,6 +114,7 @@ export function applicationReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'setPixelTemplate':
     case 'setPixel':
       return bitmapReducer(state, action, CanvasKit, context);
     case 'setKeyModifier':

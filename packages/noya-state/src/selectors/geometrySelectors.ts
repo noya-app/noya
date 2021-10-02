@@ -497,3 +497,13 @@ export function getDrawnLayerRect(
 
   return createRect(origin, current);
 }
+
+export function getOffsetEventPoint(state: ApplicationState, point: Point) {
+  const meta = getCurrentPageMetadata(state);
+
+  // Event coordinates are relative to (0,0), but we want them to include
+  // the current page's zoom and offset from the origin
+  return AffineTransform.scale(1 / meta.zoomValue)
+    .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+    .applyTo(point);
+}

@@ -15,6 +15,7 @@ export function useWorkspace() {
     preferences,
     nextFocusAction,
     isolatedLayer,
+    draggedBitmapTemplate,
   } = state;
 
   const setCanvasSize = useCallback(
@@ -79,6 +80,7 @@ export function useWorkspace() {
       renamingLayer,
       startRenamingLayer,
       isolatedLayer,
+      draggedBitmapTemplate,
     }),
     [
       canvasInsets,
@@ -95,6 +97,7 @@ export function useWorkspace() {
       renamingLayer,
       startRenamingLayer,
       isolatedLayer,
+      draggedBitmapTemplate,
     ],
   );
 }
