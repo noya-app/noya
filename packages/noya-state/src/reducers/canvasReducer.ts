@@ -1014,7 +1014,6 @@ export function canvasReducer(
 
             layerIndexPaths.forEach((indexPath) => {
               const originalLayer = Layers.access(pageSnapshot, indexPath);
-              if (originalLayer.isLocked) return;
 
               const layerTransform = getLayerTransformAtIndexPath(
                 pageSnapshot,
