@@ -120,6 +120,7 @@ function DropdownMenuRoot<T extends string>({
   children,
   onSelect,
   isNested,
+  isScroll = false,
   shouldBindKeyboardShortcuts,
 }: MenuProps<T>) {
   const hasCheckedItem = items.some(
@@ -134,6 +135,9 @@ function DropdownMenuRoot<T extends string>({
     [isNested, items, onSelect, shouldBindKeyboardShortcuts],
   );
 
+  const style = isScroll
+    ? { height: '100%', maxHeight: '250px', overflow: 'hidden auto' }
+    : {};
   useKeyboardShortcuts(keymap);
 
   return (
@@ -148,6 +152,7 @@ function DropdownMenuRoot<T extends string>({
         </RadixDropdownMenu.Trigger>
       )}
       <RootElement
+        style={style}
         sideOffset={4}
         onCloseAutoFocus={useCallback((event) => {
           // Prevent the trigger from being focused, which interferes with

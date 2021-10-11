@@ -149,6 +149,7 @@ export interface MenuProps<T extends string> {
   items: MenuItem<T>[];
   onSelect: (value: T) => void;
   isNested?: boolean;
+  isScroll?: boolean;
   shouldBindKeyboardShortcuts?: boolean;
 }
 
