@@ -321,7 +321,6 @@ const ToolbarContent = memo(function ToolbarContent({
       <DropdownMenu<string>
         items={insertMenuItems}
         onSelect={handleInsertSymbol}
-        isScroll={true}
       >
         <Button id="insert-symbol">
           {useMemo(
