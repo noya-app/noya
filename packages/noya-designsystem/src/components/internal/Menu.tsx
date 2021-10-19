@@ -79,13 +79,24 @@ export const styles = {
     marginRight: `-${CHECKBOX_RIGHT_INSET}px`,
   } as CSSObject,
 
-  contentStyle: ({ theme }: { theme: Theme }): CSSObject => ({
+  contentStyle: ({
+    theme,
+    scrollable,
+  }: {
+    theme: Theme;
+    scrollable?: boolean;
+  }): CSSObject => ({
     borderRadius: 4,
     backgroundColor: theme.colors.popover.background,
     color: theme.colors.text,
     boxShadow: '0 2px 4px rgba(0,0,0,0.2), 0 0 12px rgba(0,0,0,0.1)',
     padding: '4px',
     border: `1px solid ${theme.colors.divider}`,
+    ...(scrollable && {
+      height: '100%',
+      maxHeight: 'calc(100vh - 80px)',
+      overflow: 'hidden auto',
+    }),
   }),
 };
 
