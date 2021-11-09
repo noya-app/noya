@@ -18,6 +18,7 @@ jest.mock('scheduler', () => require('scheduler/unstable_mock'));
 
 // Polyfills for node
 window.TextEncoder = window.TextEncoder ?? util.TextEncoder;
+window.TextDecoder = window.TextDecoder ?? util.TextDecoder;
 File.prototype.arrayBuffer = File.prototype.arrayBuffer || arrayBuffer;
 Blob.prototype.arrayBuffer = Blob.prototype.arrayBuffer || arrayBuffer;
 

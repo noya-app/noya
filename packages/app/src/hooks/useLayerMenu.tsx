@@ -8,8 +8,8 @@ import {
 import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
+import { ClipboardUtils } from 'noya-utils';
 import { useCallback, useMemo } from 'react';
-import { pasteLayer } from './usePasteHandler';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -82,7 +82,6 @@ export default function useLayerMenu(
 ) {
   const dispatch = useDispatch();
   const { startRenamingLayer } = useWorkspace();
-  //const [canPaste, setCanPaste] = useState(false);
 
   const isEditingText = Selectors.getIsEditingText(interactionType);
 
@@ -123,15 +122,6 @@ export default function useLayerMenu(
 
   const canShow = layers.some((item) => !item.isVisible);
 
-  const canPaste = true;
-  // @ts-ignore
-  /*navigator.clipboard.read().then((items) => {
-    items[0].getType('text/html').then((blob: Blob) => {
-      console.log(blob);
-      setCanPaste(blob && blob.type === 'text/html');
-    });
-  });*/
-
   const menuConfig: MenuConfig<LayerMenuItemType> = useMemo(() => {
     const selectAllSection: RegularMenuItem<LayerMenuItemType>[] = [
       { value: 'selectAll', title: 'Select All', shortcut: 'Mod-a' },
@@ -162,10 +152,7 @@ export default function useLayerMenu(
       [{ value: 'duplicate', title: 'Duplicate', shortcut: 'Mod-d' }],
       [{ value: 'delete', title: 'Delete' }],
 
-      [
-        { value: 'copy', title: 'Copy' },
-        canPaste && { value: 'paste', title: 'Paste' },
-      ],
+      [{ value: 'copy', title: 'Copy' }],
       [
         canUnlock
           ? { value: 'unlock', title: 'Unlock', shortcut: 'Mod-Shift-l' }
@@ -201,7 +188,6 @@ export default function useLayerMenu(
     canShow,
     canUngroup,
     canUnlock,
-    canPaste,
     hasSelectedLayers,
     newIgnoreMasksValue,
     newIsAlphaMaskValue,
@@ -256,19 +242,23 @@ export default function useLayerMenu(
             try {
               // @ts-ignore (TS says that .read() doesn't exist but it does >,<)
               const clipboardItems = await navigator.clipboard.read();
+
               for (const clipboardItem of clipboardItems) {
                 const blob = await clipboardItem.getType('text/html');
                 const blobText = await blob.text();
 
                 if (!blobText) return;
 
-                pasteLayer(blobText, (data) => {
-                  const layers = data as Sketch.AnyLayer[];
-                  dispatch('addLayer', layers);
-                });
+                const layers = ClipboardUtils.fromEncodedHTML(blobText) as
+                  | Sketch.AnyLayer[]
+                  | undefined;
+
+                if (!layers) return;
+
+                dispatch('addLayer', layers);
               }
             } catch (e) {
-              //Do something? console.debug('Failed to read clipboard');
+              console.warn('Failed to paste');
             }
           };
 
