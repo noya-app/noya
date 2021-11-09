@@ -1,19 +1,21 @@
+import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { ClipboardUtils } from 'noya-utils';
 import { useEffect, useMemo } from 'react';
 import { isSupportedFile, TypedFile } from '../components/FileDropTarget';
 import { OffsetPoint } from '../containers/Canvas';
+import { NoyaClipboardData } from './useCopyHandler';
 
 export function usePasteHandler<T extends string>({
   canvasSize,
   onPasteImages,
-  onPasteLayer,
+  onPasteLayers: onPasteLayer,
   supportedFileTypes,
 }: {
   canvasSize: Size | undefined;
   onPasteImages: (files: TypedFile<T>[], offsetPoint: OffsetPoint) => void;
-  onPasteLayer: (layer: any) => void;
+  onPasteLayers: (layer: Sketch.AnyLayer[]) => void;
   supportedFileTypes: T[];
 }) {
   const insertPoint = useMemo((): OffsetPoint => {
@@ -40,7 +42,19 @@ export function usePasteHandler<T extends string>({
         : undefined;
 
       if (decodedData !== undefined) {
-        onPasteLayer(decodedData);
+        if (
+          typeof decodedData === 'object' &&
+          decodedData &&
+          'type' in decodedData
+        ) {
+          const data = decodedData as NoyaClipboardData;
+
+          switch (data.type) {
+            case 'layers': {
+              onPasteLayer(data.layers);
+            }
+          }
+        }
         return;
       }
 

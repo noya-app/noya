@@ -1096,11 +1096,8 @@ export default memo(function Canvas() {
       (files, point) => onImportImages(files, 'selectedArtboard', point),
       [onImportImages],
     ),
-    onPasteLayer: useCallback(
-      (data) => {
-        const layers = data as Sketch.AnyLayer[];
-        dispatch('addLayer', layers);
-      },
+    onPasteLayers: useCallback(
+      (layers) => dispatch('addLayer', layers),
       [dispatch],
     ),
   });
