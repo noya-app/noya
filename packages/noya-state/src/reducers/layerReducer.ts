@@ -50,7 +50,7 @@ export type LayerAction =
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
   | [type: 'duplicateLayer', ids: string[]]
-  | [type: 'addLayer', data: Sketch.AnyLayer[]]
+  | [type: 'addLayer', data: Sketch.AnyLayer | Sketch.AnyLayer[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -160,7 +160,7 @@ export const detachSymbolIntances = (
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
-  context?: ApplicationReducerContext,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'moveLayer': {
@@ -423,12 +423,12 @@ export function layerReducer(
       });
     }
     case 'addLayer': {
-      const [, layers] = action;
+      const layers = Array.isArray(action[1]) ? action[1] : [action[1]];
+
       const currentPageIndex = getCurrentPageIndex(state);
+
       const selectedLayerIndexPath =
         getSelectedLayerIndexPathsExcludingDescendants(state)[0];
-
-      if (!context) return state;
 
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[currentPageIndex];
@@ -483,6 +483,7 @@ export function layerReducer(
           } else {
             draftPage.layers.push(newLayer);
           }
+
           draft.selectedLayerIds.push(newLayer.do_objectID);
         });
       });
