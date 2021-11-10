@@ -1025,6 +1025,8 @@ export function canvasReducer(
                 indexPath,
               ) as Layers.PageLayer;
 
+              if (layer.isLocked) return;
+
               const originalBounds = createBounds(originalLayer.frame);
 
               const scaleTransform = AffineTransform.multiply(

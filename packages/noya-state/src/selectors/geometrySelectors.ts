@@ -312,7 +312,7 @@ export function getBoundingRect(
   };
 
   visitLayersReversed(rootLayer, options, (layer, indexPath) => {
-    if (!layerIds.includes(layer.do_objectID) || layer.isLocked) return;
+    if (!layerIds.includes(layer.do_objectID)) return;
 
     const transform = AffineTransform.multiply(
       getLayerTransformAtIndexPathReversed(rootLayer, indexPath),
