@@ -17,6 +17,8 @@ import {
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
   getLayerIndexPathsExcludingDescendants,
+  addToParentLayer,
+  getSelectedLayerIndexPathsExcludingDescendants,
   getLayerTransformAtIndexPath,
   getParentLayer,
   getRightMostLayerBounds,
@@ -32,6 +34,7 @@ import {
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
+import { ApplicationReducerContext, Primitives } from 'noya-state';
 
 export type LayerAction =
   | [
@@ -47,6 +50,7 @@ export type LayerAction =
   | [type: 'detachSymbol', layerId: string | string[]]
   | [type: 'deleteSymbol', ids: string[]]
   | [type: 'duplicateLayer', ids: string[]]
+  | [type: 'addLayer', data: Sketch.AnyLayer | Sketch.AnyLayer[]]
   | [
       type: 'selectLayer',
       layerId: string | string[] | undefined,
@@ -156,6 +160,7 @@ export const detachSymbolIntances = (
 export function layerReducer(
   state: ApplicationState,
   action: LayerAction,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'moveLayer': {
@@ -414,6 +419,72 @@ export function layerReducer(
           draft.selectedLayerIds.push(
             ...copiedLayers.map((layer) => layer.do_objectID),
           );
+        });
+      });
+    }
+    case 'addLayer': {
+      const layers = Array.isArray(action[1]) ? action[1] : [action[1]];
+
+      const currentPageIndex = getCurrentPageIndex(state);
+
+      const selectedLayerIndexPath =
+        getSelectedLayerIndexPathsExcludingDescendants(state)[0];
+
+      return produce(state, (draft) => {
+        const draftPage = draft.sketch.pages[currentPageIndex];
+        const selectedLayer =
+          selectedLayerIndexPath && selectedLayerIndexPath.length > 0
+            ? Layers.access(draftPage, selectedLayerIndexPath)
+            : draftPage;
+
+        draft.selectedLayerIds = [];
+
+        let parentLayer = draftPage as Layers.ParentLayer;
+
+        if (Layers.isParentLayer(selectedLayer)) {
+          parentLayer = selectedLayer;
+        }
+
+        const viewportCenter = {
+          x: context.canvasSize.width / 2,
+          y: context.canvasSize.height / 2,
+        };
+
+        const meta = draft.sketch.user[draftPage.do_objectID] ?? {
+          zoomValue: 1,
+          scrollOrigin: '{0,0}',
+        };
+
+        const parsed = Primitives.parsePoint(meta.scrollOrigin);
+
+        layers.forEach((layer) => {
+          const { pageIndex, indexPaths } = findPageLayerIndexPaths(
+            state,
+            (l) => l.do_objectID === layer.do_objectID,
+          )[0];
+
+          if (layer._class === 'page') return;
+
+          const newLayer = produce(copyLayer(layer), (l) => {
+            l.name = layer.name;
+            l.frame = {
+              ...l.frame,
+              x: viewportCenter.x - parsed.x - layer.frame.width / 2,
+              y: viewportCenter.y - parsed.y - layer.frame.height / 2,
+            };
+          });
+
+          if (!Layers.isPageLayer(parentLayer)) {
+            addToParentLayer(parentLayer.layers, newLayer);
+          } else if (currentPageIndex === pageIndex && indexPaths.length > 0) {
+            addSiblingLayer(draftPage, indexPaths[0], newLayer);
+          } else if (!Layers.isPageLayer(selectedLayer)) {
+            addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+          } else {
+            draftPage.layers.push(newLayer);
+          }
+
+          draft.selectedLayerIds.push(newLayer.do_objectID);
         });
       });
     }

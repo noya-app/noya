@@ -1,15 +1,21 @@
+import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
+import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
+import { ClipboardUtils } from 'noya-utils';
 import { useEffect, useMemo } from 'react';
 import { isSupportedFile, TypedFile } from '../components/FileDropTarget';
 import { OffsetPoint } from '../containers/Canvas';
+import { NoyaClipboardData } from './useCopyHandler';
 
-export function useImagePasteHandler<T extends string>({
+export function usePasteHandler<T extends string>({
   canvasSize,
   onPasteImages,
+  onPasteLayers: onPasteLayer,
   supportedFileTypes,
 }: {
   canvasSize: Size | undefined;
   onPasteImages: (files: TypedFile<T>[], offsetPoint: OffsetPoint) => void;
+  onPasteLayers: (layer: Sketch.AnyLayer[]) => void;
   supportedFileTypes: T[];
 }) {
   const insertPoint = useMemo((): OffsetPoint => {
@@ -24,10 +30,33 @@ export function useImagePasteHandler<T extends string>({
   useEffect(() => {
     const handler = (event: ClipboardEvent) => {
       if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
+        (event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement) &&
+        !event.target.classList.contains(IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS)
       )
         return;
+
+      const encodedHTML = event.clipboardData?.getData('text/html');
+      const decodedData = encodedHTML
+        ? ClipboardUtils.fromEncodedHTML(encodedHTML)
+        : undefined;
+
+      if (decodedData !== undefined) {
+        if (
+          typeof decodedData === 'object' &&
+          decodedData &&
+          'type' in decodedData
+        ) {
+          const data = decodedData as NoyaClipboardData;
+
+          switch (data.type) {
+            case 'layers': {
+              onPasteLayer(data.layers);
+            }
+          }
+        }
+        return;
+      }
 
       const items = [...(event.clipboardData ?? new DataTransfer()).items];
 
@@ -47,5 +76,5 @@ export function useImagePasteHandler<T extends string>({
     document.addEventListener('paste', handler);
 
     return () => document.removeEventListener('paste', handler);
-  }, [insertPoint, onPasteImages, supportedFileTypes]);
+  }, [insertPoint, onPasteImages, onPasteLayer, supportedFileTypes]);
 }

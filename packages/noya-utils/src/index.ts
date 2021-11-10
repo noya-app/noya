@@ -7,6 +7,7 @@ export * from './lerp';
 export * from './sum';
 export * from './round';
 export * from './range';
+export * from './clipboard';
 export * from './cartesianProduct';
 export * from './windowsOf';
 export * from './sortBy';

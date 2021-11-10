@@ -48,7 +48,8 @@ import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import DropTarget, { TypedFile } from '../components/FileDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
-import { useImagePasteHandler } from '../hooks/useFilePasteHandler';
+import { usePasteHandler } from '../hooks/usePasteHandler';
+import { useCopyHandler } from '../hooks/useCopyHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
@@ -1097,14 +1098,20 @@ export default memo(function Canvas() {
     [CanvasKit, dispatch, offsetEventPoint],
   );
 
-  useImagePasteHandler<SupportedImageUploadType>({
+  usePasteHandler<SupportedImageUploadType>({
     supportedFileTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
     canvasSize: containerSize,
     onPasteImages: useCallback(
       (files, point) => onImportImages(files, 'selectedArtboard', point),
       [onImportImages],
     ),
+    onPasteLayers: useCallback(
+      (layers) => dispatch('addLayer', layers),
+      [dispatch],
+    ),
   });
+
+  useCopyHandler();
 
   const inputRef = useRef<HTMLInputElement>(null);
 

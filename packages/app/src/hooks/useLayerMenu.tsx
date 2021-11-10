@@ -8,6 +8,7 @@ import {
 import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
+import { ClipboardUtils } from 'noya-utils';
 import { useCallback, useMemo } from 'react';
 import { useOpenInputDialog } from '../contexts/DialogContext';
 
@@ -64,6 +65,8 @@ export type LayerMenuItemType =
   | 'group'
   | 'ungroup'
   | 'delete'
+  | 'copy'
+  | 'paste'
   | 'createSymbol'
   | 'detachSymbol'
   | 'useAsMask'
@@ -81,6 +84,7 @@ export default function useLayerMenu(
   const dispatch = useDispatch();
   const openDialog = useOpenInputDialog();
   const { startRenamingLayer } = useWorkspace();
+
   const isEditingText = Selectors.getIsEditingText(interactionType);
 
   const hasSelectedLayers = layers.length > 0;
@@ -149,6 +153,8 @@ export default function useLayerMenu(
       ],
       [{ value: 'duplicate', title: 'Duplicate', shortcut: 'Mod-d' }],
       [{ value: 'delete', title: 'Delete' }],
+
+      [{ value: 'copy', title: 'Copy' }],
       [
         canUnlock
           ? { value: 'unlock', title: 'Unlock', shortcut: 'Mod-Shift-l' }
@@ -211,6 +217,54 @@ export default function useLayerMenu(
           return;
         case 'delete':
           dispatch('deleteLayer', selectedLayerIds);
+          return;
+        case 'copy':
+          const isSafari = /Apple Computer/.test(navigator.vendor);
+
+          if (isSafari) {
+            const range = document.createRange();
+            range.selectNode(document.body);
+
+            window.getSelection()?.removeAllRanges();
+            window.getSelection()?.addRange(range);
+          }
+
+          document.execCommand('copy');
+
+          if (isSafari) {
+            window.getSelection()?.removeAllRanges();
+          }
+
+          return;
+        case 'paste':
+          // Works on safari
+          document.execCommand('paste');
+
+          const paste = async () => {
+            try {
+              // @ts-ignore (TS says that .read() doesn't exist but it does >,<)
+              const clipboardItems = await navigator.clipboard.read();
+
+              for (const clipboardItem of clipboardItems) {
+                const blob = await clipboardItem.getType('text/html');
+                const blobText = await blob.text();
+
+                if (!blobText) return;
+
+                const layers = ClipboardUtils.fromEncodedHTML(blobText) as
+                  | Sketch.AnyLayer[]
+                  | undefined;
+
+                if (!layers) return;
+
+                dispatch('addLayer', layers);
+              }
+            } catch (e) {
+              console.warn('Failed to paste');
+            }
+          };
+
+          paste();
           return;
         case 'duplicate':
           dispatch('duplicateLayer', selectedLayerIds);

@@ -1,3 +1,7 @@
+import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import { FontManager } from 'noya-fonts';
+import { GoogleFontProvider } from 'noya-google-fonts';
+import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import {
   createInitialState,
@@ -5,8 +9,27 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
-import { ApplicationState } from '../applicationReducer';
+import {
+  ApplicationReducerContext,
+  ApplicationState,
+} from '../applicationReducer';
 import { layerReducer } from '../layerReducer';
+
+let CanvasKit: CanvasKitType;
+let context: ApplicationReducerContext;
+
+beforeAll(async () => {
+  CanvasKit = await loadCanvasKit();
+  const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
+  context = {
+    canvasInsets: { top: 0, right: 0, bottom: 0, left: 0 },
+    canvasSize: { width: 1000, height: 1000 },
+    fontManager: {
+      ...new FontManager(GoogleFontProvider),
+      getTypefaceFontProvider: () => typefaceFontProvider,
+    },
+  };
+});
 
 const getPageLayersLength = (state: ApplicationState) =>
   Selectors.getCurrentPage(state).layers.length;
@@ -36,12 +59,11 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
 
-    const updated = layerReducer(state, [
-      'moveLayer',
-      rectangle.do_objectID,
-      group.do_objectID,
-      'inside',
-    ]);
+    const updated = layerReducer(
+      state,
+      ['moveLayer', rectangle.do_objectID, group.do_objectID, 'inside'],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -58,12 +80,11 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
 
-    const updated = layerReducer(state, [
-      'moveLayer',
-      rectangle.do_objectID,
-      group.do_objectID,
-      'above',
-    ]);
+    const updated = layerReducer(
+      state,
+      ['moveLayer', rectangle.do_objectID, group.do_objectID, 'above'],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -80,12 +101,11 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, group] })),
     );
 
-    const updated = layerReducer(state, [
-      'moveLayer',
-      group.do_objectID,
-      rectangle.do_objectID,
-      'below',
-    ]);
+    const updated = layerReducer(
+      state,
+      ['moveLayer', group.do_objectID, rectangle.do_objectID, 'below'],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -103,21 +123,19 @@ describe('moveLayer', () => {
     );
 
     expect(state).toEqual(
-      layerReducer(state, [
-        'moveLayer',
-        rectangle.do_objectID,
-        group.do_objectID,
-        'below',
-      ]),
+      layerReducer(
+        state,
+        ['moveLayer', rectangle.do_objectID, group.do_objectID, 'below'],
+        context,
+      ),
     );
 
     expect(state).toEqual(
-      layerReducer(state, [
-        'moveLayer',
-        group.do_objectID,
-        rectangle.do_objectID,
-        'above',
-      ]),
+      layerReducer(
+        state,
+        ['moveLayer', group.do_objectID, rectangle.do_objectID, 'above'],
+        context,
+      ),
     );
   });
 
@@ -128,12 +146,16 @@ describe('moveLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, oval, group] })),
     );
 
-    const updated = layerReducer(state, [
-      'moveLayer',
-      [rectangle.do_objectID, oval.do_objectID],
-      group.do_objectID,
-      'inside',
-    ]);
+    const updated = layerReducer(
+      state,
+      [
+        'moveLayer',
+        [rectangle.do_objectID, oval.do_objectID],
+        group.do_objectID,
+        'inside',
+      ],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -152,7 +174,11 @@ describe('deleteLayer', () => {
 
     expect(getPageLayersLength(state)).toEqual(1);
 
-    const updated = layerReducer(state, ['deleteLayer', rectangle.do_objectID]);
+    const updated = layerReducer(
+      state,
+      ['deleteLayer', rectangle.do_objectID],
+      context,
+    );
 
     expect(getPageLayersLength(updated)).toEqual(0);
   });
@@ -165,10 +191,11 @@ describe('deleteLayer', () => {
     );
 
     test('within same parent', () => {
-      const updated = layerReducer(state, [
-        'deleteLayer',
-        [group.do_objectID, oval.do_objectID],
-      ]);
+      const updated = layerReducer(
+        state,
+        ['deleteLayer', [group.do_objectID, oval.do_objectID]],
+        context,
+      );
 
       expect(
         debugDescription([
@@ -179,10 +206,11 @@ describe('deleteLayer', () => {
     });
 
     test('within different parents', () => {
-      const updated = layerReducer(state, [
-        'deleteLayer',
-        [rectangle.do_objectID, oval.do_objectID],
-      ]);
+      const updated = layerReducer(
+        state,
+        ['deleteLayer', [rectangle.do_objectID, oval.do_objectID]],
+        context,
+      );
 
       expect(
         debugDescription([
@@ -194,10 +222,11 @@ describe('deleteLayer', () => {
 
     // Rectangle is a child of Group, so this should be an invalid selection
     test('bad nesting', () => {
-      const updated = layerReducer(state, [
-        'deleteLayer',
-        [group.do_objectID, rectangle.do_objectID],
-      ]);
+      const updated = layerReducer(
+        state,
+        ['deleteLayer', [group.do_objectID, rectangle.do_objectID]],
+        context,
+      );
 
       expect(
         debugDescription([
@@ -215,10 +244,11 @@ describe('duplicateLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle] })),
     );
 
-    const updated = layerReducer(state, [
-      'duplicateLayer',
-      [rectangle.do_objectID],
-    ]);
+    const updated = layerReducer(
+      state,
+      ['duplicateLayer', [rectangle.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -233,10 +263,11 @@ describe('duplicateLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
     );
 
-    const updated = layerReducer(state, [
-      'duplicateLayer',
-      [rectangle.do_objectID, oval.do_objectID],
-    ]);
+    const updated = layerReducer(
+      state,
+      ['duplicateLayer', [rectangle.do_objectID, oval.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -253,10 +284,11 @@ describe('duplicateLayer', () => {
       ),
     );
 
-    const updated = layerReducer(state, [
-      'duplicateLayer',
-      [rectangle.do_objectID, artboard.do_objectID],
-    ]);
+    const updated = layerReducer(
+      state,
+      ['duplicateLayer', [rectangle.do_objectID, artboard.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -273,10 +305,11 @@ describe('duplicateLayer', () => {
       createSketchFile(SketchModel.page({ layers: [rectangle, artboard] })),
     );
 
-    const updated = layerReducer(state, [
-      'duplicateLayer',
-      [rectangle.do_objectID, text.do_objectID],
-    ]);
+    const updated = layerReducer(
+      state,
+      ['duplicateLayer', [rectangle.do_objectID, text.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -320,10 +353,11 @@ describe('grouping', () => {
       ),
     );
 
-    const groupedState = layerReducer(state, [
-      'groupLayers',
-      [rectangle.do_objectID, oval.do_objectID],
-    ]);
+    const groupedState = layerReducer(
+      state,
+      ['groupLayers', [rectangle.do_objectID, oval.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -339,10 +373,11 @@ describe('grouping', () => {
 
     expect(groupedState.selectedLayerIds).toEqual([group.do_objectID]);
 
-    const ungroupedState = layerReducer(groupedState, [
-      'ungroupLayers',
-      [group.do_objectID],
-    ]);
+    const ungroupedState = layerReducer(
+      groupedState,
+      ['ungroupLayers', [group.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -399,10 +434,11 @@ describe('grouping', () => {
       ),
     );
 
-    const groupedState = layerReducer(state, [
-      'groupLayers',
-      [rectangle.do_objectID, oval.do_objectID],
-    ]);
+    const groupedState = layerReducer(
+      state,
+      ['groupLayers', [rectangle.do_objectID, oval.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -418,10 +454,11 @@ describe('grouping', () => {
 
     expect(groupedState.selectedLayerIds).toEqual([group.do_objectID]);
 
-    const ungroupedState = layerReducer(groupedState, [
-      'ungroupLayers',
-      [group.do_objectID],
-    ]);
+    const ungroupedState = layerReducer(
+      groupedState,
+      ['ungroupLayers', [group.do_objectID]],
+      context,
+    );
 
     expect(
       debugDescription([
@@ -470,10 +507,11 @@ describe('grouping', () => {
       group2.do_objectID,
     ];
 
-    const updated = layerReducer(state, [
-      'ungroupLayers',
-      state.selectedLayerIds,
-    ]);
+    const updated = layerReducer(
+      state,
+      ['ungroupLayers', state.selectedLayerIds],
+      context,
+    );
 
     expect(
       debugDescription([

@@ -162,8 +162,10 @@ export function addToParentLayer(
 ) {
   const parent = layers
     .filter(
-      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster =>
-        Layers.isArtboard(layer) || Layers.isSymbolMaster(layer),
+      (layer): layer is Sketch.Artboard | Sketch.SymbolMaster | Sketch.Group =>
+        Layers.isArtboard(layer) ||
+        Layers.isSymbolMaster(layer) ||
+        Layers.isGroup(layer),
     )
     .find((artboard) => rectsIntersect(artboard.frame, layer.frame));
 
