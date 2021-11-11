@@ -263,19 +263,19 @@ const ToolbarContent = memo(function ToolbarContent({
     (type: ZoomMenuType) => {
       switch (type) {
         case 'zoomIn':
-          dispatch('setZoom', 2, 'multiply');
+          dispatch('setZoom*', 2, 'multiply');
           break;
         case 'zoomOut':
-          dispatch('setZoom', 0.5, 'multiply');
+          dispatch('setZoom*', 0.5, 'multiply');
           break;
         case 'zoomActualSize':
-          dispatch('setZoom', 1);
+          dispatch('setZoom*', 1);
           break;
         case 'zoomToFitCanvas':
-          dispatch('zoomToFit', 'canvas');
+          dispatch('zoomToFit*', 'canvas');
           break;
         case 'zoomToFitSelection':
-          dispatch('zoomToFit', 'selection');
+          dispatch('zoomToFit*', 'selection');
           break;
       }
     },
@@ -299,8 +299,8 @@ const ToolbarContent = memo(function ToolbarContent({
   }, [isCreatingPath, dispatch]);
 
   useKeyboardShortcuts({
-    'Mod-=': () => dispatch('setZoom', 2, 'multiply'),
-    'Mod-_': () => dispatch('setZoom', 0.5, 'multiply'),
+    'Mod-=': () => dispatch('setZoom*', 2, 'multiply'),
+    'Mod-_': () => dispatch('setZoom*', 0.5, 'multiply'),
     ...(isEditingText
       ? {}
       : {

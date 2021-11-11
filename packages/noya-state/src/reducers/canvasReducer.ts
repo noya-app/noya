@@ -89,8 +89,8 @@ export type InsertedImage = { name: string } & (
 );
 
 export type CanvasAction =
-  | [type: 'setZoom', value: number, mode?: 'replace' | 'multiply']
-  | [type: 'zoomToFit', target: 'canvas' | 'selection']
+  | [type: 'setZoom*', value: number, mode?: 'replace' | 'multiply']
+  | [type: 'zoomToFit*', target: 'canvas' | 'selection']
   | [
       type: 'insertArtboard',
       details: { name: string; width: number; height: number },
@@ -109,7 +109,7 @@ export type CanvasAction =
   | [type: 'addPointToPath', point: Point]
   | [type: 'insertPointInPath', point: Point]
   | [type: 'moveLayersIntoParentAtPoint', point: Point]
-  | [type: 'pan', point: Point]
+  | [type: 'pan*', point: Point]
   | [
       type: 'interaction',
       action: InteractionAction | SnapshotInteractionAction,
@@ -122,7 +122,7 @@ export function canvasReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
-    case 'zoomToFit': {
+    case 'zoomToFit*': {
       const [, target] = action;
 
       const page = Selectors.getCurrentPage(state);
@@ -172,7 +172,7 @@ export function canvasReducer(
         };
       });
     }
-    case 'setZoom': {
+    case 'setZoom*': {
       const [, value, mode] = action;
       const pageId = getCurrentPage(state).do_objectID;
       const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
@@ -507,7 +507,7 @@ export function canvasReducer(
         draft.selectedGradient.stopIndex = Math.max(stopIndex - 1, 0);
       });
     }
-    case 'pan': {
+    case 'pan*': {
       const page = getCurrentPage(state);
       const currentPageId = page.do_objectID;
       const { x, y } = action[1];

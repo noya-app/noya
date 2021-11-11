@@ -39,12 +39,16 @@ export function historyReducer(
         return state;
       } else {
         return produce(state, (draft) => {
+          const user = draft.present.sketch.user;
+          const interactionState = draft.present.interactionState;
           const nextPresent = draft.past.pop();
           if (nextPresent) {
             draft.future.unshift(
               createHistoryEntry(nextPresent.actionType, currentState),
             );
             draft.present = nextPresent.state;
+            draft.present.sketch.user = user;
+            draft.present.interactionState = interactionState;
           }
         });
       }
@@ -53,12 +57,16 @@ export function historyReducer(
         return state;
       } else {
         return produce(state, (draft) => {
+          const user = draft.present.sketch.user;
+          const interactionState = draft.present.interactionState;
           const nextPresent = draft.future.shift();
           if (nextPresent) {
             draft.past.push(
               createHistoryEntry(nextPresent.actionType, currentState),
             );
             draft.present = nextPresent.state;
+            draft.present.sketch.user = user;
+            draft.present.interactionState = interactionState;
           }
         });
       }
@@ -76,7 +84,11 @@ export function historyReducer(
           ...currentState,
           interactionState: createInitialInteractionState(),
         });
-        if (sketchFileChanged) {
+        if (
+          sketchFileChanged &&
+          !action[0].includes('*') &&
+          action[0] !== 'interaction'
+        ) {
           if (mergableEntry) {
             draft.past[draft.past.length - 1] = {
               ...historyEntry,

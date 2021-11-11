@@ -168,14 +168,14 @@ export function applicationReducer(
     case 'movePage': {
       return pageReducer(state, action);
     }
-    case 'setZoom':
-    case 'zoomToFit':
+    case 'setZoom*':
+    case 'zoomToFit*':
     case 'insertArtboard':
     case 'addDrawnLayer':
     case 'addShapePathLayer':
     case 'addSymbolLayer':
     case 'addPointToPath':
-    case 'pan':
+    case 'pan*':
     case 'importImage':
     case 'interaction':
     case 'moveLayersIntoParentAtPoint':

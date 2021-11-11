@@ -83,7 +83,7 @@ function panToFit(
 
   workspaceState = workspaceReducer(
     workspaceState,
-    ['pan', delta],
+    ['pan*', delta],
     CanvasKit,
     context.fontManager,
   );

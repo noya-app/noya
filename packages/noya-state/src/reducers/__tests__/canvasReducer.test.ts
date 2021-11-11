@@ -465,7 +465,7 @@ describe('drawing', () => {
   });
 });
 
-describe('setZoom', () => {
+describe('setZoom*', () => {
   test('zoom 2x', () => {
     const state = createInitialState(createSketchFile(SketchModel.page()));
 
@@ -474,7 +474,7 @@ describe('setZoom', () => {
       scrollOrigin: { x: 0, y: 0 },
     });
 
-    const updated = run(state, [['setZoom', 2, 'multiply']]);
+    const updated = run(state, [['setZoom*', 2, 'multiply']]);
 
     expect(getCurrentPageMetadata(updated)).toEqual({
       zoomValue: 2,
@@ -491,7 +491,7 @@ describe('setZoom', () => {
       scrollOrigin: { x: -500, y: -500 },
     });
 
-    const updated = run(state, [['setZoom', 2, 'multiply']]);
+    const updated = run(state, [['setZoom*', 2, 'multiply']]);
 
     expect(getCurrentPageMetadata(updated)).toEqual({
       zoomValue: 4,
@@ -508,7 +508,7 @@ describe('setZoom', () => {
       scrollOrigin: { x: -500, y: -500 },
     });
 
-    const updated = run(state, [['setZoom', 1 / 2, 'multiply']]);
+    const updated = run(state, [['setZoom*', 1 / 2, 'multiply']]);
 
     expect(getCurrentPageMetadata(updated)).toEqual({
       zoomValue: 1,
@@ -524,7 +524,7 @@ describe('setZoom', () => {
 
     expect(state.sketch.user[page.do_objectID]).toEqual(undefined);
 
-    const updated = run(state, [['setZoom', 2, 'multiply']]);
+    const updated = run(state, [['setZoom*', 2, 'multiply']]);
 
     expect(getCurrentPageMetadata(updated)).toEqual({
       zoomValue: 2,
