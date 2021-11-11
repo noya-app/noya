@@ -1,11 +1,26 @@
 import * as React from 'react';
-import { ThemeProvider } from 'styled-components';
-import { Grid, Stack, Text, Spacer } from 'noya-designsystem';
-import { PagerView, View } from '../components/PagerView';
-import logoSrc from '../assets/logo.svg';
-import * as theme from '../theme';
+import styled from 'styled-components';
 
-const preventTextOprhan = (text: string) => text.replace(/ /g, '\u00a0');
+import {
+  Button,
+  Grid,
+  InputField,
+  Spacer,
+  Stack,
+  Text,
+  mediaQuery,
+  textStyles,
+} from '../system';
+import { GitHubIcon } from '../components/Icons';
+import { Layout } from '../components/Layout';
+import { Packages } from '../components/Packages';
+
+import logoSrc from '../assets/logo.svg';
+import sketchSrc from '../assets/sketch.svg';
+import figmaSrc from '../assets/figma.svg';
+import xdSrc from '../assets/xd.svg';
+
+const preventTextRunt = (text: string) => text.replace(/ /g, '\u00a0');
 
 const features = [
   {
@@ -36,148 +51,418 @@ const features = [
 
 export default function App() {
   return (
-    // @ts-ignore
-    <ThemeProvider theme={theme}>
-      <Stack axis="y" width="100%" paddingX="10rem" paddingY="6rem">
-        <header style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <img src={logoSrc} alt="logo" width="100px" />
-          <span style={{ justifySelf: 'end' }}>
-            <Stack as="nav" axis="x" gap={8}>
-              <GitHubIcon />
-            </Stack>
-          </span>
-        </header>
+    <Layout>
+      <Spacer size="1rem" />
 
-        <Spacer.Vertical size="4rem" />
-
-        <Stack axis="x" justifyContent="fill">
-          <Stack axis="y" gap="2rem">
-            <Text variant="heading1">
-              Build Your Own <Text variant="mark">Design Tool</Text>
-            </Text>
-            <Text variant="body1" width="24ch">
-              Noya is an ecosystem of design utilities to help with your next
-              project.
-            </Text>
-          </Stack>
-          <Stack axis="y" alignItems="center" justifyContent="center">
-            Demo Here
+      <Stack
+        as="header"
+        gridColumn="1 / -1"
+        flexDirection="row"
+        justifyContent="space-between"
+      >
+        <Stack
+          as="img"
+          src={logoSrc}
+          alt="logo"
+          height="var(--header-icon-size)"
+        />
+        <Stack as="nav" flexDirection="row" gap={8}>
+          <Stack as="a" href="https://github.com/noya-app/noya">
+            <GitHubIcon />
           </Stack>
         </Stack>
+      </Stack>
 
-        <Spacer.Vertical size="12rem" />
+      <Spacer
+        css={{
+          minHeight: '6rem',
+          [mediaQuery.medium]: {
+            minHeight: '8rem',
+          },
+        }}
+      />
 
-        <Stack axis="x" alignItems="center" justifyContent="fill" gap="2rem">
-          <Grid columns="1fr 1fr" gap="1rem">
-            {features.map((feature) => (
-              <Stack key={feature.name} axis="x" padding="1rem">
-                <Text variant="body1">{feature.name}</Text>
-              </Stack>
-            ))}
-          </Grid>
-          <Stack axis="y" gap="2.5rem">
-            <Text variant="heading2">
-              All Of The Features You’re Used To{' '}
-              <Text variant="mark">{preventTextOprhan('And More')}</Text>
-            </Text>
-            <Text variant="body1">
-              Full-featured while delivering a system that can cater to your
-              specific needs.
-            </Text>
-          </Stack>
-        </Stack>
-
-        <Spacer.Vertical size="12rem" />
-
-        <Stack axis="y" alignItems="center">
-          <Text variant="heading2" align="center" width="12ch">
-            Use Our Tool Or{' '}
-            <Text variant="mark">Build {preventTextOprhan('Your Own')}</Text>
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        alignItems="center"
+        css={{
+          rowGap: '4rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Stack
+          alignItems="center"
+          css={{
+            gridColumn: '2 / span 10',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              alignItems: 'start',
+              gridColumn: '1 / span 6',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading1">
+            Build Your Own <br /> <Text variant="mark">Design Tool</Text>
           </Text>
-          <Spacer.Vertical size="2.5rem" />
-          <Text variant="body1" align="center" width="32ch">
+          <Spacer size="2rem" />
+          <Text variant="body1" width="32ch">
+            Noya is an ecosystem of design utilities to help with your next
+            project.
+          </Text>
+          <Spacer size="4rem" />
+          <Button>Open App</Button>
+        </Stack>
+
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          minHeight="24rem"
+          background="rgb(141, 47, 216)"
+          css={{
+            gridColumn: '1 / -1',
+            [mediaQuery.medium]: {
+              gridColumn: '7 / span 6',
+              minHeight: '40rem',
+            },
+          }}
+        >
+          Demo Here
+        </Stack>
+      </Grid>
+
+      <Spacer size="24rem" />
+
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        css={{
+          rowGap: '6rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Grid
+          gridColumn="1 / -1"
+          gridTemplateColumns="repeat(2, 1fr)"
+          alignItems="end"
+          css={{
+            gridRow: '2',
+            gap: '4rem',
+            [mediaQuery.medium]: {
+              gridRow: '1',
+              gridColumn: '1 / span 6',
+              gap: '1rem',
+            },
+          }}
+        >
+          {features.map((feature) => (
+            <Stack
+              key={feature.name}
+              alignItems="center"
+              css={{
+                [mediaQuery.medium]: {
+                  flexDirection: 'row',
+                },
+              }}
+            >
+              <Text variant="body1">{feature.name}</Text>
+            </Stack>
+          ))}
+        </Grid>
+
+        <Stack
+          gap="2rem"
+          gridColumn="2 / span 10"
+          css={{
+            gridRow: '1',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '7 / span 6',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading2">
+            All Of The Features <br /> You’re Used To <br />
+            <Text variant="mark">{preventTextRunt('And More')}</Text>
+          </Text>
+          <Text variant="body1">
+            Full-featured while delivering a system that can cater to your
+            specific needs.
+          </Text>
+        </Stack>
+
+        <Spacer
+          size="6rem"
+          css={{
+            [mediaQuery.medium]: {
+              minHeight: '24rem',
+            },
+          }}
+        />
+
+        <Stack
+          alignItems="center"
+          gridColumn="3 / span 8"
+          css={{
+            [mediaQuery.medium]: {
+              gridColumn: '4 / span 6',
+            },
+          }}
+        >
+          <Text variant="heading2" alignment="center">
+            Use Our Tool Or <br />
+            <Text variant="mark">Build {preventTextRunt('Your Own')}</Text>
+          </Text>
+          <Spacer size="2rem" />
+          <Text variant="body1" alignment="center">
             Noya is built on a modular set of packages that can be used on their
             own or altogether in our featured app.
           </Text>
-          <Spacer.Vertical size="6rem" />
-          <Packages />
+        </Stack>
+      </Grid>
+
+      <Spacer size="6rem" />
+
+      <Packages />
+
+      <Spacer size="24rem" />
+
+      <Grid
+        gridColumn="1 / -1"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        alignItems="center"
+        css={{
+          rowGap: '6rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Grid
+          gridColumn="1 / -1"
+          gridTemplateColumns="repeat(3, 1fr)"
+          alignItems="center"
+          justifyItems="center"
+          css={{
+            gridRow: '2',
+            gap: '2rem',
+            [mediaQuery.medium]: {
+              gridRow: '1',
+              gridColumn: '1 / span 5',
+              gap: '1rem',
+            },
+          }}
+        >
+          {[
+            { name: 'Sketch', source: sketchSrc },
+            { name: 'Figma', source: figmaSrc },
+            { name: 'XD', source: xdSrc },
+          ].map(({ name, source }, index) => (
+            <>
+              <img
+                src={source}
+                alt={name}
+                css={{
+                  gridColumn: index + 1,
+                  gridRow: 1,
+                  height: '10rem',
+                  opacity: name === 'Sketch' ? undefined : 0.5,
+                  [mediaQuery.medium]: {
+                    height: '8rem',
+                  },
+                }}
+              />
+              {name === 'Sketch' ? null : (
+                <Text css={{ gridColumn: index + 1, gridRow: 2 }}>
+                  Coming Soon
+                </Text>
+              )}
+            </>
+          ))}
+        </Grid>
+
+        <Stack
+          gap="2rem"
+          gridColumn="2 / span 10"
+          css={{
+            gridRow: '1',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '7 / span 6',
+              textAlign: 'left',
+            },
+          }}
+        >
+          <Text variant="heading2">
+            Import and Export <br />
+            <Text variant="mark">{preventTextRunt('To Multiple Tools')}</Text>
+          </Text>
+          <Text variant="body1">
+            Import design files from Sketch, and soon Figma, and Adobe XD.
+          </Text>
+        </Stack>
+      </Grid>
+
+      <Spacer size="24rem" />
+
+      <Stack alignItems="center" gridColumn="1 / -1">
+        <Text variant="heading2" css={{ ...textStyles.mark, fontSize: '5rem' }}>
+          Open Source
+        </Text>
+        <Spacer
+          size="2rem"
+          css={{
+            [mediaQuery.medium]: {
+              minHeight: '4rem',
+            },
+          }}
+        />
+        <Text
+          variant="body1"
+          alignment="center"
+          css={{
+            fontSize: '3rem',
+            width: '24ch',
+            [mediaQuery.medium]: {
+              width: '40ch',
+            },
+          }}
+        >
+          The core library is completely free and we are committed to creating a
+          rich ecosystem for designers and developers.
+        </Text>
+      </Stack>
+
+      <Spacer size="24rem" />
+
+      <Grid
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="1rem"
+        css={{
+          gridColumn: '1 / -1 !important',
+          rowGap: '4rem',
+          [mediaQuery.medium]: {
+            rowGap: '1rem',
+          },
+        }}
+      >
+        <Stack
+          gap="2rem"
+          css={{
+            gridColumn: '1 / span 12',
+            gridRow: '1',
+            alignItems: 'center',
+            textAlign: 'center',
+            [mediaQuery.medium]: {
+              gridColumn: '2 / span 4',
+              textAlign: 'left',
+              alignItems: 'start',
+            },
+          }}
+        >
+          <Text variant="heading2">
+            Meet the <br />
+            <Text variant="mark">Contributors</Text>
+          </Text>
+          <Text variant="body1" width="24ch">
+            Noya wouldn’t be possible without an amazing community.
+          </Text>
+          <Spacer size="0.5rem" />
+          <Button>Get started contributing</Button>
+        </Stack>
+
+        <Stack
+          flexDirection="row"
+          alignItems="center"
+          gridColumn="1 / span 12"
+          gap="4rem"
+          css={{
+            position: 'relative',
+            overflow: 'auto',
+            scrollSnapType: 'x mandatory',
+            paddingLeft: 'calc(50vw - 50px)',
+            paddingBottom: '30px',
+            /** Hide horizontal scrollbar on mobile. */
+            clipPath: 'inset(0 0 30px 0)',
+            [mediaQuery.medium]: {
+              paddingLeft: 0,
+              gridColumn: '6 / span 7',
+            },
+          }}
+        >
+          <OverflowGradient />
+          {['Devin', 'Travis', 'Maria', 'Leanne'].map((contributor) => (
+            <div
+              key={contributor}
+              css={{
+                width: 100,
+                height: 100,
+                flexShrink: 0,
+                background: '#be6dff',
+                borderRadius: '100%',
+              }}
+            />
+          ))}
+          {/* Add space to the end of the scroll container */}
+          <div css={{ flex: '0 0 1rem' }} />
+        </Stack>
+      </Grid>
+
+      <Spacer size="24rem" />
+
+      <Stack gridColumn="1 / -1" alignItems="center">
+        <Text variant="heading2">Stay In Touch</Text>
+        <Spacer size="2rem" />
+        <Text
+          variant="body1"
+          alignment="center"
+          css={{
+            width: '24ch',
+            [mediaQuery.medium]: {
+              // width: '40ch',
+            },
+          }}
+        >
+          Get updates on the lastest releases and new features.
+        </Text>
+        <Spacer size="4rem" />
+        <Stack flexDirection="row">
+          <InputField />
+          <Button
+            css={{
+              borderTopLeftRadius: '0 !important',
+              borderBottomLeftRadius: '0 !important',
+            }}
+          >
+            Sign Up
+          </Button>
         </Stack>
       </Stack>
-    </ThemeProvider>
+
+      <Spacer size="24rem" />
+    </Layout>
   );
 }
 
-function GitHubIcon() {
-  return (
-    <svg
-      width="40"
-      height="40"
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M19.9987 2.26685C10.2075 2.26685 2.26697 10.2063 2.26697 20.0008C2.26697 27.8346 7.34764 34.4818 14.3944 36.8279C15.2816 36.99 15.6049 36.4423 15.6049 35.9722C15.6049 35.5508 15.5897 34.4362 15.581 32.9567C10.6484 34.0279 9.60765 30.5791 9.60765 30.5791C8.80095 28.5303 7.63831 27.9847 7.63831 27.9847C6.0282 26.8852 7.76023 26.9071 7.76023 26.9071C9.54015 27.0322 10.4764 28.7348 10.4764 28.7348C12.0582 31.4444 14.6274 30.6618 15.6376 30.2079C15.7987 29.0626 16.257 28.281 16.7632 27.8378C12.8256 27.3892 8.68556 25.8685 8.68556 19.0733C8.68556 17.1366 9.37685 15.5548 10.5112 14.3148C10.3283 13.8663 9.71978 12.0635 10.6854 9.62168C10.6854 9.62168 12.1735 9.14486 15.5614 11.4386C16.9755 11.0456 18.4931 10.8497 20.0008 10.842C21.5075 10.8497 23.024 11.0456 24.4403 11.4386C27.826 9.14486 29.3118 9.62168 29.3118 9.62168C30.2798 12.0635 29.6713 13.8663 29.4894 14.3148C30.626 15.5548 31.3118 17.1366 31.3118 19.0733C31.3118 25.8859 27.1652 27.385 23.2156 27.8236C23.8514 28.3714 24.4185 29.4535 24.4185 31.1082C24.4185 33.478 24.3968 35.3908 24.3968 35.9722C24.3968 36.4468 24.7168 36.9988 25.616 36.8255C32.6574 34.4754 37.7337 27.8335 37.7337 20.0008C37.7337 10.2063 29.7932 2.26685 19.9987 2.26685Z"
-        fill="white"
-      />
-    </svg>
-  );
-}
-
-// TODO: grep packages directory and generate from package.json name + description
-function Packages() {
-  const colors = [
-    '#8d2fd8',
-    '#be6dff',
-    '#8d2fd8',
-    '#be6dff',
-    '#8d2fd8',
-    '#be6dff',
-    '#8d2fd8',
-    '#be6dff',
-    '#8d2fd8',
-    '#be6dff',
-    '#8d2fd8',
-    '#be6dff',
-  ];
-  return (
-    <PagerView>
-      {colors.map((color, index) => (
-        <View key={index} color={color} />
-      ))}
-    </PagerView>
-  );
-}
-
-// function Package({
-//   heading,
-//   content,
-//   active,
-//   setIndex,
-// }: {
-//   heading: string;
-//   content: string;
-//   active?: boolean;
-//   setIndex?: () => void;
-// }) {
-//   return (
-//     <Stack
-//       axis="y"
-//       width="32rem"
-//       padding="4rem"
-//       gap="2rem"
-//       background="rgba(255,255,255,0.1)"
-//       onClick={setIndex}
-//       style={{
-//         flexShrink: 0,
-//         borderRadius: '2rem',
-//         transform: active ? undefined : 'scale(0.85)',
-//       }}
-//     >
-//       <Text variant="heading3">{heading}</Text>
-//       <Text variant="body1">{content}</Text>
-//     </Stack>
-//   );
-// }
+const OverflowGradient = styled.div({
+  display: 'none',
+  [mediaQuery.medium]: {
+    display: 'block',
+    position: 'sticky',
+    top: 0,
+    left: 0,
+    width: 32,
+    height: '100%',
+    flexShrink: 0,
+    background: 'linear-gradient(to left,rgb(45 14 70 / 0%),rgb(45 14 70))',
+  },
+});

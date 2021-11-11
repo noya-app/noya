@@ -2,6 +2,9 @@ import * as React from 'react';
 import { useDrag } from 'react-use-gesture';
 import { animated, SpringValue, useSpring } from 'react-spring';
 import { snap } from '@popmotion/popcorn';
+import { Spacer, Stack } from '../system';
+
+import { useIsomorphicLayoutEffect } from '../hooks/use-isomorphic-layout-effect';
 
 type PagerViewContextProps = {
   initialOffset: number;
@@ -22,9 +25,15 @@ const usePagerContext = () => {
   return contextValue;
 };
 
-const viewSize = 300;
+const viewSize = 540;
 
-export function View({ color }: { color: string }) {
+export function View({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   const { initialOffset, frameSize, trackSize, trackXOffset } =
     usePagerContext();
   const getViewTarget = (value: number) => {
@@ -44,21 +53,29 @@ export function View({ color }: { color: string }) {
   };
 
   return (
+    // @ts-ignore
     <animated.div
-      style={{
+      className={className}
+      css={{
         gridArea: '1 / 1',
-        backgroundColor: color,
-        transform: trackXOffset.to((x) => `translateX(${getViewTarget(x)}px)`),
         width: viewSize,
-        height: 200,
+      }}
+      style={{
+        transform: trackXOffset.to((x) => `translateX(${getViewTarget(x)}px)`),
       }}
     >
-      {initialOffset / viewSize}
+      {children}
     </animated.div>
   );
 }
 
-export function PagerView({ children }: { children: React.ReactNode }) {
+export function PagerView({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [frameSize, setFrameSize] = React.useState(-1);
   const trackSize = React.Children.toArray(children).reduce(
@@ -91,7 +108,7 @@ export function PagerView({ children }: { children: React.ReactNode }) {
     },
   );
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (ref.current) {
       setFrameSize(ref.current.offsetWidth);
     }
@@ -103,7 +120,8 @@ export function PagerView({ children }: { children: React.ReactNode }) {
         {...bind()}
         ref={ref}
         onMouseDown={() => api.stop()}
-        style={{
+        className={className}
+        css={{
           display: 'grid',
           gridAutoFlow: 'column',
           width: '100%',
@@ -123,10 +141,32 @@ export function PagerView({ children }: { children: React.ReactNode }) {
           </PagerViewContext.Provider>
         ))}
       </div>
-      <div>
-        <button onClick={() => moveTrackPosition(viewSize)}>Prev</button>
-        <button onClick={() => moveTrackPosition(-viewSize)}>Next</button>
-      </div>
+      <Spacer size="2rem" />
+      <Stack
+        flexDirection="row"
+        justifyContent="center"
+        height="1rem"
+        gap="1rem"
+        css={{
+          gridColumn: '1 / -1',
+        }}
+      >
+        {React.Children.map(children, (_, index) => (
+          <button
+            key={index}
+            aria-label={`Move to ${index}`}
+            onClick={() => moveTrackPosition(-index * viewSize)}
+            css={{
+              width: '1rem',
+              height: '1rem',
+              padding: 0,
+              border: 'none',
+              borderRadius: '100%',
+              backgroundColor: '#9171a9',
+            }}
+          />
+        ))}
+      </Stack>
     </>
   );
 }
