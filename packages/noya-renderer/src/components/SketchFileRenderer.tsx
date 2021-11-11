@@ -34,6 +34,7 @@ import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
+import { PixelGrid } from './PixelGrid';
 import PseudoPathLine from './PseudoPathLine';
 import PseudoPoint from './PseudoPoint';
 import { HorizontalRuler } from './Rulers';
@@ -98,7 +99,7 @@ export default memo(function SketchFileRenderer() {
   const {
     canvasSize,
     canvasInsets,
-    preferences: { showRulers },
+    preferences: { showRulers, showPixelGrid },
     highlightedLayer,
   } = useWorkspace();
   const [state] = useApplicationState();
@@ -445,6 +446,7 @@ export default memo(function SketchFileRenderer() {
               />
             )}
             {showRulers && <HorizontalRuler />}
+            {showPixelGrid && <PixelGrid />}
           </Group>
         </Group>
       </ZoomProvider>

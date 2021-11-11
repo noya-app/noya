@@ -41,6 +41,7 @@ export type WorkspaceState = {
   nextFocusAction?: NextFocusAction;
   preferences: {
     showRulers: boolean;
+    showPixelGrid: boolean;
   };
 };
 
@@ -149,6 +150,7 @@ export function createInitialWorkspaceState(
     canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
     preferences: {
       showRulers: false,
+      showPixelGrid: true,
     },
   };
 }

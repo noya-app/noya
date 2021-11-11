@@ -27,6 +27,7 @@ export const colors = {
     dragHandleStroke: 'rgba(180,180,180,0.5)',
     measurement: 'rgb(207,92,42)',
     sliceOutline: 'rgb(210,210,210)',
+    grid: 'rgba(0,0,0,0.05)',
   },
   sidebar: {
     background: 'rgba(252,252,252,0.85)',
