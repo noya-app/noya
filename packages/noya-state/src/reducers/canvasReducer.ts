@@ -133,7 +133,9 @@ export function canvasReducer(
 
       if (!boundingRect) return state;
 
-      const padding = 20;
+      // Padding is 10% of the smallest side of the target
+      const padding = Math.min(boundingRect.width, boundingRect.height) * 0.1;
+
       boundingRect = insetRect(boundingRect, -padding, -padding);
 
       const bounds = createBounds(boundingRect);
