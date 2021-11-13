@@ -606,6 +606,7 @@ export function canvasReducer(
       const layerIds = layerIndexPaths.map(
         (indexPath) => Layers.access(page, indexPath).do_objectID,
       );
+
       const interactionState = interactionReducer(
         state.interactionState,
         action[1][0] === 'maybeScale' ||
@@ -1027,6 +1028,8 @@ export function canvasReducer(
                 pageSnapshot,
                 indexPath,
               ) as Layers.PageLayer;
+
+              if (layer.isLocked) return;
 
               const originalBounds = createBounds(originalLayer.frame);
 
