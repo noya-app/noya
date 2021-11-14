@@ -14,6 +14,7 @@ interface ImageProps {
   image: ArrayBuffer;
   rect: RectParameters;
   paint: Paint | PaintParameters;
+  resample?: boolean;
 }
 
 export default memo(function Image(props: ImageProps) {
@@ -21,10 +22,10 @@ export default memo(function Image(props: ImageProps) {
 
   const rect = useRect(props.rect);
   const paint = usePaint(props.paint);
-  const image = useMemo(() => decodeImage(CanvasKit, props.image), [
-    CanvasKit,
-    props.image,
-  ]);
+  const image = useMemo(
+    () => decodeImage(CanvasKit, props.image),
+    [CanvasKit, props.image],
+  );
 
   const elementProps: ImageComponentProps | undefined = useMemo(
     () =>
@@ -33,9 +34,10 @@ export default memo(function Image(props: ImageProps) {
             rect,
             paint,
             image,
+            resample: props.resample,
           }
         : undefined,
-    [rect, paint, image],
+    [rect, paint, image, props.resample],
   );
 
   if (!elementProps) return null;

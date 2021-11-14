@@ -26,6 +26,7 @@ export interface ImageComponentProps {
   rect: Rect;
   image: Image;
   paint: Paint;
+  resample?: boolean;
 }
 
 interface ImageComponent {
