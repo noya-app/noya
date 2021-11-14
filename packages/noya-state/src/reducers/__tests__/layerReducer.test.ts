@@ -551,7 +551,7 @@ describe('addLayer', () => {
 
     expect(
       debugDescription([
-        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(groupedState),
         Selectors.getCurrentPage(updated),
       ]),
     ).toMatchSnapshot();
