@@ -440,7 +440,6 @@ export function layerReducer(
         draft.selectedLayerIds = [];
 
         let parentLayer = draftPage as Layers.ParentLayer;
-
         if (Layers.isParentLayer(selectedLayer)) {
           parentLayer = selectedLayer;
         }
