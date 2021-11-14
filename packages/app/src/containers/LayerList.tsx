@@ -2,6 +2,7 @@ import {
   ArrowDownIcon,
   CircleIcon,
   Component1Icon,
+  Component2Icon,
   ComponentInstanceIcon,
   CopyIcon,
   FrameIcon,
@@ -163,6 +164,8 @@ export const LayerIcon = memo(function LayerIcon({
       return <Share1Icon color={color} />;
     case 'line':
       return <LineIcon color={color} />;
+    case 'componentContainer':
+      return <Component2Icon color={color} />;
     default:
       return null;
   }

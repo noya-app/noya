@@ -522,6 +522,7 @@ export type SymbolMaster = {
     | Slice
     | Hotspot
     | Bitmap
+    | ComponentContainer
   )[];
 };
 /**
@@ -751,6 +752,7 @@ export type Group = {
     | Slice
     | Hotspot
     | Bitmap
+    | ComponentContainer
   )[];
   _class: 'group';
 };
@@ -1034,6 +1036,7 @@ export type ShapeGroup = {
     | Slice
     | Hotspot
     | Bitmap
+    | ComponentContainer
   )[];
   _class: 'shapeGroup';
   windingRule: WindingRule;
@@ -1253,6 +1256,43 @@ export type Bitmap = {
   clippingMask: PointListString;
 };
 /**
+ * Component containers introduce code-based components into the layer hierarchy
+ */
+export type ComponentContainer = {
+  do_objectID: Uuid;
+  booleanOperation: BooleanOperation;
+  exportOptions: ExportOptions;
+  frame: Rect;
+  flow?: FlowConnection;
+  isFixedToViewport: boolean;
+  isFlippedHorizontal: boolean;
+  isFlippedVertical: boolean;
+  isLocked: boolean;
+  isVisible: boolean;
+  layerListExpandedType: LayerListExpanded;
+  name: string;
+  nameIsFixed: boolean;
+  resizingConstraint: number;
+  resizingType: ResizeType;
+  rotation: number;
+  sharedStyleID?: Uuid;
+  shouldBreakMaskChain: boolean;
+  hasClippingMask?: boolean;
+  clippingMaskMode?: number;
+  userInfo?: any;
+  style?: Style;
+  maintainScrollPosition?: boolean;
+  _class: 'componentContainer';
+  component: Component;
+};
+/**
+ * Defines a code-based component
+ */
+export type Component = {
+  _class: 'component';
+  source: string;
+};
+/**
  * Defines a text style that has been imported from a library
  */
 export type ForeignTextStyle = {
@@ -1392,6 +1432,7 @@ export type Page = {
     | Slice
     | Hotspot
     | Bitmap
+    | ComponentContainer
   )[];
 };
 /**
@@ -1448,6 +1489,7 @@ export type Artboard = {
     | Slice
     | Hotspot
     | Bitmap
+    | ComponentContainer
   )[];
 };
 /**
@@ -1614,6 +1656,7 @@ export type AnyLayer =
   | Slice
   | Hotspot
   | Bitmap
+  | ComponentContainer
   | Page
   | Artboard;
 /**
@@ -1678,6 +1721,8 @@ export type AnyObject =
   | Slice
   | Hotspot
   | Bitmap
+  | ComponentContainer
+  | Component
   | ForeignTextStyle
   | ForeignSwatch
   | Swatch
@@ -1716,6 +1761,8 @@ export enum ClassValue {
   BorderOptions = 'borderOptions',
   Color = 'color',
   ColorControls = 'colorControls',
+  Component = 'component',
+  ComponentContainer = 'componentContainer',
   CurvePoint = 'curvePoint',
   ExportFormat = 'exportFormat',
   ExportOptions = 'exportOptions',
@@ -1805,6 +1852,8 @@ export type ClassMap = {
   exportOptions: ExportOptions;
   exportFormat: ExportFormat;
   curvePoint: CurvePoint;
+  componentContainer: ComponentContainer;
+  component: Component;
   colorControls: ColorControls;
   color: Color;
   borderOptions: BorderOptions;

@@ -1218,7 +1218,8 @@ export function createDrawingLayer(
   | Sketch.Text
   | Sketch.Artboard
   | Sketch.Slice
-  | Sketch.ShapePath {
+  | Sketch.ShapePath
+  | Sketch.ComponentContainer {
   let rect = Selectors.getDrawnLayerRect(origin, current, scalingOptions);
 
   if (pixelAlign) {
@@ -1247,6 +1248,15 @@ export function createDrawingLayer(
                 })
               : SketchModel.stringAttribute(),
           ],
+        }),
+      });
+    case 'componentContainer':
+      return SketchModel.componentContainer({
+        frame,
+        component: SketchModel.component({
+          source: `export default function Test() {
+  return <View></View>;
+}`,
         }),
       });
     case 'artboard':

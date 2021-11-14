@@ -531,6 +531,26 @@ function group(options?: ModelOptions<Sketch.Group>): Sketch.Group {
   };
 }
 
+function component(options?: ModelOptions<Sketch.Component>): Sketch.Component {
+  return {
+    source: '',
+    ...options,
+    _class: Sketch.ClassValue.Component,
+  };
+}
+
+function componentContainer(
+  options?: ModelOptions<Sketch.ComponentContainer>,
+): Sketch.ComponentContainer {
+  return {
+    ...newLayerBase(options),
+    name: 'Component Container',
+    component: component(),
+    ...options,
+    _class: Sketch.ClassValue.ComponentContainer,
+  };
+}
+
 function slice(options?: ModelOptions<Sketch.Slice>): Sketch.Slice {
   return {
     ...newLayerBase(options),
@@ -764,6 +784,8 @@ export const SketchModel = {
   borderOptions,
   color,
   colorControls,
+  component,
+  componentContainer,
   curvePoint,
   dataReference,
   document,

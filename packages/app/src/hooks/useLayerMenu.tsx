@@ -31,6 +31,7 @@ function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
     case 'symbolInstance':
     case 'symbolMaster':
     case 'text':
+    case 'componentContainer':
       return false;
   }
 }
@@ -54,6 +55,7 @@ function isValidMaskChainBreakerType(type: Sketch.AnyLayer['_class']): boolean {
     case 'MSImmutableHotspotLayer':
     case 'slice':
     case 'symbolMaster':
+    case 'componentContainer':
       return false;
   }
 }

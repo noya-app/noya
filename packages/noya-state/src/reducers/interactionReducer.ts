@@ -32,7 +32,8 @@ export type DrawableLayerType =
   | 'line'
   | 'text'
   | 'artboard'
-  | 'slice';
+  | 'slice'
+  | 'componentContainer';
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 

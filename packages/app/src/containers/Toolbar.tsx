@@ -41,7 +41,8 @@ type InsertMenuLayerType =
   | 'line'
   | 'vector'
   | 'text'
-  | 'slice';
+  | 'slice'
+  | 'componentContainer';
 
 type ZoomMenuType =
   | 'zoomIn'
@@ -88,6 +89,8 @@ const ToolbarContent = memo(function ToolbarContent({
       ? interactionStateProjection.layerType
       : undefined;
 
+  const isInsertComponentContainer =
+    isInsertingLayerType === 'componentContainer';
   const isInsertArtboard = isInsertingLayerType === 'artboard';
   const isInsertRectangle = isInsertingLayerType === 'rectangle';
   const isInsertOval = isInsertingLayerType === 'oval';
@@ -104,6 +107,13 @@ const ToolbarContent = memo(function ToolbarContent({
   }));
 
   const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
+    {
+      title: 'Component Container',
+      value: 'componentContainer',
+      shortcut: 'c',
+      disabled: isEditingText,
+      icon: <LayerIcon type="componentContainer" />,
+    },
     {
       title: 'Artboard',
       value: 'artboard',
@@ -207,6 +217,13 @@ const ToolbarContent = memo(function ToolbarContent({
               dispatch('interaction', ['insert', 'artboard']);
             }
             break;
+          case 'componentContainer':
+            if (isInsertComponentContainer) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'componentContainer']);
+            }
+            break;
           case 'rectangle':
             if (isInsertRectangle) {
               dispatch('interaction', ['reset']);
@@ -256,6 +273,7 @@ const ToolbarContent = memo(function ToolbarContent({
       isInsertRectangle,
       isInsertSlice,
       isInsertText,
+      isInsertComponentContainer,
     ],
   );
 
