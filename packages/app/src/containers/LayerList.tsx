@@ -33,7 +33,7 @@ import {
 } from 'noya-icons';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
-import { ComponentLayer, getComponentInfo } from 'noya-typescript';
+import { ElementLayer, getComponentInfo } from 'noya-typescript';
 import { isDeepEqual } from 'noya-utils';
 import React, {
   ForwardedRef,
@@ -78,7 +78,7 @@ function flattenLayerList(
   page: Sketch.Page,
   selectedLayerIds: string[],
   filteredLayerIds: Set<string>,
-  componentLayers: Record<string, ComponentLayer>,
+  componentLayers: Record<string, ElementLayer>,
 ): LayerListItem[] {
   const flattened: LayerListItem[] = [];
 

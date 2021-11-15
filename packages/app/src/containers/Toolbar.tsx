@@ -22,10 +22,11 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
-import { testTypescript } from 'noya-typescript';
+import { getComponentInfo } from 'noya-typescript';
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+import { useTypescriptCompiler } from '../contexts/TypescriptCompilerContext';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
@@ -330,6 +331,8 @@ const ToolbarContent = memo(function ToolbarContent({
 
   const fileName = fileHandle?.name ?? 'Untitled.sketch';
 
+  const { compileFile } = useTypescriptCompiler();
+
   return (
     <>
       <Spacer.Horizontal size={itemSeparatorSize * 1.5} />
@@ -396,7 +399,14 @@ const ToolbarContent = memo(function ToolbarContent({
       <Spacer.Horizontal size={itemSeparatorSize * 4} />
       <Button
         onClick={() => {
-          testTypescript();
+          const result = compileFile(
+            'test',
+            `export default function MyComponent() {
+  return <View background={"white"}></View>
+}`,
+          );
+
+          console.info(getComponentInfo(result));
         }}
       >
         Test TS
