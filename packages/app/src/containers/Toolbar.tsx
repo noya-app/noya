@@ -23,7 +23,7 @@ import {
   Selectors,
 } from 'noya-state';
 import { getComponentInfo } from 'noya-typescript';
-import { round } from 'noya-utils';
+import { round, uuid } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { useTypescriptCompiler } from '../contexts/TypescriptCompilerContext';
@@ -402,11 +402,14 @@ const ToolbarContent = memo(function ToolbarContent({
           const result = compileFile(
             'test',
             `export default function MyComponent() {
-  return <View background={"white"}></View>
+  return (<View background={"white"}>
+  <Text>abc</Text>
+  <Text2>def</Text2>
+</View>)
 }`,
           );
 
-          console.info(getComponentInfo(result));
+          console.info(getComponentInfo(result, uuid()));
         }}
       >
         Test TS

@@ -1255,7 +1255,12 @@ export function createDrawingLayer(
         frame,
         component: SketchModel.component({
           source: `export default function Test() {
-  return <View></View>;
+  return (
+    <View>
+      <Text></Text>
+      <View></View>
+    </View>
+  );
 }`,
         }),
       });

@@ -1,5 +1,6 @@
 import * as tsvfs from '@typescript/vfs';
 import lzstring from 'lz-string';
+import { withOptions } from 'tree-visit';
 import ts, {
   Expression,
   JsxOpeningElement,
@@ -23,13 +24,23 @@ export type ElementAttributeValue =
     };
 
 export type ElementLayer = {
+  id: string;
   tagName: string;
   children: ElementLayer[];
   attributes: Record<string, ElementAttributeValue>;
 };
 
-function getLayerHierarchy(expression: Expression): ElementLayer | undefined {
-  if (expression.kind !== SyntaxKind.JsxElement) return;
+export const ElementTree = withOptions({
+  getChildren: (element: ElementLayer) => element.children,
+});
+
+function getLayerHierarchy(
+  expression: Expression,
+  id: string,
+): ElementLayer | undefined {
+  const jsxElement = Nodes.find(expression, isKind(SyntaxKind.JsxElement));
+
+  if (!jsxElement) return;
 
   const tagElement = firstChild(
     expression,
@@ -43,9 +54,18 @@ function getLayerHierarchy(expression: Expression): ElementLayer | undefined {
   let children: ElementLayer[] = [];
 
   if (isKind(SyntaxKind.JsxOpeningElement)(tagElement)) {
-    const content = expression.getChildren()[1].getChildren();
+    const content = expression.getChildren()[1].getChildren()[1];
 
-    children = content.flatMap((item) => getLayerHierarchy(item as any) ?? []);
+    // console.log(Nodes.diagram(expression));
+
+    if (content && isKind(SyntaxKind.SyntaxList)(content)) {
+      children = content
+        .getChildren()
+        .flatMap(
+          (item, index) =>
+            getLayerHierarchy(item as any, `${id}:${index}`) ?? [],
+        );
+    }
   }
 
   const jsxAttributes = Nodes.findAll(
@@ -81,6 +101,7 @@ function getLayerHierarchy(expression: Expression): ElementLayer | undefined {
   // console.log(Nodes.diagram(tagElement));
 
   return {
+    id,
     tagName: tagElement.tagName.getText(),
     children,
     attributes,
@@ -125,6 +146,7 @@ export function createTypescriptEnvironment(
 
 export function getComponentInfo(
   sourceFile: ts.SourceFile,
+  id: string,
 ): ElementLayer | undefined {
   const functionDeclaration = firstChildOfKind(
     sourceFile,
@@ -138,7 +160,7 @@ export function getComponentInfo(
     );
 
     if (returnStatement && returnStatement.expression) {
-      return getLayerHierarchy(returnStatement.expression);
+      return getLayerHierarchy(returnStatement.expression, `${id}:0`);
     }
   }
 }

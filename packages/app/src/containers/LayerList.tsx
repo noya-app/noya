@@ -33,7 +33,7 @@ import {
 } from 'noya-icons';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
-import { ElementLayer, getComponentInfo } from 'noya-typescript';
+import { ElementLayer, ElementTree, getComponentInfo } from 'noya-typescript';
 import { isDeepEqual } from 'noya-utils';
 import React, {
   ForwardedRef,
@@ -125,18 +125,20 @@ function flattenLayerList(
       ) {
         const component = componentLayers[layer.do_objectID];
 
-        flattened.push({
-          type: 'component',
-          id: layer.do_objectID + ':component',
-          name: component.tagName,
-          depth: indexPath.length,
-          expanded: true,
-          selected: false,
-          visible: true,
-          hasClippingMask: false,
-          shouldBreakMaskChain: false,
-          isWithinMaskChain: false,
-          isLocked: false,
+        ElementTree.visit(component, (element, elementPath) => {
+          flattened.push({
+            type: 'component',
+            id: element.id,
+            name: element.tagName,
+            depth: indexPath.length + elementPath.length,
+            expanded: true,
+            selected: false,
+            visible: true,
+            hasClippingMask: false,
+            shouldBreakMaskChain: false,
+            isWithinMaskChain: false,
+            isLocked: false,
+          });
         });
       }
     },
@@ -366,7 +368,7 @@ export default memo(function LayerList({
           layer.do_objectID,
           layer.component.source,
         );
-        const info = getComponentInfo(sourceFile);
+        const info = getComponentInfo(sourceFile, layer.do_objectID);
         return info ? [[layer.do_objectID, info]] : [];
       }),
     );
