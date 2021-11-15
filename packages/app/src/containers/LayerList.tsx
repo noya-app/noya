@@ -1,19 +1,4 @@
 import {
-  ArrowDownIcon,
-  CircleIcon,
-  Component1Icon,
-  Component2Icon,
-  ComponentInstanceIcon,
-  CopyIcon,
-  FrameIcon,
-  GroupIcon,
-  ImageIcon,
-  MaskOnIcon,
-  Share1Icon,
-  SquareIcon,
-  TextIcon,
-} from 'noya-icons';
-import {
   useApplicationState,
   useGetStateSnapshot,
   useSelector,
@@ -30,8 +15,25 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
+import {
+  ArrowDownIcon,
+  CircleIcon,
+  Component1Icon,
+  Component2Icon,
+  ComponentInstanceIcon,
+  CopyIcon,
+  FrameIcon,
+  GroupIcon,
+  ImageIcon,
+  LineIcon,
+  MaskOnIcon,
+  Share1Icon,
+  SquareIcon,
+  TextIcon,
+} from 'noya-icons';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
+import { ComponentLayer, getComponentInfo } from 'noya-typescript';
 import { isDeepEqual } from 'noya-utils';
 import React, {
   ForwardedRef,
@@ -46,13 +48,8 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import { LineIcon } from 'noya-icons';
+import { useTypescriptCompiler } from '../contexts/TypescriptCompilerContext';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
-import {
-  compileTypescriptFile,
-  ComponentLayer,
-  getComponentInfo,
-} from 'noya-typescript';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -81,10 +78,8 @@ function flattenLayerList(
   page: Sketch.Page,
   selectedLayerIds: string[],
   filteredLayerIds: Set<string>,
-  componentLayers: Map<string, ComponentLayer>,
+  componentLayers: Record<string, ComponentLayer>,
 ): LayerListItem[] {
-  console.info('flatten', componentLayers);
-
   const flattened: LayerListItem[] = [];
 
   visit<PageLayer | Sketch.Page>(page, {
@@ -126,9 +121,9 @@ function flattenLayerList(
 
       if (
         Layers.isComponentContainer(layer) &&
-        componentLayers.has(layer.do_objectID)
+        layer.do_objectID in componentLayers
       ) {
-        const component = componentLayers.get(layer.do_objectID)!;
+        const component = componentLayers[layer.do_objectID];
 
         flattened.push({
           type: 'component',
@@ -357,37 +352,27 @@ export default memo(function LayerList({
     [filter, page],
   );
 
-  const [componentLayers, setComponentLayers] = useState<
-    Map<string, ComponentLayer>
-  >(new Map());
+  const { compileFile } = useTypescriptCompiler();
 
-  useEffect(() => {
-    async function main() {
-      const layers = Layers.findAll(
-        page,
-        Layers.isComponentContainer,
-      ) as Sketch.ComponentContainer[];
+  const componentLayersObject = useMemo(() => {
+    const layers = Layers.findAll(
+      page,
+      Layers.isComponentContainer,
+    ) as Sketch.ComponentContainer[];
 
-      const map: typeof componentLayers = new Map();
+    return Object.fromEntries(
+      layers.flatMap((layer) => {
+        const sourceFile = compileFile(
+          layer.do_objectID,
+          layer.component.source,
+        );
+        const info = getComponentInfo(sourceFile);
+        return info ? [[layer.do_objectID, info]] : [];
+      }),
+    );
+  }, [compileFile, page]);
 
-      const promises = await layers.map(async (layer) => {
-        const sourceFile = await compileTypescriptFile(layer.component.source);
-        return { id: layer.do_objectID, layers: getComponentInfo(sourceFile) };
-      });
-
-      const results = await Promise.all(promises);
-
-      results.forEach((item) => {
-        if (!item.layers) return;
-
-        map.set(item.id, item.layers);
-      });
-
-      setComponentLayers(map);
-    }
-
-    main();
-  }, [page]);
+  const componentLayers = useDeepMemo(componentLayersObject);
 
   const items = useDeepMemo(
     flattenLayerList(page, selectedLayerIds, filteredLayerIds, componentLayers),

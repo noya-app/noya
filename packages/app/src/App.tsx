@@ -22,6 +22,7 @@ import {
 } from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
+import { TypescriptCompilerProvider } from './contexts/TypescriptCompilerContext';
 import {
   EnvironmentParameters,
   EnvironmentParametersProvider,
@@ -156,11 +157,13 @@ export default function App() {
 
   return (
     <EnvironmentParametersProvider value={environmentParameters}>
-      <CanvasKitProvider>
-        <FontManagerProvider>
-          <Contents />
-        </FontManagerProvider>
-      </CanvasKitProvider>
+      <TypescriptCompilerProvider>
+        <CanvasKitProvider>
+          <FontManagerProvider>
+            <Contents />
+          </FontManagerProvider>
+        </CanvasKitProvider>
+      </TypescriptCompilerProvider>
     </EnvironmentParametersProvider>
   );
 }
