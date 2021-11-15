@@ -22,6 +22,7 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
+import { testTypescript } from 'noya-typescript';
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -391,6 +392,14 @@ const ToolbarContent = memo(function ToolbarContent({
           ),
           [],
         )}
+      </Button>
+      <Spacer.Horizontal size={itemSeparatorSize * 4} />
+      <Button
+        onClick={() => {
+          testTypescript();
+        }}
+      >
+        Test TS
       </Button>
     </>
   );
