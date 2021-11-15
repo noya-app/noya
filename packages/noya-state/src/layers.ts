@@ -50,6 +50,12 @@ export const isLayerWithEditedProperty = <T extends Sketch.AnyLayer>(
   return 'edited' in layer;
 };
 
+export const isComponentContainer = (
+  layer: Sketch.AnyLayer,
+): layer is Sketch.ComponentContainer => {
+  return layer._class === 'componentContainer';
+};
+
 export const isPageLayer = (layer: Sketch.AnyLayer): layer is Sketch.Page => {
   return layer._class === 'page';
 };

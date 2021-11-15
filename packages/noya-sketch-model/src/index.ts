@@ -544,7 +544,7 @@ function componentContainer(
 ): Sketch.ComponentContainer {
   return {
     ...newLayerBase(options),
-    name: 'Component Container',
+    name: 'Component',
     component: component(),
     ...options,
     _class: Sketch.ClassValue.ComponentContainer,

@@ -109,7 +109,7 @@ const ToolbarContent = memo(function ToolbarContent({
 
   const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
     {
-      title: 'Component Container',
+      title: 'Component',
       value: 'componentContainer',
       shortcut: 'c',
       disabled: isEditingText,

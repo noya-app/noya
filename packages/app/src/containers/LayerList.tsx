@@ -48,6 +48,11 @@ import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
 import { LineIcon } from 'noya-icons';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
+import {
+  compileTypescriptFile,
+  ComponentLayer,
+  getComponentInfo,
+} from 'noya-typescript';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,
@@ -59,7 +64,7 @@ const IconContainer = styled.span(({ theme }) => ({
 type LayerType = PageLayer['_class'];
 
 type LayerListItem = {
-  type: LayerType | 'line';
+  type: LayerType | 'line' | 'component';
   id: string;
   name: string;
   depth: number;
@@ -76,7 +81,10 @@ function flattenLayerList(
   page: Sketch.Page,
   selectedLayerIds: string[],
   filteredLayerIds: Set<string>,
+  componentLayers: Map<string, ComponentLayer>,
 ): LayerListItem[] {
+  console.info('flatten', componentLayers);
+
   const flattened: LayerListItem[] = [];
 
   visit<PageLayer | Sketch.Page>(page, {
@@ -115,6 +123,27 @@ function flattenLayerList(
         isWithinMaskChain: Layers.isWithinMaskChain(parent, currentIndex),
         isLocked: layer.isLocked,
       });
+
+      if (
+        Layers.isComponentContainer(layer) &&
+        componentLayers.has(layer.do_objectID)
+      ) {
+        const component = componentLayers.get(layer.do_objectID)!;
+
+        flattened.push({
+          type: 'component',
+          id: layer.do_objectID + ':component',
+          name: component.tagName,
+          depth: indexPath.length,
+          expanded: true,
+          selected: false,
+          visible: true,
+          hasClippingMask: false,
+          shouldBreakMaskChain: false,
+          isWithinMaskChain: false,
+          isLocked: false,
+        });
+      }
     },
   });
 
@@ -126,7 +155,7 @@ export const LayerIcon = memo(function LayerIcon({
   selected,
   variant,
 }: {
-  type: LayerType | 'line';
+  type: LayerType | 'line' | 'component';
   selected?: boolean;
   variant?: 'primary';
 }) {
@@ -166,6 +195,8 @@ export const LayerIcon = memo(function LayerIcon({
       return <LineIcon color={color} />;
     case 'componentContainer':
       return <Component2Icon color={color} />;
+    case 'component':
+      return <ComponentInstanceIcon color={color} />;
     default:
       return null;
   }
@@ -325,8 +356,41 @@ export default memo(function LayerList({
       ),
     [filter, page],
   );
+
+  const [componentLayers, setComponentLayers] = useState<
+    Map<string, ComponentLayer>
+  >(new Map());
+
+  useEffect(() => {
+    async function main() {
+      const layers = Layers.findAll(
+        page,
+        Layers.isComponentContainer,
+      ) as Sketch.ComponentContainer[];
+
+      const map: typeof componentLayers = new Map();
+
+      const promises = await layers.map(async (layer) => {
+        const sourceFile = await compileTypescriptFile(layer.component.source);
+        return { id: layer.do_objectID, layers: getComponentInfo(sourceFile) };
+      });
+
+      const results = await Promise.all(promises);
+
+      results.forEach((item) => {
+        if (!item.layers) return;
+
+        map.set(item.id, item.layers);
+      });
+
+      setComponentLayers(map);
+    }
+
+    main();
+  }, [page]);
+
   const items = useDeepMemo(
-    flattenLayerList(page, selectedLayerIds, filteredLayerIds),
+    flattenLayerList(page, selectedLayerIds, filteredLayerIds, componentLayers),
   );
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(
