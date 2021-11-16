@@ -68,6 +68,7 @@ export function layerPropertyReducer(
         if (elementId) {
           console.info(
             'rename in',
+            elementId.split(':'),
             (draftLayer as Sketch.ComponentContainer).component.source,
           );
         } else {

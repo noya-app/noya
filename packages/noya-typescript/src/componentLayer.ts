@@ -13,11 +13,14 @@ import {
   Nodes,
   transformNode,
 } from './traversal';
+import { IndexPath } from 'tree-visit';
+import { isDeepEqual } from 'noya-utils';
 
 export type ElementAttributeValue =
   | {
       type: 'stringLiteral';
       value: string;
+      indexPath: IndexPath;
     }
   | {
       type: 'other';
@@ -36,6 +39,7 @@ export const ElementTree = withOptions({
 });
 
 function getLayerHierarchy(
+  sourceFile: SourceFile,
   expression: Expression,
   id: string,
 ): ElementLayer | undefined {
@@ -64,7 +68,7 @@ function getLayerHierarchy(
         .getChildren()
         .flatMap(
           (item, index) =>
-            getLayerHierarchy(item as any, `${id}:${index}`) ?? [],
+            getLayerHierarchy(sourceFile, item as any, `${id}:${index}`) ?? [],
         );
     }
   }
@@ -92,7 +96,14 @@ function getLayerHierarchy(
       );
 
       if (stringLiteral) {
-        value = { type: 'stringLiteral', value: stringLiteral.text };
+        value = {
+          type: 'stringLiteral',
+          value: stringLiteral.text,
+          indexPath: Nodes.findIndexPath(
+            sourceFile,
+            (node) => node === expression,
+          )!,
+        };
       }
 
       return [[key, value]];
@@ -130,7 +141,18 @@ export function getComponentLayer(
     );
 
     if (returnStatement && returnStatement.expression) {
-      const element = getLayerHierarchy(returnStatement.expression, `${id}#0`);
+      const indexPath = Nodes.findIndexPath(
+        sourceFile,
+        (node) => node === returnStatement.expression,
+      );
+
+      if (!indexPath) return;
+
+      const element = getLayerHierarchy(
+        sourceFile,
+        returnStatement.expression,
+        `${id}#0`,
+      );
 
       if (!element) return;
 
@@ -149,6 +171,20 @@ export function setFunctionName(
   return transformNode(sourceFile, (node) => {
     if (ts.isIdentifier(node) && ts.isFunctionDeclaration(node.parent)) {
       return ts.factory.createIdentifier(name);
+    }
+
+    return node;
+  });
+}
+
+export function setAttributeStringValue(
+  sourceFile: SourceFile,
+  targetIndexPath: IndexPath,
+  value: string,
+): SourceFile {
+  return transformNode(sourceFile, (node, indexPath) => {
+    if (isDeepEqual(targetIndexPath, indexPath)) {
+      return ts.factory.createStringLiteral(value);
     }
 
     return node;

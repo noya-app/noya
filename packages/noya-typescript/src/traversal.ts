@@ -14,6 +14,8 @@ export function getChildren(node: ts.Node) {
 const functions = withOptions<ts.Node>({ getChildren });
 
 export const Nodes = {
+  access: functions.access,
+
   find<T extends ts.Node>(
     node: ts.Node,
     predicate: (node: ts.Node) => node is T,

@@ -12,6 +12,40 @@ Object {
 }
 `;
 
+exports[`gets component layer with attributes 1`] = `
+Object {
+  "element": Object {
+    "attributes": Object {
+      "name": Object {
+        "indexPath": Array [
+          0,
+          3,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+        ],
+        "type": "stringLiteral",
+        "value": "test",
+      },
+    },
+    "children": Array [],
+    "id": "abc#0",
+    "tagName": "View",
+  },
+  "name": "Foo",
+}
+`;
+
+exports[`set element name 1`] = `
+"export default function Foo() {
+    return <View name=\\"hello\\"></View>;
+}
+"
+`;
+
 exports[`visits 1`] = `
 "export default function Bar() {
     return <View></View>;
