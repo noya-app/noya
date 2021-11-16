@@ -3,9 +3,16 @@ import ts, {
   Expression,
   JsxOpeningElement,
   JsxSelfClosingElement,
+  SourceFile,
   SyntaxKind,
 } from 'typescript';
-import { firstChild, firstChildOfKind, isKind, Nodes } from './traversal';
+import {
+  firstChild,
+  firstChildOfKind,
+  isKind,
+  Nodes,
+  transformNode,
+} from './traversal';
 
 export type ElementAttributeValue =
   | {
@@ -133,4 +140,17 @@ export function getComponentLayer(
       };
     }
   }
+}
+
+export function setFunctionName(
+  sourceFile: SourceFile,
+  name: string,
+): SourceFile {
+  return transformNode(sourceFile, (node) => {
+    if (ts.isIdentifier(node) && ts.isFunctionDeclaration(node.parent)) {
+      return ts.factory.createIdentifier(name);
+    }
+
+    return node;
+  });
 }

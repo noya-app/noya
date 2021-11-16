@@ -21,6 +21,8 @@ export const Nodes = {
     return functions.find(node, predicate) as T | undefined;
   },
 
+  findIndexPath: functions.findIndexPath,
+
   findAll<T extends ts.Node>(
     node: ts.Node,
     predicate: (node: ts.Node) => node is T,
@@ -74,6 +76,10 @@ export function firstChild<T extends ts.Node>(
   }) as T | undefined;
 }
 
+export function kindName(node: ts.Node) {
+  return SyntaxKind[node.kind];
+}
+
 export function isKind<T extends ts.SyntaxKind>(
   kind: T,
 ): (node: ts.Node) => node is SyntaxKindMap[T] {
@@ -88,4 +94,49 @@ export function firstChildOfKind<T extends ts.SyntaxKind>(
     node,
     (child): child is SyntaxKindMap[T] => child.kind === kind,
   );
+}
+
+export function transformNode<T extends ts.Node>(
+  node: T,
+  transform: (
+    node: ts.Node,
+    indexPath: number[],
+    nodePath: ts.Node[],
+  ) => ts.Node,
+): T {
+  const transformerFactory: ts.TransformerFactory<ts.Node> =
+    (context) => (rootNode) => {
+      let indexPath: number[] = [];
+      let nodePath: ts.Node[] = [];
+
+      function visit(node: ts.Node): ts.Node {
+        node = transform(node, indexPath, nodePath);
+
+        let childIndex = 0;
+
+        let result = ts.visitEachChild(
+          node,
+          (child) => {
+            indexPath.push(childIndex);
+            nodePath.push(node);
+
+            child = visit(child);
+
+            nodePath.pop();
+            indexPath.pop();
+
+            childIndex++;
+
+            return child;
+          },
+          context,
+        );
+
+        return result;
+      }
+
+      return ts.visitNode(rootNode, visit);
+    };
+
+  return ts.transform(node, [transformerFactory]).transformed[0] as T;
 }

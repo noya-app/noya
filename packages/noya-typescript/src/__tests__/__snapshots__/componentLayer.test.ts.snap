@@ -11,3 +11,10 @@ Object {
   "name": "Foo",
 }
 `;
+
+exports[`visits 1`] = `
+"export default function Bar() {
+    return <View></View>;
+}
+"
+`;
