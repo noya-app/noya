@@ -6,6 +6,7 @@ import { Group } from '../..';
 import { useIsLayerClipped } from '../../ClippedLayerContext';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
+import SketchComponent from './SketchComponent';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
 import SketchSlice from './SketchSlice';
@@ -54,6 +55,9 @@ export default memo(function SketchLayer({ layer }: Props) {
       break;
     case 'slice':
       element = <SketchSlice layer={layer} />;
+      break;
+    case 'componentContainer':
+      element = <SketchComponent layer={layer} />;
       break;
     default:
       console.info(layer._class, 'not handled');

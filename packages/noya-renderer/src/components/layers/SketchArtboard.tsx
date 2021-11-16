@@ -26,7 +26,7 @@ interface ArtboardLabelProps {
   isSymbolMaster: boolean;
 }
 
-const ArtboardLabel = memo(function ArtboardLabel({
+export const ArtboardLabel = memo(function ArtboardLabel({
   text,
   layerFrame,
   isSymbolMaster,
@@ -77,7 +77,7 @@ interface ArtboardBlurProps {
   layerFrame: Rect;
 }
 
-const ArtboardBlur = memo(function ArtboardBlur({
+export const ArtboardBlur = memo(function ArtboardBlur({
   layerFrame,
 }: ArtboardBlurProps) {
   const CanvasKit = useCanvasKit();

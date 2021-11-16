@@ -546,6 +546,9 @@ function componentContainer(
     ...newLayerBase(options),
     name: 'Component',
     component: component(),
+    hasBackgroundColor: false,
+    includeBackgroundColorInExport: true,
+    backgroundColor: color({ blue: 1, green: 1, red: 1 }),
     ...options,
     _class: Sketch.ClassValue.ComponentContainer,
   };

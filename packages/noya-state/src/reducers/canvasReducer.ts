@@ -1061,7 +1061,12 @@ export function canvasReducer(
                 createRect(roundedMin, roundedMax),
               );
 
-              if (!Layers.isSymbolMasterOrArtboard(newLayer)) {
+              if (
+                !(
+                  Layers.isSymbolMasterOrArtboard(newLayer) ||
+                  Layers.isComponentContainer(newLayer)
+                )
+              ) {
                 newLayer = produce(newLayer, (draft) => {
                   draft.isFlippedHorizontal =
                     width < 0
@@ -1256,9 +1261,9 @@ export function createDrawingLayer(
         component: SketchModel.component({
           source: `export default function Test() {
   return (
-    <View>
-      <View name={"My View"}></View>
-      <Text></Text>
+    <View name={"Root"} background={"#fff"}>
+      <View name={"Top"} background={"#f00"}></View>
+      <Text name={"Bottom"}></Text>
     </View>
   );
 }`,

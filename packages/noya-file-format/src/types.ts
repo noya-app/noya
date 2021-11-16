@@ -1283,6 +1283,9 @@ export type ComponentContainer = {
   style?: Style;
   maintainScrollPosition?: boolean;
   _class: 'componentContainer';
+  backgroundColor: Color;
+  hasBackgroundColor: boolean;
+  includeBackgroundColorInExport: boolean;
   component: Component;
 };
 /**
