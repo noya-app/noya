@@ -17,6 +17,7 @@ import {
 
 type TypescriptCompilerContextValue = {
   compileFile: (id: string, source: string) => any;
+  environment: TypescriptEnvironment;
 };
 
 const TypescriptCompilerContext = createContext<
@@ -64,12 +65,16 @@ export const TypescriptCompilerProvider = memo(
       [environment],
     );
 
+    const contextValue = useMemo(() => {
+      if (!environment) return;
+
+      return { compileFile, environment };
+    }, [compileFile, environment]);
+
+    if (!contextValue) return <></>;
+
     return (
-      <TypescriptCompilerContext.Provider
-        value={useMemo(() => {
-          return { compileFile };
-        }, [compileFile])}
-      >
+      <TypescriptCompilerContext.Provider value={contextValue}>
         {children}
       </TypescriptCompilerContext.Provider>
     );

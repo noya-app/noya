@@ -10,6 +10,10 @@ import {
   Selectors,
 } from 'noya-state';
 import {
+  createTypescriptEnvironment,
+  createTestingFileSystem,
+} from 'noya-typescript';
+import {
   ApplicationReducerContext,
   ApplicationState,
 } from '../applicationReducer';
@@ -28,6 +32,9 @@ beforeAll(async () => {
       ...new FontManager(GoogleFontProvider),
       getTypefaceFontProvider: () => typefaceFontProvider,
     },
+    typescriptEnvironment: createTypescriptEnvironment(
+      await createTestingFileSystem(),
+    ),
   };
 });
 

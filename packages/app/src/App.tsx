@@ -22,7 +22,10 @@ import {
 } from 'noya-state';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
-import { TypescriptCompilerProvider } from './contexts/TypescriptCompilerContext';
+import {
+  TypescriptCompilerProvider,
+  useTypescriptCompiler,
+} from './contexts/TypescriptCompilerContext';
 import {
   EnvironmentParameters,
   EnvironmentParametersProvider,
@@ -41,6 +44,7 @@ function Contents() {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const documentPath = useEnvironmentParameter('documentPath');
+  const { environment } = useTypescriptCompiler();
 
   const reducer = useMemo(
     () =>
@@ -63,6 +67,7 @@ function Contents() {
                   action.value,
                   CanvasKit,
                   fontManager,
+                  environment,
                 ),
               };
             } else {
@@ -70,7 +75,7 @@ function Contents() {
             }
         }
       },
-    [CanvasKit, fontManager],
+    [CanvasKit, environment, fontManager],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });

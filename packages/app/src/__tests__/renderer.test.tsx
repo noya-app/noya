@@ -23,6 +23,10 @@ import {
   WorkspaceState,
 } from 'noya-state';
 import path from 'path';
+import {
+  createTestingFileSystem,
+  createTypescriptEnvironment,
+} from 'noya-typescript';
 
 let CanvasKit: CanvasKitType;
 let context: ApplicationReducerContext;
@@ -37,6 +41,9 @@ beforeAll(async () => {
       ...new FontManager(GoogleFontProvider),
       getTypefaceFontProvider: () => typefaceFontProvider,
     },
+    typescriptEnvironment: createTypescriptEnvironment(
+      await createTestingFileSystem(),
+    ),
   };
 });
 
@@ -52,6 +59,7 @@ function panToFit(
     ['selectPage', page.do_objectID],
     CanvasKit,
     context.fontManager,
+    context.typescriptEnvironment,
   );
 
   const boundingRect = Selectors.getPageContentBoundingRect(page);
@@ -79,6 +87,7 @@ function panToFit(
     ['setCanvasSize', canvasSize, { top: 0, right: 0, bottom: 0, left: 0 }],
     CanvasKit,
     context.fontManager,
+    context.typescriptEnvironment,
   );
 
   workspaceState = workspaceReducer(
@@ -86,6 +95,7 @@ function panToFit(
     ['pan*', delta],
     CanvasKit,
     context.fontManager,
+    context.typescriptEnvironment,
   );
 
   return {

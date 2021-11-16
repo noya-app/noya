@@ -2,6 +2,7 @@ import {
   createBaseFileSystem,
   createTypescriptEnvironment,
   getComponentLayer,
+  printSourceFile,
   setAttributeStringValue,
   setFunctionName,
   TypescriptEnvironment,
@@ -17,12 +18,6 @@ beforeAll(async () => {
 
 const filename = 'test.tsx';
 
-function printSourceFile(sourceFile: SourceFile) {
-  const printer = ts.createPrinter();
-
-  return printer.printNode(ts.EmitHint.Unspecified, sourceFile, sourceFile);
-}
-
 it('gets component layer', () => {
   env.environment.createFile(
     filename,
@@ -33,7 +28,7 @@ it('gets component layer', () => {
 
   const sourceFile = env.environment.getSourceFile(filename)!;
 
-  const componentLayer = getComponentLayer(sourceFile, 'abc');
+  const componentLayer = getComponentLayer(sourceFile);
 
   expect(componentLayer).toMatchSnapshot();
 });
@@ -48,7 +43,7 @@ it('gets component layer with attributes', () => {
 
   const sourceFile = env.environment.getSourceFile(filename)!;
 
-  const componentLayer = getComponentLayer(sourceFile, 'abc');
+  const componentLayer = getComponentLayer(sourceFile);
 
   expect(componentLayer).toMatchSnapshot();
 });
@@ -63,7 +58,7 @@ it('set element name', () => {
 
   const sourceFile = env.environment.getSourceFile(filename)!;
 
-  const componentLayer = getComponentLayer(sourceFile, 'abc');
+  const componentLayer = getComponentLayer(sourceFile);
   const attribute = componentLayer!.element.attributes['name'];
 
   if (attribute.type !== 'stringLiteral') throw new Error('Bad attribute');

@@ -13,8 +13,18 @@ import {
   getSelectedLayerIndexPaths,
   resizeLayerFrame,
 } from '../selectors/selectors';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+import {
+  accessPageLayers,
+  ApplicationReducerContext,
+  ApplicationState,
+} from './applicationReducer';
 import { SetNumberMode } from './styleReducer';
+import {
+  ElementTree,
+  getComponentLayer,
+  printSourceFile,
+  setAttributeStringValue,
+} from 'noya-typescript';
 
 export type LayerPropertyAction =
   | [type: 'setLayerName', layerId: string, name: string]
@@ -44,6 +54,7 @@ export function layerPropertyReducer(
   state: ApplicationState,
   action: LayerPropertyAction,
   CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
     case 'setLayerName': {
@@ -65,12 +76,43 @@ export function layerPropertyReducer(
           indexPath,
         );
 
-        if (elementId) {
+        if (elementId && Layers.isComponentContainer(draftLayer)) {
           console.info(
             'rename in',
             elementId.split(':'),
             (draftLayer as Sketch.ComponentContainer).component.source,
           );
+
+          const sourceFile =
+            context.typescriptEnvironment.environment.getSourceFile(
+              `${layerId}.tsx`,
+            );
+
+          if (!sourceFile) return;
+
+          const componentLayer = getComponentLayer(sourceFile);
+
+          if (!componentLayer) return;
+
+          const element = ElementTree.find(
+            componentLayer.element,
+            (element) => element.indexPath.join(':') === elementId,
+          );
+
+          if (!element) return;
+
+          if (element.attributes.name.type === 'stringLiteral') {
+            const result = setAttributeStringValue(
+              sourceFile,
+              element.attributes.name.indexPath,
+              name,
+            );
+
+            draftLayer.component.source = printSourceFile(result);
+
+            console.info('original element', element);
+            console.info('updated source', draftLayer.component.source);
+          }
         } else {
           draftLayer.name = name;
         }

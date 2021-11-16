@@ -42,6 +42,7 @@ import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
+import { TypescriptEnvironment } from 'noya-typescript';
 
 export type { SetNumberMode };
 
@@ -110,6 +111,7 @@ export type ApplicationReducerContext = {
   canvasInsets: Insets;
   canvasSize: Size;
   fontManager: IFontManager;
+  typescriptEnvironment: TypescriptEnvironment;
 };
 
 export function applicationReducer(
@@ -200,7 +202,7 @@ export function applicationReducer(
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
-      return layerPropertyReducer(state, action, CanvasKit);
+      return layerPropertyReducer(state, action, CanvasKit, context);
     case 'groupLayers':
     case 'deleteLayer':
     case 'moveLayer':

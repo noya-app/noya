@@ -136,13 +136,17 @@ function flattenLayerList(
               ? element.attributes.name.value
               : undefined;
 
+          const elementId = `${layer.do_objectID}#${element.indexPath.join(
+            ':',
+          )}`;
+
           flattened.push({
             type: 'component',
-            id: element.id,
+            id: elementId,
             name: customName ?? element.tagName,
             depth: indexPath.length + elementPath.length,
             expanded: true,
-            selected: selectedLayerIds.includes(element.id),
+            selected: selectedLayerIds.includes(elementId),
             visible: true,
             hasClippingMask: false,
             shouldBreakMaskChain: false,
@@ -378,7 +382,7 @@ export default memo(function LayerList({
           layer.do_objectID,
           layer.component.source,
         );
-        const info = getComponentLayer(sourceFile, layer.do_objectID);
+        const info = getComponentLayer(sourceFile);
         return info ? [[layer.do_objectID, info]] : [];
       }),
     );

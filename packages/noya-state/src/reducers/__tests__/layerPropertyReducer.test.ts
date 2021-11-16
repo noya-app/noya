@@ -1,14 +1,38 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import { FontManager } from 'noya-fonts';
+import { GoogleFontProvider } from 'noya-google-fonts';
 import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
-import { createInitialState, createSketchFile, Selectors } from 'noya-state';
+import {
+  ApplicationReducerContext,
+  createInitialState,
+  createSketchFile,
+  Selectors,
+} from 'noya-state';
+import {
+  createTestingFileSystem,
+  createTypescriptEnvironment,
+} from 'noya-typescript';
 import { fixGroupFrame } from '../../selectors/layerSelectors';
 import { layerPropertyReducer } from '../layerPropertyReducer';
 
 let CanvasKit: CanvasKitType;
+let context: ApplicationReducerContext;
 
 beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
+  const typefaceFontProvider = CanvasKit.TypefaceFontProvider.Make();
+  context = {
+    canvasInsets: { top: 0, right: 0, bottom: 0, left: 0 },
+    canvasSize: { width: 1000, height: 1000 },
+    fontManager: {
+      ...new FontManager(GoogleFontProvider),
+      getTypefaceFontProvider: () => typefaceFontProvider,
+    },
+    typescriptEnvironment: createTypescriptEnvironment(
+      await createTestingFileSystem(),
+    ),
+  };
 });
 
 const rectangle = SketchModel.rectangle();
@@ -25,6 +49,7 @@ describe('setLayerName', () => {
       state,
       ['setLayerName', rectangle.do_objectID, 'Test'],
       CanvasKit,
+      context,
     );
 
     expect(updated.sketch.pages[0].layers[0].name).toEqual('Test');
@@ -33,7 +58,12 @@ describe('setLayerName', () => {
   test('fails silently when renaming missing id', () => {
     const state = createInitialState(createSketchFile(SketchModel.page()));
 
-    layerPropertyReducer(state, ['setLayerName', 'bad', 'Test'], CanvasKit);
+    layerPropertyReducer(
+      state,
+      ['setLayerName', 'bad', 'Test'],
+      CanvasKit,
+      context,
+    );
   });
 });
 
@@ -61,6 +91,7 @@ describe('setLayerWidth', () => {
       state,
       ['setLayerWidth', 200],
       CanvasKit,
+      context,
     );
 
     expect(

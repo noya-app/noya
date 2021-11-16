@@ -28,7 +28,8 @@ export type ElementAttributeValue =
     };
 
 export type ElementLayer = {
-  id: string;
+  // id: string;
+  indexPath: IndexPath;
   tagName: string;
   children: ElementLayer[];
   attributes: Record<string, ElementAttributeValue>;
@@ -41,7 +42,6 @@ export const ElementTree = withOptions({
 function getLayerHierarchy(
   sourceFile: SourceFile,
   expression: Expression,
-  id: string,
 ): ElementLayer | undefined {
   const jsxElement = Nodes.find(expression, isKind(SyntaxKind.JsxElement));
 
@@ -67,8 +67,7 @@ function getLayerHierarchy(
       children = content
         .getChildren()
         .flatMap(
-          (item, index) =>
-            getLayerHierarchy(sourceFile, item as any, `${id}:${index}`) ?? [],
+          (item, index) => getLayerHierarchy(sourceFile, item as any) ?? [],
         );
     }
   }
@@ -113,7 +112,7 @@ function getLayerHierarchy(
   // console.log(Nodes.diagram(tagElement));
 
   return {
-    id,
+    indexPath: Nodes.findIndexPath(sourceFile, (node) => node === jsxElement)!,
     tagName: tagElement.tagName.getText(),
     children,
     attributes,
@@ -127,7 +126,6 @@ export type ComponentLayer = {
 
 export function getComponentLayer(
   sourceFile: ts.SourceFile,
-  id: string,
 ): ComponentLayer | undefined {
   const functionDeclaration = firstChildOfKind(
     sourceFile,
@@ -148,11 +146,7 @@ export function getComponentLayer(
 
       if (!indexPath) return;
 
-      const element = getLayerHierarchy(
-        sourceFile,
-        returnStatement.expression,
-        `${id}#0`,
-      );
+      const element = getLayerHierarchy(sourceFile, returnStatement.expression);
 
       if (!element) return;
 
@@ -184,7 +178,10 @@ export function setAttributeStringValue(
 ): SourceFile {
   return transformNode(sourceFile, (node, indexPath) => {
     if (isDeepEqual(targetIndexPath, indexPath)) {
-      return ts.factory.createStringLiteral(value);
+      return ts.factory.createJsxExpression(
+        undefined,
+        ts.factory.createStringLiteral(value),
+      );
     }
 
     return node;

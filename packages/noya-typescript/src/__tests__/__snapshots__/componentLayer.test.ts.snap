@@ -5,7 +5,12 @@ Object {
   "element": Object {
     "attributes": Object {},
     "children": Array [],
-    "id": "abc#0",
+    "indexPath": Array [
+      0,
+      3,
+      0,
+      0,
+    ],
     "tagName": "View",
   },
   "name": "Foo",
@@ -32,7 +37,12 @@ Object {
       },
     },
     "children": Array [],
-    "id": "abc#0",
+    "indexPath": Array [
+      0,
+      3,
+      0,
+      0,
+    ],
     "tagName": "View",
   },
   "name": "Foo",
@@ -41,7 +51,7 @@ Object {
 
 exports[`set element name 1`] = `
 "export default function Foo() {
-    return <View name=\\"hello\\"></View>;
+    return <View name={\\"hello\\"}></View>;
 }
 "
 `;

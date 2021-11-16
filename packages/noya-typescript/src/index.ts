@@ -1,6 +1,6 @@
 import * as tsvfs from '@typescript/vfs';
 import lzstring from 'lz-string';
-import ts from 'typescript';
+import ts, { SourceFile } from 'typescript';
 export * from './componentLayer';
 
 export const compilerOptions: ts.CompilerOptions = {
@@ -15,6 +15,10 @@ export async function createBaseFileSystem(): Promise<Map<string, string>> {
     ts,
     lzstring,
   );
+}
+
+export async function createTestingFileSystem(): Promise<Map<string, string>> {
+  return await tsvfs.createDefaultMapFromNodeModules(compilerOptions, ts);
 }
 
 export type TypescriptEnvironment = {
@@ -41,4 +45,10 @@ export function createTypescriptEnvironment(
     fileSystem,
     // host: tsvfs.createVirtualCompilerHost(system, compilerOptions, ts),
   };
+}
+
+export function printSourceFile(sourceFile: SourceFile) {
+  const printer = ts.createPrinter();
+
+  return printer.printNode(ts.EmitHint.Unspecified, sourceFile, sourceFile);
 }

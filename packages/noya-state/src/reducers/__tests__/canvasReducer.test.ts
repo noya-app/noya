@@ -5,6 +5,10 @@ import { loadCanvasKit } from 'noya-renderer';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';
 import {
+  createTestingFileSystem,
+  createTypescriptEnvironment,
+} from 'noya-typescript';
+import {
   encodePageMetadata,
   getCurrentPageMetadata,
 } from '../../selectors/pageSelectors';
@@ -28,6 +32,9 @@ beforeAll(async () => {
       ...new FontManager(GoogleFontProvider),
       getTypefaceFontProvider: () => typefaceFontProvider,
     },
+    typescriptEnvironment: createTypescriptEnvironment(
+      await createTestingFileSystem(),
+    ),
   };
 });
 

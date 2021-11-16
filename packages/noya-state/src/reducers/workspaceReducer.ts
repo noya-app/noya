@@ -5,6 +5,7 @@ import { Insets, Size } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
+import { TypescriptEnvironment } from 'noya-typescript';
 import { createSketchFile } from '../sketchFile';
 import {
   createInitialHistoryState,
@@ -60,6 +61,7 @@ export function workspaceReducer(
   action: WorkspaceAction,
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
+  typescriptEnvironment: TypescriptEnvironment,
 ): WorkspaceState {
   switch (action[0]) {
     case 'newFile': {
@@ -134,6 +136,7 @@ export function workspaceReducer(
           canvasInsets: state.canvasInsets,
           canvasSize: state.canvasSize,
           fontManager,
+          typescriptEnvironment,
         });
       });
     }
