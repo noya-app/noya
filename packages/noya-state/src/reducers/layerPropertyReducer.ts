@@ -47,8 +47,9 @@ export function layerPropertyReducer(
 ): ApplicationState {
   switch (action[0]) {
     case 'setLayerName': {
-      const [, layerId, name] = action;
+      const [, layerOrElementId, name] = action;
 
+      const [layerId, elementId] = layerOrElementId.split('#');
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
@@ -63,7 +64,15 @@ export function layerPropertyReducer(
           draft.sketch.pages[pageIndex],
           indexPath,
         );
-        draftLayer.name = name;
+
+        if (elementId) {
+          console.info(
+            'rename in',
+            (draftLayer as Sketch.ComponentContainer).component.source,
+          );
+        } else {
+          draftLayer.name = name;
+        }
       });
     }
     case 'setLayerVisible':

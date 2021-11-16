@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gets component layer 1`] = `
+Object {
+  "element": Object {
+    "attributes": Object {},
+    "children": Array [],
+    "id": "abc#0",
+    "tagName": "View",
+  },
+  "name": "Foo",
+}
+`;

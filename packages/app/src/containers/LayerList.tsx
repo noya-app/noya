@@ -33,7 +33,11 @@ import {
 } from 'noya-icons';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
-import { ElementLayer, ElementTree, getComponentInfo } from 'noya-typescript';
+import {
+  ComponentLayer,
+  ElementTree,
+  getComponentLayer,
+} from 'noya-typescript';
 import { isDeepEqual } from 'noya-utils';
 import React, {
   ForwardedRef,
@@ -78,7 +82,7 @@ function flattenLayerList(
   page: Sketch.Page,
   selectedLayerIds: string[],
   filteredLayerIds: Set<string>,
-  componentLayers: Record<string, ElementLayer>,
+  componentLayers: Record<string, ComponentLayer>,
 ): LayerListItem[] {
   const flattened: LayerListItem[] = [];
 
@@ -125,14 +129,20 @@ function flattenLayerList(
       ) {
         const component = componentLayers[layer.do_objectID];
 
-        ElementTree.visit(component, (element, elementPath) => {
+        ElementTree.visit(component.element, (element, elementPath) => {
+          const customName =
+            element.attributes.name &&
+            element.attributes.name.type === 'stringLiteral'
+              ? element.attributes.name.value
+              : undefined;
+
           flattened.push({
             type: 'component',
             id: element.id,
-            name: element.tagName,
+            name: customName ?? element.tagName,
             depth: indexPath.length + elementPath.length,
             expanded: true,
-            selected: false,
+            selected: selectedLayerIds.includes(element.id),
             visible: true,
             hasClippingMask: false,
             shouldBreakMaskChain: false,
@@ -368,7 +378,7 @@ export default memo(function LayerList({
           layer.do_objectID,
           layer.component.source,
         );
-        const info = getComponentInfo(sourceFile, layer.do_objectID);
+        const info = getComponentLayer(sourceFile, layer.do_objectID);
         return info ? [[layer.do_objectID, info]] : [];
       }),
     );
