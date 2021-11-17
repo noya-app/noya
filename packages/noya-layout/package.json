@@ -1,10 +1,9 @@
 {
-  "name": "noya-state",
+  "name": "noya-layout",
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "UNLICENSED",
   "dependencies": {
-    "immer": "^9.0.5",
-    "tree-visit": "^0.1.0"
+    "yoga-layout-prebuilt": "^1.10.0"
   }
 }

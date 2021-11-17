@@ -16,28 +16,14 @@ const functions = withOptions<ts.Node>({ getChildren });
 export const Nodes = {
   access: functions.access,
 
-  find<T extends ts.Node>(
-    node: ts.Node,
-    predicate: (node: ts.Node) => node is T,
-  ) {
-    return functions.find(node, predicate) as T | undefined;
-  },
+  find: functions.find,
 
   findIndexPath: functions.findIndexPath,
 
-  findAll<T extends ts.Node>(
-    node: ts.Node,
-    predicate: (node: ts.Node) => node is T,
-  ) {
-    return functions.findAll(node, predicate) as T[];
-  },
+  findAll: functions.findAll,
 
   diagram(node: ts.Node) {
-    return functions.diagram(node, {
-      flattenSingleChildNodes: false,
-      getLabel: (node) => SyntaxKind[node.kind],
-      getChildren,
-    });
+    return functions.diagram(node, (node) => SyntaxKind[node.kind]);
   },
 };
 

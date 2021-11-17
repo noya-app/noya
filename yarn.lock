@@ -3922,6 +3922,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/yoga-layout@1.9.2":
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/@types/yoga-layout/-/yoga-layout-1.9.2.tgz#efaf9e991a7390dc081a0b679185979a83a9639a"
+  integrity sha512-S9q47ByT2pPvD65IvrWp7qppVMpk9WGMbVq9wbWZOHg6tnXSD4vyhao6nOSBwwfDdV2p3Kx9evA9vI+XWTfDvw==
+
 "@typescript-eslint/eslint-plugin@^4.0.0", "@typescript-eslint/eslint-plugin@^4.28.2", "@typescript-eslint/eslint-plugin@^4.5.0":
   version "4.29.2"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-4.29.2.tgz#f54dc0a32b8f61c6024ab8755da05363b733838d"
@@ -16977,10 +16982,10 @@ tr46@^2.1.0:
   dependencies:
     punycode "^2.1.1"
 
-tree-visit@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/tree-visit/-/tree-visit-0.0.9.tgz#100f5bd45ab29246c9ade138c3ff2302f54cd166"
-  integrity sha512-R+UGxsa3apNQ+WPMiax+HSnuXiq/8glmHfB3P/OlZWR6zbhw2sPIDtALbiSPKCoZe9NGc8LXcmg+5H3AW8RKbQ==
+tree-visit@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/tree-visit/-/tree-visit-0.1.0.tgz#ec35cfc13548b41ca5eabd5cbd7f83b574a8ed83"
+  integrity sha512-5lARH0BoZY70TwE+MV7v0KRtApSP4LSxC2JLRCUyK6KUCb8f/Qv9dS+PaWx9h3yKyNYjX2/JHwDx8DyQHHFzlw==
 
 trim-newlines@^1.0.0:
   version "1.0.0"
@@ -18454,6 +18459,13 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+yoga-layout-prebuilt@^1.10.0:
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/yoga-layout-prebuilt/-/yoga-layout-prebuilt-1.10.0.tgz#2936fbaf4b3628ee0b3e3b1df44936d6c146faa6"
+  integrity sha512-YnOmtSbv4MTf7RGJMK0FvZ+KD8OEe/J5BNnR0GHhD8J/XcG/Qvxgszm0Un6FTHWW4uHlTgP0IztiXQnGyIR45g==
+  dependencies:
+    "@types/yoga-layout" "1.9.2"
 
 zen-observable-ts@^0.8.21:
   version "0.8.21"

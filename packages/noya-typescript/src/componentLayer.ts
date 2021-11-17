@@ -1,9 +1,13 @@
 import { withOptions } from 'tree-visit';
 import ts, {
   Expression,
+  isJsxAttribute,
+  JsxAttribute,
+  JsxExpression,
   JsxOpeningElement,
   JsxSelfClosingElement,
   SourceFile,
+  StringLiteral,
   SyntaxKind,
 } from 'typescript';
 import {
@@ -72,16 +76,13 @@ function getLayerHierarchy(
     }
   }
 
-  const jsxAttributes = Nodes.findAll(
-    tagElement,
-    isKind(SyntaxKind.JsxAttribute),
-  );
+  const jsxAttributes = Nodes.findAll<JsxAttribute>(tagElement, isJsxAttribute);
 
   const attributes = Object.fromEntries(
     jsxAttributes.flatMap((attribute) => {
-      const expression = Nodes.find(
+      const expression = Nodes.find<JsxExpression>(
         attribute,
-        isKind(SyntaxKind.JsxExpression),
+        ts.isJsxExpression,
       );
 
       if (!expression) return [];
@@ -89,7 +90,7 @@ function getLayerHierarchy(
       const key = attribute.name.getText();
       let value: ElementAttributeValue = { type: 'other', value: expression };
 
-      const stringLiteral = Nodes.find(
+      const stringLiteral = Nodes.find<StringLiteral>(
         expression,
         isKind(SyntaxKind.StringLiteral),
       );
