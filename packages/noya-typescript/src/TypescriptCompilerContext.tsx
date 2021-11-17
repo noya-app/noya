@@ -25,50 +25,66 @@ const TypescriptCompilerContext = createContext<
 >(undefined);
 
 export const TypescriptCompilerProvider = memo(
-  function TypescriptCompilerProvider({ children }: { children: ReactNode }) {
-    const [baseFileSystem, setBaseFileSystem] = useState<
-      PromiseState<Map<string, string>>
-    >({ type: 'pending' });
+  function TypescriptCompilerProvider({
+    environment: initialEnvironment,
+    children,
+  }: {
+    environment?: TypescriptEnvironment;
+    children: ReactNode;
+  }) {
+    const successEnvironment = useMemo(():
+      | PromiseState<TypescriptEnvironment>
+      | undefined => {
+      return initialEnvironment
+        ? { type: 'success', value: initialEnvironment }
+        : undefined;
+    }, [initialEnvironment]);
+
+    // const [baseFileSystem, setBaseFileSystem] = useState<
+    //   PromisedFileSystem
+    // >(initialFileSystem ?? { type: 'pending' });
 
     const [environment, setEnvironment] = useState<
-      TypescriptEnvironment | undefined
-    >();
+      PromiseState<TypescriptEnvironment>
+    >(successEnvironment ?? { type: 'pending' });
 
     useEffect(() => {
+      // environment was passed in, no need to fetch
+      if (initialEnvironment) return;
+
       createBaseFileSystem()
         .then((fileSystem) => {
-          setBaseFileSystem({ type: 'success', value: fileSystem });
+          setEnvironment({
+            type: 'success',
+            value: createTypescriptEnvironment(fileSystem),
+          });
         })
         .catch((error) => {
-          setBaseFileSystem({ type: 'failure', value: error });
+          setEnvironment({ type: 'failure', value: error });
         });
-    }, []);
-
-    useEffect(() => {
-      if (baseFileSystem.type !== 'success') return;
-
-      setEnvironment(createTypescriptEnvironment(baseFileSystem.value));
-    }, [baseFileSystem]);
+    }, [initialEnvironment]);
 
     const compileFile = useCallback(
       (id: string, source: string) => {
+        if (environment.type !== 'success') return;
+
         const filename = `${id}.tsx`;
 
-        if (environment?.environment.getSourceFile(filename)) {
-          environment.environment.updateFile(filename, source);
+        if (environment?.value.environment.getSourceFile(filename)) {
+          environment?.value.environment.updateFile(filename, source);
         } else {
-          environment?.environment.createFile(filename, source);
+          environment?.value.environment.createFile(filename, source);
         }
 
-        return environment?.environment.getSourceFile(filename);
+        return environment?.value.environment.getSourceFile(filename);
       },
       [environment],
     );
 
     const contextValue = useMemo(() => {
-      if (!environment) return;
+      if (environment.type !== 'success') return;
 
-      return { compileFile, environment };
+      return { compileFile, environment: environment.value };
     }, [compileFile, environment]);
 
     if (!contextValue) return <></>;

@@ -15,6 +15,10 @@ import { memo, useLayoutEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
 import { usePixelRatio } from 'noya-react-utils';
+import {
+  TypescriptCompilerProvider,
+  useTypescriptCompiler,
+} from 'noya-typescript';
 
 const CanvasComponent = styled.canvas<{ size: Size }>(({ size }) => ({
   position: 'absolute',
@@ -35,6 +39,7 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const CanvasKit = useCanvasKit();
   const pixelRatio = usePixelRatio();
+  const { environment } = useTypescriptCompiler();
 
   // Update the canvas size and recreate the surface whenever the window is resized
   useLayoutEffect(() => {
@@ -68,23 +73,25 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
 
     try {
       render(
-        <CanvasKitProvider>
-          <ThemeProvider theme={theme}>
-            <StateProvider state={workspaceState}>
-              <ImageCacheProvider>
-                <FontManagerProvider>
-                  <ComponentsProvider value={Components}>
-                    <RenderingModeProvider value="interactive">
-                      <RootScaleProvider value={pixelRatio}>
-                        <SketchFileRenderer />
-                      </RootScaleProvider>
-                    </RenderingModeProvider>
-                  </ComponentsProvider>
-                </FontManagerProvider>
-              </ImageCacheProvider>
-            </StateProvider>
-          </ThemeProvider>
-        </CanvasKitProvider>,
+        <TypescriptCompilerProvider environment={environment}>
+          <CanvasKitProvider>
+            <ThemeProvider theme={theme}>
+              <StateProvider state={workspaceState}>
+                <ImageCacheProvider>
+                  <FontManagerProvider>
+                    <ComponentsProvider value={Components}>
+                      <RenderingModeProvider value="interactive">
+                        <RootScaleProvider value={pixelRatio}>
+                          <SketchFileRenderer />
+                        </RootScaleProvider>
+                      </RenderingModeProvider>
+                    </ComponentsProvider>
+                  </FontManagerProvider>
+                </ImageCacheProvider>
+              </StateProvider>
+            </ThemeProvider>
+          </CanvasKitProvider>
+        </TypescriptCompilerProvider>,
         surface,
         CanvasKit,
       );
@@ -97,7 +104,7 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, workspaceState, theme, surface, pixelRatio]);
+  }, [CanvasKit, workspaceState, theme, surface, pixelRatio, environment]);
 
   return <CanvasComponent size={size} ref={canvasRef} />;
 });

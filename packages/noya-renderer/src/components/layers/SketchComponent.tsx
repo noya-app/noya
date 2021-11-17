@@ -2,6 +2,7 @@ import Sketch from 'noya-file-format';
 import { ClipProps, usePaint } from 'noya-react-canvaskit';
 import { Group, Rect as RCKRect, useCanvasKit } from 'noya-renderer';
 import { Primitives } from 'noya-state';
+import { getComponentLayer, useTypescriptCompiler } from 'noya-typescript';
 import { memo, useMemo } from 'react';
 import { useRenderingMode } from '../../RenderingModeContext';
 import { ArtboardBlur, ArtboardLabel } from './SketchArtboard';
@@ -45,6 +46,28 @@ export const SketchComponentContent = memo(function SketchComponentContent({
   );
 });
 
+const Elements = memo(function Elements({
+  layer,
+}: {
+  layer: Sketch.ComponentContainer;
+}) {
+  const compiler = useTypescriptCompiler();
+
+  const sourceFile = compiler.environment.environment.getSourceFile(
+    `${layer.do_objectID}.tsx`,
+  );
+
+  const componentLayer = useMemo(() => {
+    if (!sourceFile) return;
+
+    return getComponentLayer(sourceFile);
+  }, [sourceFile]);
+
+  console.info(componentLayer);
+
+  return <></>;
+});
+
 interface Props {
   layer: Sketch.ComponentContainer;
 }
@@ -62,6 +85,7 @@ export default memo(function SketchComponent({ layer }: Props) {
             isSymbolMaster={true}
           />
           <ArtboardBlur layerFrame={layer.frame} />
+          <Elements layer={layer} />
         </>
       )}
       <SketchComponentContent layer={layer} />

@@ -52,7 +52,7 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import { useTypescriptCompiler } from '../contexts/TypescriptCompilerContext';
+import { useTypescriptCompiler } from 'noya-typescript';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const IconContainer = styled.span(({ theme }) => ({

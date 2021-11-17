@@ -2,6 +2,7 @@ import * as tsvfs from '@typescript/vfs';
 import lzstring from 'lz-string';
 import ts, { SourceFile } from 'typescript';
 export * from './componentLayer';
+export * from './TypescriptCompilerContext';
 
 export const compilerOptions: ts.CompilerOptions = {
   jsx: ts.JsxEmit.Preserve,

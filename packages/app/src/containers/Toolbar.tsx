@@ -26,7 +26,7 @@ import { getComponentLayer } from 'noya-typescript';
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useTypescriptCompiler } from '../contexts/TypescriptCompilerContext';
+import { useTypescriptCompiler } from 'noya-typescript';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
