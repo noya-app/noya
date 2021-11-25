@@ -841,12 +841,12 @@ export function canvasReducer(
             const newInteractionState = {
               ...interactionState,
               origin: {
-                x: origin.x - originAdjustment.x,
-                y: origin.y - originAdjustment.y,
+                x: Math.round(origin.x - originAdjustment.x),
+                y: Math.round(origin.y - originAdjustment.y),
               },
               current: {
-                x: current.x - currentAdjustment.x,
-                y: current.y - currentAdjustment.y,
+                x: Math.round(current.x - currentAdjustment.x),
+                y: Math.round(current.y - currentAdjustment.y),
               },
             };
 
@@ -892,8 +892,8 @@ export function canvasReducer(
                 indexPath,
               );
 
-              draftLayer.frame.x = initialRect.x + delta.x;
-              draftLayer.frame.y = initialRect.y + delta.y;
+              draftLayer.frame.x = Math.round(initialRect.x + delta.x);
+              draftLayer.frame.y = Math.round(initialRect.y + delta.y);
 
               fixGroupFrameHierarchy(
                 draft.sketch.pages[pageIndex],
@@ -1053,8 +1053,8 @@ export function canvasReducer(
               const roundedMin = { x: Math.round(min.x), y: Math.round(min.y) };
               const roundedMax = { x: Math.round(max.x), y: Math.round(max.y) };
 
-              const width = roundedMax.x - roundedMin.x;
-              const height = roundedMax.y - roundedMin.y;
+              const width = Math.round(roundedMax.x - roundedMin.x);
+              const height = Math.round(roundedMax.y - roundedMin.y);
 
               let newLayer = resizeLayerFrame(
                 layer,
