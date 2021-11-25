@@ -30,12 +30,16 @@ import {
   LayerIndexPaths,
   moveLayer,
   removeLayer,
-  isLayerVisible,
+  getLayersInRect,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
-import { ApplicationReducerContext, Primitives } from 'noya-state';
+import {
+  ApplicationReducerContext,
+  findIndexPath,
+  Primitives,
+} from 'noya-state';
 
 export type LayerAction =
   | [
@@ -425,102 +429,128 @@ export function layerReducer(
     }
     case 'addLayer': {
       const layers = Array.isArray(action[1]) ? action[1] : [action[1]];
-
       const currentPageIndex = getCurrentPageIndex(state);
-
       const selectedLayerIndexPath =
         getSelectedLayerIndexPathsExcludingDescendants(state)[0];
 
+      const { canvasSize, canvasInsets } = context;
+      const viewportCenter = {
+        x: canvasSize.width / 2,
+        y: canvasSize.height / 2,
+      };
+      const visibleRect = {
+        x: -canvasInsets.left,
+        y: -canvasInsets.top,
+        width: canvasSize.width + canvasInsets.left + canvasInsets.right,
+        height: canvasSize.height + canvasInsets.top + canvasInsets.bottom,
+      };
+
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[currentPageIndex];
-        const selectedLayer =
-          selectedLayerIndexPath && selectedLayerIndexPath.length > 0
-            ? Layers.access(draftPage, selectedLayerIndexPath)
-            : draftPage;
-
         draft.selectedLayerIds = [];
-        const parentLayer = Layers.isParentLayer(selectedLayer)
-          ? selectedLayer
-          : (draftPage as Layers.ParentLayer);
 
         const meta = draft.sketch.user[draftPage.do_objectID] ?? {
           zoomValue: 1,
           scrollOrigin: '{0,0}',
         };
 
-        const viewportCenter = {
-          x: context.canvasSize.width / 2,
-          y: context.canvasSize.height / 2,
-        };
-
         const parsed = Primitives.parsePoint(meta.scrollOrigin);
-        const currentCanvasFrame = {
-          x: parsed.x,
-          y: parsed.y,
-          width: context.canvasSize.width,
-          height: context.canvasSize.height,
-        };
+
+        const allVisibleLayersIds = getLayersInRect(
+          state,
+          draftPage,
+          canvasInsets,
+          visibleRect,
+          {
+            includeHiddenLayers: true,
+            groups: 'groupAndChildren',
+            artboards: 'artboardAndChildren',
+          },
+        ).map((layer) => layer.do_objectID);
 
         layers.forEach((layer) => {
-          const layerFrame = layer.frame;
-          const { pageIndex, indexPaths } = findPageLayerIndexPaths(
-            state,
-            (l) => l.do_objectID === layer.do_objectID,
-          )[0];
-
           if (layer._class === 'page') return;
-          const newLayer = produce(copyLayer(layer), (l) => {
+
+          const frame = {
+            midWidth: layer.frame.width / 2,
+            midHeight: layer.frame.height / 2,
+          };
+
+          let newLayer = produce(copyLayer(layer), (l) => {
             l.name = layer.name;
           });
 
-          if (
-            isLayerVisible(layer, currentCanvasFrame) &&
-            currentPageIndex === pageIndex &&
-            indexPaths.length > 0
-          ) {
-            // If the layer is on the current page and is visible
-            addSiblingLayer(draftPage, indexPaths[0], newLayer);
-          } else if (!Layers.isPageLayer(parentLayer)) {
-            // If the selected layer is a parent layer but not a page layer
-            newLayer.frame = {
-              ...newLayer.frame,
-              x: parentLayer.frame.width / 2 - layerFrame.width / 2,
-              y: parentLayer.frame.height / 2 - layerFrame.height / 2,
-            };
-
-            addToParentLayer(parentLayer.layers, newLayer);
-          } else {
-            newLayer.frame = {
-              ...newLayer.frame,
-              x: viewportCenter.x - parsed.x - layerFrame.width / 2,
-              y: viewportCenter.y - parsed.y - layerFrame.height / 2,
-            }; //center the layer on the page
-
-            if (!Layers.isPageLayer(selectedLayer)) {
-              // If the selected layer not a page layer
-              const selectedLayerParent = getParentLayer(
+          if (allVisibleLayersIds.includes(layer.do_objectID)) {
+            const indexPath =
+              findIndexPath(
                 draftPage,
-                selectedLayerIndexPath,
-              );
+                (l) => l.do_objectID === layer.do_objectID,
+              ) ?? [];
 
-              if (!Layers.isPageLayer(selectedLayerParent)) {
-                // If the selected layer has a a parent layer that its not a page layer
-                newLayer.frame = {
+            addSiblingLayer(draftPage, indexPath, newLayer);
+          } else {
+            const selectedLayer =
+              selectedLayerIndexPath && selectedLayerIndexPath.length > 0
+                ? Layers.access(draftPage, selectedLayerIndexPath)
+                : draftPage;
+
+            if (
+              Layers.isParentLayer(selectedLayer) &&
+              !Layers.isPageLayer(selectedLayer)
+            ) {
+              const parentFrame = {
+                midWidth: selectedLayer.frame.width / 2,
+                midHeight: selectedLayer.frame.height / 2,
+              };
+
+              newLayer = {
+                ...newLayer,
+                frame: {
                   ...newLayer.frame,
-                  x: selectedLayerParent.frame.width / 2 - layerFrame.width / 2,
-                  y:
-                    selectedLayerParent.frame.height / 2 -
-                    layerFrame.height / 2,
-                }; //center the layer on the parent layer
+                  x: parentFrame.midWidth - frame.midWidth,
+                  y: parentFrame.midHeight - frame.midHeight,
+                },
+              };
 
-                addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
-              } else {
-                // If the selected layer has a a parent layer that its a page layer
-                addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
-              }
+              addToParentLayer(selectedLayer.layers, newLayer);
             } else {
-              // If the selected layer is a page layer
-              draftPage.layers.push(newLayer);
+              newLayer = {
+                ...newLayer,
+                frame: {
+                  ...newLayer.frame,
+                  x: viewportCenter.x - parsed.x - frame.midWidth,
+                  y: viewportCenter.y - parsed.y - frame.midHeight,
+                },
+              }; //center the layer on the page
+
+              if (!Layers.isPageLayer(selectedLayer)) {
+                const selectedLayerParent = getParentLayer(
+                  draftPage,
+                  selectedLayerIndexPath,
+                );
+
+                if (!Layers.isPageLayer(selectedLayerParent)) {
+                  const parentFrame = {
+                    midWidth: selectedLayerParent.frame.width / 2,
+                    midHeight: selectedLayerParent.frame.height / 2,
+                  };
+
+                  newLayer = {
+                    ...newLayer,
+                    frame: {
+                      ...newLayer.frame,
+                      x: parentFrame.midWidth - frame.midWidth,
+                      y: parentFrame.midHeight - frame.midHeight,
+                    },
+                  };
+
+                  addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+                } else {
+                  addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+                }
+              } else {
+                draftPage.layers.push(newLayer);
+              }
             }
           }
 

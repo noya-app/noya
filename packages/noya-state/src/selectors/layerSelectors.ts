@@ -501,15 +501,3 @@ export function getConstrainedScaling(
       true)
   );
 }
-
-// Check if layer is visible in the page
-export function isLayerVisible(layer: Sketch.AnyLayer, canvasFrame: Rect) {
-  const frame = layer.frame;
-
-  return (
-    frame.x + frame.width > canvasFrame.x &&
-    frame.x < canvasFrame.x + canvasFrame.width &&
-    frame.y + frame.height > canvasFrame.y &&
-    frame.y < canvasFrame.y + canvasFrame.height
-  );
-}
