@@ -42,7 +42,12 @@ import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import { TypescriptEnvironment } from 'noya-typescript';
+import {
+  printSourceFile,
+  setAttributeStringValue,
+  TypescriptEnvironment,
+} from 'noya-typescript';
+import { sketchColorToHex } from 'noya-designsystem';
 
 export type { SetNumberMode };
 
@@ -292,6 +297,57 @@ export function applicationReducer(
     case 'nudgeShaderVariableValue':
     case 'addShaderVariable':
     case 'deleteShaderVariable': {
+      const componentElements = Selectors.getSelectedComponentElements(state);
+
+      if (componentElements.length > 0) {
+        switch (action[0]) {
+          case 'setFillColor': {
+            const [, , color] = action;
+            const pageIndex = getCurrentPageIndex(state);
+            const page = Selectors.getCurrentPage(state);
+            const objectPath = componentElements[0];
+            const layerIndexPath = Layers.findIndexPath(
+              page,
+              (layer) => layer.do_objectID === objectPath.layerId,
+            );
+
+            if (!layerIndexPath) return state;
+
+            return produce(state, (draft) => {
+              const draftLayer = Layers.access(
+                draft.sketch.pages[pageIndex],
+                layerIndexPath,
+              );
+
+              if (Layers.isComponentContainer(draftLayer)) {
+                const editable = Selectors.getEditableElementLayer(
+                  context.typescriptEnvironment,
+                  objectPath,
+                );
+
+                if (!editable) return;
+
+                const { sourceFile, elementLayer } = editable;
+
+                if (
+                  elementLayer.attributes.background.type === 'stringLiteral'
+                ) {
+                  const result = setAttributeStringValue(
+                    sourceFile,
+                    elementLayer.attributes.background.indexPath,
+                    sketchColorToHex(color),
+                  );
+
+                  draftLayer.component.source = printSourceFile(result);
+                }
+              }
+            });
+          }
+        }
+
+        return state;
+      }
+
       if (getCurrentTab(state) === 'canvas') {
         const pageIndex = getCurrentPageIndex(state);
         const layerIndexPaths = getSelectedLayerIndexPaths(state);

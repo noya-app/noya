@@ -13,3 +13,4 @@ export * from './textStyleSelectors';
 export * from './textSelectors';
 export * from './textEditorSelectors';
 export * from './attributedStringSelectors';
+export * from './componentSelectors';

@@ -9,7 +9,7 @@ import {
 } from 'noya-layout';
 import { ClipProps, useColorFill, usePaint } from 'noya-react-canvaskit';
 import { Group, Rect as RCKRect, Rect, useCanvasKit } from 'noya-renderer';
-import { Primitives } from 'noya-state';
+import { getSourceFileForId, Primitives } from 'noya-state';
 import {
   ElementLayer,
   getComponentLayer,
@@ -113,8 +113,9 @@ const ElementTree = memo(function Elements({
 }) {
   const compiler = useTypescriptCompiler();
 
-  const sourceFile = compiler.environment.environment.getSourceFile(
-    `${layer.do_objectID}.tsx`,
+  const sourceFile = getSourceFileForId(
+    compiler.environment,
+    layer.do_objectID,
   );
 
   const { elementLayer, measuredLayout } = useMemo(() => {

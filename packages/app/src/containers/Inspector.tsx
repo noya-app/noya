@@ -1,6 +1,6 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, withSeparatorElements } from 'noya-designsystem';
-import { useShallowArray } from 'noya-react-utils';
+import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import {
   getMultiNumberValue,
   getMultiValue,
@@ -9,7 +9,7 @@ import {
   Selectors,
   SetNumberMode,
 } from 'noya-state';
-import { Fragment, memo, useCallback, useMemo } from 'react';
+import { Fragment, memo, ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
@@ -20,6 +20,7 @@ import BlurInspector from './BlurInspector';
 import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
+import { ElementFillInspector } from './ElementFillInspector';
 import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
 import InnerShadowInspector from './InnerShadowInspector';
@@ -41,6 +42,9 @@ const HorizontalPaddingContainer = styled.div({
 export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
 
+  const selectedComponentElements = useDeepMemo(
+    Selectors.getSelectedComponentElements(state),
+  );
   const selectedLayers = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   );
@@ -116,6 +120,25 @@ export default memo(function Inspector() {
   const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
 
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
+
+  const componentElements = useMemo(() => {
+    if (
+      selectedComponentElements.length === 0 ||
+      selectedComponentElements.length > 1 // TODO: Multiple selection
+    )
+      return [];
+
+    const views: ReactNode[] = [
+      <ElementFillInspector title="Fills" allowMoreThanOne />,
+    ];
+
+    return withSeparatorElements(
+      views,
+      <HorizontalPaddingContainer>
+        <Divider />
+      </HorizontalPaddingContainer>,
+    );
+  }, [selectedComponentElements.length]);
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps = {
@@ -241,6 +264,10 @@ export default memo(function Inspector() {
     hasFixedRadiusLayers,
     hasContextSettingsLayers,
   ]);
+
+  if (componentElements.length > 0) {
+    return <>{componentElements}</>;
+  }
 
   if (
     state.interactionState.type === 'insert' &&

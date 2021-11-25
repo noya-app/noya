@@ -1,5 +1,6 @@
 import type Sketch from 'noya-file-format';
 import {
+  hexToRgba,
   hsvaToRgbaString,
   RgbaColor,
   rgbaToHex,
@@ -27,6 +28,10 @@ export function rgbaToSketchColor(value: RgbaColor): Sketch.Color {
     green: value.g / 255,
     blue: value.b / 255,
   };
+}
+
+export function hexToSketchColor(value: string): Sketch.Color {
+  return rgbaToSketchColor(hexToRgba(value, 1));
 }
 
 export function sketchColorToHex(value: Sketch.Color): string {

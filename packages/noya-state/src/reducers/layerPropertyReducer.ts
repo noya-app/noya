@@ -1,6 +1,8 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
+import { Selectors } from 'noya-state';
+import { printSourceFile, setAttributeStringValue } from 'noya-typescript';
 import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
@@ -19,12 +21,6 @@ import {
   ApplicationState,
 } from './applicationReducer';
 import { SetNumberMode } from './styleReducer';
-import {
-  ElementTree,
-  getComponentLayer,
-  printSourceFile,
-  setAttributeStringValue,
-} from 'noya-typescript';
 
 export type LayerPropertyAction =
   | [type: 'setLayerName', layerId: string, name: string]
@@ -60,12 +56,12 @@ export function layerPropertyReducer(
     case 'setLayerName': {
       const [, layerOrElementId, name] = action;
 
-      const [layerId, elementId] = layerOrElementId.split('#');
+      const objectPath = Selectors.parseObjectId(layerOrElementId);
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
       const indexPath = Layers.findIndexPath(
         page,
-        (layer) => layer.do_objectID === layerId,
+        (layer) => layer.do_objectID === objectPath.layerId,
       );
 
       if (!indexPath) return state;
@@ -76,42 +72,27 @@ export function layerPropertyReducer(
           indexPath,
         );
 
-        if (elementId && Layers.isComponentContainer(draftLayer)) {
-          console.info(
-            'rename in',
-            elementId.split(':'),
-            (draftLayer as Sketch.ComponentContainer).component.source,
+        if (objectPath.indexPath && Layers.isComponentContainer(draftLayer)) {
+          const editable = Selectors.getEditableElementLayer(
+            context.typescriptEnvironment,
+            objectPath,
           );
 
-          const sourceFile =
-            context.typescriptEnvironment.environment.getSourceFile(
-              `${layerId}.tsx`,
-            );
+          if (!editable) return;
 
-          if (!sourceFile) return;
+          const { sourceFile, elementLayer } = editable;
 
-          const componentLayer = getComponentLayer(sourceFile);
-
-          if (!componentLayer) return;
-
-          const element = ElementTree.find(
-            componentLayer.element,
-            (element) => element.indexPath.join(':') === elementId,
-          );
-
-          if (!element) return;
-
-          if (element.attributes.name.type === 'stringLiteral') {
+          if (elementLayer.attributes.name.type === 'stringLiteral') {
             const result = setAttributeStringValue(
               sourceFile,
-              element.attributes.name.indexPath,
+              elementLayer.attributes.name.indexPath,
               name,
             );
 
             draftLayer.component.source = printSourceFile(result);
 
-            console.info('original element', element);
-            console.info('updated source', draftLayer.component.source);
+            // console.info('original elementLayer', elementLayer);
+            // console.info('updated source', draftLayer.component.source);
           }
         } else {
           draftLayer.name = name;
