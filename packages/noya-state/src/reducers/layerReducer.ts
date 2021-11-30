@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
-import { AffineTransform, transformRect } from 'noya-geometry';
+import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
@@ -469,12 +469,12 @@ export function layerReducer(
         ).map((layer) => layer.do_objectID);
 
         layers.forEach((layer) => {
-          if (layer._class === 'page') return;
+          if (Layers.isPageLayer(layer)) return;
 
-          const frame = {
-            midWidth: layer.frame.width / 2,
-            midHeight: layer.frame.height / 2,
-          };
+          const bounds = createBounds({
+            width: layer.frame.width,
+            height: layer.frame.height,
+          });
 
           let newLayer = produce(copyLayer(layer), (l) => {
             l.name = layer.name;
@@ -498,30 +498,23 @@ export function layerReducer(
               Layers.isParentLayer(selectedLayer) &&
               !Layers.isPageLayer(selectedLayer)
             ) {
-              const parentFrame = {
-                midWidth: selectedLayer.frame.width / 2,
-                midHeight: selectedLayer.frame.height / 2,
-              };
+              const parentBounds = createBounds({
+                width: selectedLayer.frame.width,
+                height: selectedLayer.frame.height,
+              });
 
-              newLayer = {
-                ...newLayer,
-                frame: {
-                  ...newLayer.frame,
-                  x: parentFrame.midWidth - frame.midWidth,
-                  y: parentFrame.midHeight - frame.midHeight,
-                },
-              };
+              newLayer = produce(newLayer, (draftLayer) => {
+                draftLayer.frame.x = parentBounds.midX - bounds.midX;
+                draftLayer.frame.y = parentBounds.midY - bounds.midY;
+              });
 
               addToParentLayer(selectedLayer.layers, newLayer);
             } else {
-              newLayer = {
-                ...newLayer,
-                frame: {
-                  ...newLayer.frame,
-                  x: viewportCenter.x - parsed.x - frame.midWidth,
-                  y: viewportCenter.y - parsed.y - frame.midHeight,
-                },
-              }; //center the layer on the page
+              // Center the layer on the page
+              newLayer = produce(newLayer, (draftLayer) => {
+                draftLayer.frame.x = viewportCenter.x - parsed.x - bounds.midX;
+                draftLayer.frame.y = viewportCenter.y - parsed.y - bounds.midY;
+              });
 
               if (!Layers.isPageLayer(selectedLayer)) {
                 const selectedLayerParent = getParentLayer(
@@ -530,19 +523,16 @@ export function layerReducer(
                 );
 
                 if (!Layers.isPageLayer(selectedLayerParent)) {
-                  const parentFrame = {
-                    midWidth: selectedLayerParent.frame.width / 2,
-                    midHeight: selectedLayerParent.frame.height / 2,
-                  };
+                  const parentFrame = createBounds({
+                    width: selectedLayerParent.frame.width,
+                    height: selectedLayerParent.frame.height,
+                  });
 
-                  newLayer = {
-                    ...newLayer,
-                    frame: {
-                      ...newLayer.frame,
-                      x: parentFrame.midWidth - frame.midWidth,
-                      y: parentFrame.midHeight - frame.midHeight,
-                    },
-                  };
+                  // Center the layer within the new parent
+                  newLayer = produce(newLayer, (draftLayer) => {
+                    draftLayer.frame.x = parentFrame.midX - bounds.midX;
+                    draftLayer.frame.y = parentFrame.midY - bounds.midY;
+                  });
 
                   addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
                 } else {
