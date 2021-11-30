@@ -1,6 +1,6 @@
 import { AffineTransform } from 'noya-geometry';
 import { isNumberEqual } from 'noya-utils';
-import { Bounds, Point, Rect } from './types';
+import { Bounds, Point, Rect, Size } from './types';
 
 export function transformRect(
   rect: Rect,
@@ -106,7 +106,11 @@ export function rotatedRectContainsPoint(points: Point[], p: Point): boolean {
   return !(triangleArea > rectangleArea);
 }
 
-export function createBounds(rect: Rect): Bounds {
+export function createBounds(rect: Rect | Size): Bounds {
+  if (!('x' in rect && 'y' in rect)) {
+    return createBounds({ x: 0, y: 0, ...rect });
+  }
+
   const minX = Math.min(rect.x, rect.x + rect.width);
   const minY = Math.min(rect.y, rect.y + rect.height);
   const maxX = Math.max(rect.x, rect.x + rect.width);

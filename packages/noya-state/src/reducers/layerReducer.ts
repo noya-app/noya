@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
-import { AffineTransform, transformRect } from 'noya-geometry';
+import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, groupBy, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
@@ -30,11 +30,16 @@ import {
   LayerIndexPaths,
   moveLayer,
   removeLayer,
+  getLayersInRect,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
-import { ApplicationReducerContext, Primitives } from 'noya-state';
+import {
+  ApplicationReducerContext,
+  findIndexPath,
+  Primitives,
+} from 'noya-state';
 
 export type LayerAction =
   | [
@@ -424,30 +429,25 @@ export function layerReducer(
     }
     case 'addLayer': {
       const layers = Array.isArray(action[1]) ? action[1] : [action[1]];
-
       const currentPageIndex = getCurrentPageIndex(state);
-
       const selectedLayerIndexPath =
         getSelectedLayerIndexPathsExcludingDescendants(state)[0];
 
+      const { canvasSize, canvasInsets } = context;
+      const viewportCenter = {
+        x: canvasSize.width / 2,
+        y: canvasSize.height / 2,
+      };
+      const visibleRect = {
+        x: -canvasInsets.left,
+        y: -canvasInsets.top,
+        width: canvasSize.width + canvasInsets.left + canvasInsets.right,
+        height: canvasSize.height + canvasInsets.top + canvasInsets.bottom,
+      };
+
       return produce(state, (draft) => {
         const draftPage = draft.sketch.pages[currentPageIndex];
-        const selectedLayer =
-          selectedLayerIndexPath && selectedLayerIndexPath.length > 0
-            ? Layers.access(draftPage, selectedLayerIndexPath)
-            : draftPage;
-
         draft.selectedLayerIds = [];
-
-        let parentLayer = draftPage as Layers.ParentLayer;
-        if (Layers.isParentLayer(selectedLayer)) {
-          parentLayer = selectedLayer;
-        }
-
-        const viewportCenter = {
-          x: context.canvasSize.width / 2,
-          y: context.canvasSize.height / 2,
-        };
 
         const meta = draft.sketch.user[draftPage.do_objectID] ?? {
           zoomValue: 1,
@@ -456,31 +456,92 @@ export function layerReducer(
 
         const parsed = Primitives.parsePoint(meta.scrollOrigin);
 
+        const allVisibleLayersIds = getLayersInRect(
+          state,
+          draftPage,
+          canvasInsets,
+          visibleRect,
+          {
+            includeHiddenLayers: true,
+            groups: 'groupAndChildren',
+            artboards: 'artboardAndChildren',
+          },
+        ).map((layer) => layer.do_objectID);
+
         layers.forEach((layer) => {
-          const { pageIndex, indexPaths } = findPageLayerIndexPaths(
-            state,
-            (l) => l.do_objectID === layer.do_objectID,
-          )[0];
+          if (Layers.isPageLayer(layer)) return;
 
-          if (layer._class === 'page') return;
-
-          const newLayer = produce(copyLayer(layer), (l) => {
-            l.name = layer.name;
-            l.frame = {
-              ...l.frame,
-              x: viewportCenter.x - parsed.x - layer.frame.width / 2,
-              y: viewportCenter.y - parsed.y - layer.frame.height / 2,
-            };
+          const bounds = createBounds({
+            width: layer.frame.width,
+            height: layer.frame.height,
           });
 
-          if (!Layers.isPageLayer(parentLayer)) {
-            addToParentLayer(parentLayer.layers, newLayer);
-          } else if (currentPageIndex === pageIndex && indexPaths.length > 0) {
-            addSiblingLayer(draftPage, indexPaths[0], newLayer);
-          } else if (!Layers.isPageLayer(selectedLayer)) {
-            addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+          let newLayer = produce(copyLayer(layer), (l) => {
+            l.name = layer.name;
+          });
+
+          if (allVisibleLayersIds.includes(layer.do_objectID)) {
+            const indexPath =
+              findIndexPath(
+                draftPage,
+                (l) => l.do_objectID === layer.do_objectID,
+              ) ?? [];
+
+            addSiblingLayer(draftPage, indexPath, newLayer);
           } else {
-            draftPage.layers.push(newLayer);
+            const selectedLayer =
+              selectedLayerIndexPath && selectedLayerIndexPath.length > 0
+                ? Layers.access(draftPage, selectedLayerIndexPath)
+                : draftPage;
+
+            if (
+              Layers.isParentLayer(selectedLayer) &&
+              !Layers.isPageLayer(selectedLayer)
+            ) {
+              const parentBounds = createBounds({
+                width: selectedLayer.frame.width,
+                height: selectedLayer.frame.height,
+              });
+
+              newLayer = produce(newLayer, (draftLayer) => {
+                draftLayer.frame.x = parentBounds.midX - bounds.midX;
+                draftLayer.frame.y = parentBounds.midY - bounds.midY;
+              });
+
+              addToParentLayer(selectedLayer.layers, newLayer);
+            } else {
+              // Center the layer on the page
+              newLayer = produce(newLayer, (draftLayer) => {
+                draftLayer.frame.x = viewportCenter.x - parsed.x - bounds.midX;
+                draftLayer.frame.y = viewportCenter.y - parsed.y - bounds.midY;
+              });
+
+              if (!Layers.isPageLayer(selectedLayer)) {
+                const selectedLayerParent = getParentLayer(
+                  draftPage,
+                  selectedLayerIndexPath,
+                );
+
+                if (!Layers.isPageLayer(selectedLayerParent)) {
+                  const parentFrame = createBounds({
+                    width: selectedLayerParent.frame.width,
+                    height: selectedLayerParent.frame.height,
+                  });
+
+                  // Center the layer within the new parent
+                  newLayer = produce(newLayer, (draftLayer) => {
+                    draftLayer.frame.x = parentFrame.midX - bounds.midX;
+                    draftLayer.frame.y = parentFrame.midY - bounds.midY;
+                  });
+
+                  addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+                } else {
+                  addSiblingLayer(draftPage, selectedLayerIndexPath, newLayer);
+                }
+              } else {
+                draftPage.layers.push(newLayer);
+              }
+            }
           }
 
           draft.selectedLayerIds.push(newLayer.do_objectID);
