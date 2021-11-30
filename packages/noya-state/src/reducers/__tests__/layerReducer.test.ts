@@ -530,3 +530,93 @@ describe('grouping', () => {
     ]);
   });
 });
+
+describe('addLayer', () => {
+  test('selected layer is a group', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
+    );
+
+    const groupedState = layerReducer(
+      state,
+      ['groupLayers', [rectangle.do_objectID, oval.do_objectID]],
+      context,
+    );
+
+    const updated = layerReducer(
+      groupedState,
+      ['addLayer', rectangle],
+      context,
+    );
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(groupedState),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+  test('original layer is in parent layer', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [rectangle, oval] })),
+    );
+
+    const updated = layerReducer(state, ['addLayer', rectangle], context);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+  test('some layer is selected', () => {
+    const rectangleTwo = SketchModel.rectangle({
+      frame: SketchModel.rect({
+        x: 100,
+        y: 100,
+        width: 100,
+        height: 100,
+      }),
+    });
+
+    const state = createInitialState(
+      createSketchFile(
+        SketchModel.page({ layers: [oval, text, rectangleTwo] }),
+      ),
+    );
+
+    const stateWithLayerSelected = layerReducer(
+      state,
+      ['selectLayer', oval.do_objectID],
+      context,
+    );
+
+    const updated = layerReducer(
+      stateWithLayerSelected,
+      ['addLayer', rectangle],
+      context,
+    );
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+  test('no layer is selected', () => {
+    const state = createInitialState(
+      createSketchFile(SketchModel.page({ layers: [oval] })),
+    );
+
+    const updated = layerReducer(state, ['addLayer', rectangle], context);
+
+    expect(
+      debugDescription([
+        Selectors.getCurrentPage(state),
+        Selectors.getCurrentPage(updated),
+      ]),
+    ).toMatchSnapshot();
+  });
+});

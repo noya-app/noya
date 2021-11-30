@@ -1,5 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`addLayer no layer is selected 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+└── <Rectangle> Rectangle { x: 450, y: 450, w: 100, h: 100 }"
+`;
+
+exports[`addLayer original layer is in parent layer 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 450, y: 450, w: 100, h: 100 }
+├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+└── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }"
+`;
+
+exports[`addLayer selected layer is a group 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 150, h: 150 }
+    ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+    └── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+└── <Group> Group { x: 0, y: 0, w: 150, h: 150 }
+    ├── <Rectangle> Rectangle { x: 0, y: 0, w: 100, h: 100 }
+    ├── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+    └── <Rectangle> Rectangle { x: 450, y: 450, w: 100, h: 100 }"
+`;
+
+exports[`addLayer some layer is selected 1`] = `
+"<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+├── <Text> Text { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 100, y: 100, w: 100, h: 100 }
+
+<Page> Page { x: 0, y: 0, w: 0, h: 0 }
+├── <Rectangle> Rectangle { x: 450, y: 450, w: 100, h: 100 }
+├── <Oval> Oval { x: 50, y: 50, w: 100, h: 100 }
+├── <Text> Text { x: 0, y: 0, w: 0, h: 0 }
+└── <Rectangle> Rectangle { x: 100, y: 100, w: 100, h: 100 }"
+`;
+
 exports[`deleteLayer delete multiple bad nesting 1`] = `
 "<Page> Page { x: 0, y: 0, w: 0, h: 0 }
 ├── <Group> Group { x: 0, y: 0, w: 0, h: 0 }
