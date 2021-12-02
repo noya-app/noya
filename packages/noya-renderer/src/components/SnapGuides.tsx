@@ -10,6 +10,7 @@ import {
   Rect,
   Size,
 } from 'noya-geometry';
+import { useZoom } from 'noya-renderer';
 import {
   getLayerSnapValues,
   getPossibleTargetSnapLayers,
@@ -141,6 +142,7 @@ const SnapGuidesAxis = memo(function SnapGuidesAxis({
 export default memo(function SnapGuides() {
   const { canvasSize } = useWorkspace();
   const [state] = useApplicationState();
+  const zoom = useZoom();
   const interactionState = state.interactionState;
   const page = Selectors.getCurrentPage(state);
 
@@ -200,10 +202,13 @@ export default memo(function SnapGuides() {
         );
 
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
-
         return {
           snapRect: createRect(newExtentPoint, newExtentPoint),
-          areaSize: normalizeRect(newBoundingRect),
+          areaSize: normalizeRect({
+            ...newBoundingRect,
+            width: newBoundingRect.width / zoom,
+            height: newBoundingRect.height / zoom,
+          }),
         };
       }
       case 'insert': {
@@ -227,11 +232,15 @@ export default memo(function SnapGuides() {
 
         return {
           snapRect: createRect(current, current),
-          areaSize: rect,
+          areaSize: {
+            ...rect,
+            width: rect.width / zoom,
+            height: rect.height / zoom,
+          },
         };
       }
     }
-  }, [canvasSize, interactionState, page, state]);
+  }, [canvasSize, interactionState, page, state, zoom]);
 
   const snapRect = adjustedSource?.snapRect;
   const areaSize = adjustedSource?.areaSize;
@@ -247,18 +256,18 @@ export default memo(function SnapGuides() {
     return (
       <AreaMeasurementLabel
         origin={{
-          x: interactionState.current.x + 20,
-          y: interactionState.current.y + 20,
+          x: interactionState.current.x + 10 / zoom,
+          y: interactionState.current.y + 10 / zoom,
         }}
         text={`${round(areaSize.width, 2)} × ${round(areaSize.height, 2)}`}
-        fontSize={12}
+        fontSize={14 / zoom}
         padding={{
-          width: 8,
-          height: 4,
+          width: 8 / zoom,
+          height: 4 / zoom,
         }}
       />
     );
-  }, [interactionState, areaSize]);
+  }, [interactionState, areaSize, zoom]);
 
   if (!snapRect) return null;
 
