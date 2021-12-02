@@ -1,3 +1,4 @@
+import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import Sketch from 'noya-file-format';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import {
@@ -6,13 +7,26 @@ import {
   getEditableStyles,
   Selectors,
 } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import BorderRow from '../components/inspector/BorderRow';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import { useShallowArray } from 'noya-react-utils';
+import { Divider, Select, Spacer } from 'noya-designsystem';
+
+const LINE_CAP_OPTIONS = [
+  Sketch.LineCapStyle.Butt.toString(),
+  Sketch.LineCapStyle.Round.toString(),
+  Sketch.LineCapStyle.Projecting.toString(),
+];
+const LINE_JOIN_OPTIONS = [
+  Sketch.LineJoinStyle.Bevel.toString(),
+  Sketch.LineJoinStyle.Miter.toString(),
+  Sketch.LineJoinStyle.Round.toString(),
+];
 
 export default memo(function BorderInspector() {
   const [state, dispatch] = useApplicationState();
+  const [expanded, setExpanded] = useState(false);
   const selectLayerId = state.selectedLayerIds[0];
 
   const selectedStyles = useShallowArray(
@@ -28,12 +42,62 @@ export default memo(function BorderInspector() {
     [borderMatrix],
   );
 
+  const borderOptions = useMemo(
+    () => selectedStyles[0].borderOptions,
+    [selectedStyles],
+  );
+
+  const getLineCapStyleTitle = useCallback(
+    (id: string) => Sketch.LineCapStyle[parseInt(id)],
+    [],
+  );
+  const getLineJoinStyleTitle = useCallback(
+    (id: string) => Sketch.LineJoinStyle[parseInt(id)],
+    [],
+  );
+
+  const BorderInspectorExpanded = useMemo(() => {
+    return (
+      <>
+        <InspectorPrimitives.VerticalSeparator />
+        <Divider />
+        <InspectorPrimitives.VerticalSeparator />
+        <InspectorPrimitives.Row>
+          <InspectorPrimitives.Title>End</InspectorPrimitives.Title>
+          <Spacer.Horizontal size={105} />
+          <InspectorPrimitives.Title>Angles</InspectorPrimitives.Title>
+        </InspectorPrimitives.Row>
+        <InspectorPrimitives.VerticalSeparator />
+        <InspectorPrimitives.Row>
+          <Select
+            id="line-end-style"
+            value={borderOptions.lineCapStyle.toString()}
+            options={LINE_CAP_OPTIONS}
+            getTitle={getLineCapStyleTitle}
+            onChange={() => {}}
+          />
+          <InspectorPrimitives.HorizontalSeparator />
+          <Select
+            id="line-join-style"
+            value={borderOptions.lineJoinStyle.toString()}
+            options={LINE_JOIN_OPTIONS}
+            getTitle={getLineJoinStyleTitle}
+            onChange={() => {}}
+          />
+        </InspectorPrimitives.Row>
+        <InspectorPrimitives.VerticalSeparator />
+      </>
+    );
+  }, [borderOptions, getLineCapStyleTitle, getLineJoinStyleTitle]);
+
   return (
     <CheckboxArrayController<EditableBorder>
       title="Borders"
       id="borders"
       key="borders"
+      expanded={expanded}
       value={editableBorders}
+      expandedContent={BorderInspectorExpanded}
       onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
       onClickTrash={useCallback(
         () => dispatch('deleteDisabledBorders'),
@@ -47,6 +111,10 @@ export default memo(function BorderInspector() {
       onChangeCheckbox={useCallback(
         (index, checked) => dispatch('setBorderEnabled', index, checked),
         [dispatch],
+      )}
+      onClickExpand={useCallback(
+        () => setExpanded(!expanded),
+        [setExpanded, expanded],
       )}
       renderItem={useCallback(
         ({

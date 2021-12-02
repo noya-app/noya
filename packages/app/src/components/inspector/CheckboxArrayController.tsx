@@ -13,10 +13,13 @@ interface CheckboxArrayControllerProps<Item> {
   value: Item[];
   title: ReactNode;
   sortable?: boolean;
+  expanded?: boolean;
+  expandedContent?: ReactNode;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
+  onClickExpand?: () => void;
   getKey?: (item: Item) => string;
   renderItem: (props: {
     item: Item;
@@ -30,10 +33,13 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
   value,
   title,
   sortable = true,
+  expanded = false,
+  expandedContent,
   getKey,
   onMoveItem,
   onClickPlus,
   onClickTrash,
+  onClickExpand,
   onChangeCheckbox,
   renderItem,
 }: CheckboxArrayControllerProps<Item>) {
@@ -56,10 +62,13 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       items={value}
       getKey={getKey}
       title={title}
+      expanded={expanded}
       sortable={sortable}
+      expandedContent={expandedContent}
       onMoveItem={onMoveItem}
       onClickPlus={onClickPlus}
       onClickTrash={showTrash ? onClickTrash : undefined}
+      onClickExpand={onClickExpand}
       renderItem={({ item, index }) =>
         renderItem({ item, index, checkbox: getCheckboxElement(index) })
       }

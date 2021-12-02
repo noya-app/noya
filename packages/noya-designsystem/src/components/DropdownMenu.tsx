@@ -148,7 +148,6 @@ function DropdownMenuRoot<T extends string>({
         </RadixDropdownMenu.Trigger>
       )}
       <RootElement
-        scrollable={true}
         sideOffset={4}
         onCloseAutoFocus={useCallback((event) => {
           // Prevent the trigger from being focused, which interferes with
