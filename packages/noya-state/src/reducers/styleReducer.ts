@@ -45,6 +45,8 @@ export type StyleAction =
       amount: number,
       mode?: SetNumberMode,
     ]
+  | [type: 'setBorderLineCap', amount: Sketch.LineCapStyle]
+  | [type: 'setBorderLineJoin', amount: Sketch.LineJoinStyle]
   | [type: 'setBorderPosition', index: number, position: Sketch.BorderPosition]
   | [
       type: 'setFillOpacity',
@@ -309,6 +311,18 @@ export function styleReducer(
           mode === 'replace' ? amount : draft.borders[index].thickness + amount;
 
         draft.borders[index].thickness = Math.max(0, newValue);
+      });
+    }
+    case 'setBorderLineCap': {
+      const [, lineCap] = action;
+      return produce(state, (draft) => {
+        draft.borderOptions.lineCapStyle = lineCap;
+      });
+    }
+    case 'setBorderLineJoin': {
+      const [, lineJoin] = action;
+      return produce(state, (draft) => {
+        draft.borderOptions.lineJoinStyle = lineJoin;
       });
     }
     case 'setFillOpacity': {

@@ -56,6 +56,19 @@ export default memo(function BorderInspector() {
     [],
   );
 
+  const onChangeLineCapStyle = useCallback(
+    (value: string) => {
+      dispatch('setBorderLineCap', parseInt(value));
+    },
+    [dispatch],
+  );
+  const onChangeLineJoinStyle = useCallback(
+    (value: string) => {
+      dispatch('setBorderLineJoin', parseInt(value));
+    },
+    [dispatch],
+  );
+
   const BorderInspectorExpanded = useMemo(() => {
     return (
       <>
@@ -74,7 +87,7 @@ export default memo(function BorderInspector() {
             value={borderOptions.lineCapStyle.toString()}
             options={LINE_CAP_OPTIONS}
             getTitle={getLineCapStyleTitle}
-            onChange={() => {}}
+            onChange={onChangeLineCapStyle}
           />
           <InspectorPrimitives.HorizontalSeparator />
           <Select
@@ -82,13 +95,19 @@ export default memo(function BorderInspector() {
             value={borderOptions.lineJoinStyle.toString()}
             options={LINE_JOIN_OPTIONS}
             getTitle={getLineJoinStyleTitle}
-            onChange={() => {}}
+            onChange={onChangeLineJoinStyle}
           />
         </InspectorPrimitives.Row>
         <InspectorPrimitives.VerticalSeparator />
       </>
     );
-  }, [borderOptions, getLineCapStyleTitle, getLineJoinStyleTitle]);
+  }, [
+    borderOptions,
+    getLineCapStyleTitle,
+    getLineJoinStyleTitle,
+    onChangeLineCapStyle,
+    onChangeLineJoinStyle,
+  ]);
 
   return (
     <CheckboxArrayController<EditableBorder>

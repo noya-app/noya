@@ -242,6 +242,8 @@ export function applicationReducer(
     case 'setShadowColor':
     case 'setInnerShadowColor':
     case 'setBorderWidth':
+    case 'setBorderLineCap':
+    case 'setBorderLineJoin':
     case 'setFillOpacity':
     case 'setOpacity':
     case 'setShadowX':
