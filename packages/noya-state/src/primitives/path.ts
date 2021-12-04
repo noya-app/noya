@@ -297,7 +297,7 @@ export function getStrokedPath(
   path: Path,
   width: number,
   pathOp?: PathOp,
-) {
+): Path {
   const copy = path.copy();
 
   // A 0-width path will never change the original when unioned

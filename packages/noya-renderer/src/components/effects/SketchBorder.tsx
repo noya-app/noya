@@ -43,6 +43,5 @@ export default memo(function SketchBorder({
   );
 
   useDeletable(strokedPath);
-
   return <Path path={strokedPath} paint={paint} />;
 });
