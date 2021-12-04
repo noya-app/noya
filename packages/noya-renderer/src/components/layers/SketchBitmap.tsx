@@ -50,6 +50,7 @@ export default memo(function SketchBitmap({ layer }: Props) {
 
   const borders = (layer.style.borders ?? []).filter((x) => x.isEnabled);
   const shadows = (layer.style.shadows ?? []).filter((x) => x.isEnabled);
+  const borderOptions = layer.style.borderOptions ?? {};
 
   const element = (
     <>
@@ -64,6 +65,7 @@ export default memo(function SketchBitmap({ layer }: Props) {
       {borders.map((border, index) => (
         <SketchBorder
           key={`border-${index}`}
+          borderOptions={borderOptions}
           path={path}
           border={border}
           frame={layer.frame}

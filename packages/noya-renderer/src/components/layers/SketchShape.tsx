@@ -349,6 +349,7 @@ export default memo(function SketchShape({ layer }: Props) {
           path={path}
           border={border}
           frame={layer.frame}
+          borderOptions={style.borderOptions}
         />
       ))}
     </>
