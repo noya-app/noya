@@ -1,12 +1,17 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit, Path, PathOp } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { distance, Point, Rect } from 'noya-geometry';
 import {
   CommandWithoutQuadratics,
   makePathsFromCommands,
 } from 'noya-import-svg';
 import { PointString, SketchModel } from 'noya-sketch-model';
-import { parsePoint, stringifyPoint } from 'noya-state';
+import {
+  lineCapStyle,
+  lineJoinStyle,
+  parsePoint,
+  stringifyPoint,
+} from 'noya-state';
 import { clamp, rotate, windowsOf, zip } from 'noya-utils';
 import { parsePathCmds, PathCommand, PathCommandVerb } from './pathCommand';
 
@@ -296,6 +301,8 @@ export function getStrokedPath(
   CanvasKit: CanvasKit,
   path: Path,
   width: number,
+  lineCap: Sketch.LineCapStyle,
+  lineJoin: Sketch.LineJoinStyle,
   pathOp?: PathOp,
 ): Path {
   const copy = path.copy();
@@ -306,6 +313,8 @@ export function getStrokedPath(
   if (
     !copy.stroke({
       width,
+      cap: lineCapStyle(CanvasKit, lineCap),
+      join: lineJoinStyle(CanvasKit, lineJoin),
     })
   ) {
     console.info('[getStrokedPath] Failed to stroke path');
@@ -326,6 +335,8 @@ export function getStrokedBorderPath(
   path: Path,
   borderWidth: number,
   borderPosition: Sketch.BorderPosition,
+  lineCap: Sketch.LineCapStyle,
+  lineJoin: Sketch.LineJoinStyle,
 ) {
   switch (borderPosition) {
     case Sketch.BorderPosition.Center:
@@ -337,7 +348,14 @@ export function getStrokedBorderPath(
 
   const pathOp = getBorderPositionPathOp(CanvasKit, borderPosition);
 
-  return getStrokedPath(CanvasKit, path, borderWidth, pathOp);
+  return getStrokedPath(
+    CanvasKit,
+    path,
+    borderWidth,
+    lineCap,
+    lineJoin,
+    pathOp,
+  );
 }
 
 export function unscaleCurvePoint(curvePoint: Sketch.CurvePoint, frame: Rect) {

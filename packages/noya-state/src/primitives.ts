@@ -462,15 +462,15 @@ export function lineJoinStyle(
 
 export function lineCapStyle(
   CanvasKit: CanvasKit,
-  lineJoin: Sketch.LineCapStyle,
+  lineCap: Sketch.LineCapStyle,
 ): StrokeCap {
-  switch (lineJoin) {
+  switch (lineCap) {
     case Sketch.LineCapStyle.Butt:
-      return CanvasKit.StrokeJoin.Bevel;
+      return CanvasKit.StrokeCap.Butt;
     case Sketch.LineCapStyle.Projecting:
-      return CanvasKit.StrokeJoin.Miter;
+      return CanvasKit.StrokeCap.Square;
     case Sketch.LineCapStyle.Round:
-      return CanvasKit.StrokeJoin.Round;
+      return CanvasKit.StrokeCap.Round;
   }
 }
 

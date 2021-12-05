@@ -1,9 +1,9 @@
-import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Path, useCanvasKit } from 'noya-renderer';
-import { lineCapStyle, lineJoinStyle, Primitives } from 'noya-state';
+import { Primitives } from 'noya-state';
 import { memo, useMemo } from 'react';
 
 export default memo(function SketchBorder({
@@ -19,17 +19,10 @@ export default memo(function SketchBorder({
 }) {
   const CanvasKit = useCanvasKit();
 
-  const paint = useMemo(() => {
-    const paint = Primitives.fill(CanvasKit, border, frame);
-
-    if (borderOptions.isEnabled) {
-      paint.setStrokeJoin(
-        lineJoinStyle(CanvasKit, borderOptions.lineJoinStyle),
-      );
-      paint.setStrokeCap(lineCapStyle(CanvasKit, borderOptions.lineCapStyle));
-    }
-    return paint;
-  }, [CanvasKit, border, frame, borderOptions]);
+  const paint = useMemo(
+    () => Primitives.fill(CanvasKit, border, frame),
+    [CanvasKit, border, frame],
+  );
 
   const strokedPath = useMemo(
     () =>
@@ -38,10 +31,20 @@ export default memo(function SketchBorder({
         path,
         border.thickness,
         border.position,
+        borderOptions.lineCapStyle,
+        borderOptions.lineJoinStyle,
       ),
-    [CanvasKit, border.position, border.thickness, path],
+    [
+      CanvasKit,
+      border.position,
+      border.thickness,
+      borderOptions.lineCapStyle,
+      borderOptions.lineJoinStyle,
+      path,
+    ],
   );
 
   useDeletable(strokedPath);
+
   return <Path path={strokedPath} paint={paint} />;
 });
