@@ -1,6 +1,7 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import {
+  AffineTransform,
   Axis,
   createBounds,
   createRect,
@@ -10,7 +11,7 @@ import {
   Rect,
   Size,
 } from 'noya-geometry';
-import { useZoom } from 'noya-renderer';
+import { Group, useZoom } from 'noya-renderer';
 import {
   getLayerSnapValues,
   getPossibleTargetSnapLayers,
@@ -204,11 +205,7 @@ export default memo(function SnapGuides() {
         const newExtentPoint = getRectExtentPoint(newBoundingRect, direction);
         return {
           snapRect: createRect(newExtentPoint, newExtentPoint),
-          areaSize: normalizeRect({
-            ...newBoundingRect,
-            width: newBoundingRect.width / zoom,
-            height: newBoundingRect.height / zoom,
-          }),
+          areaSize: normalizeRect(newBoundingRect),
         };
       }
       case 'insert': {
@@ -232,15 +229,11 @@ export default memo(function SnapGuides() {
 
         return {
           snapRect: createRect(current, current),
-          areaSize: {
-            ...rect,
-            width: rect.width / zoom,
-            height: rect.height / zoom,
-          },
+          areaSize: rect,
         };
       }
     }
-  }, [canvasSize, interactionState, page, state, zoom]);
+  }, [canvasSize, interactionState, page, state]);
 
   const snapRect = adjustedSource?.snapRect;
   const areaSize = adjustedSource?.areaSize;
@@ -253,21 +246,28 @@ export default memo(function SnapGuides() {
     )
       return null;
 
+    const origin = {
+      x: interactionState.current.x,
+      y: interactionState.current.y,
+    };
+
     return (
-      <AreaMeasurementLabel
-        origin={{
-          x: interactionState.current.x + 10 / zoom,
-          y: interactionState.current.y + 10 / zoom,
-        }}
-        text={`${round(areaSize.width, 2)} × ${round(areaSize.height, 2)}`}
-        fontSize={14 / zoom}
-        padding={{
-          width: 8 / zoom,
-          height: 4 / zoom,
-        }}
-      />
+      <Group
+        transform={AffineTransform.translate(origin.x, origin.y)
+          .scale(1 / zoom, 1 / zoom)
+          .translate(20, 20)}
+      >
+        <AreaMeasurementLabel
+          text={`${round(areaSize.width, 2)} × ${round(areaSize.height, 2)}`}
+          fontSize={14}
+          padding={{
+            width: 8,
+            height: 4,
+          }}
+        />
+      </Group>
     );
-  }, [interactionState, areaSize, zoom]);
+  }, [areaSize, interactionState, zoom]);
 
   if (!snapRect) return null;
 

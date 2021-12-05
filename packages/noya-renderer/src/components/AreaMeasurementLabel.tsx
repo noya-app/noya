@@ -1,21 +1,18 @@
 import { SYSTEM_FONT_ID } from 'noya-fonts';
-import { Point, Size } from 'noya-geometry';
+import { Size } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
-import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { Rect, Text } from '..';
 import { useFontManager } from '../FontManagerContext';
 
 interface Props {
-  origin: Point;
   text: string;
   fontSize?: number;
   padding?: Size;
 }
 
 export function AreaMeasurementLabel({
-  origin,
   text,
   fontSize = 11,
   padding = {
@@ -59,15 +56,13 @@ export function AreaMeasurementLabel({
   const labelRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        origin.x + padding.width,
-        origin.y + padding.height,
+        padding.width,
+        padding.height,
         paragraphSize.width,
         paragraphSize.height,
       ),
     [
       CanvasKit,
-      origin.x,
-      origin.y,
       padding.width,
       padding.height,
       paragraphSize.width,
@@ -84,14 +79,8 @@ export function AreaMeasurementLabel({
   );
 
   const backgroundRect = useMemo(
-    () =>
-      CanvasKit.XYWHRect(
-        round(origin.x),
-        round(origin.y),
-        backgroundSize.width,
-        backgroundSize.height,
-      ),
-    [origin.x, origin.y, backgroundSize, CanvasKit],
+    () => CanvasKit.XYWHRect(0, 0, backgroundSize.width, backgroundSize.height),
+    [backgroundSize, CanvasKit],
   );
 
   const backgroundFill = useColorFill('rgb(80,80,80)');
