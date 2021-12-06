@@ -56,7 +56,7 @@ function ArrayController<Item>({
   renderItem,
 }: ArrayControllerProps<Item>) {
   const iconColor = useTheme().colors.icon;
-  const iconSelected = useTheme().colors.iconSelected;
+  const primaryLightColor = useTheme().colors.primaryLight;
 
   const keys = useMemo(
     () => items.map((item, index) => getKey?.(item) ?? index.toString()),
@@ -118,7 +118,7 @@ function ArrayController<Item>({
               <IconButton
                 id={`${id}-gear`}
                 iconName="GearIcon"
-                color={expanded ? iconSelected : iconColor}
+                color={expanded ? primaryLightColor : iconColor}
                 onClick={onClickExpand}
               />
             ),
