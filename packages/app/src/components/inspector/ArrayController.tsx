@@ -159,7 +159,7 @@ function ArrayController<Item>({
       ) : (
         indexes.map(renderRow)
       )}
-      {expanded && renderExpandedContent}
+      {expanded && renderExpandedContent?.()}
     </InspectorPrimitives.Section>
   );
 }

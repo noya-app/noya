@@ -56,10 +56,6 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
 
   const showTrash = value.some((item) => !item.isEnabled);
 
-  const renderExpandedContent = useCallback(
-    () => expandedContent,
-    [expandedContent],
-  );
   return (
     <ArrayController<Item>
       id={id}
@@ -75,7 +71,10 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       renderItem={({ item, index }) =>
         renderItem({ item, index, checkbox: getCheckboxElement(index) })
       }
-      renderExpandedContent={renderExpandedContent}
+      renderExpandedContent={useCallback(
+        () => expandedContent,
+        [expandedContent],
+      )}
     />
   );
 }
