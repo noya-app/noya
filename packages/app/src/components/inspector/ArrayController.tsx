@@ -31,13 +31,13 @@ interface ArrayControllerProps<Item> {
   sortable?: boolean;
   reversed?: boolean;
   expanded?: boolean;
-  expandedContent?: ReactNode;
   getKey?: (item: Item) => string;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
   onClickExpand?: () => void;
   renderItem: (props: { item: Item; index: number }) => ReactNode;
+  renderExpandedContent?: () => ReactNode;
 }
 
 function ArrayController<Item>({
@@ -47,13 +47,13 @@ function ArrayController<Item>({
   sortable = false,
   reversed = true,
   expanded = false,
-  expandedContent = null,
   getKey,
   onMoveItem,
   onClickPlus,
   onClickTrash,
   onClickExpand,
   renderItem,
+  renderExpandedContent,
 }: ArrayControllerProps<Item>) {
   const iconColor = useTheme().colors.icon;
   const primaryLightColor = useTheme().colors.primaryLight;
@@ -159,7 +159,7 @@ function ArrayController<Item>({
       ) : (
         indexes.map(renderRow)
       )}
-      {expanded && expandedContent}
+      {expanded && renderExpandedContent}
     </InspectorPrimitives.Section>
   );
 }

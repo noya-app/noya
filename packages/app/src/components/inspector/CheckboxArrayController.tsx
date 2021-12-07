@@ -1,4 +1,4 @@
-import { memo, ReactNode } from 'react';
+import { memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
 
@@ -34,7 +34,7 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
   title,
   sortable = true,
   expanded = false,
-  expandedContent,
+  expandedContent = null,
   getKey,
   onMoveItem,
   onClickPlus,
@@ -56,6 +56,10 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
 
   const showTrash = value.some((item) => !item.isEnabled);
 
+  const renderExpandedContent = useCallback(
+    () => expandedContent,
+    [expandedContent],
+  );
   return (
     <ArrayController<Item>
       id={id}
@@ -64,7 +68,6 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       title={title}
       expanded={expanded}
       sortable={sortable}
-      expandedContent={expandedContent}
       onMoveItem={onMoveItem}
       onClickPlus={onClickPlus}
       onClickTrash={showTrash ? onClickTrash : undefined}
@@ -72,6 +75,7 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       renderItem={({ item, index }) =>
         renderItem({ item, index, checkbox: getCheckboxElement(index) })
       }
+      renderExpandedContent={renderExpandedContent}
     />
   );
 }
