@@ -1262,7 +1262,7 @@ export function createDrawingLayer(
           source: `export default function Test() {
   return (
     <View name={"Root"} background={"#fff"}>
-      <View name={"Top"} background={"#f00"}></View>
+      <View name={"Top"}></View>
       <Text name={"Bottom"} background={"#00f"}></Text>
     </View>
   );

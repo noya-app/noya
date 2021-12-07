@@ -2,7 +2,7 @@ import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
-import { printSourceFile, setAttributeStringValue } from 'noya-typescript';
+import { ElementAttributes, printSourceFile } from 'noya-typescript';
 import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
@@ -82,10 +82,14 @@ export function layerPropertyReducer(
 
           const { sourceFile, elementLayer } = editable;
 
-          if (elementLayer.attributes.name.type === 'stringLiteral') {
-            const result = setAttributeStringValue(
+          if (
+            elementLayer.attributes.name &&
+            elementLayer.attributes.name.type === 'stringLiteral'
+          ) {
+            const result = ElementAttributes.setAttribute(
               sourceFile,
-              elementLayer.attributes.name.indexPath,
+              elementLayer.indexPath,
+              'name',
               name,
             );
 

@@ -128,9 +128,7 @@ export default memo(function Inspector() {
     )
       return [];
 
-    const views: ReactNode[] = [
-      <ElementFillInspector title="Fills" allowMoreThanOne />,
-    ];
+    const views: ReactNode[] = [<ElementFillInspector title="Fills" />];
 
     return withSeparatorElements(
       views,

@@ -1,8 +1,12 @@
-import { withOptions } from 'tree-visit';
+import { isDeepEqual } from 'noya-utils';
+import { IndexPath, withOptions } from 'tree-visit';
 import ts, {
   Expression,
+  isIdentifier,
   isJsxAttribute,
+  isJsxAttributes,
   JsxAttribute,
+  JsxAttributes,
   JsxExpression,
   JsxOpeningElement,
   JsxSelfClosingElement,
@@ -17,14 +21,11 @@ import {
   Nodes,
   transformNode,
 } from './traversal';
-import { IndexPath } from 'tree-visit';
-import { isDeepEqual } from 'noya-utils';
 
 export type ElementAttributeValue =
   | {
       type: 'stringLiteral';
       value: string;
-      indexPath: IndexPath;
     }
   | {
       type: 'other';
@@ -36,7 +37,7 @@ export type ElementLayer = {
   indexPath: IndexPath;
   tagName: string;
   children: ElementLayer[];
-  attributes: Record<string, ElementAttributeValue>;
+  attributes: Record<string, ElementAttributeValue | void>;
 };
 
 export const ElementTree = withOptions({
@@ -99,10 +100,6 @@ function getLayerHierarchy(
         value = {
           type: 'stringLiteral',
           value: stringLiteral.text,
-          indexPath: Nodes.findIndexPath(
-            sourceFile,
-            (node) => node === expression,
-          )!,
         };
       }
 
@@ -172,19 +169,105 @@ export function setFunctionName(
   });
 }
 
-export function setAttributeStringValue(
-  sourceFile: SourceFile,
-  targetIndexPath: IndexPath,
-  value: string,
-): SourceFile {
-  return transformNode(sourceFile, (node, indexPath) => {
-    if (isDeepEqual(targetIndexPath, indexPath)) {
-      return ts.factory.createJsxExpression(
-        undefined,
-        ts.factory.createStringLiteral(value),
-      );
-    }
+export const ElementAttributes = {
+  removeAttribute(
+    sourceFile: SourceFile,
+    elementIndexPath: IndexPath,
+    name: string,
+  ): SourceFile {
+    const node = Nodes.access(sourceFile, elementIndexPath);
+    const attributesIndexPath = Nodes.findIndexPath(node, isJsxAttributes);
 
-    return node;
-  });
-}
+    if (!attributesIndexPath) return sourceFile;
+
+    elementIndexPath = [...elementIndexPath, ...attributesIndexPath];
+
+    return transformNode(sourceFile, (node, indexPath) => {
+      if (isDeepEqual(elementIndexPath, indexPath)) {
+        return ts.factory.createJsxAttributes(
+          (node as JsxAttributes).properties.filter(
+            (property) =>
+              !(
+                property.name &&
+                isIdentifier(property.name) &&
+                property.name.text === name
+              ),
+          ),
+        );
+      }
+
+      return node;
+    });
+  },
+
+  addAttribute(
+    sourceFile: SourceFile,
+    elementIndexPath: IndexPath,
+    name: string,
+    value: string,
+  ): SourceFile {
+    const node = Nodes.access(sourceFile, elementIndexPath);
+    const attributesIndexPath = Nodes.findIndexPath(node, isJsxAttributes);
+
+    if (!attributesIndexPath) return sourceFile;
+
+    elementIndexPath = [...elementIndexPath, ...attributesIndexPath];
+
+    return transformNode(sourceFile, (node, indexPath) => {
+      if (isDeepEqual(elementIndexPath, indexPath)) {
+        const expression = ts.factory.createJsxExpression(
+          undefined,
+          ts.factory.createStringLiteral(value),
+        );
+
+        return ts.factory.createJsxAttributes([
+          ...(node as JsxAttributes).properties,
+          ts.factory.createJsxAttribute(
+            ts.factory.createIdentifier(name),
+            expression,
+          ),
+        ]);
+      }
+
+      return node;
+    });
+  },
+
+  setAttribute(
+    sourceFile: SourceFile,
+    elementIndexPath: IndexPath,
+    name: string,
+    value: string,
+  ): SourceFile {
+    const node = Nodes.access(sourceFile, elementIndexPath);
+    const attributesIndexPath = Nodes.findIndexPath(node, isJsxAttributes);
+
+    if (!attributesIndexPath) return sourceFile;
+
+    elementIndexPath = [...elementIndexPath, ...attributesIndexPath];
+
+    return transformNode(sourceFile, (node, indexPath) => {
+      if (isDeepEqual(elementIndexPath, indexPath)) {
+        const expression = ts.factory.createJsxExpression(
+          undefined,
+          ts.factory.createStringLiteral(value),
+        );
+
+        return ts.factory.createJsxAttributes(
+          (node as JsxAttributes).properties.map((property) =>
+            property.name &&
+            isIdentifier(property.name) &&
+            property.name.text === name
+              ? ts.factory.createJsxAttribute(
+                  ts.factory.createIdentifier(name),
+                  expression,
+                )
+              : property,
+          ),
+        );
+      }
+
+      return node;
+    });
+  },
+};

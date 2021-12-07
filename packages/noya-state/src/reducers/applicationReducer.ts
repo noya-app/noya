@@ -1,12 +1,18 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
+import { sketchColorToHex } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { Selectors } from 'noya-state';
+import {
+  ElementAttributes,
+  printSourceFile,
+  TypescriptEnvironment,
+} from 'noya-typescript';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
@@ -42,12 +48,6 @@ import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-import {
-  printSourceFile,
-  setAttributeStringValue,
-  TypescriptEnvironment,
-} from 'noya-typescript';
-import { sketchColorToHex } from 'noya-designsystem';
 
 export type { SetNumberMode };
 
@@ -301,8 +301,9 @@ export function applicationReducer(
 
       if (componentElements.length > 0) {
         switch (action[0]) {
+          case 'addNewFill':
+          case 'deleteDisabledFills':
           case 'setFillColor': {
-            const [, , color] = action;
             const pageIndex = getCurrentPageIndex(state);
             const page = Selectors.getCurrentPage(state);
             const objectPath = componentElements[0];
@@ -329,16 +330,54 @@ export function applicationReducer(
 
                 const { sourceFile, elementLayer } = editable;
 
-                if (
-                  elementLayer.attributes.background.type === 'stringLiteral'
-                ) {
-                  const result = setAttributeStringValue(
-                    sourceFile,
-                    elementLayer.attributes.background.indexPath,
-                    sketchColorToHex(color),
-                  );
+                switch (action[0]) {
+                  case 'addNewFill': {
+                    if (!elementLayer.attributes.background) {
+                      const result = ElementAttributes.addAttribute(
+                        sourceFile,
+                        elementLayer.indexPath,
+                        'background',
+                        '#000000',
+                      );
 
-                  draftLayer.component.source = printSourceFile(result);
+                      draftLayer.component.source = printSourceFile(result);
+                    }
+
+                    break;
+                  }
+                  case 'deleteDisabledFills': {
+                    if (elementLayer.attributes.background) {
+                      const result = ElementAttributes.removeAttribute(
+                        sourceFile,
+                        elementLayer.indexPath,
+                        'background',
+                      );
+
+                      draftLayer.component.source = printSourceFile(result);
+                    }
+
+                    break;
+                  }
+                  case 'setFillColor': {
+                    const [, , color] = action;
+
+                    if (
+                      elementLayer.attributes.background &&
+                      elementLayer.attributes.background.type ===
+                        'stringLiteral'
+                    ) {
+                      const result = ElementAttributes.setAttribute(
+                        sourceFile,
+                        elementLayer.indexPath,
+                        'background',
+                        sketchColorToHex(color),
+                      );
+
+                      draftLayer.component.source = printSourceFile(result);
+                    }
+
+                    break;
+                  }
                 }
               }
             });

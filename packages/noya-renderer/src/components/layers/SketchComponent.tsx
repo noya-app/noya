@@ -74,7 +74,8 @@ const MeasuredElement = memo(function MeasuredElement({
 }) {
   const CanvasKit = useCanvasKit();
   const paint = useColorFill(
-    elementLayer.attributes.background.type === 'stringLiteral'
+    elementLayer.attributes.background &&
+      elementLayer.attributes.background.type === 'stringLiteral'
       ? elementLayer.attributes.background.value
       : 'rgba(0,0,0,0)',
   );

@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`add and remove attribute 1`] = `
+"export default function Foo() {
+    return <View name={\\"hello\\"}></View>;
+}
+"
+`;
+
+exports[`add and remove attribute 2`] = `
+"export default function Foo() {
+    return <View></View>;
+}
+"
+`;
+
 exports[`gets component layer 1`] = `
 Object {
   "element": Object {

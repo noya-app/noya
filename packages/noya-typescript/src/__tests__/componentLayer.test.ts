@@ -1,9 +1,9 @@
 import {
   createBaseFileSystem,
   createTypescriptEnvironment,
+  ElementAttributes,
   getComponentLayer,
   printSourceFile,
-  setAttributeStringValue,
   setFunctionName,
   TypescriptEnvironment,
 } from 'noya-typescript';
@@ -61,15 +61,47 @@ it('set element name', () => {
   const componentLayer = getComponentLayer(sourceFile);
   const attribute = componentLayer!.element.attributes['name'];
 
-  if (attribute.type !== 'stringLiteral') throw new Error('Bad attribute');
+  if (!attribute || attribute.type !== 'stringLiteral')
+    throw new Error('Bad attribute');
 
-  const result = setAttributeStringValue(
+  const result = ElementAttributes.setAttribute(
     sourceFile,
-    attribute.indexPath,
+    componentLayer!.element.indexPath,
+    'name',
     'hello',
   );
 
   expect(printSourceFile(result)).toMatchSnapshot();
+});
+
+it('add and remove attribute', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result = ElementAttributes.addAttribute(
+    sourceFile,
+    componentLayer!.element.indexPath,
+    'name',
+    'hello',
+  );
+
+  expect(printSourceFile(result)).toMatchSnapshot();
+
+  const removed = ElementAttributes.removeAttribute(
+    result,
+    componentLayer!.element.indexPath,
+    'name',
+  );
+
+  expect(printSourceFile(removed)).toMatchSnapshot();
 });
 
 it('visits', () => {

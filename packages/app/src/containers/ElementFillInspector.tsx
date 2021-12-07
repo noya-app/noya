@@ -11,22 +11,25 @@ import {
   getSelectedComponentElements,
 } from 'noya-state';
 import { ElementLayer, useTypescriptCompiler } from 'noya-typescript';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
-import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
+import { memo, useCallback, useMemo } from 'react';
+import ArrayController from '../components/inspector/ArrayController';
 import FillRow from '../components/inspector/FillRow';
 
 function getStyleForElementLayer(elementLayer: ElementLayer): Sketch.Style {
   const backgroundColor =
+    elementLayer.attributes.background &&
     elementLayer.attributes.background.type === 'stringLiteral'
       ? hexToSketchColor(elementLayer.attributes.background.value)
-      : SketchModel.TRANSPARENT;
+      : undefined;
 
   const style = SketchModel.style({
-    fills: [
-      SketchModel.fill({
-        color: backgroundColor,
-      }),
-    ],
+    fills: backgroundColor
+      ? [
+          SketchModel.fill({
+            color: backgroundColor,
+          }),
+        ]
+      : [],
   });
 
   return style;
@@ -34,10 +37,8 @@ function getStyleForElementLayer(elementLayer: ElementLayer): Sketch.Style {
 
 export const ElementFillInspector = memo(function ElementFillInspector({
   title,
-  allowMoreThanOne,
 }: {
   title: string;
-  allowMoreThanOne: boolean;
 }) {
   const [state, dispatch] = useApplicationState();
   const compiler = useTypescriptCompiler();
@@ -65,40 +66,29 @@ export const ElementFillInspector = memo(function ElementFillInspector({
   );
 
   const handleClickPlus = useCallback(() => dispatch('addNewFill'), [dispatch]);
+  const handleClickTrash = useCallback(
+    () => dispatch('deleteDisabledFills'),
+    [dispatch],
+  );
 
   return (
-    <CheckboxArrayController<EditableFill>
+    <ArrayController<EditableFill>
       title={title}
       id={title}
       key={title}
-      value={editableFills}
-      onClickPlus={allowMoreThanOne ? handleClickPlus : undefined}
-      onClickTrash={useCallback(
-        () => dispatch('deleteDisabledFills'),
-        [dispatch],
-      )}
+      items={editableFills}
+      onClickPlus={editableFills.length === 0 ? handleClickPlus : undefined}
+      onClickTrash={editableFills.length > 0 ? handleClickTrash : undefined}
       onMoveItem={useCallback(
         (sourceIndex, destinationIndex) =>
           dispatch('moveFill', sourceIndex, destinationIndex),
         [dispatch],
       )}
-      onChangeCheckbox={useCallback(
-        (index, checked) => dispatch('setFillEnabled', index, checked),
-        [dispatch],
-      )}
       renderItem={useCallback(
-        ({
-          item,
-          index,
-          checkbox,
-        }: {
-          item: EditableFill;
-          index: number;
-          checkbox: ReactNode;
-        }) => (
+        ({ item, index }: { item: EditableFill; index: number }) => (
           <FillRow
             id={`fill-${index}`}
-            prefix={checkbox}
+            // prefix={checkbox}
             fillType={item.fillType}
             contextOpacity={item.contextOpacity}
             onSetOpacity={(value, mode) =>
