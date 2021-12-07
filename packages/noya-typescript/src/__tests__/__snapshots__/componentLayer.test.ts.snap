@@ -36,16 +36,6 @@ Object {
   "element": Object {
     "attributes": Object {
       "name": Object {
-        "indexPath": Array [
-          0,
-          3,
-          0,
-          0,
-          0,
-          1,
-          0,
-          1,
-        ],
         "type": "stringLiteral",
         "value": "test",
       },
