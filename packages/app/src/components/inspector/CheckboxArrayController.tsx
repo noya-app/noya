@@ -1,4 +1,4 @@
-import { memo, ReactNode, useCallback } from 'react';
+import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
 
@@ -14,7 +14,6 @@ interface CheckboxArrayControllerProps<Item> {
   title: ReactNode;
   sortable?: boolean;
   expanded?: boolean;
-  expandedContent?: ReactNode;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onChangeCheckbox?: (index: number, checked: boolean) => void;
   onClickPlus?: () => void;
@@ -26,6 +25,7 @@ interface CheckboxArrayControllerProps<Item> {
     index: number;
     checkbox: ReactNode;
   }) => ReactNode;
+  renderExpandedContent?: () => ReactNode;
 }
 
 function CheckboxArrayController<Item extends BaseArrayItem>({
@@ -34,7 +34,6 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
   title,
   sortable = true,
   expanded = false,
-  expandedContent = null,
   getKey,
   onMoveItem,
   onClickPlus,
@@ -42,6 +41,7 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
   onClickExpand,
   onChangeCheckbox,
   renderItem,
+  renderExpandedContent,
 }: CheckboxArrayControllerProps<Item>) {
   const getCheckboxElement = (index: number) =>
     onChangeCheckbox ? (
@@ -71,10 +71,7 @@ function CheckboxArrayController<Item extends BaseArrayItem>({
       renderItem={({ item, index }) =>
         renderItem({ item, index, checkbox: getCheckboxElement(index) })
       }
-      renderExpandedContent={useCallback(
-        () => expandedContent,
-        [expandedContent],
-      )}
+      renderExpandedContent={renderExpandedContent}
     />
   );
 }

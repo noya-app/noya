@@ -69,7 +69,7 @@ export default memo(function BorderInspector() {
     [dispatch],
   );
 
-  const borderInspectorExpanded = useMemo(() => {
+  const renderExpandedContent = useCallback(() => {
     return (
       <>
         <InspectorPrimitives.VerticalSeparator />
@@ -116,7 +116,6 @@ export default memo(function BorderInspector() {
       key="borders"
       expanded={expanded}
       value={editableBorders}
-      expandedContent={borderInspectorExpanded}
       onClickPlus={useCallback(() => dispatch('addNewBorder'), [dispatch])}
       onClickTrash={useCallback(
         () => dispatch('deleteDisabledBorders'),
@@ -135,6 +134,7 @@ export default memo(function BorderInspector() {
         () => setExpanded(!expanded),
         [setExpanded, expanded],
       )}
+      renderExpandedContent={renderExpandedContent}
       renderItem={useCallback(
         ({
           item,
