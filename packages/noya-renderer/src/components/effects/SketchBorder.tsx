@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import * as CanvasKit from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Path, useCanvasKit } from 'noya-renderer';
@@ -10,10 +10,12 @@ export default memo(function SketchBorder({
   path,
   frame,
   border,
+  borderOptions,
 }: {
   path: CanvasKit.Path;
   frame: Rect;
   border: Sketch.Border;
+  borderOptions: Sketch.BorderOptions;
 }) {
   const CanvasKit = useCanvasKit();
 
@@ -29,8 +31,17 @@ export default memo(function SketchBorder({
         path,
         border.thickness,
         border.position,
+        borderOptions.lineCapStyle,
+        borderOptions.lineJoinStyle,
       ),
-    [CanvasKit, border.position, border.thickness, path],
+    [
+      CanvasKit,
+      border.position,
+      border.thickness,
+      borderOptions.lineCapStyle,
+      borderOptions.lineJoinStyle,
+      path,
+    ],
   );
 
   useDeletable(strokedPath);

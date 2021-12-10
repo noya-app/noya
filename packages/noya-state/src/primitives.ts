@@ -4,6 +4,8 @@ import type {
   Path,
   RuntimeEffect,
   Shader,
+  StrokeCap,
+  StrokeJoin,
   TextAlign,
   TextStyle,
 } from 'canvaskit';
@@ -441,6 +443,34 @@ export function textHorizontalAlignment(
       return CanvasKit.TextAlign.Justify;
     case Sketch.TextHorizontalAlignment.Natural: // What is this?
       return CanvasKit.TextAlign.Start;
+  }
+}
+
+export function lineJoinStyle(
+  CanvasKit: CanvasKit,
+  lineJoin: Sketch.LineJoinStyle,
+): StrokeJoin {
+  switch (lineJoin) {
+    case Sketch.LineJoinStyle.Bevel:
+      return CanvasKit.StrokeJoin.Bevel;
+    case Sketch.LineJoinStyle.Round:
+      return CanvasKit.StrokeJoin.Round;
+    case Sketch.LineJoinStyle.Miter:
+      return CanvasKit.StrokeJoin.Miter;
+  }
+}
+
+export function lineCapStyle(
+  CanvasKit: CanvasKit,
+  lineCap: Sketch.LineCapStyle,
+): StrokeCap {
+  switch (lineCap) {
+    case Sketch.LineCapStyle.Butt:
+      return CanvasKit.StrokeCap.Butt;
+    case Sketch.LineCapStyle.Projecting:
+      return CanvasKit.StrokeCap.Square;
+    case Sketch.LineCapStyle.Round:
+      return CanvasKit.StrokeCap.Round;
   }
 }
 

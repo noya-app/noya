@@ -143,11 +143,13 @@ const SketchBorderShadow = memo(function SketchBorderShadow({
   shadow,
   borderWidth,
   borderPosition,
+  borderOptions,
 }: {
   path: CanvasKit.Path;
   shadow: Sketch.Shadow;
   borderWidth: number;
   borderPosition: Sketch.BorderPosition;
+  borderOptions: Sketch.BorderOptions;
 }) {
   const CanvasKit = useCanvasKit();
 
@@ -158,8 +160,17 @@ const SketchBorderShadow = memo(function SketchBorderShadow({
         path,
         borderWidth,
         borderPosition,
+        borderOptions.lineCapStyle,
+        borderOptions.lineJoinStyle,
       ),
-    [CanvasKit, borderPosition, borderWidth, path],
+    [
+      CanvasKit,
+      borderOptions.lineCapStyle,
+      borderOptions.lineJoinStyle,
+      borderPosition,
+      borderWidth,
+      path,
+    ],
   );
 
   return <SketchShadow shadow={shadow} path={strokedPath} />;
@@ -170,12 +181,14 @@ const SketchFillShadow = memo(function SketchFillShadow({
   shadow,
   borderWidth,
   borderPosition,
+  borderOptions,
   shouldClipPath,
 }: {
   path: CanvasKit.Path;
   shadow: Sketch.Shadow;
   borderWidth: number;
   borderPosition: Sketch.BorderPosition;
+  borderOptions: Sketch.BorderOptions;
   shouldClipPath: boolean;
 }) {
   const CanvasKit = useCanvasKit();
@@ -197,6 +210,8 @@ const SketchFillShadow = memo(function SketchFillShadow({
     CanvasKit,
     path,
     additionalRadius,
+    borderOptions.lineCapStyle,
+    borderOptions.lineJoinStyle,
     CanvasKit.PathOp.Union,
   );
 
@@ -316,6 +331,7 @@ export default memo(function SketchShape({ layer }: Props) {
             path={path}
             borderWidth={borderWidth}
             borderPosition={borderPosition}
+            borderOptions={style.borderOptions}
           />
         ) : (
           <SketchFillShadow
@@ -325,6 +341,7 @@ export default memo(function SketchShape({ layer }: Props) {
             shouldClipPath={fills.length > 0}
             borderWidth={borderWidth}
             borderPosition={borderPosition}
+            borderOptions={style.borderOptions}
           />
         ),
       )}
@@ -349,6 +366,7 @@ export default memo(function SketchShape({ layer }: Props) {
           path={path}
           border={border}
           frame={layer.frame}
+          borderOptions={style.borderOptions}
         />
       ))}
     </>

@@ -1,4 +1,10 @@
-import { MaskFilter, Paint, PaintStyle } from 'canvaskit';
+import {
+  Paint,
+  PaintStyle,
+  MaskFilter,
+  StrokeCap,
+  StrokeJoin,
+} from 'canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useColor, { ColorParameters } from './useColor';
@@ -11,6 +17,8 @@ export interface PaintParameters {
   strokeWidth?: number;
   antiAlias?: boolean;
   maskFilter?: MaskFilter;
+  strokeJoin?: StrokeJoin;
+  strokeCap?: StrokeCap;
 }
 
 function isPaint(value: Paint | PaintParameters): value is Paint {
@@ -21,6 +29,7 @@ export default function usePaint(parameters: PaintParameters | Paint): Paint {
   const CanvasKit = useCanvasKit();
 
   const maybePaintObject = isPaint(parameters) ? parameters : undefined;
+
   const maybeParameters = useStablePaintParameters(
     !isPaint(parameters) ? parameters : undefined,
   );
@@ -33,20 +42,20 @@ export default function usePaint(parameters: PaintParameters | Paint): Paint {
     paint.setStyle(maybeParameters.style);
     paint.setAntiAlias(maybeParameters.antiAlias ?? true);
     paint.setStrokeWidth(maybeParameters.strokeWidth ?? 1);
-
+    if (maybeParameters.strokeJoin)
+      paint.setStrokeJoin(maybeParameters.strokeJoin);
+    if (maybeParameters.strokeCap)
+      paint.setStrokeCap(maybeParameters.strokeCap);
     if (maybeParameters.opacity !== undefined && maybeParameters.opacity < 1) {
       paint.setAlphaf(maybeParameters.opacity);
     }
-
     if (maybeParameters.maskFilter) {
       paint.setMaskFilter(maybeParameters.maskFilter);
     }
-
     return paint;
   }, [maybeParameters, CanvasKit.Paint]);
 
   const deletablePaint = useDeletable(paint);
-
   return maybePaintObject ?? deletablePaint!;
 }
 
@@ -64,6 +73,8 @@ function useStablePaintParameters(parameters: PaintParameters | undefined) {
         strokeWidth: parameters.strokeWidth,
         maskFilter: parameters.maskFilter,
         opacity: parameters.opacity,
+        strokeJoin: parameters.strokeJoin,
+        strokeCap: parameters.strokeCap,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,6 +85,8 @@ function useStablePaintParameters(parameters: PaintParameters | undefined) {
       parameters?.strokeWidth,
       parameters?.maskFilter,
       parameters?.opacity,
+      parameters?.strokeJoin,
+      parameters?.strokeCap,
     ],
   );
 

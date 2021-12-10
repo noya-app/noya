@@ -30,11 +30,14 @@ interface ArrayControllerProps<Item> {
   title: ReactNode;
   sortable?: boolean;
   reversed?: boolean;
+  expanded?: boolean;
   getKey?: (item: Item) => string;
   onMoveItem?: (sourceIndex: number, destinationIndex: number) => void;
   onClickPlus?: () => void;
   onClickTrash?: () => void;
+  onClickExpand?: () => void;
   renderItem: (props: { item: Item; index: number }) => ReactNode;
+  renderExpandedContent?: () => ReactNode;
 }
 
 function ArrayController<Item>({
@@ -43,13 +46,17 @@ function ArrayController<Item>({
   title,
   sortable = false,
   reversed = true,
+  expanded = false,
   getKey,
   onMoveItem,
   onClickPlus,
   onClickTrash,
+  onClickExpand,
   renderItem,
+  renderExpandedContent,
 }: ArrayControllerProps<Item>) {
   const iconColor = useTheme().colors.icon;
+  const primaryLightColor = useTheme().colors.primaryLight;
 
   const keys = useMemo(
     () => items.map((item, index) => getKey?.(item) ?? index.toString()),
@@ -107,6 +114,14 @@ function ArrayController<Item>({
                 onClick={onClickTrash}
               />
             ),
+            onClickExpand && (
+              <IconButton
+                id={`${id}-gear`}
+                iconName="GearIcon"
+                color={expanded ? primaryLightColor : iconColor}
+                onClick={onClickExpand}
+              />
+            ),
             onClickPlus && (
               <IconButton
                 id={`${id}-add`}
@@ -144,6 +159,7 @@ function ArrayController<Item>({
       ) : (
         indexes.map(renderRow)
       )}
+      {expanded && renderExpandedContent?.()}
     </InspectorPrimitives.Section>
   );
 }
