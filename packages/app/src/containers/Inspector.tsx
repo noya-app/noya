@@ -21,6 +21,7 @@ import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import { ElementFillInspector } from './ElementFillInspector';
+import { ElementLayoutInspector } from './ElementLayoutInspector';
 import ExportInspector from './ExportInspector';
 import FillInspector from './FillInspector';
 import InnerShadowInspector from './InnerShadowInspector';
@@ -128,7 +129,10 @@ export default memo(function Inspector() {
     )
       return [];
 
-    const views: ReactNode[] = [<ElementFillInspector title="Fills" />];
+    const views: ReactNode[] = [
+      <ElementLayoutInspector />,
+      <ElementFillInspector title="Fills" />,
+    ];
 
     return withSeparatorElements(
       views,

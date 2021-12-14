@@ -82,22 +82,14 @@ export function layerPropertyReducer(
 
           const { sourceFile, elementLayer } = editable;
 
-          if (
-            elementLayer.attributes.name &&
-            elementLayer.attributes.name.type === 'stringLiteral'
-          ) {
-            const result = ElementAttributes.setAttribute(
-              sourceFile,
-              elementLayer.indexPath,
-              'name',
-              name,
-            );
+          const result = ElementAttributes.setAttribute(
+            sourceFile,
+            elementLayer.indexPath,
+            'name',
+            name,
+          );
 
-            draftLayer.component.source = printSourceFile(result);
-
-            // console.info('original elementLayer', elementLayer);
-            // console.info('updated source', draftLayer.component.source);
-          }
+          draftLayer.component.source = printSourceFile(result);
         } else {
           draftLayer.name = name;
         }

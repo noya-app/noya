@@ -29,6 +29,10 @@ export function parseObjectId(objectId: string) {
   return { layerId, ...(indexPath && { indexPath }) };
 }
 
+export function createObjectId(layerId: string, indexPath?: number[]) {
+  return indexPath ? `${layerId}#${indexPath.join(':')}` : layerId;
+}
+
 export const getSelectedComponentElements = (
   state: Draft<ApplicationState>,
 ): ComponentElementPath[] => {

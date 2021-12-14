@@ -9,7 +9,11 @@ import {
 } from 'noya-layout';
 import { ClipProps, useColorFill, usePaint } from 'noya-react-canvaskit';
 import { Group, Rect as RCKRect, Rect, useCanvasKit } from 'noya-renderer';
-import { getSourceFileForId, Primitives } from 'noya-state';
+import {
+  ElementFlexDirection,
+  getSourceFileForId,
+  Primitives,
+} from 'noya-state';
 import {
   ElementLayer,
   getComponentLayer,
@@ -179,9 +183,15 @@ export default memo(function SketchComponent({ layer }: Props) {
 });
 
 function elementLayerToLayoutNode(elementLayer: ElementLayer): LayoutNode {
+  const flexDirection =
+    elementLayer.attributes.flexDirection &&
+    elementLayer.attributes.flexDirection.type === 'stringLiteral'
+      ? (elementLayer.attributes.flexDirection.value as ElementFlexDirection)
+      : 'column';
+
   return createLayoutNode(
     {
-      flexDirection: FlexDirection.column,
+      flexDirection: FlexDirection[flexDirection],
       flex: 1,
     },
     elementLayer.children.map(elementLayerToLayoutNode),

@@ -6,6 +6,7 @@ import ts, {
   isJsxAttribute,
   isJsxAttributes,
   JsxAttribute,
+  JsxAttributeLike,
   JsxAttributes,
   JsxExpression,
   JsxOpeningElement,
@@ -253,17 +254,22 @@ export const ElementAttributes = {
           ts.factory.createStringLiteral(value),
         );
 
+        const jsxAttribute = ts.factory.createJsxAttribute(
+          ts.factory.createIdentifier(name),
+          expression,
+        );
+
+        const properties = (node as JsxAttributes).properties;
+        const propertyExists = properties.some(
+          (property) => getJsxPropertyName(property) === name,
+        );
+
         return ts.factory.createJsxAttributes(
-          (node as JsxAttributes).properties.map((property) =>
-            property.name &&
-            isIdentifier(property.name) &&
-            property.name.text === name
-              ? ts.factory.createJsxAttribute(
-                  ts.factory.createIdentifier(name),
-                  expression,
-                )
-              : property,
-          ),
+          propertyExists
+            ? properties.map((property) =>
+                getJsxPropertyName(property) === name ? jsxAttribute : property,
+              )
+            : [...properties, jsxAttribute],
         );
       }
 
@@ -271,3 +277,9 @@ export const ElementAttributes = {
     });
   },
 };
+
+function getJsxPropertyName(property: JsxAttributeLike): string | undefined {
+  return property.name && isIdentifier(property.name)
+    ? property.name.text
+    : undefined;
+}

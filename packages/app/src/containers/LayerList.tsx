@@ -32,7 +32,7 @@ import {
   TextIcon,
 } from 'noya-icons';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
-import { Layers, PageLayer, Selectors } from 'noya-state';
+import { createObjectId, Layers, PageLayer, Selectors } from 'noya-state';
 import {
   ComponentLayer,
   ElementTree,
@@ -136,9 +136,10 @@ function flattenLayerList(
               ? element.attributes.name.value
               : undefined;
 
-          const elementId = `${layer.do_objectID}#${element.indexPath.join(
-            ':',
-          )}`;
+          const elementId = createObjectId(
+            layer.do_objectID,
+            element.indexPath,
+          );
 
           flattened.push({
             type: 'component',

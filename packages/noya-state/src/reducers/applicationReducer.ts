@@ -30,6 +30,7 @@ import {
 } from '../selectors/selectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
+import { ElementAction, elementReducer } from './elementReducer';
 import { ExportAction, exportReducer } from './exportReducer';
 import {
   createInitialInteractionState,
@@ -110,7 +111,8 @@ export type Action =
   | SymbolsAction
   | ExportAction
   | PointAction
-  | TextEditorAction;
+  | TextEditorAction
+  | ElementAction;
 
 export type ApplicationReducerContext = {
   canvasInsets: Insets;
@@ -579,6 +581,8 @@ export function applicationReducer(
     case 'insertText':
     case 'deleteText':
       return textEditorReducer(state, action, CanvasKit, context);
+    case 'setElementFlexDirection':
+      return elementReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);
   }

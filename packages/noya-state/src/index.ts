@@ -12,6 +12,7 @@ export * from './reducers/historyReducer';
 export * from './reducers/interactionReducer';
 export * from './reducers/canvasReducer';
 export * from './reducers/styleReducer';
+export * from './reducers/elementReducer';
 export * from './types';
 
 export type { SelectionType } from './utils/selection';
