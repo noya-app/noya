@@ -22,11 +22,9 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
-import { getComponentLayer } from 'noya-typescript';
 import { round } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useTypescriptCompiler } from 'noya-typescript';
 import { LayerIcon } from './LayerList';
 
 type InteractionStateProjection =
@@ -108,7 +106,7 @@ const ToolbarContent = memo(function ToolbarContent({
     value: `${SYMBOL_ITEM_PREFIX}${symbol.do_objectID}`,
   }));
 
-  const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
+  const elementMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
     {
       title: 'Component',
       value: 'componentContainer',
@@ -116,6 +114,9 @@ const ToolbarContent = memo(function ToolbarContent({
       disabled: isEditingText,
       icon: <LayerIcon type="componentContainer" />,
     },
+  ];
+
+  const shapeMenuItems: RegularMenuItem<InsertMenuLayerType>[] = [
     {
       title: 'Artboard',
       value: 'artboard',
@@ -169,6 +170,7 @@ const ToolbarContent = memo(function ToolbarContent({
 
   const insertMenuItems: MenuItem<string>[] = createSectionedMenu(
     shapeMenuItems,
+    elementMenuItems,
     symbolsMenuItems,
   );
 
@@ -331,8 +333,6 @@ const ToolbarContent = memo(function ToolbarContent({
 
   const fileName = fileHandle?.name ?? 'Untitled.sketch';
 
-  const { compileFile } = useTypescriptCompiler();
-
   return (
     <>
       <Spacer.Horizontal size={itemSeparatorSize * 1.5} />
@@ -395,24 +395,6 @@ const ToolbarContent = memo(function ToolbarContent({
           ),
           [],
         )}
-      </Button>
-      <Spacer.Horizontal size={itemSeparatorSize * 4} />
-      <Button
-        onClick={() => {
-          const result = compileFile(
-            'test',
-            `export default function MyComponent() {
-  return (<View background={"white"}>
-  <Text>abc</Text>
-  <Text2>def</Text2>
-</View>)
-}`,
-          );
-
-          console.info(getComponentLayer(result));
-        }}
-      >
-        Test TS
       </Button>
     </>
   );
