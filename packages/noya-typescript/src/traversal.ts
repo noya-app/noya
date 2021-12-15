@@ -97,12 +97,12 @@ export function transformNode<T extends ts.Node>(
       let indexPath: number[] = [];
       let nodePath: ts.Node[] = [];
 
-      function visit(node: ts.Node): ts.Node {
-        const newNode = transform(node, indexPath, nodePath);
+      function visit(node: ts.Node): ts.Node | undefined {
+        const transformedNode = transform(node, indexPath, nodePath);
 
-        if (!newNode) return newNode!;
+        if (!transformedNode) return transformedNode;
 
-        node = newNode;
+        node = transformedNode;
 
         let childIndex = 0;
 
@@ -112,14 +112,14 @@ export function transformNode<T extends ts.Node>(
             indexPath.push(childIndex);
             nodePath.push(node);
 
-            child = visit(child);
+            const transformedChild = visit(child);
 
             nodePath.pop();
             indexPath.pop();
 
             childIndex++;
 
-            return child;
+            return transformedChild;
           },
           context,
         );
