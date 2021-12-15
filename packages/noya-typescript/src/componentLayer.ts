@@ -203,12 +203,7 @@ export const ElementAttributes = {
       if (isDeepEqual(elementIndexPath, indexPath)) {
         return ts.factory.createJsxAttributes(
           (node as JsxAttributes).properties.filter(
-            (property) =>
-              !(
-                property.name &&
-                isIdentifier(property.name) &&
-                property.name.text === name
-              ),
+            (property) => getJsxPropertyName(property) !== name,
           ),
         );
       }
@@ -237,12 +232,14 @@ export const ElementAttributes = {
           ts.factory.createStringLiteral(value),
         );
 
+        const jsxAttribute = ts.factory.createJsxAttribute(
+          ts.factory.createIdentifier(name),
+          expression,
+        );
+
         return ts.factory.createJsxAttributes([
           ...(node as JsxAttributes).properties,
-          ts.factory.createJsxAttribute(
-            ts.factory.createIdentifier(name),
-            expression,
-          ),
+          jsxAttribute,
         ]);
       }
 
