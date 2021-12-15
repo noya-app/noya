@@ -1,6 +1,7 @@
 import {
   createBaseFileSystem,
   createTypescriptEnvironment,
+  Element,
   ElementAttributes,
   getComponentLayer,
   printSourceFile,
@@ -102,6 +103,62 @@ it('add and remove attribute', () => {
   );
 
   expect(printSourceFile(removed)).toMatchSnapshot();
+});
+
+it('add element', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result1 = Element.addChild(
+    sourceFile,
+    componentLayer!.element.indexPath,
+    'Text',
+  );
+
+  expect(printSourceFile(result1)).toMatchSnapshot();
+
+  const result2 = Element.addChild(
+    result1,
+    componentLayer!.element.indexPath,
+    'Image',
+  );
+
+  expect(printSourceFile(result2)).toMatchSnapshot();
+});
+
+it('remove element', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View><Text></Text><Image></Image></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result1 = Element.removeElement(
+    sourceFile,
+    componentLayer!.element.children[1].indexPath,
+  );
+
+  expect(printSourceFile(result1)).toMatchSnapshot();
+
+  const result2 = Element.removeElement(
+    result1,
+    componentLayer!.element.children[0].indexPath,
+  );
+
+  expect(printSourceFile(result2)).toMatchSnapshot();
 });
 
 it('visits', () => {

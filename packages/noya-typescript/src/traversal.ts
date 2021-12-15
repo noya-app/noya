@@ -90,7 +90,7 @@ export function transformNode<T extends ts.Node>(
     node: ts.Node,
     indexPath: number[],
     nodePath: ts.Node[],
-  ) => ts.Node,
+  ) => ts.Node | undefined,
 ): T {
   const transformerFactory: ts.TransformerFactory<ts.Node> =
     (context) => (rootNode) => {
@@ -98,7 +98,11 @@ export function transformNode<T extends ts.Node>(
       let nodePath: ts.Node[] = [];
 
       function visit(node: ts.Node): ts.Node {
-        node = transform(node, indexPath, nodePath);
+        const newNode = transform(node, indexPath, nodePath);
+
+        if (!newNode) return newNode!;
+
+        node = newNode;
 
         let childIndex = 0;
 

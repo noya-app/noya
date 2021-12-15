@@ -8,6 +8,7 @@ import ts, {
   JsxAttribute,
   JsxAttributeLike,
   JsxAttributes,
+  JsxElement,
   JsxExpression,
   JsxOpeningElement,
   JsxSelfClosingElement,
@@ -18,6 +19,7 @@ import ts, {
 import {
   firstChild,
   firstChildOfKind,
+  getChildren,
   isKind,
   Nodes,
   transformNode,
@@ -81,17 +83,13 @@ function getLayerHierarchy(
   let children: ElementLayer[] = [];
 
   if (isKind(SyntaxKind.JsxOpeningElement)(tagElement)) {
-    const content = expression.getChildren()[1].getChildren()[1];
+    const childrenElements = getChildren(jsxElement).filter(
+      isKind(SyntaxKind.JsxElement),
+    );
 
-    // console.log(Nodes.diagram(expression));
-
-    if (content && isKind(SyntaxKind.SyntaxList)(content)) {
-      children = content
-        .getChildren()
-        .flatMap(
-          (item, index) => getLayerHierarchy(sourceFile, item as any) ?? [],
-        );
-    }
+    children = childrenElements.flatMap(
+      (child) => getLayerHierarchy(sourceFile, child) ?? [],
+    );
   }
 
   const jsxAttributes = Nodes.findAll<JsxAttribute>(tagElement, isJsxAttribute);
@@ -185,6 +183,50 @@ export function setFunctionName(
     return node;
   });
 }
+
+export const Element = {
+  addChild(
+    sourceFile: SourceFile,
+    elementIndexPath: IndexPath,
+    tagName: string,
+  ) {
+    return transformNode(sourceFile, (node, indexPath) => {
+      if (isDeepEqual(elementIndexPath, indexPath)) {
+        const newElement = ts.factory.createJsxElement(
+          ts.factory.createJsxOpeningElement(
+            ts.factory.createIdentifier(tagName),
+            undefined,
+            ts.factory.createJsxAttributes([]),
+          ),
+          [],
+          ts.factory.createJsxClosingElement(
+            ts.factory.createIdentifier(tagName),
+          ),
+        );
+
+        const { openingElement, closingElement, children } = node as JsxElement;
+
+        return ts.factory.createJsxElement(
+          openingElement,
+          [...children, newElement],
+          closingElement,
+        );
+      }
+
+      return node;
+    });
+  },
+
+  removeElement(sourceFile: SourceFile, elementIndexPath: IndexPath) {
+    return transformNode(sourceFile, (node, indexPath) => {
+      if (isDeepEqual(elementIndexPath, indexPath)) {
+        return undefined;
+      }
+
+      return node;
+    });
+  },
+};
 
 export const ElementAttributes = {
   removeAttribute(
