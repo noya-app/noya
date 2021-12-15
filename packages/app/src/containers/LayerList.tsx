@@ -37,6 +37,7 @@ import {
   ComponentLayer,
   ElementTree,
   getComponentLayer,
+  useTypescriptCompiler,
 } from 'noya-typescript';
 import { isDeepEqual } from 'noya-utils';
 import React, {
@@ -52,7 +53,6 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import { useTypescriptCompiler } from 'noya-typescript';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const IconContainer = styled.span(({ theme }) => ({
@@ -397,6 +397,7 @@ export default memo(function LayerList({
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(
     selectedLayers,
+    Selectors.getSelectedElementLayerPaths(state),
     state.interactionState.type,
   );
 

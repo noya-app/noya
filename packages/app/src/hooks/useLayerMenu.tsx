@@ -7,7 +7,13 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
-import { InteractionType, Layers, Selectors } from 'noya-state';
+import {
+  createObjectId,
+  ElementLayerPath,
+  InteractionType,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import { ClipboardUtils } from 'noya-utils';
 import { useCallback, useMemo } from 'react';
 import { useOpenInputDialog } from '../contexts/DialogContext';
@@ -81,6 +87,7 @@ export type LayerMenuItemType =
 
 export default function useLayerMenu(
   layers: Sketch.AnyLayer[],
+  elementLayerPaths: ElementLayerPath[],
   interactionType: InteractionType,
 ) {
   const dispatch = useDispatch();
@@ -89,7 +96,7 @@ export default function useLayerMenu(
 
   const isEditingText = Selectors.getIsEditingText(interactionType);
 
-  const hasSelectedLayers = layers.length > 0;
+  const hasSelectedLayers = layers.length > 0 || elementLayerPaths.length > 0;
 
   const canUngroup = layers.length === 1 && Layers.isGroup(layers[0]);
 
@@ -218,7 +225,10 @@ export default function useLayerMenu(
           }
           return;
         case 'delete':
-          dispatch('deleteLayer', selectedLayerIds);
+          dispatch('deleteLayer', [
+            ...selectedLayerIds,
+            ...elementLayerPaths.map(createObjectId),
+          ]);
           return;
         case 'copy':
           const isSafari = /Apple Computer/.test(navigator.vendor);
@@ -327,6 +337,7 @@ export default function useLayerMenu(
       isEditingText,
       dispatch,
       selectedLayerIds,
+      elementLayerPaths,
       newIsAlphaMaskValue,
       openDialog,
       newUseAsMaskValue,

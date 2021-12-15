@@ -44,7 +44,7 @@ export default memo(function Inspector() {
   const [state, dispatch] = useApplicationState();
 
   const selectedComponentElements = useDeepMemo(
-    Selectors.getSelectedComponentElements(state),
+    Selectors.getSelectedElementLayerPaths(state),
   );
   const selectedLayers = useShallowArray(
     useSelector(Selectors.getSelectedLayers),

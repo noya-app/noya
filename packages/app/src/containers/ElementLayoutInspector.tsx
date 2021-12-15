@@ -11,7 +11,7 @@ import {
   createObjectId,
   ElementFlexDirection,
   getElementLayerForObjectPath,
-  getSelectedComponentElements,
+  getSelectedElementLayerPaths,
 } from 'noya-state';
 import { getAttributeValue, useTypescriptCompiler } from 'noya-typescript';
 import { upperFirst } from 'noya-utils';
@@ -21,7 +21,7 @@ import * as InspectorPrimitives from '../components/inspector/InspectorPrimitive
 export const ElementLayoutInspector = memo(function ElementLayoutInspector() {
   const [state, dispatch] = useApplicationState();
   const compiler = useTypescriptCompiler();
-  const objectPath = useDeepMemo(getSelectedComponentElements(state)[0]);
+  const objectPath = useDeepMemo(getSelectedElementLayerPaths(state)[0]);
   const elementLayer = getElementLayerForObjectPath(
     compiler.environment,
     objectPath,

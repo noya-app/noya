@@ -299,7 +299,7 @@ export function applicationReducer(
     case 'nudgeShaderVariableValue':
     case 'addShaderVariable':
     case 'deleteShaderVariable': {
-      const componentElements = Selectors.getSelectedComponentElements(state);
+      const componentElements = Selectors.getSelectedElementLayerPaths(state);
 
       if (componentElements.length > 0) {
         switch (action[0]) {

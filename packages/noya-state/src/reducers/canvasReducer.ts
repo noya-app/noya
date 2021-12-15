@@ -1262,8 +1262,8 @@ export function createDrawingLayer(
           source: `export default function Test() {
   return (
     <View background={"#fff"}>
-      <View></View>
-      <Text background={"#00f"}></Text>
+      <View name={"View 1"}></View>
+      <View name={"View 2"} background={"#00f"}></View>
     </View>
   );
 }`,

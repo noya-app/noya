@@ -11,7 +11,7 @@ import { isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import { SourceFile } from 'typescript';
 
-export type ComponentElementPath = {
+export type ElementLayerPath = {
   layerId: string;
   indexPath: IndexPath;
 };
@@ -21,6 +21,10 @@ export type ObjectPath = {
   indexPath?: IndexPath;
 };
 
+export function isElementLayerId(objectId: string) {
+  return objectId.includes('#');
+}
+
 export function parseObjectId(objectId: string) {
   const [layerId, elementId] = objectId.split('#');
 
@@ -29,18 +33,31 @@ export function parseObjectId(objectId: string) {
   return { layerId, ...(indexPath && { indexPath }) };
 }
 
-export function createObjectId(layerId: string, indexPath?: number[]) {
+export function createObjectId(layerId: string, indexPath?: number[]): string;
+export function createObjectId(objectPath: ObjectPath): string;
+export function createObjectId(
+  layerIdOrObjectPath: string | ObjectPath,
+  indexPath?: number[],
+): string {
+  let layerId: string;
+
+  if (typeof layerIdOrObjectPath === 'string') {
+    layerId = layerIdOrObjectPath;
+  } else {
+    layerId = layerIdOrObjectPath.layerId;
+    indexPath = layerIdOrObjectPath.indexPath;
+  }
+
   return indexPath ? `${layerId}#${indexPath.join(':')}` : layerId;
 }
 
-export const getSelectedComponentElements = (
+export const getSelectedElementLayerPaths = (
   state: Draft<ApplicationState>,
-): ComponentElementPath[] => {
+): ElementLayerPath[] => {
   return state.selectedLayerIds
     .map(parseObjectId)
     .filter(
-      (objectPath): objectPath is ComponentElementPath =>
-        !!objectPath.indexPath,
+      (objectPath): objectPath is ElementLayerPath => !!objectPath.indexPath,
     );
 };
 
@@ -115,3 +132,13 @@ export function getEditableElementLayer(
 
   return { elementLayer, sourceFile };
 }
+
+export const getSelectedElementLayers = (
+  state: Draft<ApplicationState>,
+  environment: TypescriptEnvironment,
+): ElementLayer[] => {
+  return state.selectedLayerIds.flatMap((id) => {
+    const elementLayer = getElementLayerForId(environment, id);
+    return elementLayer ? [elementLayer] : [];
+  });
+};

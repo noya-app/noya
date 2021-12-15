@@ -263,6 +263,7 @@ export default memo(function Canvas() {
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [menuItems, onSelectMenuItem] = useLayerMenu(
     selectedLayers,
+    Selectors.getSelectedElementLayerPaths(state),
     state.interactionState.type,
   );
 

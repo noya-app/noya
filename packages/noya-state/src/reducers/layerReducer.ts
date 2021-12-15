@@ -1,15 +1,24 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
-import { getIncrementedName, groupBy, uuid } from 'noya-utils';
+import {
+  ApplicationReducerContext,
+  findIndexPath,
+  Primitives,
+  Selectors,
+} from 'noya-state';
+import { Element, printSourceFile } from 'noya-typescript';
+import { getIncrementedName, groupBy, uuid, zip } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { PageLayer } from '../layers';
 import {
   addSiblingLayer,
+  addToParentLayer,
   deleteLayers,
+  ElementLayerPath,
   findPageLayerIndexPaths,
   getBoundingRect,
   getCurrentPage,
@@ -17,29 +26,25 @@ import {
   getIndexPathsForGroup,
   getIndexPathsOfArtboardLayers,
   getLayerIndexPathsExcludingDescendants,
-  addToParentLayer,
-  getSelectedLayerIndexPathsExcludingDescendants,
+  getLayersInRect,
   getLayerTransformAtIndexPath,
   getParentLayer,
   getRightMostLayerBounds,
+  getSelectedLayerIndexPathsExcludingDescendants,
   getSelectedSymbols,
   getSymbols,
   getSymbolsInstancesIndexPaths,
   getSymbolsPageIndex,
   insertLayerAtIndexPath,
+  isElementLayerId,
   LayerIndexPaths,
   moveLayer,
+  parseObjectId,
   removeLayer,
-  getLayersInRect,
 } from '../selectors/selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
 import { ApplicationState } from './applicationReducer';
 import { createPage } from './pageReducer';
-import {
-  ApplicationReducerContext,
-  findIndexPath,
-  Primitives,
-} from 'noya-state';
 
 export type LayerAction =
   | [
@@ -180,6 +185,53 @@ export function layerReducer(
       const [, id] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
+
+      const elementIds = ids.filter(isElementLayerId);
+
+      if (elementIds.length > 0) {
+        const pageIndex = getCurrentPageIndex(state);
+        const elementPaths = elementIds
+          .map(parseObjectId)
+          .filter(
+            (objectPath): objectPath is ElementLayerPath =>
+              !!objectPath.indexPath,
+          );
+        const componentLayerIndexPaths = elementPaths.map((elementPath) =>
+          Layers.findIndexPath(
+            Selectors.getCurrentPage(state),
+            (layer) => layer.do_objectID === elementPath.layerId,
+          ),
+        );
+
+        state = produce(state, (draft) => {
+          zip(elementPaths, componentLayerIndexPaths).forEach(
+            ([elementPath, componentLayerIndexPath]) => {
+              if (!componentLayerIndexPath) return;
+
+              const draftLayer = Layers.access(
+                draft.sketch.pages[pageIndex],
+                componentLayerIndexPath,
+              ) as Sketch.ComponentContainer;
+
+              const editable = Selectors.getEditableElementLayer(
+                context.typescriptEnvironment,
+                elementPath,
+              );
+
+              if (!editable) return;
+
+              const { sourceFile, elementLayer } = editable;
+
+              const result = Element.removeElement(
+                sourceFile,
+                elementLayer.indexPath,
+              );
+
+              draftLayer.component.source = printSourceFile(result);
+            },
+          );
+        });
+      }
 
       const indexPaths = findPageLayerIndexPaths(state, (layer) =>
         ids.includes(layer.do_objectID),

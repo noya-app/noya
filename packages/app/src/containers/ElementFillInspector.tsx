@@ -8,7 +8,7 @@ import {
   getEditableFill,
   getEditableStyles,
   getElementLayerForObjectPath,
-  getSelectedComponentElements,
+  getSelectedElementLayerPaths,
 } from 'noya-state';
 import { ElementLayer, useTypescriptCompiler } from 'noya-typescript';
 import { memo, useCallback, useMemo } from 'react';
@@ -42,7 +42,7 @@ export const ElementFillInspector = memo(function ElementFillInspector({
 }) {
   const [state, dispatch] = useApplicationState();
   const compiler = useTypescriptCompiler();
-  const objectPath = useDeepMemo(getSelectedComponentElements(state)[0]);
+  const objectPath = useDeepMemo(getSelectedElementLayerPaths(state)[0]);
   const elementLayer = getElementLayerForObjectPath(
     compiler.environment,
     objectPath,
