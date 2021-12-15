@@ -4,6 +4,7 @@ import {
   createLayoutNode,
   FlexDirection,
   LayoutNode,
+  LayoutProperties,
   measureLayout,
   YogaNode,
 } from 'noya-layout';
@@ -16,7 +17,9 @@ import {
 } from 'noya-state';
 import {
   ElementLayer,
+  getAttributeValue,
   getComponentLayer,
+  parseIntSafe,
   useTypescriptCompiler,
 } from 'noya-typescript';
 import { memo, useMemo } from 'react';
@@ -184,16 +187,27 @@ export default memo(function SketchComponent({ layer }: Props) {
 
 function elementLayerToLayoutNode(elementLayer: ElementLayer): LayoutNode {
   const flexDirection =
-    elementLayer.attributes.flexDirection &&
-    elementLayer.attributes.flexDirection.type === 'stringLiteral'
-      ? (elementLayer.attributes.flexDirection.value as ElementFlexDirection)
-      : 'column';
+    getAttributeValue<ElementFlexDirection>(
+      elementLayer.attributes,
+      'flexDirection',
+    ) ?? 'column';
+
+  const flexBasis =
+    getAttributeValue(elementLayer.attributes, 'flexBasis') ?? 0;
+  const flexGrow =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexGrow')) ?? 1;
+  const flexShrink =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexShrink')) ?? 1;
+
+  const properties: LayoutProperties = {
+    flexDirection: FlexDirection[flexDirection],
+    flexBasis,
+    flexGrow,
+    flexShrink,
+  };
 
   return createLayoutNode(
-    {
-      flexDirection: FlexDirection[flexDirection],
-      flex: 1,
-    },
+    properties,
     elementLayer.children.map(elementLayerToLayoutNode),
   );
 }

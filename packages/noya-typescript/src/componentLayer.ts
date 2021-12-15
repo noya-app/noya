@@ -33,6 +33,22 @@ export type ElementAttributeValue =
       value: ts.Node;
     };
 
+export function getAttributeValue<T extends string>(
+  attributes: Record<string, ElementAttributeValue | void>,
+  name: string,
+): T | undefined {
+  const attribute = attributes[name];
+
+  return attribute && attribute.type === 'stringLiteral'
+    ? (attribute.value as T)
+    : undefined;
+}
+
+export function parseIntSafe(value?: string): number | undefined {
+  const number = Number(value);
+  return Number.isInteger(number) ? number : undefined;
+}
+
 export type ElementLayer = {
   // id: string;
   indexPath: IndexPath;

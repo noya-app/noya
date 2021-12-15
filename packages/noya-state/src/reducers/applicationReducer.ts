@@ -582,6 +582,9 @@ export function applicationReducer(
     case 'deleteText':
       return textEditorReducer(state, action, CanvasKit, context);
     case 'setElementFlexDirection':
+    case 'setElementFlexBasis':
+    case 'setElementFlexGrow':
+    case 'setElementFlexShrink':
       return elementReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);

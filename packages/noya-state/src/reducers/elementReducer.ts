@@ -15,7 +15,23 @@ export type ElementAction =
       type: 'setElementFlexDirection',
       layerId: string,
       value: ElementFlexDirection,
-    ];
+    ]
+  | [type: 'setElementFlexBasis', layerId: string, value: string]
+  | [type: 'setElementFlexGrow', layerId: string, value: string]
+  | [type: 'setElementFlexShrink', layerId: string, value: string];
+
+function getPropertyForActionType(type: ElementAction[0]): string {
+  switch (type) {
+    case 'setElementFlexDirection':
+      return 'flexDirection';
+    case 'setElementFlexBasis':
+      return 'flexBasis';
+    case 'setElementFlexGrow':
+      return 'flexGrow';
+    case 'setElementFlexShrink':
+      return 'flexShrink';
+  }
+}
 
 export function elementReducer(
   state: ApplicationState,
@@ -24,8 +40,11 @@ export function elementReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
-    case 'setElementFlexDirection': {
-      const [, layerOrElementId, flexDirection] = action;
+    case 'setElementFlexDirection':
+    case 'setElementFlexBasis':
+    case 'setElementFlexGrow':
+    case 'setElementFlexShrink': {
+      const [, layerOrElementId, value] = action;
 
       const objectPath = Selectors.parseObjectId(layerOrElementId);
       const page = getCurrentPage(state);
@@ -58,8 +77,8 @@ export function elementReducer(
         const result = ElementAttributes.setAttribute(
           sourceFile,
           elementLayer.indexPath,
-          'flexDirection',
-          flexDirection,
+          getPropertyForActionType(action[0]),
+          value,
         );
 
         draftLayer.component.source = printSourceFile(result);
