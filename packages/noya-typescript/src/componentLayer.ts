@@ -187,28 +187,36 @@ export function setFunctionName(
 export const Element = {
   addChild(
     sourceFile: SourceFile,
-    elementIndexPath: IndexPath,
-    tagName: string,
+    parentIndexPath: IndexPath,
+    tagNameOrElement: string | JsxElement,
+    index?: number,
   ) {
     return transformNode(sourceFile, (node, indexPath) => {
-      if (isDeepEqual(elementIndexPath, indexPath)) {
-        const newElement = ts.factory.createJsxElement(
-          ts.factory.createJsxOpeningElement(
-            ts.factory.createIdentifier(tagName),
-            undefined,
-            ts.factory.createJsxAttributes([]),
-          ),
-          [],
-          ts.factory.createJsxClosingElement(
-            ts.factory.createIdentifier(tagName),
-          ),
-        );
+      if (isDeepEqual(parentIndexPath, indexPath)) {
+        const newElement =
+          typeof tagNameOrElement === 'string'
+            ? ts.factory.createJsxElement(
+                ts.factory.createJsxOpeningElement(
+                  ts.factory.createIdentifier(tagNameOrElement),
+                  undefined,
+                  ts.factory.createJsxAttributes([]),
+                ),
+                [],
+                ts.factory.createJsxClosingElement(
+                  ts.factory.createIdentifier(tagNameOrElement),
+                ),
+              )
+            : tagNameOrElement;
 
         const { openingElement, closingElement, children } = node as JsxElement;
 
+        const newChildren = [...children];
+
+        newChildren.splice(index ?? newChildren.length, 0, newElement);
+
         return ts.factory.createJsxElement(
           openingElement,
-          [...children, newElement],
+          newChildren,
           closingElement,
         );
       }
@@ -225,6 +233,19 @@ export const Element = {
 
       return node;
     });
+  },
+
+  duplicateElement(sourceFile: SourceFile, elementIndexPath: IndexPath) {
+    let originalNode = Nodes.access(sourceFile, elementIndexPath) as JsxElement;
+
+    const clone = ts.getMutableClone(originalNode);
+
+    return Element.addChild(
+      sourceFile,
+      elementIndexPath.slice(0, -1),
+      clone,
+      elementIndexPath[elementIndexPath.length - 1],
+    );
   },
 };
 

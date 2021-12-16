@@ -283,7 +283,12 @@ export default function useLayerMenu(
           paste();
           return;
         case 'duplicate':
-          dispatch('duplicateLayer', selectedLayerIds);
+          dispatch(
+            'duplicateLayer',
+            hasSelectedElements
+              ? elementLayerPaths.map(createObjectId)
+              : selectedLayerIds,
+          );
           return;
         case 'group': {
           dispatch('groupLayers', selectedLayerIds);

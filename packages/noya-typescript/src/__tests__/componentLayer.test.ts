@@ -161,6 +161,26 @@ it('remove element', () => {
   expect(printSourceFile(result2)).toMatchSnapshot();
 });
 
+it('duplicate element', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View><Text></Text><Image></Image></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result1 = Element.duplicateElement(
+    sourceFile,
+    componentLayer!.element.children[0].indexPath,
+  );
+
+  expect(printSourceFile(result1)).toMatchSnapshot();
+});
+
 it('visits', () => {
   env.environment.createFile(
     filename,

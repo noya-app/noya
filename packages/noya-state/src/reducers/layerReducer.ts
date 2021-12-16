@@ -9,9 +9,10 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { Element, printSourceFile } from 'noya-typescript';
+import { Element, ElementLayer, printSourceFile } from 'noya-typescript';
 import { getIncrementedName, groupBy, uuid, zip } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
+import { SourceFile } from 'typescript';
 import * as Layers from '../layers';
 import { PageLayer } from '../layers';
 import {
@@ -186,52 +187,14 @@ export function layerReducer(
 
       const ids = typeof id === 'string' ? [id] : id;
 
-      const elementIds = ids.filter(isElementLayerId);
-
-      if (elementIds.length > 0) {
-        const pageIndex = getCurrentPageIndex(state);
-        const elementPaths = elementIds
-          .map(parseObjectId)
-          .filter(
-            (objectPath): objectPath is ElementLayerPath =>
-              !!objectPath.indexPath,
-          );
-        const componentLayerIndexPaths = elementPaths.map((elementPath) =>
-          Layers.findIndexPath(
-            Selectors.getCurrentPage(state),
-            (layer) => layer.do_objectID === elementPath.layerId,
-          ),
-        );
-
-        state = produce(state, (draft) => {
-          zip(elementPaths, componentLayerIndexPaths).forEach(
-            ([elementPath, componentLayerIndexPath]) => {
-              if (!componentLayerIndexPath) return;
-
-              const draftLayer = Layers.access(
-                draft.sketch.pages[pageIndex],
-                componentLayerIndexPath,
-              ) as Sketch.ComponentContainer;
-
-              const editable = Selectors.getEditableElementLayer(
-                context.typescriptEnvironment,
-                elementPath,
-              );
-
-              if (!editable) return;
-
-              const { sourceFile, elementLayer } = editable;
-
-              const result = Element.removeElement(
-                sourceFile,
-                elementLayer.indexPath,
-              );
-
-              draftLayer.component.source = printSourceFile(result);
-            },
-          );
-        });
-      }
+      state = updateElementLayers(
+        state,
+        context,
+        ids,
+        (sourceFile, elementLayer) => {
+          return Element.removeElement(sourceFile, elementLayer.indexPath);
+        },
+      );
 
       const indexPaths = findPageLayerIndexPaths(state, (layer) =>
         ids.includes(layer.do_objectID),
@@ -422,6 +385,15 @@ export function layerReducer(
       const [, id] = action;
 
       const ids = typeof id === 'string' ? [id] : id;
+
+      state = updateElementLayers(
+        state,
+        context,
+        ids,
+        (sourceFile, elementLayer) => {
+          return Element.duplicateElement(sourceFile, elementLayer.indexPath);
+        },
+      );
 
       const page = getCurrentPage(state);
       const pageIndex = getCurrentPageIndex(state);
@@ -627,4 +599,59 @@ function copyLayer(targetLayer: PageLayer) {
       }
     });
   });
+}
+
+function updateElementLayers(
+  state: ApplicationState,
+  context: ApplicationReducerContext,
+  ids: string[],
+  updateCallback: (
+    sourceFile: SourceFile,
+    elementLayer: ElementLayer,
+  ) => SourceFile,
+) {
+  const elementIds = ids.filter(isElementLayerId);
+
+  if (elementIds.length > 0) {
+    const pageIndex = getCurrentPageIndex(state);
+    const elementPaths = elementIds
+      .map(parseObjectId)
+      .filter(
+        (objectPath): objectPath is ElementLayerPath => !!objectPath.indexPath,
+      );
+    const componentLayerIndexPaths = elementPaths.map((elementPath) =>
+      Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === elementPath.layerId,
+      ),
+    );
+
+    state = produce(state, (draft) => {
+      zip(elementPaths, componentLayerIndexPaths).forEach(
+        ([elementPath, componentLayerIndexPath]) => {
+          if (!componentLayerIndexPath) return;
+
+          const draftLayer = Layers.access(
+            draft.sketch.pages[pageIndex],
+            componentLayerIndexPath,
+          ) as Sketch.ComponentContainer;
+
+          const editable = Selectors.getEditableElementLayer(
+            context.typescriptEnvironment,
+            elementPath,
+          );
+
+          if (!editable) return;
+
+          const { sourceFile, elementLayer } = editable;
+
+          const result = updateCallback(sourceFile, elementLayer);
+
+          draftLayer.component.source = printSourceFile(result);
+        },
+      );
+    });
+  }
+
+  return state;
 }

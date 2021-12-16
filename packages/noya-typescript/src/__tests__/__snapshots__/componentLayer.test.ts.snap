@@ -28,6 +28,13 @@ exports[`add element 2`] = `
 "
 `;
 
+exports[`duplicate element 1`] = `
+"export default function Foo() {
+    return <View><Text></Text><Text></Text><Image></Image></View>;
+}
+"
+`;
+
 exports[`gets component layer 1`] = `
 Object {
   "element": Object {
