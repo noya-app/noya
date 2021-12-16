@@ -96,19 +96,21 @@ export default function useLayerMenu(
 
   const isEditingText = Selectors.getIsEditingText(interactionType);
 
-  const hasSelectedLayers = layers.length > 0 || elementLayerPaths.length > 0;
+  const hasSelectedLayers = layers.length > 0;
+  const hasSelectedElements = elementLayerPaths.length > 0;
 
+  const canGroup = !hasSelectedElements;
   const canUngroup = layers.length === 1 && Layers.isGroup(layers[0]);
 
   const canDetach = layers.length === 1 && Layers.isSymbolInstance(layers[0]);
 
-  const canBeMask = layers.every((layer) =>
-    isValidClippingMaskType(layer._class),
-  );
+  const canBeMask =
+    !hasSelectedElements &&
+    layers.every((layer) => isValidClippingMaskType(layer._class));
 
-  const canBeMaskChainBreaker = layers.every((layer) =>
-    isValidMaskChainBreakerType(layer._class),
-  );
+  const canBeMaskChainBreaker =
+    !hasSelectedElements &&
+    layers.every((layer) => isValidMaskChainBreakerType(layer._class));
 
   const canBeSymbol = useMemo(() => {
     return (
@@ -138,7 +140,7 @@ export default function useLayerMenu(
       { value: 'selectAll', title: 'Select All', shortcut: 'Mod-a' },
     ];
 
-    if (!hasSelectedLayers) return [selectAllSection];
+    if (!hasSelectedLayers && !hasSelectedElements) return [selectAllSection];
 
     return [
       [
@@ -153,7 +155,7 @@ export default function useLayerMenu(
       ],
       [
         { value: 'rename', title: 'Rename' },
-        { value: 'group', title: 'Group', shortcut: 'Mod-g' },
+        canGroup && { value: 'group', title: 'Group', shortcut: 'Mod-g' },
         canUngroup && {
           value: 'ungroup',
           title: 'Ungroup',
@@ -196,9 +198,11 @@ export default function useLayerMenu(
     canBeMaskChainBreaker,
     canBeSymbol,
     canDetach,
+    canGroup,
     canShow,
     canUngroup,
     canUnlock,
+    hasSelectedElements,
     hasSelectedLayers,
     newIgnoreMasksValue,
     newIsAlphaMaskValue,
@@ -328,7 +332,11 @@ export default function useLayerMenu(
           return;
         }
         case 'rename': {
-          startRenamingLayer(selectedLayerIds[0]);
+          startRenamingLayer(
+            hasSelectedElements
+              ? createObjectId(elementLayerPaths[0])
+              : selectedLayerIds[0],
+          );
           return;
         }
       }
@@ -343,6 +351,7 @@ export default function useLayerMenu(
       newUseAsMaskValue,
       newIgnoreMasksValue,
       startRenamingLayer,
+      hasSelectedElements,
     ],
   );
 
