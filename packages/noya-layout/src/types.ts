@@ -5,7 +5,7 @@ export interface LayoutProperties {
   alignItems?: Parameters<YogaNode['setAlignItems']>[0];
   alignSelf?: Parameters<YogaNode['setAlignSelf']>[0];
   aspectRatio?: Parameters<YogaNode['setAspectRatio']>[0];
-  border?: Record<YogaEdge, Parameters<YogaNode['setBorder']>[1]>;
+  border?: Partial<Record<YogaEdge, Parameters<YogaNode['setBorder']>[1]>>;
   display?: Parameters<YogaNode['setDisplay']>[0];
   flex?: Parameters<YogaNode['setFlex']>[0];
   flexBasis?: Parameters<YogaNode['setFlexBasis']>[0];
@@ -18,9 +18,11 @@ export interface LayoutProperties {
   heightAuto?: boolean;
   heightPercent?: Parameters<YogaNode['setHeightPercent']>[0];
   justifyContent?: Parameters<YogaNode['setJustifyContent']>[0];
-  margin?: Record<YogaEdge, Parameters<YogaNode['setMargin']>[1]>;
-  marginAuto?: Record<YogaEdge, boolean>;
-  marginPercent?: Record<YogaEdge, Parameters<YogaNode['setMarginPercent']>[1]>;
+  margin?: Partial<Record<YogaEdge, Parameters<YogaNode['setMargin']>[1]>>;
+  marginAuto?: Partial<Record<YogaEdge, boolean>>;
+  marginPercent?: Partial<
+    Record<YogaEdge, Parameters<YogaNode['setMarginPercent']>[1]>
+  >;
   maxHeight?: Parameters<YogaNode['setMaxHeight']>[0];
   maxHeightPercent?: Parameters<YogaNode['setMaxHeightPercent']>[0];
   maxWidth?: Parameters<YogaNode['setMaxWidth']>[0];
@@ -30,15 +32,13 @@ export interface LayoutProperties {
   minWidth?: Parameters<YogaNode['setMinWidth']>[0];
   minWidthPercent?: Parameters<YogaNode['setMinWidthPercent']>[0];
   overflow?: Parameters<YogaNode['setOverflow']>[0];
-  padding?: Record<YogaEdge, Parameters<YogaNode['setPadding']>[1]>;
-  paddingPercent?: Record<
-    YogaEdge,
-    Parameters<YogaNode['setPaddingPercent']>[1]
+  padding?: Partial<Record<YogaEdge, Parameters<YogaNode['setPadding']>[1]>>;
+  paddingPercent?: Partial<
+    Record<YogaEdge, Parameters<YogaNode['setPaddingPercent']>[1]>
   >;
-  position?: Record<YogaEdge, Parameters<YogaNode['setPosition']>[1]>;
-  positionPercent?: Record<
-    YogaEdge,
-    Parameters<YogaNode['setPositionPercent']>[1]
+  position?: Partial<Record<YogaEdge, Parameters<YogaNode['setPosition']>[1]>>;
+  positionPercent?: Partial<
+    Record<YogaEdge, Parameters<YogaNode['setPositionPercent']>[1]>
   >;
   positionType?: Parameters<YogaNode['setPositionType']>[0];
   width?: Parameters<YogaNode['setWidth']>[0];

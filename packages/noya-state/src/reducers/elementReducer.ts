@@ -2,6 +2,7 @@ import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { Selectors } from 'noya-state';
 import { ElementAttributes, printSourceFile } from 'noya-typescript';
+import { Insets } from 'noya-geometry';
 import * as Layers from '../layers';
 import { getCurrentPage, getCurrentPageIndex } from '../selectors/selectors';
 import {
@@ -18,7 +19,12 @@ export type ElementAction =
     ]
   | [type: 'setElementFlexBasis', layerId: string, value: string]
   | [type: 'setElementFlexGrow', layerId: string, value: string]
-  | [type: 'setElementFlexShrink', layerId: string, value: string];
+  | [type: 'setElementFlexShrink', layerId: string, value: string]
+  | [
+      type: `setElementPadding${Capitalize<keyof Insets>}`,
+      layerId: string,
+      value: string,
+    ];
 
 function getPropertyForActionType(type: ElementAction[0]): string {
   switch (type) {
@@ -30,6 +36,14 @@ function getPropertyForActionType(type: ElementAction[0]): string {
       return 'flexGrow';
     case 'setElementFlexShrink':
       return 'flexShrink';
+    case 'setElementPaddingTop':
+      return 'paddingTop';
+    case 'setElementPaddingRight':
+      return 'paddingRight';
+    case 'setElementPaddingBottom':
+      return 'paddingBottom';
+    case 'setElementPaddingLeft':
+      return 'paddingLeft';
   }
 }
 
@@ -43,7 +57,11 @@ export function elementReducer(
     case 'setElementFlexDirection':
     case 'setElementFlexBasis':
     case 'setElementFlexGrow':
-    case 'setElementFlexShrink': {
+    case 'setElementFlexShrink':
+    case 'setElementPaddingTop':
+    case 'setElementPaddingRight':
+    case 'setElementPaddingBottom':
+    case 'setElementPaddingLeft': {
       const [, layerOrElementId, value] = action;
 
       const objectPath = Selectors.parseObjectId(layerOrElementId);

@@ -18,6 +18,32 @@ import { upperFirst } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 
+const CSSDimensionInput = memo(function CSSDimensionInput({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <InputField.Root id={id}>
+      <InputField.NumberInput
+        value={Number(value)}
+        onNudge={useCallback(
+          (amount: number) => onChange((Number(value) + amount).toString()),
+          [onChange, value],
+        )}
+        onSubmit={useCallback(
+          (value: number) => onChange(value.toString()),
+          [onChange],
+        )}
+      />
+    </InputField.Root>
+  );
+});
+
 export const ElementLayoutInspector = memo(function ElementLayoutInspector() {
   const [state, dispatch] = useApplicationState();
   const compiler = useTypescriptCompiler();
@@ -39,12 +65,24 @@ export const ElementLayoutInspector = memo(function ElementLayoutInspector() {
         flexGrow: getAttributeValue(elementLayer.attributes, 'flexGrow') ?? '1',
         flexShrink:
           getAttributeValue(elementLayer.attributes, 'flexShrink') ?? '1',
+        paddingTop:
+          getAttributeValue(elementLayer.attributes, 'paddingTop') ?? '0',
+        paddingRight:
+          getAttributeValue(elementLayer.attributes, 'paddingRight') ?? '0',
+        paddingBottom:
+          getAttributeValue(elementLayer.attributes, 'paddingBottom') ?? '0',
+        paddingLeft:
+          getAttributeValue(elementLayer.attributes, 'paddingLeft') ?? '0',
       }
     : {
         flexDirection: 'column' as const,
         flexBasis: '0',
         flexGrow: '1',
         flexShrink: '1',
+        paddingTop: '0',
+        paddingRight: '0',
+        paddingBottom: '0',
+        paddingLeft: '0',
       };
 
   const objectId = createObjectId(objectPath.layerId, objectPath.indexPath);
@@ -52,6 +90,10 @@ export const ElementLayoutInspector = memo(function ElementLayoutInspector() {
   const elementFlexBasisId = 'element-flex-basis';
   const elementFlexGrowId = 'element-flex-grow';
   const elementFlexShrinkId = 'element-flex-shrink';
+  const elementPaddingTop = 'element-padding-top';
+  const elementPaddingRight = 'element-padding-right';
+  const elementPaddingBottom = 'element-padding-bottom';
+  const elementPaddingLeft = 'element-padding-left';
 
   return (
     <>
@@ -73,75 +115,29 @@ export const ElementLayoutInspector = memo(function ElementLayoutInspector() {
               }
             }, [])}
           >
-            <InputField.Root id={elementFlexBasisId}>
-              <InputField.NumberInput
-                value={Number(layout.flexBasis)}
-                onNudge={useCallback(
-                  (value: number) => {
-                    dispatch(
-                      'setElementFlexBasis',
-                      objectId,
-                      (Number(layout.flexBasis) + value).toString(),
-                    );
-                  },
-                  [dispatch, layout.flexBasis, objectId],
-                )}
-                onSubmit={useCallback(
-                  (value: number) => {
-                    dispatch('setElementFlexBasis', objectId, value.toString());
-                  },
-                  [dispatch, objectId],
-                )}
-              />
-            </InputField.Root>
+            <CSSDimensionInput
+              id={elementFlexBasisId}
+              value={layout.flexBasis}
+              onChange={(value: string) => {
+                dispatch('setElementFlexBasis', objectId, value.toString());
+              }}
+            />
             <InspectorPrimitives.HorizontalSeparator />
-            <InputField.Root id={elementFlexGrowId}>
-              <InputField.NumberInput
-                value={Number(layout.flexGrow)}
-                onNudge={useCallback(
-                  (value: number) => {
-                    dispatch(
-                      'setElementFlexGrow',
-                      objectId,
-                      (Number(layout.flexGrow) + value).toString(),
-                    );
-                  },
-                  [dispatch, layout.flexGrow, objectId],
-                )}
-                onSubmit={useCallback(
-                  (value: number) => {
-                    dispatch('setElementFlexGrow', objectId, value.toString());
-                  },
-                  [dispatch, objectId],
-                )}
-              />
-            </InputField.Root>
+            <CSSDimensionInput
+              id={elementFlexGrowId}
+              value={layout.flexGrow}
+              onChange={(value: string) => {
+                dispatch('setElementFlexGrow', objectId, value.toString());
+              }}
+            />
             <InspectorPrimitives.HorizontalSeparator />
-            <InputField.Root id={elementFlexShrinkId}>
-              <InputField.NumberInput
-                value={Number(layout.flexShrink)}
-                onNudge={useCallback(
-                  (value: number) => {
-                    dispatch(
-                      'setElementFlexShrink',
-                      objectId,
-                      (Number(layout.flexShrink) + value).toString(),
-                    );
-                  },
-                  [dispatch, layout.flexShrink, objectId],
-                )}
-                onSubmit={useCallback(
-                  (value: number) => {
-                    dispatch(
-                      'setElementFlexShrink',
-                      objectId,
-                      value.toString(),
-                    );
-                  },
-                  [dispatch, objectId],
-                )}
-              />
-            </InputField.Root>
+            <CSSDimensionInput
+              id={elementFlexShrinkId}
+              value={layout.flexShrink}
+              onChange={(value: string) => {
+                dispatch('setElementFlexShrink', objectId, value.toString());
+              }}
+            />
           </LabeledElementView>
         </InspectorPrimitives.LabeledRow>
       </InspectorPrimitives.Section>
@@ -166,6 +162,55 @@ export const ElementLayoutInspector = memo(function ElementLayoutInspector() {
               [dispatch, objectId],
             )}
           />
+        </InspectorPrimitives.LabeledRow>
+        <InspectorPrimitives.VerticalSeparator />
+        <InspectorPrimitives.LabeledRow label="Padding">
+          <LabeledElementView
+            renderLabel={useCallback(({ id }) => {
+              switch (id) {
+                case elementPaddingTop:
+                  return <Label.Label>Top</Label.Label>;
+                case elementPaddingRight:
+                  return <Label.Label>Right</Label.Label>;
+                case elementPaddingBottom:
+                  return <Label.Label>Bottom</Label.Label>;
+                case elementPaddingLeft:
+                  return <Label.Label>Left</Label.Label>;
+              }
+            }, [])}
+          >
+            <CSSDimensionInput
+              id={elementPaddingTop}
+              value={layout.paddingTop}
+              onChange={(value: string) => {
+                dispatch('setElementPaddingTop', objectId, value.toString());
+              }}
+            />
+            <InspectorPrimitives.HorizontalSeparator />
+            <CSSDimensionInput
+              id={elementPaddingRight}
+              value={layout.paddingRight}
+              onChange={(value: string) => {
+                dispatch('setElementPaddingRight', objectId, value.toString());
+              }}
+            />
+            <InspectorPrimitives.HorizontalSeparator />
+            <CSSDimensionInput
+              id={elementPaddingBottom}
+              value={layout.paddingBottom}
+              onChange={(value: string) => {
+                dispatch('setElementPaddingBottom', objectId, value.toString());
+              }}
+            />
+            <InspectorPrimitives.HorizontalSeparator />
+            <CSSDimensionInput
+              id={elementPaddingLeft}
+              value={layout.paddingLeft}
+              onChange={(value: string) => {
+                dispatch('setElementPaddingLeft', objectId, value.toString());
+              }}
+            />
+          </LabeledElementView>
         </InspectorPrimitives.LabeledRow>
       </InspectorPrimitives.Section>
     </>

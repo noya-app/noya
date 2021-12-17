@@ -585,6 +585,10 @@ export function applicationReducer(
     case 'setElementFlexBasis':
     case 'setElementFlexGrow':
     case 'setElementFlexShrink':
+    case 'setElementPaddingTop':
+    case 'setElementPaddingRight':
+    case 'setElementPaddingBottom':
+    case 'setElementPaddingLeft':
       return elementReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);

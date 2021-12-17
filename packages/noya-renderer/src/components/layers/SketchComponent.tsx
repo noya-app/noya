@@ -2,6 +2,7 @@ import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import {
   createLayoutNode,
+  Edge,
   FlexDirection,
   LayoutNode,
   LayoutProperties,
@@ -192,12 +193,29 @@ export function elementLayerToLayoutNode(
     parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexGrow')) ?? 1;
   const flexShrink =
     parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexShrink')) ?? 1;
+  const paddingTop =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingTop')) ?? 0;
+  const paddingRight =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingRight')) ??
+    0;
+  const paddingBottom =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingBottom')) ??
+    0;
+  const paddingLeft =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingLeft')) ??
+    0;
 
   const properties: LayoutProperties = {
     flexDirection: FlexDirection[flexDirection],
     flexBasis,
     flexGrow,
     flexShrink,
+    padding: {
+      [Edge.top]: paddingTop,
+      [Edge.right]: paddingRight,
+      [Edge.bottom]: paddingBottom,
+      [Edge.left]: paddingLeft,
+    },
   };
 
   return createLayoutNode(
