@@ -87,22 +87,14 @@ const MeasuredElement = memo(function MeasuredElement({
       : 'rgba(0,0,0,0)',
   );
 
+  const left = measuredLayout.getComputedLeft();
+  const top = measuredLayout.getComputedTop();
+  const width = measuredLayout.getComputedWidth();
+  const height = measuredLayout.getComputedHeight();
+
   return (
-    <Group
-      transform={AffineTransform.translate(
-        measuredLayout.getComputedLeft(),
-        measuredLayout.getComputedTop(),
-      )}
-    >
-      <Rect
-        paint={paint}
-        rect={CanvasKit.XYWHRect(
-          0,
-          0,
-          measuredLayout.getComputedWidth(),
-          measuredLayout.getComputedHeight(),
-        )}
-      />
+    <Group transform={AffineTransform.translate(left, top)}>
+      <Rect paint={paint} rect={CanvasKit.XYWHRect(0, 0, width, height)} />
       {elementLayer.children.map((child, index) => (
         <MeasuredElement
           key={index}
@@ -185,7 +177,9 @@ export default memo(function SketchComponent({ layer }: Props) {
   );
 });
 
-function elementLayerToLayoutNode(elementLayer: ElementLayer): LayoutNode {
+export function elementLayerToLayoutNode(
+  elementLayer: ElementLayer,
+): LayoutNode {
   const flexDirection =
     getAttributeValue<ElementFlexDirection>(
       elementLayer.attributes,

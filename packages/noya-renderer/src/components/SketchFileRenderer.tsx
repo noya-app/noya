@@ -12,6 +12,7 @@ import {
   encodeCurvePoint,
   getClippedLayerMap,
   Layers,
+  parseObjectId,
   Primitives,
   Selectors,
 } from 'noya-state';
@@ -202,9 +203,13 @@ export default memo(function SketchFileRenderer() {
       return;
     }
 
+    const { layerId, indexPath: elementIndexPath } = parseObjectId(
+      highlightedLayer.id,
+    );
+
     const indexPath = Layers.findIndexPath(
       page,
-      (layer) => layer.do_objectID === highlightedLayer.id,
+      (layer) => layerId === layer.do_objectID,
     );
 
     if (!indexPath) return;
@@ -217,7 +222,11 @@ export default memo(function SketchFileRenderer() {
 
     return (
       highlightedLayer && (
-        <HoverOutline transform={layerTransform} layer={layer} />
+        <HoverOutline
+          transform={layerTransform}
+          layer={layer}
+          elementIndexPath={elementIndexPath}
+        />
       )
     );
   }, [highlightedLayer, page, state.selectedLayerIds]);
