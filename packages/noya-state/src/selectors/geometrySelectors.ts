@@ -28,12 +28,13 @@ import {
   getComponentLayer,
   TypescriptEnvironment,
 } from 'noya-typescript';
-import { zip } from 'noya-utils';
+import { isShallowEqual, zip } from 'noya-utils';
 import { SKIP, STOP, VisitOptions, withOptions } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { getDragHandles } from '../selection';
+import { ElementLayerPath, parseObjectId } from './componentSelectors';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import {
   getCurrentPage,
@@ -65,6 +66,16 @@ export type LayerTraversalOptions = {
   includeLockedLayers?: boolean;
 
   /**
+   * The default is false
+   */
+  includeElements?: boolean;
+
+  /**
+   * The TypescriptEnvironment is required to traverse into elements
+   */
+  typescriptEnvironment?: TypescriptEnvironment | false;
+
+  /**
    * The default is `groupOnly`
    */
   groups?: 'groupOnly' | 'childrenOnly' | 'groupAndChildren';
@@ -86,8 +97,10 @@ export type LayerTraversalOptions = {
 const DEFAULT_TRAVERSAL_OPTIONS: Required<LayerTraversalOptions> = {
   includeHiddenLayers: false,
   includeLockedLayers: true,
+  includeElements: false,
   groups: 'groupOnly',
   artboards: 'childrenOnly',
+  typescriptEnvironment: false,
 };
 
 function shouldVisitChildren(
@@ -323,6 +336,57 @@ export function getBoundingRect(
   };
 
   visitLayersReversed(rootLayer, options, (layer, indexPath) => {
+    if (
+      options.includeElements &&
+      options.typescriptEnvironment &&
+      Layers.isComponentContainer(layer)
+    ) {
+      const elementPaths: ElementLayerPath[] = layerIds
+        .filter((id) => id.startsWith(layer.do_objectID))
+        .map(parseObjectId)
+        .flatMap(({ indexPath, layerId }) =>
+          indexPath ? [{ indexPath, layerId }] : [],
+        );
+
+      const sourceFile = getSourceFileForId(
+        options.typescriptEnvironment,
+        layer.do_objectID,
+      );
+
+      if (!sourceFile) return;
+
+      const componentLayer = getComponentLayer(sourceFile);
+
+      if (!componentLayer) return;
+
+      const layoutNode = elementLayerToLayoutNode(componentLayer.element);
+
+      const measuredLayout = measureLayout(layoutNode, layer.frame);
+
+      visitElementLayers(
+        layer.frame,
+        componentLayer.element,
+        measuredLayout,
+        (elementLayer, rect) => {
+          if (
+            !elementPaths.some((elementPath) =>
+              isShallowEqual(elementLayer.indexPath, elementPath.indexPath),
+            )
+          )
+            return;
+
+          const localPoints = getRectCornerPoints(rect);
+          const xs = localPoints.map((point) => point.x);
+          const ys = localPoints.map((point) => point.y);
+
+          bounds.minX = Math.min(bounds.minX, ...xs);
+          bounds.minY = Math.min(bounds.minY, ...ys);
+          bounds.maxX = Math.max(bounds.maxX, ...xs);
+          bounds.maxY = Math.max(bounds.maxY, ...ys);
+        },
+      );
+    }
+
     if (!layerIds.includes(layer.do_objectID)) return;
 
     const transform = AffineTransform.multiply(

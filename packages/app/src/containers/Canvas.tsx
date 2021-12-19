@@ -725,29 +725,28 @@ export default memo(function Canvas() {
             },
           );
 
-          if (layer && Layers.isComponentContainer(layer)) {
-            const element = Selectors.getElementAtPoint(
-              CanvasKit,
-              fontManager,
-              state,
-              insets,
-              rawPoint,
-              layer,
-              compiler.environment,
-            );
+          const element =
+            layer && Layers.isComponentContainer(layer)
+              ? Selectors.getElementAtPoint(
+                  CanvasKit,
+                  fontManager,
+                  state,
+                  insets,
+                  rawPoint,
+                  layer,
+                  compiler.environment,
+                )
+              : undefined;
 
-            if (element) {
-              highlightLayer(
-                layer
-                  ? {
-                      id: createObjectId(layer.do_objectID, element.indexPath),
-                      precedence: 'belowSelection',
-                      isMeasured: event.altKey,
-                    }
-                  : undefined,
-              );
-            }
-          }
+          highlightLayer(
+            element && layer
+              ? {
+                  id: createObjectId(layer.do_objectID, element.indexPath),
+                  precedence: 'aboveSelection',
+                  isMeasured: event.altKey,
+                }
+              : undefined,
+          );
           break;
         }
         case 'editPath': {

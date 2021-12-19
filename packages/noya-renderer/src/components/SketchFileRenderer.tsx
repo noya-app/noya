@@ -16,6 +16,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
+import { useTypescriptCompiler } from 'noya-typescript';
 import { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
@@ -129,13 +130,16 @@ export default memo(function SketchFileRenderer() {
   } = useTheme().colors;
   const backgroundFill = useColorFill(backgroundColor);
 
+  const compiler = useTypescriptCompiler();
   const boundingRect = useMemo(
     () =>
       Selectors.getBoundingRect(page, state.selectedLayerIds, {
         groups: 'childrenOnly',
         includeHiddenLayers: true,
+        includeElements: true,
+        typescriptEnvironment: compiler.environment,
       }),
-    [page, state.selectedLayerIds],
+    [compiler.environment, page, state.selectedLayerIds],
   );
 
   const quickMeasureGuides = useMemo(() => {
