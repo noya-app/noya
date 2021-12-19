@@ -1,22 +1,50 @@
+import { useApplicationState } from 'noya-app-state-context';
 import { InputField, Slider, Spacer } from 'noya-designsystem';
-import { getMultiNumberValue, Selectors } from 'noya-state';
+import { useShallowArray } from 'noya-react-utils';
+import {
+  getElementLayerForObjectPath,
+  getMultiNumberValue,
+  getSelectedElementLayerPaths,
+  Selectors,
+} from 'noya-state';
+import {
+  getAttributeValue,
+  parseIntSafe,
+  useTypescriptCompiler,
+} from 'noya-typescript';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function RadiusInspector() {
-  const [, dispatch] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
+
+  const compiler = useTypescriptCompiler();
+  const selectedElementPaths = getSelectedElementLayerPaths(state);
+  const elementLayers = selectedElementPaths.flatMap((elementPath) => {
+    const elementLayer = getElementLayerForObjectPath(
+      compiler.environment,
+      elementPath,
+    );
+    return elementLayer ? [elementLayer] : [];
+  });
 
   const selectedLayers = useShallowArray(
-    useSelector(Selectors.getSelectedLayersWithFixedRadius),
+    Selectors.getSelectedLayersWithFixedRadius(state),
   );
 
-  const radii = useShallowArray(
-    selectedLayers.flatMap((layer) => layer.fixedRadius),
+  const radiusValue = useMemo(
+    () =>
+      getMultiNumberValue([
+        ...selectedLayers.flatMap((layer) => layer.fixedRadius),
+        ...elementLayers.map(
+          (elementLayer) =>
+            parseIntSafe(
+              getAttributeValue(elementLayer.attributes, 'borderRadius'),
+            ) ?? 0,
+        ),
+      ]),
+    [elementLayers, selectedLayers],
   );
-
-  const radiusValue = useMemo(() => getMultiNumberValue(radii), [radii]);
 
   const handleSubmitRadius = useCallback(
     (value: number) => {

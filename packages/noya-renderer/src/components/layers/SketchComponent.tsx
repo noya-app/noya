@@ -1,8 +1,14 @@
 import Sketch from 'noya-file-format';
-import { AffineTransform } from 'noya-geometry';
+import { AffineTransform, getRectCornerPoints } from 'noya-geometry';
 import { measureLayout, YogaNode } from 'noya-layout';
-import { ClipProps, useColorFill, usePaint } from 'noya-react-canvaskit';
-import { Group, Rect as RCKRect, Rect, useCanvasKit } from 'noya-renderer';
+import {
+  ClipProps,
+  useColorFill,
+  useDeletable,
+  usePaint,
+} from 'noya-react-canvaskit';
+import { Group, Rect as RCKRect, Path, useCanvasKit } from 'noya-renderer';
+import { PointString, SketchModel } from 'noya-sketch-model';
 import {
   elementLayerToLayoutNode,
   getSourceFileForId,
@@ -10,7 +16,9 @@ import {
 } from 'noya-state';
 import {
   ElementLayer,
+  getAttributeValue,
   getComponentLayer,
+  parseIntSafe,
   useTypescriptCompiler,
 } from 'noya-typescript';
 import { memo, useMemo } from 'react';
@@ -72,20 +80,35 @@ const MeasuredElement = memo(function MeasuredElement({
 }) {
   const CanvasKit = useCanvasKit();
   const paint = useColorFill(
-    elementLayer.attributes.background &&
-      elementLayer.attributes.background.type === 'stringLiteral'
-      ? elementLayer.attributes.background.value
-      : 'rgba(0,0,0,0)',
+    getAttributeValue(elementLayer.attributes, 'background') ?? 'rgba(0,0,0,0)',
   );
+  const borderRadius =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'borderRadius')) ??
+    0;
 
   const left = measuredLayout.getComputedLeft();
   const top = measuredLayout.getComputedTop();
   const width = measuredLayout.getComputedWidth();
   const height = measuredLayout.getComputedHeight();
 
+  const rect = useMemo(() => ({ x: 0, y: 0, width, height }), [height, width]);
+  const points = getRectCornerPoints(rect);
+  const curvePoints = points.map((point) =>
+    SketchModel.curvePoint({
+      point: PointString.encode(Primitives.unscalePoint(point, rect)),
+      cornerRadius: borderRadius,
+    }),
+  );
+
+  const path = useMemo(
+    () => Primitives.path(CanvasKit, curvePoints, rect, true),
+    [CanvasKit, curvePoints, rect],
+  );
+  useDeletable(path);
+
   return (
     <Group transform={AffineTransform.translate(left, top)}>
-      <Rect paint={paint} rect={CanvasKit.XYWHRect(0, 0, width, height)} />
+      <Path path={path} paint={paint} />
       {elementLayer.children.map((child, index) => (
         <MeasuredElement
           key={index}

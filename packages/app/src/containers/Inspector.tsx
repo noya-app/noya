@@ -131,6 +131,7 @@ export default memo(function Inspector() {
 
     const views: ReactNode[] = [
       <ElementLayoutInspector />,
+      <RadiusInspector />,
       <ElementFillInspector title="Fills" />,
     ];
 

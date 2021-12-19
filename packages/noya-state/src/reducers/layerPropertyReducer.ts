@@ -2,7 +2,13 @@ import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
-import { ElementAttributes, printSourceFile } from 'noya-typescript';
+import {
+  ElementAttributes,
+  getAttributeValue,
+  parseIntSafe,
+  printSourceFile,
+} from 'noya-typescript';
+import { zip } from 'noya-utils';
 import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
@@ -152,6 +158,55 @@ export function layerPropertyReducer(
       const [, amount, mode = 'replace'] = action;
       const pageIndex = getCurrentPageIndex(state);
       const layerIndexPaths = getSelectedLayerIndexPaths(state);
+      const elementPaths = Selectors.getSelectedElementLayerPaths(state);
+
+      if (elementPaths.length > 0) {
+        const componentLayerIndexPaths = elementPaths.map((elementPath) =>
+          Layers.findIndexPath(
+            Selectors.getCurrentPage(state),
+            (layer) => layer.do_objectID === elementPath.layerId,
+          ),
+        );
+
+        state = produce(state, (draft) => {
+          zip(elementPaths, componentLayerIndexPaths).forEach(
+            ([elementPath, componentLayerIndexPath]) => {
+              if (!componentLayerIndexPath) return;
+
+              const draftLayer = Layers.access(
+                draft.sketch.pages[pageIndex],
+                componentLayerIndexPath,
+              ) as Sketch.ComponentContainer;
+
+              const editable = Selectors.getEditableElementLayer(
+                context.typescriptEnvironment,
+                elementPath,
+              );
+
+              if (!editable) return;
+
+              const { sourceFile, elementLayer } = editable;
+
+              const borderRadius =
+                parseIntSafe(
+                  getAttributeValue(elementLayer.attributes, 'borderRadius'),
+                ) ?? 0;
+
+              const newValue =
+                mode === 'replace' ? amount : borderRadius + amount;
+
+              const result = ElementAttributes.setAttribute(
+                sourceFile,
+                elementLayer.indexPath,
+                'borderRadius',
+                Math.max(0, newValue).toString(),
+              );
+
+              draftLayer.component.source = printSourceFile(result);
+            },
+          );
+        });
+      }
 
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
