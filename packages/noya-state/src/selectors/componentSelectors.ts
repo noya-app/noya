@@ -1,10 +1,19 @@
 import { Draft } from 'immer';
-import { ApplicationState } from 'noya-state';
+import {
+  createLayoutNode,
+  Edge,
+  FlexDirection,
+  LayoutNode,
+  LayoutProperties,
+} from 'noya-layout';
+import { ApplicationState, ElementFlexDirection } from 'noya-state';
 import {
   ComponentLayer,
   ElementLayer,
   ElementTree,
+  getAttributeValue,
   getComponentLayer,
+  parseIntSafe,
   TypescriptEnvironment,
 } from 'noya-typescript';
 import { isDeepEqual } from 'noya-utils';
@@ -142,3 +151,49 @@ export const getSelectedElementLayers = (
     return elementLayer ? [elementLayer] : [];
   });
 };
+
+export function elementLayerToLayoutNode(
+  elementLayer: ElementLayer,
+): LayoutNode {
+  const flexDirection =
+    getAttributeValue<ElementFlexDirection>(
+      elementLayer.attributes,
+      'flexDirection',
+    ) ?? 'column';
+
+  const flexBasis =
+    getAttributeValue(elementLayer.attributes, 'flexBasis') ?? 0;
+  const flexGrow =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexGrow')) ?? 1;
+  const flexShrink =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexShrink')) ?? 1;
+  const paddingTop =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingTop')) ?? 0;
+  const paddingRight =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingRight')) ??
+    0;
+  const paddingBottom =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingBottom')) ??
+    0;
+  const paddingLeft =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingLeft')) ??
+    0;
+
+  const properties: LayoutProperties = {
+    flexDirection: FlexDirection[flexDirection],
+    flexBasis,
+    flexGrow,
+    flexShrink,
+    padding: {
+      [Edge.top]: paddingTop,
+      [Edge.right]: paddingRight,
+      [Edge.bottom]: paddingBottom,
+      [Edge.left]: paddingLeft,
+    },
+  };
+
+  return createLayoutNode(
+    properties,
+    elementLayer.children.map(elementLayerToLayoutNode),
+  );
+}

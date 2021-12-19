@@ -18,6 +18,7 @@ import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
+  InsertableElementType,
   InteractionType,
   Layers,
   Selectors,
@@ -32,7 +33,11 @@ type InteractionStateProjection =
       type: 'insert';
       layerType: DrawableLayerType;
     }
-  | { type: Exclude<InteractionType, 'insert'> };
+  | {
+      type: 'insertingElement';
+      elementType: InsertableElementType;
+    }
+  | { type: Exclude<InteractionType, 'insert' | 'insertingElement'> };
 
 type InsertMenuLayerType =
   | 'artboard'
@@ -42,7 +47,9 @@ type InsertMenuLayerType =
   | 'vector'
   | 'text'
   | 'slice'
-  | 'componentContainer';
+  | 'componentContainer'
+  | 'view'
+  | 'textView';
 
 type ZoomMenuType =
   | 'zoomIn'
@@ -87,10 +94,13 @@ const ToolbarContent = memo(function ToolbarContent({
   const isInsertingLayerType =
     interactionStateProjection.type === 'insert'
       ? interactionStateProjection.layerType
+      : interactionStateProjection.type === 'insertingElement'
+      ? interactionStateProjection.elementType
       : undefined;
 
   const isInsertComponentContainer =
     isInsertingLayerType === 'componentContainer';
+  const isInsertView = isInsertingLayerType === 'view';
   const isInsertArtboard = isInsertingLayerType === 'artboard';
   const isInsertRectangle = isInsertingLayerType === 'rectangle';
   const isInsertOval = isInsertingLayerType === 'oval';
@@ -113,6 +123,20 @@ const ToolbarContent = memo(function ToolbarContent({
       shortcut: 'c',
       disabled: isEditingText,
       icon: <LayerIcon type="componentContainer" />,
+    },
+    {
+      title: 'View',
+      value: 'view',
+      shortcut: ',',
+      disabled: isEditingText,
+      icon: <LayerIcon type="element" />,
+    },
+    {
+      title: 'TextView',
+      value: 'textView',
+      shortcut: '.',
+      disabled: isEditingText,
+      icon: <LayerIcon type="text" />,
     },
   ];
 
@@ -221,13 +245,6 @@ const ToolbarContent = memo(function ToolbarContent({
               dispatch('interaction', ['insert', 'artboard']);
             }
             break;
-          case 'componentContainer':
-            if (isInsertComponentContainer) {
-              dispatch('interaction', ['reset']);
-            } else {
-              dispatch('interaction', ['insert', 'componentContainer']);
-            }
-            break;
           case 'rectangle':
             if (isInsertRectangle) {
               dispatch('interaction', ['reset']);
@@ -266,18 +283,33 @@ const ToolbarContent = memo(function ToolbarContent({
           case 'vector':
             dispatch('interaction', ['drawingShapePath']);
             break;
+          case 'componentContainer':
+            if (isInsertComponentContainer) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insert', 'componentContainer']);
+            }
+            break;
+          case 'view':
+            if (isInsertView) {
+              dispatch('interaction', ['reset']);
+            } else {
+              dispatch('interaction', ['insertingElement', 'view']);
+            }
+            break;
         }
       }
     },
     [
       dispatch,
       isInsertArtboard,
-      isInsertLine,
-      isInsertOval,
       isInsertRectangle,
-      isInsertSlice,
+      isInsertOval,
+      isInsertLine,
       isInsertText,
+      isInsertSlice,
       isInsertComponentContainer,
+      isInsertView,
     ],
   );
 
@@ -411,12 +443,19 @@ export default function Toolbar() {
       ? state.interactionState.layerType
       : undefined;
 
+  const elementType =
+    state.interactionState.type === 'insertingElement'
+      ? state.interactionState.elementType
+      : undefined;
+
   const projection = useMemo(
     (): InteractionStateProjection =>
       state.interactionState.type === 'insert'
         ? { type: 'insert', layerType: layerType! }
+        : state.interactionState.type === 'insertingElement'
+        ? { type: 'insertingElement', elementType: elementType! }
         : { type: state.interactionState.type },
-    [state.interactionState.type, layerType],
+    [state.interactionState.type, layerType, elementType],
   );
 
   const canStartEditingPath =

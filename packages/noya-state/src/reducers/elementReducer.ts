@@ -1,17 +1,36 @@
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { Selectors } from 'noya-state';
-import { ElementAttributes, printSourceFile } from 'noya-typescript';
-import { Insets } from 'noya-geometry';
+import {
+  ElementAttributes,
+  Element,
+  printSourceFile,
+  getComponentLayer,
+} from 'noya-typescript';
+import { Insets, Point } from 'noya-geometry';
 import * as Layers from '../layers';
-import { getCurrentPage, getCurrentPageIndex } from '../selectors/selectors';
+import {
+  createObjectId,
+  getCurrentPage,
+  getCurrentPageIndex,
+  getElementLayerForComponentLayer,
+  getSourceFileForId,
+} from '../selectors/selectors';
 import {
   ApplicationReducerContext,
   ApplicationState,
 } from './applicationReducer';
+import { InsertableElementType } from './interactionReducer';
+import { SourceFile } from 'typescript';
 
 export type ElementFlexDirection = 'row' | 'column';
 export type ElementAction =
+  | [
+      type: 'insertElement',
+      layerId: string,
+      elementType: InsertableElementType,
+      point: Point,
+    ]
   | [
       type: 'setElementFlexDirection',
       layerId: string,
@@ -26,7 +45,9 @@ export type ElementAction =
       value: string,
     ];
 
-function getPropertyForActionType(type: ElementAction[0]): string {
+function getPropertyForActionType(
+  type: Exclude<ElementAction[0], 'insertElement'>,
+): string {
   switch (type) {
     case 'setElementFlexDirection':
       return 'flexDirection';
@@ -54,6 +75,7 @@ export function elementReducer(
   context: ApplicationReducerContext,
 ): ApplicationState {
   switch (action[0]) {
+    case 'insertElement':
     case 'setElementFlexDirection':
     case 'setElementFlexBasis':
     case 'setElementFlexGrow':
@@ -80,24 +102,78 @@ export function elementReducer(
           indexPath,
         );
 
-        if (!objectPath.indexPath || !Layers.isComponentContainer(draftLayer))
-          return;
+        if (!Layers.isComponentContainer(draftLayer)) return;
 
-        const editable = Selectors.getEditableElementLayer(
-          context.typescriptEnvironment,
-          objectPath,
-        );
+        let result: SourceFile;
 
-        if (!editable) return;
+        switch (action[0]) {
+          case 'insertElement': {
+            const sourceFile = getSourceFileForId(
+              context.typescriptEnvironment,
+              objectPath.layerId,
+            );
 
-        const { sourceFile, elementLayer } = editable;
+            if (!sourceFile) return;
 
-        const result = ElementAttributes.setAttribute(
-          sourceFile,
-          elementLayer.indexPath,
-          getPropertyForActionType(action[0]),
-          value,
-        );
+            const componentLayer = getComponentLayer(sourceFile);
+
+            if (!componentLayer) return;
+
+            const elementLayer = objectPath.indexPath
+              ? getElementLayerForComponentLayer(
+                  componentLayer,
+                  objectPath.indexPath,
+                )
+              : componentLayer.element;
+
+            if (!elementLayer) return;
+
+            result = Element.addChild(
+              sourceFile,
+              elementLayer.indexPath,
+              'View',
+            );
+
+            const resultComponentLayer = getComponentLayer(result);
+
+            // Update selection
+            if (resultComponentLayer) {
+              const resultElement = getElementLayerForComponentLayer(
+                resultComponentLayer,
+                elementLayer.indexPath,
+              );
+
+              if (resultElement && resultElement.children.length > 0) {
+                draft.selectedLayerIds = [
+                  createObjectId(
+                    objectPath.layerId,
+                    resultElement.children[resultElement.children.length - 1]
+                      .indexPath,
+                  ),
+                ];
+              }
+            }
+
+            break;
+          }
+          default: {
+            const editable = Selectors.getEditableElementLayer(
+              context.typescriptEnvironment,
+              objectPath,
+            );
+
+            if (!editable) return;
+
+            const { sourceFile, elementLayer } = editable;
+
+            result = ElementAttributes.setAttribute(
+              sourceFile,
+              elementLayer.indexPath,
+              getPropertyForActionType(action[0]),
+              value,
+            );
+          }
+        }
 
         draftLayer.component.source = printSourceFile(result);
       });

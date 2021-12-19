@@ -15,10 +15,21 @@ import {
   Size,
   transformRect,
 } from 'noya-geometry';
+import { measureLayout, YogaNode } from 'noya-layout';
 import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
-import { ScalingOptions } from 'noya-state';
-import { SKIP, STOP, VisitOptions } from 'tree-visit';
+import {
+  elementLayerToLayoutNode,
+  getSourceFileForId,
+  ScalingOptions,
+} from 'noya-state';
+import {
+  ElementLayer,
+  getComponentLayer,
+  TypescriptEnvironment,
+} from 'noya-typescript';
+import { zip } from 'noya-utils';
+import { SKIP, STOP, VisitOptions, withOptions } from 'tree-visit';
 import { ApplicationState, Layers, PageLayer } from '../index';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
@@ -496,4 +507,78 @@ export function getDrawnLayerRect(
   }
 
   return createRect(origin, current);
+}
+
+type ElementLayoutPair = [ElementLayer, YogaNode];
+
+const ElementLayoutPairs = withOptions<ElementLayoutPair>({
+  getChildren: ([elementLayer, yogaNode]) => {
+    const yogaChildren: YogaNode[] = [];
+    for (let i = 0; i < yogaNode.getChildCount(); i++) {
+      yogaChildren.push(yogaNode.getChild(i));
+    }
+    return zip(elementLayer.children, yogaChildren);
+  },
+});
+
+export function getElementAtPoint(
+  CanvasKit: CanvasKit,
+  fontManager: IFontManager,
+  state: ApplicationState,
+  insets: Insets,
+  point: Point,
+  layer: Sketch.ComponentContainer,
+  typescriptEnvironment: TypescriptEnvironment,
+): ElementLayer | undefined {
+  // const page = getCurrentPage(state);
+  // const { zoomValue } = getCurrentPageMetadata(state);
+  // const canvasTransform = getCanvasTransform(state, insets);
+  // const screenTransform = getScreenTransform(insets);
+
+  // const screenPoint = screenTransform.applyTo(point);
+
+  const sourceFile = getSourceFileForId(
+    typescriptEnvironment,
+    layer.do_objectID,
+  );
+
+  if (!sourceFile) return;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  if (!componentLayer) return;
+
+  const layoutNode = elementLayerToLayoutNode(componentLayer.element);
+
+  const measuredLayout = measureLayout(layoutNode, layer.frame);
+
+  let offset = { x: layer.frame.x, y: layer.frame.y };
+  let found: ElementLayer[] = [];
+
+  ElementLayoutPairs.visit([componentLayer.element, measuredLayout], {
+    onEnter: ([elementLayer, yogaNode]) => {
+      const left = yogaNode.getComputedLeft();
+      const top = yogaNode.getComputedTop();
+      const width = yogaNode.getComputedWidth();
+      const height = yogaNode.getComputedHeight();
+
+      offset.x += left;
+      offset.y += top;
+
+      const rect = { ...offset, width, height };
+
+      if (rectContainsPoint(rect, point)) {
+        found.push(elementLayer);
+      }
+    },
+    onLeave: ([, yogaNode]) => {
+      const left = yogaNode.getComputedLeft();
+      const top = yogaNode.getComputedTop();
+
+      offset.x -= left;
+      offset.y -= top;
+    },
+  });
+
+  return found.length > 0 ? found[found.length - 1] : undefined;
 }

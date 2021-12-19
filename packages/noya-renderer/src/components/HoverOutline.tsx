@@ -3,7 +3,12 @@ import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { measureLayout, YogaNode } from 'noya-layout';
 import { useStroke } from 'noya-react-canvaskit';
-import { getSourceFileForId, Layers, Selectors } from 'noya-state';
+import {
+  elementLayerToLayoutNode,
+  getSourceFileForId,
+  Layers,
+  Selectors,
+} from 'noya-state';
 import {
   ElementLayer,
   getComponentLayer,
@@ -17,7 +22,6 @@ import { useCanvasKit } from '../hooks/useCanvasKit';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
 import { useZoom } from '../ZoomContext';
-import { elementLayerToLayoutNode } from './layers/SketchComponent';
 
 interface HoverOutlinePathProps {
   layer: Layers.PointsLayer | Sketch.ShapeGroup;

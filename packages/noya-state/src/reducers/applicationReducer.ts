@@ -589,6 +589,7 @@ export function applicationReducer(
     case 'setElementPaddingRight':
     case 'setElementPaddingBottom':
     case 'setElementPaddingLeft':
+    case 'insertElement':
       return elementReducer(state, action, CanvasKit, context);
     default:
       return themeReducer(state, action);

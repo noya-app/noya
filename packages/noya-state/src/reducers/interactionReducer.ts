@@ -35,6 +35,8 @@ export type DrawableLayerType =
   | 'slice'
   | 'componentContainer';
 
+export type InsertableElementType = 'view' | 'textView';
+
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 
 // These actions need to be augmented by additional state (a snapshot of the
@@ -49,6 +51,11 @@ export type SnapshotInteractionAction =
 export type InteractionAction =
   | [type: 'reset']
   | [type: 'insert', layerType: DrawableLayerType, current?: Point]
+  | [
+      type: 'insertingElement',
+      layerType: InsertableElementType,
+      current?: Point,
+    ]
   | [type: `insertingSymbol`, id: UUID, current?: Point]
   | [type: 'editPath', current?: Point]
   | [type: 'drawingShapePath', current?: Point]
@@ -88,6 +95,11 @@ export type InteractionState =
   | {
       type: 'insertingSymbol';
       symbolID: UUID;
+      point?: Point;
+    }
+  | {
+      type: 'insertingElement';
+      elementType: InsertableElementType;
       point?: Point;
     }
   | {
@@ -214,6 +226,10 @@ export function interactionReducer(
     case 'insertingSymbol': {
       const [, symbolID, point] = action;
       return { type: 'insertingSymbol', symbolID, point };
+    }
+    case 'insertingElement': {
+      const [, elementType, point] = action;
+      return { type: 'insertingElement', elementType, point };
     }
     case 'hoverHandle': {
       const [type, direction] = action;

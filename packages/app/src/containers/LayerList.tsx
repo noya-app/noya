@@ -65,7 +65,7 @@ const IconContainer = styled.span(({ theme }) => ({
 type LayerType = PageLayer['_class'];
 
 type LayerListItem = {
-  type: LayerType | 'line' | 'component';
+  type: LayerType | 'line' | 'element';
   id: string;
   name: string;
   depth: number;
@@ -125,7 +125,8 @@ function flattenLayerList(
 
       if (
         Layers.isComponentContainer(layer) &&
-        layer.do_objectID in componentLayers
+        layer.do_objectID in componentLayers &&
+        layer.layerListExpandedType !== Sketch.LayerListExpanded.Collapsed
       ) {
         const component = componentLayers[layer.do_objectID];
 
@@ -142,7 +143,7 @@ function flattenLayerList(
           );
 
           flattened.push({
-            type: 'component',
+            type: 'element',
             id: elementId,
             name: customName ?? element.tagName,
             depth: indexPath.length + elementPath.length,
@@ -167,7 +168,7 @@ export const LayerIcon = memo(function LayerIcon({
   selected,
   variant,
 }: {
-  type: LayerType | 'line' | 'component';
+  type: LayerType | 'line' | 'element';
   selected?: boolean;
   variant?: 'primary';
 }) {
@@ -207,7 +208,7 @@ export const LayerIcon = memo(function LayerIcon({
       return <LineIcon color={color} />;
     case 'componentContainer':
       return <Component2Icon color={color} />;
-    case 'component':
+    case 'element':
       return <ComponentInstanceIcon color={color} />;
     default:
       return null;
@@ -498,7 +499,10 @@ export default memo(function LayerList({
 
       const isSymbolClass =
         type === 'symbolInstance' || type === 'symbolMaster';
-      const isArtboardClass = type === 'artboard' || type === 'symbolMaster';
+      const isArtboardClass =
+        type === 'artboard' ||
+        type === 'symbolMaster' ||
+        type === 'componentContainer';
       const isGroupClass =
         isArtboardClass || type === 'group' || type === 'shapeGroup';
 

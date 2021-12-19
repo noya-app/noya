@@ -34,6 +34,7 @@ import {
   SelectedPoint,
   Selectors,
   InsertedImage,
+  createObjectId,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
 import {
@@ -55,6 +56,7 @@ import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { useSize } from '../hooks/useSize';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
 import { decode } from 'noya-sketch-file';
+import { useTypescriptCompiler } from 'noya-typescript';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -115,6 +117,7 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
 
 export default memo(function Canvas() {
   const theme = useTheme();
+  const compiler = useTypescriptCompiler();
   const {
     sizes: {
       sidebarWidth,
@@ -357,6 +360,47 @@ export default memo(function Canvas() {
           dispatch('interaction', ['reset']);
           break;
         }
+        case 'insertingElement': {
+          const layer = Selectors.getLayerAtPoint(
+            CanvasKit,
+            fontManager,
+            state,
+            insets,
+            rawPoint,
+            {
+              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
+            },
+          );
+
+          if (layer && Layers.isComponentContainer(layer)) {
+            const element = Selectors.getElementAtPoint(
+              CanvasKit,
+              fontManager,
+              state,
+              insets,
+              rawPoint,
+              layer,
+              compiler.environment,
+            );
+
+            const parentObjectId = createObjectId(
+              layer.do_objectID,
+              element?.indexPath,
+            );
+
+            dispatch(
+              'insertElement',
+              parentObjectId,
+              state.interactionState.elementType,
+              point,
+            );
+          }
+
+          dispatch('interaction', ['reset']);
+          break;
+        }
         case 'panMode': {
           dispatch('interaction', ['maybePan', rawPoint]);
 
@@ -500,6 +544,26 @@ export default memo(function Canvas() {
             },
           );
 
+          if (event.metaKey && layer && Layers.isComponentContainer(layer)) {
+            const element = Selectors.getElementAtPoint(
+              CanvasKit,
+              fontManager,
+              state,
+              insets,
+              rawPoint,
+              layer,
+              compiler.environment,
+            );
+
+            if (element) {
+              dispatch(
+                'selectLayer',
+                createObjectId(layer.do_objectID, element.indexPath),
+              );
+              return;
+            }
+          }
+
           const selectedGradientStopIndex =
             Selectors.getGradientStopIndexAtPoint(state, point);
 
@@ -550,6 +614,7 @@ export default memo(function Canvas() {
       dispatch,
       insets,
       modKey,
+      compiler.environment,
     ],
   );
 
@@ -638,6 +703,51 @@ export default memo(function Canvas() {
             state.interactionState.symbolID,
             point,
           ]);
+          break;
+        }
+        case 'insertingElement': {
+          dispatch('interaction', [
+            'insertingElement',
+            state.interactionState.elementType,
+            point,
+          ]);
+
+          const layer = Selectors.getLayerAtPoint(
+            CanvasKit,
+            fontManager,
+            state,
+            insets,
+            rawPoint,
+            {
+              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
+            },
+          );
+
+          if (layer && Layers.isComponentContainer(layer)) {
+            const element = Selectors.getElementAtPoint(
+              CanvasKit,
+              fontManager,
+              state,
+              insets,
+              rawPoint,
+              layer,
+              compiler.environment,
+            );
+
+            if (element) {
+              highlightLayer(
+                layer
+                  ? {
+                      id: createObjectId(layer.do_objectID, element.indexPath),
+                      precedence: 'belowSelection',
+                      isMeasured: event.altKey,
+                    }
+                  : undefined,
+              );
+            }
+          }
           break;
         }
         case 'editPath': {
@@ -813,9 +923,32 @@ export default memo(function Canvas() {
             },
           );
 
+          if (event.metaKey && layer && Layers.isComponentContainer(layer)) {
+            const element = Selectors.getElementAtPoint(
+              CanvasKit,
+              fontManager,
+              state,
+              insets,
+              rawPoint,
+              layer,
+              compiler.environment,
+            );
+
+            if (element) {
+              highlightLayer(
+                layer
+                  ? {
+                      id: createObjectId(layer.do_objectID, element.indexPath),
+                      precedence: 'belowSelection',
+                      isMeasured: event.altKey,
+                    }
+                  : undefined,
+              );
+            }
+          }
           // For perf, check that we actually need to update the highlight.
           // This gets called on every mouse movement.
-          if (highlightedLayer?.id !== layer?.do_objectID) {
+          else if (highlightedLayer?.id !== layer?.do_objectID) {
             highlightLayer(
               layer
                 ? {
@@ -851,6 +984,7 @@ export default memo(function Canvas() {
       insets,
       modKey,
       highlightedLayer?.id,
+      compiler.environment,
       highlightLayer,
     ],
   );
@@ -1018,6 +1152,25 @@ export default memo(function Canvas() {
         return 'grab';
       case 'insert':
         return 'crosshair';
+      case 'insertingElement':
+        if (!state.interactionState.point) return 'no-drop';
+
+        const layer = Selectors.getLayerAtPoint(
+          CanvasKit,
+          fontManager,
+          state,
+          insets,
+          state.interactionState.point,
+          {
+            groups: 'groupAndChildren',
+            artboards: 'emptyOrContainedArtboardOrChildren',
+            includeLockedLayers: false,
+          },
+        );
+
+        if (!layer || !Layers.isComponentContainer(layer)) return 'no-drop';
+
+        return 'copy';
       case 'drawingShapePath':
         return 'crosshair';
       case 'maybeScale':
@@ -1046,7 +1199,7 @@ export default memo(function Canvas() {
       default:
         return 'default';
     }
-  }, [state, handleDirection]);
+  }, [state, CanvasKit, fontManager, insets, handleDirection]);
 
   const onImportImages = useCallback(
     async (

@@ -126,7 +126,8 @@ function getLayerHierarchy(
 
   return {
     indexPath: Nodes.findIndexPath(sourceFile, (node) => node === jsxElement)!,
-    tagName: tagElement.tagName.getText(),
+    tagName: (tagElement.tagName as any)['escapedText'],
+    // tagName: tagElement.tagName.getText(),
     children,
     attributes,
   };

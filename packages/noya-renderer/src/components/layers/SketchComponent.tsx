@@ -1,26 +1,16 @@
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
-import {
-  createLayoutNode,
-  Edge,
-  FlexDirection,
-  LayoutNode,
-  LayoutProperties,
-  measureLayout,
-  YogaNode,
-} from 'noya-layout';
+import { measureLayout, YogaNode } from 'noya-layout';
 import { ClipProps, useColorFill, usePaint } from 'noya-react-canvaskit';
 import { Group, Rect as RCKRect, Rect, useCanvasKit } from 'noya-renderer';
 import {
-  ElementFlexDirection,
+  elementLayerToLayoutNode,
   getSourceFileForId,
   Primitives,
 } from 'noya-state';
 import {
   ElementLayer,
-  getAttributeValue,
   getComponentLayer,
-  parseIntSafe,
   useTypescriptCompiler,
 } from 'noya-typescript';
 import { memo, useMemo } from 'react';
@@ -177,49 +167,3 @@ export default memo(function SketchComponent({ layer }: Props) {
     </>
   );
 });
-
-export function elementLayerToLayoutNode(
-  elementLayer: ElementLayer,
-): LayoutNode {
-  const flexDirection =
-    getAttributeValue<ElementFlexDirection>(
-      elementLayer.attributes,
-      'flexDirection',
-    ) ?? 'column';
-
-  const flexBasis =
-    getAttributeValue(elementLayer.attributes, 'flexBasis') ?? 0;
-  const flexGrow =
-    parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexGrow')) ?? 1;
-  const flexShrink =
-    parseIntSafe(getAttributeValue(elementLayer.attributes, 'flexShrink')) ?? 1;
-  const paddingTop =
-    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingTop')) ?? 0;
-  const paddingRight =
-    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingRight')) ??
-    0;
-  const paddingBottom =
-    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingBottom')) ??
-    0;
-  const paddingLeft =
-    parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingLeft')) ??
-    0;
-
-  const properties: LayoutProperties = {
-    flexDirection: FlexDirection[flexDirection],
-    flexBasis,
-    flexGrow,
-    flexShrink,
-    padding: {
-      [Edge.top]: paddingTop,
-      [Edge.right]: paddingRight,
-      [Edge.bottom]: paddingBottom,
-      [Edge.left]: paddingLeft,
-    },
-  };
-
-  return createLayoutNode(
-    properties,
-    elementLayer.children.map(elementLayerToLayoutNode),
-  );
-}
