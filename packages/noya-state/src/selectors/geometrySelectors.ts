@@ -521,6 +521,62 @@ const ElementLayoutPairs = withOptions<ElementLayoutPair>({
   },
 });
 
+function visitElementLayers(
+  initialOffset: Point,
+  elementLayer: ElementLayer,
+  measuredLayout: YogaNode,
+  f: (elementLayer: ElementLayer, rect: Rect) => void,
+) {
+  let offset = { ...initialOffset };
+
+  ElementLayoutPairs.visit([elementLayer, measuredLayout], {
+    onEnter: ([elementLayer, yogaNode]) => {
+      const left = yogaNode.getComputedLeft();
+      const top = yogaNode.getComputedTop();
+      const width = yogaNode.getComputedWidth();
+      const height = yogaNode.getComputedHeight();
+
+      offset.x += left;
+      offset.y += top;
+
+      const rect = { ...offset, width, height };
+
+      f(elementLayer, rect);
+    },
+    onLeave: ([, yogaNode]) => {
+      const left = yogaNode.getComputedLeft();
+      const top = yogaNode.getComputedTop();
+
+      offset.x -= left;
+      offset.y -= top;
+    },
+  });
+}
+
+export function findInElementLayer<T>(
+  initialOffset: Point,
+  elementLayer: ElementLayer,
+  measuredLayout: YogaNode,
+  f: (elementLayer: ElementLayer, rect: Rect) => T | undefined,
+): T | undefined {
+  let found: T[] = [];
+
+  visitElementLayers(
+    initialOffset,
+    elementLayer,
+    measuredLayout,
+    (elementLayer, rect) => {
+      let result = f(elementLayer, rect);
+
+      if (result !== undefined) {
+        found.push(result);
+      }
+    },
+  );
+
+  return found.length > 0 ? found[found.length - 1] : undefined;
+}
+
 export function getElementAtPoint(
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
@@ -552,33 +608,14 @@ export function getElementAtPoint(
 
   const measuredLayout = measureLayout(layoutNode, layer.frame);
 
-  let offset = { x: layer.frame.x, y: layer.frame.y };
-  let found: ElementLayer[] = [];
-
-  ElementLayoutPairs.visit([componentLayer.element, measuredLayout], {
-    onEnter: ([elementLayer, yogaNode]) => {
-      const left = yogaNode.getComputedLeft();
-      const top = yogaNode.getComputedTop();
-      const width = yogaNode.getComputedWidth();
-      const height = yogaNode.getComputedHeight();
-
-      offset.x += left;
-      offset.y += top;
-
-      const rect = { ...offset, width, height };
-
+  return findInElementLayer(
+    layer.frame,
+    componentLayer.element,
+    measuredLayout,
+    (elementLayer, rect) => {
       if (rectContainsPoint(rect, point)) {
-        found.push(elementLayer);
+        return elementLayer;
       }
     },
-    onLeave: ([, yogaNode]) => {
-      const left = yogaNode.getComputedLeft();
-      const top = yogaNode.getComputedTop();
-
-      offset.x -= left;
-      offset.y -= top;
-    },
-  });
-
-  return found.length > 0 ? found[found.length - 1] : undefined;
+  );
 }

@@ -1,7 +1,7 @@
 import { Paint } from 'canvaskit';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
-import { measureLayout, YogaNode } from 'noya-layout';
+import { measureLayout } from 'noya-layout';
 import { useStroke } from 'noya-react-canvaskit';
 import {
   elementLayerToLayoutNode,
@@ -9,13 +9,9 @@ import {
   Layers,
   Selectors,
 } from 'noya-state';
-import {
-  ElementLayer,
-  getComponentLayer,
-  useTypescriptCompiler,
-} from 'noya-typescript';
+import { getComponentLayer, useTypescriptCompiler } from 'noya-typescript';
 import { isShallowEqual } from 'noya-utils';
-import { memo, ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Path, Rect } from '..';
 import { useCanvasKit } from '../hooks/useCanvasKit';
@@ -40,41 +36,6 @@ interface HoverOutlineRectProps {
 function HoverOutlineRect({ layer, paint }: HoverOutlineRectProps) {
   return <Rect rect={useLayerFrameRect(layer)} paint={paint} />;
 }
-
-const MeasuredElement = memo(function MeasuredElement({
-  elementLayer,
-  measuredLayout,
-  paint,
-  selectedIndexPath,
-}: {
-  elementLayer: ElementLayer;
-  measuredLayout: YogaNode;
-  paint: Paint;
-  selectedIndexPath: number[];
-}) {
-  const CanvasKit = useCanvasKit();
-  const left = measuredLayout.getComputedLeft();
-  const top = measuredLayout.getComputedTop();
-  const width = measuredLayout.getComputedWidth();
-  const height = measuredLayout.getComputedHeight();
-
-  return (
-    <Group transform={AffineTransform.translate(left, top)}>
-      {isShallowEqual(elementLayer.indexPath, selectedIndexPath) && (
-        <Rect paint={paint} rect={CanvasKit.XYWHRect(0, 0, width, height)} />
-      )}
-      {elementLayer.children.map((child, index) => (
-        <MeasuredElement
-          key={index}
-          elementLayer={child}
-          measuredLayout={measuredLayout.getChild(index)}
-          selectedIndexPath={selectedIndexPath}
-          paint={paint}
-        />
-      ))}
-    </Group>
-  );
-});
 
 interface Props {
   layer: Sketch.AnyLayer;
@@ -137,19 +98,24 @@ export default function HoverOutline({
 
         const measuredLayout = measureLayout(layoutNode, layer.frame);
 
-        element = (
-          <Group
-            transform={AffineTransform.translate(layer.frame.x, layer.frame.y)}
-          >
-            <MeasuredElement
-              measuredLayout={measuredLayout}
-              elementLayer={componentLayer.element}
-              paint={paint}
-              selectedIndexPath={elementIndexPath}
-            />
-          </Group>
+        const rect = Selectors.findInElementLayer(
+          layer.frame,
+          componentLayer.element,
+          measuredLayout,
+          (elementLayer, rect) =>
+            isShallowEqual(elementLayer.indexPath, elementIndexPath)
+              ? rect
+              : undefined,
         );
 
+        if (!rect) break;
+
+        element = (
+          <Rect
+            paint={paint}
+            rect={CanvasKit.XYWHRect(rect.x, rect.y, rect.width, rect.height)}
+          />
+        );
         break;
       }
 
