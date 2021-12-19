@@ -27,6 +27,7 @@ enum LayerType {
   symbolMaster
   text
   triangle
+  componentContainer
 }
 
 type Size {
@@ -52,6 +53,11 @@ type RenderedImage {
   data: String!
 }
 
+enum GeneratedCodeFramework {
+  reactDom
+  reactNative
+}
+
 type Layer {
   id: ID!
   name: String!
@@ -60,6 +66,7 @@ type Layer {
     format: RenderedImageFormat
     bufferEncoding: BufferEncoding
   ): RenderedImage
+  generatedCode(framework: GeneratedCodeFramework): String!
 }
 
 input LayersFilter {

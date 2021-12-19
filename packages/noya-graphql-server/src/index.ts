@@ -72,6 +72,11 @@ async function main() {
           id: layer.do_objectID,
           name: layer.name,
           type: layer._class,
+          async generatedCode(framework: 'reactDom' | 'reactNative') {
+            if (!Layers.isComponentContainer(layer)) return '';
+
+            return layer.component.source;
+          },
           async renderedImage(args: {
             format: string;
             bufferEncoding: 'base64' | 'utf8';
