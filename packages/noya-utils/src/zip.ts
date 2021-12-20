@@ -15,7 +15,8 @@ export function zip<T>(...arrays: T[][]): T[][];
  * have the same length as the shortest input array.
  */
 export function zip(...arrays: unknown[][]): unknown[][] {
-  const length = Math.min(...arrays.map((array) => array.length));
+  const length =
+    arrays.length > 0 ? Math.min(...arrays.map((array) => array.length)) : 0;
 
   const result = new Array<unknown[]>(length);
 
