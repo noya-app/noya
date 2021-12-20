@@ -42,6 +42,7 @@ interface Props {
   prefix?: ReactNode;
   fillType?: Sketch.FillType;
   hasMultipleFills: boolean;
+  hasBorderPosition?: boolean;
   width: DimensionValue;
   position: Sketch.BorderPosition;
   onSetWidth: (amount: number, mode: SetNumberMode) => void;
@@ -56,6 +57,7 @@ export default memo(function BorderRow({
   prefix,
   fillType,
   hasMultipleFills,
+  hasBorderPosition,
   width,
   position,
   onSetWidth,
@@ -107,6 +109,7 @@ export default memo(function BorderRow({
           id={borderPositionId}
           value={toPositionString(position)}
           onValueChange={handleChangePosition}
+          disabled={hasBorderPosition === false}
         >
           <RadioGroup.Item value="inside" tooltip="Inside">
             <BorderInsideIcon />

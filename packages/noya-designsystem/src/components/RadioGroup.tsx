@@ -3,7 +3,7 @@ import { ComponentProps, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Tooltip } from '..';
 
-const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
+const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme, disabled }) => ({
   appearance: 'none',
   width: '0px', // Reset intrinsic width
   flex: '1 1 0px',
@@ -21,6 +21,9 @@ const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
   display: 'flex',
   alignItems: 'stretch',
   minHeight: '27px',
+  ...(disabled && {
+    opacity: 0.5,
+  }),
 }));
 
 const StyledItem = styled(ToggleGroupPrimitive.Item)(({ theme }) => ({

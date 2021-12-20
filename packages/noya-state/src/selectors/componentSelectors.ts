@@ -178,12 +178,21 @@ export function elementLayerToLayoutNode(
   const paddingLeft =
     parseIntSafe(getAttributeValue(elementLayer.attributes, 'paddingLeft')) ??
     0;
+  const borderWidth =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'borderWidth')) ??
+    0;
 
   const properties: LayoutProperties = {
     flexDirection: FlexDirection[flexDirection],
     flexBasis,
     flexGrow,
     flexShrink,
+    border: {
+      [Edge.top]: borderWidth,
+      [Edge.right]: borderWidth,
+      [Edge.bottom]: borderWidth,
+      [Edge.left]: borderWidth,
+    },
     padding: {
       [Edge.top]: paddingTop,
       [Edge.right]: paddingRight,

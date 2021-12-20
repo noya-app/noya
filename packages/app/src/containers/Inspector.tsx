@@ -20,6 +20,7 @@ import BlurInspector from './BlurInspector';
 import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
+import { ElementBorderInspector } from './ElementBorderInspector';
 import { ElementFillInspector } from './ElementFillInspector';
 import { ElementLayoutInspector } from './ElementLayoutInspector';
 import ExportInspector from './ExportInspector';
@@ -133,6 +134,7 @@ export default memo(function Inspector() {
       <ElementLayoutInspector />,
       <RadiusInspector />,
       <ElementFillInspector title="Fills" />,
+      <ElementBorderInspector />,
     ];
 
     return withSeparatorElements(

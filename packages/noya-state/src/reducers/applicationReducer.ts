@@ -14,6 +14,7 @@ import { Selectors } from 'noya-state';
 import {
   ElementAttributes,
   getAttributeValue,
+  parseIntSafe,
   printSourceFile,
   TypescriptEnvironment,
 } from 'noya-typescript';
@@ -306,119 +307,181 @@ export function applicationReducer(
       const componentElements = Selectors.getSelectedElementLayerPaths(state);
 
       if (componentElements.length > 0) {
-        switch (action[0]) {
-          case 'addNewFill':
-          case 'deleteDisabledFills':
-          case 'setFillOpacity':
-          case 'setFillColor': {
-            const pageIndex = getCurrentPageIndex(state);
-            const page = Selectors.getCurrentPage(state);
-            const objectPath = componentElements[0];
-            const layerIndexPath = Layers.findIndexPath(
-              page,
-              (layer) => layer.do_objectID === objectPath.layerId,
+        const pageIndex = getCurrentPageIndex(state);
+        const page = Selectors.getCurrentPage(state);
+        const objectPath = componentElements[0];
+        const layerIndexPath = Layers.findIndexPath(
+          page,
+          (layer) => layer.do_objectID === objectPath.layerId,
+        );
+
+        if (!layerIndexPath) return state;
+
+        return produce(state, (draft) => {
+          const draftLayer = Layers.access(
+            draft.sketch.pages[pageIndex],
+            layerIndexPath,
+          );
+
+          if (Layers.isComponentContainer(draftLayer)) {
+            const editable = Selectors.getEditableElementLayer(
+              context.typescriptEnvironment,
+              objectPath,
             );
 
-            if (!layerIndexPath) return state;
+            if (!editable) return;
 
-            return produce(state, (draft) => {
-              const draftLayer = Layers.access(
-                draft.sketch.pages[pageIndex],
-                layerIndexPath,
-              );
+            const { sourceFile, elementLayer } = editable;
 
-              if (Layers.isComponentContainer(draftLayer)) {
-                const editable = Selectors.getEditableElementLayer(
-                  context.typescriptEnvironment,
-                  objectPath,
+            switch (action[0]) {
+              case 'addNewBorder': {
+                let result = ElementAttributes.setAttribute(
+                  sourceFile,
+                  elementLayer.indexPath,
+                  'borderColor',
+                  'rgba(0,0,0,1)',
                 );
 
-                if (!editable) return;
+                result = ElementAttributes.setAttribute(
+                  result,
+                  elementLayer.indexPath,
+                  'borderWidth',
+                  '1',
+                );
 
-                const { sourceFile, elementLayer } = editable;
-
-                switch (action[0]) {
-                  case 'addNewFill': {
-                    if (!elementLayer.attributes.background) {
-                      const result = ElementAttributes.addAttribute(
-                        sourceFile,
-                        elementLayer.indexPath,
-                        'background',
-                        '#000000',
-                      );
-
-                      draftLayer.component.source = printSourceFile(result);
-                    }
-
-                    break;
-                  }
-                  case 'deleteDisabledFills': {
-                    if (elementLayer.attributes.background) {
-                      const result = ElementAttributes.removeAttribute(
-                        sourceFile,
-                        elementLayer.indexPath,
-                        'background',
-                      );
-
-                      draftLayer.component.source = printSourceFile(result);
-                    }
-
-                    break;
-                  }
-                  case 'setFillColor': {
-                    const [, , color] = action;
-
-                    const result = ElementAttributes.setAttribute(
-                      sourceFile,
-                      elementLayer.indexPath,
-                      'background',
-                      sketchColorToRgbaString(color),
-                    );
-
-                    draftLayer.component.source = printSourceFile(result);
-
-                    break;
-                  }
-                  case 'setFillOpacity': {
-                    const [, , amount, mode] = action;
-
-                    const backgroundColorString =
-                      getAttributeValue(
-                        elementLayer.attributes,
-                        'background',
-                      ) ?? 'rgba(0,0,0,1)';
-
-                    const color = rgbaStringToSketchColor(
-                      backgroundColorString,
-                    );
-
-                    const newValue = clamp(
-                      mode === 'replace' ? amount : color.alpha + amount,
-                      0,
-                      1,
-                    );
-
-                    const result = ElementAttributes.setAttribute(
-                      sourceFile,
-                      elementLayer.indexPath,
-                      'background',
-                      sketchColorToRgbaString({
-                        ...color,
-                        alpha: newValue,
-                      }),
-                    );
-
-                    draftLayer.component.source = printSourceFile(result);
-
-                    break;
-                  }
-                }
+                draftLayer.component.source = printSourceFile(result);
+                break;
               }
-            });
-          }
-        }
+              case 'deleteDisabledBorders': {
+                let result = ElementAttributes.removeAttribute(
+                  sourceFile,
+                  elementLayer.indexPath,
+                  'borderColor',
+                );
 
-        return state;
+                result = ElementAttributes.removeAttribute(
+                  result,
+                  elementLayer.indexPath,
+                  'borderWidth',
+                );
+
+                draftLayer.component.source = printSourceFile(result);
+
+                break;
+              }
+              case 'setBorderColor': {
+                const [, , color] = action;
+
+                const result = ElementAttributes.setAttribute(
+                  sourceFile,
+                  elementLayer.indexPath,
+                  'borderColor',
+                  sketchColorToRgbaString(color),
+                );
+
+                draftLayer.component.source = printSourceFile(result);
+
+                break;
+              }
+              case 'setBorderWidth': {
+                const [, , amount, mode] = action;
+
+                const newValue = Math.max(
+                  mode === 'replace'
+                    ? amount
+                    : (parseIntSafe(
+                        getAttributeValue(
+                          elementLayer.attributes,
+                          'borderWidth',
+                        ),
+                      ) ?? 0) + amount,
+                  0,
+                );
+
+                const result = ElementAttributes.setAttribute(
+                  sourceFile,
+                  elementLayer.indexPath,
+                  'borderWidth',
+                  newValue.toString(),
+                );
+
+                draftLayer.component.source = printSourceFile(result);
+
+                break;
+              }
+              case 'addNewFill': {
+                if (!elementLayer.attributes.background) {
+                  const result = ElementAttributes.addAttribute(
+                    sourceFile,
+                    elementLayer.indexPath,
+                    'background',
+                    'rgba(0,0,0,1)',
+                  );
+
+                  draftLayer.component.source = printSourceFile(result);
+                }
+
+                break;
+              }
+              case 'deleteDisabledFills': {
+                if (elementLayer.attributes.background) {
+                  const result = ElementAttributes.removeAttribute(
+                    sourceFile,
+                    elementLayer.indexPath,
+                    'background',
+                  );
+
+                  draftLayer.component.source = printSourceFile(result);
+                }
+
+                break;
+              }
+              case 'setFillColor': {
+                const [, , color] = action;
+
+                const result = ElementAttributes.setAttribute(
+                  sourceFile,
+                  elementLayer.indexPath,
+                  'background',
+                  sketchColorToRgbaString(color),
+                );
+
+                draftLayer.component.source = printSourceFile(result);
+
+                break;
+              }
+              case 'setFillOpacity': {
+                const [, , amount, mode] = action;
+
+                const backgroundColorString =
+                  getAttributeValue(elementLayer.attributes, 'background') ??
+                  'rgba(0,0,0,1)';
+
+                const color = rgbaStringToSketchColor(backgroundColorString);
+
+                const newValue = clamp(
+                  mode === 'replace' ? amount : color.alpha + amount,
+                  0,
+                  1,
+                );
+
+                const result = ElementAttributes.setAttribute(
+                  sourceFile,
+                  elementLayer.indexPath,
+                  'background',
+                  sketchColorToRgbaString({
+                    ...color,
+                    alpha: newValue,
+                  }),
+                );
+
+                draftLayer.component.source = printSourceFile(result);
+
+                break;
+              }
+            }
+          }
+        });
       }
 
       if (getCurrentTab(state) === 'canvas') {

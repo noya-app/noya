@@ -1,3 +1,4 @@
+import { rgbaStringToSketchColor } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { AffineTransform, getRectCornerPoints } from 'noya-geometry';
 import { measureLayout, YogaNode } from 'noya-layout';
@@ -23,6 +24,7 @@ import {
 } from 'noya-typescript';
 import { memo, useMemo } from 'react';
 import { useRenderingMode } from '../../RenderingModeContext';
+import SketchBorder from '../effects/SketchBorder';
 import { ArtboardBlur, ArtboardLabel } from './SketchArtboard';
 
 interface SketchComponentContentProps {
@@ -79,11 +81,17 @@ const MeasuredElement = memo(function MeasuredElement({
   measuredLayout: YogaNode;
 }) {
   const CanvasKit = useCanvasKit();
-  const paint = useColorFill(
-    getAttributeValue(elementLayer.attributes, 'background') ?? 'rgba(0,0,0,0)',
-  );
+  const backgroundColor =
+    getAttributeValue(elementLayer.attributes, 'background') ?? 'rgba(0,0,0,0)';
+  const borderColor =
+    getAttributeValue(elementLayer.attributes, 'borderColor') ??
+    'rgba(0,0,0,0)';
+  const paint = useColorFill(backgroundColor);
   const borderRadius =
     parseIntSafe(getAttributeValue(elementLayer.attributes, 'borderRadius')) ??
+    0;
+  const borderWidth =
+    parseIntSafe(getAttributeValue(elementLayer.attributes, 'borderWidth')) ??
     0;
 
   const left = measuredLayout.getComputedLeft();
@@ -106,9 +114,20 @@ const MeasuredElement = memo(function MeasuredElement({
   );
   useDeletable(path);
 
+  const border = useMemo(() => {
+    return SketchModel.border({
+      color: rgbaStringToSketchColor(borderColor),
+      thickness: borderWidth,
+      position: Sketch.BorderPosition.Inside,
+    });
+  }, [borderColor, borderWidth]);
+
   return (
     <Group transform={AffineTransform.translate(left, top)}>
       <Path path={path} paint={paint} />
+      {borderWidth > 0 && (
+        <SketchBorder path={path} frame={rect} border={border} />
+      )}
       {elementLayer.children.map((child, index) => (
         <MeasuredElement
           key={index}
