@@ -255,12 +255,17 @@ export default memo(function Canvas() {
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current page's zoom and offset from the origin
-  const offsetEventPoint = useCallback(
-    (point: Point) =>
-      AffineTransform.scale(1 / meta.zoomValue)
-        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
-        .applyTo(point),
+  const eventPointTransform = useMemo(
+    () =>
+      AffineTransform.scale(1 / meta.zoomValue).translate(
+        -meta.scrollOrigin.x,
+        -meta.scrollOrigin.y,
+      ),
     [meta],
+  );
+  const offsetEventPoint = useCallback(
+    (point: Point) => eventPointTransform.applyTo(point),
+    [eventPointTransform],
   );
 
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
@@ -1154,12 +1159,16 @@ export default memo(function Canvas() {
       case 'insertingElement':
         if (!state.interactionState.point) return 'no-drop';
 
+        const point = eventPointTransform
+          .invert()
+          .applyTo(state.interactionState.point);
+
         const layer = Selectors.getLayerAtPoint(
           CanvasKit,
           fontManager,
           state,
           insets,
-          state.interactionState.point,
+          point,
           {
             groups: 'groupAndChildren',
             artboards: 'emptyOrContainedArtboardOrChildren',
@@ -1198,7 +1207,14 @@ export default memo(function Canvas() {
       default:
         return 'default';
     }
-  }, [state, CanvasKit, fontManager, insets, handleDirection]);
+  }, [
+    state,
+    eventPointTransform,
+    CanvasKit,
+    fontManager,
+    insets,
+    handleDirection,
+  ]);
 
   const onImportImages = useCallback(
     async (

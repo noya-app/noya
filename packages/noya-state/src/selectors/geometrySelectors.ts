@@ -652,10 +652,10 @@ export function getElementAtPoint(
 ): ElementLayer | undefined {
   // const page = getCurrentPage(state);
   // const { zoomValue } = getCurrentPageMetadata(state);
-  // const canvasTransform = getCanvasTransform(state, insets);
-  // const screenTransform = getScreenTransform(insets);
+  const canvasTransform = getCanvasTransform(state, insets);
+  const screenTransform = getScreenTransform(insets);
 
-  // const screenPoint = screenTransform.applyTo(point);
+  const screenPoint = screenTransform.applyTo(point);
 
   const sourceFile = getSourceFileForId(
     typescriptEnvironment,
@@ -677,7 +677,9 @@ export function getElementAtPoint(
     componentLayer.element,
     measuredLayout,
     (elementLayer, rect) => {
-      if (rectContainsPoint(rect, point)) {
+      if (
+        rectContainsPoint(transformRect(rect, canvasTransform), screenPoint)
+      ) {
         return elementLayer;
       }
     },
