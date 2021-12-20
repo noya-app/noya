@@ -36,6 +36,7 @@ import { createObjectId, Layers, PageLayer, Selectors } from 'noya-state';
 import {
   ComponentLayer,
   ElementTree,
+  getAttributeValue,
   getComponentLayer,
   useTypescriptCompiler,
 } from 'noya-typescript';
@@ -131,11 +132,7 @@ function flattenLayerList(
         const component = componentLayers[layer.do_objectID];
 
         ElementTree.visit(component.element, (element, elementPath) => {
-          const customName =
-            element.attributes.name &&
-            element.attributes.name.type === 'stringLiteral'
-              ? element.attributes.name.value
-              : undefined;
+          const customName = getAttributeValue(element.attributes, 'name');
 
           const elementId = createObjectId(
             layer.do_objectID,

@@ -209,7 +209,7 @@ export function getLayersInRect(
 export function artboardLabelContainsPoint(
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
-  layer: Sketch.Artboard | Sketch.SymbolMaster,
+  layer: Sketch.Artboard | Sketch.SymbolMaster | Sketch.ComponentContainer,
   canvasTransform: AffineTransform,
   screenPoint: Point,
   zoom: number,
@@ -263,7 +263,7 @@ export function getLayerAtPoint(
 
     if (!frameContainsPoint) {
       if (
-        Layers.isSymbolMasterOrArtboard(layer) &&
+        Layers.isSymbolMasterOrArtboardOrComponentContainer(layer) &&
         options.artboards === 'emptyOrContainedArtboardOrChildren' &&
         artboardLabelContainsPoint(
           CanvasKit,
