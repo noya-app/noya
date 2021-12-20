@@ -1,4 +1,4 @@
-import { isDeepEqual } from 'noya-utils';
+import { isDeepEqual, isShallowEqual } from 'noya-utils';
 import { IndexPath, withOptions } from 'tree-visit';
 import ts, {
   Expression,
@@ -103,7 +103,7 @@ function getLayerHierarchy(
 
       if (!expression) return [];
 
-      const key = attribute.name.getText();
+      const key = (attribute.name as any)['escapedText'];
       let value: ElementAttributeValue = { type: 'other', value: expression };
 
       const stringLiteral = Nodes.find<StringLiteral>(
@@ -185,6 +185,8 @@ export function setFunctionName(
   });
 }
 
+const TRACKING_SENTINEL_PROP = 'tracking_prop_';
+
 export const Element = {
   addChild(
     sourceFile: SourceFile,
@@ -236,6 +238,20 @@ export const Element = {
     });
   },
 
+  replaceElement(
+    sourceFile: SourceFile,
+    elementIndexPath: IndexPath,
+    newElement: JsxElement,
+  ) {
+    return transformNode(sourceFile, (node, indexPath) => {
+      if (isDeepEqual(elementIndexPath, indexPath)) {
+        return newElement;
+      }
+
+      return node;
+    });
+  },
+
   duplicateElement(sourceFile: SourceFile, elementIndexPath: IndexPath) {
     let originalNode = Nodes.access(sourceFile, elementIndexPath) as JsxElement;
 
@@ -247,6 +263,100 @@ export const Element = {
       clone,
       elementIndexPath[elementIndexPath.length - 1],
     );
+  },
+
+  moveElement(
+    sourceFile: SourceFile,
+    sourceIndexPath: IndexPath,
+    destinationIndexPath: IndexPath,
+    position: 'above' | 'below' | 'inside',
+  ) {
+    let originalNode = Nodes.access(sourceFile, sourceIndexPath) as JsxElement;
+
+    const clone = ts.getMutableClone(originalNode);
+
+    const withTracking = ElementAttributes.addAttribute(
+      sourceFile,
+      sourceIndexPath,
+      TRACKING_SENTINEL_PROP,
+      '',
+    );
+
+    let result: SourceFile;
+
+    switch (position) {
+      case 'inside': {
+        result = Element.addChild(withTracking, destinationIndexPath, clone);
+        break;
+      }
+      case 'above':
+      case 'below': {
+        const componentLayer = getComponentLayer(withTracking);
+
+        if (!componentLayer) throw new Error("Couldn't find componentLayer");
+
+        const indexPath = ElementTree.findIndexPath(
+          componentLayer.element,
+          (node) => isShallowEqual(node.indexPath, destinationIndexPath),
+        );
+
+        if (!indexPath) throw new Error("Couldn't find indexPath");
+
+        const parentElement = ElementTree.access(
+          componentLayer.element,
+          indexPath.slice(0, -1),
+        );
+
+        const parentNode = Nodes.access(
+          withTracking,
+          parentElement.indexPath,
+        ) as JsxElement;
+
+        const { openingElement, closingElement, children } = parentNode;
+
+        const newChildren = [...children];
+
+        // console.log(
+        //   'splice into',
+        //   indexPath[indexPath.length - 1],
+        //   clone.getFullText(),
+        // );
+
+        const siblingIndex = indexPath[indexPath.length - 1];
+        const destinationIndex =
+          position === 'above' ? siblingIndex : siblingIndex + 1;
+
+        newChildren.splice(destinationIndex, 0, clone);
+
+        result = Element.replaceElement(
+          withTracking,
+          parentElement.indexPath,
+          ts.factory.createJsxElement(
+            openingElement,
+            newChildren,
+            closingElement,
+          ),
+        );
+        break;
+      }
+    }
+
+    const componentLayer = getComponentLayer(result);
+
+    if (!componentLayer) throw new Error('componentLayer not found');
+
+    const elementLayer = ElementTree.find(
+      componentLayer.element,
+      (elementLayer) =>
+        getAttributeValue(elementLayer.attributes, TRACKING_SENTINEL_PROP) !==
+        undefined,
+    );
+
+    if (!elementLayer) throw new Error('elementLayer not found');
+
+    // return result;
+
+    return Element.removeElement(result, elementLayer.indexPath);
   },
 };
 

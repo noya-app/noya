@@ -3,6 +3,7 @@ import lzstring from 'lz-string';
 import ts, { SourceFile } from 'typescript';
 export * from './componentLayer';
 export * from './TypescriptCompilerContext';
+export { Nodes } from './traversal';
 
 export const compilerOptions: ts.CompilerOptions = {
   jsx: ts.JsxEmit.Preserve,
@@ -51,8 +52,12 @@ export function createTypescriptEnvironment(
   };
 }
 
-export function printSourceFile(sourceFile: SourceFile) {
+export function printSourceFile(sourceFile: SourceFile, node?: ts.Node) {
   const printer = ts.createPrinter();
 
-  return printer.printNode(ts.EmitHint.Unspecified, sourceFile, sourceFile);
+  return printer.printNode(
+    ts.EmitHint.Unspecified,
+    node ?? sourceFile,
+    sourceFile,
+  );
 }

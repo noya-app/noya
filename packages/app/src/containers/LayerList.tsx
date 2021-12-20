@@ -595,13 +595,9 @@ export default memo(function LayerList({
           const sourceIds = selectedLayerIds.includes(sourceId)
             ? selectedLayerIds
             : sourceId;
+          const destinationId = items[destinationIndex].id;
 
-          dispatch(
-            'moveLayer',
-            sourceIds,
-            items[destinationIndex].id,
-            position,
-          );
+          dispatch('moveLayer', sourceIds, destinationId, position);
         },
         [dispatch, items, selectedLayerIds],
       )}
@@ -611,6 +607,14 @@ export default memo(function LayerList({
           destinationId: string,
           relationDropPosition: RelativeDropPosition,
         ) => {
+          if (
+            Selectors.isElementLayerId(sourceId) &&
+            Selectors.isElementLayerId(destinationId) &&
+            !destinationId.startsWith(sourceId)
+          ) {
+            return true;
+          }
+
           const sourceIds = selectedLayerIds.includes(sourceId)
             ? selectedLayerIds
             : sourceId;

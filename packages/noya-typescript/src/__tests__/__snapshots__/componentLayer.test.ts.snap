@@ -74,6 +74,48 @@ Object {
 }
 `;
 
+exports[`move element above 1`] = `
+"export default function Foo() {
+    return <View><Image></Image><Text></Text><Button></Button></View>;
+}
+"
+`;
+
+exports[`move element above 2`] = `
+"export default function Foo() {
+    return <View><Image></Image><Text></Text><Button></Button></View>;
+}
+"
+`;
+
+exports[`move element below 1`] = `
+"export default function Foo() {
+    return <View><Image></Image><Button></Button><Text></Text></View>;
+}
+"
+`;
+
+exports[`move element below 2`] = `
+"export default function Foo() {
+    return <View><Text></Text><Button></Button><Image></Image></View>;
+}
+"
+`;
+
+exports[`move element inside 1`] = `
+"export default function Foo() {
+    return <View><Text><Image></Image></Text></View>;
+}
+"
+`;
+
+exports[`move element inside 2`] = `
+"export default function Foo() {
+    return <View><Image><Text></Text></Image></View>;
+}
+"
+`;
+
 exports[`remove element 1`] = `
 "export default function Foo() {
     return <View><Text></Text></View>;

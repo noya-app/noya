@@ -179,7 +179,7 @@ export function layerReducer(
 
       // Since layers are stored in reverse order, to place a layer "above",
       // we actually place it "below" in terms of index, etc.
-      return moveLayer(state, id, destinationId, rawPosition);
+      return moveLayer(state, id, destinationId, rawPosition, context);
     }
     case 'deleteLayer':
     case 'deleteSymbol': {
@@ -238,10 +238,16 @@ export function layerReducer(
       });
 
       // Insert the group layer
-      state = insertLayerAtIndexPath(state, group, targetIndexPath, 'above');
+      state = insertLayerAtIndexPath(
+        state,
+        group,
+        targetIndexPath,
+        'above',
+        context,
+      );
 
       // Move all selected layers into the new group
-      return moveLayer(state, ids, group.do_objectID, 'inside');
+      return moveLayer(state, ids, group.do_objectID, 'inside', context);
     }
     case 'ungroupLayers': {
       const [, id] = action;
@@ -258,7 +264,13 @@ export function layerReducer(
 
         const childrenIds = groupLayer.layers.map((layer) => layer.do_objectID);
 
-        state = moveLayer(state, childrenIds, groupLayer.do_objectID, 'above');
+        state = moveLayer(
+          state,
+          childrenIds,
+          groupLayer.do_objectID,
+          'above',
+          context,
+        );
 
         state = removeLayer(state, groupLayer.do_objectID);
 

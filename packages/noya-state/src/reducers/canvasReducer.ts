@@ -549,7 +549,13 @@ export function canvasReducer(
       )
         return state;
 
-      return moveLayer(state, state.selectedLayerIds, parentId, 'inside');
+      return moveLayer(
+        state,
+        state.selectedLayerIds,
+        parentId,
+        'inside',
+        context,
+      );
     }
     case 'insertPointInPath': {
       const [, point] = action;
@@ -1198,7 +1204,13 @@ export function canvasReducer(
       });
 
       if (parentLayer) {
-        state = moveLayer(state, layerIds, parentLayer.do_objectID, 'inside');
+        state = moveLayer(
+          state,
+          layerIds,
+          parentLayer.do_objectID,
+          'inside',
+          context,
+        );
       }
 
       return state;

@@ -161,6 +161,99 @@ it('remove element', () => {
   expect(printSourceFile(result2)).toMatchSnapshot();
 });
 
+it('move element inside', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View><Text></Text><Image></Image></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result1 = Element.moveElement(
+    sourceFile,
+    componentLayer!.element.children[1].indexPath,
+    componentLayer!.element.children[0].indexPath,
+    'inside',
+  );
+
+  expect(printSourceFile(result1)).toMatchSnapshot();
+
+  const result2 = Element.moveElement(
+    sourceFile,
+    componentLayer!.element.children[0].indexPath,
+    componentLayer!.element.children[1].indexPath,
+    'inside',
+  );
+
+  expect(printSourceFile(result2)).toMatchSnapshot();
+});
+
+it('move element above', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View><Text></Text><Image></Image><Button></Button></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result1 = Element.moveElement(
+    sourceFile,
+    componentLayer!.element.children[1].indexPath,
+    componentLayer!.element.children[0].indexPath,
+    'above',
+  );
+
+  expect(printSourceFile(result1)).toMatchSnapshot();
+
+  const result2 = Element.moveElement(
+    sourceFile,
+    componentLayer!.element.children[0].indexPath,
+    componentLayer!.element.children[2].indexPath,
+    'above',
+  );
+
+  expect(printSourceFile(result2)).toMatchSnapshot();
+});
+
+it('move element below', () => {
+  env.environment.createFile(
+    filename,
+    `export default function Foo() {
+    return <View><Text></Text><Image></Image><Button></Button></View>
+  }`,
+  );
+
+  const sourceFile = env.environment.getSourceFile(filename)!;
+
+  const componentLayer = getComponentLayer(sourceFile);
+
+  const result1 = Element.moveElement(
+    sourceFile,
+    componentLayer!.element.children[0].indexPath,
+    componentLayer!.element.children[2].indexPath,
+    'below',
+  );
+
+  expect(printSourceFile(result1)).toMatchSnapshot();
+
+  const result2 = Element.moveElement(
+    sourceFile,
+    componentLayer!.element.children[2].indexPath,
+    componentLayer!.element.children[0].indexPath,
+    'below',
+  );
+
+  expect(printSourceFile(result2)).toMatchSnapshot();
+});
+
 it('duplicate element', () => {
   env.environment.createFile(
     filename,

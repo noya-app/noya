@@ -1,6 +1,6 @@
-import type Sketch from 'noya-file-format';
 import produce, { Draft } from 'immer';
 import { RelativeDropPosition } from 'noya-designsystem';
+import type Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -13,8 +13,10 @@ import {
   rectsIntersect,
   transformRect,
 } from 'noya-geometry';
+import { Element, printSourceFile } from 'noya-typescript';
 import { IndexPath } from 'tree-visit';
 import {
+  ApplicationReducerContext,
   ApplicationState,
   getMultiValue,
   isLine,
@@ -24,6 +26,7 @@ import {
   Selectors,
 } from '../index';
 import type { UUID } from '../types';
+import { getSourceFileForId, parseObjectId } from './componentSelectors';
 import {
   getLayerIndexPathsExcludingDescendants,
   getSelectedLayerIndexPathsExcludingDescendants,
@@ -210,6 +213,7 @@ export function moveLayer(
   id: string | string[],
   destinationId: string,
   rawPosition: RelativeDropPosition,
+  context: ApplicationReducerContext,
 ) {
   const position =
     rawPosition === 'above'
@@ -219,9 +223,43 @@ export function moveLayer(
       : rawPosition;
 
   const ids = typeof id === 'string' ? [id] : id;
-
   const indexPaths = getLayerIndexPathsExcludingDescendants(state, ids);
   const pageIndex = getCurrentPageIndex(state);
+
+  const elementIds = ids.filter(Selectors.isElementLayerId);
+
+  if (elementIds.length > 0 && Selectors.isElementLayerId(destinationId)) {
+    const { layerId, indexPath } = parseObjectId(elementIds[0]);
+    const componentLayerIndexPath = Layers.findIndexPath(
+      Selectors.getCurrentPage(state),
+      (layer) => layer.do_objectID === layerId,
+    );
+
+    state = produce(state, (draft) => {
+      if (!componentLayerIndexPath || !indexPath) return;
+
+      const draftLayer = Layers.access(
+        draft.sketch.pages[pageIndex],
+        componentLayerIndexPath,
+      ) as Sketch.ComponentContainer;
+
+      const sourceFile = getSourceFileForId(
+        context.typescriptEnvironment,
+        layerId,
+      );
+
+      if (!sourceFile) return;
+
+      const result = Element.moveElement(
+        sourceFile,
+        indexPath,
+        parseObjectId(destinationId).indexPath!,
+        position,
+      );
+
+      draftLayer.component.source = printSourceFile(result);
+    });
+  }
 
   return produce(state, (draft) => {
     const draftPage = draft.sketch.pages[pageIndex];
@@ -359,6 +397,7 @@ export function insertLayerAtIndexPath(
   layer: PageLayer | PageLayer[],
   destinationIndexPath: IndexPath,
   rawPosition: RelativeDropPosition,
+  context: ApplicationReducerContext,
 ) {
   const layers = Array.isArray(layer) ? layer : [layer];
   const ids = layers.map((layer) => layer.do_objectID);
@@ -378,6 +417,7 @@ export function insertLayerAtIndexPath(
     ids,
     Layers.access(getCurrentPage(state), destinationIndexPath).do_objectID,
     rawPosition,
+    context,
   );
 }
 
@@ -386,6 +426,7 @@ export function insertLayer(
   layer: PageLayer | PageLayer[],
   destinationId: string,
   rawPosition: RelativeDropPosition,
+  context: ApplicationReducerContext,
 ) {
   const destinationIndexPath = Layers.findIndexPath(
     getCurrentPage(state),
@@ -399,6 +440,7 @@ export function insertLayer(
     layer,
     destinationIndexPath,
     rawPosition,
+    context,
   );
 }
 
