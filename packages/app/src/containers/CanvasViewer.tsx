@@ -9,6 +9,7 @@ import React, {
 import { useTheme } from 'styled-components';
 import { useWorkspaceState } from 'noya-app-state-context';
 import { generateImage } from 'noya-generate-image';
+import { useTypescriptCompiler } from 'noya-typescript';
 
 interface Props {
   width: number;
@@ -22,6 +23,7 @@ export default memo(function CanvasViewer({
   renderContent,
 }: Props) {
   const CanvasKit = useCanvasKit();
+  const compiler = useTypescriptCompiler();
   const rawApplicationState = useWorkspaceState();
   const theme = useTheme();
   const [imageData, setImageData] = useState<ImageData | undefined>();
@@ -32,6 +34,7 @@ export default memo(function CanvasViewer({
 
     generateImage(
       CanvasKit,
+      compiler.environment,
       width,
       height,
       theme,
@@ -49,7 +52,15 @@ export default memo(function CanvasViewer({
     return () => {
       valid = false;
     };
-  }, [CanvasKit, width, height, theme, rawApplicationState, renderContent]);
+  }, [
+    CanvasKit,
+    width,
+    height,
+    theme,
+    rawApplicationState,
+    renderContent,
+    compiler.environment,
+  ]);
 
   useLayoutEffect(() => {
     if (!imageData) return;

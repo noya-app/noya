@@ -1,12 +1,18 @@
+import fetch from 'cross-fetch';
 import { ApolloServer, gql } from 'apollo-server';
 import fs from 'fs';
+import 'mock-local-storage';
+import { lightTheme } from 'noya-designsystem';
+import { generateImage, ImageEncoding } from 'noya-generate-image';
+import { LayerPreview, loadCanvasKit } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import { createInitialWorkspaceState, Layers, Selectors } from 'noya-state';
-import path from 'path';
-import { LayerPreview, loadCanvasKit } from 'noya-renderer';
+import {
+  createBaseFileSystem,
+  createTypescriptEnvironment,
+} from 'noya-typescript';
 import { setPathToWasm } from 'noya-utils';
-import { ImageEncoding, generateImage } from 'noya-generate-image';
-import { lightTheme } from 'noya-designsystem';
+import path from 'path';
 import React from 'react';
 
 const wasmPath = path.join(
@@ -33,6 +39,10 @@ async function main() {
 
   const workspaceState = createInitialWorkspaceState(sketch);
   const state = workspaceState.history.present;
+
+  const typescriptEnvironment = createTypescriptEnvironment(
+    await createBaseFileSystem(fetch),
+  );
 
   const typeDefs = gql(schema);
 
@@ -90,6 +100,7 @@ async function main() {
 
             const image = await generateImage(
               CanvasKit,
+              typescriptEnvironment,
               size.width,
               size.height,
               lightTheme,

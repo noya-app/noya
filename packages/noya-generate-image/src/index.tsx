@@ -15,6 +15,10 @@ import { ImageCacheProvider } from 'noya-renderer';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { UTF16 } from 'noya-utils';
+import {
+  TypescriptCompilerProvider,
+  TypescriptEnvironment,
+} from 'noya-typescript';
 
 function readPixels(image: Image): Uint8Array | null {
   const colorSpace = image.getColorSpace();
@@ -33,6 +37,7 @@ export type ImageEncoding = 'bytes' | 'svg' | 'png' | 'jpg' | 'webp';
 
 export function generateImage(
   CanvasKit: CanvasKit,
+  typescriptEnvironment: TypescriptEnvironment,
   width: number,
   height: number,
   theme: Theme,
@@ -43,22 +48,24 @@ export function generateImage(
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider CanvasKit={CanvasKit}>
-          <ThemeProvider theme={theme}>
-            <StateProvider state={state}>
-              <ImageCacheProvider>
-                <FontManagerProvider>
-                  <SVGRenderer
-                    idPrefix=""
-                    size={{ width: width, height: height }}
-                  >
-                    {renderContent()}
-                  </SVGRenderer>
-                </FontManagerProvider>
-              </ImageCacheProvider>
-            </StateProvider>
-          </ThemeProvider>
-        </CanvasKitProvider>,
+        <TypescriptCompilerProvider environment={typescriptEnvironment}>
+          <CanvasKitProvider CanvasKit={CanvasKit}>
+            <ThemeProvider theme={theme}>
+              <StateProvider state={state}>
+                <ImageCacheProvider>
+                  <FontManagerProvider>
+                    <SVGRenderer
+                      idPrefix=""
+                      size={{ width: width, height: height }}
+                    >
+                      {renderContent()}
+                    </SVGRenderer>
+                  </FontManagerProvider>
+                </ImageCacheProvider>
+              </StateProvider>
+            </ThemeProvider>
+          </CanvasKitProvider>
+        </TypescriptCompilerProvider>,
       );
 
       return Promise.resolve(
@@ -75,19 +82,21 @@ export function generateImage(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider CanvasKit={CanvasKit}>
-            <ThemeProvider theme={theme}>
-              <StateProvider state={state}>
-                <ImageCacheProvider>
-                  <FontManagerProvider>
-                    <ComponentsProvider value={Components}>
-                      {renderContent()}
-                    </ComponentsProvider>
-                  </FontManagerProvider>
-                </ImageCacheProvider>
-              </StateProvider>
-            </ThemeProvider>
-          </CanvasKitProvider>
+          <TypescriptCompilerProvider environment={typescriptEnvironment}>
+            <CanvasKitProvider CanvasKit={CanvasKit}>
+              <ThemeProvider theme={theme}>
+                <StateProvider state={state}>
+                  <ImageCacheProvider>
+                    <FontManagerProvider>
+                      <ComponentsProvider value={Components}>
+                        {renderContent()}
+                      </ComponentsProvider>
+                    </FontManagerProvider>
+                  </ImageCacheProvider>
+                </StateProvider>
+              </ThemeProvider>
+            </CanvasKitProvider>
+          </TypescriptCompilerProvider>
         );
 
         render(root, surface, CanvasKit, () => {

@@ -8,13 +8,16 @@ export const compilerOptions: ts.CompilerOptions = {
   jsx: ts.JsxEmit.Preserve,
 };
 
-export async function createBaseFileSystem(): Promise<Map<string, string>> {
+export async function createBaseFileSystem(
+  fetcher?: Parameters<typeof tsvfs.createDefaultMapFromCDN>[5],
+): Promise<Map<string, string>> {
   return await tsvfs.createDefaultMapFromCDN(
     compilerOptions,
     ts.version,
     true,
     ts,
     lzstring,
+    fetcher,
   );
 }
 

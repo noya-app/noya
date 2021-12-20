@@ -23,6 +23,7 @@ import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { usePreviewLayer } from '../hooks/usePreviewLayer';
+import { useTypescriptCompiler } from 'noya-typescript';
 
 async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {
@@ -59,6 +60,7 @@ export default memo(function ExportInspector() {
   const theme = useTheme();
   const CanvasKit = useCanvasKit();
   const getWorkspaceStateSnapshot = useGetWorkspaceStateSnapshot();
+  const compiler = useTypescriptCompiler();
 
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayer = useSelector(Selectors.getSelectedLayers)[0];
@@ -77,6 +79,7 @@ export default memo(function ExportInspector() {
 
       return generateImage(
         CanvasKit,
+        compiler.environment,
         exportSize.width,
         exportSize.height,
         theme,
@@ -96,6 +99,7 @@ export default memo(function ExportInspector() {
       selectedLayer.frame.width,
       selectedLayer.frame.height,
       CanvasKit,
+      compiler.environment,
       theme,
       getWorkspaceStateSnapshot,
       preview.layer,

@@ -119,6 +119,7 @@ async function generatePageImage(
     act(() => {
       generateImage(
         CanvasKit,
+        context.typescriptEnvironment,
         size.width,
         size.height,
         darkTheme,

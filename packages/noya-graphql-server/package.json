@@ -16,6 +16,7 @@
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^9.0.1",
     "graphql": "^15.5.1",
+    "mock-local-storage": "^1.1.19",
     "next": "^11.0.1",
     "webpack": "^5.44.0",
     "webpack-cli": "^4.7.2"
