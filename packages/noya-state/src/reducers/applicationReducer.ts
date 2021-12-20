@@ -1,7 +1,10 @@
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
-import { sketchColorToHex } from 'noya-designsystem';
+import {
+  rgbaStringToSketchColor,
+  sketchColorToRgbaString,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
@@ -10,10 +13,11 @@ import { SketchFile } from 'noya-sketch-file';
 import { Selectors } from 'noya-state';
 import {
   ElementAttributes,
+  getAttributeValue,
   printSourceFile,
   TypescriptEnvironment,
 } from 'noya-typescript';
-import { uuid } from 'noya-utils';
+import { clamp, uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
@@ -305,6 +309,7 @@ export function applicationReducer(
         switch (action[0]) {
           case 'addNewFill':
           case 'deleteDisabledFills':
+          case 'setFillOpacity':
           case 'setFillColor': {
             const pageIndex = getCurrentPageIndex(state);
             const page = Selectors.getCurrentPage(state);
@@ -363,20 +368,47 @@ export function applicationReducer(
                   case 'setFillColor': {
                     const [, , color] = action;
 
-                    if (
-                      elementLayer.attributes.background &&
-                      elementLayer.attributes.background.type ===
-                        'stringLiteral'
-                    ) {
-                      const result = ElementAttributes.setAttribute(
-                        sourceFile,
-                        elementLayer.indexPath,
-                        'background',
-                        sketchColorToHex(color),
-                      );
+                    const result = ElementAttributes.setAttribute(
+                      sourceFile,
+                      elementLayer.indexPath,
+                      'background',
+                      sketchColorToRgbaString(color),
+                    );
 
-                      draftLayer.component.source = printSourceFile(result);
-                    }
+                    draftLayer.component.source = printSourceFile(result);
+
+                    break;
+                  }
+                  case 'setFillOpacity': {
+                    const [, , amount, mode] = action;
+
+                    const backgroundColorString =
+                      getAttributeValue(
+                        elementLayer.attributes,
+                        'background',
+                      ) ?? 'rgba(0,0,0,1)';
+
+                    const color = rgbaStringToSketchColor(
+                      backgroundColorString,
+                    );
+
+                    const newValue = clamp(
+                      mode === 'replace' ? amount : color.alpha + amount,
+                      0,
+                      1,
+                    );
+
+                    const result = ElementAttributes.setAttribute(
+                      sourceFile,
+                      elementLayer.indexPath,
+                      'background',
+                      sketchColorToRgbaString({
+                        ...color,
+                        alpha: newValue,
+                      }),
+                    );
+
+                    draftLayer.component.source = printSourceFile(result);
 
                     break;
                   }

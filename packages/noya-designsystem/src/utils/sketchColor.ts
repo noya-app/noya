@@ -5,6 +5,8 @@ import {
   RgbaColor,
   rgbaToHex,
   rgbaToHsva,
+  rgbaStringToHsva,
+  hsvaToRgba,
 } from 'noya-colorpicker';
 
 export function sketchColorToRgba(value: Sketch.Color): RgbaColor {
@@ -28,6 +30,10 @@ export function rgbaToSketchColor(value: RgbaColor): Sketch.Color {
     green: value.g / 255,
     blue: value.b / 255,
   };
+}
+
+export function rgbaStringToSketchColor(value: string): Sketch.Color {
+  return rgbaToSketchColor(hsvaToRgba(rgbaStringToHsva(value)));
 }
 
 export function hexToSketchColor(value: string): Sketch.Color {

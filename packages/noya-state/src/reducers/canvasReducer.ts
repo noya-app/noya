@@ -1261,9 +1261,9 @@ export function createDrawingLayer(
         component: SketchModel.component({
           source: `export default function Test() {
   return (
-    <View background={"#fff"} flexDirection={"row"}>
+    <View flexDirection={"row"}>
       <View name={"View 1"}></View>
-      <View name={"View 2"} background={"#00f"}></View>
+      <View name={"View 2"} background={"rgba(0,120,255,1)"}></View>
     </View>
   );
 }`,

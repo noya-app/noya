@@ -1,7 +1,7 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { hexToSketchColor } from 'noya-designsystem';
+import { rgbaStringToSketchColor } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { useDeepMemo, useShallowArray } from 'noya-react-utils';
+import { useShallowArray } from 'noya-react-utils';
 import { SketchModel } from 'noya-sketch-model';
 import {
   EditableFill,
@@ -10,23 +10,26 @@ import {
   getElementLayerForObjectPath,
   getSelectedElementLayerPaths,
 } from 'noya-state';
-import { ElementLayer, useTypescriptCompiler } from 'noya-typescript';
+import {
+  ElementLayer,
+  getAttributeValue,
+  useTypescriptCompiler,
+} from 'noya-typescript';
 import { memo, useCallback, useMemo } from 'react';
 import ArrayController from '../components/inspector/ArrayController';
 import FillRow from '../components/inspector/FillRow';
 
 function getStyleForElementLayer(elementLayer: ElementLayer): Sketch.Style {
-  const backgroundColor =
-    elementLayer.attributes.background &&
-    elementLayer.attributes.background.type === 'stringLiteral'
-      ? hexToSketchColor(elementLayer.attributes.background.value)
-      : undefined;
+  const backgroundColor = getAttributeValue(
+    elementLayer.attributes,
+    'background',
+  );
 
   const style = SketchModel.style({
     fills: backgroundColor
       ? [
           SketchModel.fill({
-            color: backgroundColor,
+            color: rgbaStringToSketchColor(backgroundColor),
           }),
         ]
       : [],
@@ -41,20 +44,20 @@ export const ElementFillInspector = memo(function ElementFillInspector({
   title: string;
 }) {
   const [state, dispatch] = useApplicationState();
+
   const compiler = useTypescriptCompiler();
-  const objectPath = useDeepMemo(getSelectedElementLayerPaths(state)[0]);
-  const elementLayer = getElementLayerForObjectPath(
-    compiler.environment,
-    objectPath,
+  const selectedElementPaths = getSelectedElementLayerPaths(state);
+  const elementLayers = selectedElementPaths.flatMap((elementPath) => {
+    const elementLayer = getElementLayerForObjectPath(
+      compiler.environment,
+      elementPath,
+    );
+    return elementLayer ? [elementLayer] : [];
+  });
+
+  const selectedStyles = useShallowArray(
+    elementLayers.map(getStyleForElementLayer),
   );
-
-  const selectedStyles: Sketch.Style[] = [
-    elementLayer ? getStyleForElementLayer(elementLayer) : SketchModel.style(),
-  ];
-
-  // const selectedStyles = useShallowArray(
-  //   useSelector(Selectors.getSelectedStyles),
-  // );
 
   const fillMatrix = useShallowArray(
     selectedStyles.map((style) => style?.fills ?? []),
@@ -120,7 +123,7 @@ export const ElementFillInspector = memo(function ElementFillInspector({
                 dispatch('setFillGradient', index, value),
               onEditGradient: (stopIndex) =>
                 dispatch('setSelectedGradient', {
-                  layerId: objectPath.layerId,
+                  layerId: state.selectedLayerIds[0],
                   fillIndex: index,
                   stopIndex,
                   styleType: 'fills',
@@ -155,7 +158,7 @@ export const ElementFillInspector = memo(function ElementFillInspector({
           />
         ),
 
-        [dispatch, objectPath.layerId],
+        [dispatch, state.selectedLayerIds],
       )}
     />
   );
