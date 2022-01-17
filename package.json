@@ -12,7 +12,13 @@
       "**/electron-squirrel-startup",
       "**/electron-squirrel-startup/**",
       "**/@electron-forge/publisher-github",
-      "**/@electron-forge/publisher-github/**"
+      "**/@electron-forge/publisher-github/**",
+      "**/react-native",
+      "**/react-native/**",
+      "**/@shopify/react-native-skia",
+      "**/expo",
+      "**/expo-**",
+      "**/react-native-**"
     ]
   },
   "modular": {
@@ -22,6 +28,7 @@
     "start": "cross-env PORT=1234 modular start app",
     "start:desktop": "cd packages/noya-desktop && yarn run start",
     "start:site": "yarn workspace site start",
+    "start:mobile": "yarn workspace app-mobile start",
     "build": "modular build app",
     "build:desktop": "cd packages/noya-desktop && yarn run make",
     "build:site": "yarn workspace site build",

@@ -1,0 +1,30 @@
+{
+  "name": "app-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.16.7",
+    "@shopify/react-native-skia": "https://github.com/Shopify/react-native-skia/releases/download/v0.1.65-alpha/shopify-react-native-skia-0.1.65.tgz",
+    "expo": ">=44.0.0-0 <45.0.0",
+    "expo-image-picker": "~12.0.1",
+    "expo-media-library": "~14.0.0",
+    "react": "17.0.2",
+    "react-native": "0.66.4",
+    "react-native-gesture-handler": "^2.1.1",
+    "react-native-reanimated": "^2.3.1"
+  },
+  "modular": {
+    "type": "app"
+  },
+  "devDependencies": {
+    "@types/react-native": "^0.66.12",
+    "babel-plugin-module-resolver": "^4.1.0"
+  }
+}

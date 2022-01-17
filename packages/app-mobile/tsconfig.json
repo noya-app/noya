@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "module": "esnext",
+    "jsx": "react-native",
+
+    "moduleResolution": "node"
+  }
+}
