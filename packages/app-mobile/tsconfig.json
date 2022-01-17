@@ -9,7 +9,6 @@
     "target": "esnext",
     "module": "commonjs",
     "skipDefaultLibCheck": true,
-
     "skipLibCheck": true,
     "jsx": "react-native",
     "esModuleInterop": true,
