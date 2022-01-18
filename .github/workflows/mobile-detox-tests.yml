@@ -22,7 +22,11 @@ jobs:
           cd ..
 
       - name: Build iOS app
-        run: yarn detox:build
+        run: |
+          cd packages/app-mobile/ios
+          yarn detox:build
 
       - name: Run iOS E2E test suite
-        run: yarn detox:test
+        run: |
+          cd packages/app-mobile/ios
+          yarn detox:test
