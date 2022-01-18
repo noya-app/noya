@@ -30,7 +30,6 @@
 		6C97AB639B58BBB4B15BBE30 /* Pods-noyamobile-noyamobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile-noyamobileTests.debug.xcconfig"; path = "Target Support Files/Pods-noyamobile-noyamobileTests/Pods-noyamobile-noyamobileTests.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = noyamobile/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ABFE59519B596E51CEFDCCC0 /* libPods-noyamobile-noyamobileTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-noyamobile-noyamobileTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		BBE586CC47E6C20AA0700272 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-noyamobile-noyamobileTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		C0A881CF5CF3F2B244570E2A /* Pods-noyamobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile.debug.xcconfig"; path = "Target Support Files/Pods-noyamobile/Pods-noyamobile.debug.xcconfig"; sourceTree = "<group>"; };
 		D00AAFFCFCFDA5787532823F /* Pods-noyamobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile.release.xcconfig"; path = "Target Support Files/Pods-noyamobile/Pods-noyamobile.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -69,7 +68,6 @@
 			isa = PBXGroup;
 			children = (
 				31D927AFB4A737A11D6D3EC8 /* noyamobile */,
-				78748157A39BCEFA8EAA6D76 /* noyamobileTests */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -103,14 +101,6 @@
 				4A1365128A42E7DA9351FF5E /* ExpoModulesProvider.swift */,
 			);
 			name = noyamobile;
-			sourceTree = "<group>";
-		};
-		78748157A39BCEFA8EAA6D76 /* noyamobileTests */ = {
-			isa = PBXGroup;
-			children = (
-				BBE586CC47E6C20AA0700272 /* ExpoModulesProvider.swift */,
-			);
-			name = noyamobileTests;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -415,7 +405,7 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 ";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
