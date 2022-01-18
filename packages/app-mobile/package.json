@@ -24,6 +24,7 @@
     "type": "app"
   },
   "devDependencies": {
+    "@types/detox": "^18.1.0",
     "@types/react-native": "^0.66.12",
     "babel-plugin-module-resolver": "^4.1.0"
   }

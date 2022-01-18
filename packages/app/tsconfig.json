@@ -1,6 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.shared.json",
   "compilerOptions": {
-    "module": "esnext"
+    "module": "esnext",
+    "noEmit": true
   }
 }
