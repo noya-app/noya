@@ -1,0 +1,29 @@
+name: Mobile Detox tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+  steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@master
+
+    - name: Configure detox
+      run: |
+        brew tap wix/brew
+        brew install applesimutils
+
+    - name: Install app dependencies
+      run: |
+        yarn install --frozen-lockfile --network-timeout 1000000
+        cd packages/app-mobile/ios
+        pod install
+        cd ..
+
+    - name: Build iOS app
+      run: yarn detox:build
+
+    - name: Run iOS E2E test suite
+      run: yarn detox:test

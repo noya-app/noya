@@ -5,7 +5,9 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start"
+    "start": "react-native start",
+    "detox:build": "detox build",
+    "detox:test": "detox test"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
