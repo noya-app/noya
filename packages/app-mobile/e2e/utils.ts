@@ -1,3 +1,4 @@
+import Detox from 'detox';
 import path from 'path';
 import fs from 'fs';
 
@@ -44,6 +45,25 @@ const expectToMatchScreenShot = async (testFile: string, testName: string) => {
       `The test ${testName} was expected to match the snapshot file at ${snapshottedImagePath}, but it was different!`,
     );
   }
+};
+
+export const dragDraw = async (
+  element: Detox.IndexableNativeElement,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+) => {
+  await element.longPressAndDrag(
+    500,
+    from.x,
+    from.y,
+    element,
+    to.x,
+    to.y,
+    'fast',
+    100,
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 100));
 };
 
 export const createCustomTesters = (testFile: string) => ({

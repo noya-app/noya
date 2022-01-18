@@ -199,10 +199,12 @@ const Editor: React.FC = () => {
               tapGesture.gesture,
             )}
           >
-            <Canvas style={styles.canvas} innerRef={canvasRef}>
-              {elements.map(renderElement)}
-              {uiElements.map(renderElement)}
-            </Canvas>
+            <View testID="Canvas" style={{ flex: 1 }}>
+              <Canvas style={styles.canvas} innerRef={canvasRef}>
+                {elements.map(renderElement)}
+                {uiElements.map(renderElement)}
+              </Canvas>
+            </View>
           </GestureDetector>
         </GestureHandlerRootView>
         <Toolbar

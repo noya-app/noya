@@ -5,9 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start",
-    "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "start": "react-native start"
   },
   "dependencies": {
     "@babel/runtime": "^7.16.7",
@@ -26,6 +24,25 @@
   "devDependencies": {
     "@types/detox": "^18.1.0",
     "@types/react-native": "^0.66.12",
-    "babel-plugin-module-resolver": "^4.1.0"
+    "@types/react-test-renderer": "^17.0.1",
+    "babel-plugin-module-resolver": "^4.1.0",
+    "detox": "^19.4.2",
+    "jest": "^27.4.7",
+    "jest-circus": "^27.4.6",
+    "jest-environment-node": "^27.4.6",
+    "react-test-renderer": "^17.0.2",
+    "ts-jest": "^27.1.3"
+  },
+  "detox": {
+    "test-runner": "jest",
+    "runnerConfig": "e2e/config.json",
+    "configurations": {
+      "ios.release": {
+        "binaryPath": "./ios/build/Build/Products/Release-iphonesimulator/noyamobile.app",
+        "build": "xcodebuild -workspace ios/noyamobile.xcworkspace -configuration debug -scheme noyamobile -sdk iphonesimulator -derivedDataPath ios/build",
+        "type": "ios.simulator",
+        "name": "iPad Pro (12.9-inch) (5th generation)"
+      }
+    }
   }
 }
