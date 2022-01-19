@@ -35,3 +35,8 @@ jobs:
         run: |
           cd packages/app-mobile
           yarn detox:test --record-logs all
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: runartifacts
+          path: packages/app-mobile/artifacts
