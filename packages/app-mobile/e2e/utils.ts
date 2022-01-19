@@ -1,4 +1,3 @@
-import Detox from 'detox';
 import path from 'path';
 import fs from 'fs';
 

@@ -39,11 +39,11 @@
     "test-runner": "jest",
     "runnerConfig": "e2e/config.json",
     "configurations": {
-      "ios.release": {
+      "ios": {
         "binaryPath": "./ios/build/Build/Products/Release-iphonesimulator/noyamobile.app",
         "build": "xcodebuild -workspace ios/noyamobile.xcworkspace -configuration debug -scheme noyamobile -sdk iphonesimulator -derivedDataPath ios/build",
         "type": "ios.simulator",
-        "name": "iPad Pro (12.9-inch) (5th generation)"
+        "name": "iPad Air (4th generation)"
       }
     }
   }
