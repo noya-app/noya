@@ -34,4 +34,4 @@ jobs:
       - name: Run iOS E2E test suite
         run: |
           cd packages/app-mobile
-          yarn detox:test -- -- --record-logs all
+          yarn detox:test --record-logs all
