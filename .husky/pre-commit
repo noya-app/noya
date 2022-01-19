@@ -1,7 +1,14 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npm run lint-staged
+yarn run lint-staged
 
-echo "\nChecking TypeScript types...\n"
-npx tsc --noEmit
+echo "\nChecking TypeScript types in app"
+npx tsc --noEmit --project ./packages/app
+echo "\nChecking TypeScript types in app-mobile"
+npx tsc --noEmit --project ./packages/app-mobile
+echo "\nChecking TypeScript types in canvaskit-sandbox"
+npx tsc --noEmit --project ./packages/canvaskit-sandbox
+echo "\nChecking TypeScript types in site"
+npx tsc --noEmit --project ./packages/site
+

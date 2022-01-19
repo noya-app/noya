@@ -1,0 +1,32 @@
+{
+  "extends": "modular-scripts/tsconfig.json",
+  "include": [
+    "modular",
+    "./packages/canvaskit",
+    "./packages/canvaskit-sandbox",
+    "./packages/noya-app-state-context",
+    "./packages/noya-colorpicker",
+    "./packages/noya-designsystem",
+    "./packages/noya-desktop",
+    "./packages/noya-embedded",
+    "./packages/noya-file-format",
+    "./packages/noya-fonts",
+    "./packages/noya-generate-image",
+    "./packages/noya-geometry",
+    "./packages/noya-google-fonts",
+    "./packages/noya-graphql-server",
+    "./packages/noya-icons",
+    "./packages/noya-import-svg",
+    "./packages/noya-keymap",
+    "./packages/noya-pdf",
+    "./packages/noya-react-canvaskit",
+    "./packages/noya-react-utils",
+    "./packages/noya-renderer",
+    "./packages/noya-sketch-file",
+    "./packages/noya-state",
+    "./packages/noya-svg-rendeerer",
+    "./packages/noya-svgkit",
+    "./packages/noya-utils",
+    "./packages/pathkit"
+  ]
+}
