@@ -1,45 +1,45 @@
-name: Mobile Detox tests
+# name: Mobile Detox tests
 
-on: [pull_request]
+# on: [pull_request]
 
-jobs:
-  build:
-    runs-on: macOS-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@main
+# jobs:
+#   build:
+#     runs-on: macOS-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@main
 
-      - name: Configure detox
-        run: |
-          brew tap wix/brew
-          brew install applesimutils
+#       - name: Configure detox
+#         run: |
+#           brew tap wix/brew
+#           brew install applesimutils
 
-      - name: Install app dependencies
-        run: |
-          yarn install --frozen-lockfile --network-timeout 1000000
-          cd packages/app-mobile/ios
-          pod install
-          cd ..
+#       - name: Install app dependencies
+#         run: |
+#           yarn install --frozen-lockfile --network-timeout 1000000
+#           cd packages/app-mobile/ios
+#           pod install
+#           cd ..
 
-      - name: Build iOS app
-        run: |
-          cd packages/app-mobile/ios
-          yarn detox:build -- -- --record-logs all
+#       - name: Build iOS app
+#         run: |
+#           cd packages/app-mobile/ios
+#           yarn detox:build -- -- --record-logs all
 
-      - name: Upload test application build
-        uses: actions/upload-artifact@v2
-        with:
-          name: noyamobile-app
-          path: packages/app-mobile/ios/build/Build/Products/Release-iphonesimulator/noyamobile.app
+#       - name: Upload test application build
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: noyamobile-app
+#           path: packages/app-mobile/ios/build/Build/Products/Release-iphonesimulator/noyamobile.app
 
-      - name: Run iOS E2E test suite
-        run: |
-          cd packages/app-mobile
-          yarn detox:test --record-logs all
+#       - name: Run iOS E2E test suite
+#         run: |
+#           cd packages/app-mobile
+#           yarn detox:test --record-logs all
 
-      - name: Upload Device logs and test artifacts
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: device-artifacts
-          path: packages/app-mobile/artifacts
+#       - name: Upload Device logs and test artifacts
+#         if: always()
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: device-artifacts
+#           path: packages/app-mobile/artifacts
