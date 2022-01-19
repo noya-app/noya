@@ -18,12 +18,14 @@
     "react": "17.0.2",
     "react-native": "0.66.4",
     "react-native-gesture-handler": "^2.1.1",
-    "react-native-reanimated": "^2.3.1"
+    "react-native-reanimated": "^2.3.1",
+    "tree-visit": "^0.1.0"
   },
   "modular": {
     "type": "app"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-export-namespace-from": "^7.16.7",
     "@types/detox": "^18.1.0",
     "@types/react-native": "^0.66.12",
     "@types/react-test-renderer": "^17.0.1",
