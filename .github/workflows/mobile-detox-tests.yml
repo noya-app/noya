@@ -26,9 +26,10 @@ jobs:
           cd packages/app-mobile/ios
           yarn detox:build -- -- --record-logs all
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload test application build
+        uses: actions/upload-artifact@v2
         with:
-          name: detoxbuild
+          name: noyamobile-app
           path: packages/app-mobile/ios/build/Build/Products/Release-iphonesimulator/noyamobile.app
 
       - name: Run iOS E2E test suite
@@ -36,7 +37,9 @@ jobs:
           cd packages/app-mobile
           yarn detox:test --record-logs all
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload Device logs and test artifacts
+        if: always()
+        uses: actions/upload-artifact@v2
         with:
-          name: runartifacts
+          name: device-artifacts
           path: packages/app-mobile/artifacts
