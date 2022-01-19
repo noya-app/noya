@@ -1,6 +1,6 @@
 name: Mobile Detox tests
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -26,7 +26,12 @@ jobs:
           cd packages/app-mobile/ios
           yarn detox:build -- -- --record-logs all
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: detoxbuild
+          path: packages/app-mobile/ios/build/Build/Products/Release-iphonesimulator/noyamobile.app
+
       - name: Run iOS E2E test suite
         run: |
-          cd packages/app-mobile/ios
-          yarn detox:test
+          cd packages/app-mobile
+          yarn detox:test -- -- --record-logs all
