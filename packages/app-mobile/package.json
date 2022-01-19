@@ -12,6 +12,7 @@
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@shopify/react-native-skia": "https://github.com/Shopify/react-native-skia/releases/download/v0.1.65-alpha/shopify-react-native-skia-0.1.65.tgz",
+    "base-64": "^1.0.0",
     "expo": ">=44.0.0-0 <45.0.0",
     "expo-image-picker": "~12.0.1",
     "expo-media-library": "~14.0.0",

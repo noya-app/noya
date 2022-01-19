@@ -3,10 +3,13 @@ const fs = require('fs');
 
 const getPathConfigs = (appRootDir) => {
   const packages = fs.readdirSync(path.resolve(appRootDir, '../'));
-  const excludes = ['README.md', 'app', 'app-mobile', 'site'];
+  const excludes = ['app', 'app-mobile', 'site'];
   const watchFolders = [];
-  const babelAliases = {};
-  const extraNodeModules = {};
+  const babelAliases = {
+    'react-native': path.resolve(appRootDir, './node_modules/react-native'),
+  };
+  // const extraNodeModules = {};
+  const extraNodeModules = [];
 
   packages.forEach((packageName) => {
     if (excludes.includes(packageName)) {
@@ -16,7 +19,8 @@ const getPathConfigs = (appRootDir) => {
     const basePath = path.resolve(appRootDir, `../${packageName}`);
 
     watchFolders.push(basePath);
-    extraNodeModules[packageName] = basePath;
+    // extraNodeModules[packageName] = basePath;
+    extraNodeModules.push(`${basePath}/node_modules`);
     babelAliases[packageName] = `${basePath}/src`;
   });
 
