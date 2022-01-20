@@ -2,10 +2,10 @@
   "extends": "modular-scripts/tsconfig.json",
   "compilerOptions": {
     "paths": {
-      // Include path too all package src index files
+      /* Include path too all package src index files */
       "*": ["../*/src"],
 
-      // For lib packages, allow to import from subpaths
+      /* For lib packages, allow to import from subpaths */
       "canvaskit/*": ["./packages/canvaskit/src/*"],
       "noya-app-state-context/*": ["./packages/noya-app-state-context/src/*"],
       "noya-colorpicker/*": ["./packages/noya-colorpicker/src/*"],

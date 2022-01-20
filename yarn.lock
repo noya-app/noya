@@ -4338,163 +4338,6 @@
   resolved "https://registry.yarnpkg.com/@react-native/polyfills/-/polyfills-2.0.0.tgz#4c40b74655c83982c8cf47530ee7dc13d957b6aa"
   integrity sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==
 
-"@react-native-community/cli-debugger-ui@^6.0.0-rc.0":
-  version "6.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-debugger-ui/-/cli-debugger-ui-6.0.0-rc.0.tgz#774378626e4b70f5e1e2e54910472dcbaffa1536"
-  integrity sha512-achYcPPoWa9D02C5tn6TBzjeY443wQTyx37urptc75JpZ7gR5YHsDyIEEWa3DDYp1va9zx/iGg+uZ/hWw07GAw==
-  dependencies:
-    serve-static "^1.13.1"
-
-"@react-native-community/cli-hermes@^6.3.0":
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-hermes/-/cli-hermes-6.3.0.tgz#92b2f07d08626a60f6893c3e3d57c1538c8fb5a7"
-  integrity sha512-Uhbm9bubyZLZ12vFCIfWbE/Qi3SBTbYIN/TC08EudTLhv/KbPomCQnmFsnJ7AXQFuOZJs73mBxoEAYSbRbwyVA==
-  dependencies:
-    "@react-native-community/cli-platform-android" "^6.3.0"
-    "@react-native-community/cli-tools" "^6.2.0"
-    chalk "^4.1.2"
-    hermes-profile-transformer "^0.0.6"
-    ip "^1.1.5"
-
-"@react-native-community/cli-platform-android@^6.0.0", "@react-native-community/cli-platform-android@^6.3.0":
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-6.3.0.tgz#ab7d156bd69a392493323eeaba839a874c0e201f"
-  integrity sha512-d5ufyYcvrZoHznYm5bjBXaiHIJv552t5gYtQpnUsxBhHSQ8QlaNmlLUyeSPRDfOw4ND9b0tPHqs4ufwx6vp/fQ==
-  dependencies:
-    "@react-native-community/cli-tools" "^6.2.0"
-    chalk "^4.1.2"
-    execa "^1.0.0"
-    fs-extra "^8.1.0"
-    glob "^7.1.3"
-    jetifier "^1.6.2"
-    lodash "^4.17.15"
-    logkitty "^0.7.1"
-    slash "^3.0.0"
-    xmldoc "^1.1.2"
-
-"@react-native-community/cli-platform-ios@^6.0.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-6.2.0.tgz#ceaa23995511a8e400b506632ac7e6a66a17ec2a"
-  integrity sha512-k15MhExxLiLDDZOeuPgvTxbp0CsoLQQpk2Du0HjZDePqqWcKJylQqMZru1o8HuQHPcEr+b71HIs5V+lKyFYpfg==
-  dependencies:
-    "@react-native-community/cli-tools" "^6.2.0"
-    chalk "^4.1.2"
-    glob "^7.1.3"
-    js-yaml "^3.13.1"
-    lodash "^4.17.15"
-    ora "^3.4.0"
-    plist "^3.0.2"
-    xcode "^2.0.0"
-
-"@react-native-community/cli-plugin-metro@^6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-plugin-metro/-/cli-plugin-metro-6.2.0.tgz#143f459f1b6d595011e787ecfbe87621195de6ae"
-  integrity sha512-JfmzuFNzOr+dFTUQJo1rV0t87XAqgHRTMYXNleQVt8otOVCk1FSCgKlgqMdvQc/FCx2ZjoMWEEV/g0LrPI8Etw==
-  dependencies:
-    "@react-native-community/cli-server-api" "^6.2.0"
-    "@react-native-community/cli-tools" "^6.2.0"
-    chalk "^4.1.2"
-    metro "^0.66.1"
-    metro-config "^0.66.1"
-    metro-core "^0.66.1"
-    metro-react-native-babel-transformer "^0.66.1"
-    metro-resolver "^0.66.1"
-    metro-runtime "^0.66.1"
-    readline "^1.3.0"
-
-"@react-native-community/cli-server-api@^6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-server-api/-/cli-server-api-6.2.0.tgz#8dc399ef0e14e07c9942515b507292fb850f41f2"
-  integrity sha512-OnbnYclhoDpjge33QO5Slhfn0DsmLzzAgyrSCnb24HhSqwq7ObjMHaLpoEhpajzLG71wq5oKh0APEQjiL4Mknw==
-  dependencies:
-    "@react-native-community/cli-debugger-ui" "^6.0.0-rc.0"
-    "@react-native-community/cli-tools" "^6.2.0"
-    compression "^1.7.1"
-    connect "^3.6.5"
-    errorhandler "^1.5.0"
-    nocache "^2.1.0"
-    pretty-format "^26.6.2"
-    serve-static "^1.13.1"
-    ws "^1.1.0"
-
-"@react-native-community/cli-tools@^6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-tools/-/cli-tools-6.2.0.tgz#8f4adc2d83ab96e5654348533c8fa602742c4fce"
-  integrity sha512-08ssz4GMEnRxC/1FgTTN/Ud7mExQi5xMphItPjfHiTxpZPhrFn+IMx6mya0ncFEhhxQ207wYlJMRLPRRdBZ8oA==
-  dependencies:
-    appdirsjs "^1.2.4"
-    chalk "^4.1.2"
-    lodash "^4.17.15"
-    mime "^2.4.1"
-    node-fetch "^2.6.0"
-    open "^6.2.0"
-    semver "^6.3.0"
-    shell-quote "1.6.1"
-
-"@react-native-community/cli-types@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-types/-/cli-types-6.0.0.tgz#90269fbdc7229d5e3b8f2f3e029a94083551040d"
-  integrity sha512-K493Fk2DMJC0ZM8s8gnfseKxGasIhuDaCUDeLZcoCSFlrjKEuEs1BKKEJiev0CARhKEXKOyyp/uqYM9nWhisNw==
-  dependencies:
-    ora "^3.4.0"
-
-"@react-native-community/cli@^6.0.0":
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-6.3.1.tgz#b5194a3a008cd7c76c79aaa93ce605d314e5bfd2"
-  integrity sha512-UQ77AkGvPzdwJt6qhYXUyDMP1v2rdCcIlrhU48FOcAhGX+N/LCL9Cp/Ic6CkiiSHJdktbgiEEJ2srprXH8nzVg==
-  dependencies:
-    "@react-native-community/cli-debugger-ui" "^6.0.0-rc.0"
-    "@react-native-community/cli-hermes" "^6.3.0"
-    "@react-native-community/cli-plugin-metro" "^6.2.0"
-    "@react-native-community/cli-server-api" "^6.2.0"
-    "@react-native-community/cli-tools" "^6.2.0"
-    "@react-native-community/cli-types" "^6.0.0"
-    appdirsjs "^1.2.4"
-    chalk "^4.1.2"
-    command-exists "^1.2.8"
-    commander "^2.19.0"
-    cosmiconfig "^5.1.0"
-    deepmerge "^3.2.0"
-    envinfo "^7.7.2"
-    execa "^1.0.0"
-    find-up "^4.1.0"
-    fs-extra "^8.1.0"
-    glob "^7.1.3"
-    graceful-fs "^4.1.3"
-    joi "^17.2.1"
-    leven "^3.1.0"
-    lodash "^4.17.15"
-    minimist "^1.2.0"
-    node-stream-zip "^1.9.1"
-    ora "^3.4.0"
-    pretty-format "^26.6.2"
-    prompts "^2.4.0"
-    semver "^6.3.0"
-    serve-static "^1.13.1"
-    strip-ansi "^5.2.0"
-    sudo-prompt "^9.0.0"
-    wcwidth "^1.0.1"
-
-"@react-native/assets@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native/assets/-/assets-1.0.0.tgz#c6f9bf63d274bafc8e970628de24986b30a55c8e"
-  integrity sha512-KrwSpS1tKI70wuKl68DwJZYEvXktDHdZMG0k2AXD/rJVSlB23/X2CB2cutVR0HwNMJIal9HOUOBB2rVfa6UGtQ==
-
-"@react-native/normalize-color@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native/normalize-color/-/normalize-color-1.0.0.tgz#c52a99d4fe01049102d47dc45d40cbde4f720ab6"
-  integrity sha512-xUNRvNmCl3UGCPbbHvfyFMnpvLPoOjDCcp5bT9m2k+TF/ZBklEQwhPZlkrxRx2NhgFh1X3a5uL7mJ7ZR+8G7Qg==
-
-"@react-native/normalize-color@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native/normalize-color/-/normalize-color-2.0.0.tgz#da955909432474a9a0fe1cbffc66576a0447f567"
-  integrity sha512-Wip/xsc5lw8vsBlmY2MO/gFLp3MvuZ2baBZjDeTjjndMgM0h5sxz7AZR62RDPGgstp8Np7JzjvVqVT7tpFZqsw==
-
-"@react-native/polyfills@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@react-native/polyfills/-/polyfills-2.0.0.tgz#4c40b74655c83982c8cf47530ee7dc13d957b6aa"
-  integrity sha512-K0aGNn1TjalKj+65D7ycc1//H9roAQ51GJVk5ZJQFb2teECGmzd86bYDC0aYdbRf7gtovescq4Zt6FR0tgXiHQ==
-
 "@react-spring/animated@~9.2.0":
   version "9.2.4"
   resolved "https://registry.yarnpkg.com/@react-spring/animated/-/animated-9.2.4.tgz#062ecc0fdfef89f2541a42d8500428b70035f879"
@@ -13946,13 +13789,6 @@ jsonfile@^2.1.0:
   optionalDependencies:
     graceful-fs "^4.1.6"
 
-jsonfile@^2.1.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/jsonfile/-/jsonfile-2.4.0.tgz#3736a2b428b87bbda0cc83b53fa3d633a35c2ae8"
-  integrity sha1-NzaitCi4e72gzIO1P6PWM6NcKug=
-  optionalDependencies:
-    graceful-fs "^4.1.6"
-
 jsonfile@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/jsonfile/-/jsonfile-4.0.0.tgz#8771aae0799b64076b76640fca058f9c10e33ecb"
@@ -22122,16 +21958,6 @@ yargs-parser@^18.1.2:
   dependencies:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
-
-yargs-unparser@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/yargs-unparser/-/yargs-unparser-2.0.0.tgz#f131f9226911ae5d9ad38c432fe809366c2325eb"
-  integrity sha512-7pRTIA9Qc1caZ0bZ6RYRGbHJthJWuakf+WmHK0rVeLkNrrGhfoabBNdue6kdINI6r4if7ocq9aD/n7xwKOdzOA==
-  dependencies:
-    camelcase "^6.0.0"
-    decamelize "^4.0.0"
-    flat "^5.0.2"
-    is-plain-obj "^2.1.0"
 
 yargs-unparser@^2.0.0:
   version "2.0.0"
