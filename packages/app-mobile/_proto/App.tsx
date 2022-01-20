@@ -3,12 +3,9 @@ import '@shopify/react-native-skia';
 import React from 'react';
 import { SafeAreaView, StatusBar, useColorScheme } from 'react-native';
 
-// import * as noyaUtils from 'noya-utils';
-
 // eslint-disable-next-line
-import { Theme } from './src/constants';
-// eslint-disable-next-line
-import Editor from './src/components/Editor';
+import { Theme } from '../src/constants';
+import Editor from './components/Editor';
 
 const App = () => {
   const colorScheme = useColorScheme();

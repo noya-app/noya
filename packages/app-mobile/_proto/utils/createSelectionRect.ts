@@ -1,5 +1,6 @@
 import { SelectionGesture } from '../hooks/useSelectionGesture';
-import { ElementType } from '../types';
+// eslint-disable-next-line
+import { ElementType } from '../../src/types';
 
 export default function createSelectionRect(gesture: SelectionGesture) {
   return {
