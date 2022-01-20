@@ -8,18 +8,16 @@ const getPathConfigs = (appRootDir) => {
   const babelAliases = {
     'react-native': path.resolve(appRootDir, './node_modules/react-native'),
   };
-  // const extraNodeModules = {};
   const extraNodeModules = [];
 
   packages.forEach((packageName) => {
+    const basePath = path.resolve(appRootDir, `../${packageName}`);
+
     if (excludes.includes(packageName)) {
       return;
     }
 
-    const basePath = path.resolve(appRootDir, `../${packageName}`);
-
     watchFolders.push(basePath);
-    // extraNodeModules[packageName] = basePath;
     extraNodeModules.push(`${basePath}/node_modules`);
     babelAliases[packageName] = `${basePath}/src`;
   });
