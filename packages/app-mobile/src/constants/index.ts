@@ -1,14 +1,10 @@
-const dark = {
-  backgroundColor: '#151a23',
-  textColor: '#fff',
-};
+import { Theme } from 'noya-designsystem/theme';
+import * as noyaLight from 'noya-designsystem/theme/light';
+import * as noyaDark from 'noya-designsystem/theme/dark';
 
-const light = {
-  backgroundColor: '#ddd',
-  textColor: '#000',
-};
+export const lightTheme = noyaLight;
+export const darkTheme = noyaDark;
 
-export const Theme = {
-  dark,
-  light,
-};
+declare module 'styled-components/native' {
+  export interface DefaultTheme extends Theme {}
+}

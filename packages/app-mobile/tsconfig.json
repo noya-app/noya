@@ -1,4 +1,7 @@
 {
+  "extends": "../../tsconfig-base.json",
+  "include": ["e2e"], // No real typecheck for src files for now
+  "exclude": ["_proto", "node_modules"],
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
@@ -6,20 +9,14 @@
     "lib": ["es2017"],
     "target": "esnext",
     "module": "commonjs",
+    "skipDefaultLibCheck": true,
+
     "skipLibCheck": true,
     "jsx": "react-native",
     "esModuleInterop": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "types": ["node", "jest", "detox"],
     "allowSyntheticDefaultImports": true
-  },
-  "exclude": [
-    "node_modules",
-    "jest.config.js",
-    "babel.config.js",
-    "metro.config.js"
-  ],
-  "include": ["e2e/*.ts", "e2eExplicit/*.ts"]
+  }
 }

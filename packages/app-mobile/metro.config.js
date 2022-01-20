@@ -8,30 +8,7 @@ const pathConfigs = getPathConfigs(__dirname);
 const metroConfig = {
   watchFolders: [...pathConfigs.watchFolders, `${rootDir}/node_modules`],
   resolver: {
-    sourceExts: [
-      'cjs',
-      'json',
-      'ts',
-      'tsx',
-      'js',
-      'jsx',
-      'android.ts',
-      'android.tsx',
-      'ios.ts',
-      'ios.tsx',
-      'web.ts',
-      'web.tsx',
-      'android.js',
-      'android.jsx',
-      'ios.js',
-      'ios.jsx',
-      'web.js',
-      'web.jsx',
-      'native.js',
-      'native.ts',
-      'native.tsx',
-      'native.jsx',
-    ],
+    sourceExts: ['cjs', 'json', 'ts', 'tsx', 'js', 'jsx'],
   },
   transformer: {
     getTransformOptions: async () => ({
