@@ -19,14 +19,7 @@ if (!global.atob) {
 }
 
 // eslint-disable-next-line
-import {
-  createInitialWorkspaceState,
-  createSketchFile,
-  // Selectors,
-  // WorkspaceAction,
-  // workspaceReducer,
-  // WorkspaceState,
-} from 'noya-state';
+import { createInitialWorkspaceState, createSketchFile } from 'noya-state';
 
 // eslint-disable-next-line
 import { Theme } from './constants';
