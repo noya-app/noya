@@ -1,6 +1,5 @@
 {
-  "extends": "../../tsconfig-base.json",
-  "include": ["e2e"], // No real typecheck for src files for now
+  "extends": "../../tsconfig.json",
   "exclude": ["_proto", "node_modules"],
   "compilerOptions": {
     "strict": true,

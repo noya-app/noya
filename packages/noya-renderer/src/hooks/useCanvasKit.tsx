@@ -1,7 +1,9 @@
+import React, { useContext, ReactNode } from 'react';
+
+import { CanvasKitContext } from 'noya-renderer-mobile';
 import type { CanvasKit } from 'canvaskit';
 import { SuspendedValue } from 'noya-react-utils';
 import { loadCanvasKit } from 'noya-renderer';
-import { createContext, memo, useContext, ReactNode } from 'react';
 // import loadSVGKit from 'noya-svgkit';
 
 // We don't start loading CanvasKit until the Provider renders the first time,
@@ -9,9 +11,7 @@ import { createContext, memo, useContext, ReactNode } from 'react';
 // which needs to happen before `loadCanvasKit` is called.
 let suspendedCanvasKit: SuspendedValue<CanvasKit>;
 
-const CanvasKitContext = createContext<CanvasKit | undefined>(undefined);
-
-export const CanvasKitProvider = memo(function CanvasKitProvider({
+export const CanvasKitProvider = React.memo(function CanvasKitProvider({
   children,
   CanvasKit,
 }: {

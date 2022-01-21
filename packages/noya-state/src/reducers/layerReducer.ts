@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { RelativeDropPosition } from 'noya-designsystem';
+import { RelativeDropPosition } from 'noya-designsystem/types';
 import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, groupBy, uuid } from 'noya-utils';

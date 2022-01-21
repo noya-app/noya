@@ -24,6 +24,7 @@
       "noya-react-canvaskit/*": ["./packages/noya-react-canvaskit/src/*"],
       "noya-reeact-utils/*": ["./packages/noya-reeact-utils/src/*"],
       "noya-renderer/*": ["./packages/noya-renderer/src/*"],
+      "noya-renderer-mobile/*": ["./packages/noya-renderer-mobile/src/*"],
       "noya-sketch-file/*": ["./packages/noya-sketch-file/src/*"],
       "noya-sketch-model/*": ["./packages/noya-sketch-model/src/*"],
       "noya-state/*": ["./packages/noya-state/src/*"],

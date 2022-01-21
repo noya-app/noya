@@ -1,10 +1,10 @@
 import Sketch from 'noya-file-format';
-import { SketchPattern } from 'noya-designsystem';
+import { SketchPattern } from 'noya-designsystem/types';
 import { decodeFontName, FontTraits } from 'noya-fonts';
 import { getMultiNumberValue, getMultiValue, Selectors } from 'noya-state';
 import { isDeepEqual, zipLongest } from 'noya-utils';
-import { SimpleTextDecoration } from './primitives';
 import { SketchModel } from 'noya-sketch-model';
+import { SimpleTextDecoration } from './primitives';
 
 export type EditableTextStyle = {
   fontFamily?: string;
