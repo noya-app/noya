@@ -26,6 +26,8 @@ export type IFontManager = Pick<
   getTypefaceFontProvider: () => TypefaceFontProvider;
 };
 
+console.log(FontManager);
+
 type FontManagerContextValue = IFontManager & {
   downloadFont: FontManager['downloadFont'];
 };
@@ -40,7 +42,11 @@ const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
   ).then((resp) => resp.arrayBuffer()),
 );
 
-const sharedFontManager = new FontManager(GoogleFontProvider);
+const sharedFontManager = {
+  entries: [],
+  addDownloadedFontListener: (k: any) => {},
+  removeDownloadedFontListener: (b: any) => {},
+}; // new FontManager(GoogleFontProvider);
 
 interface Props {
   children?: ReactNode;
