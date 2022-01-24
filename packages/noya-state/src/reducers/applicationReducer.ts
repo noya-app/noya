@@ -75,17 +75,17 @@ export type LastEditedTextStyle = {
 };
 
 export type ApplicationState = {
-  // currentTab: WorkspaceTab;
-  // currentThemeTab: ThemeTab;
-  // interactionState: InteractionState;
-  // keyModifiers: KeyModifiers;
-  // lastEditedTextStyle?: LastEditedTextStyle;
-  // selectedPage: string;
-  // selectedLayerIds: string[];
-  // selectedPointLists: SelectedPointLists;
-  // selectedControlPoint?: SelectedControlPoint;
-  // selectedThemeTab: Record<ThemeTab, ThemeSelection>;
-  // selectedGradient?: SelectedGradient;
+  currentTab: WorkspaceTab;
+  currentThemeTab: ThemeTab;
+  interactionState: InteractionState;
+  keyModifiers: KeyModifiers;
+  lastEditedTextStyle?: LastEditedTextStyle;
+  selectedPage: string;
+  selectedLayerIds: string[];
+  selectedPointLists: SelectedPointLists;
+  selectedControlPoint?: SelectedControlPoint;
+  selectedThemeTab: Record<ThemeTab, ThemeSelection>;
+  selectedGradient?: SelectedGradient;
   sketch: SketchFile;
 };
 
@@ -107,11 +107,11 @@ export type ApplicationState = {
 //   | PointAction
 //   | TextEditorAction;
 
-// export type ApplicationReducerContext = {
-//   canvasInsets: Insets;
-//   canvasSize: Size;
-//   fontManager: IFontManager;
-// };
+export type ApplicationReducerContext = {
+  canvasInsets: Insets;
+  canvasSize: Size;
+  fontManager: IFontManager;
+};
 
 // export function applicationReducer(
 //   state: ApplicationState,
@@ -506,31 +506,31 @@ export type ApplicationState = {
 //   });
 // }
 
-// export function createInitialState(sketch: SketchFile): ApplicationState {
-//   if (sketch.pages.length === 0) {
-//     throw new Error('Invalid Sketch file - no pages');
-//   }
+export function createInitialState(sketch: SketchFile): ApplicationState {
+  if (sketch.pages.length === 0) {
+    throw new Error('Invalid Sketch file - no pages');
+  }
 
-//   return {
-//     currentTab: 'canvas',
-//     currentThemeTab: 'swatches',
-//     interactionState: createInitialInteractionState(),
-//     keyModifiers: {
-//       altKey: false,
-//       ctrlKey: false,
-//       metaKey: false,
-//       shiftKey: false,
-//     },
-//     selectedPage: sketch.pages[0].do_objectID,
-//     selectedLayerIds: [],
-//     selectedPointLists: {},
-//     selectedControlPoint: undefined,
-//     selectedThemeTab: {
-//       swatches: { ids: [], groupName: '' },
-//       layerStyles: { ids: [], groupName: '' },
-//       textStyles: { ids: [], groupName: '' },
-//       symbols: { ids: [], groupName: '' },
-//     },
-//     sketch,
-//   };
-// }
+  return {
+    currentTab: 'canvas',
+    currentThemeTab: 'swatches',
+    interactionState: createInitialInteractionState(),
+    keyModifiers: {
+      altKey: false,
+      ctrlKey: false,
+      metaKey: false,
+      shiftKey: false,
+    },
+    selectedPage: sketch.pages[0].do_objectID,
+    selectedLayerIds: [],
+    selectedPointLists: {},
+    selectedControlPoint: undefined,
+    selectedThemeTab: {
+      swatches: { ids: [], groupName: '' },
+      layerStyles: { ids: [], groupName: '' },
+      textStyles: { ids: [], groupName: '' },
+      symbols: { ids: [], groupName: '' },
+    },
+    sketch,
+  };
+}

@@ -14,6 +14,7 @@ import {
   Select,
   withSeparatorElements,
 } from 'noya-designsystem';
+import { rgbaToSketchColor, sketchColorToHex } from 'noya-utils';
 import { SetNumberMode } from 'noya-state';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';

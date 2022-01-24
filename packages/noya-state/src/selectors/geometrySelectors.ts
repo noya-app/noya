@@ -17,7 +17,7 @@ import {
   Size,
   transformRect,
 } from 'noya-geometry';
-import { IFontManager } from 'noya-renderer-web';
+import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
 import { Layers, PageLayer, ScalingOptions, ApplicationState } from '../index';
 import { visitReversed } from '../layers';
