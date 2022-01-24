@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-  "exclude": ["_proto", "node_modules"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
