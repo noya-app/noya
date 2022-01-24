@@ -1,35 +1,40 @@
-import React, { useContext, ReactNode } from 'react';
+import React, { useContext, createContext, PropsWithChildren } from 'react';
 
-import { CanvasKitContext } from 'noya-renderer-mobile';
 import type { CanvasKit } from 'canvaskit';
 import { SuspendedValue } from 'noya-react-utils';
-import { loadCanvasKit } from 'noya-renderer';
-// import loadSVGKit from 'noya-svgkit';
 
 // We don't start loading CanvasKit until the Provider renders the first time,
 // since we currently support setting the wasm path at runtime when the app starts,
 // which needs to happen before `loadCanvasKit` is called.
 let suspendedCanvasKit: SuspendedValue<CanvasKit>;
 
-export const CanvasKitProvider = React.memo(function CanvasKitProvider({
-  children,
-  CanvasKit,
-}: {
-  children?: ReactNode;
-  CanvasKit?: CanvasKit;
-}) {
-  if (!suspendedCanvasKit) {
-    suspendedCanvasKit = new SuspendedValue<CanvasKit>(loadCanvasKit());
+// Export Context object to be used in noya-renderer useCanvasKit
+export const CanvasKitContext = createContext<CanvasKit | undefined>(undefined);
+
+interface CanvasKitProviderProps {
+  loadCanvasKit?: () => Promise<CanvasKit>;
+  canvasKit?: CanvasKit;
+}
+
+const Provider: React.FC<PropsWithChildren<CanvasKitProviderProps>> = (
+  props,
+) => {
+  const { children } = props;
+
+  if (!suspendedCanvasKit && props.loadCanvasKit) {
+    suspendedCanvasKit = new SuspendedValue<CanvasKit>(props.loadCanvasKit());
   }
 
-  const LoadedCanvasKit = CanvasKit ?? suspendedCanvasKit.getValueOrThrow();
+  const canvasKit = props.canvasKit ?? suspendedCanvasKit.getValueOrThrow();
 
   return (
-    <CanvasKitContext.Provider value={LoadedCanvasKit}>
+    <CanvasKitContext.Provider value={canvasKit}>
       {children}
     </CanvasKitContext.Provider>
   );
-});
+};
+
+export const CanvasKitProvider = React.memo(Provider);
 
 export function useCanvasKit() {
   const value = useContext(CanvasKitContext);

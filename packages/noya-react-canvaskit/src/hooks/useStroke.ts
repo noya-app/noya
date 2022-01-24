@@ -1,5 +1,5 @@
 import { Paint } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { useCanvasKit } from 'noya-renderer-web';
 import { useMemo } from 'react';
 import usePaint, { PaintParameters } from './usePaint';
 

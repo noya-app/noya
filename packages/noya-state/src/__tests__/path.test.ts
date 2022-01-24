@@ -1,5 +1,5 @@
 import type { CanvasKit as CanvasKitType, Path } from 'canvaskit';
-import { loadCanvasKit } from 'noya-renderer';
+import { loadCanvasKit } from 'noya-renderer-web';
 import { SketchModel } from 'noya-sketch-model';
 import { PathCommand, PathCommandVerb, parsePathCmds } from 'noya-state';
 import { round } from 'noya-utils';

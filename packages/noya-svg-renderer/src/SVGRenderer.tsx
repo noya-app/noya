@@ -5,7 +5,7 @@ import {
   ComponentsContextValue,
   ComponentsProvider,
   useCanvasKit,
-} from 'noya-renderer';
+} from 'noya-renderer-web';
 import { Base64, detectFileType, getFileExtensionForType } from 'noya-utils';
 import { memo, ReactNode, useMemo, useRef } from 'react';
 import { ElementIdProvider, useGetNextElementId } from './ElementIdContext';

@@ -1,7 +1,7 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import { FontManager } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
-import { loadCanvasKit } from 'noya-renderer';
+import { loadCanvasKit } from 'noya-renderer-web';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import {
   createInitialState,

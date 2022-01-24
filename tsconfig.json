@@ -3,7 +3,7 @@
   "compilerOptions": {
     "paths": {
       /* Include path too all package src index files */
-      "*": ["../*/src"],
+      "*": ["./*/src"],
 
       /* For lib packages, allow to import from subpaths */
       "canvaskit/*": ["./packages/canvaskit/src/*"],
@@ -23,8 +23,8 @@
       "noya-pdf/*": ["./packages/noya-pdf/src/*"],
       "noya-react-canvaskit/*": ["./packages/noya-react-canvaskit/src/*"],
       "noya-reeact-utils/*": ["./packages/noya-reeact-utils/src/*"],
+      "noya-renderer-web/*": ["./packages/noya-renderer-web/src/*"],
       "noya-renderer/*": ["./packages/noya-renderer/src/*"],
-      "noya-renderer-mobile/*": ["./packages/noya-renderer-mobile/src/*"],
       "noya-sketch-file/*": ["./packages/noya-sketch-file/src/*"],
       "noya-sketch-model/*": ["./packages/noya-sketch-model/src/*"],
       "noya-state/*": ["./packages/noya-state/src/*"],

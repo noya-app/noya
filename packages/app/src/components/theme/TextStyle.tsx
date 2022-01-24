@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { sketchColorToRgba } from 'noya-designsystem';
 import { center, Size } from 'noya-geometry';
-import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
+import { SketchLayer, useTextLayerParagraph } from 'noya-renderer-web';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';
 import produce from 'immer';
@@ -81,9 +81,9 @@ export default memo(function TextStyle({ name, style }: Props) {
 
     const rbga = sketchColorToRgba(color);
     /*
-      Formula found in this question 
+      Formula found in this question
       https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
-      Source: https://en.wikipedia.org/wiki/Relative_luminance 
+      Source: https://en.wikipedia.org/wiki/Relative_luminance
     */
     const Y = 0.2126 * rbga.r + 0.7152 * rbga.g + 0.0722 * rbga.b;
     return Y < 128 ? 'white' : 'black';

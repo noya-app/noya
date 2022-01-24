@@ -10,7 +10,7 @@ import {
   rectContainsPoint,
   Size,
 } from 'noya-geometry';
-import { IFontManager } from 'noya-renderer';
+import { IFontManager } from 'noya-renderer-web';
 import {
   InteractionState,
   Layers,

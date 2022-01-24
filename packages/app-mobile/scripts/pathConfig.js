@@ -2,16 +2,16 @@ const path = require('path');
 const fs = require('fs');
 
 const allowList = [
-  'noya-state',
-  'noya-utils',
+  'canvaskit',
   'noya-fonts',
+  'noya-utils',
+  'noya-state',
+  'noya-renderer',
   'noya-geometry',
-  'noya-file-format',
   'noya-react-utils',
-  'noya-colorpicker',
-  'noya-designsystem',
+  'noya-sketch-file',
+  'noya-file-format',
   'noya-sketch-model',
-  'noya-renderer-mobile',
   'noya-app-state-context',
 ];
 

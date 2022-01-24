@@ -15,7 +15,7 @@ import {
   Size,
   transformRect,
 } from 'noya-geometry';
-import { IFontManager } from 'noya-renderer';
+import { IFontManager } from 'noya-renderer-web';
 import * as Primitives from 'noya-state';
 import { ScalingOptions } from 'noya-state';
 import { SKIP, STOP, VisitOptions } from 'tree-visit';

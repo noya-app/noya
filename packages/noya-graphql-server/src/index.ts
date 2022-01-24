@@ -3,7 +3,7 @@ import fs from 'fs';
 import { decode } from 'noya-sketch-file';
 import { createInitialWorkspaceState, Layers, Selectors } from 'noya-state';
 import path from 'path';
-import { LayerPreview, loadCanvasKit } from 'noya-renderer';
+import { LayerPreview, loadCanvasKit } from 'noya-renderer-web';
 import { setPathToWasm } from 'noya-utils';
 import { ImageEncoding, generateImage } from 'noya-generate-image';
 import { lightTheme } from 'noya-designsystem';

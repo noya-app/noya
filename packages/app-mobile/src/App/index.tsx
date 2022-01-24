@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 // Local imports
-import { CanvasKitProvider } from 'noya-renderer-mobile';
+import { CanvasKitProvider } from 'noya-renderer';
 import { darkTheme, lightTheme } from '../constants';
 import loadCanvasKit from '../utils/loadCanvasKit';
 import AppContent from './AppContent';

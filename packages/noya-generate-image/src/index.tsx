@@ -9,9 +9,9 @@ import {
   CanvasKitProvider,
   ComponentsProvider,
   FontManagerProvider,
-} from 'noya-renderer';
+} from 'noya-renderer-web';
 import { StateProvider } from 'noya-app-state-context';
-import { ImageCacheProvider } from 'noya-renderer';
+import { ImageCacheProvider } from 'noya-renderer-web';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { UTF16 } from 'noya-utils';

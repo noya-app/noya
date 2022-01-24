@@ -10,7 +10,7 @@ import {
   loadCanvasKit,
   RenderingModeProvider,
   SketchFileRenderer,
-} from 'noya-renderer';
+} from 'noya-renderer-web';
 import { decode } from 'noya-sketch-file';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {

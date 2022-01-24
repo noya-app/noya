@@ -10,7 +10,7 @@ import {
   useCanvasKit,
   useDownloadFont,
   useFontManager,
-} from 'noya-renderer';
+} from 'noya-renderer-web';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,

@@ -5,11 +5,11 @@ import {
   WorkspaceAction,
   workspaceReducer,
 } from 'noya-state';
-import { useCanvasKit } from 'noya-renderer-mobile';
+import { useCanvasKit } from 'noya-renderer';
 import { useEffect, useMemo, useReducer } from 'react';
 import { PromiseState } from 'noya-react-utils';
 import { SketchFile } from 'noya-sketch-file';
-import { IFontManager } from 'noya-renderer/FontManagerContext';
+import { IFontManager } from 'noya-renderer';
 
 type Action =
   | { type: 'set'; value: SketchFile }
@@ -17,20 +17,25 @@ type Action =
 
 class FontManagerStub {
   getFontId() {
+    // eslint-ignore-next-line
     console.log(Function.name);
   }
   getBeestFontDescriptor() {
+    // eslint-ignore-next-line
     console.log(Function.name);
   }
   downloadFont() {
+    // eslint-ignore-next-line
     console.log(Function.name);
   }
   get entries() {
+    // eslint-ignore-next-line
     console.log(Function.name);
     return [];
   }
 
   get values() {
+    // eslint-ignore-next-line
     console.log(Function.name);
     return [];
   }

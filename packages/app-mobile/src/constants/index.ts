@@ -1,9 +1,9 @@
-import { Theme } from 'noya-designsystem/theme';
-import * as noyaLight from 'noya-designsystem/theme/light';
-import * as noyaDark from 'noya-designsystem/theme/dark';
+import * as lightTheme from './lightTheme';
 
-export const lightTheme = noyaLight;
-export const darkTheme = noyaDark;
+export * as lightTheme from './lightTheme';
+export * as darkTheme from './darkTheme';
+
+export type Theme = typeof lightTheme;
 
 declare module 'styled-components/native' {
   export interface DefaultTheme extends Theme {}
