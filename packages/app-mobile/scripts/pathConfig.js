@@ -6,12 +6,15 @@ const allowList = [
   'noya-fonts',
   'noya-utils',
   'noya-state',
+  'noya-keymap',
   'noya-renderer',
   'noya-geometry',
   'noya-react-utils',
   'noya-sketch-file',
   'noya-file-format',
   'noya-sketch-model',
+  'noya-colorpicker',
+  'noyya-import-svg',
   'noya-app-state-context',
 ];
 

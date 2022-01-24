@@ -6,10 +6,8 @@ import {
   InputField,
   Label,
   LabeledElementView,
-  rgbaToSketchColor,
-  sketchColorToHex,
 } from 'noya-designsystem';
-import { clamp } from 'noya-utils';
+import { clamp, rgbaToSketchColor, sketchColorToHex } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

@@ -1,3 +1,5 @@
+import { memo, useCallback, useMemo } from 'react';
+
 import type Sketch from 'noya-file-format';
 import {
   Alpha,
@@ -11,9 +13,8 @@ import {
   Saturation,
   Gradient,
 } from 'noya-colorpicker';
-import { memo, useCallback, useMemo } from 'react';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-utils';
 import * as Spacer from '../components/Spacer';
-import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 
 interface Props {
   value: Sketch.GradientStop[];

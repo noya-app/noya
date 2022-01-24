@@ -1,15 +1,16 @@
-// import Sketch from 'noya-file-format';
-// import { CanvasKit } from 'canvaskit';
-// import produce from 'immer';
-// import { WritableDraft } from 'immer/dist/internal';
-// import { Insets, Size } from 'noya-geometry';
-// import { KeyModifiers } from 'noya-keymap';
-// import { IFontManager } from 'noya-renderer-web';
+import produce from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
+import { IndexPath } from 'tree-visit';
+
+import Sketch from 'noya-file-format';
+import { CanvasKit } from 'canvaskit';
+import { Insets, Size } from 'noya-geometry';
+import { KeyModifiers } from 'noya-keymap';
+import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 // import { Selectors } from 'noya-state';
-// import { uuid } from 'noya-utils';
-// import { IndexPath } from 'tree-visit';
-// import * as Layers from '../layers';
+import { uuid } from 'noya-utils';
+import * as Layers from '../layers';
 // import { getSelectedGradient } from '../selectors/gradientSelectors';
 // import {
 //   findPageLayerIndexPaths,
@@ -25,11 +26,11 @@ import { SketchFile } from 'noya-sketch-file';
 // import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 // import { CanvasAction, canvasReducer } from './canvasReducer';
 // import { ExportAction, exportReducer } from './exportReducer';
-// import {
-//   createInitialInteractionState,
-//   interactionReducer,
-//   InteractionState,
-// } from './interactionReducer';
+import {
+  createInitialInteractionState,
+  interactionReducer,
+  InteractionState,
+} from './interactionReducer';
 // import {
 //   LayerPropertyAction,
 //   layerPropertyReducer,
@@ -45,46 +46,46 @@ import { SketchFile } from 'noya-sketch-file';
 
 // export type { SetNumberMode };
 
-// export type WorkspaceTab = 'canvas' | 'theme' | 'pages';
+export type WorkspaceTab = 'canvas' | 'theme' | 'pages';
 
-// export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
-// type ThemeSelection = { ids: string[]; groupName: string };
+export type ThemeTab = 'swatches' | 'textStyles' | 'layerStyles' | 'symbols';
+type ThemeSelection = { ids: string[]; groupName: string };
 
-// export type controlPointType = 'curveFrom' | 'curveTo';
+export type controlPointType = 'curveFrom' | 'curveTo';
 
-// export type SelectedControlPoint = {
-//   layerId: string;
-//   pointIndex: number;
-//   controlPointType: controlPointType;
-// };
+export type SelectedControlPoint = {
+  layerId: string;
+  pointIndex: number;
+  controlPointType: controlPointType;
+};
 
-// export type SelectedGradient = {
-//   layerId: string;
-//   fillIndex: number;
-//   stopIndex: number;
-//   styleType: 'fills' | 'borders';
-// };
+export type SelectedGradient = {
+  layerId: string;
+  fillIndex: number;
+  stopIndex: number;
+  styleType: 'fills' | 'borders';
+};
 
-// export type SelectedPointLists = Record<string, number[]>;
+export type SelectedPointLists = Record<string, number[]>;
 
-// export type LastEditedTextStyle = {
-//   textStyle: Sketch.TextStyle;
-//   stringAttribute: Sketch.StringAttribute[];
-//   textBehaviour?: Sketch.TextBehaviour;
-// };
+export type LastEditedTextStyle = {
+  textStyle: Sketch.TextStyle;
+  stringAttribute: Sketch.StringAttribute[];
+  textBehaviour?: Sketch.TextBehaviour;
+};
 
 export type ApplicationState = {
-  // currentTab: WorkspaceTab;
-  // currentThemeTab: ThemeTab;
-  // interactionState: InteractionState;
-  // keyModifiers: KeyModifiers;
-  // lastEditedTextStyle?: LastEditedTextStyle;
-  // selectedPage: string;
-  // selectedLayerIds: string[];
-  // selectedPointLists: SelectedPointLists;
-  // selectedControlPoint?: SelectedControlPoint;
-  // selectedThemeTab: Record<ThemeTab, ThemeSelection>;
-  // selectedGradient?: SelectedGradient;
+  currentTab: WorkspaceTab;
+  currentThemeTab: ThemeTab;
+  interactionState: InteractionState;
+  keyModifiers: KeyModifiers;
+  lastEditedTextStyle?: LastEditedTextStyle;
+  selectedPage: string;
+  selectedLayerIds: string[];
+  selectedPointLists: SelectedPointLists;
+  selectedControlPoint?: SelectedControlPoint;
+  selectedThemeTab: Record<ThemeTab, ThemeSelection>;
+  selectedGradient?: SelectedGradient;
   sketch: SketchFile;
 };
 
@@ -106,11 +107,11 @@ export type ApplicationState = {
 //   | PointAction
 //   | TextEditorAction;
 
-// export type ApplicationReducerContext = {
-//   canvasInsets: Insets;
-//   canvasSize: Size;
-//   fontManager: IFontManager;
-// };
+export type ApplicationReducerContext = {
+  canvasInsets: Insets;
+  canvasSize: Size;
+  fontManager: IFontManager;
+};
 
 // export function applicationReducer(
 //   state: ApplicationState,
@@ -505,31 +506,31 @@ export type ApplicationState = {
 //   });
 // }
 
-// export function createInitialState(sketch: SketchFile): ApplicationState {
-//   if (sketch.pages.length === 0) {
-//     throw new Error('Invalid Sketch file - no pages');
-//   }
+export function createInitialState(sketch: SketchFile): ApplicationState {
+  if (sketch.pages.length === 0) {
+    throw new Error('Invalid Sketch file - no pages');
+  }
 
-//   return {
-//     currentTab: 'canvas',
-//     currentThemeTab: 'swatches',
-//     interactionState: createInitialInteractionState(),
-//     keyModifiers: {
-//       altKey: false,
-//       ctrlKey: false,
-//       metaKey: false,
-//       shiftKey: false,
-//     },
-//     selectedPage: sketch.pages[0].do_objectID,
-//     selectedLayerIds: [],
-//     selectedPointLists: {},
-//     selectedControlPoint: undefined,
-//     selectedThemeTab: {
-//       swatches: { ids: [], groupName: '' },
-//       layerStyles: { ids: [], groupName: '' },
-//       textStyles: { ids: [], groupName: '' },
-//       symbols: { ids: [], groupName: '' },
-//     },
-//     sketch,
-//   };
-// }
+  return {
+    currentTab: 'canvas',
+    currentThemeTab: 'swatches',
+    interactionState: createInitialInteractionState(),
+    keyModifiers: {
+      altKey: false,
+      ctrlKey: false,
+      metaKey: false,
+      shiftKey: false,
+    },
+    selectedPage: sketch.pages[0].do_objectID,
+    selectedLayerIds: [],
+    selectedPointLists: {},
+    selectedControlPoint: undefined,
+    selectedThemeTab: {
+      swatches: { ids: [], groupName: '' },
+      layerStyles: { ids: [], groupName: '' },
+      textStyles: { ids: [], groupName: '' },
+      symbols: { ids: [], groupName: '' },
+    },
+    sketch,
+  };
+}

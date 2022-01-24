@@ -1,10 +1,11 @@
-import Sketch from 'noya-file-format';
 import { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { useObjectURL } from '../hooks/useObjectURL';
+
+import Sketch from 'noya-file-format';
+import { sketchColorToRgbaString } from 'noya-utils';
 import { useSketchImage } from 'noya-renderer-web';
+import { useObjectURL } from '../hooks/useObjectURL';
 import { getGradientBackground } from '../utils/getGradientBackground';
-import { sketchColorToRgbaString } from '../utils/sketchColor';
 import { SketchPattern } from '../utils/sketchPattern';
 
 const dotsHorizontalSvg = (fillColor: string) => `

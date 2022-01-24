@@ -5,11 +5,9 @@ import {
   InputField,
   Label,
   LabeledElementView,
-  rgbaToSketchColor,
-  sketchColorToHex,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { clamp } from 'noya-utils';
+import { clamp, rgbaToSketchColor, sketchColorToHex } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import DimensionInput from './DimensionInput';
 import * as InspectorPrimitives from './InspectorPrimitives';

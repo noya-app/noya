@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { sketchColorToRgbaString } from '..';
+import { sketchColorToRgbaString } from 'noya-utils';
 
 const getRGBAColor = (value: Sketch.GradientStop[], num: 100 | 360) =>
   [...value]

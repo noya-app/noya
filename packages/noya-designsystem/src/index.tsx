@@ -59,7 +59,6 @@ export * from './hooks/useHover';
 export * from './hooks/useModKey';
 
 // Utils
-export * from './utils/sketchColor';
 export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
 export * from './utils/sketchPattern';

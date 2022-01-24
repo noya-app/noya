@@ -1,8 +1,8 @@
 import Sketch from 'noya-file-format';
 import { rgbaToHex } from 'noya-colorpicker';
-import { GridView, sketchColorToRgba } from 'noya-designsystem';
+import { GridView } from 'noya-designsystem';
 import { SelectionType } from 'noya-state';
-import { delimitedPath, sortBy } from 'noya-utils';
+import { delimitedPath, sortBy, sketchColorToRgba } from 'noya-utils';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import { createThemeGroups } from '../../utils/themeTree';
 import ColorSwatch from './ColorSwatch';

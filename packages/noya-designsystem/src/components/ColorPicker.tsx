@@ -1,3 +1,5 @@
+import { memo, useCallback, useMemo } from 'react';
+
 import type Sketch from 'noya-file-format';
 import {
   Alpha,
@@ -10,9 +12,8 @@ import {
   rgbaToHsva,
   Saturation,
 } from 'noya-colorpicker';
-import { memo, useCallback, useMemo } from 'react';
 import * as Spacer from '../components/Spacer';
-import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
+import { rgbaToSketchColor, sketchColorToRgba } from 'noya-utils';
 
 interface Props {
   value: Sketch.Color;

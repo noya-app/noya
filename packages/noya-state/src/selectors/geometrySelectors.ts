@@ -1,3 +1,5 @@
+import { SKIP, STOP, VisitOptions } from 'tree-visit';
+
 import type { CanvasKit } from 'canvaskit';
 import Sketch from 'noya-file-format';
 import {
@@ -15,11 +17,14 @@ import {
   Size,
   transformRect,
 } from 'noya-geometry';
-import { IFontManager } from 'noya-renderer-web';
+import { IFontManager } from 'noya-renderer';
 import * as Primitives from 'noya-state';
-import { ScalingOptions } from 'noya-state';
-import { SKIP, STOP, VisitOptions } from 'tree-visit';
-import { ApplicationState, Layers, PageLayer } from '../index';
+import {
+  Layers,
+  PageLayer,
+  ScalingOptions,
+  ApplicationState,
+} from 'noya-state';
 import { visitReversed } from '../layers';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { getDragHandles } from '../selection';
