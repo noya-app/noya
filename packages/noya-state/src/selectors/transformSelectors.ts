@@ -3,8 +3,8 @@ import { IndexPath } from 'tree-visit';
 import type Sketch from 'noya-file-format';
 import { AffineTransform, createBounds, Insets } from 'noya-geometry';
 import { ApplicationState, Layers } from '../index';
-import { toRadians } from '../utils/radians';
 import { getCurrentPageMetadata } from './pageSelectors';
+import { toRadians } from '../utils/radians';
 
 export function getLayerTransform(
   ctm: AffineTransform,

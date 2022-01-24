@@ -9,7 +9,7 @@ import {
 } from 'noya-geometry';
 import { cartesianProduct, isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import { getRectExtentPoint, Layers, resizeRect } from '.';
+import { getRectExtentPoint, Layers, resizeRect } from 'noya-state';
 import { ParentLayer } from './layers';
 import { ScalingOptions } from './primitives';
 import { ApplicationState } from './reducers/applicationReducer';

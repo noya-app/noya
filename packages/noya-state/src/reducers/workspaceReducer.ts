@@ -7,12 +7,12 @@ import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from '../sketchFile';
-// import {
-//   createInitialHistoryState,
-//   HistoryAction,
-//   historyReducer,
-//   HistoryState,
-// } from './historyReducer';
+import {
+  createInitialHistoryState,
+  HistoryAction,
+  historyReducer,
+  HistoryState,
+} from './historyReducer';
 
 export type LayerHighlightPrecedence = 'aboveSelection' | 'belowSelection';
 
@@ -35,7 +35,7 @@ export type NextFocusAction =
  */
 export type WorkspaceState = {
   fileHandle?: FileSystemHandle;
-  // history: HistoryState;
+  history: HistoryState;
   highlightedLayer?: LayerHighlight;
   canvasSize: { width: number; height: number };
   canvasInsets: Insets;
@@ -53,8 +53,8 @@ export type WorkspaceAction =
   | [type: 'setCanvasSize', size: Size, insets: Insets]
   | [type: 'setShowRulers', value: boolean]
   | [type: 'setNextFocusAction', value?: NextFocusAction]
-  | [type: 'highlightLayer', highlight: LayerHighlight | undefined];
-// | HistoryAction;
+  | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
+  | HistoryAction;
 
 export function workspaceReducer(
   state: WorkspaceState,
@@ -66,20 +66,20 @@ export function workspaceReducer(
     case 'newFile': {
       return produce(state, (draft) => {
         draft.fileHandle = undefined;
-        // draft.history = createInitialHistoryState(
-        //   createSketchFile(
-        //     SketchModel.page({
-        //       name: 'Page 1',
-        //     }),
-        //   ),
-        // );
+        draft.history = createInitialHistoryState(
+          createSketchFile(
+            SketchModel.page({
+              name: 'Page 1',
+            }),
+          ),
+        );
       });
     }
     case 'setFile': {
       const [, sketchFile, fileHandle] = action;
       return produce(state, (draft) => {
         draft.fileHandle = fileHandle;
-        // draft.history = createInitialHistoryState(sketchFile);
+        draft.history = createInitialHistoryState(sketchFile);
       });
     }
     case 'setFileHandle': {
@@ -131,11 +131,11 @@ export function workspaceReducer(
     }
     default: {
       return produce(state, (draft) => {
-        // draft.history = historyReducer(state.history, action, CanvasKit, {
-        //   canvasInsets: state.canvasInsets,
-        //   canvasSize: state.canvasSize,
-        //   fontManager,
-        // });
+        draft.history = historyReducer(state.history, action, CanvasKit, {
+          canvasInsets: state.canvasInsets,
+          canvasSize: state.canvasSize,
+          fontManager,
+        });
       });
     }
   }
@@ -145,7 +145,7 @@ export function createInitialWorkspaceState(
   sketch: SketchFile,
 ): WorkspaceState {
   return {
-    // history: createInitialHistoryState(sketch),
+    history: createInitialHistoryState(sketch),
     highlightedLayer: undefined,
     canvasSize: { width: 0, height: 0 },
     canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
