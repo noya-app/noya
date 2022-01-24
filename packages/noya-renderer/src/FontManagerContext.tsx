@@ -1,5 +1,5 @@
 import { TypefaceFontProvider } from 'canvaskit';
-import { FontManager } from 'noya-fonts/src/fontManager';
+import { FontManager } from 'noya-fonts';
 
 export type IFontManager = Pick<
   FontManager,

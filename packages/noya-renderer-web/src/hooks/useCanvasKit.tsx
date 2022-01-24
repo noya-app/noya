@@ -3,7 +3,7 @@ import React, { useContext, ReactNode } from 'react';
 import { CanvasKitContext } from 'noya-renderer';
 import type { CanvasKit } from 'canvaskit';
 import { SuspendedValue } from 'noya-react-utils';
-import { loadCanvasKit } from 'noya-renderer-web';
+import { loadCanvasKit } from '..';
 // import loadSVGKit from 'noya-svgkit';
 
 // We don't start loading CanvasKit until the Provider renders the first time,

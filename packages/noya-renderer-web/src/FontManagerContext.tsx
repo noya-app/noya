@@ -1,9 +1,9 @@
+import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { TypefaceFontProvider } from 'canvaskit';
 import fetch from 'cross-fetch';
-import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
 import { SuspendedValue, useMutableState } from 'noya-react-utils';
-import { useCanvasKit } from 'noya-renderer-web';
+import { useCanvasKit } from './hooks/useCanvasKit';
 import {
   createContext,
   memo,
@@ -25,6 +25,8 @@ export type IFontManager = Pick<
   getTypefaceFontProvider: () => TypefaceFontProvider;
 };
 
+console.log(FontManager);
+
 type FontManagerContextValue = IFontManager & {
   downloadFont: FontManager['downloadFont'];
 };
@@ -39,7 +41,11 @@ const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
   ).then((resp) => resp.arrayBuffer()),
 );
 
-const sharedFontManager = new FontManager(GoogleFontProvider);
+const sharedFontManager = {
+  entries: [],
+  addDownloadedFontListener: (k: any) => {},
+  removeDownloadedFontListener: (b: any) => {},
+}; // new FontManager(GoogleFontProvider);
 
 interface Props {
   children?: ReactNode;
@@ -77,6 +83,7 @@ export const FontManagerProvider = memo(function FontManagerProvider({
   }, [updateTypefaceFontProvider]);
 
   const contextValue = useMemo(
+    // @ts-ignore
     (): FontManagerContextValue => ({
       getTypefaceFontProvider: () => typefaceFontProvider,
       ...createInlineWrapperFunctions(sharedFontManager),

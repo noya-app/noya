@@ -37,7 +37,6 @@
     "babel-plugin-module-resolver": "^4.1.0",
     "babel-plugin-styled-components": "^2.0.2",
     "detox": "^19.4.2",
-    "jest": "^27.4.7",
     "jest-circus": "^27.4.6",
     "jest-environment-node": "^27.4.6",
     "react-test-renderer": "^17.0.2",

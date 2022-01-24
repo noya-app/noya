@@ -3,5 +3,8 @@
   "compilerOptions": {
     "module": "esnext",
     "noEmit": true
-  }
+  },
+  "include": [
+    "src"
+  ]
 }
