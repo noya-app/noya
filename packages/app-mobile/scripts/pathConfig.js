@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 
 const allowList = [
+  'noya-ui',
   'canvaskit',
   'noya-fonts',
   'noya-utils',
@@ -10,11 +11,11 @@ const allowList = [
   'noya-renderer',
   'noya-geometry',
   'noya-react-utils',
+  'noya-import-svg',
   'noya-sketch-file',
   'noya-file-format',
   'noya-sketch-model',
   'noya-colorpicker',
-  'noyya-import-svg',
   'noya-app-state-context',
 ];
 

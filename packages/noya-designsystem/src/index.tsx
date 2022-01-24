@@ -49,10 +49,6 @@ export { default as Text } from './components/Text';
 export { SEPARATOR_ITEM } from './components/internal/Menu';
 export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 
-// Contexts
-export * from './contexts/GlobalInputBlurContext';
-export * from './contexts/DesignSystemConfiguration';
-
 // Hooks
 export * from './hooks/mergeEventHandlers';
 export * from './hooks/useHover';
@@ -61,6 +57,5 @@ export * from './hooks/useModKey';
 // Utils
 export * from './utils/createSectionedMenu';
 export * from './utils/getGradientBackground';
-export * from './utils/sketchPattern';
 export * from './utils/mouseEvent';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

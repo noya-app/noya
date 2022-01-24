@@ -2,13 +2,13 @@ import produce from 'immer';
 import { useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
-  DesignSystemConfigurationProvider,
   Divider,
   InputField,
   lightTheme,
   ScrollArea,
   Spacer,
 } from 'noya-designsystem';
+import { DesignSystemConfigurationProvider } from 'noya-ui';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { Selectors, WorkspaceTab } from 'noya-state';

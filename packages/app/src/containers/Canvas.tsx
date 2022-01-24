@@ -7,14 +7,16 @@ import {
 import {
   ContextMenu,
   mergeEventHandlers,
-  SupportedCanvasUploadType,
-  SupportedImageUploadType,
-  SUPPORTED_CANVAS_UPLOAD_TYPES,
-  SUPPORTED_IMAGE_UPLOAD_TYPES,
   useModKey,
   isLeftButtonClicked,
   isRightButtonClicked,
 } from 'noya-designsystem';
+import {
+  SupportedCanvasUploadType,
+  SupportedImageUploadType,
+  SUPPORTED_CANVAS_UPLOAD_TYPES,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
+} from 'noya-designsystem/types';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,

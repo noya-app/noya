@@ -1,5 +1,6 @@
 import { Draft } from 'immer';
-import { ApplicationState } from '../index';
+
+import { ApplicationState } from 'noya-state';
 import { ThemeTab, WorkspaceTab } from '../reducers/applicationReducer';
 
 export const getCurrentTab = (

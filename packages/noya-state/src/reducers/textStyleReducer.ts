@@ -1,263 +1,264 @@
-// import Sketch from 'noya-file-format';
-// import produce from 'immer';
-// import { Selectors, SimpleTextDecoration } from 'noya-state';
-// import { uuid } from 'noya-utils';
-// import * as Layers from '../layers';
-// import {
-//   getCurrentTab,
-//   getCurrentPageIndex,
-//   getSelectedLayerIndexPaths,
-//   findPageLayerIndexPaths,
-// } from '../selectors/selectors';
-// import { accessPageLayers, ApplicationState } from './applicationReducer';
-// import {
-//   StringAttributeAction,
-//   stringAttributeReducer,
-// } from './stringAttributeReducer';
+import produce from 'immer';
 
-// export type TextStyleAction =
-//   | StringAttributeAction
-//   | [type: 'setTextAlignment', value: number]
-//   | [type: 'setTextDecoration', value: SimpleTextDecoration]
-//   | [type: 'setTextTransform', value: number];
+import Sketch from 'noya-file-format';
+import { Selectors, SimpleTextDecoration } from 'noya-state';
+import { uuid } from 'noya-utils';
+import * as Layers from '../layers';
+import {
+  getCurrentTab,
+  getCurrentPageIndex,
+  getSelectedLayerIndexPaths,
+  findPageLayerIndexPaths,
+} from '../selectors/selectors';
+import { accessPageLayers, ApplicationState } from './applicationReducer';
+import {
+  StringAttributeAction,
+  stringAttributeReducer,
+} from './stringAttributeReducer';
 
-// export function textStyleReducer(
-//   state: ApplicationState,
-//   action: TextStyleAction,
-// ): ApplicationState {
-//   switch (action[0]) {
-//     case 'setTextFontName':
-//     case 'setTextFontSize':
-//     case 'setTextColor':
-//     case 'setTextLineSpacing':
-//     case 'setTextLetterSpacing':
-//     case 'setTextParagraphSpacing':
-//     case 'setTextHorizontalAlignment':
-//     case 'setTextVerticalAlignment': {
-//       if (getCurrentTab(state) === 'canvas') {
-//         const pageIndex = getCurrentPageIndex(state);
-//         const layerIndexPaths = getSelectedLayerIndexPaths(state);
+export type TextStyleAction =
+  | StringAttributeAction
+  | [type: 'setTextAlignment', value: number]
+  | [type: 'setTextDecoration', value: SimpleTextDecoration]
+  | [type: 'setTextTransform', value: number];
 
-//         const selectedText = Selectors.getTextSelection(state);
+export function textStyleReducer(
+  state: ApplicationState,
+  action: TextStyleAction,
+): ApplicationState {
+  switch (action[0]) {
+    case 'setTextFontName':
+    case 'setTextFontSize':
+    case 'setTextColor':
+    case 'setTextLineSpacing':
+    case 'setTextLetterSpacing':
+    case 'setTextParagraphSpacing':
+    case 'setTextHorizontalAlignment':
+    case 'setTextVerticalAlignment': {
+      if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-//         return produce(state, (draft) => {
-//           const textLayers = accessPageLayers(
-//             draft,
-//             pageIndex,
-//             layerIndexPaths,
-//           ).filter(Layers.isTextLayer);
+        const selectedText = Selectors.getTextSelection(state);
 
-//           const firstTextLayer = textLayers[0];
+        return produce(state, (draft) => {
+          const textLayers = accessPageLayers(
+            draft,
+            pageIndex,
+            layerIndexPaths,
+          ).filter(Layers.isTextLayer);
 
-//           if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
-//             draft.lastEditedTextStyle = {
-//               textStyle: Object.assign({}, firstTextLayer.style.textStyle),
-//               stringAttribute: Object.assign(
-//                 {},
-//                 firstTextLayer.attributedString.attributes,
-//               ),
-//             };
-//           }
+          const firstTextLayer = textLayers[0];
 
-//           textLayers.forEach((layer) => {
-//             if (!Layers.hasTextStyle(layer)) return;
+          if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, firstTextLayer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                firstTextLayer.attributedString.attributes,
+              ),
+            };
+          }
 
-//             switch (action[0]) {
-//               case 'setTextVerticalAlignment': {
-//                 layer.style.textStyle.verticalAlignment = action[1];
-//                 break;
-//               }
-//             }
+          textLayers.forEach((layer) => {
+            if (!Layers.hasTextStyle(layer)) return;
 
-//             const { anchor, head } = selectedText?.range ?? {
-//               anchor: 0,
-//               head: layer.attributedString.string.length,
-//             };
+            switch (action[0]) {
+              case 'setTextVerticalAlignment': {
+                layer.style.textStyle.verticalAlignment = action[1];
+                break;
+              }
+            }
 
-//             layer.attributedString = Selectors.setAttributesInRange(
-//               layer.attributedString,
-//               [anchor, head],
-//               (attributes) => stringAttributeReducer(attributes, action),
-//             );
+            const { anchor, head } = selectedText?.range ?? {
+              anchor: 0,
+              head: layer.attributedString.string.length,
+            };
 
-//             layer.style.textStyle.encodedAttributes = stringAttributeReducer(
-//               layer.style.textStyle.encodedAttributes,
-//               action,
-//             );
-//           });
-//         });
-//       } else {
-//         const ids = state.selectedThemeTab.textStyles.ids;
+            layer.attributedString = Selectors.setAttributesInRange(
+              layer.attributedString,
+              [anchor, head],
+              (attributes) => stringAttributeReducer(attributes, action),
+            );
 
-//         const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
-//           state,
-//           (layer) =>
-//             layer.sharedStyleID !== undefined &&
-//             ids.includes(layer.sharedStyleID),
-//         );
+            layer.style.textStyle.encodedAttributes = stringAttributeReducer(
+              layer.style.textStyle.encodedAttributes,
+              action,
+            );
+          });
+        });
+      } else {
+        const ids = state.selectedThemeTab.textStyles.ids;
 
-//         return produce(state, (draft) => {
-//           const layerTextStyles =
-//             draft.sketch.document.layerTextStyles?.objects ?? [];
+        const layerIndexPathsWithSharedStyle = findPageLayerIndexPaths(
+          state,
+          (layer) =>
+            layer.sharedStyleID !== undefined &&
+            ids.includes(layer.sharedStyleID),
+        );
 
-//           layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
-//             if (
-//               !ids.includes(sharedTextStyle.do_objectID) ||
-//               sharedTextStyle.value.textStyle === undefined
-//             )
-//               return;
+        return produce(state, (draft) => {
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
 
-//             sharedTextStyle.value.textStyle.encodedAttributes =
-//               stringAttributeReducer(
-//                 sharedTextStyle.value.textStyle.encodedAttributes,
-//                 action,
-//               );
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
 
-//             layerIndexPathsWithSharedStyle.forEach((layerPath) =>
-//               accessPageLayers(
-//                 draft,
-//                 layerPath.pageIndex,
-//                 layerPath.indexPaths,
-//               ).forEach((layer) => {
-//                 layer.style = produce(
-//                   sharedTextStyle.value,
-//                   (sharedTextStyle) => {
-//                     sharedTextStyle.do_objectID = uuid();
-//                     return sharedTextStyle;
-//                   },
-//                 );
-//               }),
-//             );
-//           });
-//         });
-//       }
-//     }
-//     case 'setTextAlignment': {
-//       const pageIndex = getCurrentPageIndex(state);
-//       const layerIndexPaths = getSelectedLayerIndexPaths(state);
+            sharedTextStyle.value.textStyle.encodedAttributes =
+              stringAttributeReducer(
+                sharedTextStyle.value.textStyle.encodedAttributes,
+                action,
+              );
 
-//       return produce(state, (draft) => {
-//         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
-//           if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer)) return;
+            layerIndexPathsWithSharedStyle.forEach((layerPath) =>
+              accessPageLayers(
+                draft,
+                layerPath.pageIndex,
+                layerPath.indexPaths,
+              ).forEach((layer) => {
+                layer.style = produce(
+                  sharedTextStyle.value,
+                  (sharedTextStyle) => {
+                    sharedTextStyle.do_objectID = uuid();
+                    return sharedTextStyle;
+                  },
+                );
+              }),
+            );
+          });
+        });
+      }
+    }
+    case 'setTextAlignment': {
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-//           layer.textBehaviour = action[1];
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (!Layers.isTextLayer(layer) || !Layers.hasTextStyle(layer)) return;
 
-//           if (draft.lastEditedTextStyle)
-//             draft.lastEditedTextStyle.textBehaviour = action[1];
-//         });
-//       });
-//     }
-//     case 'setTextDecoration':
-//       if (getCurrentTab(state) === 'canvas') {
-//         const pageIndex = getCurrentPageIndex(state);
-//         const layerIndexPaths = getSelectedLayerIndexPaths(state);
+          layer.textBehaviour = action[1];
 
-//         return produce(state, (draft) => {
-//           const textLayers = accessPageLayers(
-//             draft,
-//             pageIndex,
-//             layerIndexPaths,
-//           ).filter(Layers.isTextLayer);
+          if (draft.lastEditedTextStyle)
+            draft.lastEditedTextStyle.textBehaviour = action[1];
+        });
+      });
+    }
+    case 'setTextDecoration':
+      if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-//           const firstTextLayer = textLayers[0];
+        return produce(state, (draft) => {
+          const textLayers = accessPageLayers(
+            draft,
+            pageIndex,
+            layerIndexPaths,
+          ).filter(Layers.isTextLayer);
 
-//           if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
-//             draft.lastEditedTextStyle = {
-//               textStyle: Object.assign({}, firstTextLayer.style.textStyle),
-//               stringAttribute: Object.assign(
-//                 {},
-//                 firstTextLayer.attributedString.attributes,
-//               ),
-//             };
-//           }
+          const firstTextLayer = textLayers[0];
 
-//           textLayers.forEach((layer) => {
-//             if (!Layers.hasTextStyle(layer)) return;
+          if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, firstTextLayer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                firstTextLayer.attributedString.attributes,
+              ),
+            };
+          }
 
-//             const attributes = layer.style.textStyle.encodedAttributes;
+          textLayers.forEach((layer) => {
+            if (!Layers.hasTextStyle(layer)) return;
 
-//             attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-//             attributes.strikethroughStyle =
-//               action[1] === 'strikethrough' ? 1 : 0;
-//           });
-//         });
-//       } else {
-//         return produce(state, (draft) => {
-//           const ids = state.selectedThemeTab.textStyles.ids;
+            const attributes = layer.style.textStyle.encodedAttributes;
 
-//           const layerTextStyles =
-//             draft.sketch.document.layerTextStyles?.objects ?? [];
+            attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+            attributes.strikethroughStyle =
+              action[1] === 'strikethrough' ? 1 : 0;
+          });
+        });
+      } else {
+        return produce(state, (draft) => {
+          const ids = state.selectedThemeTab.textStyles.ids;
 
-//           layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
-//             if (
-//               !ids.includes(sharedTextStyle.do_objectID) ||
-//               sharedTextStyle.value.textStyle === undefined
-//             )
-//               return;
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
 
-//             const attributes =
-//               sharedTextStyle.value.textStyle.encodedAttributes;
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
 
-//             attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
-//             attributes.strikethroughStyle =
-//               action[1] === 'strikethrough' ? 1 : 0;
-//           });
-//         });
-//       }
-//     case 'setTextTransform': {
-//       if (getCurrentTab(state) === 'canvas') {
-//         const pageIndex = getCurrentPageIndex(state);
-//         const layerIndexPaths = getSelectedLayerIndexPaths(state);
+            const attributes =
+              sharedTextStyle.value.textStyle.encodedAttributes;
 
-//         return produce(state, (draft) => {
-//           const textLayers = accessPageLayers(
-//             draft,
-//             pageIndex,
-//             layerIndexPaths,
-//           ).filter(Layers.isTextLayer);
+            attributes.underlineStyle = action[1] === 'underline' ? 1 : 0;
+            attributes.strikethroughStyle =
+              action[1] === 'strikethrough' ? 1 : 0;
+          });
+        });
+      }
+    case 'setTextTransform': {
+      if (getCurrentTab(state) === 'canvas') {
+        const pageIndex = getCurrentPageIndex(state);
+        const layerIndexPaths = getSelectedLayerIndexPaths(state);
 
-//           const firstTextLayer = textLayers[0];
+        return produce(state, (draft) => {
+          const textLayers = accessPageLayers(
+            draft,
+            pageIndex,
+            layerIndexPaths,
+          ).filter(Layers.isTextLayer);
 
-//           if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
-//             draft.lastEditedTextStyle = {
-//               textStyle: Object.assign({}, firstTextLayer.style.textStyle),
-//               stringAttribute: Object.assign(
-//                 {},
-//                 firstTextLayer.attributedString.attributes,
-//               ),
-//             };
-//           }
+          const firstTextLayer = textLayers[0];
 
-//           textLayers.forEach((layer) => {
-//             if (!Layers.hasTextStyle(layer)) return;
+          if (firstTextLayer && Layers.hasTextStyle(firstTextLayer)) {
+            draft.lastEditedTextStyle = {
+              textStyle: Object.assign({}, firstTextLayer.style.textStyle),
+              stringAttribute: Object.assign(
+                {},
+                firstTextLayer.attributedString.attributes,
+              ),
+            };
+          }
 
-//             const attributes = layer.style.textStyle.encodedAttributes;
-//             attributes.MSAttributedStringTextTransformAttribute = action[1];
-//           });
-//         });
-//       } else {
-//         return produce(state, (draft) => {
-//           const ids = state.selectedThemeTab.textStyles.ids;
+          textLayers.forEach((layer) => {
+            if (!Layers.hasTextStyle(layer)) return;
 
-//           const layerTextStyles =
-//             draft.sketch.document.layerTextStyles?.objects ?? [];
+            const attributes = layer.style.textStyle.encodedAttributes;
+            attributes.MSAttributedStringTextTransformAttribute = action[1];
+          });
+        });
+      } else {
+        return produce(state, (draft) => {
+          const ids = state.selectedThemeTab.textStyles.ids;
 
-//           layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
-//             if (
-//               !ids.includes(sharedTextStyle.do_objectID) ||
-//               sharedTextStyle.value.textStyle === undefined
-//             )
-//               return;
+          const layerTextStyles =
+            draft.sketch.document.layerTextStyles?.objects ?? [];
 
-//             const attributes =
-//               sharedTextStyle.value.textStyle.encodedAttributes;
+          layerTextStyles.forEach((sharedTextStyle: Sketch.SharedStyle) => {
+            if (
+              !ids.includes(sharedTextStyle.do_objectID) ||
+              sharedTextStyle.value.textStyle === undefined
+            )
+              return;
 
-//             attributes.MSAttributedStringTextTransformAttribute = action[1];
-//           });
-//         });
-//       }
-//     }
-//     default:
-//       return state;
-//   }
-// }
+            const attributes =
+              sharedTextStyle.value.textStyle.encodedAttributes;
+
+            attributes.MSAttributedStringTextTransformAttribute = action[1];
+          });
+        });
+      }
+    }
+    default:
+      return state;
+  }
+}

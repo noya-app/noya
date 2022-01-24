@@ -1,7 +1,7 @@
 import { PlatformName } from 'noya-keymap';
 import { createContext, memo, ReactNode, useContext, useMemo } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { Theme } from '../theme';
+import { Theme } from 'noya-designsystem';
 
 export type DesignSystemConfigurationContextValue = {
   platform: PlatformName;

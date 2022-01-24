@@ -1,6 +1,8 @@
+import { Draft } from 'immer';
+import { IndexPath } from 'tree-visit';
+
 import Sketch from 'noya-file-format';
 import { CanvasKit, Path } from 'canvaskit';
-import { Draft } from 'immer';
 import {
   createRectFromBounds,
   distance,
@@ -19,7 +21,6 @@ import {
   stringifyPoint,
 } from 'noya-state';
 import { range, windowsOf } from 'noya-utils';
-import { IndexPath } from 'tree-visit';
 import {
   ApplicationState,
   InteractionState,

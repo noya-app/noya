@@ -1,331 +1,326 @@
-// import { CanvasKit } from 'canvaskit';
-// import produce from 'immer';
-// import {
-//   Layers,
-//   Selectors,
-//   TextEditorCursorDirection,
-//   TextEditorCursorUnit,
-//   TextSelectionRange,
-// } from 'noya-state';
-// import { UUID } from '../types';
-// import {
-//   ApplicationReducerContext,
-//   ApplicationState,
-// } from './applicationReducer';
-// import { interactionReducer } from './interactionReducer';
+import produce from 'immer';
 
-// export type TextEditorAction =
-//   | [type: 'setTextSelection', range: TextSelectionRange]
-//   | [type: 'selectAllText', layerId?: UUID]
-//   | [
-//       type: 'selectContainingText',
-//       layerId: UUID,
-//       index: number,
-//       unit: 'word' | 'line',
-//     ]
-//   | [
-//       type: 'moveCursor',
-//       direction: TextEditorCursorDirection,
-//       unit: TextEditorCursorUnit,
-//     ]
-//   | [
-//       type: 'moveTextSelection',
-//       direction: TextEditorCursorDirection,
-//       unit: TextEditorCursorUnit,
-//     ]
-//   | [type: 'insertText', text: string]
-//   | [
-//       type: 'deleteText',
-//       direction: TextEditorCursorDirection,
-//       unit: TextEditorCursorUnit,
-//     ];
+import { CanvasKit } from 'canvaskit';
+import {
+  Layers,
+  Selectors,
+  TextEditorCursorDirection,
+  TextEditorCursorUnit,
+  TextSelectionRange,
+} from 'noya-state';
+import { UUID } from '../types';
+import {
+  ApplicationReducerContext,
+  ApplicationState,
+} from './applicationReducer';
+import { interactionReducer } from './interactionReducer';
 
-// export function textEditorReducer(
-//   state: ApplicationState,
-//   action: TextEditorAction,
-//   CanvasKit: CanvasKit,
-//   context: ApplicationReducerContext,
-// ): ApplicationState {
-//   switch (action[0]) {
-//     case 'setTextSelection': {
-//       const [, range] = action;
+export type TextEditorAction =
+  | [type: 'setTextSelection', range: TextSelectionRange]
+  | [type: 'selectAllText', layerId?: UUID]
+  | [
+      type: 'selectContainingText',
+      layerId: UUID,
+      index: number,
+      unit: 'word' | 'line',
+    ]
+  | [
+      type: 'moveCursor',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ]
+  | [
+      type: 'moveTextSelection',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ]
+  | [type: 'insertText', text: string]
+  | [
+      type: 'deleteText',
+      direction: TextEditorCursorDirection,
+      unit: TextEditorCursorUnit,
+    ];
 
-//       return produce(state, (draft) => {
-//         if (!Selectors.hasTextSelection(draft.interactionState)) return;
+export function textEditorReducer(
+  state: ApplicationState,
+  action: TextEditorAction,
+  CanvasKit: CanvasKit,
+  context: ApplicationReducerContext,
+): ApplicationState {
+  switch (action[0]) {
+    case 'setTextSelection': {
+      const [, range] = action;
 
-//         draft.interactionState.range = range;
-//       });
-//     }
-//     case 'selectAllText': {
-//       const [, layerId] = action;
+      return produce(state, (draft) => {
+        if (!Selectors.hasTextSelection(draft.interactionState)) return;
 
-//       const id = layerId ?? Selectors.getTextSelection(state)?.layerId;
+        draft.interactionState.range = range;
+      });
+    }
+    case 'selectAllText': {
+      const [, layerId] = action;
 
-//       if (id === undefined) return state;
+      const id = layerId ?? Selectors.getTextSelection(state)?.layerId;
 
-//       const layer = Layers.find(
-//         Selectors.getCurrentPage(state),
-//         (layer) => layer.do_objectID === id,
-//       );
+      if (id === undefined) return state;
 
-//       if (!layer || !Layers.isTextLayer(layer)) return state;
+      const layer = Layers.find(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === id,
+      );
 
-//       return produce(state, (draft) => {
-//         draft.interactionState = interactionReducer(draft.interactionState, [
-//           'editingText',
-//           id,
-//           { anchor: 0, head: layer.attributedString.string.length },
-//         ]);
-//       });
-//     }
-//     case 'selectContainingText': {
-//       const [, layerId, index, unit] = action;
+      if (!layer || !Layers.isTextLayer(layer)) return state;
 
-//       const pageIndex = Selectors.getCurrentPageIndex(state);
-//       const indexPath = Layers.findIndexPath(
-//         Selectors.getCurrentPage(state),
-//         (layer) => layer.do_objectID === layerId,
-//       );
+      return produce(state, (draft) => {
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'editingText',
+          id,
+          { anchor: 0, head: layer.attributedString.string.length },
+        ]);
+      });
+    }
+    case 'selectContainingText': {
+      const [, layerId, index, unit] = action;
 
-//       if (!indexPath) return state;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
 
-//       return produce(state, (draft) => {
-//         const draftLayer = Layers.access(
-//           draft.sketch.pages[pageIndex],
-//           indexPath,
-//         );
+      if (!indexPath) return state;
 
-//         if (!Layers.isTextLayer(draftLayer)) return;
+      return produce(state, (draft) => {
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
 
-//         const paragraph = Selectors.getLayerParagraph(
-//           CanvasKit,
-//           context.fontManager,
-//           draftLayer,
-//         );
+        if (!Layers.isTextLayer(draftLayer)) return;
 
-//         switch (unit) {
-//           case 'word': {
-//             const boundary = paragraph.getWordBoundary(index);
+        const paragraph = Selectors.getLayerParagraph(
+          CanvasKit,
+          context.fontManager,
+          draftLayer,
+        );
 
-//             draft.interactionState = interactionReducer(
-//               draft.interactionState,
-//               [
-//                 'editingText',
-//                 layerId,
-//                 {
-//                   anchor: boundary.start,
-//                   head: boundary.end,
-//                 },
-//               ],
-//             );
+        switch (unit) {
+          case 'word': {
+            const boundary = paragraph.getWordBoundary(index);
 
-//             break;
-//           }
-//           case 'line': {
-//             const backwardIndex = Selectors.getNextCursorPosition(
-//               paragraph,
-//               draftLayer.attributedString.string,
-//               index,
-//               undefined,
-//               'backward',
-//               unit,
-//             ).index;
+            draft.interactionState = interactionReducer(
+              draft.interactionState,
+              [
+                'editingText',
+                layerId,
+                {
+                  anchor: boundary.start,
+                  head: boundary.end,
+                },
+              ],
+            );
 
-//             const forwardIndex = Selectors.getNextCursorPosition(
-//               paragraph,
-//               draftLayer.attributedString.string,
-//               index,
-//               undefined,
-//               'forward',
-//               unit,
-//             ).index;
+            break;
+          }
+          case 'line': {
+            const backwardIndex = Selectors.getNextCursorPosition(
+              paragraph,
+              draftLayer.attributedString.string,
+              index,
+              undefined,
+              'backward',
+              unit,
+            ).index;
 
-//             draft.interactionState = interactionReducer(
-//               draft.interactionState,
-//               [
-//                 'editingText',
-//                 layerId,
-//                 {
-//                   anchor: backwardIndex,
-//                   head: forwardIndex,
-//                 },
-//               ],
-//             );
+            const forwardIndex = Selectors.getNextCursorPosition(
+              paragraph,
+              draftLayer.attributedString.string,
+              index,
+              undefined,
+              'forward',
+              unit,
+            ).index;
 
-//             break;
-//           }
-//         }
-//       });
-//     }
-//     case 'moveTextSelection':
-//     case 'moveCursor': {
-//       const [type, direction, unit] = action;
+            draft.interactionState = interactionReducer(
+              draft.interactionState,
+              [
+                'editingText',
+                layerId,
+                {
+                  anchor: backwardIndex,
+                  head: forwardIndex,
+                },
+              ],
+            );
 
-//       const selectedText = Selectors.getTextSelection(state);
+            break;
+          }
+        }
+      });
+    }
+    case 'moveTextSelection':
+    case 'moveCursor': {
+      const [type, direction, unit] = action;
 
-//       if (!selectedText) return state;
+      const selectedText = Selectors.getTextSelection(state);
 
-//       const { layerId, range } = selectedText;
-//       const pageIndex = Selectors.getCurrentPageIndex(state);
-//       const indexPath = Layers.findIndexPath(
-//         Selectors.getCurrentPage(state),
-//         (layer) => layer.do_objectID === layerId,
-//       );
+      if (!selectedText) return state;
 
-//       if (!indexPath) return state;
+      const { layerId, range } = selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
 
-//       return produce(state, (draft) => {
-//         const draftLayer = Layers.access(
-//           draft.sketch.pages[pageIndex],
-//           indexPath,
-//         );
+      if (!indexPath) return state;
 
-//         if (!Layers.isTextLayer(draftLayer)) return;
+      return produce(state, (draft) => {
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
 
-//         const paragraph = Selectors.getLayerParagraph(
-//           CanvasKit,
-//           context.fontManager,
-//           draftLayer,
-//         );
+        if (!Layers.isTextLayer(draftLayer)) return;
 
-//         const newRange = Selectors.getNextCursorRange(
-//           paragraph,
-//           draftLayer.attributedString.string,
-//           range,
-//           direction,
-//           unit,
-//           type === 'moveCursor' ? 'move' : 'select',
-//         );
+        const paragraph = Selectors.getLayerParagraph(
+          CanvasKit,
+          context.fontManager,
+          draftLayer,
+        );
 
-//         draft.interactionState = interactionReducer(draft.interactionState, [
-//           'editingText',
-//           layerId,
-//           newRange,
-//         ]);
-//       });
-//     }
-//     case 'insertText': {
-//       const [, text] = action;
+        const newRange = Selectors.getNextCursorRange(
+          paragraph,
+          draftLayer.attributedString.string,
+          range,
+          direction,
+          unit,
+          type === 'moveCursor' ? 'move' : 'select',
+        );
 
-//       const selectedText = Selectors.getTextSelection(state);
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'editingText',
+          layerId,
+          newRange,
+        ]);
+      });
+    }
+    case 'insertText': {
+      const [, text] = action;
 
-//       if (!selectedText) return state;
+      const selectedText = Selectors.getTextSelection(state);
 
-//       const { layerId, range } = selectedText;
-//       const pageIndex = Selectors.getCurrentPageIndex(state);
-//       const indexPath = Layers.findIndexPath(
-//         Selectors.getCurrentPage(state),
-//         (layer) => layer.do_objectID === layerId,
-//       );
+      if (!selectedText) return state;
 
-//       if (!indexPath) return state;
+      const { layerId, range } = selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
 
-//       return produce(state, (draft) => {
-//         const draftLayer = Layers.access(
-//           draft.sketch.pages[pageIndex],
-//           indexPath,
-//         );
+      if (!indexPath) return state;
 
-//         if (!Layers.isTextLayer(draftLayer)) return;
+      return produce(state, (draft) => {
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
 
-//         const {
-//           attributedString,
-//           range: newRange,
-//         } = Selectors.replaceTextAndUpdateSelectionRange(
-//           draftLayer.attributedString,
-//           range,
-//           text,
-//           Selectors.getEncodedStringAttributes(draftLayer.style),
-//         );
+        if (!Layers.isTextLayer(draftLayer)) return;
 
-//         draftLayer.attributedString = attributedString;
-//         draft.interactionState = interactionReducer(draft.interactionState, [
-//           'editingText',
-//           layerId,
-//           newRange,
-//         ]);
-//       });
-//     }
-//     case 'deleteText': {
-//       const [, direction, unit] = action;
+        const { attributedString, range: newRange } =
+          Selectors.replaceTextAndUpdateSelectionRange(
+            draftLayer.attributedString,
+            range,
+            text,
+            Selectors.getEncodedStringAttributes(draftLayer.style),
+          );
 
-//       const selectedText = Selectors.getTextSelection(state);
+        draftLayer.attributedString = attributedString;
+        draft.interactionState = interactionReducer(draft.interactionState, [
+          'editingText',
+          layerId,
+          newRange,
+        ]);
+      });
+    }
+    case 'deleteText': {
+      const [, direction, unit] = action;
 
-//       if (!selectedText) return state;
+      const selectedText = Selectors.getTextSelection(state);
 
-//       const { layerId, range } = selectedText;
-//       const pageIndex = Selectors.getCurrentPageIndex(state);
-//       const indexPath = Layers.findIndexPath(
-//         Selectors.getCurrentPage(state),
-//         (layer) => layer.do_objectID === layerId,
-//       );
+      if (!selectedText) return state;
 
-//       if (!indexPath) return state;
+      const { layerId, range } = selectedText;
+      const pageIndex = Selectors.getCurrentPageIndex(state);
+      const indexPath = Layers.findIndexPath(
+        Selectors.getCurrentPage(state),
+        (layer) => layer.do_objectID === layerId,
+      );
 
-//       return produce(state, (draft) => {
-//         const draftLayer = Layers.access(
-//           draft.sketch.pages[pageIndex],
-//           indexPath,
-//         );
+      if (!indexPath) return state;
 
-//         if (!Layers.isTextLayer(draftLayer)) return;
+      return produce(state, (draft) => {
+        const draftLayer = Layers.access(
+          draft.sketch.pages[pageIndex],
+          indexPath,
+        );
 
-//         const { head, anchor } = range;
+        if (!Layers.isTextLayer(draftLayer)) return;
 
-//         // If we have a selected range, delete that range
-//         if (head !== anchor) {
-//           const {
-//             attributedString,
-//             range: newRange,
-//           } = Selectors.replaceTextAndUpdateSelectionRange(
-//             draftLayer.attributedString,
-//             range,
-//             '',
-//             Selectors.getEncodedStringAttributes(draftLayer.style),
-//           );
+        const { head, anchor } = range;
 
-//           draftLayer.attributedString = attributedString;
-//           draft.interactionState = interactionReducer(draft.interactionState, [
-//             'editingText',
-//             layerId,
-//             newRange,
-//           ]);
-//         } else {
-//           const paragraph = Selectors.getLayerParagraph(
-//             CanvasKit,
-//             context.fontManager,
-//             draftLayer,
-//           );
+        // If we have a selected range, delete that range
+        if (head !== anchor) {
+          const { attributedString, range: newRange } =
+            Selectors.replaceTextAndUpdateSelectionRange(
+              draftLayer.attributedString,
+              range,
+              '',
+              Selectors.getEncodedStringAttributes(draftLayer.style),
+            );
 
-//           const position = Selectors.getNextCursorPosition(
-//             paragraph,
-//             draftLayer.attributedString.string,
-//             head,
-//             undefined,
-//             direction,
-//             unit,
-//           );
+          draftLayer.attributedString = attributedString;
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'editingText',
+            layerId,
+            newRange,
+          ]);
+        } else {
+          const paragraph = Selectors.getLayerParagraph(
+            CanvasKit,
+            context.fontManager,
+            draftLayer,
+          );
 
-//           const {
-//             attributedString,
-//             range: newRange,
-//           } = Selectors.replaceTextAndUpdateSelectionRange(
-//             draftLayer.attributedString,
-//             { head: position.index, anchor: head },
-//             '',
-//             Selectors.getEncodedStringAttributes(draftLayer.style),
-//           );
+          const position = Selectors.getNextCursorPosition(
+            paragraph,
+            draftLayer.attributedString.string,
+            head,
+            undefined,
+            direction,
+            unit,
+          );
 
-//           draftLayer.attributedString = attributedString;
-//           draft.interactionState = interactionReducer(draft.interactionState, [
-//             'editingText',
-//             layerId,
-//             newRange,
-//           ]);
-//         }
-//       });
-//     }
-//     default:
-//       return state;
-//   }
-// }
+          const { attributedString, range: newRange } =
+            Selectors.replaceTextAndUpdateSelectionRange(
+              draftLayer.attributedString,
+              { head: position.index, anchor: head },
+              '',
+              Selectors.getEncodedStringAttributes(draftLayer.style),
+            );
+
+          draftLayer.attributedString = attributedString;
+          draft.interactionState = interactionReducer(draft.interactionState, [
+            'editingText',
+            layerId,
+            newRange,
+          ]);
+        }
+      });
+    }
+    default:
+      return state;
+  }
+}

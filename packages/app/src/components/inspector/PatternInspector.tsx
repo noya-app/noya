@@ -4,12 +4,13 @@ import {
   InputField,
   PatternPreviewBackground,
   Select,
-  SketchPattern,
   Slider,
-  SupportedImageUploadType,
-  SUPPORTED_IMAGE_UPLOAD_TYPES,
   useHover,
 } from 'noya-designsystem';
+import {
+  SupportedImageUploadType,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
+} from 'noya-designsystem/types';
 import { getFileExtensionForType, uuid } from 'noya-utils';
 import { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -57,7 +58,7 @@ const UploadButton = styled.button<{ show: boolean }>(({ show = false }) => ({
 
 interface Props {
   id: string;
-  pattern: SketchPattern;
+  pattern: Sketch.Pattern;
   onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
   onChangeFillType: (amount: Sketch.PatternFillType) => void;
   onChangeTileScale: (amount: number) => void;
@@ -74,7 +75,7 @@ export const PATTERN_FILL_TYPE_OPTIONS: PatternFillType[] = [
 ];
 
 interface PatternPreviewProps {
-  pattern: SketchPattern;
+  pattern: Sketch.Pattern;
   onAddImage: (image: ArrayBuffer, _ref: string) => void;
   onChangeImage: (image: Sketch.FileRef | Sketch.DataRef) => void;
 }

@@ -7,7 +7,6 @@ import {
   Label,
   LabeledElementView,
   Select,
-  SketchPattern,
   withSeparatorElements,
 } from 'noya-designsystem';
 import { rgbaToSketchColor, sketchColorToHex } from 'noya-utils';
@@ -36,7 +35,7 @@ interface Props {
   prefix?: ReactNode;
   fillType?: Sketch.FillType;
   gradient?: Sketch.Gradient;
-  pattern?: SketchPattern;
+  pattern?: Sketch.Pattern;
   contextOpacity: DimensionValue;
   onChangeFillType: (type: Sketch.FillType) => void;
   onSetOpacity: (amount: number, mode: SetNumberMode) => void;

@@ -3,7 +3,7 @@ import { ApplicationMenuItem } from 'noya-embedded';
 import { memo, ReactElement } from 'react';
 import { CSSObject } from 'styled-components';
 import { Theme } from '../../theme';
-import { useDesignSystemConfiguration } from 'noya-designsystem';
+import { useDesignSystemConfiguration } from 'noya-ui';
 import { getShortcutDisplayParts } from 'noya-keymap';
 import withSeparatorElements from '../../utils/withSeparatorElements';
 

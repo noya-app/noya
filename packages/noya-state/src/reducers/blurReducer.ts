@@ -1,57 +1,58 @@
-// import Sketch from 'noya-file-format';
-// import produce from 'immer';
-// import { SketchModel } from 'noya-sketch-model';
-// import { clamp } from 'noya-utils';
-// import { SetNumberMode } from '..';
+import produce from 'immer';
 
-// export type BlurAction =
-//   | [type: 'setBlurEnabled', isEnabled: boolean]
-//   | [type: 'setBlurType', value: Sketch.BlurType]
-//   | [type: 'setBlurRadius', value: number, mode: SetNumberMode]
-//   | [type: 'setBlurSaturation', value: number, mode: SetNumberMode];
+import Sketch from 'noya-file-format';
+import { SketchModel } from 'noya-sketch-model';
+import { clamp } from 'noya-utils';
+import { SetNumberMode } from './applicationReducer';
 
-// export function blurReducer(
-//   state: Sketch.Blur | undefined,
-//   action: BlurAction,
-// ): Sketch.Blur {
-//   state = state ?? SketchModel.blur();
+export type BlurAction =
+  | [type: 'setBlurEnabled', isEnabled: boolean]
+  | [type: 'setBlurType', value: Sketch.BlurType]
+  | [type: 'setBlurRadius', value: number, mode: SetNumberMode]
+  | [type: 'setBlurSaturation', value: number, mode: SetNumberMode];
 
-//   switch (action[0]) {
-//     case 'setBlurEnabled': {
-//       const [, isEnabled] = action;
+export function blurReducer(
+  state: Sketch.Blur | undefined,
+  action: BlurAction,
+): Sketch.Blur {
+  state = state ?? SketchModel.blur();
 
-//       return produce(state, (draft) => {
-//         draft.isEnabled = isEnabled;
-//       });
-//     }
-//     case 'setBlurType': {
-//       const [, value] = action;
+  switch (action[0]) {
+    case 'setBlurEnabled': {
+      const [, isEnabled] = action;
 
-//       return produce(state, (draft) => {
-//         draft.type = value;
-//       });
-//     }
-//     case 'setBlurRadius': {
-//       const [, amount, mode = 'replace'] = action;
+      return produce(state, (draft) => {
+        draft.isEnabled = isEnabled;
+      });
+    }
+    case 'setBlurType': {
+      const [, value] = action;
 
-//       return produce(state, (draft) => {
-//         const newValue =
-//           mode === 'replace' ? amount : (draft.radius ?? 0) + amount;
+      return produce(state, (draft) => {
+        draft.type = value;
+      });
+    }
+    case 'setBlurRadius': {
+      const [, amount, mode = 'replace'] = action;
 
-//         draft.radius = clamp(newValue, 0, 50);
-//       });
-//     }
-//     case 'setBlurSaturation': {
-//       const [, amount, mode = 'replace'] = action;
+      return produce(state, (draft) => {
+        const newValue =
+          mode === 'replace' ? amount : (draft.radius ?? 0) + amount;
 
-//       return produce(state, (draft) => {
-//         const newValue =
-//           mode === 'replace' ? amount : draft.saturation + amount;
+        draft.radius = clamp(newValue, 0, 50);
+      });
+    }
+    case 'setBlurSaturation': {
+      const [, amount, mode = 'replace'] = action;
 
-//         draft.saturation = clamp(newValue, 0, 2);
-//       });
-//     }
-//     default:
-//       return state;
-//   }
-// }
+      return produce(state, (draft) => {
+        const newValue =
+          mode === 'replace' ? amount : draft.saturation + amount;
+
+        draft.saturation = clamp(newValue, 0, 2);
+      });
+    }
+    default:
+      return state;
+  }
+}

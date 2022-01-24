@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 
 import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
-// import { useGlobalInputBlurTrigger } from 'noya-designsystem/contexts/GlobalInputBlurContext';
+import { useGlobalInputBlurTrigger } from 'noya-ui';
 
 export type Dispatcher = (action: WorkspaceAction) => void;
 
@@ -64,23 +64,23 @@ export const useWorkspaceState = (): WorkspaceState => {
  * function is referentially stable, so won't cause unnecessary re-renders.
  */
 export const useDispatch = (): FlatDispatcher => {
-  // const dispatch = useContext(DispatchContext);
-  // const blurTrigger = useGlobalInputBlurTrigger();
-  // // Simplify the dispatch function by flattening our action tuple
-  // return useCallback(
-  //   (...args: WorkspaceAction) => {
-  //     // When changing selection, trigger any pending updates in input fields
-  //     if (
-  //       args[0] === 'selectLayer' ||
-  //       args[0] === 'selectPage' ||
-  //       args[0] === 'setTab'
-  //     ) {
-  //       blurTrigger();
-  //     }
-  //     dispatch(args);
-  //   },
-  //   [dispatch, blurTrigger],
-  // );
+  const dispatch = useContext(DispatchContext);
+  const blurTrigger = useGlobalInputBlurTrigger();
+  // Simplify the dispatch function by flattening our action tuple
+  return useCallback(
+    (...args: WorkspaceAction) => {
+      // When changing selection, trigger any pending updates in input fields
+      if (
+        args[0] === 'selectLayer' ||
+        args[0] === 'selectPage' ||
+        args[0] === 'setTab'
+      ) {
+        blurTrigger();
+      }
+      dispatch(args);
+    },
+    [dispatch, blurTrigger],
+  );
 };
 
 /**
