@@ -10,7 +10,7 @@ import {
 import {
   SupportedImageUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
-} from 'noya-designsystem/types';
+} from 'noya-designsystem/src/types';
 import { getFileExtensionForType, uuid } from 'noya-utils';
 import { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
