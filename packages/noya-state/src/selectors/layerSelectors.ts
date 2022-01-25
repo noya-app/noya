@@ -22,7 +22,7 @@ import {
   Layers,
   PageLayer,
   Selectors,
-} from 'noya-state';
+} from '../index';
 import type { UUID } from '../types';
 import {
   getLayerIndexPathsExcludingDescendants,
