@@ -2,9 +2,9 @@ import { IndexPath } from 'tree-visit';
 
 import type Sketch from 'noya-file-format';
 import { AffineTransform, createBounds, Insets } from 'noya-geometry';
-import { ApplicationState, Layers } from '..';
-import { getCurrentPageMetadata } from './pageSelectors';
+import { ApplicationState, Layers } from '../index';
 import { toRadians } from '../utils/radians';
+import { getCurrentPageMetadata } from './pageSelectors';
 
 export function getLayerTransform(
   ctm: AffineTransform,

@@ -3,11 +3,11 @@ import { Draft } from 'immer';
 import { SketchModel } from 'noya-sketch-model';
 import type Sketch from 'noya-file-format';
 import { delimitedPath, uuid } from 'noya-utils';
-import { Layers } from 'noya-state';
+import { Layers } from '..';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
-import { getCurrentTab } from './workspaceSelectors';
 import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
+import { getCurrentTab } from './workspaceSelectors';
 
 export type ComponentsTypes =
   | Sketch.Swatch

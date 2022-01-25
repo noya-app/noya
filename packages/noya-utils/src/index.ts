@@ -23,7 +23,6 @@ export * from './fileType';
 export * from './memoize';
 export * from './types';
 export * from './upperFirst';
-export * from './sketchColor';
 export * from './unique';
 export * from './url';
 export * as delimitedPath from './delimitedPath';

@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 import produce from 'immer';
 
 import Sketch from 'noya-file-format';
-import { sketchColorToRgba } from 'noya-utils';
+import { sketchColorToRgba } from 'noya-colorpicker';
 import { center, Size } from 'noya-geometry';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer-web';
 import { SketchModel } from 'noya-sketch-model';

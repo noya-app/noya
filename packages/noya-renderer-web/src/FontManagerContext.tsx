@@ -1,9 +1,3 @@
-import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
-import { TypefaceFontProvider } from 'canvaskit';
-import fetch from 'cross-fetch';
-import { GoogleFontProvider } from 'noya-google-fonts';
-import { SuspendedValue, useMutableState } from 'noya-react-utils';
-import { useCanvasKit } from './hooks/useCanvasKit';
 import {
   createContext,
   memo,
@@ -12,6 +6,13 @@ import {
   useEffect,
   useMemo,
 } from 'react';
+import fetch from 'cross-fetch';
+
+import { TypefaceFontProvider } from 'canvaskit';
+import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
+import { GoogleFontProvider } from 'noya-google-fonts';
+import { SuspendedValue, useMutableState } from 'noya-react-utils';
+import { useCanvasKit } from './hooks/useCanvasKit';
 
 export type IFontManager = Pick<
   FontManager,
@@ -24,8 +25,6 @@ export type IFontManager = Pick<
 > & {
   getTypefaceFontProvider: () => TypefaceFontProvider;
 };
-
-console.log(FontManager);
 
 type FontManagerContextValue = IFontManager & {
   downloadFont: FontManager['downloadFont'];
@@ -41,11 +40,7 @@ const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
   ).then((resp) => resp.arrayBuffer()),
 );
 
-const sharedFontManager = {
-  entries: [],
-  addDownloadedFontListener: (k: any) => {},
-  removeDownloadedFontListener: (b: any) => {},
-}; // new FontManager(GoogleFontProvider);
+const sharedFontManager = new FontManager(GoogleFontProvider);
 
 interface Props {
   children?: ReactNode;

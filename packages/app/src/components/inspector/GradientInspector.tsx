@@ -1,13 +1,18 @@
 import type Sketch from 'noya-file-format';
 import { useApplicationState } from 'noya-app-state-context';
-import { hexToRgba, validHex } from 'noya-colorpicker';
+import {
+  validHex,
+  hexToRgba,
+  sketchColorToHex,
+  rgbaToSketchColor,
+} from 'noya-colorpicker';
 import {
   GradientPicker,
   InputField,
   Label,
   LabeledElementView,
 } from 'noya-designsystem';
-import { clamp, rgbaToSketchColor, sketchColorToHex } from 'noya-utils';
+import { clamp } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

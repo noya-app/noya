@@ -1,4 +1,4 @@
-import { UTF16 } from 'noya-utils';
+import { UTF16 } from './utf16';
 import { Base64 } from './base64';
 
 /**

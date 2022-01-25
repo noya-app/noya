@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { sketchColorToRgbaString } from 'noya-utils';
+import { sketchColorToRgbaString } from 'noya-colorpicker';
 import { Size } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Path } from 'noya-renderer-web';

@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import Sketch from 'noya-file-format';
-import { sketchColorToRgbaString } from 'noya-utils';
+import { sketchColorToRgbaString } from 'noya-colorpicker';
 import { useSketchImage } from 'noya-renderer-web';
 import { useObjectURL } from '../hooks/useObjectURL';
 import { getGradientBackground } from '../utils/getGradientBackground';

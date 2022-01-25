@@ -1,7 +1,12 @@
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { hexToRgba, validHex } from 'noya-colorpicker';
+import {
+  validHex,
+  hexToRgba,
+  sketchColorToHex,
+  rgbaToSketchColor,
+} from 'noya-colorpicker';
 import {
   InputField,
   Label,
@@ -9,9 +14,7 @@ import {
   Select,
   withSeparatorElements,
 } from 'noya-designsystem';
-import { rgbaToSketchColor, sketchColorToHex } from 'noya-utils';
 import { SetNumberMode } from 'noya-state';
-
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';

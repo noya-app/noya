@@ -1,8 +1,11 @@
 import produce from 'immer';
 
 import { CanvasKit } from 'canvaskit';
-import { interpolateRgba } from 'noya-colorpicker';
-import { rgbaToSketchColor, sketchColorToRgba } from 'noya-utils';
+import {
+  interpolateRgba,
+  rgbaToSketchColor,
+  sketchColorToRgba,
+} from 'noya-colorpicker';
 import Sketch from 'noya-file-format';
 import {
   AffineTransform,

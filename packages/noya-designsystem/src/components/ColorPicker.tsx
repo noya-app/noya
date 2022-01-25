@@ -11,9 +11,10 @@ import {
   RgbaColor,
   rgbaToHsva,
   Saturation,
+  rgbaToSketchColor,
+  sketchColorToRgba,
 } from 'noya-colorpicker';
 import * as Spacer from '../components/Spacer';
-import { rgbaToSketchColor, sketchColorToRgba } from 'noya-utils';
 
 interface Props {
   value: Sketch.Color;

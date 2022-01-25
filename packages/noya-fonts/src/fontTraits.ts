@@ -33,9 +33,7 @@ export function encodeFontTraits(fontTraits: FontTraits): string {
 /**
  * Split a hyphen-separated font name into a font family and traits
  */
-export function decodeFontName(
-  fontName: string,
-): {
+export function decodeFontName(fontName: string): {
   fontFamily: string;
   fontTraits: FontTraits;
 } {
@@ -63,12 +61,10 @@ export function encodeFontName(
 export function getTraitsDisplayName({ fontSlant, fontWeight }: FontTraits) {
   const slantDisplayName =
     fontSlant !== 'upright' ? upperFirst(fontSlant) : undefined;
-
   // If we're already displaying "Italic", we don't need to display "Regular" weight
   const weightDisplayName =
     slantDisplayName && fontWeight === 'regular'
       ? undefined
       : upperFirst(fontWeight);
-
   return [weightDisplayName, slantDisplayName].filter((x) => !!x).join(' ');
 }

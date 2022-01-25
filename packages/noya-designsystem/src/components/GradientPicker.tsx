@@ -12,8 +12,9 @@ import {
   rgbaToHsva,
   Saturation,
   Gradient,
+  rgbaToSketchColor,
+  sketchColorToRgba,
 } from 'noya-colorpicker';
-import { rgbaToSketchColor, sketchColorToRgba } from 'noya-utils';
 import * as Spacer from '../components/Spacer';
 
 interface Props {
