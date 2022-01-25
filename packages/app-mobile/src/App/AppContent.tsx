@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components/native';
 
 import { WorkspaceAction } from 'noya-state';
-import { StateProvider } from 'noya-app-state-context/ApplicationStateContext';
+import { StateProvider } from 'noya-app-state-context';
 import useAppState from '../hooks/useAppState';
 
 const AppContent: React.FC<{}> = () => {
