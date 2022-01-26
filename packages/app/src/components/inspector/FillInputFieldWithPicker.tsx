@@ -1,13 +1,8 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import { useApplicationState } from 'noya-app-state-context';
-import {
-  Divider,
-  FillInputField,
-  Select,
-  SketchPattern,
-  useGlobalInputBlurListener,
-} from 'noya-designsystem';
+import { Divider, FillInputField, Select } from 'noya-designsystem';
+import { useGlobalInputBlurListener } from 'noya-ui';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
@@ -19,7 +14,7 @@ import {
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
-import PatternInspector, { PatternFillType } from './PatternInspector';
+import PatternInspector from './PatternInspector';
 import PickerGradients from './PickerGradients';
 import PickerPatterns from './PickerPatterns';
 import ColorPickerSwatches from './PickerSwatches';
@@ -301,7 +296,7 @@ export type GradientFillProps = {
 };
 
 export type PatternFillProps = {
-  pattern: SketchPattern;
+  pattern: Sketch.Pattern;
   onChangePatternFillType: (value: Sketch.PatternFillType) => void;
   onChangePatternTileScale: (amount: number) => void;
   onChangeFillImage: (value: Sketch.FileRef | Sketch.DataRef) => void;

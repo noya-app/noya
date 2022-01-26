@@ -7,21 +7,23 @@ import {
 import {
   ContextMenu,
   mergeEventHandlers,
-  SupportedCanvasUploadType,
-  SupportedImageUploadType,
-  SUPPORTED_CANVAS_UPLOAD_TYPES,
-  SUPPORTED_IMAGE_UPLOAD_TYPES,
   useModKey,
   isLeftButtonClicked,
   isRightButtonClicked,
 } from 'noya-designsystem';
+import {
+  SupportedCanvasUploadType,
+  SupportedImageUploadType,
+  SUPPORTED_CANVAS_UPLOAD_TYPES,
+  SUPPORTED_IMAGE_UPLOAD_TYPES,
+} from 'noya-designsystem/src/types';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
-import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { useCanvasKit, useFontManager } from 'noya-renderer-web';
 import {
   ApplicationState,
   CompassDirection,

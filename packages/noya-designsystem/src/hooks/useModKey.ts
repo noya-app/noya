@@ -1,4 +1,4 @@
-import { useDesignSystemConfiguration } from '../contexts/DesignSystemConfiguration';
+import { useDesignSystemConfiguration } from 'noya-ui';
 
 /**
  * Either ctrl or meta, depending on the platform

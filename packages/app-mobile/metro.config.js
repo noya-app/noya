@@ -1,21 +1,14 @@
-/**
- * Metro configuration for React Native
- * https://github.com/facebook/react-native
- *
- * @format
- */
+const path = require('path');
 
-const {
-  getPathConfigs,
-  proxyExtraNodeModules,
-} = require('./scripts/pathConfig');
+const { getPathConfigs } = require('./scripts/pathConfig');
 
+const rootDir = path.resolve(__dirname, '../../');
 const pathConfigs = getPathConfigs(__dirname);
 
-module.exports = {
-  watchFolders: pathConfigs.watchFolders,
+const metroConfig = {
+  watchFolders: [...pathConfigs.watchFolders, `${rootDir}/node_modules`],
   resolver: {
-    extraNodeModules: proxyExtraNodeModules(pathConfigs.extraNodeModules),
+    sourceExts: ['cjs', 'json', 'ts', 'tsx', 'js', 'jsx'],
   },
   transformer: {
     getTransformOptions: async () => ({
@@ -26,3 +19,5 @@ module.exports = {
     }),
   },
 };
+
+module.exports = metroConfig;

@@ -13,7 +13,7 @@ module.exports = {
             message: 'Please use "noya-utils" instead.',
           },
         ],
-        patterns: ['*src*'],
+        patterns: [],
       },
     ],
   },

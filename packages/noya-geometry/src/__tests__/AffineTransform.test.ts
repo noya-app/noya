@@ -1,5 +1,5 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
-import { loadCanvasKit } from 'noya-renderer';
+import { loadCanvasKit } from 'noya-renderer-web';
 import { AffineTransform } from '../AffineTransform';
 import { toRadians } from '../radians';
 

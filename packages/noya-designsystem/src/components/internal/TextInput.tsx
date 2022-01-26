@@ -11,7 +11,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useGlobalInputBlurListener } from '../../contexts/GlobalInputBlurContext';
+import { useGlobalInputBlurListener } from 'noya-ui';
 
 type Props = {
   id?: string;

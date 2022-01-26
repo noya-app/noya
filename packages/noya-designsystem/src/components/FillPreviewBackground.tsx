@@ -1,11 +1,11 @@
-import Sketch from 'noya-file-format';
 import { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
+
+import Sketch from 'noya-file-format';
+import { sketchColorToRgbaString } from 'noya-colorpicker';
+import { useSketchImage } from 'noya-renderer-web';
 import { useObjectURL } from '../hooks/useObjectURL';
-import { useSketchImage } from 'noya-renderer';
 import { getGradientBackground } from '../utils/getGradientBackground';
-import { sketchColorToRgbaString } from '../utils/sketchColor';
-import { SketchPattern } from '../utils/sketchPattern';
 
 const dotsHorizontalSvg = (fillColor: string) => `
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15' fill='${fillColor}'>
@@ -104,7 +104,7 @@ const GradientPreviewBackground = memo(function GradientPreviewBackground({
 });
 
 interface Props {
-  value?: Sketch.Color | Sketch.Gradient | SketchPattern;
+  value?: Sketch.Color | Sketch.Gradient | Sketch.Pattern;
 }
 
 export const FillPreviewBackground = memo(function FillPreviewBackground({

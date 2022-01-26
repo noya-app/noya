@@ -1,5 +1,5 @@
 import type { CanvasKit } from 'canvaskit';
-import { loadCanvasKit } from 'noya-renderer';
+import { loadCanvasKit } from 'noya-renderer-web';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 interface Props {

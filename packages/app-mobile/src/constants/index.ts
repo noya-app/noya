@@ -1,14 +1,10 @@
-const dark = {
-  backgroundColor: '#151a23',
-  textColor: '#fff',
-};
+import * as lightTheme from './lightTheme';
 
-const light = {
-  backgroundColor: '#ddd',
-  textColor: '#000',
-};
+export * as lightTheme from './lightTheme';
+export * as darkTheme from './darkTheme';
 
-export const Theme = {
-  dark,
-  light,
-};
+export type Theme = typeof lightTheme;
+
+declare module 'styled-components/native' {
+  export interface DefaultTheme extends Theme {}
+}

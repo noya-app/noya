@@ -1,10 +1,11 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { RelativeDropPosition } from 'noya-designsystem';
+import { IndexPath } from 'tree-visit';
+
+import Sketch from 'noya-file-format';
+import { RelativeDropPosition } from 'noya-designsystem/src/types';
 import { AffineTransform, createBounds, transformRect } from 'noya-geometry';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, groupBy, uuid } from 'noya-utils';
-import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { PageLayer } from '../layers';
 import {

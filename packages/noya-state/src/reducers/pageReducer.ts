@@ -1,5 +1,6 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+
+import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';

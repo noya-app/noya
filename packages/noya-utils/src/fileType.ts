@@ -1,4 +1,4 @@
-import { invert } from '.';
+import { invert } from './invert';
 import { isEqualArray } from './internal/isEqual';
 
 const FILE_TYPE_TO_EXTENSION = {

@@ -77,7 +77,7 @@ export enum GradientType {
 }
 /**
   * A formatted string representation of a 2D point, e.g. {1, 1}.
- 
+
   */
 export type PointString = string;
 /**
@@ -293,6 +293,17 @@ export enum PatternFillType {
   Stretch = 2,
   Fit = 3,
 }
+/**
+ * Defines a pattern
+ */
+export type Pattern = {
+  // This _class doesn't exist in Sketch, but it's convenient in `switch`
+  // statements to be able to reference _class.
+  _class: 'pattern';
+  image?: FileRef | DataRef;
+  patternFillType: PatternFillType;
+  patternTileScale: number;
+};
 /**
  * Defines a shader
  */

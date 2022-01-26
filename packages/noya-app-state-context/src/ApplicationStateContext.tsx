@@ -1,6 +1,4 @@
-import { useGlobalInputBlurTrigger } from 'noya-designsystem';
-import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
-import {
+import React, {
   createContext,
   memo,
   ReactNode,
@@ -10,6 +8,9 @@ import {
   useMemo,
   useRef,
 } from 'react';
+
+import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
+import { useGlobalInputBlurTrigger } from 'noya-ui';
 
 export type Dispatcher = (action: WorkspaceAction) => void;
 
@@ -64,9 +65,7 @@ export const useWorkspaceState = (): WorkspaceState => {
  */
 export const useDispatch = (): FlatDispatcher => {
   const dispatch = useContext(DispatchContext);
-
   const blurTrigger = useGlobalInputBlurTrigger();
-
   // Simplify the dispatch function by flattening our action tuple
   return useCallback(
     (...args: WorkspaceAction) => {
@@ -78,7 +77,6 @@ export const useDispatch = (): FlatDispatcher => {
       ) {
         blurTrigger();
       }
-
       dispatch(args);
     },
     [dispatch, blurTrigger],
@@ -95,10 +93,10 @@ export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
   const state = useWorkspaceState();
   const dispatch = useDispatch();
 
-  return useMemo(() => [state.history.present, dispatch], [
-    state.history.present,
-    dispatch,
-  ]);
+  return useMemo(
+    () => [state.history.present, dispatch],
+    [state.history.present, dispatch],
+  );
 };
 
 /**
@@ -123,9 +121,10 @@ export const useGetWorkspaceStateSnapshot = (): (() => WorkspaceState) => {
 export const useGetStateSnapshot = (): (() => ApplicationState) => {
   const getWorkspaceStateSnapshot = useGetWorkspaceStateSnapshot();
 
-  return useCallback(() => getWorkspaceStateSnapshot().history.present, [
-    getWorkspaceStateSnapshot,
-  ]);
+  return useCallback(
+    () => getWorkspaceStateSnapshot().history.present,
+    [getWorkspaceStateSnapshot],
+  );
 };
 
 export function useSelector<Projection>(

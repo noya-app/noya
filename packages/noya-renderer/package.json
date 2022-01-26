@@ -2,12 +2,5 @@
   "name": "noya-renderer",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "license": "UNLICENSED",
-  "dependencies": {
-    "uuid": "^8.3.2"
-  },
-  "devDependencies": {
-    "@types/uuid": "^8.3.0",
-    "canvas": "^2.6.1"
-  }
+  "license": "UNLICENSED"
 }

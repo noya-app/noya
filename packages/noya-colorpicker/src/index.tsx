@@ -13,4 +13,5 @@ export * from './utils/convert';
 export * from './utils/compare';
 export * from './utils/validate';
 export * from './utils/interpolateRgba';
+export * from './utils/sketchColor';
 export * from './types';

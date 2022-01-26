@@ -1,14 +1,15 @@
-import Sketch from 'noya-file-format';
-import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
+import { IndexPath } from 'tree-visit';
+
+import Sketch from 'noya-file-format';
+import { CanvasKit } from 'canvaskit';
 import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
-import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {

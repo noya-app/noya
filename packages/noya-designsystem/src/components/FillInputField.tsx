@@ -1,7 +1,6 @@
 import Sketch from 'noya-file-format';
 import { CSSProperties, ForwardedRef, forwardRef, memo } from 'react';
 import styled from 'styled-components';
-import { SketchPattern } from '../utils/sketchPattern';
 import { FillPreviewBackground } from './FillPreviewBackground';
 
 const Container = styled.button<{ flex?: CSSProperties['flex'] }>(
@@ -25,7 +24,7 @@ const Container = styled.button<{ flex?: CSSProperties['flex'] }>(
 
 interface Props {
   id?: string;
-  value?: Sketch.Color | Sketch.Gradient | SketchPattern;
+  value?: Sketch.Color | Sketch.Gradient | Sketch.Pattern;
   flex?: CSSProperties['flex'];
 }
 

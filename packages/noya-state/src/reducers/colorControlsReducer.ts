@@ -1,7 +1,8 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+
+import Sketch from 'noya-file-format';
 import { clamp } from 'noya-utils';
-import { SetNumberMode } from '..';
+import { SetNumberMode } from './applicationReducer';
 
 export type ColorControlsAction =
   | [type: 'setColorControlsEnabled', isEnabled: boolean]

@@ -1,13 +1,13 @@
-import type Sketch from 'noya-file-format';
-import { delimitedPath } from 'noya-utils';
-import { Layers } from '..';
 import { Draft } from 'immer';
+
+import { SketchModel } from 'noya-sketch-model';
+import type Sketch from 'noya-file-format';
+import { delimitedPath, uuid } from 'noya-utils';
+import { Layers } from '..';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
-import { getCurrentTab } from './workspaceSelectors';
-import { uuid } from 'noya-utils';
 import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
-import { SketchModel } from 'noya-sketch-model';
+import { getCurrentTab } from './workspaceSelectors';
 
 export type ComponentsTypes =
   | Sketch.Swatch
@@ -171,7 +171,7 @@ export const setNewShaderFill = (fills: Sketch.Fill[], index: number) => {
   float x = floor(position.x * 10) / 10;
   float y = floor(position.y * 10) / 10;
   return mix(color1, color2, (x + y) / 2);
-}   
+}
 `,
     variables: [
       {

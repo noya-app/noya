@@ -1,0 +1,15 @@
+{
+  "extends": "modular-scripts/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      /*
+       * Provide renderer paths explicitly to avoid
+       * noya-renderer "hiding" noya-renderer-web
+       */
+      "noya-renderer": ["./packages/noya-renderer"],
+      "noya-renderer-web": ["./packages/noya-renderer-web"],
+      /* Include path too all package src index files */
+      "*": ["./*/src"]
+    }
+  }
+}

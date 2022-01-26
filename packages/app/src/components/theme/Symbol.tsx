@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer-web';
 import { memo } from 'react';
 import CanvasGridItem from './CanvasGridItem';
 

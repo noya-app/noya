@@ -1,7 +1,9 @@
-import Sketch from 'noya-file-format';
-import { sketchColorToRgba, getGradientBackground } from 'noya-designsystem';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
+
+import Sketch from 'noya-file-format';
+import { getGradientBackground } from 'noya-designsystem';
+import { sketchColorToRgba} from 'noya-colorpicker';
 import { RgbaColor } from '../types';
 import { interpolateRgba } from '../utils/interpolateRgba';
 import { Interaction, Interactive } from './Interactive';

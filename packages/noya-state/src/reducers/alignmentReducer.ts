@@ -1,8 +1,9 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import { IndexPath } from 'tree-visit';
+
+import Sketch from 'noya-file-format';
 import { Bounds, createBounds, transformRect } from 'noya-geometry';
 import { sum } from 'noya-utils';
-import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import {
   getCurrentPage,

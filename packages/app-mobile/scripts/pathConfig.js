@@ -1,36 +1,44 @@
 const path = require('path');
 const fs = require('fs');
 
+const allowList = [
+  'noya-ui',
+  'canvaskit',
+  'noya-fonts',
+  'noya-utils',
+  'noya-state',
+  'noya-keymap',
+  'noya-renderer',
+  'noya-geometry',
+  'noya-react-utils',
+  'noya-import-svg',
+  'noya-sketch-file',
+  'noya-file-format',
+  'noya-sketch-model',
+  'noya-colorpicker',
+  'noya-app-state-context',
+];
+
 const getPathConfigs = (appRootDir) => {
   const packages = fs.readdirSync(path.resolve(appRootDir, '../'));
-  const excludes = ['README.md', 'app', 'app-mobile', 'site'];
   const watchFolders = [];
-  const babelAliases = {};
-  const extraNodeModules = {};
+  const babelAliases = {
+    react: path.resolve(appRootDir, './node_modules/react'),
+    'react-native': path.resolve(appRootDir, './node_modules/react-native'),
+  };
 
   packages.forEach((packageName) => {
-    if (excludes.includes(packageName)) {
+    const basePath = path.resolve(appRootDir, `../${packageName}`);
+
+    if (!allowList.includes(packageName)) {
       return;
     }
 
-    const basePath = path.resolve(appRootDir, `../${packageName}`);
-
-    watchFolders.push(basePath);
-    extraNodeModules[packageName] = basePath;
+    watchFolders.push(`${basePath}/src`);
     babelAliases[packageName] = `${basePath}/src`;
   });
 
-  return { babelAliases, extraNodeModules, watchFolders };
+  return { babelAliases, watchFolders };
 };
 
-const proxyExtraNodeModules = (extraNodeModules) => {
-  return new Proxy(extraNodeModules, {
-    get: (target, name) => {
-      return name in target
-        ? target[name]
-        : path.join(process.cwd(), `node_modules/${name}`);
-    },
-  });
-};
-
-module.exports = { getPathConfigs, proxyExtraNodeModules };
+module.exports = { getPathConfigs };

@@ -24,7 +24,7 @@ jobs:
       - name: Build iOS app
         run: |
           cd packages/app-mobile/ios
-          yarn detox:build -- -- --record-logs all
+          yarn detox:build
 
       - name: Upload test application build
         uses: actions/upload-artifact@v2

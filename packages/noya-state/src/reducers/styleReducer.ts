@@ -1,5 +1,6 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+
+import Sketch from 'noya-file-format';
 import { GradientAction, gradientReducer } from './gradientReducer';
 import {
   ColorControlsAction,

@@ -1,5 +1,6 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+
+import Sketch from 'noya-file-format';
 import { SetNumberMode } from './styleReducer';
 
 export type StringAttributeAction =
