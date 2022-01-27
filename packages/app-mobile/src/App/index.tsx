@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 // Local imports
-import { CanvasKitProvider } from 'noya-renderer';
+import { CanvasKitProvider, SketchFileDebugProvider } from 'noya-renderer';
 import { darkTheme, lightTheme } from '../constants';
 import loadCanvasKit from '../utils/loadCanvasKit';
 import AppContent from './AppContent';
@@ -30,18 +30,20 @@ const App: React.FC<{}> = () => {
   );
 
   return (
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
-      <Suspense fallback={AppLoader}>
-        <CanvasKitProvider loadCanvasKit={loadCanvasKit}>
-          <AppWrapper>
-            <StatusBar
-              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-            />
-            <AppContent />
-          </AppWrapper>
-        </CanvasKitProvider>
-      </Suspense>
-    </ThemeProvider>
+    <SketchFileDebugProvider>
+      <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+        <Suspense fallback={AppLoader}>
+          <CanvasKitProvider loadCanvasKit={loadCanvasKit}>
+            <AppWrapper>
+              <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+              />
+              <AppContent />
+            </AppWrapper>
+          </CanvasKitProvider>
+        </Suspense>
+      </ThemeProvider>
+    </SketchFileDebugProvider>
   );
 };
 

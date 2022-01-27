@@ -4,6 +4,8 @@ import styled from 'styled-components/native';
 import { WorkspaceAction } from 'noya-state';
 import { StateProvider } from 'noya-app-state-context';
 import useAppState from '../hooks/useAppState';
+import Toolbar from '../containers/Toolbar';
+import Canvas from '../containers/Canvas';
 
 const AppContent: React.FC<{}> = () => {
   const { state, dispatch } = useAppState();
@@ -22,7 +24,8 @@ const AppContent: React.FC<{}> = () => {
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
       <ContentContainer>
-        <Placeholder>It's working!</Placeholder>
+        <Toolbar />
+        <Canvas />
       </ContentContainer>
     </StateProvider>
   );
@@ -32,12 +35,6 @@ export default AppContent;
 
 const ContentContainer = styled.View((p) => ({
   flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
   backgroundColor: p.theme.colors.sidebar.background,
-}));
-
-const Placeholder = styled.Text((p) => ({
-  fontSize: 24,
-  color: p.theme.colors.text,
+  position: 'relative',
 }));

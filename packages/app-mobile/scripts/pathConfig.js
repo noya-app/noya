@@ -16,6 +16,7 @@ const allowList = [
   'noya-file-format',
   'noya-sketch-model',
   'noya-colorpicker',
+  'noya-react-canvaskit',
   'noya-app-state-context',
 ];
 
@@ -25,6 +26,10 @@ const getPathConfigs = (appRootDir) => {
   const babelAliases = {
     react: path.resolve(appRootDir, './node_modules/react'),
     'react-native': path.resolve(appRootDir, './node_modules/react-native'),
+    '@shopify/react-native-skia': path.resolve(
+      appRootDir,
+      './node_modules/@shopify/react-native-skia',
+    ),
   };
 
   packages.forEach((packageName) => {

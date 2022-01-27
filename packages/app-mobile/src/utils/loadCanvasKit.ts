@@ -1,6 +1,6 @@
 import { CanvasKit } from 'canvaskit';
+import { SkiaKit } from './SkiaKit';
 
-const canvasKit: CanvasKit = {};
 let loadingPromise: Promise<CanvasKit> | undefined;
 
 export default function loadCanvasKit() {
@@ -8,7 +8,7 @@ export default function loadCanvasKit() {
 
   loadingPromise = new Promise(async (resolve) => {
     // TODO: return real canvaskit for mobile
-    resolve(canvasKit);
+    resolve(SkiaKit);
   });
 
   return loadingPromise;

@@ -5,7 +5,7 @@ import {
   StrokeCap,
   StrokeJoin,
 } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer-web';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useColor, { ColorParameters } from './useColor';
 import useDeletable from './useDeletable';
