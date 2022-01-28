@@ -4,10 +4,6 @@ import Sketch from 'noya-file-format';
 import { clamp } from 'noya-utils';
 import { SetNumberMode } from './applicationReducer';
 
-import Sketch from 'noya-file-format';
-import { clamp } from 'noya-utils';
-import { SetNumberMode } from './applicationReducer';
-
 export type ColorControlsAction =
   | [type: 'setColorControlsEnabled', isEnabled: boolean]
   | [type: 'setHue', amount: number, mode?: SetNumberMode]

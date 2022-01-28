@@ -34,7 +34,7 @@ const Provider: React.FC<PropsWithChildren<CanvasKitProviderProps>> = (
   );
 };
 
-export const CanvasKitProvsider = React.memo(Provider);
+export const CanvasKitProvider = React.memo(Provider);
 
 export function useCanvasKit() {
   const value = useContext(CanvasKitContext);
