@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { useCanvasKit } from 'noya-renderer-web';
+import { useCanvasKit } from 'noya-renderer';
 import { Layers, Primitives } from 'noya-state';
 import { CanvasKit } from 'canvaskit';
 import { useMemo } from 'react';

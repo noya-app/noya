@@ -2,10 +2,7 @@ import React, { useContext } from 'react';
 import styled from 'styled-components/native';
 import { GestureResponderEvent } from 'react-native';
 
-import {
-  Rect as SkiaRect,
-  Canvas as SkiaCanvas,
-} from '@shopify/react-native-skia';
+import { Canvas as SkiaCanvas } from '@shopify/react-native-skia';
 
 import {
   useApplicationState,
