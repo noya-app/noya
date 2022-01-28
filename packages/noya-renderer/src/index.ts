@@ -6,3 +6,4 @@ export {
 
 export * from './hooks/useCanvasKit';
 export * from './FontManagerContext';
+export * from './ComponentsContext';

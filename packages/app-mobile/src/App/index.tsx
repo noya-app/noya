@@ -15,8 +15,8 @@ import {
 
 // Local imports
 import { CanvasKitProvider, SketchFileDebugProvider } from 'noya-renderer';
+import { loadSkiaCanvasKit } from 'noya-skia-canvaskit';
 import { darkTheme, lightTheme } from '../constants';
-import loadCanvasKit from '../utils/loadCanvasKit';
 import AppContent from './AppContent';
 
 const App: React.FC<{}> = () => {
@@ -33,7 +33,7 @@ const App: React.FC<{}> = () => {
     <SketchFileDebugProvider>
       <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
         <Suspense fallback={AppLoader}>
-          <CanvasKitProvider loadCanvasKit={loadCanvasKit}>
+          <CanvasKitProvider loadCanvasKit={loadSkiaCanvasKit}>
             <AppWrapper>
               <StatusBar
                 barStyle={isDarkMode ? 'light-content' : 'dark-content'}

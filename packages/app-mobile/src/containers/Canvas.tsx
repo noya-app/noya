@@ -12,11 +12,13 @@ import {
   useWorkspaceState,
   StateProvider,
 } from 'noya-app-state-context';
+import { Components } from 'noya-react-canvaskit';
 import {
   SketchFileDebugContext,
   SketchFileRenderer,
   useCanvasKit,
   CanvasKitProvider,
+  ComponentsProvider,
 } from 'noya-renderer';
 
 const Canvas: React.FC<{}> = () => {
@@ -57,11 +59,35 @@ const Canvas: React.FC<{}> = () => {
         ]);
         break;
       }
+
+      case 'drawing': {
+        dispatch('interaction', [
+          'updateDrawing',
+          {
+            x: e.nativeEvent.locationX,
+            y: e.nativeEvent.locationY,
+          },
+        ]);
+        break;
+      }
     }
   };
 
   const onResponderRelease = (e: GestureResponderEvent) => {
-    console.log('onResponderRelease');
+    switch (state.interactionState.type) {
+      case 'drawing': {
+        dispatch('interaction', [
+          'updateDrawing',
+          {
+            x: e.nativeEvent.locationX,
+            y: e.nativeEvent.locationY,
+          },
+        ]);
+        dispatch('addDrawnLayer');
+
+        break;
+      }
+    }
   };
 
   return (
@@ -75,15 +101,9 @@ const Canvas: React.FC<{}> = () => {
         <CanvasKitProvider canvasKit={canvasKit}>
           <SketchFileDebugContext.Provider value={debugCtx}>
             <StateProvider state={workspaceState}>
-              <SketchFileRenderer />
-              {/* Control rect to see if canvas is rendering :) */}
-              <SkiaRect
-                x={100}
-                y={100}
-                width={100}
-                height={100}
-                color="lightblue"
-              />
+              <ComponentsProvider value={Components}>
+                <SketchFileRenderer />
+              </ComponentsProvider>
             </StateProvider>
           </SketchFileDebugContext.Provider>
         </CanvasKitProvider>

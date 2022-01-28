@@ -16,6 +16,7 @@ const allowList = [
   'noya-file-format',
   'noya-sketch-model',
   'noya-colorpicker',
+  'noya-skia-canvaskit',
   'noya-react-canvaskit',
   'noya-app-state-context',
 ];

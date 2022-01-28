@@ -41,7 +41,7 @@ import { ALL_DIRECTIONS, getGuides } from '../guides';
 // import HoverOutline from './HoverOutline';
 // import { InsertPointOverlay } from './InsertPointOverlay';
 // import { SketchArtboardContent } from './layers/SketchArtboard';
-// import SketchGroup from './layers/SketchGroup';
+import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 // import Marquee from './Marquee';
 // import { PixelGrid } from './PixelGrid';
@@ -260,5 +260,10 @@ export default React.memo(function SketchFileRenderer() {
   //   [rootScale],
   // );
 
-  return drawingLayer && <SketchLayer layer={drawingLayer} />;
+  return (
+    <>
+      <SketchGroup layer={page} />
+      {drawingLayer && <SketchLayer layer={drawingLayer} />}
+    </>
+  );
 });

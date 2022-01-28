@@ -1,40 +1,21 @@
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 
-import { Paint } from 'canvaskit';
-import { Rect as RectType } from 'packages/noya-geometry';
-import { Rect as SkiaRect } from '@shopify/react-native-skia';
-import { RectParameters } from '../hooks/useRect';
+import { Group as SkiaGroup } from '@shopify/react-native-skia';
+import { GroupComponentProps } from '../types';
 
-// TODO: move to shared directory f.e. PropTypes
-// To avoid doubling the type
-interface RectProps {
-  rect: RectParameters;
-  cornerRadius?: number;
-  paint: Paint;
-}
+const Group: React.FC<GroupComponentProps> = (props) => {
+  // TODO: handle rest of the props
+  const {
+    // transform,
+    // opacity,
+    children,
+    // clip,
+    // colorFilter,
+    // imageFilter,
+    // backdropImageFilter,
+  } = props;
 
-// TODO: move to noya-geometry
-const convertTLBRArrayToXYWH = (inRect: Float32Array): RectType => {
-  const [top, left, bottom, right] = inRect;
-  return {
-    x: left,
-    y: top,
-    width: right - left,
-    height: bottom - top,
-  };
+  return <SkiaGroup>{children}</SkiaGroup>;
 };
 
-const Rect: React.FC<RectProps> = (props) => {
-  const { rect } = props;
-
-  const { x, y, width, height } = useMemo(
-    () => convertTLBRArrayToXYWH(rect),
-    [rect],
-  );
-
-  return (
-    <SkiaRect x={x} y={y} width={width} height={height} color="lightblue" />
-  );
-};
-
-export default memo(Rect);
+export default Group;

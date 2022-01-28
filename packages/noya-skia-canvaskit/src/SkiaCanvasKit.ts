@@ -5,8 +5,6 @@ import type {
   // ColorInt,
   // ColorIntArray,
   // ColorSpace,
-  EmbindEnum,
-  EmbindEnumEntity,
   // EmulatedCanvas2D,
   // FontMgr,
   GrDirectContext,
@@ -39,60 +37,19 @@ import type {
   // WebGLOptions,
 } from 'canvaskit';
 // import { Skia } from '@shopify/react-native-skia';
-
-// Copied from svgkit
-export class JSEmbindObject {
-  _isDeleted = false;
-  clone() {
-    return this;
-  }
-  delete() {
-    this._isDeleted = false;
-  }
-  deleteAfter() {
-    throw new Error('Not implemented');
-  }
-  isAliasOf(other: any) {
-    return this === other;
-  }
-  isDeleted() {
-    return this._isDeleted;
-  }
-}
-
-function createEnumEntity(value: number): EmbindEnumEntity {
-  return { value };
-}
-
-function createEnum<K extends string>(
-  caseNames: K[],
-): EmbindEnum & Record<K, EmbindEnumEntity> {
-  const entries = caseNames.map(
-    (name, index) => [name, createEnumEntity(index)] as const,
-  );
-  const cases = Object.fromEntries(entries) as Record<K, EmbindEnumEntity>;
-
-  return {
-    ...cases,
-    values: Object.values(cases),
-  };
-}
-
-const Embind = {
-  createEnumEntity,
-  createEnum,
-};
+import { Embind } from './Embind';
+import { SkiaPaintWrapper } from './SkiaPaint';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
 class JSTextStyle implements TextStyle {}
 
-export const SkiaKit: CanvasKit = {
+export const SkiaCanvasKit: CanvasKit = {
   Color(r, g, b, a) {
     throw new Error('Not implemented');
   },
   Color4f(r, g, b, a) {
-    throw new Error('Not implemented');
+    return new Float32Array([r, g, b, a ?? 0]);
   },
   ColorAsInt(r, g, b, a) {
     throw new Error('Not implemented');
@@ -236,11 +193,7 @@ export const SkiaKit: CanvasKit = {
   ParagraphStyle: JSParagraphStyle,
   ContourMeasureIter: 0 as any,
   Font: 0 as any,
-  Paint: 0 as any,
-  // Path: class SkiaPath {
-  //   // MakeFromCmds
-  //   moveTo(x, y) {}
-  // },
+  Paint: SkiaPaintWrapper,
 
   Path: 0 as any,
   PictureRecorder: 0 as any,
