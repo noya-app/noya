@@ -94,8 +94,6 @@ export default React.memo(function SketchFileRenderer() {
     [page, state.selectedLayerIds],
   );
 
-  // console.log(page.layers);s
-
   // const quickMeasureGuides = useMemo(() => {
   //   if (
   //     !highlightedLayer ||

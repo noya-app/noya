@@ -42,7 +42,6 @@ const LTRBArrayToIRect = (
 };
 
 const IRectToLTRBArray = (inRect: RNSkia.IRect): Float32Array => {
-  console.log(inRect);
   return new Float32Array([
     inRect.x,
     inRect.y,
