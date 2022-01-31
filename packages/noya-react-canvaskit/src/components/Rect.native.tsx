@@ -14,8 +14,9 @@ interface RectProps {
 }
 
 // TODO: move to noya-geometry
-const convertTLBRArrayToXYWH = (inRect: Float32Array): RectType => {
-  const [top, left, bottom, right] = inRect;
+const LTRBArrayToIRect = (inRect: Float32Array): RectType => {
+  const [left, top, right, bottom] = inRect;
+
   return {
     x: left,
     y: top,
@@ -27,10 +28,7 @@ const convertTLBRArrayToXYWH = (inRect: Float32Array): RectType => {
 const Rect: React.FC<RectProps> = (props) => {
   const { rect } = props;
 
-  const { x, y, width, height } = useMemo(
-    () => convertTLBRArrayToXYWH(rect),
-    [rect],
-  );
+  const { x, y, width, height } = useMemo(() => LTRBArrayToIRect(rect), [rect]);
 
   return (
     <SkiaRect x={x} y={y} width={width} height={height} color="lightblue" />
