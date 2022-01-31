@@ -15,6 +15,7 @@ import {
   useCanvasKit,
   CanvasKitProvider,
   ComponentsProvider,
+  ImageCacheProvider,
 } from 'noya-renderer';
 
 const Canvas: React.FC<{}> = () => {
@@ -93,13 +94,15 @@ const Canvas: React.FC<{}> = () => {
       onResponderRelease={onResponderRelease}
     >
       <StyledCanvas>
-        <CanvasKitProvider canvasKit={canvasKit}>
-          <StateProvider state={workspaceState}>
-            <ComponentsProvider value={Components}>
-              <SketchFileRenderer />
-            </ComponentsProvider>
-          </StateProvider>
-        </CanvasKitProvider>
+        <ImageCacheProvider>
+          <CanvasKitProvider canvasKit={canvasKit}>
+            <StateProvider state={workspaceState}>
+              <ComponentsProvider value={Components}>
+                <SketchFileRenderer />
+              </ComponentsProvider>
+            </StateProvider>
+          </CanvasKitProvider>
+        </ImageCacheProvider>
       </StyledCanvas>
     </CanvasWrapper>
   );
