@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components/native';
 import { GestureResponderEvent } from 'react-native';
 
@@ -11,7 +11,6 @@ import {
 } from 'noya-app-state-context';
 import { Components } from 'noya-react-canvaskit';
 import {
-  SketchFileDebugContext,
   SketchFileRenderer,
   useCanvasKit,
   CanvasKitProvider,
@@ -20,7 +19,6 @@ import {
 
 const Canvas: React.FC<{}> = () => {
   const [state, dispatch] = useApplicationState();
-  const debugCtx = useContext(SketchFileDebugContext);
   const workspaceState = useWorkspaceState();
   const canvasKit = useCanvasKit();
 
@@ -96,13 +94,11 @@ const Canvas: React.FC<{}> = () => {
     >
       <StyledCanvas>
         <CanvasKitProvider canvasKit={canvasKit}>
-          <SketchFileDebugContext.Provider value={debugCtx}>
-            <StateProvider state={workspaceState}>
-              <ComponentsProvider value={Components}>
-                <SketchFileRenderer />
-              </ComponentsProvider>
-            </StateProvider>
-          </SketchFileDebugContext.Provider>
+          <StateProvider state={workspaceState}>
+            <ComponentsProvider value={Components}>
+              <SketchFileRenderer />
+            </ComponentsProvider>
+          </StateProvider>
         </CanvasKitProvider>
       </StyledCanvas>
     </CanvasWrapper>

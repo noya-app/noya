@@ -50,36 +50,7 @@ import SketchLayer from './layers/SketchLayer';
 // import { HorizontalRuler } from './Rulers';
 // import SnapGuides from './SnapGuides';
 
-export const SketchFileDebugContext = React.createContext<{
-  obj: Object;
-  setDebug: (data: Object) => void;
-}>({
-  obj: {},
-  setDebug: () => {
-    console.log('wrong context');
-  },
-});
-
-export const SketchFileDebugProvider: React.FC<PropsWithChildren<{}>> = ({
-  children,
-}) => {
-  const objRef = useRef<Object>();
-
-  const setDebug = (newObj: Object) => {
-    objRef.current = newObj;
-  };
-
-  return (
-    <SketchFileDebugContext.Provider
-      value={{ obj: objRef.current || {}, setDebug }}
-    >
-      {children}
-    </SketchFileDebugContext.Provider>
-  );
-};
-
 export default React.memo(function SketchFileRenderer() {
-  const debugCtx = useContext(SketchFileDebugContext);
   const {
     canvasSize,
     canvasInsets,
@@ -123,25 +94,7 @@ export default React.memo(function SketchFileRenderer() {
     [page, state.selectedLayerIds],
   );
 
-  // useEffect(() => {
-  debugCtx.setDebug({
-    canvasSize,
-    canvasInsets,
-    showRulers,
-    showPixelGrid,
-    highlightedLayer,
-    interactionState,
-    state,
-    page,
-    screenTransform,
-    canvasTransform,
-    isEditingPath,
-    isEditingText,
-    isInserting,
-    zoomValue,
-    canvasRect,
-  });
-  // });
+  // console.log(page.layers);s
 
   // const quickMeasureGuides = useMemo(() => {
   //   if (
@@ -259,6 +212,8 @@ export default React.memo(function SketchFileRenderer() {
   //   () => AffineTransform.scale(rootScale),
   //   [rootScale],
   // );
+
+  // console.log(JSON.stringify(drawingLayer, null, '\t'));
 
   return (
     <>

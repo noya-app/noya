@@ -1,65 +1,85 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components/native';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
-import { DrawableLayerType, InteractionType } from 'noya-state';
+import { DrawableLayerType } from 'noya-state';
 
-import DebugModal from './DebugModal';
 import Button from '../components/Button';
 import Layout from '../components/Layout';
-
-type InteractionStateProjection =
-  | {
-      type: 'insert';
-      layerType: DrawableLayerType;
-    }
-  | { type: Exclude<InteractionType, 'insert'> };
 
 interface ToolbarProps {}
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
   const [state] = useApplicationState();
-  const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
 
-  const layerType =
-    state.interactionState.type === 'insert'
-      ? state.interactionState.layerType
-      : undefined;
+  const interType = state.interactionState.type;
+  const layerType = useMemo(() => {
+    if (interType === 'insert') {
+      return state.interactionState.layerType;
+    }
 
-  const projection = useMemo(
-    (): InteractionStateProjection =>
-      state.interactionState.type === 'insert'
-        ? { type: 'insert', layerType: layerType! }
-        : { type: state.interactionState.type },
-    [state.interactionState.type, layerType],
-  );
+    if (interType === 'drawing') {
+      return state.interactionState.shapeType;
+    }
 
-  const isInsertingLayerType =
-    projection.type === 'insert' ? projection.layerType : undefined;
+    return undefined;
+  }, [state.interactionState, interType]);
 
-  const isInsertRectangle = isInsertingLayerType === 'rectangle';
+  const onToDo = () => {};
 
-  const onAddRect = () => {
-    if (isInsertRectangle) {
+  const isButtonActive = (shape: DrawableLayerType) =>
+    layerType === shape && (interType === 'drawing' || interType === 'insert');
+
+  const onReset = () => {
+    if (interType !== 'none') {
       dispatch('interaction', ['reset']);
-    } else {
-      dispatch('interaction', ['insert', 'rectangle']);
     }
   };
 
-  const onOpenModal = () => {
-    setShowModal(true);
+  const onAddShape = (shape: DrawableLayerType) => () => {
+    dispatch('interaction', ['insert', shape]);
   };
+
+  const buttons = [
+    { icon: 'cursor-arrow', onPress: onReset, active: interType === 'none' },
+    {
+      icon: 'frame',
+      onPress: onAddShape('artboard'),
+      active: isButtonActive('artboard'),
+    },
+    {
+      icon: 'square',
+      onPress: onAddShape('rectangle'),
+      active: isButtonActive('rectangle'),
+    },
+    {
+      icon: 'circle',
+      onPress: onAddShape('oval'),
+      active: isButtonActive('oval'),
+    },
+    {
+      icon: 'slash',
+      onPress: onAddShape('line'),
+      active: isButtonActive('line'),
+    },
+    { icon: 'share-1', onPress: onToDo },
+    { icon: 'text', onPress: onToDo },
+    { icon: 'group', onPress: onToDo },
+  ];
 
   return (
     <>
       <ToolbarView>
-        <Button label="Add Rect" onPress={onAddRect} />
-        <Layout.Queue size="medium" />
-        <Button label="Open Debug Modal" onPress={onOpenModal} />
+        <ToolbarContainer>
+          {buttons.map(({ icon, onPress, active }, idx) => (
+            <React.Fragment key={idx}>
+              <Button icon={icon} onPress={onPress} active={active} />
+              <Layout.Queue size="medium" />
+            </React.Fragment>
+          ))}
+        </ToolbarContainer>
       </ToolbarView>
-      <DebugModal showModal={showModal} setShowModal={setShowModal} />
     </>
   );
 };
@@ -67,8 +87,18 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 export default Toolbar;
 
 const ToolbarView = styled.View((p) => ({
+  bottom: 10,
+  zIndex: 100,
   width: '100%',
-  padding: p.theme.sizes.spacing.medium,
-  backgroundColor: p.theme.colors.sidebar.background,
+  position: 'absolute',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const ToolbarContainer = styled.View((p) => ({
   flexDirection: 'row',
+  paddingVertical: p.theme.sizes.spacing.small,
+  paddingHorizontal: p.theme.sizes.spacing.medium,
+  backgroundColor: p.theme.colors.sidebar.background,
+  borderRadius: 10,
 }));

@@ -1,32 +1,57 @@
 import * as RNSkia from '@shopify/react-native-skia';
 
 import type {
-  AngleInDegrees,
-  AngleInRadians,
+  // AngleInDegrees,
+  // AngleInRadians,
   EmbindEnumEntity,
   FillType,
   InputFlattenedPointArray,
   InputRect,
   InputRRect,
   Path,
-  PathOp,
-  Point,
-  Rect,
+  // PathOp,
+  // Point,
+  // Rect,
   StrokeOpts,
   VerbList,
   WeightList,
 } from 'canvaskit';
-import {
-  createRectFromBounds,
-  getRectCornerPoints,
-  getRectEdgeMidPoints,
-} from 'noya-geometry';
+import // createRectFromBounds,
+// getRectCornerPoints,
+// getRectEdgeMidPoints,
+'noya-geometry';
 import { parsePathCmds } from 'noya-state';
 import { JSEmbindObject } from './Embind';
 
-const ROOT_2_OVER_2 = Math.sqrt(2) / 2;
+// const ROOT_2_OVER_2 = Math.sqrt(2) / 2;
 
-// TODO: do i rreally need pathkit?
+const LTRBArrayToIRect = (
+  inRect: Float32Array | undefined,
+): RNSkia.IRect | undefined => {
+  if (!inRect) {
+    return undefined;
+  }
+
+  const [left, top, right, bottom] = inRect;
+  return {
+    x: left,
+    y: top,
+    width: right - left,
+    height: bottom - top,
+  };
+};
+
+const IRectToLTRBArray = (inRect: RNSkia.IRect): Float32Array => {
+  console.log(inRect);
+  return new Float32Array([
+    inRect.x,
+    inRect.y,
+    inRect.x + inRect.width,
+    inRect.y + inRect.height,
+  ]);
+};
+
+// TODO: do i really need pathkit?
 export function createSkiaPath(PathKit?: any) {
   class SKiaPathWrapper extends JSEmbindObject implements Path {
     private _path = RNSkia.Skia.Path.Make();
@@ -112,11 +137,15 @@ export function createSkiaPath(PathKit?: any) {
     close(): Path {
       this._path.close();
 
-      return this; // ????
+      return this;
     }
 
     computeTightBounds(outputArray?: Float32Array): Float32Array {
-      throw new Error('Not implemented');
+      const a = IRectToLTRBArray(
+        this._path.computeTightBounds(LTRBArrayToIRect(outputArray)),
+      );
+
+      return a;
     }
 
     conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path {
@@ -148,7 +177,9 @@ export function createSkiaPath(PathKit?: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error('Not implemented');
+      this._path.cubicTo(cpx1, cpy1, cpx2, cpy2, x, y);
+
+      return this;
     }
 
     dash(on: number, off: number, phase: number): boolean {
@@ -181,12 +212,12 @@ export function createSkiaPath(PathKit?: any) {
 
     lineTo(x: number, y: number): Path {
       this._path.lineTo(x, y);
-      return this; // ????
+      return this;
     }
 
     moveTo(x: number, y: number): Path {
       this._path.moveTo(x, y);
-      return this; // ????
+      return this;
     }
 
     offset(dx: number, dy: number): Path {
@@ -252,17 +283,11 @@ export function createSkiaPath(PathKit?: any) {
 
     rQuadTo(x1: number, y1: number, x2: number, y2: number): Path {
       this._path.rQuadTo(x1, y1, x2, y2);
-      return this; // ???
+      return this;
     }
 
     setFillType(fill: FillType): void {
-      // TODO: fixme
-      this._path.setFillType(
-        RNSkia.FillType.Winding,
-        // fill === RNSkia.FillType.Winding
-        //   ? RNSkia.FillType.Winding
-        //   : RNSkia.FillType.EvenOdd,
-      );
+      this._path.setFillType(fill.value as RNSkia.FillType);
     }
 
     setIsVolatile(volatile: boolean): void {
@@ -281,8 +306,8 @@ export function createSkiaPath(PathKit?: any) {
         miter_limit,
 
         precision,
-        join: RNSkia.StrokeJoin.Bevel, // TODO FIXME
-        cap: RNSkia.StrokeCap.Butt, // TODO FIXME
+        join: join?.value as RNSkia.StrokeJoin,
+        cap: cap?.value as RNSkia.StrokeCap,
       });
 
       return this;
