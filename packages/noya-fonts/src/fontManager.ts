@@ -14,7 +14,9 @@ export interface FontProvider {
 export const SYSTEM_FONT_ID = 'system' as FontId;
 
 export class FontManager {
-  constructor(public provider: FontProvider) {}
+  constructor(public provider: FontProvider) {
+    this.provider = provider;
+  }
 
   private emitter = new Emitter<[FontId, ArrayBuffer]>();
 

@@ -67,12 +67,14 @@ export class SkiaPaintWrapper extends JSEmbindObject implements Paint {
   }
 
   setColor(color: InputColor, colorSpace?: ColorSpace): void {
-    const r = parseInt(color[0] * 255);
-    const g = parseInt(color[1] * 255);
-    const b = parseInt(color[2] * 255);
-    const a = parseInt(color[3] * 255);
+    const [inR, inG, inB, inA] = color as number[];
 
-    this._paint.setColor((a << 24) + (r << 16) + (g << 8) + (b << 0));
+    const a = Math.floor(inA * 255) << 24;
+    const r = Math.floor(inR * 255) << 16;
+    const g = Math.floor(inG * 255) << 8;
+    const b = Math.floor(inB * 255) << 0;
+
+    this._paint.setColor(a + r + g + b);
   }
 
   setColorComponents(

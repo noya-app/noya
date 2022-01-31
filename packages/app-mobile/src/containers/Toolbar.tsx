@@ -15,16 +15,16 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
   const interType = state.interactionState.type;
   const layerType = useMemo(() => {
-    if (interType === 'insert') {
+    if (state.interactionState.type === 'insert') {
       return state.interactionState.layerType;
     }
 
-    if (interType === 'drawing') {
+    if (state.interactionState.type === 'drawing') {
       return state.interactionState.shapeType;
     }
 
     return undefined;
-  }, [state.interactionState, interType]);
+  }, [state.interactionState]);
 
   const onToDo = () => {};
 
