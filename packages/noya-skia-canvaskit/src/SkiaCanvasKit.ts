@@ -36,9 +36,11 @@ import type {
   // WebGLContextHandle,
   // WebGLOptions,
 } from 'canvaskit';
-// import { Skia } from '@shopify/react-native-skia';
+import parseColor from 'color-parse';
+// import * as RNSkia from '@shopify/react-native-skia';
 import { Embind } from './Embind';
 import { SkiaPaintWrapper } from './SkiaPaint';
+import { SkiaImageFilterFactory } from './SkiaImageFilter';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
@@ -46,7 +48,7 @@ class JSTextStyle implements TextStyle {}
 
 export const SkiaCanvasKit: CanvasKit = {
   Color(r, g, b, a) {
-    throw new Error('Not implemented');
+    return new Float32Array([r / 255, g / 255, b / 255, a ?? 0]);
   },
   Color4f(r, g, b, a) {
     return new Float32Array([r, g, b, a ?? 0]);
@@ -58,7 +60,9 @@ export const SkiaCanvasKit: CanvasKit = {
     throw new Error('Not implemented');
   },
   parseColorString(color, colorMap) {
-    throw new Error('Not implemented');
+    const [r, g, b, a = 1] = parseColor(color).values;
+
+    return new Float32Array([r / 255, g / 255, b / 255, a]);
   },
   multiplyByAlpha(color, alpha) {
     throw new Error('Not implemented');
@@ -188,7 +192,7 @@ export const SkiaCanvasKit: CanvasKit = {
     throw new Error('Not implemented');
   },
 
-  // Constructors, i.e. things made with `new CanvasKit.Foo()`;
+  // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ImageData: 0 as any,
   ParagraphStyle: JSParagraphStyle,
   ContourMeasureIter: 0 as any,
@@ -203,7 +207,7 @@ export const SkiaCanvasKit: CanvasKit = {
   ParagraphBuilder: 0 as any,
   ColorFilter: 0 as any,
   FontMgr: 0 as any,
-  ImageFilter: 0 as any,
+  ImageFilter: new SkiaImageFilterFactory(),
   MaskFilter: 0 as any,
   PathEffect: 0 as any,
   RuntimeEffect: 0 as any,

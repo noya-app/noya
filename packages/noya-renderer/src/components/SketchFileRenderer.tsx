@@ -34,7 +34,7 @@ import { ALL_DIRECTIONS, getGuides } from '../guides';
 // import { useRootScale } from '../RootScaleContext';
 // import { useZoom, ZoomProvider } from '../ZoomContext';
 // import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
-// import DragHandles from './DragHandles';
+import DragHandles from './DragHandles';
 // import EditablePath from './EditablePath';
 // import GradientEditor from './GradientEditor';
 // import { ExtensionGuide, MeasurementGuide } from './Guides';
@@ -116,7 +116,7 @@ export default React.memo(function SketchFileRenderer() {
   //     page,
   //     [highlightedLayer.id],
   //     {
-  //       groups: 'childrenOnly',s
+  //       groups: 'childrenOnly',
   //       includeHiddenLayers: true,
   //     },
   //   );
@@ -217,6 +217,11 @@ export default React.memo(function SketchFileRenderer() {
     <>
       <SketchGroup layer={page} />
       {drawingLayer && <SketchLayer layer={drawingLayer} />}
+      {!state.selectedGradient &&
+        boundingRect &&
+        !drawingLayer &&
+        !isInserting &&
+        !isEditingText && <DragHandles rect={boundingRect} />}
     </>
   );
 });
