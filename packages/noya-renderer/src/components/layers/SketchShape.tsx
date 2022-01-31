@@ -17,7 +17,7 @@ import { Group, Path } from '../../ComponentsContext';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
-import { useSketchImage } from '../../imageCache';
+import { useSketchImage } from '../../ImageCache';
 import { getUniformValues } from '../../shaders';
 // import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
