@@ -5,7 +5,7 @@ import '../utils/prepareGlobals';
 
 // Lib imports
 import React, { Suspense } from 'react';
-import styled, { ThemeProvider } from 'styled-components/native';
+import styled, { ThemeProvider } from 'styled-components';
 import {
   StatusBar,
   SafeAreaView,

@@ -13,7 +13,7 @@ import {
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
-import { Group, Path } from '../../ComponentsContext';
+import { Group, Path } from '../../contexts/ComponentsContext';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';

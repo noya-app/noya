@@ -4,7 +4,7 @@ import { Rect } from 'noya-geometry';
 import { Primitives } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
 import { usePaint } from 'noya-react-canvaskit';
-import { Rect as RCKRect } from '../ComponentsContext';
+import { Rect as RCKRect } from '../contexts/ComponentsContext';
 
 interface Props {
   rect: Rect;

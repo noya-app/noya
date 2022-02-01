@@ -6,7 +6,7 @@ import * as CanvasKit from 'canvaskit';
 import { Primitives } from 'noya-state';
 import { useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
-import { Path } from '../../ComponentsContext';
+import { Path } from '../../contexts/ComponentsContext';
 
 export default memo(function SketchBorder({
   path,

@@ -37,7 +37,7 @@ import type {
   // WebGLOptions,
 } from 'canvaskit';
 import parseColor from 'color-parse';
-// import * as RNSkia from '@shopify/react-native-skia';
+import * as RNSkia from '@shopify/react-native-skia';
 import { Embind } from './Embind';
 import { SkiaPaintWrapper } from './SkiaPaint';
 import { SkiaImageFilterFactory } from './SkiaImageFilter';

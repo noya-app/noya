@@ -27,6 +27,10 @@ const getPathConfigs = (appRootDir) => {
   const babelAliases = {
     react: path.resolve(appRootDir, './node_modules/react'),
     'react-native': path.resolve(appRootDir, './node_modules/react-native'),
+    'styled-components': path.resolve(
+      appRootDir,
+      './node_modules/styled-components/native',
+    ),
     '@shopify/react-native-skia': path.resolve(
       appRootDir,
       './node_modules/@shopify/react-native-skia',

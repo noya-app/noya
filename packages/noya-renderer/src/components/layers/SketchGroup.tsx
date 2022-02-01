@@ -8,7 +8,7 @@ import { PageLayer, Primitives } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
 import { chunkBy } from 'noya-utils';
 
-import { Group } from '../../ComponentsContext';
+import { Group } from '../../contexts/ComponentsContext';
 import SketchLayer from './SketchLayer';
 // import DropShadowGroup from '../effects/DropShadowGroup';
 

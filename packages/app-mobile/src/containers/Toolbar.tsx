@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import styled from 'styled-components/native';
+import styled from 'styled-components';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';

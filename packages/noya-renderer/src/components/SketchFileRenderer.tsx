@@ -8,12 +8,13 @@ import React, {
   useState,
 } from 'react';
 import produce from 'immer';
+import { useTheme } from 'styled-components';
 
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 // import Sketch from 'noya-file-format';
-import { AffineTransform, createRect, insetRect, Rect } from 'noya-geometry';
-// import { useColorFill, useStroke } from 'noya-react-canvaskit';
-// import { Polyline, useCanvasKit } from 'noya-renderer-web';
+import { createRect, insetRect, Rect } from 'noya-geometry';
+import { useColorFill, useStroke } from 'noya-react-canvaskit';
+// import { Polyline } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import {
   createDrawingLayer,
@@ -25,14 +26,12 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-// import { useTheme } from 'styled-components';
 import { useCanvasKit } from '../hooks/useCanvasKit';
-// import { ClippedLayerProvider } from '../ClippedLayerContext';
-// import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { ClippedLayerProvider } from '../contexts/ClippedLayerContext';
+import { Group, Rect as RCKRect } from '../contexts/ComponentsContext';
+import { useZoom, ZoomProvider } from '../contexts/ZoomContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
 // import { useRenderingMode } from '../RenderingModeContext';
-// import { useRootScale } from '../RootScaleContext';
-// import { useZoom, ZoomProvider } from '../ZoomContext';
 // import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import DragHandles from './DragHandles';
 // import EditablePath from './EditablePath';
@@ -43,18 +42,13 @@ import DragHandles from './DragHandles';
 // import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
+import RootScaleTransformGroup from './other/RootScaleTransform';
 import Marquee from './Marquee';
 // import { PixelGrid } from './PixelGrid';
 // import PseudoPathLine from './PseudoPathLine';
 // import PseudoPoint from './PseudoPoint';
 // import { HorizontalRuler } from './Rulers';
 // import SnapGuides from './SnapGuides';
-
-const ClippedLayerProvider = React.Fragment;
-const ZoomProvider = React.Fragment;
-const RootScaleTransformGroup = React.Fragment;
-const CanvasTransform = React.Fragment;
-const ScreenTransform = React.Fragment;
 
 export default React.memo(function SketchFileRenderer() {
   const {
@@ -85,11 +79,12 @@ export default React.memo(function SketchFileRenderer() {
     [CanvasKit, canvasInsets.left, canvasSize.height, canvasSize.width],
   );
 
-  // Fill
-  // const {
-  //   canvas: { background: backgroundColor },
-  // } = useTheme().colors;
-  // const backgroundFill = useColorFill(backgroundColor);
+  // Fill;
+  const {
+    canvas: { background: backgroundColor },
+  } = useTheme().colors;
+
+  const backgroundFill = useColorFill(backgroundColor);
 
   const boundingRect = useMemo(
     () =>
@@ -185,6 +180,13 @@ export default React.memo(function SketchFileRenderer() {
   //   );
   // }, [highlightedLayer, page, state.selectedLayerIds]);
 
+  const clippedLayerMap = useMemo(() => {
+    // if (renderingMode === 'static') return {};
+
+    return getClippedLayerMap(state, canvasSize, canvasInsets);
+  }, [canvasInsets, canvasSize, state]);
+  // }, [canvasInsets, canvasSize, renderingMode, state]);
+
   const drawingLayer =
     interactionState.type === 'drawing'
       ? createDrawingLayer(
@@ -211,12 +213,6 @@ export default React.memo(function SketchFileRenderer() {
         )
       : null;
 
-  // const rootScale = useRootScale();
-  // const rootScaleTransform = useMemo(
-  //   () => AffineTransform.scale(rootScale),
-  //   [rootScale],
-  // );
-
   const marquee = interactionState.type === 'marquee' && (
     <Marquee
       rect={createRect(interactionState.origin, interactionState.current)}
@@ -229,10 +225,21 @@ export default React.memo(function SketchFileRenderer() {
     !isInserting &&
     !isEditingText && <DragHandles rect={boundingRect} />;
 
+  const CanvasTransform = ({ children }: PropsWithChildren<{}>) => (
+    <Group transform={canvasTransform}>{children}</Group>
+  );
+
+  const ScreenTransform = ({ children }: PropsWithChildren<{}>) => (
+    <Group transform={screenTransform}>{children}</Group>
+  );
+
+  const canvasBackground = <RCKRect rect={canvasRect} paint={backgroundFill} />;
+
   return (
-    <ClippedLayerProvider>
-      <ZoomProvider>
+    <ClippedLayerProvider value={clippedLayerMap}>
+      <ZoomProvider value={zoomValue}>
         <RootScaleTransformGroup>
+          {canvasBackground}
           <CanvasTransform>
             <SketchGroup layer={page} />
             {drawingLayer && <SketchLayer layer={drawingLayer} />}
@@ -246,26 +253,21 @@ export default React.memo(function SketchFileRenderer() {
 });
 
 /*
-  final render shape:
+  final render shape - wrappers + missing components:
   <ClippedLayerProvider>
     <ZoomProvider>
       <RootScaleTransformGroup>
-        <CanvasBackground />
         <CanvasTransform>
-          <PageLayer />
           <GradientEditor />
           <SketchArtboardContent />
           <InsertPointOverlay />
           <BoundingRect />
           <RotatedBoundingRect />
           <HighlightedSketchLayer />
-          <DrawingLayer />
           <SnapGuides />
           <QuickMeasureGuides />
-          <DragHandles />
         </CanvasTransform>
         <ScreenTransform>
-          <Marquee />
           <HorizontalRuler />
           <PixelGrid />
         </ScreenTransform>

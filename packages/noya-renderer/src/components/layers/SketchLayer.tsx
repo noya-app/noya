@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
-import { Group } from '../../ComponentsContext';
+import { Group } from '../../contexts/ComponentsContext';
 // import { useIsLayerClipped } from '../../ClippedLayerContext';
 // import SketchArtboard from './SketchArtboard';
 // import SketchBitmap from './SketchBitmap';

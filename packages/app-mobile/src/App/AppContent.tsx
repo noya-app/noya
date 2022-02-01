@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import styled from 'styled-components/native';
+import styled from 'styled-components';
 
 import { WorkspaceAction } from 'noya-state';
 import { StateProvider } from 'noya-app-state-context';

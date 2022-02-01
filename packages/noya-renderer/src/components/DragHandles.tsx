@@ -3,7 +3,7 @@ import { useApplicationState } from 'noya-app-state-context';
 import { Rect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
 import { getDragHandles, Primitives } from 'noya-state';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Rect as RCKRect } from '../contexts/ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { pixelAlignRect } from '../pixelAlignment';
 

@@ -1,13 +1,13 @@
 import React from 'react';
-import styled from 'styled-components/native';
-import { GestureResponderEvent } from 'react-native';
-
+import { GestureResponderEvent, LayoutChangeEvent } from 'react-native';
+import styled, { ThemeProvider, useTheme } from 'styled-components';
 import { Canvas as SkiaCanvas } from '@shopify/react-native-skia';
 
 import {
   useApplicationState,
   useWorkspaceState,
   StateProvider,
+  useWorkspace,
 } from 'noya-app-state-context';
 import { Point, createRect } from 'noya-geometry';
 import { Selectors, getCurrentPage } from 'noya-state';
@@ -32,8 +32,10 @@ function getPoint(event: GesturePoint): Point {
 
 const Canvas: React.FC<{}> = () => {
   const [state, dispatch] = useApplicationState();
+  const { setCanvasSize } = useWorkspace();
   const workspaceState = useWorkspaceState();
   const canvasKit = useCanvasKit();
+  const theme = useTheme();
 
   const insets = {
     left: 0,
@@ -198,26 +200,35 @@ const Canvas: React.FC<{}> = () => {
     }
   };
 
+  const onCanvasLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+
+    setCanvasSize({ width, height }, insets);
+  };
+
   return (
     <CanvasWrapper
       onStartShouldSetResponder={onStartShouldSetResponder}
       onResponderMove={onResponderMove}
       onResponderGrant={onResponderGrant}
       onResponderRelease={onResponderRelease}
+      onLayout={onCanvasLayout}
     >
       <InteractionView>
         <Interaction>{state.interactionState.type}</Interaction>
       </InteractionView>
       <StyledCanvas>
-        <ImageCacheProvider>
-          <CanvasKitProvider canvasKit={canvasKit}>
-            <StateProvider state={workspaceState}>
-              <ComponentsProvider value={Components}>
-                <SketchFileRenderer />
-              </ComponentsProvider>
-            </StateProvider>
-          </CanvasKitProvider>
-        </ImageCacheProvider>
+        <ThemeProvider theme={theme}>
+          <ImageCacheProvider>
+            <CanvasKitProvider canvasKit={canvasKit}>
+              <StateProvider state={workspaceState}>
+                <ComponentsProvider value={Components}>
+                  <SketchFileRenderer />
+                </ComponentsProvider>
+              </StateProvider>
+            </CanvasKitProvider>
+          </ImageCacheProvider>
+        </ThemeProvider>
       </StyledCanvas>
     </CanvasWrapper>
   );
@@ -231,7 +242,6 @@ const CanvasWrapper = styled.View(() => ({
 
 const StyledCanvas = styled(SkiaCanvas)((p) => ({
   flex: 1,
-  backgroundColor: p.theme.colors.canvas.background,
 }));
 
 const InteractionView = styled.View((p) => ({
