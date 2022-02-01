@@ -75,7 +75,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
           {buttons.map(({ icon, onPress, active }, idx) => (
             <React.Fragment key={idx}>
               <Button icon={icon} onPress={onPress} active={active} />
-              <Layout.Queue size="medium" />
+              {idx !== buttons.length - 1 && <Layout.Queue size="medium" />}
             </React.Fragment>
           ))}
         </ToolbarContainer>

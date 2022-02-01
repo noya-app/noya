@@ -42,7 +42,7 @@ class FontManagerStub {
 }
 
 // @ts-ignore
-const fontManager = new FontManagerStub() as IFontManager;
+export const fontManager = new FontManagerStub() as IFontManager;
 
 export default function useAppState() {
   // TODO: create app start params povider

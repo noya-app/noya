@@ -35,7 +35,9 @@ export class SkiaImageFilterFactory
   private _filterFactory = RNSkia.Skia.ImageFilter;
 
   MakeShader(shader: Shader): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   MakeArithmetic(
@@ -47,7 +49,9 @@ export class SkiaImageFilterFactory
     background: ImageFilter | null,
     foreground: ImageFilter | null,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   MakeErode(
@@ -55,11 +59,15 @@ export class SkiaImageFilterFactory
     radiusY: number,
     input: ImageFilter | null,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   MakeOffset(dx: number, dy: number, input: ImageFilter | null): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   /**
@@ -73,7 +81,9 @@ export class SkiaImageFilterFactory
     background: ImageFilter,
     foreground: ImageFilter,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   /**
@@ -94,7 +104,9 @@ export class SkiaImageFilterFactory
     color: InputColor,
     input: ImageFilter | null,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   /**
@@ -150,7 +162,9 @@ export class SkiaImageFilterFactory
     mode: TileMode,
     input: ImageFilter | null,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   /**
@@ -159,7 +173,9 @@ export class SkiaImageFilterFactory
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
   MakeColorFilter(cf: ColorFilter, input: ImageFilter | null): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   /**
@@ -173,7 +189,9 @@ export class SkiaImageFilterFactory
     outer: ImageFilter | null,
     inner: ImageFilter | null,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   /**
@@ -189,6 +207,8 @@ export class SkiaImageFilterFactory
     sampling: FilterOptions | CubicResampler,
     input: ImageFilter | null,
   ): ImageFilter {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 }

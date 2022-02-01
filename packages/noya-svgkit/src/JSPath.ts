@@ -30,14 +30,18 @@ export function createJSPath(PathKit: any) {
     private _path = new PathKit.NewPath();
 
     makeAsWinding(): Path | null {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     addArc(
       oval: InputRect,
       startAngle: AngleInDegrees,
       sweepAngle: AngleInDegrees,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): JSPath {
       const [minX, minY, maxX, maxY] = oval as Float32Array | number[];
@@ -66,23 +70,33 @@ export function createJSPath(PathKit: any) {
       return this;
     }
     addPath(...args: any[]): Path | null {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     addPoly(points: InputFlattenedPointArray, close: boolean): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     addRect(rect: InputRect, isCCW?: boolean): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     addRRect(rrect: InputRRect, isCCW?: boolean): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     addVerbsPointsWeights(
       verbs: VerbList,
       points: InputFlattenedPointArray,
       weights?: WeightList,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     arc(
       x: number,
@@ -92,7 +106,9 @@ export function createJSPath(PathKit: any) {
       endAngle: AngleInRadians,
       isCCW?: boolean,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     arcToOval(
       oval: InputRect,
@@ -100,7 +116,9 @@ export function createJSPath(PathKit: any) {
       endAngle: AngleInDegrees,
       forceMoveTo: boolean,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     arcToRotated(
       rx: number,
@@ -111,7 +129,9 @@ export function createJSPath(PathKit: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     arcToTangent(
       x1: number,
@@ -141,7 +161,9 @@ export function createJSPath(PathKit: any) {
       return JSPath.MakeFromCmds(this.toCmds())!;
     }
     countPoints(): number {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     cubicTo(
       cpx1: number,
@@ -154,13 +176,19 @@ export function createJSPath(PathKit: any) {
       return this._path.cubicTo(cpx1, cpy1, cpx2, cpy2, x, y);
     }
     dash(on: number, off: number, phase: number): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     equals(other: Path): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     getBounds(outputArray?: Rect): Rect {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     getFillType(): FillType {
       return this._path.getFillType() === PathKit.FillType.WINDING
@@ -168,13 +196,19 @@ export function createJSPath(PathKit: any) {
         : SVGKit.FillType.EvenOdd;
     }
     getPoint(index: number, outputArray?: Point): Point {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     isEmpty(): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     isVolatile(): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     lineTo(x: number, y: number): Path {
       return this._path.lineTo(x, y);
@@ -183,7 +217,9 @@ export function createJSPath(PathKit: any) {
       return this._path.moveTo(x, y);
     }
     offset(dx: number, dy: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     op(other: JSPath, op: PathOp): boolean {
       return this._path.op(
@@ -205,7 +241,9 @@ export function createJSPath(PathKit: any) {
       dx: number,
       dy: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     rConicTo(
       dx1: number,
@@ -214,7 +252,9 @@ export function createJSPath(PathKit: any) {
       dy2: number,
       w: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     rCubicTo(
       cpx1: number,
@@ -224,22 +264,34 @@ export function createJSPath(PathKit: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     reset(): void {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     rewind(): void {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     rLineTo(x: number, y: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     rMoveTo(x: number, y: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     rQuadTo(x1: number, y1: number, x2: number, y2: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     setFillType(fill: FillType): void {
       this._path.setFillType(
@@ -249,10 +301,14 @@ export function createJSPath(PathKit: any) {
       );
     }
     setIsVolatile(volatile: boolean): void {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     simplify(): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     stroke(opts?: StrokeOpts): Path | null {
       this._path = this._path.stroke(opts);
@@ -265,10 +321,14 @@ export function createJSPath(PathKit: any) {
       return this._path.toSVGString();
     }
     transform(...args: any[]): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
     trim(startT: number, stopT: number, isComplement: boolean): Path | null {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     static MakeFromCmds(cmds: Float32Array): JSPath | null {

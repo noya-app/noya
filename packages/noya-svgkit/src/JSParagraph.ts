@@ -12,32 +12,44 @@ import { JSEmbindObject } from './Embind';
 
 export class JSParagraph extends JSEmbindObject implements Paragraph {
   didExceedMaxLines(): boolean {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getAlphabeticBaseline(): number {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getGlyphPositionAtCoordinate(dx: number, dy: number): PositionWithAffinity {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getHeight(): number {
     return 0;
-    // throw new Error('Not implemented');
+    // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
   }
 
   getIdeographicBaseline(): number {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getLineMetrics(): LineMetrics[] {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getLongestLine(): number {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getMaxIntrinsicWidth(): number {
@@ -45,7 +57,9 @@ export class JSParagraph extends JSEmbindObject implements Paragraph {
   }
 
   getMaxWidth(): number {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getMinIntrinsicWidth(): number {
@@ -53,7 +67,9 @@ export class JSParagraph extends JSEmbindObject implements Paragraph {
   }
 
   getRectsForPlaceholders(): FlattenedRectangleArray {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getRectsForRange(
@@ -62,18 +78,24 @@ export class JSParagraph extends JSEmbindObject implements Paragraph {
     hStyle: RectHeightStyle,
     wStyle: RectWidthStyle,
   ): FlattenedRectangleArray {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getWordBoundary(offset: number): URange {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getShapedLines(): ShapedLine[] {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   layout(width: number): void {
-    // throw new Error('Not implemented');
+    // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
   }
 }

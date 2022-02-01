@@ -54,10 +54,14 @@ export const SkiaCanvasKit: CanvasKit = {
     return new Float32Array([r, g, b, a ?? 0]);
   },
   ColorAsInt(r, g, b, a) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getColorComponents(c) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   parseColorString(color, colorMap) {
     const [r, g, b, a = 1] = parseColor(color).values;
@@ -65,25 +69,35 @@ export const SkiaCanvasKit: CanvasKit = {
     return new Float32Array([r / 255, g / 255, b / 255, a]);
   },
   multiplyByAlpha(color, alpha) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   computeTonalColors(colors) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   LTRBRect(left, top, right, bottom) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   XYWHRect(x, y, width, height) {
     return new Float32Array([x, y, x + width, y + height]);
   },
   LTRBiRect(left, top, right, bottom) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   XYWHiRect(x, y, width, height) {
     return new Int32Array([x, y, x + width, y + height]);
   },
   RRectXY(rect, rx, ry) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getShadowLocalBounds(
     ctm,
@@ -94,83 +108,133 @@ export const SkiaCanvasKit: CanvasKit = {
     flags,
     dstRect,
   ) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   Malloc(typedArray, len) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MallocGlyphIDs(len) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   Free(m) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeCanvasSurface(canvas) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeRasterDirectSurface(ii, pixels, bytesPerRow) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeSWCanvasSurface(canvas) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeWebGLCanvasSurface(canvas, colorSpace, opts) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeSurface(width, height) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   GetWebGLContext(canvas, opts) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeGrContext(ctx) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeOnScreenGLSurface(ctx, width, height, colorSpace) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeRenderTarget(
     ...args:
       | [ctx: GrDirectContext, info: ImageInfo]
       | [ctx: GrDirectContext, width: number, height: number]
   ) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   currentContext() {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   setCurrentContext(ctx) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   deleteContext(ctx) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getDecodeCacheLimitBytes() {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getDecodeCacheUsedBytes() {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   setDecodeCacheLimitBytes(size) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeAnimatedImageFromEncoded(bytes) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeCanvas(width, height) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeImage(info, bytes, bytesPerRow) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeImageFromEncoded(bytes) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeImageFromCanvasImageSource(src) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakePicture(bytes) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeVertices(
     mode,
@@ -180,16 +244,24 @@ export const SkiaCanvasKit: CanvasKit = {
     indices,
     isVolatile,
   ) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeAnimation(json) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeManagedAnimation(json, assets, filterPrefix, soundMap) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeParticles(json, assets) {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s

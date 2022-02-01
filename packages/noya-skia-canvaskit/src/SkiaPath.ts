@@ -56,31 +56,45 @@ export function createSkiaPath(PathKit?: any) {
     private _path = RNSkia.Skia.Path.Make();
 
     makeAsWinding(): Path | null {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addArc(oval: InputRect, startAngle: number, sweepAngle: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addPath(...args: any[]): Path | null {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addPoly(points: InputFlattenedPointArray, close: boolean): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addRect(rect: InputRect, isCCW?: boolean): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addRRect(rrect: InputRRect, isCCW?: boolean): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     addVerbsPointsWeights(
@@ -88,7 +102,9 @@ export function createSkiaPath(PathKit?: any) {
       points: InputFlattenedPointArray,
       weights?: WeightList,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     arc(
@@ -99,7 +115,9 @@ export function createSkiaPath(PathKit?: any) {
       endAngle: number,
       isCCW?: boolean,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     arcToOval(
@@ -108,7 +126,9 @@ export function createSkiaPath(PathKit?: any) {
       endAngle: number,
       forceMoveTo: boolean,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     arcToRotated(
@@ -120,7 +140,9 @@ export function createSkiaPath(PathKit?: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     arcToTangent(
@@ -130,7 +152,9 @@ export function createSkiaPath(PathKit?: any) {
       y2: number,
       radius: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     close(): Path {
@@ -148,11 +172,13 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     contains(x: number, y: number): boolean {
-      throw new Error('Not implemented');
+      return this._path.contains(x, y);
     }
 
     copy(): Path {
@@ -165,7 +191,9 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     countPoints(): number {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     cubicTo(
@@ -182,31 +210,45 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     dash(on: number, off: number, phase: number): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     equals(other: Path): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     getBounds(outputArray?: Float32Array): Float32Array {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     getFillType(): EmbindEnumEntity {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     getPoint(index: number, outputArray?: Float32Array): Float32Array {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     isEmpty(): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     isVolatile(): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     lineTo(x: number, y: number): Path {
@@ -220,15 +262,21 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     offset(dx: number, dy: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     op(other: Path, op: EmbindEnumEntity): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     quadTo(x1: number, y1: number, x2: number, y2: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rArcTo(
@@ -240,7 +288,9 @@ export function createSkiaPath(PathKit?: any) {
       dx: number,
       dy: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rConicTo(
@@ -250,7 +300,9 @@ export function createSkiaPath(PathKit?: any) {
       dy2: number,
       w: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rCubicTo(
@@ -261,23 +313,33 @@ export function createSkiaPath(PathKit?: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     reset(): void {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rewind(): void {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rLineTo(x: number, y: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rMoveTo(x: number, y: number): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     rQuadTo(x1: number, y1: number, x2: number, y2: number): Path {
@@ -290,11 +352,15 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     setIsVolatile(volatile: boolean): void {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     simplify(): boolean {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     stroke(opts?: StrokeOpts): Path | null {
@@ -313,19 +379,27 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     toCmds(): Float32Array {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     toSVGString(): string {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     transform(...args: any[]): Path {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     trim(startT: number, stopT: number, isComplement: boolean): Path | null {
-      throw new Error('Not implemented');
+      throw new Error(
+        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      );
     }
 
     static MakeFromCmds(cmds: Float32Array): SKiaPathWrapper | null {

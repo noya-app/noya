@@ -78,10 +78,14 @@ export const SVGKit: CanvasKit = {
     return new Float32Array([r, g, b, a ?? 0]);
   },
   ColorAsInt(r: number, g: number, b: number, a?: number): ColorInt {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getColorComponents(c: Color): number[] {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   parseColorString(color: string, colorMap?: object): Color {
     const [r, g, b, a = 1] = parseColor(color).values;
@@ -89,10 +93,14 @@ export const SVGKit: CanvasKit = {
     return new Float32Array([r / 255, g / 255, b / 255, a]);
   },
   multiplyByAlpha(c: Color, alpha: number): Color {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   computeTonalColors(colors: TonalColorsInput): TonalColorsOutput {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
 
   LTRBRect(left: number, top: number, right: number, bottom: number): Rect {
@@ -126,46 +134,66 @@ export const SVGKit: CanvasKit = {
     flags: number,
     dstRect?: Rect,
   ): Rect | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   Malloc(typedArray: TypedArrayConstructor, len: number): MallocObj {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MallocGlyphIDs(len: number): MallocObj {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   Free(m: MallocObj): void {},
   MakeCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeRasterDirectSurface(
     ii: ImageInfo,
     pixels: MallocObj,
     bytesPerRow: number,
   ): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeSWCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeWebGLCanvasSurface(
     canvas: HTMLCanvasElement | string,
     colorSpace?: ColorSpace,
     opts?: WebGLOptions,
   ): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeSurface(width: number, height: number): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   GetWebGLContext(
     canvas: HTMLCanvasElement,
     opts?: WebGLOptions,
   ): WebGLContextHandle {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeGrContext(ctx: WebGLContextHandle): GrDirectContext {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeOnScreenGLSurface(
     ctx: GrDirectContext,
@@ -173,56 +201,84 @@ export const SVGKit: CanvasKit = {
     height: number,
     colorSpace: ColorSpace,
   ): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeRenderTarget(
     ...args:
       | [ctx: GrDirectContext, info: ImageInfo]
       | [ctx: GrDirectContext, width: number, height: number]
   ): Surface | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   currentContext(): WebGLContextHandle {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   setCurrentContext(ctx: WebGLContextHandle): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   deleteContext(ctx: WebGLContextHandle): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getDecodeCacheLimitBytes(): number {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   getDecodeCacheUsedBytes(): number {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   setDecodeCacheLimitBytes(size: number): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeAnimatedImageFromEncoded(
     bytes: Uint8Array | ArrayBuffer,
   ): AnimatedImage | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeCanvas(width: number, height: number): EmulatedCanvas2D {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeImage(
     info: ImageInfo,
     bytes: number[] | Uint8Array | Uint8ClampedArray,
     bytesPerRow: number,
   ): Image | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): Image | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeImageFromCanvasImageSource(src: CanvasImageSource): Image {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakePicture(bytes: Uint8Array | ArrayBuffer): SkPicture | null {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeVertices(
     mode: VertexMode,
@@ -232,10 +288,14 @@ export const SVGKit: CanvasKit = {
     indices?: number[] | null,
     isVolatile?: boolean,
   ): Vertices {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeAnimation(json: string): SkottieAnimation {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeManagedAnimation(
     json: string,
@@ -243,10 +303,14 @@ export const SVGKit: CanvasKit = {
     filterPrefix?: string,
     soundMap?: SoundMap,
   ): ManagedSkottieAnimation {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
   MakeParticles(json: string, assets?: Record<string, ArrayBuffer>): Particles {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   },
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;

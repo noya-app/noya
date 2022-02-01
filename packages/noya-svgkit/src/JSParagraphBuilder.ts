@@ -16,7 +16,8 @@ import { JSParagraph } from './JSParagraph';
 
 export class JSParagraphBuilder
   extends JSEmbindObject
-  implements ParagraphBuilder {
+  implements ParagraphBuilder
+{
   _parts: {
     text: string;
     style?: TextStyle;
@@ -30,7 +31,9 @@ export class JSParagraphBuilder
     baseline?: TextBaseline,
     offset?: number,
   ): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   addText(str: string): void {
@@ -50,7 +53,9 @@ export class JSParagraphBuilder
   }
 
   pushPaintStyle(textStyle: TextStyle, fg: Paint, bg: Paint): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
@@ -63,7 +68,9 @@ export class JSParagraphBuilder
     style: ParagraphStyle,
     fontSrc: TypefaceFontProvider,
   ): ParagraphBuilder {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   static ShapeText(
@@ -71,6 +78,8 @@ export class JSParagraphBuilder
     runs: FontBlock[],
     width?: number,
   ): ShapedLine[] {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 }
