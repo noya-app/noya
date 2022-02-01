@@ -42,7 +42,11 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   };
 
   const buttons = [
-    { icon: 'cursor-arrow', onPress: onReset, active: interType === 'none' },
+    {
+      icon: 'cursor-arrow',
+      onPress: onReset,
+      active: interType === 'none' || interType === 'marquee',
+    },
     {
       icon: 'frame',
       onPress: onAddShape('artboard'),

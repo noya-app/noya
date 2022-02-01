@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useRef, useEffect, useMemo } from 'react';
 
 import { Paint } from 'canvaskit';
 import { Rect as RectType } from 'packages/noya-geometry';
@@ -26,12 +26,18 @@ const LTRBArrayToIRect = (inRect: Float32Array): RectType => {
 };
 
 const Rect: React.FC<RectProps> = (props) => {
-  const { rect } = props;
+  const { rect, paint } = props;
+
+  const skiaPaint = useRef(paint._paint);
+
+  useEffect(() => {
+    skiaPaint.current = paint._paint;
+  }, [paint._paint]);
 
   const { x, y, width, height } = useMemo(() => LTRBArrayToIRect(rect), [rect]);
 
   return (
-    <SkiaRect x={x} y={y} width={width} height={height} color="lightblue" />
+    <SkiaRect x={x} y={y} width={width} height={height} paint={skiaPaint} />
   );
 };
 

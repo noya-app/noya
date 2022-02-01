@@ -231,7 +231,7 @@ const CanvasWrapper = styled.View(() => ({
 
 const StyledCanvas = styled(SkiaCanvas)((p) => ({
   flex: 1,
-  backgroundColor: '#fff',
+  backgroundColor: p.theme.colors.canvas.background,
 }));
 
 const InteractionView = styled.View((p) => ({

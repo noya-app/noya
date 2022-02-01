@@ -11,7 +11,7 @@ import produce from 'immer';
 
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 // import Sketch from 'noya-file-format';
-// import { AffineTransform, createRect, insetRect, Rect } from 'noya-geometry';
+import { AffineTransform, createRect, insetRect, Rect } from 'noya-geometry';
 // import { useColorFill, useStroke } from 'noya-react-canvaskit';
 // import { Polyline, useCanvasKit } from 'noya-renderer-web';
 import { SketchModel } from 'noya-sketch-model';
@@ -43,7 +43,7 @@ import DragHandles from './DragHandles';
 // import { SketchArtboardContent } from './layers/SketchArtboard';
 import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
-// import Marquee from './Marquee';
+import Marquee from './Marquee';
 // import { PixelGrid } from './PixelGrid';
 // import PseudoPathLine from './PseudoPathLine';
 // import PseudoPoint from './PseudoPoint';
@@ -211,8 +211,6 @@ export default React.memo(function SketchFileRenderer() {
   //   [rootScale],
   // );
 
-  // console.log(JSON.stringify(drawingLayer, null, '\t'));
-
   return (
     <>
       <SketchGroup layer={page} />
@@ -222,6 +220,11 @@ export default React.memo(function SketchFileRenderer() {
         !drawingLayer &&
         !isInserting &&
         !isEditingText && <DragHandles rect={boundingRect} />}
+      {interactionState.type === 'marquee' && (
+        <Marquee
+          rect={createRect(interactionState.origin, interactionState.current)}
+        />
+      )}
     </>
   );
 });
