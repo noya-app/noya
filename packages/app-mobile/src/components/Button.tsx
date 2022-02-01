@@ -17,7 +17,7 @@ const Button: React.FC<ButtonProps> = (props) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <ButtonView active={active}>
-        {!!icon && <ButtonIcon name={icon} />}
+        {!!icon && <ButtonIcon name={icon} size={15} />}
         {!!label && <ButtonText>{label}</ButtonText>}
       </ButtonView>
     </TouchableOpacity>
@@ -31,7 +31,6 @@ const ButtonView = styled.View<{ active?: boolean }>((p) => ({
   backgroundColor: p.active
     ? p.theme.colors.primaryDark
     : p.theme.colors.inputBackground,
-  // shadowOffset: { width: 0, height: 4 },
   shadowColor: 'rgba(0,0,0,0.2)',
   shadowOpacity: '1',
   padding: 8,
@@ -45,7 +44,6 @@ const ButtonText = styled.Text((p) => ({
 }));
 
 const ButtonIcon = styled(Layout.Icon)((p) => ({
+  flex: 1,
   color: p.theme.colors.text,
-  width: 16,
-  height: 16,
 }));

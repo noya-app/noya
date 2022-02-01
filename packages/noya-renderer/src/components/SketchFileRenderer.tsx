@@ -50,6 +50,12 @@ import Marquee from './Marquee';
 // import { HorizontalRuler } from './Rulers';
 // import SnapGuides from './SnapGuides';
 
+const ClippedLayerProvider = React.Fragment;
+const ZoomProvider = React.Fragment;
+const RootScaleTransformGroup = React.Fragment;
+const CanvasTransform = React.Fragment;
+const ScreenTransform = React.Fragment;
+
 export default React.memo(function SketchFileRenderer() {
   const {
     canvasSize,
@@ -211,20 +217,59 @@ export default React.memo(function SketchFileRenderer() {
   //   [rootScale],
   // );
 
+  const marquee = interactionState.type === 'marquee' && (
+    <Marquee
+      rect={createRect(interactionState.origin, interactionState.current)}
+    />
+  );
+
+  const dragHandles = !state.selectedGradient &&
+    boundingRect &&
+    !drawingLayer &&
+    !isInserting &&
+    !isEditingText && <DragHandles rect={boundingRect} />;
+
   return (
-    <>
-      <SketchGroup layer={page} />
-      {drawingLayer && <SketchLayer layer={drawingLayer} />}
-      {!state.selectedGradient &&
-        boundingRect &&
-        !drawingLayer &&
-        !isInserting &&
-        !isEditingText && <DragHandles rect={boundingRect} />}
-      {interactionState.type === 'marquee' && (
-        <Marquee
-          rect={createRect(interactionState.origin, interactionState.current)}
-        />
-      )}
-    </>
+    <ClippedLayerProvider>
+      <ZoomProvider>
+        <RootScaleTransformGroup>
+          <CanvasTransform>
+            <SketchGroup layer={page} />
+            {drawingLayer && <SketchLayer layer={drawingLayer} />}
+            {dragHandles}
+          </CanvasTransform>
+          <ScreenTransform>{marquee}</ScreenTransform>
+        </RootScaleTransformGroup>
+      </ZoomProvider>
+    </ClippedLayerProvider>
   );
 });
+
+/*
+  final render shape:
+  <ClippedLayerProvider>
+    <ZoomProvider>
+      <RootScaleTransformGroup>
+        <CanvasBackground />
+        <CanvasTransform>
+          <PageLayer />
+          <GradientEditor />
+          <SketchArtboardContent />
+          <InsertPointOverlay />
+          <BoundingRect />
+          <RotatedBoundingRect />
+          <HighlightedSketchLayer />
+          <DrawingLayer />
+          <SnapGuides />
+          <QuickMeasureGuides />
+          <DragHandles />
+        </CanvasTransform>
+        <ScreenTransform>
+          <Marquee />
+          <HorizontalRuler />
+          <PixelGrid />
+        </ScreenTransform>
+      </RootScaleTransformGroup>
+    </ZoomProvider>
+  </ClippedLayerProvider>
+*/
