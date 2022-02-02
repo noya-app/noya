@@ -11,7 +11,7 @@ import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
 import SketchSlice from './SketchSlice';
 import SketchSymbolInstance from './SketchSymbolInstance';
-// import SketchText from './SketchText';
+import SketchText from './SketchText';
 
 interface Props {
   layer: PageLayer | Sketch.Page;
@@ -35,9 +35,9 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'group':
       element = <SketchGroup layer={layer} />;
       break;
-    // case 'text':
-    //   element = <SketchText layer={layer} />;
-    //   break;
+    case 'text':
+      element = <SketchText layer={layer} />;
+      break;
     case 'bitmap':
       element = <SketchBitmap layer={layer} />;
       break;
