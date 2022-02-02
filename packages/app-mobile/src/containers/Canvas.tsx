@@ -22,13 +22,22 @@ import {
   FontManagerProvider,
 } from 'noya-renderer';
 
-interface GesturePoint {
-  locationX: number;
-  locationY: number;
-}
+function getPoint(event: GestureResponderEvent): Point {
+  const { nativeEvent } = event;
 
-function getPoint(event: GesturePoint): Point {
-  return { x: Math.round(event.locationX), y: Math.round(event.locationY) };
+  if (nativeEvent.touches.length > 1) {
+    const firstTouch = nativeEvent.touches[0];
+
+    return {
+      x: firstTouch.locationX,
+      y: firstTouch.locationY,
+    };
+  }
+
+  return {
+    x: Math.round(nativeEvent.locationX),
+    y: Math.round(nativeEvent.locationY),
+  };
 }
 
 const Canvas: React.FC<{}> = () => {
@@ -51,7 +60,7 @@ const Canvas: React.FC<{}> = () => {
 
   const onResponderGrant = (e: GestureResponderEvent) => {
     const numOfTouches = e.nativeEvent.touches.length;
-    const rawPoint = getPoint(e.nativeEvent);
+    const rawPoint = getPoint(e);
 
     switch (state.interactionState.type) {
       case 'insert': {
@@ -127,7 +136,7 @@ const Canvas: React.FC<{}> = () => {
   };
 
   const onResponderMove = (e: GestureResponderEvent) => {
-    const rawPoint = getPoint(e.nativeEvent);
+    const rawPoint = getPoint(e);
     const numOfTouches = e.nativeEvent.touches.length;
 
     switch (state.interactionState.type) {
@@ -183,7 +192,7 @@ const Canvas: React.FC<{}> = () => {
   };
 
   const onResponderRelease = (e: GestureResponderEvent) => {
-    const rawPoint = getPoint(e.nativeEvent);
+    const rawPoint = getPoint(e);
 
     switch (state.interactionState.type) {
       case 'drawing': {
@@ -219,7 +228,7 @@ const Canvas: React.FC<{}> = () => {
         break;
       }
       case 'none': {
-        // touchRef.current = { x: 0, y: 0 };
+        touchRef.current = { x: 0, y: 0 };
         break;
       }
     }

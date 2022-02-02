@@ -27,9 +27,10 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
 
   const transform = useMemo(() => {
     if (props.transform) {
-      const { x, y } = props.transform.applyTo({ x: 1, y: 1 });
-
-      return [{ translateX: x }, { translateY: y }];
+      return [
+        { translateX: props.transform.m02 },
+        { translateY: props.transform.m12 },
+      ];
     }
 
     return [];
