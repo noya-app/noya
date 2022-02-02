@@ -5,7 +5,7 @@ import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { Group } from '../../contexts/ComponentsContext';
 import { useIsLayerClipped } from '../../contexts/ClippedLayerContext';
-// import SketchArtboard from './SketchArtboard';
+import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
@@ -18,19 +18,19 @@ interface Props {
 }
 
 export default memo(function SketchLayer({ layer }: Props) {
-  const isClipped = false; // useIsLayerClipped(layer.do_objectID);
+  const isClipped = useIsLayerClipped(layer.do_objectID);
 
   if (isClipped || !layer.isVisible) return null;
 
   let element: JSX.Element;
 
   switch (layer._class) {
-    // case 'artboard':
-    //   element = <SketchArtboard layer={layer} isSymbolMaster={false} />;
-    //   break;
-    // case 'symbolMaster':
-    //   element = <SketchArtboard layer={layer} isSymbolMaster={true} />;
-    //   break;
+    case 'artboard':
+      element = <SketchArtboard layer={layer} isSymbolMaster={false} />;
+      break;
+    case 'symbolMaster':
+      element = <SketchArtboard layer={layer} isSymbolMaster={true} />;
+      break;
     case 'page':
     case 'group':
       element = <SketchGroup layer={layer} />;
