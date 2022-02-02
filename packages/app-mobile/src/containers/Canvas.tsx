@@ -15,11 +15,12 @@ import { Components } from 'noya-react-canvaskit';
 import {
   SketchFileRenderer,
   useCanvasKit,
+  useFontManager,
   CanvasKitProvider,
   ComponentsProvider,
   ImageCacheProvider,
+  FontManagerProvider,
 } from 'noya-renderer';
-import { fontManager } from '../hooks/useAppState';
 
 interface GesturePoint {
   locationX: number;
@@ -34,6 +35,7 @@ const Canvas: React.FC<{}> = () => {
   const [state, dispatch] = useApplicationState();
   const { setCanvasSize } = useWorkspace();
   const workspaceState = useWorkspaceState();
+  const fontManager = useFontManager();
   const canvasKit = useCanvasKit();
   const theme = useTheme();
   const touchRef = useRef<Point>({ x: 0, y: 0 });
@@ -244,11 +246,13 @@ const Canvas: React.FC<{}> = () => {
         <ThemeProvider theme={theme}>
           <ImageCacheProvider>
             <CanvasKitProvider canvasKit={canvasKit}>
-              <StateProvider state={workspaceState}>
-                <ComponentsProvider value={Components}>
-                  <SketchFileRenderer />
-                </ComponentsProvider>
-              </StateProvider>
+              <FontManagerProvider>
+                <StateProvider state={workspaceState}>
+                  <ComponentsProvider value={Components}>
+                    <SketchFileRenderer />
+                  </ComponentsProvider>
+                </StateProvider>
+              </FontManagerProvider>
             </CanvasKitProvider>
           </ImageCacheProvider>
         </ThemeProvider>

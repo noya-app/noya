@@ -41,6 +41,8 @@ import * as RNSkia from '@shopify/react-native-skia';
 import { Embind } from './Embind';
 import { SkiaPaintWrapper } from './SkiaPaint';
 import { SkiaImageFilterFactory } from './SkiaImageFilter';
+import { SkiaTypefaceFontProviderFactory } from './TypefaceFontProvider';
+import { SkiaParagraphBuilder } from './SkiaParagraphBuilder';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
@@ -276,7 +278,7 @@ export const SkiaCanvasKit: CanvasKit = {
   TextStyle: JSTextStyle,
 
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
-  ParagraphBuilder: 0 as any,
+  ParagraphBuilder: SkiaParagraphBuilder,
   ColorFilter: 0 as any,
   FontMgr: 0 as any,
   ImageFilter: new SkiaImageFilterFactory(),
@@ -286,7 +288,7 @@ export const SkiaCanvasKit: CanvasKit = {
   Shader: 0 as any,
   TextBlob: 0 as any,
   Typeface: 0 as any,
-  TypefaceFontProvider: 0 as any,
+  TypefaceFontProvider: new SkiaTypefaceFontProviderFactory(),
 
   // Misc
   ColorMatrix: 0 as any,

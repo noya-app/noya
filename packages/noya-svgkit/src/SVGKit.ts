@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import parseColor from 'color-parse';
+
 import type {
   AnimatedImage,
   CanvasKit,
@@ -37,12 +39,11 @@ import type {
   WebGLContextHandle,
   WebGLOptions,
 } from 'canvaskit';
-import parseColor from 'color-parse';
-import { Embind, JSEmbindObject } from './Embind';
-import { JSMaskFilter } from './JSMaskFilter';
 import { JSPaint } from './JSPaint';
-import { JSParagraphBuilder } from './JSParagraphBuilder';
+import { JSMaskFilter } from './JSMaskFilter';
+import { Embind, JSEmbindObject } from './Embind';
 import { JSShaderFactory } from './JSShaderFactory';
+import { JSParagraphBuilder } from './JSParagraphBuilder';
 
 export type SerializableProperties<T> = {
   [K in keyof T as T[K] extends Function ? never : K]: T[K];
