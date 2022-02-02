@@ -4,13 +4,13 @@ import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { Group } from '../../contexts/ComponentsContext';
-// import { useIsLayerClipped } from '../../ClippedLayerContext';
+import { useIsLayerClipped } from '../../contexts/ClippedLayerContext';
 // import SketchArtboard from './SketchArtboard';
-// import SketchBitmap from './SketchBitmap';
+import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
-// import SketchSlice from './SketchSlice';
-// import SketchSymbolInstance from './SketchSymbolInstance';
+import SketchSlice from './SketchSlice';
+import SketchSymbolInstance from './SketchSymbolInstance';
 // import SketchText from './SketchText';
 
 interface Props {
@@ -38,9 +38,9 @@ export default memo(function SketchLayer({ layer }: Props) {
     // case 'text':
     //   element = <SketchText layer={layer} />;
     //   break;
-    // case 'bitmap':
-    //   element = <SketchBitmap layer={layer} />;
-    //   break;
+    case 'bitmap':
+      element = <SketchBitmap layer={layer} />;
+      break;
     case 'rectangle':
     case 'oval':
     case 'triangle':
@@ -50,12 +50,12 @@ export default memo(function SketchLayer({ layer }: Props) {
     case 'shapeGroup':
       element = <SketchShape layer={layer} />;
       break;
-    // case 'symbolInstance':
-    //   element = <SketchSymbolInstance layer={layer} />;
-    //   break;
-    // case 'slice':
-    //   element = <SketchSlice layer={layer} />;
-    //   break;
+    case 'symbolInstance':
+      element = <SketchSymbolInstance layer={layer} />;
+      break;
+    case 'slice':
+      element = <SketchSlice layer={layer} />;
+      break;
     default:
       console.info(layer._class, 'not handled');
       element = <></>;

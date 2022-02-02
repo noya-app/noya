@@ -19,7 +19,7 @@ import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';
 import { getUniformValues } from '../../shaders';
-// import BlurGroup from '../effects/BlurGroup';
+import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
 
 /**
@@ -378,12 +378,14 @@ export default memo(function SketchShape({ layer }: Props) {
 
   const opacity = layer.style?.contextSettings?.opacity ?? 1;
 
-  // const blur = useMemo(
-  //   () => style.blur ?? SketchModel.blur({ isEnabled: false }),
-  //   [style.blur],
-  // );
-  // <BlurGroup blur={blur} clippingPath={path}>
-  /* </BlurGroup> */
+  const blur = useMemo(
+    () => style.blur ?? SketchModel.blur({ isEnabled: false }),
+    [style.blur],
+  );
 
-  return opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements;
+  return (
+    <BlurGroup blur={blur} clippingPath={path}>
+      {opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements}
+    </BlurGroup>
+  );
 });
