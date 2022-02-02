@@ -5,12 +5,12 @@ import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
 import { Group } from '../../contexts/ComponentsContext';
 import { useIsLayerClipped } from '../../contexts/ClippedLayerContext';
+import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchArtboard from './SketchArtboard';
 import SketchBitmap from './SketchBitmap';
 import SketchGroup from './SketchGroup';
 import SketchShape from './SketchShape';
 import SketchSlice from './SketchSlice';
-import SketchSymbolInstance from './SketchSymbolInstance';
 import SketchText from './SketchText';
 
 interface Props {

@@ -18,11 +18,11 @@ import {
   transformRect,
 } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
-import * as Primitives from 'noya-state';
-import { Layers, PageLayer, ScalingOptions, ApplicationState } from '../index';
-import { visitReversed } from '../layers';
+import { ApplicationState } from '../reducers/applicationReducer';
 import { CompassDirection } from '../reducers/interactionReducer';
+import { ScalingOptions, path as pathPrimitive } from '../primitives';
 import { getDragHandles } from '../selection';
+import * as Layers from '../layers';
 import { getSelectedLayerIndexPaths } from './indexPathSelectors';
 import {
   getCurrentPage,
@@ -121,7 +121,7 @@ function visitLayersReversed(
   options: LayerTraversalOptions,
   onEnter: NonNullable<VisitOptions<Sketch.AnyLayer>['onEnter']>,
 ) {
-  visitReversed(rootLayer, {
+  Layers.visitReversed(rootLayer, {
     onEnter: (layer, indexPath) => {
       if (Layers.isPageLayer(layer)) return;
 
@@ -144,7 +144,7 @@ export function getLayersInRect(
   insets: Insets,
   rect: Rect,
   options: LayerTraversalOptions = {},
-): PageLayer[] {
+): Layers.PageLayer[] {
   let found: Sketch.AnyLayer[] = [];
 
   const screenTransform = getScreenTransform(insets);
@@ -179,7 +179,7 @@ export function getLayersInRect(
     found.push(layer);
   });
 
-  return found as PageLayer[];
+  return found as Layers.PageLayer[];
 }
 
 export function artboardLabelContainsPoint(
@@ -212,7 +212,7 @@ export function getLayerAtPoint(
   insets: Insets,
   point: Point,
   options: LayerTraversalOptions = {},
-): PageLayer | undefined {
+): Layers.PageLayer | undefined {
   const page = getCurrentPage(state);
   const { zoomValue } = getCurrentPageMetadata(state);
   const canvasTransform = getCanvasTransform(state, insets);
@@ -272,7 +272,7 @@ export function getLayerAtPoint(
       case 'oval': {
         const pathPoint = transform.invert().applyTo(screenPoint);
 
-        const path = Primitives.path(
+        const path = pathPrimitive(
           CanvasKit,
           layer.points,
           layer.frame,
@@ -292,7 +292,7 @@ export function getLayerAtPoint(
     return STOP;
   });
 
-  return found as PageLayer;
+  return found as Layers.PageLayer;
 }
 
 /**

@@ -10,7 +10,7 @@ import { chunkBy } from 'noya-utils';
 
 import { Group } from '../../contexts/ComponentsContext';
 import DropShadowGroup from '../effects/DropShadowGroup';
-import SketchLayer from './SketchLayer';
+import { SketchLayer } from './index';
 
 function composeImageFilters(
   CanvasKit: CanvasKit,
