@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
 import * as CanvasKit from 'canvaskit';
 import Sketch from 'noya-file-format';
@@ -12,13 +12,12 @@ import {
 } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
-import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { Group, Path } from '../../contexts/ComponentsContext';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { useSketchImage } from '../../contexts/ImageCacheContext';
 import { compileShader } from '../../hooks/useCompileShader';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import useLayerPath from '../../hooks/useLayerPath';
-import { useSketchImage } from '../../ImageCache';
-import { getUniformValues } from '../../shaders';
+import { getUniformValues } from '../../utils/shaders';
 import BlurGroup from '../effects/BlurGroup';
 import SketchBorder from '../effects/SketchBorder';
 

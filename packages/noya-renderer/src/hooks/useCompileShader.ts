@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { CanvasKit, RuntimeEffect } from 'canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import Sketch from 'noya-file-format';
-import { getSkiaShaderString } from '../shaders';
+import { getSkiaShaderString } from '../utils/shaders';
 import { useCanvasKit } from './useCanvasKit';
 
 type CompiledShader =

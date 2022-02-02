@@ -5,7 +5,7 @@ import { getRectCornerPoints } from 'noya-geometry';
 import { makePath } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { Primitives } from 'noya-state';
-import { useSketchImage } from '../../ImageCache';
+import { useSketchImage } from '../../contexts/ImageCacheContext';
 import { Group, Image } from '../../contexts/ComponentsContext';
 import { useZoom } from '../../contexts/ZoomContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';

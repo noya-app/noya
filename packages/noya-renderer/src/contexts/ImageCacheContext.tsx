@@ -74,8 +74,8 @@ function useImageCache(): ImageCacheContextValue {
 }
 
 export function useSketchImage(image?: Sketch.FileRef | Sketch.DataRef) {
-  const [state] = useApplicationState();
   const [imageCache, addImageToCache] = useImageCache();
+  const [state] = useApplicationState();
 
   const imageData = image
     ? imageCache[image._ref] || state.sketch.images[image._ref]
@@ -90,7 +90,7 @@ export function useSketchImage(image?: Sketch.FileRef | Sketch.DataRef) {
     // TODO:
     // generateImageFromPDF(new Uint8Array(imageData))
     //   .then((blob) => blob.arrayBuffer())
-    //   .then((arrayBuffer) => {
+    //   .then((arrayBuffer) => { zs
     //     addImageToCache(ref, arrayBuffer);
     //   });
   }, [addImageToCache, imageCache, imageData, ref]);

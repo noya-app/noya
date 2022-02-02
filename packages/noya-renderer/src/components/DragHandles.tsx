@@ -5,7 +5,7 @@ import { useColorFill } from 'noya-react-canvaskit';
 import { getDragHandles, Primitives } from 'noya-state';
 import { Group, Rect as RCKRect } from '../contexts/ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
-import { pixelAlignRect } from '../pixelAlignment';
+import { pixelAlignRect } from '../utils/pixelAlignment';
 
 interface Props {
   rect: Rect;
