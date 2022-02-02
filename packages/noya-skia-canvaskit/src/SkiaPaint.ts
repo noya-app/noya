@@ -124,9 +124,8 @@ export class SkiaPaintWrapper extends JSEmbindObject implements Paint {
   }
 
   setPathEffect(effect: PathEffect): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    // @ts-expect-error
+    this._paint.setPathEffect(effect._pathEffect);
   }
 
   setShader(shader: Shader): void {

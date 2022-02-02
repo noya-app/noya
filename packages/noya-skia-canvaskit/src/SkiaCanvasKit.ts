@@ -20,7 +20,6 @@ import type {
   ParagraphStyle,
   // Particles,
   // Path,
-  // PathEffect,
   // Rect,
   // RRect,
   // SkottieAnimation,
@@ -37,12 +36,12 @@ import type {
   // WebGLOptions,
 } from 'canvaskit';
 import parseColor from 'color-parse';
-import * as RNSkia from '@shopify/react-native-skia';
 import { Embind } from './Embind';
 import { SkiaPaintWrapper } from './SkiaPaint';
 import { SkiaImageFilterFactory } from './SkiaImageFilter';
 import { SkiaTypefaceFontProviderFactory } from './TypefaceFontProvider';
 import { SkiaParagraphBuilder } from './SkiaParagraphBuilder';
+import { SkiaPathEffect } from './SkiaPathEffect';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
@@ -283,7 +282,7 @@ export const SkiaCanvasKit: CanvasKit = {
   FontMgr: 0 as any,
   ImageFilter: new SkiaImageFilterFactory(),
   MaskFilter: 0 as any,
-  PathEffect: 0 as any,
+  PathEffect: SkiaPathEffect,
   RuntimeEffect: 0 as any,
   Shader: 0 as any,
   TextBlob: 0 as any,
