@@ -1,12 +1,4 @@
-import React, {
-  memo,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 import produce from 'immer';
 import { useTheme } from 'styled-components';
 
@@ -402,6 +394,21 @@ export default React.memo(function SketchFileRenderer() {
     !isInserting &&
     !isEditingText && <DragHandles rect={boundingRect} />;
 
+  const boundingRectLayer = (state.selectedLayerIds.length > 1 ||
+    !Selectors.getSelectedLineLayer(state)) &&
+    boundingRect &&
+    !state.selectedGradient &&
+    !drawingLayer &&
+    !isInserting && (
+      <>
+        <BoundingRect rect={boundingRect} />
+        {!isEditingText &&
+          state.selectedLayerIds.map((layerId) => (
+            <RotatedBoundingRect key={layerId} layerId={layerId} />
+          ))}
+      </>
+    );
+
   const CanvasTransform = ({ children }: PropsWithChildren<{}>) => (
     <Group transform={canvasTransform}>{children}</Group>
   );
@@ -436,23 +443,7 @@ export default React.memo(function SketchFileRenderer() {
               </>
             ) : (
               <>
-                {(state.selectedLayerIds.length > 1 ||
-                  !Selectors.getSelectedLineLayer(state)) &&
-                  boundingRect &&
-                  !state.selectedGradient &&
-                  !drawingLayer &&
-                  !isInserting && (
-                    <>
-                      <BoundingRect rect={boundingRect} />
-                      {!isEditingText &&
-                        state.selectedLayerIds.map((layerId) => (
-                          <RotatedBoundingRect
-                            key={layerId}
-                            layerId={layerId}
-                          />
-                        ))}
-                    </>
-                  )}
+                {boundingRectLayer}
                 {!drawingLayer &&
                   !isInserting &&
                   !isEditingText &&
@@ -460,11 +451,7 @@ export default React.memo(function SketchFileRenderer() {
                 {drawingLayer && <SketchLayer layer={drawingLayer} />}
                 <SnapGuides />
                 {quickMeasureGuides}
-                {!state.selectedGradient &&
-                  boundingRect &&
-                  !drawingLayer &&
-                  !isInserting &&
-                  !isEditingText && <DragHandles rect={boundingRect} />}
+                {dragHandles}
               </>
             )}
           </CanvasTransform>
