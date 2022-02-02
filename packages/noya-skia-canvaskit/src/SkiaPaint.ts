@@ -37,21 +37,22 @@ export class SkiaPaintWrapper extends JSEmbindObject implements Paint {
   }
 
   getColor(): Color {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    const color = this._paint.getColor();
+
+    const a = ((color & 0xff000000) >> 24) / 255.0;
+    const r = ((color & 0x00ff0000) >> 16) / 255.0;
+    const g = ((color & 0x0000ff00) >> 8) / 255.0;
+    const b = (color & 0x000000ff) / 255.0;
+
+    return new Float32Array([r, g, b, a]);
   }
 
   getStrokeCap(): StrokeCap {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    return this._paint.getStrokeCap() as unknown as StrokeCap;
   }
 
   getStrokeJoin(): StrokeJoin {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    return this._paint.getStrokeJoin() as unknown as StrokeJoin;
   }
 
   getStrokeMiter(): number {
