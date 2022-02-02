@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { GestureResponderEvent, LayoutChangeEvent } from 'react-native';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import { Canvas as SkiaCanvas } from '@shopify/react-native-skia';
@@ -36,6 +36,7 @@ const Canvas: React.FC<{}> = () => {
   const workspaceState = useWorkspaceState();
   const canvasKit = useCanvasKit();
   const theme = useTheme();
+  const touchRef = useRef<Point>({ x: 0, y: 0 });
 
   const insets = {
     left: 0,
@@ -47,6 +48,7 @@ const Canvas: React.FC<{}> = () => {
   const onStartShouldSetResponder = (e: GestureResponderEvent) => true;
 
   const onResponderGrant = (e: GestureResponderEvent) => {
+    const numOfTouches = e.nativeEvent.touches.length;
     const rawPoint = getPoint(e.nativeEvent);
 
     switch (state.interactionState.type) {
@@ -60,6 +62,11 @@ const Canvas: React.FC<{}> = () => {
         break;
       }
       case 'none': {
+        if (numOfTouches > 1) {
+          touchRef.current = rawPoint;
+          return;
+        }
+
         const layer = Selectors.getLayerAtPoint(
           canvasKit,
           fontManager,
@@ -119,6 +126,7 @@ const Canvas: React.FC<{}> = () => {
 
   const onResponderMove = (e: GestureResponderEvent) => {
     const rawPoint = getPoint(e.nativeEvent);
+    const numOfTouches = e.nativeEvent.touches.length;
 
     switch (state.interactionState.type) {
       case 'insert': {
@@ -155,6 +163,17 @@ const Canvas: React.FC<{}> = () => {
           'selectLayer',
           layers.map((layer) => layer.do_objectID),
         );
+
+        break;
+      }
+      case 'none': {
+        if (numOfTouches > 1) {
+          const deltaX = touchRef.current.x - rawPoint.x;
+          const deltaY = touchRef.current.y - rawPoint.y;
+
+          dispatch('pan*', { x: deltaX, y: deltaY });
+          touchRef.current = rawPoint;
+        }
 
         break;
       }
@@ -195,6 +214,10 @@ const Canvas: React.FC<{}> = () => {
 
         // containerRef.current?.releasePointerCapture(event.pointerId);
 
+        break;
+      }
+      case 'none': {
+        // touchRef.current = { x: 0, y: 0 };
         break;
       }
     }
