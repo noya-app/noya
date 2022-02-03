@@ -88,7 +88,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   );
 };
 
-export default Toolbar;
+export default React.memo(Toolbar);
 
 const ToolbarView = styled.View((p) => ({
   bottom: 10,
@@ -105,4 +105,5 @@ const ToolbarContainer = styled.View((p) => ({
   paddingHorizontal: p.theme.sizes.spacing.medium,
   backgroundColor: p.theme.colors.sidebar.background,
   borderRadius: 10,
+  // height: 100,
 }));

@@ -17,4 +17,4 @@ const Stack: React.FC<StackProps> = (props) => {
   return <View style={{ height }} />;
 };
 
-export default Stack;
+export default React.memo(Stack);

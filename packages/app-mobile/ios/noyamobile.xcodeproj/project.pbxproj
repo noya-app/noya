@@ -325,7 +325,7 @@
 				CODE_SIGN_ENTITLEMENTS = noyamobile/noyamobile.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = WC59N2X3FV;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = noyamobile/Info.plist;
 				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
@@ -357,8 +357,8 @@
 				CODE_SIGN_ENTITLEMENTS = noyamobile/noyamobile.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_BITCODE = NO;
+				DEVELOPMENT_TEAM = WC59N2X3FV;
+				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = noyamobile/Info.plist;
 				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
 				LD_RUNPATH_SEARCH_PATHS = (

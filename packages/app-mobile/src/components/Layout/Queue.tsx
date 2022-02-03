@@ -17,4 +17,4 @@ const Queue: React.FC<QueueProps> = (props) => {
   return <View style={{ width }} />;
 };
 
-export default Queue;
+export default React.memo(Queue);

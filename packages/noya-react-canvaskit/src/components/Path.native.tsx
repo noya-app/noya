@@ -1,18 +1,22 @@
 import React, { useEffect, useRef } from 'react';
 
-import { Path as SkiaPath } from '@shopify/react-native-skia';
+import {
+  Path as SkiaPath,
+  useDrawing,
+  Drawing,
+} from '@shopify/react-native-skia';
 import { PathComponentProps } from '../types';
 
 const Path: React.FC<PathComponentProps> = (props) => {
   const { paint, path } = props;
-  const skiaPaint = useRef(paint._paint);
+  console.log('Path.render', paint.getColor());
 
-  useEffect(() => {
-    skiaPaint.current = paint._paint;
-  }, [paint._paint]);
+  const onDraw = useDrawing({ paint, path }, ({ canvas }) => {
+    console.log('onDraw', paint.getColor());
+    canvas.drawPath(path._path, paint._paint);
+  });
 
-  // TODO: fixme, add some getter?
-  return <SkiaPath paint={skiaPaint} path={path._path} />;
+  return <Drawing onDraw={onDraw} />;
 };
 
 export default Path;

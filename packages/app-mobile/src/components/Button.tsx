@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = (props) => {
   );
 };
 
-export default Button;
+export default React.memo(Button);
 
 const ButtonView = styled.View<{ active?: boolean }>((p) => ({
   borderRadius: 4,

@@ -85,7 +85,9 @@ export class SkiaPaintWrapper extends JSEmbindObject implements Paint {
     const g = Math.floor(inG * 255) << 8;
     const b = Math.floor(inB * 255) << 0;
 
-    this._paint.setColor(r | g | b | a);
+    console.log('setColor', r + g + b + a);
+
+    this._paint.setColor(r + g + b + a);
   }
 
   setColorComponents(
