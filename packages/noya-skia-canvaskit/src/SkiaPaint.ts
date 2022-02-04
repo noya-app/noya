@@ -80,14 +80,16 @@ export class SkiaPaintWrapper extends JSEmbindObject implements Paint {
   setColor(color: InputColor, colorSpace?: ColorSpace): void {
     const [inR, inG, inB, inA] = color as number[];
 
-    const a = Math.floor(inA * 255) << 24;
-    const r = Math.floor(inR * 255) << 16;
-    const g = Math.floor(inG * 255) << 8;
-    const b = Math.floor(inB * 255) << 0;
+    const a = Math.floor(inA * 255) << 0;
+    const r = Math.floor(inR * 255) << 24;
+    const g = Math.floor(inG * 255) << 16;
+    const b = Math.floor(inB * 255) << 8;
 
-    console.log('setColor', r + g + b + a);
+    // Stolen from react-native processColor :)
+    let normalizedColor = a | r | g | b;
+    normalizedColor = ((normalizedColor << 24) | (normalizedColor >>> 8)) >>> 0;
 
-    this._paint.setColor(r + g + b + a);
+    this._paint.setColor(normalizedColor);
   }
 
   setColorComponents(

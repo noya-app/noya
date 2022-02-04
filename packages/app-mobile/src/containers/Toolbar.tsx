@@ -1,13 +1,27 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { decode as decodeBase64 } from 'base-64';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';
+import { decode } from 'noya-sketch-file';
 
 import Button from '../components/Button';
 import Layout from '../components/Layout';
 
 interface ToolbarProps {}
+
+function base64ToArrayBuffer(base64: string) {
+  var binary_string = decodeBase64(base64);
+  var len = binary_string.length;
+  var bytes = new Uint8Array(len);
+  for (var i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
   const [state] = useApplicationState();
@@ -26,8 +40,6 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     return undefined;
   }, [state.interactionState]);
 
-  const onToDo = () => {};
-
   const isButtonActive = (shape: DrawableLayerType) =>
     layerType === shape && (interType === 'drawing' || interType === 'insert');
 
@@ -39,6 +51,36 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
   const onAddShape = (shape: DrawableLayerType) => () => {
     dispatch('interaction', ['insert', shape]);
+  };
+
+  const onOpenFile = async () => {
+    try {
+      const results = await DocumentPicker.getDocumentAsync({
+        multiple: false,
+        type: '*/*',
+      });
+      // console.log(results);
+
+      if (results.type !== 'success') {
+        return;
+      }
+
+      if (results.file) {
+        const data = await results.file.arrayBuffer();
+        const sketch = await decode(data);
+
+        dispatch('setFile', sketch);
+        return;
+      }
+      const fileString = await FileSystem.readAsStringAsync(results.uri, {
+        encoding: 'base64',
+      });
+      const data = base64ToArrayBuffer(fileString);
+      const sketch = await decode(data);
+      dispatch('setFile', sketch);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const buttons = [
@@ -67,9 +109,9 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       onPress: onAddShape('line'),
       active: isButtonActive('line'),
     },
-    { icon: 'share-1', onPress: onToDo },
-    { icon: 'text', onPress: onToDo },
-    { icon: 'group', onPress: onToDo },
+    // { icon: 'share-1', onPress: onToDo },
+    // { icon: 'text', onPress: onToDo },
+    { icon: 'file', onPress: onOpenFile },
   ];
 
   return (

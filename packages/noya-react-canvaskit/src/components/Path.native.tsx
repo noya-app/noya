@@ -1,22 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 
-import {
-  Path as SkiaPath,
-  useDrawing,
-  Drawing,
-} from '@shopify/react-native-skia';
+import { Path as SkiaPath } from '@shopify/react-native-skia';
 import { PathComponentProps } from '../types';
 
 const Path: React.FC<PathComponentProps> = (props) => {
-  const { paint, path } = props;
-  console.log('Path.render', paint.getColor());
+  const { path, paint } = props;
 
-  const onDraw = useDrawing({ paint, path }, ({ canvas }) => {
-    console.log('onDraw', paint.getColor());
-    canvas.drawPath(path._path, paint._paint);
-  });
+  const skiaPaint = useRef(paint._paint);
 
-  return <Drawing onDraw={onDraw} />;
+  useEffect(() => {
+    skiaPaint.current = paint._paint;
+  }, [paint._paint]);
+
+  return <SkiaPath path={path._path} paint={skiaPaint} />;
 };
 
-export default Path;
+export default memo(Path);

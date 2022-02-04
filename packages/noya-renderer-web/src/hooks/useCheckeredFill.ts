@@ -9,6 +9,7 @@ export default function useCheckeredFill() {
   const { transparentChecker } = useTheme().colors;
 
   const paint = useMemo(() => {
+    console.log('useCheckeredFill.useMemo');
     const paint = new CanvasKit.Paint();
     const image = CanvasKit.MakeImageFromEncoded(CHECKERED_BACKGROUND_BYTES);
 

@@ -36,7 +36,7 @@ export default function usePaint(parameters: PaintParameters | Paint): Paint {
 
   const paint = useMemo(() => {
     if (!maybeParameters) return;
-
+    console.log('usePaint');
     const paint = new CanvasKit.Paint();
     paint.setColor(maybeParameters.color);
     paint.setStyle(maybeParameters.style);

@@ -17,6 +17,7 @@ export default memo(function SketchSlice({ layer }: Props) {
   const primaryColor = useTheme().colors.canvas.sliceOutline;
 
   const paint = useMemo(() => {
+    console.log('SketchSlice.useMemo');
     const paint = new CanvasKit.Paint();
     paint.setColor(CanvasKit.parseColorString(primaryColor));
     paint.setPathEffect(CanvasKit.PathEffect.MakeDash([4, 2]));

@@ -3,6 +3,9 @@ import { EmbindEnum, EmbindEnumEntity } from 'canvaskit';
 // Copied from svgkit
 export class JSEmbindObject {
   _isDeleted = false;
+  // constructor() {
+  //   console.log(`${this.constructor.name}.constructor`);
+  // }
   clone() {
     return this;
   }

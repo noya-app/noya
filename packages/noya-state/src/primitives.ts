@@ -356,6 +356,7 @@ export function fill(
   runtimeEffect?: RuntimeEffect,
   uniforms?: number[],
 ): Paint {
+  console.log('fill');
   const paint = new CanvasKit.Paint();
 
   switch (fill.fillType) {
@@ -394,6 +395,7 @@ export function fill(
 }
 
 export function border(CanvasKit: CanvasKit, border: Sketch.Border): Paint {
+  console.log('border');
   const paint = new CanvasKit.Paint();
 
   paint.setColor(

@@ -152,9 +152,8 @@ export function createSkiaPath(PathKit?: any) {
       y2: number,
       radius: number,
     ): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.arcToTangent(x1, y1, x2, y2, radius);
+      return this;
     }
 
     close(): Path {
@@ -191,9 +190,7 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     countPoints(): number {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.countPoints();
     }
 
     cubicTo(
@@ -267,10 +264,8 @@ export function createSkiaPath(PathKit?: any) {
       );
     }
 
-    op(other: Path, op: EmbindEnumEntity): boolean {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+    op(other: SKiaPathWrapper, op: EmbindEnumEntity): boolean {
+      return this._path.op(other._path, op.value as RNSkia.PathOp);
     }
 
     quadTo(x1: number, y1: number, x2: number, y2: number): Path {

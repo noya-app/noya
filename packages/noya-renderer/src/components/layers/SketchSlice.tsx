@@ -19,6 +19,7 @@ const SketchSlice: React.FC<Props> = (props) => {
   const primaryColor = useTheme().colors.canvas.sliceOutline;
 
   const paint = useMemo(() => {
+    console.log('SketchSlice');
     const paint = new CanvasKit.Paint();
     paint.setColor(CanvasKit.parseColorString(primaryColor));
     paint.setPathEffect(CanvasKit.PathEffect.MakeDash([4, 2]));

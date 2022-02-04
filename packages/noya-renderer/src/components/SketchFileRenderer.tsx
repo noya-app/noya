@@ -418,12 +418,11 @@ export default React.memo(function SketchFileRenderer() {
   );
 
   const canvasBackground = <RCKRect rect={canvasRect} paint={backgroundFill} />;
-
+  // {canvasBackground}
   return (
     <ClippedLayerProvider value={clippedLayerMap}>
       <ZoomProvider value={zoomValue}>
         <RootScaleTransformGroup>
-          {canvasBackground}
           <CanvasTransform>
             <SketchGroup layer={page} />
             {state.selectedGradient && gradient && (

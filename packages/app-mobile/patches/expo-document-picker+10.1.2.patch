@@ -1,0 +1,38 @@
+diff --git a/node_modules/expo-document-picker/ios/EXDocumentPicker/EXDocumentPickerModule.m b/node_modules/expo-document-picker/ios/EXDocumentPicker/EXDocumentPickerModule.m
+index 96ee295..2b740f7 100644
+--- a/node_modules/expo-document-picker/ios/EXDocumentPicker/EXDocumentPickerModule.m
++++ b/node_modules/expo-document-picker/ios/EXDocumentPicker/EXDocumentPickerModule.m
+@@ -186,14 +186,26 @@ - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocum
+ 
+   NSString *extension = [url pathExtension];
+   NSString *mimeType = [EXDocumentPickerModule getMimeType:extension];
++  NSString *name = [url lastPathComponent];
++  NSString *uri = [newUrl absoluteString];
++
++  if (mimeType != nil) {
++    _resolve(@{
++               @"type": @"success",
++               @"uri": uri,
++               @"name": name,
++               @"size": @(fileSize),
++               @"mimeType": mimeType
++               });
++  } else {
++    _resolve(@{
++               @"type": @"success",
++               @"uri": uri,
++               @"name": name,
++               @"size": @(fileSize)
++               });
++  }
+ 
+-  _resolve(@{
+-             @"type": @"success",
+-             @"uri": [newUrl absoluteString],
+-             @"name": [url lastPathComponent],
+-             @"size": @(fileSize),
+-             @"mimeType": mimeType
+-             });
+   _resolve = nil;
+   _reject = nil;
+ }

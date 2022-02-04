@@ -26,7 +26,10 @@ const SketchBitmap: React.FC<Props> = (props) => {
 
   const image = useSketchImage(layer.image);
 
-  const paint = useMemo(() => new CanvasKit.Paint(), [CanvasKit]);
+  const paint = useMemo(() => {
+    console.log('SketchBitmap');
+    return new CanvasKit.Paint();
+  }, [CanvasKit]);
 
   const path = useMemo(() => {
     const path = makePath(CanvasKit, getRectCornerPoints(layer.frame));

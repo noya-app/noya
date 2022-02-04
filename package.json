@@ -38,7 +38,7 @@
     "lint": "eslint . --ext .js,.ts,.tsx",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
-    "postinstall": "husky install",
+    "postinstall": "husky install; patch-package",
     "start:canvaskit-sandbox": "modular start canvaskit-sandbox"
   },
   "eslintConfig": {
@@ -87,6 +87,7 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "patch-package": "^6.4.7"
   }
 }

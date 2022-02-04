@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useMemo } from 'react';
+import React, { memo, PropsWithChildren, useMemo } from 'react';
 
 import { ColorFilter, ImageFilter } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
@@ -39,4 +39,4 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
   return <SkiaGroup transform={transform}>{children}</SkiaGroup>;
 };
 
-export default Group;
+export default memo(Group);
