@@ -60,7 +60,11 @@ export function createSkiaPath(PathKit?: any) {
       return this;
     }
 
-    addArc(oval: InputRect, startAngle: number, sweepAngle: number): Path {
+    addArc(
+      oval: InputRect,
+      startAngle: number,
+      sweepAngle: number,
+    ): SKiaPathWrapper {
       this._path.addArc(
         LTRBArrayToIRect(oval as Float32Array)!,
         startAngle,
@@ -70,7 +74,11 @@ export function createSkiaPath(PathKit?: any) {
       return this;
     }
 
-    addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): Path {
+    addOval(
+      oval: InputRect,
+      isCCW?: boolean,
+      startIndex?: number,
+    ): SKiaPathWrapper {
       this._path.addOval(
         LTRBArrayToIRect(oval as Float32Array)!,
         isCCW,
@@ -80,25 +88,25 @@ export function createSkiaPath(PathKit?: any) {
       return this;
     }
 
-    addPath(...args: any[]): Path | null {
+    addPath(...args: any[]): SKiaPathWrapper {
       throw new Error(
         `${this.constructor.name}.${arguments.callee.name} not implemented!`,
       );
     }
 
-    addPoly(points: InputFlattenedPointArray, close: boolean): Path {
+    addPoly(points: InputFlattenedPointArray, close: boolean): SKiaPathWrapper {
       throw new Error(
         `${this.constructor.name}.${arguments.callee.name} not implemented!`,
       );
     }
 
-    addRect(rect: InputRect, isCCW?: boolean): Path {
+    addRect(rect: InputRect, isCCW?: boolean): SKiaPathWrapper {
       this._path.addRect(LTRBArrayToIRect(rect as Float32Array)!, isCCW);
 
       return this;
     }
 
-    addRRect(rrect: InputRRect, isCCW?: boolean): Path {
+    addRRect(rrect: InputRRect, isCCW?: boolean): SKiaPathWrapper {
       throw new Error(
         `${this.constructor.name}.${arguments.callee.name} not implemented!`,
       );
@@ -223,7 +231,7 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     equals(other: Path): boolean {
-      return this._path.equals(other._path);
+      return this._path.equals((other as SKiaPathWrapper)._path);
     }
 
     getBounds(outputArray?: Float32Array): Float32Array {

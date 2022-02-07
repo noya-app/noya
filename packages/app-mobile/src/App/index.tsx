@@ -8,6 +8,7 @@ import '../utils/patchFileReader';
 import React, { Suspense } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
 import {
+  View,
   StatusBar,
   SafeAreaView,
   useColorScheme,
@@ -54,7 +55,7 @@ const AppWrapper = styled(SafeAreaView)((_props) => ({
   flex: 1,
 }));
 
-const ContentContainer = styled.View((p) => ({
+const ContentContainer = styled(View)((p) => ({
   flex: 1,
   justifyContent: 'center',
   alignItems: 'center',

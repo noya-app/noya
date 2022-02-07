@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { View } from 'react-native';
 
 import { WorkspaceAction } from 'noya-state';
 import { StateProvider } from 'noya-app-state-context';
@@ -33,7 +34,7 @@ const AppContent: React.FC<{}> = () => {
 
 export default AppContent;
 
-const ContentContainer = styled.View((p) => ({
+const ContentContainer = styled(View)((p) => ({
   flex: 1,
   backgroundColor: p.theme.colors.sidebar.background,
   position: 'relative',

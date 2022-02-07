@@ -10,6 +10,7 @@ import {
   skiaMatrix3,
 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
+
 import { ClipProps } from '../types';
 
 interface GroupProps {
@@ -43,7 +44,11 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       canvas.save();
 
       if (clip) {
-        canvas.clipPath(clip.path._path, clip.op.value, clip.antiAlias);
+        canvas.clipPath(
+          clip.path._path,
+          clip.op.value,
+          clip.antiAlias ?? false,
+        );
       }
 
       if (transform) {
