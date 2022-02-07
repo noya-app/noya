@@ -1,8 +1,15 @@
-import React, { memo, PropsWithChildren, useMemo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
 
 import { ColorFilter, ImageFilter } from 'canvaskit';
 import { AffineTransform } from 'noya-geometry';
-import { Group as SkiaGroup } from '@shopify/react-native-skia';
+import {
+  Drawing,
+  useDrawing,
+  selectPaint,
+  processPaint,
+  skiaMatrix3,
+} from '@shopify/react-native-skia';
+import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 import { ClipProps } from '../types';
 
 interface GroupProps {
@@ -15,30 +22,53 @@ interface GroupProps {
 }
 
 const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
-  // TODO: handle rest of the props
-  const {
-    // opacity,
-    children,
-    // clip,
-    // colorFilter,
-    // imageFilter,
-    // backdropImageFilter,
-  } = props;
+  const onDraw = useDrawing(
+    props,
+    (
+      ctx,
+      {
+        opacity,
+        transform,
+        clip,
+        colorFilter,
+        imageFilter,
+        backdropImageFilter,
+      },
+      children,
+    ) => {
+      const { canvas } = ctx;
+      const paint = selectPaint(ctx.paint, { opacity });
+      processPaint(paint, ctx.opacity, { opacity });
 
-  const transform = useMemo(() => {
-    if (props.transform) {
-      return [
-        { translateX: props.transform.m02 },
-        { translateY: props.transform.m12 },
-        { scaleX: props.transform.m00 },
-        { scaleY: props.transform.m11 },
-      ];
-    }
+      canvas.save();
 
-    return [];
-  }, [props.transform]);
+      if (clip) {
+        canvas.clipPath(clip.path._path, clip.op.value, clip.antiAlias);
+      }
 
-  return <SkiaGroup transform={transform}>{children}</SkiaGroup>;
+      if (transform) {
+        const { m00, m01, m02, m10, m11, m12 } = transform;
+        canvas.concat(
+          skiaMatrix3([
+            [m00, m01, m02],
+            [m10, m11, m12],
+            [0, 0, 1],
+          ]),
+        );
+      }
+
+      processChildren(
+        {
+          ...ctx,
+          paint,
+          opacity: opacity ? opacity * ctx.opacity : ctx.opacity,
+        },
+        children,
+      );
+    },
+  );
+
+  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
 };
 
 export default memo(Group);
