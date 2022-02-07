@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { GestureResponderEvent, LayoutChangeEvent } from 'react-native';
 import styled from 'styled-components';
 
@@ -7,6 +7,11 @@ import { Point, createRect } from 'noya-geometry';
 import { Selectors, getCurrentPage } from 'noya-state';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { FpsCounter } from '../components/FPSCounter';
+import useMultitouchGH, {
+  GestureType,
+  PanGesture,
+  PinchGesture,
+} from '../hooks/useMultitouchGH';
 import CanvasRenderer from './CanvasRenderer';
 
 function getPoint(event: GestureResponderEvent): Point {
@@ -32,7 +37,7 @@ const Canvas: React.FC<{}> = () => {
   const { setCanvasSize } = useWorkspace();
   const fontManager = useFontManager();
   const canvasKit = useCanvasKit();
-  const touchRef = useRef<Point>({ x: 0, y: 0 });
+  const gestures = useMultitouchGH();
 
   const insets = useMemo(
     () => ({
@@ -51,8 +56,8 @@ const Canvas: React.FC<{}> = () => {
 
   const onResponderGrant = useCallback(
     (e: GestureResponderEvent) => {
-      const numOfTouches = e.nativeEvent.touches.length;
       const rawPoint = getPoint(e);
+      gestures.setTouches(e);
 
       switch (state.interactionState.type) {
         case 'insert': {
@@ -65,11 +70,6 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'none': {
-          if (numOfTouches > 1) {
-            touchRef.current = rawPoint;
-            return;
-          }
-
           const layer = Selectors.getLayerAtPoint(
             canvasKit,
             fontManager,
@@ -127,13 +127,14 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [state, canvasKit, fontManager, dispatch, insets],
+    [state, canvasKit, fontManager, dispatch, insets, gestures],
   );
 
   const onResponderMove = useCallback(
     (e: GestureResponderEvent) => {
       const rawPoint = getPoint(e);
       const numOfTouches = e.nativeEvent.touches.length;
+      const multiTouchGesture = gestures.getGesture(e);
 
       switch (state.interactionState.type) {
         case 'insert': {
@@ -150,6 +151,11 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'marquee': {
+          if (numOfTouches > 1) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
           dispatch('interaction', ['updateMarquee', rawPoint]);
 
           const { origin, current } = state.interactionState;
@@ -174,24 +180,37 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'none': {
-          if (numOfTouches > 1) {
-            const deltaX = touchRef.current.x - rawPoint.x;
-            const deltaY = touchRef.current.y - rawPoint.y;
+          if (numOfTouches <= 1) {
+            break;
+          }
 
-            dispatch('pan*', { x: deltaX, y: deltaY });
-            touchRef.current = rawPoint;
+          if (multiTouchGesture.type === GestureType.Pan) {
+            const { deltaX: x, deltaY: y } = multiTouchGesture as PanGesture;
+            dispatch('pan*', { x, y });
+            break;
+          }
+
+          if (multiTouchGesture.type === GestureType.Pinch) {
+            const { scale } = multiTouchGesture as PinchGesture;
+
+            if (scale !== 0 || scale !== Infinity) {
+              dispatch('setZoom*', scale, 'multiply');
+            }
+
+            break;
           }
 
           break;
         }
       }
     },
-    [state, dispatch, insets],
+    [state, dispatch, gestures, insets],
   );
 
   const onResponderRelease = useCallback(
     (e: GestureResponderEvent) => {
       const rawPoint = getPoint(e);
+      gestures.resetTouches();
 
       switch (state.interactionState.type) {
         case 'drawing': {
@@ -227,12 +246,11 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'none': {
-          touchRef.current = { x: 0, y: 0 };
           break;
         }
       }
     },
-    [state, dispatch, insets],
+    [state, dispatch, insets, gestures],
   );
 
   const onCanvasLayout = useCallback(

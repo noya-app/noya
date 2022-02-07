@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
@@ -53,13 +53,28 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     dispatch('interaction', ['insert', shape]);
   };
 
+  const onZoom = useCallback(
+    (type: 'zoomIn' | 'zoomOut') => {
+      switch (type) {
+        case 'zoomIn': {
+          dispatch('setZoom*', 2, 'multiply');
+          break;
+        }
+        case 'zoomOut': {
+          dispatch('setZoom*', 0.5, 'multiply');
+          break;
+        }
+      }
+    },
+    [dispatch],
+  );
+
   const onOpenFile = async () => {
     try {
       const results = await DocumentPicker.getDocumentAsync({
         multiple: false,
         type: '*/*',
       });
-      // console.log(results);
 
       if (results.type !== 'success') {
         return;
@@ -108,6 +123,14 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       icon: 'slash',
       onPress: onAddShape('line'),
       active: isButtonActive('line'),
+    },
+    {
+      icon: 'zoom-in',
+      onPress: () => onZoom('zoomIn'),
+    },
+    {
+      icon: 'zoom-out',
+      onPress: () => onZoom('zoomOut'),
     },
     // { icon: 'share-1', onPress: onToDo },
     // { icon: 'text', onPress: onToDo },

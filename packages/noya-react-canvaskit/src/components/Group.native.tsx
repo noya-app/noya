@@ -30,6 +30,8 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       return [
         { translateX: props.transform.m02 },
         { translateY: props.transform.m12 },
+        { scaleX: props.transform.m00 },
+        { scaleY: props.transform.m11 },
       ];
     }
 

@@ -40,7 +40,6 @@ export function ExtensionGuide({ points }: Props) {
   const primaryColor = useTheme().colors.primary;
 
   const paint = useMemo(() => {
-    console.log('Guide.useMemo');
     const paint = new CanvasKit.Paint();
     paint.setColor(CanvasKit.parseColorString(primaryColor));
     paint.setPathEffect(CanvasKit.PathEffect.MakeDash([1, 2]));

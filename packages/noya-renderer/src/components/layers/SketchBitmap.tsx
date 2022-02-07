@@ -27,7 +27,6 @@ const SketchBitmap: React.FC<Props> = (props) => {
   const image = useSketchImage(layer.image);
 
   const paint = useMemo(() => {
-    console.log('SketchBitmap');
     return new CanvasKit.Paint();
   }, [CanvasKit]);
 

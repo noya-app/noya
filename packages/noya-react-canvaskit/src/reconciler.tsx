@@ -344,7 +344,6 @@ const hostConfig: ReactCanvasKitHostConfig = {
               opacity < 1 || colorFilter || imageFilter || backdropImageFilter;
 
             if (needsLayer) {
-              console.log('reconciler');
               const layerPaint = new CanvasKit.Paint();
 
               if (opacity < 1) {

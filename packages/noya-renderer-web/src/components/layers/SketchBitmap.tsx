@@ -23,7 +23,6 @@ export default memo(function SketchBitmap({ layer }: Props) {
   const image = useSketchImage(layer.image);
 
   const paint = useMemo(() => {
-    console.log('SketchBitmap.useMemo');
     return new CanvasKit.Paint();
   }, [CanvasKit]);
 
