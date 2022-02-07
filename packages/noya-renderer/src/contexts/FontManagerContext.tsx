@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
+import fetch from 'cross-fetch';
 
 import { TypefaceFontProvider } from 'canvaskit';
 import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
