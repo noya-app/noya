@@ -56,21 +56,28 @@ export function createSkiaPath(PathKit?: any) {
     private _path = RNSkia.Skia.Path.Make();
 
     makeAsWinding(): Path | null {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.makeAsWinding();
+      return this;
     }
 
     addArc(oval: InputRect, startAngle: number, sweepAngle: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      this._path.addArc(
+        LTRBArrayToIRect(oval as Float32Array)!,
+        startAngle,
+        sweepAngle,
       );
+
+      return this;
     }
 
     addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      this._path.addOval(
+        LTRBArrayToIRect(oval as Float32Array)!,
+        isCCW,
+        startIndex,
       );
+
+      return this;
     }
 
     addPath(...args: any[]): Path | null {
@@ -86,9 +93,9 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     addRect(rect: InputRect, isCCW?: boolean): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.addRect(LTRBArrayToIRect(rect as Float32Array)!, isCCW);
+
+      return this;
     }
 
     addRRect(rrect: InputRRect, isCCW?: boolean): Path {
@@ -126,9 +133,14 @@ export function createSkiaPath(PathKit?: any) {
       endAngle: number,
       forceMoveTo: boolean,
     ): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      this._path.arcToOval(
+        LTRBArrayToIRect(oval as Float32Array)!,
+        startAngle,
+        endAngle,
+        forceMoveTo,
       );
+
+      return this;
     }
 
     arcToRotated(
@@ -140,9 +152,9 @@ export function createSkiaPath(PathKit?: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.arcToRotated(rx, ry, xAxisRotate, useSmallArc, isCCW, x, y);
+
+      return this;
     }
 
     arcToTangent(
@@ -171,9 +183,9 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.conicTo(x1, y1, x2, y2, w);
+
+      return this;
     }
 
     contains(x: number, y: number): boolean {
@@ -207,15 +219,11 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     dash(on: number, off: number, phase: number): boolean {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.dash(on, off, phase);
     }
 
     equals(other: Path): boolean {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.equals(other._path);
     }
 
     getBounds(outputArray?: Float32Array): Float32Array {
@@ -225,27 +233,28 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     getFillType(): EmbindEnumEntity {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return { value: this._path.getFillType() };
     }
 
     getPoint(index: number, outputArray?: Float32Array): Float32Array {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      const point = this._path.getPoint(index);
+      if (outputArray) {
+        /// ?????
+        outputArray[0] = point.x;
+        outputArray[1] = point.y;
+
+        return outputArray;
+      }
+
+      return new Float32Array([point.x, point.y]);
     }
 
     isEmpty(): boolean {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.isEmpty();
     }
 
     isVolatile(): boolean {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.isVolatile();
     }
 
     lineTo(x: number, y: number): Path {
@@ -259,9 +268,8 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     offset(dx: number, dy: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.offset(dx, dy);
+      return this;
     }
 
     op(other: SKiaPathWrapper, op: EmbindEnumEntity): boolean {
@@ -269,9 +277,9 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     quadTo(x1: number, y1: number, x2: number, y2: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.quadTo(x1, y1, x2, y2);
+
+      return this;
     }
 
     rArcTo(
@@ -283,9 +291,9 @@ export function createSkiaPath(PathKit?: any) {
       dx: number,
       dy: number,
     ): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.rArcTo(rx, ry, xAxisRotate, useSmallArc, isCCW, dx, dy);
+
+      return this;
     }
 
     rConicTo(
@@ -295,9 +303,9 @@ export function createSkiaPath(PathKit?: any) {
       dy2: number,
       w: number,
     ): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.rConicTo(dx1, dy1, dx2, dy2, w);
+
+      return this;
     }
 
     rCubicTo(
@@ -308,33 +316,28 @@ export function createSkiaPath(PathKit?: any) {
       x: number,
       y: number,
     ): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.rCubicTo(cpx1, cpy1, cpx2, cpy2, x, y);
+
+      return this;
     }
 
     reset(): void {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.reset();
     }
 
     rewind(): void {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.rewind();
     }
 
     rLineTo(x: number, y: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.rLineTo(x, y);
+
+      return this;
     }
 
     rMoveTo(x: number, y: number): Path {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.rMoveTo(x, y);
+      return this;
     }
 
     rQuadTo(x1: number, y1: number, x2: number, y2: number): Path {
@@ -347,15 +350,11 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     setIsVolatile(volatile: boolean): void {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.setIsVolatile(volatile);
     }
 
     simplify(): boolean {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.simplify();
     }
 
     stroke(opts?: StrokeOpts): Path | null {
@@ -380,9 +379,7 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     toSVGString(): string {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      return this._path.toSVGString();
     }
 
     transform(...args: any[]): Path {
@@ -392,9 +389,9 @@ export function createSkiaPath(PathKit?: any) {
     }
 
     trim(startT: number, stopT: number, isComplement: boolean): Path | null {
-      throw new Error(
-        `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-      );
+      this._path.trim(startT, stopT, isComplement);
+
+      return this;
     }
 
     static MakeFromCmds(cmds: Float32Array): SKiaPathWrapper | null {

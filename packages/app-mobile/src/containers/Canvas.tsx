@@ -277,8 +277,9 @@ const CanvasWrapper = styled.View(() => ({
 const InteractionView = styled.View((p) => ({
   zIndex: 10,
   width: '50%',
+  maxWidth: 300,
   position: 'absolute',
-  backgroundColor: p.theme.colors.neutralBackground,
+  backgroundColor: p.theme.colors.inputBackground,
   padding: p.theme.sizes.spacing.small,
 }));
 
