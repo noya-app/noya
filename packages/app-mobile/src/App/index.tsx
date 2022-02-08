@@ -2,11 +2,13 @@
 import 'react-native-gesture-handler';
 import '@shopify/react-native-skia';
 import '../utils/prepareGlobals';
+import '../utils/patchFileReader';
 
 // Lib imports
 import React, { Suspense } from 'react';
-import styled, { ThemeProvider } from 'styled-components/native';
+import styled, { ThemeProvider } from 'styled-components';
 import {
+  View,
   StatusBar,
   SafeAreaView,
   useColorScheme,
@@ -14,9 +16,9 @@ import {
 } from 'react-native';
 
 // Local imports
-import { CanvasKitProvider } from 'noya-renderer';
+import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
+import { loadSkiaCanvasKit } from 'noya-skia-canvaskit';
 import { darkTheme, lightTheme } from '../constants';
-import loadCanvasKit from '../utils/loadCanvasKit';
 import AppContent from './AppContent';
 
 const App: React.FC<{}> = () => {
@@ -32,13 +34,15 @@ const App: React.FC<{}> = () => {
   return (
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <Suspense fallback={AppLoader}>
-        <CanvasKitProvider loadCanvasKit={loadCanvasKit}>
-          <AppWrapper>
-            <StatusBar
-              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-            />
-            <AppContent />
-          </AppWrapper>
+        <CanvasKitProvider loadCanvasKit={loadSkiaCanvasKit}>
+          <FontManagerProvider>
+            <AppWrapper>
+              <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+              />
+              <AppContent />
+            </AppWrapper>
+          </FontManagerProvider>
         </CanvasKitProvider>
       </Suspense>
     </ThemeProvider>
@@ -51,7 +55,7 @@ const AppWrapper = styled(SafeAreaView)((_props) => ({
   flex: 1,
 }));
 
-const ContentContainer = styled.View((p) => ({
+const ContentContainer = styled(View)((p) => ({
   flex: 1,
   justifyContent: 'center',
   alignItems: 'center',

@@ -5,7 +5,7 @@ import {
   StrokeCap,
   StrokeJoin,
 } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer-web';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useColor, { ColorParameters } from './useColor';
 import useDeletable from './useDeletable';
@@ -36,7 +36,6 @@ export default function usePaint(parameters: PaintParameters | Paint): Paint {
 
   const paint = useMemo(() => {
     if (!maybeParameters) return;
-
     const paint = new CanvasKit.Paint();
     paint.setColor(maybeParameters.color);
     paint.setStyle(maybeParameters.style);

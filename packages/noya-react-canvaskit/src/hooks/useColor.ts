@@ -1,5 +1,5 @@
 import { Color } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer-web';
+import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useStable4ElementArray from './useStable4ElementArray';
 

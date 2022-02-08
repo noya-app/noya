@@ -9,7 +9,9 @@ export class JSEmbindObject {
     this._isDeleted = false;
   }
   deleteAfter() {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
   isAliasOf(other: any) {
     return this === other;

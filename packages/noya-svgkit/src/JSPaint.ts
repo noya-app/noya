@@ -105,7 +105,9 @@ export class JSPaint extends JSEmbindObject implements Paint {
     a: number,
     colorSpace?: ColorSpace,
   ): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   setColorFilter(filter: ColorFilter): void {
@@ -113,7 +115,9 @@ export class JSPaint extends JSEmbindObject implements Paint {
   }
 
   setColorInt(color: ColorInt, colorSpace?: ColorSpace): void {
-    throw new Error('Not implemented');
+    throw new Error(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   setImageFilter(filter: ImageFilter): void {

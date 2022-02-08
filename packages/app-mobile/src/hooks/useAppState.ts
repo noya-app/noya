@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useReducer } from 'react';
+
 import {
   createInitialWorkspaceState,
   createSketchFile,
@@ -6,47 +8,17 @@ import {
   workspaceReducer,
 } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
-import { useEffect, useMemo, useReducer } from 'react';
 import { PromiseState } from 'noya-react-utils';
 import { SketchFile } from 'noya-sketch-file';
-import { IFontManager } from 'noya-renderer';
+import { useFontManager } from 'noya-renderer';
 
 type Action =
   | { type: 'set'; value: SketchFile }
   | { type: 'update'; value: WorkspaceAction };
 
-class FontManagerStub {
-  getFontId() {
-    // eslint-ignore-next-line
-    console.log(Function.name);
-  }
-  getBeestFontDescriptor() {
-    // eslint-ignore-next-line
-    console.log(Function.name);
-  }
-  downloadFont() {
-    // eslint-ignore-next-line
-    console.log(Function.name);
-  }
-  get entries() {
-    // eslint-ignore-next-line
-    console.log(Function.name);
-    return [];
-  }
-
-  get values() {
-    // eslint-ignore-next-line
-    console.log(Function.name);
-    return [];
-  }
-}
-
-// @ts-ignore
-const fontManager = new FontManagerStub() as IFontManager;
-
 export default function useAppState() {
-  // TODO: create app start params povider
   const CanvasKit = useCanvasKit();
+  const fontManager = useFontManager();
 
   const reducer = useMemo(
     () =>
@@ -75,8 +47,7 @@ export default function useAppState() {
 
         return state;
       },
-    // TODO: add fontManager when implemented
-    [CanvasKit],
+    [CanvasKit, fontManager],
   );
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });

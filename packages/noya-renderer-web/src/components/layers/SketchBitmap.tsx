@@ -22,7 +22,9 @@ export default memo(function SketchBitmap({ layer }: Props) {
 
   const image = useSketchImage(layer.image);
 
-  const paint = useMemo(() => new CanvasKit.Paint(), [CanvasKit]);
+  const paint = useMemo(() => {
+    return new CanvasKit.Paint();
+  }, [CanvasKit]);
 
   const path = useMemo(() => {
     const path = makePath(CanvasKit, getRectCornerPoints(layer.frame));
