@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import { decode as decodeBase64 } from 'base-64';
+import { View } from 'react-native';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';
@@ -155,7 +156,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
 export default React.memo(Toolbar);
 
-const ToolbarView = styled.View((p) => ({
+const ToolbarView = styled(View)((p) => ({
   bottom: 10,
   zIndex: 100,
   width: '100%',
@@ -164,11 +165,10 @@ const ToolbarView = styled.View((p) => ({
   justifyContent: 'center',
 }));
 
-const ToolbarContainer = styled.View((p) => ({
+const ToolbarContainer = styled(View)((p) => ({
   flexDirection: 'row',
   paddingVertical: p.theme.sizes.spacing.small,
   paddingHorizontal: p.theme.sizes.spacing.medium,
   backgroundColor: p.theme.colors.sidebar.background,
   borderRadius: 10,
-  // height: 100,
 }));

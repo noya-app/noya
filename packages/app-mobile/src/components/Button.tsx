@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 import Layout from './Layout';
 
@@ -26,7 +26,7 @@ const Button: React.FC<ButtonProps> = (props) => {
 
 export default React.memo(Button);
 
-const ButtonView = styled.View<{ active?: boolean }>((p) => ({
+const ButtonView = styled(View)<{ active?: boolean }>((p) => ({
   borderRadius: 4,
   backgroundColor: p.active
     ? p.theme.colors.primaryDark
@@ -38,7 +38,7 @@ const ButtonView = styled.View<{ active?: boolean }>((p) => ({
   borderColor: p.theme.colors.divider,
 }));
 
-const ButtonText = styled.Text((p) => ({
+const ButtonText = styled(Text)((p) => ({
   fontSize: 16,
   color: p.theme.colors.text,
 }));

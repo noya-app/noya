@@ -1,9 +1,18 @@
 import React, { useCallback, useMemo } from 'react';
-import { GestureResponderEvent, LayoutChangeEvent } from 'react-native';
+import {
+  View,
+  Text,
+  LayoutChangeEvent,
+  GestureResponderEvent,
+} from 'react-native';
 import styled from 'styled-components';
 
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { Point, createRect } from 'noya-geometry';
+import {
+  useApplicationState,
+  useWorkspace,
+  useSelector,
+} from 'noya-app-state-context';
+import { AffineTransform, Point, createRect } from 'noya-geometry';
 import { Selectors, getCurrentPage } from 'noya-state';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { FpsCounter } from '../components/FPSCounter';
@@ -38,6 +47,7 @@ const Canvas: React.FC<{}> = () => {
   const fontManager = useFontManager();
   const canvasKit = useCanvasKit();
   const gestures = useMultitouchGH();
+  const meta = useSelector(Selectors.getCurrentPageMetadata);
 
   const insets = useMemo(
     () => ({
@@ -49,6 +59,16 @@ const Canvas: React.FC<{}> = () => {
     [],
   );
 
+  // Event coordinates are relative to (0,0), but we want them to include
+  // the current page's zoom and offset from the origin
+  const offsetEventPoint = useCallback(
+    (point: Point) =>
+      AffineTransform.scale(1 / meta.zoomValue)
+        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+        .applyTo(point),
+    [meta],
+  );
+
   const onStartShouldSetResponder = useCallback(
     (e: GestureResponderEvent) => true,
     [],
@@ -57,6 +77,7 @@ const Canvas: React.FC<{}> = () => {
   const onResponderGrant = useCallback(
     (e: GestureResponderEvent) => {
       const rawPoint = getPoint(e);
+      const point = offsetEventPoint(rawPoint);
       gestures.setTouches(e);
 
       switch (state.interactionState.type) {
@@ -64,7 +85,7 @@ const Canvas: React.FC<{}> = () => {
           dispatch('interaction', [
             'startDrawing',
             state.interactionState.layerType,
-            rawPoint,
+            point,
           ]);
 
           break;
@@ -75,7 +96,7 @@ const Canvas: React.FC<{}> = () => {
             fontManager,
             state,
             insets,
-            rawPoint,
+            point,
             {
               groups: 'groupAndChildren', // event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
@@ -84,25 +105,22 @@ const Canvas: React.FC<{}> = () => {
           );
 
           const selectedGradientStopIndex =
-            Selectors.getGradientStopIndexAtPoint(state, rawPoint);
+            Selectors.getGradientStopIndexAtPoint(state, point);
 
           if (state.selectedGradient && selectedGradientStopIndex !== -1) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
 
-            dispatch('interaction', ['maybeMoveGradientStop', rawPoint]);
+            dispatch('interaction', ['maybeMoveGradientStop', point]);
           } else if (
             state.selectedGradient &&
-            Selectors.isPointerOnGradientLine(state, rawPoint)
+            Selectors.isPointerOnGradientLine(state, point)
           ) {
-            dispatch('addStopToGradient', rawPoint);
+            dispatch('addStopToGradient', point);
           } else if (
             state.selectedGradient &&
-            Selectors.isPointerOnGradientEllipseEditor(state, rawPoint)
+            Selectors.isPointerOnGradientEllipseEditor(state, point)
           ) {
-            dispatch('interaction', [
-              'maybeMoveGradientEllipseLength',
-              rawPoint,
-            ]);
+            dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
             if (state.selectedLayerIds.includes(layer.do_objectID)) {
               // if (event.shiftKey && state.selectedLayerIds.length !== 1) {
@@ -117,7 +135,7 @@ const Canvas: React.FC<{}> = () => {
               );
             }
 
-            dispatch('interaction', ['maybeMove', rawPoint]);
+            dispatch('interaction', ['maybeMove', point]);
           } else {
             dispatch('selectLayer', undefined);
             dispatch('interaction', ['startMarquee', rawPoint]);
@@ -127,12 +145,21 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [state, canvasKit, fontManager, dispatch, insets, gestures],
+    [
+      state,
+      canvasKit,
+      fontManager,
+      dispatch,
+      insets,
+      gestures,
+      offsetEventPoint,
+    ],
   );
 
   const onResponderMove = useCallback(
     (e: GestureResponderEvent) => {
       const rawPoint = getPoint(e);
+      const point = offsetEventPoint(rawPoint);
       const numOfTouches = e.nativeEvent.touches.length;
       const multiTouchGesture = gestures.getGesture(e);
 
@@ -141,13 +168,13 @@ const Canvas: React.FC<{}> = () => {
           dispatch('interaction', [
             state.interactionState.type,
             state.interactionState.layerType,
-            rawPoint,
+            point,
           ]);
           break;
         }
 
         case 'drawing': {
-          dispatch('interaction', ['updateDrawing', rawPoint]);
+          dispatch('interaction', ['updateDrawing', point]);
           break;
         }
         case 'marquee': {
@@ -204,17 +231,18 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [state, dispatch, gestures, insets],
+    [state, dispatch, gestures, insets, offsetEventPoint],
   );
 
   const onResponderRelease = useCallback(
     (e: GestureResponderEvent) => {
       const rawPoint = getPoint(e);
+      const point = offsetEventPoint(rawPoint);
       gestures.resetTouches();
 
       switch (state.interactionState.type) {
         case 'drawing': {
-          dispatch('interaction', ['updateDrawing', rawPoint]);
+          dispatch('interaction', ['updateDrawing', point]);
           dispatch('addDrawnLayer');
 
           break;
@@ -250,7 +278,7 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [state, dispatch, insets, gestures],
+    [state, dispatch, insets, gestures, offsetEventPoint],
   );
 
   const onCanvasLayout = useCallback(
@@ -288,11 +316,11 @@ const Canvas: React.FC<{}> = () => {
 
 export default React.memo(Canvas);
 
-const CanvasWrapper = styled.View(() => ({
+const CanvasWrapper = styled(View)(() => ({
   flex: 1,
 }));
 
-const InteractionView = styled.View((p) => ({
+const InteractionView = styled(View)((p) => ({
   zIndex: 10,
   width: '50%',
   maxWidth: 300,
@@ -301,7 +329,7 @@ const InteractionView = styled.View((p) => ({
   padding: p.theme.sizes.spacing.small,
 }));
 
-const Interaction = styled.Text((p) => ({
+const Interaction = styled(Text)((p) => ({
   color: p.theme.colors.text,
   fontSize: 14,
   textTransform: 'uppercase',

@@ -14,20 +14,25 @@ export interface FontProvider {
 export const SYSTEM_FONT_ID = 'system' as FontId;
 
 export class FontManager {
+  getFontFamilyIdList: FontProvider['getFontFamilyIdList'];
+  getFontFamilyId: FontProvider['getFontFamilyId'];
+  getFontFamilyName: FontProvider['getFontFamilyName'];
+  getFontFileUrl: FontProvider['getFontFileUrl'];
+  getFontDescriptorsForFamily: FontProvider['getFontDescriptorsForFamily'];
+
   constructor(public provider: FontProvider) {
-    this.provider = provider;
+    this.getFontFamilyIdList = this.provider.getFontFamilyIdList;
+    this.getFontFamilyId = this.provider.getFontFamilyId;
+    this.getFontFamilyName = this.provider.getFontFamilyName;
+    this.getFontFileUrl = this.provider.getFontFileUrl;
+    this.getFontDescriptorsForFamily =
+      this.provider.getFontDescriptorsForFamily;
   }
 
   private emitter = new Emitter<[FontId, ArrayBuffer]>();
 
   addDownloadedFontListener = this.emitter.addListener;
   removeDownloadedFontListener = this.emitter.removeListener;
-
-  getFontFamilyIdList = this.provider.getFontFamilyIdList;
-  getFontFamilyId = this.provider.getFontFamilyId;
-  getFontFamilyName = this.provider.getFontFamilyName;
-  getFontFileUrl = this.provider.getFontFileUrl;
-  getFontDescriptorsForFamily = this.provider.getFontDescriptorsForFamily;
 
   /**
    * Get a canonical ID for a font, given a name

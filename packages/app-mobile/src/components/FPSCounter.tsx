@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import styled from 'styled-components';
 import { useFPSMetric } from '../hooks/useFPSMetric';
 
@@ -17,6 +17,6 @@ export const FpsCounter: FunctionComponent<{ visible: boolean }> = ({
   );
 };
 
-const Txt = styled.Text((p) => ({
+const Txt = styled(Text)((p) => ({
   color: p.theme.colors.text,
 }));
