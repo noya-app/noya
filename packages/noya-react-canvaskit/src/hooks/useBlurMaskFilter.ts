@@ -1,5 +1,5 @@
 import { BlurStyle, MaskFilter } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { useCanvasKit } from 'noya-renderer-web';
 import { useMemo } from 'react';
 import useDeletable from './useDeletable';
 

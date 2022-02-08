@@ -38,7 +38,7 @@
     "lint": "eslint . --ext .js,.ts,.tsx",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
-    "postinstall": "husky install; yarn workspace app-mobile run patch-package",
+    "postinstall": "husky install",
     "start:canvaskit-sandbox": "modular start canvaskit-sandbox"
   },
   "eslintConfig": {
@@ -87,7 +87,6 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "patch-package": "^6.4.7"
+    "cross-env": "^7.0.3"
   }
 }

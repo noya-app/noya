@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import parseColor from 'color-parse';
-
 import type {
   AnimatedImage,
   CanvasKit,
@@ -39,11 +37,12 @@ import type {
   WebGLContextHandle,
   WebGLOptions,
 } from 'canvaskit';
-import { JSPaint } from './JSPaint';
-import { JSMaskFilter } from './JSMaskFilter';
+import parseColor from 'color-parse';
 import { Embind, JSEmbindObject } from './Embind';
-import { JSShaderFactory } from './JSShaderFactory';
+import { JSMaskFilter } from './JSMaskFilter';
+import { JSPaint } from './JSPaint';
 import { JSParagraphBuilder } from './JSParagraphBuilder';
+import { JSShaderFactory } from './JSShaderFactory';
 
 export type SerializableProperties<T> = {
   [K in keyof T as T[K] extends Function ? never : K]: T[K];
@@ -79,14 +78,10 @@ export const SVGKit: CanvasKit = {
     return new Float32Array([r, g, b, a ?? 0]);
   },
   ColorAsInt(r: number, g: number, b: number, a?: number): ColorInt {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   getColorComponents(c: Color): number[] {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   parseColorString(color: string, colorMap?: object): Color {
     const [r, g, b, a = 1] = parseColor(color).values;
@@ -94,14 +89,10 @@ export const SVGKit: CanvasKit = {
     return new Float32Array([r / 255, g / 255, b / 255, a]);
   },
   multiplyByAlpha(c: Color, alpha: number): Color {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   computeTonalColors(colors: TonalColorsInput): TonalColorsOutput {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
 
   LTRBRect(left: number, top: number, right: number, bottom: number): Rect {
@@ -135,66 +126,46 @@ export const SVGKit: CanvasKit = {
     flags: number,
     dstRect?: Rect,
   ): Rect | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   Malloc(typedArray: TypedArrayConstructor, len: number): MallocObj {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MallocGlyphIDs(len: number): MallocObj {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   Free(m: MallocObj): void {},
   MakeCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeRasterDirectSurface(
     ii: ImageInfo,
     pixels: MallocObj,
     bytesPerRow: number,
   ): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeSWCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeWebGLCanvasSurface(
     canvas: HTMLCanvasElement | string,
     colorSpace?: ColorSpace,
     opts?: WebGLOptions,
   ): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeSurface(width: number, height: number): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   GetWebGLContext(
     canvas: HTMLCanvasElement,
     opts?: WebGLOptions,
   ): WebGLContextHandle {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeGrContext(ctx: WebGLContextHandle): GrDirectContext {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeOnScreenGLSurface(
     ctx: GrDirectContext,
@@ -202,84 +173,56 @@ export const SVGKit: CanvasKit = {
     height: number,
     colorSpace: ColorSpace,
   ): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeRenderTarget(
     ...args:
       | [ctx: GrDirectContext, info: ImageInfo]
       | [ctx: GrDirectContext, width: number, height: number]
   ): Surface | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   currentContext(): WebGLContextHandle {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   setCurrentContext(ctx: WebGLContextHandle): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   deleteContext(ctx: WebGLContextHandle): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   getDecodeCacheLimitBytes(): number {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   getDecodeCacheUsedBytes(): number {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   setDecodeCacheLimitBytes(size: number): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeAnimatedImageFromEncoded(
     bytes: Uint8Array | ArrayBuffer,
   ): AnimatedImage | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeCanvas(width: number, height: number): EmulatedCanvas2D {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeImage(
     info: ImageInfo,
     bytes: number[] | Uint8Array | Uint8ClampedArray,
     bytesPerRow: number,
   ): Image | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): Image | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeImageFromCanvasImageSource(src: CanvasImageSource): Image {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakePicture(bytes: Uint8Array | ArrayBuffer): SkPicture | null {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeVertices(
     mode: VertexMode,
@@ -289,14 +232,10 @@ export const SVGKit: CanvasKit = {
     indices?: number[] | null,
     isVolatile?: boolean,
   ): Vertices {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeAnimation(json: string): SkottieAnimation {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeManagedAnimation(
     json: string,
@@ -304,14 +243,10 @@ export const SVGKit: CanvasKit = {
     filterPrefix?: string,
     soundMap?: SoundMap,
   ): ManagedSkottieAnimation {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
   MakeParticles(json: string, assets?: Record<string, ArrayBuffer>): Particles {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error('Not implemented');
   },
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;

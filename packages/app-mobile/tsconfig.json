@@ -5,10 +5,11 @@
     "strict": true,
     "noEmit": true,
     "allowJs": true,
-    "lib": ["es2021"],
+    "lib": ["es2017"],
     "target": "esnext",
     "module": "commonjs",
     "skipDefaultLibCheck": true,
+
     "skipLibCheck": true,
     "jsx": "react-native",
     "esModuleInterop": true,

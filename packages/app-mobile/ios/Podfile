@@ -4,13 +4,6 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '12.0'
 
-def fix_config(config)
-  # https://github.com/CocoaPods/CocoaPods/issues/8891
-  if config.build_settings['DEVELOPMENT_TEAM'].nil?
-    config.build_settings['DEVELOPMENT_TEAM'] = 'WC59N2X3FV'
-  end
-end
-
 target 'noyamobile' do
   use_expo_modules!
   post_integrate do |installer|
@@ -37,17 +30,5 @@ target 'noyamobile' do
   post_install do |installer|
     react_native_post_install(installer)
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
-
-    # Apply developer id for pods?
-    # installer.generated_projects.each do |project|
-    #   project.build_configurations.each do |config|
-    #       fix_config(config)
-    #   end
-    #   project.targets.each do |target|
-    #     target.build_configurations.each do |config|
-    #       fix_config(config)
-    #     end
-    #   end
-    # end
   end
 end

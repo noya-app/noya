@@ -42,10 +42,6 @@ export const colors = {
   imageOverlay:
     'linear-gradient(0deg, rgba(132, 63, 255,0.55), rgba(132, 63, 255,0.55))',
   selection: 'rgb(179,215,254)',
-
-  get dragOutline() {
-    return colors.primary;
-  },
 };
 
 export const fonts = {
