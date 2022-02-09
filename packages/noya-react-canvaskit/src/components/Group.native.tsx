@@ -1,7 +1,4 @@
 import React, { memo, PropsWithChildren } from 'react';
-
-import { ColorFilter, ImageFilter } from 'canvaskit';
-import { AffineTransform } from 'noya-geometry';
 import {
   Drawing,
   useDrawing,
@@ -10,6 +7,10 @@ import {
   skiaMatrix3,
 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
+
+import { ColorFilter, ImageFilter } from 'canvaskit';
+import { SkiaPath } from 'noya-skia-canvaskit';
+import { AffineTransform } from 'noya-geometry';
 
 import { ClipProps } from '../types';
 
@@ -45,7 +46,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
 
       if (clip) {
         canvas.clipPath(
-          clip.path._path,
+          (clip.path as SkiaPath).getRNSkiaPath(),
           clip.op.value,
           clip.antiAlias ?? false,
         );

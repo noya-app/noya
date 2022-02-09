@@ -163,6 +163,10 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
     this._paint.setStyle(style.value);
   }
 
+  getRNSkiaPaint() {
+    return this._paint;
+  }
+
   get style(): PaintStyle {
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
