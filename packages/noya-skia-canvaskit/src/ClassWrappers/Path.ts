@@ -16,39 +16,17 @@ import type {
   VerbList,
   WeightList,
 } from 'canvaskit';
-import // createRectFromBounds,
-// getRectCornerPoints,
-// getRectEdgeMidPoints,
-'noya-geometry';
+import {
+  LTRBArrayToRect,
+  RectToLTRBArray,
+  // createRectFromBounds,
+  // getRectCornerPoints,
+  // getRectEdgeMidPoints,
+} from 'noya-geometry';
 // import { parsePathCmds } from 'noya-state';
 import { JSEmbindObject } from './Embind';
 
 // const ROOT_2_OVER_2 = Math.sqrt(2) / 2;
-
-const LTRBArrayToIRect = (
-  inRect: Float32Array | undefined,
-): RNSkia.IRect | undefined => {
-  if (!inRect) {
-    return undefined;
-  }
-
-  const [left, top, right, bottom] = inRect;
-  return {
-    x: left,
-    y: top,
-    width: right - left,
-    height: bottom - top,
-  };
-};
-
-const IRectToLTRBArray = (inRect: RNSkia.IRect): Float32Array => {
-  return new Float32Array([
-    inRect.x,
-    inRect.y,
-    inRect.x + inRect.width,
-    inRect.y + inRect.height,
-  ]);
-};
 
 export class SkiaPath extends JSEmbindObject implements Path {
   private _path = RNSkia.Skia.Path.Make();
@@ -60,7 +38,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
 
   addArc(oval: InputRect, startAngle: number, sweepAngle: number): SkiaPath {
     this._path.addArc(
-      LTRBArrayToIRect(oval as Float32Array)!,
+      LTRBArrayToRect(oval as Float32Array)!,
       startAngle,
       sweepAngle,
     );
@@ -70,7 +48,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
 
   addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): SkiaPath {
     this._path.addOval(
-      LTRBArrayToIRect(oval as Float32Array)!,
+      LTRBArrayToRect(oval as Float32Array)!,
       isCCW,
       startIndex,
     );
@@ -91,7 +69,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   addRect(rect: InputRect, isCCW?: boolean): SkiaPath {
-    this._path.addRect(LTRBArrayToIRect(rect as Float32Array)!, isCCW);
+    this._path.addRect(LTRBArrayToRect(rect as Float32Array)!, isCCW);
 
     return this;
   }
@@ -132,7 +110,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
     forceMoveTo: boolean,
   ): SkiaPath {
     this._path.arcToOval(
-      LTRBArrayToIRect(oval as Float32Array)!,
+      LTRBArrayToRect(oval as Float32Array)!,
       startAngle,
       endAngle,
       forceMoveTo,
@@ -173,8 +151,10 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   computeTightBounds(outputArray?: Float32Array): Float32Array {
-    const a = IRectToLTRBArray(
-      this._path.computeTightBounds(LTRBArrayToIRect(outputArray)),
+    const a = RectToLTRBArray(
+      this._path.computeTightBounds(
+        outputArray ? LTRBArrayToRect(outputArray) : undefined,
+      ),
     );
 
     return a;
@@ -390,6 +370,10 @@ export class SkiaPath extends JSEmbindObject implements Path {
     this._path.trim(startT, stopT, isComplement);
 
     return this;
+  }
+
+  getRNSkiaPath() {
+    return this._path;
   }
 
   static MakeFromCmds(cmds: Float32Array): SkiaPath {

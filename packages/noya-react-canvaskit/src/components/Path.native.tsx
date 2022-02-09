@@ -1,18 +1,20 @@
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo } from 'react';
+import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { Path as SkiaPath } from '@shopify/react-native-skia';
-import { PathComponentProps } from '../types';
+import { SkiaPath, SkiaPaint } from 'noya-skia-canvaskit';
 
-const Path: React.FC<PathComponentProps> = (props) => {
-  const { path, paint } = props;
+interface NativePathProps {
+  path: SkiaPath;
+  paint: SkiaPaint;
+}
 
-  const skiaPaint = useRef(paint._paint);
+const Path: React.FC<NativePathProps> = (props) => {
+  const onDraw = useDrawing(props, ({ canvas }, { path, paint }) => {
+    canvas.drawPath(path.getRNSkiaPath(), paint.getRNSkiaPaint());
+  });
 
-  useEffect(() => {
-    skiaPaint.current = paint._paint;
-  }, [paint._paint]);
-
-  return <SkiaPath path={path._path} paint={skiaPaint} />;
+  // @ts-ignore
+  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
 };
 
 export default memo(Path);
