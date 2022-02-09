@@ -4,7 +4,7 @@ import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { sketchColorToRgba } from 'noya-colorpicker';
 import { center, Size } from 'noya-geometry';
-import { SketchLayer, useTextLayerParagraph } from 'noya-renderer-web';
+import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';
 import CanvasGridItem from './CanvasGridItem';

@@ -2,6 +2,7 @@ import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
 import { getCurrentPlatform, PlatformName } from 'noya-keymap';
+import { loadCanvasKit } from 'canvaskit';
 import { PromiseState } from 'noya-react-utils';
 import {
   CanvasKitProvider,
@@ -10,7 +11,7 @@ import {
   useCanvasKit,
   useDownloadFont,
   useFontManager,
-} from 'noya-renderer-web';
+} from 'noya-renderer';
 import { decode, SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
@@ -156,7 +157,7 @@ export default function App() {
 
   return (
     <EnvironmentParametersProvider value={environmentParameters}>
-      <CanvasKitProvider>
+      <CanvasKitProvider loadCanvasKit={loadCanvasKit}>
         <FontManagerProvider>
           <Contents />
         </FontManagerProvider>

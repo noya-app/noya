@@ -14,7 +14,7 @@ import {
   FontTraits,
   getTraitsDisplayName,
 } from 'noya-fonts';
-import { useFontManager } from 'noya-renderer-web';
+import { useFontManager } from 'noya-renderer';
 import { SetNumberMode } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';

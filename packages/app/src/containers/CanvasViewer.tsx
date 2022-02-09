@@ -1,4 +1,4 @@
-import { useCanvasKit } from 'noya-renderer-web';
+import { useCanvasKit } from 'noya-renderer';
 import React, {
   memo,
   ReactNode,

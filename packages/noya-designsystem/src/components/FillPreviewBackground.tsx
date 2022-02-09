@@ -3,7 +3,7 @@ import styled, { useTheme } from 'styled-components';
 
 import Sketch from 'noya-file-format';
 import { sketchColorToRgbaString } from 'noya-colorpicker';
-import { useSketchImage } from 'noya-renderer-web';
+import { useSketchImage } from 'noya-renderer';
 import { useObjectURL } from '../hooks/useObjectURL';
 import { getGradientBackground } from '../utils/getGradientBackground';
 

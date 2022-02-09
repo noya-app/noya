@@ -9,10 +9,7 @@ import {
 import { Button, Divider, withSeparatorElements } from 'noya-designsystem';
 import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
-import {
-  LayerPreview as RCKLayerPreview,
-  useCanvasKit,
-} from 'noya-renderer-web';
+import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import {
   FileType,

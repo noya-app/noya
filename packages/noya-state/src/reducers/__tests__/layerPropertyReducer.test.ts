@@ -1,5 +1,5 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
-import { loadCanvasKit } from 'noya-renderer-web';
+import { loadCanvasKit } from 'canvaskit';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';
 import { fixGroupFrame } from '../../selectors/layerSelectors';

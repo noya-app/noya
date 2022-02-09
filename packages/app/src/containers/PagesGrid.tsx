@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { GridView, MenuItem } from 'noya-designsystem';
-import { LayerPreview as RCKLayerPreview } from 'noya-renderer-web';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import CanvasGridItem from '../components/theme/CanvasGridItem';

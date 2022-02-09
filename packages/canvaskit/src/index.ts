@@ -1,5 +1,7 @@
 import { emscriptenRequireInterop } from './emscriptenRequireInterop';
 
+export * from './loadCanvasKit';
+
 // Minimum TypeScript Version: 3.7
 export async function CanvasKitInit(
   opts: CanvasKitInitOptions,
