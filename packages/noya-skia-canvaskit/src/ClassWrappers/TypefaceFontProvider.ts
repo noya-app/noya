@@ -1,5 +1,3 @@
-import { Skia } from '@shopify/react-native-skia';
-
 import type {
   TypefaceFontProvider,
   TypefaceFontProviderFactory,
@@ -15,11 +13,8 @@ export class SkiaTypefaceFontProvider
   }
 }
 
-export class SkiaTypefaceFontProviderFactory
-  extends JSEmbindObject
-  implements TypefaceFontProviderFactory
-{
+export const SkiaTypefaceFontProviderFactory: TypefaceFontProviderFactory = {
   Make(): TypefaceFontProvider {
     return new SkiaTypefaceFontProvider();
-  }
-}
+  },
+};

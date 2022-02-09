@@ -18,13 +18,13 @@ import {
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 
-export class SkiaPaintWrapper extends JSEmbindObject implements Paint {
+export class SkiaPaint extends JSEmbindObject implements Paint {
   private _paint = RNSkia.Skia.Paint();
 
   copy(): Paint {
     const paintCopy = this._paint.copy();
 
-    const copy = new SkiaPaintWrapper();
+    const copy = new SkiaPaint();
     copy._paint = paintCopy;
 
     return copy;

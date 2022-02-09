@@ -14,6 +14,8 @@ import type {
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 
+const { ImageFilter: FilterFactory } = RNSkia.Skia;
+
 export class SkiaImageFilter extends JSEmbindObject implements ImageFilter {
   private _imageFilter: RNSkia.IImageFilter;
 
@@ -28,17 +30,12 @@ export class SkiaImageFilter extends JSEmbindObject implements ImageFilter {
   }
 }
 
-export class SkiaImageFilterFactory
-  extends JSEmbindObject
-  implements ImageFilterFactory
-{
-  private _filterFactory = RNSkia.Skia.ImageFilter;
-
+export const SkiaImageFilterFactory: ImageFilterFactory = {
   MakeShader(shader: Shader): ImageFilter {
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   MakeArithmetic(
     k1: number,
@@ -52,7 +49,7 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   MakeErode(
     radiusX: number,
@@ -62,13 +59,13 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   MakeOffset(dx: number, dy: number, input: ImageFilter | null): ImageFilter {
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   /**
    *  Create a blend of two image filters.
@@ -84,7 +81,7 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   /**
    *  Create a filter that draws a drop shadow under the input content. This filter produces an
@@ -107,7 +104,7 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   /**
    *  Create a filter that renders a drop shadow, in exactly the same manner as MakeDropShadow,
@@ -135,7 +132,7 @@ export class SkiaImageFilterFactory
     const g = Math.floor(inG * 255) << 8;
     const b = Math.floor(inB * 255) << 0;
 
-    const skiaImageFilter = this._filterFactory.MakeDropShadowOnly(
+    const skiaImageFilter = FilterFactory.MakeDropShadowOnly(
       dx,
       dy,
       sigmaX,
@@ -145,7 +142,7 @@ export class SkiaImageFilterFactory
     );
 
     return new SkiaImageFilter(skiaImageFilter);
-  }
+  },
 
   /**
    * Create a filter that blurs its input by the separate X and Y sigmas. The provided tile mode
@@ -165,7 +162,7 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   /**
    * Create a filter that applies the color filter to the input filter results.
@@ -176,7 +173,7 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   /**
    * Create a filter that composes 'inner' with 'outer', such that the results of 'inner' are
@@ -192,7 +189,7 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
+  },
 
   /**
    * Create a filter that transforms the input image by 'matrix'. This matrix transforms the
@@ -210,5 +207,5 @@ export class SkiaImageFilterFactory
     throw new Error(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
-  }
-}
+  },
+};
