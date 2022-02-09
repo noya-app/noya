@@ -12,7 +12,7 @@ import {
   TypefaceFontProvider,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
-import { SkiaParagraph } from './SkiaParagraph';
+import { SkiaParagraph } from './Paragraph';
 
 export class SkiaParagraphBuilder
   extends JSEmbindObject

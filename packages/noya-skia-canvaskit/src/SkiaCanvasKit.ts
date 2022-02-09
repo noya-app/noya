@@ -36,12 +36,7 @@ import type {
   // WebGLOptions,
 } from 'canvaskit';
 import parseColor from 'color-parse';
-import { Embind } from './Embind';
-import { SkiaPaintWrapper } from './SkiaPaint';
-import { SkiaImageFilterFactory } from './SkiaImageFilter';
-import { SkiaTypefaceFontProviderFactory } from './TypefaceFontProvider';
-import { SkiaParagraphBuilder } from './SkiaParagraphBuilder';
-import { SkiaPathEffect } from './SkiaPathEffect';
+import { Wrappers, Embind } from './ClassWrappers';
 
 class JSParagraphStyle implements ParagraphStyle {}
 
@@ -270,30 +265,25 @@ export const SkiaCanvasKit: CanvasKit = {
   ParagraphStyle: JSParagraphStyle,
   ContourMeasureIter: 0 as any,
   Font: 0 as any,
-  Paint: SkiaPaintWrapper,
 
-  Path: 0 as any,
   PictureRecorder: 0 as any,
   TextStyle: JSTextStyle,
 
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
-  ParagraphBuilder: SkiaParagraphBuilder,
   ColorFilter: 0 as any,
   FontMgr: 0 as any,
-  ImageFilter: new SkiaImageFilterFactory(),
   MaskFilter: 0 as any,
-  PathEffect: SkiaPathEffect,
   RuntimeEffect: 0 as any,
   Shader: 0 as any,
   TextBlob: 0 as any,
   Typeface: 0 as any,
-  TypefaceFontProvider: new SkiaTypefaceFontProviderFactory(),
 
   // Misc
   ColorMatrix: 0 as any,
   Matrix: 0 as any,
   M44: 0 as any,
   Vector: 0 as any,
+  ...Wrappers,
 
   // Core Enums
   AlphaType: Embind.createEnum(['Opaque', 'Premul', 'Unpremul']),
