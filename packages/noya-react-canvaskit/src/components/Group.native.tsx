@@ -70,6 +70,8 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         },
         children,
       );
+
+      canvas.restore();
     },
   );
 
