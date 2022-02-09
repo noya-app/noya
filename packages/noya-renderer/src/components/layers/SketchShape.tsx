@@ -56,8 +56,7 @@ const SketchFill = memo(function SketchFill({
   const image = useSketchImage(fill.image);
 
   // TODO: Delete unused shaders
-  const runtimeEffect = undefined;
-  useMemo(() => {
+  const runtimeEffect = useMemo(() => {
     if (
       fill.fillType !== Sketch.FillType.Shader ||
       !fill.shader ||
