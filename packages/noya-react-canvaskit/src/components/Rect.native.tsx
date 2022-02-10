@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { SkiaPaint } from 'noya-skia-canvaskit';
+import { SkiaPaint } from 'noya-native-canvaskit';
 import { LTRBArrayToRect } from 'noya-geometry';
 
 interface RectProps {

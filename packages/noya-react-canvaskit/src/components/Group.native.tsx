@@ -9,7 +9,7 @@ import {
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
 import { ColorFilter, ImageFilter } from 'canvaskit';
-import { SkiaPath } from 'noya-skia-canvaskit';
+import { SkiaPath } from 'noya-native-canvaskit';
 import { AffineTransform } from 'noya-geometry';
 
 import { ClipProps } from '../types';
