@@ -1,23 +1,23 @@
 import * as RNSkia from '@shopify/react-native-skia';
 
 import {
-  BlendMode,
-  Color,
-  ColorFilter,
-  ColorInt,
-  ColorSpace,
-  ImageFilter,
-  InputColor,
-  MaskFilter,
   Paint,
-  PaintStyle,
-  PathEffect,
-  Shader,
+  Color,
+  ColorInt,
+  BlendMode,
   StrokeCap,
+  ColorSpace,
+  InputColor,
+  PaintStyle,
   StrokeJoin,
 } from 'canvaskit';
-import { JSEmbindObject } from './Embind';
 import { colorArrayToNum, colorNumToArray } from '../utils/color';
+import { SkiaColorFilter } from './ColorFilter';
+import { SkiaImageFilter } from './ImageFilter';
+import { SkiaMaskFilter } from './MaskFilter';
+import { SkiaPathEffect } from './PathEffect';
+import { JSEmbindObject } from './Embind';
+import { SkiaShader } from './Shader';
 
 export class SkiaPaint extends JSEmbindObject implements Paint {
   private _paint = RNSkia.Skia.Paint();
@@ -66,9 +66,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setBlendMode(mode: BlendMode): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    this._paint.setBlendMode(mode.value);
   }
 
   setColor(color: InputColor, colorSpace?: ColorSpace): void {
@@ -87,51 +85,36 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
     );
   }
 
-  setColorFilter(filter: ColorFilter): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  setColorFilter(filter: SkiaColorFilter): void {
+    this._paint.setColorFilter(filter.getColorFilter());
   }
 
   setColorInt(color: ColorInt, colorSpace?: ColorSpace): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    this._paint.setColor(color);
   }
 
-  setImageFilter(filter: ImageFilter): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  setImageFilter(filter: SkiaImageFilter): void {
+    this._paint.setImageFilter(filter.getImageFilter());
   }
 
-  setMaskFilter(filter: MaskFilter): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  setMaskFilter(filter: SkiaMaskFilter): void {
+    this._paint.setMaskFilter(filter.getMaskFilter());
   }
 
-  setPathEffect(effect: PathEffect): void {
-    // @ts-expect-error
-    this._paint.setPathEffect(effect._pathEffect);
+  setPathEffect(effect: SkiaPathEffect): void {
+    this._paint.setPathEffect(effect.getPathEffect());
   }
 
-  setShader(shader: Shader): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  setShader(shader: SkiaShader): void {
+    this._paint.setShader(shader.getShader());
   }
 
   setStrokeCap(cap: StrokeCap): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    this._paint.setStrokeCap(cap.value);
   }
 
   setStrokeJoin(join: StrokeJoin): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    this._paint.setStrokeJoin(join.value);
   }
 
   setStrokeMiter(limit: number): void {

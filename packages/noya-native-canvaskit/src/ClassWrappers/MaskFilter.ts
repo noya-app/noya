@@ -3,7 +3,7 @@ import { Skia, IMaskFilter } from '@shopify/react-native-skia';
 import type { MaskFilterFactory, MaskFilter, BlurStyle } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 
-class SkiaMaskFilter extends JSEmbindObject implements MaskFilter {
+export class SkiaMaskFilter extends JSEmbindObject implements MaskFilter {
   constructor(private _maskFilter: IMaskFilter) {
     super();
   }

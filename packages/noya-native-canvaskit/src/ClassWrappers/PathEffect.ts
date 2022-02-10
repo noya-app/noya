@@ -6,12 +6,12 @@ import { JSEmbindObject } from './Embind';
 const SkPathEffect = RNSkia.Skia.PathEffect;
 
 export class SkiaPathEffect extends JSEmbindObject implements PathEffect {
-  _pathEffect: RNSkia.IPathEffect | null;
-
-  constructor(pathEffect: RNSkia.IPathEffect | null) {
+  constructor(private _pathEffect: RNSkia.IPathEffect | null) {
     super();
+  }
 
-    this._pathEffect = pathEffect;
+  getPathEffect(): RNSkia.IPathEffect | null {
+    return this._pathEffect;
   }
 
   static MakeCorner(radius: number): PathEffect | null {
