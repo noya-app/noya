@@ -1,7 +1,15 @@
 export { Embind } from './Embind';
 export { SkiaPath } from './Path';
+export { SkiaFont } from './Font';
 export { SkiaPaint } from './Paint';
+export { SkiaShaderFactory } from './Shader';
 export { SkiaPathEffect } from './PathEffect';
+export { SkiaFontMgrFactory } from './FontMgr';
+export { SkiaTextBlobFactory } from './TextBlob';
+export { SkiaTypefaceFactory } from './Typeface';
+export { SkiaMaskFilterFactory } from './MaskFilter';
 export { SkiaImageFilterFactory } from './ImageFilter';
+export { SkiaColorFilterFactory } from './ColorFilter';
 export { SkiaParagraphBuilder } from './ParagraphBuilder';
+export { SkiaRuntimeEffectFactory } from './RuntimeEffect';
 export { SkiaTypefaceFontProviderFactory } from './TypefaceFontProvider';

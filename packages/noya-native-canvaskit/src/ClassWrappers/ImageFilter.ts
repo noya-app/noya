@@ -17,12 +17,8 @@ import { JSEmbindObject } from './Embind';
 const { ImageFilter: FilterFactory } = RNSkia.Skia;
 
 export class SkiaImageFilter extends JSEmbindObject implements ImageFilter {
-  private _imageFilter: RNSkia.IImageFilter;
-
-  constructor(imgFil: RNSkia.IImageFilter) {
+  constructor(private _imageFilter: RNSkia.IImageFilter) {
     super();
-
-    this._imageFilter = imgFil;
   }
 
   getImageFilter(): RNSkia.IImageFilter {

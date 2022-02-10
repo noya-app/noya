@@ -17,6 +17,7 @@ import {
   StrokeJoin,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
+import { colorArrayToNum, colorNumToArray } from '../utils/color';
 
 export class SkiaPaint extends JSEmbindObject implements Paint {
   private _paint = RNSkia.Skia.Paint();
@@ -37,14 +38,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   getColor(): Color {
-    const color = this._paint.getColor();
-
-    const a = ((color & 0xff000000) >> 24) / 255.0;
-    const r = ((color & 0x00ff0000) >> 16) / 255.0;
-    const g = ((color & 0x0000ff00) >> 8) / 255.0;
-    const b = (color & 0x000000ff) / 255.0;
-
-    return new Float32Array([r, g, b, a]);
+    return colorNumToArray(this._paint.getColor());
   }
 
   getStrokeCap(): StrokeCap {
@@ -78,18 +72,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setColor(color: InputColor, colorSpace?: ColorSpace): void {
-    const [inR, inG, inB, inA] = color as number[];
-
-    const a = Math.floor(inA * 255) << 0;
-    const r = Math.floor(inR * 255) << 24;
-    const g = Math.floor(inG * 255) << 16;
-    const b = Math.floor(inB * 255) << 8;
-
-    // Stolen from react-native processColor :)
-    let normalizedColor = a | r | g | b;
-    normalizedColor = ((normalizedColor << 24) | (normalizedColor >>> 8)) >>> 0;
-
-    this._paint.setColor(normalizedColor);
+    this._paint.setColor(colorArrayToNum(color as Float32Array));
   }
 
   setColorComponents(
