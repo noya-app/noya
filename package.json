@@ -62,6 +62,7 @@
     "@types/node": "^14.14.22",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@types/uuid": "^8.3.4",
     "cross-fetch": "^3.1.4",
     "eslint-config-modular-app": "^0.3.1",
     "husky": "^5.1.3",
