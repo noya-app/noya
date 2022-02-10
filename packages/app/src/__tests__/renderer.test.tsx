@@ -1,16 +1,13 @@
 import { act } from '@testing-library/react';
 import Sketch from 'noya-file-format';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import { loadCanvasKit } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';
 import { FontManager } from 'noya-fonts';
 import { generateImage } from 'noya-generate-image';
 import { GoogleFontProvider } from 'noya-google-fonts';
-import {
-  loadCanvasKit,
-  RenderingModeProvider,
-  SketchFileRenderer,
-} from 'noya-renderer-web';
+import { RenderingModeProvider, SketchFileRenderer } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import { PointString, SketchModel } from 'noya-sketch-model';
 import {

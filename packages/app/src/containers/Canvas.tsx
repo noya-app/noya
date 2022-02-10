@@ -23,7 +23,7 @@ import {
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
-import { useCanvasKit, useFontManager } from 'noya-renderer-web';
+import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
   ApplicationState,
   CompassDirection,

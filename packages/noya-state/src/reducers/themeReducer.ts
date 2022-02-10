@@ -1,6 +1,7 @@
 import produce from 'immer';
 
 import Sketch from 'noya-file-format';
+import { Swatch } from 'noya-file-format/src/types';
 import { SketchModel } from 'noya-sketch-model';
 import { delimitedPath, getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
@@ -98,7 +99,7 @@ export function themeReducer(
         const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
           do_objectID: uuid(),
-          objects: [],
+          objects: [] as Swatch[],
         };
 
         const swatches = draft.selectedThemeTab.swatches;
@@ -231,7 +232,7 @@ export function themeReducer(
         const sharedSwatches = draft.sketch.document.sharedSwatches ?? {
           _class: 'swatchContainer',
           do_objectID: uuid(),
-          objects: [],
+          objects: [] as Swatch[],
         };
 
         sharedSwatches.objects.forEach((swatch: Sketch.Swatch) => {

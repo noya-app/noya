@@ -8,10 +8,10 @@ import { ThemeProvider } from 'styled-components';
 import {
   CanvasKitProvider,
   ComponentsProvider,
+  ImageCacheProvider,
   FontManagerProvider,
-} from 'noya-renderer-web';
+} from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
-import { ImageCacheProvider } from 'noya-renderer-web';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { SVGRenderer } from 'noya-svg-renderer';
 import { UTF16 } from 'noya-utils';
@@ -43,7 +43,7 @@ export function generateImage(
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider CanvasKit={CanvasKit}>
+        <CanvasKitProvider canvasKit={CanvasKit}>
           <ThemeProvider theme={theme}>
             <StateProvider state={state}>
               <ImageCacheProvider>
@@ -75,7 +75,7 @@ export function generateImage(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider CanvasKit={CanvasKit}>
+          <CanvasKitProvider canvasKit={CanvasKit}>
             <ThemeProvider theme={theme}>
               <StateProvider state={state}>
                 <ImageCacheProvider>

@@ -10,7 +10,7 @@ import {
   RootScaleProvider,
   SketchFileRenderer,
   useCanvasKit,
-} from 'noya-renderer-web';
+} from 'noya-renderer';
 import { memo, useLayoutEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 import { StateProvider, useWorkspaceState } from 'noya-app-state-context';

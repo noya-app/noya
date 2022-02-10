@@ -2,12 +2,6 @@
   "extends": "modular-scripts/tsconfig.json",
   "compilerOptions": {
     "paths": {
-      /*
-       * Provide renderer paths explicitly to avoid
-       * noya-renderer "hiding" noya-renderer-web
-       */
-      "noya-renderer": ["./packages/noya-renderer"],
-      "noya-renderer-web": ["./packages/noya-renderer-web"],
       // Hack for packages other than mobile
       "@shopify/react-native-skia/*": [
         "./packages/app-mobile/node_modules/@shopify/react-native-skia/*"
@@ -15,7 +9,7 @@
       "@shopify/react-native-skia": [
         "./packages/app-mobile/node_modules/@shopify/react-native-skia"
       ],
-      /* Include path too all package src index files */
+      /* Include path to all package src index files */
       "*": ["./*/src"]
     }
   }
