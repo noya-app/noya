@@ -17,8 +17,8 @@ const allowList = [
   'noya-sketch-model',
   'noya-colorpicker',
   'noya-google-fonts',
-  'noya-skia-canvaskit',
   'noya-react-canvaskit',
+  'noya-native-canvaskit',
   'noya-app-state-context',
 ];
 

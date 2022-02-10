@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { SkiaPath, SkiaPaint } from 'noya-skia-canvaskit';
+import { SkiaPath, SkiaPaint } from 'noya-native-canvaskit';
 
 interface NativePathProps {
   path: SkiaPath;

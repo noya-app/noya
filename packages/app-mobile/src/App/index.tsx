@@ -17,7 +17,7 @@ import {
 
 // Local imports
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
-import { loadSkiaCanvasKit } from 'noya-skia-canvaskit';
+import { loadSkiaCanvasKit } from 'noya-native-canvaskit';
 import { darkTheme, lightTheme } from '../constants';
 import AppContent from './AppContent';
 
