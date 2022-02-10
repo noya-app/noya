@@ -37,12 +37,12 @@ export const SkiaCanvasKit: CanvasKit = {
     return new Float32Array([r, g, b, a ?? 0]);
   },
   ColorAsInt(r, g, b, a) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   getColorComponents(c) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -52,17 +52,17 @@ export const SkiaCanvasKit: CanvasKit = {
     return new Float32Array([r / 255, g / 255, b / 255, a]);
   },
   multiplyByAlpha(color, alpha) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   computeTonalColors(colors) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   LTRBRect(left, top, right, bottom) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -70,7 +70,7 @@ export const SkiaCanvasKit: CanvasKit = {
     return new Float32Array([x, y, x + width, y + height]);
   },
   LTRBiRect(left, top, right, bottom) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -78,7 +78,7 @@ export const SkiaCanvasKit: CanvasKit = {
     return new Int32Array([x, y, x + width, y + height]);
   },
   RRectXY(rect, rx, ry) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -91,22 +91,22 @@ export const SkiaCanvasKit: CanvasKit = {
     flags,
     dstRect,
   ) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   Malloc(typedArray, len) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MallocGlyphIDs(len) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   Free(m) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -116,37 +116,37 @@ export const SkiaCanvasKit: CanvasKit = {
     );
   },
   MakeRasterDirectSurface(ii, pixels, bytesPerRow) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeSWCanvasSurface(canvas) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeWebGLCanvasSurface(canvas, colorSpace, opts) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeSurface(width, height) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   GetWebGLContext(canvas, opts) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeGrContext(ctx) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeOnScreenGLSurface(ctx, width, height, colorSpace) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -155,67 +155,67 @@ export const SkiaCanvasKit: CanvasKit = {
       | [ctx: GrDirectContext, info: ImageInfo]
       | [ctx: GrDirectContext, width: number, height: number]
   ) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   currentContext() {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   setCurrentContext(ctx) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   deleteContext(ctx) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   getDecodeCacheLimitBytes() {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   getDecodeCacheUsedBytes() {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   setDecodeCacheLimitBytes(size) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeAnimatedImageFromEncoded(bytes) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeCanvas(width, height) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeImage(info, bytes, bytesPerRow) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeImageFromEncoded(bytes) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeImageFromCanvasImageSource(src) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakePicture(bytes) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -227,22 +227,22 @@ export const SkiaCanvasKit: CanvasKit = {
     indices,
     isVolatile,
   ) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeAnimation(json) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeManagedAnimation(json, assets, filterPrefix, soundMap) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
   MakeParticles(json, assets) {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },

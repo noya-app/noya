@@ -10,12 +10,11 @@ import type {
   InputMatrix,
   ShaderFactory,
   AngleInDegrees,
-  InputFlexibleColorArray,
 } from 'canvaskit';
 import { colorArrayToNum } from '../utils/color';
 import { JSEmbindObject } from './Embind';
 
-class SkiaShader extends JSEmbindObject implements Shader {
+export class SkiaShader extends JSEmbindObject implements Shader {
   constructor(private _shader: IShader) {
     super();
   }
@@ -61,23 +60,21 @@ export const SkiaShaderFactory: ShaderFactory = {
   MakeLinearGradient(
     start: InputPoint,
     end: InputPoint,
-    colors: InputFlexibleColorArray,
+    colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: InputMatrix,
     flags?: number,
     colorSpace?: ColorSpace,
   ): SkiaShader {
-    // TODO: make sure the colors variable is processed correctly
     return new SkiaShader(
       Skia.Shader.MakeLinearGradient(
         { x: start[0], y: start[1] },
         { x: end[0], y: end[1] },
-        // @ts-expect-error
-        colors,
+        colors.map((c) => colorArrayToNum(c)),
         pos,
         mode.value,
-        localMatrix,
+        undefined, // TODO: localMatrix
         flags,
       ),
     );
@@ -86,7 +83,7 @@ export const SkiaShaderFactory: ShaderFactory = {
   MakeRadialGradient(
     center: InputPoint,
     radius: number,
-    colors: InputFlexibleColorArray,
+    colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: InputMatrix,
@@ -98,11 +95,10 @@ export const SkiaShaderFactory: ShaderFactory = {
       Skia.Shader.MakeRadialGradient(
         { x: center[0], y: center[1] },
         radius,
-        // @ts-expect-error
-        colors,
+        colors.map((c) => colorArrayToNum(c)),
         pos,
         mode.value,
-        localMatrix,
+        undefined, // TODO: localMatrix
         flags,
       ),
     );
@@ -111,7 +107,7 @@ export const SkiaShaderFactory: ShaderFactory = {
   MakeSweepGradient(
     cx: number,
     cy: number,
-    colors: InputFlexibleColorArray,
+    colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: InputMatrix | null,
@@ -125,11 +121,10 @@ export const SkiaShaderFactory: ShaderFactory = {
       Skia.Shader.MakeSweepGradient(
         cx,
         cy,
-        // @ts-expect-error
-        colors,
+        colors.map((c) => colorArrayToNum(c)),
         pos,
         mode.value,
-        localMatrix,
+        undefined, // TODO: localMatrix
         flags,
         startAngle,
         endAngle,
@@ -162,7 +157,7 @@ export const SkiaShaderFactory: ShaderFactory = {
     startRadius: number,
     end: InputPoint,
     endRadius: number,
-    colors: InputFlexibleColorArray,
+    colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
     localMatrix?: InputMatrix,
@@ -176,11 +171,10 @@ export const SkiaShaderFactory: ShaderFactory = {
         startRadius,
         { x: end[0], y: end[0] },
         endRadius,
-        // @ts-expect-error
-        colors,
+        colors.map((c) => colorArrayToNum(c)),
         pos,
         mode.value,
-        localMatrix,
+        undefined, // TODO: localMatrix
         flags,
       ),
     );

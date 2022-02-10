@@ -13,7 +13,7 @@ class SkiaTypeface extends JSEmbindObject implements Typeface {
     numCodePoints?: number,
     output?: GlyphIDArray,
   ): GlyphIDArray {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }

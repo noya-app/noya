@@ -11,7 +11,7 @@ export class JSEmbindObject {
     this._isDeleted = false;
   }
   deleteAfter() {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }

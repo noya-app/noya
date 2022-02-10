@@ -12,62 +12,68 @@ import { JSEmbindObject } from './Embind';
 
 export class SkiaParagraph extends JSEmbindObject implements Paragraph {
   didExceedMaxLines(): boolean {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getAlphabeticBaseline(): number {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getGlyphPositionAtCoordinate(dx: number, dy: number): PositionWithAffinity {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getHeight(): number {
-    return 0;
+    console.warn(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
     // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
   }
 
   getIdeographicBaseline(): number {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getLineMetrics(): LineMetrics[] {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getLongestLine(): number {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getMaxIntrinsicWidth(): number {
-    return 0;
+    console.warn(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getMaxWidth(): number {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getMinIntrinsicWidth(): number {
-    return 0;
+    console.warn(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
   }
 
   getRectsForPlaceholders(): FlattenedRectangleArray {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -78,24 +84,27 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
     hStyle: RectHeightStyle,
     wStyle: RectWidthStyle,
   ): FlattenedRectangleArray {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getWordBoundary(offset: number): URange {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getShapedLines(): ShapedLine[] {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   layout(width: number): void {
+    console.warn(
+      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    );
     // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
   }
 }

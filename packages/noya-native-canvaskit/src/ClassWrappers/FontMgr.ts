@@ -4,7 +4,7 @@ import type { FontMgr, FontMgrFactory } from 'canvaskit';
 
 export const SkiaFontMgrFactory: FontMgrFactory = {
   FromData(...buffers: ArrayBuffer[]): FontMgr | null {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },

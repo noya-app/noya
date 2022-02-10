@@ -56,14 +56,14 @@ export class SkiaPath extends JSEmbindObject implements Path {
     return this;
   }
 
-  addPath(...args: any[]): SkiaPath {
-    throw new Error(
+  addPath(other: SkiaPath): SkiaPath {
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   addPoly(points: InputFlattenedPointArray, close: boolean): SkiaPath {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -75,7 +75,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   addRRect(rrect: InputRRect, isCCW?: boolean): SkiaPath {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -85,7 +85,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
     points: InputFlattenedPointArray,
     weights?: WeightList,
   ): SkiaPath {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -98,7 +98,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
     endAngle: number,
     isCCW?: boolean,
   ): Path {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -205,7 +205,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   getBounds(outputArray?: Float32Array): Float32Array {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -351,7 +351,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   toCmds(): Float32Array {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -361,7 +361,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   transform(...args: any[]): SkiaPath {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }

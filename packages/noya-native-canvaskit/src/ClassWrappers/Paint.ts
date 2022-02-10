@@ -32,7 +32,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   getBlendMode(): BlendMode {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -66,7 +66,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setBlendMode(mode: BlendMode): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -82,31 +82,31 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
     a: number,
     colorSpace?: ColorSpace,
   ): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   setColorFilter(filter: ColorFilter): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   setColorInt(color: ColorInt, colorSpace?: ColorSpace): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   setImageFilter(filter: ImageFilter): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   setMaskFilter(filter: MaskFilter): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -117,19 +117,19 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setShader(shader: Shader): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   setStrokeCap(cap: StrokeCap): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   setStrokeJoin(join: StrokeJoin): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -151,7 +151,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   get style(): PaintStyle {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }

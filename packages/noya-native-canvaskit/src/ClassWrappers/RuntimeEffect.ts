@@ -29,7 +29,7 @@ class SkiaRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
     //   isOpaque,
     //   localMatrix ? (localMatrix as number[]) : undefined,
     // );
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -41,13 +41,13 @@ class SkiaRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
     localMatrix?: InputMatrix,
   ): Shader {
     // TODO: add after implementiong shader wrapper
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
 
   getUniform(index: number): SkSLUniform {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }

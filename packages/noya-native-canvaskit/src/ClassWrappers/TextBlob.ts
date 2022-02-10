@@ -14,7 +14,7 @@ class SkiaTextBlob extends JSEmbindObject implements TextBlob {}
 
 export const SkiaTextBlobFactory: TextBlobFactory = {
   MakeFromGlyphs(glyphs: InputGlyphIDArray, font: SkiaFont): SkiaTextBlob {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -24,7 +24,7 @@ export const SkiaTextBlobFactory: TextBlobFactory = {
     rsxforms: InputFlattenedRSXFormArray,
     font: SkiaFont,
   ): SkiaTextBlob {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -34,13 +34,13 @@ export const SkiaTextBlobFactory: TextBlobFactory = {
     rsxforms: InputFlattenedRSXFormArray,
     font: SkiaFont,
   ): SkiaTextBlob {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
 
   MakeFromText(str: string, font: SkiaFont): SkiaTextBlob {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
@@ -51,7 +51,7 @@ export const SkiaTextBlobFactory: TextBlobFactory = {
     font: SkiaFont,
     initialOffset?: number,
   ): SkiaTextBlob {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },

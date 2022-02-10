@@ -31,7 +31,7 @@ export class SkiaParagraphBuilder
     baseline?: TextBaseline,
     offset?: number,
   ): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -53,7 +53,7 @@ export class SkiaParagraphBuilder
   }
 
   pushPaintStyle(textStyle: TextStyle, fg: Paint, bg: Paint): void {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
@@ -79,7 +79,7 @@ export class SkiaParagraphBuilder
     runs: FontBlock[],
     width?: number,
   ): ShapedLine[] {
-    throw new Error(
+    console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   }
