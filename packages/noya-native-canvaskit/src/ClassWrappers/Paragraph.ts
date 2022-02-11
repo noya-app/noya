@@ -45,7 +45,9 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
       const typeface = fontProvider.typefaces[fontFamily]!;
       const font = new SkiaFont(typeface, style.fontSize);
       const paint = new SkiaPaint();
-      paint.setColor(style.color ?? [1, 1, 1, 1]);
+      paint.setColor(
+        paragraphStyle.textStyle?.color ?? style.color ?? [1, 0, 1, 1],
+      );
       const textSize = font.getFont().measureText(text, paint.getRNSkiaPaint());
 
       this._height = Math.max(textSize.height, this._height);

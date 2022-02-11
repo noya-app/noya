@@ -5,6 +5,7 @@ import {
   selectPaint,
   processPaint,
   skiaMatrix3,
+  Skia,
 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
@@ -44,13 +45,18 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
 
       canvas.save();
 
-      if (clip) {
-        canvas.clipPath(
-          (clip.path as SkiaPath).getRNSkiaPath(),
-          clip.op.value,
-          clip.antiAlias ?? false,
-        );
-      }
+      // if (clip) {
+      //   const path =
+      //     clip.path instanceof SkiaPath
+      //       ? clip.path
+      //       : new SkiaPath().addRect(clip.path as Float32Array);
+
+      //   canvas.clipPath(
+      //     path.getRNSkiaPath(),
+      //     clip.op.value,
+      //     clip.antiAlias ?? false,
+      //   );
+      // }
 
       if (transform) {
         const { m00, m01, m02, m10, m11, m12 } = transform;

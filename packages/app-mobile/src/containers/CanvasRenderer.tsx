@@ -11,6 +11,7 @@ import {
   ComponentsProvider,
   ImageCacheProvider,
   FontManagerProvider,
+  RenderingModeProvider,
 } from 'noya-renderer';
 
 const CanvasRenderer = () => {
@@ -26,7 +27,9 @@ const CanvasRenderer = () => {
             <FontManagerProvider>
               <StateProvider state={workspaceState}>
                 <ComponentsProvider value={Components}>
-                  <SketchFileRenderer />
+                  <RenderingModeProvider value="interactive">
+                    <SketchFileRenderer />
+                  </RenderingModeProvider>
                 </ComponentsProvider>
               </StateProvider>
             </FontManagerProvider>

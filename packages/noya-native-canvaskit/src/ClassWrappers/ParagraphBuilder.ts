@@ -2,14 +2,12 @@ import {
   FontBlock,
   FontMgr,
   Paint,
-  Paragraph,
   ParagraphBuilder,
   ParagraphStyle,
   PlaceholderAlignment,
   ShapedLine,
   TextBaseline,
   TextStyle,
-  TypefaceFontProvider,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
@@ -55,7 +53,7 @@ export class SkiaParagraphBuilder
   }
 
   pop(): void {
-    this._parts.pop();
+    this._styleStack.pop();
   }
 
   pushStyle(text: TextStyle): void {
