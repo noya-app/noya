@@ -57,6 +57,7 @@ export const FontManagerProvider = memo(function FontManagerProvider({
     () => {
       const provider = CanvasKit.TypefaceFontProvider.Make();
       provider.registerFont(defaultFont, SYSTEM_FONT_ID);
+
       sharedFontManager.entries.forEach(([name, data]) => {
         provider.registerFont(data, name);
       });

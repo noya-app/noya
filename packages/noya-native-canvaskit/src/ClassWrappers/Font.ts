@@ -1,15 +1,29 @@
+import { Skia, Font as RNSkiaFont } from '@shopify/react-native-skia';
+
 import type {
   Font,
   Paint,
-  Typeface,
   FontMetrics,
   EmbindEnumEntity,
   InputGlyphIDArray,
 } from 'canvaskit';
+import { SkiaTypeface } from './Typeface';
 
 import { JSEmbindObject } from './Embind';
 
 export class SkiaFont extends JSEmbindObject implements Font {
+  private _font: RNSkiaFont;
+
+  constructor(face: SkiaTypeface, size?: number) {
+    super();
+
+    this._font = Skia.Font(face.getTypeface(), size);
+  }
+
+  getFont() {
+    return this._font;
+  }
+
   getMetrics(): FontMetrics {
     console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
@@ -81,7 +95,7 @@ export class SkiaFont extends JSEmbindObject implements Font {
     );
   }
 
-  getTypeface(): Typeface | null {
+  getTypeface(): SkiaTypeface | null {
     console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
@@ -141,7 +155,7 @@ export class SkiaFont extends JSEmbindObject implements Font {
     );
   }
 
-  setTypeface(face: Typeface | null): void {
+  setTypeface(face: SkiaTypeface | null): void {
     console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );

@@ -2,7 +2,6 @@ import type {
   CanvasKit,
   GrDirectContext,
   ImageInfo,
-  ParagraphStyle,
   TextStyle,
 } from 'canvaskit';
 import parseColor from 'color-parse';
@@ -14,6 +13,7 @@ import {
   SkiaPaint,
   SkiaPathEffect,
   SkiaShaderFactory,
+  SkiaParagraphStyle,
   SkiaFontMgrFactory,
   SkiaTextBlobFactory,
   SkiaTypefaceFactory,
@@ -24,8 +24,6 @@ import {
   SkiaRuntimeEffectFactory,
   SkiaTypefaceFontProviderFactory,
 } from './ClassWrappers';
-
-class JSParagraphStyle implements ParagraphStyle {}
 
 class JSTextStyle implements TextStyle {}
 
@@ -249,8 +247,9 @@ export const SkiaCanvasKit: CanvasKit = {
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ImageData: 0 as any,
-  ParagraphStyle: JSParagraphStyle,
+  ParagraphStyle: SkiaParagraphStyle,
   ContourMeasureIter: 0 as any,
+  // @ts-expect-error
   Font: SkiaFont,
   Path: SkiaPath,
   Paint: SkiaPaint,

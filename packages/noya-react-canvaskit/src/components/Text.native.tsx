@@ -1,18 +1,21 @@
 import React, { memo } from 'react';
-import { Text as SkiaText } from '@shopify/react-native-skia';
+import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { Paragraph } from 'canvaskit';
-import useRect, { RectParameters } from '../hooks/useRect';
+import { RectParameters } from '../hooks/useRect';
+import { SkiaParagraph } from 'noya-native-canvaskit';
 
-// TODO: move to shared directory f.e. PropTypes
-// To avoid doubling the type
 interface TextProps {
   rect: RectParameters;
-  paragraph: Paragraph;
+  paragraph: SkiaParagraph;
 }
 
 const Text: React.FC<TextProps> = (props) => {
-  return null;
+  const onDraw = useDrawing(props, ({ canvas }, { rect, paragraph }) => {
+    // rn-skia uses y as bottom line
+    paragraph.draw(canvas, rect[0], rect[3]);
+  });
+
+  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
 };
 
 export default memo(Text);

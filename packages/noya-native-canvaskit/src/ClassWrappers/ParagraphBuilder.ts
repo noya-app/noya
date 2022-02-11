@@ -12,6 +12,7 @@ import {
   TypefaceFontProvider,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
+import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
 import { SkiaParagraph } from './Paragraph';
 
 export class SkiaParagraphBuilder
@@ -23,6 +24,11 @@ export class SkiaParagraphBuilder
     style?: TextStyle;
   }[] = [];
   _styleStack: TextStyle[] = [];
+  _paragraphStyle: ParagraphStyle | undefined;
+
+  constructor(private _fontProvider: SkiaTypefaceFontProvider | undefined) {
+    super();
+  }
 
   addPlaceholder(
     width?: number,
@@ -40,8 +46,12 @@ export class SkiaParagraphBuilder
     this._parts.push({ text: str, style: this._styleStack[0] });
   }
 
-  build(): Paragraph {
-    return new SkiaParagraph();
+  build(): SkiaParagraph {
+    return new SkiaParagraph(
+      this._parts,
+      this._paragraphStyle,
+      this._fontProvider,
+    );
   }
 
   pop(): void {
@@ -58,19 +68,30 @@ export class SkiaParagraphBuilder
     );
   }
 
-  static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
-    const builder = new SkiaParagraphBuilder();
+  setProvider(provider: SkiaTypefaceFontProvider) {
+    this._fontProvider = provider;
+  }
 
-    builder.pushStyle(style);
+  setParagraphStyle(style: ParagraphStyle) {
+    this._paragraphStyle = style;
+  }
+
+  static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
+    const builder = new SkiaParagraphBuilder(undefined);
+
+    builder.pushStyle(style.textStyle!);
     return builder;
   }
 
   static MakeFromFontProvider(
     style: ParagraphStyle,
-    fontSrc: TypefaceFontProvider,
+    fontSrc: SkiaTypefaceFontProvider,
   ): ParagraphBuilder {
-    const builder = new SkiaParagraphBuilder();
-    builder.pushStyle(style);
+    const builder = new SkiaParagraphBuilder(fontSrc);
+
+    builder.pushStyle(style.textStyle!);
+    builder.setParagraphStyle(style);
+
     return builder;
   }
 
