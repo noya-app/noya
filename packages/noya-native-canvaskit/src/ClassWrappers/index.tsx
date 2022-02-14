@@ -2,6 +2,7 @@ export { Embind } from './Embind';
 export { SkiaPath } from './Path';
 export { SkiaFont } from './Font';
 export { SkiaPaint } from './Paint';
+export { SkiaImage } from './Image';
 export { SkiaParagraph } from './Paragraph';
 export { SkiaShaderFactory } from './Shader';
 export { SkiaPathEffect } from './PathEffect';

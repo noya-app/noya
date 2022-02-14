@@ -5,12 +5,14 @@ import type {
   TextStyle,
 } from 'canvaskit';
 import parseColor from 'color-parse';
+import * as RNSkia from '@shopify/react-native-skia';
 
 import {
   Embind,
   SkiaPath,
   SkiaFont,
   SkiaPaint,
+  SkiaImage,
   SkiaPathEffect,
   SkiaShaderFactory,
   SkiaParagraphStyle,
@@ -202,11 +204,18 @@ export const SkiaCanvasKit: CanvasKit = {
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
     );
   },
+
   MakeImageFromEncoded(bytes) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    const data = RNSkia.Skia.Data.fromBytes(new Uint8Array(bytes));
+    const img = RNSkia.Skia.MakeImageFromEncoded(data);
+
+    if (!img) {
+      return null;
+    }
+
+    return new SkiaImage(img);
   },
+
   MakeImageFromCanvasImageSource(src) {
     console.warn(
       `${this.constructor.name}.${arguments.callee.name} not implemented!`,
