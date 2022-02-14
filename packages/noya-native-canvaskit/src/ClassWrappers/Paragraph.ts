@@ -42,7 +42,9 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
 
     blocks.forEach(({ text, style }) => {
       const fontFamily = style.fontFamilies![0];
-      const typeface = fontProvider.typefaces[fontFamily]!;
+      const typeface =
+        fontProvider.typefaces[fontFamily] ||
+        fontProvider.typefaces[Object.keys(fontProvider.typefaces)[0]]!;
       const font = new SkiaFont(typeface, style.fontSize);
       const paint = new SkiaPaint();
       paint.setColor(

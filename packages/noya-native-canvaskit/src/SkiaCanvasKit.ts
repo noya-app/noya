@@ -13,6 +13,7 @@ import {
   SkiaFont,
   SkiaPaint,
   SkiaImage,
+  SkiaMatrix,
   SkiaPathEffect,
   SkiaShaderFactory,
   SkiaParagraphStyle,
@@ -280,7 +281,7 @@ export const SkiaCanvasKit: CanvasKit = {
 
   // Misc
   ColorMatrix: 0 as any,
-  Matrix: 0 as any,
+  Matrix: SkiaMatrix,
   M44: 0 as any,
   Vector: 0 as any,
 

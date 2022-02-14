@@ -1,4 +1,4 @@
-import { Skia, IImage } from '@shopify/react-native-skia';
+import { IImage } from '@shopify/react-native-skia';
 
 import type {
   Image,

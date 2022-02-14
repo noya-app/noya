@@ -77,9 +77,11 @@ export const SkiaColorFilterFactory: ColorFilterFactory = {
    * @param cMatrix
    */
   MakeMatrix(cMatrix: InputColorMatrix): SkiaColorFilter {
-    return new SkiaColorFilter(
-      Skia.ColorFilter.MakeMatrix(cMatrix as number[]),
+    const skColorFilter = Skia.ColorFilter.MakeMatrix(
+      Array.from(cMatrix as Float32Array | number[]),
     );
+
+    return new SkiaColorFilter(skColorFilter);
   },
 
   /**
