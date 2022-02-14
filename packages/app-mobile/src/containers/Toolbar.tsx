@@ -74,9 +74,8 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     };
 
     dispatch(
-      // @ts-ignore data type check
       'importImage',
-      [{ data: decodedImage, size, extension, name }],
+      [{ data, size, extension, name }],
       { x: 0, y: 0 },
       'nearestArtboard',
     );

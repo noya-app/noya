@@ -1,34 +1,40 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
 import { SkiaImage, SkiaPaint } from 'noya-native-canvaskit';
+import { useCanvasKit } from 'noya-renderer';
 
 interface ImageProps {
   paint: SkiaPaint;
-  // image: ArrayBuffer;
-  image: SkiaImage;
+  image: ArrayBuffer;
   rect: Float32Array;
 }
 
 const Image: React.FC<ImageProps> = (props) => {
-  const onDraw = useDrawing(props, ({ canvas }, { image, paint, rect }) => {
-    // const data = Skia.Data.fromBytes(new Uint8Array(image));
-    // const img = Skia.MakeImageFromEncoded(data);
+  const { rect, paint } = props;
 
-    // if (!img) {
-    //   return;
-    // }
+  const CanvasKit = useCanvasKit();
 
-    canvas.drawImage(
-      image.getImage(),
-      rect[0],
-      rect[1],
-      paint.getRNSkiaPaint(),
-    );
-  });
+  const skiaImage = useMemo(() => {
+    return CanvasKit.MakeImageFromEncoded(props.image) as SkiaImage;
+  }, [CanvasKit, props.image]);
+
+  const drawingProps = { rect, paint, image: skiaImage };
+
+  const onDraw = useDrawing(
+    drawingProps,
+    ({ canvas }, { image, paint, rect }) => {
+      canvas.drawImage(
+        image.getImage(),
+        rect[0],
+        rect[1],
+        paint.getRNSkiaPaint(),
+      );
+    },
+  );
 
   // @ts-ignore
-  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
+  return <Drawing onDraw={onDraw} {...drawingProps} skipProcessing />;
 };
 
 export default memo(Image);
