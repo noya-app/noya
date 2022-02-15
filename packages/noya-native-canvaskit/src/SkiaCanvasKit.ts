@@ -1,9 +1,4 @@
-import type {
-  CanvasKit,
-  GrDirectContext,
-  ImageInfo,
-  TextStyle,
-} from 'canvaskit';
+import type { CanvasKit, GrDirectContext, ImageInfo } from 'canvaskit';
 import parseColor from 'color-parse';
 import * as RNSkia from '@shopify/react-native-skia';
 
@@ -15,6 +10,7 @@ import {
   SkiaImage,
   SkiaMatrix,
   SkiaPathEffect,
+  SkiaTextStyle,
   SkiaShaderFactory,
   SkiaParagraphStyle,
   SkiaFontMgrFactory,
@@ -27,8 +23,6 @@ import {
   SkiaRuntimeEffectFactory,
   SkiaTypefaceFontProviderFactory,
 } from './ClassWrappers';
-
-class JSTextStyle implements TextStyle {}
 
 export const SkiaCanvasKit: CanvasKit = {
   Color(r, g, b, a) {
@@ -264,7 +258,7 @@ export const SkiaCanvasKit: CanvasKit = {
   Path: SkiaPath,
   Paint: SkiaPaint,
   PictureRecorder: 0 as any,
-  TextStyle: JSTextStyle,
+  TextStyle: SkiaTextStyle,
 
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
   ParagraphBuilder: SkiaParagraphBuilder,

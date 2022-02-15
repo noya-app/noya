@@ -4,7 +4,6 @@ import type {
   TileMode,
   BlendMode,
   InputColor,
-  ColorFilter,
   ImageFilter,
   ImageFilterFactory,
   InputMatrix,
@@ -12,6 +11,7 @@ import type {
   CubicResampler,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
+import { SkiaColorFilter } from './ColorFilter';
 import { SkiaShader } from './Shader';
 
 const { ImageFilter: FilterFactory } = RNSkia.Skia;
@@ -159,9 +159,14 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
     mode: TileMode,
     input: SkiaImageFilter | null,
   ): SkiaImageFilter {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    const filter = FilterFactory.MakeBlur(
+      sigmaX,
+      sigmaY,
+      mode.value,
+      input ? input.getImageFilter() : null,
     );
+
+    return new SkiaImageFilter(filter);
   },
 
   /**
@@ -170,12 +175,15 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
   MakeColorFilter(
-    cf: ColorFilter,
+    cf: SkiaColorFilter,
     input: SkiaImageFilter | null,
   ): SkiaImageFilter {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    const filter = FilterFactory.MakeColorFilter(
+      cf.getColorFilter(),
+      input ? input.getImageFilter() : null,
     );
+
+    return new SkiaImageFilter(filter);
   },
 
   /**

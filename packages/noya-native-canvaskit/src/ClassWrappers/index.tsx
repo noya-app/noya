@@ -4,6 +4,7 @@ export { SkiaFont } from './Font';
 export { SkiaPaint } from './Paint';
 export { SkiaImage } from './Image';
 export { SkiaMatrix } from './Matrix';
+export { SkiaTextStyle } from './TextStyle';
 export { SkiaParagraph } from './Paragraph';
 export { SkiaShaderFactory } from './Shader';
 export { SkiaPathEffect } from './PathEffect';

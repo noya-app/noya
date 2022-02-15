@@ -12,6 +12,7 @@ import {
 import { JSEmbindObject } from './Embind';
 import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
 import { SkiaParagraph } from './Paragraph';
+import { SkiaTextStyle } from './TextStyle';
 
 export class SkiaParagraphBuilder
   extends JSEmbindObject
@@ -41,11 +42,15 @@ export class SkiaParagraphBuilder
   }
 
   addText(str: string): void {
-    this._parts.push({ text: str, style: this._styleStack[0] });
+    this._parts.push({
+      text: str,
+      style: new SkiaTextStyle(this._styleStack[0]),
+    });
   }
 
   build(): SkiaParagraph {
     return new SkiaParagraph(
+      // @ts-ignore TODO: common type for parts/blocks?
       this._parts,
       this._paragraphStyle,
       this._fontProvider,
@@ -53,11 +58,11 @@ export class SkiaParagraphBuilder
   }
 
   pop(): void {
-    this._styleStack.pop();
+    this._styleStack.shift();
   }
 
   pushStyle(text: TextStyle): void {
-    this._styleStack.push(text);
+    this._styleStack.unshift(text);
   }
 
   pushPaintStyle(textStyle: TextStyle, fg: Paint, bg: Paint): void {
@@ -103,3 +108,28 @@ export class SkiaParagraphBuilder
     );
   }
 }
+
+const a = [
+  {
+    style: { color: [Float32Array], fontFamilies: [Array], fontSize: 42 },
+    text: 'Title',
+  },
+];
+
+const x = {
+  disableHinting: undefined,
+  ellipsis: undefined,
+  heightMultiplier: undefined,
+  maxLines: undefined,
+  strutStyle: {
+    fontFamilies: ['system'],
+    fontSize: 42,
+    forceStrutHeight: true,
+    heightMultiplier: undefined,
+    strutEnabled: true,
+  },
+  textAlign: { value: 2 },
+  textDirection: undefined,
+  textHeightBehavior: undefined,
+  textStyle: { color: [0, 0, 0, 1], fontFamilies: ['system'], fontSize: 42 },
+};
