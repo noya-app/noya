@@ -1,12 +1,10 @@
 import React, { memo, PropsWithChildren } from 'react';
 import {
   Drawing,
-  Skia,
   useDrawing,
   selectPaint,
   processPaint,
   skiaMatrix3,
-  TileMode,
 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
