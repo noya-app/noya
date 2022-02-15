@@ -51,35 +51,6 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       const paint = selectPaint(ctx.paint, { opacity });
       processPaint(paint, ctx.opacity, { opacity });
 
-      canvas.save();
-
-      if (clip) {
-        if (clip.path instanceof Float32Array) {
-          canvas.clipRect(
-            LTRBArrayToRect(clip.path),
-            clip.op.value,
-            clip.antiAlias ?? true,
-          );
-        } else if (clip.path instanceof SkiaPath) {
-          canvas.clipPath(
-            clip.path.getRNSkiaPath(),
-            clip.op.value,
-            clip.antiAlias ?? true,
-          );
-        }
-      }
-
-      if (transform) {
-        const { m00, m01, m02, m10, m11, m12 } = transform;
-        canvas.concat(
-          skiaMatrix3([
-            [m00, m01, m02],
-            [m10, m11, m12],
-            [0, 0, 1],
-          ]),
-        );
-      }
-
       // If we need to apply effects to the group as a whole, we need
       // to draw the elements on a separate bitmap using `saveLayer`
       const needsLayer =
@@ -88,7 +59,9 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         imageFilter ||
         backdropImageFilter;
 
-      if (needsLayer) {
+      if (!needsLayer) {
+        canvas.save();
+      } else {
         const layerPaint = new CanvasKit.Paint() as SkiaPaint;
 
         if (opacity && opacity < 1) {
@@ -108,6 +81,33 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
           null,
           backdropImageFilter?.getImageFilter(),
         );
+      }
+
+      if (transform) {
+        const { m00, m01, m02, m10, m11, m12 } = transform;
+        canvas.concat(
+          skiaMatrix3([
+            [m00, m01, m02],
+            [m10, m11, m12],
+            [0, 0, 1],
+          ]),
+        );
+      }
+
+      if (clip) {
+        if (clip.path instanceof Float32Array) {
+          canvas.clipRect(
+            LTRBArrayToRect(clip.path),
+            clip.op.value,
+            clip.antiAlias ?? true,
+          );
+        } else if (clip.path instanceof SkiaPath) {
+          canvas.clipPath(
+            clip.path.getRNSkiaPath(),
+            clip.op.value,
+            clip.antiAlias ?? true,
+          );
+        }
       }
 
       processChildren(
