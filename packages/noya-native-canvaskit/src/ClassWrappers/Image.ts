@@ -1,11 +1,10 @@
-import { IImage } from '@shopify/react-native-skia';
+import { IImage, skiaMatrix3 } from '@shopify/react-native-skia';
 
 import type {
   Image,
   ColorSpace,
   EncodedImageFormat,
   PartialImageInfo,
-  InputMatrix,
   Shader,
   TileMode,
   ImageInfo,
@@ -15,6 +14,7 @@ import type {
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 import { SkiaShader } from './Shader';
+import { SkiaMatrix } from './Matrix';
 
 export class SkiaImage extends JSEmbindObject implements Image {
   constructor(private _image: IImage) {
@@ -52,14 +52,14 @@ export class SkiaImage extends JSEmbindObject implements Image {
     ty: TileMode,
     B: number,
     C: number,
-    localMatrix?: InputMatrix,
+    localMatrix?: Float32Array | number[],
   ): SkiaShader {
     const shader = this._image.makeShaderCubic(
       tx.value,
       ty.value,
       B,
       C,
-      /* , localMatrix */
+      SkiaMatrix.toRNSMatrix(localMatrix),
     );
 
     return new SkiaShader(shader);
@@ -70,14 +70,14 @@ export class SkiaImage extends JSEmbindObject implements Image {
     ty: TileMode,
     fm: FilterMode,
     mm: MipmapMode,
-    localMatrix?: InputMatrix,
+    localMatrix?: Float32Array | number[],
   ): Shader {
     const shader = this._image.makeShaderOptions(
       tx.value,
       ty.value,
       fm.value,
       mm.value,
-      /* localMatrix */
+      SkiaMatrix.toRNSMatrix(localMatrix),
     );
 
     return new SkiaShader(shader);

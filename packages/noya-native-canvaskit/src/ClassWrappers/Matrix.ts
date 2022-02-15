@@ -1,8 +1,7 @@
-import { Skia } from '@shopify/react-native-skia';
+import { skiaMatrix3, Matrix } from '@shopify/react-native-skia';
+import type { Matrix3x3, AngleInRadians } from 'canvaskit';
 
-import type { Matrix3x3Helpers, Matrix3x3, AngleInRadians } from 'canvaskit';
-
-export const SkiaMatrix: Matrix3x3Helpers = {
+export const SkiaMatrix = {
   /**
    * Returns a new identity 3x3 matrix.
    */
@@ -15,9 +14,9 @@ export const SkiaMatrix: Matrix3x3Helpers = {
    * @param m
    */
   invert(m: Matrix3x3 | number[]): number[] | null {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    // TODO: NOT used within noya yet
+    console.warn(`SkiaMatrix.invert not implemented!`);
+    return m as number[];
   },
 
   /**
@@ -26,9 +25,10 @@ export const SkiaMatrix: Matrix3x3Helpers = {
    * @param points - the flattened points to map; the results are computed in place on this array.
    */
   mapPoints(m: Matrix3x3 | number[], points: number[]): number[] {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    // TODO: NOT used within noya yet
+    console.warn(`SkiaMatrix.mapPoints not implemented!`);
+
+    return m as number[];
   },
 
   /**
@@ -67,9 +67,17 @@ export const SkiaMatrix: Matrix3x3Helpers = {
    * @param py - the Y value to rotate around, defaults to 0.
    */
   rotated(radians: AngleInRadians, px?: number, py?: number): number[] {
+    const tx = px ?? 0;
+    const ty = py ?? 0;
     const cosR = Math.cos(radians);
     const sinR = Math.sin(radians);
-    return [cosR, -sinR, 0, sinR, cosR, 0, 0, 0, 1];
+    const rotation = [cosR, -sinR, 0, sinR, cosR, 0, 0, 0, 1];
+
+    return this.multiply(
+      this.translated(-tx, -ty),
+      rotation,
+      this.translated(tx, ty),
+    );
   },
 
   /**
@@ -80,7 +88,15 @@ export const SkiaMatrix: Matrix3x3Helpers = {
    * @param py - the Y value to scale from, defaults to 0.
    */
   scaled(sx: number, sy: number, px?: number, py?: number): number[] {
-    return [sx, 0, 0, 0, sy, 0, 0, 0, 1];
+    const tx = px ?? 0;
+    const ty = py ?? 0;
+    const scale = [sx, 0, 0, 0, sy, 0, 0, 0, 1];
+
+    return this.multiply(
+      this.translated(-tx, -ty),
+      scale,
+      this.translated(tx, ty),
+    );
   },
 
   /**
@@ -91,8 +107,14 @@ export const SkiaMatrix: Matrix3x3Helpers = {
    * @param py - the Y value to skew from, defaults to 0.
    */
   skewed(kx: number, ky: number, px?: number, py?: number): number[] {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    const tx = px ?? 0;
+    const ty = py ?? 0;
+    const skew = [1, kx, 0, ky, 1, 0, 0, 0, 1];
+
+    return this.multiply(
+      this.translated(-tx, -ty),
+      skew,
+      this.translated(tx, ty),
     );
   },
 
@@ -103,5 +125,17 @@ export const SkiaMatrix: Matrix3x3Helpers = {
    */
   translated(dx: number, dy: number): number[] {
     return [1, 0, dx, 0, 1, dy, 0, 0, 1];
+  },
+
+  toRNSMatrix(inMat?: Float32Array | number[]): Matrix | undefined {
+    if (!inMat) {
+      return undefined;
+    }
+
+    return skiaMatrix3([
+      [inMat[0], inMat[1], inMat[2]],
+      [inMat[3], inMat[4], inMat[5]],
+      [inMat[6], inMat[7], inMat[8]],
+    ]);
   },
 };

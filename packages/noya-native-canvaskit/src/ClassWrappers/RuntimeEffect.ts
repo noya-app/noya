@@ -1,13 +1,14 @@
 import { Skia, IRuntimeEffect } from '@shopify/react-native-skia';
 
 import type {
+  SkSLUniform,
   RuntimeEffect,
   RuntimeEffectFactory,
-  Shader,
-  InputMatrix,
-  SkSLUniform,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
+
+import { SkiaShader } from './Shader';
+import { SkiaMatrix } from './Matrix';
 
 class SkiaRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
   constructor(private _runtimeEffect: IRuntimeEffect) {
@@ -21,35 +22,37 @@ class SkiaRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
   makeShader(
     uniforms: Float32Array | number[],
     isOpaque?: boolean,
-    localMatrix?: InputMatrix,
-  ): Shader {
-    // TODO: add after implementiong shader wrapper
-    // this._runtimeEffect.makeShader(
-    //   uniforms as number[],
-    //   isOpaque,
-    //   localMatrix ? (localMatrix as number[]) : undefined,
-    // );
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    localMatrix?: Float32Array | number[],
+  ): SkiaShader {
+    const shader = this._runtimeEffect.makeShader(
+      uniforms as number[],
+      isOpaque,
+      SkiaMatrix.toRNSMatrix(localMatrix),
     );
+
+    return new SkiaShader(shader);
   }
 
   makeShaderWithChildren(
     uniforms: Float32Array | number[],
     isOpaque?: boolean,
-    children?: Shader[],
-    localMatrix?: InputMatrix,
-  ): Shader {
-    // TODO: add after implementiong shader wrapper
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    children?: SkiaShader[],
+    localMatrix?: Float32Array | number[],
+  ): SkiaShader {
+    const rnsChilds = (children ?? []).map((c) => c.getShader());
+
+    const shader = this._runtimeEffect.makeShaderWithChildren(
+      uniforms as number[],
+      isOpaque,
+      rnsChilds,
+      SkiaMatrix.toRNSMatrix(localMatrix),
     );
+
+    return new SkiaShader(shader);
   }
 
   getUniform(index: number): SkSLUniform {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    return this._runtimeEffect.getUniform(index);
   }
 
   getUniformCount(): number {
