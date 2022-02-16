@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { View } from 'react-native';
 
@@ -7,10 +7,12 @@ import { decodeFontName } from 'noya-fonts';
 import { useDownloadFont, useFontManager } from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
 import useAppState from '../hooks/useAppState';
+import LayerList from '../containers/LayerList';
 import Toolbar from '../containers/Toolbar';
 import Canvas from '../containers/Canvas';
 
 const AppContent: React.FC<{}> = () => {
+  const [showLayerList, setShowLayerList] = useState(false);
   const { state, dispatch } = useAppState();
   const fontManager = useFontManager();
 
@@ -20,6 +22,14 @@ const AppContent: React.FC<{}> = () => {
     },
     [dispatch],
   );
+
+  const onToggleLayerList = useCallback(() => {
+    if (showLayerList) {
+      setShowLayerList(false);
+    } else {
+      setShowLayerList(true);
+    }
+  }, [showLayerList]);
 
   const downloadFont = useDownloadFont();
 
@@ -46,8 +56,9 @@ const AppContent: React.FC<{}> = () => {
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
       <ContentContainer>
-        <Toolbar />
+        <Toolbar onToggleLayerList={onToggleLayerList} />
         <Canvas />
+        {showLayerList && <LayerList />}
       </ContentContainer>
     </StateProvider>
   );

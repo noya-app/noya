@@ -14,7 +14,15 @@ import { decode } from 'noya-sketch-file';
 import Button from '../components/Button';
 import Layout from '../components/Layout';
 
-interface ToolbarProps {}
+interface ToolbarProps {
+  onToggleLayerList: () => void;
+}
+
+interface Item {
+  icon: string;
+  onPress: () => void;
+  active?: boolean;
+}
 
 function base64ToArrayBuffer(base64: string) {
   var binary_string = decodeBase64(base64);
@@ -27,6 +35,7 @@ function base64ToArrayBuffer(base64: string) {
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
+  const { onToggleLayerList } = props;
   const [state] = useApplicationState();
   const CanvasKit = useCanvasKit();
   const dispatch = useDispatch();
@@ -141,11 +150,11 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       const sketch = await decode(data);
       dispatch('setFile', sketch);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
     }
   };
 
-  const buttons = [
+  const drawItems: Item[] = [
     {
       icon: 'cursor-arrow',
       onPress: onReset,
@@ -186,17 +195,28 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     },
     // { icon: 'share-1', onPress: onToDo },
     // { icon: 'text', onPress: onToDo },
+  ];
+
+  const utilItems: Item[] = [
     { icon: 'file', onPress: onOpenFile },
+    { icon: 'layers', onPress: onToggleLayerList },
   ];
 
   return (
     <>
       <ToolbarView>
         <ToolbarContainer>
-          {buttons.map(({ icon, onPress, active }, idx) => (
+          {drawItems.map(({ icon, onPress, active }: Item, idx: number) => (
             <React.Fragment key={idx}>
               <Button icon={icon} onPress={onPress} active={active} />
-              {idx !== buttons.length - 1 && <Layout.Queue size="medium" />}
+              {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
+            </React.Fragment>
+          ))}
+          <Spacer />
+          {utilItems.map(({ icon, onPress, active }: Item, idx: number) => (
+            <React.Fragment key={idx}>
+              <Button icon={icon} onPress={onPress} active={active} />
+              {idx !== utilItems.length - 1 && <Layout.Queue size="medium" />}
             </React.Fragment>
           ))}
         </ToolbarContainer>
@@ -222,4 +242,11 @@ const ToolbarContainer = styled(View)((p) => ({
   paddingHorizontal: p.theme.sizes.spacing.medium,
   backgroundColor: p.theme.colors.sidebar.background,
   borderRadius: 10,
+}));
+
+const Spacer = styled(View)((p) => ({
+  borderLeftWidth: 1,
+  borderColor: p.theme.colors.text,
+  marginLeft: p.theme.sizes.spacing.medium,
+  paddingLeft: p.theme.sizes.spacing.medium,
 }));

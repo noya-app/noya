@@ -11,11 +11,21 @@ interface RectProps {
 }
 
 const Rect: React.FC<RectProps> = (props) => {
-  const onDraw = useDrawing(props, ({ canvas }, rectProps) => {
-    const rect = LTRBArrayToRect(rectProps.rect);
+  const onDraw = useDrawing(
+    props,
+    ({ canvas }, { rect, paint, cornerRadius }) => {
+      const iRect = LTRBArrayToRect(rect);
 
-    canvas.drawRect(rect, rectProps.paint.getRNSkiaPaint());
-  });
+      if (cornerRadius) {
+        canvas.drawRRect(
+          { rect: iRect, rx: cornerRadius, ry: cornerRadius },
+          paint.getRNSkiaPaint(),
+        );
+      } else {
+        canvas.drawRect(iRect, paint.getRNSkiaPaint());
+      }
+    },
+  );
 
   // @ts-ignore
   return <Drawing onDraw={onDraw} {...props} skipProcessing />;

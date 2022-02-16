@@ -382,8 +382,10 @@ export default memo(function SketchShape({ layer }: Props) {
   );
 
   return (
-    <BlurGroup blur={blur} clippingPath={path}>
-      {opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements}
-    </BlurGroup>
+    <>
+      <BlurGroup blur={blur} clippingPath={path}>
+        {opacity < 1 ? <Group opacity={opacity}>{elements}</Group> : elements}
+      </BlurGroup>
+    </>
   );
 });

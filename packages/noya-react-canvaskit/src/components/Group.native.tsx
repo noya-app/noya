@@ -1,11 +1,5 @@
 import React, { memo, PropsWithChildren } from 'react';
-import {
-  Drawing,
-  useDrawing,
-  selectPaint,
-  processPaint,
-  skiaMatrix3,
-} from '@shopify/react-native-skia';
+import { Drawing, useDrawing, skiaMatrix3 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
 import { useCanvasKit } from 'noya-renderer';
@@ -46,9 +40,6 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       children,
     ) => {
       const { canvas } = ctx;
-      const paint = selectPaint(ctx.paint, { opacity });
-      processPaint(paint, ctx.opacity, { opacity });
-
       // If we need to apply effects to the group as a whole, we need
       // to draw the elements on a separate bitmap using `saveLayer`
       const needsLayer =
@@ -57,9 +48,36 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         imageFilter ||
         backdropImageFilter;
 
-      if (!needsLayer) {
-        canvas.save();
-      } else {
+      const restoreCount = canvas.save();
+
+      if (clip) {
+        if (clip.path instanceof Float32Array) {
+          canvas.clipRect(
+            LTRBArrayToRect(clip.path),
+            clip.op.value,
+            clip.antiAlias ?? true,
+          );
+        } else if (clip.path instanceof SkiaPath) {
+          canvas.clipPath(
+            clip.path.getRNSkiaPath(),
+            clip.op.value,
+            clip.antiAlias ?? true,
+          );
+        }
+      }
+
+      if (transform) {
+        const { m00, m01, m02, m10, m11, m12 } = transform;
+        canvas.concat(
+          skiaMatrix3([
+            [m00, m01, m02],
+            [m10, m11, m12],
+            [0, 0, 1],
+          ]),
+        );
+      }
+
+      if (needsLayer) {
         const layerPaint = new CanvasKit.Paint() as SkiaPaint;
 
         if (opacity && opacity < 1) {
@@ -81,43 +99,8 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         );
       }
 
-      if (transform) {
-        const { m00, m01, m02, m10, m11, m12 } = transform;
-        canvas.concat(
-          skiaMatrix3([
-            [m00, m01, m02],
-            [m10, m11, m12],
-            [0, 0, 1],
-          ]),
-        );
-      }
-
-      if (clip) {
-        if (clip.path instanceof Float32Array) {
-          canvas.clipRect(
-            LTRBArrayToRect(clip.path),
-            clip.op.value,
-            clip.antiAlias ?? true,
-          );
-        } else if (clip.path instanceof SkiaPath) {
-          canvas.clipPath(
-            clip.path.getRNSkiaPath(),
-            clip.op.value,
-            clip.antiAlias ?? true,
-          );
-        }
-      }
-
-      processChildren(
-        {
-          ...ctx,
-          paint,
-          opacity: opacity ? opacity * ctx.opacity : ctx.opacity,
-        },
-        children,
-      );
-
-      canvas.restore();
+      processChildren(ctx, children);
+      canvas.restoreToCount(restoreCount);
     },
   );
 
