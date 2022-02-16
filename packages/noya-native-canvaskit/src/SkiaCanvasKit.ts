@@ -9,8 +9,9 @@ import {
   SkiaPaint,
   SkiaImage,
   SkiaMatrix,
-  SkiaPathEffect,
   SkiaTextStyle,
+  SkiaPathEffect,
+  SkiaColorMatrix,
   SkiaShaderFactory,
   SkiaParagraphStyle,
   SkiaFontMgrFactory,
@@ -274,7 +275,7 @@ export const SkiaCanvasKit: CanvasKit = {
   TypefaceFontProvider: SkiaTypefaceFontProviderFactory,
 
   // Misc
-  ColorMatrix: 0 as any,
+  ColorMatrix: SkiaColorMatrix,
   Matrix: SkiaMatrix,
   M44: 0 as any,
   Vector: 0 as any,

@@ -1,12 +1,19 @@
 import { skiaMatrix3, Matrix } from '@shopify/react-native-skia';
 import type { Matrix3x3, AngleInRadians } from 'canvaskit';
 
+import * as matrixUtils from '../utils/matrix';
+
 export const SkiaMatrix = {
   /**
    * Returns a new identity 3x3 matrix.
    */
   identity(): number[] {
-    return [1, 0, 0, 0, 1, 0, 0, 0, 1];
+    // prettier-ignore
+    return [
+      1, 0, 0,
+      0, 1, 0,
+      0, 0, 1
+    ];
   },
 
   /**
@@ -36,25 +43,35 @@ export const SkiaMatrix = {
    * @param matrices
    */
   multiply(...matrices: Array<Matrix3x3 | number[]>): number[] {
+    // let res = [...matrices[0]];
+
+    // for (let i = 1; i < matrices.length; i += 1) {
+    //   const [a00, a01, a02, a10, a11, a12, a20, a21, a22] = res;
+    //   const [b00, b01, b02, b10, b11, b12, b20, b21, b22] = matrices[i];
+
+    //   res = [
+    //     a00 * b00 + a01 * b10 + a02 * b20,
+    //     a00 * b01 + a01 * b11 + a02 * b21,
+    //     a00 * b02 + a01 * b12 + a02 * b22,
+
+    //     a10 * b00 + a11 * b10 + a12 * b20,
+    //     a10 * b01 + a11 * b11 + a12 * b21,
+    //     a10 * b02 + a11 * b12 + a12 * b22,
+
+    //     a20 * b00 + a21 * b10 + a22 * b20,
+    //     a20 * b01 + a21 * b11 + a22 * b21,
+    //     a20 * b02 + a21 * b12 + a22 * b22,
+    //   ];
+    // }
+
+    // return res;
     let res = [...matrices[0]];
 
     for (let i = 1; i < matrices.length; i += 1) {
-      const [a00, a01, a02, a10, a11, a12, a20, a21, a22] = res;
-      const [b00, b01, b02, b10, b11, b12, b20, b21, b22] = matrices[i];
+      const a = [...res];
+      const b = matrices[i];
 
-      res = [
-        a00 * b00 + a01 * b10 + a02 * b20,
-        a00 * b01 + a01 * b11 + a02 * b21,
-        a00 * b02 + a01 * b12 + a02 * b22,
-
-        a10 * b00 + a11 * b10 + a12 * b20,
-        a10 * b01 + a11 * b11 + a12 * b21,
-        a10 * b02 + a11 * b12 + a12 * b22,
-
-        a20 * b00 + a21 * b10 + a22 * b20,
-        a20 * b01 + a21 * b11 + a22 * b21,
-        a20 * b02 + a21 * b12 + a22 * b22,
-      ];
+      res = matrixUtils.multiply(a, b) as number[];
     }
 
     return res;

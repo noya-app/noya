@@ -8,6 +8,7 @@ export * from './TextStyle';
 export * from './Paragraph';
 export * from './Shader';
 export * from './PathEffect';
+export * from './ColorMatrix';
 export * from './FontMgr';
 export * from './TextBlob';
 export * from './Typeface';
