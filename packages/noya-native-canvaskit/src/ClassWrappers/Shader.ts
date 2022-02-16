@@ -1,18 +1,17 @@
-import { Skia, IShader } from '@shopify/react-native-skia';
+import { Skia, IShader, TileMode } from '@shopify/react-native-skia';
 
 import type {
   Shader,
-  TileMode,
   BlendMode,
   InputPoint,
   InputColor,
   ColorSpace,
-  InputMatrix,
   ShaderFactory,
   AngleInDegrees,
 } from 'canvaskit';
 import { colorArrayToNum } from '../utils/color';
 import { JSEmbindObject } from './Embind';
+import { SkiaMatrix } from './Matrix';
 
 export class SkiaShader extends JSEmbindObject implements Shader {
   constructor(private _shader: IShader) {
@@ -63,7 +62,7 @@ export const SkiaShaderFactory: ShaderFactory = {
     colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: InputMatrix,
+    localMatrix?: Float32Array | number[],
     flags?: number,
     colorSpace?: ColorSpace,
   ): SkiaShader {
@@ -73,8 +72,8 @@ export const SkiaShaderFactory: ShaderFactory = {
         { x: end[0], y: end[1] },
         colors.map((c) => colorArrayToNum(c)),
         pos,
-        mode.value,
-        undefined, // TODO: localMatrix
+        mode,
+        SkiaMatrix.toRNSMatrix(localMatrix),
         flags,
       ),
     );
@@ -86,7 +85,7 @@ export const SkiaShaderFactory: ShaderFactory = {
     colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: InputMatrix,
+    localMatrix?: Float32Array | number[],
     flags?: number,
     colorSpace?: ColorSpace,
   ): SkiaShader {
@@ -97,8 +96,8 @@ export const SkiaShaderFactory: ShaderFactory = {
         radius,
         colors.map((c) => colorArrayToNum(c)),
         pos,
-        mode.value,
-        undefined, // TODO: localMatrix
+        mode,
+        SkiaMatrix.toRNSMatrix(localMatrix),
         flags,
       ),
     );
@@ -110,7 +109,7 @@ export const SkiaShaderFactory: ShaderFactory = {
     colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: InputMatrix | null,
+    localMatrix?: Float32Array | number[],
     flags?: number,
     startAngle?: AngleInDegrees,
     endAngle?: AngleInDegrees,
@@ -123,8 +122,8 @@ export const SkiaShaderFactory: ShaderFactory = {
         cy,
         colors.map((c) => colorArrayToNum(c)),
         pos,
-        mode.value,
-        undefined, // TODO: localMatrix
+        mode,
+        SkiaMatrix.toRNSMatrix(localMatrix),
         flags,
         startAngle,
         endAngle,
@@ -160,7 +159,7 @@ export const SkiaShaderFactory: ShaderFactory = {
     colors: Float32Array[],
     pos: number[] | null,
     mode: TileMode,
-    localMatrix?: InputMatrix,
+    localMatrix?: Float32Array | number[],
     flags?: number,
     colorSpace?: ColorSpace,
   ): SkiaShader {
@@ -173,8 +172,8 @@ export const SkiaShaderFactory: ShaderFactory = {
         endRadius,
         colors.map((c) => colorArrayToNum(c)),
         pos,
-        mode.value,
-        undefined, // TODO: localMatrix
+        mode,
+        SkiaMatrix.toRNSMatrix(localMatrix),
         flags,
       ),
     );

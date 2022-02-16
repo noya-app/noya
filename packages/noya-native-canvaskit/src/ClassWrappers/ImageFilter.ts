@@ -156,13 +156,13 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
   MakeBlur(
     sigmaX: number,
     sigmaY: number,
-    mode: TileMode,
+    mode: RNSkia.TileMode,
     input: SkiaImageFilter | null,
   ): SkiaImageFilter {
     const filter = FilterFactory.MakeBlur(
       sigmaX,
       sigmaY,
-      mode.value,
+      mode,
       input ? input.getImageFilter() : null,
     );
 
