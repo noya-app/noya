@@ -355,9 +355,9 @@ export const SkiaCanvasKit: CanvasKit = {
   //       return true;
   //     },
   // },
-  StrokeCap: Embind.createEnum(['Butt', 'Round', 'Square']),
-  StrokeJoin: Embind.createEnum(['Bevel', 'Miter', 'Round']),
-  TileMode: Embind.createEnum(['Clamp', 'Decal', 'Mirror', 'Repeat']),
+  StrokeCap: RNSkia.StrokeCap,
+  StrokeJoin: RNSkia.StrokeJoin,
+  TileMode: RNSkia.TileMode,
   VertexMode: Embind.createEnum(['Triangles', 'TrianglesStrip', 'TriangleFan']),
 
   // Core Constants

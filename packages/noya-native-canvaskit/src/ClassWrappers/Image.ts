@@ -2,28 +2,18 @@ import { IImage, TileMode as SkiaTileMode } from '@shopify/react-native-skia';
 
 import type {
   Image,
-  ColorSpace,
-  EncodedImageFormat,
-  PartialImageInfo,
   Shader,
-  TileMode,
+  MallocObj,
   ImageInfo,
   MipmapMode,
   FilterMode,
-  MallocObj,
+  ColorSpace,
+  PartialImageInfo,
+  EncodedImageFormat,
 } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 import { SkiaShader } from './Shader';
 import { SkiaMatrix } from './Matrix';
-
-function castTileMode(tm: TileMode): SkiaTileMode {
-  return {
-    0: SkiaTileMode.Clamp,
-    1: SkiaTileMode.Decal,
-    2: SkiaTileMode.Mirror,
-    3: SkiaTileMode.Repeat,
-  }[tm.value as 0 | 1 | 2 | 3]; // ¯\_(ツ)_/¯
-}
 
 export class SkiaImage extends JSEmbindObject implements Image {
   constructor(private _image: IImage) {
@@ -57,15 +47,15 @@ export class SkiaImage extends JSEmbindObject implements Image {
   }
 
   makeShaderCubic(
-    tx: TileMode,
-    ty: TileMode,
+    tx: SkiaTileMode,
+    ty: SkiaTileMode,
     B: number,
     C: number,
     localMatrix?: Float32Array | number[],
   ): SkiaShader {
     const shader = this._image.makeShaderCubic(
-      castTileMode(tx),
-      castTileMode(ty),
+      tx,
+      ty,
       B,
       C,
       SkiaMatrix.toRNSMatrix(localMatrix),
@@ -75,15 +65,15 @@ export class SkiaImage extends JSEmbindObject implements Image {
   }
 
   makeShaderOptions(
-    tx: TileMode,
-    ty: TileMode,
+    tx: SkiaTileMode,
+    ty: SkiaTileMode,
     fm: FilterMode,
     mm: MipmapMode,
     localMatrix?: Float32Array | number[],
   ): Shader {
     const shader = this._image.makeShaderOptions(
-      castTileMode(tx),
-      castTileMode(ty),
+      tx,
+      ty,
       fm.value,
       mm.value,
       SkiaMatrix.toRNSMatrix(localMatrix),
