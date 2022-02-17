@@ -17,7 +17,7 @@ import {
 
 // Local imports
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
-import { loadSkiaCanvasKit } from 'noya-native-canvaskit';
+import { SkiaCanvasKit } from 'noya-native-canvaskit';
 import { darkTheme, lightTheme } from '../constants';
 import AppContent from './AppContent';
 
@@ -32,9 +32,11 @@ const App: React.FC<{}> = () => {
   );
 
   return (
+    // @ts-ignore
     <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
       <Suspense fallback={AppLoader}>
-        <CanvasKitProvider loadCanvasKit={loadSkiaCanvasKit}>
+        {/* @ts-ignore */}
+        <CanvasKitProvider CanvasKit={SkiaCanvasKit}>
           <FontManagerProvider>
             <AppWrapper>
               <StatusBar

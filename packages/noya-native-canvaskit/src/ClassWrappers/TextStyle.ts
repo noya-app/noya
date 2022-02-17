@@ -1,16 +1,14 @@
 import type {
   FontStyle,
-  TextStyle,
   InputColor,
   TextShadow,
-  TextBaseline,
-  DecorationStyle,
   TextFontFeatures,
 } from 'canvaskit';
 
+import { TextBaseline, DecorationStyle } from '../types';
 import { SkiaCanvasKit } from '../SkiaCanvasKit';
 
-export class SkiaTextStyle implements TextStyle {
+export class SkiaTextStyle {
   backgroundColor?: InputColor;
   color?: InputColor = SkiaCanvasKit.WHITE;
   decoration?: number;
@@ -30,9 +28,9 @@ export class SkiaTextStyle implements TextStyle {
   textBaseline?: TextBaseline;
   wordSpacing?: number;
 
-  constructor(ts: TextStyle) {
+  constructor(ts: SkiaTextStyle) {
     for (const [key, value] of Object.entries(ts)) {
-      this[key as keyof TextStyle] = value;
+      this[key as keyof SkiaTextStyle] = value;
     }
   }
 }

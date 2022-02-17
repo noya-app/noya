@@ -1,19 +1,16 @@
-import { Skia, IShader, TileMode } from '@shopify/react-native-skia';
+import { Skia, IShader, TileMode, BlendMode } from '@shopify/react-native-skia';
 
 import type {
-  Shader,
-  BlendMode,
   InputPoint,
   InputColor,
   ColorSpace,
-  ShaderFactory,
   AngleInDegrees,
 } from 'canvaskit';
 import { colorArrayToNum } from '../utils/color';
 import { JSEmbindObject } from './Embind';
 import { SkiaMatrix } from './Matrix';
 
-export class SkiaShader extends JSEmbindObject implements Shader {
+export class SkiaShader extends JSEmbindObject {
   constructor(private _shader: IShader) {
     super();
   }
@@ -23,10 +20,10 @@ export class SkiaShader extends JSEmbindObject implements Shader {
   }
 }
 
-export const SkiaShaderFactory: ShaderFactory = {
+export const SkiaShaderFactory = {
   MakeBlend(mode: BlendMode, one: SkiaShader, two: SkiaShader): SkiaShader {
     return new SkiaShader(
-      Skia.Shader.MakeBlend(mode.value, one.getShader(), two.getShader()),
+      Skia.Shader.MakeBlend(mode, one.getShader(), two.getShader()),
     );
   },
 

@@ -1,16 +1,10 @@
-import { Skia, IRuntimeEffect } from '@shopify/react-native-skia';
+import { Skia, IRuntimeEffect, SkSLUniform } from '@shopify/react-native-skia';
 
-import type {
-  SkSLUniform,
-  RuntimeEffect,
-  RuntimeEffectFactory,
-} from 'canvaskit';
 import { JSEmbindObject } from './Embind';
-
 import { SkiaShader } from './Shader';
 import { SkiaMatrix } from './Matrix';
 
-class SkiaRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
+class SkiaRuntimeEffect extends JSEmbindObject {
   constructor(private _runtimeEffect: IRuntimeEffect) {
     super();
   }
@@ -68,8 +62,11 @@ class SkiaRuntimeEffect extends JSEmbindObject implements RuntimeEffect {
   }
 }
 
-export const SkiaRuntimeEffectFactory: RuntimeEffectFactory = {
-  Make(sksl: string, callback?: (err: string) => void): RuntimeEffect | null {
+export const SkiaRuntimeEffectFactory = {
+  Make(
+    sksl: string,
+    callback?: (err: string) => void,
+  ): SkiaRuntimeEffect | null {
     const effect = Skia.RuntimeEffect.Make(sksl);
 
     if (effect) {

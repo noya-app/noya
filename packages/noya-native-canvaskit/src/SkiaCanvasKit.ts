@@ -1,16 +1,45 @@
-import type { CanvasKit, GrDirectContext, ImageInfo } from 'canvaskit';
-import parseColor from 'color-parse';
 import * as RNSkia from '@shopify/react-native-skia';
 
+import type {
+  Rect,
+  IRect,
+  RRect,
+  Color,
+  Surface,
+  SoundMap,
+  Vertices,
+  ColorInt,
+  MallocObj,
+  Particles,
+  ImageInfo,
+  SkPicture,
+  InputRect,
+  VertexMode,
+  ColorSpace,
+  InputMatrix,
+  InputVector3,
+  WebGLOptions,
+  ColorIntArray,
+  AnimatedImage,
+  GrDirectContext,
+  TonalColorsInput,
+  SkottieAnimation,
+  EmulatedCanvas2D,
+  TonalColorsOutput,
+  WebGLContextHandle,
+  TypedArrayConstructor,
+  ManagedSkottieAnimation,
+  InputFlattenedPointArray,
+} from 'canvaskit';
+import parseColor from 'color-parse';
+
 import {
-  Embind,
   SkiaPath,
   SkiaFont,
   SkiaPaint,
   SkiaImage,
   SkiaMatrix,
   SkiaTextStyle,
-  SkiaPathEffect,
   SkiaColorMatrix,
   SkiaShaderFactory,
   SkiaParagraphStyle,
@@ -18,190 +47,210 @@ import {
   SkiaTextBlobFactory,
   SkiaTypefaceFactory,
   SkiaParagraphBuilder,
-  SkiaMaskFilterFactory,
   SkiaImageFilterFactory,
   SkiaColorFilterFactory,
   SkiaRuntimeEffectFactory,
   SkiaTypefaceFontProviderFactory,
 } from './ClassWrappers';
+import * as Types from './types';
 
-export const SkiaCanvasKit: CanvasKit = {
-  Color(r, g, b, a) {
+export const SkiaCanvasKit = {
+  Color(r: number, g: number, b: number, a?: number): Color {
     return new Float32Array([r / 255, g / 255, b / 255, a ?? 0]);
   },
-  Color4f(r, g, b, a) {
+
+  Color4f(r: number, g: number, b: number, a?: number): Color {
     return new Float32Array([r, g, b, a ?? 0]);
   },
-  ColorAsInt(r, g, b, a) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  // @ts-ignore
+  ColorAsInt(r: number, g: number, b: number, a?: number): ColorInt {
+    console.warn(`SkiaCanvasKit.ColorAsInt not implemented!`);
   },
-  getColorComponents(c) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  // @ts-ignore
+  getColorComponents(c: Color): number[] {
+    console.warn(`SkiaCanvasKit.getColorComponents not implemented!`);
   },
-  parseColorString(color, colorMap) {
+
+  parseColorString(color: string, colorMap?: object): Color {
     const [r, g, b, a = 1] = parseColor(color).values;
 
     return new Float32Array([r / 255, g / 255, b / 255, a]);
   },
-  multiplyByAlpha(color, alpha) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  computeTonalColors(colors) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  LTRBRect(left, top, right, bottom) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  XYWHRect(x, y, width, height) {
-    return new Float32Array([x, y, x + width, y + height]);
-  },
-  LTRBiRect(left, top, right, bottom) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  XYWHiRect(x, y, width, height) {
-    return new Int32Array([x, y, x + width, y + height]);
-  },
-  RRectXY(rect, rx, ry) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  getShadowLocalBounds(
-    ctm,
-    path,
-    zPlaneParams,
-    lightPos,
-    lightRadius,
-    flags,
-    dstRect,
-  ) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  Malloc(typedArray, len) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MallocGlyphIDs(len) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  Free(m) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeCanvasSurface(canvas) {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeRasterDirectSurface(ii, pixels, bytesPerRow) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeSWCanvasSurface(canvas) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeWebGLCanvasSurface(canvas, colorSpace, opts) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeSurface(width, height) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  GetWebGLContext(canvas, opts) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeGrContext(ctx) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeOnScreenGLSurface(ctx, width, height, colorSpace) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeRenderTarget(
-    ...args:
-      | [ctx: GrDirectContext, info: ImageInfo]
-      | [ctx: GrDirectContext, width: number, height: number]
-  ) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  currentContext() {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  setCurrentContext(ctx) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  deleteContext(ctx) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  getDecodeCacheLimitBytes() {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  getDecodeCacheUsedBytes() {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  setDecodeCacheLimitBytes(size) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeAnimatedImageFromEncoded(bytes) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeCanvas(width, height) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
-  },
-  MakeImage(info, bytes, bytesPerRow) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  // @ts-ignore
+  multiplyByAlpha(c: Color, alpha: number): Color {
+    console.warn(`SkiaCanvasKit.multipyByAlpha not implemented!`);
   },
 
-  MakeImageFromEncoded(bytes) {
+  // @ts-ignore
+  computeTonalColors(colors: TonalColorsInput): TonalColorsOutput {
+    console.warn(`SkiaCanvasKit.computeTonalColors not implemented!`);
+  },
+
+  LTRBRect(left: number, top: number, right: number, bottom: number): Rect {
+    return new Float32Array([left, top, right, bottom]);
+  },
+
+  XYWHRect(x: number, y: number, width: number, height: number): Rect {
+    return new Float32Array([x, y, x + width, y + height]);
+  },
+
+  // @ts-ignore
+  LTRBiRect(left: number, top: number, right: number, bottom: number): IRect {
+    console.warn(`SkiaCanvasKit.LTRBiRect not implemented!`);
+  },
+
+  XYWHiRect(x: number, y: number, width: number, height: number): IRect {
+    return new Int32Array([x, y, x + width, y + height]);
+  },
+
+  // @ts-ignore
+  RRectXY(rect: InputRect, rx: number, ry: number): RRect {
+    console.warn(`SkiaCanvasKit.RRectXY not implemented!`);
+  },
+
+  getShadowLocalBounds(
+    ctm: InputMatrix,
+    path: SkiaPath,
+    zPlaneParams: InputVector3,
+    lightPos: InputVector3,
+    lightRadius: number,
+    flags: number,
+    dstRect?: Rect,
+    // @ts-ignore
+  ): Rect | null {
+    console.warn(`SkiaCanvasKit.getShadowLocalBounds not implemented!`);
+  },
+
+  // @ts-ignore
+  Malloc(typedArray: TypedArrayConstructor, len: number): MallocObj {
+    console.warn(`SkiaCanvasKit.Malloc not implemented!`);
+  },
+
+  // @ts-ignore
+  MallocGlyphIDs(len: number): MallocObj {
+    console.warn(`SkiaCanvasKit.MallocGlyphIDs not implemented!`);
+  },
+
+  Free(m: MallocObj): void {
+    console.warn(`SkiaCanvasKit.Free not implemented!`);
+  },
+
+  MakeCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
+    throw new Error(`SkiaCanvasKit.MakeCanvasSurface not implemented!`);
+  },
+
+  MakeRasterDirectSurface(
+    ii: ImageInfo,
+    pixels: MallocObj,
+    bytesPerRow: number,
+    // @ts-ignore
+  ): Surface | null {
+    console.warn(`SkiaCanvasKit.MakeRasterDirectSurface not implemented!`);
+  },
+
+  // @ts-ignore
+  MakeSWCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
+    console.warn(`SkiaCanvasKit.MakeSWCanvasSurface not implemented!`);
+  },
+
+  MakeWebGLCanvasSurface(
+    canvas: HTMLCanvasElement | string,
+    colorSpace?: ColorSpace,
+    opts?: WebGLOptions,
+    // @ts-ignore
+  ): Surface | null {
+    console.warn(`SkiaCanvasKit.MakeWebGLCanvasSurface not implemented!`);
+  },
+
+  // @ts-ignore
+  MakeSurface(width: number, height: number): Surface | null {
+    console.warn(`SkiaCanvasKit.MakeSurface not implemented!`);
+  },
+
+  GetWebGLContext(
+    canvas: HTMLCanvasElement,
+    opts?: WebGLOptions,
+    // @ts-ignore
+  ): WebGLContextHandle {
+    console.warn(`SkiaCanvasKit.GetWebGLContext not implemented!`);
+  },
+
+  // @ts-ignore
+  MakeGrContext(ctx: WebGLContextHandle): GrDirectContext {
+    console.warn(`SkiaCanvasKit.MakeGrContext not implemented!`);
+  },
+
+  MakeOnScreenGLSurface(
+    ctx: GrDirectContext,
+    width: number,
+    height: number,
+    colorSpace: ColorSpace,
+    // @ts-ignore
+  ): Surface | null {
+    console.warn(`SkiaCanvasKit.MakeOnScreenGLSurface not implemented!`);
+  },
+
+  MakeRenderTarget(
+    ctx: GrDirectContext,
+    width: number,
+    height: number,
+    // @ts-ignore
+  ): Surface | null {
+    console.warn(`SkiaCanvasKit.MakeRenderTarget not implemented!`);
+  },
+
+  // @ts-ignore
+  currentContext(): WebGLContextHandle {
+    console.warn(`SkiaCanvasKit.currentContext not implemented!`);
+  },
+
+  setCurrentContext(ctx: WebGLContextHandle): void {
+    console.warn(`SkiaCanvasKit.setCurrentContext not implemented!`);
+  },
+
+  deleteContext(ctx: WebGLContextHandle): void {
+    console.warn(`SkiaCanvasKit.deleteContext not implemented!`);
+  },
+
+  // @ts-ignore
+  getDecodeCacheLimitBytes(): number {
+    console.warn(`SkiaCanvasKit.getDecodeCacheLimitBytes not implemented!`);
+  },
+
+  // @ts-ignore
+  getDecodeCacheUsedBytes(): number {
+    console.warn(`SkiaCanvasKit.getDecodeCacheUsedBytes not implemented!`);
+  },
+
+  setDecodeCacheLimitBytes(size: number): void {
+    console.warn(`SkiaCanvasKit.setDecodeCacheLimitBytes not implemented!`);
+  },
+
+  MakeAnimatedImageFromEncoded(
+    bytes: Uint8Array | ArrayBuffer,
+    // @ts-ignore
+  ): AnimatedImage | null {
+    console.warn(`SkiaCanvasKit.MakeAnimatedImageFromEncoded not implemented!`);
+  },
+
+  // @ts-ignore
+  MakeCanvas(width: number, height: number): EmulatedCanvas2D {
+    console.warn(`SkiaCanvasKit.MakeCanvas not implemented!`);
+  },
+
+  MakeImage(
+    info: ImageInfo,
+    bytes: number[] | Uint8Array | Uint8ClampedArray,
+    bytesPerRow: number,
+    // @ts-ignore
+  ): SkiaImage | null {
+    console.warn(`SkiaCanvasKit.MakeImage not implemented!`);
+  },
+
+  MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): SkiaImage | null {
     const data = RNSkia.Skia.Data.fromBytes(new Uint8Array(bytes));
     const img = RNSkia.Skia.MakeImageFromEncoded(data);
 
@@ -212,49 +261,54 @@ export const SkiaCanvasKit: CanvasKit = {
     return new SkiaImage(img);
   },
 
-  MakeImageFromCanvasImageSource(src) {
+  // @ts-ignore
+  MakeImageFromCanvasImageSource(src: CanvasImageSource): SkiaImage {
     console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+      `SkiaCanvasKit.MakeImageFromCanvasImageSource not implemented!`,
     );
   },
-  MakePicture(bytes) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  // @ts-ignore
+  MakePicture(bytes: Uint8Array | ArrayBuffer): SkPicture | null {
+    console.warn(`SkiaCanvasKit.MakePicture not implemented!`);
   },
+
   MakeVertices(
-    mode,
-    positions,
-    textureCoordinates,
-    colors,
-    indices,
-    isVolatile,
-  ) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    mode: VertexMode,
+    positions: InputFlattenedPointArray,
+    textureCoordinates?: InputFlattenedPointArray | null,
+    colors?: Float32Array | ColorIntArray | null,
+    indices?: number[] | null,
+    isVolatile?: boolean,
+    // @ts-ignore
+  ): Vertices {
+    console.warn(`SkiaCanvasKit.MakeVertices not implemented!`);
   },
-  MakeAnimation(json) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  // @ts-ignore
+  MakeAnimation(json: string): SkottieAnimation {
+    console.warn(`SkiaCanvasKit.MakeAnimation not implemented!`);
   },
-  MakeManagedAnimation(json, assets, filterPrefix, soundMap) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  MakeManagedAnimation(
+    json: string,
+    assets?: Record<string, ArrayBuffer>,
+    filterPrefix?: string,
+    soundMap?: SoundMap,
+    // @ts-ignore
+  ): ManagedSkottieAnimation {
+    console.warn(`SkiaCanvasKit.MakeManagedAnimation not implemented!`);
   },
-  MakeParticles(json, assets) {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+
+  // @ts-ignore
+  MakeParticles(json: string, assets?: Record<string, ArrayBuffer>): Particles {
+    console.warn(`SkiaCanvasKit.MakeParticles not implemented!`);
   },
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ImageData: 0 as any,
   ParagraphStyle: SkiaParagraphStyle,
   ContourMeasureIter: 0 as any,
-  // @ts-expect-error
   Font: SkiaFont,
   Path: SkiaPath,
   Paint: SkiaPaint,
@@ -266,8 +320,8 @@ export const SkiaCanvasKit: CanvasKit = {
   ColorFilter: SkiaColorFilterFactory,
   FontMgr: SkiaFontMgrFactory,
   ImageFilter: SkiaImageFilterFactory,
-  MaskFilter: SkiaMaskFilterFactory,
-  PathEffect: SkiaPathEffect,
+  MaskFilter: RNSkia.Skia.MaskFilter,
+  PathEffect: RNSkia.Skia.PathEffect,
   RuntimeEffect: SkiaRuntimeEffectFactory,
   Shader: SkiaShaderFactory,
   TextBlob: SkiaTextBlobFactory,
@@ -281,84 +335,27 @@ export const SkiaCanvasKit: CanvasKit = {
   Vector: 0 as any,
 
   // Core Enums
-  AlphaType: Embind.createEnum(['Opaque', 'Premul', 'Unpremul']),
-  BlendMode: Embind.createEnum([
-    'Clear',
-    'Src',
-    'Dst',
-    'SrcOver',
-    'DstOver',
-    'SrcIn',
-    'DstIn',
-    'SrcOut',
-    'DstOut',
-    'SrcATop',
-    'DstATop',
-    'Xor',
-    'Plus',
-    'Modulate',
-    'Screen',
-    'Overlay',
-    'Darken',
-    'Lighten',
-    'ColorDodge',
-    'ColorBurn',
-    'HardLight',
-    'SoftLight',
-    'Difference',
-    'Exclusion',
-    'Multiply',
-    'Hue',
-    'Saturation',
-    'Color',
-    'Luminosity',
-  ]),
-  BlurStyle: Embind.createEnum(['Normal', 'Solid', 'Outer', 'Inner']),
-  ClipOp: Embind.createEnum(['Difference', 'Intersect']),
-  ColorType: Embind.createEnum([
-    'Alpha_8',
-    'RGB_565',
-    'RGBA_8888',
-    'BGRA_8888',
-    'RGBA_1010102',
-    'RGB_101010x',
-    'Gray_8',
-    'RGBA_F16',
-    'RGBA_F32',
-  ]),
-  FillType: Embind.createEnum(['Winding', 'EvenOdd']),
-  FilterMode: Embind.createEnum(['Linear', 'Nearest']),
-  FontEdging: Embind.createEnum(['Alias', 'AntiAlias', 'SubpixelAntiAlias']),
-  FontHinting: Embind.createEnum(['None', 'Slight', 'Normal', 'Full']),
-  GlyphRunFlags: {
-    IsWhiteSpace: 1,
-  },
-  ImageFormat: Embind.createEnum(['PNG', 'JPEG', 'WEBP']),
-  MipmapMode: Embind.createEnum(['None', 'Nearest', 'Linear']),
-  PaintStyle: Embind.createEnum(['Fill', 'Stroke']),
-  PathOp: Embind.createEnum([
-    'Difference',
-    'Intersect',
-    'Union',
-    'XOR',
-    'ReverseDifference',
-  ]),
-  PointMode: Embind.createEnum(['Points', 'Lines', 'Polygon']),
+  AlphaType: Types.AlphaType,
+  BlendMode: RNSkia.BlendMode,
+  BlurStyle: RNSkia.BlurStyle,
+  ClipOp: RNSkia.ClipOp,
+  ColorType: Types.ColorType,
+  FillType: RNSkia.FillType,
+  FilterMode: RNSkia.FilterMode,
+  FontEdging: Types.FontEdging,
+  FontHinting: Types.FontHinting,
+  GlyphRunFlags: { IsWhiteSpace: 1 },
+  ImageFormat: RNSkia.ImageFormat,
+  MipmapMode: RNSkia.MipmapMode,
+  PaintStyle: RNSkia.PaintStyle,
+  PathOp: RNSkia.PathOp,
+  PointMode: RNSkia.PointMode,
   ColorSpace: 0 as any,
-  // ColorSpace: class ColorSpace extends JSEmbindObject {
 
-  //     'SRGB' = Embind .createEnumEntity(0)
-  //     'DISPLAY_P3' = Embind .createEnumEntity(1)
-  //     'ADOBE_RGB' = Embind.createEnumEntity(2)
-
-  //     Equals(a, b) {
-  //       return true;
-  //     },
-  // },
   StrokeCap: RNSkia.StrokeCap,
   StrokeJoin: RNSkia.StrokeJoin,
   TileMode: RNSkia.TileMode,
-  VertexMode: Embind.createEnum(['Triangles', 'TrianglesStrip', 'TriangleFan']),
+  VertexMode: Types.VertexMode,
 
   // Core Constants
   TRANSPARENT: new Float32Array([0, 0, 0, 0]),
@@ -392,72 +389,18 @@ export const SkiaCanvasKit: CanvasKit = {
   skottie: false, // true if base Skottie code was compiled in
 
   // Paragraph Enums
-  Affinity: Embind.createEnum(['Upstream', 'Downstream']),
-  DecorationStyle: Embind.createEnum([
-    'Solid',
-    'Double',
-    'Dotted',
-    'Dashed',
-    'Wavy',
-  ]),
-  FontSlant: Embind.createEnum(['Upright', 'Italic', 'Oblique']),
-  FontWeight: Embind.createEnum([
-    'Invisible',
-    'Thin',
-    'ExtraLight',
-    'Light',
-    'Normal',
-    'Medium',
-    'SemiBold',
-    'Bold',
-    'ExtraBold',
-    'Black',
-    'ExtraBlack',
-  ]),
-  FontWidth: Embind.createEnum([
-    'UltraCondensed',
-    'ExtraCondensed',
-    'Condensed',
-    'SemiCondensed',
-    'Normal',
-    'SemiExpanded',
-    'Expanded',
-    'ExtraExpanded',
-    'UltraExpanded',
-  ]),
-  PlaceholderAlignment: Embind.createEnum([
-    'Baseline',
-    'AboveBaseline',
-    'BelowBaseline',
-    'Top',
-    'Bottom',
-    'Middle',
-  ]),
-  RectHeightStyle: Embind.createEnum([
-    'Tight',
-    'Max',
-    'IncludeLineSpacingMiddle',
-    'IncludeLineSpacingTop',
-    'IncludeLineSpacingBottom',
-    'Strut',
-  ]),
-  RectWidthStyle: Embind.createEnum(['Tight', 'Max']),
-  TextAlign: Embind.createEnum([
-    'Left',
-    'Right',
-    'Center',
-    'Justify',
-    'Start',
-    'End',
-  ]),
-  TextBaseline: Embind.createEnum(['Alphabetic', 'Ideographic']),
-  TextDirection: Embind.createEnum(['LTR', 'RTL']),
-  TextHeightBehavior: Embind.createEnum([
-    'All',
-    'DisableFirstAscent',
-    'DisableLastDescent',
-    'DisableAll',
-  ]),
+  Affinity: Types.Affinity,
+  DecorationStyle: Types.DecorationStyle,
+  FontSlant: RNSkia.FontSlant,
+  FontWeight: RNSkia.FontWeight,
+  FontWidth: RNSkia.FontWidth,
+  PlaceholderAlignment: Types.PlaceholderAlignment,
+  RectHeightStyle: Types.RectHeightStyle,
+  RectWidthStyle: Types.RectWidthStyle,
+  TextAlign: Types.TextAlign,
+  TextBaseline: Types.TextBaseline,
+  TextDirection: Types.TextDirection,
+  TextHeightBehavior: Types.TextHeightBehavior,
 
   // Paragraph Constants
   NoDecoration: 0x0,

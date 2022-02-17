@@ -51,9 +51,8 @@ export const SkiaColorMatrix = {
     db: number,
     da: number,
   ): ColorMatrix {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaColorMatrix.postTranslate not implemented!`);
+    return this.identity();
   },
 
   /**
@@ -63,9 +62,9 @@ export const SkiaColorMatrix = {
    * @param cosine - cos(angle)
    */
   rotated(axis: number, sine: number, cosine: number): ColorMatrix {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaColorMatrix.rotated not implemented!`);
+
+    return this.identity();
   },
 
   /**
@@ -81,8 +80,8 @@ export const SkiaColorMatrix = {
     blueScale: number,
     alphaScale: number,
   ): ColorMatrix {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaColorMatrix.scaled not implemented!`);
+
+    return this.identity();
   },
 };

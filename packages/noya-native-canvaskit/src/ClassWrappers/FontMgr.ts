@@ -1,12 +1,11 @@
 import { Skia } from '@shopify/react-native-skia';
 
-import type { FontMgr, FontMgrFactory } from 'canvaskit';
+import type { FontMgr } from 'canvaskit';
 
-export const SkiaFontMgrFactory: FontMgrFactory = {
+export const SkiaFontMgrFactory = {
+  // @ts-ignore
   FromData(...buffers: ArrayBuffer[]): FontMgr | null {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaFontMgrFactory.FromData not implemented!`);
   },
 
   RefDefault(): FontMgr {

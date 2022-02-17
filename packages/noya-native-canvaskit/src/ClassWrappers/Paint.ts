@@ -1,28 +1,24 @@
-import * as RNSkia from '@shopify/react-native-skia';
-
 import {
-  Paint,
-  Color,
-  ColorInt,
-  BlendMode,
+  Skia,
   StrokeCap,
-  ColorSpace,
-  InputColor,
+  BlendMode,
   PaintStyle,
   StrokeJoin,
-} from 'canvaskit';
+  IPathEffect,
+  IMaskFilter,
+  IImageFilter,
+  IColorFilter,
+} from '@shopify/react-native-skia';
+
+import { Color, ColorInt, ColorSpace, InputColor } from 'canvaskit';
 import { colorArrayToNum, colorNumToArray } from '../utils/color';
-import { SkiaColorFilter } from './ColorFilter';
-import { SkiaImageFilter } from './ImageFilter';
-import { SkiaMaskFilter } from './MaskFilter';
-import { SkiaPathEffect } from './PathEffect';
 import { JSEmbindObject } from './Embind';
 import { SkiaShader } from './Shader';
 
-export class SkiaPaint extends JSEmbindObject implements Paint {
-  private _paint = RNSkia.Skia.Paint();
+export class SkiaPaint extends JSEmbindObject {
+  private _paint = Skia.Paint();
 
-  copy(): Paint {
+  copy(): SkiaPaint {
     const paintCopy = this._paint.copy();
 
     const copy = new SkiaPaint();
@@ -31,10 +27,9 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
     return copy;
   }
 
+  // @ts-ignore
   getBlendMode(): BlendMode {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaPaint.getBlendMode not implemented!`);
   }
 
   getColor(): Color {
@@ -66,7 +61,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setBlendMode(mode: BlendMode): void {
-    this._paint.setBlendMode(mode.value);
+    this._paint.setBlendMode(mode);
   }
 
   setColor(color: InputColor, colorSpace?: ColorSpace): void {
@@ -80,29 +75,27 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
     a: number,
     colorSpace?: ColorSpace,
   ): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaPaint.setColorComponents not implemented!`);
   }
 
-  setColorFilter(filter: SkiaColorFilter): void {
-    this._paint.setColorFilter(filter.getColorFilter());
+  setColorFilter(filter: IColorFilter): void {
+    this._paint.setColorFilter(filter);
   }
 
   setColorInt(color: ColorInt, colorSpace?: ColorSpace): void {
     this._paint.setColor(color);
   }
 
-  setImageFilter(filter: SkiaImageFilter): void {
-    this._paint.setImageFilter(filter.getImageFilter());
+  setImageFilter(filter: IImageFilter): void {
+    this._paint.setImageFilter(filter);
   }
 
-  setMaskFilter(filter: SkiaMaskFilter): void {
-    this._paint.setMaskFilter(filter.getMaskFilter());
+  setMaskFilter(filter: IMaskFilter): void {
+    this._paint.setMaskFilter(filter);
   }
 
-  setPathEffect(effect: SkiaPathEffect): void {
-    this._paint.setPathEffect(effect.getPathEffect());
+  setPathEffect(effect: IPathEffect): void {
+    this._paint.setPathEffect(effect);
   }
 
   setShader(shader: SkiaShader): void {
@@ -110,11 +103,11 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setStrokeCap(cap: StrokeCap): void {
-    this._paint.setStrokeCap(cap.value);
+    this._paint.setStrokeCap(cap);
   }
 
   setStrokeJoin(join: StrokeJoin): void {
-    this._paint.setStrokeJoin(join.value);
+    this._paint.setStrokeJoin(join);
   }
 
   setStrokeMiter(limit: number): void {
@@ -126,7 +119,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   setStyle(style: PaintStyle): void {
-    this._paint.setStyle(style.value);
+    this._paint.setStyle(style);
   }
 
   getRNSkiaPaint() {
@@ -134,8 +127,7 @@ export class SkiaPaint extends JSEmbindObject implements Paint {
   }
 
   get style(): PaintStyle {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaPaint.get style not implemented!`);
+    return 0;
   }
 }

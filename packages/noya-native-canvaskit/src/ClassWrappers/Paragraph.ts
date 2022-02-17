@@ -3,14 +3,12 @@ import { ICanvas } from '@shopify/react-native-skia';
 import {
   FlattenedRectangleArray,
   LineMetrics,
-  Paragraph,
   PositionWithAffinity,
-  RectHeightStyle,
-  RectWidthStyle,
   ShapedLine,
   TextStyle,
   URange,
 } from 'canvaskit';
+import { RectHeightStyle, RectWidthStyle } from '../types';
 import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
 import { SkiaParagraphStyle } from './ParagraphStyle';
 import { JSEmbindObject } from './Embind';
@@ -28,7 +26,7 @@ interface TextBlock {
   font: SkiaFont;
 }
 
-export class SkiaParagraph extends JSEmbindObject implements Paragraph {
+export class SkiaParagraph extends JSEmbindObject {
   _blocks: TextBlock[] = [];
   _height: number = 0;
   _maxWidth: number = 0;
@@ -60,53 +58,43 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
     });
   }
 
+  // @ts-ignore
   didExceedMaxLines(): boolean {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.didExceedMaxLines not implemented!`);
   }
 
+  // @ts-ignore
   getAlphabeticBaseline(): number {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getAlphabeticBaseline not implemented!`);
   }
 
+  // @ts-ignore
   getGlyphPositionAtCoordinate(dx: number, dy: number): PositionWithAffinity {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getGlyphPositionAtCoordinate not implemented!`);
   }
 
   getHeight(): number {
-    // console.warn(
-    //   `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    // );
     return this._height;
-    // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
   }
 
+  // @ts-ignore
   getIdeographicBaseline(): number {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getIdeographicBaseline not implemented!`);
   }
 
+  // @ts-ignore
   getLineMetrics(): LineMetrics[] {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getLineMetrics not implemented!`);
   }
 
+  // @ts-ignore
   getLongestLine(): number {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getLongestLine not implemented!`);
   }
 
   getMaxIntrinsicWidth(): number {
     // console.warn(
-    //   `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    //   `SkiaParagraph.name not implemented!`,
     // );
     return this._maxWidth;
   }
@@ -119,10 +107,9 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
     return this._maxWidth;
   }
 
+  // @ts-ignore
   getRectsForPlaceholders(): FlattenedRectangleArray {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getRectsForPlaceholders not implemented!`);
   }
 
   getRectsForRange(
@@ -130,22 +117,19 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
     end: number,
     hStyle: RectHeightStyle,
     wStyle: RectWidthStyle,
+    // @ts-ignore
   ): FlattenedRectangleArray {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getRectsForRange not implemented!`);
   }
 
+  // @ts-ignore
   getWordBoundary(offset: number): URange {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getWordBoundary not implemented!`);
   }
 
+  // @ts-ignore
   getShapedLines(): ShapedLine[] {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getShapedLines not implemented!`);
   }
 
   draw(canvas: ICanvas, x: number, y: number) {
@@ -155,8 +139,6 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
   }
 
   layout(width: number): void {
-    // console.warn(
-    //   `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    // );
+    // console.warn(`SkiaParagraph.layout not implemented!`);
   }
 }

@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { SkiaImage, SkiaPaint } from 'noya-native-canvaskit';
+import { SkiaPaint, SkiaCanvasKit } from 'noya-native-canvaskit';
 import { LTRBArrayToRect } from 'noya-geometry';
 import { useCanvasKit } from 'noya-renderer';
 
@@ -14,11 +14,11 @@ interface ImageProps {
 
 const Image: React.FC<ImageProps> = (props) => {
   const { rect, paint, resample } = props;
-
-  const CanvasKit = useCanvasKit();
+  // @ts-ignore
+  const CanvasKit = useCanvasKit() as typeof SkiaCanvasKit;
 
   const skiaImage = useMemo(() => {
-    const image = CanvasKit.MakeImageFromEncoded(props.image) as SkiaImage;
+    const image = CanvasKit.MakeImageFromEncoded(props.image)!;
 
     return image;
   }, [CanvasKit, props.image]);

@@ -1,29 +1,20 @@
-import {
-  FontBlock,
-  FontMgr,
-  Paint,
-  ParagraphBuilder,
-  ParagraphStyle,
-  PlaceholderAlignment,
-  ShapedLine,
-  TextBaseline,
-  TextStyle,
-} from 'canvaskit';
-import { JSEmbindObject } from './Embind';
+import { FontBlock, FontMgr, ShapedLine } from 'canvaskit';
+
+import { PlaceholderAlignment, TextBaseline } from '../types';
 import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
+import { SkiaParagraphStyle } from './ParagraphStyle';
 import { SkiaParagraph } from './Paragraph';
 import { SkiaTextStyle } from './TextStyle';
+import { JSEmbindObject } from './Embind';
+import { SkiaPaint } from './Paint';
 
-export class SkiaParagraphBuilder
-  extends JSEmbindObject
-  implements ParagraphBuilder
-{
+export class SkiaParagraphBuilder extends JSEmbindObject {
   _parts: {
     text: string;
-    style?: TextStyle;
+    style?: SkiaTextStyle;
   }[] = [];
-  _styleStack: TextStyle[] = [];
-  _paragraphStyle: ParagraphStyle | undefined;
+  _styleStack: SkiaTextStyle[] = [];
+  _paragraphStyle: SkiaParagraphStyle | undefined;
 
   constructor(private _fontProvider: SkiaTypefaceFontProvider | undefined) {
     super();
@@ -36,9 +27,7 @@ export class SkiaParagraphBuilder
     baseline?: TextBaseline,
     offset?: number,
   ): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraphBuilder.addPlaceholder not implemented!`);
   }
 
   addText(str: string): void {
@@ -61,25 +50,26 @@ export class SkiaParagraphBuilder
     this._styleStack.shift();
   }
 
-  pushStyle(text: TextStyle): void {
+  pushStyle(text: SkiaTextStyle): void {
     this._styleStack.unshift(text);
   }
 
-  pushPaintStyle(textStyle: TextStyle, fg: Paint, bg: Paint): void {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  pushPaintStyle(textStyle: SkiaTextStyle, fg: SkiaPaint, bg: SkiaPaint): void {
+    console.warn(`SkiaParagraphBuilder.pushPaintStyle not implemented!`);
   }
 
   setProvider(provider: SkiaTypefaceFontProvider) {
     this._fontProvider = provider;
   }
 
-  setParagraphStyle(style: ParagraphStyle) {
+  setParagraphStyle(style: SkiaParagraphStyle) {
     this._paragraphStyle = style;
   }
 
-  static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
+  static Make(
+    style: SkiaParagraphStyle,
+    fontManager: FontMgr,
+  ): SkiaParagraphBuilder {
     const builder = new SkiaParagraphBuilder(undefined);
 
     builder.pushStyle(style.textStyle!);
@@ -87,9 +77,9 @@ export class SkiaParagraphBuilder
   }
 
   static MakeFromFontProvider(
-    style: ParagraphStyle,
+    style: SkiaParagraphStyle,
     fontSrc: SkiaTypefaceFontProvider,
-  ): ParagraphBuilder {
+  ): SkiaParagraphBuilder {
     const builder = new SkiaParagraphBuilder(fontSrc);
 
     builder.pushStyle(style.textStyle!);
@@ -102,34 +92,8 @@ export class SkiaParagraphBuilder
     text: string,
     runs: FontBlock[],
     width?: number,
+    // @ts-ignore
   ): ShapedLine[] {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraphBuilder.ShapeText not implemented!`);
   }
 }
-
-const a = [
-  {
-    style: { color: [Float32Array], fontFamilies: [Array], fontSize: 42 },
-    text: 'Title',
-  },
-];
-
-const x = {
-  disableHinting: undefined,
-  ellipsis: undefined,
-  heightMultiplier: undefined,
-  maxLines: undefined,
-  strutStyle: {
-    fontFamilies: ['system'],
-    fontSize: 42,
-    forceStrutHeight: true,
-    heightMultiplier: undefined,
-    strutEnabled: true,
-  },
-  textAlign: { value: 2 },
-  textDirection: undefined,
-  textHeightBehavior: undefined,
-  textStyle: { color: [0, 0, 0, 1], fontFamilies: ['system'], fontSize: 42 },
-};

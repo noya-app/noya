@@ -1,10 +1,10 @@
 import { Skia, Typeface as RNSkiaTypeface } from '@shopify/react-native-skia';
 
-import type { Typeface, GlyphIDArray } from 'canvaskit';
+import type { GlyphIDArray } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 
-export class SkiaTypeface extends JSEmbindObject implements Typeface {
-  constructor(private _typeface: RNSkiaTypeface | undefined) {
+export class SkiaTypeface extends JSEmbindObject {
+  constructor(private _typeface: RNSkiaTypeface | null) {
     super();
   }
 
@@ -13,15 +13,13 @@ export class SkiaTypeface extends JSEmbindObject implements Typeface {
     numCodePoints?: number,
     output?: GlyphIDArray,
   ): GlyphIDArray {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaTypeface.getGlyphIDs not implemented!`);
 
     return new Uint16Array();
   }
 
   getTypeface() {
-    return this._typeface;
+    return this._typeface ?? undefined;
   }
 }
 

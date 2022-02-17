@@ -1,21 +1,22 @@
-import { IImage, TileMode as SkiaTileMode } from '@shopify/react-native-skia';
+import {
+  IImage,
+  TileMode,
+  FilterMode,
+  MipmapMode,
+} from '@shopify/react-native-skia';
 
 import type {
-  Image,
-  Shader,
   MallocObj,
   ImageInfo,
-  MipmapMode,
-  FilterMode,
   ColorSpace,
   PartialImageInfo,
   EncodedImageFormat,
 } from 'canvaskit';
-import { JSEmbindObject } from './Embind';
 import { SkiaShader } from './Shader';
 import { SkiaMatrix } from './Matrix';
+import { JSEmbindObject } from './Embind';
 
-export class SkiaImage extends JSEmbindObject implements Image {
+export class SkiaImage extends JSEmbindObject {
   constructor(private _image: IImage) {
     super();
   }
@@ -24,31 +25,28 @@ export class SkiaImage extends JSEmbindObject implements Image {
     return this._image.encodeToBytes(fmt?.value, quality);
   }
 
+  // @ts-ignore
   getColorSpace(): ColorSpace {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaImage.getColorSpace not implemented!`);
   }
 
+  // @ts-ignore
   getImageInfo(): PartialImageInfo {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaImage.getImageInfo not implemented!`);
   }
 
   height() {
     return this._image.height();
   }
 
-  makeCopyWithDefaultMipmaps(): Image {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  // @ts-ignore
+  makeCopyWithDefaultMipmaps(): SkiaImage {
+    console.warn(`SkiaImage.makeCopyWithDefaultMipmaps not implemented!`);
   }
 
   makeShaderCubic(
-    tx: SkiaTileMode,
-    ty: SkiaTileMode,
+    tx: TileMode,
+    ty: TileMode,
     B: number,
     C: number,
     localMatrix?: Float32Array | number[],
@@ -64,18 +62,19 @@ export class SkiaImage extends JSEmbindObject implements Image {
     return new SkiaShader(shader);
   }
 
+  // @ts-ignore
   makeShaderOptions(
-    tx: SkiaTileMode,
-    ty: SkiaTileMode,
+    tx: TileMode,
+    ty: TileMode,
     fm: FilterMode,
     mm: MipmapMode,
     localMatrix?: Float32Array | number[],
-  ): Shader {
+  ): SkiaShader {
     const shader = this._image.makeShaderOptions(
       tx,
       ty,
-      fm.value,
-      mm.value,
+      fm,
+      mm,
       SkiaMatrix.toRNSMatrix(localMatrix),
     );
 
@@ -88,10 +87,9 @@ export class SkiaImage extends JSEmbindObject implements Image {
     imageInfo: ImageInfo,
     dest?: MallocObj,
     bytesPerRow?: number,
+    // @ts-ignore
   ): Uint8Array | Float32Array | null {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaImage.readPixels not implemented!`);
   }
 
   width() {

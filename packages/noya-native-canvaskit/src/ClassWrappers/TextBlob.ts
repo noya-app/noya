@@ -1,48 +1,37 @@
-// import { Skia, IMaskFilter } from '@shopify/react-native-skia';
-
-import type {
-  TextBlob,
-  TextBlobFactory,
-  InputGlyphIDArray,
-  InputFlattenedRSXFormArray,
-} from 'canvaskit';
+import type { InputGlyphIDArray, InputFlattenedRSXFormArray } from 'canvaskit';
 import { JSEmbindObject } from './Embind';
 import { SkiaFont } from './Font';
 import { SkiaPath } from './Path';
 
-class SkiaTextBlob extends JSEmbindObject implements TextBlob {}
+class SkiaTextBlob extends JSEmbindObject {}
 
-export const SkiaTextBlobFactory: TextBlobFactory = {
+export const SkiaTextBlobFactory = {
+  // @ts-ignore
   MakeFromGlyphs(glyphs: InputGlyphIDArray, font: SkiaFont): SkiaTextBlob {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaTextBlobFactory.MakeFromGlyphs not implemented!`);
   },
 
   MakeFromRSXform(
     str: string,
     rsxforms: InputFlattenedRSXFormArray,
     font: SkiaFont,
+    // @ts-ignore
   ): SkiaTextBlob {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaTextBlobFactory.MakeFromRSXform not implemented!`);
   },
 
   MakeFromRSXformGlyphs(
     glyphs: InputGlyphIDArray,
     rsxforms: InputFlattenedRSXFormArray,
     font: SkiaFont,
+    // @ts-ignore
   ): SkiaTextBlob {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaTextBlobFactory.MakeFromRSXformGlyphs not implemented!`);
   },
 
+  // @ts-ignore
   MakeFromText(str: string, font: SkiaFont): SkiaTextBlob {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaTextBlobFactory.MakeFromText not implemented!`);
   },
 
   MakeOnPath(
@@ -50,9 +39,8 @@ export const SkiaTextBlobFactory: TextBlobFactory = {
     path: SkiaPath,
     font: SkiaFont,
     initialOffset?: number,
+    // @ts-ignore
   ): SkiaTextBlob {
-    console.warn(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaTextBlobFactory.MakeOnPath not implemented!`);
   },
 };

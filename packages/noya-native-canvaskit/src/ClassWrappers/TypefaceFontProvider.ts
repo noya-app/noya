@@ -1,11 +1,7 @@
-import type { TypefaceFontProvider } from 'canvaskit';
-import { JSEmbindObject } from './Embind';
 import { SkiaTypeface, SkiaTypefaceFactory } from './Typeface';
+import { JSEmbindObject } from './Embind';
 
-export class SkiaTypefaceFontProvider
-  extends JSEmbindObject
-  implements TypefaceFontProvider
-{
+export class SkiaTypefaceFontProvider extends JSEmbindObject {
   public typefaces: { [name: string]: SkiaTypeface | null } = {};
 
   registerFont(bytes: ArrayBuffer | Uint8Array, family: string): void {

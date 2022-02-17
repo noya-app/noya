@@ -31,9 +31,7 @@ export class JSParagraphBuilder
     baseline?: TextBaseline,
     offset?: number,
   ): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error(`JSParagraphBuilder.addPlaceholder not implemented!`);
   }
 
   addText(str: string): void {
@@ -53,9 +51,7 @@ export class JSParagraphBuilder
   }
 
   pushPaintStyle(textStyle: TextStyle, fg: Paint, bg: Paint): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error(`JSParagraphBuilder.pushPaintStyle not implemented!`);
   }
 
   static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
@@ -68,9 +64,7 @@ export class JSParagraphBuilder
     style: ParagraphStyle,
     fontSrc: TypefaceFontProvider,
   ): ParagraphBuilder {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error(`JSParagraphBuilder.MakeFromFontProvider not implemented!`);
   }
 
   static ShapeText(
@@ -78,8 +72,6 @@ export class JSParagraphBuilder
     runs: FontBlock[],
     width?: number,
   ): ShapedLine[] {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    throw new Error(`JSParagraphBuilder.ShapeText not implemented!`);
   }
 }

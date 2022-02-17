@@ -1,20 +1,18 @@
-import {
-  EmbindEnumEntity,
-  ParagraphStyle,
-  StrutStyle,
-  TextStyle,
-} from 'canvaskit';
+import { StrutStyle } from 'canvaskit';
 
-export class SkiaParagraphStyle implements ParagraphStyle {
+import { TextAlign, TextDirection, TextHeightBehavior } from '../types';
+import { SkiaTextStyle } from './TextStyle';
+
+export class SkiaParagraphStyle {
   disableHinting?: boolean;
   ellipsis?: string;
   heightMultiplier?: number;
   maxLines?: number;
   strutStyle?: StrutStyle;
-  textAlign?: EmbindEnumEntity;
-  textDirection?: EmbindEnumEntity;
-  textHeightBehavior?: EmbindEnumEntity;
-  textStyle?: TextStyle;
+  textAlign?: TextAlign;
+  textDirection?: TextDirection;
+  textHeightBehavior?: TextHeightBehavior;
+  textStyle?: SkiaTextStyle;
 
   constructor({
     disableHinting,
@@ -26,7 +24,7 @@ export class SkiaParagraphStyle implements ParagraphStyle {
     textDirection,
     textHeightBehavior,
     textStyle,
-  }: ParagraphStyle) {
+  }: SkiaParagraphStyle) {
     this.disableHinting = disableHinting;
     this.ellipsis = ellipsis;
     this.heightMultiplier = heightMultiplier;

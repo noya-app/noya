@@ -1,29 +1,36 @@
 import React, { memo, PropsWithChildren } from 'react';
-import { Drawing, useDrawing, skiaMatrix3 } from '@shopify/react-native-skia';
+import {
+  ClipOp,
+  Drawing,
+  useDrawing,
+  skiaMatrix3,
+  IColorFilter,
+  IImageFilter,
+} from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
 import { useCanvasKit } from 'noya-renderer';
 import { AffineTransform, LTRBArrayToRect } from 'noya-geometry';
-import {
-  SkiaPath,
-  SkiaPaint,
-  SkiaColorFilter,
-  SkiaImageFilter,
-} from 'noya-native-canvaskit';
+import { SkiaPath, SkiaPaint, SkiaCanvasKit } from 'noya-native-canvaskit';
 
-import { ClipProps } from '../types';
+interface ClipProps {
+  path: Float32Array | SkiaPath;
+  op: ClipOp;
+  antiAlias?: boolean;
+}
 
 interface GroupProps {
   opacity?: number;
   transform?: AffineTransform;
   clip?: ClipProps;
-  colorFilter?: SkiaColorFilter;
-  imageFilter?: SkiaImageFilter;
-  backdropImageFilter?: SkiaImageFilter;
+  colorFilter?: IColorFilter;
+  imageFilter?: IImageFilter;
+  backdropImageFilter?: IImageFilter;
 }
 
 const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
-  const CanvasKit = useCanvasKit();
+  // @ts-ignore
+  const CanvasKit = useCanvasKit() as typeof SkiaCanvasKit;
 
   const onDraw = useDrawing(
     props,
@@ -54,13 +61,13 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         if (clip.path instanceof Float32Array) {
           canvas.clipRect(
             LTRBArrayToRect(clip.path),
-            clip.op.value,
+            clip.op,
             clip.antiAlias ?? true,
           );
         } else if (clip.path instanceof SkiaPath) {
           canvas.clipPath(
             clip.path.getRNSkiaPath(),
-            clip.op.value,
+            clip.op,
             clip.antiAlias ?? true,
           );
         }
@@ -95,7 +102,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         canvas.saveLayer(
           layerPaint.getRNSkiaPaint(),
           null,
-          backdropImageFilter?.getImageFilter(),
+          backdropImageFilter,
         );
       }
 
