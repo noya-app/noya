@@ -60,7 +60,7 @@ export const SkiaCanvasKit = {
   },
 
   Color4f(r: number, g: number, b: number, a?: number): Color {
-    return new Float32Array([r, g, b, a ?? 0]);
+    return new Float32Array([r, g, b, a ?? 1]);
   },
 
   // @ts-ignore
