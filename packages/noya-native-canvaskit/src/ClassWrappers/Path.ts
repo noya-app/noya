@@ -1,37 +1,36 @@
-import * as RNSkia from '@shopify/react-native-skia';
+import {
+  Skia,
+  IPath,
+  IPoint,
+  FillType,
+  PathOp,
+  StrokeOpts,
+} from '@shopify/react-native-skia';
 
 import type {
-  // AngleInDegrees,
-  // AngleInRadians,
-  EmbindEnumEntity,
-  FillType,
   InputFlattenedPointArray,
   InputRect,
   InputRRect,
-  Path,
-  PathOp,
-  // Point,
-  // Rect,
-  StrokeOpts,
   VerbList,
   WeightList,
 } from 'canvaskit';
-import {
-  LTRBArrayToRect,
-  RectToLTRBArray,
-  // createRectFromBounds,
-  // getRectCornerPoints,
-  // getRectEdgeMidPoints,
-} from 'noya-geometry';
-// import { parsePathCmds } from 'noya-state';
+import { LTRBArrayToRect, RectToLTRBArray } from 'noya-geometry';
 import { JSEmbindObject } from './Embind';
 
-// const ROOT_2_OVER_2 = Math.sqrt(2) / 2;
+export class SkiaPath extends JSEmbindObject {
+  private _path: IPath;
 
-export class SkiaPath extends JSEmbindObject implements Path {
-  private _path = RNSkia.Skia.Path.Make();
+  constructor(path?: IPath) {
+    super();
 
-  makeAsWinding(): Path | null {
+    if (path) {
+      this._path = path;
+    } else {
+      this._path = Skia.Path.Make();
+    }
+  }
+
+  makeAsWinding(): SkiaPath | null {
     this._path.makeAsWinding();
     return this;
   }
@@ -56,16 +55,22 @@ export class SkiaPath extends JSEmbindObject implements Path {
     return this;
   }
 
-  addPath(...args: any[]): SkiaPath {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  addPath(other: SkiaPath): SkiaPath {
+    console.warn(`SkiaPath.addPath not implemented!`);
+    return this;
   }
 
   addPoly(points: InputFlattenedPointArray, close: boolean): SkiaPath {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    const p = points as Float32Array;
+    const skiaPoints: IPoint[] = [];
+
+    for (let i = 0; i < points.length / 2; i += 2) {
+      skiaPoints.push({ x: p[i] as number, y: p[i + 1] });
+    }
+
+    this._path.addPoly(skiaPoints, close);
+
+    return this;
   }
 
   addRect(rect: InputRect, isCCW?: boolean): SkiaPath {
@@ -75,9 +80,32 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   addRRect(rrect: InputRRect, isCCW?: boolean): SkiaPath {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    const [
+      _top, // eslint-disable-line
+      _left, // eslint-disable-line
+      _right, // eslint-disable-line
+      _bottom, // eslint-disable-line
+      TLrX,
+      TLrY,
+      // _TRrX,
+      // _TRrY,
+      // _BRrX,
+      // _BRrY,
+      // _BLrX,
+      // _BLrY,
+    ] = rrect as Float32Array;
+
+    this._path.addRRect({
+      rect: LTRBArrayToRect(rrect as Float32Array),
+      rx: TLrX,
+      ry: TLrY,
+    });
+
+    console.warn(
+      'React-native skia supports only single radius for all corners',
     );
+
+    return this;
   }
 
   addVerbsPointsWeights(
@@ -85,9 +113,9 @@ export class SkiaPath extends JSEmbindObject implements Path {
     points: InputFlattenedPointArray,
     weights?: WeightList,
   ): SkiaPath {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaPath.addVerbsPointsWeights not implemented!`);
+
+    return this;
   }
 
   arc(
@@ -97,10 +125,10 @@ export class SkiaPath extends JSEmbindObject implements Path {
     startAngle: number,
     endAngle: number,
     isCCW?: boolean,
-  ): Path {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  ): SkiaPath {
+    console.warn(`SkiaPath.arc not implemented!`);
+
+    return this;
   }
 
   arcToOval(
@@ -173,10 +201,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   copy(): SkiaPath {
     const pathCopy = this._path.copy();
 
-    const copy = new SkiaPath();
-    copy._path = pathCopy;
-
-    return copy;
+    return new SkiaPath(pathCopy);
   }
 
   countPoints(): number {
@@ -205,19 +230,19 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   getBounds(outputArray?: Float32Array): Float32Array {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    const rect = this._path.getBounds();
+
+    return RectToLTRBArray(rect);
   }
 
-  getFillType(): EmbindEnumEntity {
-    return { value: this._path.getFillType() };
+  getFillType(): FillType {
+    return this._path.getFillType();
   }
 
   getPoint(index: number, outputArray?: Float32Array): Float32Array {
     const point = this._path.getPoint(index);
     if (outputArray) {
-      /// ?????
+      // TODO ?????
       outputArray[0] = point.x;
       outputArray[1] = point.y;
 
@@ -250,11 +275,11 @@ export class SkiaPath extends JSEmbindObject implements Path {
     return this;
   }
 
-  op(other: SkiaPath, op: EmbindEnumEntity): boolean {
-    return this._path.op(other._path, op.value as RNSkia.PathOp);
+  op(other: SkiaPath, op: PathOp): boolean {
+    return this._path.op(other._path, op);
   }
 
-  quadTo(x1: number, y1: number, x2: number, y2: number): Path {
+  quadTo(x1: number, y1: number, x2: number, y2: number): SkiaPath {
     this._path.quadTo(x1, y1, x2, y2);
 
     return this;
@@ -268,7 +293,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
     isCCW: boolean,
     dx: number,
     dy: number,
-  ): Path {
+  ): SkiaPath {
     this._path.rArcTo(rx, ry, xAxisRotate, useSmallArc, isCCW, dx, dy);
 
     return this;
@@ -280,7 +305,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
     dx2: number,
     dy2: number,
     w: number,
-  ): Path {
+  ): SkiaPath {
     this._path.rConicTo(dx1, dy1, dx2, dy2, w);
 
     return this;
@@ -293,7 +318,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
     cpy2: number,
     x: number,
     y: number,
-  ): Path {
+  ): SkiaPath {
     this._path.rCubicTo(cpx1, cpy1, cpx2, cpy2, x, y);
 
     return this;
@@ -324,7 +349,7 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   setFillType(fill: FillType): void {
-    this._path.setFillType(fill.value as RNSkia.FillType);
+    this._path.setFillType(fill);
   }
 
   setIsVolatile(volatile: boolean): void {
@@ -336,24 +361,14 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   stroke(opts?: StrokeOpts): SkiaPath {
-    const { width, miter_limit, precision, join, cap } = opts ?? {};
-
-    this._path.stroke({
-      width,
-      miter_limit,
-
-      precision,
-      join: join?.value as RNSkia.StrokeJoin,
-      cap: cap?.value as RNSkia.StrokeCap,
-    });
+    this._path.stroke(opts);
 
     return this;
   }
 
+  // @ts-ignore
   toCmds(): Float32Array {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaPath.toCmds not implemented!`);
   }
 
   toSVGString(): string {
@@ -361,9 +376,9 @@ export class SkiaPath extends JSEmbindObject implements Path {
   }
 
   transform(...args: any[]): SkiaPath {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaPath.transform not implemented!`);
+
+    return this;
   }
 
   trim(startT: number, stopT: number, isComplement: boolean): SkiaPath {
@@ -383,19 +398,22 @@ export class SkiaPath extends JSEmbindObject implements Path {
     return path;
   }
 
-  static MakeFromOp(one: Path, two: Path, op: PathOp): SkiaPath {
-    const path = new SkiaPath();
-    // TODO: implement me
-    // path._path = PathKit.FromCmds(parsePathCmds(cmds));
-    return path;
+  static MakeFromOp(one: SkiaPath, two: SkiaPath, op: PathOp): SkiaPath {
+    const skiaPath = Skia.Path.MakeFromOp(
+      one.getRNSkiaPath(),
+      two.getRNSkiaPath(),
+      op,
+    );
+
+    return new SkiaPath(skiaPath ?? undefined);
   }
 
   static MakeFromSVGString(str: string): SkiaPath {
-    const path = new SkiaPath();
-    // TODO: implement me
-    // path._path = PathKit.FromCmds(parsePathCmds(cmds));
-    return path;
+    const skiaPath = Skia.Path.MakeFromSVGString(str);
+
+    return new SkiaPath(skiaPath ?? undefined);
   }
+
   static MakeFromVerbsPointsWeights(
     verbs: VerbList,
     points: InputFlattenedPointArray,

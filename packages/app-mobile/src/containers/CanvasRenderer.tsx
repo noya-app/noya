@@ -11,22 +11,25 @@ import {
   ComponentsProvider,
   ImageCacheProvider,
   FontManagerProvider,
+  RenderingModeProvider,
 } from 'noya-renderer';
 
 const CanvasRenderer = () => {
   const workspaceState = useWorkspaceState();
-  const canvasKit = useCanvasKit();
+  const CanvasKit = useCanvasKit();
   const theme = useTheme();
 
   return (
     <StyledCanvas>
-      <CanvasKitProvider canvasKit={canvasKit}>
+      <CanvasKitProvider CanvasKit={CanvasKit}>
         <ThemeProvider theme={theme}>
           <ImageCacheProvider>
             <FontManagerProvider>
               <StateProvider state={workspaceState}>
                 <ComponentsProvider value={Components}>
-                  <SketchFileRenderer />
+                  <RenderingModeProvider value="interactive">
+                    <SketchFileRenderer />
+                  </RenderingModeProvider>
                 </ComponentsProvider>
               </StateProvider>
             </FontManagerProvider>

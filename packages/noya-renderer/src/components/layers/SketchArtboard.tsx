@@ -133,7 +133,7 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
 
   return (
     <>
-      {showBackground && <RCKRect rect={rect} paint={paint} />}
+      {showBackground ? <RCKRect rect={rect} paint={paint} /> : null}
       <Group clip={clip}>
         <SketchGroup layer={layer} />
       </Group>

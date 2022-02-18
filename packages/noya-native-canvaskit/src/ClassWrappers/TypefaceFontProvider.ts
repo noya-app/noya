@@ -1,20 +1,17 @@
-import type {
-  TypefaceFontProvider,
-  TypefaceFontProviderFactory,
-} from 'canvaskit';
+import { SkiaTypeface, SkiaTypefaceFactory } from './Typeface';
 import { JSEmbindObject } from './Embind';
 
-export class SkiaTypefaceFontProvider
-  extends JSEmbindObject
-  implements TypefaceFontProvider
-{
+export class SkiaTypefaceFontProvider extends JSEmbindObject {
+  public typefaces: { [name: string]: SkiaTypeface | null } = {};
+
   registerFont(bytes: ArrayBuffer | Uint8Array, family: string): void {
-    // Skia.Typeface.MakeFreeTypeFaceFromData(bytes);
+    this.typefaces[family] =
+      SkiaTypefaceFactory.MakeFreeTypeFaceFromData(bytes);
   }
 }
 
-export const SkiaTypefaceFontProviderFactory: TypefaceFontProviderFactory = {
-  Make(): TypefaceFontProvider {
+export const SkiaTypefaceFontProviderFactory = {
+  Make(): SkiaTypefaceFontProvider {
     return new SkiaTypefaceFontProvider();
   },
 };

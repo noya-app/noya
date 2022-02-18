@@ -1,29 +1,37 @@
 import React, { memo, PropsWithChildren } from 'react';
 import {
+  ClipOp,
   Drawing,
   useDrawing,
-  selectPaint,
-  processPaint,
   skiaMatrix3,
+  IColorFilter,
+  IImageFilter,
 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
-import { ColorFilter, ImageFilter } from 'canvaskit';
-import { SkiaPath } from 'noya-native-canvaskit';
-import { AffineTransform } from 'noya-geometry';
+import { useCanvasKit } from 'noya-renderer';
+import { AffineTransform, LTRBArrayToRect } from 'noya-geometry';
+import { SkiaPath, SkiaPaint, SkiaCanvasKit } from 'noya-native-canvaskit';
 
-import { ClipProps } from '../types';
+interface ClipProps {
+  path: Float32Array | SkiaPath;
+  op: ClipOp;
+  antiAlias?: boolean;
+}
 
 interface GroupProps {
   opacity?: number;
   transform?: AffineTransform;
   clip?: ClipProps;
-  colorFilter?: ColorFilter;
-  imageFilter?: ImageFilter;
-  backdropImageFilter?: ImageFilter;
+  colorFilter?: IColorFilter;
+  imageFilter?: IImageFilter;
+  backdropImageFilter?: IImageFilter;
 }
 
 const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
+  // @ts-ignore
+  const CanvasKit = useCanvasKit() as typeof SkiaCanvasKit;
+
   const onDraw = useDrawing(
     props,
     (
@@ -39,17 +47,30 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       children,
     ) => {
       const { canvas } = ctx;
-      const paint = selectPaint(ctx.paint, { opacity });
-      processPaint(paint, ctx.opacity, { opacity });
+      // If we need to apply effects to the group as a whole, we need
+      // to draw the elements on a separate bitmap using `saveLayer`
+      const needsLayer =
+        (!!opacity && opacity < 1) ||
+        colorFilter ||
+        imageFilter ||
+        backdropImageFilter;
 
-      canvas.save();
+      const restoreCount = canvas.save();
 
       if (clip) {
-        canvas.clipPath(
-          (clip.path as SkiaPath).getRNSkiaPath(),
-          clip.op.value,
-          clip.antiAlias ?? false,
-        );
+        if (clip.path instanceof Float32Array) {
+          canvas.clipRect(
+            LTRBArrayToRect(clip.path),
+            clip.op,
+            clip.antiAlias ?? true,
+          );
+        } else if (clip.path instanceof SkiaPath) {
+          canvas.clipPath(
+            clip.path.getRNSkiaPath(),
+            clip.op,
+            clip.antiAlias ?? true,
+          );
+        }
       }
 
       if (transform) {
@@ -63,16 +84,30 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         );
       }
 
-      processChildren(
-        {
-          ...ctx,
-          paint,
-          opacity: opacity ? opacity * ctx.opacity : ctx.opacity,
-        },
-        children,
-      );
+      if (needsLayer) {
+        const layerPaint = new CanvasKit.Paint() as SkiaPaint;
 
-      canvas.restore();
+        if (opacity && opacity < 1) {
+          layerPaint.setAlphaf(opacity);
+        }
+
+        if (colorFilter) {
+          layerPaint.setColorFilter(colorFilter);
+        }
+
+        if (imageFilter) {
+          layerPaint.setImageFilter(imageFilter);
+        }
+
+        canvas.saveLayer(
+          layerPaint.getRNSkiaPaint(),
+          null,
+          backdropImageFilter,
+        );
+      }
+
+      processChildren(ctx, children);
+      canvas.restoreToCount(restoreCount);
     },
   );
 

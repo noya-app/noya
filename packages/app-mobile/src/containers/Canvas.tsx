@@ -45,7 +45,7 @@ const Canvas: React.FC<{}> = () => {
   const [state, dispatch] = useApplicationState();
   const { setCanvasSize } = useWorkspace();
   const fontManager = useFontManager();
-  const canvasKit = useCanvasKit();
+  const CanvasKit = useCanvasKit();
   const gestures = useMultitouchGH();
   const meta = useSelector(Selectors.getCurrentPageMetadata);
 
@@ -92,7 +92,7 @@ const Canvas: React.FC<{}> = () => {
         }
         case 'none': {
           const layer = Selectors.getLayerAtPoint(
-            canvasKit,
+            CanvasKit,
             fontManager,
             state,
             insets,
@@ -147,7 +147,7 @@ const Canvas: React.FC<{}> = () => {
     },
     [
       state,
-      canvasKit,
+      CanvasKit,
       fontManager,
       dispatch,
       insets,

@@ -1,40 +1,26 @@
-import * as RNSkia from '@shopify/react-native-skia';
-
-import type {
-  Shader,
+import {
+  Skia,
   TileMode,
   BlendMode,
+  IImageFilter,
+  IColorFilter,
+} from '@shopify/react-native-skia';
+
+import type {
   InputColor,
-  ColorFilter,
-  ImageFilter,
-  ImageFilterFactory,
   InputMatrix,
   FilterOptions,
   CubicResampler,
 } from 'canvaskit';
-import { JSEmbindObject } from './Embind';
+import { colorArrayToNum } from '../utils/color';
+import { SkiaShader } from './Shader';
 
-const { ImageFilter: FilterFactory } = RNSkia.Skia;
+const { ImageFilter: FilterFactory } = Skia;
 
-export class SkiaImageFilter extends JSEmbindObject implements ImageFilter {
-  private _imageFilter: RNSkia.IImageFilter;
-
-  constructor(imgFil: RNSkia.IImageFilter) {
-    super();
-
-    this._imageFilter = imgFil;
-  }
-
-  getImageFilter(): RNSkia.IImageFilter {
-    return this._imageFilter;
-  }
-}
-
-export const SkiaImageFilterFactory: ImageFilterFactory = {
-  MakeShader(shader: Shader): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+export const SkiaImageFilterFactory = {
+  // @ts-ignore
+  MakeShader(shader: SkiaShader): IImageFilter {
+    console.warn(`SkiaImageFilterFactory.MakeShader not implemented!`);
   },
 
   MakeArithmetic(
@@ -43,28 +29,29 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
     k3: number,
     k4: number,
     enforcePMColor: boolean,
-    background: ImageFilter | null,
-    foreground: ImageFilter | null,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    background: IImageFilter | null,
+    foreground: IImageFilter | null,
+    // @ts-ignore
+  ): IImageFilter {
+    console.warn(`SkiaImageFilterFactory.MakeArithmetic not implemented!`);
   },
 
   MakeErode(
     radiusX: number,
     radiusY: number,
-    input: ImageFilter | null,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    input: IImageFilter | null,
+  ): IImageFilter | null {
+    console.warn(`SkiaImageFilterFactory.MakeErode not implemented!`);
+    return null;
   },
 
-  MakeOffset(dx: number, dy: number, input: ImageFilter | null): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  MakeOffset(
+    dx: number,
+    dy: number,
+    input: IImageFilter | null,
+    // @ts-ignore
+  ): IImageFilter {
+    console.warn(`SkiaImageFilterFactory.MakeOffset not implemented!`);
   },
 
   /**
@@ -75,12 +62,11 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
    */
   MakeBlend(
     blendMode: BlendMode,
-    background: ImageFilter,
-    foreground: ImageFilter,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    background: IImageFilter,
+    foreground: IImageFilter,
+    // @ts-ignore
+  ): IImageFilter {
+    console.warn(`SkiaImageFilterFactory.MakeBlend not implemented!`);
   },
 
   /**
@@ -99,10 +85,15 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
     sigmaX: number,
     sigmaY: number,
     color: InputColor,
-    input: ImageFilter | null,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+    input: IImageFilter | null,
+  ): IImageFilter {
+    return FilterFactory.MakeDropShadow(
+      dx,
+      dy,
+      sigmaX,
+      sigmaY,
+      colorArrayToNum(color as Float32Array),
+      input ?? undefined,
     );
   },
 
@@ -124,24 +115,16 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
     sigmaX: number,
     sigmaY: number,
     color: InputColor,
-    input: ImageFilter | null,
-  ): ImageFilter {
-    const [inR, inG, inB, inA] = color as number[];
-    const a = Math.floor(inA * 255) << 24;
-    const r = Math.floor(inR * 255) << 16;
-    const g = Math.floor(inG * 255) << 8;
-    const b = Math.floor(inB * 255) << 0;
-
-    const skiaImageFilter = FilterFactory.MakeDropShadowOnly(
+    input: IImageFilter | null,
+  ): IImageFilter {
+    return FilterFactory.MakeDropShadowOnly(
       dx,
       dy,
       sigmaX,
       sigmaY,
-      a + r + g + b,
-      input ? (input as SkiaImageFilter).getImageFilter() : undefined,
+      colorArrayToNum(color as Float32Array),
+      input ?? undefined,
     );
-
-    return new SkiaImageFilter(skiaImageFilter);
   },
 
   /**
@@ -157,11 +140,9 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
     sigmaX: number,
     sigmaY: number,
     mode: TileMode,
-    input: ImageFilter | null,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    input: IImageFilter | null,
+  ): IImageFilter {
+    return FilterFactory.MakeBlur(sigmaX, sigmaY, mode, input);
   },
 
   /**
@@ -169,10 +150,8 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
    * @param cf
    * @param input - if null, it will use the dynamic source image (e.g. a saved layer)
    */
-  MakeColorFilter(cf: ColorFilter, input: ImageFilter | null): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+  MakeColorFilter(cf: IColorFilter, input: IImageFilter | null): IImageFilter {
+    return FilterFactory.MakeColorFilter(cf, input);
   },
 
   /**
@@ -183,12 +162,14 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
    * @param inner - if null, it will use the dynamic source image (e.g. a saved layer)
    */
   MakeCompose(
-    outer: ImageFilter | null,
-    inner: ImageFilter | null,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    outer: IImageFilter | null,
+    inner: IImageFilter | null,
+  ): IImageFilter | null {
+    if (!outer || !inner) {
+      return null;
+    }
+
+    return FilterFactory.MakeCompose(outer, inner);
   },
 
   /**
@@ -202,10 +183,9 @@ export const SkiaImageFilterFactory: ImageFilterFactory = {
   MakeMatrixTransform(
     matr: InputMatrix,
     sampling: FilterOptions | CubicResampler,
-    input: ImageFilter | null,
-  ): ImageFilter {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    input: IImageFilter | null,
+    // @ts-ignore
+  ): IImageFilter {
+    console.warn(`SkiaImageFilterFactory.MakeMatrixTransform not implemented!`);
   },
 };

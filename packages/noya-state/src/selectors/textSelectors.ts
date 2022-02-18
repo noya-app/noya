@@ -137,6 +137,7 @@ export function getLayerParagraph(
       span.attributes,
       textDecoration,
     );
+
     builder.pushStyle(style);
     builder.addText(applyTextTransform(span.string, textTransform));
     builder.pop();

@@ -13,7 +13,7 @@ export const CanvasKitContext = createContext<CanvasKit | undefined>(undefined);
 
 interface CanvasKitProviderProps {
   loadCanvasKit?: () => Promise<CanvasKit>;
-  canvasKit?: CanvasKit;
+  CanvasKit?: CanvasKit;
 }
 
 const Provider: React.FC<PropsWithChildren<CanvasKitProviderProps>> = (
@@ -25,10 +25,10 @@ const Provider: React.FC<PropsWithChildren<CanvasKitProviderProps>> = (
     suspendedCanvasKit = new SuspendedValue<CanvasKit>(props.loadCanvasKit());
   }
 
-  const canvasKit = props.canvasKit ?? suspendedCanvasKit.getValueOrThrow();
+  const CanvasKit = props.CanvasKit ?? suspendedCanvasKit.getValueOrThrow();
 
   return (
-    <CanvasKitContext.Provider value={canvasKit}>
+    <CanvasKitContext.Provider value={CanvasKit}>
       {children}
     </CanvasKitContext.Provider>
   );

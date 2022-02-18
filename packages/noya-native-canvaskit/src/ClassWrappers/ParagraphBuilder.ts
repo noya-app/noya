@@ -1,28 +1,24 @@
-import {
-  FontBlock,
-  FontMgr,
-  Paint,
-  Paragraph,
-  ParagraphBuilder,
-  ParagraphStyle,
-  PlaceholderAlignment,
-  ShapedLine,
-  TextBaseline,
-  TextStyle,
-  TypefaceFontProvider,
-} from 'canvaskit';
-import { JSEmbindObject } from './Embind';
-import { SkiaParagraph } from './Paragraph';
+import { FontBlock, FontMgr, ShapedLine } from 'canvaskit';
 
-export class SkiaParagraphBuilder
-  extends JSEmbindObject
-  implements ParagraphBuilder
-{
+import { PlaceholderAlignment, TextBaseline } from '../types';
+import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
+import { SkiaParagraphStyle } from './ParagraphStyle';
+import { SkiaParagraph } from './Paragraph';
+import { SkiaTextStyle } from './TextStyle';
+import { JSEmbindObject } from './Embind';
+import { SkiaPaint } from './Paint';
+
+export class SkiaParagraphBuilder extends JSEmbindObject {
   _parts: {
     text: string;
-    style?: TextStyle;
+    style?: SkiaTextStyle;
   }[] = [];
-  _styleStack: TextStyle[] = [];
+  _styleStack: SkiaTextStyle[] = [];
+  _paragraphStyle: SkiaParagraphStyle | undefined;
+
+  constructor(private _fontProvider: SkiaTypefaceFontProvider | undefined) {
+    super();
+  }
 
   addPlaceholder(
     width?: number,
@@ -31,46 +27,64 @@ export class SkiaParagraphBuilder
     baseline?: TextBaseline,
     offset?: number,
   ): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraphBuilder.addPlaceholder not implemented!`);
   }
 
   addText(str: string): void {
-    this._parts.push({ text: str, style: this._styleStack[0] });
+    this._parts.push({
+      text: str,
+      style: new SkiaTextStyle(this._styleStack[0]),
+    });
   }
 
-  build(): Paragraph {
-    return new SkiaParagraph();
-  }
-
-  pop(): void {
-    this._parts.pop();
-  }
-
-  pushStyle(text: TextStyle): void {
-    this._styleStack.push(text);
-  }
-
-  pushPaintStyle(textStyle: TextStyle, fg: Paint, bg: Paint): void {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
+  build(): SkiaParagraph {
+    return new SkiaParagraph(
+      // @ts-ignore TODO: common type for parts/blocks?
+      this._parts,
+      this._paragraphStyle,
+      this._fontProvider,
     );
   }
 
-  static Make(style: ParagraphStyle, fontManager: FontMgr): ParagraphBuilder {
-    const builder = new SkiaParagraphBuilder();
+  pop(): void {
+    this._styleStack.shift();
+  }
 
-    builder.pushStyle(style);
+  pushStyle(text: SkiaTextStyle): void {
+    this._styleStack.unshift(text);
+  }
+
+  pushPaintStyle(textStyle: SkiaTextStyle, fg: SkiaPaint, bg: SkiaPaint): void {
+    console.warn(`SkiaParagraphBuilder.pushPaintStyle not implemented!`);
+  }
+
+  setProvider(provider: SkiaTypefaceFontProvider) {
+    this._fontProvider = provider;
+  }
+
+  setParagraphStyle(style: SkiaParagraphStyle) {
+    this._paragraphStyle = style;
+  }
+
+  static Make(
+    style: SkiaParagraphStyle,
+    fontManager: FontMgr,
+  ): SkiaParagraphBuilder {
+    const builder = new SkiaParagraphBuilder(undefined);
+
+    builder.pushStyle(style.textStyle!);
     return builder;
   }
 
   static MakeFromFontProvider(
-    style: ParagraphStyle,
-    fontSrc: TypefaceFontProvider,
-  ): ParagraphBuilder {
-    const builder = new SkiaParagraphBuilder();
-    builder.pushStyle(style);
+    style: SkiaParagraphStyle,
+    fontSrc: SkiaTypefaceFontProvider,
+  ): SkiaParagraphBuilder {
+    const builder = new SkiaParagraphBuilder(fontSrc);
+
+    builder.pushStyle(style.textStyle!);
+    builder.setParagraphStyle(style);
+
     return builder;
   }
 
@@ -78,9 +92,8 @@ export class SkiaParagraphBuilder
     text: string,
     runs: FontBlock[],
     width?: number,
+    // @ts-ignore
   ): ShapedLine[] {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraphBuilder.ShapeText not implemented!`);
   }
 }

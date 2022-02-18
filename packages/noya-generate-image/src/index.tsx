@@ -43,7 +43,7 @@ export function generateImage(
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider canvasKit={CanvasKit}>
+        <CanvasKitProvider CanvasKit={CanvasKit}>
           <ThemeProvider theme={theme}>
             <StateProvider state={state}>
               <ImageCacheProvider>
@@ -75,7 +75,7 @@ export function generateImage(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider canvasKit={CanvasKit}>
+          <CanvasKitProvider CanvasKit={CanvasKit}>
             <ThemeProvider theme={theme}>
               <StateProvider state={state}>
                 <ImageCacheProvider>

@@ -1,75 +1,115 @@
+import { ICanvas } from '@shopify/react-native-skia';
+
 import {
   FlattenedRectangleArray,
   LineMetrics,
-  Paragraph,
   PositionWithAffinity,
-  RectHeightStyle,
-  RectWidthStyle,
   ShapedLine,
+  TextStyle,
   URange,
 } from 'canvaskit';
+import { RectHeightStyle, RectWidthStyle } from '../types';
+import { SkiaTypefaceFontProvider } from './TypefaceFontProvider';
+import { SkiaParagraphStyle } from './ParagraphStyle';
 import { JSEmbindObject } from './Embind';
+import { SkiaPaint } from './Paint';
+import { SkiaFont } from './Font';
 
-export class SkiaParagraph extends JSEmbindObject implements Paragraph {
+interface ParagraphBlock {
+  text: string;
+  style: TextStyle;
+}
+
+interface TextBlock {
+  text: string;
+  paint: SkiaPaint;
+  font: SkiaFont;
+}
+
+export class SkiaParagraph extends JSEmbindObject {
+  _blocks: TextBlock[] = [];
+  _height: number = 0;
+  _maxWidth: number = 0;
+
+  constructor(
+    blocks: ParagraphBlock[],
+    paragraphStyle: SkiaParagraphStyle,
+    fontProvider: SkiaTypefaceFontProvider,
+  ) {
+    super();
+
+    blocks.forEach(({ text, style }) => {
+      const fontFamily = style.fontFamilies![0];
+      const typeface =
+        fontProvider.typefaces[fontFamily] ||
+        fontProvider.typefaces[Object.keys(fontProvider.typefaces)[0]]!;
+      const font = new SkiaFont(typeface, style.fontSize);
+      const paint = new SkiaPaint();
+
+      paint.setColor(
+        style.color ?? paragraphStyle.textStyle?.color ?? [1, 0, 1, 1],
+      );
+      const textSize = font.getFont().measureText(text, paint.getRNSkiaPaint());
+
+      this._height = Math.max(textSize.height, this._height);
+      this._maxWidth = Math.max(textSize.width, this._maxWidth);
+
+      this._blocks.push({ text, paint, font });
+    });
+  }
+
+  // @ts-ignore
   didExceedMaxLines(): boolean {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.didExceedMaxLines not implemented!`);
   }
 
+  // @ts-ignore
   getAlphabeticBaseline(): number {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getAlphabeticBaseline not implemented!`);
   }
 
+  // @ts-ignore
   getGlyphPositionAtCoordinate(dx: number, dy: number): PositionWithAffinity {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getGlyphPositionAtCoordinate not implemented!`);
   }
 
   getHeight(): number {
-    return 0;
-    // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
+    return this._height;
   }
 
+  // @ts-ignore
   getIdeographicBaseline(): number {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getIdeographicBaseline not implemented!`);
   }
 
+  // @ts-ignore
   getLineMetrics(): LineMetrics[] {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getLineMetrics not implemented!`);
   }
 
+  // @ts-ignore
   getLongestLine(): number {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getLongestLine not implemented!`);
   }
 
   getMaxIntrinsicWidth(): number {
-    return 0;
+    // console.warn(
+    //   `SkiaParagraph.name not implemented!`,
+    // );
+    return this._maxWidth;
   }
 
   getMaxWidth(): number {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    return this._maxWidth;
   }
 
   getMinIntrinsicWidth(): number {
-    return 0;
+    return this._maxWidth;
   }
 
+  // @ts-ignore
   getRectsForPlaceholders(): FlattenedRectangleArray {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getRectsForPlaceholders not implemented!`);
   }
 
   getRectsForRange(
@@ -77,25 +117,28 @@ export class SkiaParagraph extends JSEmbindObject implements Paragraph {
     end: number,
     hStyle: RectHeightStyle,
     wStyle: RectWidthStyle,
+    // @ts-ignore
   ): FlattenedRectangleArray {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getRectsForRange not implemented!`);
   }
 
+  // @ts-ignore
   getWordBoundary(offset: number): URange {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getWordBoundary not implemented!`);
   }
 
+  // @ts-ignore
   getShapedLines(): ShapedLine[] {
-    throw new Error(
-      `${this.constructor.name}.${arguments.callee.name} not implemented!`,
-    );
+    console.warn(`SkiaParagraph.getShapedLines not implemented!`);
+  }
+
+  draw(canvas: ICanvas, x: number, y: number) {
+    this._blocks.forEach(({ text, font, paint }) => {
+      canvas.drawText(text, x, y, paint.getRNSkiaPaint(), font.getFont());
+    });
   }
 
   layout(width: number): void {
-    // throw new Error(`${this.constructor.name}.${arguments.callee.name} not implemented!`);
+    // console.warn(`SkiaParagraph.layout not implemented!`);
   }
 }
