@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import styled, { ThemeProvider, useTheme } from 'styled-components';
+import { ThemeProvider, useTheme } from 'styled-components';
 import { Canvas as SkiaCanvas } from '@shopify/react-native-skia';
 
 import { useWorkspaceState, StateProvider } from 'noya-app-state-context';
@@ -20,7 +20,7 @@ const CanvasRenderer = () => {
   const theme = useTheme();
 
   return (
-    <StyledCanvas>
+    <SkiaCanvas style={{ flex: 1 }}>
       <CanvasKitProvider CanvasKit={CanvasKit}>
         <ThemeProvider theme={theme}>
           <ImageCacheProvider>
@@ -36,12 +36,8 @@ const CanvasRenderer = () => {
           </ImageCacheProvider>
         </ThemeProvider>
       </CanvasKitProvider>
-    </StyledCanvas>
+    </SkiaCanvas>
   );
 };
 
 export default memo(CanvasRenderer);
-
-const StyledCanvas = styled(SkiaCanvas)((p) => ({
-  flex: 1,
-}));

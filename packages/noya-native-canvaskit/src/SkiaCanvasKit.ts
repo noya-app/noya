@@ -74,9 +74,12 @@ export const SkiaCanvasKit = {
   },
 
   parseColorString(color: string, colorMap?: object): Color {
-    const [r, g, b, a = 1] = parseColor(color).values;
+    const {
+      values: [r, g, b],
+      alpha,
+    } = parseColor(color);
 
-    return new Float32Array([r / 255, g / 255, b / 255, a]);
+    return new Float32Array([r / 255, g / 255, b / 255, alpha ?? 1]);
   },
 
   // @ts-ignore
