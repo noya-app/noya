@@ -1,73 +1,29 @@
 import { EnumEntity } from './Enums';
+import { DefaultConstructor, StrokeOpts } from './misc';
 
-export interface IPath {
-  addArc(
-    oval: InputRect,
-    startAngle: AngleInDegrees,
-    sweepAngle: AngleInDegrees,
-  ): Path;
+export interface IPath<IRect> {
+  addOval(oval: IRect, isCCW?: boolean, startIndex?: number): IPath<IRect>;
 
-  addOval(oval: InputRect, isCCW?: boolean, startIndex?: number): Path;
+  addPath(...args: any[]): IPath<IRect> | null;
 
-  addPath(...args: any[]): Path | null;
-
-  addPoly(points: InputFlattenedPointArray, close: boolean): Path;
-
-  addRect(rect: InputRect, isCCW?: boolean): Path;
-
-  addRRect(rrect: InputRRect, isCCW?: boolean): Path;
-
-  addVerbsPointsWeights(
-    verbs: VerbList,
-    points: InputFlattenedPointArray,
-    weights?: WeightList,
-  ): Path;
+  addRect(rect: IRect, isCCW?: boolean): IPath<IRect>;
 
   arc(
     x: number,
     y: number,
     radius: number,
-    startAngle: AngleInRadians,
-    endAngle: AngleInRadians,
+    startAngle: number,
+    endAngle: number,
     isCCW?: boolean,
-  ): Path;
+  ): IPath<IRect>;
 
-  arcToOval(
-    oval: InputRect,
-    startAngle: AngleInDegrees,
-    endAngle: AngleInDegrees,
-    forceMoveTo: boolean,
-  ): Path;
+  close(): IPath<IRect>;
 
-  arcToRotated(
-    rx: number,
-    ry: number,
-    xAxisRotate: AngleInDegrees,
-    useSmallArc: boolean,
-    isCCW: boolean,
-    x: number,
-    y: number,
-  ): Path;
-
-  arcToTangent(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    radius: number,
-  ): Path;
-
-  close(): Path;
-
-  computeTightBounds(outputArray?: Rect): Rect;
-
-  conicTo(x1: number, y1: number, x2: number, y2: number, w: number): Path;
+  computeTightBounds(): IRect;
 
   contains(x: number, y: number): boolean;
 
-  copy(): Path;
-
-  countPoints(): number;
+  copy(): IPath<IRect>;
 
   cubicTo(
     cpx1: number,
@@ -76,78 +32,44 @@ export interface IPath {
     cpy2: number,
     x: number,
     y: number,
-  ): Path;
+  ): IPath<IRect>;
 
-  dash(on: number, off: number, phase: number): boolean;
+  equals(other: IPath<IRect>): boolean;
 
-  equals(other: Path): boolean;
+  getFillType(): EnumEntity;
 
-  getBounds(outputArray?: Rect): Rect;
+  lineTo(x: number, y: number): IPath<IRect>;
 
-  getFillType(): FillType;
+  moveTo(x: number, y: number): IPath<IRect>;
 
-  getPoint(index: number, outputArray?: Point): Point;
+  offset(dx: number, dy: number): IPath<IRect>;
 
-  isEmpty(): boolean;
+  op(other: IPath<IRect>, op: EnumEntity): boolean;
 
-  isVolatile(): boolean;
-
-  lineTo(x: number, y: number): Path;
-
-  makeAsWinding(): Path | null;
-
-  moveTo(x: number, y: number): Path;
-
-  offset(dx: number, dy: number): Path;
-
-  op(other: Path, op: PathOp): boolean;
-
-  quadTo(x1: number, y1: number, x2: number, y2: number): Path;
-
-  rArcTo(
-    rx: number,
-    ry: number,
-    xAxisRotate: AngleInDegrees,
-    useSmallArc: boolean,
-    isCCW: boolean,
-    dx: number,
-    dy: number,
-  ): Path;
-
-  rConicTo(dx1: number, dy1: number, dx2: number, dy2: number, w: number): Path;
-
-  rCubicTo(
-    cpx1: number,
-    cpy1: number,
-    cpx2: number,
-    cpy2: number,
-    x: number,
-    y: number,
-  ): Path;
+  quadTo(x1: number, y1: number, x2: number, y2: number): IPath<IRect>;
 
   reset(): void;
 
   rewind(): void;
 
-  rLineTo(x: number, y: number): Path;
+  setFillType(fill: EnumEntity): void;
 
-  rMoveTo(x: number, y: number): Path;
-
-  rQuadTo(x1: number, y1: number, x2: number, y2: number): Path;
-
-  setFillType(fill: FillType): void;
-
-  setIsVolatile(volatile: boolean): void;
-
-  simplify(): boolean;
-
-  stroke(opts?: StrokeOpts): Path | null;
+  stroke(opts?: StrokeOpts): IPath<IRect> | null;
 
   toCmds(): Float32Array;
 
   toSVGString(): string;
 
-  transform(...args: any[]): Path;
+  trim(
+    startT: number,
+    stopT: number,
+    isComplement: boolean,
+  ): IPath<IRect> | null;
+}
 
-  trim(startT: number, stopT: number, isComplement: boolean): Path | null;
+export interface IPathConstructorAndFactory<IRect, Path extends IPath<IRect>>
+  extends DefaultConstructor<Path> {
+  MakeFromOp(one: Path, two: Path, op: EnumEntity): Path | null;
+
+  MakeFromSVGString(str: string): Path | null;
 }
