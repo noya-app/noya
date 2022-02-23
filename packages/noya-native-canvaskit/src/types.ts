@@ -1,5 +1,28 @@
-// Separate file for enums that doesn't yet
-// exists on rn-skia to avoid circular deps
+import * as RNSkia from '@shopify/react-native-skia';
+
+// Primitives
+export type Color = number;
+export type ColorArray = Color[];
+
+export type Rect = RNSkia.IRect;
+export type RRect = RNSkia.IRRect;
+
+export type Point = RNSkia.IPoint;
+
+export type Matrix = RNSkia.Matrix;
+
+// Enums
+
+export enum Affinity {
+  Upstream,
+  Downstream,
+}
+
+export enum ColorSpace {
+  SRGB,
+  DISPLAY_P3,
+  ADOBE_RGB,
+}
 
 export enum AlphaType {
   Opaque,
@@ -36,11 +59,6 @@ export enum VertexMode {
   Triangles,
   TrianglesStrip,
   TriangleFan,
-}
-
-export enum Affinity {
-  Upstream,
-  Downstream,
 }
 
 export enum DecorationStyle {

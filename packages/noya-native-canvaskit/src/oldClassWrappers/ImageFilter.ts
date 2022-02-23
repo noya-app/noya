@@ -12,7 +12,7 @@ import type {
   FilterOptions,
   CubicResampler,
 } from 'canvaskit';
-import { colorArrayToNum } from '../utils/color';
+import { colorArrayToNum } from '../oldUtils/color';
 import { SkiaShader } from './Shader';
 
 const { ImageFilter: FilterFactory } = Skia;

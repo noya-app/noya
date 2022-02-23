@@ -1,5 +1,6 @@
 import {
   Skia,
+  IShader,
   StrokeCap,
   BlendMode,
   PaintStyle,
@@ -10,18 +11,16 @@ import {
   IColorFilter,
 } from '@shopify/react-native-skia';
 
-import { Color, ColorInt, ColorSpace, InputColor } from 'canvaskit';
-import { colorArrayToNum, colorNumToArray } from '../utils/color';
-import { JSEmbindObject } from './Embind';
-import { SkiaShader } from './Shader';
+import { IPaint } from 'canvaskit-types';
+import { Color, ColorSpace } from './types';
 
-export class SkiaPaint extends JSEmbindObject {
+export default class PaintNative implements IPaint<Color> {
   private _paint = Skia.Paint();
 
-  copy(): SkiaPaint {
+  copy(): PaintNative {
     const paintCopy = this._paint.copy();
 
-    const copy = new SkiaPaint();
+    const copy = new PaintNative();
     copy._paint = paintCopy;
 
     return copy;
@@ -33,15 +32,15 @@ export class SkiaPaint extends JSEmbindObject {
   }
 
   getColor(): Color {
-    return colorNumToArray(this._paint.getColor());
+    return this._paint.getColor();
   }
 
   getStrokeCap(): StrokeCap {
-    return this._paint.getStrokeCap() as unknown as StrokeCap;
+    return this._paint.getStrokeCap();
   }
 
   getStrokeJoin(): StrokeJoin {
-    return this._paint.getStrokeJoin() as unknown as StrokeJoin;
+    return this._paint.getStrokeJoin();
   }
 
   getStrokeMiter(): number {
@@ -64,8 +63,8 @@ export class SkiaPaint extends JSEmbindObject {
     this._paint.setBlendMode(mode);
   }
 
-  setColor(color: InputColor, colorSpace?: ColorSpace): void {
-    this._paint.setColor(colorArrayToNum(color as Float32Array));
+  setColor(color: Color, colorSpace?: ColorSpace): void {
+    this._paint.setColor(color);
   }
 
   setColorComponents(
@@ -82,7 +81,7 @@ export class SkiaPaint extends JSEmbindObject {
     this._paint.setColorFilter(filter);
   }
 
-  setColorInt(color: ColorInt, colorSpace?: ColorSpace): void {
+  setColorInt(color: Color, colorSpace?: ColorSpace): void {
     this._paint.setColor(color);
   }
 
@@ -98,8 +97,8 @@ export class SkiaPaint extends JSEmbindObject {
     this._paint.setPathEffect(effect);
   }
 
-  setShader(shader: SkiaShader): void {
-    this._paint.setShader(shader.getShader());
+  setShader(shader: IShader): void {
+    this._paint.setShader(shader);
   }
 
   setStrokeCap(cap: StrokeCap): void {

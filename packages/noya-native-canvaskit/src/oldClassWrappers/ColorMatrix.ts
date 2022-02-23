@@ -1,6 +1,6 @@
 import type { ColorMatrix } from 'canvaskit';
 
-import * as matrixUtils from '../utils/matrix';
+import * as matrixUtils from '../oldUtils/matrix';
 
 /**
  * An ColorMatrix is a 4x4 color matrix that transforms the 4 color channels

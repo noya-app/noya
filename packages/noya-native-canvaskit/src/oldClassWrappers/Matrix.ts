@@ -1,7 +1,7 @@
 import { skiaMatrix3, Matrix } from '@shopify/react-native-skia';
 import type { Matrix3x3, AngleInRadians } from 'canvaskit';
 
-import * as matrixUtils from '../utils/matrix';
+import * as matrixUtils from '../oldUtils/matrix';
 
 export const SkiaMatrix = {
   /**

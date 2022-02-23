@@ -1,7 +1,7 @@
 import { Skia, BlendMode, IColorFilter } from '@shopify/react-native-skia';
 
 import type { InputColor, InputColorMatrix } from 'canvaskit';
-import { colorArrayToNum } from '../utils/color';
+import { colorArrayToNum } from '../oldUtils/color';
 
 export const SkiaColorFilterFactory = {
   /**

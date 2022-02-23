@@ -1,2 +1,2 @@
-export * from './ClassWrappers';
-export * from './SkiaCanvasKit';
+// export * from './oldClassWrappers';
+export { default as CanvasKitNative } from './CanvasKitNative';
