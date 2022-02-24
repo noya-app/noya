@@ -33,12 +33,29 @@ import type {
   IBlurStyle,
 } from './Enums';
 
-import type { DefaultConstructor } from './misc';
+import type {
+  IFontConstructor,
+  ITypefaceFactory,
+  DefaultConstructor,
+  IColorFilterFactory,
+  ITextStyleConstructor,
+  IParagraphStyleConstructor,
+  ITypefaceFontProviderFactory,
+} from './misc';
 import { IShaderFactory } from './IShader';
 import type { IPaint } from './IPaint';
 import type { IPath, IPathConstructorAndFactory } from './IPath';
+import type { IParagraphBuilderFactory } from './IParagraph';
 
-export interface ICanvasKit<IColor, IRect, IPoint, IColorArray, IMatrix> {
+export interface ICanvasKit<
+  IColor,
+  IRect,
+  IPoint,
+  IColorArray,
+  IMatrix,
+  IInputMatrix,
+  IRectArray,
+> {
   // Colors
   Color(r: number, g: number, b: number, a?: number): IColor;
   Color4f(r: number, g: number, b: number, a?: number): IColor;
@@ -55,11 +72,18 @@ export interface ICanvasKit<IColor, IRect, IPoint, IColorArray, IMatrix> {
   // MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): IImage | null;
 
   // Constructors
-  readonly Paint: DefaultConstructor<IPaint<IColor>>;
+  readonly ParagraphStyle: IParagraphStyleConstructor<IColor>;
+  readonly Font: IFontConstructor;
   readonly Path: IPathConstructorAndFactory<IRect, IPath<IRect>>;
+  readonly Paint: DefaultConstructor<IPaint<IColor>>;
+  readonly TextStyle: ITextStyleConstructor<IColor>;
 
   // Factories
+  readonly ParagraphBuilder: IParagraphBuilderFactory<IColor, IRectArray>;
+  readonly ColorFilter: IColorFilterFactory<IColor, IInputMatrix>;
   readonly Shader: IShaderFactory<IColor, IPoint, IColorArray, IMatrix>;
+  readonly Typeface: ITypefaceFactory;
+  readonly TypefaceFontProvider: ITypefaceFontProviderFactory;
 
   // Misc
 

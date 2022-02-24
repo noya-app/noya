@@ -6,6 +6,8 @@ export type ColorArray = Color[];
 export type Rect = RNSkia.IRect;
 export type Point = RNSkia.IPoint;
 export type Matrix = RNSkia.Matrix;
+export type InputMatrix = number[];
+export type RectArray = Rect[];
 
 // Enums
 export enum Affinity {
@@ -111,4 +113,21 @@ export enum TextHeightBehavior {
   DisableFirstAscent,
   DisableLastDescent,
   DisableAll,
+}
+
+export interface FontStyle {
+  weight?: RNSkia.FontWeight;
+  width?: RNSkia.FontWidth;
+  slant?: RNSkia.FontSlant;
+}
+
+export interface StrutStyle {
+  strutEnabled?: boolean;
+  fontFamilies?: string[];
+  fontStyle?: FontStyle;
+  fontSize?: number;
+  heightMultiplier?: number;
+  halfLeading?: boolean;
+  leading?: number;
+  forceStrutHeight?: boolean;
 }

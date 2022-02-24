@@ -1,5 +1,5 @@
 import { EnumEntity } from './Enums';
-import { DefaultConstructor, StrokeOpts } from './misc';
+import { DefaultConstructor, IStrokeOpts } from './misc';
 
 export interface IPath<IRect> {
   addOval(oval: IRect, isCCW?: boolean, startIndex?: number): IPath<IRect>;
@@ -54,7 +54,7 @@ export interface IPath<IRect> {
 
   setFillType(fill: EnumEntity): void;
 
-  stroke(opts?: StrokeOpts): IPath<IRect> | null;
+  stroke(opts?: IStrokeOpts): IPath<IRect> | null;
 
   toCmds(): Float32Array;
 

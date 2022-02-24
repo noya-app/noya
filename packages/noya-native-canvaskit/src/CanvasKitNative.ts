@@ -1,15 +1,38 @@
 import * as RNSkia from '@shopify/react-native-skia';
 import parseColor from 'color-parse';
 
-import { ICanvasKit, IShaderFactory } from 'canvaskit-types';
+import {
+  ICanvasKit,
+  IColorFilterFactory,
+  IParagraphBuilderFactory,
+  IShaderFactory,
+} from 'canvaskit-types';
 // import primitives separately for easier use
-import type { Color, Rect, Point, ColorArray, Matrix } from './types';
+import type {
+  Rect,
+  Color,
+  Point,
+  Matrix,
+  RectArray,
+  ColorArray,
+  InputMatrix,
+} from './types';
+import { Colors, ParagraphDecoration } from './constants';
+import {
+  FontNative,
+  TextStyleNative,
+  ParagraphStyleNative,
+  TypefaceFactoryNative,
+  TypefaceFontProviderFactoryNative,
+} from './misc';
 import PaintNative from './PaintNative';
 import PathNative from './PathNative';
+import { ParagraphBuilderFactoryNative } from './ParagraphNative';
 import * as Types from './types';
 
 class CanvasKitNative
-  implements ICanvasKit<Color, Rect, Point, ColorArray, Matrix>
+  implements
+    ICanvasKit<Color, Rect, Point, ColorArray, Matrix, InputMatrix, RectArray>
 {
   Color(r: number, g: number, b: number, a?: number): Color {
     let normalizedColor =
@@ -79,26 +102,26 @@ class CanvasKitNative
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ImageData = 0 as any;
-  //   ParagraphStyle: SkiaParagraphStyle,
+  ParagraphStyle = ParagraphStyleNative;
   ContourMeasureIter = 0 as any;
-  //   Font: SkiaFont,
+  Font = FontNative;
   Path = PathNative;
   Paint = PaintNative;
   PictureRecorder = 0 as any;
-  //   TextStyle: SkiaTextStyle,
+  TextStyle = TextStyleNative;
 
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
-  //   ParagraphBuilder: SkiaParagraphBuilder,
+  ParagraphBuilder: IParagraphBuilderFactory<Color, RectArray> =
+    ParagraphBuilderFactoryNative;
   //   ColorFilter: SkiaColorFilterFactory,
-  //   FontMgr: SkiaFontMgrFactory,
+  ColorFilter: IColorFilterFactory<Color, number[]> = RNSkia.Skia.ColorFilter;
   //   ImageFilter: SkiaImageFilterFactory,
   //   MaskFilter: RNSkia.Skia.MaskFilter,
   //   PathEffect: RNSkia.Skia.PathEffect,
   //   RuntimeEffect: SkiaRuntimeEffectFactory,
   Shader: IShaderFactory<Color, Point, ColorArray, Matrix> = RNSkia.Skia.Shader;
-  //   TextBlob: SkiaTextBlobFactory,
-  //   Typeface: SkiaTypefaceFactory,
-  //   TypefaceFontProvider: SkiaTypefaceFontProviderFactory,
+  Typeface = TypefaceFactoryNative;
+  TypefaceFontProvider = TypefaceFontProviderFactoryNative;
 
   // Core Enums
   AlphaType = Types.AlphaType;
@@ -123,15 +146,15 @@ class CanvasKitNative
   VertexMode = Types.VertexMode;
 
   // Core Constants
-  TRANSPARENT = 0x0;
-  BLACK = 0xff000000;
-  WHITE = 0xffffffff;
-  RED = 0xfffff0000;
-  GREEN = 0xff00ff00;
-  BLUE = 0xff0000ff;
-  YELLOW = 0xffffff00;
-  CYAN = 0xff00ffff;
-  MAGENTA = 0xffff00ff;
+  TRANSPARENT = Colors.TRANSPARENT;
+  BLACK = Colors.BLACK;
+  WHITE = Colors.WHITE;
+  RED = Colors.RED;
+  GREEN = Colors.GREEN;
+  BLUE = Colors.BLUE;
+  YELLOW = Colors.YELLOW;
+  CYAN = Colors.CYAN;
+  MAGENTA = Colors.MAGENTA;
 
   // Paragraph Enums
   Affinity = Types.Affinity;
@@ -148,10 +171,10 @@ class CanvasKitNative
   TextHeightBehavior = Types.TextHeightBehavior;
 
   // Paragraph Constants
-  NoDecoration = 0x0;
-  UnderlineDecoration = 0x1;
-  OverlineDecoration = 0x2;
-  LineThroughDecoration = 0x4;
+  NoDecoration = ParagraphDecoration.NoDecoration;
+  UnderlineDecoration = ParagraphDecoration.UnderlineDecoration;
+  OverlineDecoration = ParagraphDecoration.OverlineDecoration;
+  LineThroughDecoration = ParagraphDecoration.LineThroughDecoration;
 }
 
 export default new CanvasKitNative();
