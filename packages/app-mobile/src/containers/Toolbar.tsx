@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
+import { delimitedPath } from 'noya-utils';
 import { decode } from 'noya-sketch-file';
 
 import Button from '../components/Button';
@@ -32,6 +33,16 @@ function base64ToArrayBuffer(base64: string) {
     bytes[i] = binary_string.charCodeAt(i);
   }
   return bytes.buffer;
+}
+
+function parseFilename(uri: string) {
+  const basename = delimitedPath.basename(uri);
+  const [name, extension] = basename.split('.');
+
+  return {
+    name,
+    extension: extension as 'png' | 'jpg' | 'webp' | 'pdf',
+  };
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
@@ -81,9 +92,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     (base64Image: string, uri: string) => {
       const data = base64ToArrayBuffer(base64Image);
       const decodedImage = CanvasKit.MakeImageFromEncoded(data);
-      const extension =
-        uri.substring(uri.lastIndexOf('.')) === 'jpg' ? 'jpg' : 'png';
-      const name = uri.substring(uri.lastIndexOf('/'), uri.lastIndexOf('.'));
+      const { name, extension } = parseFilename(uri);
 
       if (!decodedImage) {
         return;

@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { StyleSheet } from 'react-native';
 import { ThemeProvider, useTheme } from 'styled-components';
 import { Canvas as SkiaCanvas } from '@shopify/react-native-skia';
 
@@ -20,7 +21,7 @@ const CanvasRenderer = () => {
   const theme = useTheme();
 
   return (
-    <SkiaCanvas style={{ flex: 1 }}>
+    <SkiaCanvas style={styles.canvas}>
       <CanvasKitProvider CanvasKit={CanvasKit}>
         <ThemeProvider theme={theme}>
           <ImageCacheProvider>
@@ -41,3 +42,5 @@ const CanvasRenderer = () => {
 };
 
 export default memo(CanvasRenderer);
+
+const styles = StyleSheet.create({ canvas: { flex: 1 } });
