@@ -1,4 +1,4 @@
-import React, { memo, PropsWithChildren, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import produce from 'immer';
 import { useTheme } from 'styled-components';
 
@@ -129,7 +129,6 @@ export default React.memo(function SketchFileRenderer() {
     [CanvasKit, canvasInsets.left, canvasSize.height, canvasSize.width],
   );
 
-  // Fill;
   const {
     canvas: { background: backgroundColor },
   } = useTheme().colors;
@@ -409,22 +408,12 @@ export default React.memo(function SketchFileRenderer() {
       </>
     );
 
-  const CanvasTransform = ({ children }: PropsWithChildren<{}>) => (
-    <Group transform={canvasTransform}>{children}</Group>
-  );
-
-  const ScreenTransform = ({ children }: PropsWithChildren<{}>) => (
-    <Group transform={screenTransform}>{children}</Group>
-  );
-
-  const canvasBackground = <RCKRect rect={canvasRect} paint={backgroundFill} />;
-
   return (
     <ClippedLayerProvider value={clippedLayerMap}>
       <ZoomProvider value={zoomValue}>
-        {canvasBackground}
+        <RCKRect rect={canvasRect} paint={backgroundFill} />
         <RootScaleTransformGroup>
-          <CanvasTransform>
+          <Group transform={canvasTransform}>
             <SketchGroup layer={page} />
             {state.selectedGradient && gradient && (
               <GradientEditor
@@ -454,12 +443,12 @@ export default React.memo(function SketchFileRenderer() {
                 {dragHandles}
               </>
             )}
-          </CanvasTransform>
-          <ScreenTransform>
+          </Group>
+          <Group transform={screenTransform}>
             {marquee}
             {showRulers && <HorizontalRuler />}
             {showPixelGrid && <PixelGrid />}
-          </ScreenTransform>
+          </Group>
         </RootScaleTransformGroup>
       </ZoomProvider>
     </ClippedLayerProvider>

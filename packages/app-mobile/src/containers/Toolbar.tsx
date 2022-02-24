@@ -9,6 +9,7 @@ import { View } from 'react-native';
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
+import { delimitedPath } from 'noya-utils';
 import { decode } from 'noya-sketch-file';
 
 import Button from '../components/Button';
@@ -34,13 +35,27 @@ function base64ToArrayBuffer(base64: string) {
   return bytes.buffer;
 }
 
+function parseFilename(uri: string) {
+  const basename = delimitedPath.basename(uri);
+  const [name, extension] = basename.split('.');
+
+  return {
+    name,
+    extension: extension as 'png' | 'jpg' | 'webp' | 'pdf',
+  };
+}
+
 const Toolbar: React.FC<ToolbarProps> = (props) => {
   const { onToggleLayerList } = props;
   const [state] = useApplicationState();
   const CanvasKit = useCanvasKit();
   const dispatch = useDispatch();
 
-  const interType = state.interactionState.type;
+  const interType = useMemo(
+    () => state.interactionState.type,
+    [state.interactionState.type],
+  );
+
   const layerType = useMemo(() => {
     if (state.interactionState.type === 'insert') {
       return state.interactionState.layerType;
@@ -53,44 +68,52 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     return undefined;
   }, [state.interactionState]);
 
-  const isButtonActive = (shape: DrawableLayerType) =>
-    layerType === shape && (interType === 'drawing' || interType === 'insert');
+  const isButtonActive = useCallback(
+    (shape: DrawableLayerType) =>
+      layerType === shape &&
+      (interType === 'drawing' || interType === 'insert'),
+    [layerType, interType],
+  );
 
-  const onReset = () => {
+  const onReset = useCallback(() => {
     if (interType !== 'none') {
       dispatch('interaction', ['reset']);
     }
-  };
+  }, [dispatch, interType]);
 
-  const onAddShape = (shape: DrawableLayerType) => () => {
-    dispatch('interaction', ['insert', shape]);
-  };
+  const onAddShape = useCallback(
+    (shape: DrawableLayerType) => () => {
+      dispatch('interaction', ['insert', shape]);
+    },
+    [dispatch],
+  );
 
-  const processImage = (base64Image: string, uri: string) => {
-    const data = base64ToArrayBuffer(base64Image);
-    const decodedImage = CanvasKit.MakeImageFromEncoded(data);
-    const extension =
-      uri.substring(uri.lastIndexOf('.')) === 'jpg' ? 'jpg' : 'png';
-    const name = uri.substring(uri.lastIndexOf('/'), uri.lastIndexOf('.'));
+  const processImage = useCallback(
+    (base64Image: string, uri: string) => {
+      const data = base64ToArrayBuffer(base64Image);
+      const decodedImage = CanvasKit.MakeImageFromEncoded(data);
+      const { name, extension } = parseFilename(uri);
 
-    if (!decodedImage) {
-      return;
-    }
+      if (!decodedImage) {
+        return;
+      }
 
-    const size = {
-      width: decodedImage.width(),
-      height: decodedImage.height(),
-    };
+      const size = {
+        width: decodedImage.width(),
+        height: decodedImage.height(),
+      };
 
-    dispatch(
-      'importImage',
-      [{ data, size, extension, name }],
-      { x: 0, y: 0 },
-      'nearestArtboard',
-    );
-  };
+      dispatch(
+        'importImage',
+        [{ data, size, extension, name }],
+        { x: 0, y: 0 },
+        'nearestArtboard',
+      );
+    },
+    [CanvasKit, dispatch],
+  );
 
-  const onAddImage = async () => {
+  const onAddImage = useCallback(async () => {
     const results = await ImagePicker.launchImageLibraryAsync();
 
     if (results.cancelled) {
@@ -107,7 +130,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     });
 
     processImage(fileString, results.uri);
-  };
+  }, [processImage]);
 
   const onZoom = useCallback(
     (type: 'zoomIn' | 'zoomOut') => {
@@ -125,7 +148,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     [dispatch],
   );
 
-  const onOpenFile = async () => {
+  const onOpenFile = useCallback(async () => {
     try {
       const results = await DocumentPicker.getDocumentAsync({
         multiple: false,
@@ -152,55 +175,61 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
     } catch (e) {
       console.warn(e);
     }
-  };
+  }, [dispatch]);
 
-  const drawItems: Item[] = [
-    {
-      icon: 'cursor-arrow',
-      onPress: onReset,
-      active: interType === 'none' || interType === 'marquee',
-    },
-    {
-      icon: 'frame',
-      onPress: onAddShape('artboard'),
-      active: isButtonActive('artboard'),
-    },
-    {
-      icon: 'image',
-      onPress: onAddImage,
-      // active: isButtonActive(),
-    },
-    {
-      icon: 'square',
-      onPress: onAddShape('rectangle'),
-      active: isButtonActive('rectangle'),
-    },
-    {
-      icon: 'circle',
-      onPress: onAddShape('oval'),
-      active: isButtonActive('oval'),
-    },
-    {
-      icon: 'slash',
-      onPress: onAddShape('line'),
-      active: isButtonActive('line'),
-    },
-    {
-      icon: 'zoom-in',
-      onPress: () => onZoom('zoomIn'),
-    },
-    {
-      icon: 'zoom-out',
-      onPress: () => onZoom('zoomOut'),
-    },
-    // { icon: 'share-1', onPress: onToDo },
-    // { icon: 'text', onPress: onToDo },
-  ];
+  const drawItems: Item[] = useMemo(
+    () => [
+      {
+        icon: 'cursor-arrow',
+        onPress: onReset,
+        active: interType === 'none' || interType === 'marquee',
+      },
+      {
+        icon: 'frame',
+        onPress: onAddShape('artboard'),
+        active: isButtonActive('artboard'),
+      },
+      {
+        icon: 'image',
+        onPress: onAddImage,
+        // active: isButtonActive(),
+      },
+      {
+        icon: 'square',
+        onPress: onAddShape('rectangle'),
+        active: isButtonActive('rectangle'),
+      },
+      {
+        icon: 'circle',
+        onPress: onAddShape('oval'),
+        active: isButtonActive('oval'),
+      },
+      {
+        icon: 'slash',
+        onPress: onAddShape('line'),
+        active: isButtonActive('line'),
+      },
+      {
+        icon: 'zoom-in',
+        onPress: () => onZoom('zoomIn'),
+      },
+      {
+        icon: 'zoom-out',
+        onPress: () => onZoom('zoomOut'),
+      },
+      // { icon: 'share-1', onPress: onToDo },
+      // { icon: 'text', onPress: onToDo },
+    ],
+    [interType, onReset, onAddImage, onAddShape, onZoom, isButtonActive],
+  );
 
-  const utilItems: Item[] = [
-    { icon: 'file', onPress: onOpenFile },
-    { icon: 'layers', onPress: onToggleLayerList },
-  ];
+  const utilItems: Item[] = useMemo(
+    () => [
+      { icon: 'file', onPress: onOpenFile },
+      { icon: 'layers', onPress: onToggleLayerList },
+    ],
+    [onOpenFile, onToggleLayerList],
+  );
 
   return (
     <>
