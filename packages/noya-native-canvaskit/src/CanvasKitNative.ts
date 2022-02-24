@@ -27,6 +27,7 @@ import {
 } from './misc';
 import PaintNative from './PaintNative';
 import PathNative from './PathNative';
+import ImageFilterFactoryNative from './ImageFilterNative';
 import { ParagraphBuilderFactoryNative } from './ParagraphNative';
 import * as Types from './types';
 
@@ -113,12 +114,11 @@ class CanvasKitNative
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
   ParagraphBuilder: IParagraphBuilderFactory<Color, RectArray> =
     ParagraphBuilderFactoryNative;
-  //   ColorFilter: SkiaColorFilterFactory,
   ColorFilter: IColorFilterFactory<Color, number[]> = RNSkia.Skia.ColorFilter;
-  //   ImageFilter: SkiaImageFilterFactory,
-  //   MaskFilter: RNSkia.Skia.MaskFilter,
-  //   PathEffect: RNSkia.Skia.PathEffect,
-  //   RuntimeEffect: SkiaRuntimeEffectFactory,
+  ImageFilter = ImageFilterFactoryNative;
+  MaskFilter = RNSkia.Skia.MaskFilter;
+  PathEffect = RNSkia.Skia.PathEffect;
+  RuntimeEffect = RNSkia.Skia.RuntimeEffect;
   Shader: IShaderFactory<Color, Point, ColorArray, Matrix> = RNSkia.Skia.Shader;
   Typeface = TypefaceFactoryNative;
   TypefaceFontProvider = TypefaceFontProviderFactoryNative;

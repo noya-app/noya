@@ -33,19 +33,23 @@ import type {
   IBlurStyle,
 } from './Enums';
 
+import type { IPath, IPathConstructorAndFactory } from './IPath';
+import type { IParagraphBuilderFactory } from './IParagraph';
+import type { IImageFilterFactory } from './IImageFilter';
+import type { IShaderFactory } from './IShader';
+import type { IPaint } from './IPaint';
 import type {
   IFontConstructor,
   ITypefaceFactory,
+  IPathEffectFactory,
+  IMaskFilterFactory,
   DefaultConstructor,
   IColorFilterFactory,
+  IRuntimeEffectFactory,
   ITextStyleConstructor,
   IParagraphStyleConstructor,
   ITypefaceFontProviderFactory,
 } from './misc';
-import { IShaderFactory } from './IShader';
-import type { IPaint } from './IPaint';
-import type { IPath, IPathConstructorAndFactory } from './IPath';
-import type { IParagraphBuilderFactory } from './IParagraph';
 
 export interface ICanvasKit<
   IColor,
@@ -81,6 +85,10 @@ export interface ICanvasKit<
   // Factories
   readonly ParagraphBuilder: IParagraphBuilderFactory<IColor, IRectArray>;
   readonly ColorFilter: IColorFilterFactory<IColor, IInputMatrix>;
+  readonly ImageFilter: IImageFilterFactory<IColor>;
+  readonly MaskFilter: IMaskFilterFactory;
+  readonly PathEffect: IPathEffectFactory;
+  readonly RuntimeEffect: IRuntimeEffectFactory;
   readonly Shader: IShaderFactory<IColor, IPoint, IColorArray, IMatrix>;
   readonly Typeface: ITypefaceFactory;
   readonly TypefaceFontProvider: ITypefaceFontProviderFactory;

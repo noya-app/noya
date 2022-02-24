@@ -1,18 +1,18 @@
 import {
   Skia,
-  Typeface as RNSTypeface,
   Font as RNSFont,
+  Typeface as RNSTypeface,
 } from '@shopify/react-native-skia';
 
 import {
+  IFont,
+  ITypeface,
   IFontStyle,
   ITextStyle,
   ITextShadow,
   IParagraphStyle,
-  ITextFontFeatures,
   ITypefaceFactory,
-  IFont,
-  ITypeface,
+  ITextFontFeatures,
   ITypefaceFontProvider,
   ITypefaceFontProviderFactory,
 } from 'canvaskit-types';

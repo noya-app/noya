@@ -137,6 +137,12 @@ export interface IColorFilter {}
 
 export interface ITypeface {}
 
+export interface IMaskFilter {}
+
+export interface IPathEffect {}
+
+export interface IRuntimeEffect {}
+
 export interface IFont {
   getTypeface(): ITypeface;
 }
@@ -175,4 +181,22 @@ export interface IColorFilterFactory<IColor, IMatrix> {
   MakeBlend(color: IColor, mode: EnumEntity): IColorFilter;
   MakeCompose(outer: IColorFilter, inner: IColorFilter): IColorFilter;
   MakeMatrix(cMatrix: IMatrix): IColorFilter;
+}
+
+export interface IMaskFilterFactory {
+  MakeBlur(
+    blurStyle: EnumEntity,
+    sigma: number,
+    respectCTM: boolean,
+  ): IMaskFilter;
+}
+
+export interface IPathEffectFactory {
+  MakeCorner(radius: number): IPathEffect | null;
+  MakeDash(intervals: number[], phase?: number): IPathEffect;
+  MakeDiscrete(segLength: number, dev: number, seedAssist: number): IPathEffect;
+}
+
+export interface IRuntimeEffectFactory {
+  Make(sksl: string, callback?: (err: string) => void): IRuntimeEffect | null;
 }

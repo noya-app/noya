@@ -1,8 +1,7 @@
 import type { EnumEntity } from './Enums';
-import type { IShader } from './IShader';
 import type { IColorFilter } from './misc';
-
-export interface IImageFilter {}
+import type { IShader } from './IShader';
+import type { IImageFilter } from './IImageFilter';
 
 export interface IMaskFilter {}
 

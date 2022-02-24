@@ -1,3 +1,4 @@
+export * from './IImageFilter';
 export * from './ICanvasKit';
 export * from './IParagraph';
 export * from './IShader';
