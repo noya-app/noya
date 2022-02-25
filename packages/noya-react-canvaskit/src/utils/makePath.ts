@@ -1,4 +1,4 @@
-import { CanvasKit, Path } from 'canvaskit';
+import { CanvasKit, Path } from 'canvaskit-types';
 import { Point } from 'noya-geometry';
 
 export default function makePath(CanvasKit: CanvasKit, points: Point[]): Path {

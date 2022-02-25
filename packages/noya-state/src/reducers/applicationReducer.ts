@@ -3,7 +3,7 @@ import { WritableDraft } from 'immer/dist/internal';
 import { IndexPath } from 'tree-visit';
 
 import Sketch from 'noya-file-format';
-import { CanvasKit } from 'canvaskit';
+import type { CanvasKit } from 'canvaskit-types';
 import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';

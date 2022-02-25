@@ -1,6 +1,6 @@
 import produce from 'immer';
 
-import { CanvasKit } from 'canvaskit';
+import type { CanvasKit } from 'canvaskit-types';
 import {
   interpolateRgba,
   rgbaToSketchColor,

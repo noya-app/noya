@@ -4,7 +4,7 @@ import {
   MaskFilter,
   StrokeCap,
   StrokeJoin,
-} from 'canvaskit';
+} from 'canvaskit-types';
 import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useColor, { ColorParameters } from './useColor';

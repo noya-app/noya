@@ -1,6 +1,6 @@
 import produce from 'immer';
 
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from 'canvaskit-types';
 import {
   Layers,
   Selectors,

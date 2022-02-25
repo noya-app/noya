@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 
 import { Rect } from 'noya-geometry';
 import Sketch from 'noya-file-format';
-import * as CanvasKit from 'canvaskit';
+import * as CanvasKit from 'canvaskit-types';
 import { Primitives } from 'noya-state';
 import { useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit } from '../../hooks/useCanvasKit';

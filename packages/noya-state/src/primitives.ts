@@ -8,7 +8,7 @@ import type {
   StrokeJoin,
   TextAlign,
   TextStyle,
-} from 'canvaskit';
+} from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { FontId, SYSTEM_FONT_ID } from 'noya-fonts';
 import {

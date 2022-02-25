@@ -1,7 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from 'canvaskit-types';
 import { toDegrees } from 'noya-geometry';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { Group } from '../../contexts/ComponentsContext';

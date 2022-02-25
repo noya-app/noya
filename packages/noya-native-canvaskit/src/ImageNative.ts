@@ -96,4 +96,8 @@ export default class ImageNative implements IImage<Matrix> {
   width() {
     return this._image.width();
   }
+
+  getRNSImage() {
+    return this._image;
+  }
 }

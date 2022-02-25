@@ -1,3 +1,23 @@
+import type { Brand } from 'noya-utils';
+import type { IMatrixHelpers, IColorMatrixHelpers } from './MatrixHelpers';
+import type { IPath, IPathConstructorAndFactory } from './IPath';
+import type { IParagraph, IParagraphBuilderFactory } from './IParagraph';
+import type { IImageFilter, IImageFilterFactory } from './IImageFilter';
+import type { IShader, IShaderFactory } from './IShader';
+import type { IPaint } from './IPaint';
+import type { IImage } from './IImage';
+import type {
+  IFontConstructor,
+  ITypefaceFactory,
+  IPathEffectFactory,
+  IMaskFilterFactory,
+  DefaultConstructor,
+  IColorFilterFactory,
+  IRuntimeEffectFactory,
+  ITextStyleConstructor,
+  IParagraphStyleConstructor,
+  ITypefaceFontProviderFactory,
+} from './misc';
 import type {
   IBlendMode,
   IStrokeCap,
@@ -32,26 +52,6 @@ import type {
   IImageFormat,
   IBlurStyle,
 } from './Enums';
-
-import type { IMatrixHelpers, IColorMatrixHelpers } from './MatrixHelpers';
-import type { IPath, IPathConstructorAndFactory } from './IPath';
-import type { IParagraphBuilderFactory } from './IParagraph';
-import type { IImageFilterFactory } from './IImageFilter';
-import type { IShaderFactory } from './IShader';
-import type { IPaint } from './IPaint';
-import type { IImage } from './IImage';
-import type {
-  IFontConstructor,
-  ITypefaceFactory,
-  IPathEffectFactory,
-  IMaskFilterFactory,
-  DefaultConstructor,
-  IColorFilterFactory,
-  IRuntimeEffectFactory,
-  ITextStyleConstructor,
-  IParagraphStyleConstructor,
-  ITypefaceFontProviderFactory,
-} from './misc';
 
 export interface ICanvasKit<
   IColor,
@@ -156,3 +156,32 @@ export interface ICanvasKit<
   readonly OverlineDecoration: number;
   readonly LineThroughDecoration: number;
 }
+
+export type Color = Brand<unknown, 'color'>;
+export type Rect = Brand<unknown, 'rect'>;
+export type Point = Brand<unknown, 'point'>;
+export type ColorArray = Brand<unknown, 'colorarray'>;
+export type Matrix = Brand<unknown, 'matrix'>;
+export type InputMatrix = Brand<unknown, 'inputmatrix'>;
+export type RectArray = Brand<unknown, 'rectarray'>;
+export type ColorMatrix = Brand<unknown, 'colormatrix'>;
+export type Surface = Brand<unknown, 'surface'>;
+
+export type Image = IImage<Matrix>;
+export type ImageFilter = IImageFilter;
+export type Path = IPath<Rect>;
+export type Paragraph = IParagraph<RectArray>;
+export type Shader = IShader;
+export type Paint = IPaint<Color>;
+
+export type CanvasKit = ICanvasKit<
+  Color,
+  Rect,
+  Point,
+  ColorArray,
+  Matrix,
+  InputMatrix,
+  RectArray,
+  ColorMatrix,
+  Surface
+>;

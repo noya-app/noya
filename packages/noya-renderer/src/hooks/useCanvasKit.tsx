@@ -1,6 +1,6 @@
 import React, { useContext, createContext, PropsWithChildren } from 'react';
 
-import type { CanvasKit } from 'canvaskit';
+import type { CanvasKit } from 'canvaskit-types';
 import { SuspendedValue } from 'noya-react-utils';
 
 // We don't start loading CanvasKit until the Provider renders the first time,

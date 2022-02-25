@@ -1,4 +1,4 @@
-import { CanvasKit, Paint } from 'canvaskit';
+import { CanvasKit, Paint } from 'canvaskit-types';
 import { useCanvasKit } from 'noya-renderer';
 import { createElement, memo, useMemo } from 'react';
 import { memoize } from 'noya-utils';
@@ -13,7 +13,7 @@ const decodeImage = memoize((CanvasKit: CanvasKit, data: ArrayBuffer) => {
 interface ImageProps {
   image: ArrayBuffer;
   rect: RectParameters;
-  paint: Paint | PaintParameters;
+  paint: CanvasKit['Paint'] | PaintParameters;
   resample?: boolean;
 }
 

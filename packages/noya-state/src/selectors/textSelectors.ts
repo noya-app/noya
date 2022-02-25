@@ -1,4 +1,4 @@
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { SYSTEM_FONT_ID } from 'noya-fonts';
 import {

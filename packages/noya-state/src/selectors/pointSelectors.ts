@@ -2,7 +2,7 @@ import { Draft } from 'immer';
 import { IndexPath } from 'tree-visit';
 
 import Sketch from 'noya-file-format';
-import { CanvasKit, Path } from 'canvaskit';
+import { CanvasKit, Path } from 'canvaskit-types';
 import {
   createRectFromBounds,
   distance,

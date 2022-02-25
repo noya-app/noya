@@ -11,10 +11,14 @@ import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
 import { useCanvasKit } from 'noya-renderer';
 import { AffineTransform, LTRBArrayToRect } from 'noya-geometry';
-import { SkiaPath, SkiaPaint, SkiaCanvasKit } from 'noya-native-canvaskit';
+import {
+  PathNative,
+  PaintNative,
+  CanvasKitNative,
+} from 'noya-native-canvaskit';
 
 interface ClipProps {
-  path: Float32Array | SkiaPath;
+  path: Float32Array | PathNative;
   op: ClipOp;
   antiAlias?: boolean;
 }
@@ -30,7 +34,7 @@ interface GroupProps {
 
 const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
   // @ts-ignore
-  const CanvasKit = useCanvasKit() as typeof SkiaCanvasKit;
+  const CanvasKit = useCanvasKit() as typeof CanvasKitNative;
 
   const onDraw = useDrawing(
     props,
@@ -64,9 +68,9 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
             clip.op,
             clip.antiAlias ?? true,
           );
-        } else if (clip.path instanceof SkiaPath) {
+        } else if (clip.path instanceof PathNative) {
           canvas.clipPath(
-            clip.path.getRNSkiaPath(),
+            clip.path.getRNSPath(),
             clip.op,
             clip.antiAlias ?? true,
           );
@@ -85,7 +89,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       }
 
       if (needsLayer) {
-        const layerPaint = new CanvasKit.Paint() as SkiaPaint;
+        const layerPaint = new CanvasKit.Paint() as PaintNative;
 
         if (opacity && opacity < 1) {
           layerPaint.setAlphaf(opacity);

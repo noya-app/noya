@@ -159,6 +159,10 @@ export default class PathNative implements IPath<Rect> {
     return this;
   }
 
+  getRNSPath() {
+    return this._path;
+  }
+
   static MakeFromOp(one: PathNative, two: PathNative, op: PathOp): PathNative {
     const skiaPath = Skia.Path.MakeFromOp(one._path, two._path, op);
 

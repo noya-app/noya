@@ -1,4 +1,4 @@
-import { CanvasKit, Path, PathOp } from 'canvaskit';
+import type { CanvasKit, Path, PathOp } from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { distance, Point, Rect } from 'noya-geometry';
 import {

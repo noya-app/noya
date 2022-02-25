@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
 
-import { CanvasKit, Paragraph } from 'canvaskit';
+import { CanvasKit, Paragraph } from 'canvaskit-types';
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
