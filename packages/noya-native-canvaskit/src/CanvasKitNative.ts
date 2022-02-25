@@ -15,6 +15,7 @@ import type {
   Matrix,
   RectArray,
   ColorArray,
+  ColorMatrix,
   InputMatrix,
 } from './types';
 import { Colors, ParagraphDecoration } from './constants';
@@ -25,15 +26,27 @@ import {
   TypefaceFactoryNative,
   TypefaceFontProviderFactoryNative,
 } from './misc';
-import PaintNative from './PaintNative';
-import PathNative from './PathNative';
 import ImageFilterFactoryNative from './ImageFilterNative';
 import { ParagraphBuilderFactoryNative } from './ParagraphNative';
+import { MatrixHelpers, ColorMatrixHelpers } from './MatrixHelpers';
+import ImageNative from './ImageNative';
+import PaintNative from './PaintNative';
+import PathNative from './PathNative';
 import * as Types from './types';
 
 class CanvasKitNative
   implements
-    ICanvasKit<Color, Rect, Point, ColorArray, Matrix, InputMatrix, RectArray>
+    ICanvasKit<
+      Color,
+      Rect,
+      Point,
+      ColorArray,
+      Matrix,
+      InputMatrix,
+      RectArray,
+      ColorMatrix,
+      RNSkia.ISurface
+    >
 {
   Color(r: number, g: number, b: number, a?: number): Color {
     let normalizedColor =
@@ -75,40 +88,35 @@ class CanvasKitNative
     return { x, y, width, height };
   }
 
-  //   MakeCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null {
-  //     throw new Error(`SkiaCanvasKit.MakeCanvasSurface not implemented!`);
-  //   },
+  MakeCanvasSurface(canvas: HTMLCanvasElement | string): any {
+    console.warn(`SkiaCanvasKit.MakeCanvasSurface not implemented!`);
+  }
 
-  //   // @ts-ignore
-  //   MakeSurface(width: number, height: number): Surface | null {
-  //     console.warn(`SkiaCanvasKit.MakeSurface not implemented!`);
-  //   },
+  MakeSurface(width: number, height: number): any {
+    console.warn(`SkiaCanvasKit.MakeSurface not implemented!`);
+  }
 
-  //   MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): SkiaImage | null {
-  //     const data = RNSkia.Skia.Data.fromBytes(new Uint8Array(bytes));
-  //     const img = RNSkia.Skia.MakeImageFromEncoded(data);
+  MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): ImageNative | null {
+    const data = RNSkia.Skia.Data.fromBytes(new Uint8Array(bytes));
+    const img = RNSkia.Skia.MakeImageFromEncoded(data);
 
-  //     if (!img) {
-  //       return null;
-  //     }
+    if (!img) {
+      return null;
+    }
 
-  //     return new SkiaImage(img);
-  //   },
+    return new ImageNative(img);
+  }
 
-  //   // Misc
-  //   ColorMatrix: SkiaColorMatrix,
-  //   Matrix: SkiaMatrix,
-  //   M44: 0 as any,
-  //   Vector: 0 as any,
+  // Misc
+  ColorMatrix = ColorMatrixHelpers;
+  Matrix = MatrixHelpers;
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
-  ImageData = 0 as any;
   ParagraphStyle = ParagraphStyleNative;
   ContourMeasureIter = 0 as any;
   Font = FontNative;
   Path = PathNative;
   Paint = PaintNative;
-  PictureRecorder = 0 as any;
   TextStyle = TextStyleNative;
 
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
@@ -119,6 +127,7 @@ class CanvasKitNative
   MaskFilter = RNSkia.Skia.MaskFilter;
   PathEffect = RNSkia.Skia.PathEffect;
   RuntimeEffect = RNSkia.Skia.RuntimeEffect;
+  // @ts-ignore TODO: fix later
   Shader: IShaderFactory<Color, Point, ColorArray, Matrix> = RNSkia.Skia.Shader;
   Typeface = TypefaceFactoryNative;
   TypefaceFontProvider = TypefaceFontProviderFactoryNative;

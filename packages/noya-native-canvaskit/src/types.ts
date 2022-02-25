@@ -5,9 +5,10 @@ export type Color = number;
 export type ColorArray = Color[];
 export type Rect = RNSkia.IRect;
 export type Point = RNSkia.IPoint;
-export type Matrix = RNSkia.Matrix;
+export type Matrix = number[];
 export type InputMatrix = number[];
 export type RectArray = Rect[];
+export type ColorMatrix = number[];
 
 // Enums
 export enum Affinity {
@@ -113,6 +114,12 @@ export enum TextHeightBehavior {
   DisableFirstAscent,
   DisableLastDescent,
   DisableAll,
+}
+
+export enum ImageFormat {
+  PNG,
+  JPEG,
+  WEBP,
 }
 
 export interface FontStyle {

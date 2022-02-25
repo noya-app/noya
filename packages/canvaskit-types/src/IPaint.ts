@@ -1,11 +1,7 @@
-import type { EnumEntity } from './Enums';
-import type { IColorFilter } from './misc';
-import type { IShader } from './IShader';
+import type { IColorFilter, IMaskFilter, IPathEffect } from './misc';
 import type { IImageFilter } from './IImageFilter';
-
-export interface IMaskFilter {}
-
-export interface IPathEffect {}
+import type { EnumEntity } from './Enums';
+import type { IShader } from './IShader';
 
 export interface IPaint<IColor> {
   copy(): IPaint<IColor>;

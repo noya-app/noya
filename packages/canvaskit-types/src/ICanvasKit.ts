@@ -33,11 +33,13 @@ import type {
   IBlurStyle,
 } from './Enums';
 
+import type { IMatrixHelpers, IColorMatrixHelpers } from './MatrixHelpers';
 import type { IPath, IPathConstructorAndFactory } from './IPath';
 import type { IParagraphBuilderFactory } from './IParagraph';
 import type { IImageFilterFactory } from './IImageFilter';
 import type { IShaderFactory } from './IShader';
 import type { IPaint } from './IPaint';
+import type { IImage } from './IImage';
 import type {
   IFontConstructor,
   ITypefaceFactory,
@@ -59,6 +61,8 @@ export interface ICanvasKit<
   IMatrix,
   IInputMatrix,
   IRectArray,
+  IColorMatrix,
+  ISurface,
 > {
   // Colors
   Color(r: number, g: number, b: number, a?: number): IColor;
@@ -69,11 +73,15 @@ export interface ICanvasKit<
   LTRBRect(left: number, top: number, right: number, bottom: number): IRect;
   XYWHRect(x: number, y: number, width: number, height: number): IRect;
 
-  // MakeCanvasSurface(canvas: HTMLCanvasElement | string): Surface | null;
+  MakeCanvasSurface(canvas: HTMLCanvasElement | string): ISurface | null;
 
-  // MakeSurface(width: number, height: number): Surface | null;
+  MakeSurface(width: number, height: number): ISurface | null;
 
-  // MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): IImage | null;
+  MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): IImage<IMatrix> | null;
+
+  // Misc
+  ColorMatrix: IColorMatrixHelpers<IColorMatrix>;
+  Matrix: IMatrixHelpers<IMatrix>;
 
   // Constructors
   readonly ParagraphStyle: IParagraphStyleConstructor<IColor>;

@@ -244,3 +244,9 @@ export interface IVertexMode {
   TrianglesStrip: EnumEntity;
   TriangleFan: EnumEntity;
 }
+
+export interface IImageFormat {
+  PNG: EnumEntity;
+  JPEG: EnumEntity;
+  WEBP: EnumEntity;
+}

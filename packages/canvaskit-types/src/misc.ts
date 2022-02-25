@@ -1,5 +1,7 @@
 import { EnumEntity } from './Enums';
 
+export type MallocObj = any;
+
 export interface DefaultConstructor<T> {
   new (): T;
 }
@@ -10,6 +12,21 @@ export interface EmbindObject {
   deleteAfter(): void;
   isAliasOf(other: any): boolean;
   isDeleted(): boolean;
+}
+
+export interface IImageInfo {
+  alphaType: EnumEntity;
+  colorSpace: EnumEntity;
+  colorType: EnumEntity;
+  height: number;
+  width: number;
+}
+
+export interface IPartialImageInfo {
+  alphaType: EnumEntity;
+  colorType: EnumEntity;
+  height: number;
+  width: number;
 }
 
 export interface IPositionWithAfinity {
