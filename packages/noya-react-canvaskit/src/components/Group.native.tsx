@@ -10,15 +10,16 @@ import {
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
 import { useCanvasKit } from 'noya-renderer';
-import { AffineTransform, LTRBArrayToRect } from 'noya-geometry';
+import { AffineTransform } from 'noya-geometry';
 import {
+  Rect,
   PathNative,
   PaintNative,
   CanvasKitNative,
 } from 'noya-native-canvaskit';
 
 interface ClipProps {
-  path: Float32Array | PathNative;
+  path: Rect | PathNative;
   op: ClipOp;
   antiAlias?: boolean;
 }
@@ -62,18 +63,14 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       const restoreCount = canvas.save();
 
       if (clip) {
-        if (clip.path instanceof Float32Array) {
-          canvas.clipRect(
-            LTRBArrayToRect(clip.path),
-            clip.op,
-            clip.antiAlias ?? true,
-          );
-        } else if (clip.path instanceof PathNative) {
+        if (clip.path instanceof PathNative) {
           canvas.clipPath(
             clip.path.getRNSPath(),
             clip.op,
             clip.antiAlias ?? true,
           );
+        } else {
+          canvas.clipRect(clip.path, clip.op, clip.antiAlias ?? true);
         }
       }
 

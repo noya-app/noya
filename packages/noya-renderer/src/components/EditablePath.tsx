@@ -2,7 +2,7 @@ import React, { Fragment, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
 import Sketch from 'noya-file-format';
-import { Paint } from 'canvaskit';
+import { Paint } from 'canvaskit-types';
 import { AffineTransform, Point } from 'noya-geometry';
 import { useDeletable, useFill, useStroke } from 'noya-react-canvaskit';
 import {

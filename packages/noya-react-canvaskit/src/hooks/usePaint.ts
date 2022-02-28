@@ -1,9 +1,9 @@
 import {
   Paint,
-  PaintStyle,
   MaskFilter,
-  StrokeCap,
-  StrokeJoin,
+  IStrokeCap,
+  IStrokeJoin,
+  IPaintStyle,
 } from 'canvaskit-types';
 import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
@@ -13,12 +13,12 @@ import useDeletable from './useDeletable';
 export interface PaintParameters {
   color: ColorParameters;
   opacity?: number;
-  style: PaintStyle;
+  style: IPaintStyle;
   strokeWidth?: number;
   antiAlias?: boolean;
   maskFilter?: MaskFilter;
-  strokeJoin?: StrokeJoin;
-  strokeCap?: StrokeCap;
+  strokeJoin?: IStrokeJoin;
+  strokeCap?: IStrokeCap;
 }
 
 function isPaint(value: Paint | PaintParameters): value is Paint {

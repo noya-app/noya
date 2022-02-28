@@ -7,21 +7,21 @@ export interface IMatrixHelpers<IMatrix> {
   translated(dx: number, dy: number): IMatrix;
 }
 
-export interface IColorMatrixHelpers<IColorMatrix> {
-  concat(outer: IColorMatrix, inner: IColorMatrix): IColorMatrix;
-  identity(): IColorMatrix;
+export interface IColorMatrixHelpers<IMatrix> {
+  concat(outer: IMatrix, inner: IMatrix): IMatrix;
+  identity(): IMatrix;
   postTranslate(
-    m: IColorMatrix,
+    m: IMatrix,
     dr: number,
     dg: number,
     db: number,
     da: number,
-  ): IColorMatrix;
-  rotated(axis: number, sine: number, cosine: number): IColorMatrix;
+  ): IMatrix;
+  rotated(axis: number, sine: number, cosine: number): IMatrix;
   scaled(
     redScale: number,
     greenScale: number,
     blueScale: number,
     alphaScale: number,
-  ): IColorMatrix;
+  ): IMatrix;
 }

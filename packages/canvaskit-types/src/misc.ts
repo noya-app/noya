@@ -1,4 +1,21 @@
-import { EnumEntity } from './Enums';
+import {
+  IAlphaType,
+  IColorSpace,
+  IColorType,
+  IAffinity,
+  IFontWieght,
+  IFontWidth,
+  IFontSlant,
+  IStrokeCap,
+  IStrokeJoin,
+  IDecorationStyle,
+  ITextBaseline,
+  ITextAlign,
+  ITextDirection,
+  ITextHeightBehavior,
+  IBlendMode,
+  IBlurStyle,
+} from './Enums';
 
 export type MallocObj = any;
 
@@ -15,23 +32,23 @@ export interface EmbindObject {
 }
 
 export interface IImageInfo {
-  alphaType: EnumEntity;
-  colorSpace: EnumEntity;
-  colorType: EnumEntity;
+  alphaType: IAlphaType;
+  colorSpace: IColorSpace;
+  colorType: IColorType;
   height: number;
   width: number;
 }
 
 export interface IPartialImageInfo {
-  alphaType: EnumEntity;
-  colorType: EnumEntity;
+  alphaType: IAlphaType;
+  colorType: IColorType;
   height: number;
   width: number;
 }
 
 export interface IPositionWithAfinity {
   pos: number;
-  affinity: EnumEntity;
+  affinity: IAffinity;
 }
 
 export interface ILineMetrics {
@@ -81,9 +98,9 @@ export interface IShapedLine {
 }
 
 export interface IFontStyle {
-  weight?: EnumEntity;
-  width?: EnumEntity;
-  slant?: EnumEntity;
+  weight?: IFontWieght;
+  width?: IFontWidth;
+  slant?: IFontSlant;
 }
 
 export interface IStrokeOpts {
@@ -91,8 +108,8 @@ export interface IStrokeOpts {
   miter_limit?: number;
 
   precision?: number;
-  join?: EnumEntity;
-  cap?: EnumEntity;
+  join?: IStrokeJoin;
+  cap?: IStrokeCap;
 }
 
 export interface IStrutStyle {
@@ -123,7 +140,7 @@ export interface ITextStyle<IColor> {
   decoration?: number;
   decorationColor?: IColor;
   decorationThickness?: number;
-  decrationStyle?: EnumEntity;
+  decrationStyle?: IDecorationStyle;
   fontFamilies?: string[];
   fontFeatures?: ITextFontFeatures[];
   fontSize?: number;
@@ -134,7 +151,7 @@ export interface ITextStyle<IColor> {
   letterSpacing?: number;
   locale?: string;
   shadows?: ITextShadow<IColor>[];
-  textBaseline?: EnumEntity;
+  textBaseline?: ITextBaseline;
   wordSpacing?: number;
 }
 
@@ -144,21 +161,19 @@ export interface IParagraphStyle<IColor> {
   heightMultiplier?: number;
   maxLines?: number;
   strutStyle?: IStrutStyle;
-  textAlign?: EnumEntity;
-  textDirection?: EnumEntity;
-  textHeightBehavior?: EnumEntity;
+  textAlign?: ITextAlign;
+  textDirection?: ITextDirection;
+  textHeightBehavior?: ITextHeightBehavior;
   textStyle?: ITextStyle<IColor>;
 }
 
-export interface IColorFilter {}
+export interface IColorFilter extends EmbindObject {}
 
-export interface ITypeface {}
+export interface ITypeface extends EmbindObject {}
 
-export interface IMaskFilter {}
+export interface IMaskFilter extends EmbindObject {}
 
-export interface IPathEffect {}
-
-export interface IRuntimeEffect {}
+export interface IPathEffect extends EmbindObject {}
 
 export interface IFont {
   getTypeface(): ITypeface;
@@ -195,14 +210,14 @@ export interface ITypefaceFactory {
 }
 
 export interface IColorFilterFactory<IColor, IMatrix> {
-  MakeBlend(color: IColor, mode: EnumEntity): IColorFilter;
+  MakeBlend(color: IColor, mode: IBlendMode): IColorFilter;
   MakeCompose(outer: IColorFilter, inner: IColorFilter): IColorFilter;
   MakeMatrix(cMatrix: IMatrix): IColorFilter;
 }
 
 export interface IMaskFilterFactory {
   MakeBlur(
-    blurStyle: EnumEntity,
+    blurStyle: IBlurStyle,
     sigma: number,
     respectCTM: boolean,
   ): IMaskFilter;
@@ -212,8 +227,4 @@ export interface IPathEffectFactory {
   MakeCorner(radius: number): IPathEffect | null;
   MakeDash(intervals: number[], phase?: number): IPathEffect;
   MakeDiscrete(segLength: number, dev: number, seedAssist: number): IPathEffect;
-}
-
-export interface IRuntimeEffectFactory {
-  Make(sksl: string, callback?: (err: string) => void): IRuntimeEffect | null;
 }

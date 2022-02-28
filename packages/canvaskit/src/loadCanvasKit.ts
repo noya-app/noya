@@ -30,6 +30,11 @@ export function loadCanvasKit() {
       _setStyle.call(this, paintStyle);
     };
 
+    // @ts-ignore
+    CanvasKit.Point = (x: number, y: number) => new Float32Array([x, y]);
+    // @ts-ignore
+    CanvasKit.CreateMatrix = (inMat: number[]) => new Float32Array(inMat);
+
     resolve(CanvasKit as unknown as CanvasKit);
   });
 

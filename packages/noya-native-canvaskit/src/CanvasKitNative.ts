@@ -8,16 +8,7 @@ import {
   IShaderFactory,
 } from 'canvaskit-types';
 // import primitives separately for easier use
-import type {
-  Rect,
-  Color,
-  Point,
-  Matrix,
-  RectArray,
-  ColorArray,
-  ColorMatrix,
-  InputMatrix,
-} from './types';
+import type { Rect, Color, Point, Matrix, ColorArray } from './types';
 import { Colors, ParagraphDecoration } from './constants';
 import {
   FontNative,
@@ -42,9 +33,7 @@ class CanvasKitNative
       Point,
       ColorArray,
       Matrix,
-      InputMatrix,
-      RectArray,
-      ColorMatrix,
+      // @ts-ignore surfaces aren't used in native implementation
       RNSkia.ISurface
     >
 {
@@ -120,9 +109,9 @@ class CanvasKitNative
   TextStyle = TextStyleNative;
 
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
-  ParagraphBuilder: IParagraphBuilderFactory<Color, RectArray> =
+  ParagraphBuilder: IParagraphBuilderFactory<Color> =
     ParagraphBuilderFactoryNative;
-  ColorFilter: IColorFilterFactory<Color, number[]> = RNSkia.Skia.ColorFilter;
+  ColorFilter: IColorFilterFactory<Color, Matrix> = RNSkia.Skia.ColorFilter;
   ImageFilter = ImageFilterFactoryNative;
   MaskFilter = RNSkia.Skia.MaskFilter;
   PathEffect = RNSkia.Skia.PathEffect;

@@ -1,25 +1,35 @@
-import type { EnumEntity } from './Enums';
+import type {
+  IImageFormat,
+  IColorSpace,
+  ITileMode,
+  IMipmapMode,
+} from './Enums';
 import type { IShader } from './IShader';
-import type { IPartialImageInfo, IImageInfo, MallocObj } from './misc';
+import type {
+  MallocObj,
+  IImageInfo,
+  EmbindObject,
+  IPartialImageInfo,
+} from './misc';
 
-export interface IImage<IMatrix> {
-  encodeToBytes(fmt?: EnumEntity, quality?: number): Uint8Array | null;
-  getColorSpace(): EnumEntity;
+export interface IImage<IMatrix> extends EmbindObject {
+  encodeToBytes(fmt?: IImageFormat, quality?: number): Uint8Array | null;
+  getColorSpace(): IColorSpace;
   getImageInfo(): IPartialImageInfo;
   height(): number;
   makeCopyWithDefaultMipmaps(): IImage<IMatrix>;
   makeShaderCubic(
-    tx: EnumEntity,
-    ty: EnumEntity,
+    tx: ITileMode,
+    ty: ITileMode,
     B: number,
     C: number,
     localMatrix?: IMatrix,
   ): IShader;
   makeShaderOptions(
-    tx: EnumEntity,
-    ty: EnumEntity,
-    fm: EnumEntity,
-    mm: EnumEntity,
+    tx: ITileMode,
+    ty: ITileMode,
+    fm: IImageFormat,
+    mm: IMipmapMode,
     localMatrix?: IMatrix,
   ): IShader;
   readPixels(

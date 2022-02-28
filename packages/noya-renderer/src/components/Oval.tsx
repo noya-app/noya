@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { Paint } from 'canvaskit';
+import { Paint } from 'canvaskit-types';
 import { Point } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Path } from '../contexts/ComponentsContext';

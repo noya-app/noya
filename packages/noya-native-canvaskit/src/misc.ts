@@ -27,6 +27,30 @@ import {
   TextHeightBehavior,
 } from './types';
 
+export class JSEmbindObject {
+  _isDeleted = false;
+
+  clone() {
+    return this;
+  }
+
+  delete() {
+    this._isDeleted = false;
+  }
+
+  deleteAfter() {
+    throw new Error('JSEmbindObject.deleteAfter not implemented!');
+  }
+
+  isAliasOf(other: any) {
+    return this === other;
+  }
+
+  isDeleted() {
+    return this._isDeleted;
+  }
+}
+
 export class TextStyleNative implements ITextStyle<Color> {
   backgroundColor?: Color;
   color?: Color = Colors.WHITE;
@@ -72,29 +96,31 @@ export class ParagraphStyleNative implements IParagraphStyle<Color> {
   }
 }
 
-export class FontNative implements IFont {
+export class FontNative extends JSEmbindObject implements IFont {
   private _font: RNSFont;
   private _typeface: RNSTypeface;
 
   constructor(face: ITypeface, size?: number) {
-    this._font = Skia.Font(face as RNSTypeface, size);
-    this._typeface = face as RNSTypeface;
+    super();
+
+    this._font = Skia.Font(face as unknown as RNSTypeface, size);
+    this._typeface = face as unknown as RNSTypeface;
   }
 
   getFont() {
     return this._font;
   }
 
-  getTypeface(): RNSTypeface {
-    return this._typeface;
+  getTypeface(): ITypeface {
+    return this._typeface as unknown as ITypeface;
   }
 }
 
 export const TypefaceFactoryNative: ITypefaceFactory = {
-  MakeFreeTypeFaceFromData(fontData: ArrayBuffer): RNSTypeface | null {
+  MakeFreeTypeFaceFromData(fontData: ArrayBuffer): ITypeface | null {
     const data = Skia.Data.fromBytes(new Uint8Array(fontData));
 
-    return Skia.Typeface.MakeFreeTypeFaceFromData(data);
+    return Skia.Typeface.MakeFreeTypeFaceFromData(data) as unknown as ITypeface;
   },
 };
 

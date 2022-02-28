@@ -1,9 +1,9 @@
-import { BlurStyle, MaskFilter } from 'canvaskit';
+import { IBlurStyle, MaskFilter } from 'canvaskit-types';
 import { JSEmbindObject } from './Embind';
 
 export class JSMaskFilter extends JSEmbindObject implements MaskFilter {
   static MakeBlur(
-    style: BlurStyle,
+    style: IBlurStyle,
     sigma: number,
     respectCTM: boolean,
   ): MaskFilter {

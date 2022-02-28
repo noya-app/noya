@@ -1,11 +1,12 @@
-import { EnumEntity } from './Enums';
+import { IBlendMode, IColorSpace, ITileMode } from './Enums';
+import { EmbindObject } from './misc';
 
-export interface IShader {}
+export interface IShader extends EmbindObject {}
 
 export interface IShaderFactory<IColor, IPoint, IColorArray, IMatrix> {
-  MakeBlend(mode: EnumEntity, one: IShader, two: IShader): IShader;
+  MakeBlend(mode: IBlendMode, one: IShader, two: IShader): IShader;
 
-  MakeColor(color: IColor, space: EnumEntity): IShader;
+  MakeColor(color: IColor, space: IColorSpace): IShader;
 
   MakeFractalNoise(
     baseFreqX: number,
@@ -21,10 +22,10 @@ export interface IShaderFactory<IColor, IPoint, IColorArray, IMatrix> {
     end: IPoint,
     colors: IColorArray,
     pos: number[] | null,
-    mode: EnumEntity,
+    mode: ITileMode,
     localMatrix?: IMatrix,
     flags?: number,
-    colorSpace?: EnumEntity,
+    colorSpace?: IColorSpace,
   ): IShader;
 
   MakeRadialGradient(
@@ -32,10 +33,10 @@ export interface IShaderFactory<IColor, IPoint, IColorArray, IMatrix> {
     radius: number,
     colors: IColorArray,
     pos: number[] | null,
-    mode: EnumEntity,
+    mode: ITileMode,
     localMatrix?: IMatrix,
     flags?: number,
-    colorSpace?: EnumEntity,
+    colorSpace?: IColorSpace,
   ): IShader;
 
   MakeSweepGradient(
@@ -43,12 +44,12 @@ export interface IShaderFactory<IColor, IPoint, IColorArray, IMatrix> {
     cy: number,
     colors: IColorArray,
     pos: number[] | null,
-    mode: EnumEntity,
+    mode: ITileMode,
     localMatrix?: IMatrix | null,
     flags?: number,
     startAngle?: number,
     endAngle?: number,
-    colorSpace?: EnumEntity,
+    colorSpace?: IColorSpace,
   ): IShader;
 
   MakeTurbulence(
@@ -67,9 +68,9 @@ export interface IShaderFactory<IColor, IPoint, IColorArray, IMatrix> {
     endRadius: number,
     colors: IColorArray,
     pos: number[] | null,
-    mode: EnumEntity,
+    mode: ITileMode,
     localMatrix?: IMatrix,
     flags?: number,
-    colorSpace?: EnumEntity,
+    colorSpace?: IColorSpace,
   ): IShader;
 }

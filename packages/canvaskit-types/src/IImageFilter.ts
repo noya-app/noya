@@ -1,8 +1,8 @@
-import type { IColorFilter } from './misc';
-import type { EnumEntity } from './Enums';
+import type { IColorFilter, EmbindObject } from './misc';
+import type { IBlendMode, IMipmapMode } from './Enums';
 import type { IShader } from './IShader';
 
-export interface IImageFilter {}
+export interface IImageFilter extends EmbindObject {}
 
 export interface IImageFilterFactory<IColor> {
   MakeShader(shader: IShader): IImageFilter;
@@ -26,7 +26,7 @@ export interface IImageFilterFactory<IColor> {
   MakeOffset(dx: number, dy: number, input: IImageFilter | null): IImageFilter;
 
   MakeBlend(
-    blendMode: EnumEntity,
+    blendMode: IBlendMode,
     background: IImageFilter,
     foreground: IImageFilter,
   ): IImageFilter;
@@ -52,7 +52,7 @@ export interface IImageFilterFactory<IColor> {
   MakeBlur(
     sigmaX: number,
     sigmaY: number,
-    mode: EnumEntity,
+    mode: IMipmapMode,
     input: IImageFilter | null,
   ): IImageFilter;
 
@@ -61,5 +61,5 @@ export interface IImageFilterFactory<IColor> {
   MakeCompose(
     outer: IImageFilter | null,
     inner: IImageFilter | null,
-  ): IImageFilter | null;
+  ): IImageFilter;
 }

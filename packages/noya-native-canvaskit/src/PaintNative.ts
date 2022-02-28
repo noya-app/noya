@@ -12,9 +12,13 @@ import {
 } from '@shopify/react-native-skia';
 
 import { IPaint } from 'canvaskit-types';
+import { JSEmbindObject } from './misc';
 import { Color, ColorSpace } from './types';
 
-export default class PaintNative implements IPaint<Color> {
+export default class PaintNative
+  extends JSEmbindObject
+  implements IPaint<Color>
+{
   private _paint = Skia.Paint();
 
   copy(): PaintNative {

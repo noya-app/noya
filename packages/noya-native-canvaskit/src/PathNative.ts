@@ -7,16 +7,20 @@ import {
 } from '@shopify/react-native-skia';
 
 import { IPath } from 'canvaskit-types';
+import { RectToLTRBArray } from 'noya-geometry';
+import { JSEmbindObject } from './misc';
 import { Rect } from './types';
 
 // NOTE:
 // This class/wrapper can be removed if/when react-native-skia
 // implenets: addPath, arc, *toCmds
 // * only used in tests
-export default class PathNative implements IPath<Rect> {
+export default class PathNative extends JSEmbindObject implements IPath<Rect> {
   private _path: RNSPath;
 
   constructor(path?: RNSPath) {
+    super();
+
     if (path) {
       this._path = path;
     } else {
@@ -54,13 +58,27 @@ export default class PathNative implements IPath<Rect> {
     return this;
   }
 
+  arcToTangent(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    radius: number,
+  ): PathNative {
+    this._path.arcToTangent(x1, y1, x2, y2, radius);
+
+    return this;
+  }
+
   close(): PathNative {
     this._path.close();
     return this;
   }
 
-  computeTightBounds(): Rect {
-    return this._path.computeTightBounds();
+  computeTightBounds(): number[] {
+    const rect = this._path.computeTightBounds();
+
+    return RectToLTRBArray(rect);
   }
 
   contains(x: number, y: number): boolean {

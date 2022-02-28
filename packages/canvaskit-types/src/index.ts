@@ -2,6 +2,7 @@ export * from './MatrixHelpers';
 export * from './IImageFilter';
 export * from './ICanvasKit';
 export * from './IParagraph';
+export * from './CanvasKit';
 export * from './IShader';
 export * from './IPaint';
 export * from './IImage';

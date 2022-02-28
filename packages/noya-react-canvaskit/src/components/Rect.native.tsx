@@ -1,34 +1,37 @@
 import React, { memo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { SkiaPaint } from 'noya-native-canvaskit';
-import { LTRBArrayToRect } from 'noya-geometry';
+import { Rect as PRect } from 'canvaskit-types';
+import { PaintNative, Rect as RNSRect } from 'noya-native-canvaskit';
+import useRect from '../hooks/useRect.native';
 
 interface RectProps {
-  rect: Float32Array;
+  rect: PRect;
   cornerRadius?: number;
-  paint: SkiaPaint;
+  paint: PaintNative;
 }
 
 const Rect: React.FC<RectProps> = (props) => {
-  const onDraw = useDrawing(
-    props,
-    ({ canvas }, { rect, paint, cornerRadius }) => {
-      const iRect = LTRBArrayToRect(rect);
+  const rect = useRect(props.rect as unknown as RNSRect);
 
+  const elementProps = { ...props, rect };
+
+  const onDraw = useDrawing(
+    elementProps,
+    ({ canvas }, { rect, paint, cornerRadius }) => {
       if (cornerRadius) {
         canvas.drawRRect(
-          { rect: iRect, rx: cornerRadius, ry: cornerRadius },
+          { rect, rx: cornerRadius, ry: cornerRadius },
           paint.getRNSkiaPaint(),
         );
       } else {
-        canvas.drawRect(iRect, paint.getRNSkiaPaint());
+        canvas.drawRect(rect, paint.getRNSkiaPaint());
       }
     },
   );
 
   // @ts-ignore
-  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
+  return <Drawing onDraw={onDraw} {...elementProps} skipProcessing />;
 };
 
 export default memo(Rect);

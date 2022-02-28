@@ -1,7 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { CanvasKit } from 'canvaskit-types';
+import { CanvasKit, Matrix } from 'canvaskit-types';
 import { toDegrees } from 'noya-geometry';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { Group } from '../../contexts/ComponentsContext';
@@ -12,10 +12,7 @@ import {
   getSaturationMatrix,
 } from '../../utils/colorMatrix';
 
-function multiplyColorMatrix(
-  CanvasKit: CanvasKit,
-  [first, ...rest]: Float32Array[],
-) {
+function multiplyColorMatrix(CanvasKit: CanvasKit, [first, ...rest]: Matrix[]) {
   if (!first) return CanvasKit.ColorMatrix.identity();
 
   return rest.reduce(
@@ -38,10 +35,10 @@ const ColorControlsGroup: React.FC<PropsWithChildren<Props>> = (props) => {
     return isEnabled
       ? CanvasKit.ColorFilter.MakeMatrix(
           multiplyColorMatrix(CanvasKit, [
-            getHueRotationMatrix(toDegrees(hue)),
-            getSaturationMatrix(saturation),
-            getBrightnessMatrix(brightness),
-            getContrastMatrix(contrast),
+            getHueRotationMatrix(CanvasKit, toDegrees(hue)),
+            getSaturationMatrix(CanvasKit, saturation),
+            getBrightnessMatrix(CanvasKit, brightness),
+            getContrastMatrix(CanvasKit, contrast),
           ]),
         )
       : undefined;

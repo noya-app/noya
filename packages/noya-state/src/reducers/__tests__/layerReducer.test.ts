@@ -1,4 +1,4 @@
-import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import type { CanvasKit as CanvasKitType } from 'canvaskit-types';
 import { FontManager } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
 import { loadCanvasKit } from 'canvaskit';

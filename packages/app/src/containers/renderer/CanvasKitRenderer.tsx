@@ -1,4 +1,4 @@
-import type { Surface } from 'canvaskit';
+import type { Surface, CanvasKit } from 'canvaskit';
 import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import {
@@ -45,7 +45,9 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
     canvasElement.width = size.width * pixelRatio;
     canvasElement.height = size.height * pixelRatio;
 
-    const newSurface = CanvasKit.MakeCanvasSurface(canvasElement);
+    const newSurface = CanvasKit.MakeCanvasSurface(
+      canvasElement,
+    ) as unknown as Surface;
 
     if (!newSurface) {
       console.warn('failed to create surface');
@@ -86,7 +88,7 @@ export default memo(function CanvasKitRenderer({ size }: Props) {
           </ThemeProvider>
         </CanvasKitProvider>,
         surface,
-        CanvasKit,
+        CanvasKit as unknown as CanvasKit,
       );
 
       return () => {

@@ -9,6 +9,7 @@ import {
 import { Button, Divider, withSeparatorElements } from 'noya-designsystem';
 import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
+import type { CanvasKit } from 'canvaskit';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import {
@@ -76,7 +77,7 @@ export default memo(function ExportInspector() {
       const exportSize = getExportSize(exportFormat, size);
 
       return generateImage(
-        CanvasKit,
+        CanvasKit as unknown as CanvasKit,
         exportSize.width,
         exportSize.height,
         theme,

@@ -1,7 +1,7 @@
-import { EnumEntity } from './Enums';
-import { DefaultConstructor, IStrokeOpts } from './misc';
+import { IFillType, IPathOp } from './Enums';
+import { DefaultConstructor, IStrokeOpts, EmbindObject } from './misc';
 
-export interface IPath<IRect> {
+export interface IPath<IRect> extends EmbindObject {
   addOval(oval: IRect, isCCW?: boolean, startIndex?: number): IPath<IRect>;
 
   addPath(...args: any[]): IPath<IRect> | null;
@@ -17,9 +17,17 @@ export interface IPath<IRect> {
     isCCW?: boolean,
   ): IPath<IRect>;
 
+  arcToTangent(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    radius: number,
+  ): IPath<IRect>;
+
   close(): IPath<IRect>;
 
-  computeTightBounds(): IRect;
+  computeTightBounds(): number[];
 
   contains(x: number, y: number): boolean;
 
@@ -36,7 +44,7 @@ export interface IPath<IRect> {
 
   equals(other: IPath<IRect>): boolean;
 
-  getFillType(): EnumEntity;
+  getFillType(): IFillType;
 
   lineTo(x: number, y: number): IPath<IRect>;
 
@@ -44,7 +52,7 @@ export interface IPath<IRect> {
 
   offset(dx: number, dy: number): IPath<IRect>;
 
-  op(other: IPath<IRect>, op: EnumEntity): boolean;
+  op(other: IPath<IRect>, op: IPathOp): boolean;
 
   quadTo(x1: number, y1: number, x2: number, y2: number): IPath<IRect>;
 
@@ -52,7 +60,7 @@ export interface IPath<IRect> {
 
   rewind(): void;
 
-  setFillType(fill: EnumEntity): void;
+  setFillType(fill: IFillType): void;
 
   stroke(opts?: IStrokeOpts): IPath<IRect> | null;
 
@@ -69,7 +77,7 @@ export interface IPath<IRect> {
 
 export interface IPathConstructorAndFactory<IRect, Path extends IPath<IRect>>
   extends DefaultConstructor<Path> {
-  MakeFromOp(one: Path, two: Path, op: EnumEntity): Path | null;
+  MakeFromOp(one: Path, two: Path, op: IPathOp): Path | null;
 
   MakeFromSVGString(str: string): Path | null;
 }

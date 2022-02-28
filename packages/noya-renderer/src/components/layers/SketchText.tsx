@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
 
-import { CanvasKit, Paragraph } from 'canvaskit-types';
+import type { CanvasKit, Paragraph, Rect as RectType } from 'canvaskit-types';
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
@@ -27,36 +27,37 @@ function useNearestBackgroundColor(layer: Sketch.Text) {
     );
     const parsedBackgroundColor = CanvasKit.parseColorString(canvasColor);
 
-    if (!indexPath) return parsedBackgroundColor;
+    if (!indexPath) return CanvasKit.getColorComponents(parsedBackgroundColor);
 
     const artboard = page.layers[indexPath[0]];
 
     if (!Layers.isSymbolMasterOrArtboard(artboard))
-      return parsedBackgroundColor;
+      return CanvasKit.getColorComponents(parsedBackgroundColor);
 
     const { red, green, blue, alpha } = artboard.backgroundColor;
 
-    return new Float32Array([red, green, blue, alpha]);
+    return [red, green, blue, alpha];
   }, [CanvasKit, canvasColor, layer.do_objectID, state]);
 }
 
 function useCursorColor(layer: Sketch.Text) {
   const CanvasKit = useCanvasKit();
 
-  const layerTextColor =
-    layer.style?.textStyle?.encodedAttributes
-      .MSAttributedStringColorAttribute ?? SketchModel.BLACK;
-
-  const foregroundColor = useMemo(
+  const foregroundColorComponens = useMemo(
     () =>
-      new Float32Array([
-        layerTextColor.red,
-        layerTextColor.green,
-        layerTextColor.blue,
-        layerTextColor.alpha,
-      ]),
-    [layerTextColor],
+      layer.style?.textStyle?.encodedAttributes
+        .MSAttributedStringColorAttribute ?? SketchModel.BLACK,
+    [
+      layer.style?.textStyle?.encodedAttributes
+        .MSAttributedStringColorAttribute,
+    ],
   );
+
+  const foregroundColor = useMemo(() => {
+    const { red, green, blue, alpha } = foregroundColorComponens;
+
+    return CanvasKit.Color4f(red, green, blue, alpha);
+  }, [CanvasKit, foregroundColorComponens]);
 
   const backgroundColor = useNearestBackgroundColor(layer);
 
@@ -67,9 +68,9 @@ function useCursorColor(layer: Sketch.Text) {
   );
 
   const foregroundLuminance = getLuminance(
-    foregroundColor[0],
-    foregroundColor[1],
-    foregroundColor[2],
+    foregroundColorComponens.red,
+    foregroundColorComponens.green,
+    foregroundColorComponens.blue,
   );
 
   const contrastRatio =
@@ -106,7 +107,9 @@ function TextSelection({
 }) {
   const CanvasKit = useCanvasKit();
 
-  const selectionPaint = useColorFill(useTheme().colors.selection);
+  const selectionPaint = useColorFill(
+    CanvasKit.parseColorString(useTheme().colors.selection),
+  );
 
   const { anchor, head } = selectedRange;
 
@@ -117,7 +120,12 @@ function TextSelection({
   return (
     <>
       {rects.map((rect, i) => (
-        <Rect key={i} rect={rect} paint={selectionPaint} />
+        <Rect
+          key={i}
+          // TODO: refactor getRectsForRange?
+          rect={rect as unknown as RectType}
+          paint={selectionPaint}
+        />
       ))}
     </>
   );
@@ -134,7 +142,7 @@ function getRectsForRange(
     end,
     CanvasKit.RectHeightStyle.Max,
     CanvasKit.RectWidthStyle.Max,
-  ) as unknown as Float32Array[];
+  );
 }
 
 function getCursorRect(

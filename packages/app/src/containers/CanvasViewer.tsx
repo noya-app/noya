@@ -1,4 +1,3 @@
-import { useCanvasKit } from 'noya-renderer';
 import React, {
   memo,
   ReactNode,
@@ -7,8 +6,11 @@ import React, {
   useState,
 } from 'react';
 import { useTheme } from 'styled-components';
+
+import { useCanvasKit } from 'noya-renderer';
 import { useWorkspaceState } from 'noya-app-state-context';
 import { generateImage } from 'noya-generate-image';
+import type { CanvasKit } from 'canvaskit';
 
 interface Props {
   width: number;
@@ -31,7 +33,7 @@ export default memo(function CanvasViewer({
     let valid = true;
 
     generateImage(
-      CanvasKit,
+      CanvasKit as unknown as CanvasKit,
       width,
       height,
       theme,

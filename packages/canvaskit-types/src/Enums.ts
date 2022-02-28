@@ -1,252 +1,308 @@
-export type EnumEntity = number | { readonly value: number };
+type EnumEntity = number | { readonly value: number };
 
-export interface IAffinity {
-  Upstream: EnumEntity;
-  Downstream: EnumEntity;
+export type IAffinity = EnumEntity;
+
+export interface IAffinityEnumValues {
+  Upstream: IAffinity;
+  Downstream: IAffinity;
 }
 
-export interface IAlphaType {
-  Opaque: EnumEntity;
-  Premul: EnumEntity;
-  Unpremul: EnumEntity;
+export type IAlphaType = EnumEntity;
+
+export interface IAlphaTypeEnumValues {
+  Opaque: IAlphaType;
+  Premul: IAlphaType;
+  Unpremul: IAlphaType;
 }
 
-export interface IBlendMode {
-  Clear: EnumEntity;
-  Src: EnumEntity;
-  Dst: EnumEntity;
-  SrcOver: EnumEntity;
-  DstOver: EnumEntity;
-  SrcIn: EnumEntity;
-  DstIn: EnumEntity;
-  SrcOut: EnumEntity;
-  DstOut: EnumEntity;
-  SrcATop: EnumEntity;
-  DstATop: EnumEntity;
-  Xor: EnumEntity;
-  Plus: EnumEntity;
-  Modulate: EnumEntity;
-  Screen: EnumEntity;
-  Overlay: EnumEntity;
-  Darken: EnumEntity;
-  Lighten: EnumEntity;
-  ColorDodge: EnumEntity;
-  ColorBurn: EnumEntity;
-  HardLight: EnumEntity;
-  SoftLight: EnumEntity;
+export type IBlendMode = EnumEntity;
+
+export interface IBlendModeEnumValues {
+  Clear: IBlendMode;
+  Src: IBlendMode;
+  Dst: IBlendMode;
+  SrcOver: IBlendMode;
+  DstOver: IBlendMode;
+  SrcIn: IBlendMode;
+  DstIn: IBlendMode;
+  SrcOut: IBlendMode;
+  DstOut: IBlendMode;
+  SrcATop: IBlendMode;
+  DstATop: IBlendMode;
+  Xor: IBlendMode;
+  Plus: IBlendMode;
+  Modulate: IBlendMode;
+  Screen: IBlendMode;
+  Overlay: IBlendMode;
+  Darken: IBlendMode;
+  Lighten: IBlendMode;
+  ColorDodge: IBlendMode;
+  ColorBurn: IBlendMode;
+  HardLight: IBlendMode;
+  SoftLight: IBlendMode;
   Difference: EnumEntity;
-  Exclusion: EnumEntity;
-  Multiply: EnumEntity;
-  Hue: EnumEntity;
-  Saturation: EnumEntity;
-  Color: EnumEntity;
-  Luminosity: EnumEntity;
+  Exclusion: IBlendMode;
+  Multiply: IBlendMode;
+  Hue: IBlendMode;
+  Saturation: IBlendMode;
+  Color: IBlendMode;
+  Luminosity: IBlendMode;
 }
 
-export interface IBlurStyle {
-  Normal: EnumEntity;
-  Solid: EnumEntity;
-  Outer: EnumEntity;
-  Inner: EnumEntity;
+export type IBlurStyle = EnumEntity;
+
+export interface IBlurStyleEnumValues {
+  Normal: IBlurStyle;
+  Solid: IBlurStyle;
+  Outer: IBlurStyle;
+  Inner: IBlurStyle;
 }
 
-export interface IClipOp {
-  Difference: EnumEntity;
-  Intersect: EnumEntity;
+export type IClipOp = EnumEntity;
+
+export interface IClipOpEnumValues {
+  Difference: IClipOp;
+  Intersect: IClipOp;
 }
 
-export interface IColorSpace {
+export type IColorSpace = EnumEntity;
+
+export interface IColorSpaceEnumValues {
   SRGB: EnumEntity;
   DISPLAY_P3: EnumEntity;
   ADOBE_RGB: EnumEntity;
 }
 
-export interface IColorType {
-  Alpha_8: EnumEntity;
-  RGB_565: EnumEntity;
-  RGBA_8888: EnumEntity;
-  BGRA_8888: EnumEntity;
-  RGBA_1010102: EnumEntity;
-  RGB_101010x: EnumEntity;
-  Gray_8: EnumEntity;
-  RGBA_F16: EnumEntity;
-  RGBA_F32: EnumEntity;
+export type IColorType = EnumEntity;
+
+export interface IColorTypeEnumValues {
+  Alpha_8: IColorType;
+  RGB_565: IColorType;
+  RGBA_8888: IColorType;
+  BGRA_8888: IColorType;
+  RGBA_1010102: IColorType;
+  RGB_101010x: IColorType;
+  Gray_8: IColorType;
+  RGBA_F16: IColorType;
+  RGBA_F32: IColorType;
 }
 
-export interface IDecorationStyle {
-  Solid: EnumEntity;
-  Double: EnumEntity;
-  Dotted: EnumEntity;
-  Dashed: EnumEntity;
-  Wavy: EnumEntity;
+export type IDecorationStyle = EnumEntity;
+
+export interface IDecorationStyleEnumValues {
+  Solid: IDecorationStyle;
+  Double: IDecorationStyle;
+  Dotted: IDecorationStyle;
+  Dashed: IDecorationStyle;
+  Wavy: IDecorationStyle;
 }
 
-export interface IFillType {
-  Winding: EnumEntity;
-  EvenOdd: EnumEntity;
+export type IFillType = EnumEntity;
+
+export interface IFillTypeEnumValues {
+  Winding: IFillType;
+  EvenOdd: IFillType;
 }
 
-export interface IFilterMode {
-  Linear: EnumEntity;
-  Nearest: EnumEntity;
+export type IFilterMode = EnumEntity;
+
+export interface IFilterModeEnumValues {
+  Linear: IFilterMode;
+  Nearest: IFilterMode;
 }
 
-export interface IFontEdging {
-  Alias: EnumEntity;
-  AntiAlias: EnumEntity;
-  SubpixelAntiAlias: EnumEntity;
+export type IFontEdging = EnumEntity;
+
+export interface IFontEdgingEnumValues {
+  Alias: IFontEdging;
+  AntiAlias: IFontEdging;
+  SubpixelAntiAlias: IFontEdging;
 }
 
-export interface IFontHinting {
-  None: EnumEntity;
-  Slight: EnumEntity;
-  Normal: EnumEntity;
-  Full: EnumEntity;
+export type IFontHinting = EnumEntity;
+
+export interface IFontHintingEnumValues {
+  None: IFontHinting;
+  Slight: IFontHinting;
+  Normal: IFontHinting;
+  Full: IFontHinting;
 }
 
-export interface IFontSlant {
-  Upright: EnumEntity;
-  Italic: EnumEntity;
-  Oblique: EnumEntity;
+export type IFontSlant = EnumEntity;
+
+export interface IFontSlantEnumValues {
+  Upright: IFontSlant;
+  Italic: IFontSlant;
+  Oblique: IFontSlant;
 }
 
-export interface IFontWeight {
-  Invisible: EnumEntity;
-  Thin: EnumEntity;
-  ExtraLight: EnumEntity;
-  Light: EnumEntity;
-  Normal: EnumEntity;
-  Medium: EnumEntity;
-  SemiBold: EnumEntity;
-  Bold: EnumEntity;
-  ExtraBold: EnumEntity;
-  Black: EnumEntity;
-  ExtraBlack: EnumEntity;
+export type IFontWieght = EnumEntity;
+
+export interface IFontWeightEnumValues {
+  Invisible: IFontWieght;
+  Thin: IFontWieght;
+  ExtraLight: IFontWieght;
+  Light: IFontWieght;
+  Normal: IFontWieght;
+  Medium: IFontWieght;
+  SemiBold: IFontWieght;
+  Bold: IFontWieght;
+  ExtraBold: IFontWieght;
+  Black: IFontWieght;
+  ExtraBlack: IFontWieght;
 }
 
-export interface IFontWidth {
-  UltraCondensed: EnumEntity;
-  ExtraCondensed: EnumEntity;
-  Condensed: EnumEntity;
-  SemiCondensed: EnumEntity;
-  Normal: EnumEntity;
-  SemiExpanded: EnumEntity;
-  Expanded: EnumEntity;
-  ExtraExpanded: EnumEntity;
-  UltraExpanded: EnumEntity;
+export type IFontWidth = EnumEntity;
+
+export interface IFontWidthEnumValues {
+  UltraCondensed: IFontWidth;
+  ExtraCondensed: IFontWidth;
+  Condensed: IFontWidth;
+  SemiCondensed: IFontWidth;
+  Normal: IFontWidth;
+  SemiExpanded: IFontWidth;
+  Expanded: IFontWidth;
+  ExtraExpanded: IFontWidth;
+  UltraExpanded: IFontWidth;
 }
 
 export interface IGlyphRunFlagValues {
   IsWhiteSpace: number;
 }
 
-export interface IImageFormat {
-  PNG: EnumEntity;
-  JPEG: EnumEntity;
-  WEBP: EnumEntity;
+export type IImageFormat = EnumEntity;
+
+export interface IImageFormatEnumValues {
+  PNG: IImageFormat;
+  JPEG: IImageFormat;
+  WEBP: IImageFormat;
 }
 
-export interface IMipmapMode {
-  None: EnumEntity;
-  Nearest: EnumEntity;
-  Linear: EnumEntity;
+export type IMipmapMode = EnumEntity;
+
+export interface IMipmapModeEnumValues {
+  None: IMipmapMode;
+  Nearest: IMipmapMode;
+  Linear: IMipmapMode;
 }
 
-export interface IPaintStyle {
-  Fill: EnumEntity;
-  Stroke: EnumEntity;
+export type IPaintStyle = EnumEntity;
+
+export interface IPaintStyleEnumValues {
+  Fill: IPaintStyle;
+  Stroke: IPaintStyle;
 }
 
-export interface IPathOp {
-  Difference: EnumEntity;
-  Intersect: EnumEntity;
-  Union: EnumEntity;
-  XOR: EnumEntity;
-  ReverseDifference: EnumEntity;
+export type IPathOp = EnumEntity;
+
+export interface IPathOpEnumValues {
+  Difference: IPathOp;
+  Intersect: IPathOp;
+  Union: IPathOp;
+  XOR: IPathOp;
+  ReverseDifference: IPathOp;
 }
 
-export interface IPlaceholderAlignment {
-  Baseline: EnumEntity;
-  AboveBaseline: EnumEntity;
-  BelowBaseline: EnumEntity;
-  Top: EnumEntity;
-  Bottom: EnumEntity;
-  Middle: EnumEntity;
+export type IPlaceholderAlignment = EnumEntity;
+
+export interface IPlaceholderAlignmentEnumValues {
+  Baseline: IPlaceholderAlignment;
+  AboveBaseline: IPlaceholderAlignment;
+  BelowBaseline: IPlaceholderAlignment;
+  Top: IPlaceholderAlignment;
+  Bottom: IPlaceholderAlignment;
+  Middle: IPlaceholderAlignment;
 }
 
-export interface IPointMode {
-  Points: EnumEntity;
-  Lines: EnumEntity;
-  Polygon: EnumEntity;
+export type IPointMode = EnumEntity;
+
+export interface IPointModeEnumValues {
+  Points: IPointMode;
+  Lines: IPointMode;
+  Polygon: IPointMode;
 }
 
-export interface IRectHeightStyle {
-  Tight: EnumEntity;
-  Max: EnumEntity;
-  IncludeLineSpacingMiddle: EnumEntity;
-  IncludeLineSpacingTop: EnumEntity;
-  IncludeLineSpacingBottom: EnumEntity;
-  Strut: EnumEntity;
+export type IRectHeightStyle = EnumEntity;
+
+export interface IRectHeightStyleEnumValues {
+  Tight: IRectHeightStyle;
+  Max: IRectHeightStyle;
+  IncludeLineSpacingMiddle: IRectHeightStyle;
+  IncludeLineSpacingTop: IRectHeightStyle;
+  IncludeLineSpacingBottom: IRectHeightStyle;
+  Strut: IRectHeightStyle;
 }
 
-export interface IRectWidthStyle {
-  Tight: EnumEntity;
-  Max: EnumEntity;
+export type IRectWidthStyle = EnumEntity;
+
+export interface IRectWidthStyleEnumValues {
+  Tight: IRectWidthStyle;
+  Max: IRectWidthStyle;
 }
 
-export interface IStrokeCap {
-  Butt: EnumEntity;
-  Round: EnumEntity;
-  Square: EnumEntity;
+export type IStrokeCap = EnumEntity;
+
+export interface IStrokeCapEnumValues {
+  Butt: IStrokeCap;
+  Round: IStrokeCap;
+  Square: IStrokeCap;
 }
 
-export interface IStrokeJoin {
-  Bevel: EnumEntity;
-  Miter: EnumEntity;
-  Round: EnumEntity;
+export type IStrokeJoin = EnumEntity;
+
+export interface IStrokeJoinEnumValues {
+  Bevel: IStrokeJoin;
+  Miter: IStrokeJoin;
+  Round: IStrokeJoin;
 }
 
-export interface ITextAlign {
-  Left: EnumEntity;
-  Right: EnumEntity;
-  Center: EnumEntity;
-  Justify: EnumEntity;
-  Start: EnumEntity;
-  End: EnumEntity;
+export type ITextAlign = EnumEntity;
+
+export interface ITextAlignEnumValues {
+  Left: ITextAlign;
+  Right: ITextAlign;
+  Center: ITextAlign;
+  Justify: ITextAlign;
+  Start: ITextAlign;
+  End: ITextAlign;
 }
 
-export interface ITextBaseline {
-  Alphabetic: EnumEntity;
-  Ideographic: EnumEntity;
+export type ITextBaseline = EnumEntity;
+
+export interface ITextBaselineEnumValues {
+  Alphabetic: ITextBaseline;
+  Ideographic: ITextBaseline;
 }
 
-export interface ITextDirection {
-  LTR: EnumEntity;
-  RTL: EnumEntity;
+export type ITextDirection = EnumEntity;
+
+export interface ITextDirectionEnumValues {
+  LTR: ITextDirection;
+  RTL: ITextDirection;
 }
 
-export interface ITextHeightBehavior {
-  All: EnumEntity;
-  DisableFirstAscent: EnumEntity;
-  DisableLastDescent: EnumEntity;
-  DisableAll: EnumEntity;
+export type ITextHeightBehavior = EnumEntity;
+
+export interface ITextHeightBehaviorEnumValues {
+  All: ITextHeightBehavior;
+  DisableFirstAscent: ITextHeightBehavior;
+  DisableLastDescent: ITextHeightBehavior;
+  DisableAll: ITextHeightBehavior;
 }
 
-export interface ITileMode {
-  Clamp: EnumEntity;
-  Decal: EnumEntity;
-  Mirror: EnumEntity;
-  Repeat: EnumEntity;
+export type ITileMode = EnumEntity;
+
+export interface ITileModeEnumValues {
+  Clamp: ITileMode;
+  Decal: ITileMode;
+  Mirror: ITileMode;
+  Repeat: ITileMode;
 }
 
-export interface IVertexMode {
-  Triangles: EnumEntity;
-  TrianglesStrip: EnumEntity;
-  TriangleFan: EnumEntity;
-}
+export type IVertexMode = EnumEntity;
 
-export interface IImageFormat {
-  PNG: EnumEntity;
-  JPEG: EnumEntity;
-  WEBP: EnumEntity;
+export interface IVertexModeEnumValues {
+  Triangles: IVertexMode;
+  TrianglesStrip: IVertexMode;
+  TriangleFan: IVertexMode;
 }

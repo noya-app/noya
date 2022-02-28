@@ -1,4 +1,4 @@
-import { ColorFilter, ImageFilter } from 'canvaskit';
+import { ColorFilter, ImageFilter, Matrix } from 'canvaskit-types';
 import { AffineTransform } from 'noya-geometry';
 import { createElement, memo, ReactNode, useMemo } from 'react';
 import { ClipProps, GroupComponentProps } from '../types';
@@ -15,7 +15,10 @@ interface GroupProps {
 
 export default memo(function Group(props: GroupProps) {
   const transform = useMemo(
-    () => (props.transform ? props.transform.float32Array : undefined),
+    () =>
+      props.transform
+        ? (props.transform.float32Array as unknown as Matrix)
+        : undefined,
     [props.transform],
   );
 

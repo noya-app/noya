@@ -1,9 +1,9 @@
-import { CanvasKit, Paint } from 'canvaskit-types';
+import { CanvasKit, Paint, Rect } from 'canvaskit-types';
 import { useCanvasKit } from 'noya-renderer';
 import { createElement, memo, useMemo } from 'react';
 import { memoize } from 'noya-utils';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
-import useRect, { RectParameters } from '../hooks/useRect';
+import useRect from '../hooks/useRect';
 import { ImageComponentProps } from '../types';
 
 const decodeImage = memoize((CanvasKit: CanvasKit, data: ArrayBuffer) => {
@@ -12,8 +12,8 @@ const decodeImage = memoize((CanvasKit: CanvasKit, data: ArrayBuffer) => {
 
 interface ImageProps {
   image: ArrayBuffer;
-  rect: RectParameters;
-  paint: CanvasKit['Paint'] | PaintParameters;
+  rect: Rect;
+  paint: Paint | PaintParameters;
   resample?: boolean;
 }
 

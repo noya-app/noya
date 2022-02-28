@@ -1,72 +1,71 @@
-import type { Brand } from 'noya-utils';
 import type { IMatrixHelpers, IColorMatrixHelpers } from './MatrixHelpers';
 import type { IPath, IPathConstructorAndFactory } from './IPath';
-import type { IParagraph, IParagraphBuilderFactory } from './IParagraph';
-import type { IImageFilter, IImageFilterFactory } from './IImageFilter';
-import type { IShader, IShaderFactory } from './IShader';
+import type { IRuntimeEffectFactory } from './IRuntimeEffect';
+import type { IParagraphBuilderFactory } from './IParagraph';
+import type { IImageFilterFactory } from './IImageFilter';
+import type { IContourMeasureIterConstructor } from './IContourMeasureIter';
+import type { IShaderFactory } from './IShader';
 import type { IPaint } from './IPaint';
 import type { IImage } from './IImage';
 import type {
+  EmbindObject,
   IFontConstructor,
   ITypefaceFactory,
   IPathEffectFactory,
   IMaskFilterFactory,
   DefaultConstructor,
   IColorFilterFactory,
-  IRuntimeEffectFactory,
   ITextStyleConstructor,
   IParagraphStyleConstructor,
   ITypefaceFontProviderFactory,
 } from './misc';
 import type {
-  IBlendMode,
-  IStrokeCap,
-  IStrokeJoin,
-  IColorSpace,
-  IPaintStyle,
-  IAlphaType,
-  IClipOp,
-  IColorType,
-  IFillType,
-  IFilterMode,
-  IFontEdging,
-  IFontHinting,
+  IClipOpEnumValues,
+  IPathOpEnumValues,
+  IFillTypeEnumValues,
   IGlyphRunFlagValues,
-  IMipmapMode,
-  IPathOp,
-  IPointMode,
-  IDecorationStyle,
-  IFontSlant,
-  IFontWeight,
-  IFontWidth,
-  IPlaceholderAlignment,
-  IAffinity,
-  IRectHeightStyle,
-  IRectWidthStyle,
-  ITextAlign,
-  ITextBaseline,
-  ITextDirection,
-  ITextHeightBehavior,
-  ITileMode,
-  IVertexMode,
-  IImageFormat,
-  IBlurStyle,
+  IAffinityEnumValues,
+  ITileModeEnumValues,
+  IPointModeEnumValues,
+  IFontWidthEnumValues,
+  ITextAlignEnumValues,
+  IBlurStyleEnumValues,
+  IFontSlantEnumValues,
+  IStrokeJoinEnumValues,
+  IBlendModeEnumValues,
+  IStrokeCapEnumValues,
+  IColorSpaceEnumValues,
+  IAlphaTypeEnumValues,
+  IColorTypeEnumValues,
+  IMipmapModeEnumValues,
+  IPaintStyleEnumValues,
+  IFontEdgingEnumValues,
+  IFontWeightEnumValues,
+  IFilterModeEnumValues,
+  IVertexModeEnumValues,
+  IImageFormatEnumValues,
+  IFontHintingEnumValues,
+  ITextBaselineEnumValues,
+  ITextDirectionEnumValues,
+  IRectWidthStyleEnumValues,
+  IDecorationStyleEnumValues,
+  IRectHeightStyleEnumValues,
+  ITextHeightBehaviorEnumValues,
+  IPlaceholderAlignmentEnumValues,
 } from './Enums';
 
 export interface ICanvasKit<
   IColor,
   IRect,
   IPoint,
-  IColorArray,
+  IColorArray extends Array<any>,
   IMatrix,
-  IInputMatrix,
-  IRectArray,
-  IColorMatrix,
-  ISurface,
+  ISurface extends EmbindObject,
 > {
   // Colors
   Color(r: number, g: number, b: number, a?: number): IColor;
   Color4f(r: number, g: number, b: number, a?: number): IColor;
+  getColorComponents(color: IColor): number[];
   parseColorString(color: string, colorMap?: object): IColor;
 
   // Rects
@@ -79,11 +78,17 @@ export interface ICanvasKit<
 
   MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): IImage<IMatrix> | null;
 
+  // Methods that don't exist on original canvaskit
+  // and have to be added
+  Point(x: number, y: number): IPoint;
+  CreateMatrix(inMat: number[]): IMatrix;
+
   // Misc
-  ColorMatrix: IColorMatrixHelpers<IColorMatrix>;
+  ColorMatrix: IColorMatrixHelpers<IMatrix>;
   Matrix: IMatrixHelpers<IMatrix>;
 
   // Constructors
+  readonly ContourMeasureIter: IContourMeasureIterConstructor<IRect>;
   readonly ParagraphStyle: IParagraphStyleConstructor<IColor>;
   readonly Font: IFontConstructor;
   readonly Path: IPathConstructorAndFactory<IRect, IPath<IRect>>;
@@ -91,12 +96,12 @@ export interface ICanvasKit<
   readonly TextStyle: ITextStyleConstructor<IColor>;
 
   // Factories
-  readonly ParagraphBuilder: IParagraphBuilderFactory<IColor, IRectArray>;
-  readonly ColorFilter: IColorFilterFactory<IColor, IInputMatrix>;
+  readonly ParagraphBuilder: IParagraphBuilderFactory<IColor>;
+  readonly ColorFilter: IColorFilterFactory<IColor, IMatrix>;
   readonly ImageFilter: IImageFilterFactory<IColor>;
   readonly MaskFilter: IMaskFilterFactory;
   readonly PathEffect: IPathEffectFactory;
-  readonly RuntimeEffect: IRuntimeEffectFactory;
+  readonly RuntimeEffect: IRuntimeEffectFactory<IMatrix>;
   readonly Shader: IShaderFactory<IColor, IPoint, IColorArray, IMatrix>;
   readonly Typeface: ITypefaceFactory;
   readonly TypefaceFontProvider: ITypefaceFontProviderFactory;
@@ -104,26 +109,26 @@ export interface ICanvasKit<
   // Misc
 
   // Core Enums
-  readonly AlphaType: IAlphaType;
-  readonly BlendMode: IBlendMode;
-  readonly BlurStyle: IBlurStyle;
-  readonly ClipOp: IClipOp;
-  readonly ColorType: IColorType;
-  readonly FillType: IFillType;
-  readonly FilterMode: IFilterMode;
-  readonly FontEdging: IFontEdging;
-  readonly FontHinting: IFontHinting;
+  readonly AlphaType: IAlphaTypeEnumValues;
+  readonly BlendMode: IBlendModeEnumValues;
+  readonly BlurStyle: IBlurStyleEnumValues;
+  readonly ClipOp: IClipOpEnumValues;
+  readonly ColorType: IColorTypeEnumValues;
+  readonly FillType: IFillTypeEnumValues;
+  readonly FilterMode: IFilterModeEnumValues;
+  readonly FontEdging: IFontEdgingEnumValues;
+  readonly FontHinting: IFontHintingEnumValues;
   readonly GlyphRunFlags: IGlyphRunFlagValues;
-  readonly ImageFormat: IImageFormat;
-  readonly MipmapMode: IMipmapMode;
-  readonly PaintStyle: IPaintStyle;
-  readonly PathOp: IPathOp;
-  readonly PointMode: IPointMode;
-  readonly ColorSpace: IColorSpace;
-  readonly StrokeCap: IStrokeCap;
-  readonly StrokeJoin: IStrokeJoin;
-  readonly TileMode: ITileMode;
-  readonly VertexMode: IVertexMode;
+  readonly ImageFormat: IImageFormatEnumValues;
+  readonly MipmapMode: IMipmapModeEnumValues;
+  readonly PaintStyle: IPaintStyleEnumValues;
+  readonly PathOp: IPathOpEnumValues;
+  readonly PointMode: IPointModeEnumValues;
+  readonly ColorSpace: IColorSpaceEnumValues;
+  readonly StrokeCap: IStrokeCapEnumValues;
+  readonly StrokeJoin: IStrokeJoinEnumValues;
+  readonly TileMode: ITileModeEnumValues;
+  readonly VertexMode: IVertexModeEnumValues;
 
   // Core Constants
   readonly TRANSPARENT: IColor;
@@ -137,18 +142,18 @@ export interface ICanvasKit<
   readonly MAGENTA: IColor;
 
   // Paragraph Enums
-  readonly Affinity: IAffinity;
-  readonly DecorationStyle: IDecorationStyle;
-  readonly FontSlant: IFontSlant;
-  readonly FontWeight: IFontWeight;
-  readonly FontWidth: IFontWidth;
-  readonly PlaceholderAlignment: IPlaceholderAlignment;
-  readonly RectHeightStyle: IRectHeightStyle;
-  readonly RectWidthStyle: IRectWidthStyle;
-  readonly TextAlign: ITextAlign;
-  readonly TextBaseline: ITextBaseline;
-  readonly TextDirection: ITextDirection;
-  readonly TextHeightBehavior: ITextHeightBehavior;
+  readonly Affinity: IAffinityEnumValues;
+  readonly DecorationStyle: IDecorationStyleEnumValues;
+  readonly FontSlant: IFontSlantEnumValues;
+  readonly FontWeight: IFontWeightEnumValues;
+  readonly FontWidth: IFontWidthEnumValues;
+  readonly PlaceholderAlignment: IPlaceholderAlignmentEnumValues;
+  readonly RectHeightStyle: IRectHeightStyleEnumValues;
+  readonly RectWidthStyle: IRectWidthStyleEnumValues;
+  readonly TextAlign: ITextAlignEnumValues;
+  readonly TextBaseline: ITextBaselineEnumValues;
+  readonly TextDirection: ITextDirectionEnumValues;
+  readonly TextHeightBehavior: ITextHeightBehaviorEnumValues;
 
   // Paragraph Constants
   readonly NoDecoration: number;
@@ -156,32 +161,3 @@ export interface ICanvasKit<
   readonly OverlineDecoration: number;
   readonly LineThroughDecoration: number;
 }
-
-export type Color = Brand<unknown, 'color'>;
-export type Rect = Brand<unknown, 'rect'>;
-export type Point = Brand<unknown, 'point'>;
-export type ColorArray = Brand<unknown, 'colorarray'>;
-export type Matrix = Brand<unknown, 'matrix'>;
-export type InputMatrix = Brand<unknown, 'inputmatrix'>;
-export type RectArray = Brand<unknown, 'rectarray'>;
-export type ColorMatrix = Brand<unknown, 'colormatrix'>;
-export type Surface = Brand<unknown, 'surface'>;
-
-export type Image = IImage<Matrix>;
-export type ImageFilter = IImageFilter;
-export type Path = IPath<Rect>;
-export type Paragraph = IParagraph<RectArray>;
-export type Shader = IShader;
-export type Paint = IPaint<Color>;
-
-export type CanvasKit = ICanvasKit<
-  Color,
-  Rect,
-  Point,
-  ColorArray,
-  Matrix,
-  InputMatrix,
-  RectArray,
-  ColorMatrix,
-  Surface
->;

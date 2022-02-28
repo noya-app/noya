@@ -1,6 +1,7 @@
-import { Paint } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
+
+import { Paint } from 'canvaskit-types';
+import { useCanvasKit } from 'noya-renderer';
 import { ColorParameters } from './useColor';
 import usePaint, { PaintParameters } from './usePaint';
 

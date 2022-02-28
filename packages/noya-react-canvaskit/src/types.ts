@@ -1,14 +1,14 @@
-import {
-  ClipOp,
+import type {
+  IClipOp,
   ColorFilter,
   Image,
   ImageFilter,
-  Matrix3x3,
   Paint,
   Paragraph,
   Path,
   Rect,
-} from 'canvaskit';
+  Matrix,
+} from 'canvaskit-types';
 import { ReactNode } from 'react';
 
 export interface RectComponentProps {
@@ -55,13 +55,13 @@ interface TextComponent {
 }
 
 export interface ClipProps {
-  path: Float32Array | Path;
-  op: ClipOp;
+  path: Rect | Path;
+  op: IClipOp;
   antiAlias?: boolean;
 }
 
 export interface GroupComponentProps {
-  transform?: Matrix3x3;
+  transform?: Matrix;
   opacity: number;
   children: ReactNode;
   clip?: ClipProps;

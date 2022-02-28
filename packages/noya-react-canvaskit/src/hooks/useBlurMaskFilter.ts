@@ -1,10 +1,10 @@
-import { BlurStyle, MaskFilter } from 'canvaskit';
+import { IBlurStyle, MaskFilter } from 'canvaskit-types';
 import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
 import useDeletable from './useDeletable';
 
 export type BlurMaskFilterParameters = {
-  style: BlurStyle;
+  style: IBlurStyle;
   sigma: number;
   respectCTM: boolean;
 };
