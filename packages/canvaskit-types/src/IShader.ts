@@ -1,7 +1,6 @@
 import { IBlendMode, IColorSpace, ITileMode } from './Enums';
-import { EmbindObject } from './misc';
 
-export interface IShader extends EmbindObject {}
+export interface IShader {}
 
 export interface IShaderFactory<IColor, IPoint, IColorArray, IMatrix> {
   MakeBlend(mode: IBlendMode, one: IShader, two: IShader): IShader;

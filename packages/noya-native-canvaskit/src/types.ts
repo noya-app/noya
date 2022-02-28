@@ -5,7 +5,7 @@ export type Color = number;
 export type ColorArray = Color[];
 export type Rect = RNSkia.IRect;
 export type Point = RNSkia.IPoint;
-export type Matrix = number[];
+export type Matrix = RNSkia.Matrix;
 
 // Enums
 export enum Affinity {

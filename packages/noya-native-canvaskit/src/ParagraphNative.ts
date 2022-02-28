@@ -2,21 +2,23 @@ import type { ICanvas } from '@shopify/react-native-skia';
 
 import type {
   IURange,
-  EnumEntity,
   IParagraph,
   IShapedLine,
   ILineMetrics,
+  IRectWidthStyle,
+  IRectHeightStyle,
   IParagraphBuilder,
   IPositionWithAfinity,
   IParagraphBuilderFactory,
 } from 'canvaskit-types';
 
-import type { Color, RectArray } from './types';
+import type { Color } from './types';
 import PaintNative from './PaintNative';
 import {
   FontNative,
-  ParagraphStyleNative,
+  JSEmbindObject,
   TextStyleNative,
+  ParagraphStyleNative,
   TypefaceFontProviderNative,
 } from './misc';
 
@@ -31,7 +33,7 @@ interface TextBlock {
   font: FontNative;
 }
 
-export class ParagraphNative implements IParagraph<RectArray> {
+export class ParagraphNative extends JSEmbindObject implements IParagraph {
   private _blocks: TextBlock[] = [];
   private _height = 0;
   private _maxWidth = 0;
@@ -41,6 +43,8 @@ export class ParagraphNative implements IParagraph<RectArray> {
     paragraphStyle: ParagraphStyleNative,
     fontProvider: TypefaceFontProviderNative,
   ) {
+    super();
+
     blocks.forEach(({ text, style }) => {
       const fontFamily = style.fontFamilies![0];
       const typeface =
@@ -73,7 +77,7 @@ export class ParagraphNative implements IParagraph<RectArray> {
   }
 
   // @ts-ignore
-  getLineMetrics(): ILineMetrics {
+  getLineMetrics(): ILineMetrics[] {
     console.warn(`ParagraphNative.getLineMetrics not implemented!`);
   }
   getMaxIntrinsicWidth(): number {
@@ -89,8 +93,8 @@ export class ParagraphNative implements IParagraph<RectArray> {
   getRectsForRange(
     start: number,
     end: number,
-    hStyle: EnumEntity,
-    wStyle: EnumEntity,
+    hStyle: IRectHeightStyle,
+    wStyle: IRectWidthStyle,
     // @ts-ignore
   ): RectArray {
     console.warn(`ParagraphNative.getRectsForRange not implemented!`);
@@ -116,13 +120,16 @@ export class ParagraphNative implements IParagraph<RectArray> {
 }
 
 export class ParagraphBuilderNative
-  implements IParagraphBuilder<Color, RectArray>
+  extends JSEmbindObject
+  implements IParagraphBuilder<Color>
 {
   private _parts: ParagraphPart[] = [];
   private _styleStack: TextStyleNative[] = [];
   private _paragraphStyle: ParagraphStyleNative | undefined;
 
-  constructor(private _fontProvider: TypefaceFontProviderNative) {}
+  constructor(private _fontProvider: TypefaceFontProviderNative) {
+    super();
+  }
 
   addText(str: string): void {
     this._parts.push({
@@ -152,10 +159,7 @@ export class ParagraphBuilderNative
   }
 }
 
-export const ParagraphBuilderFactoryNative: IParagraphBuilderFactory<
-  Color,
-  RectArray
-> = {
+export const ParagraphBuilderFactoryNative: IParagraphBuilderFactory<Color> = {
   MakeFromFontProvider(
     style: ParagraphStyleNative,
     fontSrc: TypefaceFontProviderNative,

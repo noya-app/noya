@@ -1,6 +1,6 @@
 import type { IMatrixHelpers, IColorMatrixHelpers } from 'canvaskit-types';
 
-import type { Matrix, ColorMatrix } from './types';
+import type { Matrix } from './types';
 
 function multiply(a: number[], b: number[]): number[] {
   const size = Math.sqrt(a.length);
@@ -80,16 +80,21 @@ export const MatrixHelpers: IMatrixHelpers<Matrix> = {
   },
 
   translated(dx: number, dy: number): Matrix {
-    return [1, 0, dx, 0, 1, dy, 0, 0, 1];
+    // prettier-ignore
+    return [
+      1, 0, dx,
+      0, 1, dy,
+      0, 0, 1
+    ];
   },
 };
 
-export const ColorMatrixHelpers: IColorMatrixHelpers<ColorMatrix> = {
-  concat(outer: ColorMatrix, inner: ColorMatrix): ColorMatrix {
-    return multiply(outer, inner) as ColorMatrix;
+export const ColorMatrixHelpers: IColorMatrixHelpers<Matrix> = {
+  concat(outer: Matrix, inner: Matrix): Matrix {
+    return multiply(outer, inner) as Matrix;
   },
 
-  identity(): ColorMatrix {
+  identity(): Matrix {
     // prettier-ignore
     return  [
       1, 0, 0, 0,
@@ -100,17 +105,17 @@ export const ColorMatrixHelpers: IColorMatrixHelpers<ColorMatrix> = {
   },
 
   postTranslate(
-    m: ColorMatrix,
+    m: Matrix,
     dr: number,
     dg: number,
     db: number,
     da: number,
-  ): ColorMatrix {
+  ): Matrix {
     console.warn(`SkiaColorMatrix.postTranslate not implemented!`);
     return this.identity();
   },
 
-  rotated(axis: number, sine: number, cosine: number): ColorMatrix {
+  rotated(axis: number, sine: number, cosine: number): Matrix {
     console.warn(`SkiaColorMatrix.rotated not implemented!`);
 
     return this.identity();
@@ -121,7 +126,7 @@ export const ColorMatrixHelpers: IColorMatrixHelpers<ColorMatrix> = {
     greenScale: number,
     blueScale: number,
     alphaScale: number,
-  ): ColorMatrix {
+  ): Matrix {
     console.warn(`SkiaColorMatrix.scaled not implemented!`);
 
     return this.identity();

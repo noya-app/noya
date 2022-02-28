@@ -12,6 +12,7 @@ import type { Rect, Color, Point, Matrix, ColorArray } from './types';
 import { Colors, ParagraphDecoration } from './constants';
 import {
   FontNative,
+  toRNSMatrix,
   TextStyleNative,
   ParagraphStyleNative,
   TypefaceFactoryNative,
@@ -94,6 +95,14 @@ class CanvasKitNative
     }
 
     return new ImageNative(img);
+  }
+
+  Point(x: number, y: number): Point {
+    return { x, y };
+  }
+
+  CreateMatrix(inMat: number[]): Matrix {
+    return toRNSMatrix(inMat)!;
   }
 
   // Misc

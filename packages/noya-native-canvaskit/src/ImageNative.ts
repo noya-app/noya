@@ -8,29 +8,15 @@ import {
 
 import type { IImage, IShader } from 'canvaskit-types';
 import type { ImageFormat, Matrix } from './types';
+import { JSEmbindObject } from './misc';
 
-const toRNSMatrix = (m?: Matrix) => {
-  if (!m) {
-    return undefined;
+export default class ImageNative
+  extends JSEmbindObject
+  implements IImage<Matrix>
+{
+  constructor(private _image: RNSImage) {
+    super();
   }
-
-  const r = Skia.Matrix();
-
-  r.set(0, m[0]);
-  r.set(1, m[1]);
-  r.set(2, m[2]);
-  r.set(3, m[3]);
-  r.set(4, m[4]);
-  r.set(5, m[5]);
-  r.set(6, m[6]);
-  r.set(7, m[7]);
-  r.set(8, m[8]);
-
-  return r;
-};
-
-export default class ImageNative implements IImage<Matrix> {
-  constructor(private _image: RNSImage) {}
 
   encodeToBytes(fmt?: ImageFormat, quality?: number): Uint8Array | null {
     return this._image.encodeToBytes(fmt, quality);
@@ -62,7 +48,7 @@ export default class ImageNative implements IImage<Matrix> {
     C: number,
     localMatrix?: Matrix,
   ): IShader {
-    return this._image.makeShaderCubic(tx, ty, B, C, toRNSMatrix(localMatrix));
+    return this._image.makeShaderCubic(tx, ty, B, C, localMatrix);
   }
 
   // @ts-ignore
@@ -73,13 +59,7 @@ export default class ImageNative implements IImage<Matrix> {
     mm: MipmapMode,
     localMatrix?: Matrix,
   ): IShader {
-    return this._image.makeShaderOptions(
-      tx,
-      ty,
-      fm,
-      mm,
-      toRNSMatrix(localMatrix),
-    );
+    return this._image.makeShaderOptions(tx, ty, fm, mm, localMatrix);
   }
 
   readPixels(

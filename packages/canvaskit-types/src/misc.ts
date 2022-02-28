@@ -173,7 +173,7 @@ export interface ITypeface extends EmbindObject {}
 
 export interface IMaskFilter extends EmbindObject {}
 
-export interface IPathEffect extends EmbindObject {}
+export interface IPathEffect {}
 
 export interface IFont {
   getTypeface(): ITypeface;

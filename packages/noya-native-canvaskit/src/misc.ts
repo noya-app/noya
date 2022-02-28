@@ -19,6 +19,7 @@ import {
 import { Colors } from './constants';
 import {
   Color,
+  Matrix,
   TextAlign,
   StrutStyle,
   TextBaseline,
@@ -49,6 +50,26 @@ export class JSEmbindObject {
   isDeleted() {
     return this._isDeleted;
   }
+}
+
+export function toRNSMatrix(m?: number[]): Matrix | undefined {
+  if (!m) {
+    return undefined;
+  }
+
+  const r = Skia.Matrix();
+
+  r.set(0, m[0]);
+  r.set(1, m[1]);
+  r.set(2, m[2]);
+  r.set(3, m[3]);
+  r.set(4, m[4]);
+  r.set(5, m[5]);
+  r.set(6, m[6]);
+  r.set(7, m[7]);
+  r.set(8, m[8]);
+
+  return r;
 }
 
 export class TextStyleNative implements ITextStyle<Color> {
