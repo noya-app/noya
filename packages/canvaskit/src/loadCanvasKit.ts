@@ -33,7 +33,15 @@ export function loadCanvasKit() {
     // @ts-ignore
     CanvasKit.Point = (x: number, y: number) => new Float32Array([x, y]);
     // @ts-ignore
-    CanvasKit.CreateMatrix = (inMat: number[]) => new Float32Array(inMat);
+    CanvasKit.CreateMatrix = (inMat: number[] | Float32Array) => {
+      if (inMat instanceof Float32Array) {
+        return inMat;
+      }
+
+      return new Float32Array(inMat);
+    };
+    // @ts-ignore
+    CanvasKit.CreateInputMatrix = (inMat: number[]) => new Float32Array(inMat);
 
     resolve(CanvasKit as unknown as CanvasKit);
   });

@@ -209,10 +209,10 @@ export interface ITypefaceFactory {
   MakeFreeTypeFaceFromData(fontData: ArrayBuffer): ITypeface | null;
 }
 
-export interface IColorFilterFactory<IColor, IMatrix> {
+export interface IColorFilterFactory<IColor, InputMatrix> {
   MakeBlend(color: IColor, mode: IBlendMode): IColorFilter;
   MakeCompose(outer: IColorFilter, inner: IColorFilter): IColorFilter;
-  MakeMatrix(cMatrix: IMatrix): IColorFilter;
+  MakeMatrix(cMatrix: InputMatrix): IColorFilter;
 }
 
 export interface IMaskFilterFactory {

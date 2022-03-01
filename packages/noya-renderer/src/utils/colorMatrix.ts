@@ -36,7 +36,7 @@ export function getSaturationMatrix(CanvasKit: CanvasKit, s: number) {
   const sg = lumG * (1 - s);
   const sb = lumB * (1 - s);
 
-  return CanvasKit.CreateMatrix(
+  return CanvasKit.CreateInputMatrix(
     [
       [sr + s, sg, sb, 0, 0],
       [sr, sg + s, sb, 0, 0],
@@ -47,7 +47,7 @@ export function getSaturationMatrix(CanvasKit: CanvasKit, s: number) {
 }
 
 export function getBrightnessMatrix(CanvasKit: CanvasKit, w: number) {
-  return CanvasKit.CreateMatrix(
+  return CanvasKit.CreateInputMatrix(
     [
       [1, 0, 0, 0, w],
       [0, 1, 0, 0, w],
@@ -59,7 +59,7 @@ export function getBrightnessMatrix(CanvasKit: CanvasKit, w: number) {
 
 export function getContrastMatrix(CanvasKit: CanvasKit, c: number) {
   const t = (1 - c) / 2.0;
-  return CanvasKit.CreateMatrix(
+  return CanvasKit.CreateInputMatrix(
     [
       [c, 0, 0, 0, t],
       [0, c, 0, 0, t],
@@ -76,7 +76,7 @@ export function getHueRotationMatrix(CanvasKit: CanvasKit, degrees: number) {
   const c = Math.cos(theta);
   const s = Math.sin(theta);
 
-  return CanvasKit.CreateMatrix(
+  return CanvasKit.CreateInputMatrix(
     [
       [
         0.213 + c * 0.787 + s * -0.213,

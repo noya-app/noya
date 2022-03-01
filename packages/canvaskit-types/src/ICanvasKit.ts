@@ -60,6 +60,7 @@ export interface ICanvasKit<
   IPoint,
   IColorArray extends Array<any>,
   IMatrix,
+  IInputMatrix,
   ISurface extends EmbindObject,
 > {
   // Colors
@@ -81,11 +82,12 @@ export interface ICanvasKit<
   // Methods that don't exist on original canvaskit
   // and have to be added
   Point(x: number, y: number): IPoint;
-  CreateMatrix(inMat: number[]): IMatrix;
+  CreateMatrix(inMat: number[] | IInputMatrix): IMatrix;
+  CreateInputMatrix(inMat: number[]): IInputMatrix;
 
   // Misc
-  ColorMatrix: IColorMatrixHelpers<IMatrix>;
-  Matrix: IMatrixHelpers<IMatrix>;
+  ColorMatrix: IColorMatrixHelpers<IInputMatrix>;
+  Matrix: IMatrixHelpers<IInputMatrix>;
 
   // Constructors
   readonly ContourMeasureIter: IContourMeasureIterConstructor<IRect>;
@@ -97,7 +99,7 @@ export interface ICanvasKit<
 
   // Factories
   readonly ParagraphBuilder: IParagraphBuilderFactory<IColor>;
-  readonly ColorFilter: IColorFilterFactory<IColor, IMatrix>;
+  readonly ColorFilter: IColorFilterFactory<IColor, IInputMatrix>;
   readonly ImageFilter: IImageFilterFactory<IColor>;
   readonly MaskFilter: IMaskFilterFactory;
   readonly PathEffect: IPathEffectFactory;

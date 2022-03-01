@@ -1,7 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { CanvasKit, Matrix } from 'canvaskit-types';
+import { CanvasKit, InputMatrix } from 'canvaskit-types';
 import { toDegrees } from 'noya-geometry';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { Group } from '../../contexts/ComponentsContext';
@@ -12,7 +12,10 @@ import {
   getSaturationMatrix,
 } from '../../utils/colorMatrix';
 
-function multiplyColorMatrix(CanvasKit: CanvasKit, [first, ...rest]: Matrix[]) {
+function multiplyColorMatrix(
+  CanvasKit: CanvasKit,
+  [first, ...rest]: InputMatrix[],
+) {
   if (!first) return CanvasKit.ColorMatrix.identity();
 
   return rest.reduce(

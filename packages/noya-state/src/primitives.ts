@@ -303,11 +303,13 @@ export function shader(
             CanvasKit.TileMode.Repeat,
             1 / 3,
             1 / 3,
-            CanvasKit.Matrix.multiply(
-              CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
-              CanvasKit.Matrix.scaled(
-                fill.patternTileScale,
-                fill.patternTileScale,
+            CanvasKit.CreateMatrix(
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+                CanvasKit.Matrix.scaled(
+                  fill.patternTileScale,
+                  fill.patternTileScale,
+                ),
               ),
             ),
           );
@@ -335,14 +337,16 @@ export function shader(
             CanvasKit.TileMode.Decal,
             1 / 3,
             1 / 3,
-            CanvasKit.Matrix.multiply(
-              CanvasKit.Matrix.translated(
-                bounds.midX - scaledRect.width / 2,
-                bounds.midY - scaledRect.height / 2,
-              ),
-              CanvasKit.Matrix.scaled(
-                scaledRect.width / canvasImage.width(),
-                scaledRect.height / canvasImage.height(),
+            CanvasKit.CreateMatrix(
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(
+                  bounds.midX - scaledRect.width / 2,
+                  bounds.midY - scaledRect.height / 2,
+                ),
+                CanvasKit.Matrix.scaled(
+                  scaledRect.width / canvasImage.width(),
+                  scaledRect.height / canvasImage.height(),
+                ),
               ),
             ),
           );

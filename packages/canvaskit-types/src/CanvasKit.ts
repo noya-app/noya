@@ -21,6 +21,7 @@ export type Rect = Brand<unknown, 'rect'>;
 export type Point = Brand<unknown, 'point'>;
 export type ColorArray = Array<Color>;
 export type Matrix = Brand<unknown, 'matrix'>;
+export type InputMatrix = Brand<unknown, 'inputmatrix'>;
 export type Surface = Brand<EmbindObject, 'surface'>;
 
 export type Image = IImage<Matrix>;
@@ -42,5 +43,6 @@ export type CanvasKit = ICanvasKit<
   Point,
   ColorArray,
   Matrix,
+  InputMatrix,
   Surface
 >;

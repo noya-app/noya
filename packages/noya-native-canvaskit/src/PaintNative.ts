@@ -6,13 +6,13 @@ import {
   PaintStyle,
   StrokeJoin,
   IPathEffect,
-  IMaskFilter,
-  IImageFilter,
-  IColorFilter,
 } from '@shopify/react-native-skia';
 
 import { IPaint } from 'canvaskit-types';
 import { JSEmbindObject } from './misc';
+import { ColorFilterNative } from './ColorFilterNative';
+import { ImageFilterNative } from './ImageFilterNative';
+import { MaskFilterNative } from './MaskFilterNative';
 import { Color, ColorSpace } from './types';
 
 export default class PaintNative
@@ -81,20 +81,20 @@ export default class PaintNative
     console.warn(`SkiaPaint.setColorComponents not implemented!`);
   }
 
-  setColorFilter(filter: IColorFilter): void {
-    this._paint.setColorFilter(filter);
+  setColorFilter(filter: ColorFilterNative): void {
+    this._paint.setColorFilter(filter.getRNSColorFilter());
   }
 
   setColorInt(color: Color, colorSpace?: ColorSpace): void {
     this._paint.setColor(color);
   }
 
-  setImageFilter(filter: IImageFilter): void {
-    this._paint.setImageFilter(filter);
+  setImageFilter(filter: ImageFilterNative): void {
+    this._paint.setImageFilter(filter.getRNSImageFilter());
   }
 
-  setMaskFilter(filter: IMaskFilter): void {
-    this._paint.setMaskFilter(filter);
+  setMaskFilter(filter: MaskFilterNative): void {
+    this._paint.setMaskFilter(filter.getRNSMaskFilter());
   }
 
   setPathEffect(effect: IPathEffect): void {

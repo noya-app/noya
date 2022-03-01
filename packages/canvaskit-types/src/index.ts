@@ -1,3 +1,4 @@
+export * from './IRuntimeEffect';
 export * from './MatrixHelpers';
 export * from './IImageFilter';
 export * from './ICanvasKit';

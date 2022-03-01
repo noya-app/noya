@@ -20,7 +20,7 @@ export default function useCheckeredFill() {
       CanvasKit.TileMode.Repeat,
       1 / 3,
       1 / 3,
-      CanvasKit.Matrix.scaled(0.5, 0.5),
+      CanvasKit.CreateMatrix(CanvasKit.Matrix.scaled(0.5, 0.5)),
     );
 
     const colorShader = CanvasKit.Shader.MakeColor(

@@ -3,12 +3,18 @@ import parseColor from 'color-parse';
 
 import {
   ICanvasKit,
-  IColorFilterFactory,
   IParagraphBuilderFactory,
   IShaderFactory,
 } from 'canvaskit-types';
 // import primitives separately for easier use
-import type { Rect, Color, Point, Matrix, ColorArray } from './types';
+import type {
+  Rect,
+  Color,
+  Point,
+  Matrix,
+  ColorArray,
+  InputMatrix,
+} from './types';
 import { Colors, ParagraphDecoration } from './constants';
 import {
   FontNative,
@@ -21,6 +27,9 @@ import {
 import ImageFilterFactoryNative from './ImageFilterNative';
 import { ParagraphBuilderFactoryNative } from './ParagraphNative';
 import { MatrixHelpers, ColorMatrixHelpers } from './MatrixHelpers';
+import { ColorFilterFactoryNative } from './ColorFilterNative';
+import { MaskFilterFactoryNative } from './MaskFilterNative';
+import { RuntimeEffectFactoryNative } from './RuntimeEffectNative';
 import ImageNative from './ImageNative';
 import PaintNative from './PaintNative';
 import PathNative from './PathNative';
@@ -34,6 +43,7 @@ class CanvasKitNative
       Point,
       ColorArray,
       Matrix,
+      InputMatrix,
       // @ts-ignore surfaces aren't used in native implementation
       RNSkia.ISurface
     >
@@ -54,6 +64,15 @@ class CanvasKitNative
     const normalizedColor = a | r | g | b;
 
     return ((normalizedColor << 24) | (normalizedColor >>> 8)) >>> 0;
+  }
+
+  getColorComponents(color: number): number[] {
+    const a = ((color & 0xff000000) >> 24) / 255.0;
+    const r = ((color & 0x00ff0000) >> 16) / 255.0;
+    const g = ((color & 0x0000ff00) >> 8) / 255.0;
+    const b = (color & 0x000000ff) / 255.0;
+
+    return [r, g, b, a];
   }
 
   parseColorString(color: string, colorMap?: object): Color {
@@ -101,8 +120,12 @@ class CanvasKitNative
     return { x, y };
   }
 
-  CreateMatrix(inMat: number[]): Matrix {
+  CreateMatrix(inMat: number[] | InputMatrix): Matrix {
     return toRNSMatrix(inMat)!;
+  }
+
+  CreateInputMatrix(inMat: number[]): InputMatrix {
+    return inMat;
   }
 
   // Misc
@@ -120,12 +143,11 @@ class CanvasKitNative
   // Factories, i.e. things made with CanvasKit.Foo.MakeTurboEncapsulator()
   ParagraphBuilder: IParagraphBuilderFactory<Color> =
     ParagraphBuilderFactoryNative;
-  ColorFilter: IColorFilterFactory<Color, Matrix> = RNSkia.Skia.ColorFilter;
+  ColorFilter = ColorFilterFactoryNative;
   ImageFilter = ImageFilterFactoryNative;
-  MaskFilter = RNSkia.Skia.MaskFilter;
+  MaskFilter = MaskFilterFactoryNative;
   PathEffect = RNSkia.Skia.PathEffect;
-  RuntimeEffect = RNSkia.Skia.RuntimeEffect;
-  // @ts-ignore TODO: fix later
+  RuntimeEffect = RuntimeEffectFactoryNative;
   Shader: IShaderFactory<Color, Point, ColorArray, Matrix> = RNSkia.Skia.Shader;
   Typeface = TypefaceFactoryNative;
   TypefaceFontProvider = TypefaceFontProviderFactoryNative;

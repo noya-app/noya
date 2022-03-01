@@ -4,8 +4,6 @@ import {
   Drawing,
   useDrawing,
   skiaMatrix3,
-  IColorFilter,
-  IImageFilter,
 } from '@shopify/react-native-skia';
 import { processChildren } from '@shopify/react-native-skia/src/renderer/Host';
 
@@ -16,6 +14,8 @@ import {
   PathNative,
   PaintNative,
   CanvasKitNative,
+  ColorFilterNative,
+  ImageFilterNative,
 } from 'noya-native-canvaskit';
 
 interface ClipProps {
@@ -28,9 +28,9 @@ interface GroupProps {
   opacity?: number;
   transform?: AffineTransform;
   clip?: ClipProps;
-  colorFilter?: IColorFilter;
-  imageFilter?: IImageFilter;
-  backdropImageFilter?: IImageFilter;
+  colorFilter?: ColorFilterNative;
+  imageFilter?: ImageFilterNative;
+  backdropImageFilter?: ImageFilterNative;
 }
 
 const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
@@ -103,7 +103,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
         canvas.saveLayer(
           layerPaint.getRNSkiaPaint(),
           null,
-          backdropImageFilter,
+          backdropImageFilter?.getRNSImageFilter(),
         );
       }
 

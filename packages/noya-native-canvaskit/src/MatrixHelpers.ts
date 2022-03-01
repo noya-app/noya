@@ -1,10 +1,10 @@
 import type { IMatrixHelpers, IColorMatrixHelpers } from 'canvaskit-types';
 
-import type { Matrix } from './types';
+import type { InputMatrix } from './types';
 
-function multiply(a: number[], b: number[]): number[] {
+function multiply(a: InputMatrix, b: InputMatrix): InputMatrix {
   const size = Math.sqrt(a.length);
-  const result: number[] = new Array(a.length).fill(0);
+  const result: InputMatrix = new Array(a.length).fill(0);
 
   for (let i = 0; i < a.length; i += 1) {
     for (let j = 0; j < size; j += 1) {
@@ -18,7 +18,7 @@ function multiply(a: number[], b: number[]): number[] {
   return result;
 }
 
-export const MatrixHelpers: IMatrixHelpers<Matrix> = {
+export const MatrixHelpers: IMatrixHelpers<InputMatrix> = {
   identity() {
     // prettier-ignore
     return [
@@ -28,20 +28,20 @@ export const MatrixHelpers: IMatrixHelpers<Matrix> = {
     ];
   },
 
-  multiply(...matrices: Array<Matrix>): Matrix {
+  multiply(...matrices: Array<InputMatrix>): InputMatrix {
     let res = [...matrices[0]];
 
     for (let i = 1; i < matrices.length; i += 1) {
       const a = [...res];
       const b = matrices[i];
 
-      res = multiply(a, b) as Matrix;
+      res = multiply(a, b);
     }
 
     return res;
   },
 
-  rotated(radians: number, px?: number, py?: number): Matrix {
+  rotated(radians: number, px?: number, py?: number): InputMatrix {
     const tx = px ?? 0;
     const ty = py ?? 0;
     const cosR = Math.cos(radians);
@@ -55,7 +55,7 @@ export const MatrixHelpers: IMatrixHelpers<Matrix> = {
     );
   },
 
-  scaled(sx: number, sy: number, px?: number, py?: number): Matrix {
+  scaled(sx: number, sy: number, px?: number, py?: number): InputMatrix {
     const tx = px ?? 0;
     const ty = py ?? 0;
     const scale = [sx, 0, 0, 0, sy, 0, 0, 0, 1];
@@ -67,7 +67,7 @@ export const MatrixHelpers: IMatrixHelpers<Matrix> = {
     );
   },
 
-  skewed(kx: number, ky: number, px?: number, py?: number): Matrix {
+  skewed(kx: number, ky: number, px?: number, py?: number): InputMatrix {
     const tx = px ?? 0;
     const ty = py ?? 0;
     const skew = [1, kx, 0, ky, 1, 0, 0, 0, 1];
@@ -79,7 +79,7 @@ export const MatrixHelpers: IMatrixHelpers<Matrix> = {
     );
   },
 
-  translated(dx: number, dy: number): Matrix {
+  translated(dx: number, dy: number): InputMatrix {
     // prettier-ignore
     return [
       1, 0, dx,
@@ -89,12 +89,12 @@ export const MatrixHelpers: IMatrixHelpers<Matrix> = {
   },
 };
 
-export const ColorMatrixHelpers: IColorMatrixHelpers<Matrix> = {
-  concat(outer: Matrix, inner: Matrix): Matrix {
-    return multiply(outer, inner) as Matrix;
+export const ColorMatrixHelpers: IColorMatrixHelpers<InputMatrix> = {
+  concat(outer: InputMatrix, inner: InputMatrix): InputMatrix {
+    return multiply(outer, inner) as InputMatrix;
   },
 
-  identity(): Matrix {
+  identity(): InputMatrix {
     // prettier-ignore
     return  [
       1, 0, 0, 0,
@@ -105,17 +105,17 @@ export const ColorMatrixHelpers: IColorMatrixHelpers<Matrix> = {
   },
 
   postTranslate(
-    m: Matrix,
+    m: InputMatrix,
     dr: number,
     dg: number,
     db: number,
     da: number,
-  ): Matrix {
+  ): InputMatrix {
     console.warn(`SkiaColorMatrix.postTranslate not implemented!`);
     return this.identity();
   },
 
-  rotated(axis: number, sine: number, cosine: number): Matrix {
+  rotated(axis: number, sine: number, cosine: number): InputMatrix {
     console.warn(`SkiaColorMatrix.rotated not implemented!`);
 
     return this.identity();
@@ -126,7 +126,7 @@ export const ColorMatrixHelpers: IColorMatrixHelpers<Matrix> = {
     greenScale: number,
     blueScale: number,
     alphaScale: number,
-  ): Matrix {
+  ): InputMatrix {
     console.warn(`SkiaColorMatrix.scaled not implemented!`);
 
     return this.identity();

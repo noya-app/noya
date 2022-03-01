@@ -27,8 +27,8 @@ export interface IImageFilterFactory<IColor> {
 
   MakeBlend(
     blendMode: IBlendMode,
-    background: IImageFilter,
-    foreground: IImageFilter,
+    background: IImageFilter | null,
+    foreground: IImageFilter | null,
   ): IImageFilter;
 
   MakeDropShadow(
@@ -61,5 +61,5 @@ export interface IImageFilterFactory<IColor> {
   MakeCompose(
     outer: IImageFilter | null,
     inner: IImageFilter | null,
-  ): IImageFilter;
+  ): IImageFilter | null;
 }

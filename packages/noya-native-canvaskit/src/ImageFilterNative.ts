@@ -3,18 +3,30 @@ import {
   IShader,
   TileMode,
   BlendMode,
-  IImageFilter,
-  IColorFilter,
+  IImageFilter as RNSImageFilter,
 } from '@shopify/react-native-skia';
 
-import { IImageFilterFactory } from 'canvaskit-types/src/IImageFilter';
+import {
+  IImageFilterFactory,
+  IImageFilter,
+} from 'canvaskit-types/src/IImageFilter';
+import { ColorFilterNative } from './ColorFilterNative';
+import { JSEmbindObject } from './misc';
 import { Color } from './types';
 
-const { ImageFilter: FilterFactory } = Skia;
+export class ImageFilterNative extends JSEmbindObject implements IImageFilter {
+  constructor(private _filter: RNSImageFilter) {
+    super();
+  }
+
+  getRNSImageFilter() {
+    return this._filter;
+  }
+}
 
 const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
   // @ts-ignore
-  MakeShader(shader: IShader): IImageFilter {
+  MakeShader(shader: IShader): ImageFilterNative {
     console.warn(`SkiaImageFilterFactory.MakeShader not implemented!`);
   },
 
@@ -27,7 +39,7 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
     background: IImageFilter | null,
     foreground: IImageFilter | null,
     // @ts-ignore
-  ): IImageFilter {
+  ): ImageFilterNative {
     console.warn(`SkiaImageFilterFactory.MakeArithmetic not implemented!`);
   },
 
@@ -35,7 +47,7 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
     radiusX: number,
     radiusY: number,
     input: IImageFilter | null,
-  ): IImageFilter | null {
+  ): ImageFilterNative | null {
     console.warn(`SkiaImageFilterFactory.MakeErode not implemented!`);
     return null;
   },
@@ -43,18 +55,18 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
   MakeOffset(
     dx: number,
     dy: number,
-    input: IImageFilter | null,
+    input: ImageFilterNative | null,
     // @ts-ignore
-  ): IImageFilter {
+  ): ImageFilterNative {
     console.warn(`SkiaImageFilterFactory.MakeOffset not implemented!`);
   },
 
   MakeBlend(
     blendMode: BlendMode,
-    background: IImageFilter,
-    foreground: IImageFilter,
+    background: ImageFilterNative,
+    foreground: ImageFilterNative,
     // @ts-ignore
-  ): IImageFilter {
+  ): ImageFilterNative {
     console.warn(`SkiaImageFilterFactory.MakeBlend not implemented!`);
   },
 
@@ -64,15 +76,17 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
     sigmaX: number,
     sigmaY: number,
     color: Color,
-    input: IImageFilter | null,
-  ): IImageFilter {
-    return FilterFactory.MakeDropShadow(
-      dx,
-      dy,
-      sigmaX,
-      sigmaY,
-      color,
-      input ?? undefined,
+    input: ImageFilterNative | null,
+  ): ImageFilterNative {
+    return new ImageFilterNative(
+      Skia.ImageFilter.MakeDropShadow(
+        dx,
+        dy,
+        sigmaX,
+        sigmaY,
+        color,
+        input?.getRNSImageFilter() ?? undefined,
+      ),
     );
   },
 
@@ -82,15 +96,17 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
     sigmaX: number,
     sigmaY: number,
     color: Color,
-    input: IImageFilter | null,
-  ): IImageFilter {
-    return FilterFactory.MakeDropShadowOnly(
-      dx,
-      dy,
-      sigmaX,
-      sigmaY,
-      color,
-      input ?? undefined,
+    input: ImageFilterNative | null,
+  ): ImageFilterNative {
+    return new ImageFilterNative(
+      Skia.ImageFilter.MakeDropShadowOnly(
+        dx,
+        dy,
+        sigmaX,
+        sigmaY,
+        color,
+        input?.getRNSImageFilter() ?? undefined,
+      ),
     );
   },
 
@@ -98,24 +114,44 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
     sigmaX: number,
     sigmaY: number,
     mode: TileMode,
-    input: IImageFilter | null,
-  ): IImageFilter {
-    return FilterFactory.MakeBlur(sigmaX, sigmaY, mode, input);
+    input: ImageFilterNative | null,
+  ): ImageFilterNative {
+    return new ImageFilterNative(
+      Skia.ImageFilter.MakeBlur(
+        sigmaX,
+        sigmaY,
+        mode,
+        input?.getRNSImageFilter() ?? null,
+      ),
+    );
   },
 
-  MakeColorFilter(cf: IColorFilter, input: IImageFilter | null): IImageFilter {
-    return FilterFactory.MakeColorFilter(cf, input);
+  MakeColorFilter(
+    cf: ColorFilterNative,
+    input: ImageFilterNative | null,
+  ): ImageFilterNative {
+    return new ImageFilterNative(
+      Skia.ImageFilter.MakeColorFilter(
+        cf.getRNSColorFilter(),
+        input?.getRNSImageFilter() ?? null,
+      ),
+    );
   },
 
   MakeCompose(
-    outer: IImageFilter | null,
-    inner: IImageFilter | null,
-  ): IImageFilter | null {
+    outer: ImageFilterNative | null,
+    inner: ImageFilterNative | null,
+  ): ImageFilterNative | null {
     if (!outer || !inner) {
       return null;
     }
 
-    return FilterFactory.MakeCompose(outer, inner);
+    return new ImageFilterNative(
+      Skia.ImageFilter.MakeCompose(
+        outer.getRNSImageFilter(),
+        inner.getRNSImageFilter(),
+      ),
+    );
   },
 };
 
