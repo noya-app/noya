@@ -1,4 +1,4 @@
-import { InputField, Slider } from 'noya-designsystem';
+import { InputField, Slider } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';

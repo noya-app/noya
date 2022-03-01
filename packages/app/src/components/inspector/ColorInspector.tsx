@@ -12,7 +12,7 @@ import {
   InputField,
   Label,
   LabeledElementView,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { clamp } from 'noya-utils';
 import DimensionInput from './DimensionInput';

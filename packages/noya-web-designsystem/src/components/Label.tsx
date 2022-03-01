@@ -1,6 +1,6 @@
 import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
-import * as Spacer from '../components/Spacer';
+import * as Spacer from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Label

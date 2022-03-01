@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { Label, LabeledElementView, RadioGroup } from 'noya-designsystem';
+import { Label, LabeledElementView, RadioGroup } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import { BorderCenterIcon } from 'noya-icons';

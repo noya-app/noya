@@ -1,4 +1,4 @@
-import { IconButton, Spacer } from 'noya-designsystem';
+import { IconButton, Spacer } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { useCallback } from 'react';
 import styled from 'styled-components';

@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import Sketch from 'noya-file-format';
-import { getGradientBackground } from 'noya-designsystem';
+import { getGradientBackground } from 'noya-web-designsystem';
 import { sketchColorToRgba } from 'noya-colorpicker';
 import { RgbaColor } from '../types';
 import { interpolateRgba } from '../utils/interpolateRgba';

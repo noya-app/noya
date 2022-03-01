@@ -13,7 +13,7 @@ import {
   RegularMenuItem,
   Spacer,
   Tooltip,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {

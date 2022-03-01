@@ -6,7 +6,7 @@ import {
   UpdateIcon,
 } from 'noya-icons';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Button, Select } from 'noya-designsystem';
+import { Button, Select } from 'noya-web-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';

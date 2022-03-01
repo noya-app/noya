@@ -11,7 +11,7 @@ import {
   InputField,
   Label,
   LabeledElementView,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { clamp } from 'noya-utils';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

@@ -7,7 +7,7 @@ import {
   lightTheme,
   ScrollArea,
   Spacer,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { DesignSystemConfigurationProvider } from 'noya-ui';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';

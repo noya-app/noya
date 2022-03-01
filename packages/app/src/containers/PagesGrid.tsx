@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { GridView, MenuItem } from 'noya-designsystem';
+import { GridView, MenuItem } from 'noya-web-designsystem';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';

@@ -1,4 +1,10 @@
-import { Button, Dialog, IDialog, InputField, Spacer } from 'noya-designsystem';
+import {
+  Button,
+  Dialog,
+  IDialog,
+  InputField,
+  Spacer,
+} from 'noya-web-designsystem';
 import {
   createContext,
   ReactNode,

@@ -1,4 +1,4 @@
-import { Spacer } from 'noya-designsystem';
+import { Spacer } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';

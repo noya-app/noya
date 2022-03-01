@@ -15,7 +15,7 @@ import {
   rgbaToSketchColor,
   sketchColorToRgba,
 } from 'noya-colorpicker';
-import * as Spacer from '../components/Spacer';
+import * as Spacer from './Spacer';
 
 interface Props {
   value: Sketch.GradientStop[];

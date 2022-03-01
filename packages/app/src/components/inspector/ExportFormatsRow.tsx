@@ -6,7 +6,7 @@ import {
   LabeledElementView,
   Select,
   withSeparatorElements,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { ExportOptions } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';

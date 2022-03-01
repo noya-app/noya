@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { GridView } from 'noya-designsystem';
+import { GridView } from 'noya-web-designsystem';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { Fragment, memo, useCallback, useMemo } from 'react';

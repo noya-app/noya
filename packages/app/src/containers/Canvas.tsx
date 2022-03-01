@@ -10,13 +10,13 @@ import {
   useModKey,
   isLeftButtonClicked,
   isRightButtonClicked,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import {
   SupportedCanvasUploadType,
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
-} from 'noya-designsystem/src/types';
+} from 'noya-web-designsystem/src/types';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,

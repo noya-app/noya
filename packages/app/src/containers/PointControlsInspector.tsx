@@ -6,7 +6,7 @@ import {
   LabeledElementView,
   Select,
   Spacer,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import {
   getMultiNumberValue,
   getMultiValue,

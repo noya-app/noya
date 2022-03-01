@@ -13,7 +13,7 @@ import {
   LabeledElementView,
   Select,
   withSeparatorElements,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';

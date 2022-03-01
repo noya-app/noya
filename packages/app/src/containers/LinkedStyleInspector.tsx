@@ -7,7 +7,7 @@ import {
 } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import { useDispatch, useSelector } from 'noya-app-state-context';
-import { Button, Select } from 'noya-designsystem';
+import { Button, Select } from 'noya-web-designsystem';
 import { getMultiValue, Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';

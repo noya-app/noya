@@ -128,7 +128,6 @@ export function resizeRect(
 }
 
 export function point(CanvasKit: CanvasKit, point: Point): CKPoint {
-  // return [point.x, point.y];
   return CanvasKit.Point(point.x, point.y);
 }
 
