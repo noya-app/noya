@@ -1,4 +1,4 @@
-import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import type { CanvasKit as CanvasKitType } from 'canvaskit-types';
 import { loadCanvasKit } from 'canvaskit';
 import { debugDescription, SketchModel } from 'noya-sketch-model';
 import { createInitialState, createSketchFile, Selectors } from 'noya-state';

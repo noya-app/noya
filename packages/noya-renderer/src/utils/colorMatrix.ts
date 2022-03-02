@@ -1,3 +1,4 @@
+import type { CanvasKit } from 'canvaskit-types';
 import { toRadians } from 'noya-geometry';
 
 // Descriptions of color filters:
@@ -30,12 +31,12 @@ export function getLuminance(r: number, g: number, b: number) {
   );
 }
 
-export function getSaturationMatrix(s: number) {
+export function getSaturationMatrix(CanvasKit: CanvasKit, s: number) {
   const sr = lumR * (1 - s);
   const sg = lumG * (1 - s);
   const sb = lumB * (1 - s);
 
-  return new Float32Array(
+  return CanvasKit.CreateInputMatrix(
     [
       [sr + s, sg, sb, 0, 0],
       [sr, sg + s, sb, 0, 0],
@@ -45,8 +46,8 @@ export function getSaturationMatrix(s: number) {
   );
 }
 
-export function getBrightnessMatrix(w: number) {
-  return new Float32Array(
+export function getBrightnessMatrix(CanvasKit: CanvasKit, w: number) {
+  return CanvasKit.CreateInputMatrix(
     [
       [1, 0, 0, 0, w],
       [0, 1, 0, 0, w],
@@ -56,9 +57,9 @@ export function getBrightnessMatrix(w: number) {
   );
 }
 
-export function getContrastMatrix(c: number) {
+export function getContrastMatrix(CanvasKit: CanvasKit, c: number) {
   const t = (1 - c) / 2.0;
-  return new Float32Array(
+  return CanvasKit.CreateInputMatrix(
     [
       [c, 0, 0, 0, t],
       [0, c, 0, 0, t],
@@ -70,12 +71,12 @@ export function getContrastMatrix(c: number) {
 
 // Hue rotation matrix code taken from Skia (BSD 3-Clause):
 // https://github.com/google/skia/blob/a1feabd38305ea7f5e3961f96585fbe1f1c00f91/modules/svg/src/SkSVGFeColorMatrix.cpp#L56
-export function getHueRotationMatrix(degrees: number) {
+export function getHueRotationMatrix(CanvasKit: CanvasKit, degrees: number) {
   const theta = toRadians(degrees);
   const c = Math.cos(theta);
   const s = Math.sin(theta);
 
-  return new Float32Array(
+  return CanvasKit.CreateInputMatrix(
     [
       [
         0.213 + c * 0.787 + s * -0.213,

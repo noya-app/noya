@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
-import { Paint } from 'canvaskit';
+import { Paint } from 'canvaskit-types';
 import { Point } from 'noya-geometry';
 import { useDeletable, useStroke } from 'noya-react-canvaskit';
 import { useCanvasKit } from '../hooks/useCanvasKit';

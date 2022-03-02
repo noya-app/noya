@@ -1,21 +1,19 @@
 import React, { memo, useMemo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { SkiaPaint, SkiaCanvasKit } from 'noya-native-canvaskit';
-import { LTRBArrayToRect } from 'noya-geometry';
+import { PaintNative, CanvasKitNative, Rect } from 'noya-native-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
 
 interface ImageProps {
-  paint: SkiaPaint;
+  paint: PaintNative;
   image: ArrayBuffer;
-  rect: Float32Array;
+  rect: Rect;
   resample?: boolean;
 }
 
 const Image: React.FC<ImageProps> = (props) => {
   const { rect, paint, resample } = props;
-  // @ts-ignore
-  const CanvasKit = useCanvasKit() as typeof SkiaCanvasKit;
+  const CanvasKit = useCanvasKit() as unknown as typeof CanvasKitNative;
 
   const skiaImage = useMemo(() => {
     const image = CanvasKit.MakeImageFromEncoded(props.image)!;
@@ -34,22 +32,21 @@ const Image: React.FC<ImageProps> = (props) => {
         width: image.width(),
         height: image.height(),
       };
-      const destRect = LTRBArrayToRect(rect);
 
       if (resample) {
         canvas.drawImageRectCubic(
-          image.getImage(),
+          image.getRNSImage(),
           srcRect,
-          destRect,
+          rect,
           1 / 3,
           1 / 3,
           paint.getRNSkiaPaint(),
         );
       } else {
         canvas.drawImageRect(
-          image.getImage(),
+          image.getRNSImage(),
           srcRect,
-          destRect,
+          rect,
           paint.getRNSkiaPaint(),
         );
       }

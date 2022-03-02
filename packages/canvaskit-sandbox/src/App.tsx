@@ -1,4 +1,5 @@
 import type { CanvasKit } from 'canvaskit';
+import type { CanvasKit as PublicCanvasKit } from 'canvaskit-types';
 import { loadCanvasKit } from 'canvaskit';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
@@ -35,7 +36,9 @@ function App() {
   const [CanvasKit, setCanvasKit] = useState<CanvasKit | undefined>(undefined);
 
   useEffect(() => {
-    loadCanvasKit().then(setCanvasKit);
+    loadCanvasKit().then((ck: PublicCanvasKit) =>
+      setCanvasKit(ck as unknown as CanvasKit),
+    );
   }, []);
 
   if (!CanvasKit) return null;

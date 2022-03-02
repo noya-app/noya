@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { useCanvasKit } from 'noya-renderer';
 import { Layers, Primitives } from 'noya-state';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from 'canvaskit-types';
 import { useMemo } from 'react';
 import { getCombinedLayerPaths } from '../utils/getCombinedLayerPaths';
 import { useDeletable } from 'noya-react-canvaskit';

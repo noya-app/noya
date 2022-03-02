@@ -1,7 +1,7 @@
 import type { FileSystemHandle } from 'browser-fs-access';
 import produce from 'immer';
 
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from 'canvaskit-types';
 import { Insets, Size } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';

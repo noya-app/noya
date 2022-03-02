@@ -1,8 +1,9 @@
-import { Rect } from 'canvaskit';
+import { Rect } from 'canvaskit-types';
+import { Rect as CKRect } from 'canvaskit';
 import useStable4ElementArray from './useStable4ElementArray';
 
-export type RectParameters = Float32Array;
-
-export default function useRect(parameters: RectParameters): Rect {
-  return useStable4ElementArray(parameters);
+export default function useRect(parameters: Rect): Rect {
+  return useStable4ElementArray(
+    parameters as unknown as CKRect,
+  ) as unknown as Rect;
 }

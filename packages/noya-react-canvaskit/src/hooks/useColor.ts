@@ -1,25 +1,35 @@
-import { Color } from 'canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import { useMemo } from 'react';
+
+import type { CanvasKit } from 'canvaskit';
+import type { Color } from 'canvaskit-types';
+import { useCanvasKit } from 'noya-renderer';
 import useStable4ElementArray from './useStable4ElementArray';
 
-export type ColorParameters = Color | number[] | string;
+export type ColorParameters = Color | string | undefined;
+type CKColor = Color | number[] | string | undefined;
 
-export default function useColor(parameters: ColorParameters): Color;
 export default function useColor(
-  parameters: ColorParameters | undefined,
-): Color | undefined;
-export default function useColor(
-  parameters: ColorParameters | undefined,
+  parameters: ColorParameters,
 ): Color | undefined {
-  const CanvasKit = useCanvasKit();
+  const CanvasKit = useCanvasKit() as unknown as CanvasKit;
 
   const color = useMemo(() => {
-    if (parameters instanceof Float32Array) return parameters;
-    if (parameters instanceof Array) return new Float32Array(parameters);
-    if (parameters === undefined) return parameters;
-    return CanvasKit.parseColorString(parameters);
+    const c = parameters as unknown as CKColor;
+
+    if (c instanceof Float32Array) {
+      return c;
+    }
+
+    if (c instanceof Array) {
+      return new Float32Array(c);
+    }
+
+    if (c === undefined) {
+      return c;
+    }
+
+    return CanvasKit.parseColorString(c as string);
   }, [CanvasKit, parameters]);
 
-  return useStable4ElementArray(color);
+  return useStable4ElementArray(color) as unknown as Color;
 }

@@ -1,2 +1,10 @@
-export * from './ClassWrappers';
-export * from './SkiaCanvasKit';
+export { default as CanvasKitNative } from './CanvasKitNative';
+export { default as ImageNative } from './ImageNative';
+export { default as PaintNative } from './PaintNative';
+export { default as PathNative } from './PathNative';
+export { ColorFilterNative } from './ColorFilterNative';
+export { ImageFilterNative } from './ImageFilterNative';
+export { MaskFilterNative } from './MaskFilterNative';
+export { RuntimeEffectNative } from './RuntimeEffectNative';
+export { ParagraphNative, ParagraphBuilderNative } from './ParagraphNative';
+export * from './types';

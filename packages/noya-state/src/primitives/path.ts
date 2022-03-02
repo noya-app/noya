@@ -1,4 +1,4 @@
-import { CanvasKit, Path, PathOp } from 'canvaskit';
+import type { CanvasKit, Path, IPathOp } from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { distance, Point, Rect } from 'noya-geometry';
 import {
@@ -286,7 +286,7 @@ export function path(
 const getBorderPositionPathOp = (
   CanvasKit: CanvasKit,
   position: Sketch.BorderPosition,
-): PathOp | undefined => {
+): IPathOp | undefined => {
   switch (position) {
     case Sketch.BorderPosition.Center:
       return;
@@ -303,7 +303,7 @@ export function getStrokedPath(
   width: number,
   lineCap: Sketch.LineCapStyle,
   lineJoin: Sketch.LineJoinStyle,
-  pathOp?: PathOp,
+  pathOp?: IPathOp,
 ): Path {
   const copy = path.copy();
 

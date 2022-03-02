@@ -1,4 +1,4 @@
-import { Paragraph, ShapedLine } from 'canvaskit';
+import { Paragraph, ShapedLine } from 'canvaskit-types';
 import { Point } from 'noya-geometry';
 import { clamp } from 'noya-utils';
 import { normalizeRange } from '../selectors/attributedStringSelectors';

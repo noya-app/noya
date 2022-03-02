@@ -1,4 +1,4 @@
-import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import type { CanvasKit as CanvasKitType } from 'canvaskit-types';
 import { loadCanvasKit } from 'canvaskit';
 import { AffineTransform } from '../AffineTransform';
 import { toRadians } from '../radians';

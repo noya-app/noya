@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react';
 import Sketch from 'noya-file-format';
-import type { CanvasKit as CanvasKitType } from 'canvaskit';
+import type { CanvasKit as CanvasKitType } from 'canvaskit-types';
 import { loadCanvasKit } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';
@@ -105,6 +105,7 @@ async function generatePageImage(
   const image = await new Promise<Uint8Array | undefined>((resolve) => {
     act(() => {
       generateImage(
+        // @ts-ignore
         CanvasKit,
         size.width,
         size.height,

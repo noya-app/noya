@@ -1,11 +1,11 @@
-import { Paint } from 'canvaskit';
+import { Paint, Rect } from 'canvaskit-types';
 import { createElement, memo, useMemo } from 'react';
 import usePaint from '../hooks/usePaint';
-import useRect, { RectParameters } from '../hooks/useRect';
+import useRect from '../hooks/useRect';
 import { RectComponentProps } from '../types';
 
 interface RectProps {
-  rect: RectParameters;
+  rect: Rect;
   cornerRadius?: number;
   paint: Paint;
 }

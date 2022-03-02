@@ -209,7 +209,7 @@ export function computeBoundsFromPoints(points: Point[]): Rect {
   return { x, y, width, height };
 }
 
-export function LTRBArrayToRect(inRect: Float32Array): Rect {
+export function LTRBArrayToRect(inRect: number[]): Rect {
   const [left, top, right, bottom] = inRect;
 
   return {
@@ -220,11 +220,11 @@ export function LTRBArrayToRect(inRect: Float32Array): Rect {
   };
 }
 
-export function RectToLTRBArray(inRect: Rect): Float32Array {
-  return new Float32Array([
+export function RectToLTRBArray(inRect: Rect): number[] {
+  return [
     inRect.x,
     inRect.y,
     inRect.x + inRect.width,
     inRect.y + inRect.height,
-  ]);
+  ];
 }

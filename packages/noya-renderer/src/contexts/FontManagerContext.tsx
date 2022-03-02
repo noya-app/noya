@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import fetch from 'cross-fetch';
 
-import { TypefaceFontProvider } from 'canvaskit';
+import { ITypefaceFontProvider } from 'canvaskit-types';
 import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
 import { SuspendedValue, useMutableState } from 'noya-react-utils';
@@ -23,7 +23,7 @@ export type IFontManager = Pick<
   | 'getFontFamilyIdList'
   | 'getBestFontDescriptor'
 > & {
-  getTypefaceFontProvider: () => TypefaceFontProvider;
+  getTypefaceFontProvider: () => ITypefaceFontProvider;
 };
 
 type FontManagerContextValue = IFontManager & {

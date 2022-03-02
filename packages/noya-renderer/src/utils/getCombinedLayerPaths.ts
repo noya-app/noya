@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { CanvasKit } from 'canvaskit';
+import { CanvasKit } from 'canvaskit-types';
 import { Layers, Primitives } from 'noya-state';
 
 export function getCombinedLayerPaths(

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 
-import * as CanvasKit from 'canvaskit';
+import * as CanvasKit from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Rect } from 'noya-geometry';
 import {

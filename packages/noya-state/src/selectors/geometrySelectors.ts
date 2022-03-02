@@ -1,6 +1,6 @@
 import { SKIP, STOP, VisitOptions } from 'tree-visit';
 
-import type { CanvasKit } from 'canvaskit';
+import type { CanvasKit } from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import {
   AffineTransform,

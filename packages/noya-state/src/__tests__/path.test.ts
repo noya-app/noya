@@ -1,4 +1,4 @@
-import type { CanvasKit as CanvasKitType, Path } from 'canvaskit';
+import type { CanvasKit as CanvasKitType, Path } from 'canvaskit-types';
 import { loadCanvasKit } from 'canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { PathCommand, PathCommandVerb, parsePathCmds } from 'noya-state';

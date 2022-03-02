@@ -1,4 +1,5 @@
-import { Paint } from 'canvaskit';
+import { Rect as CKRect } from 'canvaskit';
+import type { CanvasKit, Paint, IPath } from 'canvaskit-types';
 import { AffineTransform, Size } from 'noya-geometry';
 import { ClipProps } from 'noya-react-canvaskit';
 import {
@@ -41,7 +42,7 @@ const stringifyColor = (color: Iterable<number>) => {
 
 function usePaintProps(paint: Paint): React.SVGProps<any> {
   const CanvasKit = useCanvasKit();
-  const color = stringifyColor(paint.getColor());
+  const color = stringifyColor(CanvasKit.getColorComponents(paint.getColor()));
 
   if (paint.style === CanvasKit.PaintStyle.Stroke) {
     return {
@@ -68,19 +69,29 @@ function getRectProps(rect: Float32Array) {
 }
 
 const Rect: ComponentsContextValue['Rect'] = memo(({ rect, paint }) => {
-  return <rect {...usePaintProps(paint)} {...getRectProps(rect)} />;
+  return (
+    <rect
+      {...usePaintProps(paint as unknown as Paint)}
+      {...getRectProps(rect as unknown as CKRect)}
+    />
+  );
 });
 
 const Polyline: ComponentsContextValue['Polyline'] = memo(
   ({ points, paint }) => {
     const pointsString = points.map(({ x, y }) => `${x},${y}`).join(' ');
 
-    return <polyline points={pointsString} {...usePaintProps(paint)} />;
+    return (
+      <polyline
+        points={pointsString}
+        {...usePaintProps(paint as unknown as Paint)}
+      />
+    );
   },
 );
 
 const Path: ComponentsContextValue['Path'] = memo(({ path, paint }) => {
-  const CanvasKit = useCanvasKit();
+  const CanvasKit = useCanvasKit() as unknown as CanvasKit;
 
   return (
     <path
@@ -90,7 +101,7 @@ const Path: ComponentsContextValue['Path'] = memo(({ path, paint }) => {
           ? 'evenodd'
           : 'nonzero'
       }
-      {...usePaintProps(paint)}
+      {...usePaintProps(paint as unknown as Paint)}
     />
   );
 });
@@ -165,7 +176,7 @@ const ClipPath = memo(
           {path instanceof Float32Array ? (
             <rect {...getRectProps(path)} />
           ) : (
-            <path d={path.toSVGString()} />
+            <path d={(path as unknown as IPath<CKRect>).toSVGString()} />
           )}
         </clipPath>
         {children(`url(#${id})`)}
@@ -206,7 +217,9 @@ const Image: ComponentsContextValue['Image'] = memo(
       )}`;
     }, [image]);
 
-    return <image {...getRectProps(rect)} href={encodedImage} />;
+    return (
+      <image {...getRectProps(rect as unknown as CKRect)} href={encodedImage} />
+    );
   },
 );
 

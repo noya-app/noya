@@ -1,6 +1,6 @@
 import React, { ReactNode, useMemo } from 'react';
 
-import { Paint } from 'canvaskit';
+import { Paint } from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { Layers, Selectors } from 'noya-state';

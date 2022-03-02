@@ -1,14 +1,17 @@
 import type {
-  CanvasKit,
-  Paint,
   Path,
-  RuntimeEffect,
+  Point as CKPoint,
+  Paint,
   Shader,
-  StrokeCap,
-  StrokeJoin,
-  TextAlign,
-  TextStyle,
-} from 'canvaskit';
+  Color,
+  ColorArray,
+  CanvasKit,
+  ITextAlign,
+  IStrokeCap,
+  ITextStyle,
+  IStrokeJoin,
+  RuntimeEffect,
+} from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import { FontId, SYSTEM_FONT_ID } from 'noya-fonts';
 import {
@@ -124,8 +127,9 @@ export function resizeRect(
   }
 }
 
-export function point(point: Point): number[] {
-  return [point.x, point.y];
+export function point(CanvasKit: CanvasKit, point: Point): CKPoint {
+  // return [point.x, point.y];
+  return CanvasKit.Point(point.x, point.y);
 }
 
 export function color(CanvasKit: CanvasKit, color: Sketch.Color) {
@@ -167,7 +171,7 @@ export function shader(
       const shader = runtimeEffect?.makeShader(
         uniforms ?? [],
         false,
-        unitTransform.float32Array,
+        CanvasKit.CreateMatrix(unitTransform.array),
       );
 
       return shader;
@@ -177,7 +181,7 @@ export function shader(
         : clearColor(CanvasKit);
       return CanvasKit.Shader.MakeColor(fillColor, CanvasKit.ColorSpace.SRGB);
     case Sketch.FillType.Gradient: {
-      let colors: Float32Array[] = [];
+      let colors: ColorArray = [];
       let positions: number[] = [];
 
       [...fill.gradient.stops]
@@ -206,8 +210,8 @@ export function shader(
           const transformedTo = unitTransform.applyTo(toPoint);
 
           return CanvasKit.Shader.MakeLinearGradient(
-            point(transformedFrom),
-            point(transformedTo),
+            point(CanvasKit, transformedFrom),
+            point(CanvasKit, transformedTo),
             colors,
             positions,
             CanvasKit.TileMode.Clamp,
@@ -231,12 +235,12 @@ export function shader(
           ).scale(fill.gradient.elipseLength || 1, 1, transformedCenter);
 
           return CanvasKit.Shader.MakeRadialGradient(
-            point(transformedCenter),
+            point(CanvasKit, transformedCenter),
             distance(transformedTo, transformedCenter),
             colors,
             positions,
             CanvasKit.TileMode.Clamp,
-            coordinateSystemTransform.float32Array,
+            CanvasKit.CreateMatrix(coordinateSystemTransform.array),
           );
         }
         case Sketch.GradientType.Angular: {
@@ -278,7 +282,7 @@ export function shader(
             colors,
             positions,
             CanvasKit.TileMode.Clamp,
-            matrix.float32Array,
+            CanvasKit.CreateMatrix(matrix.array),
           );
         }
         default:
@@ -299,11 +303,13 @@ export function shader(
             CanvasKit.TileMode.Repeat,
             1 / 3,
             1 / 3,
-            CanvasKit.Matrix.multiply(
-              CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
-              CanvasKit.Matrix.scaled(
-                fill.patternTileScale,
-                fill.patternTileScale,
+            CanvasKit.CreateMatrix(
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(layerFrame.x, layerFrame.y),
+                CanvasKit.Matrix.scaled(
+                  fill.patternTileScale,
+                  fill.patternTileScale,
+                ),
               ),
             ),
           );
@@ -331,14 +337,16 @@ export function shader(
             CanvasKit.TileMode.Decal,
             1 / 3,
             1 / 3,
-            CanvasKit.Matrix.multiply(
-              CanvasKit.Matrix.translated(
-                bounds.midX - scaledRect.width / 2,
-                bounds.midY - scaledRect.height / 2,
-              ),
-              CanvasKit.Matrix.scaled(
-                scaledRect.width / canvasImage.width(),
-                scaledRect.height / canvasImage.height(),
+            CanvasKit.CreateMatrix(
+              CanvasKit.Matrix.multiply(
+                CanvasKit.Matrix.translated(
+                  bounds.midX - scaledRect.width / 2,
+                  bounds.midY - scaledRect.height / 2,
+                ),
+                CanvasKit.Matrix.scaled(
+                  scaledRect.width / canvasImage.width(),
+                  scaledRect.height / canvasImage.height(),
+                ),
               ),
             ),
           );
@@ -431,7 +439,7 @@ export function path(
 export function textHorizontalAlignment(
   CanvasKit: CanvasKit,
   alignment: Sketch.TextHorizontalAlignment,
-): TextAlign {
+): ITextAlign {
   switch (alignment) {
     case Sketch.TextHorizontalAlignment.Left:
       return CanvasKit.TextAlign.Left;
@@ -449,7 +457,7 @@ export function textHorizontalAlignment(
 export function lineJoinStyle(
   CanvasKit: CanvasKit,
   lineJoin: Sketch.LineJoinStyle,
-): StrokeJoin {
+): IStrokeJoin {
   switch (lineJoin) {
     case Sketch.LineJoinStyle.Bevel:
       return CanvasKit.StrokeJoin.Bevel;
@@ -463,7 +471,7 @@ export function lineJoinStyle(
 export function lineCapStyle(
   CanvasKit: CanvasKit,
   lineCap: Sketch.LineCapStyle,
-): StrokeCap {
+): IStrokeCap {
   switch (lineCap) {
     case Sketch.LineCapStyle.Butt:
       return CanvasKit.StrokeCap.Butt;
@@ -481,7 +489,7 @@ export function createCanvasKitTextStyle(
   fontId: FontId,
   attributes: Sketch.StringAttribute['attributes'],
   decoration: SimpleTextDecoration,
-): TextStyle {
+): ITextStyle<Color> {
   const textColor = attributes.MSAttributedStringColorAttribute;
   const font = attributes.MSAttributedStringFontAttribute;
 

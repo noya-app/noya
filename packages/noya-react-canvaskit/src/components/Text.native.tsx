@@ -1,21 +1,31 @@
 import React, { memo } from 'react';
 import { Drawing, useDrawing } from '@shopify/react-native-skia';
 
-import { RectParameters } from '../hooks/useRect';
-import { SkiaParagraph } from 'noya-native-canvaskit';
+import { ParagraphNative, Rect as RNSRect } from 'noya-native-canvaskit';
+import { Rect } from 'canvaskit-types';
+import useRect from '../hooks/useRect';
 
 interface TextProps {
-  rect: RectParameters;
-  paragraph: SkiaParagraph;
+  rect: Rect;
+  paragraph: ParagraphNative;
 }
 
 const Text: React.FC<TextProps> = (props) => {
-  const onDraw = useDrawing(props, ({ canvas }, { rect, paragraph }) => {
-    // rn-skia uses y as bottom line
-    paragraph.draw(canvas, rect[0], rect[3]);
-  });
+  const rect = useRect(props.rect);
 
-  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
+  const elementProps = { ...props, rect };
+
+  const onDraw = useDrawing(
+    elementProps,
+    ({ canvas }, { paragraph, ...params }) => {
+      const rect = params.rect as unknown as RNSRect;
+
+      // rn-skia uses y as bottom line
+      paragraph.draw(canvas, rect.x, rect.y + rect.height);
+    },
+  );
+
+  return <Drawing onDraw={onDraw} {...elementProps} skipProcessing />;
 };
 
 export default memo(Text);

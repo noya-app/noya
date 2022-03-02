@@ -1,4 +1,4 @@
-import { Paint } from 'canvaskit';
+import { Paint } from 'canvaskit-types';
 import { Point } from 'noya-geometry';
 import { useCanvasKit } from 'noya-renderer';
 import { memo, useMemo } from 'react';

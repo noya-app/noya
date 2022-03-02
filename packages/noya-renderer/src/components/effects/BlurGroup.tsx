@@ -1,7 +1,7 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { Path } from 'canvaskit';
+import { Path } from 'canvaskit-types';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { Group } from '../../contexts/ComponentsContext';
 import { getSaturationMatrix } from '../../utils/colorMatrix';
@@ -30,7 +30,9 @@ const BlurGroup: React.FC<PropsWithChildren<Props>> = (props) => {
 
     if (blur.type === Sketch.BlurType.Background && blur.saturation !== 1) {
       const colorFilter = CanvasKit.ImageFilter.MakeColorFilter(
-        CanvasKit.ColorFilter.MakeMatrix(getSaturationMatrix(blur.saturation)),
+        CanvasKit.ColorFilter.MakeMatrix(
+          getSaturationMatrix(CanvasKit, blur.saturation),
+        ),
         blurFilter,
       );
 

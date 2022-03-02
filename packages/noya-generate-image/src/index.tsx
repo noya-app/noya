@@ -1,5 +1,6 @@
 import Sketch from 'noya-file-format';
 import type { CanvasKit, Image } from 'canvaskit';
+import type { CanvasKit as PublicCanvasKit } from 'canvaskit-types';
 import { Theme } from 'noya-designsystem';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import { WorkspaceState } from 'noya-state';
@@ -43,7 +44,7 @@ export function generateImage(
   switch (format) {
     case Sketch.ExportFileFormat.SVG: {
       const svg = renderToStaticMarkup(
-        <CanvasKitProvider CanvasKit={CanvasKit}>
+        <CanvasKitProvider CanvasKit={CanvasKit as unknown as PublicCanvasKit}>
           <ThemeProvider theme={theme}>
             <StateProvider state={state}>
               <ImageCacheProvider>
@@ -75,7 +76,9 @@ export function generateImage(
 
       return new Promise((resolve) => {
         const root = (
-          <CanvasKitProvider CanvasKit={CanvasKit}>
+          <CanvasKitProvider
+            CanvasKit={CanvasKit as unknown as PublicCanvasKit}
+          >
             <ThemeProvider theme={theme}>
               <StateProvider state={state}>
                 <ImageCacheProvider>

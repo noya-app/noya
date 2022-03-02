@@ -1,7 +1,7 @@
 import React, { memo, ReactNode, useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
-import { CanvasKit, ImageFilter, Shader } from 'canvaskit';
+import { CanvasKit, ImageFilter, Shader } from 'canvaskit-types';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable } from 'noya-react-canvaskit';
 import { PageLayer, Primitives } from 'noya-state';

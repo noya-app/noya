@@ -1,7 +1,20 @@
 // Some snippets adapted from udevbe/react-canvaskit (MIT License)
 // https://github.com/udevbe/react-canvaskit/blob/459c6d804e18b4e6603acc370c961c77244b552f/react-canvaskit/src/ReactCanvasKit.tsx
 
-import { Canvas, CanvasKit, Surface } from 'canvaskit';
+import {
+  Path,
+  Rect,
+  Image,
+  Paint,
+  Canvas,
+  Surface,
+  CanvasKit,
+  Paragraph,
+  InputMatrix,
+  ClipOp,
+  ColorFilter,
+  ImageFilter,
+} from 'canvaskit';
 import type { ReactNode } from 'react';
 import type { HostConfig } from 'react-reconciler';
 import ReactReconciler from 'react-reconciler';
@@ -263,7 +276,9 @@ const hostConfig: ReactCanvasKitHostConfig = {
       const draw = (element: AnyElementInstance) => {
         switch (element.type) {
           case 'Rect': {
-            const { rect, cornerRadius, paint } = element.props;
+            const rect = element.props.rect as unknown as Rect;
+            const cornerRadius = element.props.cornerRadius;
+            const paint = element.props.paint as unknown as Paint;
 
             if (cornerRadius) {
               const roundedRect = new Float32Array(12);
@@ -277,12 +292,16 @@ const hostConfig: ReactCanvasKitHostConfig = {
             break;
           }
           case 'Path': {
-            const { path, paint } = element.props;
+            const path = element.props.path as unknown as Path;
+            const paint = element.props.paint as unknown as Paint;
             canvas.drawPath(path, paint);
             break;
           }
           case 'Image': {
-            const { rect, image, paint, resample } = element.props;
+            const rect = element.props.rect as unknown as Rect;
+            const paint = element.props.paint as unknown as Paint;
+            const image = element.props.image as unknown as Image;
+            const resample = element.props.resample;
 
             const inputRect = CanvasKit.XYWHRect(
               0,
@@ -307,20 +326,28 @@ const hostConfig: ReactCanvasKitHostConfig = {
             break;
           }
           case 'Text':
-            const { rect, paragraph } = element.props;
+            const rect = element.props.rect as unknown as Rect;
+            const paragraph = element.props.paragraph as unknown as Paragraph;
 
             canvas.drawParagraph(paragraph, rect[0], rect[1]);
 
             break;
           case 'Group': {
-            const {
-              transform,
-              opacity,
-              clip,
-              colorFilter,
-              imageFilter,
-              backdropImageFilter,
-            } = element.props;
+            const opacity = element.props.opacity;
+            const transform = element.props.transform as unknown as InputMatrix;
+            const colorFilter = element.props
+              .colorFilter as unknown as ColorFilter;
+            const imageFilter = element.props
+              .imageFilter as unknown as ImageFilter;
+            const backdropImageFilter = element.props
+              .backdropImageFilter as unknown as ImageFilter;
+            const clip = element.props.clip as unknown as
+              | undefined
+              | {
+                  path: Path | Float32Array;
+                  op: ClipOp;
+                  antiAlias: boolean;
+                };
 
             const saveCount = canvas.getSaveCount();
 

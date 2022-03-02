@@ -1,7 +1,7 @@
 import produce from 'immer';
 
 import { SketchFile } from 'noya-sketch-file';
-import { CanvasKit } from 'canvaskit';
+import type { CanvasKit } from 'canvaskit-types';
 import {
   ApplicationState,
   Action,
