@@ -227,14 +227,18 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       <ToolbarContainer>
         {drawItems.map(({ icon, onPress, active }: Item, idx: number) => (
           <React.Fragment key={idx}>
-            <Button icon={icon} onPress={onPress} active={active} />
+            <Button onClick={onPress} active={active}>
+              <Layout.Icon name={icon} size={16} />
+            </Button>
             {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
           </React.Fragment>
         ))}
         <Spacer />
         {utilItems.map(({ icon, onPress, active }: Item, idx: number) => (
           <React.Fragment key={idx}>
-            <Button icon={icon} onPress={onPress} active={active} />
+            <Button onClick={onPress} active={active}>
+              <Layout.Icon name={icon} size={16} />
+            </Button>
             {idx !== utilItems.length - 1 && <Layout.Queue size="medium" />}
           </React.Fragment>
         ))}

@@ -1,10 +1,4 @@
-import React, {
-  memo,
-  useMemo,
-  useState,
-  useCallback,
-  ReactElement,
-} from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import { View } from 'react-native';
 import styled from 'styled-components';
 import Animated, {
@@ -86,10 +80,11 @@ const ExpandableProvider = (props: ExpandableProps) => {
           {tabs.map((tab, idx) => (
             <React.Fragment key={tab.id}>
               <Button
-                icon={tab.icon}
-                onPress={() => onToggleTab(tab.id)}
+                onClick={() => onToggleTab(tab.id)}
                 active={activeTab === tab.id}
-              />
+              >
+                <Layout.Icon name={tab.icon} size={16} />
+              </Button>
               {idx !== tabs.length - 1 && <Layout.Stack size="medium" />}
             </React.Fragment>
           ))}
