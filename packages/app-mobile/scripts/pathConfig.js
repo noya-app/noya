@@ -17,10 +17,10 @@ const allowList = [
   'noya-sketch-model',
   'noya-colorpicker',
   'noya-google-fonts',
+  'noya-designsystem',
   'noya-react-canvaskit',
   'noya-native-canvaskit',
   'noya-app-state-context',
-  'noya-mobile-designsystem',
 ];
 
 const getPathConfigs = (appRootDir) => {

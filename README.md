@@ -23,8 +23,8 @@ quick summary of the key packages:
 - [Renderer](/packages/noya-renderer) - Render a design file to an HTML5 canvas
   (via Google's
   [Skia compiled to webassembly](https://www.npmjs.com/package/canvaskit-wasm))
-- [Web Design System](/packages/noya-web-designsystem) - Common UI components,
-  like buttons and inputs for web application
+- [Design System](/packages/noya-designsystem) - Common UI components, like
+  buttons and inputs for applications
 - [Sketch File](/packages/noya-sketch-file) - Parse a `.sketch` file into JSON
 - [Color Picker](/packages/noya-colorpicker) - A React component for picking
   colors (based on [react-colorful](https://github.com/omgovich/react-colorful))
