@@ -21,7 +21,6 @@ const allowList = [
   'noya-native-canvaskit',
   'noya-app-state-context',
   'noya-mobile-designsystem',
-  'noya-designsystem-shared',
 ];
 
 const getPathConfigs = (appRootDir) => {
