@@ -1,9 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
-interface QueueProps {
-  size: 'small' | 'medium' | 'large';
-}
+import { QueueProps } from './types';
 
 const Queue: React.FC<QueueProps> = (props) => {
   const { size } = props;

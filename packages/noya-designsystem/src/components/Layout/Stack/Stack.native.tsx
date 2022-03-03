@@ -1,9 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
-interface StackProps {
-  size: 'small' | 'medium' | 'large';
-}
+import { StackProps } from './types';
 
 const Stack: React.FC<StackProps> = (props) => {
   const { size } = props;

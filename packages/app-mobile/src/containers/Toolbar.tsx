@@ -8,7 +8,7 @@ import { View } from 'react-native';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';
-import { BoxView, Layout, Button } from 'noya-mobile-designsystem';
+import { Layout, Button } from 'noya-designsystem';
 import { useCanvasKit } from 'noya-renderer';
 import { delimitedPath } from 'noya-utils';
 import { decode } from 'noya-sketch-file';
@@ -254,8 +254,11 @@ const ToolbarView = styled(View)((_p) => ({
   justifyContent: 'center',
 }));
 
-const ToolbarContainer = styled(BoxView)((_p) => ({
+const ToolbarContainer = styled(View)((p) => ({
   flexDirection: 'row',
+  borderRadius: 8,
+  padding: p.theme.sizes.spacing.small,
+  backgroundColor: p.theme.colors.sidebar.background,
 }));
 
 const Spacer = styled(View)((p) => ({

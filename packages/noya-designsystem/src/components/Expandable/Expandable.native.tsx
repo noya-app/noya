@@ -13,27 +13,10 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 
-import Layout from './Layout';
-import Button from './Button';
-import BoxView from './BoxView';
+import { Layout } from '../Layout';
+import { Button } from '../Button';
 
-type ExpandablePosition = 'left' | 'right';
-
-interface Tab {
-  id: string;
-  icon: string;
-}
-
-type ExpandableChild = ReactElement<Tab>;
-
-type ExpandableProps = {
-  children: ExpandableChild | ExpandableChild[];
-  position?: ExpandablePosition;
-};
-
-interface ExpandableViewProps {
-  position: ExpandablePosition;
-}
+import { ExpandableProps, Tab, ExpandableViewProps } from './types';
 
 const ExpandableProvider = (props: ExpandableProps) => {
   const { position = 'left', children } = props;
@@ -99,7 +82,7 @@ const ExpandableProvider = (props: ExpandableProps) => {
       </ExpandableContentWrapper>
       <Layout.Queue size="medium" />
       <View>
-        <BoxView>
+        <ButtonList>
           {tabs.map((tab, idx) => (
             <React.Fragment key={tab.id}>
               <Button
@@ -110,7 +93,7 @@ const ExpandableProvider = (props: ExpandableProps) => {
               {idx !== tabs.length - 1 && <Layout.Stack size="medium" />}
             </React.Fragment>
           ))}
-        </BoxView>
+        </ButtonList>
       </View>
     </ExpandableView>
   );
@@ -147,7 +130,16 @@ const ExpandableContentWrapper = styled(View)((_p) => ({
   width: 250,
 }));
 
-const ExpandableContent = styled(BoxView)((_p) => ({
-  width: 250,
+const ButtonList = styled(View)((p) => ({
+  borderRadius: 8,
+  padding: p.theme.sizes.spacing.small,
+  backgroundColor: p.theme.colors.sidebar.background,
+}));
+
+const ExpandableContent = styled(View)((p) => ({
   flex: 1,
+  width: 250,
+  borderRadius: 8,
+  padding: p.theme.sizes.spacing.small,
+  backgroundColor: p.theme.colors.sidebar.background,
 }));

@@ -6,7 +6,7 @@ import { WorkspaceAction, Selectors } from 'noya-state';
 import { decodeFontName } from 'noya-fonts';
 import { useDownloadFont, useFontManager } from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
-import { Expandable } from 'noya-mobile-designsystem';
+import { Expandable } from 'noya-designsystem';
 import useAppState from '../hooks/useAppState';
 import AttributeInspector from '../containers/AttributeInspector';
 import ThemeManager from '../containers/ThemeManager';

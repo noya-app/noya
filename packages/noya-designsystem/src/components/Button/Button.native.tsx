@@ -1,17 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import { View, Text, TouchableOpacity } from 'react-native';
 
-import Layout from './Layout';
+import { Layout } from '../Layout';
+import { ButtonProps } from './types';
 
-interface ButtonProps {
-  onPress: () => void | Promise<void>;
-  label?: string;
-  icon?: string;
-  active?: boolean;
-}
-
-const Button: React.FC<ButtonProps> = (props) => {
+const ButtonComponent: React.FC<ButtonProps> = (props) => {
   const { label, icon, active, onPress } = props;
 
   return (
@@ -24,7 +18,7 @@ const Button: React.FC<ButtonProps> = (props) => {
   );
 };
 
-export default React.memo(Button);
+export const Button = memo(ButtonComponent);
 
 const ButtonView = styled(View)<{ active?: boolean }>((p) => ({
   borderRadius: 4,

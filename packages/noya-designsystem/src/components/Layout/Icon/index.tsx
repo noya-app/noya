@@ -1,5 +1,9 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 
-export default memo(() => {
+import { IconProps } from './types';
+
+const Icon: React.FC<IconProps> = (props) => {
   throw new Error('Icon.tsx not implemented!');
-});
+};
+
+export default memo(Icon);
