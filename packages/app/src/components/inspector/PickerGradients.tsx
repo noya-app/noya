@@ -7,7 +7,7 @@ import {
   MenuItem,
   Select,
   Spacer,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import type Sketch from 'noya-file-format';
 import { memo, useCallback, useState } from 'react';
 import { useOpenInputDialog } from '../../contexts/DialogContext';

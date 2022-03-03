@@ -1,5 +1,5 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Divider } from 'noya-designsystem';
+import { Divider } from 'noya-web-designsystem';
 import Sketch from 'noya-file-format';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';

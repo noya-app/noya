@@ -1,5 +1,5 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { Spacer } from 'noya-designsystem';
+import { Spacer } from 'noya-web-designsystem';
 import {
   ComponentProps,
   ForwardedRef,

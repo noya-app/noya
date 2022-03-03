@@ -1,7 +1,7 @@
 import * as Popover from '@radix-ui/react-popover';
 import { Slot } from '@radix-ui/react-slot';
 import { useApplicationState } from 'noya-app-state-context';
-import { Divider, FillInputField, Select } from 'noya-designsystem';
+import { Divider, FillInputField, Select } from 'noya-web-designsystem';
 import { useGlobalInputBlurListener } from 'noya-ui';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';

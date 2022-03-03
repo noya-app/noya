@@ -1,6 +1,6 @@
 import type Sketch from 'noya-file-format';
 import produce, { Draft } from 'immer';
-import { RelativeDropPosition } from 'noya-designsystem/src/types';
+import { RelativeDropPosition } from 'noya-web-designsystem/src/types';
 import {
   AffineTransform,
   createBounds,

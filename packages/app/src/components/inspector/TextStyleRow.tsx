@@ -6,7 +6,7 @@ import {
   MenuItem,
   Select,
   SelectOption,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import {
   DEFAULT_FONT_TRAITS,
   encodeFontName,

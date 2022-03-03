@@ -1,4 +1,4 @@
-import { Button, Spacer } from 'noya-designsystem';
+import { Button, Spacer } from 'noya-web-designsystem';
 import { useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { FlipHorizontalIcon } from 'noya-icons';

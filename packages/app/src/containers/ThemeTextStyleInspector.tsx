@@ -1,4 +1,4 @@
-import { Divider, withSeparatorElements } from 'noya-designsystem';
+import { Divider, withSeparatorElements } from 'noya-web-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useApplicationState, useSelector } from 'noya-app-state-context';

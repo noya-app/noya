@@ -1,6 +1,9 @@
 import { CaretDownIcon } from 'noya-icons';
 import { Property } from 'csstype';
-import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
+import {
+  DropdownMenu as NoyaDropdownMenu,
+  MenuItem,
+} from 'noya-web-designsystem';
 import { memoize } from 'noya-utils';
 import {
   Children,

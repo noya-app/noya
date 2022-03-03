@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { Spacer } from 'noya-designsystem';
+import { Spacer } from 'noya-web-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';

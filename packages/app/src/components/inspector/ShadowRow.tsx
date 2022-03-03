@@ -1,4 +1,4 @@
-import { Label, LabeledElementView } from 'noya-designsystem';
+import { Label, LabeledElementView } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';

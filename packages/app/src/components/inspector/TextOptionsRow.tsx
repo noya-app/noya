@@ -9,7 +9,7 @@ import {
   LabeledElementView,
   RadioGroup,
   Select,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { SimpleTextDecoration } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

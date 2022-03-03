@@ -7,7 +7,7 @@ import {
   withSeparatorElements,
   IconButton,
   Button,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { range } from 'noya-utils';

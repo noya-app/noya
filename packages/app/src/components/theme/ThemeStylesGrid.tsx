@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import { memo, useMemo, useCallback, Fragment } from 'react';
-import { GridView } from 'noya-designsystem';
+import { GridView } from 'noya-web-designsystem';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { createThemeGroups } from '../../utils/themeTree';

@@ -11,7 +11,7 @@ import {
   DropdownMenu,
   MenuItem,
   Spacer,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';

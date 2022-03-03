@@ -6,7 +6,7 @@ import {
   TreeView,
   Select,
   Button,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { LayerIcon } from '../../containers/LayerList';

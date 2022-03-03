@@ -1,4 +1,4 @@
-import { Button, RadioGroup, Spacer } from 'noya-designsystem';
+import { Button, RadioGroup, Spacer } from 'noya-web-designsystem';
 import {
   BlendingModeIcon,
   ComponentInstanceIcon,

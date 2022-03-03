@@ -26,7 +26,7 @@ import {
   TreeView,
   useModKey,
   withSeparatorElements,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';

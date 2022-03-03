@@ -11,8 +11,8 @@ import {
   PinTopIcon,
   AlignCenterVerticallyIcon,
 } from 'noya-icons';
-import { Label, RadioGroup, LabeledElementView } from 'noya-designsystem';
-import { Spacer } from 'noya-designsystem';
+import { Label, RadioGroup, LabeledElementView } from 'noya-web-designsystem';
+import { Spacer } from 'noya-web-designsystem';
 import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

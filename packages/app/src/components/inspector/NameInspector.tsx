@@ -1,4 +1,4 @@
-import { InputField, Spacer } from 'noya-designsystem';
+import { InputField, Spacer } from 'noya-web-designsystem';
 import { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

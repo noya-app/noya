@@ -1,4 +1,4 @@
-import { Divider } from 'noya-designsystem';
+import { Divider } from 'noya-web-designsystem';
 import { getMultiValue, Selectors } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import { memo, useCallback } from 'react';

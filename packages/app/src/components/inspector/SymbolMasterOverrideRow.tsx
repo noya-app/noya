@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { Divider, Spacer, TreeView } from 'noya-designsystem';
+import { Divider, Spacer, TreeView } from 'noya-web-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { memo, ReactNode, useCallback } from 'react';
 import { LayerIcon } from '../../containers/LayerList';

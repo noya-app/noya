@@ -4,7 +4,7 @@ import {
   Label,
   LabeledElementView,
   Select,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { upperFirst } from 'noya-utils';

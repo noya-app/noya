@@ -3,7 +3,7 @@ import Sketch from 'noya-file-format';
 import type { CanvasKit as CanvasKitType } from 'canvaskit-types';
 import { loadCanvasKit } from 'canvaskit';
 import fs from 'fs';
-import { darkTheme } from 'noya-designsystem';
+import { darkTheme } from 'noya-web-designsystem';
 import { FontManager } from 'noya-fonts';
 import { generateImage } from 'noya-generate-image';
 import { GoogleFontProvider } from 'noya-google-fonts';

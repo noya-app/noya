@@ -1,5 +1,5 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { IconButton } from 'noya-designsystem';
+import { IconButton } from 'noya-web-designsystem';
 import { memo } from 'react';
 import styled from 'styled-components';
 

@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { GridView } from 'noya-designsystem';
+import { GridView } from 'noya-web-designsystem';
 import { delimitedPath, sortBy } from 'noya-utils';
 import { SelectionType } from 'noya-state';
 import { createThemeGroups } from '../../utils/themeTree';

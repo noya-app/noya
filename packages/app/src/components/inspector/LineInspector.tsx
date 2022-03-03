@@ -1,5 +1,5 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Spacer } from 'noya-designsystem';
+import { Spacer } from 'noya-web-designsystem';
 import { useShallowArray } from 'noya-react-utils';
 import {
   clampRotation,

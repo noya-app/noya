@@ -14,7 +14,7 @@ import {
   Spacer,
   InputField,
   LabeledElementView,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { GroupLayouts, SetNumberMode } from 'noya-state';
 import { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';

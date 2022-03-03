@@ -10,7 +10,7 @@ import {
   RelativeDropPosition,
   Spacer,
   TreeView,
-} from 'noya-designsystem';
+} from 'noya-web-designsystem';
 import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';

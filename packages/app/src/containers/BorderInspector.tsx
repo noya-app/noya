@@ -11,7 +11,7 @@ import { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import BorderRow from '../components/inspector/BorderRow';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import { useShallowArray } from 'noya-react-utils';
-import { Divider, Select, Spacer } from 'noya-designsystem';
+import { Divider, Select, Spacer } from 'noya-web-designsystem';
 
 const LINE_CAP_OPTIONS = [
   Sketch.LineCapStyle.Butt.toString(),
