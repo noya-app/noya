@@ -8,16 +8,12 @@ import { View } from 'react-native';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { DrawableLayerType } from 'noya-state';
+import { BoxView, Layout, Button } from 'noya-mobile-designsystem';
 import { useCanvasKit } from 'noya-renderer';
 import { delimitedPath } from 'noya-utils';
 import { decode } from 'noya-sketch-file';
 
-import Button from '../components/Button';
-import Layout from '../components/Layout';
-
-interface ToolbarProps {
-  onToggleLayerList: () => void;
-}
+interface ToolbarProps {}
 
 interface Item {
   icon: string;
@@ -46,7 +42,6 @@ function parseFilename(uri: string) {
 }
 
 const Toolbar: React.FC<ToolbarProps> = (props) => {
-  const { onToggleLayerList } = props;
   const [state] = useApplicationState();
   const CanvasKit = useCanvasKit();
   const dispatch = useDispatch();
@@ -192,7 +187,6 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
       {
         icon: 'image',
         onPress: onAddImage,
-        // active: isButtonActive(),
       },
       {
         icon: 'square',
@@ -224,40 +218,35 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   );
 
   const utilItems: Item[] = useMemo(
-    () => [
-      { icon: 'file', onPress: onOpenFile },
-      { icon: 'layers', onPress: onToggleLayerList },
-    ],
-    [onOpenFile, onToggleLayerList],
+    () => [{ icon: 'file', onPress: onOpenFile }],
+    [onOpenFile],
   );
 
   return (
-    <>
-      <ToolbarView>
-        <ToolbarContainer>
-          {drawItems.map(({ icon, onPress, active }: Item, idx: number) => (
-            <React.Fragment key={idx}>
-              <Button icon={icon} onPress={onPress} active={active} />
-              {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
-            </React.Fragment>
-          ))}
-          <Spacer />
-          {utilItems.map(({ icon, onPress, active }: Item, idx: number) => (
-            <React.Fragment key={idx}>
-              <Button icon={icon} onPress={onPress} active={active} />
-              {idx !== utilItems.length - 1 && <Layout.Queue size="medium" />}
-            </React.Fragment>
-          ))}
-        </ToolbarContainer>
-      </ToolbarView>
-    </>
+    <ToolbarView pointerEvents="box-none">
+      <ToolbarContainer>
+        {drawItems.map(({ icon, onPress, active }: Item, idx: number) => (
+          <React.Fragment key={idx}>
+            <Button icon={icon} onPress={onPress} active={active} />
+            {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
+          </React.Fragment>
+        ))}
+        <Spacer />
+        {utilItems.map(({ icon, onPress, active }: Item, idx: number) => (
+          <React.Fragment key={idx}>
+            <Button icon={icon} onPress={onPress} active={active} />
+            {idx !== utilItems.length - 1 && <Layout.Queue size="medium" />}
+          </React.Fragment>
+        ))}
+      </ToolbarContainer>
+    </ToolbarView>
   );
 };
 
 export default React.memo(Toolbar);
 
-const ToolbarView = styled(View)((p) => ({
-  bottom: 10,
+const ToolbarView = styled(View)((_p) => ({
+  top: 10,
   zIndex: 100,
   width: '100%',
   position: 'absolute',
@@ -265,12 +254,8 @@ const ToolbarView = styled(View)((p) => ({
   justifyContent: 'center',
 }));
 
-const ToolbarContainer = styled(View)((p) => ({
+const ToolbarContainer = styled(BoxView)((_p) => ({
   flexDirection: 'row',
-  paddingVertical: p.theme.sizes.spacing.small,
-  paddingHorizontal: p.theme.sizes.spacing.medium,
-  backgroundColor: p.theme.colors.sidebar.background,
-  borderRadius: 10,
 }));
 
 const Spacer = styled(View)((p) => ({

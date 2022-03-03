@@ -44,6 +44,5 @@ const ButtonText = styled(Text)((p) => ({
 }));
 
 const ButtonIcon = styled(Layout.Icon)((p) => ({
-  flex: 1,
   color: p.theme.colors.text,
 }));

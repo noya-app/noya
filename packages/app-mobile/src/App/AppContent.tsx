@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 import { View } from 'react-native';
 
@@ -6,13 +6,17 @@ import { WorkspaceAction, Selectors } from 'noya-state';
 import { decodeFontName } from 'noya-fonts';
 import { useDownloadFont, useFontManager } from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
+import { Expandable } from 'noya-mobile-designsystem';
 import useAppState from '../hooks/useAppState';
+import AttributeInspector from '../containers/AttributeInspector';
+import ThemeManager from '../containers/ThemeManager';
 import LayerList from '../containers/LayerList';
+import MainMenu from '../containers/MainMenu';
+import PageList from '../containers/PageList';
 import Toolbar from '../containers/Toolbar';
 import Canvas from '../containers/Canvas';
 
 const AppContent: React.FC<{}> = () => {
-  const [showLayerList, setShowLayerList] = useState(false);
   const { state, dispatch } = useAppState();
   const fontManager = useFontManager();
 
@@ -22,14 +26,6 @@ const AppContent: React.FC<{}> = () => {
     },
     [dispatch],
   );
-
-  const onToggleLayerList = useCallback(() => {
-    if (showLayerList) {
-      setShowLayerList(false);
-    } else {
-      setShowLayerList(true);
-    }
-  }, [showLayerList]);
 
   const downloadFont = useDownloadFont();
 
@@ -56,9 +52,17 @@ const AppContent: React.FC<{}> = () => {
   return (
     <StateProvider state={state.value} dispatch={handleDispatch}>
       <ContentContainer>
-        <Toolbar onToggleLayerList={onToggleLayerList} />
+        <Expandable position="left">
+          <MainMenu id="main-menu" icon="hamburger-menu" />
+          <PageList id="page-list" icon="file" />
+          <LayerList id="layers" icon="layers" />
+          <ThemeManager id="theme" icon="tokens" />
+        </Expandable>
+        <Expandable position="right">
+          <AttributeInspector id="inspector" icon="backpack" />
+        </Expandable>
+        <Toolbar />
         <Canvas />
-        {showLayerList && <LayerList />}
       </ContentContainer>
     </StateProvider>
   );
@@ -68,6 +72,6 @@ export default AppContent;
 
 const ContentContainer = styled(View)((p) => ({
   flex: 1,
-  backgroundColor: p.theme.colors.sidebar.background,
   position: 'relative',
+  backgroundColor: p.theme.colors.sidebar.background,
 }));

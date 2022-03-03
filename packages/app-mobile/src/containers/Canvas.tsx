@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   View,
-  Text,
+  // Text,
   LayoutChangeEvent,
   GestureResponderEvent,
 } from 'react-native';
@@ -15,7 +15,7 @@ import {
 import { AffineTransform, Point, createRect } from 'noya-geometry';
 import { Selectors, getCurrentPage } from 'noya-state';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
-import { FpsCounter } from '../components/FPSCounter';
+// import { FpsCounter } from '../components/FPSCounter';
 import useMultitouchGH, {
   GestureType,
   PanGesture,
@@ -290,15 +290,16 @@ const Canvas: React.FC<{}> = () => {
     [setCanvasSize, insets],
   );
 
-  const interactionView = useMemo(
-    () => (
-      <InteractionView>
-        <FpsCounter visible />
-        <Interaction>{state.interactionState.type}</Interaction>
-      </InteractionView>
-    ),
-    [state.interactionState.type],
-  );
+  // const interactionView = useMemo(
+  //   () => (
+  //     <InteractionView>
+  //       <FpsCounter visible />
+  //       <Interaction>{state.interactionState.type}</Interaction>
+  //     </InteractionView>
+  //   ),
+  //   [state.interactionState.type],
+  // );
+  // {interactionView}
 
   return (
     <CanvasWrapper
@@ -308,7 +309,6 @@ const Canvas: React.FC<{}> = () => {
       onResponderRelease={onResponderRelease}
       onLayout={onCanvasLayout}
     >
-      {interactionView}
       <CanvasRenderer />
     </CanvasWrapper>
   );
@@ -320,17 +320,17 @@ const CanvasWrapper = styled(View)(() => ({
   flex: 1,
 }));
 
-const InteractionView = styled(View)((p) => ({
-  zIndex: 10,
-  width: '50%',
-  maxWidth: 300,
-  position: 'absolute',
-  backgroundColor: p.theme.colors.inputBackground,
-  padding: p.theme.sizes.spacing.small,
-}));
+// const InteractionView = styled(View)((p) => ({
+//   zIndex: 10,
+//   width: '50%',
+//   maxWidth: 300,
+//   position: 'absolute',
+//   backgroundColor: p.theme.colors.inputBackground,
+//   padding: p.theme.sizes.spacing.small,
+// }));
 
-const Interaction = styled(Text)((p) => ({
-  color: p.theme.colors.text,
-  fontSize: 14,
-  textTransform: 'uppercase',
-}));
+// const Interaction = styled(Text)((p) => ({
+//   color: p.theme.colors.text,
+//   fontSize: 14,
+//   textTransform: 'uppercase',
+// }));
