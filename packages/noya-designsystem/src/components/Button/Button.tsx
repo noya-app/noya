@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import styled from 'styled-components';
-// import { Tooltip } from '..';
+import { Tooltip } from '../Tooltip';
 
 import { ButtonProps, ButtonVariant } from './types';
 
@@ -107,12 +107,11 @@ const ButtonRoot = forwardRef(function Button(
     </ButtonElement>
   );
 
-  // return tooltip ? (
-  //   <Tooltip content={tooltip}>{buttonElement}</Tooltip>
-  // ) : (
-  //   buttonElement
-  // );
-  return buttonElement;
+  return tooltip ? (
+    <Tooltip content={tooltip}>{buttonElement}</Tooltip>
+  ) : (
+    buttonElement
+  );
 });
 
 export const Button = memo(ButtonRoot);
