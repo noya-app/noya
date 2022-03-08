@@ -14,7 +14,16 @@ import {
 import { ControlledProps, SubmittableProps, TextInputProps } from './types';
 
 const ControlledTextInput = forwardRef(function ControlledTextInput(
-  { onKeyDown, value, onChange, autoCapitalize, ...rest }: ControlledProps,
+  {
+    value,
+    onChange,
+    onKeyDown,
+    spellCheck,
+    autoCorrect,
+    autoComplete,
+    autoCapitalize,
+    ...rest
+  }: ControlledProps,
   forwardedRef: ForwardedRef<TextInput>,
 ) {
   const onKeyPress = useCallback(
@@ -30,6 +39,16 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
       ref={forwardedRef}
       value={value}
       onKeyPress={onKeyDown ? onKeyPress : undefined}
+      autoCorrect={autoCorrect !== 'off'}
+      autoComplete={autoComplete}
+      spellCheck={
+        typeof spellCheck === 'string' ? spellCheck === 'true' : spellCheck
+      }
+      autoCapitalize={
+        autoCapitalize === 'off'
+          ? 'none'
+          : (autoCapitalize as 'sentences' | 'words' | 'characters')
+      }
       {...rest}
     />
   );
@@ -37,11 +56,14 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
 
 const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   {
-    onKeyDown,
     value,
     onSubmit,
-    allowSubmittingWithSameValue = false,
+    onKeyDown,
+    spellCheck,
+    autoCorrect,
+    autoComplete,
     autoCapitalize,
+    allowSubmittingWithSameValue = false,
     ...rest
   }: SubmittableProps,
   forwardedRef: ForwardedRef<TextInput>,
@@ -90,10 +112,21 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   return (
     <TextInput
       ref={forwardedRef}
+      {...rest}
+      value={internalValue}
       onChangeText={handleChange}
       onSubmitEditing={hnadleSubmit}
       onBlur={handleBlur}
-      {...rest}
+      autoCorrect={autoCorrect !== 'off'}
+      autoComplete={autoComplete}
+      spellCheck={
+        typeof spellCheck === 'string' ? spellCheck === 'true' : spellCheck
+      }
+      autoCapitalize={
+        autoCapitalize === 'off'
+          ? 'none'
+          : (autoCapitalize as 'sentences' | 'words' | 'characters')
+      }
     />
   );
 });

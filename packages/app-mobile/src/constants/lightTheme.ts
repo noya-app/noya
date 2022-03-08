@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
@@ -49,9 +51,8 @@ export const colors = {
 };
 
 export const fonts = {
-  normal: 'BlinkMacSystemFont',
-  //'\'BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Helvetica, Arial, sans-serif\'',
-  monospace: "Menlo, Monaco, Consolas, 'Courier New', monospace",
+  normal: Platform.OS === 'ios' ? 'AppleSDGothicNeo-Regular' : 'normal',
+  monospace: Platform.OS === 'ios' ? 'Menlo-Regular' : 'monospace',
 };
 
 // The last one, 0.85, I just eyeballed

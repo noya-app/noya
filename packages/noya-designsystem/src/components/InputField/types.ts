@@ -5,6 +5,10 @@ export type LabelPosition = 'start' | 'end';
 
 export type InputFieldVariant = 'normal' | 'bare';
 
+export interface InputFieldLabelProps {
+  children?: string;
+}
+
 export interface InputFieldRootProps {
   id?: string;
   flex?: string;

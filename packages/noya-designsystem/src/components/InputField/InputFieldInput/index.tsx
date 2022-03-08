@@ -78,7 +78,7 @@ export const InputElement = styled(TextInput).withConfig({
   }),
 );
 
-export const InputFieldInput = forwardRef(function InputFieldInput(
+const InputFieldInput = forwardRef(function InputFieldInput(
   props: TextInputProps & { textAlign?: Property.TextAlign; variant?: 'bare' },
   forwardedRef: ForwardedRef<HTMLInputElement>,
 ) {
@@ -96,3 +96,5 @@ export const InputFieldInput = forwardRef(function InputFieldInput(
     />
   );
 });
+
+export default InputFieldInput;

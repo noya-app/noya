@@ -1,10 +1,11 @@
-import React, { Children, isValidElement, useMemo } from 'react';
+import React, { Children, isValidElement, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { InputFieldRootProps } from '../types';
 import { InputFieldContext } from '../context';
+import InputFieldLabel from '../InputFieldLabel';
 
-export default function InputFieldRoot({
+function InputFieldRoot({
   id,
   flex,
   children,
@@ -12,16 +13,15 @@ export default function InputFieldRoot({
   labelPosition = 'end',
   labelSize = 6,
 }: InputFieldRootProps) {
-  // const childrenArray = Children.toArray(children);
+  const childrenArray = Children.toArray(children);
 
   const hasDropdown = false;
   // childrenArray.some(
   //   (child) => isValidElement(child) && child.type === DropdownMenu,
   // );
-  const hasLabel = false;
-  // childrenArray.some(
-  //   (child) => isValidElement(child) && child.type === Label,
-  // );
+  const hasLabel = childrenArray.some(
+    (child) => isValidElement(child) && child.type === InputFieldLabel,
+  );
 
   const contextValue = useMemo(
     () => ({ labelPosition, labelSize, hasDropdown, hasLabel }),
@@ -36,6 +36,8 @@ export default function InputFieldRoot({
     </InputFieldContext.Provider>
   );
 }
+
+export default memo(InputFieldRoot);
 
 const RootContainer = styled.div<{ size?: number; flex?: string }>(
   ({ theme, flex, size }) => ({

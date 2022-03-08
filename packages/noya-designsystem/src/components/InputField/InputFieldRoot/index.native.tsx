@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { InputFieldRootProps } from '../types';
 import { InputFieldContext } from '../context';
+import InputFieldLabel from '../InputFieldLabel';
 
 export default function InputFieldRoot({
   flex,
@@ -12,16 +13,16 @@ export default function InputFieldRoot({
   labelPosition = 'end',
   labelSize = 6,
 }: InputFieldRootProps) {
-  // const childrenArray = Children.toArray(children);
+  const childrenArray = Children.toArray(children);
 
   const hasDropdown = false;
   // childrenArray.some(
   //   (child) => isValidElement(child) && child.type === DropdownMenu,
   // );
-  const hasLabel = false;
-  // childrenArray.some(
-  //   (child) => isValidElement(child) && child.type === Label,
-  // );
+
+  const hasLabel = childrenArray.some(
+    (child) => isValidElement(child) && child.type === InputFieldLabel,
+  );
 
   const contextValue = useMemo(
     () => ({ labelPosition, labelSize, hasDropdown, hasLabel }),
