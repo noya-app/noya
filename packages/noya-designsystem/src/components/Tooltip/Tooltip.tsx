@@ -5,9 +5,9 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
 import { TooltipProps } from './types';
 
-// const Arrow = styled(TooltipPrimitive.Arrow)(({ theme }) => ({
-//   fill: theme.colors.popover.background,
-// }));
+const Arrow = styled(TooltipPrimitive.Arrow)(({ theme }) => ({
+  fill: theme.colors.popover.background,
+}));
 
 const Content = styled(TooltipPrimitive.Content)(({ theme }) => ({
   ...theme.textStyles.small,
@@ -25,7 +25,7 @@ export default memo(function Tooltip({ children, content }: TooltipProps) {
       <TooltipPrimitive.Trigger as={Slot}>{children}</TooltipPrimitive.Trigger>
       <Content side="bottom" align="center" sideOffset={2}>
         {content}
-        {/* <Arrow /> */}
+        <Arrow />
       </Content>
     </TooltipPrimitive.Root>
   );
