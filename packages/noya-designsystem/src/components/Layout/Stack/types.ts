@@ -1,3 +1,3 @@
 export interface StackProps {
-  size: 'small' | 'medium' | 'large';
+  size: 'small' | 'medium' | 'large' | number;
 }

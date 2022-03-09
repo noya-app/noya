@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import type { IconProps } from '../Layout/Icon/types';
+
 export type ButtonVariant = 'normal' | 'thin' | 'none';
 
 export interface ButtonProps {
@@ -12,3 +14,6 @@ export interface ButtonProps {
   tooltip?: ReactNode;
   onClick?: () => void;
 }
+
+export type IconButtonProps = Omit<ButtonProps, 'children' | 'flex'> &
+  IconProps;

@@ -22,14 +22,12 @@ const ButtonElement = styled(View)<{
   paddingRight: variant === 'none' ? 0 : variant === 'thin' ? 1 : 6,
   paddingBottom: variant === 'none' ? 0 : 4,
   paddingLeft: variant === 'none' ? 0 : variant === 'thin' ? 1 : 6,
-  background: active
+  backgroundColor: active
     ? theme.colors.primary
     : variant === 'none'
     ? 'transparent'
     : theme.colors.inputBackground,
   opacity: disabled ? 0.25 : 1,
-  alignItems: 'center',
-  justifyContent: 'center',
   shadowColor: 'rgba(0,0,0,0.2)',
   shadowOpacity: '1',
 }));
