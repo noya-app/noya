@@ -2,8 +2,8 @@ import React, { memo, useCallback } from 'react';
 
 import type { KeyDownParams } from '../../internal/TextInput/types';
 import type { InputFieldNumberInputProps } from '../types';
-import { parseNumber, handleNudge } from './utils';
 import InputFieldInput from '../InputFieldInput';
+import { parseNumber, handleNudge } from './utils';
 
 function InputFieldNumberInput(props: InputFieldNumberInputProps) {
   const { value, placeholder, onNudge } = props;
