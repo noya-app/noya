@@ -39,7 +39,7 @@ export default function DimensionsInspector({
         <Layout.Queue size={2} />
         <Layout.Center>
           <IconButton
-            name={constrainProportions ? 'LockClosedIcon' : 'LockOpen1Icon'}
+            name={constrainProportions ? 'lock-closed' : 'lock-open-1'}
             size={12}
             onClick={useCallback(
               () => onSetConstraintProportions(!constrainProportions),

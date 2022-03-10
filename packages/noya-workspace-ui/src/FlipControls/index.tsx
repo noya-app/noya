@@ -35,7 +35,7 @@ export default function FlipControls({
         onClick={handleSetIsFlippedHorizontal}
         active={isFlippedHorizontal}
         disabled={!supportsFlipping}
-        name="FlipHorizontalIcon"
+        name="flip-horizontal"
         variant="normal"
       />
       <Layout.Queue size="small" />
@@ -45,7 +45,7 @@ export default function FlipControls({
         onClick={handleSetIsFlippedVertical}
         active={isFlippedVertical}
         disabled={!supportsFlipping}
-        name="FlipVerticalIcon"
+        name="flip-vertical"
         variant="normal"
       />
     </Layout.Row>

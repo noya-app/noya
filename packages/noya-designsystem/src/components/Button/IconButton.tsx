@@ -11,7 +11,12 @@ export const IconButton = memo(
   ) {
     return (
       <Button ref={ref} variant={variant ?? 'none'} {...props}>
-        <Layout.Icon name={name} color={color} selected={selected} />
+        <Layout.Icon
+          name={name}
+          color={color}
+          selected={selected}
+          size={size ?? 16}
+        />
       </Button>
     );
   }),

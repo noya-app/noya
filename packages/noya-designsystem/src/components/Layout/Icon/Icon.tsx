@@ -1,21 +1,30 @@
 import React, { memo } from 'react';
-import { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
-import * as Icons from 'noya-icons';
+import selectionFile from './selection.json';
+import { createGlyphsMap } from './utils';
 import { IconProps } from './types';
 
-const Icon: React.FC<IconProps> = ({ name, color, size, selected }) => {
-  const { icon: iconColor, iconSelected: iconSelectedColor } =
-    useTheme().colors;
+const ghlyps = createGlyphsMap(selectionFile);
 
-  const Icon = Icons[name as keyof typeof Icons];
-
-  return (
-    <Icon
-      color={color ?? (selected ? iconSelectedColor : iconColor)}
-      {...(size && { width: size, height: size })}
-    />
-  );
-};
+const Icon = styled.span<IconProps>(
+  ({ theme, name, color, selected, size }) => ({
+    fontFamily: 'icomoon',
+    speak: 'never',
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+    fontVariant: 'normal',
+    textTransform: 'none',
+    lineHeight: 1,
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale',
+    '&:before': {
+      display: 'block',
+      content: `"\\${ghlyps[name]}"`,
+    },
+    color: color ?? (selected ? theme.colors.iconSelected : theme.colors.icon),
+    fontSize: size ? `${size}px` : '12px',
+  }),
+);
 
 export default memo(Icon);

@@ -1,4 +1,5 @@
-import { IconButton, Spacer } from 'noya-web-designsystem';
+import { Spacer } from 'noya-web-designsystem';
+import { IconButton } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { useCallback } from 'react';
 import styled from 'styled-components';
@@ -69,7 +70,7 @@ export default function DimensionsInspector({
         <DimensionInput value={width} onSetValue={onSetWidth} label="W" />
         <Spacer.Horizontal size={2} />
         <IconButton
-          iconName={constrainProportions ? 'LockClosedIcon' : 'LockOpen1Icon'}
+          name={constrainProportions ? 'lock-closed' : 'lock-open-1'}
           size={12}
           onClick={useCallback(
             () => onSetConstraintProportions(!constrainProportions),
