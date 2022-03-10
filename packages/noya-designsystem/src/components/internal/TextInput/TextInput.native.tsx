@@ -90,7 +90,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     [value, internalValue, allowSubmittingWithSameValue, onSubmit],
   );
 
-  const hnadleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(() => {
     handleEditFinish(false);
   }, [handleEditFinish]);
 
@@ -115,7 +115,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
       {...rest}
       value={internalValue}
       onChangeText={handleChange}
-      onSubmitEditing={hnadleSubmit}
+      onSubmitEditing={handleSubmit}
       onBlur={handleBlur}
       autoCorrect={autoCorrect !== 'off'}
       autoComplete={autoComplete}
