@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from 'react';
 
 import { round } from 'noya-utils';
-import { InputField } from '../../components/InputField';
+import { InputField } from 'noya-designsystem';
 import type { DimensionInputProps } from './types';
 
 export default memo(function DimensionInput({

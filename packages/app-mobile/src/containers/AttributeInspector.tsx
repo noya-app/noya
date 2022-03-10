@@ -8,11 +8,8 @@ import {
   Selectors,
   SetNumberMode,
 } from 'noya-state';
-import {
-  Layout,
-  DimensionsInspector,
-  withSeparatorElements,
-} from 'noya-designsystem';
+import { Layout, withSeparatorElements } from 'noya-designsystem';
+import { DimensionsInspector } from 'noya-workspace-ui';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 

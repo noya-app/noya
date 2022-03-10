@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import { Layout, IconButton } from '../../components';
+import { Layout, IconButton } from 'noya-designsystem';
 
 export interface FlipControlsProps {
   supportsFlipping: boolean;

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import { IconButton, Layout } from '../../components';
+import { IconButton, Layout } from 'noya-designsystem';
 import FlipControls from '../FlipControls';
 import { DimensionsInspectorProps } from './types';
 import DimensionInput from './DimensionInput';

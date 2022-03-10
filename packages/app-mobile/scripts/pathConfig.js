@@ -18,6 +18,7 @@ const allowList = [
   'noya-colorpicker',
   'noya-google-fonts',
   'noya-designsystem',
+  'noya-workspace-ui',
   'noya-react-canvaskit',
   'noya-native-canvaskit',
   'noya-app-state-context',
