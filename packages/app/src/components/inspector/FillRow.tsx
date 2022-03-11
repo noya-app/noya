@@ -15,9 +15,8 @@ import {
   withSeparatorElements,
 } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
+import { DimensionInput, DimensionValue } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-import DimensionInput from './DimensionInput';
-import { DimensionValue } from './DimensionsInspector';
 import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,

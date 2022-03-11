@@ -1,9 +1,9 @@
+import React from 'react';
+
+import { DimensionInput, DimensionValue } from 'noya-workspace-ui';
 import { Spacer } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
-import React from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-import DimensionInput from './DimensionInput';
-import { DimensionValue } from './DimensionsInspector';
 
 function roundNumber(number: number, roundTo: number) {
   return Number(number.toFixed(roundTo));

@@ -8,6 +8,7 @@ const Center: React.FC<PropsWithChildren<{}>> = ({ children }) => {
 export default memo(Center);
 
 const CenterView = styled.div((_p) => ({
+  display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
 }));

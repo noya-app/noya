@@ -6,8 +6,7 @@ import { BorderCenterIcon } from 'noya-icons';
 import { BorderInsideIcon } from 'noya-icons';
 import { BorderOutsideIcon } from 'noya-icons';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-import DimensionInput from './DimensionInput';
-import { DimensionValue } from './DimensionsInspector';
+import { DimensionInput, DimensionValue } from 'noya-workspace-ui';
 import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,
