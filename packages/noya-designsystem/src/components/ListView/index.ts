@@ -6,4 +6,9 @@ export {
   EditableRowTitle,
   DragIndicatorElement,
 } from './ListView';
-export type { ListViewRowProps, ListViewClickInfo } from './types';
+export type {
+  ItemInfo,
+  ListViewRowProps,
+  IVirtualizedList,
+  ListViewClickInfo,
+} from './types';
