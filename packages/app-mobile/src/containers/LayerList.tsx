@@ -5,9 +5,9 @@ import { visit } from 'tree-visit';
 
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
-import Sketch from 'noya-file-format';
 import { Layers, PageLayer, Selectors } from 'noya-state';
-import Layout from '../components/Layout';
+import { Layout } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 
 interface LayerListProps {}
 
@@ -101,9 +101,7 @@ function typeToIcon(item: LayerListItem) {
 
 const LayerList: React.FC<LayerListProps> = (props) => {
   const [state, dispatch] = useApplicationState();
-
   const page = useSelector(Selectors.getCurrentPage);
-
   const selectedLayerIds = useShallowArray(state.selectedLayerIds);
   const items = useDeepMemo(flattenLayerList(page, selectedLayerIds));
 
@@ -112,7 +110,6 @@ const LayerList: React.FC<LayerListProps> = (props) => {
       dispatch('interaction', ['reset']);
       dispatch('selectLayer', item.id, 'replace');
     };
-
     return (
       <ItemView
         key={item.id}
@@ -127,35 +124,19 @@ const LayerList: React.FC<LayerListProps> = (props) => {
   };
 
   return (
-    <LayerListView>
-      <Container>
-        <HeaderView>
-          <Icon name="layers" size={16} />
-          <Title>Layer list</Title>
-        </HeaderView>
-        <StyledScrollView>{items.map(renderItem)}</StyledScrollView>
-      </Container>
-    </LayerListView>
+    <Container>
+      <HeaderView>
+        <Icon name="layers" size={16} />
+        <Title>Layer list</Title>
+      </HeaderView>
+      <StyledScrollView>{items.map(renderItem)}</StyledScrollView>
+    </Container>
   );
 };
 
 export default memo(LayerList);
 
-const LayerListView = styled(View)((p) => ({
-  position: 'absolute',
-  zIndex: 100,
-  right: 10,
-  top: 10,
-  bottom: 10,
-}));
-
-const Container = styled(View)((p) => ({
-  backgroundColor: p.theme.colors.sidebar.background,
-  padding: p.theme.sizes.spacing.medium,
-  borderRadius: 4,
-  width: 250,
-  flex: 1,
-}));
+const Container = styled(View)((p) => ({}));
 
 const HeaderView = styled(View)((p) => ({
   flexDirection: 'row',
@@ -185,7 +166,7 @@ const ItemView = styled(TouchableOpacity)<{ depth: number; selected: boolean }>(
     alignItems: 'center',
     paddingVertical: p.theme.sizes.spacing.micro,
     marginBottom: p.theme.sizes.spacing.small,
-    paddingLeft: (16 + p.theme.sizes.spacing.small) * p.depth,
+    paddingLeft: (16 + p.theme.sizes.spacing.small) * p.depth + 10,
     backgroundColor: p.selected ? p.theme.colors.primaryDark : 'transparent',
     borderRadius: 4,
   }),

@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const colors = {
   text: 'rgb(38, 48, 83)',
   textMuted: 'rgb(85, 85, 85)',
@@ -49,69 +51,77 @@ export const colors = {
 };
 
 export const fonts = {
-  normal:
-    "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-  monospace: "Menlo, Monaco, Consolas, 'Courier New', monospace",
+  normal: Platform.OS === 'ios' ? 'AppleSDGothicNeo-Regular' : 'normal',
+  monospace: Platform.OS === 'ios' ? 'Menlo-Regular' : 'monospace',
 };
 
 // The last one, 0.85, I just eyeballed
-const typeScale = [3.052, 2.441, 1.953, 1.563, 1.25, 1, 0.85]; // Major third
+const baseFontSize = 16;
+const typeScale = [
+  3.052 * baseFontSize,
+  2.441 * baseFontSize,
+  1.953 * baseFontSize,
+  1.563 * baseFontSize,
+  1.25 * baseFontSize,
+  1 * baseFontSize,
+  0.85 * baseFontSize,
+]; // Major third
 
 export const textStyles = {
   title: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[0]}rem`,
+    fontSize: typeScale[0],
     fontWeight: 'bold',
-    lineHeight: '1.4',
+    lineHeight: `${typeScale[0] * 1.4}px`,
   },
   subtitle: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[3]}rem`,
+    fontSize: typeScale[3],
     fontWeight: 500,
-    lineHeight: '1.75',
+    lineHeight: `${typeScale[3] * 1.75}px`,
   },
   heading1: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[2]}rem`,
+    fontSize: typeScale[2],
     fontWeight: 500,
-    lineHeight: '1.75',
+    lineHeight: `${typeScale[2] * 1.75}px`,
   },
   heading2: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[3]}rem`,
+    fontSize: typeScale[3],
     fontWeight: 500,
-    lineHeight: '1.75',
+    lineHeight: `${typeScale[3] * 1.75}px`,
   },
   heading3: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[4]}rem`,
+    fontSize: typeScale[4],
     fontWeight: 500,
-    lineHeight: '1.75',
+    lineHeight: `${typeScale[4] * 1.75}px`,
   },
   body: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[5]}rem`,
+    fontSize: typeScale[5],
     fontWeight: 400,
-    lineHeight: '1.75',
+    lineHeight: `${typeScale[5] * 1.75}px`,
   },
   small: {
     fontFamily: fonts.normal,
-    fontSize: `${typeScale[6]}rem`,
+    fontSize: typeScale[6],
     fontWeight: 400,
-    lineHeight: '1.4',
+    lineHeight: `${typeScale[6] * 1.4}px`,
   },
   code: {
     fontFamily: fonts.monospace,
     fontSize: '90%',
-    lineHeight: '1.5',
+    lineHeight: `${baseFontSize * 0.9 * 1.5}px`,
   },
   label: {
     fontFamily: fonts.normal,
-    fontSize: '0.62rem',
+    fontSize: 0.62 * baseFontSize,
     fontWeight: 400,
-    lineHeight: '1.4',
+    lineHeight: `${baseFontSize & (0.62 * 1.4)}px`,
     textTransform: 'uppercase',
-    letterSpacing: '0.4px',
+    letterSpacing: 0.4,
   },
 };
 

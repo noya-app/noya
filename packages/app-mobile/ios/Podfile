@@ -4,13 +4,6 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '12.0'
 
-def fix_config(config)
-  # https://github.com/CocoaPods/CocoaPods/issues/8891
-  if config.build_settings['DEVELOPMENT_TEAM'].nil?
-    config.build_settings['DEVELOPMENT_TEAM'] = 'WC59N2X3FV'
-  end
-end
-
 target 'noyamobile' do
   use_expo_modules!
   post_integrate do |installer|
@@ -38,16 +31,24 @@ target 'noyamobile' do
     react_native_post_install(installer)
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
-    # Apply developer id for pods?
-    # installer.generated_projects.each do |project|
-    #   project.build_configurations.each do |config|
-    #       fix_config(config)
-    #   end
-    #   project.targets.each do |target|
-    #     target.build_configurations.each do |config|
-    #       fix_config(config)
-    #     end
-    #   end
-    # end
+    installer.pods_project.targets.each do |target|
+      # Fix bundle targets' 'Signing Certificate' to 'Sign to Run Locally'
+      if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
+          target.build_configurations.each do |config|
+              config.build_settings['CODE_SIGN_IDENTITY[sdk=macosx*]'] = '-'
+          end
+      end
+    end
+
+   		# For Mac Catalyst release build. XCode v13, ReactNative v0.64
+		installer.aggregate_targets.each do |aggregate_target|
+			aggregate_target.user_project.native_targets.each do |target|
+				target.build_configurations.each do |config|
+				config.build_settings['LIBRARY_SEARCH_PATHS'] = ['$(SDKROOT)/usr/lib/swift', '$(inherited)']
+				end
+			end
+			aggregate_target.user_project.save
+		end
+
   end
 end

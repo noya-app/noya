@@ -17,6 +17,8 @@ const allowList = [
   'noya-sketch-model',
   'noya-colorpicker',
   'noya-google-fonts',
+  'noya-designsystem',
+  'noya-workspace-ui',
   'noya-react-canvaskit',
   'noya-native-canvaskit',
   'noya-app-state-context',
@@ -35,6 +37,14 @@ const getPathConfigs = (appRootDir) => {
     '@shopify/react-native-skia': path.resolve(
       appRootDir,
       './node_modules/@shopify/react-native-skia',
+    ),
+    'react-native-vector-icons': path.resolve(
+      appRootDir,
+      './node_modules/react-native-vector-icons',
+    ),
+    'react-native-reanimated': path.resolve(
+      appRootDir,
+      './node_modules/react-native-reanimated',
     ),
   };
 

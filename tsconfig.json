@@ -9,6 +9,9 @@
       "@shopify/react-native-skia": [
         "./packages/app-mobile/node_modules/@shopify/react-native-skia"
       ],
+      "react-native-reanimated": [
+        "./packages/app-mobile/node_modules/react-native-reanimated"
+      ],
       /* Include path to all package src index files */
       "*": ["./*/src"]
     }

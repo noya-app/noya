@@ -35,3 +35,16 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Font face for noya-designsystem icons */
+@font-face {
+  font-family: 'icomoon';
+  src: url('./fonts/icomoon.eot?vpywm');
+  src: url('./fonts/icomoon.eot?vpywm#iefix') format('embedded-opentype'),
+    url('./fonts/icomoon.ttf?vpywm') format('truetype'),
+    url('./fonts/icomoon.woff?vpywm') format('woff'),
+    url('./fonts/icomoon.svg?vpywm#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
