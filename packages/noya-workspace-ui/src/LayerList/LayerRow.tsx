@@ -78,15 +78,22 @@ const LayerRow = memo(
       onChangeIsLocked(false);
     }, [onChangeIsLocked]);
 
-    const titleElement = <TreeView.RowTitle>{name}</TreeView.RowTitle>;
+    const rowSelected = !isDragging && selected;
+    const rowHovered = !isDragging && hovered;
+
+    const titleElement = (
+      <TreeView.RowTitle disable={!visible} selected={rowSelected}>
+        {name}
+      </TreeView.RowTitle>
+    );
 
     return (
       <TreeView.Row<LayerMenuItemType>
         ref={forwardedRef}
         onHoverChange={handleHoverChange}
-        selected={!isDragging && selected}
+        selected={rowSelected}
         disabled={!visible}
-        hovered={!isDragging && hovered}
+        hovered={rowHovered}
         {...props}
       >
         {isEditing ? (

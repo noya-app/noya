@@ -39,14 +39,19 @@ import type {
   ListViewRootProps,
   ListRowMarginType,
   ListRowContextValue,
+  ListRowContainerProps,
 } from './types';
+import { getPositionMargin } from './utils';
 
-const ListViewRowTitle = styled.span(({ theme }) => ({
-  flex: '1 1 0',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'pre',
-}));
+// `disabled` and `selected` props are for native compability only
+const ListViewRowTitle = styled.span<{ disabled: boolean; selected: boolean }>(
+  ({ theme }) => ({
+    flex: '1 1 0',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'pre',
+  }),
+);
 
 export const ListRowContext = createContext<ListRowContextValue>({
   marginType: 'none',
@@ -99,26 +104,11 @@ function ListViewEditableRowTitle({
   );
 }
 
-function getPositionMargin(marginType: ListRowMarginType) {
-  return {
-    top: marginType === 'top' || marginType === 'vertical' ? 8 : 0,
-    bottom: marginType === 'bottom' || marginType === 'vertical' ? 8 : 0,
-  };
-}
-
 /* ----------------------------------------------------------------------------
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled.div<{
-  marginType: ListRowMarginType;
-  selected: boolean;
-  selectedPosition: ListRowPosition;
-  disabled: boolean;
-  hovered: boolean;
-  isSectionHeader: boolean;
-  showsActiveState: boolean;
-}>(
+const RowContainer = styled.div<ListRowContainerProps>(
   ({
     theme,
     marginType,

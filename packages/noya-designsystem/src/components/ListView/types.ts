@@ -34,6 +34,12 @@ export interface RenderProps<T> {
   virtualized?: Size;
 }
 
+export interface EditableRowProps {
+  value: string;
+  onSubmitEditing: (value: string) => void;
+  autoFocus: boolean;
+}
+
 export interface IVirtualizedList {
   scrollToIndex(index: number): void;
 }
@@ -75,4 +81,15 @@ export interface ListViewRowProps<MenuItemType extends string = string> {
   menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
+}
+
+export interface ListRowContainerProps {
+  id?: string;
+  marginType: ListRowMarginType;
+  selected: boolean;
+  selectedPosition: ListRowPosition;
+  disabled: boolean;
+  hovered: boolean;
+  isSectionHeader: boolean;
+  showsActiveState: boolean;
 }
