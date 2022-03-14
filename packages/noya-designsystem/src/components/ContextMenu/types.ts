@@ -3,7 +3,7 @@ import type { MenuItem } from '../internal/Menu';
 
 export interface MenuItemProps<T extends string> {
   value?: T;
-  children: ReactNode;
+  children?: ReactNode;
   onSelect: (value: T) => void;
   checked: boolean;
   disabled: boolean;

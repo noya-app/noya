@@ -22,12 +22,13 @@ import {
   StyleSheet,
   TextProps,
   ListRenderItem,
-  TouchableOpacity,
-  GestureResponderEvent,
 } from 'react-native';
 import styled from 'styled-components';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { InputField } from '../InputField';
+import ContextMenu from '../ContextMenu';
+import Touchable from '../internal/Touchable';
 import { Layout } from '../Layout';
 import {
   RenderProps,
@@ -182,11 +183,11 @@ const ListViewRow = forwardRef(function ListViewRow<
     onPress,
     // onDoubleClick,
     // onHoverChange,
+    menuItems,
+    onSelectMenuItem,
     children,
     onContextMenu,
-  }: // menuItems,
-  // onSelectMenuItem,
-  ListViewRowProps<MenuItemType>,
+  }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<View>,
 ) {
   const {
@@ -197,25 +198,19 @@ const ListViewRow = forwardRef(function ListViewRow<
     pressEventName,
   } = useContext(ListRowContext);
 
-  const handlePress = useCallback(
-    (event: GestureResponderEvent) => {
-      onPress?.({
-        // TODO
-        shiftKey: false,
-        altKey: false,
-        metaKey: false,
-        ctrlKey: false,
-      });
-    },
-    [onPress],
-  );
+  const handleLongPress = useCallback(() => {
+    onContextMenu?.();
+  }, [onContextMenu]);
 
-  const handleLongPress = useCallback(
-    (event: GestureResponderEvent) => {
-      onContextMenu?.();
-    },
-    [onContextMenu],
-  );
+  const handlePress = useCallback(() => {
+    onPress?.({
+      // TODO
+      shiftKey: false,
+      altKey: false,
+      metaKey: false,
+      ctrlKey: false,
+    });
+  }, [onPress]);
 
   const renderContent = (
     {
@@ -226,14 +221,12 @@ const ListViewRow = forwardRef(function ListViewRow<
     ref: Ref<View>,
   ) => {
     const element = (
-      <TouchableOpacity onPress={handlePress} onLongPress={handleLongPress}>
+      <Touchable onPress={handlePress} onLongPress={handleLongPress}>
         <RowContainer
           ref={ref}
-          // onContextMenu={onContextMenu}
           isSectionHeader={isSectionHeader}
           id={id}
           // {...hoverProps}
-          // onDoubleClick={handleDoubleClick}
           marginType={marginType}
           disabled={disabled}
           hovered={hovered}
@@ -243,7 +236,6 @@ const ListViewRow = forwardRef(function ListViewRow<
           // {...renderProps}
           // {...mergeEventHandlers(
           //   { onPointerDown: renderProps.onPointerDown },
-          //   { [pressEventName]: handlePress },
           // )}
         >
           {relativeDropPosition && (
@@ -255,8 +247,19 @@ const ListViewRow = forwardRef(function ListViewRow<
           {depth > 0 && <Layout.Queue size={depth * indentation} />}
           {children}
         </RowContainer>
-      </TouchableOpacity>
+      </Touchable>
     );
+
+    if (menuItems && onSelectMenuItem) {
+      return (
+        <ContextMenu<MenuItemType>
+          items={menuItems}
+          onSelect={onSelectMenuItem}
+        >
+          {element}
+        </ContextMenu>
+      );
+    }
 
     return element;
   };

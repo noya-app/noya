@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Slot } from '@radix-ui/react-slot';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 
-import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import { Layout } from '../Layout';
 import {
@@ -70,7 +69,7 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
         onSelect={handleSelectItem}
       >
         <StyledItemIndicator>
-          <CheckIcon />
+          <Layout.Icon name="check" />
         </StyledItemIndicator>
         {children}
       </CheckboxItemElement>
@@ -104,7 +103,7 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
         <>
           <Layout.Queue />
           <Layout.Queue size={16} />
-          <ChevronRightIcon />
+          <Layout.Icon name="chevron-right" />
         </>
       )}
     </ItemElement>
