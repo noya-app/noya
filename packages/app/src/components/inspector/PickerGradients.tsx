@@ -1,15 +1,15 @@
+import { memo, useCallback, useState } from 'react';
 import {
   Button,
   ContextMenu,
   Divider,
   getGradientBackground,
-  ListView,
   MenuItem,
   Select,
   Spacer,
 } from 'noya-web-designsystem';
+import { ListView } from 'noya-designsystem';
 import type Sketch from 'noya-file-format';
-import { memo, useCallback, useState } from 'react';
 import { useOpenInputDialog } from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {

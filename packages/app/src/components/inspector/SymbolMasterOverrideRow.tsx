@@ -3,7 +3,8 @@ import { memo, ReactNode, useCallback } from 'react';
 import Sketch from 'noya-file-format';
 import { LayerIcon } from 'noya-workspace-ui';
 import { useApplicationState } from 'noya-app-state-context';
-import { Divider, Spacer, TreeView } from 'noya-web-designsystem';
+import { Divider, Spacer } from 'noya-web-designsystem';
+import { TreeView } from 'noya-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

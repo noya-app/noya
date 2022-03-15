@@ -9,8 +9,8 @@ import {
   MenuItem,
   RelativeDropPosition,
   Spacer,
-  TreeView,
 } from 'noya-web-designsystem';
+import { TreeView } from 'noya-designsystem';
 import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';

@@ -1,6 +1,8 @@
-import { Select, Spacer, TreeView } from 'noya-web-designsystem';
 import { useMemo, useState } from 'react';
 import styled from 'styled-components';
+
+import { TreeView } from 'noya-designsystem';
+import { Select, Spacer } from 'noya-web-designsystem';
 import { useApplicationState } from 'noya-app-state-context';
 
 type Preset = { name: string; width: number; height: number };
