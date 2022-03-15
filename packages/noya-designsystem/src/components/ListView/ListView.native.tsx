@@ -45,6 +45,7 @@ import { getPositionMargin } from './utils';
 
 const StyledTitle = styled(Text)<{ disabled: boolean; selected: boolean }>(
   ({ theme, selected, disabled }) => ({
+    flex: 1,
     overflow: 'hidden',
     color: selected
       ? 'white'

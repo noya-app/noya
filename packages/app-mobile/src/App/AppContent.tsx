@@ -60,7 +60,7 @@ const AppContent: React.FC<{}> = () => {
             id="layers"
             icon="layers"
             filter={layersFilter}
-            size={{ width: 250, height: 250 }}
+            size={{ width: 350, height: 250 }}
           />
           <ThemeManager id="theme" icon="tokens" />
         </Expandable>

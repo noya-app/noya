@@ -13,17 +13,16 @@ import {
   styles,
   CHECKBOX_WIDTH,
   SEPARATOR_ITEM,
-  KeyboardShortcut,
   CHECKBOX_RIGHT_INSET,
 } from '../internal/Menu';
 import { MenuItemProps, MenuProps } from './types';
 import { TouchableListener } from '../internal/Touchable';
 
+const SeparatorElement = styled(View)(styles.separatorStyle);
+
 /* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
-
-const SeparatorElement = styled(View)(styles.separatorStyle);
 
 const ItemText = styled(Text)((props) => ({
   ...props.theme.textStyles.small,
@@ -163,6 +162,18 @@ function ContextMenuRoot<T extends string>({
     [setState],
   );
 
+  const onClose = useCallback(() => {
+    setState({ visible: false, x: 0, y: 0 });
+  }, [setState]);
+
+  const handleSelect = useCallback(
+    (value: T) => {
+      onClose();
+      onSelect(value);
+    },
+    [onSelect, onClose],
+  );
+
   return (
     <RootContainer>
       {/* {isNested ? (
@@ -190,7 +201,7 @@ function ContextMenuRoot<T extends string>({
                       checked={item.checked ?? false}
                       disabled={item.disabled ?? false}
                       icon={item.icon}
-                      onSelect={onSelect}
+                      onSelect={handleSelect}
                       items={item.items}
                       shortcut={item.shortcut}
                       label={item.title}

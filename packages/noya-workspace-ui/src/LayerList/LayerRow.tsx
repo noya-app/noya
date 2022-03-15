@@ -13,9 +13,8 @@ import {
   IconButton,
   withSeparatorElements,
 } from 'noya-designsystem';
+import { useDesignSystemConfiguration } from 'noya-ui';
 import type { LayerMenuItemType } from '../hooks/useLayerMenu';
-
-const iconSize = 10;
 
 const LayerRow = memo(
   forwardRef(function LayerRow(
@@ -46,6 +45,7 @@ const LayerRow = memo(
     },
     forwardedRef: ForwardedRef<HTMLLIElement>,
   ) {
+    const platform = useDesignSystemConfiguration().platform;
     const [hovered, setHovered] = useState(false);
 
     const handleHoverChange = useCallback(
@@ -83,6 +83,10 @@ const LayerRow = memo(
     const rowSelected = !isDragging && selected;
     const rowHovered = !isDragging && hovered;
 
+    // TODO: check for external mouse? on tablets
+    const showIcon =
+      platform === 'ios' || platform === 'android' ? selected : hovered;
+
     const titleElement = (
       <TreeView.RowTitle disable={!visible} selected={rowSelected}>
         {name}
@@ -115,14 +119,12 @@ const LayerRow = memo(
                   name="lock-closed"
                   selected={selected}
                   onClick={handleSetUnlocked}
-                  size={iconSize}
                 />
-              ) : hovered ? (
+              ) : showIcon ? (
                 <IconButton
                   name="lock-open-1"
                   selected={selected}
                   onClick={handleSetLocked}
-                  size={iconSize}
                 />
               ) : null,
               !visible ? (
@@ -130,14 +132,12 @@ const LayerRow = memo(
                   name="eye-closed"
                   selected={selected}
                   onClick={handleSetVisible}
-                  size={iconSize}
                 />
-              ) : hovered ? (
+              ) : showIcon ? (
                 <IconButton
                   name="eye-open"
                   selected={selected}
                   onClick={handleSetHidden}
-                  size={iconSize}
                 />
               ) : isLocked ? (
                 <Layout.Queue size={15} />
