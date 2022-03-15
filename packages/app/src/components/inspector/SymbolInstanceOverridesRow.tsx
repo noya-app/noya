@@ -1,5 +1,8 @@
+import { memo, ReactNode, useCallback, useMemo } from 'react';
+
 import { ResetIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
+import { LayerIcon } from 'noya-workspace-ui';
 import {
   InputField,
   Spacer,
@@ -8,8 +11,6 @@ import {
   Button,
 } from 'noya-web-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
-import { LayerIcon } from '../../containers/LayerList';
 import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from './InspectorPrimitives';
 interface Props {

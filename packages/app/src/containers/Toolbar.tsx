@@ -1,4 +1,7 @@
+import { memo, useCallback, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
 import { FileSystemHandle } from 'browser-fs-access';
+
 import {
   useApplicationState,
   useDispatch,
@@ -23,9 +26,7 @@ import {
   Selectors,
 } from 'noya-state';
 import { round } from 'noya-utils';
-import { memo, useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
-import { LayerIcon } from './LayerList';
+import { LayerIcon } from 'noya-workspace-ui';
 
 type InteractionStateProjection =
   | {
