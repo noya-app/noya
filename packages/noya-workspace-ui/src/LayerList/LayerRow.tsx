@@ -14,6 +14,7 @@ import {
   withSeparatorElements,
 } from 'noya-designsystem';
 import { useDesignSystemConfiguration } from 'noya-ui';
+import type { PressableEvent } from 'noya-react-utils';
 import type { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const LayerRow = memo(
@@ -56,29 +57,37 @@ const LayerRow = memo(
       [onHoverChange],
     );
 
-    const handleSetVisible = useCallback(() => {
-      // (event: React.MouseEvent) => {
-      //   event.stopPropagation();
-      onChangeVisible(true);
-    }, [onChangeVisible]);
+    const handleSetVisible = useCallback(
+      (event: PressableEvent) => {
+        event.stopPropagation();
+        onChangeVisible(true);
+      },
+      [onChangeVisible],
+    );
 
-    const handleSetHidden = useCallback(() => {
-      // (event: React.MouseEvent) => {
-      //   event.stopPropagation();
-      onChangeVisible(false);
-    }, [onChangeVisible]);
+    const handleSetHidden = useCallback(
+      (event: PressableEvent) => {
+        event.stopPropagation();
+        onChangeVisible(false);
+      },
+      [onChangeVisible],
+    );
 
-    const handleSetLocked = useCallback(() => {
-      // (event: React.MouseEvent) => {
-      //   event.stopPropagation();
-      onChangeIsLocked(true);
-    }, [onChangeIsLocked]);
+    const handleSetLocked = useCallback(
+      (event: PressableEvent) => {
+        event.stopPropagation();
+        onChangeIsLocked(true);
+      },
+      [onChangeIsLocked],
+    );
 
-    const handleSetUnlocked = useCallback(() => {
-      // (event: React.MouseEvent) => {
-      //   event.stopPropagation();
-      onChangeIsLocked(false);
-    }, [onChangeIsLocked]);
+    const handleSetUnlocked = useCallback(
+      (event: PressableEvent) => {
+        event.stopPropagation();
+        onChangeIsLocked(false);
+      },
+      [onChangeIsLocked],
+    );
 
     const rowSelected = !isDragging && selected;
     const rowHovered = !isDragging && hovered;

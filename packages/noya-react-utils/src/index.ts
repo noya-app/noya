@@ -6,3 +6,4 @@ export * from './hooks/useMutableState';
 export * from './hooks/usePixelRatio';
 export * from './PromiseState';
 export * from './SuspendedValue';
+export * from './Pressable';
