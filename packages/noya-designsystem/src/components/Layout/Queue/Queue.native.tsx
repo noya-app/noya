@@ -15,7 +15,7 @@ const Queue: React.FC<QueueProps> = (props) => {
           large: 15,
         }[size];
 
-  return <View style={{ width }} />;
+  return <View style={size ? { width } : { flex: 1 }} />;
 };
 
 export default React.memo(Queue);

@@ -15,6 +15,8 @@ import {
 } from 'noya-designsystem';
 import type { LayerMenuItemType } from '../hooks/useLayerMenu';
 
+const iconSize = 10;
+
 const LayerRow = memo(
   forwardRef(function LayerRow(
     {
@@ -110,28 +112,32 @@ const LayerRow = memo(
               titleElement,
               isLocked ? (
                 <IconButton
-                  name="LockClosedIcon"
+                  name="lock-closed"
                   selected={selected}
                   onClick={handleSetUnlocked}
+                  size={iconSize}
                 />
               ) : hovered ? (
                 <IconButton
-                  name="LockOpen1Icon"
+                  name="lock-open-1"
                   selected={selected}
                   onClick={handleSetLocked}
+                  size={iconSize}
                 />
               ) : null,
               !visible ? (
                 <IconButton
-                  name="EyeClosedIcon"
+                  name="eye-closed"
                   selected={selected}
                   onClick={handleSetVisible}
+                  size={iconSize}
                 />
               ) : hovered ? (
                 <IconButton
-                  name="EyeOpenIcon"
+                  name="eye-open"
                   selected={selected}
                   onClick={handleSetHidden}
+                  size={iconSize}
                 />
               ) : isLocked ? (
                 <Layout.Queue size={15} />

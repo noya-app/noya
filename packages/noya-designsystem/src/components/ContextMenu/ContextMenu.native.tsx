@@ -1,11 +1,11 @@
-import React, {
-  memo,
-  PropsWithChildren,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
-import { View, Text, Modal, TouchableWithoutFeedback } from 'react-native';
+import React, { memo, PropsWithChildren, useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import styled from 'styled-components';
 
 import { Layout } from '../Layout';
@@ -15,22 +15,15 @@ import {
   SEPARATOR_ITEM,
   KeyboardShortcut,
   CHECKBOX_RIGHT_INSET,
-  getKeyboardShortcutsForMenuItems,
 } from '../internal/Menu';
 import { MenuItemProps, MenuProps } from './types';
 import { TouchableListener } from '../internal/Touchable';
 
 /* ----------------------------------------------------------------------------
- * Separator
- * ------------------------------------------------------------------------- */
-
-const SeparatorElement = styled(View)((props) => ({
-  ...styles.separatorStyle(props),
-}));
-
-/* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
+
+const SeparatorElement = styled(View)(styles.separatorStyle);
 
 const ItemText = styled(Text)((props) => ({
   ...props.theme.textStyles.small,
@@ -39,9 +32,7 @@ const ItemText = styled(Text)((props) => ({
   color: 'white',
 }));
 
-const ItemElement = styled(View)((props) => ({
-  ...styles.itemStyle(props),
-}));
+const ItemElement = styled(View)(styles.itemStyle);
 
 const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
   value,
@@ -54,33 +45,44 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
   items,
   shortcut,
 }: MenuItemProps<T> & { label: string }) {
+  const handleSelectItem = useCallback(() => {
+    if (!value) return;
+
+    onSelect(value);
+  }, [onSelect, value]);
+
   const element = (
-    <ItemElement>
-      {indented && (
-        <Layout.Queue size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
-      )}
-      {icon && (
-        <>
-          {icon}
-          <Layout.Queue size={8} />
-        </>
-      )}
-      <ItemText>{label}</ItemText>
-      {/* {shortcut && (
-        <>
-          <Layout.Queue />
-          <Layout.Queue size={24} />
-          <KeyboardShortcut shortcut={shortcut} />
-        </>
-      )} */}
-      {items && items.length > 0 && (
-        <>
-          <Layout.Queue />
-          <Layout.Queue size={16} />
-          <Layout.Icon name="chevron-right" />
-        </>
-      )}
-    </ItemElement>
+    <TouchableOpacity onPress={handleSelectItem} disabled={disabled}>
+      <ItemElement>
+        {indented && (
+          <Layout.Queue size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
+        )}
+        {icon && (
+          <>
+            {icon}
+            <Layout.Queue size={8} />
+          </>
+        )}
+        <ItemText>{label}</ItemText>
+        {/*
+          * TODO: show shortcut only when
+          * external keyboard is attached
+        {shortcut && (
+          <>
+            <Layout.Queue />
+            <Layout.Queue size={24} />
+            <KeyboardShortcut shortcut={shortcut} />
+          </>
+        )} */}
+        {items && items.length > 0 && (
+          <>
+            <Layout.Queue />
+            <Layout.Queue size={16} />
+            <Layout.Icon name="chevron-right" />
+          </>
+        )}
+      </ItemElement>
+    </TouchableOpacity>
   );
 
   // if (items && items.length > 0) {
@@ -133,16 +135,26 @@ interface MenuState {
 }
 
 function ContextMenuRoot<T extends string>({
+  // shouldBindKeyboardShortcuts,
+  // isNested,
   items,
   children,
   onSelect,
-  isNested,
-  shouldBindKeyboardShortcuts,
 }: MenuProps<T>) {
   const [state, setState] = useState<MenuState>({ visible: false, x: 0, y: 0 });
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
+
+  // const keymap = useMemo(
+  //   () =>
+  //     isNested || shouldBindKeyboardShortcuts === false
+  //       ? {}
+  //       : getKeyboardShortcutsForMenuItems(items, onSelect),
+  //   [isNested, items, onSelect, shouldBindKeyboardShortcuts],
+  // );
+
+  // useKeyboardShortcuts(keymap);
 
   const onOpen = useCallback(
     (x: number, y: number) => {

@@ -7,23 +7,23 @@ import {
 test('picks a shortcut key for the given platform', () => {
   const shortcut: PlatformKeyboardShortcut = {
     key: 'k',
-    mac: 'm',
-    win: 'w',
+    macos: 'm',
+    windows: 'w',
   };
 
   expect(getPlatformShortcutName(shortcut, 'key')).toEqual('k');
-  expect(getPlatformShortcutName(shortcut, 'mac')).toEqual('m');
-  expect(getPlatformShortcutName(shortcut, 'win')).toEqual('w');
+  expect(getPlatformShortcutName(shortcut, 'macos')).toEqual('m');
+  expect(getPlatformShortcutName(shortcut, 'windows')).toEqual('w');
   expect(getPlatformShortcutName(shortcut, 'linux')).toEqual('k');
 });
 
 test('supports platform-specific commands', () => {
   const shortcut: PlatformKeyboardShortcut = {
-    mac: 'm',
+    macos: 'm',
   };
 
-  expect(getPlatformShortcutName(shortcut, 'mac')).toEqual('m');
-  expect(getPlatformShortcutName(shortcut, 'win')).toEqual(undefined);
+  expect(getPlatformShortcutName(shortcut, 'macos')).toEqual('m');
+  expect(getPlatformShortcutName(shortcut, 'windows')).toEqual(undefined);
 });
 
 test('gets event shortcut name', () => {
@@ -34,7 +34,7 @@ test('gets event shortcut name', () => {
         keyCode: 100,
         shiftKey: false,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['d']);
 
@@ -45,7 +45,7 @@ test('gets event shortcut name', () => {
         keyCode: 68,
         shiftKey: true,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['D', 'Shift-d']);
 
@@ -55,7 +55,7 @@ test('gets event shortcut name', () => {
         key: '2',
         keyCode: 50,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['2']);
 
@@ -66,7 +66,7 @@ test('gets event shortcut name', () => {
         keyCode: 50,
         shiftKey: true,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['@', 'Shift-2']);
 
@@ -77,7 +77,7 @@ test('gets event shortcut name', () => {
         keyCode: 64,
         shiftKey: true,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['@', 'Shift-@']);
 
@@ -87,7 +87,7 @@ test('gets event shortcut name', () => {
         key: ' ',
         keyCode: 32,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual([' ']);
 
@@ -98,7 +98,7 @@ test('gets event shortcut name', () => {
         keyCode: 32,
         shiftKey: true,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['Shift- ']);
 
@@ -108,7 +108,7 @@ test('gets event shortcut name', () => {
         key: 'ArrowUp',
         keyCode: 38,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['ArrowUp']);
 
@@ -119,7 +119,7 @@ test('gets event shortcut name', () => {
         keyCode: 38,
         shiftKey: true,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['Shift-ArrowUp']);
 
@@ -130,7 +130,7 @@ test('gets event shortcut name', () => {
         keyCode: 16,
         shiftKey: true,
       }),
-      'mac',
+      'macos',
     ),
   ).toEqual(['Shift']);
 });

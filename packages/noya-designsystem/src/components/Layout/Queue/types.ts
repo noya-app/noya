@@ -1,3 +1,3 @@
 export interface QueueProps {
-  size: 'small' | 'medium' | 'large' | number;
+  size?: 'small' | 'medium' | 'large' | number;
 }

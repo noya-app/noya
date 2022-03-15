@@ -1,11 +1,24 @@
-import { PlatformName } from 'noya-keymap';
-import { createContext, memo, ReactNode, useContext, useMemo } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useContext,
+  createContext,
+  PropsWithChildren,
+} from 'react';
 import { ThemeProvider } from 'styled-components';
+
+import { PlatformName } from 'noya-keymap';
 import { Theme } from 'noya-web-designsystem';
 
-export type DesignSystemConfigurationContextValue = {
+export interface DesignSystemConfigurationContextValue {
   platform: PlatformName;
-};
+}
+
+type DesignSystemConfigurationProviderProps = PropsWithChildren<
+  DesignSystemConfigurationContextValue & {
+    theme: Theme;
+  }
+>;
 
 const DesignSystemConfigurationContext = createContext<
   DesignSystemConfigurationContextValue | undefined
@@ -16,14 +29,16 @@ export const DesignSystemConfigurationProvider = memo(
     children,
     theme,
     platform,
-  }: {
-    children: ReactNode;
-    theme: Theme;
-  } & DesignSystemConfigurationContextValue) {
+  }: DesignSystemConfigurationProviderProps) {
+    const value = useMemo(
+      () => ({
+        platform,
+      }),
+      [platform],
+    );
+
     return (
-      <DesignSystemConfigurationContext.Provider
-        value={useMemo(() => ({ platform }), [platform])}
-      >
+      <DesignSystemConfigurationContext.Provider value={value}>
         <ThemeProvider theme={theme}>{children}</ThemeProvider>
       </DesignSystemConfigurationContext.Provider>
     );

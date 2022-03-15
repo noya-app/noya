@@ -1,14 +1,23 @@
-export type PlatformName = 'mac' | 'win' | 'linux' | 'key';
+export type PlatformName =
+  | 'ios'
+  | 'android'
+  | 'windows'
+  | 'macos'
+  | 'linux'
+  | 'key';
 
 export const getCurrentPlatform = (navigator?: {
   platform: string;
-}): PlatformName =>
-  typeof navigator === 'undefined'
-    ? 'key'
-    : /Mac/.test(navigator.platform)
-    ? 'mac'
+}): PlatformName => {
+  if (typeof navigator === 'undefined') {
+    return 'key';
+  }
+
+  return /Mac/.test(navigator.platform)
+    ? 'macos'
     : /Win/.test(navigator.platform)
-    ? 'win'
+    ? 'windows'
     : /Linux|X11/.test(navigator.platform)
     ? 'linux'
     : 'key';
+};

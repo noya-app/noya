@@ -124,7 +124,7 @@ class ApplicationMenu extends Emitter<[ApplicationMenuItemType]> {
     const data: MessageFromEmbedded = {
       type: 'setMenu',
       value: [
-        ...(platform === 'mac' ? [aboutMenu] : []),
+        ...(platform === 'macos' ? [aboutMenu] : []),
         ...menuItems.map(getApplicationMenuItem),
       ],
     };

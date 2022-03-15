@@ -51,7 +51,7 @@ export const colors = {
 };
 
 export const fonts = {
-  normal: Platform.OS === 'ios' ? 'AppleSDGothicNeo-Regular' : 'normal',
+  normal: 'System',
   monospace: Platform.OS === 'ios' ? 'Menlo-Regular' : 'monospace',
 };
 

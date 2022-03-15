@@ -26,6 +26,7 @@ export const styles = {
     paddingHorizontal: 8,
     paddingVertical: 4,
     alignItems: 'center',
+    flexDirection: 'row',
   }),
 
   separatorStyle: ({ theme }: { theme: Theme }) => ({
@@ -34,14 +35,4 @@ export const styles = {
     marginHorizontal: 8,
     marginVertical: 4,
   }),
-};
-
-export function getKeyboardShortcutsForMenuItems() {
-  throw new Error(
-    'Menu.native.tsx getKeyboardShortcutsForMenuItems not implemented!',
-  );
-}
-
-export const KeyboardShortcut = function KeyboardShortcut() {
-  throw new Error('Menu.native.tsx KeyboardShortcut not implemented!');
 };

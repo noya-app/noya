@@ -24,7 +24,6 @@ import {
   ListRenderItem,
 } from 'react-native';
 import styled from 'styled-components';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { InputField } from '../InputField';
 import ContextMenu from '../ContextMenu';
