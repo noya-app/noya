@@ -27,7 +27,7 @@ import styled from 'styled-components';
 
 import { InputField } from '../InputField';
 import ContextMenu from '../ContextMenu';
-import Touchable from '../internal/Touchable';
+import Touchable from '../Touchable';
 import { Layout } from '../Layout';
 import {
   RenderProps,

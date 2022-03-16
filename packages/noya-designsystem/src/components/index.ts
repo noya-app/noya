@@ -6,4 +6,7 @@ export * from './Sortable';
 export * from './Tooltip';
 export * from './Layout';
 export * from './Button';
+export * from './Touchable';
+export { default as Touchable } from './Touchable';
+export { default as ContextMenu } from './ContextMenu';
 export type { MenuItem, RegularMenuItem } from './internal/Menu';

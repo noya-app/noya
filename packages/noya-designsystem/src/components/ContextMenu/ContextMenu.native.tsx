@@ -15,8 +15,8 @@ import {
   SEPARATOR_ITEM,
   CHECKBOX_RIGHT_INSET,
 } from '../internal/Menu';
+import { Gesture, TouchableListener } from '../Touchable';
 import { MenuItemProps, MenuProps } from './types';
-import { TouchableListener } from '../internal/Touchable';
 
 const SeparatorElement = styled(View)(styles.separatorStyle);
 
@@ -99,7 +99,7 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled(View)((_p) => ({}));
+const RootContainer = styled(View)((_p) => ({ flex: 1 }));
 
 const Backdrop = styled(View)((_p) => ({
   width: '100%',
@@ -115,14 +115,14 @@ const RootContent = styled(View)<{ x: number; y: number }>((props) => ({
 
 const Trigger: React.FC<
   PropsWithChildren<{
-    onOpen: (x: number, y: number) => void;
+    onOpen: (params: Gesture) => void;
   }>
 > = (props) => {
   const { children, onOpen } = props;
 
   return (
     <TouchableListener onLongPress={onOpen}>
-      <View>{children}</View>
+      <View style={{ flex: 1 }}>{children}</View>
     </TouchableListener>
   );
 };
@@ -156,8 +156,8 @@ function ContextMenuRoot<T extends string>({
   // useKeyboardShortcuts(keymap);
 
   const onOpen = useCallback(
-    (x: number, y: number) => {
-      setState({ visible: true, x, y });
+    (params: Gesture) => {
+      setState({ visible: true, ...params.point });
     },
     [setState],
   );

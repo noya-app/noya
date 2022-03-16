@@ -1,7 +1,7 @@
 import React from 'react';
-import { TouchableProps } from './types';
+import { TouchableComponentProps, TouchableProps } from './types';
 
-const Touchable: React.FC<TouchableProps> = (props) => {
+const Touchable: React.FC<TouchableComponentProps> = (props) => {
   console.warn('Touchable.tsx not implemented!');
 
   return null;
