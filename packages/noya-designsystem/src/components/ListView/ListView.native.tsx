@@ -27,6 +27,7 @@ import styled from 'styled-components';
 
 import { InputField } from '../InputField';
 import ContextMenu from '../ContextMenu';
+import * as Sortable from '../Sortable';
 import Touchable from '../Touchable';
 import { Layout } from '../Layout';
 import {
@@ -172,7 +173,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     disabled = false,
     hovered = false,
     isSectionHeader = false,
-    // sortable: overrideSortable,
+    sortable: overrideSortable,
     onPress,
     // onDoubleClick,
     // onHoverChange,
@@ -257,16 +258,6 @@ const ListViewRow = forwardRef(function ListViewRow<
     return element;
   };
 
-  // if (sortable && id) {
-  //   return (
-  //     <Sortable.Item<HTMLElement> id={id} disabled={overrideSortable === false}>
-  //       {({ ref: sortableRef, ...sortableProps }) =>
-  //         renderContent(sortableProps, composeRefs(sortableRef, forwardedRef))
-  //       }
-  //     </Sortable.Item>
-  //   );
-  // }
-
   return renderContent(
     {
       disabled,
@@ -302,7 +293,7 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     scrollable = false,
     expandable = true,
     sortable = false,
-    // onMoveItem,
+    onMoveItem,
     indentation = 12,
     // acceptsDrop,
     data,
@@ -388,6 +379,19 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     },
     [renderItem, getItemContextValue],
   );
+
+  if (sortable) {
+    return (
+      <RootContainer scrollable={scrollable}>
+        <Sortable.List<T>
+          data={data}
+          keyExtractor={keyExtractor}
+          renderItem={renderWrappedChild}
+          style={FlatListStyles.list}
+        />
+      </RootContainer>
+    );
+  }
 
   return (
     <RootContainer scrollable={scrollable}>
