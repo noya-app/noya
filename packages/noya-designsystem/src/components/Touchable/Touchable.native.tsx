@@ -141,7 +141,8 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
       const gesture = getGesture(event);
 
       onCallHandlers('onTouchUpdate', gesture);
-      gestureHandled.current = gesture.type !== GestureType.None;
+      gestureHandled.current =
+        gestureHandled.current || gesture.type !== GestureType.None;
     },
     [onCallHandlers, getGesture],
   );
