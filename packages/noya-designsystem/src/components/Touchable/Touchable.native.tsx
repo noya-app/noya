@@ -91,6 +91,8 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
         type: GestureType.Pinch,
         point: currentPos,
         scale: currentAvgDist / lastAvgDist,
+        absolutePoint: touchMeta.absolutePoint,
+        numOfPointers: touchMeta.numOfPointers,
       };
     }
 
@@ -98,6 +100,8 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
       return {
         type: GestureType.Pan,
         point: currentPos,
+        absolutePoint: touchMeta.absolutePoint,
+        numOfPointers: touchMeta.numOfPointers,
         delta: {
           x: lastPos.x - currentPos.x,
           y: lastPos.y - currentPos.y,
@@ -108,6 +112,8 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
     return {
       type: GestureType.None,
       point: currentPos,
+      absolutePoint: touchMeta.absolutePoint,
+      numOfPointers: touchMeta.numOfPointers,
     };
   }, []);
 
@@ -131,6 +137,11 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
       onCallHandlers('onTouchStart', {
         point,
         type: GestureType.None,
+        numOfPointers: event.nativeEvent.touches.length || 1,
+        absolutePoint: {
+          x: event.nativeEvent.pageX,
+          y: event.nativeEvent.pageY,
+        },
       });
     },
     [onCallHandlers, setMeta],

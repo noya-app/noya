@@ -19,6 +19,10 @@ import { useCanvasKit, useFontManager } from 'noya-renderer';
 import CanvasRenderer from './CanvasRenderer';
 import { useLayerMenu } from 'noya-workspace-ui';
 
+function isMoving(point: Point, origin: Point): boolean {
+  return Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2;
+}
+
 const Canvas: React.FC<{}> = () => {
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
@@ -73,7 +77,7 @@ const Canvas: React.FC<{}> = () => {
             fontManager,
             state,
             insets,
-            point,
+            rawPoint,
             {
               groups: 'groupAndChildren', // event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
@@ -139,13 +143,55 @@ const Canvas: React.FC<{}> = () => {
           ]);
           break;
         }
+        case 'maybeMove':
+        case 'maybeScale': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', [
+              state.interactionState.type === 'maybeMove'
+                ? 'updateMoving'
+                : 'updateScaling',
+              point,
+            ]);
+          }
+
+          break;
+        }
+        case 'maybeMoveControlPoint': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingControlPoint', origin, point]);
+          }
+          break;
+        }
+        case 'movingControlPoint': {
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingControlPoint', origin, point]);
+
+          break;
+        }
+
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
+
+          break;
+        }
 
         case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
           break;
         }
         case 'marquee': {
-          if (params.type !== GestureType.None) {
+          if (params.numOfPointers > 1) {
             dispatch('interaction', ['reset']);
             return;
           }
@@ -174,13 +220,15 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'none': {
-          if (params.type === GestureType.Pinch) {
-            dispatch('setZoom*', params.scale!, 'multiply');
-            break;
-          }
+          if (params.numOfPointers > 1) {
+            if (params.type === GestureType.Pinch) {
+              dispatch('setZoom*', params.scale!, 'multiply');
+              break;
+            }
 
-          if (params.type === GestureType.Pan) {
-            dispatch('pan*', params.delta!);
+            if (params.type === GestureType.Pan) {
+              dispatch('pan*', params.delta!);
+            }
           }
 
           break;
@@ -224,8 +272,39 @@ const Canvas: React.FC<{}> = () => {
             layers.map((layer) => layer.do_objectID),
           );
 
-          // containerRef.current?.releasePointerCapture(event.pointerId);
+          break;
+        }
+        case 'maybeMove':
+        case 'maybeScale':
+        case 'moveGradientStop':
+        case 'maybeMoveGradientStop':
+        case 'maybeMoveGradientEllipseLength':
+        case 'moveGradientEllipseLength': {
+          dispatch('interaction', ['reset']);
 
+          break;
+        }
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
+
+          if (state.interactionState.type === 'moving')
+            dispatch('moveLayersIntoParentAtPoint', point);
+
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
+        case 'maybeMoveControlPoint':
+        case 'movingControlPoint':
+        case 'maybeMovePoint':
+        case 'movingPoint': {
+          dispatch('interaction', ['resetEditPath', point]);
           break;
         }
         case 'none': {

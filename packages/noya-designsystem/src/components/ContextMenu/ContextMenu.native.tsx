@@ -100,8 +100,6 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootContainer = styled(View)((_p) => ({ flex: 1 }));
-
 const Backdrop = styled(View)((_p) => ({
   width: '100%',
   height: '100%',
@@ -121,11 +119,7 @@ const Trigger: React.FC<
 > = (props) => {
   const { children, onOpen } = props;
 
-  return (
-    <TouchableListener onLongPress={onOpen}>
-      <View style={{ flex: 1 }}>{children}</View>
-    </TouchableListener>
-  );
+  return <TouchableListener onLongPress={onOpen}>{children}</TouchableListener>;
 };
 
 interface MenuState {
@@ -159,7 +153,7 @@ function ContextMenuRoot<T extends string>({
 
   const onOpen = useCallback(
     (params: Gesture) => {
-      setState({ visible: true, ...params.point });
+      setState({ visible: true, ...params.absolutePoint });
     },
     [setState],
   );
@@ -177,12 +171,8 @@ function ContextMenuRoot<T extends string>({
   );
 
   return (
-    <RootContainer>
-      {/* {isNested ? (
-        <TriggerItem>{children}</TriggerItem>
-      ) : ( */}
+    <>
       <Trigger onOpen={onOpen}>{children}</Trigger>
-      {/* )} */}
       <Modal visible={state.visible} transparent>
         <TouchableWithoutFeedback
           onPress={() => {
@@ -215,7 +205,7 @@ function ContextMenuRoot<T extends string>({
           </Backdrop>
         </TouchableWithoutFeedback>
       </Modal>
-    </RootContainer>
+    </>
   );
 }
 

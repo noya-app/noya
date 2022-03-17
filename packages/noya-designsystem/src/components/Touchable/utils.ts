@@ -1,11 +1,10 @@
-import { GestureResponderEvent } from 'react-native';
-
 import { Point } from 'noya-geometry';
 import type {
   TouchMeta,
   TouchPoint,
   TouchCallback,
   TouchableContextType,
+  SimplifiedGestureEvent,
 } from './types';
 
 // Time to consider single press a long press
@@ -17,10 +16,12 @@ export const PinchThreshold = 5;
 // to consider it a pan gesture
 export const PanThreshold = 5;
 
-export const initMeta = {
+export const initMeta: TouchMeta = {
   points: [],
   avgDistance: 0,
   centroid: { x: 0, y: 0 },
+  absolutePoint: { x: 0, y: 0 },
+  numOfPointers: 0,
 };
 
 export const initialHandlers: TouchableContextType = {
@@ -52,7 +53,7 @@ export function mergeHandlers(
   return handlers;
 }
 
-export function getPoint({ nativeEvent }: GestureResponderEvent) {
+export function getPoint({ nativeEvent }: SimplifiedGestureEvent) {
   if (nativeEvent.touches.length > 1) {
     const firstTouch = nativeEvent.touches[0];
 
@@ -74,7 +75,7 @@ export function getDistance(p1: Point, p2: Point) {
 
 export function getTouchMeta({
   nativeEvent,
-}: GestureResponderEvent): TouchMeta {
+}: SimplifiedGestureEvent): TouchMeta {
   const centroid: Point = { x: 0, y: 0 };
   let avgDistance = 0;
 
@@ -101,10 +102,18 @@ export function getTouchMeta({
   if (!points.length) {
     return {
       points: [],
-      centroid: { x: nativeEvent.locationX, y: nativeEvent.locationY },
+      centroid: getPoint({ nativeEvent }),
       avgDistance: 0,
+      numOfPointers: nativeEvent.touches.length || 1,
+      absolutePoint: { x: nativeEvent.pageX, y: nativeEvent.pageY },
     };
   }
 
-  return { points, centroid, avgDistance };
+  return {
+    points,
+    centroid,
+    avgDistance,
+    numOfPointers: nativeEvent.touches.length || 1,
+    absolutePoint: { x: nativeEvent.pageX, y: nativeEvent.pageY },
+  };
 }
