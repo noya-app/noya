@@ -15,7 +15,7 @@ import {
 } from 'noya-web-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { clamp } from 'noya-utils';
-import DimensionInput from './DimensionInput';
+import { DimensionInput } from 'noya-workspace-ui';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const DEFAULT_SKETCH_COLOR: Sketch.Color = {

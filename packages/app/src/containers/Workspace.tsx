@@ -1,4 +1,7 @@
+import { ReactNode, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import produce from 'immer';
+
 import { useSelector } from 'noya-app-state-context';
 import {
   darkTheme,
@@ -12,15 +15,13 @@ import { DesignSystemConfigurationProvider } from 'noya-ui';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import { ReactNode, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { LayerList } from 'noya-workspace-ui';
 import { AutoSizer } from '../components/AutoSizer';
 import { DialogProvider } from '../contexts/DialogContext';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Canvas from './Canvas';
 import Inspector from './Inspector';
-import LayerList from './LayerList';
 import Menubar from './Menubar';
 import PageList from './PageList';
 import PagesGrid from './PagesGrid';

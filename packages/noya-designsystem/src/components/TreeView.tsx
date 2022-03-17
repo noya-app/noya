@@ -1,15 +1,16 @@
-import {
-  ForwardedRef,
-  forwardRef,
+import React, {
   memo,
   ReactNode,
-  useCallback,
+  forwardRef,
   useContext,
+  ForwardedRef,
 } from 'react';
-import IconButton from './IconButton';
+
+import { usePressableHandler } from 'noya-react-utils';
+import type { ListViewRowProps } from './ListView';
+import { IconButton } from './Button';
 import * as ListView from './ListView';
-import { ListViewRowProps } from './ListView';
-import * as Spacer from './Spacer';
+import { Layout } from './Layout';
 
 /* ----------------------------------------------------------------------------
  * Row
@@ -36,10 +37,10 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
 ) {
   const { expandable } = useContext(ListView.ListRowContext);
 
-  const handleClickChevron = useCallback(
-    (event: React.MouseEvent) => {
+  const handleClickChevron = usePressableHandler(
+    (event) => {
       event.stopPropagation();
-      onClickChevron?.({ altKey: event.altKey });
+      onClickChevron?.({ altKey: false /* event.altKey */ });
     },
     [onClickChevron],
   );
@@ -49,21 +50,21 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
       {expandable && (
         <>
           {expanded === undefined ? (
-            <Spacer.Horizontal size={15} />
+            <Layout.Queue size={15} />
           ) : (
             <IconButton
-              iconName={expanded ? 'ChevronDownIcon' : 'ChevronRightIcon'}
+              name={expanded ? 'chevron-down' : 'chevron-right'}
               onClick={handleClickChevron}
               selected={rest.selected}
             />
           )}
-          <Spacer.Horizontal size={6} />
+          <Layout.Queue size={6} />
         </>
       )}
       {icon && (
         <>
           {icon}
-          <Spacer.Horizontal size={10} />
+          <Layout.Queue size={10} />
         </>
       )}
       {children}

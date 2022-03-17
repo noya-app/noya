@@ -22,7 +22,7 @@ export function parseKeyName(
     else if (/^(c|ctrl|control)$/i.test(mod)) ctrl = true;
     else if (/^s(hift)?$/i.test(mod)) shift = true;
     else if (/^mod$/i.test(mod)) {
-      if (platform === 'mac') meta = true;
+      if (platform === 'macos' || platform === 'ios') meta = true;
       else ctrl = true;
     } else throw new Error('Unrecognized modifier name: ' + mod);
   }
@@ -69,7 +69,7 @@ function getModifierDisplayName(
   name: keyof KeyModifiers,
   platform: PlatformName,
 ) {
-  return platform === 'mac'
+  return platform === 'macos' || platform === 'ios'
     ? macModiferDisplayName[name]
     : modifierDisplayName[name];
 }
@@ -84,7 +84,7 @@ export function getShortcutDisplayParts(
   const { key, modifiers } = parseKeyName(name, platform);
 
   return {
-    separator: platform === 'mac' ? undefined : '-',
+    separator: platform === 'macos' || platform === 'ios' ? undefined : '-',
     keys: [
       modifiers.altKey && getModifierDisplayName('altKey', platform),
       modifiers.ctrlKey && getModifierDisplayName('ctrlKey', platform),

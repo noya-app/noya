@@ -12,10 +12,14 @@ import { Button } from '../Button';
 
 import { ExpandableProps, Tab, ExpandableViewProps } from './types';
 
+const PanelWidth = 350;
+
 const ExpandableProvider = (props: ExpandableProps) => {
   const { position = 'left', children } = props;
   const [activeTab, setActiveTab] = useState<string | null>(null);
-  const expandableOffset = useSharedValue(position === 'left' ? -250 : 250);
+  const expandableOffset = useSharedValue(
+    position === 'left' ? -PanelWidth : PanelWidth,
+  );
 
   const tabs = useMemo(() => {
     const tabs: Tab[] = [];
@@ -41,7 +45,7 @@ const ExpandableProvider = (props: ExpandableProps) => {
     (tab: string) => {
       if (activeTab === tab) {
         setActiveTab(null);
-        expandableOffset.value = position === 'left' ? -250 : 250;
+        expandableOffset.value = position === 'left' ? -PanelWidth : PanelWidth;
       } else {
         setActiveTab(tab);
         expandableOffset.value = 0;
@@ -126,7 +130,7 @@ const ExpandableView = styled(Animated.View)<ExpandableViewProps>((p) => {
 });
 
 const ExpandableContentWrapper = styled(View)((_p) => ({
-  width: 250,
+  width: PanelWidth,
 }));
 
 const ButtonList = styled(View)((p) => ({
@@ -137,7 +141,7 @@ const ButtonList = styled(View)((p) => ({
 
 const ExpandableContent = styled(View)((p) => ({
   flex: 1,
-  width: 250,
+  width: PanelWidth,
   borderRadius: 8,
   padding: p.theme.sizes.spacing.small,
   backgroundColor: p.theme.colors.sidebar.background,

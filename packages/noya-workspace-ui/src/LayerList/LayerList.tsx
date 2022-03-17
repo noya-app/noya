@@ -1,317 +1,43 @@
+import React, {
+  memo,
+  useRef,
+  useMemo,
+  useState,
+  useCallback,
+  useLayoutEffect,
+} from 'react';
+
 import {
-  ArrowDownIcon,
-  CircleIcon,
-  Component1Icon,
-  ComponentInstanceIcon,
-  CopyIcon,
-  FrameIcon,
-  GroupIcon,
-  ImageIcon,
-  MaskOnIcon,
-  Share1Icon,
-  SquareIcon,
-  TextIcon,
-} from 'noya-icons';
-import {
-  useApplicationState,
-  useGetStateSnapshot,
   useSelector,
   useWorkspace,
+  useApplicationState,
+  useGetStateSnapshot,
 } from 'noya-app-state-context';
-import {
-  IconButton,
-  ListView,
-  RelativeDropPosition,
-  Spacer,
-  TreeView,
-  useModKey,
-  withSeparatorElements,
-} from 'noya-web-designsystem';
 import Sketch from 'noya-file-format';
-import { Size } from 'noya-geometry';
-import { useDeepMemo, useShallowArray } from 'noya-react-utils';
-import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
-import React, {
-  ForwardedRef,
-  forwardRef,
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import styled, { useTheme } from 'styled-components';
-import { visit } from 'tree-visit';
-import { LineIcon } from 'noya-icons';
-import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
+import { Layers, Selectors } from 'noya-state';
+import { useDeepMemo, useShallowArray } from 'noya-react-utils';
+import {
+  Layout,
+  ListView,
+  TreeView,
+  RelativeDropPosition,
+} from 'noya-designsystem';
+import useLayerMenu from '../hooks/useLayerMenu';
+import { LayerListProps, LayerListItem } from './types';
+import IconContainer from './IconContainer';
+import { flattenLayerList } from './utils';
+import LayerIcon from './LayerIcon';
+import LayerRow from './LayerRow';
 
-const IconContainer = styled.span(({ theme }) => ({
-  color: theme.colors.mask,
-  flex: '0 0 auto',
-  display: 'flex',
-  alignItems: 'center',
-}));
-
-type LayerType = PageLayer['_class'];
-
-type LayerListItem = {
-  type: LayerType | 'line';
-  id: string;
-  name: string;
-  depth: number;
-  expanded: boolean;
-  selected: boolean;
-  visible: boolean;
-  hasClippingMask: boolean;
-  shouldBreakMaskChain: boolean;
-  isWithinMaskChain: boolean;
-  isLocked: boolean;
-};
-
-function flattenLayerList(
-  page: Sketch.Page,
-  selectedLayerIds: string[],
-  filteredLayerIds: Set<string>,
-): LayerListItem[] {
-  const flattened: LayerListItem[] = [];
-
-  visit<PageLayer | Sketch.Page>(page, {
-    getChildren: (layer) => {
-      if (layer.layerListExpandedType === Sketch.LayerListExpanded.Collapsed) {
-        return [];
-      }
-
-      return Layers.getChildren(layer).slice().reverse();
-    },
-    onEnter(layer, indexPath) {
-      if (Layers.isPageLayer(layer) || !filteredLayerIds.has(layer.do_objectID))
-        return;
-
-      const currentIndex = indexPath[indexPath.length - 1];
-
-      const parent = Layers.accessReversed(
-        page,
-        indexPath.slice(0, -1),
-      ) as Layers.ParentLayer;
-
-      flattened.push({
-        type:
-          Layers.isShapePath(layer) && Selectors.isLine(layer.points)
-            ? 'line'
-            : layer._class,
-        id: layer.do_objectID,
-        name: layer.name,
-        depth: indexPath.length - 1,
-        expanded:
-          layer.layerListExpandedType !== Sketch.LayerListExpanded.Collapsed,
-        selected: selectedLayerIds.includes(layer.do_objectID),
-        visible: layer.isVisible,
-        hasClippingMask: layer.hasClippingMask ?? false,
-        shouldBreakMaskChain: layer.shouldBreakMaskChain,
-        isWithinMaskChain: Layers.isWithinMaskChain(parent, currentIndex),
-        isLocked: layer.isLocked,
-      });
-    },
-  });
-
-  return flattened;
-}
-
-export const LayerIcon = memo(function LayerIcon({
-  type,
-  selected,
-  variant,
-}: {
-  type: LayerType | 'line';
-  selected?: boolean;
-  variant?: 'primary';
-}) {
-  const colors = useTheme().colors;
-
-  const color =
-    variant && !selected
-      ? colors[variant]
-      : selected
-      ? colors.iconSelected
-      : colors.icon;
-
-  switch (type) {
-    case 'rectangle':
-      return <SquareIcon color={color} />;
-    case 'oval':
-      return <CircleIcon color={color} />;
-    case 'text':
-      return <TextIcon color={color} />;
-    case 'artboard':
-      return <FrameIcon color={color} />;
-    case 'symbolMaster':
-      return <Component1Icon color={color} />;
-    case 'symbolInstance':
-      return <ComponentInstanceIcon color={color} />;
-    case 'group':
-      return <CopyIcon color={color} />;
-    case 'slice':
-      return <GroupIcon color={color} />;
-    case 'bitmap':
-      return <ImageIcon color={color} />;
-    case 'shapeGroup':
-      return <CopyIcon color={color} />;
-    case 'shapePath':
-      return <Share1Icon color={color} />;
-    case 'line':
-      return <LineIcon color={color} />;
-    default:
-      return null;
-  }
-});
-
-const LayerRow = memo(
-  forwardRef(function LayerRow(
-    {
-      name,
-      selected,
-      visible,
-      isWithinMaskChain,
-      onHoverChange,
-      onChangeVisible,
-      onChangeIsLocked,
-      isLocked,
-      isDragging,
-      isEditing,
-      onSubmitEditing,
-      ...props
-    }: TreeView.TreeRowProps<LayerMenuItemType> & {
-      name: string;
-      selected: boolean;
-      visible: boolean;
-      isWithinMaskChain: boolean;
-      isLocked: boolean;
-      isDragging: boolean;
-      isEditing: boolean;
-      onChangeVisible: (visible: boolean) => void;
-      onChangeIsLocked: (isLocked: boolean) => void;
-      onSubmitEditing: (name: string) => void;
-    },
-    forwardedRef: ForwardedRef<HTMLLIElement>,
-  ) {
-    const [hovered, setHovered] = useState(false);
-
-    const handleHoverChange = useCallback(
-      (hovered: boolean) => {
-        onHoverChange?.(hovered);
-        setHovered(hovered);
-      },
-      [onHoverChange],
-    );
-
-    const handleSetVisible = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onChangeVisible(true);
-      },
-      [onChangeVisible],
-    );
-
-    const handleSetHidden = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onChangeVisible(false);
-      },
-      [onChangeVisible],
-    );
-
-    const handleSetLocked = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onChangeIsLocked(true);
-      },
-      [onChangeIsLocked],
-    );
-
-    const handleSetUnlocked = useCallback(
-      (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onChangeIsLocked(false);
-      },
-      [onChangeIsLocked],
-    );
-
-    const titleElement = <TreeView.RowTitle>{name}</TreeView.RowTitle>;
-
-    return (
-      <TreeView.Row<LayerMenuItemType>
-        ref={forwardedRef}
-        onHoverChange={handleHoverChange}
-        selected={!isDragging && selected}
-        disabled={!visible}
-        hovered={!isDragging && hovered}
-        {...props}
-      >
-        {isEditing ? (
-          <ListView.EditableRowTitle
-            autoFocus
-            value={name}
-            onSubmitEditing={onSubmitEditing}
-          />
-        ) : isDragging ? (
-          titleElement
-        ) : (
-          withSeparatorElements(
-            [
-              titleElement,
-              isLocked ? (
-                <IconButton
-                  iconName="LockClosedIcon"
-                  selected={selected}
-                  onClick={handleSetUnlocked}
-                />
-              ) : hovered ? (
-                <IconButton
-                  iconName="LockOpen1Icon"
-                  selected={selected}
-                  onClick={handleSetLocked}
-                />
-              ) : null,
-              !visible ? (
-                <IconButton
-                  iconName="EyeClosedIcon"
-                  selected={selected}
-                  onClick={handleSetVisible}
-                />
-              ) : hovered ? (
-                <IconButton
-                  iconName="EyeOpenIcon"
-                  selected={selected}
-                  onClick={handleSetHidden}
-                />
-              ) : isLocked ? (
-                <Spacer.Horizontal size={15} />
-              ) : null,
-            ],
-            <Spacer.Horizontal size={6} />,
-          )
-        )}
-      </TreeView.Row>
-    );
-  }),
-);
-
-export default memo(function LayerList({
-  size,
-  filter,
-}: {
-  size: Size;
-  filter: string;
-}) {
+export default memo(function LayerList(props: LayerListProps) {
+  const { size, filter } = props;
   const { startRenamingLayer } = useWorkspace();
   const [state, dispatch] = useApplicationState();
   const getStateSnapshot = useGetStateSnapshot();
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
-  const modKey = useModKey();
+  const modKey = 'metaKey'; //useModKey();
 
   const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const selectedLayerIds = useShallowArray(state.selectedLayerIds);
@@ -322,6 +48,7 @@ export default memo(function LayerList({
       ),
     [filter, page],
   );
+
   const items = useDeepMemo(
     flattenLayerList(page, selectedLayerIds, filteredLayerIds),
   );
@@ -457,13 +184,13 @@ export default memo(function LayerList({
             <IconContainer>
               {hasClippingMask ? (
                 <>
-                  <MaskOnIcon />
-                  <Spacer.Horizontal size={4} />
+                  <Layout.Icon name="mask-on" />
+                  <Layout.Queue size={4} />
                 </>
               ) : isWithinMaskChain ? (
                 <>
-                  <ArrowDownIcon />
-                  <Spacer.Horizontal size={4} />
+                  <Layout.Icon name="arrow-down" />
+                  <Layout.Queue size={4} />
                 </>
               ) : null}
               <LayerIcon
@@ -493,16 +220,6 @@ export default memo(function LayerList({
   );
 
   const ref = useRef<ListView.IVirtualizedList | null>(null);
-
-  const scrollToIndex =
-    items.findIndex((item) => item.id === selectedLayerIds[0]) ?? -1;
-
-  // Whenever selection changes, scroll the first selected layer into view
-  useEffect(() => {
-    if (scrollToIndex === -1) return;
-
-    ref.current?.scrollToIndex(scrollToIndex);
-  }, [scrollToIndex]);
 
   return (
     <TreeView.Root

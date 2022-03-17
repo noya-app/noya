@@ -6,9 +6,10 @@ import '../utils/patchFileReader';
 
 // Lib imports
 import React, { Suspense } from 'react';
-import styled, { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
 import {
   View,
+  Platform,
   StatusBar,
   SafeAreaView,
   useColorScheme,
@@ -16,8 +17,10 @@ import {
 } from 'react-native';
 
 // Local imports
-import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
+import { getCurrentPlatform } from 'noya-keymap';
 import { CanvasKitNative } from 'noya-native-canvaskit';
+import { DesignSystemConfigurationProvider } from 'noya-ui';
+import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
 import { darkTheme, lightTheme } from '../constants';
 import AppContent from './AppContent';
 
@@ -32,8 +35,13 @@ const App: React.FC<{}> = () => {
   );
 
   return (
-    // @ts-ignore
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+    <DesignSystemConfigurationProvider
+      platform={
+        Platform.OS === 'web' ? getCurrentPlatform(navigator) : Platform.OS
+      }
+      // @ts-ignore
+      theme={isDarkMode ? darkTheme : lightTheme}
+    >
       <Suspense fallback={AppLoader}>
         {/* @ts-ignore */}
         <CanvasKitProvider CanvasKit={CanvasKitNative}>
@@ -47,7 +55,7 @@ const App: React.FC<{}> = () => {
           </FontManagerProvider>
         </CanvasKitProvider>
       </Suspense>
-    </ThemeProvider>
+    </DesignSystemConfigurationProvider>
   );
 };
 

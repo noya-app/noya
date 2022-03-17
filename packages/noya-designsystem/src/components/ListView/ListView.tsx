@@ -1,49 +1,57 @@
-import { composeRefs } from '@radix-ui/react-compose-refs';
-import { Size } from 'noya-geometry';
-import { range } from 'noya-utils';
-import {
+import React, {
+  Ref,
+  memo,
+  useRef,
+  useMemo,
   Children,
+  ReactNode,
+  forwardRef,
+  useContext,
+  useCallback,
+  ForwardedRef,
+  ReactElement,
   createContext,
   CSSProperties,
-  ForwardedRef,
-  forwardRef,
   isValidElement,
-  memo,
-  ReactElement,
-  ReactNode,
-  Ref,
-  useCallback,
-  useContext,
-  useImperativeHandle,
   useLayoutEffect,
-  useMemo,
-  useRef,
+  useImperativeHandle,
 } from 'react';
-import { WindowScroller } from 'react-virtualized';
-import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import styled from 'styled-components';
-import { InputField, Spacer } from '..';
-import { useHover } from '../hooks/useHover';
-import { mergeEventHandlers } from '../hooks/mergeEventHandlers';
-import ContextMenu from './ContextMenu';
-import { MenuItem } from './internal/Menu';
-import ScrollArea from './ScrollArea';
-import * as Sortable from './Sortable';
-import { isLeftButtonClicked } from '../utils/mouseEvent';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
+import { WindowScroller } from 'react-virtualized';
+import { composeRefs } from '@radix-ui/react-compose-refs';
 
-export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
-export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
+import { Size } from 'noya-geometry';
+import { range } from 'noya-utils';
+import { mergeEventHandlers, useHover } from '../../hooks';
+import { isLeftButtonClicked } from '../../utils';
+import { Layout } from '../Layout';
+import { InputField } from '../InputField';
+import ScrollArea from '../ScrollArea';
+import ContextMenu from '../ContextMenu';
+import * as Sortable from '../Sortable';
+import type {
+  RenderProps,
+  ChildrenProps,
+  ListRowPosition,
+  IVirtualizedList,
+  ListViewRowProps,
+  ListViewRootProps,
+  ListRowMarginType,
+  ListRowContextValue,
+  ListRowContainerProps,
+} from './types';
+import { getPositionMargin } from './utils';
 
-type PressEventName = 'onClick' | 'onPointerDown';
-
-type ListRowContextValue = {
-  marginType: ListRowMarginType;
-  selectedPosition: ListRowPosition;
-  sortable: boolean;
-  expandable: boolean;
-  indentation: number;
-  pressEventName: PressEventName;
-};
+// `disabled` and `selected` props are for native compability only
+const ListViewRowTitle = styled.span<{ disabled: boolean; selected: boolean }>(
+  ({ theme }) => ({
+    flex: '1 1 0',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'pre',
+  }),
+);
 
 export const ListRowContext = createContext<ListRowContextValue>({
   marginType: 'none',
@@ -53,17 +61,6 @@ export const ListRowContext = createContext<ListRowContextValue>({
   indentation: 12,
   pressEventName: 'onClick',
 });
-
-/* ----------------------------------------------------------------------------
- * RowTitle
- * ------------------------------------------------------------------------- */
-
-const ListViewRowTitle = styled.span(({ theme }) => ({
-  flex: '1 1 0',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'pre',
-}));
 
 /* ----------------------------------------------------------------------------
  * EditableRowTitle
@@ -107,26 +104,11 @@ function ListViewEditableRowTitle({
   );
 }
 
-function getPositionMargin(marginType: ListRowMarginType) {
-  return {
-    top: marginType === 'top' || marginType === 'vertical' ? 8 : 0,
-    bottom: marginType === 'bottom' || marginType === 'vertical' ? 8 : 0,
-  };
-}
-
 /* ----------------------------------------------------------------------------
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled.div<{
-  marginType: ListRowMarginType;
-  selected: boolean;
-  selectedPosition: ListRowPosition;
-  disabled: boolean;
-  hovered: boolean;
-  isSectionHeader: boolean;
-  showsActiveState: boolean;
-}>(
+const RowContainer = styled.div<ListRowContainerProps>(
   ({
     theme,
     marginType,
@@ -217,31 +199,6 @@ export const DragIndicatorElement = styled.div<{
         boxShadow: '0 0 2px rgba(0,0,0,0.5)',
       }),
 }));
-
-export interface ListViewClickInfo {
-  shiftKey: boolean;
-  altKey: boolean;
-  metaKey: boolean;
-  ctrlKey: boolean;
-}
-
-export interface ListViewRowProps<MenuItemType extends string = string> {
-  id?: string;
-  selected?: boolean;
-  depth?: number;
-  disabled?: boolean;
-  draggable?: boolean;
-  hovered?: boolean;
-  sortable?: boolean;
-  onPress?: (info: ListViewClickInfo) => void;
-  onDoubleClick?: () => void;
-  onHoverChange?: (isHovering: boolean) => void;
-  children?: ReactNode;
-  isSectionHeader?: boolean;
-  menuItems?: MenuItem<MenuItemType>[];
-  onSelectMenuItem?: (value: MenuItemType) => void;
-  onContextMenu?: () => void;
-}
 
 const ListViewRow = forwardRef(function ListViewRow<
   MenuItemType extends string,
@@ -334,7 +291,7 @@ const ListViewRow = forwardRef(function ListViewRow<
             offsetLeft={33 + depth * indentation}
           />
         )}
-        {depth > 0 && <Spacer.Horizontal size={depth * indentation} />}
+        {depth > 0 && <Layout.Queue size={depth * indentation} />}
         {children}
       </RowContainer>
     );
@@ -398,10 +355,6 @@ interface VirtualizedListProps<T> {
   getItemHeight: (index: number) => number;
   keyExtractor: (index: number) => string;
   renderItem: (index: number) => ReactNode;
-}
-
-export interface IVirtualizedList {
-  scrollToIndex(index: number): void;
 }
 
 const VirtualizedListInner = forwardRef(function VirtualizedListInner<T>(
@@ -503,36 +456,6 @@ const RootContainer = styled.div<{ scrollable?: boolean }>(
     color: theme.colors.textMuted,
   }),
 );
-
-export type ItemInfo = {
-  isDragging: boolean;
-};
-
-type ChildrenProps = {
-  children: ReactNode;
-};
-
-type RenderProps<T> = {
-  data: T[];
-  renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
-  keyExtractor: (item: T, index: number) => string;
-  sortable?: boolean;
-  virtualized?: Size;
-};
-
-type ListViewRootProps = {
-  onPress?: () => void;
-  scrollable?: boolean;
-  expandable?: boolean;
-  onMoveItem?: (
-    sourceIndex: number,
-    destinationIndex: number,
-    position: Sortable.RelativeDropPosition,
-  ) => void;
-  indentation?: number;
-  acceptsDrop?: Sortable.DropValidator;
-  pressEventName?: PressEventName;
-};
 
 const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
   {

@@ -5,5 +5,5 @@ import { useDesignSystemConfiguration } from 'noya-ui';
  */
 export function useModKey(): 'ctrlKey' | 'metaKey' {
   const platform = useDesignSystemConfiguration().platform;
-  return platform === 'mac' ? 'metaKey' : 'ctrlKey';
+  return platform === 'macos' ? 'metaKey' : 'ctrlKey';
 }

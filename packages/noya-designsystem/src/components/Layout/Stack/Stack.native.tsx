@@ -15,7 +15,7 @@ const Stack: React.FC<StackProps> = (props) => {
           large: 15,
         }[size];
 
-  return <View style={{ height }} />;
+  return <View style={size ? { height } : { flex: 1 }} />;
 };
 
 export default React.memo(Stack);

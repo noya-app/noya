@@ -55,7 +55,7 @@ test('determines key name', () => {
 });
 
 test('normalizes key name', () => {
-  expect(normalizeKeyName('cmd-shift-d', 'mac')).toEqual('Shift-Meta-d');
-  expect(normalizeKeyName(' ', 'mac')).toEqual(' ');
-  expect(normalizeKeyName('Space', 'mac')).toEqual(' ');
+  expect(normalizeKeyName('cmd-shift-d', 'macos')).toEqual('Shift-Meta-d');
+  expect(normalizeKeyName(' ', 'macos')).toEqual(' ');
+  expect(normalizeKeyName('Space', 'macos')).toEqual(' ');
 });

@@ -11,7 +11,7 @@ import {
 } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import DimensionsInspector from '../components/inspector/DimensionsInspector';
+import { DimensionsInspector } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
 import AlignmentInspector from './AlignmentInspector';

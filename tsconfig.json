@@ -12,6 +12,9 @@
       "react-native-reanimated": [
         "./packages/app-mobile/node_modules/react-native-reanimated"
       ],
+      "react-native-gesture-handler": [
+        "./packages/app-mobile/node_modules/react-native-gesture-handler"
+      ],
       /* Include path to all package src index files */
       "*": ["./*/src"]
     }

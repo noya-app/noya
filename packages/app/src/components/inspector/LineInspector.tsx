@@ -12,8 +12,7 @@ import {
 import { useCallback } from 'react';
 import styled from 'styled-components';
 import CoordinatesInspector from './CoordinatesInspector';
-import DimensionInput from './DimensionInput';
-import FlipControls from './FlipControls';
+import { DimensionInput, FlipControls } from 'noya-workspace-ui';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 export type DimensionValue = number | undefined;

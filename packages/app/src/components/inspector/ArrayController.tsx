@@ -1,15 +1,16 @@
+import { memo, ReactNode, useCallback, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
+
 import * as InspectorPrimitives from './InspectorPrimitives';
 import {
   Sortable,
   Spacer,
-  ListView,
   RelativeDropPosition,
   withSeparatorElements,
   IconButton,
   Button,
 } from 'noya-web-designsystem';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
+import { ListView } from 'noya-designsystem';
 import { range } from 'noya-utils';
 
 const ElementRow = styled.div({

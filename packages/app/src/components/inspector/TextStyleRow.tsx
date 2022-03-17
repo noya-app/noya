@@ -1,3 +1,6 @@
+import { memo, useCallback, useMemo } from 'react';
+import { useTheme } from 'styled-components';
+
 import Sketch from 'noya-file-format';
 import {
   InputField,
@@ -14,11 +17,9 @@ import {
   FontTraits,
   getTraitsDisplayName,
 } from 'noya-fonts';
-import { useFontManager } from 'noya-renderer';
 import { SetNumberMode } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
-import { useTheme } from 'styled-components';
-import DimensionInput from './DimensionInput';
+import { useFontManager } from 'noya-renderer';
+import { DimensionInput } from 'noya-workspace-ui';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

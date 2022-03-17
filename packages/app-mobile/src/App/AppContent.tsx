@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { View } from 'react-native';
 
@@ -7,10 +7,10 @@ import { decodeFontName } from 'noya-fonts';
 import { useDownloadFont, useFontManager } from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
 import { Expandable } from 'noya-designsystem';
+import { LayerList } from 'noya-workspace-ui';
 import useAppState from '../hooks/useAppState';
 import AttributeInspector from '../containers/AttributeInspector';
 import ThemeManager from '../containers/ThemeManager';
-import LayerList from '../containers/LayerList';
 import MainMenu from '../containers/MainMenu';
 import PageList from '../containers/PageList';
 import Toolbar from '../containers/Toolbar';
@@ -18,6 +18,7 @@ import Canvas from '../containers/Canvas';
 
 const AppContent: React.FC<{}> = () => {
   const { state, dispatch } = useAppState();
+  const [layersFilter, setLayersFilter] = useState('');
   const fontManager = useFontManager();
 
   const handleDispatch = useCallback(
@@ -55,7 +56,12 @@ const AppContent: React.FC<{}> = () => {
         <Expandable position="left">
           <MainMenu id="main-menu" icon="hamburger-menu" />
           <PageList id="page-list" icon="file" />
-          <LayerList id="layers" icon="layers" />
+          <LayerList
+            id="layers"
+            icon="layers"
+            filter={layersFilter}
+            size={{ width: 350, height: 250 }}
+          />
           <ThemeManager id="theme" icon="tokens" />
         </Expandable>
         <Expandable position="right">

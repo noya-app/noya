@@ -1,13 +1,8 @@
 import { memo, useCallback, useState } from 'react';
 
 import type Sketch from 'noya-file-format';
-import {
-  Button,
-  Divider,
-  ListView,
-  Select,
-  Spacer,
-} from 'noya-web-designsystem';
+import { Button, Divider, Select, Spacer } from 'noya-web-designsystem';
+import { ListView } from 'noya-designsystem';
 import { sketchColorToRgbaString } from 'noya-colorpicker';
 import { uuid } from 'noya-utils';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';

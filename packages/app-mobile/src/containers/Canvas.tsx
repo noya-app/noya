@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { View, LayoutChangeEvent, GestureResponderEvent } from 'react-native';
+import { LayoutChangeEvent } from 'react-native';
 import styled from 'styled-components';
 
 import {
@@ -7,41 +7,34 @@ import {
   useWorkspace,
   useSelector,
 } from 'noya-app-state-context';
+import {
+  Touchable,
+  ContextMenu,
+  Gesture,
+  GestureType,
+} from 'noya-designsystem';
 import { AffineTransform, Point, createRect } from 'noya-geometry';
 import { Selectors, getCurrentPage } from 'noya-state';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
-import useMultitouchGH, {
-  GestureType,
-  PanGesture,
-  PinchGesture,
-} from '../hooks/useMultitouchGH';
 import CanvasRenderer from './CanvasRenderer';
+import { useLayerMenu } from 'noya-workspace-ui';
 
-function getPoint(event: GestureResponderEvent): Point {
-  const { nativeEvent } = event;
-
-  if (nativeEvent.touches.length > 1) {
-    const firstTouch = nativeEvent.touches[0];
-
-    return {
-      x: firstTouch.locationX,
-      y: firstTouch.locationY,
-    };
-  }
-
-  return {
-    x: Math.round(nativeEvent.locationX),
-    y: Math.round(nativeEvent.locationY),
-  };
+function isMoving(point: Point, origin: Point): boolean {
+  return Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2;
 }
 
 const Canvas: React.FC<{}> = () => {
+  const meta = useSelector(Selectors.getCurrentPageMetadata);
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [state, dispatch] = useApplicationState();
   const { setCanvasSize } = useWorkspace();
   const fontManager = useFontManager();
   const CanvasKit = useCanvasKit();
-  const gestures = useMultitouchGH();
-  const meta = useSelector(Selectors.getCurrentPageMetadata);
+
+  const [menuItems, onSelectMenuItem] = useLayerMenu(
+    selectedLayers,
+    state.interactionState.type,
+  );
 
   const insets = useMemo(
     () => ({
@@ -63,16 +56,10 @@ const Canvas: React.FC<{}> = () => {
     [meta],
   );
 
-  const onStartShouldSetResponder = useCallback(
-    (e: GestureResponderEvent) => true,
-    [],
-  );
-
-  const onResponderGrant = useCallback(
-    (e: GestureResponderEvent) => {
-      const rawPoint = getPoint(e);
+  const onTouchStart = useCallback(
+    (params: Gesture) => {
+      const rawPoint = params.point;
       const point = offsetEventPoint(rawPoint);
-      gestures.setTouches(e);
 
       switch (state.interactionState.type) {
         case 'insert': {
@@ -90,7 +77,7 @@ const Canvas: React.FC<{}> = () => {
             fontManager,
             state,
             insets,
-            point,
+            rawPoint,
             {
               groups: 'groupAndChildren', // event[modKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
@@ -139,23 +126,13 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [
-      state,
-      CanvasKit,
-      fontManager,
-      dispatch,
-      insets,
-      gestures,
-      offsetEventPoint,
-    ],
+    [state, CanvasKit, fontManager, dispatch, insets, offsetEventPoint],
   );
 
-  const onResponderMove = useCallback(
-    (e: GestureResponderEvent) => {
-      const rawPoint = getPoint(e);
+  const onTouchUpdate = useCallback(
+    (params: Gesture) => {
+      const rawPoint = params.point;
       const point = offsetEventPoint(rawPoint);
-      const numOfTouches = e.nativeEvent.touches.length;
-      const multiTouchGesture = gestures.getGesture(e);
 
       switch (state.interactionState.type) {
         case 'insert': {
@@ -166,13 +143,55 @@ const Canvas: React.FC<{}> = () => {
           ]);
           break;
         }
+        case 'maybeMove':
+        case 'maybeScale': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', [
+              state.interactionState.type === 'maybeMove'
+                ? 'updateMoving'
+                : 'updateScaling',
+              point,
+            ]);
+          }
+
+          break;
+        }
+        case 'maybeMoveControlPoint': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingControlPoint', origin, point]);
+          }
+          break;
+        }
+        case 'movingControlPoint': {
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingControlPoint', origin, point]);
+
+          break;
+        }
+
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
+
+          break;
+        }
 
         case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
           break;
         }
         case 'marquee': {
-          if (numOfTouches > 1) {
+          if (params.numOfPointers > 1) {
             dispatch('interaction', ['reset']);
             return;
           }
@@ -201,38 +220,28 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'none': {
-          if (numOfTouches <= 1) {
-            break;
-          }
-
-          if (multiTouchGesture.type === GestureType.Pan) {
-            const { deltaX: x, deltaY: y } = multiTouchGesture as PanGesture;
-            dispatch('pan*', { x, y });
-            break;
-          }
-
-          if (multiTouchGesture.type === GestureType.Pinch) {
-            const { scale } = multiTouchGesture as PinchGesture;
-
-            if (scale !== 0 || scale !== Infinity) {
-              dispatch('setZoom*', scale, 'multiply');
+          if (params.numOfPointers > 1) {
+            if (params.type === GestureType.Pinch) {
+              dispatch('setZoom*', params.scale!, 'multiply');
+              break;
             }
 
-            break;
+            if (params.type === GestureType.Pan) {
+              dispatch('pan*', params.delta!);
+            }
           }
 
           break;
         }
       }
     },
-    [state, dispatch, gestures, insets, offsetEventPoint],
+    [state, dispatch, insets, offsetEventPoint],
   );
 
-  const onResponderRelease = useCallback(
-    (e: GestureResponderEvent) => {
-      const rawPoint = getPoint(e);
+  const onTouchEnd = useCallback(
+    (params: Gesture) => {
+      const rawPoint = params.point;
       const point = offsetEventPoint(rawPoint);
-      gestures.resetTouches();
 
       switch (state.interactionState.type) {
         case 'drawing': {
@@ -263,8 +272,39 @@ const Canvas: React.FC<{}> = () => {
             layers.map((layer) => layer.do_objectID),
           );
 
-          // containerRef.current?.releasePointerCapture(event.pointerId);
+          break;
+        }
+        case 'maybeMove':
+        case 'maybeScale':
+        case 'moveGradientStop':
+        case 'maybeMoveGradientStop':
+        case 'maybeMoveGradientEllipseLength':
+        case 'moveGradientEllipseLength': {
+          dispatch('interaction', ['reset']);
 
+          break;
+        }
+        case 'moving':
+        case 'scaling': {
+          dispatch('interaction', [
+            state.interactionState.type === 'moving'
+              ? 'updateMoving'
+              : 'updateScaling',
+            point,
+          ]);
+
+          if (state.interactionState.type === 'moving')
+            dispatch('moveLayersIntoParentAtPoint', point);
+
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
+        case 'maybeMoveControlPoint':
+        case 'movingControlPoint':
+        case 'maybeMovePoint':
+        case 'movingPoint': {
+          dispatch('interaction', ['resetEditPath', point]);
           break;
         }
         case 'none': {
@@ -272,7 +312,7 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [state, dispatch, insets, gestures, offsetEventPoint],
+    [state, dispatch, insets, offsetEventPoint],
   );
 
   const onCanvasLayout = useCallback(
@@ -285,20 +325,21 @@ const Canvas: React.FC<{}> = () => {
   );
 
   return (
-    <CanvasWrapper
-      onStartShouldSetResponder={onStartShouldSetResponder}
-      onResponderMove={onResponderMove}
-      onResponderGrant={onResponderGrant}
-      onResponderRelease={onResponderRelease}
-      onLayout={onCanvasLayout}
-    >
-      <CanvasRenderer />
-    </CanvasWrapper>
+    <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
+      <CanvasWrapper
+        onLayout={onCanvasLayout}
+        onTouchStart={onTouchStart}
+        onTouchUpdate={onTouchUpdate}
+        onTouchEnd={onTouchEnd}
+      >
+        <CanvasRenderer />
+      </CanvasWrapper>
+    </ContextMenu>
   );
 };
 
 export default React.memo(Canvas);
 
-const CanvasWrapper = styled(View)(() => ({
+const CanvasWrapper = styled(Touchable)(() => ({
   flex: 1,
 }));

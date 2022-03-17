@@ -1,7 +1,8 @@
-import { SetNumberMode } from 'noya-state';
 import { memo } from 'react';
+
+import { SetNumberMode } from 'noya-state';
+import { DimensionValue } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-import { DimensionValue } from './DimensionsInspector';
 import { DimensionSliderRow } from './DimensionSliderRow';
 
 interface Props {

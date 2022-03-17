@@ -152,7 +152,7 @@ export const KeyboardShortcut = memo(function KeyboardShortcut({
   const keyElements = keys.map((key) => (
     <ShortcutElement
       key={key}
-      fixedWidth={platform === 'mac' && key.length === 1}
+      fixedWidth={platform === 'macos' && key.length === 1}
     >
       {key}
     </ShortcutElement>

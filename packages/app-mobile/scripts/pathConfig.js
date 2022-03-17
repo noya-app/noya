@@ -46,6 +46,10 @@ const getPathConfigs = (appRootDir) => {
       appRootDir,
       './node_modules/react-native-reanimated',
     ),
+    'react-native-gesture-handler': path.resolve(
+      appRootDir,
+      './node_modules/react-native-gesture-handler',
+    ),
   };
 
   packages.forEach((packageName) => {
