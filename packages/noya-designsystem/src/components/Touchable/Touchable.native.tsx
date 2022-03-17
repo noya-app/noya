@@ -99,8 +99,8 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
         type: GestureType.Pan,
         point: currentPos,
         delta: {
-          x: currentPos.x - lastPos.x,
-          y: currentPos.y - lastPos.y,
+          x: lastPos.x - currentPos.x,
+          y: lastPos.y - currentPos.y,
         },
       };
     }
