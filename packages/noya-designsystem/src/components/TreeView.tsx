@@ -1,14 +1,15 @@
 import React, {
-  ForwardedRef,
-  forwardRef,
   memo,
   ReactNode,
-  useCallback,
+  forwardRef,
   useContext,
+  ForwardedRef,
 } from 'react';
+
+import { usePressableHandler } from 'noya-react-utils';
+import type { ListViewRowProps } from './ListView';
 import { IconButton } from './Button';
 import * as ListView from './ListView';
-import type { ListViewRowProps } from './ListView';
 import { Layout } from './Layout';
 
 /* ----------------------------------------------------------------------------
@@ -36,11 +37,13 @@ const TreeRow = forwardRef(function TreeRow<MenuItemType extends string>(
 ) {
   const { expandable } = useContext(ListView.ListRowContext);
 
-  const handleClickChevron = useCallback(() => {
-    // (event: React.MouseEvent) => {
-    // event.stopPropagation();
-    onClickChevron?.({ altKey: false /* event.altKey */ });
-  }, [onClickChevron]);
+  const handleClickChevron = usePressableHandler(
+    (event) => {
+      event.stopPropagation();
+      onClickChevron?.({ altKey: false /* event.altKey */ });
+    },
+    [onClickChevron],
+  );
 
   return (
     <ListView.Row ref={forwardedRef} {...rest}>

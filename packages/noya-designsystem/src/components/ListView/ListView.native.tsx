@@ -150,13 +150,6 @@ const RowContainer = styled(View)<ListRowContainerProps>(
       ...(hovered && {
         boxShadow: `0 0 0 1px ${theme.colors.primary}`,
       }),
-      // ...(showsActiveState && {
-      //   '&:active': {
-      //     backgroundColor: selected
-      //       ? theme.colors.primaryLight
-      //       : theme.colors.activeBackground,
-      //   },
-      // }),
     };
   },
 );

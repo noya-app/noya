@@ -84,6 +84,7 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
     </TouchableOpacity>
   );
 
+  // TODO: nesting menus
   // if (items && items.length > 0) {
   //   return (
   //     <ContextMenuRoot isNested items={items} onSelect={onSelect}>
@@ -145,6 +146,7 @@ function ContextMenuRoot<T extends string>({
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
 
+  // TODO: keybindings for mobile
   // const keymap = useMemo(
   //   () =>
   //     isNested || shouldBindKeyboardShortcuts === false

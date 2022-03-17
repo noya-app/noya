@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, DependencyList } from 'react';
 import type { GestureResponderEvent } from 'react-native';
 
 import { PressableHandler } from './types';
@@ -8,7 +8,10 @@ const EventPlaceholder = {
   preventDefault: () => {},
 };
 
-export function usePressableHandler(handler: PressableHandler) {
+export function usePressableHandler(
+  handler: PressableHandler,
+  deps?: DependencyList,
+) {
   return useCallback(
     function usePressableCallback(_event: GestureResponderEvent) {
       handler(EventPlaceholder);
