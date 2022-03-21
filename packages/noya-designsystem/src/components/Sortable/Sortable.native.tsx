@@ -1,110 +1,97 @@
 import React, {
   memo,
-  useMemo,
   useState,
+  useContext,
   useCallback,
-  PropsWithChildren,
-  useRef,
+  createContext,
 } from 'react';
-import { View, FlatList, ListRenderItem } from 'react-native';
+import { View, FlatList, LayoutChangeEvent } from 'react-native';
 import Animated, {
-  useAnimatedRef,
   useSharedValue,
   useAnimatedStyle,
+  SharedValue,
+  useDerivedValue,
 } from 'react-native-reanimated';
 
 import { Point } from 'noya-geometry';
-import {
-  DropValidator,
+import type {
   SortableRootProps,
-  RelativeDropPosition,
   SortableListProps,
   SortableItemProps,
+  ItemMeasurement,
 } from './types';
 import { Gesture, TouchableListener } from '../Touchable';
+import { validateDropIndicator, defaultAcceptsDrop } from './utils';
 
-/* ----------------------------------------------------------------------------
- * Item
- * ------------------------------------------------------------------------- */
+interface SortableContextType {
+  // overId?: string;
+  // acceptsDrop?: DropValidator;
+  // setOverId: (id: string | undefined) => void;
+  activeItemIndex?: number;
+  touchPos: SharedValue<Point>;
+  overIndex: SharedValue<number | undefined>;
+  touchOffset: SharedValue<Point>;
+  measurements: SharedValue<ItemMeasurement[]>;
+  setActiveItemIndex: (index: number | undefined) => void;
+}
 
-type SortableListItemProps = PropsWithChildren<{
-  isDragging: boolean;
-  setIsDragging: (is: boolean) => void;
-}>;
+// @ts-ignore Initial value doesn't really matter \m/
+const SortableContext = createContext<SortableContextType>(undefined);
 
-const SortableListItem = memo(function SortableListItem(
-  props: SortableListItemProps,
+function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {}
+
+interface CellRendererComponentProps<T> {
+  item: T;
+  index: number;
+  children: React.ReactNode;
+}
+
+const CellRendererComponent = memo(function CellRendererComponent<T>(
+  props: CellRendererComponentProps<T>,
 ) {
-  const { children, isDragging, setIsDragging } = props;
-  const wrapperRef = useAnimatedRef<View>();
-  const elementSize = useSharedValue<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
-  const offset = useSharedValue<Point>({ x: 0, y: 0 });
-  const position = useSharedValue<Point>({ x: 0, y: 0 });
-  const touchStartTimeout = useRef<number | null>(null);
+  const sortable = useContext(SortableContext);
+  const { index, children } = props;
 
   const onTouchStart = useCallback(
     (params: Gesture) => {
-      touchStartTimeout.current = setTimeout(() => {
-        setIsDragging(true);
-        touchStartTimeout.current = null;
-      }, 150);
+      sortable.setActiveItemIndex(index);
 
-      wrapperRef.current?.measure((x, y, width, height) => {
-        elementSize.value = { width, height };
-        offset.value = {
-          x: params.point.x - x,
-          y: params.point.y - y,
-        };
-        position.value = {
-          x,
-          y,
-        };
-      });
+      sortable.touchPos.value = params.point;
+      sortable.touchOffset.value = {
+        x: params.point.x - (sortable.measurements.value[index]?.pos.x ?? 0),
+        y: params.point.y - (sortable.measurements.value[index]?.pos.y ?? 0),
+      };
     },
-    [wrapperRef, offset, elementSize, position, setIsDragging],
+    [index, sortable],
   );
 
   const onTouchUpdate = useCallback(
     (params: Gesture) => {
-      if (touchStartTimeout.current) {
-        clearTimeout(touchStartTimeout.current);
-        touchStartTimeout.current = null;
-      }
-      if (!isDragging) {
-        return;
-      }
-
-      position.value = {
-        x: params.point.x - offset.value.x,
-        y: params.point.y - offset.value.y,
-      };
+      sortable.touchPos.value = params.point;
     },
-    [position, isDragging, offset],
+    [sortable],
   );
 
   const onTouchEnd = useCallback(
     (params: Gesture) => {
-      setIsDragging(false);
-      touchStartTimeout.current = null;
-      elementSize.value = { width: 0, height: 0 };
-      offset.value = { x: 0, y: 0 };
+      sortable.setActiveItemIndex(undefined);
     },
-    [elementSize, setIsDragging, offset],
+    [sortable],
   );
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      position: 'absolute',
-      width: elementSize.value.width,
-      height: elementSize.value.height,
-      left: position.value.x,
-      top: position.value.y,
-      zIndeX: 1000,
-    };
-  });
+  const onLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const {
+        layout: { width, height, x, y },
+      } = event.nativeEvent;
+
+      sortable.measurements.value[index] = {
+        size: { width, height },
+        pos: { x, y },
+      };
+    },
+    [sortable, index],
+  );
 
   return (
     <TouchableListener
@@ -112,51 +99,83 @@ const SortableListItem = memo(function SortableListItem(
       onTouchUpdate={onTouchUpdate}
       onTouchEnd={onTouchEnd}
     >
-      <View ref={wrapperRef}>{children}</View>
-      {isDragging && (
-        <Animated.View style={animatedStyle}>{children}</Animated.View>
-      )}
+      {/*  index as key enforces onLayout event after data list has been modified */}
+      <View onLayout={onLayout} key={index}>
+        {children}
+      </View>
     </TouchableListener>
   );
 });
 
-/* ----------------------------------------------------------------------------
- * List
- * ------------------------------------------------------------------------- */
-
 function SortableList<T>(props: SortableListProps<T>) {
-  const { data, keyExtractor, renderItem, style } = props;
-  const [isDragging, setIsDragging] = useState(false);
+  const { data, keyExtractor, renderItem, style, acceptsDrop, renderOverlay } =
+    props;
+  const [activeItemIndex, setActiveItemIndex] = useState<number>();
+  const touchPos = useSharedValue<Point>({ x: 0, y: 0 });
+  const touchOffset = useSharedValue<Point>({ x: 0, y: 0 });
+  const measurements = useSharedValue<ItemMeasurement[]>([]);
 
-  const renderWrappedChild: ListRenderItem<T> = useCallback(
-    (info) => {
-      return (
-        <SortableListItem isDragging={isDragging} setIsDragging={setIsDragging}>
-          {renderItem(info)}
-        </SortableListItem>
-      );
-    },
-    [renderItem, isDragging],
-  );
+  const isDragging = activeItemIndex !== undefined;
+
+  const overIndex = useDerivedValue<number | undefined>(() => {
+    let over;
+
+    if (!isDragging) {
+      return;
+    }
+
+    measurements.value.forEach((item, index) => {
+      if (item.pos.y < touchPos.value.y) {
+        over = index;
+      }
+    });
+
+    return over;
+  }, [activeItemIndex, measurements]);
+
+  const dragItemStyle = useAnimatedStyle(() => {
+    if (!isDragging) {
+      return { position: 'absolute', top: 0, left: 0 };
+    }
+
+    return {
+      zIndeX: 1000,
+      flexDirection: 'row',
+      position: 'absolute',
+      width: measurements.value[activeItemIndex]?.size.width,
+      height: measurements.value[activeItemIndex]?.size.height,
+      left: touchPos.value.x - touchOffset.value.x,
+      top: touchPos.value.y - touchOffset.value.y,
+    };
+  });
 
   return (
-    <FlatList
-      data={data}
-      keyExtractor={keyExtractor}
-      renderItem={renderWrappedChild}
-      style={style}
-      scrollEnabled={!isDragging}
-    />
-  );
-}
-
-/* ----------------------------------------------------------------------------
- * Root and Item
- * ------------------------------------------------------------------------- */
-
-function SortableItem<T>(_props: SortableItemProps<T>) {
-  throw new Error(
-    'SortableItem is not implemented for mobile please use Sortable.List instead!',
+    <SortableContext.Provider
+      value={{
+        touchPos,
+        overIndex,
+        touchOffset,
+        measurements,
+        activeItemIndex,
+        setActiveItemIndex,
+      }}
+    >
+      <View style={[style, { flex: 1 }]}>
+        <FlatList
+          style={style}
+          data={data}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          CellRendererComponent={CellRendererComponent}
+          scrollEnabled={!isDragging}
+        />
+        {isDragging && (
+          <Animated.View style={dragItemStyle}>
+            {renderOverlay?.(activeItemIndex)}
+          </Animated.View>
+        )}
+      </View>
+    </SortableContext.Provider>
   );
 }
 

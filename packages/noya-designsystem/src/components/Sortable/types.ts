@@ -1,5 +1,7 @@
 import type { ReactNode, Ref } from 'react';
-import { ListRenderItem, ViewStyle } from 'react-native';
+import type { ListRenderItem, ViewStyle } from 'react-native';
+
+import type { Point } from 'noya-geometry';
 
 export type RelativeDropPosition = 'above' | 'below' | 'inside';
 
@@ -13,7 +15,7 @@ export interface SortableItemProps<RefType> {
   id: string;
   disabled?: boolean;
   children: (props: {
-    ref: Ref<RefType>;
+    ref?: Ref<RefType>;
     relativeDropPosition?: RelativeDropPosition;
     [key: string]: any;
   }) => JSX.Element;
@@ -34,6 +36,18 @@ export interface SortableRootProps {
 export interface SortableListProps<T> {
   data: T[];
   keyExtractor: (item: T, index: number) => string;
+  renderOverlay?: (index: number) => ReactNode;
   renderItem: ListRenderItem<T>;
+  acceptsDrop?: DropValidator;
   style: ViewStyle;
+}
+
+export interface ItemSize {
+  width: number;
+  height: number;
+}
+
+export interface ItemMeasurement {
+  size: ItemSize;
+  pos: Point;
 }

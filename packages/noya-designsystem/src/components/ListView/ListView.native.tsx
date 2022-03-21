@@ -156,10 +156,32 @@ const RowContainer = styled(View)<ListRowContainerProps>(
 );
 
 export const DragIndicatorElement = memo(
-  styled(View)(({ theme }) => ({
+  styled(View)<{
+    relativeDropPosition: Sortable.RelativeDropPosition;
+    offsetLeft: number;
+  }>(({ theme, relativeDropPosition, offsetLeft }) => ({
     zIndex: 1,
     position: 'absolute',
     borderRadius: 3,
+    ...(relativeDropPosition === 'inside'
+      ? {
+          shadowColor: theme.colors.dragOutline,
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 3,
+        }
+      : {
+          top: relativeDropPosition === 'above' ? -3 : undefined,
+          bottom: relativeDropPosition === 'below' ? -3 : undefined,
+          left: offsetLeft,
+          right: 0,
+          height: 6,
+          background: theme.colors.primary,
+          borderWidth: 2,
+          borderColor: 'white',
+          shadowColor: 'rgba(0, 0, 0, 0.5)',
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 2,
+        }),
   })),
 );
 
@@ -176,7 +198,6 @@ const ListViewRow = forwardRef(function ListViewRow<
     sortable: overrideSortable,
     onPress,
     // onDoubleClick,
-    // onHoverChange,
     menuItems,
     onSelectMenuItem,
     children,
@@ -187,7 +208,7 @@ const ListViewRow = forwardRef(function ListViewRow<
   const {
     marginType,
     selectedPosition,
-    // sortable,
+    sortable,
     indentation,
     pressEventName,
   } = useContext(ListRowContext);
@@ -208,9 +229,9 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   const renderContent = (
     {
-      relativeDropPosition, // ...renderProps
-    }: ListRowContainerProps & {
-      relativeDropPosition?: any;
+      relativeDropPosition,
+    }: {
+      relativeDropPosition?: Sortable.RelativeDropPosition;
     },
     ref: Ref<View>,
   ) => {
@@ -220,17 +241,12 @@ const ListViewRow = forwardRef(function ListViewRow<
           ref={ref}
           isSectionHeader={isSectionHeader}
           id={id}
-          // {...hoverProps}
           marginType={marginType}
           disabled={disabled}
           hovered={hovered}
           selected={selected}
           selectedPosition={selectedPosition}
           showsActiveState={pressEventName === 'onClick'}
-          // {...renderProps}
-          // {...mergeEventHandlers(
-          //   { onPointerDown: renderProps.onPointerDown },
-          // )}
         >
           {relativeDropPosition && (
             <DragIndicatorElement
@@ -258,18 +274,17 @@ const ListViewRow = forwardRef(function ListViewRow<
     return element;
   };
 
-  return renderContent(
-    {
-      disabled,
-      marginType,
-      selected,
-      isSectionHeader,
-      hovered,
-      showsActiveState: true, // TODO
-      selectedPosition,
-    },
-    forwardedRef,
-  );
+  // if (sortable && id) {
+  //   return (
+  //     <Sortable.Item<View> id={id} disabled={overrideSortable === false}>
+  //       {({ ref: sortableRef, ...sortableProps }) =>
+  //         renderContent(sortableProps, forwardedRef)
+  //       }
+  //     </Sortable.Item>
+  //   );
+  // }
+
+  return renderContent({}, forwardedRef);
 });
 
 /* ----------------------------------------------------------------------------
@@ -295,11 +310,10 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     sortable = false,
     onMoveItem,
     indentation = 12,
-    // acceptsDrop,
+    acceptsDrop,
     data,
     renderItem,
     keyExtractor,
-    // virtualized,
     pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
@@ -364,6 +378,11 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     [data, renderItem, sortable, expandable, indentation, pressEventName],
   );
 
+  const renderOverlay = useCallback(
+    (index: number) => renderItem(data[index], index, { isDragging: true }),
+    [data, renderItem],
+  );
+
   const renderWrappedChild: ListRenderItem<T> = useCallback(
     (info) => {
       const current = renderItem(info.item, info.index, { isDragging: false });
@@ -387,7 +406,9 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
           data={data}
           keyExtractor={keyExtractor}
           renderItem={renderWrappedChild}
+          renderOverlay={renderOverlay}
           style={FlatListStyles.list}
+          acceptsDrop={acceptsDrop}
         />
       </RootContainer>
     );
