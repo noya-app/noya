@@ -45,6 +45,9 @@ interface SortableContextType {
   onDropItem: (offsetTop: number) => void;
 }
 
+const DragStartDelayMS = 150;
+const MoveRenderThreshold = 8;
+
 // @ts-ignore Initial value doesn't really matter \m/
 const SortableContext = createContext<SortableContextType>(undefined);
 
@@ -86,10 +89,20 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   useDerivedValue(() => {
     // Y position at which dragged item is being rendered
     const offsetY = touchPos.value.y - touchOffset.value.y;
+    const startY = activeItem?.index
+      ? measurements.current[activeItem?.index]?.pos.y
+      : offsetY;
+
+    console.log(offsetY, startY);
 
     // validate drop indicator on JS thread
     // only if it is necessary
-    if (overItem.value?.id === id && activeItem?.id !== id && !disabled) {
+    if (
+      overItem.value?.id === id &&
+      activeItem?.id !== id &&
+      !disabled &&
+      Math.abs(offsetY - startY) > MoveRenderThreshold
+    ) {
       runOnJS(onValidateDrop)(overItem.value, offsetY);
     } else if (dropPosition && overItem.value?.id !== id) {
       runOnJS(setDropPosition)(undefined);
@@ -112,10 +125,13 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
 ) {
   const sortable = useContext(SortableContext);
   const { index, children } = props;
+  const touchStartTimeoutRef = useRef<number>();
 
   const onTouchStart = useCallback(
     (params: Gesture) => {
-      sortable.setActiveItemIndex(index);
+      touchStartTimeoutRef.current = setTimeout(() => {
+        sortable.setActiveItemIndex(index);
+      }, DragStartDelayMS);
 
       sortable.touchPos.value = params.point;
       // calculate difference between element and touch positions
@@ -130,6 +146,12 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
 
   const onTouchUpdate = useCallback(
     (params: Gesture) => {
+      if (touchStartTimeoutRef.current) {
+        clearTimeout(touchStartTimeoutRef.current);
+        touchStartTimeoutRef.current = undefined;
+        return;
+      }
+
       sortable.touchPos.value = params.point;
     },
     [sortable],
@@ -261,10 +283,15 @@ function SortableList<T>(props: SortableListProps<T>) {
   );
 
   const dragItemStyle = useAnimatedStyle(() => {
-    if (!isDragging) {
+    const top = touchPos.value.y - touchOffset.value.y;
+    if (
+      !isDragging ||
+      Math.abs(top - measurements.current[activeItemIndex]?.size.width) <
+        MoveRenderThreshold
+    ) {
       // absolute here prevents flickering of the dragged element
       // at the beggining of the drag
-      return { position: 'absolute', top: 0, left: 0 };
+      return { position: 'absolute', top: 0, left: 0, opacity: 0 };
     }
 
     return {
@@ -272,7 +299,7 @@ function SortableList<T>(props: SortableListProps<T>) {
       position: 'absolute',
       width: measurements.current[activeItemIndex]?.size.width,
       left: touchPos.value.x - touchOffset.value.x,
-      top: touchPos.value.y - touchOffset.value.y,
+      top,
     };
   }, [isDragging, measurements]);
 
