@@ -11,10 +11,9 @@ import {
 } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { DimensionsInspector } from 'noya-workspace-ui';
+import { DimensionsInspector, AlignmentInspector } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
-import AlignmentInspector from './AlignmentInspector';
 import ArtboardSizeList from './ArtboardSizeList';
 import BlurInspector from './BlurInspector';
 import BorderInspector from './BorderInspector';
