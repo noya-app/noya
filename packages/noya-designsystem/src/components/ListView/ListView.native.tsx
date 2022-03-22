@@ -43,6 +43,7 @@ import {
   ListRowPosition,
 } from './types';
 import { getPositionMargin } from './utils';
+import { RelativeDropPosition } from 'packages/noya-web-designsystem';
 
 const StyledTitle = styled(Text)<{ disabled: boolean; selected: boolean }>(
   ({ theme, selected, disabled }) => ({
@@ -107,7 +108,9 @@ function ListViewEditableRowTitle({
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled(View)<ListRowContainerProps>(
+const RowContainer = styled(View)<
+  ListRowContainerProps & { relativeDropPosition: RelativeDropPosition }
+>(
   ({
     theme,
     marginType,
@@ -117,6 +120,7 @@ const RowContainer = styled(View)<ListRowContainerProps>(
     hovered,
     isSectionHeader,
     showsActiveState,
+    relativeDropPosition,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -151,6 +155,13 @@ const RowContainer = styled(View)<ListRowContainerProps>(
       ...(hovered && {
         boxShadow: `0 0 0 1px ${theme.colors.primary}`,
       }),
+      ...(relativeDropPosition === 'inside' && {
+        borderWidth: 2,
+        marginHorizontal: 6,
+        marginTop: margin.top - 2,
+        marginBottom: margin.bottom - 2,
+        borderColor: '#fff',
+      }),
     };
   },
 );
@@ -164,11 +175,7 @@ export const DragIndicatorElement = memo(
     position: 'absolute',
     borderRadius: 3,
     ...(relativeDropPosition === 'inside'
-      ? {
-          shadowColor: theme.colors.dragOutline,
-          shadowOffset: { width: 0, height: 0 },
-          shadowRadius: 3,
-        }
+      ? {}
       : {
           top: relativeDropPosition === 'above' ? -3 : undefined,
           bottom: relativeDropPosition === 'below' ? -3 : undefined,
@@ -247,6 +254,7 @@ const ListViewRow = forwardRef(function ListViewRow<
           selected={selected}
           selectedPosition={selectedPosition}
           showsActiveState={pressEventName === 'onClick'}
+          relativeDropPosition={relativeDropPosition}
         >
           {relativeDropPosition && (
             <DragIndicatorElement
@@ -274,15 +282,15 @@ const ListViewRow = forwardRef(function ListViewRow<
     return element;
   };
 
-  // if (sortable && id) {
-  //   return (
-  //     <Sortable.Item<View> id={id} disabled={overrideSortable === false}>
-  //       {({ ref: sortableRef, ...sortableProps }) =>
-  //         renderContent(sortableProps, forwardedRef)
-  //       }
-  //     </Sortable.Item>
-  //   );
-  // }
+  if (sortable && id) {
+    return (
+      <Sortable.Item<View> id={id} disabled={overrideSortable === false}>
+        {({ ref: sortableRef, ...sortableProps }) =>
+          renderContent(sortableProps, forwardedRef)
+        }
+      </Sortable.Item>
+    );
+  }
 
   return renderContent({}, forwardedRef);
 });
