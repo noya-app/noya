@@ -109,7 +109,7 @@ function ListViewEditableRowTitle({
  * ------------------------------------------------------------------------- */
 
 const RowContainer = styled(View)<
-  ListRowContainerProps & { relativeDropPosition: RelativeDropPosition }
+  ListRowContainerProps & { relativeDropPosition?: RelativeDropPosition }
 >(
   ({
     theme,
@@ -417,6 +417,7 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
           renderOverlay={renderOverlay}
           style={FlatListStyles.list}
           acceptsDrop={acceptsDrop}
+          onMoveItem={onMoveItem}
         />
       </RootContainer>
     );

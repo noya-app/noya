@@ -35,32 +35,43 @@ interface OverInfo {
 }
 
 interface SortableContextType {
+  activeItem?: OverInfo;
   acceptsDrop: DropValidator;
   touchPos: SharedValue<Point>;
-  activeItem?: OverInfo;
-  overItem: SharedValue<OverInfo | undefined>;
   touchOffset: SharedValue<Point>;
+  overItem: SharedValue<OverInfo | undefined>;
   measurements: MutableRefObject<ItemMeasurement[]>;
   setActiveItemIndex: (index: number | undefined) => void;
+  onDropItem: (offsetTop: number) => void;
 }
 
 // @ts-ignore Initial value doesn't really matter \m/
 const SortableContext = createContext<SortableContextType>(undefined);
 
 function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
-  const { activeItem, measurements, acceptsDrop, overItem, touchPos } =
-    useContext(SortableContext);
+  const {
+    activeItem,
+    measurements,
+    acceptsDrop,
+    overItem,
+    touchPos,
+    touchOffset,
+  } = useContext(SortableContext);
   const [dropPosition, setDropPosition] = useState<
     RelativeDropPosition | undefined
   >();
 
   const onValidateDrop = useCallback(
-    (overItem: OverInfo, offset: Point) => {
+    (overItem: OverInfo, offsetY: number) => {
+      if (!activeItem?.id || !overItem?.id) {
+        return;
+      }
+
       const relativeDropPosition = validateDropIndicator(
         acceptsDrop,
-        activeItem!.id!,
-        overItem.id!,
-        offset.y,
+        activeItem.id,
+        overItem.id,
+        offsetY,
         measurements.current[overItem.index!]?.pos.y,
         measurements.current[overItem.index!]?.size.height,
       );
@@ -73,8 +84,9 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   );
 
   useDerivedValue(() => {
+    const offsetY = touchPos.value.y - touchOffset.value.y;
     if (overItem.value?.id === id && activeItem?.id !== id && !disabled) {
-      runOnJS(onValidateDrop)(overItem.value, touchPos.value);
+      runOnJS(onValidateDrop)(overItem.value, offsetY);
     } else if (dropPosition && overItem.value?.id !== id) {
       runOnJS(setDropPosition)(undefined);
     }
@@ -119,7 +131,7 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
 
   const onTouchEnd = useCallback(
     (params: Gesture) => {
-      sortable.setActiveItemIndex(undefined);
+      sortable.onDropItem(params.point.y - sortable.touchOffset.value.y);
     },
     [sortable],
   );
@@ -157,6 +169,7 @@ function SortableList<T>(props: SortableListProps<T>) {
     data,
     style,
     renderItem,
+    onMoveItem,
     keyExtractor,
     renderOverlay,
     acceptsDrop = defaultAcceptsDrop,
@@ -195,17 +208,51 @@ function SortableList<T>(props: SortableListProps<T>) {
     if (!isDragging) {
       return;
     }
+    const offsetY = touchPos.value.y - touchOffset.value.y;
 
     measurements.current.forEach((item, idx) => {
-      if (item.pos.y < touchPos.value.y) {
+      if (item.pos.y < offsetY) {
         index = idx;
       }
     });
 
-    const id = index ? indexToKey[index] : undefined;
+    const id = index !== undefined ? indexToKey[index] : undefined;
 
     return { index, id };
   }, [isDragging, data, keyExtractor, measurements]);
+
+  const onDropItem = useCallback(
+    (offsetTop: number) => {
+      const { index: oldIndex, id: activeId } = activeItem ?? {};
+      const { index: newIndex, id: overId } = overItem.value ?? {};
+      setActiveItemIndex(undefined);
+
+      if (
+        !activeId ||
+        !overId ||
+        oldIndex === undefined ||
+        newIndex === undefined
+      ) {
+        return;
+      }
+
+      const indicator = validateDropIndicator(
+        acceptsDrop,
+        activeId,
+        overId,
+        offsetTop,
+        measurements.current[newIndex]?.pos.y,
+        measurements.current[newIndex]?.size.height,
+      );
+
+      if (!indicator) {
+        return;
+      }
+
+      onMoveItem?.(oldIndex, newIndex, indicator);
+    },
+    [acceptsDrop, overItem.value, activeItem, onMoveItem],
+  );
 
   const dragItemStyle = useAnimatedStyle(() => {
     if (!isDragging) {
@@ -227,6 +274,7 @@ function SortableList<T>(props: SortableListProps<T>) {
         touchPos,
         overItem,
         activeItem,
+        onDropItem,
         acceptsDrop,
         touchOffset,
         measurements,

@@ -35,11 +35,16 @@ export interface SortableRootProps {
 
 export interface SortableListProps<T> {
   data: T[];
-  keyExtractor: (item: T, index: number) => string;
-  renderOverlay?: (index: number) => ReactNode;
+  style: ViewStyle;
   renderItem: ListRenderItem<T>;
   acceptsDrop?: DropValidator;
-  style: ViewStyle;
+  keyExtractor: (item: T, index: number) => string;
+  renderOverlay?: (index: number) => ReactNode;
+  onMoveItem?: (
+    sourceIndex: number,
+    destinationIndex: number,
+    position: RelativeDropPosition,
+  ) => void;
 }
 
 export interface ItemSize {
