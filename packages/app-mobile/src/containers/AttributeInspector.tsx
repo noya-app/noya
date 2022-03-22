@@ -9,7 +9,12 @@ import {
   SetNumberMode,
 } from 'noya-state';
 import { Layout, withSeparatorElements } from 'noya-designsystem';
-import { DimensionsInspector, AlignmentInspector } from 'noya-workspace-ui';
+import {
+  RadiusInspector,
+  OpacityInspector,
+  AlignmentInspector,
+  DimensionsInspector,
+} from 'noya-workspace-ui';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 
@@ -21,10 +26,12 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
   const selectedLayers = useShallowArray(
     useSelector(Selectors.getSelectedLayers),
   );
-  // const hasContextSettingsLayers =
-  //   Selectors.getSelectedLayersWithContextSettings(state).length > 0;
-  // const hasFixedRadiusLayers =
-  //   Selectors.getSelectedLayersWithFixedRadius(state).length > 0;
+
+  const hasContextSettingsLayers =
+    Selectors.getSelectedLayersWithContextSettings(state).length > 0;
+
+  const hasFixedRadiusLayers =
+    Selectors.getSelectedLayersWithFixedRadius(state).length > 0;
 
   const handleSetRotation = useCallback(
     (value: number, mode: SetNumberMode) => {
@@ -156,9 +163,9 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         )}
         <Layout.Stack size="medium" />
       </Fragment>,
-      // hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
+      hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
       // isEditingPath && <PointControlsInspector />,
-      // hasContextSettingsLayers && <OpacityInspector />,
+      hasContextSettingsLayers && <OpacityInspector />,
       // !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
       //   <LayerThemeInspector />
       // ),
@@ -211,8 +218,8 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     handleSetY,
     handleSetHeight,
     handleSetConstrainProportions,
-    // hasFixedRadiusLayers,
-    // hasContextSettingsLayers,
+    hasFixedRadiusLayers,
+    hasContextSettingsLayers,
   ]);
 
   // if (

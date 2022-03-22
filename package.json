@@ -15,6 +15,7 @@
       "**/@electron-forge/publisher-github/**",
       "**/react-native",
       "**/react-native/**",
+      "**/@react-native-community/**",
       "**/@shopify/react-native-skia",
       "**/expo",
       "**/expo-**",
