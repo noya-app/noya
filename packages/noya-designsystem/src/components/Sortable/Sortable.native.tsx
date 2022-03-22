@@ -93,8 +93,6 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
       ? measurements.current[activeItem?.index]?.pos.y
       : offsetY;
 
-    console.log(offsetY, startY);
-
     // validate drop indicator on JS thread
     // only if it is necessary
     if (
