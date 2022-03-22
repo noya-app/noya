@@ -174,21 +174,16 @@ export const DragIndicatorElement = memo(
     zIndex: 1,
     position: 'absolute',
     borderRadius: 3,
-    ...(relativeDropPosition === 'inside'
-      ? {}
-      : {
-          top: relativeDropPosition === 'above' ? -3 : undefined,
-          bottom: relativeDropPosition === 'below' ? -3 : undefined,
-          left: offsetLeft,
-          right: 0,
-          height: 6,
-          background: theme.colors.primary,
-          borderWidth: 2,
-          borderColor: 'white',
-          shadowColor: 'rgba(0, 0, 0, 0.5)',
-          shadowOffset: { width: 0, height: 0 },
-          shadowRadius: 2,
-        }),
+    ...(relativeDropPosition !== 'inside' && {
+      top: relativeDropPosition === 'above' ? -3 : undefined,
+      bottom: relativeDropPosition === 'below' ? -3 : undefined,
+      left: offsetLeft,
+      right: 0,
+      height: 6,
+      background: theme.colors.primary,
+      borderWidth: 2,
+      borderColor: 'white',
+    }),
   })),
 );
 

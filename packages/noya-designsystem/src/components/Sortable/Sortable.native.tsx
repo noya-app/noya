@@ -84,7 +84,11 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   );
 
   useDerivedValue(() => {
+    // Y position at which dragged item is being rendered
     const offsetY = touchPos.value.y - touchOffset.value.y;
+
+    // validate drop indicator on JS thread
+    // only if it is necessary
     if (overItem.value?.id === id && activeItem?.id !== id && !disabled) {
       runOnJS(onValidateDrop)(overItem.value, offsetY);
     } else if (dropPosition && overItem.value?.id !== id) {
@@ -114,6 +118,8 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
       sortable.setActiveItemIndex(index);
 
       sortable.touchPos.value = params.point;
+      // calculate difference between element and touch positions
+      // to keep it consistent while dragging
       sortable.touchOffset.value = {
         x: params.point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
         y: params.point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
@@ -256,6 +262,8 @@ function SortableList<T>(props: SortableListProps<T>) {
 
   const dragItemStyle = useAnimatedStyle(() => {
     if (!isDragging) {
+      // absolute here prevents flickering of the dragged element
+      // at the beggining of the drag
       return { position: 'absolute', top: 0, left: 0 };
     }
 
