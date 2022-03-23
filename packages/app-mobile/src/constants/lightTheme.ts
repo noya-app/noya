@@ -112,7 +112,7 @@ export const textStyles = {
   },
   code: {
     fontFamily: fonts.monospace,
-    fontSize: '90%',
+    fontSize: `${baseFontSize * 0.9}px`,
     lineHeight: `${baseFontSize * 0.9 * 1.5}px`,
   },
   label: {

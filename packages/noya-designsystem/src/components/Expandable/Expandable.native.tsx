@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useEffect } from 'react';
 import { View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import styled from 'styled-components';
 import Animated, {
@@ -9,16 +9,27 @@ import Animated, {
 
 import { Layout } from '../Layout';
 import { Button } from '../Button';
+import type { ExpandableProps, Tab, ExpandableViewProps } from './types';
+import { useExpandable } from './context';
 
-import { ExpandableProps, Tab, ExpandableViewProps } from './types';
-
-const PanelWidth = 350;
+const PanelWidth = 310;
 
 const ExpandableProvider = (props: ExpandableProps) => {
   const { position = 'left', children } = props;
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+  const expandable = useExpandable();
   const expandableOffset = useSharedValue(
     position === 'left' ? -PanelWidth : PanelWidth,
+  );
+
+  const activeTab = useMemo(() => {
+    return expandable.activeTabs[position];
+  }, [expandable.activeTabs, position]);
+
+  const setActiveTab = useCallback(
+    (tab?: string) => {
+      expandable.setActiveTab(position, tab);
+    },
+    [expandable, position],
   );
 
   const tabs = useMemo(() => {
@@ -44,15 +55,28 @@ const ExpandableProvider = (props: ExpandableProps) => {
   const onToggleTab = useCallback(
     (tab: string) => {
       if (activeTab === tab) {
-        setActiveTab(null);
-        expandableOffset.value = position === 'left' ? -PanelWidth : PanelWidth;
+        setActiveTab(undefined);
       } else {
         setActiveTab(tab);
-        expandableOffset.value = 0;
       }
     },
-    [position, expandableOffset, activeTab, setActiveTab],
+    [activeTab, setActiveTab],
   );
+
+  useEffect(() => {
+    if (
+      expandable.activeTabs[position] !== undefined &&
+      expandableOffset.value !== 0
+    ) {
+      // Panel is active
+      expandableOffset.value = 0;
+    } else if (
+      expandable.activeTabs[position] === undefined &&
+      expandableOffset.value === 0
+    ) {
+      expandableOffset.value = position === 'left' ? -PanelWidth : PanelWidth;
+    }
+  }, [expandableOffset, position, expandable]);
 
   const activeChild = useMemo(() => {
     if (children instanceof Array) {

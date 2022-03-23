@@ -7,8 +7,8 @@ import { decode as decodeBase64 } from 'base-64';
 import { View } from 'react-native';
 
 import { useApplicationState, useDispatch } from 'noya-app-state-context';
+import { Layout, Button, useExpandable } from 'noya-designsystem';
 import { DrawableLayerType } from 'noya-state';
-import { Layout, Button } from 'noya-designsystem';
 import { useCanvasKit } from 'noya-renderer';
 import { delimitedPath } from 'noya-utils';
 import { decode } from 'noya-sketch-file';
@@ -45,6 +45,7 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
   const [state] = useApplicationState();
   const CanvasKit = useCanvasKit();
   const dispatch = useDispatch();
+  const expandable = useExpandable();
 
   const interType = useMemo(
     () => state.interactionState.type,
@@ -78,6 +79,10 @@ const Toolbar: React.FC<ToolbarProps> = (props) => {
 
   const onAddShape = useCallback(
     (shape: DrawableLayerType) => () => {
+      if (shape === 'artboard') {
+        expandable.setActiveTab('right', 'inspector');
+      }
+
       dispatch('interaction', ['insert', shape]);
     },
     [dispatch],

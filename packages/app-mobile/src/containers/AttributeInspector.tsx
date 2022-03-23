@@ -11,6 +11,7 @@ import {
 import { Layout, withSeparatorElements } from 'noya-designsystem';
 import {
   RadiusInspector,
+  ArtboardSizeList,
   OpacityInspector,
   AlignmentInspector,
   DimensionsInspector,
@@ -222,12 +223,12 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     hasContextSettingsLayers,
   ]);
 
-  // if (
-  //   state.interactionState.type === 'insert' &&
-  //   state.interactionState.layerType === 'artboard'
-  // ) {
-  //   return <ArtboardSizeList />;
-  // }
+  if (
+    state.interactionState.type === 'insert' &&
+    state.interactionState.layerType === 'artboard'
+  ) {
+    return <ArtboardSizeList />;
+  }
 
   return <>{elements}</>;
 };

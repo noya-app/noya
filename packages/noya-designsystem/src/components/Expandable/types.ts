@@ -17,3 +17,13 @@ export type ExpandableProps = {
 export interface ExpandableViewProps {
   position: ExpandablePosition;
 }
+
+export interface ActiveTabs {
+  left?: string;
+  right?: string;
+}
+
+export interface ExpandableContextType {
+  activeTabs: ActiveTabs;
+  setActiveTab: (position: ExpandablePosition, tab?: string) => void;
+}

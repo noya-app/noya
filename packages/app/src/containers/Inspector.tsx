@@ -14,12 +14,12 @@ import styled from 'styled-components';
 import {
   RadiusInspector,
   OpacityInspector,
+  ArtboardSizeList,
   AlignmentInspector,
   DimensionsInspector,
 } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
-import ArtboardSizeList from './ArtboardSizeList';
 import BlurInspector from './BlurInspector';
 import BorderInspector from './BorderInspector';
 import ColorControlsInspector from './ColorControlsInspector';
