@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useWorkspaceState } from 'noya-app-state-context';
 
-export function useHistory() {
+export default function useHistory() {
   const state = useWorkspaceState();
   const redoDisabled = state.history.future.length === 0;
   const undoDisabled = state.history.past.length === 0;
