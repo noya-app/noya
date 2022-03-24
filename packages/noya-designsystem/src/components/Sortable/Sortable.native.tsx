@@ -8,6 +8,7 @@ import React, {
   createContext,
   MutableRefObject,
 } from 'react';
+import styled from 'styled-components';
 import { View, FlatList, LayoutChangeEvent } from 'react-native';
 import Animated, {
   SharedValue,
@@ -89,9 +90,10 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   useDerivedValue(() => {
     // Y position at which dragged item is being rendered
     const offsetY = touchPos.value.y - touchOffset.value.y;
-    const startY = activeItem?.index
-      ? measurements.current[activeItem?.index]?.pos.y
-      : offsetY;
+    const startY =
+      activeItem?.index !== undefined
+        ? measurements.current[activeItem?.index]?.pos.y
+        : offsetY;
 
     // validate drop indicator on JS thread
     // only if it is necessary
@@ -129,6 +131,7 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
     (params: Gesture) => {
       touchStartTimeoutRef.current = setTimeout(() => {
         sortable.setActiveItemIndex(index);
+        touchStartTimeoutRef.current = undefined;
       }, DragStartDelayMS);
 
       sortable.touchPos.value = params.point;
@@ -287,17 +290,18 @@ function SortableList<T>(props: SortableListProps<T>) {
       Math.abs(top - measurements.current[activeItemIndex]?.size.width) <
         MoveRenderThreshold
     ) {
-      // absolute here prevents flickering of the dragged element
-      // at the beggining of the drag
-      return { position: 'absolute', top: 0, left: 0, opacity: 0 };
+      return {
+        top: 0,
+        left: 0,
+        opacity: 0,
+      };
     }
 
     return {
-      zIndeX: 1000,
-      position: 'absolute',
       width: measurements.current[activeItemIndex]?.size.width,
       left: touchPos.value.x - touchOffset.value.x,
       top,
+      opacity: 1,
     };
   }, [isDragging, measurements]);
 
@@ -323,12 +327,12 @@ function SortableList<T>(props: SortableListProps<T>) {
           CellRendererComponent={CellRendererComponent}
           scrollEnabled={!isDragging}
         />
-        {isDragging && (
-          <Animated.View style={dragItemStyle} pointerEvents="none">
-            {renderOverlay?.(activeItemIndex)}
-          </Animated.View>
-        )}
       </View>
+      {isDragging && (
+        <Overlay style={dragItemStyle} pointerEvents="none">
+          {renderOverlay?.(activeItemIndex)}
+        </Overlay>
+      )}
     </SortableContext.Provider>
   );
 }
@@ -342,3 +346,8 @@ const SortableRoot = (_props: SortableRootProps) => {
 export const Item = memo(SortableItem);
 export const Root = memo(SortableRoot);
 export const List = memo(SortableList);
+
+const Overlay = styled(Animated.View)({
+  position: 'absolute',
+  zIndex: 10,
+});
