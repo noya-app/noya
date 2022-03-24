@@ -22,6 +22,7 @@ function Slider({ value, onValueChange, min, max }: SliderProps) {
       minimumValue={min}
       maximumValue={max}
       value={value}
+      step={1}
       onValueChange={onValueChange}
       maximumTrackTintColor={theme.colors.divider}
       minimumTrackTintColor={theme.colors.primary}

@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
+
 import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
@@ -21,7 +23,7 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { setPlaform, PlatformName as Platform } from 'noya-utils';
 import Workspace from './containers/Workspace';
 import {
   EnvironmentParameters,
@@ -154,6 +156,12 @@ export default function App() {
     }),
     [urlHashParameters],
   );
+
+  useEffect(() => {
+    setPlaform(
+      environmentParameters.isElectron ? Platform.Electron : Platform.Web,
+    );
+  }, []); // eslint-disable-line
 
   return (
     <EnvironmentParametersProvider value={environmentParameters}>

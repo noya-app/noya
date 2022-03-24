@@ -10,6 +10,7 @@ import {
 } from 'noya-state';
 import { Layout, withSeparatorElements } from 'noya-designsystem';
 import {
+  FillInspector,
   RadiusInspector,
   ArtboardSizeList,
   OpacityInspector,
@@ -174,9 +175,9 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       // hasTextLayer && <TextStyleInspector />,
       // hasOneSymbolMaster && <SymbolMasterInspector />,
       // hasOneSymbolInstance && <SymbolInstanceInspector />,
-      // selectedLayers.every(Layers.hasInspectableFill) && (
-      //   <FillInspector title="Fills" allowMoreThanOne />
-      // ),
+      selectedLayers.every(Layers.hasInspectableFill) && (
+        <FillInspector title="Fills" allowMoreThanOne />
+      ),
       // selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
       // selectedLayers.every(Layers.hasInspectableShadow) && (
       //   <ShadowInspector
