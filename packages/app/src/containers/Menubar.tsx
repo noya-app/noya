@@ -14,12 +14,12 @@ import {
 } from 'noya-web-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
+import { useHistory } from 'noya-workspace-ui';
 import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import { useFileManager } from '../hooks/useFileManager';
-import { useHistory } from '../hooks/useHistory';
 
 interface Props {
   fileHandle?: FileSystemHandle;
