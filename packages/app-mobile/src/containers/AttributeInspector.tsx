@@ -9,7 +9,7 @@ import {
   SetNumberMode,
 } from 'noya-state';
 import { Layout, withSeparatorElements } from 'noya-designsystem';
-import { DimensionsInspector } from 'noya-workspace-ui';
+import { DimensionsInspector, AlignmentInspector } from 'noya-workspace-ui';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 
@@ -128,7 +128,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
 
     const views = [
       <Fragment key="layout">
-        {/* <AlignmentInspector /> */}
+        <AlignmentInspector />
         {isEditingPath ? null : hasLineLayer ? null : ( // </HorizontalPaddingContainer> //   )} //     <PointCoordinatesInspector /> //   ) : ( //     <ControlPointCoordinatesInspector /> //   {isEditingControlPoint ? ( // <HorizontalPaddingContainer>
           // <LineInspector
           //   {...dimensionsInspectorProps}

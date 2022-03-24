@@ -1,70 +1,65 @@
-import { useApplicationState } from 'noya-app-state-context';
-import { IconButton } from 'noya-web-designsystem';
-import { memo } from 'react';
-import styled from 'styled-components';
+import React, { memo } from 'react';
 
-const AlignmentInspectorContainer = styled.div(({ theme }) => ({
-  display: 'flex',
-  minHeight: '35px',
-  alignItems: 'center',
-  justifyContent: 'space-evenly',
-}));
+import { useApplicationState } from 'noya-app-state-context';
+import { IconButton } from 'noya-designsystem';
+import Container from './Container';
 
 interface AlignmentInspectorProps {}
 
 function AlignmentInspector(props: AlignmentInspectorProps) {
   const [, dispatch] = useApplicationState();
+
   return (
-    <AlignmentInspectorContainer>
+    <Container>
       <IconButton
         id="SpaceEvenlyHorizontallyIcon"
-        iconName="SpaceEvenlyHorizontallyIcon"
+        name="space-evenly-horizontally"
         tooltip="Distribute horizontally"
         onClick={() => dispatch('distributeLayers', 'horizontal')}
       />
       <IconButton
         id="SpaceEvenlyVerticallyIcon"
-        iconName="SpaceEvenlyVerticallyIcon"
+        name="space-evenly-vertically"
         tooltip="Distribute vertically"
         onClick={() => dispatch('distributeLayers', 'vertical')}
       />
       <IconButton
         id="AlignLeftIcon"
-        iconName="AlignLeftIcon"
+        name="align-left"
         tooltip="Align left edges"
         onClick={() => dispatch('alignLayers', 'left')}
       />
       <IconButton
         id="AlignCenterHorizontallyIcon"
-        iconName="AlignCenterHorizontallyIcon"
+        name="align-center-horizontally"
         tooltip="Align horizontal centers"
         onClick={() => dispatch('alignLayers', 'centerHorizontal')}
       />
       <IconButton
         id="AlignRightIcon"
-        iconName="AlignRightIcon"
+        name="align-right"
         tooltip="Align right edges"
         onClick={() => dispatch('alignLayers', 'right')}
       />
       <IconButton
         id="AlignTopIcon"
-        iconName="AlignTopIcon"
+        name="align-top"
         tooltip="Align top edges"
         onClick={() => dispatch('alignLayers', 'top')}
       />
       <IconButton
         id="AlignCenterVerticallyIcon"
-        iconName="AlignCenterVerticallyIcon"
+        name="align-center-vertically"
         tooltip="Align vertical centers"
         onClick={() => dispatch('alignLayers', 'centerVertical')}
       />
       <IconButton
         id="AlignBottomIcon"
-        iconName="AlignBottomIcon"
+        name="align-bottom"
         tooltip="Align bottom edges"
         onClick={() => dispatch('alignLayers', 'bottom')}
       />
-    </AlignmentInspectorContainer>
+    </Container>
   );
 }
 
