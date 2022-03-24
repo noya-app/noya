@@ -34,12 +34,13 @@
     "build:desktop": "cd packages/noya-desktop && yarn run make",
     "build:site": "yarn workspace site build",
     "release:desktop": "cd packages/noya-desktop && yarn run release",
+    "pod:install": "cd packages/app-mobile/ios; rm -rf Pods; pod install; cd ../../..; yarn workspace app-mobile run patch-package",
     "test": "modular test",
     "test:clean": "cross-env JEST_IMAGE_SNAPSHOT_TRACK_OBSOLETE=1 yarn test --reporters=default --reporters=jest-image-snapshot/src/outdated-snapshot-reporter.js",
     "lint": "eslint . --ext .js,.ts,.tsx",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write .",
-    "postinstall": "husky install; yarn workspace app-mobile run patch-package",
+    "postinstall": "husky install",
     "start:canvaskit-sandbox": "modular start canvaskit-sandbox"
   },
   "eslintConfig": {

@@ -48,6 +48,30 @@ yarn start
 This project is built with https://github.com/jpmorganchase/modular, which is an
 abstraction layer on top of yarn workspaces.
 
+## Development Setup mobile
+
+To install, navigate to the root directory and run, if you haven't done that
+yet:
+
+```
+yarn
+```
+
+Then to install native dependencies run:
+
+```
+yarn pod:install
+```
+
+To launch development server run:
+
+```
+yarn start:mobile
+```
+
+Finally open `pacakges/app-mobile/ios/noyamobile.xcworkspace` in xCode and build
+the app
+
 ## Running Tests
 
 To run tests for all packages, run:
