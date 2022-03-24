@@ -6,6 +6,9 @@
       "@shopify/react-native-skia/*": [
         "./packages/app-mobile/node_modules/@shopify/react-native-skia/*"
       ],
+      "@react-native-community/*": [
+        "./packages/app-mobile/node_modules/@react-native-community/*"
+      ],
       "@shopify/react-native-skia": [
         "./packages/app-mobile/node_modules/@shopify/react-native-skia"
       ],

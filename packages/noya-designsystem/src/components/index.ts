@@ -1,12 +1,13 @@
 export * as ListView from './ListView';
 export * as TreeView from './TreeView';
-export * from './Expandable';
-export * from './InputField';
-export * from './Sortable';
-export * from './Tooltip';
 export * from './Layout';
 export * from './Button';
+export * from './Slider';
+export * from './Sortable';
+export * from './Tooltip';
 export * from './Touchable';
+export * from './InputField';
+export * from './Expandable';
 export { default as Touchable } from './Touchable';
 export { default as ContextMenu } from './ContextMenu';
 export type { MenuItem, RegularMenuItem } from './internal/Menu';

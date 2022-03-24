@@ -11,7 +11,12 @@ import {
 } from 'noya-state';
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { DimensionsInspector, AlignmentInspector } from 'noya-workspace-ui';
+import {
+  RadiusInspector,
+  OpacityInspector,
+  AlignmentInspector,
+  DimensionsInspector,
+} from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
 import ArtboardSizeList from './ArtboardSizeList';
@@ -24,10 +29,8 @@ import FillInspector from './FillInspector';
 import InnerShadowInspector from './InnerShadowInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
-import OpacityInspector from './OpacityInspector';
 import PointControlsInspector from './PointControlsInspector';
 import PointCoordinatesInspector from './PointCoordinatesInspector';
-import RadiusInspector from './RadiusInspector';
 import ShadowInspector from './ShadowInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';

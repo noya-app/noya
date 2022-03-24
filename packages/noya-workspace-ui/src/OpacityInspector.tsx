@@ -1,9 +1,10 @@
-import { InputField, Slider, Spacer } from 'noya-web-designsystem';
-import { getMultiNumberValue, Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import React, { memo, useCallback, useMemo } from 'react';
+
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Slider, Layout, InputField } from 'noya-designsystem';
+import { getMultiNumberValue, Selectors } from 'noya-state';
 import { useShallowArray } from 'noya-react-utils';
+import { Primitives } from './primitives';
 
 export default memo(function OpacityInspector() {
   const [, dispatch] = useApplicationState();
@@ -43,12 +44,12 @@ export default memo(function OpacityInspector() {
 
     return (
       <>
-        <InspectorPrimitives.Section>
-          <InspectorPrimitives.SectionHeader>
-            <InspectorPrimitives.Title>Opacity</InspectorPrimitives.Title>
-          </InspectorPrimitives.SectionHeader>
-          <Spacer.Vertical size={4} />
-          <InspectorPrimitives.Row>
+        <Primitives.Section>
+          <Primitives.SectionHeader>
+            <Primitives.Title>Opacity</Primitives.Title>
+          </Primitives.SectionHeader>
+          <Layout.Stack size={4} />
+          <Primitives.Row>
             <Slider
               id="opacity-slider"
               value={roundedValue ?? 0}
@@ -56,7 +57,7 @@ export default memo(function OpacityInspector() {
               min={0}
               max={100}
             />
-            <InspectorPrimitives.HorizontalSeparator />
+            <Primitives.HorizontalSeparator />
             <InputField.Root id="opacity-input" size={50}>
               <InputField.NumberInput
                 value={roundedValue}
@@ -66,8 +67,8 @@ export default memo(function OpacityInspector() {
               />
               <InputField.Label>%</InputField.Label>
             </InputField.Root>
-          </InspectorPrimitives.Row>
-        </InspectorPrimitives.Section>
+          </Primitives.Row>
+        </Primitives.Section>
       </>
     );
   }, [opacityValue, handleSubmitOpacity, handleNudgeOpacity]);

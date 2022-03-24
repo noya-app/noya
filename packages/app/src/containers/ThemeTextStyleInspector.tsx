@@ -5,7 +5,7 @@ import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 import FillInspector from './FillInspector';
 import NameInspector from '../components/inspector/NameInspector';
-import OpacityInspector from './OpacityInspector';
+import { OpacityInspector } from 'noya-workspace-ui';
 import BorderInspector from './BorderInspector';
 import ShadowInspector from './ShadowInspector';
 import { delimitedPath } from 'noya-utils';
