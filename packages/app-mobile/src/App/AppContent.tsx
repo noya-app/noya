@@ -6,7 +6,7 @@ import { WorkspaceAction, Selectors } from 'noya-state';
 import { decodeFontName } from 'noya-fonts';
 import { useDownloadFont, useFontManager } from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
-import { Expandable } from 'noya-designsystem';
+import { Expandable, ExpandableContextProvider } from 'noya-designsystem';
 import { LayerList } from 'noya-workspace-ui';
 import useAppState from '../hooks/useAppState';
 import AttributeInspector from '../containers/AttributeInspector';
@@ -51,26 +51,28 @@ const AppContent: React.FC<{}> = () => {
   }
 
   return (
-    <StateProvider state={state.value} dispatch={handleDispatch}>
-      <ContentContainer>
-        <Expandable position="left">
-          <MainMenu id="main-menu" icon="hamburger-menu" />
-          <PageList id="page-list" icon="file" />
-          <LayerList
-            id="layers"
-            icon="layers"
-            filter={layersFilter}
-            size={{ width: 350, height: 250 }}
-          />
-          <ThemeManager id="theme" icon="tokens" />
-        </Expandable>
-        <Expandable position="right">
-          <AttributeInspector id="inspector" icon="backpack" />
-        </Expandable>
-        <Toolbar />
-        <Canvas />
-      </ContentContainer>
-    </StateProvider>
+    <ExpandableContextProvider>
+      <StateProvider state={state.value} dispatch={handleDispatch}>
+        <ContentContainer>
+          <Expandable position="left">
+            <MainMenu id="main-menu" icon="hamburger-menu" />
+            <PageList id="page-list" icon="file" />
+            <LayerList
+              id="layers"
+              icon="layers"
+              filter={layersFilter}
+              size={{ width: 350, height: 250 }}
+            />
+            <ThemeManager id="theme" icon="tokens" />
+          </Expandable>
+          <Expandable position="right">
+            <AttributeInspector id="inspector" icon="backpack" />
+          </Expandable>
+          <Toolbar />
+          <Canvas />
+        </ContentContainer>
+      </StateProvider>
+    </ExpandableContextProvider>
   );
 };
 

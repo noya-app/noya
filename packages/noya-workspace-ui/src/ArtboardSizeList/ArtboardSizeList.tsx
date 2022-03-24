@@ -1,18 +1,12 @@
-import { useMemo, useState } from 'react';
-import styled from 'styled-components';
+import React, { memo, useMemo, useState } from 'react';
 
-import { TreeView } from 'noya-designsystem';
-import { Select, Spacer } from 'noya-web-designsystem';
 import { useApplicationState } from 'noya-app-state-context';
+import { TreeView, Layout, Select } from 'noya-designsystem';
+import { Header, SizeLabel } from './components';
 
 type Preset = { name: string; width: number; height: number };
 type PresetGroup = { name: string; presets: Preset[] };
 type PresetCategory = { name: string; groups: PresetGroup[] };
-
-const Header = styled.div(({ theme }) => ({
-  display: 'flex',
-  padding: '8px',
-}));
 
 const canvasSizePresets: PresetCategory[] = [
   {
@@ -77,17 +71,14 @@ const canvasSizePresets: PresetCategory[] = [
   },
 ];
 
-const SizeLabel = styled.span(({ theme }) => ({
-  ...theme.textStyles.code,
-}));
-
-export default function ArtboardSizeList() {
+function ArtboardSizeList() {
   const [, dispatch] = useApplicationState();
 
   const categoryNames = useMemo(
     () => canvasSizePresets.map((category) => category.name),
     [],
   );
+
   const [categoryName, setCategoryName] = useState(categoryNames[0]);
 
   const layerElements = useMemo(() => {
@@ -101,7 +92,7 @@ export default function ArtboardSizeList() {
             depth={0}
             key={`group-${name}`}
           >
-            {name}
+            <TreeView.RowTitle>{name}</TreeView.RowTitle>
           </TreeView.Row>,
           ...presets.map(({ name, width, height }) => (
             <TreeView.Row
@@ -112,7 +103,7 @@ export default function ArtboardSizeList() {
               }}
             >
               <TreeView.RowTitle>{name}</TreeView.RowTitle>
-              <Spacer.Horizontal size={8} />
+              <Layout.Queue size={8} />
               <SizeLabel>
                 {width}×{height}
               </SizeLabel>
@@ -136,3 +127,5 @@ export default function ArtboardSizeList() {
     </>
   );
 }
+
+export default memo(ArtboardSizeList);
