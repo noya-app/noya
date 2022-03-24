@@ -1,3 +1,12 @@
+import React, {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   closestCenter,
   DndContext,
@@ -15,28 +24,16 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import React, {
-  createContext,
-  memo,
-  ReactNode,
-  Ref,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
 import { createPortal } from 'react-dom';
 
-import { DropValidator, RelativeDropPosition } from './types';
+import type {
+  DropValidator,
+  SortableRootProps,
+  SortableItemProps,
+  SortableListProps,
+} from './types';
 
-const defaultAcceptsDrop: DropValidator = (
-  sourceId,
-  destinationId,
-  position,
-) => {
-  return position !== 'inside' && sourceId !== destinationId;
-};
+import { validateDropIndicator, defaultAcceptsDrop } from './utils';
 
 const SortableItemContext = createContext<{
   position: Translate;
@@ -48,59 +45,11 @@ const SortableItemContext = createContext<{
   setActivatorEvent: () => {},
 });
 
-function validateDropIndicator(
-  acceptsDrop: DropValidator,
-  activeId: string,
-  overId: string,
-  offsetTop: number,
-  elementTop: number,
-  elementHeight: number,
-): RelativeDropPosition | undefined {
-  const acceptsDropInside = acceptsDrop(activeId, overId, 'inside');
-
-  // If we're in the center of the element, prefer dropping inside
-  if (
-    offsetTop >= elementTop + elementHeight / 3 &&
-    offsetTop <= elementTop + (elementHeight * 2) / 3 &&
-    acceptsDropInside
-  )
-    return 'inside';
-
-  // Are we over the top or bottom half of the element?
-  const indicator =
-    offsetTop < elementTop + elementHeight / 2 ? 'above' : 'below';
-
-  // Drop above or below if possible, falling back to inside
-  return acceptsDrop(activeId, overId, indicator)
-    ? indicator
-    : acceptsDropInside
-    ? 'inside'
-    : undefined;
-}
-
 /* ----------------------------------------------------------------------------
  * Item
  * ------------------------------------------------------------------------- */
 
-type UseSortableReturnType = ReturnType<typeof useSortable>;
-
-interface ItemProps<T> {
-  id: string;
-  disabled?: boolean;
-  children: (
-    props: {
-      ref: Ref<T>;
-      relativeDropPosition?: RelativeDropPosition;
-      [key: string]: any;
-    } & UseSortableReturnType['attributes'],
-  ) => JSX.Element;
-}
-
-function SortableItem<T extends HTMLElement>({
-  id,
-  disabled,
-  children,
-}: ItemProps<T>) {
+function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   const { position, acceptsDrop, setActivatorEvent } =
     useContext(SortableItemContext);
   const sortable = useSortable({ id, disabled });
@@ -124,7 +73,10 @@ function SortableItem<T extends HTMLElement>({
   const eventY = (activatorEvent as PointerEvent | null)?.clientY ?? 0;
   const offsetTop = eventY + position.y;
 
-  const ref = useCallback((node: T) => setNodeRef(node), [setNodeRef]);
+  const ref = useCallback(
+    (node: T) => setNodeRef(node as unknown as HTMLElement),
+    [setNodeRef],
+  );
 
   return children({
     ref,
@@ -148,25 +100,13 @@ function SortableItem<T extends HTMLElement>({
  * Root
  * ------------------------------------------------------------------------- */
 
-interface RootProps {
-  keys: string[];
-  children: ReactNode;
-  renderOverlay?: (index: number) => ReactNode;
-  onMoveItem?: (
-    sourceIndex: number,
-    destinationIndex: number,
-    position: RelativeDropPosition,
-  ) => void;
-  acceptsDrop?: DropValidator;
-}
-
 function SortableRoot({
   keys,
   children,
   onMoveItem,
   renderOverlay,
   acceptsDrop = defaultAcceptsDrop,
-}: RootProps) {
+}: SortableRootProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -260,3 +200,11 @@ function SortableRoot({
 
 export const Item = memo(SortableItem);
 export const Root = memo(SortableRoot);
+
+function SortableList<T>(props: SortableListProps<T>) {
+  throw new Error(
+    'Sortable.List is not implemented for web please use Sortable.Root and Sortable.Item instead!',
+  );
+}
+
+export const List = memo(SortableList);

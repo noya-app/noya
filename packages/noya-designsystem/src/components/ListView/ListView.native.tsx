@@ -27,6 +27,7 @@ import styled from 'styled-components';
 
 import { InputField } from '../InputField';
 import ContextMenu from '../ContextMenu';
+import * as Sortable from '../Sortable';
 import Touchable from '../Touchable';
 import { Layout } from '../Layout';
 import {
@@ -42,6 +43,7 @@ import {
   ListRowPosition,
 } from './types';
 import { getPositionMargin } from './utils';
+import { RelativeDropPosition } from 'packages/noya-web-designsystem';
 
 const StyledTitle = styled(Text)<{ disabled: boolean; selected: boolean }>(
   ({ theme, selected, disabled }) => ({
@@ -106,7 +108,9 @@ function ListViewEditableRowTitle({
  * Row
  * ------------------------------------------------------------------------- */
 
-const RowContainer = styled(View)<ListRowContainerProps>(
+const RowContainer = styled(View)<
+  ListRowContainerProps & { relativeDropPosition?: RelativeDropPosition }
+>(
   ({
     theme,
     marginType,
@@ -116,6 +120,7 @@ const RowContainer = styled(View)<ListRowContainerProps>(
     hovered,
     isSectionHeader,
     showsActiveState,
+    relativeDropPosition,
   }) => {
     const margin = getPositionMargin(marginType);
 
@@ -150,15 +155,35 @@ const RowContainer = styled(View)<ListRowContainerProps>(
       ...(hovered && {
         boxShadow: `0 0 0 1px ${theme.colors.primary}`,
       }),
+      ...(relativeDropPosition === 'inside' && {
+        borderWidth: 2,
+        marginHorizontal: 6,
+        marginTop: margin.top - 2,
+        marginBottom: margin.bottom - 2,
+        borderColor: '#fff',
+      }),
     };
   },
 );
 
 export const DragIndicatorElement = memo(
-  styled(View)(({ theme }) => ({
+  styled(View)<{
+    relativeDropPosition: Sortable.RelativeDropPosition;
+    offsetLeft: number;
+  }>(({ theme, relativeDropPosition, offsetLeft }) => ({
     zIndex: 1,
     position: 'absolute',
     borderRadius: 3,
+    ...(relativeDropPosition !== 'inside' && {
+      top: relativeDropPosition === 'above' ? -3 : undefined,
+      bottom: relativeDropPosition === 'below' ? -3 : undefined,
+      left: offsetLeft,
+      right: 0,
+      height: 6,
+      background: theme.colors.primary,
+      borderWidth: 2,
+      borderColor: 'white',
+    }),
   })),
 );
 
@@ -172,10 +197,9 @@ const ListViewRow = forwardRef(function ListViewRow<
     disabled = false,
     hovered = false,
     isSectionHeader = false,
-    // sortable: overrideSortable,
+    sortable: overrideSortable,
     onPress,
     // onDoubleClick,
-    // onHoverChange,
     menuItems,
     onSelectMenuItem,
     children,
@@ -186,7 +210,7 @@ const ListViewRow = forwardRef(function ListViewRow<
   const {
     marginType,
     selectedPosition,
-    // sortable,
+    sortable,
     indentation,
     pressEventName,
   } = useContext(ListRowContext);
@@ -207,9 +231,9 @@ const ListViewRow = forwardRef(function ListViewRow<
 
   const renderContent = (
     {
-      relativeDropPosition, // ...renderProps
-    }: ListRowContainerProps & {
-      relativeDropPosition?: any;
+      relativeDropPosition,
+    }: {
+      relativeDropPosition?: Sortable.RelativeDropPosition;
     },
     ref: Ref<View>,
   ) => {
@@ -219,17 +243,13 @@ const ListViewRow = forwardRef(function ListViewRow<
           ref={ref}
           isSectionHeader={isSectionHeader}
           id={id}
-          // {...hoverProps}
           marginType={marginType}
           disabled={disabled}
           hovered={hovered}
           selected={selected}
           selectedPosition={selectedPosition}
           showsActiveState={pressEventName === 'onClick'}
-          // {...renderProps}
-          // {...mergeEventHandlers(
-          //   { onPointerDown: renderProps.onPointerDown },
-          // )}
+          relativeDropPosition={relativeDropPosition}
         >
           {relativeDropPosition && (
             <DragIndicatorElement
@@ -257,28 +277,17 @@ const ListViewRow = forwardRef(function ListViewRow<
     return element;
   };
 
-  // if (sortable && id) {
-  //   return (
-  //     <Sortable.Item<HTMLElement> id={id} disabled={overrideSortable === false}>
-  //       {({ ref: sortableRef, ...sortableProps }) =>
-  //         renderContent(sortableProps, composeRefs(sortableRef, forwardedRef))
-  //       }
-  //     </Sortable.Item>
-  //   );
-  // }
+  if (sortable && id) {
+    return (
+      <Sortable.Item<View> id={id} disabled={overrideSortable === false}>
+        {({ ref: sortableRef, ...sortableProps }) =>
+          renderContent(sortableProps, forwardedRef)
+        }
+      </Sortable.Item>
+    );
+  }
 
-  return renderContent(
-    {
-      disabled,
-      marginType,
-      selected,
-      isSectionHeader,
-      hovered,
-      showsActiveState: true, // TODO
-      selectedPosition,
-    },
-    forwardedRef,
-  );
+  return renderContent({}, forwardedRef);
 });
 
 /* ----------------------------------------------------------------------------
@@ -302,13 +311,12 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     scrollable = false,
     expandable = true,
     sortable = false,
-    // onMoveItem,
+    onMoveItem,
     indentation = 12,
-    // acceptsDrop,
+    acceptsDrop,
     data,
     renderItem,
     keyExtractor,
-    // virtualized,
     pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
@@ -373,6 +381,11 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     [data, renderItem, sortable, expandable, indentation, pressEventName],
   );
 
+  const renderOverlay = useCallback(
+    (index: number) => renderItem(data[index], index, { isDragging: true }),
+    [data, renderItem],
+  );
+
   const renderWrappedChild: ListRenderItem<T> = useCallback(
     (info) => {
       const current = renderItem(info.item, info.index, { isDragging: false });
@@ -388,6 +401,22 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     },
     [renderItem, getItemContextValue],
   );
+
+  if (sortable) {
+    return (
+      <RootContainer scrollable={scrollable}>
+        <Sortable.List<T>
+          data={data}
+          keyExtractor={keyExtractor}
+          renderItem={renderWrappedChild}
+          renderOverlay={renderOverlay}
+          style={FlatListStyles.list}
+          acceptsDrop={acceptsDrop}
+          onMoveItem={onMoveItem}
+        />
+      </RootContainer>
+    );
+  }
 
   return (
     <RootContainer scrollable={scrollable}>
