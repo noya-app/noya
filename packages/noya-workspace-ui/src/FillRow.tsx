@@ -21,8 +21,8 @@ import { DimensionInput, DimensionValue } from './DimensionsInspector';
 //   PatternFillProps,
 //   ShaderFillProps,
 // } from './FillInputFieldWithPicker';
-// import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
-// import { ShaderVariableValueInput } from './ShaderVariableRow';
+import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
+import { ShaderVariableValueInput } from './ShaderVariableRow';
 import { Primitives } from './primitives';
 
 const GRADIENT_TYPE_OPTIONS = [
@@ -98,11 +98,11 @@ export default memo(function FillRow({
     [gradientProps],
   );
 
-  // const handleSelectPatternSize = useCallback(
-  //   (value: PatternFillType) =>
-  //     patternProps.onChangePatternFillType(Sketch.PatternFillType[value]),
-  //   [patternProps],
-  // );
+  const handleSelectPatternSize = useCallback(
+    (value: PatternFillType) =>
+      patternProps.onChangePatternFillType(Sketch.PatternFillType[value]),
+    [patternProps],
+  );
 
   const fields = useMemo(() => {
     switch (fillType) {
@@ -173,63 +173,62 @@ export default memo(function FillRow({
           </>
         );
       case Sketch.FillType.Pattern:
-        return null;
-      // return (
-      //   <>
-      //     <LabeledView label="Size" flex={1}>
-      //       <Select
-      //         value={
-      //           Sketch.PatternFillType[
-      //             patternProps.pattern.patternFillType
-      //           ] as PatternFillType
-      //         }
-      //         options={PATTERN_FILL_TYPE_OPTIONS}
-      //         onChange={handleSelectPatternSize}
-      //       />
-      //     </LabeledView>
-      //     <InspectorPrimitives.HorizontalSeparator />
-      //     <LabeledView label="Opacity" size={50}>
-      //       <DimensionInput
-      //         size={50}
-      //         label="%"
-      //         value={
-      //           contextOpacity !== undefined
-      //             ? Math.round(contextOpacity * 100)
-      //             : undefined
-      //         }
-      //         onSetValue={handleSetContextOpacity}
-      //       />
-      //     </LabeledView>
-      //   </>
-      // );
+        return (
+          <>
+            <LabeledView label="Size" flex={1}>
+              <Select
+                value={
+                  Sketch.PatternFillType[
+                    patternProps.pattern.patternFillType
+                  ] as PatternFillType
+                }
+                options={PATTERN_FILL_TYPE_OPTIONS}
+                onChange={handleSelectPatternSize}
+              />
+            </LabeledView>
+            <Primitives.HorizontalSeparator />
+            <LabeledView label="Opacity" size={50}>
+              <DimensionInput
+                size={50}
+                label="%"
+                value={
+                  contextOpacity !== undefined
+                    ? Math.round(contextOpacity * 100)
+                    : undefined
+                }
+                onSetValue={handleSetContextOpacity}
+              />
+            </LabeledView>
+          </>
+        );
       case Sketch.FillType.Shader:
-        return null;
-      // return withSeparatorElements(
-      //   shaderProps.shader.variables
-      //     .map((variable, index) => (
-      //       <LabeledView
-      //         label={variable.name}
-      //         flex={1}
-      //         key={`${variable.name}-${index}`}
-      //       >
-      //         <ShaderVariableValueInput
-      //           value={variable.value}
-      //           onChange={(value) =>
-      //             shaderProps.onChangeShaderVariableValue(
-      //               variable.name,
-      //               value,
-      //             )
-      //           }
-      //           onNudge={(value) =>
-      //             shaderProps.onNudgeShaderVariableValue(variable.name, value)
-      //           }
-      //         />
-      //       </LabeledView>
-      //     ))
-      //     .reverse()
-      //     .slice(0, 3),
-      //   <InspectorPrimitives.HorizontalSeparator />,
-      // );
+        return withSeparatorElements(
+          shaderProps.shader.variables
+            // TODO: remove types after implementing shaderProps types
+            .map((variable: { name: string; value: any }, index: number) => (
+              <LabeledView
+                label={variable.name}
+                flex={1}
+                key={`${variable.name}-${index}`}
+              >
+                <ShaderVariableValueInput
+                  value={variable.value}
+                  onChange={(value) =>
+                    shaderProps.onChangeShaderVariableValue(
+                      variable.name,
+                      value,
+                    )
+                  }
+                  onNudge={(value) =>
+                    shaderProps.onNudgeShaderVariableValue(variable.name, value)
+                  }
+                />
+              </LabeledView>
+            ))
+            .reverse()
+            .slice(0, 3),
+          <Primitives.HorizontalSeparator />,
+        );
     }
   }, [
     colorProps,
@@ -238,7 +237,7 @@ export default memo(function FillRow({
     getGradientTypeTitle,
     gradientProps.gradient.gradientType,
     handleSelectGradientType,
-    // handleSelectPatternSize,
+    handleSelectPatternSize,
     handleSetContextOpacity,
     handleSetOpacity,
     patternProps.pattern.patternFillType,
