@@ -1,4 +1,5 @@
 import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import { Text } from 'react-native';
 
 import Sketch from 'noya-file-format';
 import {
@@ -8,10 +9,10 @@ import {
   rgbaToSketchColor,
 } from 'noya-colorpicker';
 import {
-  InputField,
-  // Label,
-  // LabeledElementView,
+  Label,
   Select,
+  InputField,
+  LabeledElementView,
   withSeparatorElements,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
@@ -85,37 +86,37 @@ export default memo(function FillRow({
     }
   }, [fillType]);
 
-  // const renderLabel = useCallback(
-  //   ({ id }: { id: string }) => {
-  //     if (id.startsWith(shaderVariableId)) {
-  //       return <Label.Label>{id.split('_')[1]}</Label.Label>;
-  //     }
+  const renderLabel = useCallback(
+    ({ id }: { id: string }) => {
+      if (id.startsWith(shaderVariableId)) {
+        return <Label.Label>{id.split('_')[1]}</Label.Label>;
+      }
 
-  //     switch (id) {
-  //       case fillInputId:
-  //         return <Label.Label>{fillLabel}</Label.Label>;
-  //       case hexInputId:
-  //         return <Label.Label>Hex</Label.Label>;
-  //       case opacityInputId:
-  //         return <Label.Label>Opacity</Label.Label>;
-  //       case gradientTypeId:
-  //         return <Label.Label>Type</Label.Label>;
-  //       case patternSizeId:
-  //         return <Label.Label>Size</Label.Label>;
-  //       default:
-  //         return null;
-  //     }
-  //   },
-  //   [
-  //     shaderVariableId,
-  //     fillInputId,
-  //     fillLabel,
-  //     hexInputId,
-  //     opacityInputId,
-  //     gradientTypeId,
-  //     patternSizeId,
-  //   ],
-  // );
+      switch (id) {
+        case fillInputId:
+          return <Label.Label>{fillLabel}</Label.Label>;
+        case hexInputId:
+          return <Label.Label>Hex</Label.Label>;
+        case opacityInputId:
+          return <Label.Label>Opacity</Label.Label>;
+        case gradientTypeId:
+          return <Label.Label>Type</Label.Label>;
+        case patternSizeId:
+          return <Label.Label>Size</Label.Label>;
+        default:
+          return null;
+      }
+    },
+    [
+      shaderVariableId,
+      fillInputId,
+      fillLabel,
+      hexInputId,
+      opacityInputId,
+      gradientTypeId,
+      patternSizeId,
+    ],
+  );
 
   const handleSetOpacity = useCallback(
     (amount: number, mode: SetNumberMode) => onSetOpacity(amount / 100, mode),
@@ -277,12 +278,14 @@ export default memo(function FillRow({
     shaderVariableId,
   ]);
 
+  console.log(fields);
+
   return (
-    <Primitives.Row id={id}>
-      {/* <LabeledElementView renderLabel={renderLabel}> */}
-      {prefix}
-      {prefix && <Primitives.HorizontalSeparator />}
-      {/* <FillInputFieldWithPicker
+    <Primitives.Row id={id} style={{ backgroundColor: '#f0f' }}>
+      {/* <LabeledElementView renderLabel={renderLabel}>
+        {prefix}
+        {prefix && <Primitives.HorizontalSeparator />}
+        {/* <FillInputFieldWithPicker
           id={fillInputId}
           fillType={fillType}
           onChangeType={onChangeFillType}
@@ -290,10 +293,11 @@ export default memo(function FillRow({
           gradientProps={gradientProps}
           patternProps={patternProps}
           shaderProps={shaderProps}
-        /> */}
-      <Primitives.HorizontalSeparator />
-      {fields}
-      {/* </LabeledElementView> */}
+        /> * /}
+        <Primitives.HorizontalSeparator />
+        {fields}
+      </LabeledElementView> */}
+      <Text>blablabl</Text>
     </Primitives.Row>
   );
 });
