@@ -25,11 +25,6 @@ export const Row = styled(View)(({ theme }) => ({
 
 export const Column = styled(View)(({ theme }) => ({}));
 
-// TODO: checkbox
-// export const Checkbox = styled.input(({ theme }) => ({
-//   margin: 0,
-// }));
-
 export const Text = styled(RNText)(({ theme }) => ({
   ...theme.textStyles.small,
 }));

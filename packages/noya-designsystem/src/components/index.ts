@@ -13,5 +13,5 @@ export * as Label from './Label';
 export * as Sortable from './Sortable';
 export { default as Touchable } from './Touchable';
 export { default as ContextMenu } from './ContextMenu';
+export { default as LabeledView } from './LabeledView';
 export type { MenuItem, RegularMenuItem } from './internal/Menu';
-export { default as LabeledElementView } from './LabeledElementView';

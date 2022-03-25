@@ -12,7 +12,6 @@ import { ListView } from 'noya-designsystem';
 import { range, Platform } from 'noya-utils';
 import { Primitives } from '../primitives';
 import { ElementRow, ItemContainer } from './components';
-import { Text } from 'react-native';
 
 export interface ArrayControllerProps<Item> {
   id: string;
@@ -94,12 +93,10 @@ function ArrayController<Item>({
 
   const renderSortableItem = useCallback(
     ({ item }: { item: number }) => {
-      console.log('fff');
       return (
         <Sortable.Item id={keys[item]} key={keys[item]}>
           {({ relativeDropPosition }) => (
             <ItemContainer>
-              <Text>blablaba</Text>
               {renderRow(item)}
               {relativeDropPosition && (
                 <ListView.DragIndicatorElement

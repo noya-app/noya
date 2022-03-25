@@ -318,7 +318,7 @@ function SortableList<T>(props: SortableListProps<T>) {
         setActiveItemIndex,
       }}
     >
-      <View style={[style, { flex: 1 }]}>
+      <View style={style}>
         <FlatList
           style={style}
           data={data}

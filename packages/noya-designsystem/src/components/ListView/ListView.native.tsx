@@ -303,7 +303,7 @@ const RootContainer = styled(View)<{ scrollable?: boolean }>(
   }),
 );
 
-const FlatListStyles = StyleSheet.create({ list: { width: '100%' } });
+const FlatListStyles = StyleSheet.create({ list: { width: '100%', flex: 1 } });
 
 const ListViewRootInner = forwardRef(function ListViewRoot<T>(
   {

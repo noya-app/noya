@@ -1,5 +1,4 @@
 import React, { memo, ReactNode, useCallback, useMemo } from 'react';
-import { Text } from 'react-native';
 
 import Sketch from 'noya-file-format';
 import {
@@ -9,10 +8,9 @@ import {
   rgbaToSketchColor,
 } from 'noya-colorpicker';
 import {
-  Label,
   Select,
   InputField,
-  LabeledElementView,
+  LabeledView,
   withSeparatorElements,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
@@ -66,13 +64,6 @@ export default memo(function FillRow({
   patternProps,
   shaderProps,
 }: Props) {
-  const fillInputId = `${id}-color`;
-  const hexInputId = `${id}-hex`;
-  const opacityInputId = `${id}-opacity`;
-  const gradientTypeId = `${id}-gradient-type`;
-  const patternSizeId = `${id}-pattern-type`;
-  const shaderVariableId = `${id}-shader-variable`;
-
   const fillLabel = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Color:
@@ -85,38 +76,6 @@ export default memo(function FillRow({
         return 'Shader';
     }
   }, [fillType]);
-
-  const renderLabel = useCallback(
-    ({ id }: { id: string }) => {
-      if (id.startsWith(shaderVariableId)) {
-        return <Label.Label>{id.split('_')[1]}</Label.Label>;
-      }
-
-      switch (id) {
-        case fillInputId:
-          return <Label.Label>{fillLabel}</Label.Label>;
-        case hexInputId:
-          return <Label.Label>Hex</Label.Label>;
-        case opacityInputId:
-          return <Label.Label>Opacity</Label.Label>;
-        case gradientTypeId:
-          return <Label.Label>Type</Label.Label>;
-        case patternSizeId:
-          return <Label.Label>Size</Label.Label>;
-        default:
-          return null;
-      }
-    },
-    [
-      shaderVariableId,
-      fillInputId,
-      fillLabel,
-      hexInputId,
-      opacityInputId,
-      gradientTypeId,
-      patternSizeId,
-    ],
-  );
 
   const handleSetOpacity = useCallback(
     (amount: number, mode: SetNumberMode) => onSetOpacity(amount / 100, mode),
@@ -150,90 +109,97 @@ export default memo(function FillRow({
       case Sketch.FillType.Color:
         return (
           <>
-            <InputField.Root id={hexInputId} labelPosition="start">
-              <InputField.Input
+            <LabeledView label="Hex" flex={1}>
+              <InputField.Root labelPosition="start">
+                <InputField.Input
+                  value={
+                    colorProps.color
+                      ? sketchColorToHex(colorProps.color).replace('#', '')
+                      : ''
+                  }
+                  placeholder={colorProps.color ? undefined : 'multiple'}
+                  onSubmit={(value) => {
+                    if (validHex(value)) {
+                      colorProps.onChangeColor(
+                        rgbaToSketchColor(
+                          hexToRgba(value, colorProps.color?.alpha),
+                        ),
+                      );
+                    }
+                  }}
+                />
+                <InputField.Label>#</InputField.Label>
+              </InputField.Root>
+            </LabeledView>
+            <Primitives.HorizontalSeparator />
+            <LabeledView label="Opacity" size={50}>
+              <DimensionInput
+                size={50}
+                label="%"
                 value={
                   colorProps.color
-                    ? sketchColorToHex(colorProps.color).replace('#', '')
-                    : ''
+                    ? Math.round(colorProps.color.alpha * 100)
+                    : undefined
                 }
-                placeholder={colorProps.color ? undefined : 'multiple'}
-                onSubmit={(value) => {
-                  if (validHex(value)) {
-                    colorProps.onChangeColor(
-                      rgbaToSketchColor(
-                        hexToRgba(value, colorProps.color?.alpha),
-                      ),
-                    );
-                  }
-                }}
+                onSetValue={handleSetOpacity}
               />
-              <InputField.Label>#</InputField.Label>
-            </InputField.Root>
-            <Primitives.HorizontalSeparator />
-            <DimensionInput
-              id={opacityInputId}
-              size={50}
-              label="%"
-              value={
-                colorProps.color
-                  ? Math.round(colorProps.color.alpha * 100)
-                  : undefined
-              }
-              onSetValue={handleSetOpacity}
-            />
+            </LabeledView>
           </>
         );
       case Sketch.FillType.Gradient:
         return (
           <>
-            <Select
-              id={gradientTypeId}
-              value={gradientProps.gradient.gradientType.toString()}
-              options={GRADIENT_TYPE_OPTIONS}
-              getTitle={getGradientTypeTitle}
-              onChange={handleSelectGradientType}
-            />
+            <LabeledView label="Type" flex={1}>
+              <Select
+                value={gradientProps.gradient.gradientType.toString()}
+                options={GRADIENT_TYPE_OPTIONS}
+                getTitle={getGradientTypeTitle}
+                onChange={handleSelectGradientType}
+              />
+            </LabeledView>
             <Primitives.HorizontalSeparator />
-            <DimensionInput
-              id={opacityInputId}
-              size={50}
-              label="%"
-              value={
-                contextOpacity !== undefined
-                  ? Math.round(contextOpacity * 100)
-                  : undefined
-              }
-              onSetValue={handleSetContextOpacity}
-            />
+            <LabeledView label="Opacity" size={50}>
+              <DimensionInput
+                size={50}
+                label="%"
+                value={
+                  contextOpacity !== undefined
+                    ? Math.round(contextOpacity * 100)
+                    : undefined
+                }
+                onSetValue={handleSetContextOpacity}
+              />
+            </LabeledView>
           </>
         );
       case Sketch.FillType.Pattern:
         return null;
       // return (
       //   <>
-      //     <Select
-      //       id={patternSizeId}
-      //       value={
-      //         Sketch.PatternFillType[
-      //           patternProps.pattern.patternFillType
-      //         ] as PatternFillType
-      //       }
-      //       options={PATTERN_FILL_TYPE_OPTIONS}
-      //       onChange={handleSelectPatternSize}
-      //     />
+      //     <LabeledView label="Size" flex={1}>
+      //       <Select
+      //         value={
+      //           Sketch.PatternFillType[
+      //             patternProps.pattern.patternFillType
+      //           ] as PatternFillType
+      //         }
+      //         options={PATTERN_FILL_TYPE_OPTIONS}
+      //         onChange={handleSelectPatternSize}
+      //       />
+      //     </LabeledView>
       //     <InspectorPrimitives.HorizontalSeparator />
-      //     <DimensionInput
-      //       id={opacityInputId}
-      //       size={50}
-      //       label="%"
-      //       value={
-      //         contextOpacity !== undefined
-      //           ? Math.round(contextOpacity * 100)
-      //           : undefined
-      //       }
-      //       onSetValue={handleSetContextOpacity}
-      //     />
+      //     <LabeledView label="Opacity" size={50}>
+      //       <DimensionInput
+      //         size={50}
+      //         label="%"
+      //         value={
+      //           contextOpacity !== undefined
+      //             ? Math.round(contextOpacity * 100)
+      //             : undefined
+      //         }
+      //         onSetValue={handleSetContextOpacity}
+      //       />
+      //     </LabeledView>
       //   </>
       // );
       case Sketch.FillType.Shader:
@@ -241,18 +207,24 @@ export default memo(function FillRow({
       // return withSeparatorElements(
       //   shaderProps.shader.variables
       //     .map((variable, index) => (
-      //       <ShaderVariableValueInput
+      //       <LabeledView
+      //         label={variable.name}
+      //         flex={1}
       //         key={`${variable.name}-${index}`}
-      //         flex="1"
-      //         id={`${shaderVariableId}_${variable.name}`}
-      //         value={variable.value}
-      //         onChange={(value) =>
-      //           shaderProps.onChangeShaderVariableValue(variable.name, value)
-      //         }
-      //         onNudge={(value) =>
-      //           shaderProps.onNudgeShaderVariableValue(variable.name, value)
-      //         }
-      //       />
+      //       >
+      //         <ShaderVariableValueInput
+      //           value={variable.value}
+      //           onChange={(value) =>
+      //             shaderProps.onChangeShaderVariableValue(
+      //               variable.name,
+      //               value,
+      //             )
+      //           }
+      //           onNudge={(value) =>
+      //             shaderProps.onNudgeShaderVariableValue(variable.name, value)
+      //           }
+      //         />
+      //       </LabeledView>
       //     ))
       //     .reverse()
       //     .slice(0, 3),
@@ -265,39 +237,30 @@ export default memo(function FillRow({
     fillType,
     getGradientTypeTitle,
     gradientProps.gradient.gradientType,
-    gradientTypeId,
     handleSelectGradientType,
     // handleSelectPatternSize,
     handleSetContextOpacity,
     handleSetOpacity,
-    hexInputId,
-    opacityInputId,
     patternProps.pattern.patternFillType,
-    patternSizeId,
     shaderProps,
-    shaderVariableId,
   ]);
 
-  console.log(fields);
-
   return (
-    <Primitives.Row id={id} style={{ backgroundColor: '#f0f' }}>
-      {/* <LabeledElementView renderLabel={renderLabel}>
-        {prefix}
-        {prefix && <Primitives.HorizontalSeparator />}
+    <Primitives.Row id={id}>
+      <LabeledView>{prefix}</LabeledView>
+      {prefix && <Primitives.HorizontalSeparator />}
+      <LabeledView label={fillLabel}>
         {/* <FillInputFieldWithPicker
-          id={fillInputId}
           fillType={fillType}
           onChangeType={onChangeFillType}
           colorProps={colorProps}
           gradientProps={gradientProps}
           patternProps={patternProps}
           shaderProps={shaderProps}
-        /> * /}
-        <Primitives.HorizontalSeparator />
-        {fields}
-      </LabeledElementView> */}
-      <Text>blablabl</Text>
+        /> */}
+      </LabeledView>
+      <Primitives.HorizontalSeparator />
+      {fields}
     </Primitives.Row>
   );
 });
