@@ -1,20 +1,19 @@
+import React, { memo, useCallback } from 'react';
 import Sketch from 'noya-file-format';
 import {
+  Select,
+  Layout,
   Button,
   InputField,
-  Label,
-  LabeledElementView,
-  Select,
-  Spacer,
-} from 'noya-web-designsystem';
+  LabeledView,
+} from 'noya-designsystem';
 import {
-  getMultiNumberValue,
-  getMultiValue,
   Layers,
   Selectors,
+  getMultiValue,
+  getMultiNumberValue,
 } from 'noya-state';
-import { memo, useCallback } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import { Primitives } from './primitives';
 import { useApplicationState } from 'noya-app-state-context';
 
 const CURVE_MODE_OPTIONS = [
@@ -95,25 +94,14 @@ export default memo(function PointControlsInspector() {
   const pointTypeId = 'point-type';
   const pointRadiusInputId = 'point-radius';
 
-  const renderLabel = useCallback(({ id }) => {
-    switch (id) {
-      case pointTypeId:
-        return <Label.Label>Point Type</Label.Label>;
-      case pointRadiusInputId:
-        return <Label.Label>Radius</Label.Label>;
-      default:
-        return null;
-    }
-  }, []);
-
   return (
-    <InspectorPrimitives.Section>
-      <InspectorPrimitives.SectionHeader>
-        <InspectorPrimitives.Title>Point Controls</InspectorPrimitives.Title>
-      </InspectorPrimitives.SectionHeader>
-      <Spacer.Vertical size={4} />
-      <InspectorPrimitives.Row>
-        <LabeledElementView renderLabel={renderLabel}>
+    <Primitives.Section>
+      <Primitives.SectionHeader>
+        <Primitives.Title>Point Controls</Primitives.Title>
+      </Primitives.SectionHeader>
+      <Layout.Stack size={4} />
+      <Primitives.Row>
+        <LabeledView label="Point Type">
           <Select
             id={pointTypeId}
             value={getCurveModeString(curveMode) ?? 'None'}
@@ -127,7 +115,9 @@ export default memo(function PointControlsInspector() {
               [dispatch],
             )}
           />
-          <InspectorPrimitives.HorizontalSeparator />
+        </LabeledView>
+        <Primitives.HorizontalSeparator />
+        <LabeledView label="Radius">
           <InputField.Root id={pointRadiusInputId} size={50}>
             <InputField.NumberInput
               value={cornerRadius}
@@ -136,11 +126,11 @@ export default memo(function PointControlsInspector() {
               onNudge={handleNudgeRadius}
             />
           </InputField.Root>
-        </LabeledElementView>
-      </InspectorPrimitives.Row>
-      <InspectorPrimitives.VerticalSeparator />
-      <InspectorPrimitives.Row>
-        <InspectorPrimitives.Column>
+        </LabeledView>
+      </Primitives.Row>
+      <Primitives.VerticalSeparator />
+      <Primitives.Row>
+        <Primitives.Column>
           <Button
             id="toggle-path-is-closed"
             disabled={selectedLayers.length === 0}
@@ -150,8 +140,8 @@ export default memo(function PointControlsInspector() {
           >
             {isClosed ? 'Open Path' : 'Close Path'}
           </Button>
-        </InspectorPrimitives.Column>
-      </InspectorPrimitives.Row>
-    </InspectorPrimitives.Section>
+        </Primitives.Column>
+      </Primitives.Row>
+    </Primitives.Section>
   );
 });

@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import {
   BlurInspector,
   FillInspector,
+  LineInspector,
   RadiusInspector,
   ShadowInspector,
   BorderInspector,
@@ -23,14 +24,13 @@ import {
   DimensionsInspector,
   InnerShadowInspector,
   ColorControlsInspector,
+  PointControlsInspector,
+  ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import LineInspector from '../components/inspector/LineInspector';
-import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import ExportInspector from './ExportInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
-import PointControlsInspector from './PointControlsInspector';
 import PointCoordinatesInspector from './PointCoordinatesInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';

@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback, memo, useMemo } from 'react';
+import styled from 'styled-components';
 
 import {
   getMultiNumberValue,
@@ -12,6 +13,7 @@ import { Layout, withSeparatorElements } from 'noya-designsystem';
 import {
   BlurInspector,
   FillInspector,
+  LineInspector,
   RadiusInspector,
   ShadowInspector,
   BorderInspector,
@@ -21,11 +23,19 @@ import {
   DimensionsInspector,
   InnerShadowInspector,
   ColorControlsInspector,
+  PointControlsInspector,
+  PointCoordinatesInspector,
+  ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 
 interface AttributeInspectorProps {}
+
+const HorizontalPaddingContainer = styled(Layout.View)({
+  paddingLeft: 10,
+  paddingRight: 10,
+});
 
 const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
   const [state, dispatch] = useApplicationState();
@@ -143,15 +153,24 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     const views = [
       <Fragment key="layout">
         <AlignmentInspector />
-        {isEditingPath ? null : hasLineLayer ? null : ( // </HorizontalPaddingContainer> //   )} //     <PointCoordinatesInspector /> //   ) : ( //     <ControlPointCoordinatesInspector /> //   {isEditingControlPoint ? ( // <HorizontalPaddingContainer>
-          // <LineInspector
-          //   {...dimensionsInspectorProps}
-          //   isFlippedHorizontal={isFlippedHorizontal}
-          //   isFlippedVertical={isFlippedVertical}
-          //   onSetWidth={handleSetWidth}
-          //   onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
-          //   onSetIsFlippedVertical={handleSetIsFlippedVertical}
-          // />
+        {isEditingPath ? (
+          <HorizontalPaddingContainer>
+            {isEditingControlPoint ? (
+              <ControlPointCoordinatesInspector />
+            ) : (
+              <PointCoordinatesInspector />
+            )}
+          </HorizontalPaddingContainer>
+        ) : hasLineLayer ? (
+          <LineInspector
+            {...dimensionsInspectorProps}
+            isFlippedHorizontal={isFlippedHorizontal}
+            isFlippedVertical={isFlippedVertical}
+            onSetWidth={handleSetWidth}
+            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+            onSetIsFlippedVertical={handleSetIsFlippedVertical}
+          />
+        ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
             supportsFlipping={supportsFlipping}
@@ -171,7 +190,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         <Layout.Stack size="medium" />
       </Fragment>,
       hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
-      // isEditingPath && <PointControlsInspector />,
+      isEditingPath && <PointControlsInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       // !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
       //   <LayerThemeInspector />

@@ -1,36 +1,21 @@
+import React, { useCallback } from 'react';
+
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Spacer } from 'noya-web-designsystem';
 import { useShallowArray } from 'noya-react-utils';
+import { Layout } from 'noya-designsystem';
 import {
+  Selectors,
   clampRotation,
+  isPointsLayer,
+  SetNumberMode,
   decodeCurvePoint,
   getMultiNumberValue,
-  isPointsLayer,
-  Selectors,
-  SetNumberMode,
 } from 'noya-state';
-import { useCallback } from 'react';
-import styled from 'styled-components';
-import CoordinatesInspector from './CoordinatesInspector';
-import { DimensionInput, FlipControls } from 'noya-workspace-ui';
-import * as InspectorPrimitives from './InspectorPrimitives';
-
-export type DimensionValue = number | undefined;
-
-const Row = styled.div(({ theme }) => ({
-  flex: '0 0 auto',
-  display: 'flex',
-  flexDirection: 'row',
-  paddingLeft: '10px',
-  paddingRight: '10px',
-}));
-
-const LabelContainer = styled.div(({ theme }) => ({
-  ...theme.textStyles.small,
-  width: '69px',
-  display: 'flex',
-  alignItems: 'center',
-}));
+import CoordinatesInspector from '../CoordinatesInspector';
+import { DimensionInput, DimensionValue } from '../DimensionsInspector';
+import { Primitives } from '../primitives';
+import FlipControls from '../FlipControls';
+import { Row, LabelContainer } from './components';
 
 export interface Props {
   width: DimensionValue;
@@ -139,7 +124,7 @@ export default function LineInspector({
     <>
       <Row>
         <LabelContainer>Start</LabelContainer>
-        <Spacer.Horizontal size={16} />
+        <Layout.Queue size={16} />
         <CoordinatesInspector
           x={startX}
           y={startY}
@@ -147,10 +132,10 @@ export default function LineInspector({
           onSetY={handleSetStartY}
         />
       </Row>
-      <InspectorPrimitives.VerticalSeparator />
+      <Primitives.VerticalSeparator />
       <Row>
         <LabelContainer>End</LabelContainer>
-        <Spacer.Horizontal size={16} />
+        <Layout.Queue size={16} />
         <CoordinatesInspector
           x={endX}
           y={endY}
@@ -158,16 +143,16 @@ export default function LineInspector({
           onSetY={handleSetEndY}
         />
       </Row>
-      <InspectorPrimitives.VerticalSeparator />
+      <Primitives.VerticalSeparator />
       <Row>
         <DimensionInput value={width} onSetValue={onSetWidth} label="↔" />
-        <Spacer.Horizontal size={16} />
+        <Layout.Queue size={16} />
         <DimensionInput
           value={rotation}
           onSetValue={handleSetRotation}
           label="°"
         />
-        <Spacer.Horizontal size={16} />
+        <Layout.Queue size={16} />
         <FlipControls
           supportsFlipping
           isFlippedVertical={isFlippedVertical}

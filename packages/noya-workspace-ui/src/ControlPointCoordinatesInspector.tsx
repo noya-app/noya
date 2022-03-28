@@ -1,7 +1,8 @@
-import { Selectors, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
-import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
+
+import { Selectors, SetNumberMode } from 'noya-state';
 import { useApplicationState } from 'noya-app-state-context';
+import CoordinatesInspector from './CoordinatesInspector';
 
 export default memo(function ControlPointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();
@@ -20,15 +21,13 @@ export default memo(function ControlPointCoordinatesInspector() {
     [dispatch],
   );
 
-  const decodedCurvePoint = Selectors.getCurvePointForSelectedControlPoint(
-    state,
-  );
+  const decodedCurvePoint =
+    Selectors.getCurvePointForSelectedControlPoint(state);
 
   if (!decodedCurvePoint || !state.selectedControlPoint) return null;
 
-  const { x, y } = decodedCurvePoint[
-    state.selectedControlPoint.controlPointType
-  ];
+  const { x, y } =
+    decodedCurvePoint[state.selectedControlPoint.controlPointType];
 
   return (
     <CoordinatesInspector

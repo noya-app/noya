@@ -11,7 +11,6 @@ const StyledSlider = styled(RNSlider)({
   alignItems: 'center',
   userSelect: 'none',
   touchAction: 'none',
-  height: 16,
 });
 
 function Slider({ value, onValueChange, min, max }: SliderProps) {
