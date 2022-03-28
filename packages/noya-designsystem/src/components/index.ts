@@ -9,6 +9,7 @@ export * from './Checkbox';
 export * from './Touchable';
 export * from './InputField';
 export * from './Expandable';
+export * from './RadioGroup';
 export * as Label from './Label';
 export * as Sortable from './Sortable';
 export { default as Touchable } from './Touchable';

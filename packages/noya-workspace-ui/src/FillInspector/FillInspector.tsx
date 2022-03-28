@@ -8,7 +8,7 @@ import {
 } from 'noya-state';
 import { useShallowArray } from 'noya-react-utils';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import CheckboxArrayController from './CheckboxArrayController';
+import CheckboxArrayController from '../CheckboxArrayController';
 import FillRow from './FillRow';
 
 interface Props {

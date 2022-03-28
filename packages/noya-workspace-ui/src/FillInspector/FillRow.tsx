@@ -14,16 +14,19 @@ import {
   withSeparatorElements,
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { DimensionInput, DimensionValue } from './DimensionsInspector';
+import { DimensionInput, DimensionValue } from '../DimensionsInspector';
 import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,
   PatternFillProps,
   ShaderFillProps,
 } from './FillInputFieldWithPicker';
-import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
-import { ShaderVariableValueInput } from './ShaderVariableRow';
-import { Primitives } from './primitives';
+import {
+  PatternFillType,
+  PATTERN_FILL_TYPE_OPTIONS,
+} from '../PatternInspector';
+import { ShaderVariableValueInput } from '../ShaderVariableRow';
+import { Primitives } from '../primitives';
 
 const GRADIENT_TYPE_OPTIONS = [
   Sketch.GradientType.Linear.toString(),
