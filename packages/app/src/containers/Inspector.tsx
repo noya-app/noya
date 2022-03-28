@@ -25,13 +25,13 @@ import {
   InnerShadowInspector,
   ColorControlsInspector,
   PointControlsInspector,
+  PointCoordinatesInspector,
   ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import ExportInspector from './ExportInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
-import PointCoordinatesInspector from './PointCoordinatesInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
