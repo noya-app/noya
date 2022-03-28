@@ -1,6 +1,7 @@
 export * from './DimensionsInspector';
 export * from './LayerList';
 
+export { default as ColorControlsInspector } from './ColorControlsInspector';
 export { default as AlignmentInspector } from './AlignmentInspector';
 export { default as ArtboardSizeList } from './ArtboardSizeList';
 export { default as OpacityInspector } from './OpacityInspector';

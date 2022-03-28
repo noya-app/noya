@@ -23,7 +23,9 @@ export const Row = styled(View)(({ theme }) => ({
   alignItems: 'center',
 }));
 
-export const Column = styled(View)(({ theme }) => ({}));
+export const Column = styled(View)(({ theme }) => ({
+  flex: 1,
+}));
 
 export const Text = styled(RNText)(({ theme }) => ({
   ...theme.textStyles.small,

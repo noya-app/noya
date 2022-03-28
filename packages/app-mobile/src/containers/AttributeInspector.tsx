@@ -19,6 +19,7 @@ import {
   AlignmentInspector,
   DimensionsInspector,
   InnerShadowInspector,
+  ColorControlsInspector,
 } from 'noya-workspace-ui';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
@@ -192,7 +193,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         <InnerShadowInspector />
       ),
       // selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
-      // onlyBitmapLayers && <ColorControlsInspector />,
+      onlyBitmapLayers && <ColorControlsInspector />,
       // selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
