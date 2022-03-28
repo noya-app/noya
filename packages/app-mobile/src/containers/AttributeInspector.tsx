@@ -225,14 +225,24 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     hasContextSettingsLayers,
   ]);
 
-  if (
+  const content =
     state.interactionState.type === 'insert' &&
-    state.interactionState.layerType === 'artboard'
-  ) {
-    return <ArtboardSizeList />;
-  }
+    state.interactionState.layerType === 'artboard' ? (
+      <ArtboardSizeList />
+    ) : (
+      elements
+    );
 
-  return <>{elements}</>;
+  // if (
+  //   state.interactionState.type === 'insert' &&
+  //   state.interactionState.layerType === 'artboard'
+  // ) {
+  //   return <ArtboardSizeList />;
+  // }
+
+  // return <>{elements}</>;
+  // return <ScrollView>{content}</ScrollView>;
+  return <>{content}</>;
 };
 
 export default memo(AttributeInspector);
