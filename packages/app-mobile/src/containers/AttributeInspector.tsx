@@ -200,9 +200,6 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         <Layout.Divider />
         <Layout.Stack size="medium" />
       </>,
-      // <HorizontalPaddingContainer>
-      //   <Divider />
-      // </HorizontalPaddingContainer>,
     );
   }, [
     selectedLayers,

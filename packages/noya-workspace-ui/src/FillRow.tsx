@@ -15,12 +15,12 @@ import {
 } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { DimensionInput, DimensionValue } from './DimensionsInspector';
-// import FillInputFieldWithPicker, {
-//   ColorFillProps,
-//   GradientFillProps,
-//   PatternFillProps,
-//   ShaderFillProps,
-// } from './FillInputFieldWithPicker';
+import FillInputFieldWithPicker, {
+  ColorFillProps,
+  GradientFillProps,
+  PatternFillProps,
+  ShaderFillProps,
+} from './FillInputFieldWithPicker';
 import { PatternFillType, PATTERN_FILL_TYPE_OPTIONS } from './PatternInspector';
 import { ShaderVariableValueInput } from './ShaderVariableRow';
 import { Primitives } from './primitives';
@@ -41,14 +41,10 @@ interface Props {
   onChangeFillType: (type: Sketch.FillType) => void;
   onSetOpacity: (amount: number, mode: SetNumberMode) => void;
   onSetContextOpacity: (value: number, mode: SetNumberMode) => void;
-  colorProps: any;
-  gradientProps: any;
-  patternProps: any;
-  shaderProps: any;
-  // colorProps: ColorFillProps;
-  // gradientProps: GradientFillProps;
-  // patternProps: PatternFillProps;
-  // shaderProps: ShaderFillProps;
+  colorProps: ColorFillProps;
+  gradientProps: GradientFillProps;
+  patternProps: PatternFillProps;
+  shaderProps: ShaderFillProps;
 }
 
 export default memo(function FillRow({
@@ -249,14 +245,14 @@ export default memo(function FillRow({
       <LabeledView>{prefix}</LabeledView>
       {prefix && <Primitives.HorizontalSeparator />}
       <LabeledView label={fillLabel}>
-        {/* <FillInputFieldWithPicker
+        <FillInputFieldWithPicker
           fillType={fillType}
           onChangeType={onChangeFillType}
           colorProps={colorProps}
           gradientProps={gradientProps}
           patternProps={patternProps}
           shaderProps={shaderProps}
-        /> */}
+        />
       </LabeledView>
       <Primitives.HorizontalSeparator />
       {fields}
