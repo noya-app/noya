@@ -10,6 +10,7 @@ import {
 } from 'noya-state';
 import { Layout, withSeparatorElements } from 'noya-designsystem';
 import {
+  BlurInspector,
   FillInspector,
   RadiusInspector,
   ShadowInspector,
@@ -192,7 +193,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       selectedLayers.every(Layers.hasInspectableInnerShadow) && (
         <InnerShadowInspector />
       ),
-      // selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
+      selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
       onlyBitmapLayers && <ColorControlsInspector />,
       // selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);

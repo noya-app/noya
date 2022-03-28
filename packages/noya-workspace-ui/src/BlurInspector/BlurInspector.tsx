@@ -1,11 +1,12 @@
+import React, { memo, useCallback, useMemo } from 'react';
+
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Layers, Selectors, SetNumberMode } from 'noya-state';
 import { useShallowArray } from 'noya-react-utils';
 import { SketchModel } from 'noya-sketch-model';
-import { Layers, Selectors, SetNumberMode } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
-import BlurRow from '../components/inspector/BlurRow';
-import EnableableElementController from '../components/inspector/EnableableElementController';
-import { saturationInterpolator } from './ColorControlsInspector';
+import EnableableElementController from '../EnableableElementController';
+import { saturationInterpolator } from '../ColorControlsInspector';
+import BlurRow from './BlurRow';
 
 export default memo(function BlurInspector() {
   const [state, dispatch] = useApplicationState();

@@ -12,26 +12,26 @@ import {
 import { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
+  BlurInspector,
+  FillInspector,
   RadiusInspector,
-  OpacityInspector,
+  ShadowInspector,
+  BorderInspector,
   ArtboardSizeList,
+  OpacityInspector,
   AlignmentInspector,
   DimensionsInspector,
+  InnerShadowInspector,
+  ColorControlsInspector,
 } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import LineInspector from '../components/inspector/LineInspector';
-import BlurInspector from './BlurInspector';
-import BorderInspector from './BorderInspector';
-import ColorControlsInspector from './ColorControlsInspector';
 import ControlPointCoordinatesInspector from './ControlPointCoordinatesInspector';
 import ExportInspector from './ExportInspector';
-import FillInspector from './FillInspector';
-import InnerShadowInspector from './InnerShadowInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
 import PointControlsInspector from './PointControlsInspector';
 import PointCoordinatesInspector from './PointCoordinatesInspector';
-import ShadowInspector from './ShadowInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
 import TextStyleInspector from './TextStyleInspector';
