@@ -11,5 +11,7 @@ export { default as FillInspector } from './FillInspector';
 export { default as FlipControls } from './FlipControls';
 export { default as LayerList } from './LayerList';
 
+export { InnerShadowInspector } from './ShadowInspector';
+
 export { default as useLayerMenu } from './hooks/useLayerMenu';
 export { default as useHistory } from './hooks/useHistory';
