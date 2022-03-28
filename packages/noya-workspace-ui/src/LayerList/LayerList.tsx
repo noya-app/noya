@@ -17,12 +17,7 @@ import Sketch from 'noya-file-format';
 import { isDeepEqual } from 'noya-utils';
 import { Layers, Selectors } from 'noya-state';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
-import {
-  Layout,
-  ListView,
-  TreeView,
-  RelativeDropPosition,
-} from 'noya-designsystem';
+import { Layout, ListView, TreeView, Sortable } from 'noya-designsystem';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { LayerListProps, LayerListItem } from './types';
 import IconContainer from './IconContainer';
@@ -236,7 +231,11 @@ export default memo(function LayerList(props: LayerListProps) {
         [dispatch],
       )}
       onMoveItem={useCallback(
-        (sourceIndex, destinationIndex, position: RelativeDropPosition) => {
+        (
+          sourceIndex,
+          destinationIndex,
+          position: Sortable.RelativeDropPosition,
+        ) => {
           const sourceId = items[sourceIndex].id;
           const sourceIds = selectedLayerIds.includes(sourceId)
             ? selectedLayerIds
@@ -255,7 +254,7 @@ export default memo(function LayerList(props: LayerListProps) {
         (
           sourceId: string,
           destinationId: string,
-          relationDropPosition: RelativeDropPosition,
+          relationDropPosition: Sortable.RelativeDropPosition,
         ) => {
           const sourceIds = selectedLayerIds.includes(sourceId)
             ? selectedLayerIds
