@@ -233,15 +233,6 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       elements
     );
 
-  // if (
-  //   state.interactionState.type === 'insert' &&
-  //   state.interactionState.layerType === 'artboard'
-  // ) {
-  //   return <ArtboardSizeList />;
-  // }
-
-  // return <>{elements}</>;
-  // return <ScrollView>{content}</ScrollView>;
   return <>{content}</>;
 };
 

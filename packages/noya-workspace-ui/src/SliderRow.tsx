@@ -44,7 +44,7 @@ const SliderRow = memo(function SliderRow({
         max={max}
       />
       <Primitives.HorizontalSeparator />
-      <InputField.Root id={`${id}-input`} size={50}>
+      <InputField.Root id={`${id}-input`} size={60}>
         <InputField.NumberInput
           value={value}
           placeholder={value === undefined ? 'multi' : undefined}
