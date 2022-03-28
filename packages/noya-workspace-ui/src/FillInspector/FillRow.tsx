@@ -133,7 +133,6 @@ export default memo(function FillRow({
             <Primitives.HorizontalSeparator />
             <LabeledView label="Opacity" size={50}>
               <DimensionInput
-                size={50}
                 label="%"
                 value={
                   colorProps.color
@@ -159,7 +158,6 @@ export default memo(function FillRow({
             <Primitives.HorizontalSeparator />
             <LabeledView label="Opacity" size={50}>
               <DimensionInput
-                size={50}
                 label="%"
                 value={
                   contextOpacity !== undefined
@@ -188,7 +186,6 @@ export default memo(function FillRow({
             <Primitives.HorizontalSeparator />
             <LabeledView label="Opacity" size={50}>
               <DimensionInput
-                size={50}
                 label="%"
                 value={
                   contextOpacity !== undefined

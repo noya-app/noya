@@ -107,7 +107,6 @@ export default memo(function BorderRow({
       <LabeledView label="Width" size={50}>
         <DimensionInput
           id={widthInputId}
-          size={50}
           value={width}
           onSetValue={onSetWidth}
         />

@@ -6,6 +6,7 @@ export { default as ArtboardSizeList } from './ArtboardSizeList';
 export { default as OpacityInspector } from './OpacityInspector';
 export { default as BorderInspector } from './BorderInspector';
 export { default as RadiusInspector } from './RadiusInspector';
+export { default as ShadowInspector } from './ShadowInspector';
 export { default as FillInspector } from './FillInspector';
 export { default as FlipControls } from './FlipControls';
 export { default as LayerList } from './LayerList';

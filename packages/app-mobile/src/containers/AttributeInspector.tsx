@@ -12,6 +12,7 @@ import { Layout, withSeparatorElements } from 'noya-designsystem';
 import {
   FillInspector,
   RadiusInspector,
+  ShadowInspector,
   BorderInspector,
   ArtboardSizeList,
   OpacityInspector,
@@ -102,7 +103,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
 
   const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
 
-  // const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
+  const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps = {
@@ -119,20 +120,20 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       ),
     };
 
-    // const onlyBitmapLayers = selectedLayers.every((l) =>
-    //   Layers.isBitmapLayer(l),
-    // );
-    // const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const onlyBitmapLayers = selectedLayers.every((l) =>
+      Layers.isBitmapLayer(l),
+    );
+    const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
     const hasLineLayer = selectedLayers.every(
       (l) => Layers.isPointsLayer(l) && isLine(l.points),
     );
-    // const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
-    // const hasGroup = selectedLayers.some(Layers.isGroup);
-    // const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
-    // const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
-    // const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
-    // const hasOneSymbolInstance =
-    //   selectedLayers.length === 1 && hasSymbolInstance;
+    const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
+    const hasGroup = selectedLayers.some(Layers.isGroup);
+    const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
+    const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
+    const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
+    const hasOneSymbolInstance =
+      selectedLayers.length === 1 && hasSymbolInstance;
 
     if (selectedLayers.length === 0) return null;
 
@@ -180,12 +181,12 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         <FillInspector title="Fills" allowMoreThanOne />
       ),
       selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
-      // selectedLayers.every(Layers.hasInspectableShadow) && (
-      //   <ShadowInspector
-      //     allowMoreThanOne={!hasGroup}
-      //     supportsSpread={!hasGroup}
-      //   />
-      // ),
+      selectedLayers.every(Layers.hasInspectableShadow) && (
+        <ShadowInspector
+          allowMoreThanOne={!hasGroup}
+          supportsSpread={!hasGroup}
+        />
+      ),
       // selectedLayers.every(Layers.hasInspectableInnerShadow) && (
       //   <InnerShadowInspector />
       // ),
@@ -205,7 +206,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
   }, [
     selectedLayers,
     isEditingPath,
-    // isEditingControlPoint,
+    isEditingControlPoint,
     isFlippedHorizontal,
     isFlippedVertical,
     handleSetWidth,
