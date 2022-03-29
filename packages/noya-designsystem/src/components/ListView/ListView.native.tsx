@@ -296,7 +296,7 @@ const ListViewRow = forwardRef(function ListViewRow<
 
 const RootContainer = styled(View)<{ scrollable?: boolean }>(
   ({ scrollable }) => ({
-    flexGrow: scrollable ? 1 : 0,
+    flexGrow: 1,
     flexShrink: 0,
     flexBasis: scrollable ? 0 : 'auto',
     flexWrap: 'wrap',
