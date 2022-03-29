@@ -7,7 +7,6 @@ import type { RadioGroupItemProps, RadioGroupRootProps } from './types';
 
 const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
   appearance: 'none',
-  // width: '0px', // Reset intrinsic width
   flex: '1 1 0px',
   position: 'relative',
   border: '0',
