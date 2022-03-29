@@ -2,7 +2,7 @@ import React, { memo, ReactNode } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { View, Text as RNText } from 'react-native';
 
-import { Layout } from 'noya-designsystem';
+import { Layout, Touchable } from 'noya-designsystem';
 
 export const Section = styled(View)(({ theme }) => ({
   padding: 10,
@@ -26,6 +26,11 @@ export const Row = styled(View)(({ theme }) => ({
 export const Column = styled(View)(({ theme }) => ({
   flex: 1,
 }));
+
+export const DraggableRow = styled(Touchable)({
+  flexDirection: 'row',
+  alignItems: 'center',
+});
 
 export const Text = styled(RNText)(({ theme }) => ({
   ...theme.textStyles.small,

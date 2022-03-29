@@ -7,6 +7,7 @@ import React, {
   useCallback,
   createContext,
   MutableRefObject,
+  useEffect,
 } from 'react';
 import styled from 'styled-components';
 import { View, FlatList, LayoutChangeEvent } from 'react-native';
@@ -19,16 +20,17 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Point } from 'noya-geometry';
+import { useScrollable } from '../ScrollableView';
+import { Gesture, TouchableListener } from '../Touchable';
 import type {
   DropValidator,
   ItemMeasurement,
   SortableRootProps,
   SortableListProps,
   SortableItemProps,
+  RelativeDropPosition,
 } from './types';
-import { Gesture, TouchableListener } from '../Touchable';
 import { validateDropIndicator, defaultAcceptsDrop } from './utils';
-import { RelativeDropPosition } from 'packages/noya-web-designsystem';
 
 interface OverInfo {
   index?: number;
@@ -123,6 +125,7 @@ interface CellRendererComponentProps<T> {
 const CellRendererComponent = memo(function CellRendererComponent<T>(
   props: CellRendererComponentProps<T>,
 ) {
+  const scrollable = useScrollable();
   const sortable = useContext(SortableContext);
   const { index, children } = props;
   const touchStartTimeoutRef = useRef<number>();
@@ -132,6 +135,12 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
       touchStartTimeoutRef.current = setTimeout(() => {
         sortable.setActiveItemIndex(index);
         touchStartTimeoutRef.current = undefined;
+
+        // If there is scroll view parent
+        // Disable its scroll capture durning drag&drop
+        if (scrollable.isAvailable) {
+          scrollable.setScrollEnabled(false);
+        }
       }, DragStartDelayMS);
 
       sortable.touchPos.value = params.point;
@@ -142,7 +151,7 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
         y: params.point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
       };
     },
-    [sortable, index],
+    [sortable, index, scrollable],
   );
 
   const onTouchUpdate = useCallback(
@@ -161,8 +170,13 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
   const onTouchEnd = useCallback(
     (params: Gesture) => {
       sortable.onDropItem(params.point.y - sortable.touchOffset.value.y);
+
+      // Enable parent scrollview drag
+      if (scrollable.isAvailable) {
+        scrollable.setScrollEnabled(true);
+      }
     },
-    [sortable],
+    [sortable, scrollable],
   );
 
   const onLayout = useCallback(
@@ -196,11 +210,13 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
 function SortableList<T>(props: SortableListProps<T>) {
   const {
     data,
+    keys,
     style,
     renderItem,
     onMoveItem,
     keyExtractor,
     renderOverlay,
+    scrollable = true,
     acceptsDrop = defaultAcceptsDrop,
   } = props;
   const [activeItemIndex, setActiveItemIndex] = useState<number>();
@@ -278,9 +294,9 @@ function SortableList<T>(props: SortableListProps<T>) {
         return;
       }
 
-      onMoveItem?.(oldIndex, newIndex, indicator);
+      onMoveItem?.(keys.indexOf(activeId), keys.indexOf(overId), indicator);
     },
-    [acceptsDrop, overItem.value, activeItem, onMoveItem],
+    [acceptsDrop, overItem.value, activeItem, onMoveItem, keys],
   );
 
   const dragItemStyle = useAnimatedStyle(() => {
@@ -319,14 +335,34 @@ function SortableList<T>(props: SortableListProps<T>) {
       }}
     >
       <View style={style}>
-        <FlatList
-          style={style}
-          data={data}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          CellRendererComponent={CellRendererComponent}
-          scrollEnabled={!isDragging}
-        />
+        {scrollable ? (
+          <FlatList
+            style={style}
+            data={data}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            CellRendererComponent={CellRendererComponent}
+            scrollEnabled={!isDragging}
+          />
+        ) : (
+          data.map((item, index) => (
+            <CellRendererComponent
+              key={keyExtractor(item, index)}
+              item={item}
+              index={index}
+            >
+              {renderItem({
+                item,
+                index,
+                separators: {
+                  highlight: () => {},
+                  unhighlight: () => {},
+                  updateProps: () => {},
+                },
+              })}
+            </CellRendererComponent>
+          ))
+        )}
       </View>
       {isDragging && (
         <Overlay style={dragItemStyle} pointerEvents="none">

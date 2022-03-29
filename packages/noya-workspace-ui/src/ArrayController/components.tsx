@@ -8,6 +8,6 @@ export const ElementRow = styled.div({
   marginTop: '10px',
 });
 
-export const ItemContainer = styled.div({
+export const ItemContainer = styled.div<{ ref?: any }>({
   position: 'relative',
 });

@@ -72,7 +72,7 @@ export default memo(function BorderRow({
   );
 
   return (
-    <Primitives.Row>
+    <Primitives.DraggableRow>
       <LabeledView>{prefix}</LabeledView>
       {prefix && <Primitives.HorizontalSeparator />}
       <LabeledView label="Color">
@@ -111,6 +111,6 @@ export default memo(function BorderRow({
           onSetValue={onSetWidth}
         />
       </LabeledView>
-    </Primitives.Row>
+    </Primitives.DraggableRow>
   );
 });

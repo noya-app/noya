@@ -95,8 +95,8 @@ function ArrayController<Item>({
     ({ item }: { item: number }) => {
       return (
         <Sortable.Item id={keys[item]} key={keys[item]}>
-          {({ relativeDropPosition }) => (
-            <ItemContainer>
+          {({ relativeDropPosition, ...sortableProps }) => (
+            <ItemContainer {...sortableProps}>
               {renderRow(item)}
               {relativeDropPosition && (
                 <ListView.DragIndicatorElement
@@ -152,8 +152,10 @@ function ArrayController<Item>({
       {sortable ? (
         Platform.isNative ? (
           <Sortable.List
+            keys={keys}
             data={indexes}
-            onMoveItem={onMoveItem}
+            scrollable={false}
+            onMoveItem={handleMoveItem}
             renderOverlay={renderRow}
             renderItem={renderSortableItem}
             keyExtractor={keyExtractor}

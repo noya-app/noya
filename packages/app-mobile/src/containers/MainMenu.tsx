@@ -84,10 +84,10 @@ const MainMenu: React.FC = () => {
 
         await Sharing.shareAsync(fileUrl);
 
-        // @ts-ignore TODO: proper file handle instance?
+        // @ts-ignore
         dispatch('setFileHandle', { name: fileName, kind: 'file' });
       } catch (e) {
-        console.log(e);
+        console.warn(e);
       }
     },
     [dispatch, fileHandle, getStateSnapshot],

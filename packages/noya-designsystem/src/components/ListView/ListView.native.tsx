@@ -402,11 +402,14 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     [renderItem, getItemContextValue],
   );
 
+  const ids = useMemo(() => data.map(keyExtractor), [keyExtractor, data]);
+
   if (sortable) {
     return (
       <RootContainer scrollable={scrollable}>
         <Sortable.List<T>
           data={data}
+          keys={ids}
           keyExtractor={keyExtractor}
           renderItem={renderWrappedChild}
           renderOverlay={renderOverlay}

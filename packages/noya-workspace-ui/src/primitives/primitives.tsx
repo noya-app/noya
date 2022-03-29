@@ -37,6 +37,8 @@ export const Column = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
+export const DraggableRow = Row;
+
 export const Checkbox = styled.input(({ theme }) => ({
   margin: 0,
 }));

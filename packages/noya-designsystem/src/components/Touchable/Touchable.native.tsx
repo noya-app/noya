@@ -20,6 +20,7 @@ import {
 import {
   initMeta,
   getPoint,
+  getDistance,
   getTouchMeta,
   PanThreshold,
   mergeHandlers,
@@ -27,7 +28,6 @@ import {
   initialHandlers,
   touchableEventNames,
   LongPressThresholdMS,
-  getDistance,
 } from './utils';
 
 const TouchableContext = createContext<TouchableContextType>(initialHandlers);

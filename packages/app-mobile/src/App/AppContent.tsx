@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 
 import { WorkspaceAction, Selectors } from 'noya-state';
 import { decodeFontName } from 'noya-fonts';

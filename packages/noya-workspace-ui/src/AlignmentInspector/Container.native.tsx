@@ -6,6 +6,7 @@ const Container = styled(View)(({ theme }) => ({
   flexDirection: 'row',
   minHeight: 35,
   justifyContent: 'space-evenly',
+  alignItems: 'flex-start',
 }));
 
 export default memo(Container);

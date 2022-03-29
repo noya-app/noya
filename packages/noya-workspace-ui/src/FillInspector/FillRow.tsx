@@ -241,7 +241,7 @@ export default memo(function FillRow({
   ]);
 
   return (
-    <Primitives.Row id={id}>
+    <Primitives.DraggableRow id={id}>
       <LabeledView>{prefix}</LabeledView>
       {prefix && <Primitives.HorizontalSeparator />}
       <LabeledView label={fillLabel}>
@@ -256,6 +256,6 @@ export default memo(function FillRow({
       </LabeledView>
       <Primitives.HorizontalSeparator />
       {fields}
-    </Primitives.Row>
+    </Primitives.DraggableRow>
   );
 });

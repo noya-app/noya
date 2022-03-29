@@ -2,14 +2,18 @@ import React, { Fragment, useCallback, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
-  getMultiNumberValue,
-  getMultiValue,
   isLine,
   Layers,
   Selectors,
   SetNumberMode,
+  getMultiValue,
+  getMultiNumberValue,
 } from 'noya-state';
-import { Layout, withSeparatorElements } from 'noya-designsystem';
+import {
+  Layout,
+  ScrollableView,
+  withSeparatorElements,
+} from 'noya-designsystem';
 import {
   BlurInspector,
   FillInspector,
@@ -253,7 +257,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       elements
     );
 
-  return <>{content}</>;
+  return <ScrollableView>{content}</ScrollableView>;
 };
 
 export default memo(AttributeInspector);

@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback, useEffect } from 'react';
-import { View, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View } from 'react-native';
 import styled from 'styled-components';
 import Animated, {
   withSpring,
@@ -99,13 +99,9 @@ const ExpandableProvider = (props: ExpandableProps) => {
 
   return (
     <ExpandableView position={position} style={expandableStyle}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ExpandableContentWrapper>
-          {!!activeChild && (
-            <ExpandableContent>{activeChild}</ExpandableContent>
-          )}
-        </ExpandableContentWrapper>
-      </TouchableWithoutFeedback>
+      <ExpandableContentWrapper>
+        {!!activeChild && <ExpandableContent>{activeChild}</ExpandableContent>}
+      </ExpandableContentWrapper>
       <Layout.Queue size="medium" />
       <View>
         <ButtonList>
