@@ -1,10 +1,12 @@
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+
+import { Layout } from 'noya-designsystem';
 import { ColorPickerProvider } from '../contexts/ColorPickerContext';
 import { useColorManipulation } from '../hooks/useColorManipulation';
 import { AnyColor, ColorModel, ColorPickerBaseProps } from '../types';
 
-const Container = styled.div({
+const Container = styled(Layout.View)({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',

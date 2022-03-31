@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useEventCallback } from '../hooks/useEventCallback';
 import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect';
 import { clamp } from '../utils/clamp';
+import { Interaction, InteractiveProps } from './types';
 
 const Container = styled.div(() => ({
   position: 'absolute' as any,
@@ -16,13 +17,9 @@ const Container = styled.div(() => ({
   touchAction: 'none',
 }));
 
-export interface Interaction {
-  left: number;
-  top: number;
-}
-
 // Check if an event was triggered by touch
-const isTouch = (e: PointerEvent | TouchEvent): e is TouchEvent => 'touches' in e;
+const isTouch = (e: PointerEvent | TouchEvent): e is TouchEvent =>
+  'touches' in e;
 
 // Returns a relative position of the pointer inside the node's bounding box
 const getRelativePosition = (
@@ -42,15 +39,6 @@ const getRelativePosition = (
   };
 };
 
-interface Props {
-  onMove: (interaction: Interaction) => void;
-  onKey: (offset: Interaction) => void;
-  onClick?: (interaction: Interaction | number) => void;
-  onDelete?: () => void;
-  onClickPointer?: (index: number) => void;
-  children: React.ReactNode;
-}
-
 const InteractiveBase = ({
   onMove,
   onKey,
@@ -58,7 +46,7 @@ const InteractiveBase = ({
   onDelete,
   onClickPointer,
   ...rest
-}: Props) => {
+}: InteractiveProps) => {
   const container = useRef<HTMLDivElement>(null);
   const hasTouched = useRef(false);
   const isDragging = useRef(false);

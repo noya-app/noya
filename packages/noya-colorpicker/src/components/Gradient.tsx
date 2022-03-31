@@ -6,7 +6,8 @@ import { getGradientBackground } from 'noya-web-designsystem';
 import { sketchColorToRgba } from 'noya-colorpicker';
 import { RgbaColor } from '../types';
 import { interpolateRgba } from '../utils/interpolateRgba';
-import { Interaction, Interactive } from './Interactive';
+import { Interactive } from './Interactive';
+import type { Interaction } from './types';
 import Pointer from './Pointer';
 
 const Container = styled.div<{ background: string }>(({ background }) => ({
@@ -42,7 +43,6 @@ export default memo(function Gradient({
       onDelete();
     }
     // Hue measured in degrees of the color circle ranging from 0 to 360
-    //console.log('press');
   };
 
   const handleClick = (interaction: Interaction | number) => {
@@ -51,7 +51,7 @@ export default memo(function Gradient({
       return;
     }
 
-    const gradient = gradients.map(g => ({
+    const gradient = gradients.map((g) => ({
       color: sketchColorToRgba(g.color),
       position: g.position,
     }));

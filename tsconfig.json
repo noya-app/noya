@@ -18,6 +18,9 @@
       "react-native-gesture-handler": [
         "./packages/app-mobile/node_modules/react-native-gesture-handler"
       ],
+      "react-native-linear-gradient": [
+        "./packages/app-mobile/node_modules/react-native-linear-gradient"
+      ],
       /* Include path to all package src index files */
       "*": ["./*/src"]
     }

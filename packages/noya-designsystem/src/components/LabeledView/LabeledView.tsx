@@ -6,9 +6,9 @@ import { Label } from '../Label';
 
 const Container = styled.div<{ flex?: number; size?: number }>(
   ({ flex, size }) => ({
-    ...(!!flex && !size
-      ? { display: 'flex', flex: `${flex}`, flexDirection: 'column' }
-      : {}),
+    display: 'flex',
+    flexDirection: 'column',
+    ...(!!flex && !size ? { flex: `${flex}` } : {}),
     ...(!flex && !!size ? { width: size } : {}),
   }),
 );

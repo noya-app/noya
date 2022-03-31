@@ -48,7 +48,7 @@ interface SortableContextType {
   onDropItem: (offsetTop: number) => void;
 }
 
-const DragStartDelayMS = 150;
+const DragStartDelayMS = 100;
 const MoveRenderThreshold = 8;
 
 // @ts-ignore Initial value doesn't really matter \m/

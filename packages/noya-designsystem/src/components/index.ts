@@ -16,4 +16,6 @@ export * as Sortable from './Sortable';
 export { default as Touchable } from './Touchable';
 export { default as ContextMenu } from './ContextMenu';
 export { default as LabeledView } from './LabeledView';
+export { default as ColorPicker } from './ColorPicker';
+export { default as FillInputField } from './FillInputField';
 export type { MenuItem, RegularMenuItem } from './internal/Menu';

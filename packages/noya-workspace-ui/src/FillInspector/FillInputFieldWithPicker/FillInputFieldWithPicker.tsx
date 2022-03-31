@@ -7,7 +7,7 @@ import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import { useGlobalInputBlurListener } from 'noya-ui';
 import { useApplicationState } from 'noya-app-state-context';
-import { Divider, FillInputField, Select } from 'noya-web-designsystem';
+import { Layout, FillInputField, Select } from 'noya-designsystem';
 // import {
 //   useDialogContainsElement,
 //   useOpenInputDialog,
@@ -307,22 +307,22 @@ export default memo(function FillInputFieldWithPicker({
   //   }
   // }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
 
-  // const value = useMemo(() => {
-  //   switch (fillType) {
-  //     case Sketch.FillType.Gradient:
-  //       return gradientProps?.gradient;
-  //     case Sketch.FillType.Pattern:
-  //       return patternProps?.pattern;
-  //     case Sketch.FillType.Color:
-  //     case undefined:
-  //       return colorProps.color;
-  //   }
-  // }, [
-  //   fillType,
-  //   colorProps.color,
-  //   gradientProps?.gradient,
-  //   patternProps?.pattern,
-  // ]);
+  const value = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Gradient:
+        return gradientProps?.gradient;
+      case Sketch.FillType.Pattern:
+        return patternProps?.pattern;
+      case Sketch.FillType.Color:
+      case undefined:
+        return colorProps.color;
+    }
+  }, [
+    fillType,
+    colorProps.color,
+    gradientProps?.gradient,
+    patternProps?.pattern,
+  ]);
 
   // useGlobalInputBlurListener(() => {
   //   if (state.selectedGradient) {
@@ -343,11 +343,11 @@ export default memo(function FillInputFieldWithPicker({
   //     }}
   //   >
   //     <Popover.Trigger as={Slot}>
-  //       <FillInputField
-  //         id={id}
-  //         flex={flex}
-  //         value={hasMultipleFills ? undefined : value}
-  //       />
+  // <FillInputField
+  //   id={id}
+  //   flex={flex}
+  //   value={hasMultipleFills ? undefined : value}
+  // />
   //     </Popover.Trigger>
   //     <Content
   //       // Prevent focus within a dialog from closing the popover
@@ -410,5 +410,11 @@ export default memo(function FillInputFieldWithPicker({
   //     </Content>
   //   </Popover.Root>
   // );
-  return null;
+  return (
+    <FillInputField
+      id={id}
+      flex={flex}
+      value={hasMultipleFills ? undefined : value}
+    />
+  );
 });
