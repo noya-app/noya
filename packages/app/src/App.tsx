@@ -23,7 +23,6 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { setPlaform, PlatformName as Platform } from 'noya-utils';
 import Workspace from './containers/Workspace';
 import {
   EnvironmentParameters,
@@ -156,12 +155,6 @@ export default function App() {
     }),
     [urlHashParameters],
   );
-
-  useEffect(() => {
-    setPlaform(
-      environmentParameters.isElectron ? Platform.Electron : Platform.Web,
-    );
-  }, []); // eslint-disable-line
 
   return (
     <EnvironmentParametersProvider value={environmentParameters}>
