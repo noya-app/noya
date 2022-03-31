@@ -35,7 +35,9 @@ export interface SortableRootProps {
 
 export interface SortableListProps<T> {
   data: T[];
-  style: ViewStyle;
+  keys: string[];
+  style?: ViewStyle;
+  scrollable?: boolean;
   renderItem: ListRenderItem<T>;
   acceptsDrop?: DropValidator;
   keyExtractor: (item: T, index: number) => string;

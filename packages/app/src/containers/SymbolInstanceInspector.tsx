@@ -6,7 +6,7 @@ import { useShallowArray } from 'noya-react-utils';
 import SymbolSelectorRow from '../components/inspector/LinkedSymbolRow';
 import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
 import { Divider, withSeparatorElements } from 'noya-web-designsystem';
-import FillInspector from './FillInspector';
+import { FillInspector } from 'noya-workspace-ui';
 
 export default memo(function SymbolMasterInspector() {
   const dispatch = useDispatch();

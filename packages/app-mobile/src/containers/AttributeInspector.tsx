@@ -1,25 +1,45 @@
 import React, { Fragment, useCallback, memo, useMemo } from 'react';
+import styled from 'styled-components';
 
 import {
-  getMultiNumberValue,
-  getMultiValue,
   isLine,
   Layers,
   Selectors,
   SetNumberMode,
+  getMultiValue,
+  getMultiNumberValue,
 } from 'noya-state';
-import { Layout, withSeparatorElements } from 'noya-designsystem';
 import {
+  Layout,
+  ScrollableView,
+  withSeparatorElements,
+} from 'noya-designsystem';
+import {
+  BlurInspector,
+  FillInspector,
+  LineInspector,
   RadiusInspector,
+  ShadowInspector,
+  BorderInspector,
   ArtboardSizeList,
   OpacityInspector,
   AlignmentInspector,
   DimensionsInspector,
+  InnerShadowInspector,
+  ColorControlsInspector,
+  PointControlsInspector,
+  PointCoordinatesInspector,
+  ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 
 interface AttributeInspectorProps {}
+
+const HorizontalPaddingContainer = styled(Layout.View)({
+  paddingLeft: 10,
+  paddingRight: 10,
+});
 
 const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
   const [state, dispatch] = useApplicationState();
@@ -100,7 +120,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
 
   const isEditingPath = Selectors.getIsEditingPath(state.interactionState.type);
 
-  // const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
+  const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
   const elements = useMemo(() => {
     const dimensionsInspectorProps = {
@@ -117,35 +137,44 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       ),
     };
 
-    // const onlyBitmapLayers = selectedLayers.every((l) =>
-    //   Layers.isBitmapLayer(l),
-    // );
-    // const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+    const onlyBitmapLayers = selectedLayers.every((l) =>
+      Layers.isBitmapLayer(l),
+    );
+    const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
     const hasLineLayer = selectedLayers.every(
       (l) => Layers.isPointsLayer(l) && isLine(l.points),
     );
-    // const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
-    // const hasGroup = selectedLayers.some(Layers.isGroup);
-    // const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
-    // const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
-    // const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
-    // const hasOneSymbolInstance =
-    //   selectedLayers.length === 1 && hasSymbolInstance;
+    const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
+    const hasGroup = selectedLayers.some(Layers.isGroup);
+    const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
+    const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
+    const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
+    const hasOneSymbolInstance =
+      selectedLayers.length === 1 && hasSymbolInstance;
 
     if (selectedLayers.length === 0) return null;
 
     const views = [
       <Fragment key="layout">
         <AlignmentInspector />
-        {isEditingPath ? null : hasLineLayer ? null : ( // </HorizontalPaddingContainer> //   )} //     <PointCoordinatesInspector /> //   ) : ( //     <ControlPointCoordinatesInspector /> //   {isEditingControlPoint ? ( // <HorizontalPaddingContainer>
-          // <LineInspector
-          //   {...dimensionsInspectorProps}
-          //   isFlippedHorizontal={isFlippedHorizontal}
-          //   isFlippedVertical={isFlippedVertical}
-          //   onSetWidth={handleSetWidth}
-          //   onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
-          //   onSetIsFlippedVertical={handleSetIsFlippedVertical}
-          // />
+        {isEditingPath ? (
+          <HorizontalPaddingContainer>
+            {isEditingControlPoint ? (
+              <ControlPointCoordinatesInspector />
+            ) : (
+              <PointCoordinatesInspector />
+            )}
+          </HorizontalPaddingContainer>
+        ) : hasLineLayer ? (
+          <LineInspector
+            {...dimensionsInspectorProps}
+            isFlippedHorizontal={isFlippedHorizontal}
+            isFlippedVertical={isFlippedVertical}
+            onSetWidth={handleSetWidth}
+            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+            onSetIsFlippedVertical={handleSetIsFlippedVertical}
+          />
+        ) : (
           <DimensionsInspector
             {...dimensionsInspectorProps}
             supportsFlipping={supportsFlipping}
@@ -165,7 +194,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         <Layout.Stack size="medium" />
       </Fragment>,
       hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
-      // isEditingPath && <PointControlsInspector />,
+      isEditingPath && <PointControlsInspector />,
       hasContextSettingsLayers && <OpacityInspector />,
       // !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
       //   <LayerThemeInspector />
@@ -174,21 +203,21 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
       // hasTextLayer && <TextStyleInspector />,
       // hasOneSymbolMaster && <SymbolMasterInspector />,
       // hasOneSymbolInstance && <SymbolInstanceInspector />,
-      // selectedLayers.every(Layers.hasInspectableFill) && (
-      //   <FillInspector title="Fills" allowMoreThanOne />
-      // ),
-      // selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
-      // selectedLayers.every(Layers.hasInspectableShadow) && (
-      //   <ShadowInspector
-      //     allowMoreThanOne={!hasGroup}
-      //     supportsSpread={!hasGroup}
-      //   />
-      // ),
-      // selectedLayers.every(Layers.hasInspectableInnerShadow) && (
-      //   <InnerShadowInspector />
-      // ),
-      // selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
-      // onlyBitmapLayers && <ColorControlsInspector />,
+      selectedLayers.every(Layers.hasInspectableFill) && (
+        <FillInspector title="Fills" allowMoreThanOne />
+      ),
+      selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
+      selectedLayers.every(Layers.hasInspectableShadow) && (
+        <ShadowInspector
+          allowMoreThanOne={!hasGroup}
+          supportsSpread={!hasGroup}
+        />
+      ),
+      selectedLayers.every(Layers.hasInspectableInnerShadow) && (
+        <InnerShadowInspector />
+      ),
+      selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
+      onlyBitmapLayers && <ColorControlsInspector />,
       // selectedLayers.length === 1 && <ExportInspector />,
     ].filter((element): element is JSX.Element => !!element);
 
@@ -199,14 +228,11 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
         <Layout.Divider />
         <Layout.Stack size="medium" />
       </>,
-      // <HorizontalPaddingContainer>
-      //   <Divider />
-      // </HorizontalPaddingContainer>,
     );
   }, [
     selectedLayers,
     isEditingPath,
-    // isEditingControlPoint,
+    isEditingControlPoint,
     isFlippedHorizontal,
     isFlippedVertical,
     handleSetWidth,
@@ -223,14 +249,15 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     hasContextSettingsLayers,
   ]);
 
-  if (
+  const content =
     state.interactionState.type === 'insert' &&
-    state.interactionState.layerType === 'artboard'
-  ) {
-    return <ArtboardSizeList />;
-  }
+    state.interactionState.layerType === 'artboard' ? (
+      <ArtboardSizeList />
+    ) : (
+      elements
+    );
 
-  return <>{elements}</>;
+  return <ScrollableView>{content}</ScrollableView>;
 };
 
 export default memo(AttributeInspector);

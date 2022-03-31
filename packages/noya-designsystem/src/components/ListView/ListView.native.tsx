@@ -296,14 +296,14 @@ const ListViewRow = forwardRef(function ListViewRow<
 
 const RootContainer = styled(View)<{ scrollable?: boolean }>(
   ({ scrollable }) => ({
-    flexGrow: scrollable ? 1 : 0,
+    flexGrow: 1,
     flexShrink: 0,
     flexBasis: scrollable ? 0 : 'auto',
     flexWrap: 'wrap',
   }),
 );
 
-const FlatListStyles = StyleSheet.create({ list: { width: '100%' } });
+const FlatListStyles = StyleSheet.create({ list: { width: '100%', flex: 1 } });
 
 const ListViewRootInner = forwardRef(function ListViewRoot<T>(
   {
@@ -402,11 +402,14 @@ const ListViewRootInner = forwardRef(function ListViewRoot<T>(
     [renderItem, getItemContextValue],
   );
 
+  const ids = useMemo(() => data.map(keyExtractor), [keyExtractor, data]);
+
   if (sortable) {
     return (
       <RootContainer scrollable={scrollable}>
         <Sortable.List<T>
           data={data}
+          keys={ids}
           keyExtractor={keyExtractor}
           renderItem={renderWrappedChild}
           renderOverlay={renderOverlay}

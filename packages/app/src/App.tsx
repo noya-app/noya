@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
+
 import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
@@ -21,7 +23,6 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
 import {
   EnvironmentParameters,

@@ -55,7 +55,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       // If we need to apply effects to the group as a whole, we need
       // to draw the elements on a separate bitmap using `saveLayer`
       const needsLayer =
-        (!!opacity && opacity < 1) ||
+        (opacity !== undefined && opacity < 1) ||
         colorFilter ||
         imageFilter ||
         backdropImageFilter;
@@ -88,7 +88,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
       if (needsLayer) {
         const layerPaint = new CanvasKit.Paint() as PaintNative;
 
-        if (opacity && opacity < 1) {
+        if (opacity !== undefined && opacity < 1) {
           layerPaint.setAlphaf(opacity);
         }
 

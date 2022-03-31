@@ -11,7 +11,6 @@ const StyledSlider = styled(RNSlider)({
   alignItems: 'center',
   userSelect: 'none',
   touchAction: 'none',
-  height: 16,
 });
 
 function Slider({ value, onValueChange, min, max }: SliderProps) {
@@ -22,6 +21,7 @@ function Slider({ value, onValueChange, min, max }: SliderProps) {
       minimumValue={min}
       maximumValue={max}
       value={value}
+      step={1}
       onValueChange={onValueChange}
       maximumTrackTintColor={theme.colors.divider}
       minimumTrackTintColor={theme.colors.primary}

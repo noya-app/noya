@@ -87,15 +87,11 @@ export default memo(function LabeledElementView({
     Object.entries(refs).forEach(([id, ref], index, list) => {
       if (!ref.current) return;
 
-      // console.log('id', id, ref, index);
-
       const targetElement = document.getElementById(id)!;
       const targetRect = targetElement.getBoundingClientRect();
       targetRect.x = targetElement.offsetLeft;
       const labelRect = ref.current.getBoundingClientRect();
       labelRect.x = ref.current.offsetLeft;
-
-      // console.log(id, labelRect, ref.current.offsetLeft);
 
       heights.push(labelRect.height);
 
@@ -123,23 +119,7 @@ export default memo(function LabeledElementView({
         );
       }
 
-      // if (index > 0) {
-      //   solver.addConstraint(
-      //     new kiwi.Constraint(
-      //       new kiwi.Expression(variables[index - 1]),
-      //       kiwi.Operator.Le,
-      //       new kiwi.Expression(labelRect.width / 2),
-      //       kiwi.Strength.required
-      //     )
-      //   );
-      // }
-
       if (index === list.length - 1) {
-        // console.log(
-        //   labelMidX.value(),
-        //   containerRect.width,
-        //   containerRect.width - labelRect.width / 2,
-        // );
         solver.addConstraint(
           new kiwi.Constraint(
             new kiwi.Expression(labelMidX),
@@ -159,8 +139,6 @@ export default memo(function LabeledElementView({
 
     Object.entries(refs).forEach(([id, ref], index) => {
       if (!ref.current) return;
-
-      // console.log(id, variables[index].value());
 
       const labelRect = ref.current.getBoundingClientRect();
 

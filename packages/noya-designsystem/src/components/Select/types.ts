@@ -15,7 +15,7 @@ export type ChildrenProps<T> =
     };
 
 export type SelectProps<T extends string> = ChildrenProps<T> & {
-  id: string;
+  id?: string;
   flex?: CSSProperties['flex'];
   value: T;
 };

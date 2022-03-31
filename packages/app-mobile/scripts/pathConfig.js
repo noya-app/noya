@@ -50,9 +50,9 @@ const getPathConfigs = (appRootDir) => {
       appRootDir,
       './node_modules/react-native-gesture-handler',
     ),
-    '@react-native-community/slider': path.resolve(
+    '@react-native-community': path.resolve(
       appRootDir,
-      './node_modules/@react-native-community/slider',
+      './node_modules/@react-native-community',
     ),
   };
 

@@ -28,8 +28,6 @@ const ButtonElement = styled(View)<{
     ? 'transparent'
     : theme.colors.inputBackground,
   opacity: disabled ? 0.25 : 1,
-  shadowColor: 'rgba(0,0,0,0.2)',
-  shadowOpacity: '1',
 }));
 
 const ButtonContent = styled(View)((p) => ({

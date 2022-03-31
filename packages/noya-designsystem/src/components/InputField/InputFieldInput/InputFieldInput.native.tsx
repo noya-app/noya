@@ -68,6 +68,7 @@ const InputFieldInput = forwardRef(function InputFieldInput(
       labelSize={labelSize}
       hasLabel={hasLabel}
       hasDropdown={hasDropdown}
+      numberOfLines={1}
       {...props}
     />
   );
