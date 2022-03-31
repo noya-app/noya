@@ -1,21 +1,21 @@
 import React, {
   memo,
+  useRef,
   useMemo,
   useContext,
   useCallback,
   createContext,
   PropsWithChildren,
-  useRef,
 } from 'react';
 import { View, ViewProps, GestureResponderEvent } from 'react-native';
 
 import {
   Gesture,
+  TouchMeta,
+  GestureType,
   TouchableProps,
   TouchableContextType,
   TouchableComponentProps,
-  TouchMeta,
-  GestureType,
 } from './types';
 import {
   initMeta,
@@ -48,6 +48,7 @@ const TouchableListenerInner: React.FC<PropsWithChildren<TouchableProps>> = (
     const mergedHandlers: TouchableContextType = { ...initialHandlers };
 
     (touchableEventNames as (keyof TouchableContextType)[]).forEach((name) => {
+      // @ts-ignore
       mergedHandlers[name] = mergeHandlers(
         parentHandlers?.[name] ?? [],
         touchableProps[name],
@@ -118,9 +119,16 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
   }, []);
 
   const onCallHandlers = useCallback(
-    (eventName: keyof TouchableContextType, params: Gesture) => {
-      restProps[eventName]?.(params);
-      handlers?.[eventName].forEach((handler) => handler(params));
+    (eventName: keyof TouchableContextType, params?: Gesture) => {
+      if (params) {
+        restProps[eventName]?.(params);
+        handlers?.[eventName].forEach((handler) => handler(params));
+      } else {
+        (restProps[eventName] as () => void)?.();
+        (handlers?.[eventName] as (() => void)[]).forEach((handler) =>
+          handler(),
+        );
+      }
     },
     [handlers, restProps],
   );
@@ -179,6 +187,15 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
     [onCallHandlers, getGesture],
   );
 
+  const onTouchCancel = useCallback(
+    (event: GestureResponderEvent) => {
+      lastTouchMeta.current = initMeta;
+
+      onCallHandlers('onTouchCancel');
+    },
+    [onCallHandlers],
+  );
+
   const viewProps = useMemo(() => {
     const resultProps: ViewProps = {};
 
@@ -199,6 +216,7 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
       onResponderGrant={onTouchStart}
       onResponderMove={onTouchUpdate}
       onResponderRelease={onTouchEnd}
+      onResponderTerminate={onTouchCancel}
     >
       {children}
     </View>

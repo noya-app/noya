@@ -7,7 +7,6 @@ import React, {
   useCallback,
   createContext,
   MutableRefObject,
-  useEffect,
 } from 'react';
 import styled from 'styled-components';
 import { View, FlatList, LayoutChangeEvent } from 'react-native';
@@ -179,6 +178,15 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
     [sortable, scrollable],
   );
 
+  const onTouchCancel = useCallback(() => {
+    sortable.setActiveItemIndex(undefined);
+
+    // Enable parent scrollview drag
+    if (scrollable.isAvailable) {
+      scrollable.setScrollEnabled(true);
+    }
+  }, [sortable, scrollable]);
+
   const onLayout = useCallback(
     (event: LayoutChangeEvent) => {
       const {
@@ -198,6 +206,7 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
       onTouchStart={onTouchStart}
       onTouchUpdate={onTouchUpdate}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
     >
       {/*  index as key enforces onLayout event after data list has been modified */}
       <View onLayout={onLayout} key={index}>
@@ -366,7 +375,7 @@ function SortableList<T>(props: SortableListProps<T>) {
       </View>
       {isDragging && (
         <Overlay style={dragItemStyle} pointerEvents="none">
-          {renderOverlay?.(activeItemIndex)}
+          {renderOverlay?.(keys.indexOf(activeItem!.id))}
         </Overlay>
       )}
     </SortableContext.Provider>

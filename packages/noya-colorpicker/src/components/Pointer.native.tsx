@@ -21,6 +21,7 @@ export default memo(function Pointer({ top, left }: PointerProps) {
 
   return (
     <PointerBase
+      pointerEvents="none"
       style={[
         top === undefined && { top: size.height / 2 - 8 },
         left === undefined && { left: size.width / 2 - 8 },

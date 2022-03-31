@@ -6,6 +6,7 @@ import { useSketchImage } from 'noya-renderer';
 import { sketchColorToRgbaString } from 'noya-colorpicker';
 import { getGradientBackground } from '../../utils/getGradientBackground';
 import { useObjectURL } from '../../hooks/useObjectURL';
+import { PreviewProps, ColorProps, GradientProps, PatternProps } from './types';
 
 const dotsHorizontalSvg = (fillColor: string) => `
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 15' fill='${fillColor}'>
@@ -56,11 +57,7 @@ export const PatternPreviewBackground = memo(function PatternPreviewBackground({
   fillType,
   tileScale,
   imageRef,
-}: {
-  fillType: Sketch.PatternFillType;
-  tileScale: number;
-  imageRef: Sketch.FileRef | Sketch.DataRef;
-}) {
+}: PatternProps) {
   const image = useSketchImage(imageRef);
 
   const url = useObjectURL(image);
@@ -82,9 +79,7 @@ export const PatternPreviewBackground = memo(function PatternPreviewBackground({
 
 const ColorPreviewBackground = memo(function ColorPreviewBackground({
   color,
-}: {
-  color: Sketch.Color;
-}) {
+}: ColorProps) {
   const background = useMemo(() => sketchColorToRgbaString(color), [color]);
 
   return <Background background={background} />;
@@ -92,9 +87,7 @@ const ColorPreviewBackground = memo(function ColorPreviewBackground({
 
 const GradientPreviewBackground = memo(function GradientPreviewBackground({
   gradient,
-}: {
-  gradient: Sketch.Gradient;
-}) {
+}: GradientProps) {
   const background = useMemo(
     () => getGradientBackground(gradient.stops, gradient.gradientType, 180),
     [gradient.gradientType, gradient.stops],
@@ -103,13 +96,9 @@ const GradientPreviewBackground = memo(function GradientPreviewBackground({
   return <Background background={background} />;
 });
 
-interface Props {
-  value?: Sketch.Color | Sketch.Gradient | Sketch.Pattern;
-}
-
 export const FillPreviewBackground = memo(function FillPreviewBackground({
   value,
-}: Props) {
+}: PreviewProps) {
   if (!value) return <HorizontalDotsBackground />;
 
   switch (value._class) {

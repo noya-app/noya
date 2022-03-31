@@ -13,6 +13,8 @@ import { range, Platform } from 'noya-utils';
 import { Primitives } from '../primitives';
 import { ElementRow, ItemContainer } from './components';
 
+console.log(Platform);
+
 export interface ArrayControllerProps<Item> {
   id: string;
   items: Item[];

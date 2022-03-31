@@ -99,12 +99,12 @@ export function getTouchMeta({
 
   avgDistance /= points.length;
 
-  if (!points.length) {
+  if (points.length < 2) {
     return {
       points: [],
       centroid: getPoint({ nativeEvent }),
       avgDistance: 0,
-      numOfPointers: nativeEvent.touches.length || 1,
+      numOfPointers: 1,
       absolutePoint: { x: nativeEvent.pageX, y: nativeEvent.pageY },
     };
   }

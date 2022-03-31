@@ -44,6 +44,7 @@ export type TouchableProps = PropsWithChildren<{
   onTouchStart?: TouchCallback;
   onTouchUpdate?: TouchCallback;
   onTouchEnd?: TouchCallback;
+  onTouchCancel?: () => void;
 }>;
 
 export type TouchableComponentProps = TouchableProps &
@@ -58,4 +59,5 @@ export interface TouchableContextType {
   onTouchStart: TouchCallback[];
   onTouchUpdate: TouchCallback[];
   onTouchEnd: TouchCallback[];
+  onTouchCancel: (() => void)[];
 }
