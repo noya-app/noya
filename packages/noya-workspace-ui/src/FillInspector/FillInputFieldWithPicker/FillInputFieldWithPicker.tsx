@@ -8,12 +8,12 @@ import { Selectors } from 'noya-state';
 import { useGlobalInputBlurListener } from 'noya-ui';
 import { useApplicationState } from 'noya-app-state-context';
 import { Layout, FillInputField, Select } from 'noya-designsystem';
-// import {
-//   useDialogContainsElement,
-//   useOpenInputDialog,
-// } from '../../contexts/DialogContext';
-// import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-// import ColorInspector from './ColorInspector';
+import {
+  useDialogContainsElement,
+  useOpenInputDialog,
+} from '../../contexts/DialogContext';
+import { Primitives } from '../../primitives';
+import ColorInspector from '../../ColorInspector';
 // import GradientInspector from './GradientInspector';
 // import PatternInspector from './PatternInspector';
 // import PickerGradients from './PickerGradients';
@@ -21,11 +21,11 @@ import { Layout, FillInputField, Select } from 'noya-designsystem';
 // import ColorPickerSwatches from './PickerSwatches';
 // import ShaderInspector from './ShaderInspector';
 import {
-  ColorFillProps,
-  GradientFillProps,
-  PatternFillProps,
-  ShaderFillProps,
+  FillOption,
   FillInputProps,
+  ColorFillProps,
+  PatternFillProps,
+  GradientFillProps,
   FillOptionSelectProps,
 } from './types';
 
@@ -42,48 +42,37 @@ const Content = styled(Popover.Content)<{ variant: 'normal' | 'large' }>(
   }),
 );
 
-type FillOption =
-  | 'Solid Color'
-  | 'Linear Gradient'
-  | 'Radial Gradient'
-  | 'Angular Gradient'
-  | 'Pattern Fill'
-  | 'Shader';
-
 function ColorFillPicker({
   id,
   color,
   onChangeColor,
 }: ColorFillProps & { id?: string }) {
-  // const [state, dispatch] = useApplicationState();
-  // const swatches = Selectors.getSharedSwatches(state);
-  // const onChangeSwatch = useCallback(
-  //   (swatchID: string) => {
-  //     const swatch = swatches.find((swatch) => swatch.do_objectID === swatchID);
-  //     if (!swatch) return;
-  //     onChangeColor({ ...swatch.value, swatchID });
-  //   },
-  //   [onChangeColor, swatches],
-  // );
-  // const detachThemeColor = useCallback(() => {
-  //   if (!color) return;
-  //   onChangeColor({ ...color, swatchID: undefined });
-  // }, [onChangeColor, color]);
-  // const createThemeColor = useCallback(
-  //   (swatchID: string, name: string) => {
-  //     if (!color) return;
-  //     dispatch('addSwatch', name, color, swatchID);
-  //     onChangeColor({ ...color, swatchID });
-  //   },
-  //   [color, dispatch, onChangeColor],
-  // );
-  // return (
-  //   <>
-  //     <ColorInspector
-  //       id={`${id}-color-inspector`}
-  //       color={color}
-  //       onChangeColor={onChangeColor}
-  //     />
+  const [state, dispatch] = useApplicationState();
+  const swatches = Selectors.getSharedSwatches(state);
+
+  const onChangeSwatch = useCallback(
+    (swatchID: string) => {
+      const swatch = swatches.find((swatch) => swatch.do_objectID === swatchID);
+      if (!swatch) return;
+      onChangeColor({ ...swatch.value, swatchID });
+    },
+    [onChangeColor, swatches],
+  );
+
+  const detachThemeColor = useCallback(() => {
+    if (!color) return;
+    onChangeColor({ ...color, swatchID: undefined });
+  }, [onChangeColor, color]);
+
+  const createThemeColor = useCallback(
+    (swatchID: string, name: string) => {
+      if (!color) return;
+      dispatch('addSwatch', name, color, swatchID);
+      onChangeColor({ ...color, swatchID });
+    },
+    [color, dispatch, onChangeColor],
+  );
+
   //     <ColorPickerSwatches
   //       selectedId={color ? color.swatchID : undefined}
   //       swatches={swatches}
@@ -91,9 +80,16 @@ function ColorFillPicker({
   //       onCreate={createThemeColor}
   //       onDetach={detachThemeColor}
   //     />
-  //   </>
-  // );
-  return null;
+
+  return (
+    <>
+      <ColorInspector
+        id={`${id}-color-inspector`}
+        color={color}
+        onChangeColor={onChangeColor}
+      />
+    </>
+  );
 }
 
 function GradientFillPicker({
@@ -284,28 +280,29 @@ export default memo(function FillInputFieldWithPicker({
   patternProps,
   shaderProps,
 }: FillInputProps) {
-  // const dialogContainsElement = useDialogContainsElement();
+  const dialogContainsElement = useDialogContainsElement();
 
-  // const [state, dispatch] = useApplicationState();
-  // const picker = useMemo(() => {
-  //   switch (fillType) {
-  //     case Sketch.FillType.Gradient:
-  //       return gradientProps ? (
-  //         <GradientFillPicker id={id} {...gradientProps} />
-  //       ) : null;
-  //     case Sketch.FillType.Pattern:
-  //       return patternProps ? (
-  //         <PatternFillPicker id={id} {...patternProps} />
-  //       ) : null;
-  //     case Sketch.FillType.Shader:
-  //       return shaderProps ? (
-  //         <ShaderInspector id={id} {...shaderProps} />
-  //       ) : null;
-  //     case Sketch.FillType.Color:
-  //     case undefined:
-  //       return <ColorFillPicker id={id} {...colorProps} />;
-  //   }
-  // }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
+  const [state, dispatch] = useApplicationState();
+  const picker = useMemo(() => {
+    switch (fillType) {
+      case Sketch.FillType.Gradient:
+        return gradientProps ? (
+          <GradientFillPicker id={id} {...gradientProps} />
+        ) : null;
+      case Sketch.FillType.Pattern:
+        return patternProps ? (
+          <PatternFillPicker id={id} {...patternProps} />
+        ) : null;
+      case Sketch.FillType.Shader:
+        // return shaderProps ? (
+        //   <ShaderInspector id={id} {...shaderProps} />
+        // ) : null;
+        return null;
+      case Sketch.FillType.Color:
+      case undefined:
+        return <ColorFillPicker id={id} {...colorProps} />;
+    }
+  }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
 
   const value = useMemo(() => {
     switch (fillType) {
@@ -324,97 +321,90 @@ export default memo(function FillInputFieldWithPicker({
     patternProps?.pattern,
   ]);
 
-  // useGlobalInputBlurListener(() => {
-  //   if (state.selectedGradient) {
-  //     dispatch('setSelectedGradient', undefined);
-  //   }
-  // });
+  useGlobalInputBlurListener(() => {
+    if (state.selectedGradient) {
+      dispatch('setSelectedGradient', undefined);
+    }
+  });
 
-  // return (
-  //   <Popover.Root
-  //     onOpenChange={(open) => {
-  //       if (open && fillType === Sketch.FillType.Gradient) {
-  //         gradientProps?.onEditGradient(0);
-  //       }
-
-  //       if (!open) {
-  //         dispatch('setSelectedGradient', undefined);
-  //       }
-  //     }}
-  //   >
-  //     <Popover.Trigger as={Slot}>
-  // <FillInputField
-  //   id={id}
-  //   flex={flex}
-  //   value={hasMultipleFills ? undefined : value}
-  // />
-  //     </Popover.Trigger>
-  //     <Content
-  //       // Prevent focus within a dialog from closing the popover
-  //       onFocusOutside={useCallback(
-  //         (event) => {
-  //           if (
-  //             event.target &&
-  //             event.target instanceof HTMLElement &&
-  //             dialogContainsElement(event.target)
-  //           ) {
-  //             event.preventDefault();
-  //           }
-  //         },
-  //         [dialogContainsElement],
-  //       )}
-  //       // Stop propagation on pointer events to prevent dndkit from triggering
-  //       onPointerDown={useCallback((event) => event.stopPropagation(), [])}
-  //       variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
-  //       side="bottom"
-  //       align="center"
-  //       onInteractOutside={useCallback((event) => {
-  //         // We allow interacting with the canvas to support editing gradients.
-  //         // If the inspector re-renders, e.g. due to layer selection change, the
-  //         // popover will close automatically.
-  //         if (
-  //           event.target instanceof HTMLElement &&
-  //           event.target.id === 'canvas-container'
-  //         ) {
-  //           event.preventDefault();
-  //         }
-  //       }, [])}
-  //     >
-  //       {(gradientProps || patternProps) && (
-  //         <>
-  //           <InspectorPrimitives.Section>
-  //             <InspectorPrimitives.Row>
-  //               <FillOptionSelect
-  //                 supportsGradients={!!gradientProps}
-  //                 supportsPatterns={!!patternProps}
-  //                 supportsShaders={!!shaderProps}
-  //                 fillType={fillType ?? Sketch.FillType.Color}
-  //                 gradientType={
-  //                   gradientProps?.gradient.gradientType ??
-  //                   Sketch.GradientType.Linear
-  //                 }
-  //                 onChangeType={(type) => {
-  //                   onChangeType?.(type);
-  //                   if (type === Sketch.FillType.Gradient) {
-  //                     gradientProps?.onEditGradient(0);
-  //                   }
-  //                 }}
-  //                 onChangeGradientType={gradientProps?.onChangeGradientType}
-  //               />
-  //             </InspectorPrimitives.Row>
-  //           </InspectorPrimitives.Section>
-  //           <Divider />
-  //         </>
-  //       )}
-  //       {picker}
-  //     </Content>
-  //   </Popover.Root>
-  // );
   return (
-    <FillInputField
-      id={id}
-      flex={flex}
-      value={hasMultipleFills ? undefined : value}
-    />
+    <Popover.Root
+      onOpenChange={(open) => {
+        if (open && fillType === Sketch.FillType.Gradient) {
+          gradientProps?.onEditGradient(0);
+        }
+
+        if (!open) {
+          dispatch('setSelectedGradient', undefined);
+        }
+      }}
+    >
+      <Popover.Trigger as={Slot}>
+        <FillInputField
+          id={id}
+          flex={flex}
+          value={hasMultipleFills ? undefined : value}
+        />
+      </Popover.Trigger>
+      <Content
+        // Prevent focus within a dialog from closing the popover
+        onFocusOutside={useCallback(
+          (event) => {
+            if (
+              event.target &&
+              event.target instanceof HTMLElement &&
+              dialogContainsElement(event.target)
+            ) {
+              event.preventDefault();
+            }
+          },
+          [dialogContainsElement],
+        )}
+        // Stop propagation on pointer events to prevent dndkit from triggering
+        onPointerDown={useCallback((event) => event.stopPropagation(), [])}
+        variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
+        side="bottom"
+        align="center"
+        onInteractOutside={useCallback((event) => {
+          // We allow interacting with the canvas to support editing gradients.
+          // If the inspector re-renders, e.g. due to layer selection change, the
+          // popover will close automatically.
+          if (
+            event.target instanceof HTMLElement &&
+            event.target.id === 'canvas-container'
+          ) {
+            event.preventDefault();
+          }
+        }, [])}
+      >
+        {(gradientProps || patternProps) && (
+          <>
+            <Primitives.Section>
+              <Primitives.Row>
+                <FillOptionSelect
+                  supportsGradients={!!gradientProps}
+                  supportsPatterns={!!patternProps}
+                  supportsShaders={!!shaderProps}
+                  fillType={fillType ?? Sketch.FillType.Color}
+                  gradientType={
+                    gradientProps?.gradient.gradientType ??
+                    Sketch.GradientType.Linear
+                  }
+                  onChangeType={(type) => {
+                    onChangeType?.(type);
+                    if (type === Sketch.FillType.Gradient) {
+                      gradientProps?.onEditGradient(0);
+                    }
+                  }}
+                  onChangeGradientType={gradientProps?.onChangeGradientType}
+                />
+              </Primitives.Row>
+            </Primitives.Section>
+            <Layout.Divider />
+          </>
+        )}
+        {picker}
+      </Content>
+    </Popover.Root>
   );
 });

@@ -27,11 +27,21 @@ export default memo(function LabeledView({
   children,
   flex,
   size,
+  labelPosition = 'end',
 }: LabeledViewProps) {
+  const labelContent = label ? (
+    <StyledLabel>{label}</StyledLabel>
+  ) : (
+    <LabelPlaceholder />
+  );
+
+  const content =
+    labelPosition === 'start'
+      ? [children, labelContent]
+      : [labelContent, children];
   return (
     <Container flex={flex} size={size}>
-      {children}
-      {label ? <StyledLabel>{label}</StyledLabel> : <LabelPlaceholder />}
+      {content}
     </Container>
   );
 });

@@ -2,11 +2,10 @@ import React, { ForwardedRef, forwardRef, memo } from 'react';
 import styled from 'styled-components';
 import { View } from 'react-native';
 
-import Touchable from '../Touchable';
 import { FillPreviewBackground } from './FillPreviewBackground';
 import { FillInputFieldProps } from './types';
 
-const Container = styled(Touchable)<{ flex?: number }>(({ theme, flex }) => ({
+const Container = styled(View)<{ flex?: number }>(({ flex }) => ({
   flex,
   width: 50,
   height: 27,

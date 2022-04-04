@@ -59,3 +59,11 @@ export interface FillOptionSelectProps {
   supportsPatterns: boolean;
   supportsShaders: boolean;
 }
+
+export type FillOption =
+  | 'Solid Color'
+  | 'Linear Gradient'
+  | 'Radial Gradient'
+  | 'Angular Gradient'
+  | 'Pattern Fill'
+  | 'Shader';

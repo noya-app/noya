@@ -216,7 +216,10 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
       onResponderRelease={onTouchEnd}
       onResponderTerminate={onTouchCancel}
     >
-      {children}
+      {/* Reset event handlers for nested touchable trees */}
+      <TouchableContext.Provider value={initialHandlers}>
+        {children}
+      </TouchableContext.Provider>
     </View>
   );
 };
