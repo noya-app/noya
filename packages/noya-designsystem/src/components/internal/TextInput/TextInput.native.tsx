@@ -29,7 +29,13 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
   const onKeyPress = useCallback(
     (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
       // TODO: add some lib to handle shift & alt modifiers?
-      onKeyDown?.({ key: e.nativeEvent.key, shiftKey: false, altKey: false });
+      onKeyDown?.({
+        key: e.nativeEvent.key,
+        shiftKey: false,
+        altKey: false,
+        stopPropagation: () => {},
+        preventDefault: () => {},
+      });
     },
     [onKeyDown],
   );
@@ -49,6 +55,7 @@ const ControlledTextInput = forwardRef(function ControlledTextInput(
           ? 'none'
           : (autoCapitalize as 'sentences' | 'words' | 'characters')
       }
+      onChangeText={onChange}
       {...rest}
     />
   );

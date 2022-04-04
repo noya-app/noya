@@ -20,3 +20,5 @@ export { InnerShadowInspector } from './ShadowInspector';
 
 export { default as useLayerMenu } from './hooks/useLayerMenu';
 export { default as useHistory } from './hooks/useHistory';
+
+export * from './contexts/DialogContext';

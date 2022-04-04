@@ -6,6 +6,8 @@ export interface KeyDownParams {
   key: string;
   shiftKey: boolean;
   altKey: boolean;
+  stopPropagation: () => void;
+  preventDefault: () => void;
 }
 
 interface Props {
