@@ -123,11 +123,9 @@ const Touchable: React.FC<TouchableComponentProps> = (props) => {
       if (params) {
         restProps[eventName]?.(params);
         handlers?.[eventName].forEach((handler) => handler(params));
-      } else {
+      } else if (handlers?.[eventName]) {
         (restProps[eventName] as () => void)?.();
-        (handlers?.[eventName] as (() => void)[]).forEach((handler) =>
-          handler(),
-        );
+        (handlers[eventName] as (() => void)[]).forEach((handler) => handler());
       }
     },
     [handlers, restProps],

@@ -385,9 +385,9 @@ function SortableList<T>(props: SortableListProps<T>) {
           ))
         )}
       </View>
-      {isDragging && (
+      {isDragging && !!activeItem?.id && !!renderOverlay && (
         <Overlay style={dragItemStyle} pointerEvents="none">
-          {renderOverlay?.(activeItemIndex)}
+          {renderOverlay(keys.indexOf(activeItem.id))}
         </Overlay>
       )}
     </SortableContext.Provider>
