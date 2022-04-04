@@ -168,6 +168,12 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
 
   const onTouchEnd = useCallback(
     (params: Gesture) => {
+      if (touchStartTimeoutRef.current) {
+        clearTimeout(touchStartTimeoutRef.current);
+        touchStartTimeoutRef.current = undefined;
+        return;
+      }
+
       sortable.onDropItem(params.point.y - sortable.touchOffset.value.y);
 
       // Enable parent scrollview drag
@@ -179,6 +185,12 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
   );
 
   const onTouchCancel = useCallback(() => {
+    if (touchStartTimeoutRef.current) {
+      clearTimeout(touchStartTimeoutRef.current);
+      touchStartTimeoutRef.current = undefined;
+      return;
+    }
+
     sortable.setActiveItemIndex(undefined);
 
     // Enable parent scrollview drag
@@ -375,7 +387,7 @@ function SortableList<T>(props: SortableListProps<T>) {
       </View>
       {isDragging && (
         <Overlay style={dragItemStyle} pointerEvents="none">
-          {renderOverlay?.(keys.indexOf(activeItem!.id))}
+          {renderOverlay?.(activeItemIndex)}
         </Overlay>
       )}
     </SortableContext.Provider>
