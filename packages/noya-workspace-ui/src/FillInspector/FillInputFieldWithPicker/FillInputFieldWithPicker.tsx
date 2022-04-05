@@ -18,7 +18,7 @@ import GradientInspector from '../../GradientInspector';
 // import PatternInspector from './PatternInspector';
 // import PickerGradients from './PickerGradients';
 // import PickerPatterns from './PickerPatterns';
-// import ColorPickerSwatches from './PickerSwatches';
+import ColorPickerSwatches from '../../ColorPickerSwatches';
 // import ShaderInspector from './ShaderInspector';
 import {
   FillOption,
@@ -73,20 +73,19 @@ function ColorFillPicker({
     [color, dispatch, onChangeColor],
   );
 
-  //     <ColorPickerSwatches
-  //       selectedId={color ? color.swatchID : undefined}
-  //       swatches={swatches}
-  //       onChange={onChangeSwatch}
-  //       onCreate={createThemeColor}
-  //       onDetach={detachThemeColor}
-  //     />
-
   return (
     <>
       <ColorInspector
         id={`${id}-color-inspector`}
         color={color}
         onChangeColor={onChangeColor}
+      />
+      <ColorPickerSwatches
+        selectedId={color ? color.swatchID : undefined}
+        swatches={swatches}
+        onChange={onChangeSwatch}
+        onCreate={createThemeColor}
+        onDetach={detachThemeColor}
       />
     </>
   );

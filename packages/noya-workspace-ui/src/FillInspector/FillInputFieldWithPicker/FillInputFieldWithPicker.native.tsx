@@ -8,6 +8,7 @@ import Sketch from 'noya-file-format';
 import { Primitives } from '../../primitives';
 import ColorInspector from '../../ColorInspector';
 import GradientInspector from '../../GradientInspector';
+import ColorPickerSwatches from '../../ColorPickerSwatches';
 import { useOpenInputDialog } from '../../contexts/DialogContext';
 import {
   FillOption,
@@ -19,7 +20,7 @@ import {
 } from './types';
 
 const PopoverContent = styled(Popover.Content)<{ variant: 'normal' | 'large' }>(
-  ({ theme, variant }) => ({
+  ({ variant }) => ({
     width: variant === 'large' ? 680 : 240,
     maxHeight: 600,
   }),
@@ -60,20 +61,19 @@ function ColorFillPicker({
     [color, dispatch, onChangeColor],
   );
 
-  //     <ColorPickerSwatches
-  //       selectedId={color ? color.swatchID : undefined}
-  //       swatches={swatches}
-  //       onChange={onChangeSwatch}
-  //       onCreate={createThemeColor}
-  //       onDetach={detachThemeColor}
-  //     />
-
   return (
     <>
       <ColorInspector
         id={`${id}-color-inspector`}
         color={color}
         onChangeColor={onChangeColor}
+      />
+      <ColorPickerSwatches
+        selectedId={color ? color.swatchID : undefined}
+        swatches={swatches}
+        onChange={onChangeSwatch}
+        onCreate={createThemeColor}
+        onDetach={detachThemeColor}
       />
     </>
   );
