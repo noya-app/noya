@@ -14,7 +14,7 @@ import {
 } from '../../contexts/DialogContext';
 import { Primitives } from '../../primitives';
 import ColorInspector from '../../ColorInspector';
-// import GradientInspector from './GradientInspector';
+import GradientInspector from '../../GradientInspector';
 // import PatternInspector from './PatternInspector';
 // import PickerGradients from './PickerGradients';
 // import PickerPatterns from './PickerPatterns';
@@ -101,42 +101,30 @@ function GradientFillPicker({
   onAddGradientStop,
   onDeleteGradientStop,
 }: Omit<GradientFillProps, 'onChangeGradientType'> & { id?: string }) {
-  // const [state, dispatch] = useApplicationState();
-  // const openDialog = useOpenInputDialog();
+  const [state, dispatch] = useApplicationState();
+  const openDialog = useOpenInputDialog();
 
-  // const gradientAssets = Selectors.getGradientAssets(state);
+  const gradientAssets = Selectors.getGradientAssets(state);
 
-  // const createThemeGradient = useCallback(async () => {
-  //   if (!gradient) return;
+  const createThemeGradient = useCallback(async () => {
+    if (!gradient) return;
 
-  //   // const gradientName = await openDialog('New Gradient Asset Name');
+    const gradientName = await openDialog('New Gradient Asset Name');
 
-  //   if (!gradientName) return;
+    if (!gradientName) return;
 
-  //   dispatch('addGradientAsset', gradientName, gradient);
-  // }, [dispatch, gradient]);
-  // // }, [dispatch, gradient, openDialog]);
+    dispatch('addGradientAsset', gradientName, gradient);
+  }, [dispatch, gradient, openDialog]);
 
-  // const onRemoveThemeGradient = useCallback(
-  //   (id: string) => dispatch('removeGradientAsset', id),
-  //   [dispatch],
-  // );
+  const onRemoveThemeGradient = useCallback(
+    (id: string) => dispatch('removeGradientAsset', id),
+    [dispatch],
+  );
 
-  // const onRenameThemeGradient = useCallback(
-  //   (id: string, name: string) => dispatch('setGradientAssetName', id, name),
-  //   [dispatch],
-  // );
-
-  // return (
-  //   <>
-  //     <GradientInspector
-  //       id={`${id}-gradient-inspector`}
-  //       gradient={gradient.stops}
-  //       onChangeColor={onChangeGradientColor}
-  //       onChangePosition={onChangeGradientPosition}
-  //       onAddStop={onAddGradientStop}
-  //       onDeleteStop={onDeleteGradientStop}
-  //     />
+  const onRenameThemeGradient = useCallback(
+    (id: string, name: string) => dispatch('setGradientAssetName', id, name),
+    [dispatch],
+  );
   //     <PickerGradients
   //       gradientAssets={gradientAssets}
   //       onCreate={createThemeGradient}
@@ -144,9 +132,19 @@ function GradientFillPicker({
   //       onDelete={onRemoveThemeGradient}
   //       onRename={onRenameThemeGradient}
   //     />
-  //   </>
-  // );
-  return null;
+
+  return (
+    <>
+      <GradientInspector
+        id={`${id}-gradient-inspector`}
+        gradient={gradient.stops}
+        onChangeColor={onChangeGradientColor}
+        onChangePosition={onChangeGradientPosition}
+        onAddStop={onAddGradientStop}
+        onDeleteStop={onDeleteGradientStop}
+      />
+    </>
+  );
 }
 
 function PatternFillPicker({

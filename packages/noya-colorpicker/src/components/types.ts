@@ -1,3 +1,6 @@
+import Sketch from 'noya-file-format';
+import type { RgbaColor } from '../types';
+
 export interface Interaction {
   left: number;
   top: number;
@@ -10,6 +13,10 @@ export interface InteractiveProps {
   onDelete?: () => void;
   onClickPointer?: (index: number) => void;
   children: React.ReactNode;
+  /**
+   * [Mobile only] determines gradient control points
+   */
+  locations?: number[];
 }
 
 export interface PointerProps {
@@ -18,4 +25,13 @@ export interface PointerProps {
   index?: number;
   selected?: boolean;
   onClick?: () => void;
+}
+
+export interface GradientProps {
+  gradients: Sketch.GradientStop[];
+  selectedStop: number;
+  onSelectStop: (index: number) => void;
+  onChangePosition: (position: number) => void;
+  onAdd: (value: RgbaColor, position: number) => void;
+  onDelete: () => void;
 }

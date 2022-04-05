@@ -7,6 +7,8 @@ import { Selectors } from 'noya-state';
 import Sketch from 'noya-file-format';
 import { Primitives } from '../../primitives';
 import ColorInspector from '../../ColorInspector';
+import GradientInspector from '../../GradientInspector';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 import {
   FillOption,
   FillInputProps,
@@ -86,7 +88,50 @@ function GradientFillPicker({
   onAddGradientStop,
   onDeleteGradientStop,
 }: Omit<GradientFillProps, 'onChangeGradientType'> & { id?: string }) {
-  return null;
+  const [state, dispatch] = useApplicationState();
+  const openDialog = useOpenInputDialog();
+
+  const gradientAssets = Selectors.getGradientAssets(state);
+
+  const createThemeGradient = useCallback(async () => {
+    if (!gradient) return;
+
+    const gradientName = await openDialog('New Gradient Asset Name');
+
+    if (!gradientName) return;
+
+    dispatch('addGradientAsset', gradientName, gradient);
+  }, [dispatch, gradient, openDialog]);
+
+  const onRemoveThemeGradient = useCallback(
+    (id: string) => dispatch('removeGradientAsset', id),
+    [dispatch],
+  );
+
+  const onRenameThemeGradient = useCallback(
+    (id: string, name: string) => dispatch('setGradientAssetName', id, name),
+    [dispatch],
+  );
+  //     <PickerGradients
+  //       gradientAssets={gradientAssets}
+  //       onCreate={createThemeGradient}
+  //       onChange={onChangeGradient}
+  //       onDelete={onRemoveThemeGradient}
+  //       onRename={onRenameThemeGradient}
+  //     />
+
+  return (
+    <>
+      <GradientInspector
+        id={`${id}-gradient-inspector`}
+        gradient={gradient.stops}
+        onChangeColor={onChangeGradientColor}
+        onChangePosition={onChangeGradientPosition}
+        onAddStop={onAddGradientStop}
+        onDeleteStop={onDeleteGradientStop}
+      />
+    </>
+  );
 }
 
 function PatternFillPicker({

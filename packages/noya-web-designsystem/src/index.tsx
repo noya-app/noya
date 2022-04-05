@@ -54,6 +54,5 @@ export * from './hooks/useModKey';
 
 // Utils
 export * from './utils/createSectionedMenu';
-export * from './utils/getGradientBackground';
 export * from './utils/mouseEvent';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

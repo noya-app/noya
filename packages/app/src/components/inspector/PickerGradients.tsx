@@ -3,11 +3,11 @@ import {
   Button,
   ContextMenu,
   Divider,
-  getGradientBackground,
   MenuItem,
   Select,
   Spacer,
 } from 'noya-web-designsystem';
+import { getGradientBackground } from 'noya-colorpicker';
 import { ListView } from 'noya-designsystem';
 import type Sketch from 'noya-file-format';
 import { useOpenInputDialog } from '../../contexts/DialogContext';

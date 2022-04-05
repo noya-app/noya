@@ -103,12 +103,10 @@ const StopPoint = memo(function StopPoint({
   const radius =
     (selected ? Selectors.POINT_RADIUS * 1.5 : Selectors.POINT_RADIUS) / zoom;
 
-  return (
-    <Fragment>
-      <Oval center={point} radius={radius} paint={fillPaint} />
-      <Oval center={point} radius={radius} paint={strokePaint} />
-    </Fragment>
-  );
+  return [
+    <Oval key="1" center={point} radius={radius} paint={fillPaint} />,
+    <Oval key="2" center={point} radius={radius} paint={strokePaint} />,
+  ];
 });
 
 export default memo(function GradientEditor({
@@ -146,20 +144,21 @@ export default memo(function GradientEditor({
   const from = gradientStopPoints[0].point;
   const to = gradientStopPoints[gradientStopPoints.length - 1].point;
 
+  //     {gradient.gradientType === Sketch.GradientType.Radial && (
+  //       <RadialGradientEditor
+  //         center={from}
+  //         point={to}
+  //         ellipseLength={gradient.elipseLength}
+  //       />
+  //     )}
+  //     {gradient.gradientType === Sketch.GradientType.Angular && (
+  //       <AngularGradientEditor />
+  //     )}
+
   return (
     <Group imageFilter={gradientEditorShadow}>
       {gradient.gradientType !== Sketch.GradientType.Angular && (
         <Polyline points={[from, to]} paint={gradientLineStroke} />
-      )}
-      {gradient.gradientType === Sketch.GradientType.Radial && (
-        <RadialGradientEditor
-          center={from}
-          point={to}
-          ellipseLength={gradient.elipseLength}
-        />
-      )}
-      {gradient.gradientType === Sketch.GradientType.Angular && (
-        <AngularGradientEditor />
       )}
       {gradientStopPoints.map(({ point, color }, index) => (
         <StopPoint

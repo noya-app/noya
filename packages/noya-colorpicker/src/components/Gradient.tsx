@@ -2,13 +2,13 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import Sketch from 'noya-file-format';
-import { getGradientBackground } from 'noya-web-designsystem';
-import { sketchColorToRgba } from 'noya-colorpicker';
-import { RgbaColor } from '../types';
+import { getGradientBackground } from '../utils/getGradientPackground';
 import { interpolateRgba } from '../utils/interpolateRgba';
+import { sketchColorToRgba } from '../utils/sketchColor';
 import { Interactive } from './Interactive';
 import type { Interaction } from './types';
 import Pointer from './Pointer';
+import type { GradientProps } from './types';
 
 const Container = styled.div<{ background: string }>(({ background }) => ({
   position: 'relative',
@@ -26,14 +26,7 @@ export default memo(function Gradient({
   onChangePosition,
   onAdd,
   onDelete,
-}: {
-  gradients: Sketch.GradientStop[];
-  selectedStop: number;
-  onSelectStop: (index: number) => void;
-  onChangePosition: (position: number) => void;
-  onAdd: (value: RgbaColor, position: number) => void;
-  onDelete: () => void;
-}) {
+}: GradientProps) {
   const handleMove = (interaction: Interaction) => {
     onChangePosition(interaction.left);
   };
@@ -42,7 +35,6 @@ export default memo(function Gradient({
     if (!offset) {
       onDelete();
     }
-    // Hue measured in degrees of the color circle ranging from 0 to 360
   };
 
   const handleClick = (interaction: Interaction | number) => {

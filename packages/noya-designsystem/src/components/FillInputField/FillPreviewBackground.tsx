@@ -3,8 +3,10 @@ import styled, { useTheme } from 'styled-components';
 
 import Sketch from 'noya-file-format';
 import { useSketchImage } from 'noya-renderer';
-import { sketchColorToRgbaString } from 'noya-colorpicker';
-import { getGradientBackground } from '../../utils/getGradientBackground';
+import {
+  getGradientBackground,
+  sketchColorToRgbaString,
+} from 'noya-colorpicker';
 import { useObjectURL } from '../../hooks/useObjectURL';
 import { PreviewProps, ColorProps, GradientProps, PatternProps } from './types';
 

@@ -96,9 +96,9 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
           layerPaint.setColorFilter(colorFilter);
         }
 
-        if (imageFilter) {
-          layerPaint.setImageFilter(imageFilter);
-        }
+        // if (imageFilter) {
+        //   layerPaint.setImageFilter(imageFilter);
+        // }
 
         canvas.saveLayer(
           layerPaint.getRNSkiaPaint(),
