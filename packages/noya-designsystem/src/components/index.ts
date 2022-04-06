@@ -12,6 +12,7 @@ export * from './InputField';
 export * from './Expandable';
 export * from './RadioGroup';
 export * from './ScrollableView';
+export * from './FillInputField';
 export * as Label from './Label';
 export * as Sortable from './Sortable';
 export { default as Popover } from './Popover';

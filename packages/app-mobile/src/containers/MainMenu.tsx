@@ -10,10 +10,10 @@ import {
   useGetStateSnapshot,
 } from 'noya-app-state-context';
 import type { ApplicationMenuItemType } from 'noya-embedded';
+import { decode, encode } from 'noya-sketch-file';
 import { useHistory } from 'noya-workspace-ui';
 import { TreeView } from 'noya-designsystem';
-import { decode, encode } from 'noya-sketch-file';
-import { base64ToArrayBuffer, arrayBufferToBase64 } from '../utils/arrayBuffer';
+import { Base64 } from 'noya-utils';
 
 interface MenuItem {
   title: string;
@@ -60,7 +60,7 @@ const MainMenu: React.FC = () => {
       const fileString = await FileSystem.readAsStringAsync(results.uri, {
         encoding: 'base64',
       });
-      const data = base64ToArrayBuffer(fileString);
+      const data = Base64.decode(fileString);
       const sketch = await decode(data);
       dispatch('setFile', sketch);
     } catch (e) {
@@ -71,7 +71,7 @@ const MainMenu: React.FC = () => {
   const handleSave = useCallback(
     async (action: 'save' | 'saveAs') => {
       const data = await encode(getStateSnapshot().sketch);
-      const base64File = arrayBufferToBase64(data);
+      const base64File = Base64.encode(data);
       // TODO: add file name dialog after implementing dialog component/context
       const fileName = action === 'save' ? fileHandle?.name : 'NewFile.sketch';
       const fileUrl = `${FileSystem.cacheDirectory}${fileName}`;

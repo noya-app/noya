@@ -8,7 +8,7 @@ import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { Layout, Button, useExpandable } from 'noya-designsystem';
 import { DrawableLayerType } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
-import { base64ToArrayBuffer } from '../utils/arrayBuffer';
+import { Base64 } from 'noya-utils';
 import { parseFilename } from '../utils/parseFilename';
 
 interface Item {
@@ -66,7 +66,7 @@ const Toolbar: React.FC = () => {
 
   const processImage = useCallback(
     (base64Image: string, uri: string) => {
-      const data = base64ToArrayBuffer(base64Image);
+      const data = Base64.decode(base64Image);
       const decodedImage = CanvasKit.MakeImageFromEncoded(data);
       const { name, extension } = parseFilename(uri);
 

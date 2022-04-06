@@ -7,6 +7,7 @@ export { default as ColorControlsInspector } from './ColorControlsInspector';
 export { default as PointControlsInspector } from './PointControlsInspector';
 export { default as AlignmentInspector } from './AlignmentInspector';
 export { default as ArtboardSizeList } from './ArtboardSizeList';
+export { default as PatternInspector } from './PatternInspector';
 export { default as OpacityInspector } from './OpacityInspector';
 export { default as BorderInspector } from './BorderInspector';
 export { default as RadiusInspector } from './RadiusInspector';

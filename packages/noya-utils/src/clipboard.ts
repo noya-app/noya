@@ -23,7 +23,7 @@ export const ClipboardUtils = {
 
     const base64 = match[1];
     const utf8 = Base64.decode(base64);
-    const json = UTF16.fromUTF8(utf8);
+    const json = UTF16.fromUTF8(utf8 as Uint8Array);
     const data = JSON.parse(json);
 
     return data;

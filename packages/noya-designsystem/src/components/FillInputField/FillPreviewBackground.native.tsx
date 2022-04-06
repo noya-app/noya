@@ -1,11 +1,28 @@
 import React, { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { View } from 'react-native';
+import { View, Image, ImageResizeMode } from 'react-native';
 
+import Sketch from 'noya-file-format';
 import { sketchColorToRgbaString } from 'noya-colorpicker';
-// import { useSketchImage } from 'noya-renderer';
+import { useSketchImage } from 'noya-renderer';
+import { Base64 } from 'noya-utils';
 import { Layout } from '../Layout';
 import { ColorProps, GradientProps, PatternProps, PreviewProps } from './types';
+
+function getPatternSizeAndPosition(
+  fillType: Sketch.PatternFillType,
+): ImageResizeMode {
+  switch (fillType) {
+    case Sketch.PatternFillType.Fit:
+      return 'contain';
+    case Sketch.PatternFillType.Tile:
+      return 'repeat';
+    case Sketch.PatternFillType.Fill:
+      return 'cover';
+    case Sketch.PatternFillType.Stretch:
+      return 'stretch';
+  }
+}
 
 const Background = styled(View)<{ background?: string }>(
   ({ theme, background }) => ({
@@ -16,6 +33,11 @@ const Background = styled(View)<{ background?: string }>(
     alignItems: 'center',
   }),
 );
+
+const PreviewImage = styled(Image)({
+  width: '100%',
+  height: '100%',
+});
 
 const HorizontalDotsBackground = memo(function HorizontalDotsBackground() {
   const { placeholderDots } = useTheme().colors;
@@ -41,12 +63,39 @@ const GradientPreviewBackground = memo(function GradientPreviewBackground({
   return null;
 });
 
-const PatternPreviewBackground = memo(function PatternPreviewBackground({
+export const PatternPreviewBackground = memo(function PatternPreviewBackground({
   fillType,
   tileScale,
   imageRef,
 }: PatternProps) {
-  return null;
+  const image = useSketchImage(imageRef);
+  const resizeMode = getPatternSizeAndPosition(fillType);
+
+  const imageString = useMemo(() => {
+    if (!image) {
+      return;
+    }
+
+    return Base64.encode(image);
+  }, [image]);
+
+  if (!imageString) {
+    return null;
+  }
+
+  // TODO: rewrite to skia canvas to be able to scale the tile patterns?
+  return (
+    <PreviewImage
+      source={{
+        uri: `data:image/jpeg;base64,${imageString}`,
+        // scale: fillType === Sketch.PatternFillType.Tile ? tileScale : 1,
+      }}
+      // resizeMethod={
+      //   fillType === Sketch.PatternFillType.Tile ? 'scale' : 'resize'
+      // }
+      resizeMode={resizeMode}
+    />
+  );
 });
 
 export const FillPreviewBackground = memo(function FillPreviewBackground({
