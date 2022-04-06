@@ -96,6 +96,7 @@ const Group: React.FC<PropsWithChildren<GroupProps>> = (props) => {
           layerPaint.setColorFilter(colorFilter);
         }
 
+        // TODO: bring back image filter
         // if (imageFilter) {
         //   layerPaint.setImageFilter(imageFilter);
         // }
