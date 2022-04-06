@@ -8,8 +8,7 @@ import { useApplicationState, useDispatch } from 'noya-app-state-context';
 import { Layout, Button, useExpandable } from 'noya-designsystem';
 import { DrawableLayerType } from 'noya-state';
 import { useCanvasKit } from 'noya-renderer';
-import { Base64 } from 'noya-utils';
-import { parseFilename } from '../utils/parseFilename';
+import { Base64, parseFilename } from 'noya-utils';
 
 interface Item {
   icon: string;

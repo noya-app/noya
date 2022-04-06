@@ -21,6 +21,12 @@
       "react-native-linear-gradient": [
         "./packages/app-mobile/node_modules/react-native-linear-gradient"
       ],
+      "expo-file-system": [
+        "./packages/app-mobile/node_modules/expo-file-system"
+      ],
+      "expo-image-picker": [
+        "./packages/app-mobile/node_modules/expo-image-picker"
+      ],
       /* Include path to all package src index files */
       "*": ["./*/src"]
     }

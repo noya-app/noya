@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { View, Text, TouchableOpacity } from 'react-native';
 
 import { ButtonProps, ButtonVariant } from './types';
-import { typeOf } from 'react-is';
 
 interface ElementsProps {
   variant: ButtonVariant;

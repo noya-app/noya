@@ -33,7 +33,7 @@ export default memo(function FillInputFieldWithPicker({
   patternProps,
   shaderProps,
 }: FillInputProps) {
-  const [state, dispatch] = useApplicationState();
+  const [, dispatch] = useApplicationState();
 
   const picker = useMemo(() => {
     switch (fillType) {

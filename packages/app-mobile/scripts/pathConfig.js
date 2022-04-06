@@ -58,6 +58,14 @@ const getPathConfigs = (appRootDir) => {
       appRootDir,
       './node_modules/@react-native-community',
     ),
+    'expo-file-system': path.resolve(
+      appRootDir,
+      './node_modules/expo-file-system',
+    ),
+    'expo-image-picker': path.resolve(
+      appRootDir,
+      './node_modules/expo-image-picker',
+    ),
   };
 
   packages.forEach((packageName) => {
