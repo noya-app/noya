@@ -3,7 +3,7 @@ import { Size } from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { ClipboardUtils } from 'noya-utils';
 import { useEffect, useMemo } from 'react';
-import { isSupportedFile, TypedFile } from '../components/FileDropTarget';
+import { isSupportedFile, TypedFile } from 'noya-workspace-ui';
 import { OffsetPoint } from '../containers/Canvas';
 import { NoyaClipboardData } from './useCopyHandler';
 

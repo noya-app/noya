@@ -2,7 +2,7 @@ import { Divider } from 'noya-web-designsystem';
 import { getMultiValue, Selectors } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import { memo, useCallback } from 'react';
-import ColorInspector from '../components/inspector/ColorInspector';
+import { ColorInspector } from 'noya-workspace-ui';
 import NameInspector from '../components/inspector/NameInspector';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';

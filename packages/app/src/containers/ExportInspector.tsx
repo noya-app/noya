@@ -11,6 +11,7 @@ import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
 import type { CanvasKit } from 'canvaskit';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
+import { ArrayController } from 'noya-workspace-ui';
 import { Selectors } from 'noya-state';
 import {
   FileType,
@@ -19,7 +20,6 @@ import {
 } from 'noya-utils';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import ArrayController from '../components/inspector/ArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
 import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';

@@ -1,25 +1,9 @@
-import { DragEvent, memo, ReactNode, useCallback } from 'react';
+import { DragEvent, memo, useCallback } from 'react';
 import styled from 'styled-components';
-import { OffsetPoint } from '../containers/Canvas';
+
 import { useFileDropTarget } from '../hooks/useFileDropTarget';
-
-export type TypedFile<T> = File & { type: T };
-
-export function isSupportedFile<T extends string>(
-  file: File,
-  supportedFileTypes: T[],
-): file is TypedFile<T> {
-  return (
-    supportedFileTypes.includes(file.type as T) ||
-    (file.type === '' && file.name.endsWith('.sketch'))
-  );
-}
-
-interface Props<T extends string> {
-  children: ReactNode | ((isActive: boolean) => ReactNode);
-  onDropFiles: (file: TypedFile<T>[], offsetPoint: OffsetPoint) => void;
-  supportedFileTypes: T[];
-}
+import type { FileDropTargetProps } from './types';
+import { isSupportedFile } from './utils';
 
 const Container = styled.div(() => ({ display: 'flex', flex: 1 }));
 
@@ -27,7 +11,7 @@ export default memo(function FileDropTarget<T extends string>({
   children,
   onDropFiles,
   supportedFileTypes,
-}: Props<T>) {
+}: FileDropTargetProps<T>) {
   const handleFile = useCallback(
     (event: DragEvent) => {
       event.preventDefault();

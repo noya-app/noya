@@ -3,7 +3,7 @@ import Sketch from 'noya-file-format';
 export interface FillInputFieldProps {
   id?: string;
   value?: Sketch.Color | Sketch.Gradient | Sketch.Pattern;
-  flex?: number;
+  flex?: string | number;
 }
 
 export interface PreviewProps {
