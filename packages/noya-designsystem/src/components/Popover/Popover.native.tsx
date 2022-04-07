@@ -15,7 +15,6 @@ import {
   TouchableWithoutFeedback,
   LayoutChangeEvent,
 } from 'react-native';
-import { Layout } from 'react-native-reanimated';
 import styled from 'styled-components';
 
 import type {

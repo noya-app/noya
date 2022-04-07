@@ -17,9 +17,9 @@ import { SetNumberMode } from 'noya-state';
 import { DimensionInput, DimensionValue } from '../DimensionsInspector';
 import FillInputFieldWithPicker, {
   ColorFillProps,
-  GradientFillProps,
-  PatternFillProps,
   ShaderFillProps,
+  PatternFillProps,
+  GradientFillProps,
 } from './FillInputFieldWithPicker';
 import {
   PatternFillType,
@@ -241,7 +241,8 @@ export default memo(function FillRow({
   ]);
 
   return (
-    <Primitives.DraggableRow id={id}>
+    <Primitives.Row id={id}>
+      <Primitives.DragHandle />
       <LabeledView>{prefix}</LabeledView>
       {prefix && <Primitives.HorizontalSeparator />}
       <LabeledView label={fillLabel}>
@@ -256,6 +257,6 @@ export default memo(function FillRow({
       </LabeledView>
       <Primitives.HorizontalSeparator />
       {fields}
-    </Primitives.DraggableRow>
+    </Primitives.Row>
   );
 });

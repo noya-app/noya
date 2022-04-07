@@ -42,7 +42,8 @@ export default memo(function FillRow({
   const spreadInputId = `${id}-spread`;
 
   return (
-    <Primitives.DraggableRow id={id}>
+    <Primitives.Row id={id}>
+      <Primitives.DragHandle />
       <LabeledView>{prefix}</LabeledView>
       {prefix && <Primitives.HorizontalSeparator />}
       <LabeledView label="Color">
@@ -81,6 +82,6 @@ export default memo(function FillRow({
           onSetValue={onSetSpread}
         />
       </LabeledView>
-    </Primitives.DraggableRow>
+    </Primitives.Row>
   );
 });

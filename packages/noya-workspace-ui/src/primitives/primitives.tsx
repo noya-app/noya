@@ -37,8 +37,6 @@ export const Column = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
-export const DraggableRow = Row;
-
 export const Checkbox = styled.input(({ theme }) => ({
   margin: 0,
 }));
@@ -99,4 +97,8 @@ export const LabeledSliderRow = memo(function LabeledRow({
       </Column>
     </Row>
   );
+});
+
+export const DragHandle = memo(function DragHandle() {
+  return null;
 });
