@@ -4,13 +4,8 @@ import {
   useDispatch,
   useWorkspace,
 } from 'noya-app-state-context';
-import {
-  IconButton,
-  MenuItem,
-  RelativeDropPosition,
-  Spacer,
-} from 'noya-web-designsystem';
-import { TreeView } from 'noya-designsystem';
+import { IconButton, MenuItem, Spacer } from 'noya-web-designsystem';
+import { TreeView, RelativeDropPosition } from 'noya-designsystem';
 import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';

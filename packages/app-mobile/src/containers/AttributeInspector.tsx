@@ -1,5 +1,6 @@
 import React, { Fragment, useCallback, memo, useMemo } from 'react';
 import styled from 'styled-components';
+import { View } from 'react-native';
 
 import {
   isLine,
@@ -36,7 +37,7 @@ import { useShallowArray } from 'noya-react-utils';
 
 interface AttributeInspectorProps {}
 
-const HorizontalPaddingContainer = styled(Layout.View)({
+const HorizontalPaddingContainer = styled(View)({
   paddingLeft: 10,
   paddingRight: 10,
 });
