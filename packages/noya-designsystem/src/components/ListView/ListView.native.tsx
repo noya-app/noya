@@ -43,7 +43,6 @@ import {
   ListRowPosition,
 } from './types';
 import { getPositionMargin } from './utils';
-import { RelativeDropPosition } from 'packages/noya-web-designsystem';
 
 const StyledTitle = styled(Text)<{ disabled: boolean; selected: boolean }>(
   ({ theme, selected, disabled }) => ({
@@ -109,7 +108,9 @@ function ListViewEditableRowTitle({
  * ------------------------------------------------------------------------- */
 
 const RowContainer = styled(View)<
-  ListRowContainerProps & { relativeDropPosition?: RelativeDropPosition }
+  ListRowContainerProps & {
+    relativeDropPosition?: Sortable.RelativeDropPosition;
+  }
 >(
   ({
     theme,

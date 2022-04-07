@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { ScrollArea, Select } from 'noya-web-designsystem';
+import { ScrollArea, Select } from 'noya-designsystem';
 import {
   ShaderFillProps,
   ArrayController,

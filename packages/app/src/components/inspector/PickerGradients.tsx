@@ -2,11 +2,10 @@ import { memo, useCallback, useState } from 'react';
 import {
   Button,
   ContextMenu,
-  Divider,
   MenuItem,
   Select,
-  Spacer,
-} from 'noya-web-designsystem';
+  Layout,
+} from 'noya-designsystem';
 import { getGradientBackground } from 'noya-colorpicker';
 import { ListView } from 'noya-designsystem';
 import type Sketch from 'noya-file-format';
@@ -60,7 +59,7 @@ const GradientsList = memo(function GradientsList({
               onPress={() => onSelectGradientAsset(gradient)}
             >
               <Square background={colorString} />
-              <Spacer.Horizontal size={8} />
+              <Layout.Queue size={8} />
               {name}
             </ListView.Row>
           </ContextMenu>
@@ -151,7 +150,7 @@ export default memo(function PickerGradients({
           Create Theme Gradient
         </Button>
       </InspectorPrimitives.Section>
-      <Divider />
+      <Layout.Divider />
       <InspectorPrimitives.Section>
         <InspectorPrimitives.Row>
           <Select
@@ -160,7 +159,7 @@ export default memo(function PickerGradients({
             value="Document"
             onChange={() => {}}
           />
-          <Spacer.Horizontal size={8} />
+          <Layout.Queue size={8} />
           <LayoutRadioGroup
             layout={gradientLayout}
             setLayout={setGradientLayout}

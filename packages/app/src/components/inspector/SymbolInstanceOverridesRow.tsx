@@ -3,7 +3,7 @@ import { memo, ReactNode, useCallback, useMemo } from 'react';
 import { ResetIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import { LayerIcon } from 'noya-workspace-ui';
-import { InputField, Spacer, Select, Button } from 'noya-web-designsystem';
+import { InputField, Layout, Select, Button } from 'noya-designsystem';
 import { TreeView } from 'noya-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import { useApplicationState } from 'noya-app-state-context';
@@ -292,8 +292,7 @@ export default memo(function SymbolInstanceOverridesRow({
       <InspectorPrimitives.Section>
         <InspectorPrimitives.Row>
           <InspectorPrimitives.Title>Overrides</InspectorPrimitives.Title>
-          <Spacer.Horizontal />
-
+          <Layout.Queue />
           <Button
             id="reset-symbol-sverrides"
             tooltip="Reset Overrides"
