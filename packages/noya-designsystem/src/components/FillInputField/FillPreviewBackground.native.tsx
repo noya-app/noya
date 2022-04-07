@@ -1,6 +1,15 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { View, Image, ImageResizeMode } from 'react-native';
+import { View, Image, ImageResizeMode, LayoutChangeEvent } from 'react-native';
+import {
+  vec,
+  Rect,
+  Paint,
+  Canvas,
+  SweepGradient,
+  LinearGradient,
+  RadialGradient,
+} from '@shopify/react-native-skia';
 
 import Sketch from 'noya-file-format';
 import { sketchColorToRgbaString } from 'noya-colorpicker';
@@ -34,6 +43,12 @@ const Background = styled(View)<{ background?: string }>(
   }),
 );
 
+const GradientBackground = styled(Canvas)(({ theme }) => ({
+  backgroundColor: theme.colors.inputBackground,
+  width: '100%',
+  height: '100%',
+}));
+
 const PreviewImage = styled(Image)({
   width: '100%',
   height: '100%',
@@ -60,7 +75,72 @@ const ColorPreviewBackground = memo(function ColorPreviewBackground({
 const GradientPreviewBackground = memo(function GradientPreviewBackground({
   gradient,
 }: GradientProps) {
-  return null;
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  const onLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      setSize({
+        width: event.nativeEvent.layout.width,
+        height: event.nativeEvent.layout.height,
+      });
+    },
+    [setSize],
+  );
+
+  const positions = useMemo(
+    () => gradient.stops.map((stop) => stop.position),
+    [gradient.stops],
+  );
+
+  const colors = useMemo(
+    () => gradient.stops.map((stop) => sketchColorToRgbaString(stop.color)),
+    [gradient.stops],
+  );
+
+  // TODO: Gradient params: start,end,c,r probably will have to be
+  // normalized after upgrading react-native-skia
+  const gradientPaint = useMemo(() => {
+    switch (gradient.gradientType) {
+      case Sketch.GradientType.Linear: {
+        return (
+          <LinearGradient
+            start={vec(size.width / 2, 0)}
+            end={vec(size.width / 2, size.height)}
+            positions={positions}
+            colors={colors}
+          />
+        );
+      }
+      case Sketch.GradientType.Radial: {
+        return (
+          <RadialGradient
+            c={vec(size.width / 2, size.height / 2)}
+            r={Math.max(size.width, size.height) / 2}
+            colors={colors}
+            positions={positions}
+          />
+        );
+      }
+      case Sketch.GradientType.Angular: {
+        return (
+          <SweepGradient
+            c={vec(size.width / 2, size.height / 2)}
+            colors={colors}
+            positions={positions}
+          />
+        );
+      }
+    }
+  }, [gradient, size, positions, colors]);
+
+  return (
+    <Background onLayout={onLayout}>
+      <GradientBackground>
+        <Paint>{gradientPaint}</Paint>
+        <Rect x={0} y={0} width={size.width} height={size.height} />
+      </GradientBackground>
+    </Background>
+  );
 });
 
 export const PatternPreviewBackground = memo(function PatternPreviewBackground({
