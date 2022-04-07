@@ -174,6 +174,7 @@ export default memo(function FillRow({
           <>
             <LabeledView label="Size" flex={1}>
               <Select
+                flex={1}
                 value={
                   Sketch.PatternFillType[
                     patternProps.pattern.patternFillType

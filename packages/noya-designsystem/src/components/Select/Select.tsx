@@ -51,7 +51,6 @@ const SelectElement = styled.select<{ flex: CSSProperties['flex'] }>(
     appearance: 'none',
     ...theme.textStyles.small,
     color: theme.colors.text,
-    width: '0px', // Reset intrinsic width
     flex: flex ?? '1 1 0px',
     position: 'relative',
     border: '0',

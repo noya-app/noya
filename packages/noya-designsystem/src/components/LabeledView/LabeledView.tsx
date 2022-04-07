@@ -36,9 +36,18 @@ export default memo(function LabeledView({
   );
 
   const content =
-    labelPosition === 'start'
-      ? [children, labelContent]
-      : [labelContent, children];
+    labelPosition === 'start' ? (
+      <>
+        {labelContent}
+        {children}
+      </>
+    ) : (
+      <>
+        {children}
+        {labelContent}
+      </>
+    );
+
   return (
     <Container flex={flex} size={size}>
       {content}
