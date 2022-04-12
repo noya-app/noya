@@ -1,63 +1,57 @@
-import { PropsWithChildren } from 'react';
-import { ViewProps, NativeTouchEvent } from 'react-native';
+import type { PropsWithChildren } from 'react';
+import type { ViewProps } from 'react-native';
+import type {
+  GestureUpdateEvent,
+  GestureStateChangeEvent,
+  TapGestureHandlerEventPayload,
+  PanGestureHandlerEventPayload,
+  PinchGestureHandlerEventPayload,
+  LongPressGestureHandlerEventPayload,
+} from 'react-native-gesture-handler';
 
-import { Point } from 'noya-geometry';
+export type PressEvent = GestureStateChangeEvent<TapGestureHandlerEventPayload>;
 
-export type SimplifiedGestureEvent = { nativeEvent: NativeTouchEvent };
+export type LongPressEvent =
+  GestureStateChangeEvent<LongPressGestureHandlerEventPayload>;
 
-export enum GestureType {
-  None = 'None',
-  Pan = 'Pan',
-  Pinch = 'Pinch',
-  Press = 'Press',
-  LongPress = 'LongPress',
+export type PanEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>;
+export type PanUpdateEvent = GestureUpdateEvent<PanGestureHandlerEventPayload>;
+
+export type PinchEvent =
+  GestureStateChangeEvent<PinchGestureHandlerEventPayload>;
+export type PinchUpdateEvent =
+  GestureUpdateEvent<PinchGestureHandlerEventPayload>;
+
+export interface PanHandlers {
+  onStart: (event: PanEvent) => void;
+  onUpdate: (event: PanUpdateEvent) => void;
+  onEnd: (event: PanEvent) => void;
 }
 
-export interface TouchPoint {
-  id: string;
-  x: number;
-  y: number;
+export interface PinchHandlers {
+  onStart: (event: PinchEvent) => void;
+  onUpdate: (event: PinchUpdateEvent) => void;
+  onEnd: (event: PinchEvent) => void;
 }
 
-export interface TouchMeta {
-  points: TouchPoint[];
-  avgDistance: number;
-  centroid: Point;
-  numOfPointers: number;
-  absolutePoint: Point;
-}
+export type PressHandler = (event: PressEvent) => void;
+export type DoublePressHandler = (Event: PressEvent) => void;
+export type LongPressHandler = (event: LongPressEvent) => void;
 
-export interface Gesture {
-  type: GestureType;
-  point: Point;
-  absolutePoint: Point;
-  delta?: Point;
-  scale?: number;
-  numOfPointers: number;
-}
+export interface Gestures {
+  onPress?: PressHandler;
+  onLongPress?: LongPressHandler;
+  onDoublePress?: DoublePressHandler;
 
-export type TouchCallback = (props: Gesture) => void;
+  pinchHandlers?: PinchHandlers;
+  panHandlersSingle?: PanHandlers;
+  panHandlersDouble?: PanHandlers;
+}
 
 export type TouchableProps = PropsWithChildren<{
-  onPress?: TouchCallback;
-  onLongPress?: TouchCallback;
-  onTouchStart?: TouchCallback;
-  onTouchUpdate?: TouchCallback;
-  onTouchEnd?: TouchCallback;
-  onTouchCancel?: () => void;
+  gestures: Gestures;
 }>;
 
-export type TouchableComponentProps = TouchableProps &
-  Omit<
-    ViewProps,
-    'onTouchStart' | 'onTouchUpdate' | 'onTouchEnd' | 'onPress' | 'onLongPress'
-  >;
+export type TouchableComponentProps = TouchableProps & ViewProps;
 
-export interface TouchableContextType {
-  onPress: TouchCallback[];
-  onLongPress: TouchCallback[];
-  onTouchStart: TouchCallback[];
-  onTouchUpdate: TouchCallback[];
-  onTouchEnd: TouchCallback[];
-  onTouchCancel: (() => void)[];
-}
+export type TouchableContextType = Gestures[];

@@ -2,6 +2,7 @@ export { default as ControlPointCoordinatesInspector } from './ControlPointCoord
 export { default as PointCoordinatesInspector } from './PointCoordinatesInspector';
 export { default as ColorControlsInspector } from './ColorControlsInspector';
 export { default as PointControlsInspector } from './PointControlsInspector';
+export { default as useCanvasGestures } from './hooks/useCanvasGestures';
 export { default as AlignmentInspector } from './AlignmentInspector';
 export { default as ArtboardSizeList } from './ArtboardSizeList';
 export { default as PatternInspector } from './PatternInspector';

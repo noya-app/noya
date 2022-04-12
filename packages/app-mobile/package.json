@@ -23,7 +23,7 @@
     "expo-sharing": "^10.1.1",
     "react": "17.0.2",
     "react-native": "0.66.4",
-    "react-native-gesture-handler": "^2.1.1",
+    "react-native-gesture-handler": "^2.3.2",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-reanimated": "^2.3.1",
     "react-native-vector-icons": "^9.0.0",

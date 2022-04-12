@@ -94,6 +94,11 @@ export type InsertedImage = { name: string } & (
 
 export type CanvasAction =
   | [type: 'setZoom*', value: number, mode?: 'replace' | 'multiply']
+  | [
+      type: 'setZoomRelative*',
+      details: { scale: number; scaleTo: Point },
+      mode?: 'replace' | 'multiply',
+    ]
   | [type: 'zoomToFit*', target: 'canvas' | 'selection']
   | [
       type: 'insertArtboard',
@@ -201,6 +206,33 @@ export function canvasReducer(
           (scrollOrigin.x - viewportCenter.x) * (newValue / zoomValue),
           (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
         ).applyTo(viewportCenter);
+
+        draftUser[pageId] = {
+          ...draftUser[pageId],
+          zoomValue: newValue,
+          scrollOrigin: PointString.encode(newScrollOrigin),
+        };
+      });
+    }
+    case 'setZoomRelative*': {
+      const [, { scale, scaleTo }, mode] = action;
+      const pageId = getCurrentPage(state).do_objectID;
+      const { scrollOrigin, zoomValue } = getCurrentPageMetadata(state);
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const scaleCenter = { ...scaleTo };
+        const newValue = clamp(
+          mode === 'multiply' ? scale * zoomValue : scale,
+          0.01,
+          256,
+        );
+
+        const newScrollOrigin = AffineTransform.translate(
+          (scrollOrigin.x - scaleCenter.x) * (newValue / zoomValue),
+          (scrollOrigin.y - scaleCenter.y) * (newValue / zoomValue),
+        ).applyTo(scaleCenter);
 
         draftUser[pageId] = {
           ...draftUser[pageId],
