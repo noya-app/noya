@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 
 import { IconButton, Layout } from 'noya-designsystem';
 import FlipControls from '../FlipControls';
 import { DimensionsInspectorProps } from './types';
 import DimensionInput from './DimensionInput';
 
-export default function DimensionsInspector({
+function DimensionsInspector({
   x,
   y,
   width,
@@ -61,3 +61,5 @@ export default function DimensionsInspector({
     </>
   );
 }
+
+export default memo(DimensionsInspector);

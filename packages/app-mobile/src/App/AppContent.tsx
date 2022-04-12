@@ -20,7 +20,7 @@ import PageList from '../containers/PageList';
 import Toolbar from '../containers/Toolbar';
 import Canvas from '../containers/Canvas';
 
-const AppContent: React.FC<{}> = () => {
+const AppContent: React.FC = () => {
   const { state, dispatch } = useAppState();
   const [layersFilter, setLayersFilter] = useState('');
   const fontManager = useFontManager();
@@ -50,6 +50,8 @@ const AppContent: React.FC<{}> = () => {
     });
   }, [downloadFont, fontManager, state]);
 
+  // console.log('appContent.render');
+
   if (state.type !== 'success') {
     return null;
   }
@@ -60,7 +62,7 @@ const AppContent: React.FC<{}> = () => {
         <ExpandableContextProvider>
           <StateProvider state={state.value} dispatch={handleDispatch}>
             <ContentContainer>
-              <Expandable position="left">
+              {/* <Expandable position="left">
                 <MainMenu id="main-menu" icon="hamburger-menu" />
                 <PageList id="page-list" icon="file" />
                 <LayerList
@@ -70,12 +72,15 @@ const AppContent: React.FC<{}> = () => {
                   size={{ width: 350, height: 250 }}
                 />
                 <ThemeManager id="theme" icon="tokens" />
-              </Expandable>
-              <Expandable position="right">
+              </Expandable>*/}
+              {/* <Expandable position="right">
                 <AttributeInspector id="inspector" icon="backpack" />
-              </Expandable>
+              </Expandable> */}
               <Toolbar />
               <Canvas />
+              <View style={{ width: 350, backgroundColor: '#000' }}>
+                <AttributeInspector />
+              </View>
             </ContentContainer>
           </StateProvider>
         </ExpandableContextProvider>
@@ -90,4 +95,5 @@ const ContentContainer = styled(View)((p) => ({
   flex: 1,
   position: 'relative',
   backgroundColor: p.theme.colors.sidebar.background,
+  flexDirection: 'row',
 }));

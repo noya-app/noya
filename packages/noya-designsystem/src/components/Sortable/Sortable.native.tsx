@@ -213,18 +213,19 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
     [sortable, index],
   );
 
+  // <TouchableListener
+  //   gestures={{}}
+  //   // onTouchStart={onTouchStart}
+  //   // onTouchUpdate={onTouchUpdate}
+  //   // onTouchEnd={onTouchEnd}
+  //   // onTouchCancel={onTouchCancel}
+  // >
+  // </TouchableListener>
+  // {/*  index as key enforces onLayout event after data list has been modified */}
   return (
-    <TouchableListener
-      onTouchStart={onTouchStart}
-      onTouchUpdate={onTouchUpdate}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
-    >
-      {/*  index as key enforces onLayout event after data list has been modified */}
-      <View onLayout={onLayout} key={index}>
-        {children}
-      </View>
-    </TouchableListener>
+    <View onLayout={onLayout} key={index}>
+      {children}
+    </View>
   );
 });
 

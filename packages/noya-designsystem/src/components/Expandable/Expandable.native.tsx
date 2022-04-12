@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useEffect } from 'react';
+import React, { memo, useMemo, useCallback, useLayoutEffect } from 'react';
 import { View } from 'react-native';
 import styled from 'styled-components';
 import Animated, {
@@ -63,7 +63,7 @@ const ExpandableProvider = (props: ExpandableProps) => {
     [activeTab, setActiveTab],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (
       expandable.activeTabs[position] !== undefined &&
       expandableOffset.value !== 0
@@ -78,12 +78,19 @@ const ExpandableProvider = (props: ExpandableProps) => {
     }
   }, [expandableOffset, position, expandable]);
 
-  const activeChild = useMemo(() => {
-    if (children instanceof Array) {
-      return children.find((child) => child.props.id === activeTab);
-    }
+  const tabContent = useMemo(() => {
+    // const activeChild =
+    //   children instanceof Array
+    //     ? children.find((child) => child.props.id === activeTab)
+    //     : children.props.id === activeTab
+    //     ? children
+    //     : null;
 
-    return children.props.id === activeTab ? children : null;
+    // if (!activeChild) {
+    //   return null;
+    // }
+
+    return <ExpandableContent>{children}</ExpandableContent>;
   }, [children, activeTab]);
 
   const expandableStyle = useAnimatedStyle(() => ({
@@ -99,9 +106,7 @@ const ExpandableProvider = (props: ExpandableProps) => {
 
   return (
     <ExpandableView position={position} style={expandableStyle}>
-      <ExpandableContentWrapper>
-        {!!activeChild && <ExpandableContent>{activeChild}</ExpandableContent>}
-      </ExpandableContentWrapper>
+      <ExpandableContentWrapper>{tabContent}</ExpandableContentWrapper>
       <Layout.Queue size="medium" />
       <View>
         <ButtonList>

@@ -238,30 +238,30 @@ const ListViewRow = forwardRef(function ListViewRow<
     },
     ref: Ref<View>,
   ) => {
+    // <Touchable onPress={handlePress} onLongPress={handleLongPress}>
+    //   </Touchable>
     const element = (
-      <Touchable onPress={handlePress} onLongPress={handleLongPress}>
-        <RowContainer
-          ref={ref}
-          isSectionHeader={isSectionHeader}
-          id={id}
-          marginType={marginType}
-          disabled={disabled}
-          hovered={hovered}
-          selected={selected}
-          selectedPosition={selectedPosition}
-          showsActiveState={pressEventName === 'onClick'}
-          relativeDropPosition={relativeDropPosition}
-        >
-          {relativeDropPosition && (
-            <DragIndicatorElement
-              relativeDropPosition={relativeDropPosition}
-              offsetLeft={33 + depth * indentation}
-            />
-          )}
-          {depth > 0 && <Layout.Queue size={depth * indentation} />}
-          {children}
-        </RowContainer>
-      </Touchable>
+      <RowContainer
+        ref={ref}
+        isSectionHeader={isSectionHeader}
+        id={id}
+        marginType={marginType}
+        disabled={disabled}
+        hovered={hovered}
+        selected={selected}
+        selectedPosition={selectedPosition}
+        showsActiveState={pressEventName === 'onClick'}
+        relativeDropPosition={relativeDropPosition}
+      >
+        {relativeDropPosition && (
+          <DragIndicatorElement
+            relativeDropPosition={relativeDropPosition}
+            offsetLeft={33 + depth * indentation}
+          />
+        )}
+        {depth > 0 && <Layout.Queue size={depth * indentation} />}
+        {children}
+      </RowContainer>
     );
 
     if (menuItems && onSelectMenuItem) {
