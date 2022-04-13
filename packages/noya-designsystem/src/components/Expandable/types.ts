@@ -2,16 +2,15 @@ import type { ReactElement } from 'react';
 
 export type ExpandablePosition = 'left' | 'right';
 
-export interface Tab {
-  id: string;
+export interface ExpandableItem {
+  name: string;
   icon: string;
+  content: ReactElement;
 }
 
-export type ExpandableChild = ReactElement<Tab>;
-
 export type ExpandableProps = {
-  children: ExpandableChild | ExpandableChild[];
   position?: ExpandablePosition;
+  items: ExpandableItem[];
 };
 
 export interface ExpandableViewProps {
