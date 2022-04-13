@@ -15,7 +15,7 @@ import {
   SEPARATOR_ITEM,
   CHECKBOX_RIGHT_INSET,
 } from '../internal/Menu';
-import { Gesture, TouchableListener } from '../Touchable';
+import { LongPressEvent, TouchableListener } from '../Touchable';
 import { MenuItemProps, MenuProps } from './types';
 
 const SeparatorElement = styled(View)(styles.separatorStyle);
@@ -114,12 +114,16 @@ const RootContent = styled(View)<{ x: number; y: number }>((props) => ({
 
 const Trigger: React.FC<
   PropsWithChildren<{
-    onOpen: (params: Gesture) => void;
+    onOpen: (params: LongPressEvent) => void;
   }>
 > = (props) => {
   const { children, onOpen } = props;
 
-  return <TouchableListener onLongPress={onOpen}>{children}</TouchableListener>;
+  return (
+    <TouchableListener gestures={{ onLongPress: onOpen }}>
+      {children}
+    </TouchableListener>
+  );
 };
 
 interface MenuState {
@@ -152,8 +156,8 @@ function ContextMenuRoot<T extends string>({
   // useKeyboardShortcuts(keymap);
 
   const onOpen = useCallback(
-    (params: Gesture) => {
-      setState({ visible: true, ...params.absolutePoint });
+    (params: LongPressEvent) => {
+      setState({ visible: true, x: params.absoluteX, y: params.absoluteY });
     },
     [setState],
   );

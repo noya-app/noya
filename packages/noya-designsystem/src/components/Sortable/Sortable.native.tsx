@@ -20,7 +20,7 @@ import Animated, {
 
 import { Point } from 'noya-geometry';
 import { useScrollable } from '../ScrollableView';
-import { Gesture, TouchableListener } from '../Touchable';
+import { PanEvent, PanUpdateEvent, TouchableListener } from '../Touchable';
 import type {
   DropValidator,
   ItemMeasurement,
@@ -129,75 +129,77 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
   const { index, children } = props;
   const touchStartTimeoutRef = useRef<number>();
 
-  const onTouchStart = useCallback(
-    (params: Gesture) => {
-      touchStartTimeoutRef.current = setTimeout(() => {
-        sortable.setActiveItemIndex(index);
-        touchStartTimeoutRef.current = undefined;
+  const dragHandlers = {
+    onStart: useCallback(
+      (event: PanEvent) => {
+        const point = { x: event.x, y: event.y };
 
-        // If there is scroll view parent
-        // Disable its scroll capture durning drag&drop
-        if (scrollable.isAvailable) {
-          scrollable.setScrollEnabled(false);
+        touchStartTimeoutRef.current = setTimeout(() => {
+          sortable.setActiveItemIndex(index);
+          touchStartTimeoutRef.current = undefined;
+
+          // If there is scroll view parent
+          // Disable its scroll capture durning drag&drop
+          if (scrollable.isAvailable) {
+            scrollable.setScrollEnabled(false);
+          }
+        }, DragStartDelayMS);
+
+        sortable.touchPos.value = point;
+        // calculate difference between element and touch positions
+        // to keep it consistent while dragging
+        sortable.touchOffset.value = {
+          x: point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
+          y: point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
+        };
+      },
+      [sortable, index, scrollable],
+    ),
+    onUpdate: useCallback(
+      (event: PanUpdateEvent) => {
+        if (touchStartTimeoutRef.current) {
+          clearTimeout(touchStartTimeoutRef.current);
+          touchStartTimeoutRef.current = undefined;
+          return;
         }
-      }, DragStartDelayMS);
 
-      sortable.touchPos.value = params.point;
-      // calculate difference between element and touch positions
-      // to keep it consistent while dragging
-      sortable.touchOffset.value = {
-        x: params.point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
-        y: params.point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
-      };
-    },
-    [sortable, index, scrollable],
-  );
+        sortable.touchPos.value = { x: event.x, y: event.y };
+      },
+      [sortable],
+    ),
+    onEnd: useCallback(
+      (event: PanEvent) => {
+        if (touchStartTimeoutRef.current) {
+          clearTimeout(touchStartTimeoutRef.current);
+          touchStartTimeoutRef.current = undefined;
+          return;
+        }
 
-  const onTouchUpdate = useCallback(
-    (params: Gesture) => {
-      if (touchStartTimeoutRef.current) {
-        clearTimeout(touchStartTimeoutRef.current);
-        touchStartTimeoutRef.current = undefined;
-        return;
-      }
+        sortable.onDropItem(event.y - sortable.touchOffset.value.y);
 
-      sortable.touchPos.value = params.point;
-    },
-    [sortable],
-  );
+        // Enable parent scrollview drag
+        if (scrollable.isAvailable) {
+          scrollable.setScrollEnabled(true);
+        }
+      },
+      [sortable, scrollable],
+    ),
+  };
 
-  const onTouchEnd = useCallback(
-    (params: Gesture) => {
-      if (touchStartTimeoutRef.current) {
-        clearTimeout(touchStartTimeoutRef.current);
-        touchStartTimeoutRef.current = undefined;
-        return;
-      }
+  // const onTouchCancel = useCallback(() => {
+  //   if (touchStartTimeoutRef.current) {
+  //     clearTimeout(touchStartTimeoutRef.current);
+  //     touchStartTimeoutRef.current = undefined;
+  //     return;
+  //   }
 
-      sortable.onDropItem(params.point.y - sortable.touchOffset.value.y);
+  //   sortable.setActiveItemIndex(undefined);
 
-      // Enable parent scrollview drag
-      if (scrollable.isAvailable) {
-        scrollable.setScrollEnabled(true);
-      }
-    },
-    [sortable, scrollable],
-  );
-
-  const onTouchCancel = useCallback(() => {
-    if (touchStartTimeoutRef.current) {
-      clearTimeout(touchStartTimeoutRef.current);
-      touchStartTimeoutRef.current = undefined;
-      return;
-    }
-
-    sortable.setActiveItemIndex(undefined);
-
-    // Enable parent scrollview drag
-    if (scrollable.isAvailable) {
-      scrollable.setScrollEnabled(true);
-    }
-  }, [sortable, scrollable]);
+  //   // Enable parent scrollview drag
+  //   if (scrollable.isAvailable) {
+  //     scrollable.setScrollEnabled(true);
+  //   }
+  // }, [sortable, scrollable]);
 
   const onLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -213,19 +215,13 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
     [sortable, index],
   );
 
-  // <TouchableListener
-  //   gestures={{}}
-  //   // onTouchStart={onTouchStart}
-  //   // onTouchUpdate={onTouchUpdate}
-  //   // onTouchEnd={onTouchEnd}
-  //   // onTouchCancel={onTouchCancel}
-  // >
-  // </TouchableListener>
   // {/*  index as key enforces onLayout event after data list has been modified */}
   return (
-    <View onLayout={onLayout} key={index}>
-      {children}
-    </View>
+    <TouchableListener gestures={{ panHandlersSingle: dragHandlers }}>
+      <View onLayout={onLayout} key={index}>
+        {children}
+      </View>
+    </TouchableListener>
   );
 });
 

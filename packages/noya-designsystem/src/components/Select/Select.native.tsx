@@ -11,8 +11,8 @@ import styled from 'styled-components';
 import {
   View,
   Text,
-  TouchableOpacity,
   Modal,
+  TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';

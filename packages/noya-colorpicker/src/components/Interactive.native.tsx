@@ -8,12 +8,7 @@ import React, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { LayoutChangeEvent, View } from 'react-native';
 
-import {
-  PanEvent,
-  PanUpdateEvent,
-  PressEvent,
-  // Touchable,
-} from 'noya-designsystem';
+import { PanEvent, PanUpdateEvent } from 'noya-designsystem';
 import { InteractiveProps } from './types';
 import { clamp } from '../utils/clamp';
 
@@ -34,29 +29,6 @@ export const Interactive = memo(function InteractiveBase({
   locations,
 }: InteractiveProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
-
-  // const onPress = useCallback(
-  //   (event: PressEvent) => {
-
-  //   },
-  //   [onClick, locations, size],
-  // );
-
-  // const dragHandlers = {
-  //   onStart: useCallback(
-  //     (event: PanEvent) => {
-
-  //     [onMove, size],
-  //   ),
-  //   onUpdate: useCallback(
-  //     (event: PanUpdateEvent) => {
-
-  //     },
-  //     [onMove, size],
-  //   ),
-
-  //   onEnd: useCallback(() => {}, []),
-  // };
 
   const onStart = useCallback(
     (event: PanEvent) => {
@@ -121,8 +93,10 @@ export const Interactive = memo(function InteractiveBase({
     [setSize, size],
   );
 
+  const value = useMemo(() => size, [size]);
+
   return (
-    <InteractiveContext.Provider value={size}>
+    <InteractiveContext.Provider value={value}>
       <GestureDetector gesture={gesture}>
         <View onLayout={onLayout}>{children}</View>
       </GestureDetector>

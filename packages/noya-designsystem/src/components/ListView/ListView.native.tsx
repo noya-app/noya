@@ -238,30 +238,32 @@ const ListViewRow = forwardRef(function ListViewRow<
     },
     ref: Ref<View>,
   ) => {
-    // <Touchable onPress={handlePress} onLongPress={handleLongPress}>
-    //   </Touchable>
     const element = (
-      <RowContainer
-        ref={ref}
-        isSectionHeader={isSectionHeader}
-        id={id}
-        marginType={marginType}
-        disabled={disabled}
-        hovered={hovered}
-        selected={selected}
-        selectedPosition={selectedPosition}
-        showsActiveState={pressEventName === 'onClick'}
-        relativeDropPosition={relativeDropPosition}
+      <Touchable
+        gestures={{ onPress: handlePress, onLongPress: handleLongPress }}
       >
-        {relativeDropPosition && (
-          <DragIndicatorElement
-            relativeDropPosition={relativeDropPosition}
-            offsetLeft={33 + depth * indentation}
-          />
-        )}
-        {depth > 0 && <Layout.Queue size={depth * indentation} />}
-        {children}
-      </RowContainer>
+        <RowContainer
+          ref={ref}
+          isSectionHeader={isSectionHeader}
+          id={id}
+          marginType={marginType}
+          disabled={disabled}
+          hovered={hovered}
+          selected={selected}
+          selectedPosition={selectedPosition}
+          showsActiveState={pressEventName === 'onClick'}
+          relativeDropPosition={relativeDropPosition}
+        >
+          {relativeDropPosition && (
+            <DragIndicatorElement
+              relativeDropPosition={relativeDropPosition}
+              offsetLeft={33 + depth * indentation}
+            />
+          )}
+          {depth > 0 && <Layout.Queue size={depth * indentation} />}
+          {children}
+        </RowContainer>
+      </Touchable>
     );
 
     if (menuItems && onSelectMenuItem) {
@@ -308,7 +310,6 @@ const FlatListStyles = StyleSheet.create({ list: { width: '100%', flex: 1 } });
 
 const ListViewRootInner = forwardRef(function ListViewRoot<T>(
   {
-    onPress,
     scrollable = false,
     expandable = true,
     sortable = false,

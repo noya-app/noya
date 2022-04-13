@@ -8,7 +8,7 @@ interface ElementsProps {
   variant: ButtonVariant;
   active: boolean;
   disabled: boolean;
-  flex?: number;
+  flex?: string | number;
 }
 
 const ButtonElement = styled(View)<ElementsProps>(

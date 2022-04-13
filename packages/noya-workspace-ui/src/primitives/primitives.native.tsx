@@ -88,11 +88,11 @@ export const LabeledSliderRow = memo(function LabeledRow({
 export const DragHandle = memo(function DragHandle() {
   return (
     <>
-      {/* <Touchable>
-      </Touchable> */}
-      <LabeledView>
-        <Layout.Icon name="drag-handle-dots-2" size={20} />
-      </LabeledView>
+      <Touchable gestures={{}}>
+        <LabeledView>
+          <Layout.Icon name="drag-handle-dots-2" size={20} />
+        </LabeledView>
+      </Touchable>
       <HorizontalSeparator />
     </>
   );
