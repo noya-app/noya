@@ -170,7 +170,7 @@ export function applicationReducer(
       return pageReducer(state, action);
     }
     case 'setZoom*':
-    case 'setZoomRelative*':
+    case 'panAndZoom*':
     case 'zoomToFit*':
     case 'insertArtboard':
     case 'addDrawnLayer':

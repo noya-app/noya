@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { LayoutChangeEvent } from 'react-native';
+import { LayoutChangeEvent, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import styled from 'styled-components';
 
 import {
@@ -8,7 +9,7 @@ import {
   useApplicationState,
 } from 'noya-app-state-context';
 import { Selectors } from 'noya-state';
-import { Touchable, ContextMenu } from 'noya-designsystem';
+import { ContextMenu } from 'noya-designsystem';
 import { useLayerMenu, useCanvasGestures } from 'noya-workspace-ui';
 import CanvasRenderer from './CanvasRenderer';
 
@@ -49,18 +50,20 @@ const Canvas: React.FC<{}> = () => {
 
   return (
     <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
-      <CanvasWrapper onLayout={onCanvasLayout} gestures={gestures}>
-        <CanvasRenderer />
-      </CanvasWrapper>
+      <GestureDetector gesture={gestures}>
+        <CanvasWrapper onLayout={onCanvasLayout}>
+          <CanvasRenderer />
+        </CanvasWrapper>
+      </GestureDetector>
     </ContextMenu>
   );
 };
 
 export default React.memo(Canvas);
 
-const CanvasWrapper = styled(Touchable)((_props) => ({
+const CanvasWrapper = styled(View)({
   flex: 1,
-}));
+});
 
 // // Event coordinates are relative to (0,0), but we want them to include
 // // the current page's zoom and offset from the origin

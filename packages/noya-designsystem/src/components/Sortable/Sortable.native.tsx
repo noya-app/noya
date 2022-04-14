@@ -47,9 +47,6 @@ interface SortableContextType {
   onDropItem: (offsetTop: number) => void;
 }
 
-const DragStartDelayMS = 100;
-const MoveRenderThreshold = 8;
-
 // @ts-ignore Initial value doesn't really matter \m/
 const SortableContext = createContext<SortableContextType>(undefined);
 
@@ -91,19 +88,10 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   useDerivedValue(() => {
     // Y position at which dragged item is being rendered
     const offsetY = touchPos.value.y - touchOffset.value.y;
-    const startY =
-      activeItem?.index !== undefined
-        ? measurements.current[activeItem?.index]?.pos.y
-        : offsetY;
 
     // validate drop indicator on JS thread
     // only if it is necessary
-    if (
-      overItem.value?.id === id &&
-      activeItem?.id !== id &&
-      !disabled &&
-      Math.abs(offsetY - startY) > MoveRenderThreshold
-    ) {
+    if (overItem.value?.id === id && activeItem?.id !== id && !disabled) {
       runOnJS(onValidateDrop)(overItem.value, offsetY);
     } else if (dropPosition && overItem.value?.id !== id) {
       runOnJS(setDropPosition)(undefined);
@@ -134,16 +122,14 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
       (event: PanEvent) => {
         const point = { x: event.x, y: event.y };
 
-        touchStartTimeoutRef.current = setTimeout(() => {
-          sortable.setActiveItemIndex(index);
-          touchStartTimeoutRef.current = undefined;
+        sortable.setActiveItemIndex(index);
+        touchStartTimeoutRef.current = undefined;
 
-          // If there is scroll view parent
-          // Disable its scroll capture durning drag&drop
-          if (scrollable.isAvailable) {
-            scrollable.setScrollEnabled(false);
-          }
-        }, DragStartDelayMS);
+        // If there is scroll view parent
+        // Disable its scroll capture durning drag&drop
+        if (scrollable.isAvailable) {
+          scrollable.setScrollEnabled(false);
+        }
 
         sortable.touchPos.value = point;
         // calculate difference between element and touch positions
@@ -157,24 +143,12 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
     ),
     onUpdate: useCallback(
       (event: PanUpdateEvent) => {
-        if (touchStartTimeoutRef.current) {
-          clearTimeout(touchStartTimeoutRef.current);
-          touchStartTimeoutRef.current = undefined;
-          return;
-        }
-
         sortable.touchPos.value = { x: event.x, y: event.y };
       },
       [sortable],
     ),
     onEnd: useCallback(
       (event: PanEvent) => {
-        if (touchStartTimeoutRef.current) {
-          clearTimeout(touchStartTimeoutRef.current);
-          touchStartTimeoutRef.current = undefined;
-          return;
-        }
-
         sortable.onDropItem(event.y - sortable.touchOffset.value.y);
 
         // Enable parent scrollview drag
@@ -185,21 +159,6 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
       [sortable, scrollable],
     ),
   };
-
-  // const onTouchCancel = useCallback(() => {
-  //   if (touchStartTimeoutRef.current) {
-  //     clearTimeout(touchStartTimeoutRef.current);
-  //     touchStartTimeoutRef.current = undefined;
-  //     return;
-  //   }
-
-  //   sortable.setActiveItemIndex(undefined);
-
-  //   // Enable parent scrollview drag
-  //   if (scrollable.isAvailable) {
-  //     scrollable.setScrollEnabled(true);
-  //   }
-  // }, [sortable, scrollable]);
 
   const onLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -319,11 +278,7 @@ function SortableList<T>(props: SortableListProps<T>) {
 
   const dragItemStyle = useAnimatedStyle(() => {
     const top = touchPos.value.y - touchOffset.value.y;
-    if (
-      !isDragging ||
-      Math.abs(top - measurements.current[activeItemIndex]?.size.width) <
-        MoveRenderThreshold
-    ) {
+    if (!isDragging) {
       return {
         top: 0,
         left: 0,
