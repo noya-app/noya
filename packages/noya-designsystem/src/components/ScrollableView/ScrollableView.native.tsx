@@ -1,5 +1,5 @@
 import React, { memo, createContext, useContext, useState } from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native';
 
 import type { ScrollableContextType, ScrollableViewProps } from './types';
 

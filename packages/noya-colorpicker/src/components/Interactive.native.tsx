@@ -69,10 +69,16 @@ export const Interactive = memo(function InteractiveBase({
     },
     [onMove, size],
   );
+
   const onEnd = useCallback(() => {}, []);
 
   const gesture = useMemo(
-    () => Gesture.Pan().onStart(onStart).onChange(onUpdate).onEnd(onEnd),
+    () =>
+      Gesture.Pan()
+        .runOnJS(true)
+        .onStart(onStart)
+        .onChange(onUpdate)
+        .onEnd(onEnd),
     [onStart, onUpdate, onEnd],
   );
 

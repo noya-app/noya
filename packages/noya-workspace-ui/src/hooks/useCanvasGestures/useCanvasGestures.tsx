@@ -1,107 +1,30 @@
-import { useCallback } from 'react';
 import { Gesture } from 'react-native-gesture-handler';
 import { useSharedValue, runOnJS } from 'react-native-reanimated';
 
-import { Selectors } from 'noya-state';
-import { AffineTransform, Point } from 'noya-geometry';
-import { useSelector, useApplicationState } from 'noya-app-state-context';
 import {
-  getTouchMap,
   getFeatures,
   TouchHistory,
   GestureState,
+  MoveThreshold,
   CallbackParams,
+  getInitialHistory,
 } from './utils';
 
-const MoveThreshold = 15;
+type Callback = (params: CallbackParams) => void;
 
-export default function useCanvasGestures() {
-  const [appState, dispatch] = useApplicationState();
-  const meta = useSelector(Selectors.getCurrentPageMetadata);
+export default function useCanvasGestures(
+  onTouchStart: Callback,
+  onTouchUpdate: Callback,
+  onTouchEnd: Callback,
+) {
   const isActive = useSharedValue(false);
   const gestureState = useSharedValue<GestureState>(GestureState.Undetermined);
   const history = useSharedValue<TouchHistory>({
     touches: {},
     numberOfTouches: 0,
-    pinchLastIds: [0, 0],
-    panLastId: 0,
+    centroid: { x: 0, y: 0 },
+    pinchIds: [0, 0],
   });
-
-  // Event coordinates are relative to (0,0), but we want them to include
-  // the current page's zoom and offset from the origin
-  const offsetEventPoint = useCallback(
-    (point: Point) =>
-      AffineTransform.scale(1 / meta.zoomValue)
-        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
-        .applyTo(point),
-    [meta],
-  );
-
-  const onTouchStart = useCallback(
-    ({ x, y, state }: CallbackParams) => {
-      const rawPoint = { x, y };
-      const point = offsetEventPoint(rawPoint);
-
-      if (state !== GestureState.Other) {
-        return;
-      }
-
-      switch (appState.interactionState.type) {
-        case 'insert': {
-          dispatch('interaction', [
-            'startDrawing',
-            appState.interactionState.layerType,
-            point,
-          ]);
-        }
-      }
-    },
-    [offsetEventPoint, appState, dispatch],
-  );
-
-  const onTouchUpdate = useCallback(
-    ({ x, y, delta, scale, center, state }: CallbackParams) => {
-      const rawPoint = { x, y };
-      const point = offsetEventPoint(rawPoint);
-
-      if (state === GestureState.Undetermined) {
-        return;
-      }
-
-      if (state === GestureState.Canvas) {
-        dispatch('panAndZoom*', { scale, scaleTo: center, delta });
-        return;
-      }
-
-      switch (appState.interactionState.type) {
-        case 'drawing': {
-          dispatch('interaction', ['updateDrawing', point]);
-          break;
-        }
-      }
-    },
-    [offsetEventPoint, appState, dispatch],
-  );
-
-  const onTouchEnd = useCallback(
-    ({ x, y, state }: CallbackParams) => {
-      const rawPoint = { x, y };
-      const point = offsetEventPoint(rawPoint);
-
-      if (state !== GestureState.Other) {
-        return;
-      }
-
-      switch (appState.interactionState.type) {
-        case 'drawing': {
-          dispatch('interaction', ['updateDrawing', point]);
-          dispatch('addDrawnLayer');
-          break;
-        }
-      }
-    },
-    [offsetEventPoint, appState, dispatch],
-  );
 
   const gesture = Gesture.Manual()
     .onTouchesDown((event, manager) => {
@@ -112,33 +35,32 @@ export default function useCanvasGestures() {
         gestureState.value = GestureState.Canvas;
       }
 
-      history.value = {
-        numberOfTouches: event.numberOfTouches,
-        touches: getTouchMap(event.allTouches),
-        panLastId: 0,
-        pinchLastIds: [0, 1],
-      };
+      history.value = getInitialHistory(event.allTouches);
 
       if (!isActive.value) {
         manager.activate();
 
         runOnJS(onTouchStart)({
           scale: 1,
-          x: event.allTouches[0].x,
-          y: event.allTouches[0].y,
+          point: {
+            x: event.allTouches[0].x,
+            y: event.allTouches[0].y,
+          },
           delta: { x: 0, y: 0 },
-          center: {
+          scaleTo: {
             x: event.allTouches[0].x,
             y: event.allTouches[0].y,
           },
           state: gestureState.value,
+          touches: event.allTouches,
         });
       }
     })
     .onTouchesMove((event) => {
-      if (!isActive.value) {
+      if (!isActive.value || event.numberOfTouches === 0) {
         return;
       }
+
       const [features, touch] = getFeatures(event.allTouches, history.value);
       history.value = touch;
 
@@ -152,24 +74,30 @@ export default function useCanvasGestures() {
           delta: { x: 0, y: 0 },
           scale: 1,
           state: gestureState.value,
+          touches: event.allTouches,
         });
       } else {
         runOnJS(onTouchUpdate)({
           ...features,
           state: gestureState.value,
+          touches: event.allTouches,
         });
       }
     })
     .onTouchesUp((event, manager) => {
-      const [features, touch] = getFeatures(event.allTouches, history.value);
-      history.value = touch;
-
       if (event.numberOfTouches < 1) {
         runOnJS(onTouchEnd)({
-          ...features,
+          scale: 1,
+          point: history.value.centroid,
+          scaleTo: history.value.centroid,
+          delta: { x: 0, y: 0 },
           state: gestureState.value,
+          touches: event.allTouches,
         });
         manager.end();
+      } else {
+        const [, touch] = getFeatures(event.allTouches, history.value);
+        history.value = touch;
       }
     })
     .onStart(() => {
@@ -180,8 +108,8 @@ export default function useCanvasGestures() {
       history.value = {
         touches: {},
         numberOfTouches: 0,
-        pinchLastIds: [0, 0],
-        panLastId: 0,
+        centroid: { x: 0, y: 0 },
+        pinchIds: [0, 0],
       };
       isActive.value = false;
     });

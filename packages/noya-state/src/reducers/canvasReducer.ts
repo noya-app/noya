@@ -224,15 +224,18 @@ export function canvasReducer(
         const scaleCenter = { ...scaleTo };
         const newValue = clamp(scale * zoomValue, 0.01, 256);
 
-        const newScrollOrigin = AffineTransform.translate(
-          (scrollOrigin.x - scaleCenter.x) * (newValue / zoomValue) - delta.x,
-          (scrollOrigin.y - scaleCenter.y) * (newValue / zoomValue) - delta.y,
+        const scaledOrigin = AffineTransform.translate(
+          (scrollOrigin.x - scaleCenter.x) * (newValue / zoomValue),
+          (scrollOrigin.y - scaleCenter.y) * (newValue / zoomValue),
         ).applyTo(scaleCenter);
 
         draftUser[pageId] = {
           ...draftUser[pageId],
           zoomValue: newValue,
-          scrollOrigin: PointString.encode(newScrollOrigin),
+          scrollOrigin: PointString.encode({
+            x: scaledOrigin.x - delta.x,
+            y: scaledOrigin.y - delta.y,
+          }),
         };
       });
     }
