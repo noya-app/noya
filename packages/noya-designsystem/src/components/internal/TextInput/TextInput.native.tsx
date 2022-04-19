@@ -1,15 +1,16 @@
 import React, {
   useRef,
-  useState,
   forwardRef,
   useCallback,
   ForwardedRef,
+  useState,
   useLayoutEffect,
 } from 'react';
 import {
-  NativeSyntheticEvent,
   TextInput,
+  NativeSyntheticEvent,
   TextInputKeyPressEventData,
+  TextInputSubmitEditingEventData,
 } from 'react-native';
 import { ControlledProps, SubmittableProps, TextInputProps } from './types';
 
@@ -75,7 +76,7 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   }: SubmittableProps,
   forwardedRef: ForwardedRef<TextInput>,
 ) {
-  const [internalValue, setInternalValue] = useState('');
+  const [internalValue, setInternalValue] = useState<string>(value);
   const latestValue = useRef(value);
   latestValue.current = value;
 
@@ -83,27 +84,36 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
     setInternalValue(value);
   }, [value]);
 
-  const handleEditFinish = useCallback(
-    (isTriggeredByBlur: boolean) => {
-      const submissionValue = isTriggeredByBlur ? value : internalValue;
+  const handleSubmit = useCallback(
+    (event: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+      const submissionValue = event.nativeEvent.text;
 
-      if (submissionValue === value && !allowSubmittingWithSameValue) {
+      if (
+        submissionValue === latestValue.current &&
+        !allowSubmittingWithSameValue
+      ) {
         return;
       }
 
       onSubmit(submissionValue);
-      setInternalValue(latestValue.current);
     },
-    [value, internalValue, allowSubmittingWithSameValue, onSubmit],
+    [allowSubmittingWithSameValue, onSubmit],
   );
 
-  const handleSubmit = useCallback(() => {
-    handleEditFinish(false);
-  }, [handleEditFinish]);
-
   const handleBlur = useCallback(() => {
-    handleEditFinish(true);
-  }, [handleEditFinish]);
+    if (!allowSubmittingWithSameValue) {
+      return;
+    }
+
+    onSubmit(latestValue.current);
+  }, [allowSubmittingWithSameValue, onSubmit]);
+
+  const handleChangeText = useCallback(
+    (text: string) => {
+      setInternalValue(text);
+    },
+    [setInternalValue],
+  );
 
   // const handleKeyDown = useCallback(
   //   (event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
@@ -112,18 +122,14 @@ const SubmittableTextInput = forwardRef(function SubmittableTextInput(
   //   [],
   // );
 
-  const handleChange = useCallback((value: string) => {
-    setInternalValue(value);
-  }, []);
-
   return (
     <TextInput
       ref={forwardedRef}
       {...rest}
       value={internalValue}
-      onChangeText={handleChange}
-      onSubmitEditing={handleSubmit}
       onBlur={handleBlur}
+      onSubmitEditing={handleSubmit}
+      onChangeText={handleChangeText}
       autoCorrect={autoCorrect !== 'off'}
       autoComplete={autoComplete}
       spellCheck={

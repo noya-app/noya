@@ -32,7 +32,10 @@ import {
   PointCoordinatesInspector,
   ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
+import {
+  useThrottledApllicationState,
+  useThrottledSelector,
+} from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 
 interface AttributeInspectorProps {}
@@ -43,10 +46,10 @@ const HorizontalPaddingContainer = styled(View)({
 });
 
 const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useThrottledApllicationState();
 
   const selectedLayers = useShallowArray(
-    useSelector(Selectors.getSelectedLayers),
+    useThrottledSelector(Selectors.getSelectedLayers),
   );
 
   const hasContextSettingsLayers =

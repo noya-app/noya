@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { FillPreviewBackground } from './FillPreviewBackground';
 import { FillInputFieldProps } from './types';
 
-const Container = styled(View)<{ flex?: number }>(({ flex }) => ({
+const Container = styled(View)<{ flex?: number | string }>(({ flex }) => ({
   flex,
   width: 50,
   height: 27,

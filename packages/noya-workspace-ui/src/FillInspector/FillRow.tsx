@@ -117,11 +117,11 @@ export default memo(function FillRow({
                       : ''
                   }
                   placeholder={colorProps.color ? undefined : 'multiple'}
-                  onSubmit={(value) => {
-                    if (validHex(value)) {
+                  onSubmit={(newColor: string) => {
+                    if (validHex(newColor)) {
                       colorProps.onChangeColor(
                         rgbaToSketchColor(
-                          hexToRgba(value, colorProps.color?.alpha),
+                          hexToRgba(newColor, colorProps.color?.alpha),
                         ),
                       );
                     }
@@ -135,7 +135,7 @@ export default memo(function FillRow({
               <DimensionInput
                 label="%"
                 value={
-                  colorProps.color
+                  colorProps.color?.alpha
                     ? Math.round(colorProps.color.alpha * 100)
                     : undefined
                 }
