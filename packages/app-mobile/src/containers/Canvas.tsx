@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import styled from 'styled-components';
@@ -59,7 +59,7 @@ const Canvas: React.FC<{}> = () => {
   );
 
   const onTouchStart = useCallback(
-    ({ point: rawPoint, state }: TouchCallbackParams) => {
+    ({ point: rawPoint }: TouchCallbackParams) => {
       const point = offsetEventPoint(rawPoint);
 
       switch (appState.interactionState.type) {
@@ -136,13 +136,8 @@ const Canvas: React.FC<{}> = () => {
       scale,
       scaleTo,
       state,
-      touches,
     }: TouchCallbackParams) => {
       const point = offsetEventPoint(rawPoint);
-
-      if (state === GestureState.Undetermined) {
-        return;
-      }
 
       if (state === GestureState.Canvas) {
         dispatch('panAndZoom*', { scale, scaleTo, delta });
@@ -150,10 +145,6 @@ const Canvas: React.FC<{}> = () => {
       }
 
       switch (appState.interactionState.type) {
-        case 'drawing': {
-          dispatch('interaction', ['updateDrawing', point]);
-          break;
-        }
         case 'insert': {
           dispatch('interaction', [
             appState.interactionState.type,
@@ -203,7 +194,10 @@ const Canvas: React.FC<{}> = () => {
 
           break;
         }
-
+        case 'drawing': {
+          dispatch('interaction', ['updateDrawing', point]);
+          break;
+        }
         case 'marquee': {
           dispatch('interaction', ['updateMarquee', rawPoint]);
 
@@ -234,12 +228,8 @@ const Canvas: React.FC<{}> = () => {
   );
 
   const onTouchEnd = useCallback(
-    ({ point: rawPoint, state }: TouchCallbackParams) => {
+    ({ point: rawPoint }: TouchCallbackParams) => {
       const point = offsetEventPoint(rawPoint);
-
-      if (state !== GestureState.Other) {
-        return;
-      }
 
       switch (appState.interactionState.type) {
         case 'drawing': {

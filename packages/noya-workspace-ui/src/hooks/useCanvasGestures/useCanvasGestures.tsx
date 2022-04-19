@@ -1,5 +1,5 @@
 import { Gesture } from 'react-native-gesture-handler';
-import { useSharedValue, runOnJS } from 'react-native-reanimated';
+import { useSharedValue } from 'react-native-reanimated';
 
 import {
   getFeatures,
@@ -27,7 +27,8 @@ export default function useCanvasGestures(
   });
 
   const gesture = Gesture.Manual()
-    .onTouchesDown((event, manager) => {
+    .runOnJS(true)
+    .onTouchesDown((event) => {
       if (
         event.numberOfTouches > 1 &&
         gestureState.value === GestureState.Undetermined
@@ -38,9 +39,9 @@ export default function useCanvasGestures(
       history.value = getInitialHistory(event.allTouches);
 
       if (!isActive.value) {
-        manager.activate();
+        isActive.value = true;
 
-        runOnJS(onTouchStart)({
+        onTouchStart({
           scale: 1,
           point: {
             x: event.allTouches[0].x,
@@ -69,15 +70,8 @@ export default function useCanvasGestures(
         features.distance > MoveThreshold
       ) {
         gestureState.value = GestureState.Other;
-        runOnJS(onTouchStart)({
-          ...features,
-          delta: { x: 0, y: 0 },
-          scale: 1,
-          state: gestureState.value,
-          touches: event.allTouches,
-        });
       } else {
-        runOnJS(onTouchUpdate)({
+        onTouchUpdate({
           ...features,
           state: gestureState.value,
           touches: event.allTouches,
@@ -86,7 +80,8 @@ export default function useCanvasGestures(
     })
     .onTouchesUp((event, manager) => {
       if (event.numberOfTouches < 1) {
-        runOnJS(onTouchEnd)({
+        isActive.value = false;
+        onTouchEnd({
           scale: 1,
           point: history.value.centroid,
           scaleTo: history.value.centroid,
@@ -94,24 +89,18 @@ export default function useCanvasGestures(
           state: gestureState.value,
           touches: event.allTouches,
         });
-        manager.end();
+
+        gestureState.value = GestureState.Undetermined;
+        history.value = {
+          touches: {},
+          numberOfTouches: 0,
+          centroid: { x: 0, y: 0 },
+          pinchIds: [0, 0],
+        };
       } else {
         const [, touch] = getFeatures(event.allTouches, history.value);
         history.value = touch;
       }
-    })
-    .onStart(() => {
-      isActive.value = true;
-    })
-    .onEnd(() => {
-      gestureState.value = GestureState.Undetermined;
-      history.value = {
-        touches: {},
-        numberOfTouches: 0,
-        centroid: { x: 0, y: 0 },
-        pinchIds: [0, 0],
-      };
-      isActive.value = false;
     });
 
   return gesture;

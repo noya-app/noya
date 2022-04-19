@@ -103,7 +103,7 @@ export const useApplicationState = (): AppStateType => {
   );
 };
 
-export const useThrottledApllicationState = (): AppStateType => {
+export const useThrottledApplicationState = (): AppStateType => {
   const state = useWorkspaceState();
   const dispatch = useDispatch();
 
@@ -157,7 +157,7 @@ export function useSelector<Projection>(
 export function useThrottledSelector<Projection>(
   selector: (state: ApplicationState) => Projection,
 ) {
-  const [state] = useThrottledApllicationState();
+  const [state] = useThrottledApplicationState();
 
   return useMemo(() => selector(state), [selector, state]);
 }

@@ -33,7 +33,7 @@ import {
   ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
 import {
-  useThrottledApllicationState,
+  useThrottledApplicationState,
   useThrottledSelector,
 } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
@@ -46,7 +46,7 @@ const HorizontalPaddingContainer = styled(View)({
 });
 
 const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
-  const [state, dispatch] = useThrottledApllicationState();
+  const [state, dispatch] = useThrottledApplicationState();
 
   const selectedLayers = useShallowArray(
     useThrottledSelector(Selectors.getSelectedLayers),

@@ -52,7 +52,9 @@ export function getTouchMap(touches: TouchData[]) {
   const map: TouchMap = {};
 
   touches.forEach((touch) => {
-    map[touch.id] = touch;
+    map[touch.id] = {
+      ...touch,
+    };
   });
 
   return map;
@@ -71,10 +73,15 @@ function getPinch(
 ): { scale: number; pinchIds: [number, number] } {
   'worklet';
   if (inTouches.length < 2) {
-    return { scale: 1, pinchIds: [0, 0] };
+    return { scale: 1, pinchIds: [inTouches[0].id, inTouches[0].id] };
   }
 
   const [lp1, lp2] = history.pinchIds;
+
+  if (lp1 === lp2) {
+    const [touch1, touch2] = inTouches;
+    return { scale: 1, pinchIds: [touch1.id, touch2.id] };
+  }
   const hasSameTouch = touches[lp1] && touches[lp2];
   const lastDistance = getDistance(history.touches[lp1], history.touches[lp2]);
   let currentDistance: number = lastDistance;
@@ -85,8 +92,7 @@ function getPinch(
     currentDistance = getDistance(touches[0], touches[1]);
   }
 
-  let scale = currentDistance / lastDistance;
-
+  let scale = lastDistance === 0 ? 1 : currentDistance / lastDistance;
   return { scale, pinchIds: history.pinchIds };
 }
 
@@ -129,10 +135,24 @@ export function getInitialHistory(inTouches: TouchData[]): TouchHistory {
   centroid.x /= inTouches.length;
   centroid.y /= inTouches.length;
 
+  if (inTouches.length > 1) {
+    const [touch1, touch2] = inTouches;
+    return {
+      numberOfTouches: inTouches.length,
+      touches: getTouchMap(inTouches),
+      pinchIds: [touch1.id, touch2.id],
+      panTouchId: touch1.id,
+      centroid,
+    };
+  }
+
+  const [firstTouch] = inTouches;
+
   return {
     numberOfTouches: inTouches.length,
     touches: getTouchMap(inTouches),
-    pinchIds: [0, 1],
+    pinchIds: [firstTouch.id, firstTouch.id],
+    panTouchId: firstTouch.id,
     centroid,
   };
 }
@@ -153,13 +173,12 @@ export function getFeatures(
   let delta = { x: 0, y: 0 };
   let panTouchId: number | undefined;
   let distance: number = 0;
+  const sharedTouch = inTouches.find((touch) => !!history.touches[touch.id]);
 
-  if (inTouches.length < 2 || history.panTouchId) {
-    panTouchId = history.panTouchId ?? inTouches[0].id;
-
-    delta.x = history.touches[panTouchId].x - touches[panTouchId].x;
-    delta.y = history.touches[panTouchId].y - touches[panTouchId].y;
-    distance = getDistance(history.touches[panTouchId], touches[panTouchId]);
+  if (sharedTouch) {
+    delta.x = history.touches[sharedTouch.id].x - sharedTouch.x;
+    delta.y = history.touches[sharedTouch.id].y - sharedTouch.y;
+    distance = getDistance(history.touches[sharedTouch.id], sharedTouch);
   } else {
     delta.x = history.centroid.x - centroid.x;
     delta.y = history.centroid.y - centroid.y;
@@ -168,7 +187,7 @@ export function getFeatures(
 
   return [
     {
-      point: centroid,
+      point: sharedTouch ?? centroid,
       scale,
       scaleTo: centroidDistance < stablePointDistance ? centroid : stablePoint!,
       distance,
