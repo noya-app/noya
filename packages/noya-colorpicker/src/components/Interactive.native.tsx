@@ -4,13 +4,10 @@ import React, {
   useState,
   useCallback,
   createContext,
-  useRef,
 } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 
 import { Touchable, TouchEvent, TouchableContext } from 'noya-designsystem';
-import { throttle } from 'noya-utils';
-import { Point } from 'noya-geometry';
 import { InteractiveProps } from './types';
 import { clamp } from '../utils/clamp';
 
@@ -22,8 +19,6 @@ export const InteractiveContext = createContext<{
   height: 0,
 });
 
-const ClickThreshold = 0.05;
-
 function isInRange(x1: number, x2: number, delta: number) {
   return x1 >= x2 - delta && x1 <= x2 + delta;
 }
@@ -32,10 +27,9 @@ export const Interactive = memo(function InteractiveBase({
   onClick,
   children,
   locations,
-  ...props
+  onMove,
 }: InteractiveProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const onMove = useRef(throttle(props.onMove, 25)).current;
 
   const handlePress = useCallback(
     (event: TouchEvent) => {
@@ -55,18 +49,13 @@ export const Interactive = memo(function InteractiveBase({
       for (let i = 0; i <= locations.length; i += 1) {
         const locationX = size.width * locations[i];
 
-        console.log(locationX, 25, event.point.x);
-
-        if (isInRange(event.point.x, locationX, 25)) {
+        if (isInRange(event.point.x, locationX, 30)) {
           locationIndex = i;
           break;
         }
       }
 
-      console.log({ locationIndex });
-
       if (locationIndex !== undefined) {
-        console.log('onClick', locationIndex);
         onClick?.(locationIndex);
         return;
       }
@@ -78,17 +67,12 @@ export const Interactive = memo(function InteractiveBase({
 
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
-      if (locations) {
-        handlePress(event);
-        return;
-      }
-
       onMove({
         left: clamp(event.point.x / size.width, 0, 1),
         top: clamp(event.point.y / size.height, 0, 1),
       });
     },
-    [locations, size.width, size.height, handlePress, onMove],
+    [size.width, size.height, onMove],
   );
 
   const handleTouchUpdate = useCallback(
@@ -112,7 +96,7 @@ export const Interactive = memo(function InteractiveBase({
         !!height &&
         (width !== size.width || height !== size.height)
       ) {
-        setSize({ width, height });
+        setSize({ width: width - 8, height: height - 8 });
       }
     },
     [setSize, size],
@@ -129,7 +113,15 @@ export const Interactive = memo(function InteractiveBase({
           onTouchStart={handleTouchStart}
           onTouchUpdate={handleTouchUpdate}
         >
-          <View onLayout={onLayout}>{children}</View>
+          <View
+            onLayout={onLayout}
+            style={{
+              padding: 4,
+              marginHorizontal: -4,
+            }}
+          >
+            {children}
+          </View>
         </Touchable>
       </TouchableContext.Provider>
     </InteractiveContext.Provider>

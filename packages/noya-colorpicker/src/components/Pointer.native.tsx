@@ -13,8 +13,8 @@ const PointerBase = styled(View)<{ selected?: boolean }>(
     borderWidth: 3,
     borderColor: selected ? theme.colors.primary : 'white',
     position: 'absolute',
-    top: -8,
-    left: -8,
+    top: -4,
+    left: -4,
   }),
 );
 
@@ -26,8 +26,8 @@ export default memo(function Pointer({ top, left, selected }: PointerProps) {
       pointerEvents="none"
       selected={selected}
       style={[
-        top === undefined && { top: size.height / 2 - 8 },
-        left === undefined && { left: size.width / 2 - 8 },
+        top === undefined && { top: size.height / 2 - 4 },
+        left === undefined && { left: size.width / 2 - 4 },
         {
           transform: [
             { translateY: (top ?? 0) * size.height },

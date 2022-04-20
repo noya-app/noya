@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
-import { GestureDetector } from 'react-native-gesture-handler';
+import { GestureDetector, ManualGesture } from 'react-native-gesture-handler';
 import styled from 'styled-components';
 
 import {
@@ -21,10 +21,10 @@ import {
   SelectedControlPoint,
 } from 'noya-state';
 import {
-  GestureState,
   useLayerMenu,
-  useCanvasGestures,
+  GestureState,
   CanvasTouchEvent,
+  useCanvasGestures,
 } from 'noya-workspace-ui';
 import CanvasRenderer from './CanvasRenderer';
 
@@ -677,7 +677,11 @@ const Canvas: React.FC<{}> = () => {
     [offsetEventPoint, state, dispatch, insets, CanvasKit, fontManager],
   );
 
-  const gestures = useCanvasGestures(onTouchStart, onTouchUpdate, onTouchEnd);
+  const gestures = useCanvasGestures(
+    onTouchStart,
+    onTouchUpdate,
+    onTouchEnd,
+  ) as unknown as ManualGesture;
 
   const onCanvasLayout = useCallback(
     (event: LayoutChangeEvent) => {

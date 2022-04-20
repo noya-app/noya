@@ -64,10 +64,12 @@ export default memo(function FillInspector({ title, allowMoreThanOne }: Props) {
           }}
           gradientProps={{
             gradient: item.gradient,
-            onChangeGradientColor: (value, stopIndex) =>
-              dispatch('setFillGradientColor', index, stopIndex, value),
-            onChangeGradientPosition: (value, stopIndex) =>
-              dispatch('setFillGradientPosition', index, stopIndex, value),
+            onChangeGradientColor: (value, stopIndex) => {
+              dispatch('setFillGradientColor', index, stopIndex, value);
+            },
+            onChangeGradientPosition: (value, stopIndex) => {
+              dispatch('setFillGradientPosition', index, stopIndex, value);
+            },
             onAddGradientStop: (color, position) =>
               dispatch('addFillGradientStop', index, color, position),
             onDeleteGradientStop: (value) =>
@@ -76,13 +78,14 @@ export default memo(function FillInspector({ title, allowMoreThanOne }: Props) {
               dispatch('setFillGradientType', index, value),
             onChangeGradient: (value) =>
               dispatch('setFillGradient', index, value),
-            onEditGradient: (stopIndex) =>
+            onEditGradient: (stopIndex) => {
               dispatch('setSelectedGradient', {
                 layerId: selectLayerId,
                 fillIndex: index,
                 stopIndex,
                 styleType: 'fills',
-              }),
+              });
+            },
           }}
           patternProps={{
             pattern: item.pattern,

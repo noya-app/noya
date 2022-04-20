@@ -110,6 +110,13 @@ export default memo(function GradientInspector({
     );
   }, [gradient, clampedSelectedStopIndex, onDeleteStop, dispatch]);
 
+  const handleSelectStop = useCallback(
+    (index: number) => {
+      dispatch('setSelectedGradientStopIndex', index);
+    },
+    [dispatch],
+  );
+
   return (
     <Primitives.Section>
       <Primitives.Column>
@@ -120,10 +127,7 @@ export default memo(function GradientInspector({
           onChangePosition={handleChangePosition}
           onAdd={handleAddStop}
           onDelete={handleDeleteStop}
-          onSelectStop={useCallback(
-            (index: number) => dispatch('setSelectedGradientStopIndex', index),
-            [dispatch],
-          )}
+          onSelectStop={handleSelectStop}
         />
         <Primitives.VerticalSeparator />
         <Primitives.Row id={id}>

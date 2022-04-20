@@ -58,15 +58,15 @@ export default memo(function Gradient({
     [gradients],
   );
   return (
-    <Container background={background}>
-      <Interactive
-        onMove={handleMove}
-        onKey={handleKey}
-        onClick={handleClick}
-        onDelete={onDelete}
-        onClickPointer={onSelectStop}
-        aria-label="Gradient"
-      >
+    <Interactive
+      onMove={handleMove}
+      onKey={handleKey}
+      onClick={handleClick}
+      onDelete={onDelete}
+      onClickPointer={onSelectStop}
+      aria-label="Gradient"
+    >
+      <Container background={background}>
         {gradients.map((g, index) => (
           <Pointer
             index={index}
@@ -75,7 +75,7 @@ export default memo(function Gradient({
             left={g.position}
           />
         ))}
-      </Interactive>
-    </Container>
+      </Container>
+    </Interactive>
   );
 });
