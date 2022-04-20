@@ -3,7 +3,9 @@ import type {
   GestureUpdateEvent,
   GestureStateChangeEvent,
   PanGestureChangeEventPayload,
+  TapGestureHandlerEventPayload,
   PanGestureHandlerEventPayload,
+  LongPressGestureHandlerEventPayload,
 } from 'react-native-gesture-handler';
 
 import type { Point } from 'noya-geometry';
@@ -16,12 +18,19 @@ export interface TouchMap {
   [id: number]: TouchData;
 }
 
+export interface Centroid {
+  x: number;
+  y: number;
+  absoluteX: number;
+  absoluteY: number;
+}
+
 export interface TouchHistory {
   touches: TouchMap;
   numberOfTouches: number;
 
   // Center of the touches, used both in pan and pinch gestures
-  centroid: Point;
+  centroid: Centroid;
   // If one of the touches has stable position
   // it will be usedd as origin of scale instead of centroid
   stableTouchId?: number;
@@ -38,6 +47,7 @@ export interface TouchFeatures {
   delta: Point;
   scaleTo: Point;
   point: Point;
+  absolutePoint: Point;
 }
 
 /**
@@ -48,6 +58,11 @@ export type PanEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>;
 export type PanUpdateEvent = GestureUpdateEvent<
   PanGestureHandlerEventPayload & PanGestureChangeEventPayload
 >;
+
+export type TapEvent = GestureStateChangeEvent<TapGestureHandlerEventPayload>;
+
+export type LongPressEvent =
+  GestureStateChangeEvent<LongPressGestureHandlerEventPayload>;
 
 /**
  * Utility function usefull for gesture recognition when using
@@ -126,12 +141,14 @@ export function getTouchReferencePoints(
   history: TouchHistory,
 ) {
   'worklet';
-  let centroid: Point = { x: 0, y: 0 };
+  let centroid = { x: 0, y: 0, absoluteX: 0, absoluteY: 0 };
   let stablePoints: TouchData[] = [];
 
   inTouches.forEach((touch) => {
     centroid.x += touch.x;
     centroid.y += touch.y;
+    centroid.absoluteX += touch.absoluteX;
+    centroid.absoluteY += touch.absoluteY;
 
     if (history.touches[touch.id]) {
       const distance = getDistance(touch, history.touches[touch.id]);
@@ -144,6 +161,8 @@ export function getTouchReferencePoints(
 
   centroid.x /= inTouches.length;
   centroid.y /= inTouches.length;
+  centroid.absoluteX /= inTouches.length;
+  centroid.absoluteY /= inTouches.length;
 
   return {
     centroid,
@@ -159,15 +178,19 @@ export function getTouchReferencePoints(
  */
 export function getInitialHistory(inTouches: TouchData[]): TouchHistory {
   'worklet';
-  const centroid = { x: 0, y: 0 };
+  const centroid = { x: 0, y: 0, absoluteX: 0, absoluteY: 0 };
 
   inTouches.forEach((touch) => {
     centroid.x += touch.x;
     centroid.y += touch.y;
+    centroid.absoluteX += touch.absoluteX;
+    centroid.absoluteY += touch.absoluteY;
   });
 
   centroid.x /= inTouches.length;
   centroid.y /= inTouches.length;
+  centroid.absoluteX /= inTouches.length;
+  centroid.absoluteY /= inTouches.length;
 
   if (inTouches.length > 1) {
     const [touch1, touch2] = inTouches;
@@ -225,9 +248,18 @@ export function getTouchFeatures(
     distance = getDistance(history.centroid, centroid);
   }
 
+  const positionTouch = sharedTouch ?? centroid;
+
   return [
     {
-      point: sharedTouch ?? centroid,
+      point: {
+        x: positionTouch.x,
+        y: positionTouch.y,
+      },
+      absolutePoint: {
+        x: positionTouch.absoluteX,
+        y: positionTouch.absoluteY,
+      },
       scale,
       scaleTo: centroidDistance < stablePointDistance ? centroid : stablePoint!,
       distance,

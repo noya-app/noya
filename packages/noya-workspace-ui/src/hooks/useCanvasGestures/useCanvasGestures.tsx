@@ -50,7 +50,6 @@ export default function useCanvasGestures(
             y: event.allTouches[0].y,
           },
           state: gestureState.value,
-          touches: event.allTouches,
         });
       }
     })
@@ -74,7 +73,6 @@ export default function useCanvasGestures(
         onTouchUpdate({
           ...features,
           state: gestureState.value,
-          touches: event.allTouches,
         });
       }
     })
@@ -87,7 +85,6 @@ export default function useCanvasGestures(
           scaleTo: history.value.centroid,
           delta: { x: 0, y: 0 },
           state: gestureState.value,
-          touches: event.allTouches,
         });
 
         gestureState.value = GestureState.Undetermined;

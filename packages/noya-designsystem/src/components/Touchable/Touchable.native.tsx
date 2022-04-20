@@ -1,80 +1,210 @@
 import React, {
   memo,
   useMemo,
-  // useContext,
-  // useCallback,
+  useContext,
+  useCallback,
   createContext,
   PropsWithChildren,
 } from 'react';
-import { View } from 'react-native';
+import { View, ViewProps } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
+import { Point } from 'noya-geometry';
+import {
+  TapEvent,
+  PanEvent,
+  PanUpdateEvent,
+  LongPressEvent,
+} from '../../utils';
 import type {
-  // Gestures,
-  // PanEvent,
-  // PinchEvent,
-  // PanHandlers,
-  // PinchHandlers,
-  // PanUpdateEvent,
+  TouchEvent,
   TouchableProps,
-  // PinchUpdateEvent,
+  TouchHandlerName,
   TouchableContextType,
-  TouchableComponentProps,
-  // PressHandler,
-  // LongPressHandler,
-  // DoublePressHandler,
 } from './types';
 
 const TouchableContext = createContext<TouchableContextType>([]);
 
+function useTouchableHandlers({
+  onTouchStart,
+  onTouchUpdate,
+  onTouchEnd,
+  onPress,
+  onLongPress,
+}: TouchableProps) {
+  const parentHandlers = useContext(TouchableContext);
+
+  return useMemo(() => {
+    return [
+      ...parentHandlers,
+      {
+        onTouchStart,
+        onTouchUpdate,
+        onTouchEnd,
+        onPress,
+        onLongPress,
+      },
+    ];
+  }, [
+    parentHandlers,
+    onTouchStart,
+    onTouchUpdate,
+    onTouchEnd,
+    onPress,
+    onLongPress,
+  ]);
+}
+
 const TouchableListenerInner: React.FC<PropsWithChildren<TouchableProps>> = ({
   children,
-  // gestures,
+  ...touchableProps
 }) => {
-  // const parentHandlers = useContext(TouchableContext);
-
-  // const mergedContexts: TouchableContextType = useMemo(() => {
-  //   return [...parentHandlers, gestures];
-  // }, [gestures, parentHandlers]);
-  // <TouchableContext.Provider value={mergedContexts}>
-  // </TouchableContext.Provider>
-
-  return <>{children}</>;
-};
-
-const Touchable: React.FC<TouchableComponentProps> = ({
-  children,
-  runOnUI = false,
-  ...viewProps
-}) => {
-  // const parentHandlers = useContext(TouchableContext);
-
-  // const handlers = useMemo(
-  //   () => [...parentHandlers, gestures],
-  //   [parentHandlers, gestures],
-  // );
-
-  // const getHandlers = useCallback(
-  //   (handlerName: keyof Gestures) => {
-  //     let gestureHandlers = [];
-
-  //     for (let i = 0; i < handlers.length; i += 1) {
-  //       if (!!handlers[i]?.[handlerName]) {
-  //         gestureHandlers.push(handlers[i][handlerName]);
-  //       }
-  //     }
-
-  //     return gestureHandlers;
-  //   },
-  //   [handlers],
-  // );
-
-  const gesture = useMemo(() => {
-    return Gesture.Manual().runOnJS(true);
-  }, []);
+  const handlers = useTouchableHandlers(touchableProps);
 
   return (
-    <GestureDetector gesture={gesture}>
+    <TouchableContext.Provider value={handlers}>
+      {children}
+    </TouchableContext.Provider>
+  );
+};
+
+const TouchableInner: React.FC<TouchableProps & ViewProps> = ({
+  children,
+  onTouchStart,
+  onTouchUpdate,
+  onTouchEnd,
+  onPress,
+  onLongPress,
+  ...viewProps
+}) => {
+  const lastPan = useSharedValue<Point>({ x: 0, y: 0 });
+
+  const handlers = useTouchableHandlers({
+    onTouchStart,
+    onTouchUpdate,
+    onTouchEnd,
+    onPress,
+    onLongPress,
+  });
+
+  const callHandlers = useCallback(
+    (handlerName: TouchHandlerName, event: TouchEvent) => {
+      handlers.forEach((handlers) => {
+        handlers[handlerName]?.(event);
+      });
+    },
+    [handlers],
+  );
+
+  const tapGesture = Gesture.Tap()
+    .runOnJS(true)
+    .onEnd((event: TapEvent) => {
+      callHandlers('onPress', {
+        point: {
+          x: event.x,
+          y: event.y,
+        },
+        absolutePoint: {
+          x: event.absoluteX,
+          y: event.absoluteY,
+        },
+        delta: {
+          x: 0,
+          y: 0,
+        },
+      });
+    });
+
+  const longPressGesture = Gesture.LongPress()
+    .runOnJS(true)
+    .onEnd((event: LongPressEvent) => {
+      callHandlers('onLongPress', {
+        point: {
+          x: event.x,
+          y: event.y,
+        },
+        absolutePoint: {
+          x: event.absoluteX,
+          y: event.absoluteY,
+        },
+        delta: {
+          x: 0,
+          y: 0,
+        },
+      });
+    });
+
+  const panGesture = Gesture.Pan()
+    .runOnJS(true)
+    .onStart((event: PanEvent) => {
+      lastPan.value = {
+        x: event.x,
+        y: event.y,
+      };
+
+      callHandlers('onTouchStart', {
+        point: {
+          x: event.x,
+          y: event.y,
+        },
+        absolutePoint: {
+          x: event.absoluteX,
+          y: event.absoluteY,
+        },
+        delta: {
+          x: 0,
+          y: 0,
+        },
+      });
+    })
+    .onChange((event: PanUpdateEvent) => {
+      callHandlers('onTouchUpdate', {
+        point: {
+          x: event.x,
+          y: event.y,
+        },
+        absolutePoint: {
+          x: event.absoluteX,
+          y: event.absoluteY,
+        },
+        delta: {
+          x: event.x - lastPan.value.x,
+          y: event.y - lastPan.value.y,
+        },
+      });
+
+      lastPan.value = {
+        x: event.x,
+        y: event.y,
+      };
+    })
+    .onEnd((event: PanEvent) => {
+      callHandlers('onTouchEnd', {
+        point: {
+          x: event.x,
+          y: event.y,
+        },
+        absolutePoint: {
+          x: event.absoluteX,
+          y: event.absoluteY,
+        },
+        delta: {
+          x: event.x - lastPan.value.x,
+          y: event.y - lastPan.value.y,
+        },
+      });
+
+      lastPan.value = {
+        x: 0,
+        y: 0,
+      };
+    });
+
+  const gestures = Gesture.Race(panGesture, longPressGesture, tapGesture);
+
+  return (
+    <GestureDetector gesture={gestures}>
       <View {...viewProps} collapsable={false}>
         {children}
       </View>
@@ -83,92 +213,4 @@ const Touchable: React.FC<TouchableComponentProps> = ({
 };
 
 export const TouchableListener = memo(TouchableListenerInner);
-export default memo(Touchable);
-
-// const gestureMap: { [key: string]: any } = {};
-// const panHandlersSingle = getHandlers('panHandlersSingle') as PanHandlers[];
-// const panHandlersDouble = getHandlers('panHandlersDouble') as PanHandlers[];
-// const pinchHandlers = getHandlers('pinchHandlers') as PinchHandlers[];
-// const pressHandlers = getHandlers('onPress') as PressHandler[];
-// const longPressHandlers = getHandlers('onLongPress') as LongPressHandler[];
-// const doublePressHandlers = getHandlers(
-//   'onDoublePress',
-// ) as DoublePressHandler[];
-// if (pressHandlers.length) {
-//   gestureMap.pressHandler = Gesture.Tap()
-//     .runOnJS(true)
-//     .numberOfTaps(1)
-//     .onEnd((event, success) => {
-//       if (success) {
-//         pressHandlers.forEach((handler) => handler(event));
-//       }
-//     });
-// }
-// if (doublePressHandlers.length) {
-//   gestureMap.doublePressHandler = Gesture.Tap()
-//     .runOnJS(true)
-//     .numberOfTaps(2)
-//     .onEnd((event, success) => {
-//       if (success) {
-//         doublePressHandlers.forEach((handler) => handler(event));
-//       }
-//     });
-// }
-// if (longPressHandlers.length) {
-//   gestureMap.longPressHandler = Gesture.LongPress()
-//     .runOnJS(true)
-//     .onEnd((event, success) => {
-//       if (success) {
-//         longPressHandlers.forEach((handler) => handler(event));
-//       }
-//     });
-// }
-// if (panHandlersSingle.length) {
-//   gestureMap.panHandlerSingle = Gesture.Pan()
-//     .runOnJS(true)
-//     .maxPointers(!!panHandlersDouble.length ? 1 : 5)
-//     .onStart((event: PanEvent) => {
-//       panHandlersSingle.forEach((handlers) => handlers.onStart(event));
-//     })
-//     .onUpdate((event: PanUpdateEvent) => {
-//       panHandlersSingle.forEach((handlers) => handlers.onUpdate(event));
-//     })
-//     .onEnd((event: PanEvent) => {
-//       panHandlersSingle.forEach((handlers) => handlers.onEnd(event));
-//     });
-// }
-// if (pinchHandlers.length) {
-//   gestureMap.pinchHandler = Gesture.Pinch()
-//     .runOnJS(true)
-//     .onStart((event: PinchEvent) => {
-//       pinchHandlers.forEach((handlers) => handlers.onStart(event));
-//     })
-//     .onUpdate((event: PinchUpdateEvent) => {
-//       pinchHandlers.forEach((handlers) => handlers.onUpdate(event));
-//     })
-//     .onEnd((event: PinchEvent) => {
-//       pinchHandlers.forEach((handlers) => handlers.onEnd(event));
-//     });
-// }
-// if (panHandlersDouble.length) {
-//   gestureMap.panHandlerDouble = Gesture.Pan()
-//     .runOnJS(true)
-//     .minPointers(2)
-//     .onStart((event: PanEvent) => {
-//       panHandlersDouble.forEach((handlers) => handlers.onStart(event));
-//     })
-//     .onUpdate((event: PanUpdateEvent) => {
-//       panHandlersDouble.forEach((handlers) => handlers.onUpdate(event));
-//     })
-//     .onEnd((event: PanEvent) => {
-//       panHandlersDouble.forEach((handlers) => handlers.onEnd(event));
-//     });
-// }
-// const handlersArray = Object.values(gestureMap);
-// if (!handlersArray.length) {
-//   return undefined;
-// }
-// if (handlersArray.length === 1) {
-//   return handlersArray[0];
-// }
-// return Gesture.Race(...handlersArray);
+export const Touchable = memo(TouchableInner);

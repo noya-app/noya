@@ -28,7 +28,7 @@ import styled from 'styled-components';
 import { InputField } from '../InputField';
 import ContextMenu from '../ContextMenu';
 import * as Sortable from '../Sortable';
-import Touchable from '../Touchable';
+import { Touchable } from '../Touchable';
 import { Layout } from '../Layout';
 import {
   RenderProps,
@@ -239,9 +239,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     ref: Ref<View>,
   ) => {
     const element = (
-      <Touchable
-        gestures={{ onPress: handlePress, onLongPress: handleLongPress }}
-      >
+      <Touchable onPress={handlePress} onLongPress={handleLongPress}>
         <RowContainer
           ref={ref}
           isSectionHeader={isSectionHeader}

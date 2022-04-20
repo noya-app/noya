@@ -20,7 +20,7 @@ import Animated, {
 
 import { Point } from 'noya-geometry';
 import { useScrollable } from '../ScrollableView';
-import { PanEvent, PanUpdateEvent, TouchableListener } from '../Touchable';
+import { TouchEvent, TouchableListener } from '../Touchable';
 import type {
   DropValidator,
   ItemMeasurement,
@@ -117,48 +117,48 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
   const { index, children } = props;
   const touchStartTimeoutRef = useRef<number>();
 
-  const dragHandlers = {
-    onStart: useCallback(
-      (event: PanEvent) => {
-        const point = { x: event.x, y: event.y };
+  const onTouchStart = useCallback(
+    (event: TouchEvent) => {
+      const point = event.point;
 
-        sortable.setActiveItemIndex(index);
-        touchStartTimeoutRef.current = undefined;
+      sortable.setActiveItemIndex(index);
+      touchStartTimeoutRef.current = undefined;
 
-        // If there is scroll view parent
-        // Disable its scroll capture durning drag&drop
-        if (scrollable.isAvailable) {
-          scrollable.setScrollEnabled(false);
-        }
+      // If there is scroll view parent
+      // Disable its scroll capture durning drag&drop
+      if (scrollable.isAvailable) {
+        scrollable.setScrollEnabled(false);
+      }
 
-        sortable.touchPos.value = point;
-        // calculate difference between element and touch positions
-        // to keep it consistent while dragging
-        sortable.touchOffset.value = {
-          x: point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
-          y: point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
-        };
-      },
-      [sortable, index, scrollable],
-    ),
-    onUpdate: useCallback(
-      (event: PanUpdateEvent) => {
-        sortable.touchPos.value = { x: event.x, y: event.y };
-      },
-      [sortable],
-    ),
-    onEnd: useCallback(
-      (event: PanEvent) => {
-        sortable.onDropItem(event.y - sortable.touchOffset.value.y);
+      sortable.touchPos.value = point;
+      // calculate difference between element and touch positions
+      // to keep it consistent while dragging
+      sortable.touchOffset.value = {
+        x: point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
+        y: point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
+      };
+    },
+    [sortable, index, scrollable],
+  );
 
-        // Enable parent scrollview drag
-        if (scrollable.isAvailable) {
-          scrollable.setScrollEnabled(true);
-        }
-      },
-      [sortable, scrollable],
-    ),
-  };
+  const onTouchUpdate = useCallback(
+    (event: TouchEvent) => {
+      sortable.touchPos.value = event.point;
+    },
+    [sortable],
+  );
+
+  const onTouchEnd = useCallback(
+    (event: TouchEvent) => {
+      sortable.onDropItem(event.point.y - sortable.touchOffset.value.y);
+
+      // Enable parent scrollview drag
+      if (scrollable.isAvailable) {
+        scrollable.setScrollEnabled(true);
+      }
+    },
+    [sortable, scrollable],
+  );
 
   const onLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -176,7 +176,11 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
 
   // {/*  index as key enforces onLayout event after data list has been modified */}
   return (
-    <TouchableListener gestures={{ panHandlersSingle: dragHandlers }}>
+    <TouchableListener
+      onTouchStart={onTouchStart}
+      onTouchUpdate={onTouchUpdate}
+      onTouchEnd={onTouchEnd}
+    >
       <View onLayout={onLayout} key={index}>
         {children}
       </View>

@@ -57,9 +57,9 @@ function ToggleGroupItem({ value, children, disabled }: RadioGroupItemProps) {
 
   return (
     <StyledItem isActive={isActive}>
-      {/* <Touchable onPress={onPress} disabled={disabled}> */}
-      <StyledItemInner>{children}</StyledItemInner>
-      {/* </Touchable> */}
+      <Touchable onPress={onPress} disabled={disabled}>
+        <StyledItemInner>{children}</StyledItemInner>
+      </Touchable>
     </StyledItem>
   );
 }

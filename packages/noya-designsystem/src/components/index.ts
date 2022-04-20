@@ -7,6 +7,7 @@ export * from './Select';
 export * from './Dialog';
 export * from './Tooltip';
 export * from './Checkbox';
+export * from './Touchable';
 export * from './InputField';
 export * from './Expandable';
 export * from './RadioGroup';
