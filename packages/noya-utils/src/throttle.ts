@@ -55,6 +55,7 @@ export function throttle<T extends Function>(
       result = func.apply(context, args);
       if (!timeout) context = args = null;
     } else if (!timeout && options.trailing !== false) {
+      // @ts-ignore for some reason mobile requires it to be Timeout while web requires number
       timeout = setTimeout(later, remaining);
     }
     return result;
