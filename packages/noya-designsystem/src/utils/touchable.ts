@@ -1,12 +1,16 @@
-import type { TouchData } from 'react-native-gesture-handler';
+import type {
+  TouchData,
+  GestureUpdateEvent,
+  GestureStateChangeEvent,
+  PanGestureChangeEventPayload,
+  PanGestureHandlerEventPayload,
+} from 'react-native-gesture-handler';
 
-import { Point } from 'noya-geometry';
+import type { Point } from 'noya-geometry';
 
-export enum GestureState {
-  Undetermined = 'Undetermined',
-  Canvas = 'Canvas',
-  Other = 'Other',
-}
+/**
+ * Types used by manual gesture utilities
+ */
 
 export interface TouchMap {
   [id: number]: TouchData;
@@ -28,7 +32,7 @@ export interface TouchHistory {
   pinchIds: [number, number];
 }
 
-export interface Features {
+export interface TouchFeatures {
   distance: number;
   scale: number;
   delta: Point;
@@ -36,16 +40,20 @@ export interface Features {
   point: Point;
 }
 
-export interface CallbackParams {
-  state: GestureState;
-  scale: number;
-  delta: Point;
-  scaleTo: Point;
-  point: Point;
-  touches: TouchData[];
-}
+/**
+ * Helper types for react-native gesture handler events
+ */
+export type PanEvent = GestureStateChangeEvent<PanGestureHandlerEventPayload>;
 
-export const MoveThreshold = 2;
+export type PanUpdateEvent = GestureUpdateEvent<
+  PanGestureHandlerEventPayload & PanGestureChangeEventPayload
+>;
+
+/**
+ * Utility function usefull for gesture recognition when using
+ * manual gesture handler
+ */
+export const TouchMoveThreshold = 2;
 
 export function getTouchMap(touches: TouchData[]) {
   'worklet';
@@ -60,13 +68,22 @@ export function getTouchMap(touches: TouchData[]) {
   return map;
 }
 
-function getDistance(p1: Point, p2: Point): number {
+export function getDistance(p1: Point, p2: Point): number {
   'worklet';
 
   return Math.round(Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2));
 }
 
-function getPinch(
+/**
+ * Calculates delta scale for pinch gesture. Methods tries to track
+ * same touch points across consequentive touch updates.
+ *
+ * @param inTouches - TouchData[] provided by gesture-handler
+ * @param touches - inTouches data reduced to map
+ * @param history - informations about previous touch event (or events)
+ * @returns scale and ids of used touch points
+ */
+export function getPinch(
   inTouches: TouchData[],
   touches: TouchMap,
   history: TouchHistory,
@@ -96,7 +113,18 @@ function getPinch(
   return { scale, pinchIds: history.pinchIds };
 }
 
-function getReferencePoints(inTouches: TouchData[], history: TouchHistory) {
+/**
+ * Calculates centroid of the gesture https://en.wikipedia.org/wiki/Centroid
+ * As well as possible stable touch - touch point that didn't changed its position
+ *
+ * @param inTouches - TouchData[] provided by gesture-handler
+ * @param history - informations about previous touch event (or events)
+ * @returns centroid of the touches
+ */
+export function getTouchReferencePoints(
+  inTouches: TouchData[],
+  history: TouchHistory,
+) {
   'worklet';
   let centroid: Point = { x: 0, y: 0 };
   let stablePoints: TouchData[] = [];
@@ -108,7 +136,7 @@ function getReferencePoints(inTouches: TouchData[], history: TouchHistory) {
     if (history.touches[touch.id]) {
       const distance = getDistance(touch, history.touches[touch.id]);
 
-      if (distance < MoveThreshold) {
+      if (distance < TouchMoveThreshold) {
         stablePoints.push(touch);
       }
     }
@@ -123,6 +151,12 @@ function getReferencePoints(inTouches: TouchData[], history: TouchHistory) {
   };
 }
 
+/**
+ * Returns initial history for first touch event
+ *
+ * @param inTouches - TouchData[] provided by gesture-handler
+ * @returns touch history
+ */
 export function getInitialHistory(inTouches: TouchData[]): TouchHistory {
   'worklet';
   const centroid = { x: 0, y: 0 };
@@ -157,13 +191,19 @@ export function getInitialHistory(inTouches: TouchData[]): TouchHistory {
   };
 }
 
-export function getFeatures(
+/**
+ *
+ * @param inTouches
+ * @param history
+ * @returns
+ */
+export function getTouchFeatures(
   inTouches: TouchData[],
   history: TouchHistory,
-): [Features, TouchHistory] {
+): [TouchFeatures, TouchHistory] {
   'worklet';
   const touches = getTouchMap(inTouches);
-  const { centroid, stablePoint } = getReferencePoints(inTouches, history);
+  const { centroid, stablePoint } = getTouchReferencePoints(inTouches, history);
   const { scale, pinchIds } = getPinch(inTouches, touches, history);
   const centroidDistance = getDistance(history.centroid, centroid);
   const stablePointDistance = stablePoint

@@ -24,7 +24,7 @@ import {
   GestureState,
   useLayerMenu,
   useCanvasGestures,
-  TouchCallbackParams,
+  CanvasTouchEvent,
 } from 'noya-workspace-ui';
 import CanvasRenderer from './CanvasRenderer';
 
@@ -67,7 +67,7 @@ const Canvas: React.FC<{}> = () => {
   );
 
   const onTouchStart = useCallback(
-    ({ point: rawPoint }: TouchCallbackParams) => {
+    ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
@@ -279,7 +279,7 @@ const Canvas: React.FC<{}> = () => {
       scale,
       scaleTo,
       state: gestureState,
-    }: TouchCallbackParams) => {
+    }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
       if (gestureState === GestureState.Canvas) {
@@ -544,7 +544,7 @@ const Canvas: React.FC<{}> = () => {
   );
 
   const onTouchEnd = useCallback(
-    ({ point: rawPoint }: TouchCallbackParams) => {
+    ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
       const textSelection = Selectors.getTextSelection(state);

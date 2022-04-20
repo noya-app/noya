@@ -20,7 +20,7 @@ export const InteractiveContext = createContext<{
   height: 0,
 });
 
-const ClickThreshold = 0.03;
+const ClickThreshold = 0.05;
 
 export const Interactive = memo(function InteractiveBase({
   onMove,
@@ -106,11 +106,6 @@ export const Interactive = memo(function InteractiveBase({
       <GestureDetector gesture={gesture}>
         <View onLayout={onLayout}>{children}</View>
       </GestureDetector>
-      {/* <Touchable
-        gestures={{ panHandlersSingle: dragHandlers, onPress }}
-        onLayout={onLayout}
-      >
-      </Touchable> */}
     </InteractiveContext.Provider>
   );
 });

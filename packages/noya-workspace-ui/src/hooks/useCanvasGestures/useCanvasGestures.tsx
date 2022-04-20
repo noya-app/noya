@@ -2,20 +2,17 @@ import { Gesture } from 'react-native-gesture-handler';
 import { useSharedValue } from 'react-native-reanimated';
 
 import {
-  getFeatures,
   TouchHistory,
-  GestureState,
-  MoveThreshold,
-  CallbackParams,
+  getTouchFeatures,
   getInitialHistory,
-} from './utils';
-
-type Callback = (params: CallbackParams) => void;
+  TouchMoveThreshold,
+} from 'noya-designsystem';
+import { GestureState, CanvasTouchCallback } from './types';
 
 export default function useCanvasGestures(
-  onTouchStart: Callback,
-  onTouchUpdate: Callback,
-  onTouchEnd: Callback,
+  onTouchStart: CanvasTouchCallback,
+  onTouchUpdate: CanvasTouchCallback,
+  onTouchEnd: CanvasTouchCallback,
 ) {
   const isActive = useSharedValue(false);
   const gestureState = useSharedValue<GestureState>(GestureState.Undetermined);
@@ -62,12 +59,15 @@ export default function useCanvasGestures(
         return;
       }
 
-      const [features, touch] = getFeatures(event.allTouches, history.value);
+      const [features, touch] = getTouchFeatures(
+        event.allTouches,
+        history.value,
+      );
       history.value = touch;
 
       if (
         gestureState.value === GestureState.Undetermined &&
-        features.distance > MoveThreshold
+        features.distance > TouchMoveThreshold
       ) {
         gestureState.value = GestureState.Other;
       } else {
@@ -78,7 +78,7 @@ export default function useCanvasGestures(
         });
       }
     })
-    .onTouchesUp((event, manager) => {
+    .onTouchesUp((event) => {
       if (event.numberOfTouches < 1) {
         isActive.value = false;
         onTouchEnd({
@@ -98,7 +98,7 @@ export default function useCanvasGestures(
           pinchIds: [0, 0],
         };
       } else {
-        const [, touch] = getFeatures(event.allTouches, history.value);
+        const [, touch] = getTouchFeatures(event.allTouches, history.value);
         history.value = touch;
       }
     });
