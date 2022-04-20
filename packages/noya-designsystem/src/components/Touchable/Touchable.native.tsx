@@ -24,7 +24,7 @@ import type {
   TouchableContextType,
 } from './types';
 
-const TouchableContext = createContext<TouchableContextType>([]);
+export const TouchableContext = createContext<TouchableContextType>([]);
 
 function useTouchableHandlers({
   onTouchStart,

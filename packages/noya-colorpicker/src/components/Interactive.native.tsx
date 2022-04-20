@@ -4,11 +4,13 @@ import React, {
   useState,
   useCallback,
   createContext,
+  useRef,
 } from 'react';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { LayoutChangeEvent, View } from 'react-native';
 
-import { PanEvent, PanUpdateEvent } from 'noya-designsystem';
+import { Touchable, TouchEvent, TouchableContext } from 'noya-designsystem';
+import { throttle } from 'noya-utils';
+import { Point } from 'noya-geometry';
 import { InteractiveProps } from './types';
 import { clamp } from '../utils/clamp';
 
@@ -22,64 +24,81 @@ export const InteractiveContext = createContext<{
 
 const ClickThreshold = 0.05;
 
+function isInRange(x1: number, x2: number, delta: number) {
+  return x1 >= x2 - delta && x1 <= x2 + delta;
+}
+
 export const Interactive = memo(function InteractiveBase({
-  onMove,
   onClick,
   children,
   locations,
+  ...props
 }: InteractiveProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const onMove = useRef(throttle(props.onMove, 25)).current;
 
-  const onStart = useCallback(
-    (event: PanEvent) => {
+  const handlePress = useCallback(
+    (event: TouchEvent) => {
       if (!locations) {
         onMove({
-          left: clamp(event.x / size.width, 0, 1),
-          top: clamp(event.y / size.height, 0, 1),
+          left: clamp(event.point.x / size.width, 0, 1),
+          top: clamp(event.point.y / size.height, 0, 1),
         });
         return;
       }
 
       let locationIndex: number | undefined = undefined;
-      const left = clamp(event.x / size.width, 0, 1);
-      const top = clamp(event.y / size.height, 0, 1);
 
-      locations.forEach((location, index) => {
-        if (Math.abs(left - location) < 20 / size.width + ClickThreshold) {
-          locationIndex = index;
+      const left = clamp(event.point.x / size.width, 0, 1);
+      const top = clamp(event.point.y / size.height, 0, 1);
+
+      for (let i = 0; i <= locations.length; i += 1) {
+        const locationX = size.width * locations[i];
+
+        console.log(locationX, 25, event.point.x);
+
+        if (isInRange(event.point.x, locationX, 25)) {
+          locationIndex = i;
+          break;
         }
-      });
+      }
+
+      console.log({ locationIndex });
 
       if (locationIndex !== undefined) {
+        console.log('onClick', locationIndex);
         onClick?.(locationIndex);
         return;
       }
 
       onClick?.({ left, top });
     },
-    [locations, onClick, onMove, size],
+    [locations, onClick, size.width, size.height, onMove],
   );
 
-  const onUpdate = useCallback(
-    (event: PanUpdateEvent) => {
+  const handleTouchStart = useCallback(
+    (event: TouchEvent) => {
+      if (locations) {
+        handlePress(event);
+        return;
+      }
+
       onMove({
-        left: clamp(event.x / size.width, 0, 1),
-        top: clamp(event.y / size.height, 0, 1),
+        left: clamp(event.point.x / size.width, 0, 1),
+        top: clamp(event.point.y / size.height, 0, 1),
       });
     },
-    [onMove, size],
+    [locations, size.width, size.height, handlePress, onMove],
   );
 
-  const onEnd = useCallback(() => {}, []);
-
-  const gesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .runOnJS(true)
-        .onStart(onStart)
-        .onChange(onUpdate)
-        .onEnd(onEnd),
-    [onStart, onUpdate, onEnd],
+  const handleTouchUpdate = useCallback(
+    ({ point }: TouchEvent) => {
+      onMove({
+        left: clamp(point.x / size.width, 0, 1),
+        top: clamp(point.y / size.height, 0, 1),
+      });
+    },
+    [onMove, size.width, size.height],
   );
 
   const onLayout = useCallback(
@@ -103,9 +122,16 @@ export const Interactive = memo(function InteractiveBase({
 
   return (
     <InteractiveContext.Provider value={value}>
-      <GestureDetector gesture={gesture}>
-        <View onLayout={onLayout}>{children}</View>
-      </GestureDetector>
+      {/* Block all parent touchable component from revicing interactive events */}
+      <TouchableContext.Provider value={[]}>
+        <Touchable
+          onPress={handlePress}
+          onTouchStart={handleTouchStart}
+          onTouchUpdate={handleTouchUpdate}
+        >
+          <View onLayout={onLayout}>{children}</View>
+        </Touchable>
+      </TouchableContext.Provider>
     </InteractiveContext.Provider>
   );
 });
