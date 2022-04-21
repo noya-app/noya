@@ -34,10 +34,12 @@ export default memo(function FillInspector({ title, allowMoreThanOne }: Props) {
     selectedStyles.map((style) => style?.fills ?? []),
   );
 
-  const editableFills = useMemo(
-    () => getEditableStyles(fillMatrix, getEditableFill),
-    [fillMatrix],
-  );
+  const editableFills = useMemo(() => {
+    return getEditableStyles(
+      !fillMatrix.length ? [[]] : fillMatrix,
+      getEditableFill,
+    );
+  }, [fillMatrix]);
 
   const handleClickPlus = useCallback(() => dispatch('addNewFill'), [dispatch]);
 
