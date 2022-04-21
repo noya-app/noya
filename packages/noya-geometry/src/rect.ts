@@ -138,6 +138,15 @@ export function rectContainsPoint(rect: Rect, point: Point): boolean {
   );
 }
 
+export function scaleRect(rect: Rect, scale: number): Rect {
+  return {
+    x: rect.x - (rect.width * scale - rect.width) / 2,
+    y: rect.y - (rect.height * scale - rect.height) / 2,
+    width: rect.width * scale,
+    height: rect.height * scale,
+  };
+}
+
 // https://searchfox.org/mozilla-beta/source/toolkit/modules/Geometry.jsm
 export function rectsIntersect(a: Rect, b: Rect): boolean {
   const x1 = Math.max(a.x, b.x);
