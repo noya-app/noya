@@ -7,7 +7,10 @@ import {
   Selectors,
 } from 'noya-state';
 import { useShallowArray } from 'noya-react-utils';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
+import {
+  useThrottledApplicationState,
+  useThrottledSelector,
+} from 'noya-app-state-context';
 import CheckboxArrayController from '../CheckboxArrayController';
 import FillRow from './FillRow';
 
@@ -23,11 +26,11 @@ interface ItemProps {
 }
 
 export default memo(function FillInspector({ title, allowMoreThanOne }: Props) {
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useThrottledApplicationState();
   const selectLayerId = state.selectedLayerIds[0];
 
   const selectedStyles = useShallowArray(
-    useSelector(Selectors.getSelectedStyles),
+    useThrottledSelector(Selectors.getSelectedStyles),
   );
 
   const fillMatrix = useShallowArray(

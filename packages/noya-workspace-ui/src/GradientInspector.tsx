@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
 import type Sketch from 'noya-file-format';
-import { useApplicationState } from 'noya-app-state-context';
+import { useThrottledApplicationState } from 'noya-app-state-context';
 import {
   validHex,
   hexToRgba,
@@ -33,7 +33,7 @@ export default memo(function GradientInspector({
   onAddStop = (color: Sketch.Color, position: number) => {},
   onDeleteStop = (index: number) => {},
 }: Props) {
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useThrottledApplicationState();
 
   const hexInputId = `${id}-hex`;
   const opacityInputId = `${id}-opacity`;

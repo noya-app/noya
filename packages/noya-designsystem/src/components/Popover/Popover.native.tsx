@@ -1,22 +1,21 @@
 import React, {
   memo,
+  useRef,
+  useMemo,
   useState,
   useContext,
   useCallback,
   createContext,
-  useMemo,
-  useRef,
 } from 'react';
 import {
   View,
-  Modal,
   ViewStyle,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   LayoutChangeEvent,
 } from 'react-native';
 import styled from 'styled-components';
 
+import { Portal } from 'noya-react-utils';
 import type {
   RootProps,
   PopoverType,
@@ -26,12 +25,8 @@ import type {
   ElementDimensions,
 } from './types';
 
-const Backdrop = styled(View)({
-  width: '100%',
-  height: '100%',
-});
-
 const ContentView = styled(View)(({ theme }) => ({
+  zIndex: 999,
   position: 'absolute',
   borderRadius: 4,
   padding: 4,
@@ -103,11 +98,6 @@ const Content = memo(function Content({
   const popover = useContext(PopoverContext);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  const onCancelTouch = useCallback(() => {}, []);
-  const onDismiss = useCallback(() => {
-    popover.onChangeOpen(false);
-  }, [popover]);
-
   const positionStyle: ViewStyle = useMemo(() => {
     if (!dimensions.width || !dimensions.height) {
       // If dimensions aren't available let react calcuate them
@@ -176,17 +166,13 @@ const Content = memo(function Content({
   );
 
   return (
-    <Modal visible={popover.isOpen} transparent>
-      <TouchableWithoutFeedback onPress={onDismiss}>
-        <Backdrop>
-          <TouchableWithoutFeedback onPress={onCancelTouch}>
-            <ContentView style={[style, positionStyle]} onLayout={onLayout}>
-              {children}
-            </ContentView>
-          </TouchableWithoutFeedback>
-        </Backdrop>
-      </TouchableWithoutFeedback>
-    </Modal>
+    <Portal>
+      {popover.isOpen && (
+        <ContentView style={[style, positionStyle]} onLayout={onLayout}>
+          {children}
+        </ContentView>
+      )}
+    </Portal>
   );
 });
 

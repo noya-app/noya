@@ -12,6 +12,7 @@ import {
 import { StateProvider } from 'noya-app-state-context';
 import { Expandable, ExpandableProvider } from 'noya-designsystem';
 import { LayerList, DialogProvider } from 'noya-workspace-ui';
+import { PortalProvider } from 'noya-react-utils';
 import useAppState from '../hooks/useAppState';
 import AttributeInspector from '../containers/AttributeInspector';
 import ThemeManager from '../containers/ThemeManager';
@@ -97,12 +98,14 @@ const AppContent: React.FC = () => {
       <ImageCacheProvider>
         <ExpandableProvider>
           <StateProvider state={state.value} dispatch={handleDispatch}>
-            <ContentContainer>
-              {expandableLeft}
-              {expandableRight}
-              <Toolbar />
-              <Canvas />
-            </ContentContainer>
+            <PortalProvider>
+              <ContentContainer>
+                {expandableLeft}
+                {expandableRight}
+                <Toolbar />
+                <Canvas />
+              </ContentContainer>
+            </PortalProvider>
           </StateProvider>
         </ExpandableProvider>
       </ImageCacheProvider>
