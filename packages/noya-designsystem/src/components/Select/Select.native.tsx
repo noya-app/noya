@@ -1,15 +1,23 @@
 import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
   memo,
+  useMemo,
   useState,
+  useContext,
+  useCallback,
+  createContext,
+  useRef,
 } from 'react';
 import styled from 'styled-components';
-import { View, Text, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import Animated, { FadeInUp, FadeOutUp } from 'react-native-reanimated';
 
+import { Rect } from 'noya-geometry';
 import { Layout } from '../Layout';
 import type { SelectProps, SelectOptionProps } from './types';
 
@@ -50,13 +58,18 @@ const SelectOptionElement = styled(View)(({ theme }) => ({
 }));
 
 const DropdownElement = styled(Animated.View)(({ theme }) => ({
-  position: 'absolute',
-  backgroundColor: 'rgb(30, 30, 30)',
-  width: '100%',
-  top: 5,
   borderRadius: 4,
   paddingVertical: 4,
+  backgroundColor: 'rgb(30, 30, 30)',
 }));
+
+const Backdrop = styled(View)({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+});
 
 export const SelectOption = memo(function SelectOption<T extends string>({
   value,
@@ -99,6 +112,13 @@ function Select<T extends string>({
   ...rest
 }: SelectProps<T>) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [containerRect, setContainerRect] = useState<Rect>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const containerRef = useRef<View>(null);
 
   const options = 'options' in rest ? rest.options : undefined;
   const getTitle = 'options' in rest ? rest.getTitle : undefined;
@@ -106,8 +126,20 @@ function Select<T extends string>({
   const children = 'options' in rest ? undefined : rest.children;
 
   const onStartSelect = useCallback(() => {
-    setShowDropdown(!showDropdown);
+    if (!showDropdown) {
+      containerRef.current?.measure((_x, _y, width, height, pageX, pageY) => {
+        setContainerRect({ x: pageX, y: pageY, width, height });
+        setShowDropdown(true);
+      });
+      return;
+    }
+
+    setShowDropdown(false);
   }, [showDropdown, setShowDropdown]);
+
+  const onDismiss = useCallback(() => {
+    setShowDropdown(false);
+  }, [setShowDropdown]);
 
   const onSelect = useCallback(
     (value: string) => {
@@ -134,24 +166,36 @@ function Select<T extends string>({
 
   return (
     <SelectContext.Provider value={{ onSelect, value }}>
-      <Container>
+      <Container ref={containerRef}>
         <TouchableOpacity onPress={onStartSelect}>
           <SelectElement>
-            <SelectText>{value}</SelectText>
+            <SelectText>
+              {getTitle?.(value as T, options?.indexOf(value as T) ?? 0) ??
+                value}
+            </SelectText>
             <Layout.Icon name="chevron-down" size={16} />
           </SelectElement>
         </TouchableOpacity>
-        <View>
-          {showDropdown && (
-            <DropdownElement
-              entering={FadeInUp.duration(250)}
-              exiting={FadeOutUp.duration(250)}
-            >
-              {optionElements}
-            </DropdownElement>
-          )}
-        </View>
       </Container>
+      <Modal transparent visible={showDropdown}>
+        <TouchableWithoutFeedback onPress={onDismiss}>
+          <Backdrop>
+            {showDropdown && (
+              <DropdownElement
+                entering={FadeInUp.duration(250)}
+                exiting={FadeOutUp.duration(250)}
+                style={{
+                  width: containerRect.width,
+                  top: containerRect.y + containerRect.height,
+                  left: containerRect.x,
+                }}
+              >
+                {optionElements}
+              </DropdownElement>
+            )}
+          </Backdrop>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SelectContext.Provider>
   );
 }

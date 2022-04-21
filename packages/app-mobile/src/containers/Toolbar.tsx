@@ -1,18 +1,22 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import styled from 'styled-components';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 
-import { useApplicationState, useDispatch } from 'noya-app-state-context';
+import {
+  useDispatch,
+  useSelector,
+  useApplicationState,
+} from 'noya-app-state-context';
 import { Layout, Button, useExpandable } from 'noya-designsystem';
-import { DrawableLayerType } from 'noya-state';
+import { DrawableLayerType, Selectors } from 'noya-state';
+import { Base64, parseFilename } from 'noya-utils';
 import { useCanvasKit } from 'noya-renderer';
-import { base64ToArrayBuffer } from '../utils/arrayBuffer';
-import { parseFilename } from '../utils/parseFilename';
 
 interface Item {
-  icon: string;
+  icon?: string;
+  label?: string;
   onPress: () => void;
   active?: boolean;
 }
@@ -22,6 +26,7 @@ const Toolbar: React.FC = () => {
   const CanvasKit = useCanvasKit();
   const dispatch = useDispatch();
   const expandable = useExpandable();
+  const meta = useSelector(Selectors.getCurrentPageMetadata);
 
   const interType = useMemo(
     () => state.interactionState.type,
@@ -66,7 +71,7 @@ const Toolbar: React.FC = () => {
 
   const processImage = useCallback(
     (base64Image: string, uri: string) => {
-      const data = base64ToArrayBuffer(base64Image);
+      const data = Base64.decode(base64Image);
       const decodedImage = CanvasKit.MakeImageFromEncoded(data);
       const { name, extension } = parseFilename(uri);
 
@@ -124,6 +129,10 @@ const Toolbar: React.FC = () => {
     [dispatch],
   );
 
+  const onResetZoom = useCallback(() => {
+    dispatch('setZoom*', 1, 'replace');
+  }, [dispatch]);
+
   const drawItems: Item[] = useMemo(
     () => [
       {
@@ -160,30 +169,46 @@ const Toolbar: React.FC = () => {
         onPress: () => onZoom('zoomIn'),
       },
       {
+        label: `${Math.floor(meta.zoomValue * 100)}%`,
+        onPress: () => onResetZoom(),
+      },
+      {
         icon: 'zoom-out',
         onPress: () => onZoom('zoomOut'),
       },
     ],
-    [interType, onReset, onAddImage, onAddShape, onZoom, isButtonActive],
+    [
+      meta.zoomValue,
+      interType,
+      onReset,
+      onAddImage,
+      onAddShape,
+      onZoom,
+      onResetZoom,
+      isButtonActive,
+    ],
   );
 
   return (
     <ToolbarView pointerEvents="box-none">
       <ToolbarContainer>
-        {drawItems.map(({ icon, onPress, active }: Item, idx: number) => (
-          <React.Fragment key={idx}>
-            <Button onClick={onPress} active={active}>
-              <Layout.Icon name={icon} size={16} />
-            </Button>
-            {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
-          </React.Fragment>
-        ))}
+        {drawItems.map(
+          ({ icon, label, onPress, active }: Item, idx: number) => (
+            <React.Fragment key={idx}>
+              <Button onClick={onPress} active={active}>
+                {!!icon && <Layout.Icon name={icon} size={16} />}
+                {!!label && <Label>{label}</Label>}
+              </Button>
+              {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
+            </React.Fragment>
+          ),
+        )}
       </ToolbarContainer>
     </ToolbarView>
   );
 };
 
-export default React.memo(Toolbar);
+export default memo(Toolbar);
 
 const ToolbarView = styled(View)((_p) => ({
   top: 10,
@@ -199,4 +224,11 @@ const ToolbarContainer = styled(View)((p) => ({
   borderRadius: 8,
   padding: p.theme.sizes.spacing.small,
   backgroundColor: p.theme.colors.sidebar.background,
+}));
+
+const Label = styled(Text)(({ theme }) => ({
+  color: theme.colors.icon,
+  fontSize: 12,
+  minWidth: 30,
+  textAlign: 'center',
 }));

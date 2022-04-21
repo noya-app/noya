@@ -11,6 +11,7 @@ import React, {
 
 import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
 import { useGlobalInputBlurTrigger } from 'noya-ui';
+import { throttle } from 'noya-utils';
 
 export type Dispatcher = (action: WorkspaceAction) => void;
 
@@ -89,12 +90,30 @@ export const useDispatch = (): FlatDispatcher => {
  * Only "container" components should use this, while "presentational" components
  * should instead be passed their data via props.
  */
-export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
+
+type AppStateType = [ApplicationState, FlatDispatcher];
+
+export const useApplicationState = (): AppStateType => {
   const state = useWorkspaceState();
   const dispatch = useDispatch();
 
   return useMemo(
     () => [state.history.present, dispatch],
+    [state.history.present, dispatch],
+  );
+};
+
+export const useThrottledApplicationState = (): AppStateType => {
+  const state = useWorkspaceState();
+  const dispatch = useDispatch();
+
+  const throttled = useRef(
+    throttle((appState: AppStateType): AppStateType => appState, 100),
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(
+    () => throttled.current([state.history.present, dispatch]),
     [state.history.present, dispatch],
   );
 };
@@ -131,6 +150,14 @@ export function useSelector<Projection>(
   selector: (state: ApplicationState) => Projection,
 ) {
   const [state] = useApplicationState();
+
+  return useMemo(() => selector(state), [selector, state]);
+}
+
+export function useThrottledSelector<Projection>(
+  selector: (state: ApplicationState) => Projection,
+) {
+  const [state] = useThrottledApplicationState();
 
   return useMemo(() => selector(state), [selector, state]);
 }

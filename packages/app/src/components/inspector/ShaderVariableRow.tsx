@@ -6,10 +6,10 @@ import {
   Select,
 } from 'noya-web-designsystem';
 import Sketch from 'noya-file-format';
+import { FillInputFieldWithPicker } from 'noya-workspace-ui';
 import { SketchModel } from 'noya-sketch-model';
 import { upperFirst } from 'noya-utils';
 import { memo, useCallback } from 'react';
-import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const SHADER_VARIABLE_TYPES: Sketch.ShaderVariable['value']['type'][] = [

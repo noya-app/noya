@@ -19,8 +19,7 @@ import {
 } from 'noya-fonts';
 import { SetNumberMode } from 'noya-state';
 import { useFontManager } from 'noya-renderer';
-import { DimensionInput } from 'noya-workspace-ui';
-import FillInputFieldWithPicker from './FillInputFieldWithPicker';
+import { DimensionInput, FillInputFieldWithPicker } from 'noya-workspace-ui';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const MULTIPLE_TYPEFACES = 'Multiple Typefaces';

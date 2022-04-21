@@ -1,35 +1,45 @@
 import React, { useCallback, useMemo } from 'react';
-import { LayoutChangeEvent } from 'react-native';
+import { LayoutChangeEvent, View } from 'react-native';
+import { GestureDetector, ManualGesture } from 'react-native-gesture-handler';
 import styled from 'styled-components';
 
 import {
-  useApplicationState,
-  useWorkspace,
   useSelector,
+  useWorkspace,
+  useApplicationState,
 } from 'noya-app-state-context';
-import {
-  Touchable,
-  ContextMenu,
-  Gesture,
-  GestureType,
-} from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { AffineTransform, Point, createRect } from 'noya-geometry';
-import { Selectors, getCurrentPage } from 'noya-state';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { ContextMenu } from 'noya-designsystem';
+import {
+  Selectors,
+  getCurrentPage,
+  Layers,
+  decodeCurvePoint,
+  SelectedPoint,
+  SelectedControlPoint,
+} from 'noya-state';
+import {
+  useLayerMenu,
+  GestureState,
+  CanvasTouchEvent,
+  useCanvasGestures,
+} from 'noya-workspace-ui';
 import CanvasRenderer from './CanvasRenderer';
-import { useLayerMenu } from 'noya-workspace-ui';
 
 function isMoving(point: Point, origin: Point): boolean {
   return Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2;
 }
 
 const Canvas: React.FC<{}> = () => {
-  const meta = useSelector(Selectors.getCurrentPageMetadata);
-  const selectedLayers = useSelector(Selectors.getSelectedLayers);
   const [state, dispatch] = useApplicationState();
-  const { setCanvasSize } = useWorkspace();
+  const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
   const fontManager = useFontManager();
   const CanvasKit = useCanvasKit();
+
+  const selectedLayers = useSelector(Selectors.getSelectedLayers);
+  const meta = useSelector(Selectors.getCurrentPageMetadata);
 
   const [menuItems, onSelectMenuItem] = useLayerMenu(
     selectedLayers,
@@ -57,8 +67,7 @@ const Canvas: React.FC<{}> = () => {
   );
 
   const onTouchStart = useCallback(
-    (params: Gesture) => {
-      const rawPoint = params.point;
+    ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
       switch (state.interactionState.type) {
@@ -68,10 +77,144 @@ const Canvas: React.FC<{}> = () => {
             state.interactionState.layerType,
             point,
           ]);
-
           break;
         }
+        case 'insertingSymbol': {
+          dispatch('addSymbolLayer', state.interactionState.symbolID, point);
+          dispatch('interaction', ['reset']);
+          break;
+        }
+        case 'panMode': {
+          dispatch('interaction', ['maybePan', rawPoint]);
+          break;
+        }
+        case 'drawingShapePath': {
+          dispatch('addShapePathLayer', point);
+          dispatch('interaction', ['maybeConvertCurveMode', point]);
+          break;
+        }
+        case 'editPath': {
+          const { shiftKey } = state.keyModifiers;
+          let selectedPoint: SelectedPoint | undefined = undefined;
+          let selectedControlPoint: SelectedControlPoint | undefined;
+
+          const boundingRects = Selectors.getBoundingRectMap(
+            Selectors.getCurrentPage(state),
+            state.selectedLayerIds,
+            { groups: 'childrenOnly' },
+          );
+
+          const selectedPointsLayers = Selectors.getSelectedLayers(
+            state,
+          ).filter(Layers.isPointsLayer);
+
+          selectedPointsLayers.forEach((layer) => {
+            const boundingRect = boundingRects[layer.do_objectID];
+            layer.points.forEach((curvePoint, index) => {
+              const decodedPoint = decodeCurvePoint(curvePoint, boundingRect);
+
+              if (Selectors.isPointInRange(decodedPoint.point, point)) {
+                selectedPoint = [layer.do_objectID, index];
+              } else if (
+                Selectors.isPointInRange(decodedPoint.curveTo, point)
+              ) {
+                selectedControlPoint = {
+                  layerId: layer.do_objectID,
+                  pointIndex: index,
+                  controlPointType: 'curveTo',
+                };
+              } else if (
+                Selectors.isPointInRange(decodedPoint.curveFrom, point)
+              ) {
+                selectedControlPoint = {
+                  layerId: layer.do_objectID,
+                  pointIndex: index,
+                  controlPointType: 'curveFrom',
+                };
+              }
+            });
+          });
+
+          const indexPathOfOpenShapeLayer =
+            Selectors.getIndexPathOfOpenShapeLayer(state);
+
+          if (selectedPoint) {
+            if (Selectors.canClosePath(state, selectedPoint) && !shiftKey) {
+              dispatch('setIsClosed', true);
+              dispatch('selectPoint', selectedPoint);
+            } else {
+              // const alreadySelected = state.selectedPointLists[
+              //   selectedPoint[0]
+              // ]?.includes(selectedPoint[1]);
+
+              dispatch(
+                'selectPoint',
+                selectedPoint,
+                'replace',
+                // shiftKey || event[modKey]
+                //   ? alreadySelected
+                //     ? 'difference'
+                //     : 'intersection'
+                //   : 'replace',
+              );
+              dispatch('interaction', ['maybeMovePoint', point]);
+            }
+          } else if (selectedControlPoint) {
+            dispatch(
+              'selectControlPoint',
+              selectedControlPoint.layerId,
+              selectedControlPoint.pointIndex,
+              selectedControlPoint.controlPointType,
+            );
+            dispatch('interaction', ['maybeMoveControlPoint', point]);
+          } else if (
+            selectedPointsLayers.some((layer) =>
+              Selectors.layerPathContainsPoint(CanvasKit, layer, point),
+            )
+          ) {
+            dispatch('insertPointInPath', point);
+          } else if (indexPathOfOpenShapeLayer) {
+            dispatch('addPointToPath', point);
+            dispatch('interaction', ['maybeConvertCurveMode', point]);
+            // } else if (!(shiftKey || event[modKey])) {
+            //   dispatch('interaction', ['reset']);
+            // }
+          } else {
+            dispatch('interaction', ['reset']);
+          }
+          break;
+        }
+        case 'hoverHandle':
+        case 'editingText':
         case 'none': {
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'bounded',
+            );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: characterIndex,
+              head: characterIndex,
+            });
+            dispatch('interaction', ['maybeSelectText', point]);
+            return;
+          }
+
+          if (state.selectedLayerIds.length > 0) {
+            const direction = Selectors.getScaleDirectionAtPoint(state, point);
+
+            if (direction && !state.selectedGradient) {
+              dispatch('interaction', ['maybeScale', point, direction]);
+
+              return;
+            }
+          }
+
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
             fontManager,
@@ -126,21 +269,111 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [state, CanvasKit, fontManager, dispatch, insets, offsetEventPoint],
+    [offsetEventPoint, CanvasKit, fontManager, state, dispatch, insets],
   );
 
   const onTouchUpdate = useCallback(
-    (params: Gesture) => {
-      const rawPoint = params.point;
+    ({
+      point: rawPoint,
+      delta,
+      scale,
+      scaleTo,
+      state: gestureState,
+    }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
+      if (gestureState === GestureState.Canvas) {
+        dispatch('panAndZoom*', { scale, scaleTo, delta });
+        return;
+      }
+
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
+        case 'maybeMoveGradientEllipseLength': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientEllipseLength', point]);
+          }
+          break;
+        }
+        case 'maybeSelectingText': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['selectingText', point]);
+          }
+
+          break;
+        }
+        case 'moveGradientEllipseLength': {
+          dispatch('interaction', ['movingGradientEllipseLength', point]);
+          break;
+        }
+        case 'selectingText': {
+          if (!textSelection) return;
+
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'unbounded',
+            );
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: textSelection.range.anchor,
+              head: characterIndex,
+            });
+            return;
+          }
+          break;
+        }
+        case 'maybeMoveGradientStop': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingGradientStop', point]);
+          }
+          break;
+        }
+        case 'moveGradientStop': {
+          dispatch('interaction', ['movingGradientStop', point]);
+          break;
+        }
         case 'insert': {
           dispatch('interaction', [
             state.interactionState.type,
             state.interactionState.layerType,
             point,
           ]);
+          break;
+        }
+        case 'insertingSymbol': {
+          dispatch('interaction', [
+            'insertingSymbol',
+            state.interactionState.symbolID,
+            point,
+          ]);
+          break;
+        }
+        case 'editPath': {
+          dispatch('interaction', ['resetEditPath', point]);
+          break;
+        }
+        case 'drawingShapePath': {
+          dispatch('interaction', ['drawingShapePath', point]);
+          break;
+        }
+        case 'maybePan': {
+          dispatch('interaction', ['startPanning', rawPoint]);
+          break;
+        }
+        case 'panning': {
+          dispatch('interaction', ['updatePanning', rawPoint]);
           break;
         }
         case 'maybeMove':
@@ -158,6 +391,36 @@ const Canvas: React.FC<{}> = () => {
 
           break;
         }
+        case 'maybeMovePoint': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('interaction', ['movingPoint', origin, point]);
+          }
+          break;
+        }
+        case 'movingPoint': {
+          const { origin } = state.interactionState;
+
+          dispatch('interaction', ['updateMovingPoint', origin, point]);
+          break;
+        }
+        case 'maybeConvertCurveMode': {
+          const { origin } = state.interactionState;
+
+          if (isMoving(point, origin)) {
+            dispatch('setPointCurveMode', Sketch.CurveMode.Mirrored);
+            dispatch(
+              'selectControlPoint',
+              selectedLayers[0].do_objectID,
+              0,
+              'curveFrom',
+            );
+            dispatch('interaction', ['maybeMoveControlPoint', origin]);
+            dispatch('interaction', ['movingControlPoint', origin, point]);
+          }
+          break;
+        }
         case 'maybeMoveControlPoint': {
           const { origin } = state.interactionState;
 
@@ -173,7 +436,6 @@ const Canvas: React.FC<{}> = () => {
 
           break;
         }
-
         case 'moving':
         case 'scaling': {
           dispatch('interaction', [
@@ -185,17 +447,11 @@ const Canvas: React.FC<{}> = () => {
 
           break;
         }
-
         case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
           break;
         }
         case 'marquee': {
-          if (params.numOfPointers > 1) {
-            dispatch('interaction', ['reset']);
-            return;
-          }
-
           dispatch('interaction', ['updateMarquee', rawPoint]);
 
           const { origin, current } = state.interactionState;
@@ -219,35 +475,140 @@ const Canvas: React.FC<{}> = () => {
 
           break;
         }
-        case 'none': {
-          if (params.numOfPointers > 1) {
-            if (params.type === GestureType.Pinch) {
-              dispatch('setZoom*', params.scale!, 'multiply');
-              break;
-            }
+        case 'hoverHandle': {
+          const direction = Selectors.getScaleDirectionAtPoint(state, point);
 
-            if (params.type === GestureType.Pan) {
-              dispatch('pan*', params.delta!);
+          if (direction) {
+            if (direction !== state.interactionState.direction) {
+              dispatch('interaction', ['hoverHandle', direction]);
             }
+          } else {
+            dispatch('interaction', ['reset']);
           }
 
           break;
         }
+        case 'none': {
+          const layer = Selectors.getLayerAtPoint(
+            CanvasKit,
+            fontManager,
+            state,
+            insets,
+            rawPoint,
+            {
+              groups: 'groupOnly', //event[modKey] ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
+            },
+          );
+
+          // For perf, check that we actually need to update the highlight.
+          // This gets called on every mouse movement.
+          if (highlightedLayer?.id !== layer?.do_objectID) {
+            highlightLayer(
+              layer
+                ? {
+                    id: layer.do_objectID,
+                    precedence: 'belowSelection',
+                    isMeasured: false, //event.altKey,
+                  }
+                : undefined,
+            );
+          }
+
+          if (state.selectedLayerIds.length > 0) {
+            const direction = Selectors.getScaleDirectionAtPoint(state, point);
+
+            if (direction && !state.selectedGradient) {
+              dispatch('interaction', ['hoverHandle', direction]);
+
+              return;
+            }
+            return;
+          }
+          break;
+        }
       }
     },
-    [state, dispatch, insets, offsetEventPoint],
+    [
+      state,
+      insets,
+      dispatch,
+      CanvasKit,
+      fontManager,
+      highlightLayer,
+      selectedLayers,
+      highlightedLayer,
+      offsetEventPoint,
+    ],
   );
 
   const onTouchEnd = useCallback(
-    (params: Gesture) => {
-      const rawPoint = params.point;
+    ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
+      const textSelection = Selectors.getTextSelection(state);
+
       switch (state.interactionState.type) {
+        case 'maybeSelectingText': {
+          if (!textSelection) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
+
+          break;
+        }
+
+        case 'selectingText': {
+          if (!textSelection) {
+            dispatch('interaction', ['reset']);
+            return;
+          }
+
+          const characterIndex =
+            Selectors.getCharacterIndexAtPointInSelectedLayer(
+              CanvasKit,
+              fontManager,
+              state,
+              point,
+              'bounded',
+            );
+
+          dispatch('interaction', [
+            'editingText',
+            textSelection.layerId,
+            textSelection.range,
+          ]);
+
+          if (characterIndex !== undefined) {
+            dispatch('setTextSelection', {
+              anchor: textSelection.range.anchor,
+              head: characterIndex,
+            });
+          }
+
+          break;
+        }
+        case 'maybePan': {
+          dispatch('interaction', ['enablePanMode']);
+
+          break;
+        }
+        case 'panning': {
+          dispatch('interaction', ['updatePanning', rawPoint]);
+          dispatch('interaction', ['enablePanMode']);
+
+          break;
+        }
         case 'drawing': {
           dispatch('interaction', ['updateDrawing', point]);
           dispatch('addDrawnLayer');
-
           break;
         }
         case 'marquee': {
@@ -307,13 +668,20 @@ const Canvas: React.FC<{}> = () => {
           dispatch('interaction', ['resetEditPath', point]);
           break;
         }
-        case 'none': {
+        case 'maybeConvertCurveMode': {
+          dispatch('interaction', ['resetEditPath', point]);
           break;
         }
       }
     },
-    [state, dispatch, insets, offsetEventPoint],
+    [offsetEventPoint, state, dispatch, insets, CanvasKit, fontManager],
   );
+
+  const gestures = useCanvasGestures(
+    onTouchStart,
+    onTouchUpdate,
+    onTouchEnd,
+  ) as unknown as ManualGesture;
 
   const onCanvasLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -326,20 +694,17 @@ const Canvas: React.FC<{}> = () => {
 
   return (
     <ContextMenu items={menuItems} onSelect={onSelectMenuItem}>
-      <CanvasWrapper
-        onLayout={onCanvasLayout}
-        onTouchStart={onTouchStart}
-        onTouchUpdate={onTouchUpdate}
-        onTouchEnd={onTouchEnd}
-      >
-        <CanvasRenderer />
-      </CanvasWrapper>
+      <GestureDetector gesture={gestures}>
+        <CanvasWrapper onLayout={onCanvasLayout}>
+          <CanvasRenderer />
+        </CanvasWrapper>
+      </GestureDetector>
     </ContextMenu>
   );
 };
 
 export default React.memo(Canvas);
 
-const CanvasWrapper = styled(Touchable)(() => ({
+const CanvasWrapper = styled(View)({
   flex: 1,
-}));
+});

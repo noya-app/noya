@@ -1,9 +1,5 @@
 import Sketch from 'noya-file-format';
-import {
-  Divider,
-  PatternPreviewBackground,
-  Select,
-} from 'noya-web-designsystem';
+import { Layout, PatternPreviewBackground, Select } from 'noya-designsystem';
 import { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
@@ -42,7 +38,7 @@ interface Props {
 export default memo(function PickerPatterns({ imageAssets, onChange }: Props) {
   return (
     <>
-      <Divider />
+      <Layout.Divider />
       <InspectorPrimitives.Section>
         <InspectorPrimitives.Row>
           <Select

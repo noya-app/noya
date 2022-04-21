@@ -7,7 +7,7 @@ export type ButtonVariant = 'normal' | 'thin' | 'none';
 
 export interface ButtonProps {
   id?: string;
-  flex?: number;
+  flex?: number | string;
   children: ReactNode;
   active?: boolean;
   disabled?: boolean;

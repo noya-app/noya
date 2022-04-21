@@ -48,7 +48,7 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import DropTarget, { TypedFile } from '../components/FileDropTarget';
+import { FileDropTarget, TypedFile } from 'noya-workspace-ui';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
 import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useCopyHandler } from '../hooks/useCopyHandler';
@@ -1170,7 +1170,7 @@ export default memo(function Canvas() {
   );
 
   return (
-    <DropTarget<SupportedCanvasUploadType>
+    <FileDropTarget<SupportedCanvasUploadType>
       supportedFileTypes={SUPPORTED_CANVAS_UPLOAD_TYPES}
       onDropFiles={useCallback(
         (file, point) => {
@@ -1216,6 +1216,6 @@ export default memo(function Canvas() {
           </InsetContainer>
         </Container>
       </ContextMenu>
-    </DropTarget>
+    </FileDropTarget>
   );
 });

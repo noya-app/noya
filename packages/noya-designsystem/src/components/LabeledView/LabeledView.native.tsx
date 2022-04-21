@@ -22,15 +22,34 @@ const LabelPlaceholder = styled(View)({
 });
 
 export default memo(function LabeledView({
-  label,
-  children,
   flex,
   size,
+  label,
+  children,
+  labelPosition,
 }: LabeledViewProps) {
+  const labelContent = label ? (
+    <StyledLabel>{label}</StyledLabel>
+  ) : (
+    <LabelPlaceholder />
+  );
+
+  const content =
+    labelPosition === 'start' ? (
+      <>
+        {labelContent}
+        {children}
+      </>
+    ) : (
+      <>
+        {children}
+        {labelContent}
+      </>
+    );
+
   return (
     <Container flex={flex} size={size}>
-      {children}
-      {label ? <StyledLabel>{label}</StyledLabel> : <LabelPlaceholder />}
+      {content}
     </Container>
   );
 });

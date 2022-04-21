@@ -5,4 +5,5 @@ export interface LabeledViewProps {
   flex?: number;
   size?: number;
   label?: string;
+  labelPosition?: 'start' | 'end';
 }

@@ -1,11 +1,7 @@
-import React from 'react';
-import { TouchableComponentProps, TouchableProps } from './types';
+import React, { createContext } from 'react';
+import { TouchableProps, TouchableContextType } from './types';
 
-const Touchable: React.FC<TouchableComponentProps> = (props) => {
-  console.warn('Touchable.tsx not implemented!');
-
-  return null;
-};
+export const TouchableContext = createContext<TouchableContextType>([]);
 
 export const TouchableListener: React.FC<TouchableProps> = (props) => {
   console.warn('Touchable.tsx not implemented!');
@@ -13,4 +9,8 @@ export const TouchableListener: React.FC<TouchableProps> = (props) => {
   return null;
 };
 
-export default Touchable;
+export const Touchable: React.FC<TouchableProps> = (props) => {
+  console.warn('Touchable.tsx not implemented!');
+
+  return null;
+};

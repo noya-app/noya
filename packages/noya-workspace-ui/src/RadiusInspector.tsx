@@ -36,6 +36,7 @@ function RadiusInspector() {
   return useMemo(() => {
     const roundedValue =
       radiusValue !== undefined ? Math.round(radiusValue) : undefined;
+
     return (
       <Primitives.Section>
         <Primitives.SectionHeader>

@@ -94,6 +94,10 @@ export type InsertedImage = { name: string } & (
 
 export type CanvasAction =
   | [type: 'setZoom*', value: number, mode?: 'replace' | 'multiply']
+  | [
+      type: 'panAndZoom*',
+      details: { scale: number; scaleTo: Point; delta: Point },
+    ]
   | [type: 'zoomToFit*', target: 'canvas' | 'selection']
   | [
       type: 'insertArtboard',
@@ -206,6 +210,32 @@ export function canvasReducer(
           ...draftUser[pageId],
           zoomValue: newValue,
           scrollOrigin: PointString.encode(newScrollOrigin),
+        };
+      });
+    }
+    case 'panAndZoom*': {
+      const [, { scale, scaleTo, delta }] = action;
+      const pageId = getCurrentPage(state).do_objectID;
+      const { zoomValue, scrollOrigin } = getCurrentPageMetadata(state);
+
+      return produce(state, (draft) => {
+        const draftUser = draft.sketch.user;
+
+        const scaleCenter = { ...scaleTo };
+        const newValue = clamp(scale * zoomValue, 0.01, 256);
+
+        const scaledOrigin = AffineTransform.translate(
+          (scrollOrigin.x - scaleCenter.x) * (newValue / zoomValue),
+          (scrollOrigin.y - scaleCenter.y) * (newValue / zoomValue),
+        ).applyTo(scaleCenter);
+
+        draftUser[pageId] = {
+          ...draftUser[pageId],
+          zoomValue: newValue,
+          scrollOrigin: PointString.encode({
+            x: scaledOrigin.x - delta.x,
+            y: scaledOrigin.y - delta.y,
+          }),
         };
       });
     }

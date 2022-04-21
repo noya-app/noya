@@ -3,7 +3,8 @@ import styled from 'styled-components';
 import { useColorPicker } from '../contexts/ColorPickerContext';
 import { clamp } from '../utils/clamp';
 import { round } from '../utils/round';
-import { Interaction, Interactive } from './Interactive';
+import { Interactive } from './Interactive';
+import type { Interaction } from './types';
 import Pointer from './Pointer';
 
 const Container = styled.div(() => ({

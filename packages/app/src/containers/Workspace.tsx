@@ -15,7 +15,10 @@ import { DesignSystemConfigurationProvider } from 'noya-ui';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import { LayerList } from 'noya-workspace-ui';
+import {
+  LayerList,
+  DialogProvider as WorkspaceDialogProvider,
+} from 'noya-workspace-ui';
 import { AutoSizer } from '../components/AutoSizer';
 import { DialogProvider } from '../contexts/DialogContext';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
@@ -139,68 +142,72 @@ export default function Workspace() {
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       <DialogProvider>
-        <LeftSidebar>
-          <MenubarContainer
-            showApplicationMenu={isElectron}
-            onDoubleClick={doubleClickToolbar}
-          >
-            <Menubar />
-          </MenubarContainer>
-          <LeftSidebarBorderedContent>
-            <PageList />
-            <Divider />
-            {useTabElement({
-              canvas: (
-                <>
-                  <AutoSizer>
-                    {(size) => <LayerList size={size} filter={layersFilter} />}
-                  </AutoSizer>
-                  <FilterContainer>
-                    <InputField.Root labelPosition="start" labelSize={14}>
-                      <InputField.Input
-                        value={layersFilter}
-                        onChange={setLayersFilter}
-                        placeholder="Filter layers"
-                        type="search"
-                      />
-                      <InputField.Label>
-                        <MagnifyingGlassIcon />
-                      </InputField.Label>
-                    </InputField.Root>
-                  </FilterContainer>
-                  <Spacer.Vertical size={8} />
-                </>
-              ),
-              pages: <Spacer.Vertical />,
-              theme: <ThemeGroups />,
-            })}
-          </LeftSidebarBorderedContent>
-        </LeftSidebar>
-        <MainView>
-          <ToolbarContainer onDoubleClick={doubleClickToolbar}>
-            {useTabElement({
-              canvas: <Toolbar />,
-              pages: null,
-              theme: <ThemeToolbar />,
-            })}
-          </ToolbarContainer>
-          <ContentArea>
-            {useTabElement({
-              canvas: <Canvas />,
-              pages: <PagesGrid />,
-              theme: <ThemeWindow />,
-            })}
-            <RightSidebar>
-              <ScrollArea>
-                {useTabElement({
-                  canvas: <Inspector />,
-                  pages: null,
-                  theme: <ThemeInspector />,
-                })}
-              </ScrollArea>
-            </RightSidebar>
-          </ContentArea>
-        </MainView>
+        <WorkspaceDialogProvider>
+          <LeftSidebar>
+            <MenubarContainer
+              showApplicationMenu={isElectron}
+              onDoubleClick={doubleClickToolbar}
+            >
+              <Menubar />
+            </MenubarContainer>
+            <LeftSidebarBorderedContent>
+              <PageList />
+              <Divider />
+              {useTabElement({
+                canvas: (
+                  <>
+                    <AutoSizer>
+                      {(size) => (
+                        <LayerList size={size} filter={layersFilter} />
+                      )}
+                    </AutoSizer>
+                    <FilterContainer>
+                      <InputField.Root labelPosition="start" labelSize={14}>
+                        <InputField.Input
+                          value={layersFilter}
+                          onChange={setLayersFilter}
+                          placeholder="Filter layers"
+                          type="search"
+                        />
+                        <InputField.Label>
+                          <MagnifyingGlassIcon />
+                        </InputField.Label>
+                      </InputField.Root>
+                    </FilterContainer>
+                    <Spacer.Vertical size={8} />
+                  </>
+                ),
+                pages: <Spacer.Vertical />,
+                theme: <ThemeGroups />,
+              })}
+            </LeftSidebarBorderedContent>
+          </LeftSidebar>
+          <MainView>
+            <ToolbarContainer onDoubleClick={doubleClickToolbar}>
+              {useTabElement({
+                canvas: <Toolbar />,
+                pages: null,
+                theme: <ThemeToolbar />,
+              })}
+            </ToolbarContainer>
+            <ContentArea>
+              {useTabElement({
+                canvas: <Canvas />,
+                pages: <PagesGrid />,
+                theme: <ThemeWindow />,
+              })}
+              <RightSidebar>
+                <ScrollArea>
+                  {useTabElement({
+                    canvas: <Inspector />,
+                    pages: null,
+                    theme: <ThemeInspector />,
+                  })}
+                </ScrollArea>
+              </RightSidebar>
+            </ContentArea>
+          </MainView>
+        </WorkspaceDialogProvider>
       </DialogProvider>
     </DesignSystemConfigurationProvider>
   );

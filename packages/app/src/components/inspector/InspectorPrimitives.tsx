@@ -1,6 +1,7 @@
-import { Spacer } from 'noya-web-designsystem';
 import { memo, ReactNode } from 'react';
 import styled, { useTheme } from 'styled-components';
+
+import { Layout } from 'noya-designsystem';
 
 export const Section = styled.div(({ theme }) => ({
   flex: '0 0 auto',
@@ -45,11 +46,11 @@ export const Text = styled.span(({ theme }) => ({
 }));
 
 export const VerticalSeparator = () => (
-  <Spacer.Vertical size={useTheme().sizes.inspector.verticalSeparator} />
+  <Layout.Stack size={useTheme().sizes.inspector.verticalSeparator} />
 );
 
 export const HorizontalSeparator = () => (
-  <Spacer.Horizontal size={useTheme().sizes.inspector.horizontalSeparator} />
+  <Layout.Queue size={useTheme().sizes.inspector.horizontalSeparator} />
 );
 
 const SliderRowLabel = styled.span(({ theme }) => ({

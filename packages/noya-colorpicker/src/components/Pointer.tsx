@@ -1,6 +1,8 @@
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { PointerProps } from './types';
+
 const Container = styled.div<{ selected: boolean }>(({ theme, selected }) => ({
   width: '10px',
   height: '10px',
@@ -13,21 +15,13 @@ const Container = styled.div<{ selected: boolean }>(({ theme, selected }) => ({
   ...({ position: 'absolute' } as any),
 }));
 
-interface Props {
-  top?: number;
-  left: number;
-  index?: number;
-  selected?: boolean;
-  onClick?: () => void;
-}
-
 export default memo(function Pointer({
   top = 0.5,
   left,
   index,
   selected = false,
   onClick,
-}: Props): JSX.Element {
+}: PointerProps): JSX.Element {
   const style = useMemo(
     () => ({
       top: `${top * 100}%`,

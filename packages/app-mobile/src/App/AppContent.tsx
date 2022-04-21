@@ -1,13 +1,17 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { View } from 'react-native';
 
 import { WorkspaceAction, Selectors } from 'noya-state';
 import { decodeFontName } from 'noya-fonts';
-import { useDownloadFont, useFontManager } from 'noya-renderer';
+import {
+  useDownloadFont,
+  useFontManager,
+  ImageCacheProvider,
+} from 'noya-renderer';
 import { StateProvider } from 'noya-app-state-context';
-import { Expandable, ExpandableContextProvider } from 'noya-designsystem';
-import { LayerList } from 'noya-workspace-ui';
+import { Expandable, ExpandableProvider } from 'noya-designsystem';
+import { LayerList, DialogProvider } from 'noya-workspace-ui';
 import useAppState from '../hooks/useAppState';
 import AttributeInspector from '../containers/AttributeInspector';
 import ThemeManager from '../containers/ThemeManager';
@@ -16,7 +20,7 @@ import PageList from '../containers/PageList';
 import Toolbar from '../containers/Toolbar';
 import Canvas from '../containers/Canvas';
 
-const AppContent: React.FC<{}> = () => {
+const AppContent: React.FC = () => {
   const { state, dispatch } = useAppState();
   const [layersFilter, setLayersFilter] = useState('');
   const fontManager = useFontManager();
@@ -46,33 +50,63 @@ const AppContent: React.FC<{}> = () => {
     });
   }, [downloadFont, fontManager, state]);
 
+  const expandableLeft = useMemo(() => {
+    return (
+      <Expandable
+        position="left"
+        items={[
+          { name: 'menu', icon: 'hamburger-menu', content: <MainMenu /> },
+          { name: 'pageList', icon: 'file', content: <PageList /> },
+          {
+            name: 'layerList',
+            icon: 'layers',
+            content: (
+              <LayerList
+                filter={layersFilter}
+                size={{ width: 350, height: 250 }}
+              />
+            ),
+          },
+          { name: 'themeManager', icon: 'tokens', content: <ThemeManager /> },
+        ]}
+      />
+    );
+  }, [layersFilter]);
+
+  const expandableRight = useMemo(() => {
+    return (
+      <Expandable
+        position="right"
+        items={[
+          {
+            name: 'inspector',
+            icon: 'backpack',
+            content: <AttributeInspector />,
+          },
+        ]}
+      />
+    );
+  }, []);
+
   if (state.type !== 'success') {
     return null;
   }
 
   return (
-    <ExpandableContextProvider>
-      <StateProvider state={state.value} dispatch={handleDispatch}>
-        <ContentContainer>
-          <Expandable position="left">
-            <MainMenu id="main-menu" icon="hamburger-menu" />
-            <PageList id="page-list" icon="file" />
-            <LayerList
-              id="layers"
-              icon="layers"
-              filter={layersFilter}
-              size={{ width: 350, height: 250 }}
-            />
-            <ThemeManager id="theme" icon="tokens" />
-          </Expandable>
-          <Expandable position="right">
-            <AttributeInspector id="inspector" icon="backpack" />
-          </Expandable>
-          <Toolbar />
-          <Canvas />
-        </ContentContainer>
-      </StateProvider>
-    </ExpandableContextProvider>
+    <DialogProvider>
+      <ImageCacheProvider>
+        <ExpandableProvider>
+          <StateProvider state={state.value} dispatch={handleDispatch}>
+            <ContentContainer>
+              {expandableLeft}
+              {expandableRight}
+              <Toolbar />
+              <Canvas />
+            </ContentContainer>
+          </StateProvider>
+        </ExpandableProvider>
+      </ImageCacheProvider>
+    </DialogProvider>
   );
 };
 
@@ -82,4 +116,5 @@ const ContentContainer = styled(View)((p) => ({
   flex: 1,
   position: 'relative',
   backgroundColor: p.theme.colors.sidebar.background,
+  flexDirection: 'row',
 }));

@@ -1,15 +1,17 @@
 import React, {
+  memo,
+  useState,
+  useContext,
+  useCallback,
   createContext,
   PropsWithChildren,
-  useCallback,
-  useContext,
-  useState,
+  useMemo,
 } from 'react';
 
 import type {
-  ExpandableContextType,
   ActiveTabs,
   ExpandablePosition,
+  ExpandableContextType,
 } from './types';
 
 export const ExpandableContext = createContext<ExpandableContextType>({
@@ -28,9 +30,9 @@ export function useExpandable(): ExpandableContextType {
   return value;
 }
 
-export const ExpandableContextProvider = ({
+export const ExpandableProvider = memo(function ExpandableProvider({
   children,
-}: PropsWithChildren<{}>) => {
+}: PropsWithChildren<{}>) {
   const [activeTabs, setActiveTabs] = useState<ActiveTabs>({});
 
   const setActiveTab = useCallback(
@@ -43,9 +45,14 @@ export const ExpandableContextProvider = ({
     [activeTabs],
   );
 
+  const value = useMemo(
+    () => ({ activeTabs, setActiveTab }),
+    [activeTabs, setActiveTab],
+  );
+
   return (
-    <ExpandableContext.Provider value={{ activeTabs, setActiveTab }}>
+    <ExpandableContext.Provider value={value}>
       {children}
     </ExpandableContext.Provider>
   );
-};
+});

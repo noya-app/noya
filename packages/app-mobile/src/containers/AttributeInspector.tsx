@@ -1,5 +1,6 @@
 import React, { Fragment, useCallback, memo, useMemo } from 'react';
 import styled from 'styled-components';
+import { View } from 'react-native';
 
 import {
   isLine,
@@ -31,21 +32,24 @@ import {
   PointCoordinatesInspector,
   ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
+import {
+  useThrottledApplicationState,
+  useThrottledSelector,
+} from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 
 interface AttributeInspectorProps {}
 
-const HorizontalPaddingContainer = styled(Layout.View)({
+const HorizontalPaddingContainer = styled(View)({
   paddingLeft: 10,
   paddingRight: 10,
 });
 
 const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useThrottledApplicationState();
 
   const selectedLayers = useShallowArray(
-    useSelector(Selectors.getSelectedLayers),
+    useThrottledSelector(Selectors.getSelectedLayers),
   );
 
   const hasContextSettingsLayers =
@@ -249,15 +253,14 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     hasContextSettingsLayers,
   ]);
 
-  const content =
+  if (
     state.interactionState.type === 'insert' &&
-    state.interactionState.layerType === 'artboard' ? (
-      <ArtboardSizeList />
-    ) : (
-      elements
-    );
+    state.interactionState.layerType === 'artboard'
+  ) {
+    return <ArtboardSizeList />;
+  }
 
-  return <ScrollableView>{content}</ScrollableView>;
+  return <ScrollableView>{elements}</ScrollableView>;
 };
 
 export default memo(AttributeInspector);

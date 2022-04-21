@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useEffect } from 'react';
+import React, { memo, useMemo, useCallback, useLayoutEffect } from 'react';
 import { View } from 'react-native';
 import styled from 'styled-components';
 import Animated, {
@@ -9,13 +9,13 @@ import Animated, {
 
 import { Layout } from '../Layout';
 import { Button } from '../Button';
-import type { ExpandableProps, Tab, ExpandableViewProps } from './types';
+import type { ExpandableProps, ExpandableViewProps } from './types';
 import { useExpandable } from './context';
 
 const PanelWidth = 310;
 
-const ExpandableProvider = (props: ExpandableProps) => {
-  const { position = 'left', children } = props;
+export const Expandable = memo(function (props: ExpandableProps) {
+  const { position = 'left', items } = props;
   const expandable = useExpandable();
   const expandableOffset = useSharedValue(
     position === 'left' ? -PanelWidth : PanelWidth,
@@ -32,26 +32,6 @@ const ExpandableProvider = (props: ExpandableProps) => {
     [expandable, position],
   );
 
-  const tabs = useMemo(() => {
-    const tabs: Tab[] = [];
-
-    if (children instanceof Array) {
-      children.forEach((child) => {
-        tabs.push({
-          id: child.props.id,
-          icon: child.props.icon,
-        });
-      });
-    } else {
-      tabs.push({
-        id: children.props.id,
-        icon: children.props.icon,
-      });
-    }
-
-    return tabs;
-  }, [children]);
-
   const onToggleTab = useCallback(
     (tab: string) => {
       if (activeTab === tab) {
@@ -63,28 +43,13 @@ const ExpandableProvider = (props: ExpandableProps) => {
     [activeTab, setActiveTab],
   );
 
-  useEffect(() => {
-    if (
-      expandable.activeTabs[position] !== undefined &&
-      expandableOffset.value !== 0
-    ) {
-      // Panel is active
+  useLayoutEffect(() => {
+    if (!!activeTab && expandableOffset.value !== 0) {
       expandableOffset.value = 0;
-    } else if (
-      expandable.activeTabs[position] === undefined &&
-      expandableOffset.value === 0
-    ) {
+    } else if (!activeTab && expandableOffset.value === 0) {
       expandableOffset.value = position === 'left' ? -PanelWidth : PanelWidth;
     }
-  }, [expandableOffset, position, expandable]);
-
-  const activeChild = useMemo(() => {
-    if (children instanceof Array) {
-      return children.find((child) => child.props.id === activeTab);
-    }
-
-    return children.props.id === activeTab ? children : null;
-  }, [children, activeTab]);
+  }, [expandableOffset, position, activeTab]);
 
   const expandableStyle = useAnimatedStyle(() => ({
     transform: [
@@ -97,32 +62,40 @@ const ExpandableProvider = (props: ExpandableProps) => {
     ],
   }));
 
+  const tabContent = useMemo(() => {
+    const activeItem = items.find((item) => item.name === activeTab);
+
+    if (!activeItem) {
+      return null;
+    }
+
+    return <ExpandableContent>{activeItem.content}</ExpandableContent>;
+  }, [items, activeTab]);
+
+  const buttons = useMemo(() => {
+    return items.map((item, idx) => (
+      <React.Fragment key={item.name}>
+        <Button
+          onClick={() => onToggleTab(item.name)}
+          active={activeTab === item.name}
+        >
+          <Layout.Icon name={item.icon} size={16} />
+        </Button>
+        {idx !== items.length - 1 && <Layout.Stack size="medium" />}
+      </React.Fragment>
+    ));
+  }, [items, activeTab, onToggleTab]);
+
   return (
     <ExpandableView position={position} style={expandableStyle}>
-      <ExpandableContentWrapper>
-        {!!activeChild && <ExpandableContent>{activeChild}</ExpandableContent>}
-      </ExpandableContentWrapper>
+      <ExpandableContentWrapper>{tabContent}</ExpandableContentWrapper>
       <Layout.Queue size="medium" />
       <View>
-        <ButtonList>
-          {tabs.map((tab, idx) => (
-            <React.Fragment key={tab.id}>
-              <Button
-                onClick={() => onToggleTab(tab.id)}
-                active={activeTab === tab.id}
-              >
-                <Layout.Icon name={tab.icon} size={16} />
-              </Button>
-              {idx !== tabs.length - 1 && <Layout.Stack size="medium" />}
-            </React.Fragment>
-          ))}
-        </ButtonList>
+        <ButtonList>{buttons}</ButtonList>
       </View>
     </ExpandableView>
   );
-};
-
-export const Expandable = memo(ExpandableProvider);
+});
 
 const ExpandableView = styled(Animated.View)<ExpandableViewProps>((p) => {
   const common = {

@@ -1,6 +1,6 @@
 import React, { forwardRef, useContext, ForwardedRef } from 'react';
-import styled from 'styled-components';
 import { TextInput as InputNative } from 'react-native';
+import styled from 'styled-components';
 
 import TextInput from '../../internal/TextInput/TextInput.native';
 import { TextInputProps } from '../../internal/TextInput';
@@ -54,8 +54,10 @@ export const InputElement = styled(TextInput).withConfig({
   }),
 );
 
+type Props = TextInputProps & { textAlign?: TextAlign; variant?: 'bare' };
+
 const InputFieldInput = forwardRef(function InputFieldInput(
-  props: TextInputProps & { textAlign?: TextAlign; variant?: 'bare' },
+  props: Props,
   forwardedRef: ForwardedRef<InputNative>,
 ) {
   const { labelPosition, labelSize, hasDropdown, hasLabel } =
@@ -68,7 +70,6 @@ const InputFieldInput = forwardRef(function InputFieldInput(
       labelSize={labelSize}
       hasLabel={hasLabel}
       hasDropdown={hasDropdown}
-      numberOfLines={1}
       {...props}
     />
   );

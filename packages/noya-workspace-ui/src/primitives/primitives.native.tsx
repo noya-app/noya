@@ -2,7 +2,7 @@ import React, { memo, ReactNode } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { View, Text as RNText } from 'react-native';
 
-import { Layout, Touchable } from 'noya-designsystem';
+import { Layout, Touchable, LabeledView } from 'noya-designsystem';
 
 export const Section = styled(View)(({ theme }) => ({
   padding: 10,
@@ -26,11 +26,6 @@ export const Row = styled(View)(({ theme }) => ({
 export const Column = styled(View)(({ theme }) => ({
   flex: 1,
 }));
-
-export const DraggableRow = styled(Touchable)({
-  flexDirection: 'row',
-  alignItems: 'center',
-});
 
 export const Text = styled(RNText)(({ theme }) => ({
   ...theme.textStyles.small,
@@ -87,5 +82,18 @@ export const LabeledSliderRow = memo(function LabeledRow({
         <Row>{children}</Row>
       </Column>
     </Row>
+  );
+});
+
+export const DragHandle = memo(function DragHandle() {
+  return (
+    <>
+      <Touchable>
+        <LabeledView size={25}>
+          <Layout.Icon name="drag-handle-dots-2" size={20} />
+        </LabeledView>
+      </Touchable>
+      <HorizontalSeparator />
+    </>
   );
 });

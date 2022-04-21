@@ -10,7 +10,7 @@ import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
 import { ClipboardUtils } from 'noya-utils';
 import { useCallback, useMemo } from 'react';
-// import { useOpenInputDialog } from '../contexts/DialogContext';
+import { useOpenInputDialog } from '../contexts/DialogContext';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -83,7 +83,7 @@ export default function useLayerMenu(
 ) {
   const dispatch = useDispatch();
   // TODO:
-  const openDialog = useCallback((n: string) => n, []); // useOpenInputDialog();
+  const openDialog = useOpenInputDialog();
   const { startRenamingLayer } = useWorkspace();
 
   const isEditingText = Selectors.getIsEditingText(interactionType);

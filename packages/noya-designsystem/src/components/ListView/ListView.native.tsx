@@ -28,7 +28,7 @@ import styled from 'styled-components';
 import { InputField } from '../InputField';
 import ContextMenu from '../ContextMenu';
 import * as Sortable from '../Sortable';
-import Touchable from '../Touchable';
+import { Touchable } from '../Touchable';
 import { Layout } from '../Layout';
 import {
   RenderProps,
@@ -43,7 +43,6 @@ import {
   ListRowPosition,
 } from './types';
 import { getPositionMargin } from './utils';
-import { RelativeDropPosition } from 'packages/noya-web-designsystem';
 
 const StyledTitle = styled(Text)<{ disabled: boolean; selected: boolean }>(
   ({ theme, selected, disabled }) => ({
@@ -109,7 +108,9 @@ function ListViewEditableRowTitle({
  * ------------------------------------------------------------------------- */
 
 const RowContainer = styled(View)<
-  ListRowContainerProps & { relativeDropPosition?: RelativeDropPosition }
+  ListRowContainerProps & {
+    relativeDropPosition?: Sortable.RelativeDropPosition;
+  }
 >(
   ({
     theme,
@@ -307,7 +308,6 @@ const FlatListStyles = StyleSheet.create({ list: { width: '100%', flex: 1 } });
 
 const ListViewRootInner = forwardRef(function ListViewRoot<T>(
   {
-    onPress,
     scrollable = false,
     expandable = true,
     sortable = false,

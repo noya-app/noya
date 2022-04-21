@@ -1,14 +1,16 @@
 import React, { memo } from 'react';
 
-import { useApplicationState } from 'noya-app-state-context';
+import { FlatDispatcher, useApplicationState } from 'noya-app-state-context';
 import { IconButton } from 'noya-designsystem';
 import Container from './Container';
 
-interface AlignmentInspectorProps {}
+interface AlignmentInspectorProps {
+  dispatch: FlatDispatcher;
+}
 
-function AlignmentInspector(props: AlignmentInspectorProps) {
-  const [, dispatch] = useApplicationState();
-
+const AlignmentInspector = memo(function AlignmentInspector({
+  dispatch,
+}: AlignmentInspectorProps) {
   return (
     <Container>
       <IconButton
@@ -61,6 +63,10 @@ function AlignmentInspector(props: AlignmentInspectorProps) {
       />
     </Container>
   );
-}
+});
 
-export default memo(AlignmentInspector);
+export default memo(() => {
+  const [, dispatch] = useApplicationState();
+
+  return <AlignmentInspector dispatch={dispatch} />;
+});

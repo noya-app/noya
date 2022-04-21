@@ -40,7 +40,7 @@ export type ShaderFillProps = {
 
 export interface FillInputProps {
   id?: string;
-  flex?: number;
+  flex?: number | string;
   fillType?: Sketch.FillType;
   onChangeType?: (type: Sketch.FillType) => void;
   hasMultipleFills?: boolean;
@@ -59,3 +59,11 @@ export interface FillOptionSelectProps {
   supportsPatterns: boolean;
   supportsShaders: boolean;
 }
+
+export type FillOption =
+  | 'Solid Color'
+  | 'Linear Gradient'
+  | 'Radial Gradient'
+  | 'Angular Gradient'
+  | 'Pattern Fill'
+  | 'Shader';

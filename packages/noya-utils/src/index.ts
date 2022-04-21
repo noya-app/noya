@@ -25,6 +25,8 @@ export * from './types';
 export * from './upperFirst';
 export * from './unique';
 export * from './url';
+export * from './parseFilename';
+export * from './throttle';
 export { default as Platform } from './Platform';
 export * as delimitedPath from './delimitedPath';
 export { v4 as uuid } from 'uuid';

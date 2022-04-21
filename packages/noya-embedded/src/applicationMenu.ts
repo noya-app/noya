@@ -1,5 +1,5 @@
 import type * as Electron from 'electron';
-import { MenuItem, SEPARATOR_ITEM } from 'noya-web-designsystem';
+import { MenuItem, SEPARATOR_ITEM } from 'noya-designsystem';
 import { MessageFromEmbedded, MessageFromHost } from 'noya-embedded';
 import { Emitter } from 'noya-fonts';
 import { getCurrentPlatform, normalizeKeyName } from 'noya-keymap';

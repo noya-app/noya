@@ -32,8 +32,6 @@ export { default as ColorPicker } from './components/ColorPicker';
 export { default as GradientPicker } from './components/GradientPicker';
 export { default as Grid } from './components/Grid';
 export * as GridView from './components/GridView';
-export * as Sortable from './components/Sortable';
-export type { RelativeDropPosition } from './components/Sortable';
 export * as InputField from './components/InputField';
 export * as RadioGroup from './components/RadioGroup';
 export * as Spacer from './components/Spacer';
@@ -54,6 +52,5 @@ export * from './hooks/useModKey';
 
 // Utils
 export * from './utils/createSectionedMenu';
-export * from './utils/getGradientBackground';
 export * from './utils/mouseEvent';
 export { default as withSeparatorElements } from './utils/withSeparatorElements';

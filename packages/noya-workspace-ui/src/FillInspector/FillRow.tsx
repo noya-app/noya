@@ -17,9 +17,9 @@ import { SetNumberMode } from 'noya-state';
 import { DimensionInput, DimensionValue } from '../DimensionsInspector';
 import FillInputFieldWithPicker, {
   ColorFillProps,
-  GradientFillProps,
-  PatternFillProps,
   ShaderFillProps,
+  PatternFillProps,
+  GradientFillProps,
 } from './FillInputFieldWithPicker';
 import {
   PatternFillType,
@@ -117,11 +117,11 @@ export default memo(function FillRow({
                       : ''
                   }
                   placeholder={colorProps.color ? undefined : 'multiple'}
-                  onSubmit={(value) => {
-                    if (validHex(value)) {
+                  onSubmit={(newColor: string) => {
+                    if (validHex(newColor)) {
                       colorProps.onChangeColor(
                         rgbaToSketchColor(
-                          hexToRgba(value, colorProps.color?.alpha),
+                          hexToRgba(newColor, colorProps.color?.alpha),
                         ),
                       );
                     }
@@ -135,7 +135,7 @@ export default memo(function FillRow({
               <DimensionInput
                 label="%"
                 value={
-                  colorProps.color
+                  colorProps.color?.alpha
                     ? Math.round(colorProps.color.alpha * 100)
                     : undefined
                 }
@@ -174,6 +174,7 @@ export default memo(function FillRow({
           <>
             <LabeledView label="Size" flex={1}>
               <Select
+                flex={1}
                 value={
                   Sketch.PatternFillType[
                     patternProps.pattern.patternFillType
@@ -241,7 +242,8 @@ export default memo(function FillRow({
   ]);
 
   return (
-    <Primitives.DraggableRow id={id}>
+    <Primitives.Row id={id}>
+      <Primitives.DragHandle />
       <LabeledView>{prefix}</LabeledView>
       {prefix && <Primitives.HorizontalSeparator />}
       <LabeledView label={fillLabel}>
@@ -256,6 +258,6 @@ export default memo(function FillRow({
       </LabeledView>
       <Primitives.HorizontalSeparator />
       {fields}
-    </Primitives.DraggableRow>
+    </Primitives.Row>
   );
 });

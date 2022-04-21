@@ -1,13 +1,16 @@
-import { ScrollArea, Select } from 'noya-web-designsystem';
-import Sketch from 'noya-file-format';
-import { useDeletable } from 'noya-react-canvaskit';
-import { useCompileShader } from 'noya-renderer';
 import { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import ArrayController from './ArrayController';
-import { ShaderFillProps } from './FillInputFieldWithPicker';
+
+import { ScrollArea, Select } from 'noya-designsystem';
+import {
+  ShaderFillProps,
+  ArrayController,
+  PatternFillType,
+} from 'noya-workspace-ui';
+import { useDeletable } from 'noya-react-canvaskit';
+import { useCompileShader } from 'noya-renderer';
+import Sketch from 'noya-file-format';
 import * as InspectorPrimitives from './InspectorPrimitives';
-import { PatternFillType } from './PatternInspector';
 import { ShaderVariableRow } from './ShaderVariableRow';
 
 const VerticalDivider = styled.div(({ theme }) => ({

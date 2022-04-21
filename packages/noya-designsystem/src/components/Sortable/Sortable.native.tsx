@@ -7,7 +7,6 @@ import React, {
   useCallback,
   createContext,
   MutableRefObject,
-  useEffect,
 } from 'react';
 import styled from 'styled-components';
 import { View, FlatList, LayoutChangeEvent } from 'react-native';
@@ -21,7 +20,7 @@ import Animated, {
 
 import { Point } from 'noya-geometry';
 import { useScrollable } from '../ScrollableView';
-import { Gesture, TouchableListener } from '../Touchable';
+import { TouchEvent, TouchableListener } from '../Touchable';
 import type {
   DropValidator,
   ItemMeasurement,
@@ -47,9 +46,6 @@ interface SortableContextType {
   setActiveItemIndex: (index: number | undefined) => void;
   onDropItem: (offsetTop: number) => void;
 }
-
-const DragStartDelayMS = 150;
-const MoveRenderThreshold = 8;
 
 // @ts-ignore Initial value doesn't really matter \m/
 const SortableContext = createContext<SortableContextType>(undefined);
@@ -92,19 +88,10 @@ function SortableItem<T>({ id, disabled, children }: SortableItemProps<T>) {
   useDerivedValue(() => {
     // Y position at which dragged item is being rendered
     const offsetY = touchPos.value.y - touchOffset.value.y;
-    const startY =
-      activeItem?.index !== undefined
-        ? measurements.current[activeItem?.index]?.pos.y
-        : offsetY;
 
     // validate drop indicator on JS thread
     // only if it is necessary
-    if (
-      overItem.value?.id === id &&
-      activeItem?.id !== id &&
-      !disabled &&
-      Math.abs(offsetY - startY) > MoveRenderThreshold
-    ) {
+    if (overItem.value?.id === id && activeItem?.id !== id && !disabled) {
       runOnJS(onValidateDrop)(overItem.value, offsetY);
     } else if (dropPosition && overItem.value?.id !== id) {
       runOnJS(setDropPosition)(undefined);
@@ -131,45 +118,39 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
   const touchStartTimeoutRef = useRef<number>();
 
   const onTouchStart = useCallback(
-    (params: Gesture) => {
-      touchStartTimeoutRef.current = setTimeout(() => {
-        sortable.setActiveItemIndex(index);
-        touchStartTimeoutRef.current = undefined;
+    (event: TouchEvent) => {
+      const point = event.point;
 
-        // If there is scroll view parent
-        // Disable its scroll capture durning drag&drop
-        if (scrollable.isAvailable) {
-          scrollable.setScrollEnabled(false);
-        }
-      }, DragStartDelayMS);
+      sortable.setActiveItemIndex(index);
+      touchStartTimeoutRef.current = undefined;
 
-      sortable.touchPos.value = params.point;
+      // If there is scroll view parent
+      // Disable its scroll capture durning drag&drop
+      if (scrollable.isAvailable) {
+        scrollable.setScrollEnabled(false);
+      }
+
+      sortable.touchPos.value = point;
       // calculate difference between element and touch positions
       // to keep it consistent while dragging
       sortable.touchOffset.value = {
-        x: params.point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
-        y: params.point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
+        x: point.x - (sortable.measurements.current[index]?.pos.x ?? 0),
+        y: point.y - (sortable.measurements.current[index]?.pos.y ?? 0),
       };
     },
     [sortable, index, scrollable],
   );
 
   const onTouchUpdate = useCallback(
-    (params: Gesture) => {
-      if (touchStartTimeoutRef.current) {
-        clearTimeout(touchStartTimeoutRef.current);
-        touchStartTimeoutRef.current = undefined;
-        return;
-      }
-
-      sortable.touchPos.value = params.point;
+    (event: TouchEvent) => {
+      sortable.touchPos.value = event.point;
     },
     [sortable],
   );
 
   const onTouchEnd = useCallback(
-    (params: Gesture) => {
-      sortable.onDropItem(params.point.y - sortable.touchOffset.value.y);
+    (event: TouchEvent) => {
+      sortable.onDropItem(event.point.y - sortable.touchOffset.value.y);
 
       // Enable parent scrollview drag
       if (scrollable.isAvailable) {
@@ -193,13 +174,13 @@ const CellRendererComponent = memo(function CellRendererComponent<T>(
     [sortable, index],
   );
 
+  // {/*  index as key enforces onLayout event after data list has been modified */}
   return (
     <TouchableListener
       onTouchStart={onTouchStart}
       onTouchUpdate={onTouchUpdate}
       onTouchEnd={onTouchEnd}
     >
-      {/*  index as key enforces onLayout event after data list has been modified */}
       <View onLayout={onLayout} key={index}>
         {children}
       </View>
@@ -301,11 +282,7 @@ function SortableList<T>(props: SortableListProps<T>) {
 
   const dragItemStyle = useAnimatedStyle(() => {
     const top = touchPos.value.y - touchOffset.value.y;
-    if (
-      !isDragging ||
-      Math.abs(top - measurements.current[activeItemIndex]?.size.width) <
-        MoveRenderThreshold
-    ) {
+    if (!isDragging) {
       return {
         top: 0,
         left: 0,
@@ -364,9 +341,9 @@ function SortableList<T>(props: SortableListProps<T>) {
           ))
         )}
       </View>
-      {isDragging && (
+      {isDragging && !!activeItem?.id && !!renderOverlay && (
         <Overlay style={dragItemStyle} pointerEvents="none">
-          {renderOverlay?.(activeItemIndex)}
+          {renderOverlay(keys.indexOf(activeItem.id))}
         </Overlay>
       )}
     </SortableContext.Provider>

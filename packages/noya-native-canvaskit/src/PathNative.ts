@@ -29,7 +29,7 @@ export default class PathNative extends JSEmbindObject implements IPath<Rect> {
   }
 
   addOval(oval: Rect, isCCW?: boolean, startIndex?: number): PathNative {
-    this._path.addOval(oval, isCCW, startIndex);
+    this._path.addOval(oval, isCCW ?? false, startIndex ?? 0);
 
     return this;
   }
