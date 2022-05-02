@@ -1,9 +1,9 @@
 import {
   Skia,
-  IShader,
+  SkShader,
   TileMode,
   BlendMode,
-  IImageFilter as RNSImageFilter,
+  SkImageFilter,
 } from '@shopify/react-native-skia';
 
 import {
@@ -15,7 +15,7 @@ import { JSEmbindObject } from './misc';
 import { Color } from './types';
 
 export class ImageFilterNative extends JSEmbindObject implements IImageFilter {
-  constructor(private _filter: RNSImageFilter) {
+  constructor(private _filter: SkImageFilter) {
     super();
   }
 
@@ -26,7 +26,7 @@ export class ImageFilterNative extends JSEmbindObject implements IImageFilter {
 
 const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
   // @ts-ignore
-  MakeShader(shader: IShader): ImageFilterNative {
+  MakeShader(shader: SkShader): ImageFilterNative {
     console.warn(`SkiaImageFilterFactory.MakeShader not implemented!`);
   },
 
@@ -85,7 +85,7 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
         sigmaX,
         sigmaY,
         color,
-        input?.getRNSImageFilter() ?? undefined,
+        input?.getRNSImageFilter() ?? null,
       ),
     );
   },
@@ -105,7 +105,7 @@ const ImageFilterFactoryNative: IImageFilterFactory<Color> = {
         sigmaX,
         sigmaY,
         color,
-        input?.getRNSImageFilter() ?? undefined,
+        input?.getRNSImageFilter() ?? null,
       ),
     );
   },

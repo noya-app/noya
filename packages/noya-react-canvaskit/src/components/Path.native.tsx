@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Drawing, useDrawing } from '@shopify/react-native-skia';
+import { createDrawing } from '@shopify/react-native-skia';
 
 import { PathNative, PaintNative } from 'noya-native-canvaskit';
 
@@ -8,13 +8,15 @@ interface NativePathProps {
   paint: PaintNative;
 }
 
-const Path: React.FC<NativePathProps> = (props) => {
-  const onDraw = useDrawing(props, ({ canvas }, { path, paint }) => {
-    canvas.drawPath(path.getRNSPath(), paint.getRNSkiaPaint());
-  });
+const onDraw = createDrawing<NativePathProps>(function onDraw(
+  { canvas },
+  { path, paint },
+) {
+  canvas.drawPath(path.getRNSPath(), paint.getRNSkiaPaint());
+});
 
-  // @ts-ignore
-  return <Drawing onDraw={onDraw} {...props} skipProcessing />;
+const Path: React.FC<NativePathProps> = (props) => {
+  return <skDrawing onDraw={onDraw} {...props} skipProcessing />;
 };
 
 export default memo(Path);

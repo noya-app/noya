@@ -1,19 +1,15 @@
-import {
-  Skia,
-  BlendMode,
-  IColorFilter as RNSColorFilter,
-} from '@shopify/react-native-skia';
+import { Skia, BlendMode, SkColorFilter } from '@shopify/react-native-skia';
 
 import { IColorFilter, IColorFilterFactory } from 'canvaskit-types';
 import { Color, InputMatrix } from './types';
 import { JSEmbindObject } from './misc';
 
 export class ColorFilterNative extends JSEmbindObject implements IColorFilter {
-  constructor(private _filter: RNSColorFilter) {
+  constructor(private _filter: SkColorFilter) {
     super();
   }
 
-  getRNSColorFilter(): RNSColorFilter {
+  getRNSColorFilter(): SkColorFilter {
     return this._filter;
   }
 }

@@ -3,9 +3,9 @@ import * as RNSkia from '@shopify/react-native-skia';
 // Primitives
 export type Color = number;
 export type ColorArray = Color[];
-export type Rect = RNSkia.IRect;
-export type Point = RNSkia.IPoint;
-export type Matrix = RNSkia.Matrix;
+export type Rect = RNSkia.SkRect;
+export type Point = RNSkia.SkPoint;
+export type Matrix = RNSkia.SkMatrix;
 export type InputMatrix = number[];
 
 // Enums

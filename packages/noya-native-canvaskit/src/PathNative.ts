@@ -3,7 +3,7 @@ import {
   FillType,
   PathOp,
   StrokeOpts,
-  IPath as RNSPath,
+  SkPath,
 } from '@shopify/react-native-skia';
 
 import { IPath } from 'canvaskit-types';
@@ -16,9 +16,9 @@ import { Rect } from './types';
 // implenets: addPath, arc, *toCmds
 // * only used in tests
 export default class PathNative extends JSEmbindObject implements IPath<Rect> {
-  private _path: RNSPath;
+  private _path: SkPath;
 
-  constructor(path?: RNSPath) {
+  constructor(path?: SkPath) {
     super();
 
     if (path) {
