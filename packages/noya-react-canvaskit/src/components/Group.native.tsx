@@ -80,8 +80,6 @@ const onDraw = createDrawing<OnDrawProps>(function onDraw(
       layerPaint.setColorFilter(colorFilter);
     }
 
-    console.log(imageFilter);
-
     if (imageFilter) {
       layerPaint.setImageFilter(imageFilter);
     }
