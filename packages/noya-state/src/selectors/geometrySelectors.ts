@@ -3,21 +3,23 @@ import { SKIP, STOP, VisitOptions } from 'tree-visit';
 import type { CanvasKit } from 'canvaskit-types';
 import Sketch from 'noya-file-format';
 import {
-  AffineTransform,
-  createRect,
-  createRectFromBounds,
-  getRectCornerPoints,
-  Insets,
-  Point,
+  Size,
   Rect,
+  Point,
+  Insets,
+  scaleRect,
+  createRect,
+  transformRect,
+  rectsIntersect,
+  AffineTransform,
   rectContainsPoint,
   rectsContainsRect,
-  rectsIntersect,
+  getRectCornerPoints,
+  createRectFromBounds,
   rotatedRectContainsPoint,
-  Size,
-  transformRect,
 } from 'noya-geometry';
 import { IFontManager } from 'noya-renderer';
+import { Platform } from 'noya-utils';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { CompassDirection } from '../reducers/interactionReducer';
 import { ScalingOptions, path as pathPrimitive } from '../primitives';
@@ -378,9 +380,13 @@ export function getScaleDirectionAtPoint(
     getCurrentPageZoom(state),
   );
 
-  const handle = handles.find((handle) =>
-    rectContainsPoint(handle.rect, point),
-  );
+  const handle = handles.find((handle) => {
+    if (Platform.isNative) {
+      return rectContainsPoint(scaleRect(handle.rect, 3), point);
+    }
+
+    return rectContainsPoint(handle.rect, point);
+  });
 
   return handle?.compassDirection;
 }
