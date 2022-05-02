@@ -1,5 +1,5 @@
 import React, { Fragment, memo, useMemo } from 'react';
-import { useApplicationState } from 'noya-app-state-context';
+import { useThrottledApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Point } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
@@ -15,7 +15,7 @@ import { useCanvasKit } from '../hooks/useCanvasKit';
 import { Oval } from './Oval';
 
 const AngularGradientEditor = () => {
-  const [state] = useApplicationState();
+  const [state] = useThrottledApplicationState();
 
   const gradientLineStroke = useStroke({ color: '#FFF' });
 
@@ -119,7 +119,7 @@ export default memo(function GradientEditor({
   selectedStopIndex: number;
 }) {
   const CanvasKit = useCanvasKit();
-  const [state] = useApplicationState();
+  const [state] = useThrottledApplicationState();
   const gradientStopPoints = Selectors.getSelectedGradientStopPoints(state);
   const zoom = useZoom();
 

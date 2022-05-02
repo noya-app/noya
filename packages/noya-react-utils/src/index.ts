@@ -7,3 +7,4 @@ export * from './hooks/usePixelRatio';
 export * from './PromiseState';
 export * from './SuspendedValue';
 export * from './Pressable';
+export * from './Portal';

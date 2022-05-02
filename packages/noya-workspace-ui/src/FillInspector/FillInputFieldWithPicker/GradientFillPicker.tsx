@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { Selectors } from 'noya-state';
-import { useApplicationState } from 'noya-app-state-context';
+import { useThrottledApplicationState } from 'noya-app-state-context';
 import { useOpenInputDialog } from '../../contexts/DialogContext';
 import GradientInspector from '../../GradientInspector';
 import type { GradientFillProps } from './types';
@@ -15,7 +15,7 @@ export default function GradientFillPicker({
   onAddGradientStop,
   onDeleteGradientStop,
 }: Omit<GradientFillProps, 'onChangeGradientType'> & { id?: string }) {
-  const [state, dispatch] = useApplicationState();
+  const [state, dispatch] = useThrottledApplicationState();
   const openDialog = useOpenInputDialog();
 
   const gradientAssets = Selectors.getGradientAssets(state);
