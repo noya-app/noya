@@ -1,17 +1,8 @@
-import {
-  LetterCaseCapitalizeIcon,
-  LetterCaseLowercaseIcon,
-  LetterCaseUppercaseIcon,
-} from 'noya-icons';
-import Sketch from 'noya-file-format';
-import {
-  Label,
-  LabeledElementView,
-  RadioGroup,
-  Select,
-} from 'noya-web-designsystem';
-import { SimpleTextDecoration } from 'noya-state';
 import { memo, useCallback } from 'react';
+
+import { LabeledView, RadioGroup, Select, Layout } from 'noya-designsystem';
+import { SimpleTextDecoration } from 'noya-state';
+import Sketch from 'noya-file-format';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextOptionsRowProps {
@@ -39,17 +30,6 @@ export default memo(function TextOptionsRow({
   onChangeTextTransform,
   onChangeTextDecoration,
 }: TextOptionsRowProps) {
-  const renderLabel = useCallback(({ id }) => {
-    switch (id) {
-      case decorationInputId:
-        return <Label.Label>Decoration</Label.Label>;
-      case transformInputId:
-        return <Label.Label>Transform</Label.Label>;
-      default:
-        return null;
-    }
-  }, []);
-
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.SectionHeader>
@@ -57,7 +37,7 @@ export default memo(function TextOptionsRow({
       </InspectorPrimitives.SectionHeader>
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
-        <LabeledElementView renderLabel={renderLabel}>
+        <LabeledView label="Decoration">
           <Select<SimpleTextDecoration>
             id={decorationInputId}
             value={textDecoration ?? 'none'}
@@ -65,7 +45,9 @@ export default memo(function TextOptionsRow({
             getTitle={capitalize}
             onChange={onChangeTextDecoration}
           />
-          <InspectorPrimitives.HorizontalSeparator />
+        </LabeledView>
+        <InspectorPrimitives.HorizontalSeparator />
+        <LabeledView label="Transform">
           <RadioGroup.Root
             id={transformInputId}
             value={textTransform !== undefined ? textTransform.toString() : ''}
@@ -78,22 +60,22 @@ export default memo(function TextOptionsRow({
               value={Sketch.TextTransform.None.toString()}
               tooltip="None"
             >
-              <LetterCaseCapitalizeIcon />
+              <Layout.Icon name="letter-case-capitalize" />
             </RadioGroup.Item>
             <RadioGroup.Item
               value={Sketch.TextTransform.Uppercase.toString()}
               tooltip="Uppercase"
             >
-              <LetterCaseUppercaseIcon />
+              <Layout.Icon name="letter-case-uppercase" />
             </RadioGroup.Item>
             <RadioGroup.Item
               value={Sketch.TextTransform.Lowercase.toString()}
               tooltip="Lowercase"
             >
-              <LetterCaseLowercaseIcon />
+              <Layout.Icon name="letter-case-lowercase" />
             </RadioGroup.Item>
           </RadioGroup.Root>
-        </LabeledElementView>
+        </LabeledView>
       </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>
   );

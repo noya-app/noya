@@ -1,5 +1,5 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { Spacer } from 'noya-web-designsystem';
+import { Layout } from 'noya-designsystem';
 import {
   ComponentProps,
   ForwardedRef,
@@ -93,14 +93,14 @@ export const Dialog = forwardRef(function Dialog(
         {title && (
           <>
             <StyledTitle>{title}</StyledTitle>
-            <Spacer.Vertical size={description ? 10 : 20} />
+            <Layout.Stack size={description ? 10 : 20} />
           </>
         )}
         {description && (
           <>
-            <Spacer.Vertical size={10} />
+            <Layout.Stack size={10} />
             <StyledDescription>{description}</StyledDescription>
-            <Spacer.Vertical size={20} />
+            <Layout.Stack size={20} />
           </>
         )}
         {children}

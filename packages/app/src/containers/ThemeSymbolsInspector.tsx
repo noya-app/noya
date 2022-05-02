@@ -1,4 +1,4 @@
-import { Divider, withSeparatorElements } from 'noya-web-designsystem';
+import { Layout, withSeparatorElements } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
@@ -35,5 +35,5 @@ export default memo(function ThemeSymbolsInspector() {
     showSymbolsInspector && <SymbolMasterInspector />,
   ];
 
-  return <>{withSeparatorElements(elements, <Divider />)}</>;
+  return <>{withSeparatorElements(elements, <Layout.Divider />)}</>;
 });

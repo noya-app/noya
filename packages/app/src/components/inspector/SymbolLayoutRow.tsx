@@ -1,22 +1,8 @@
-import {
-  PinBottomIcon,
-  PinLeftIcon,
-  PinRightIcon,
-  PinTopIcon,
-  SpaceEvenlyHorizontallyIcon,
-  SpaceEvenlyVerticallyIcon,
-} from 'noya-icons';
-import Sketch from 'noya-file-format';
-import {
-  Divider,
-  Label,
-  RadioGroup,
-  Spacer,
-  InputField,
-  LabeledElementView,
-} from 'noya-web-designsystem';
+import { memo, useCallback, useMemo } from 'react';
+
+import { Layout, RadioGroup, InputField, LabeledView } from 'noya-designsystem';
 import { GroupLayouts, SetNumberMode } from 'noya-state';
-import { memo, useCallback } from 'react';
+import Sketch from 'noya-file-format';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
@@ -44,24 +30,20 @@ export default memo(function SymbolLayoutRow({
   const minWidth = inferredLayout?.minSize;
   const isAnchorDisabled = inferredLayout === undefined;
 
-  const renderLabel = useCallback(({ id }) => {
-    switch (id) {
-      case '0-0':
-        return <Label.Label>Left to Right</Label.Label>;
-      case '0-1':
-        return <Label.Label>Center</Label.Label>;
-      case '0-2':
-        return <Label.Label>Right to Left</Label.Label>;
-      case '1-0':
-        return <Label.Label>Top to Bottom</Label.Label>;
-      case '1-1':
-        return <Label.Label>Middle</Label.Label>;
-      case '1-2':
-        return <Label.Label>Bottom to Top</Label.Label>;
-      default:
-        return <Label.Label></Label.Label>;
+  const radioLabel = useMemo(() => {
+    if (!layoutAxis || !layoutAnchor) {
+      return '';
     }
-  }, []);
+
+    return {
+      '00': 'Left to Right',
+      '01': 'Center',
+      '02': 'Right to Left',
+      '10': 'Top to Bottom',
+      '11': 'Middle',
+      '12': 'Bottom to Top',
+    }[`${layoutAxis}${layoutAnchor}`];
+  }, [layoutAxis, layoutAnchor]);
 
   const handleNudgeMinWidth = useCallback(
     (value: number) => setMinWidth(value, 'adjust'),
@@ -103,10 +85,10 @@ export default memo(function SymbolLayoutRow({
       </InspectorPrimitives.Row>
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
-        <LabeledElementView renderLabel={renderLabel}>
+        <LabeledView label={radioLabel}>
           <RadioGroup.Root
             id={`${layoutAxis}-${layoutAnchor}`}
-            value={isAnchorDisabled ? '' : layoutAnchor?.toString()}
+            value={isAnchorDisabled ? '' : layoutAnchor?.toString() ?? ''}
             onValueChange={useCallback(
               (value: string) => setLayoutAnchor(parseInt(value)),
               [setLayoutAnchor],
@@ -118,9 +100,9 @@ export default memo(function SymbolLayoutRow({
             >
               {isAnchorDisabled ||
               layoutAxis === Sketch.InferredLayoutAxis.Horizontal ? (
-                <PinRightIcon />
+                <Layout.Icon name="pin-right" />
               ) : (
-                <PinBottomIcon />
+                <Layout.Icon name="pin-bottom" />
               )}
             </RadioGroup.Item>
             <RadioGroup.Item
@@ -129,9 +111,9 @@ export default memo(function SymbolLayoutRow({
             >
               {isAnchorDisabled ||
               layoutAxis === Sketch.InferredLayoutAxis.Horizontal ? (
-                <SpaceEvenlyHorizontallyIcon />
+                <Layout.Icon name="space-evenly-horizontally" />
               ) : (
-                <SpaceEvenlyVerticallyIcon />
+                <Layout.Icon name="space-evenly-vertically" />
               )}
             </RadioGroup.Item>
             <RadioGroup.Item
@@ -140,23 +122,23 @@ export default memo(function SymbolLayoutRow({
             >
               {isAnchorDisabled ||
               layoutAxis === Sketch.InferredLayoutAxis.Horizontal ? (
-                <PinLeftIcon />
+                <Layout.Icon name="pin-left" />
               ) : (
-                <PinTopIcon />
+                <Layout.Icon name="pin-top" />
               )}
             </RadioGroup.Item>
           </RadioGroup.Root>
-        </LabeledElementView>
+        </LabeledView>
       </InspectorPrimitives.Row>
       <InspectorPrimitives.VerticalSeparator />
       {!isAnchorDisabled && (
         <>
           <InspectorPrimitives.VerticalSeparator />
-          <Divider />
+          <Layout.Divider />
           <InspectorPrimitives.VerticalSeparator />
           <InspectorPrimitives.Row>
             <InspectorPrimitives.Text>Minimum Width</InspectorPrimitives.Text>
-            <Spacer.Horizontal size={75} />
+            <Layout.Queue size={75} />
             <InputField.Root id="font-size" size={70}>
               <InputField.NumberInput
                 placeholder={'None'}

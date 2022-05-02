@@ -1,4 +1,4 @@
-import { Divider } from 'noya-web-designsystem';
+import { Layout } from 'noya-designsystem';
 import { getMultiValue, Selectors } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import { memo, useCallback } from 'react';
@@ -47,7 +47,7 @@ export default memo(function SwatchesInspectors() {
         names={selectedSwatches.map((v) => delimitedPath.basename(v.name))}
         onNameChange={handleNameChange}
       />
-      <Divider />
+      <Layout.Divider />
       <ColorInspector
         id={'color-swatch'}
         color={color}

@@ -1,4 +1,3 @@
-import { HamburgerMenuIcon } from 'noya-icons';
 import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
@@ -12,6 +11,7 @@ import {
   MenuItem,
   Spacer,
 } from 'noya-web-designsystem';
+import { Layout } from 'noya-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
 import { useHistory } from 'noya-workspace-ui';
@@ -220,7 +220,7 @@ const MenubarContent = memo(function MenubarContent({
           onSelect={onSelectMenuItem}
         >
           <Button id="menu">
-            <HamburgerMenuIcon />
+            <Layout.Icon name="hamburger-menu" />
           </Button>
         </DropdownMenu>
       )}

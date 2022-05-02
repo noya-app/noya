@@ -1,10 +1,10 @@
 import { useDispatch, useWorkspace } from 'noya-app-state-context';
 import {
-  createSectionedMenu,
-  MenuConfig,
   MenuItem,
+  MenuConfig,
   RegularMenuItem,
-} from 'noya-web-designsystem';
+  createSectionedMenu,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';

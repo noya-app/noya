@@ -1,6 +1,5 @@
 import { memo, ReactNode, useCallback, useMemo } from 'react';
 
-import { ResetIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import { LayerIcon } from 'noya-workspace-ui';
 import { InputField, Layout, Select, Button } from 'noya-designsystem';
@@ -298,7 +297,7 @@ export default memo(function SymbolInstanceOverridesRow({
             tooltip="Reset Overrides"
             onClick={onResetOverrideValue}
           >
-            <ResetIcon />
+            <Layout.Icon name="reset" />
           </Button>
         </InspectorPrimitives.Row>
       </InspectorPrimitives.Section>

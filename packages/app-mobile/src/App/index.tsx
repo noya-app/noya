@@ -21,7 +21,7 @@ import { getCurrentPlatform } from 'noya-keymap';
 import { CanvasKitNative } from 'noya-native-canvaskit';
 import { DesignSystemConfigurationProvider } from 'noya-ui';
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
-import { darkTheme, lightTheme } from '../constants';
+import { darkTheme, lightTheme } from 'noya-designsystem';
 import AppContent from './AppContent';
 
 const App: React.FC<{}> = () => {

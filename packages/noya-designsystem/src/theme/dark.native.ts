@@ -1,5 +1,5 @@
 import produce from 'immer';
-import * as lightTheme from './lightTheme';
+import * as lightTheme from './light.native';
 
 export const colors = produce(lightTheme.colors, (colors) => {
   colors.text = 'rgb(248,248,250)';
@@ -22,4 +22,4 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.activeBackground = 'rgba(255,255,255,0.08)';
 });
 
-export { textStyles, fonts, sizes } from './lightTheme';
+export { textStyles, fonts, sizes } from './light.native';

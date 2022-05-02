@@ -8,6 +8,7 @@ import {
   useSelector,
   useWorkspaceState,
 } from 'noya-app-state-context';
+import { Layout } from 'noya-designsystem';
 import {
   Button,
   createSectionedMenu,
@@ -17,7 +18,6 @@ import {
   Spacer,
   Tooltip,
 } from 'noya-web-designsystem';
-import { ChevronDownIcon, PointModeIcon } from 'noya-icons';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
@@ -329,7 +329,7 @@ const ToolbarContent = memo(function ToolbarContent({
               <>
                 Insert
                 <Spacer.Horizontal size={12} />
-                <ChevronDownIcon />
+                <Layout.Icon name="chevron-down" />
               </>
             ),
             [],
@@ -347,7 +347,7 @@ const ToolbarContent = memo(function ToolbarContent({
               <>
                 {round(zoomValue * 100).toString()}%
                 <Spacer.Horizontal />
-                <ChevronDownIcon />
+                <Layout.Icon name="chevron-down" />
               </>
             ),
             [zoomValue],
@@ -370,7 +370,7 @@ const ToolbarContent = memo(function ToolbarContent({
       >
         {useMemo(
           () => (
-            <PointModeIcon />
+            <Layout.Icon name="point-mode" />
           ),
           [],
         )}

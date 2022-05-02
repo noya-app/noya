@@ -6,7 +6,7 @@ import {
   useGetWorkspaceStateSnapshot,
   useSelector,
 } from 'noya-app-state-context';
-import { Button, Divider, withSeparatorElements } from 'noya-web-designsystem';
+import { Button, Layout, withSeparatorElements } from 'noya-designsystem';
 import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
 import type { CanvasKit } from 'canvaskit';
@@ -222,5 +222,5 @@ export default memo(function ExportInspector() {
     ),
   ];
 
-  return <>{withSeparatorElements(elements, <Divider />)}</>;
+  return <>{withSeparatorElements(elements, <Layout.Divider />)}</>;
 });

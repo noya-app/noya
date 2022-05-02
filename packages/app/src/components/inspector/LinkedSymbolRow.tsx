@@ -1,9 +1,9 @@
-import { ComponentInstanceIcon, LinkBreak2Icon } from 'noya-icons';
-import { useSelector } from 'noya-app-state-context';
-import { Button, Select } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+
+import { useSelector } from 'noya-app-state-context';
+import { Button, Select, Layout } from 'noya-designsystem';
+import { Selectors } from 'noya-state';
 import { useShallowArray } from 'noya-react-utils';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -58,7 +58,7 @@ export default memo(function SymbolSelectorRow({
           tooltip="Detach instance from symbol"
           onClick={onDetach}
         >
-          <LinkBreak2Icon color={iconColor} />
+          <Layout.Icon name="link-break-2" color={iconColor} />
         </Button>
         <InspectorPrimitives.HorizontalSeparator />
         <Button
@@ -68,7 +68,7 @@ export default memo(function SymbolSelectorRow({
           tooltip="Edit Symbol Source"
           onClick={onEditSource}
         >
-          <ComponentInstanceIcon color={iconColor} />
+          <Layout.Icon name="component-instance" color={iconColor} />
         </Button>
       </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>

@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 import SymbolSelectorRow from '../components/inspector/LinkedSymbolRow';
 import SymbolInstanceOverridesRow from '../components/inspector/SymbolInstanceOverridesRow';
-import { Divider, withSeparatorElements } from 'noya-web-designsystem';
+import { Layout, withSeparatorElements } from 'noya-designsystem';
 import { FillInspector } from 'noya-workspace-ui';
 
 export default memo(function SymbolMasterInspector() {
@@ -64,5 +64,5 @@ export default memo(function SymbolMasterInspector() {
     ),
   ];
 
-  return <>{withSeparatorElements(elements, <Divider />)}</>;
+  return <>{withSeparatorElements(elements, <Layout.Divider />)}</>;
 });

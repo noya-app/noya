@@ -5,18 +5,18 @@ import {
   useWorkspace,
 } from 'noya-app-state-context';
 import {
+  useModKey,
   ContextMenu,
   mergeEventHandlers,
-  useModKey,
   isLeftButtonClicked,
   isRightButtonClicked,
-} from 'noya-web-designsystem';
+} from 'noya-designsystem';
 import {
-  SupportedCanvasUploadType,
   SupportedImageUploadType,
-  SUPPORTED_CANVAS_UPLOAD_TYPES,
+  SupportedCanvasUploadType,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
-} from 'noya-web-designsystem/src/types';
+  SUPPORTED_CANVAS_UPLOAD_TYPES,
+} from 'noya-designsystem/src/types';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,

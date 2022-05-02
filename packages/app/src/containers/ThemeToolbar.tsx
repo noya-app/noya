@@ -1,15 +1,8 @@
-import { Button, RadioGroup, Spacer } from 'noya-web-designsystem';
-import {
-  BlendingModeIcon,
-  ComponentInstanceIcon,
-  LetterCaseToggleIcon,
-  MarginIcon,
-  PlusIcon,
-  TrashIcon,
-} from 'noya-icons';
 import React, { useMemo, useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
+
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Button, RadioGroup, Layout } from 'noya-designsystem';
 import { Selectors, ThemeTab } from 'noya-state';
 
 const TabsContainer = styled.div(({ theme }) => ({
@@ -86,8 +79,8 @@ export default function SwatchesToolbar() {
   return useMemo(
     () => (
       <>
-        <Spacer.Horizontal size={8} />
-        <Spacer.Horizontal />
+        <Layout.Stack size={8} />
+        <Layout.Stack />
         <TabsContainer>
           <RadioGroup.Root
             id={'components'}
@@ -95,32 +88,32 @@ export default function SwatchesToolbar() {
             onValueChange={handleChangeTab}
           >
             <RadioGroup.Item value="swatches" tooltip="Theme colors">
-              <BlendingModeIcon />
+              <Layout.Icon name="blending-mode" />
             </RadioGroup.Item>
             <RadioGroup.Item value="textStyles" tooltip="Theme text styles">
-              <LetterCaseToggleIcon />
+              <Layout.Icon name="letter-case-toggle" />
             </RadioGroup.Item>
             <RadioGroup.Item value="layerStyles" tooltip="Theme layer styles">
-              <MarginIcon />
+              <Layout.Icon name="margin" />
             </RadioGroup.Item>
             <RadioGroup.Item value="symbols" tooltip="Theme symbols">
-              <ComponentInstanceIcon />
+              <Layout.Icon name="component-istance" />
             </RadioGroup.Item>
           </RadioGroup.Root>
         </TabsContainer>
         <RightContainer>
-          <Spacer.Horizontal size={24} />
+          <Layout.Stack size={24} />
           {componentsTab !== 'symbols' && (
             <Button id="add-component" onClick={addComponent}>
-              <PlusIcon />
+              <Layout.Icon name="plus" />
             </Button>
           )}
-          <Spacer.Horizontal size={4} />
+          <Layout.Stack size={4} />
           <Button id="remove-component" onClick={removeComponent}>
-            <TrashIcon />
+            <Layout.Icon name="trash" />
           </Button>
         </RightContainer>
-        <Spacer.Horizontal size={sidebarWidth + 8} />
+        <Layout.Stack size={sidebarWidth + 8} />
       </>
     ),
     [

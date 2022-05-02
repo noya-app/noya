@@ -1,5 +1,7 @@
-import { InputField, Spacer } from 'noya-web-designsystem';
 import { memo } from 'react';
+
+import { InputField, Layout } from 'noya-designsystem';
+
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {
@@ -18,7 +20,7 @@ export default memo(function NameInspector({ names, onNameChange }: Props) {
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Title>Name</InspectorPrimitives.Title>
-      <Spacer.Vertical size={4} />
+      <Layout.Stack size={4} />
       <InspectorPrimitives.Row>
         <InputField.Root>
           <InputField.Input

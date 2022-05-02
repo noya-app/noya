@@ -1,15 +1,10 @@
-import {
-  IconButton,
-  InputField,
-  Label,
-  LabeledElementView,
-  Select,
-} from 'noya-web-designsystem';
-import Sketch from 'noya-file-format';
+import { memo, useCallback } from 'react';
+
+import { Select, InputField, IconButton, LabeledView } from 'noya-designsystem';
 import { FillInputFieldWithPicker } from 'noya-workspace-ui';
 import { SketchModel } from 'noya-sketch-model';
 import { upperFirst } from 'noya-utils';
-import { memo, useCallback } from 'react';
+import Sketch from 'noya-file-format';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const SHADER_VARIABLE_TYPES: Sketch.ShaderVariable['value']['type'][] = [
@@ -82,22 +77,6 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
   const nameInputId = `${id}-name`;
   const typeInputId = `${id}-type`;
 
-  const renderLabel = useCallback(
-    ({ id }: { id: string }) => {
-      switch (id) {
-        case valueInputId:
-          return <Label.Label>{upperFirst(variable.value.type)}</Label.Label>;
-        case nameInputId:
-          return <Label.Label>Name</Label.Label>;
-        case typeInputId:
-          return <Label.Label>Type</Label.Label>;
-        default:
-          return null;
-      }
-    },
-    [nameInputId, typeInputId, valueInputId, variable.value.type],
-  );
-
   const handleChangeOption = useCallback(
     (type: Sketch.ShaderVariable['value']['type']) => {
       switch (type) {
@@ -115,7 +94,7 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
 
   return (
     <InspectorPrimitives.Row>
-      <LabeledElementView renderLabel={renderLabel}>
+      <LabeledView label={upperFirst(variable.value.type)}>
         <ShaderVariableValueInput
           id={valueInputId}
           flex="0 0 50px"
@@ -123,7 +102,9 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
           onNudge={onNudge}
           value={variable.value}
         />
-        <InspectorPrimitives.HorizontalSeparator />
+      </LabeledView>
+      <InspectorPrimitives.HorizontalSeparator />
+      <LabeledView label="Type">
         <Select
           id={typeInputId}
           flex="0 0 70px"
@@ -132,7 +113,9 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
           options={SHADER_VARIABLE_TYPES}
           onChange={handleChangeOption}
         />
-        <InspectorPrimitives.HorizontalSeparator />
+      </LabeledView>
+      <InspectorPrimitives.HorizontalSeparator />
+      <LabeledView label="Name">
         <InputField.Root id={nameInputId}>
           <InputField.Input
             onSubmit={useCallback(
@@ -148,13 +131,15 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
             value={variable.name}
           />
         </InputField.Root>
-        <InspectorPrimitives.HorizontalSeparator />
+      </LabeledView>
+      <InspectorPrimitives.HorizontalSeparator />
+      <LabeledView>
         <IconButton
           id={`${id}-delete`}
-          iconName="Cross2Icon"
+          name="cross-2"
           onClick={onClickDelete}
         />
-      </LabeledElementView>
+      </LabeledView>
     </InspectorPrimitives.Row>
   );
 });

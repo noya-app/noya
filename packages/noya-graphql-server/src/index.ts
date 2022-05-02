@@ -7,7 +7,7 @@ import { LayerPreview } from 'noya-renderer';
 import { loadCanvasKit } from 'canvaskit';
 import { setPathToWasm } from 'noya-utils';
 import { ImageEncoding, generateImage } from 'noya-generate-image';
-import { lightTheme } from 'noya-web-designsystem';
+import { lightTheme } from 'noya-designsystem';
 import React from 'react';
 
 const wasmPath = path.join(

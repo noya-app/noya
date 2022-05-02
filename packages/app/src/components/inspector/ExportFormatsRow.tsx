@@ -1,12 +1,11 @@
 import Sketch from 'noya-file-format';
 import {
-  IconButton,
-  InputField,
-  Label,
-  LabeledElementView,
   Select,
+  IconButton,
+  LabeledView,
   withSeparatorElements,
-} from 'noya-web-designsystem';
+} from 'noya-designsystem';
+import { InputField } from 'noya-web-designsystem';
 import { ExportOptions } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
@@ -50,22 +49,6 @@ export default memo(function ExportFormatsRow({
   const namingSchemeInputId = `${id}-`;
   const fileFormatInputId = `${id}-opacity`;
 
-  const renderLabel = useCallback(
-    ({ id }) => {
-      switch (id) {
-        case scaleInputId:
-          return <Label.Label>Size</Label.Label>;
-        case namingSchemeInputId:
-          return <Label.Label>Prefix/Suffix</Label.Label>;
-        case fileFormatInputId:
-          return <Label.Label>Format</Label.Label>;
-        default:
-          return null;
-      }
-    },
-    [scaleInputId, namingSchemeInputId, fileFormatInputId],
-  );
-
   const canChangeScale =
     exportFormat.fileFormat !== Sketch.ExportFileFormat.SVG;
 
@@ -73,75 +56,81 @@ export default memo(function ExportFormatsRow({
     exportFormat.namingScheme === Sketch.ExportFormatNamingScheme.Prefix;
 
   const elements = [
-    <InputField.Root id={scaleInputId} size={55}>
-      <InputField.Input
-        disabled={!canChangeScale}
-        value={scaleString}
-        onSubmit={useCallback(
-          (value) => {
-            const parseScale = ExportOptions.parseScale(value);
+    <LabeledView label="Size">
+      <InputField.Root id={scaleInputId} size={55}>
+        <InputField.Input
+          disabled={!canChangeScale}
+          value={scaleString}
+          onSubmit={useCallback(
+            (value) => {
+              const parseScale = ExportOptions.parseScale(value);
 
-            if (!parseScale) return;
+              if (!parseScale) return;
 
-            onChangeScale(parseScale);
-          },
-          [onChangeScale],
-        )}
-      />
-    </InputField.Root>,
-    <InputField.Root
-      id={namingSchemeInputId}
-      labelPosition={isPrefix ? 'end' : 'start'}
-    >
-      <InputField.Input
-        value={exportFormat.name}
-        placeholder={isPrefix ? 'Prefix' : 'Suffix'}
-        onSubmit={onChangeName}
-        textAlign={isPrefix ? 'end' : 'start'}
-      />
-      <InputField.DropdownMenu
-        items={useMemo(
-          () => [
-            {
-              value: Sketch.ExportFormatNamingScheme.Prefix.toString(),
-              title: 'Prefix',
+              onChangeScale(parseScale);
             },
-            {
-              value: Sketch.ExportFormatNamingScheme.Suffix.toString(),
-              title: 'Suffix',
-            },
-          ],
-          [],
-        )}
-        id={`${id}-naming-scheme-button`}
-        onSelect={useCallback(
-          (value: string) => onChangeNamingScheme(parseInt(value)),
-          [onChangeNamingScheme],
-        )}
-      />
-      <InputField.Label>...</InputField.Label>
-    </InputField.Root>,
-    <InputField.Root size={65} id={fileFormatInputId}>
-      <Select
-        id={`${id}-file-format-select`}
-        value={exportFormat.fileFormat}
-        options={SUPPORTED_EXPORT_FORMAT_OPTIONS}
-        getTitle={useCallback((id) => id.toUpperCase(), [])}
-        onChange={onChangeFileFormat}
-      />
-    </InputField.Root>,
-    <IconButton id={`${id}-delete`} iconName="Cross2Icon" onClick={onDelete} />,
+            [onChangeScale],
+          )}
+        />
+      </InputField.Root>
+    </LabeledView>,
+    <LabeledView label="Prefix/Suffix">
+      <InputField.Root
+        id={namingSchemeInputId}
+        labelPosition={isPrefix ? 'end' : 'start'}
+      >
+        <InputField.Input
+          value={exportFormat.name}
+          placeholder={isPrefix ? 'Prefix' : 'Suffix'}
+          onSubmit={onChangeName}
+          textAlign={isPrefix ? 'end' : 'start'}
+        />
+        <InputField.DropdownMenu
+          items={useMemo(
+            () => [
+              {
+                value: Sketch.ExportFormatNamingScheme.Prefix.toString(),
+                title: 'Prefix',
+              },
+              {
+                value: Sketch.ExportFormatNamingScheme.Suffix.toString(),
+                title: 'Suffix',
+              },
+            ],
+            [],
+          )}
+          id={`${id}-naming-scheme-button`}
+          onSelect={useCallback(
+            (value: string) => onChangeNamingScheme(parseInt(value)),
+            [onChangeNamingScheme],
+          )}
+        />
+        <InputField.Label>...</InputField.Label>
+      </InputField.Root>
+    </LabeledView>,
+    <LabeledView label="Format">
+      <InputField.Root size={65} id={fileFormatInputId}>
+        <Select
+          id={`${id}-file-format-select`}
+          value={exportFormat.fileFormat}
+          options={SUPPORTED_EXPORT_FORMAT_OPTIONS}
+          getTitle={useCallback((id) => id.toUpperCase(), [])}
+          onChange={onChangeFileFormat}
+        />
+      </InputField.Root>
+    </LabeledView>,
+    <LabeledView>
+      <IconButton id={`${id}-delete`} name="cross-2" onClick={onDelete} />
+    </LabeledView>,
   ];
 
   return (
     <InspectorPrimitives.Row id={id}>
       {last ? (
-        <LabeledElementView renderLabel={renderLabel}>
-          {withSeparatorElements(
-            elements,
-            <InspectorPrimitives.HorizontalSeparator />,
-          )}
-        </LabeledElementView>
+        withSeparatorElements(
+          elements,
+          <InspectorPrimitives.HorizontalSeparator />,
+        )
       ) : (
         <>
           {withSeparatorElements(

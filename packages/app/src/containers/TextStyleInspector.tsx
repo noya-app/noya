@@ -1,5 +1,5 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Divider } from 'noya-web-designsystem';
+import { Layout } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { getEditableTextStyle, getMultiValue, Selectors } from 'noya-state';
@@ -88,7 +88,7 @@ export default memo(function TextStyleInspector() {
           [dispatch],
         )}
       />
-      <Divider />
+      <Layout.Divider />
       <TextLayoutRow
         textLayout={textBehavior}
         textVerticalAlignment={editableTextStyle.verticalAlignment}
@@ -112,7 +112,7 @@ export default memo(function TextStyleInspector() {
           [dispatch],
         )}
       />
-      <Divider />
+      <Layout.Divider />
       <TextOptionsRow
         textTransform={editableTextStyle.textTransform}
         textDecoration={editableTextStyle.textDecoration}
