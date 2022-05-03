@@ -1,12 +1,13 @@
-import Sketch from 'noya-file-format';
-import { GridView } from 'noya-web-designsystem';
-import { SelectionType } from 'noya-state';
-import { delimitedPath, sortBy } from 'noya-utils';
 import { Fragment, memo, useCallback, useMemo } from 'react';
+
+import { delimitedPath, sortBy } from 'noya-utils';
+import { GridView } from 'noya-designsystem';
+import { SelectionType } from 'noya-state';
+import Sketch from 'noya-file-format';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
+import { createThemeGroups } from '../../utils/themeTree';
 import { ThemeMenuItemType, menuItems } from './menuItems';
 import Symbol from './Symbol';
-import { createThemeGroups } from '../../utils/themeTree';
-import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface Props {
   symbols: Sketch.SymbolMaster[];

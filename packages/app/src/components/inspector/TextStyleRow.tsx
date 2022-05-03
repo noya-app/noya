@@ -2,8 +2,13 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 
 import Sketch from 'noya-file-format';
-import { Select, MenuItem, LabeledView, SelectOption } from 'noya-designsystem';
-import { InputField } from 'noya-web-designsystem';
+import {
+  Select,
+  MenuItem,
+  InputField,
+  LabeledView,
+  SelectOption,
+} from 'noya-designsystem';
 import {
   DEFAULT_FONT_TRAITS,
   encodeFontName,

@@ -1,19 +1,19 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import { CheckIcon, ChevronRightIcon } from 'noya-icons';
-import { Slot } from '@radix-ui/react-slot';
-import { useKeyboardShortcuts } from 'noya-keymap';
 import { memo, useCallback, useMemo } from 'react';
+import { Slot } from '@radix-ui/react-slot';
 import styled from 'styled-components';
-import { Spacer } from '..';
-import { MenuItemProps, MenuProps } from './ContextMenu';
+
+import { useKeyboardShortcuts } from 'noya-keymap';
 import {
-  CHECKBOX_RIGHT_INSET,
-  CHECKBOX_WIDTH,
-  getKeyboardShortcutsForMenuItems,
-  KeyboardShortcut,
-  SEPARATOR_ITEM,
   styles,
-} from './internal/Menu';
+  CHECKBOX_WIDTH,
+  SEPARATOR_ITEM,
+  KeyboardShortcut,
+  CHECKBOX_RIGHT_INSET,
+  getKeyboardShortcutsForMenuItems,
+} from '../internal/Menu';
+import { MenuItemProps, MenuProps } from '../ContextMenu';
+import { Layout } from '../Layout';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -62,7 +62,7 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
         onSelect={handleSelectItem}
       >
         <StyledItemIndicator>
-          <CheckIcon />
+          <Layout.Icon name="check" />
         </StyledItemIndicator>
         {children}
       </CheckboxItemElement>
@@ -72,27 +72,27 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
   const element = (
     <ItemElement disabled={disabled} onSelect={handleSelectItem}>
       {indented && (
-        <Spacer.Horizontal size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
+        <Layout.Queue size={CHECKBOX_WIDTH - CHECKBOX_RIGHT_INSET} />
       )}
       {icon && (
         <>
           {icon}
-          <Spacer.Horizontal size={8} />
+          <Layout.Queue size={8} />
         </>
       )}
       {children}
       {shortcut && (
         <>
-          <Spacer.Horizontal />
-          <Spacer.Horizontal size={24} />
+          <Layout.Queue />
+          <Layout.Queue size={24} />
           <KeyboardShortcut shortcut={shortcut} />
         </>
       )}
       {items && items.length > 0 && (
         <>
-          <Spacer.Horizontal />
-          <Spacer.Horizontal size={16} />
-          <ChevronRightIcon />
+          <Layout.Queue />
+          <Layout.Queue size={16} />
+          <Layout.Icon name="chevron-right" />
         </>
       )}
     </ItemElement>

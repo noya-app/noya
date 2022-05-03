@@ -205,6 +205,8 @@ function SortableList<T>(props: SortableListProps<T>) {
   throw new Error(
     'Sortable.List is not implemented for web please use Sortable.Root and Sortable.Item instead!',
   );
+  // eslint-disable-next-line no-unreachable
+  return null;
 }
 
 export const List = memo(SortableList);

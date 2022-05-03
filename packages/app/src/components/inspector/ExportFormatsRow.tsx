@@ -2,10 +2,10 @@ import Sketch from 'noya-file-format';
 import {
   Select,
   IconButton,
+  InputField,
   LabeledView,
   withSeparatorElements,
 } from 'noya-designsystem';
-import { InputField } from 'noya-web-designsystem';
 import { ExportOptions } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';

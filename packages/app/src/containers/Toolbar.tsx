@@ -8,16 +8,15 @@ import {
   useSelector,
   useWorkspaceState,
 } from 'noya-app-state-context';
-import { Layout } from 'noya-designsystem';
 import {
   Button,
-  createSectionedMenu,
-  DropdownMenu,
-  MenuItem,
-  RegularMenuItem,
-  Spacer,
+  Layout,
   Tooltip,
-} from 'noya-web-designsystem';
+  MenuItem,
+  DropdownMenu,
+  RegularMenuItem,
+  createSectionedMenu,
+} from 'noya-designsystem';
 import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
 import {
   DrawableLayerType,
@@ -314,11 +313,11 @@ const ToolbarContent = memo(function ToolbarContent({
 
   return (
     <>
-      <Spacer.Horizontal size={itemSeparatorSize * 1.5} />
+      <Layout.Queue size={itemSeparatorSize * 1.5} />
       <Tooltip content={fileName}>
         <DocumentTitle>{fileName.replace(/\.sketch$/, '')}</DocumentTitle>
       </Tooltip>
-      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Layout.Queue size={itemSeparatorSize} />
       <DropdownMenu<string>
         items={insertMenuItems}
         onSelect={handleInsertSymbol}
@@ -328,7 +327,7 @@ const ToolbarContent = memo(function ToolbarContent({
             () => (
               <>
                 Insert
-                <Spacer.Horizontal size={12} />
+                <Layout.Queue size={12} />
                 <Layout.Icon name="chevron-down" />
               </>
             ),
@@ -336,7 +335,7 @@ const ToolbarContent = memo(function ToolbarContent({
           )}
         </Button>
       </DropdownMenu>
-      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Layout.Queue size={itemSeparatorSize} />
       <DropdownMenu<ZoomMenuType>
         items={zoomMenuItems}
         onSelect={handleZoomMenuItem}
@@ -346,7 +345,7 @@ const ToolbarContent = memo(function ToolbarContent({
             () => (
               <>
                 {round(zoomValue * 100).toString()}%
-                <Spacer.Horizontal />
+                <Layout.Queue />
                 <Layout.Icon name="chevron-down" />
               </>
             ),
@@ -354,7 +353,7 @@ const ToolbarContent = memo(function ToolbarContent({
           )}
         </Button>
       </DropdownMenu>
-      <Spacer.Horizontal size={itemSeparatorSize} />
+      <Layout.Queue size={itemSeparatorSize} />
       <Button
         id="edit-path"
         tooltip="Edit path"
