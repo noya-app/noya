@@ -20,6 +20,7 @@ import MainMenu from '../containers/MainMenu';
 import PageList from '../containers/PageList';
 import Toolbar from '../containers/Toolbar';
 import Canvas from '../containers/Canvas';
+import ResponderTest from '../containers/ResponderTest';
 
 const AppContent: React.FC = () => {
   const { state, dispatch } = useAppState();
@@ -51,47 +52,52 @@ const AppContent: React.FC = () => {
     });
   }, [downloadFont, fontManager, state]);
 
-  const expandableLeft = useMemo(() => {
-    return (
-      <Expandable
-        position="left"
-        items={[
-          { name: 'menu', icon: 'hamburger-menu', content: <MainMenu /> },
-          { name: 'pageList', icon: 'file', content: <PageList /> },
-          {
-            name: 'layerList',
-            icon: 'layers',
-            content: (
-              <LayerList
-                filter={layersFilter}
-                size={{ width: 350, height: 250 }}
-              />
-            ),
-          },
-          { name: 'themeManager', icon: 'tokens', content: <ThemeManager /> },
-        ]}
-      />
-    );
-  }, [layersFilter]);
+  // const expandableLeft = useMemo(() => {
+  //   return (
+  //     <Expandable
+  //       position="left"
+  //       items={[
+  //         { name: 'menu', icon: 'hamburger-menu', content: <MainMenu /> },
+  //         { name: 'pageList', icon: 'file', content: <PageList /> },
+  //         {
+  //           name: 'layerList',
+  //           icon: 'layers',
+  //           content: (
+  //             <LayerList
+  //               filter={layersFilter}
+  //               size={{ width: 350, height: 250 }}
+  //             />
+  //           ),
+  //         },
+  //         { name: 'themeManager', icon: 'tokens', content: <ThemeManager /> },
+  //       ]}
+  //     />
+  //   );
+  // }, [layersFilter]);
 
-  const expandableRight = useMemo(() => {
-    return (
-      <Expandable
-        position="right"
-        items={[
-          {
-            name: 'inspector',
-            icon: 'backpack',
-            content: <AttributeInspector />,
-          },
-        ]}
-      />
-    );
-  }, []);
+  // const expandableRight = useMemo(() => {
+  //   return (
+  //     <Expandable
+  //       position="right"
+  //       items={[
+  //         {
+  //           name: 'inspector',
+  //           icon: 'backpack',
+  //           content: <AttributeInspector />,
+  //         },
+  //       ]}
+  //     />
+  //   );
+  // }, []);
 
   if (state.type !== 'success') {
     return null;
   }
+
+  // {expandableLeft}
+  // {expandableRight}
+  // <Toolbar />
+  // <Canvas />
 
   return (
     <DialogProvider>
@@ -100,10 +106,7 @@ const AppContent: React.FC = () => {
           <StateProvider state={state.value} dispatch={handleDispatch}>
             <PortalProvider>
               <ContentContainer>
-                {expandableLeft}
-                {expandableRight}
-                <Toolbar />
-                <Canvas />
+                <ResponderTest />
               </ContentContainer>
             </PortalProvider>
           </StateProvider>

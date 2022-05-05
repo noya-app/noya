@@ -11,6 +11,9 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		3EBB20612822A98B00B13A12 /* ResponderViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBB20602822A98B00B13A12 /* ResponderViewManager.swift */; };
+		3EBB20662822B4DC00B13A12 /* ResponderViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3EBB20652822B4DC00B13A12 /* ResponderViewManager.m */; };
+		3EBB20692822DA9000B13A12 /* ResponderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBB20682822DA9000B13A12 /* ResponderView.swift */; };
 		44E0586A205C0C25B9F385E8 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1365128A42E7DA9351FF5E /* ExpoModulesProvider.swift */; };
 		6172F2D35A4C3AA820D92908 /* libPods-noyamobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6423831EA8574132BED9D8CC /* libPods-noyamobile.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -26,6 +29,10 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = noyamobile/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = noyamobile/main.m; sourceTree = "<group>"; };
 		1D0AE47A65C8663E3B452821 /* Pods-noyamobile-noyamobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile-noyamobileTests.release.xcconfig"; path = "Target Support Files/Pods-noyamobile-noyamobileTests/Pods-noyamobile-noyamobileTests.release.xcconfig"; sourceTree = "<group>"; };
+		3EBB20602822A98B00B13A12 /* ResponderViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ResponderViewManager.swift; path = noyamobile/modules/ResponderViewManager.swift; sourceTree = "<group>"; };
+		3EBB20652822B4DC00B13A12 /* ResponderViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ResponderViewManager.m; path = noyamobile/modules/ResponderViewManager.m; sourceTree = "<group>"; };
+		3EBB20672822B73400B13A12 /* noyamobile-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "noyamobile-Bridging-Header.h"; path = "noyamobile/noyamobile-Bridging-Header.h"; sourceTree = "<group>"; };
+		3EBB20682822DA9000B13A12 /* ResponderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ResponderView.swift; path = noyamobile/modules/ResponderView.swift; sourceTree = "<group>"; };
 		4A1365128A42E7DA9351FF5E /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-noyamobile/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		6423831EA8574132BED9D8CC /* libPods-noyamobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-noyamobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C97AB639B58BBB4B15BBE30 /* Pods-noyamobile-noyamobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile-noyamobileTests.debug.xcconfig"; path = "Target Support Files/Pods-noyamobile-noyamobileTests/Pods-noyamobile-noyamobileTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -67,6 +74,7 @@
 		13B07FAE1A68108700A75B9A /* noyamobile */ = {
 			isa = PBXGroup;
 			children = (
+				3EBB20672822B73400B13A12 /* noyamobile-Bridging-Header.h */,
 				04AC522827A2D5E500219B82 /* noyamobile.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -74,6 +82,9 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				3EBB20602822A98B00B13A12 /* ResponderViewManager.swift */,
+				3EBB20652822B4DC00B13A12 /* ResponderViewManager.m */,
+				3EBB20682822DA9000B13A12 /* ResponderView.swift */,
 			);
 			name = noyamobile;
 			sourceTree = "<group>";
@@ -308,6 +319,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				3EBB20692822DA9000B13A12 /* ResponderView.swift in Sources */,
+				3EBB20612822A98B00B13A12 /* ResponderViewManager.swift in Sources */,
+				3EBB20662822B4DC00B13A12 /* ResponderViewManager.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				44E0586A205C0C25B9F385E8 /* ExpoModulesProvider.swift in Sources */,
 			);
@@ -346,6 +360,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.design.noya.noyamobile;
 				PRODUCT_NAME = noyamobile;
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/$(PROJECT_NAME)/$(SWIFT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -383,6 +398,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.design.noya.noyamobile;
 				PRODUCT_NAME = noyamobile;
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/$(PROJECT_NAME)/$(SWIFT_MODULE_NAME)-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
