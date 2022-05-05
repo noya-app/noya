@@ -1,10 +1,4 @@
-export type PlatformName =
-  | 'ios'
-  | 'android'
-  | 'windows'
-  | 'macos'
-  | 'linux'
-  | 'key';
+import type { PlatformName } from '../types';
 
 export const getCurrentPlatform = (navigator?: {
   platform: string;

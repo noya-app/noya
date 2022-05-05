@@ -12,11 +12,16 @@ import {
 import { Layout, Button, useExpandable } from 'noya-designsystem';
 import { DrawableLayerType, Selectors } from 'noya-state';
 import { Base64, parseFilename } from 'noya-utils';
+import { useKeyCommands, Shortcuts } from 'noya-keymap';
 import { useCanvasKit } from 'noya-renderer';
 
 interface Item {
   icon?: string;
   label?: string;
+  shortcut?: {
+    cmd: string;
+    title: string;
+  };
   onPress: () => void;
   active?: boolean;
 }
@@ -46,9 +51,17 @@ const Toolbar: React.FC = () => {
   }, [state.interactionState]);
 
   const isButtonActive = useCallback(
-    (shape: DrawableLayerType) =>
-      layerType === shape &&
-      (interType === 'drawing' || interType === 'insert'),
+    (shape: DrawableLayerType | 'vector') => {
+      if (shape === 'vector') {
+        // TODO: check vector interaction
+        return false;
+      }
+
+      return (
+        layerType === shape &&
+        (interType === 'drawing' || interType === 'insert')
+      );
+    },
     [layerType, interType],
   );
 
@@ -59,7 +72,12 @@ const Toolbar: React.FC = () => {
   }, [dispatch, interType]);
 
   const onAddShape = useCallback(
-    (shape: DrawableLayerType) => () => {
+    (shape: DrawableLayerType | 'vector') => () => {
+      if (shape === 'vector') {
+        dispatch('interaction', ['drawingShapePath']);
+        return;
+      }
+
       if (shape === 'artboard') {
         expandable.setActiveTab('right', 'inspector');
       }
@@ -133,46 +151,73 @@ const Toolbar: React.FC = () => {
     dispatch('setZoom*', 1, 'replace');
   }, [dispatch]);
 
-  const drawItems: Item[] = useMemo(
+  const items: Item[] = useMemo(
     () => [
       {
+        shortcut: {
+          cmd: 'Escape',
+          title: 'Reset interaction',
+        },
         icon: 'cursor-arrow',
         onPress: onReset,
         active: interType === 'none' || interType === 'marquee',
       },
       {
         icon: 'frame',
+        shortuct: {
+          cmd: 'a',
+          title: 'Insert artboard',
+        },
         onPress: onAddShape('artboard'),
         active: isButtonActive('artboard'),
       },
       {
         icon: 'image',
+        shortcut: {
+          cmd: 'i',
+          title: 'Insert image',
+        },
         onPress: onAddImage,
       },
       {
         icon: 'square',
+        shortcut: {
+          cmd: 'r',
+          title: 'draw rectangle',
+        },
         onPress: onAddShape('rectangle'),
         active: isButtonActive('rectangle'),
       },
       {
         icon: 'circle',
+        shortcut: { cmd: 'o', title: 'draw oval' },
         onPress: onAddShape('oval'),
         active: isButtonActive('oval'),
       },
       {
         icon: 'slash',
+        shortcut: { cmd: 'l', title: 'draw line' },
         onPress: onAddShape('line'),
         active: isButtonActive('line'),
       },
       {
+        icon: 'share-1', // TODO: bring back shape-path icon?
+        shortcut: { cmd: 'v', title: 'draw path' },
+        onPress: onAddShape('vector'),
+        active: isButtonActive('vector'),
+      },
+      {
         icon: 'zoom-in',
+        shortcut: { cmd: 'Mod-+', title: 'Zoom in' },
         onPress: () => onZoom('zoomIn'),
       },
       {
+        shortcut: { cmd: 'Mod-0', title: 'Reset zoom' },
         label: `${Math.floor(meta.zoomValue * 100)}%`,
         onPress: () => onResetZoom(),
       },
       {
+        shortcut: { cmd: 'Mod--', title: 'Zoom out' },
         icon: 'zoom-out',
         onPress: () => onZoom('zoomOut'),
       },
@@ -189,20 +234,36 @@ const Toolbar: React.FC = () => {
     ],
   );
 
+  const keyCommands: Shortcuts = useMemo(() => {
+    return items.reduce((reducer, item) => {
+      if (!item.shortcut) {
+        return reducer;
+      }
+
+      return {
+        ...reducer,
+        [item.shortcut.cmd]: {
+          title: item.shortcut.title,
+          callback: item.onPress,
+        },
+      };
+    }, {});
+  }, [items]);
+
+  useKeyCommands(keyCommands);
+
   return (
     <ToolbarView pointerEvents="box-none">
       <ToolbarContainer>
-        {drawItems.map(
-          ({ icon, label, onPress, active }: Item, idx: number) => (
-            <React.Fragment key={idx}>
-              <Button onClick={onPress} active={active}>
-                {!!icon && <Layout.Icon name={icon} size={16} />}
-                {!!label && <Label>{label}</Label>}
-              </Button>
-              {idx !== drawItems.length - 1 && <Layout.Queue size="medium" />}
-            </React.Fragment>
-          ),
-        )}
+        {items.map(({ icon, label, onPress, active }: Item, idx: number) => (
+          <React.Fragment key={idx}>
+            <Button onClick={onPress} active={active}>
+              {!!icon && <Layout.Icon name={icon} size={16} />}
+              {!!label && <Label>{label}</Label>}
+            </Button>
+            {idx !== items.length - 1 && <Layout.Queue size="medium" />}
+          </React.Fragment>
+        ))}
       </ToolbarContainer>
     </ToolbarView>
   );
