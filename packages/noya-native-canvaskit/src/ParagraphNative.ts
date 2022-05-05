@@ -1,4 +1,4 @@
-import type { ICanvas } from '@shopify/react-native-skia';
+import type { SkCanvas } from '@shopify/react-native-skia';
 
 import type {
   IURange,
@@ -110,7 +110,7 @@ export class ParagraphNative extends JSEmbindObject implements IParagraph {
     console.warn(`ParagraphNative.getShapedLines not implemented!`);
   }
 
-  draw(canvas: ICanvas, x: number, y: number) {
+  draw(canvas: SkCanvas, x: number, y: number) {
     this._blocks.forEach(({ text, font, paint }) => {
       canvas.drawText(text, x, y, paint.getRNSkiaPaint(), font.getFont());
     });

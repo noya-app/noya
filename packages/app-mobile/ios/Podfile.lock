@@ -298,32 +298,32 @@ PODS:
   - React-jsinspector (0.66.4)
   - React-logger (0.66.4):
     - glog
-  - react-native-skia (0.1.97):
+  - react-native-skia (0.1.123):
     - React
     - React-callinvoker
     - React-Core
-    - react-native-skia/Api (= 0.1.97)
-    - react-native-skia/Jsi (= 0.1.97)
-    - react-native-skia/RNSkia (= 0.1.97)
-    - react-native-skia/SkiaHeaders (= 0.1.97)
-    - react-native-skia/Utils (= 0.1.97)
-  - react-native-skia/Api (0.1.97):
+    - react-native-skia/Api (= 0.1.123)
+    - react-native-skia/Jsi (= 0.1.123)
+    - react-native-skia/RNSkia (= 0.1.123)
+    - react-native-skia/SkiaHeaders (= 0.1.123)
+    - react-native-skia/Utils (= 0.1.123)
+  - react-native-skia/Api (0.1.123):
     - React
     - React-callinvoker
     - React-Core
-  - react-native-skia/Jsi (0.1.97):
+  - react-native-skia/Jsi (0.1.123):
     - React
     - React-callinvoker
     - React-Core
-  - react-native-skia/RNSkia (0.1.97):
+  - react-native-skia/RNSkia (0.1.123):
     - React
     - React-callinvoker
     - React-Core
-  - react-native-skia/SkiaHeaders (0.1.97):
+  - react-native-skia/SkiaHeaders (0.1.123):
     - React
     - React-callinvoker
     - React-Core
-  - react-native-skia/Utils (0.1.97):
+  - react-native-skia/Utils (0.1.123):
     - React
     - React-callinvoker
     - React-Core
@@ -663,7 +663,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 94ce921e1d8ce7023366873ec371f3441383b396
   React-jsinspector: d0374f7509d407d2264168b6d0fad0b54e300b85
   React-logger: 933f80c97c633ee8965d609876848148e3fef438
-  react-native-skia: fb6b10f44fcfc48d856ea2d24500aba246d8106f
+  react-native-skia: 8a3e1b513020e2c9b0b4e49404f396d2a88f9ac7
   react-native-slider: 241935e3ea8e47599c317f512f96ee8de607d4cb
   React-perflogger: 93075d8931c32cd1fce8a98c15d2d5ccc4d891bd
   React-RCTActionSheet: 7d3041e6761b4f3044a37079ddcb156575fb6d89
@@ -684,6 +684,6 @@ SPEC CHECKSUMS:
   Yoga: e7dc4e71caba6472ff48ad7d234389b91dadc280
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 680e46703f704bc5666132e7f0b8e9c01239d568
+PODFILE CHECKSUM: 886c57d7a3bb1eb9f8a3262cc8a79e1b039a40c4
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

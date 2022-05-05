@@ -4516,9 +4516,10 @@
     pkg-dir "^5.0.0"
     pluralize "^8.0.0"
 
-"@shopify/react-native-skia@https://github.com/Shopify/react-native-skia/releases/download/v0.1.97-alpha/shopify-react-native-skia-0.1.97.tgz":
-  version "0.1.97"
-  resolved "https://github.com/Shopify/react-native-skia/releases/download/v0.1.97-alpha/shopify-react-native-skia-0.1.97.tgz#d9c684510537139e18df4c07c9ffbfc8a6849ecb"
+"@shopify/react-native-skia@^0.1.123":
+  version "0.1.123"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.123.tgz#eaaf886cf1ca3b49f4ba79b826cd4b8f803b933e"
+  integrity sha512-Yn9nHYRuTz84eCbHbpTi8VbP33tQc1D6rDQNEj7fgV6aPusaN79XjnnxtPsZsO+nLlbkpI3q1x+2Ds3Qu1I8ZA==
   dependencies:
     react-reconciler "^0.26.2"
 

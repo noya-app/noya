@@ -1,8 +1,4 @@
-import {
-  Skia,
-  Font as RNSFont,
-  Typeface as RNSTypeface,
-} from '@shopify/react-native-skia';
+import { Skia, SkFont, SkTypeface } from '@shopify/react-native-skia';
 
 import {
   IFont,
@@ -57,19 +53,7 @@ export function toRNSMatrix(m?: number[]): Matrix | undefined {
     return undefined;
   }
 
-  const r = Skia.Matrix();
-
-  r.set(0, m[0]);
-  r.set(1, m[1]);
-  r.set(2, m[2]);
-  r.set(3, m[3]);
-  r.set(4, m[4]);
-  r.set(5, m[5]);
-  r.set(6, m[6]);
-  r.set(7, m[7]);
-  r.set(8, m[8]);
-
-  return r;
+  return m as unknown as Matrix;
 }
 
 export class TextStyleNative implements ITextStyle<Color> {
@@ -118,14 +102,14 @@ export class ParagraphStyleNative implements IParagraphStyle<Color> {
 }
 
 export class FontNative extends JSEmbindObject implements IFont {
-  private _font: RNSFont;
-  private _typeface: RNSTypeface;
+  private _font: SkFont;
+  private _typeface: SkTypeface;
 
   constructor(face: ITypeface, size?: number) {
     super();
 
-    this._font = Skia.Font(face as unknown as RNSTypeface, size);
-    this._typeface = face as unknown as RNSTypeface;
+    this._font = Skia.Font(face as unknown as SkTypeface, size);
+    this._typeface = face as unknown as SkTypeface;
   }
 
   getFont() {

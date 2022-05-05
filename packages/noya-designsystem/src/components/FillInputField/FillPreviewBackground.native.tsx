@@ -4,7 +4,6 @@ import { View, Image, ImageResizeMode, LayoutChangeEvent } from 'react-native';
 import {
   vec,
   Rect,
-  Paint,
   Canvas,
   SweepGradient,
   LinearGradient,
@@ -97,8 +96,6 @@ const GradientPreviewBackground = memo(function GradientPreviewBackground({
     [gradient.stops],
   );
 
-  // TODO: Gradient params: start,end,c,r probably will have to be
-  // normalized after upgrading react-native-skia
   const gradientPaint = useMemo(() => {
     switch (gradient.gradientType) {
       case Sketch.GradientType.Linear: {
@@ -136,8 +133,9 @@ const GradientPreviewBackground = memo(function GradientPreviewBackground({
   return (
     <Background onLayout={onLayout}>
       <GradientBackground>
-        <Paint>{gradientPaint}</Paint>
-        <Rect x={0} y={0} width={size.width} height={size.height} />
+        <Rect x={0} y={0} width={size.width} height={size.height}>
+          {gradientPaint}
+        </Rect>
       </GradientBackground>
     </Background>
   );

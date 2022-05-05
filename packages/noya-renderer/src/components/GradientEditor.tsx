@@ -129,7 +129,7 @@ export default memo(function GradientEditor({
   });
   const gradientEditorShadow = useMemo(
     () =>
-      CanvasKit.ImageFilter.MakeDropShadowOnly(
+      CanvasKit.ImageFilter.MakeDropShadow(
         0,
         0,
         2 / zoom,

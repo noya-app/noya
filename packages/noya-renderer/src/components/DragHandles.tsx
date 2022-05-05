@@ -24,7 +24,7 @@ export default memo(function DragHandles({ rect }: Props) {
 
   const dropShadow = useMemo(
     () =>
-      CanvasKit.ImageFilter.MakeDropShadowOnly(
+      CanvasKit.ImageFilter.MakeDropShadow(
         0,
         0,
         1 / zoom,

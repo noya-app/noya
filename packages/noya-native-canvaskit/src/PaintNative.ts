@@ -1,6 +1,6 @@
 import {
   Skia,
-  IShader,
+  SkShader,
   StrokeCap,
   BlendMode,
   PaintStyle,
@@ -101,7 +101,7 @@ export default class PaintNative
     this._paint.setPathEffect(effect);
   }
 
-  setShader(shader: IShader): void {
+  setShader(shader: SkShader): void {
     this._paint.setShader(shader);
   }
 

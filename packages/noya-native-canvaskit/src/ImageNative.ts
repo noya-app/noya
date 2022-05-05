@@ -1,9 +1,8 @@
 import {
-  Skia,
+  SkImage,
   TileMode,
   FilterMode,
   MipmapMode,
-  IImage as RNSImage,
 } from '@shopify/react-native-skia';
 
 import type { IImage, IShader } from 'canvaskit-types';
@@ -14,7 +13,7 @@ export default class ImageNative
   extends JSEmbindObject
   implements IImage<Matrix>
 {
-  constructor(private _image: RNSImage) {
+  constructor(private _image: SkImage) {
     super();
   }
 

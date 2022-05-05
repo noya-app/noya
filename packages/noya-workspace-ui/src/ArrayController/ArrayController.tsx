@@ -112,6 +112,11 @@ function ArrayController<Item>({
     [keys, renderRow],
   );
 
+  const renderOverlay = useCallback(
+    (index: number) => renderRow(index),
+    [renderRow],
+  );
+
   return (
     <Primitives.Section id={id}>
       <Primitives.SectionHeader>
@@ -156,7 +161,7 @@ function ArrayController<Item>({
             data={indexes}
             scrollable={false}
             onMoveItem={handleMoveItem}
-            renderOverlay={renderRow}
+            renderOverlay={renderOverlay}
             renderItem={renderSortableItem}
             keyExtractor={keyExtractor}
           />
