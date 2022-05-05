@@ -1,5 +1,4 @@
 import { memo, useCallback, useMemo } from 'react';
-import { useTheme } from 'styled-components';
 
 import { useSelector } from 'noya-app-state-context';
 import { Button, Select, Layout } from 'noya-designsystem';
@@ -21,8 +20,6 @@ export default memo(function SymbolSelectorRow({
   onEditSource,
 }: Props) {
   const symbols = useShallowArray(useSelector(Selectors.getSymbols));
-
-  const iconColor = useTheme().colors.icon;
 
   const symbolSourceOptions = useMemo(
     () => symbols.map((symbol) => symbol.symbolID),
@@ -58,7 +55,7 @@ export default memo(function SymbolSelectorRow({
           tooltip="Detach instance from symbol"
           onClick={onDetach}
         >
-          <Layout.Icon name="link-break-2" color={iconColor} />
+          <Layout.Icon name="link-break-2" />
         </Button>
         <InspectorPrimitives.HorizontalSeparator />
         <Button
@@ -68,7 +65,7 @@ export default memo(function SymbolSelectorRow({
           tooltip="Edit Symbol Source"
           onClick={onEditSource}
         >
-          <Layout.Icon name="component-instance" color={iconColor} />
+          <Layout.Icon name="component-instance" />
         </Button>
       </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>

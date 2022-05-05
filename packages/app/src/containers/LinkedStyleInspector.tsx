@@ -1,5 +1,4 @@
 import { memo, useCallback, useMemo } from 'react';
-import { useTheme } from 'styled-components';
 
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { Button, Select, Layout } from 'noya-designsystem';
@@ -24,8 +23,6 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
 }: Props) {
   const dispatch = useDispatch();
   const openDialog = useOpenInputDialog();
-
-  const iconColor = useTheme().colors.icon;
 
   const layerStyleOptions = useMemo(
     () => [NO_LAYER_STYLE, ...sharedStyles.map((style) => style.do_objectID)],
@@ -104,7 +101,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
           tooltip="Create theme style from layer"
           onClick={onAdd}
         >
-          <Layout.Icon name="plus" color={iconColor} />
+          <Layout.Icon name="plus" />
         </Button>
         <InspectorPrimitives.HorizontalSeparator />
         <Button
@@ -114,7 +111,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
           tooltip="Update theme style to match layer"
           onClick={onUpdate}
         >
-          <Layout.Icon name="update" color={iconColor} />
+          <Layout.Icon name="update" />
         </Button>
         <InspectorPrimitives.HorizontalSeparator />
         <Button
@@ -124,7 +121,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
           tooltip="Detach style from theme"
           onClick={onDetach}
         >
-          <Layout.Icon name="link-break-2" color={iconColor} />
+          <Layout.Icon name="link-break-2" />
         </Button>
         <InspectorPrimitives.HorizontalSeparator />
         <Button
@@ -134,7 +131,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
           tooltip="Rename theme style"
           onClick={onRename}
         >
-          <Layout.Icon name="cursor-text" color={iconColor} />
+          <Layout.Icon name="cursor-text" />
         </Button>
         <InspectorPrimitives.HorizontalSeparator />
         <Button
@@ -144,7 +141,7 @@ const LayerThemeInspectorContent = memo(function LayerThemeInspectorContent({
           tooltip="Reset layer style to theme style"
           onClick={onReset}
         >
-          <Layout.Icon name="reset" color={iconColor} />
+          <Layout.Icon name="reset" />
         </Button>
       </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>

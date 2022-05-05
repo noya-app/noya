@@ -40,6 +40,7 @@ export const colors = {
     border: '#BBB',
   },
   icon: 'rgb(139, 139, 139)',
+  iconHighlighted: 'rgb(38, 48, 83)',
   iconSelected: 'rgb(220, 220, 220)',
   mask: 'rgb(12,193,67)',
   imageOverlay:

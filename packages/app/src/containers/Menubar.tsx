@@ -219,7 +219,7 @@ const MenubarContent = memo(function MenubarContent({
           onSelect={onSelectMenuItem}
         >
           <Button id="menu">
-            <Layout.Icon name="hamburger-menu" />
+            <Layout.Icon name="hamburger-menu" highlighted />
           </Button>
         </DropdownMenu>
       )}

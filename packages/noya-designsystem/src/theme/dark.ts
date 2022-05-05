@@ -21,6 +21,7 @@ export const colors = produce(lightTheme.colors, (colors) => {
   colors.placeholderDots = 'rgba(255,255,255,0.3)';
   colors.dragOutline = 'white';
   colors.activeBackground = 'rgba(255,255,255,0.08)';
+  colors.iconHighlighted = 'rgb(248, 248, 250)';
 });
 
 export { textStyles, fonts, sizes } from './light';

@@ -3,4 +3,5 @@ export interface IconProps {
   size?: number;
   color?: string;
   selected?: boolean;
+  highlighted?: boolean;
 }

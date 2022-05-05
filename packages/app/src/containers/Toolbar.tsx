@@ -328,7 +328,7 @@ const ToolbarContent = memo(function ToolbarContent({
               <>
                 Insert
                 <Layout.Queue size={12} />
-                <Layout.Icon name="chevron-down" />
+                <Layout.Icon name="chevron-down" highlighted />
               </>
             ),
             [],
@@ -346,7 +346,7 @@ const ToolbarContent = memo(function ToolbarContent({
               <>
                 {round(zoomValue * 100).toString()}%
                 <Layout.Queue />
-                <Layout.Icon name="chevron-down" />
+                <Layout.Icon name="chevron-down" highlighted />
               </>
             ),
             [zoomValue],
