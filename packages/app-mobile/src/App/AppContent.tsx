@@ -20,10 +20,11 @@ import MainMenu from '../containers/MainMenu';
 import PageList from '../containers/PageList';
 import Toolbar from '../containers/Toolbar';
 import Canvas from '../containers/Canvas';
+import { registerKeyCommand } from '../utils/KeyCommandRegistry';
 
 const AppContent: React.FC = () => {
   const { state, dispatch } = useAppState();
-  const [layersFilter, setLayersFilter] = useState('');
+  const [layersFilter] = useState('');
   const fontManager = useFontManager();
 
   const handleDispatch = useCallback(
@@ -34,6 +35,13 @@ const AppContent: React.FC = () => {
   );
 
   const downloadFont = useDownloadFont();
+
+  useEffect(() => {
+    return registerKeyCommand({ command: 'command-p', title: 'Print' }, () => {
+      // eslint-disable-next-line no-console
+      console.log('Print!');
+    });
+  }, []);
 
   // Whenever the sketch file updates, download any new fonts
   useEffect(() => {
