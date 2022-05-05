@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import type { CanvasKit, Image } from 'canvaskit';
 import type { CanvasKit as PublicCanvasKit } from 'canvaskit-types';
-import { Theme } from 'noya-web-designsystem';
+import { Theme } from 'noya-designsystem';
 import { Components, render, unmount } from 'noya-react-canvaskit';
 import { WorkspaceState } from 'noya-state';
 import React, { ReactNode } from 'react';

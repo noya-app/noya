@@ -1,12 +1,13 @@
-import Sketch from 'noya-file-format';
-import { GridView } from 'noya-web-designsystem';
-import { delimitedPath, sortBy } from 'noya-utils';
-import { SelectionType } from 'noya-state';
-import { createThemeGroups } from '../../utils/themeTree';
 import { Fragment, memo, useMemo, useCallback } from 'react';
-import TextStyle from './TextStyle';
-import { menuItems, ThemeMenuItemType } from './menuItems';
+
+import { delimitedPath, sortBy } from 'noya-utils';
+import { GridView } from 'noya-designsystem';
+import { SelectionType } from 'noya-state';
+import Sketch from 'noya-file-format';
 import { useOpenInputDialog } from '../../contexts/DialogContext';
+import { createThemeGroups } from '../../utils/themeTree';
+import { menuItems, ThemeMenuItemType } from './menuItems';
+import TextStyle from './TextStyle';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];

@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { Spacer } from 'noya-web-designsystem';
+import { Layout } from 'noya-designsystem';
 import { memo, useCallback, useMemo } from 'react';
 import { FillInputFieldWithPicker } from 'noya-workspace-ui';
 import * as InspectorPrimitives from './InspectorPrimitives';
@@ -71,7 +71,7 @@ export default memo(function SymbolSourceRow({
         />
         <InspectorPrimitives.HorizontalSeparator />
         <InspectorPrimitives.Text>Background color</InspectorPrimitives.Text>
-        <Spacer.Horizontal />
+        <Layout.Queue />
         <FillInputFieldWithPicker
           id={'colorInputId'}
           colorProps={useMemo(
@@ -86,7 +86,7 @@ export default memo(function SymbolSourceRow({
       {hasBackgroundColor && (
         <>
           <InspectorPrimitives.Row>
-            <Spacer.Horizontal size={12} />
+            <Layout.Queue size={12} />
             <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={includeBackgroundColorInExport}
@@ -98,7 +98,7 @@ export default memo(function SymbolSourceRow({
             </InspectorPrimitives.Text>
           </InspectorPrimitives.Row>
           <InspectorPrimitives.Row>
-            <Spacer.Horizontal size={12} />
+            <Layout.Queue size={12} />
             <InspectorPrimitives.Checkbox
               type="checkbox"
               checked={includeBackgroundColorInInstance}

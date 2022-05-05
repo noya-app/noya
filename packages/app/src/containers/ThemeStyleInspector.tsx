@@ -9,7 +9,7 @@ import {
   ShadowInspector,
   OpacityInspector,
 } from 'noya-workspace-ui';
-import { Divider, withSeparatorElements } from 'noya-web-designsystem';
+import { Layout, withSeparatorElements } from 'noya-designsystem';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import NameInspector from '../components/inspector/NameInspector';
 
@@ -43,5 +43,5 @@ export default memo(function ThemeStyleInspector() {
     <ShadowInspector />,
   ];
 
-  return <>{withSeparatorElements(elements, <Divider />)}</>;
+  return <>{withSeparatorElements(elements, <Layout.Divider />)}</>;
 });

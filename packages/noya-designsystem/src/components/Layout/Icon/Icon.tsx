@@ -1,14 +1,14 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import styled from 'styled-components';
 
 import selectionFile from './selection.json';
-import { createGlyphsMap } from './utils';
+import { createGlyphsMap, getIconColor } from './utils';
 import { IconProps } from './types';
 
 const ghlyps = createGlyphsMap(selectionFile);
 
 const Icon = styled.span<IconProps>(
-  ({ theme, name, color, selected, size }) => ({
+  ({ theme, name, color, selected, size, highlighted }) => ({
     fontFamily: 'icomoon',
     speak: 'never',
     fontStyle: 'normal',
@@ -22,8 +22,8 @@ const Icon = styled.span<IconProps>(
       display: 'block',
       content: `"\\${ghlyps[name]}"`,
     },
-    color: color ?? (selected ? theme.colors.iconSelected : theme.colors.icon),
-    fontSize: size ? `${size}px` : '12px',
+    color: getIconColor(theme, color, selected, highlighted),
+    fontSize: size ? `${size}px` : '15px',
   }),
 );
 

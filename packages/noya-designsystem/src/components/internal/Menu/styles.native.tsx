@@ -1,5 +1,4 @@
-// TODO: fix me after moving Theme to designsystem
-import { Theme } from 'noya-web-designsystem';
+import { Theme } from 'noya-designsystem';
 
 export const styles = {
   contentStyle: ({

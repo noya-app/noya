@@ -1,14 +1,3 @@
-import { FileIcon, StackIcon, TokensIcon } from 'noya-icons';
-import {
-  useApplicationState,
-  useDispatch,
-  useWorkspace,
-} from 'noya-app-state-context';
-import { IconButton, MenuItem, Spacer } from 'noya-web-designsystem';
-import { TreeView, RelativeDropPosition } from 'noya-designsystem';
-import { useDeepMemo } from 'noya-react-utils';
-import { Selectors, WorkspaceTab } from 'noya-state';
-import { uuid } from 'noya-utils';
 import React, {
   memo,
   useCallback,
@@ -17,6 +6,22 @@ import React, {
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
+
+import {
+  useApplicationState,
+  useDispatch,
+  useWorkspace,
+} from 'noya-app-state-context';
+import {
+  Layout,
+  MenuItem,
+  TreeView,
+  IconButton,
+  RelativeDropPosition,
+} from 'noya-designsystem';
+import { PressableEvent, useDeepMemo } from 'noya-react-utils';
+import { Selectors, WorkspaceTab } from 'noya-state';
+import { uuid } from 'noya-utils';
 
 const Container = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   ...(expanded ? { height: '200px' } : { flex: '0 0 auto' }),
@@ -96,7 +101,7 @@ const PageListContent = memo(function PageListContent({
   );
 
   const handleAddPage = useCallback(
-    (event: React.MouseEvent) => {
+    (event: PressableEvent) => {
       event.stopPropagation();
 
       const pageId = uuid();
@@ -180,12 +185,12 @@ const PageListContent = memo(function PageListContent({
                   currentTab === 'canvas' &&
                   selectedPageId === page.id));
 
-            const IconComponent =
+            const iconName =
               page.type === 'theme'
-                ? TokensIcon
+                ? 'tokens'
                 : Selectors.isSymbolsPage({ name: page.name })
-                ? StackIcon
-                : FileIcon;
+                ? 'stack'
+                : 'file';
 
             return (
               <TreeView.Row<MenuItemType>
@@ -228,7 +233,8 @@ const PageListContent = memo(function PageListContent({
                 }}
                 icon={
                   page.type !== 'header' && (
-                    <IconComponent
+                    <Layout.Icon
+                      name={iconName}
                       color={selected ? iconSelectedColor : iconColor}
                     />
                   )
@@ -258,11 +264,11 @@ const PageListContent = memo(function PageListContent({
                 )}
                 {page.type === 'header' && (
                   <>
-                    <Spacer.Horizontal />
-                    <Spacer.Horizontal size={10} />
+                    <Layout.Stack />
+                    <Layout.Stack size={10} />
                     <IconButton
                       id="add-page"
-                      iconName="PlusIcon"
+                      name="plus"
                       tooltip="Add a new page"
                       onClick={handleAddPage}
                       selected={selected}

@@ -1,7 +1,7 @@
-import { GridIcon, RowsIcon } from 'noya-icons';
-import { RadioGroup } from 'noya-designsystem';
 import styled from 'styled-components';
 import { memo, useCallback } from 'react';
+
+import { Layout, RadioGroup } from 'noya-designsystem';
 
 export const Square = styled.div<{ background?: string; selected?: boolean }>(
   ({ theme, background, selected = false }) => ({
@@ -51,10 +51,10 @@ export const LayoutRadioGroup = memo(
         )}
       >
         <RadioGroup.Item value="grid" tooltip="Grid">
-          <GridIcon />
+          <Layout.Icon name="grid" />
         </RadioGroup.Item>
         <RadioGroup.Item value="list" tooltip="List">
-          <RowsIcon />
+          <Layout.Icon name="rows" />
         </RadioGroup.Item>
       </RadioGroup.Root>
     </RadioGroupContainer>

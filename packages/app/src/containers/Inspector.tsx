@@ -1,5 +1,5 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Divider, withSeparatorElements } from 'noya-web-designsystem';
+import { Layout, withSeparatorElements } from 'noya-designsystem';
 import { useShallowArray } from 'noya-react-utils';
 import {
   getMultiNumberValue,
@@ -221,7 +221,7 @@ export default memo(function Inspector() {
     return withSeparatorElements(
       views,
       <HorizontalPaddingContainer>
-        <Divider />
+        <Layout.Divider />
       </HorizontalPaddingContainer>,
     );
   }, [

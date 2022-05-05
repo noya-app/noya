@@ -5,7 +5,7 @@ import SymbolLayoutRow from '../components/inspector/SymbolLayoutRow';
 import SymbolMasterOverrideRow from '../components/inspector/SymbolMasterOverrideRow';
 import { useDispatch, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
-import { Divider, withSeparatorElements } from 'noya-web-designsystem';
+import { Layout, withSeparatorElements } from 'noya-designsystem';
 
 export default memo(function SymbolMasterInspector() {
   const dispatch = useDispatch();
@@ -94,5 +94,5 @@ export default memo(function SymbolMasterInspector() {
     />,
   ];
 
-  return <>{withSeparatorElements(elements, <Divider />)}</>;
+  return <>{withSeparatorElements(elements, <Layout.Divider />)}</>;
 });

@@ -1,4 +1,3 @@
-import { HamburgerMenuIcon } from 'noya-icons';
 import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
@@ -7,11 +6,11 @@ import {
 } from 'noya-app-state-context';
 import {
   Button,
-  createSectionedMenu,
-  DropdownMenu,
+  Layout,
   MenuItem,
-  Spacer,
-} from 'noya-web-designsystem';
+  DropdownMenu,
+  createSectionedMenu,
+} from 'noya-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
 import { useHistory } from 'noya-workspace-ui';
@@ -213,18 +212,18 @@ const MenubarContent = memo(function MenubarContent({
 
   return (
     <InspectorPrimitives.Row>
-      <Spacer.Horizontal size={8} />
+      <Layout.Queue size={8} />
       {!isElectron && (
         <DropdownMenu<ApplicationMenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
         >
           <Button id="menu">
-            <HamburgerMenuIcon />
+            <Layout.Icon name="hamburger-menu" highlighted />
           </Button>
         </DropdownMenu>
       )}
-      <Spacer.Horizontal size={8} />
+      <Layout.Queue size={8} />
     </InspectorPrimitives.Row>
   );
 });

@@ -1,17 +1,10 @@
-import {
-  CursorTextIcon,
-  LinkBreak2Icon,
-  PlusIcon,
-  ResetIcon,
-  UpdateIcon,
-} from 'noya-icons';
-import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { Button, Select } from 'noya-web-designsystem';
-import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
-import { useTheme } from 'styled-components';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+
+import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
+import { Button, Select, Layout } from 'noya-designsystem';
+import { Selectors } from 'noya-state';
+import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 import { useOpenInputDialog } from '../contexts/DialogContext';
 
 const NO_TEXT_STYLE = 'none';
@@ -19,8 +12,6 @@ const NO_TEXT_STYLE = 'none';
 export default memo(function ThemeTextInspector() {
   const [, dispatch] = useApplicationState();
   const openDialog = useOpenInputDialog();
-
-  const iconColor = useTheme().colors.icon;
 
   const sharedTextStyles = useShallowArray(
     useSelector(Selectors.getSharedTextStyles),
@@ -120,7 +111,7 @@ export default memo(function ThemeTextInspector() {
             tooltip="Create text style from text"
             onClick={onAdd}
           >
-            <PlusIcon color={iconColor} />
+            <Layout.Icon name="plus" />
           </Button>
           <InspectorPrimitives.HorizontalSeparator />
           <Button
@@ -130,7 +121,7 @@ export default memo(function ThemeTextInspector() {
             tooltip="Update text style to match text"
             onClick={onUpdate}
           >
-            <UpdateIcon color={iconColor} />
+            <Layout.Icon name="update" />
           </Button>
           <InspectorPrimitives.HorizontalSeparator />
           <Button
@@ -140,7 +131,7 @@ export default memo(function ThemeTextInspector() {
             tooltip="Detach text from text style"
             onClick={onDetach}
           >
-            <LinkBreak2Icon color={iconColor} />
+            <Layout.Icon name="link-break-2" />
           </Button>
           <InspectorPrimitives.HorizontalSeparator />
           <Button
@@ -150,7 +141,7 @@ export default memo(function ThemeTextInspector() {
             tooltip="Rename text style"
             onClick={onRename}
           >
-            <CursorTextIcon color={iconColor} />
+            <Layout.Icon name="cursor-text" />
           </Button>
           <InspectorPrimitives.HorizontalSeparator />
           <Button
@@ -160,7 +151,7 @@ export default memo(function ThemeTextInspector() {
             tooltip="Reset text to text style"
             onClick={onReset}
           >
-            <ResetIcon color={iconColor} />
+            <Layout.Icon name="reset" />
           </Button>
         </InspectorPrimitives.Row>
       </InspectorPrimitives.Section>

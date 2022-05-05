@@ -1,19 +1,7 @@
-import Sketch from 'noya-file-format';
-import {
-  StretchHorizontallyIcon,
-  StretchVerticallyIcon,
-  SquareIcon,
-  TextAlignCenterIcon,
-  TextAlignJustifyIcon,
-  TextAlignLeftIcon,
-  TextAlignRightIcon,
-  PinBottomIcon,
-  PinTopIcon,
-  AlignCenterVerticallyIcon,
-} from 'noya-icons';
-import { Label, RadioGroup, LabeledElementView } from 'noya-web-designsystem';
-import { Spacer } from 'noya-web-designsystem';
 import { memo } from 'react';
+
+import Sketch from 'noya-file-format';
+import { Layout, RadioGroup, LabeledView } from 'noya-designsystem';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextLayoutRowProps {
@@ -42,9 +30,7 @@ export default memo(function TextLayoutRowRow({
       </InspectorPrimitives.SectionHeader>
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
-        <LabeledElementView
-          renderLabel={() => <Label.Label>Auto Height</Label.Label>}
-        >
+        <LabeledView label="Auto Height">
           <RadioGroup.Root
             id="text-alignment"
             value={textLayout !== undefined ? textLayout.toString() : ''}
@@ -56,25 +42,25 @@ export default memo(function TextLayoutRowRow({
               value={Sketch.TextBehaviour.Flexible.toString()}
               tooltip="Horizontal"
             >
-              <StretchHorizontallyIcon />
+              <Layout.Icon name="stretch-horizontally" />
             </RadioGroup.Item>
             <RadioGroup.Item
               value={Sketch.TextBehaviour.Fixed.toString()}
               tooltip="Vertical"
             >
-              <StretchVerticallyIcon />
+              <Layout.Icon name="stretch-vertically" />
             </RadioGroup.Item>
             <RadioGroup.Item
               value={Sketch.TextBehaviour.FixedWidthAndHeight?.toString()}
               tooltip="Outside"
             >
-              <SquareIcon />
+              <Layout.Icon name="square" />
             </RadioGroup.Item>
           </RadioGroup.Root>
-        </LabeledElementView>
+        </LabeledView>
       </InspectorPrimitives.Row>
 
-      <Spacer.Vertical size={8} />
+      <Layout.Stack size={8} />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id="text-horizontal-aligment"
@@ -91,30 +77,30 @@ export default memo(function TextLayoutRowRow({
             value={Sketch.TextHorizontalAlignment.Left.toString()}
             tooltip="Left"
           >
-            <TextAlignLeftIcon />
+            <Layout.Icon name="text-align-left" />
           </RadioGroup.Item>
           <RadioGroup.Item
             value={Sketch.TextHorizontalAlignment.Centered.toString()}
             tooltip="Center"
           >
-            <TextAlignCenterIcon />
+            <Layout.Icon name="text-align-center" />
           </RadioGroup.Item>
           <RadioGroup.Item
             value={Sketch.TextHorizontalAlignment.Right.toString()}
             tooltip="Right"
           >
-            <TextAlignRightIcon />
+            <Layout.Icon name="text-align-right" />
           </RadioGroup.Item>
           <RadioGroup.Item
             value={Sketch.TextHorizontalAlignment.Justified.toString()}
             tooltip="Justify"
           >
-            <TextAlignJustifyIcon />
+            <Layout.Icon name="text-align-justify" />
           </RadioGroup.Item>
         </RadioGroup.Root>
       </InspectorPrimitives.Row>
 
-      <Spacer.Vertical size={8} />
+      <Layout.Stack size={8} />
       <InspectorPrimitives.Row>
         <RadioGroup.Root
           id="text-vertical-aligment"
@@ -131,19 +117,19 @@ export default memo(function TextLayoutRowRow({
             value={Sketch.TextVerticalAlignment.Top.toString()}
             tooltip="Top"
           >
-            <PinTopIcon />
+            <Layout.Icon name="pin-top" />
           </RadioGroup.Item>
           <RadioGroup.Item
             value={Sketch.TextVerticalAlignment.Middle.toString()}
             tooltip="Middle"
           >
-            <AlignCenterVerticallyIcon />
+            <Layout.Icon name="align-center-vertically" />
           </RadioGroup.Item>
           <RadioGroup.Item
             value={Sketch.TextVerticalAlignment.Bottom.toString()}
             tooltip="Bottom"
           >
-            <PinBottomIcon />
+            <Layout.Icon name="pin-bottom" />
           </RadioGroup.Item>
         </RadioGroup.Root>
       </InspectorPrimitives.Row>

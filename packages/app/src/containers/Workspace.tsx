@@ -4,16 +4,14 @@ import produce from 'immer';
 
 import { useSelector } from 'noya-app-state-context';
 import {
+  Layout,
   darkTheme,
-  Divider,
-  InputField,
   lightTheme,
+  InputField,
   ScrollArea,
-  Spacer,
-} from 'noya-web-designsystem';
+} from 'noya-designsystem';
 import { DesignSystemConfigurationProvider } from 'noya-ui';
 import { doubleClickToolbar } from 'noya-embedded';
-import { MagnifyingGlassIcon } from 'noya-icons';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import {
   LayerList,
@@ -152,7 +150,7 @@ export default function Workspace() {
             </MenubarContainer>
             <LeftSidebarBorderedContent>
               <PageList />
-              <Divider />
+              <Layout.Divider />
               {useTabElement({
                 canvas: (
                   <>
@@ -169,15 +167,13 @@ export default function Workspace() {
                           placeholder="Filter layers"
                           type="search"
                         />
-                        <InputField.Label>
-                          <MagnifyingGlassIcon />
-                        </InputField.Label>
+                        <Layout.Icon name="magnifying-glass" />
                       </InputField.Root>
                     </FilterContainer>
-                    <Spacer.Vertical size={8} />
+                    <Layout.Queue size={8} />
                   </>
                 ),
-                pages: <Spacer.Vertical />,
+                pages: <Layout.Queue />,
                 theme: <ThemeGroups />,
               })}
             </LeftSidebarBorderedContent>

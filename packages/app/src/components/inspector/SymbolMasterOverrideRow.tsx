@@ -3,8 +3,7 @@ import { memo, ReactNode, useCallback } from 'react';
 import Sketch from 'noya-file-format';
 import { LayerIcon } from 'noya-workspace-ui';
 import { useApplicationState } from 'noya-app-state-context';
-import { Divider, Spacer } from 'noya-web-designsystem';
-import { TreeView } from 'noya-designsystem';
+import { TreeView, Layout } from 'noya-designsystem';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -72,7 +71,7 @@ function getOverrideElements(
                 )
               }
             />
-            <Spacer.Horizontal size={6} />
+            <Layout.Queue size={6} />
             <TreeView.RowTitle>Symbol</TreeView.RowTitle>
           </TreeView.Row>,
           ...nestedOverrides,
@@ -95,7 +94,7 @@ function getOverrideElements(
                 )
               }
             />
-            <Spacer.Horizontal size={6} />
+            <Layout.Queue size={6} />
             <TreeView.RowTitle>Text Value</TreeView.RowTitle>
           </TreeView.Row>,
           layer.sharedStyleID && (
@@ -110,7 +109,7 @@ function getOverrideElements(
                   )
                 }
               />
-              <Spacer.Horizontal size={6} />
+              <Layout.Queue size={6} />
               <TreeView.RowTitle>Text Style</TreeView.RowTitle>
             </TreeView.Row>
           ),
@@ -129,7 +128,7 @@ function getOverrideElements(
                 onSetOverrideProperty(imageOverrideName, event.target.checked)
               }
             />
-            <Spacer.Horizontal size={6} />
+            <Layout.Queue size={6} />
             <TreeView.RowTitle>Image</TreeView.RowTitle>
           </TreeView.Row>,
         ];
@@ -152,7 +151,7 @@ function getOverrideElements(
                       )
                     }
                   />
-                  <Spacer.Horizontal size={6} />
+                  <Layout.Queue size={6} />
                   <TreeView.RowTitle>Layer Style</TreeView.RowTitle>
                 </TreeView.Row>
               ),
@@ -200,7 +199,7 @@ export default memo(function SymbolMasterOverrideRow({
           <InspectorPrimitives.Text>Allow Overrides</InspectorPrimitives.Text>
         </InspectorPrimitives.Row>
         <InspectorPrimitives.VerticalSeparator />
-        <Divider />
+        <Layout.Divider />
       </InspectorPrimitives.Section>
       <TreeView.Root expandable={false}>{overrideElements}</TreeView.Root>
     </>

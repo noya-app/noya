@@ -1,19 +1,20 @@
 import {
+  useRef,
+  useMemo,
+  useState,
+  ReactNode,
+  useContext,
+  useCallback,
+  createContext,
+} from 'react';
+import {
+  Layout,
   Button,
   Dialog,
   IDialog,
   InputField,
-  Spacer,
-} from 'noya-web-designsystem';
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+  KeyDownParams,
+} from 'noya-designsystem';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 
 function createDeferredPromise<T>() {
@@ -87,7 +88,7 @@ export const DialogProvider = function DialogProvider({
   );
 
   const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
+    (event: KeyDownParams) => {
       if (event.key !== 'Enter') return;
 
       event.stopPropagation();
@@ -153,11 +154,11 @@ export const DialogProvider = function DialogProvider({
             onKeyDown={handleKeyDown}
           />
         </InputField.Root>
-        <Spacer.Vertical size={20} />
+        <Layout.Queue size={20} />
         <InspectorPrimitives.Row>
-          <Spacer.Horizontal />
+          <Layout.Stack />
           <Button onClick={close}>Cancel</Button>
-          <Spacer.Horizontal size={20} />
+          <Layout.Stack size={20} />
           <Button disabled={!contents?.inputValue} onClick={submit}>
             Submit
           </Button>

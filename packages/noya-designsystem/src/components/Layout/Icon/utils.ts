@@ -1,3 +1,5 @@
+import type { Theme } from '../../../theme';
+
 interface GlyphMap {
   [name: string]: number;
 }
@@ -25,4 +27,21 @@ export function createGlyphsMap(selectionFile: SelectionFileMinimal) {
   });
 
   return ghlyps;
+}
+
+export function getIconColor(
+  theme: Theme,
+  color?: string,
+  selected?: boolean,
+  highlighted?: boolean,
+): string {
+  if (color) {
+    return color;
+  }
+
+  if (highlighted) {
+    return theme.colors.iconHighlighted;
+  }
+
+  return selected ? theme.colors.iconSelected : theme.colors.icon;
 }

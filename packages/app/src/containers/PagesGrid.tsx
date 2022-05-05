@@ -1,9 +1,10 @@
-import Sketch from 'noya-file-format';
-import { useApplicationState, useWorkspace } from 'noya-app-state-context';
-import { GridView, MenuItem } from 'noya-web-designsystem';
-import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
-import { Selectors } from 'noya-state';
 import { memo, useCallback, useMemo } from 'react';
+
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
+import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
+import { GridView, MenuItem } from 'noya-designsystem';
+import { Selectors } from 'noya-state';
+import Sketch from 'noya-file-format';
 import CanvasGridItem from '../components/theme/CanvasGridItem';
 
 export type PageGridMenuItemType = 'duplicate' | 'delete' | 'rename';

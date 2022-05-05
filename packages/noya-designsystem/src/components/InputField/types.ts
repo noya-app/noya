@@ -1,4 +1,6 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+
+import type { MenuItem } from '../internal/Menu';
 import type { TextInputProps } from '../internal/TextInput';
 
 export type LabelPosition = 'start' | 'end';
@@ -17,6 +19,12 @@ export interface InputFieldRootProps {
   labelPosition?: LabelPosition;
   labelSize?: number;
   hasDropdown?: boolean;
+}
+
+export interface InputFieldDropdownProps<T extends string> {
+  id?: string;
+  items: MenuItem<T>[];
+  onSelect: (value: T) => void;
 }
 
 export type InputFieldNumberInputProps = Omit<

@@ -1,6 +1,7 @@
 import React, {
   memo,
   useMemo,
+  ReactNode,
   useContext,
   createContext,
   PropsWithChildren,
@@ -8,7 +9,7 @@ import React, {
 import { ThemeProvider } from 'styled-components';
 
 import { PlatformName } from 'noya-keymap';
-import { Theme } from 'noya-web-designsystem';
+import { Theme } from 'noya-designsystem';
 
 export interface DesignSystemConfigurationContextValue {
   platform: PlatformName;
@@ -17,6 +18,7 @@ export interface DesignSystemConfigurationContextValue {
 type DesignSystemConfigurationProviderProps = PropsWithChildren<
   DesignSystemConfigurationContextValue & {
     theme: Theme;
+    children: ReactNode;
   }
 >;
 

@@ -1,7 +1,6 @@
 import { CSSObject } from 'styled-components';
 
-// TODO: fix me after moving Theme to designsystem
-import { Theme } from 'noya-web-designsystem';
+import { Theme } from 'noya-designsystem';
 import { CHECKBOX_WIDTH, CHECKBOX_RIGHT_INSET } from './constants';
 
 export const styles = {

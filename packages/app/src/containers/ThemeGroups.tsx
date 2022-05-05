@@ -1,9 +1,8 @@
 import { memo, useCallback, useMemo } from 'react';
 
-import { GroupIcon } from 'noya-icons';
 import Sketch from 'noya-file-format';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
-import { TreeView } from 'noya-designsystem';
+import { TreeView, Layout } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import { sortBy } from 'noya-utils';
 import { useShallowArray } from 'noya-react-utils';
@@ -47,7 +46,7 @@ const ThemeGroup = memo(function ThemeGroup({
             isSectionHeader={isRoot}
             onPress={() => onClick(group.path)}
             selected={selectedGroup === group.path}
-            icon={!isRoot && <GroupIcon />}
+            icon={!isRoot && <Layout.Icon name="group" />}
           >
             {group.name}
           </TreeView.Row>

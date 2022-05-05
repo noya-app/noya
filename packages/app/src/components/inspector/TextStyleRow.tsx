@@ -3,13 +3,12 @@ import { useTheme } from 'styled-components';
 
 import Sketch from 'noya-file-format';
 import {
-  InputField,
-  Label,
-  LabeledElementView,
-  MenuItem,
   Select,
+  MenuItem,
+  InputField,
+  LabeledView,
   SelectOption,
-} from 'noya-web-designsystem';
+} from 'noya-designsystem';
 import {
   DEFAULT_FONT_TRAITS,
   encodeFontName,
@@ -74,24 +73,6 @@ export default memo(function TextStyleRow({
   const fontFamilyId = fontFamily
     ? fontManager.getFontFamilyId(fontFamily)
     : undefined;
-
-  const renderLabel = useCallback(
-    ({ id }) => {
-      switch (id) {
-        case characterInputId:
-          return <Label.Label>Character</Label.Label>;
-        case lineInputId:
-          return <Label.Label>Line</Label.Label>;
-        case paragraphInputId:
-          return <Label.Label>Paragraph</Label.Label>;
-        case fontSizeId:
-          return <Label.Label>Size</Label.Label>;
-        default:
-          return null;
-      }
-    },
-    [characterInputId, fontSizeId, lineInputId, paragraphInputId],
-  );
 
   const { horizontalSeparator } = useTheme().sizes.inspector;
 
@@ -181,7 +162,7 @@ export default memo(function TextStyleRow({
       </InspectorPrimitives.Row>
       <InspectorPrimitives.VerticalSeparator />
       <InspectorPrimitives.Row>
-        <LabeledElementView renderLabel={renderLabel}>
+        <LabeledView label="Size">
           <InputField.Root id={fontSizeId}>
             <InputField.NumberInput
               placeholder={fontSize === undefined ? 'multiple' : ''}
@@ -204,26 +185,32 @@ export default memo(function TextStyleRow({
               )}
             />
           </InputField.Root>
-          <InspectorPrimitives.HorizontalSeparator />
+        </LabeledView>
+        <InspectorPrimitives.HorizontalSeparator />
+        <LabeledView label="Character">
           <DimensionInput
             id={characterInputId}
             value={letterSpacing}
             onSetValue={onChangeLineSpacing}
           />
-          <InspectorPrimitives.HorizontalSeparator />
+        </LabeledView>
+        <InspectorPrimitives.HorizontalSeparator />
+        <LabeledView label="Line">
           <DimensionInput
             id={lineInputId}
             value={lineSpacing}
             onSetValue={onChangeLetterSpacing}
             placeholder="auto"
           />
-          <InspectorPrimitives.HorizontalSeparator />
+        </LabeledView>
+        <InspectorPrimitives.HorizontalSeparator />
+        <LabeledView label="Paragraph">
           <DimensionInput
             id={paragraphInputId}
             value={paragraphSpacing}
             onSetValue={onChangeParagraphSpacing}
           />
-        </LabeledElementView>
+        </LabeledView>
       </InspectorPrimitives.Row>
     </InspectorPrimitives.Section>
   );
