@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import styled from 'styled-components';
 
 import selectionFile from './selection.json';
@@ -23,7 +23,7 @@ const Icon = styled.span<IconProps>(
       content: `"\\${ghlyps[name]}"`,
     },
     color: color ?? (selected ? theme.colors.iconSelected : theme.colors.icon),
-    fontSize: size ? `${size}px` : '12px',
+    fontSize: size ? `${size}px` : '15px',
   }),
 );
 

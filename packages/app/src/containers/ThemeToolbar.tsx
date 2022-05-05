@@ -79,8 +79,8 @@ export default function SwatchesToolbar() {
   return useMemo(
     () => (
       <>
-        <Layout.Stack size={8} />
-        <Layout.Stack />
+        <Layout.Queue size={8} />
+        <Layout.Queue />
         <TabsContainer>
           <RadioGroup.Root
             id={'components'}
@@ -97,23 +97,23 @@ export default function SwatchesToolbar() {
               <Layout.Icon name="margin" />
             </RadioGroup.Item>
             <RadioGroup.Item value="symbols" tooltip="Theme symbols">
-              <Layout.Icon name="component-istance" />
+              <Layout.Icon name="component-instance" />
             </RadioGroup.Item>
           </RadioGroup.Root>
         </TabsContainer>
         <RightContainer>
-          <Layout.Stack size={24} />
+          <Layout.Queue size={24} />
           {componentsTab !== 'symbols' && (
             <Button id="add-component" onClick={addComponent}>
               <Layout.Icon name="plus" />
             </Button>
           )}
-          <Layout.Stack size={4} />
+          <Layout.Queue size={4} />
           <Button id="remove-component" onClick={removeComponent}>
             <Layout.Icon name="trash" />
           </Button>
         </RightContainer>
-        <Layout.Stack size={sidebarWidth + 8} />
+        <Layout.Queue size={sidebarWidth + 8} />
       </>
     ),
     [
