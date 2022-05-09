@@ -6,71 +6,131 @@
 //
 import Foundation
 import React
+import UIKit
+
+let Modifiers = ["Shift", "Meta", "Ctrl", "Alt"]
+let SpecialKeys = ["Escape", "End", "Delete", "Home", "PageUp", "PageDown", "UpArrow", "DownArrow", "LeftArrow", "RightArrow"]
 
 @objc
 protocol KeyCommandable {
+  @available(iOS 13.0, *)
   func onKeyCommand(keyCommand: UIKeyCommand) -> Void
 }
 
-@objc(KeyCommandRegistry)
-class KeyCommandRegistry: RCTEventEmitter {
+func parseKeyName(key: String) -> String {
+  // Desired shortcutk key is same as separator
+  if (Modifiers.contains(key)) {
+    return "-"
+  }
+  
+  if (!SpecialKeys.contains(key)) {
+    return key
+  }
+    
+  switch key {
+    case "Escape":
+      return UIKeyCommand.inputEscape
+    case "End":
+      if #available(iOS 13.4, *) {
+        return UIKeyCommand.inputEnd
+      }
+      return key
+    case "Delete":
+      if #available(iOS 15.0, *) {
+        return UIKeyCommand.inputDelete
+      }
+      
+      return key
+    case "Home":
+      if #available(iOS 13.4, *) {
+        return UIKeyCommand.inputHome
+      }
+      
+      return key
+    case "PageUp":
+      return UIKeyCommand.inputPageUp
+    case "PageDown":
+      return UIKeyCommand.inputPageDown
+    case "UpArrow":
+      return UIKeyCommand.inputUpArrow
+    case "DownArrow":
+      return UIKeyCommand.inputDownArrow
+    case "LeftArrow":
+      return UIKeyCommand.inputLeftArrow
+    case "RightArrow":
+      return UIKeyCommand.inputRightArrow
+    default:
+      return key
+  }
+}
 
+@objc(KeyCommandRegistry)
+@available(iOS 13.0, *)
+class KeyCommandRegistry: RCTEventEmitter {
   var commandMap: [String: UIKeyCommand] = [:]
+  
+  func rebuildCommands() {
+    DispatchQueue.main.async {
+      UIMenuSystem.main.setNeedsRebuild()
+    }
+  }
 
   @objc
   func registerCommand(_ options: NSDictionary) {
-    guard let command = options["command"] as? String else { return }
-
-    let parts = command.split(separator: "-")
-    let key = String(parts.last ?? "")
-    let hasCommand = parts.contains("Meta")
-    let hasShift = parts.contains("Shift")
-    let hasControl = parts.contains("Ctrl")
-    let hasAlt = parts.contains("Alt")
-
-    if #available(iOS 13.0, *) {
-      var flags = UIKeyModifierFlags()
-
-      if (hasCommand) { flags.insert(.command) }
-      if (hasShift) { flags.insert(.shift) }
-      if (hasControl) { flags.insert(.control) }
-      if (hasAlt) { flags.insert(.alternate) }
-
-      let keyCommand = UIKeyCommand(
-        action: #selector(KeyCommandable.onKeyCommand(keyCommand:)),
-        input: key,
-        modifierFlags: flags
-      )
-
-      if let title = options["title"] as? String {
-        keyCommand.title = title
-      }
-
-      if #available(iOS 15.0, *) {
-        if let priority = options["priority"] as? String {
-          keyCommand.wantsPriorityOverSystemBehavior = priority == "system"
-        }
-      }
-
-      commandMap[command] = keyCommand
+    guard let baseCommand = options["command"] as? String else { return }
+    let parts = baseCommand.split(separator: "-")
+    let key = parseKeyName(key: String(parts.last ?? ""))
+    var flags = UIKeyModifierFlags()
+    
+    if (parts.contains("Meta")) {
+      flags.insert(.command)
     }
+
+    if (parts.contains("Shift")) {
+      flags.insert(.shift)
+    }
+
+    if (parts.contains("Ctrl")) {
+      flags.insert(.control)
+    }
+
+    if (parts.contains("Alt")) {
+      flags.insert(.alternate)
+    }
+    
+    let title = options["title"] as? String
+
+    let keyCommand = UIKeyCommand(
+      title: title ?? "",
+      action: #selector(KeyCommandable.onKeyCommand(keyCommand:)),
+      input: key,
+      modifierFlags: flags
+    )
+    
+    if #available(iOS 15.0, *) {
+      if let priority = options["priority"] as? String {
+        keyCommand.wantsPriorityOverSystemBehavior = priority == "system"
+      }
+    }
+  
+    commandMap[baseCommand] = keyCommand
+    self.rebuildCommands()
   }
 
   @objc
   func unregisterCommand(_ options: NSDictionary) {
     guard let command = options["command"] as? String else { return }
-
     commandMap.removeValue(forKey: command)
+    self.rebuildCommands()
   }
 
   // Overrides
-
-  override func supportedEvents() -> [String]! {
-    return ["onKeyCommand"]
-  }
-
   override class func requiresMainQueueSetup() -> Bool {
     return true
+  }
+  
+  override func supportedEvents() -> [String]! {
+    return ["onKeyCommand"]
   }
 
   override func startObserving() {
@@ -89,7 +149,6 @@ class KeyCommandRegistry: RCTEventEmitter {
   }
 
   // Instances
-
   private func addToInstances() {
     KeyCommandRegistry.instances.append(self)
   }
@@ -104,7 +163,6 @@ class KeyCommandRegistry: RCTEventEmitter {
   private static var instances: [KeyCommandRegistry] = []
 
   // API
-
   static func allCommands() -> [UIKeyCommand] {
     var commands: [UIKeyCommand] = []
 
@@ -116,9 +174,17 @@ class KeyCommandRegistry: RCTEventEmitter {
   }
 
   static func onKeyCommand(keyCommand: UIKeyCommand) {
+    print("[KeyCommandRegistry] calling onKeyCommand")
     KeyCommandRegistry.instances.forEach { instance in
+      print("[KeyCommandRegistry].onKeyCommand instance", instance)
       instance.commandMap.forEach { command, value in
-        guard value === keyCommand else { return }
+        print("[KeyCommandRegistry]", value, keyCommand)
+        guard value == keyCommand else {
+          print("fail!")
+          return
+
+        }
+        print("[KeyCommandRegistry] instancee found!")
         instance.sendEvent(withName: "onKeyCommand", body: ["command": command])
       }
     }

@@ -164,7 +164,7 @@ const Toolbar: React.FC = () => {
       },
       {
         icon: 'frame',
-        shortuct: {
+        shortcut: {
           cmd: 'a',
           title: 'Insert artboard',
         },
@@ -183,26 +183,26 @@ const Toolbar: React.FC = () => {
         icon: 'square',
         shortcut: {
           cmd: 'r',
-          title: 'draw rectangle',
+          title: 'Draw rectangle',
         },
         onPress: onAddShape('rectangle'),
         active: isButtonActive('rectangle'),
       },
       {
         icon: 'circle',
-        shortcut: { cmd: 'o', title: 'draw oval' },
+        shortcut: { cmd: 'o', title: 'Draw oval' },
         onPress: onAddShape('oval'),
         active: isButtonActive('oval'),
       },
       {
         icon: 'slash',
-        shortcut: { cmd: 'l', title: 'draw line' },
+        shortcut: { cmd: 'l', title: 'Draw line' },
         onPress: onAddShape('line'),
         active: isButtonActive('line'),
       },
       {
         icon: 'share-1', // TODO: bring back shape-path icon?
-        shortcut: { cmd: 'v', title: 'draw path' },
+        shortcut: { cmd: 'v', title: 'Draw path' },
         onPress: onAddShape('vector'),
         active: isButtonActive('vector'),
       },
@@ -234,23 +234,28 @@ const Toolbar: React.FC = () => {
     ],
   );
 
-  const keyCommands: Shortcuts = useMemo(() => {
-    return items.reduce((reducer, item) => {
-      if (!item.shortcut) {
-        return reducer;
-      }
+  // const keyCommands: Shortcuts = useMemo(() => {
+  //   return items.reduce((reducer, item) => {
+  //     if (!item.shortcut) {
+  //       return reducer;
+  //     }
 
-      return {
-        ...reducer,
-        [item.shortcut.cmd]: {
-          title: item.shortcut.title,
-          callback: item.onPress,
-        },
-      };
-    }, {});
-  }, [items]);
+  //     return {
+  //       ...reducer,
+  //       [item.shortcut.cmd]: {
+  //         title: item.shortcut.title,
+  //         callback: item.onPress,
+  //       },
+  //     };
+  //   }, {});
+  // }, [items]);
 
-  useKeyCommands(keyCommands);
+  useKeyCommands({
+    o: {
+      title: 'Draw oval',
+      callback: onAddShape('oval'),
+    },
+  });
 
   return (
     <ToolbarView pointerEvents="box-none">

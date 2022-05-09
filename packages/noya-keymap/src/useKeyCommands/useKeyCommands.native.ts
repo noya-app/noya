@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { NativeEventEmitter, NativeModule, NativeModules } from 'react-native';
 
 import { KeyedSet } from 'noya-utils';
@@ -53,13 +53,10 @@ export function useKeyCommands(
   shortcuts: Shortcuts,
   options: UseKeyCommandsOptions = {},
 ) {
-  const platformName = getCurrentPlatform();
-  const keyList = useMemo(
-    () => Object.entries(createKeyMap(shortcuts, platformName)),
-    [shortcuts, platformName],
-  );
-
-  console.log(keyList);
+  const keyList = useMemo(() => {
+    const platformName = getCurrentPlatform();
+    return Object.entries(createKeyMap(shortcuts, platformName));
+  }, [shortcuts]);
 
   useEffect(() => {
     keyList.forEach(([commandName, commandOptions]) => {
@@ -71,5 +68,6 @@ export function useKeyCommands(
         deleteCommand(commadName, commandOptions as NativeKeyCommand);
       });
     };
-  }, [keyList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
