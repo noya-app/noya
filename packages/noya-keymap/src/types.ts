@@ -14,10 +14,11 @@ export interface KeyModifiers {
 }
 
 export type PlatformKeyboardShortcut = Partial<Record<PlatformName, string>>;
-
 export type KeyCommandPriority = 'standard' | 'system';
 
-type KeyCommandCallback = () => void | 'fallthrough';
+export type KeyEventName = 'keydown' | 'keyup' | 'keypress';
+
+export type KeyCommandCallback = () => void | 'fallthrough';
 
 export interface NativeKeyCommand {
   title: string;
@@ -34,4 +35,18 @@ export type Shortcuts =
   | [string | PlatformKeyboardShortcut, KeyCommand][]
   | KeyMap;
 
-export interface KeyCommandOptions {}
+export interface KeyboardEventListener {
+  addEventListener: (
+    name: string,
+    handler: (keyboardEvent: KeyboardEvent) => void,
+  ) => void;
+  removeEventListener: (
+    name: string,
+    handler: (keyboardEvent: KeyboardEvent) => void,
+  ) => void;
+}
+
+export interface KeyCommandOptions {
+  eventName?: KeyEventName;
+  eventListener?: KeyboardEventListener;
+}

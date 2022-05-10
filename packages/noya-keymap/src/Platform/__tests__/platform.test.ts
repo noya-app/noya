@@ -1,4 +1,4 @@
-import { getCurrentPlatform } from '../platform';
+import { getCurrentPlatform } from '../Platform';
 
 test('determines the platform name', () => {
   expect(getCurrentPlatform()).toEqual('key');

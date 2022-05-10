@@ -1,4 +1,4 @@
-import { createKeyMap } from '../keyMap';
+import { createKeyMap } from '../createKeyMap';
 
 test('creates a keymap from an array', () => {
   const aCallback = () => {};

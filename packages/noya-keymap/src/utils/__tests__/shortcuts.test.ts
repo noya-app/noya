@@ -1,8 +1,5 @@
-import {
-  getEventShortcutNames,
-  getPlatformShortcutName,
-  PlatformKeyboardShortcut,
-} from '../shortcuts';
+import { PlatformKeyboardShortcut } from '../../types';
+import { getEventShortcutNames, getPlatformShortcutName } from '../shortcuts';
 
 test('picks a shortcut key for the given platform', () => {
   const shortcut: PlatformKeyboardShortcut = {
