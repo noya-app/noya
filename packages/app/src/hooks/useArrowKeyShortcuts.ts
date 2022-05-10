@@ -1,5 +1,5 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { useKeyboardShortcuts } from 'noya-keymap';
+import { useKeyCommands } from 'noya-keymap';
 import { Selectors } from 'noya-state';
 
 export function useArrowKeyShortcuts() {
@@ -23,7 +23,7 @@ export function useArrowKeyShortcuts() {
     }
   };
 
-  useKeyboardShortcuts(
+  useKeyCommands(
     isEditingText
       ? {
           // Cursor movement

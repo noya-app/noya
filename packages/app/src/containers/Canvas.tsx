@@ -21,7 +21,7 @@ import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
-  useKeyboardShortcuts,
+  useKeyCommands,
 } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
@@ -156,7 +156,7 @@ export default memo(function Canvas() {
     }
   };
 
-  useKeyboardShortcuts({
+  useKeyCommands({
     Backspace: handleDeleteKey,
     Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
@@ -211,7 +211,7 @@ export default memo(function Canvas() {
     },
   });
 
-  useKeyboardShortcuts(
+  useKeyCommands(
     {
       Space: () => {
         if (!isPanning) return;

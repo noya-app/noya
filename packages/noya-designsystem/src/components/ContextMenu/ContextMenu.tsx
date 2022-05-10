@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Slot } from '@radix-ui/react-slot';
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 
-import { useKeyboardShortcuts } from 'noya-keymap';
+import { useKeyCommands } from 'noya-keymap';
 import { Layout } from '../Layout';
 import {
   styles,
@@ -145,7 +145,7 @@ function ContextMenuRoot<T extends string>({
     [isNested, items, onSelect, shouldBindKeyboardShortcuts],
   );
 
-  useKeyboardShortcuts(keymap);
+  useKeyCommands(keymap);
 
   // We call preventDefault both to:
   // - Disable radix-ui's long-press-to-open behavior
