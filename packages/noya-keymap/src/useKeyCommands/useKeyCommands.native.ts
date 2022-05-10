@@ -4,12 +4,17 @@ import { NativeEventEmitter, NativeModule, NativeModules } from 'react-native';
 import { KeyedSet } from 'noya-utils';
 import { createKeyMap } from '../utils/createKeyMap';
 import { getCurrentPlatform } from '../Platform';
-import type { Shortcuts, KeyCommandPriority, NativeKeyCommand } from '../types';
-import type { UseKeyCommandsOptions } from './types';
+import type {
+  Shortcuts,
+  KeyCommandPriority,
+  NativeKeyCommand,
+  KeyCommandOptions,
+} from '../types';
 
 interface RegistryCommand {
+  title: string;
   command: string;
-  title?: string;
+  menuName: string;
   priority?: KeyCommandPriority;
 }
 
@@ -36,6 +41,7 @@ function addCommand(command: string, keyCommand: NativeKeyCommand) {
       command,
       title: keyCommand.title,
       priority: keyCommand.priority,
+      menuName: keyCommand.menuName ?? 'Menu',
     });
   }
 }
@@ -51,7 +57,7 @@ function deleteCommand(command: string, keyCommand: NativeKeyCommand) {
 
 export function useKeyCommands(
   shortcuts: Shortcuts,
-  options: UseKeyCommandsOptions = {},
+  options: KeyCommandOptions = {},
 ) {
   const keyList = useMemo(() => {
     const platformName = getCurrentPlatform();

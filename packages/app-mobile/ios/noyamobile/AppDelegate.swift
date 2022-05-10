@@ -58,18 +58,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
       // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
   }
   
-  func onKeyCommand(keyCommand: UIKeyCommand) {
-    if (keyCommand is UIKeyCommand) {
+  @available(iOS 13.0, *)
+  @objc func onKeyCommand(_ sender: AnyObject) {
+    if let keyCommand = sender as? UIKeyCommand {
       KeyCommandRegistry.onKeyCommand(keyCommand: keyCommand)
     }
-    
-//    if (sender is UIMenuController) {
-//
-////      let controller = sender as! UIMenuController
-////
-////      controller.
-//    }
-    print("IT WORKS!", keyCommand)
   }
 
   @available(iOS 13.0, *)
@@ -84,25 +77,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
     builder.remove(menu: .view)
     builder.remove(menu: .window)
     builder.remove(menu: .help)
-
-    let menu = UIMenu(
-      title: "Test menu group",
-      image: nil,
-      identifier: UIMenu.Identifier("noyamobile.testmenu"),
-      children: KeyCommandRegistry.allCommands()
-    )
-
-    builder.insertSibling(menu, afterMenu: .application)
+    
+    let commands = KeyCommandRegistry.allCommands()
+    let menuNames = commands.keys.sorted { $0 < $1 }
+    
+    // Helper variable to insert the menus in correct order
+    var prevMenuIdentifier: UIMenu.Identifier = .application
+    
+    menuNames.forEach({ menuName in
+      let commandList = commands[menuName]!
+      let menuIdentifier = UIMenu.Identifier("noyamobile.menusystem.\(menuName)")
+      
+      let menu = UIMenu(
+        title: menuName,
+        image: nil,
+        identifier: UIMenu.Identifier("noyamobile.menusystem.\(menuName)"),
+        options: [],
+        children: commandList.sorted { $0.title < $1.title }
+      )
+      
+      builder.insertSibling(menu, afterMenu: prevMenuIdentifier)
+      prevMenuIdentifier = menuIdentifier
+    })
   }
 }
 
 @available(iOS 13.0, *)
 extension AppDelegate: RCTBridgeDelegate {
   func sourceURL(for bridge: RCTBridge!) -> URL! {
-//    #if DEBUG
+    #if DEBUG
       return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index", fallbackResource:nil)
-//    #else
-//      return Bundle.main.url(forResource:"main", withExtension:"jsbundle")
-//    #endif
+    #else
+      return Bundle.main.url(forResource:"main", withExtension:"jsbundle")
+    #endif
   }
 }

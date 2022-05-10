@@ -21,6 +21,7 @@ interface Item {
   shortcut?: {
     cmd: string;
     title: string;
+    menuName: string;
   };
   onPress: () => void;
   active?: boolean;
@@ -66,10 +67,8 @@ const Toolbar: React.FC = () => {
   );
 
   const onReset = useCallback(() => {
-    if (interType !== 'none') {
-      dispatch('interaction', ['reset']);
-    }
-  }, [dispatch, interType]);
+    dispatch('interaction', ['reset']);
+  }, [dispatch]);
 
   const onAddShape = useCallback(
     (shape: DrawableLayerType | 'vector') => () => {
@@ -157,6 +156,7 @@ const Toolbar: React.FC = () => {
         shortcut: {
           cmd: 'Escape',
           title: 'Reset interaction',
+          menuName: 'Edit',
         },
         icon: 'cursor-arrow',
         onPress: onReset,
@@ -166,7 +166,8 @@ const Toolbar: React.FC = () => {
         icon: 'frame',
         shortcut: {
           cmd: 'a',
-          title: 'Insert artboard',
+          title: 'Artboard',
+          menuName: 'Insert',
         },
         onPress: onAddShape('artboard'),
         active: isButtonActive('artboard'),
@@ -175,7 +176,8 @@ const Toolbar: React.FC = () => {
         icon: 'image',
         shortcut: {
           cmd: 'i',
-          title: 'Insert image',
+          title: 'Image',
+          menuName: 'Insert',
         },
         onPress: onAddImage,
       },
@@ -183,41 +185,42 @@ const Toolbar: React.FC = () => {
         icon: 'square',
         shortcut: {
           cmd: 'r',
-          title: 'Draw rectangle',
+          title: 'Rectangle',
+          menuName: 'Insert',
         },
         onPress: onAddShape('rectangle'),
         active: isButtonActive('rectangle'),
       },
       {
         icon: 'circle',
-        shortcut: { cmd: 'o', title: 'Draw oval' },
+        shortcut: { cmd: 'o', title: 'Oval', menuName: 'Insert' },
         onPress: onAddShape('oval'),
         active: isButtonActive('oval'),
       },
       {
         icon: 'slash',
-        shortcut: { cmd: 'l', title: 'Draw line' },
+        shortcut: { cmd: 'l', title: 'Line', menuName: 'Insert' },
         onPress: onAddShape('line'),
         active: isButtonActive('line'),
       },
       {
         icon: 'share-1', // TODO: bring back shape-path icon?
-        shortcut: { cmd: 'v', title: 'Draw path' },
+        shortcut: { cmd: 'v', title: 'Path', menuName: 'Insert' },
         onPress: onAddShape('vector'),
         active: isButtonActive('vector'),
       },
       {
         icon: 'zoom-in',
-        shortcut: { cmd: 'Mod-+', title: 'Zoom in' },
+        shortcut: { cmd: 'Mod-+', title: 'Zoom in', menuName: 'Edit' },
         onPress: () => onZoom('zoomIn'),
       },
       {
-        shortcut: { cmd: 'Mod-0', title: 'Reset zoom' },
+        shortcut: { cmd: 'Mod-0', title: 'Reset zoom', menuName: 'Edit' },
         label: `${Math.floor(meta.zoomValue * 100)}%`,
         onPress: () => onResetZoom(),
       },
       {
-        shortcut: { cmd: 'Mod--', title: 'Zoom out' },
+        shortcut: { cmd: 'Mod--', title: 'Zoom out', menuName: 'Edit' },
         icon: 'zoom-out',
         onPress: () => onZoom('zoomOut'),
       },
@@ -234,28 +237,24 @@ const Toolbar: React.FC = () => {
     ],
   );
 
-  // const keyCommands: Shortcuts = useMemo(() => {
-  //   return items.reduce((reducer, item) => {
-  //     if (!item.shortcut) {
-  //       return reducer;
-  //     }
+  const keyCommands: Shortcuts = useMemo(() => {
+    return items.reduce((reducer, item) => {
+      if (!item.shortcut) {
+        return reducer;
+      }
 
-  //     return {
-  //       ...reducer,
-  //       [item.shortcut.cmd]: {
-  //         title: item.shortcut.title,
-  //         callback: item.onPress,
-  //       },
-  //     };
-  //   }, {});
-  // }, [items]);
+      return {
+        ...reducer,
+        [item.shortcut.cmd]: {
+          title: item.shortcut.title,
+          menuName: item.shortcut.menuName,
+          callback: item.onPress,
+        },
+      };
+    }, {});
+  }, [items]);
 
-  useKeyCommands({
-    o: {
-      title: 'Draw oval',
-      callback: onAddShape('oval'),
-    },
-  });
+  useKeyCommands(keyCommands);
 
   return (
     <ToolbarView pointerEvents="box-none">

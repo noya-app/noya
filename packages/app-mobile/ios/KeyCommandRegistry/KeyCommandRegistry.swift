@@ -14,7 +14,7 @@ let SpecialKeys = ["Escape", "End", "Delete", "Home", "PageUp", "PageDown", "UpA
 @objc
 protocol KeyCommandable {
   @available(iOS 13.0, *)
-  func onKeyCommand(keyCommand: UIKeyCommand) -> Void
+  func onKeyCommand(_ sender: AnyObject) -> Void
 }
 
 func parseKeyName(key: String) -> String {
@@ -67,7 +67,8 @@ func parseKeyName(key: String) -> String {
 @objc(KeyCommandRegistry)
 @available(iOS 13.0, *)
 class KeyCommandRegistry: RCTEventEmitter {
-  var commandMap: [String: UIKeyCommand] = [:]
+  // Map of commands grouped in menu names
+  var commandMap: [String: [String: UIKeyCommand]] = [:]
   
   func rebuildCommands() {
     DispatchQueue.main.async {
@@ -78,6 +79,8 @@ class KeyCommandRegistry: RCTEventEmitter {
   @objc
   func registerCommand(_ options: NSDictionary) {
     guard let baseCommand = options["command"] as? String else { return }
+    let menuName = options["menuName"] as? String ?? "Menu"
+
     let parts = baseCommand.split(separator: "-")
     let key = parseKeyName(key: String(parts.last ?? ""))
     var flags = UIKeyModifierFlags()
@@ -102,9 +105,10 @@ class KeyCommandRegistry: RCTEventEmitter {
 
     let keyCommand = UIKeyCommand(
       title: title ?? "",
-      action: #selector(KeyCommandable.onKeyCommand(keyCommand:)),
+      action: #selector(KeyCommandable.onKeyCommand(_:)),
       input: key,
-      modifierFlags: flags
+      modifierFlags: flags,
+      propertyList: ["id": baseCommand]
     )
     
     if #available(iOS 15.0, *) {
@@ -112,15 +116,26 @@ class KeyCommandRegistry: RCTEventEmitter {
         keyCommand.wantsPriorityOverSystemBehavior = priority == "system"
       }
     }
+    
+    if (commandMap[menuName] == nil) {
+      commandMap[menuName] = [:]
+    }
+
+    commandMap[menuName]![baseCommand] = keyCommand
   
-    commandMap[baseCommand] = keyCommand
     self.rebuildCommands()
   }
 
   @objc
   func unregisterCommand(_ options: NSDictionary) {
     guard let command = options["command"] as? String else { return }
-    commandMap.removeValue(forKey: command)
+    var reducedCommands: [String: [String: UIKeyCommand]] = [:]
+    
+    commandMap.forEach({ (menuName, commands) in
+      reducedCommands[menuName] = commands.filter({ (key, _value) in key == command })
+    })
+    
+    self.commandMap = reducedCommands
     self.rebuildCommands()
   }
 
@@ -163,30 +178,32 @@ class KeyCommandRegistry: RCTEventEmitter {
   private static var instances: [KeyCommandRegistry] = []
 
   // API
-  static func allCommands() -> [UIKeyCommand] {
-    var commands: [UIKeyCommand] = []
+  static func allCommands() -> [String: [UIKeyCommand]] {
+    var commands: [String: [UIKeyCommand]] = [:]
 
     instances.forEach { instance in
-      commands.append(contentsOf: instance.commandMap.values)
+
+      instance.commandMap.forEach({ (key, value) in
+        if (commands[key] == nil) {
+          commands[key] = []
+        }
+        
+        commands[key]?.append(contentsOf: value.values)
+      })
     }
 
     return commands
   }
 
   static func onKeyCommand(keyCommand: UIKeyCommand) {
-    print("[KeyCommandRegistry] calling onKeyCommand")
-    KeyCommandRegistry.instances.forEach { instance in
-      print("[KeyCommandRegistry].onKeyCommand instance", instance)
-      instance.commandMap.forEach { command, value in
-        print("[KeyCommandRegistry]", value, keyCommand)
-        guard value == keyCommand else {
-          print("fail!")
-          return
-
-        }
-        print("[KeyCommandRegistry] instancee found!")
-        instance.sendEvent(withName: "onKeyCommand", body: ["command": command])
-      }
-    }
+    KeyCommandRegistry.instances.forEach({ instance in
+      instance.commandMap.values.forEach({ commandList in
+        commandList.forEach({ (commandName, command) in
+          guard command == keyCommand else { return }
+          
+          instance.sendEvent(withName: "onKeyCommand", body: ["command": commandName])
+        })
+      })
+    })
   }
 }

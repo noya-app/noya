@@ -21,6 +21,7 @@ type KeyCommandCallback = () => void | 'fallthrough';
 
 export interface NativeKeyCommand {
   title: string;
+  menuName: string;
   callback: KeyCommandCallback;
   priority?: KeyCommandPriority;
 }
@@ -32,3 +33,5 @@ export type KeyMap = Record<string, KeyCommand>;
 export type Shortcuts =
   | [string | PlatformKeyboardShortcut, KeyCommand][]
   | KeyMap;
+
+export interface KeyCommandOptions {}
