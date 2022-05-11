@@ -48,8 +48,11 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import { FileDropTarget, TypedFile } from 'noya-workspace-ui';
-import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
+import {
+  TypedFile,
+  FileDropTarget,
+  useArrowKeyShortcuts,
+} from 'noya-workspace-ui';
 import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useCopyHandler } from '../hooks/useCopyHandler';
 import useLayerMenu from '../hooks/useLayerMenu';

@@ -9,7 +9,7 @@ import React
 import UIKit
 
 let Modifiers = ["Shift", "Meta", "Ctrl", "Alt"]
-let SpecialKeys = ["Escape", "End", "Delete", "Home", "PageUp", "PageDown", "UpArrow", "DownArrow", "LeftArrow", "RightArrow"]
+let SpecialKeys = ["Escape", "End", "Delete", "Home", "PageUp", "PageDown", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]
 
 @objc
 protocol KeyCommandable {
@@ -51,13 +51,13 @@ func parseKeyName(key: String) -> String {
       return UIKeyCommand.inputPageUp
     case "PageDown":
       return UIKeyCommand.inputPageDown
-    case "UpArrow":
+    case "ArrowUp":
       return UIKeyCommand.inputUpArrow
-    case "DownArrow":
+    case "ArrowDown":
       return UIKeyCommand.inputDownArrow
-    case "LeftArrow":
+    case "ArrowLeft":
       return UIKeyCommand.inputLeftArrow
-    case "RightArrow":
+    case "ArrowRight":
       return UIKeyCommand.inputRightArrow
     default:
       return key
@@ -72,9 +72,6 @@ class KeyCommandRegistry: RCTEventEmitter {
   var keyCommands: [String: UIKeyCommand] = [:]
 
   func rebuildCommands() {
-    print("mkc",menuKeyCommands.values.map({ $0.keys }))
-    print("kc", keyCommands.keys)
-
     DispatchQueue.main.async {
       UIMenuSystem.main.setNeedsRebuild()
     }
@@ -225,7 +222,6 @@ class KeyCommandRegistry: RCTEventEmitter {
     var commands: [UIKeyCommand] = []
     
     instances.forEach({ instance in
-      print(instance.keyCommands.keys)
       commands.append(contentsOf: instance.keyCommands.values)
     })
     

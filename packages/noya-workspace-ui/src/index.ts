@@ -21,6 +21,7 @@ export { default as FillInspector } from './FillInspector';
 export { default as FlipControls } from './FlipControls';
 export { default as LayerList } from './LayerList';
 
+export * from './hooks/useArrowKeyShortcuts';
 export * from './hooks/useCanvasGestures';
 export * from './contexts/DialogContext';
 export * from './DimensionsInspector';
