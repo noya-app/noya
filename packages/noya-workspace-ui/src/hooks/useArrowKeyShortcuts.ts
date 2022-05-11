@@ -61,10 +61,10 @@ export function useArrowKeyShortcuts() {
         }
       : {
           // Layer movement
-          ArrowLeft: { priority: 'system', callback: () => nudge('X', -1) },
-          ArrowRight: { priority: 'system', callback: () => nudge('X', 1) },
-          ArrowUp: { priority: 'system', callback: () => nudge('Y', -1) },
-          ArrowDown: { priority: 'system', callback: () => nudge('Y', 1) },
+          ArrowLeft: () => nudge('X', -1),
+          ArrowRight: () => nudge('X', 1),
+          ArrowUp: () => nudge('Y', -1),
+          ArrowDown: () => nudge('Y', 1),
           'Shift-ArrowLeft': () => nudge('X', -10),
           'Shift-ArrowRight': () => nudge('X', 10),
           'Shift-ArrowUp': () => nudge('Y', -10),
