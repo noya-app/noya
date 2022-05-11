@@ -20,14 +20,14 @@ export type KeyEventName = 'keydown' | 'keyup' | 'keypress';
 
 export type KeyCommandCallback = () => void | 'fallthrough';
 
-export interface NativeKeyCommand {
-  title: string;
-  menuName: string;
+export interface RichKeyCommand {
   callback: KeyCommandCallback;
+  title?: string;
+  menuName?: string;
   priority?: KeyCommandPriority;
 }
 
-export type KeyCommand = KeyCommandCallback | NativeKeyCommand;
+export type KeyCommand = KeyCommandCallback | RichKeyCommand;
 
 export type KeyMap = Record<string, KeyCommand>;
 

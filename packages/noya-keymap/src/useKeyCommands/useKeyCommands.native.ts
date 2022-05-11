@@ -1,79 +1,167 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { NativeEventEmitter, NativeModule, NativeModules } from 'react-native';
 
-import { KeyedSet } from 'noya-utils';
+import { parseKeyCommand } from '../utils/parseKeyCommand';
 import { createKeyMap } from '../utils/createKeyMap';
 import { getCurrentPlatform } from '../Platform';
-import type {
-  Shortcuts,
-  KeyCommandPriority,
-  NativeKeyCommand,
-  KeyCommandOptions,
-} from '../types';
+import { KeyMap, Shortcuts, KeyCommand, KeyCommandPriority } from '../types';
 
 interface RegistryCommand {
-  title: string;
   command: string;
-  menuName: string;
+  title?: string;
+  menuName?: string;
   priority?: KeyCommandPriority;
+}
+
+interface CallbackMap {
+  [key: string]: () => void;
+}
+
+interface SimpleCommand {
+  command: string;
 }
 
 const { KeyCommandRegistry } = NativeModules as {
   KeyCommandRegistry: NativeModule & {
-    registerCommand: (options: RegistryCommand) => void;
-    unregisterCommand: (options: { command: string }) => void;
+    registerCommands: (commands: RegistryCommand[]) => void;
+    unregisterCommands: (comamnds: string[]) => void;
   };
 };
 
-const callbacks = new KeyedSet<string, () => void>();
-const eventEmitter = new NativeEventEmitter(KeyCommandRegistry);
+function buildCommandOptions(
+  command: string,
+  keyCommand: KeyCommand,
+): RegistryCommand {
+  const commandOptions: RegistryCommand = {
+    command,
+  };
 
-eventEmitter.addListener('onKeyCommand', (options: { command: string }) => {
-  callbacks.forEach(options.command, (callback) => callback());
-});
+  if (typeof keyCommand === 'function') {
+    return commandOptions;
+  }
 
-function addCommand(command: string, keyCommand: NativeKeyCommand) {
-  callbacks.add(command, keyCommand.callback);
+  if (keyCommand.title) {
+    commandOptions.title = keyCommand.title;
+  }
 
-  // If we have at least 1 command, add it to the native list of key commands.
-  if (callbacks.size(command) === 1) {
-    KeyCommandRegistry.registerCommand({
-      command,
-      title: keyCommand.title,
-      priority: keyCommand.priority,
-      menuName: keyCommand.menuName ?? 'Menu',
+  if (keyCommand.priority) {
+    commandOptions.priority = keyCommand.priority;
+  }
+
+  if (keyCommand.menuName) {
+    commandOptions.menuName = keyCommand.menuName;
+  }
+
+  return commandOptions;
+}
+
+function commandsAreEqual(
+  firstCommand: KeyCommand,
+  secondCommand: KeyCommand,
+): boolean {
+  const cmd1 = parseKeyCommand(firstCommand);
+  const cdm2 = parseKeyCommand(secondCommand);
+
+  return (
+    cmd1.title === cdm2.title &&
+    cmd1.menuName === cdm2.menuName &&
+    cmd1.priority === cdm2.priority
+  );
+}
+
+class KeyCommandManager {
+  callbacks: CallbackMap = {};
+
+  eventEmitter = new NativeEventEmitter(KeyCommandRegistry);
+
+  constructor() {
+    this.eventEmitter.addListener('onKeyCommand', (p: SimpleCommand) =>
+      this.onKeyCommand(p),
+    );
+  }
+
+  onKeyCommand({ command }: SimpleCommand) {
+    if (this.callbacks[command]) {
+      this.callbacks[command]();
+    }
+  }
+
+  /**
+   * This methods compares previous and current key maps
+   * and updates the native side command list only
+   * if there was some real changes to the parameters (except callback).
+   * Otherwise it will just update the local callback to the command
+   *
+   * @param keyMap current keymap to regsiter on native side
+   * @param prevKeyMap previously registered key commands
+   */
+  updateCommands(keyMap: KeyMap, prevKeyMap: KeyMap) {
+    const commandsToRemove: string[] = [];
+    const newCommands: KeyMap = {};
+
+    const allKeys = Object.keys({ ...keyMap, ...prevKeyMap });
+
+    allKeys.forEach((key) => {
+      const currentCommand = keyMap[key];
+      const prevCommand = prevKeyMap[key];
+
+      if (currentCommand && prevCommand) {
+        // Command persisted between updates
+        if (commandsAreEqual(currentCommand, prevCommand)) {
+          this.callbacks[key] = parseKeyCommand(currentCommand).callback;
+          return;
+        }
+
+        // If props has changes recreate the command on native side
+        commandsToRemove.push(key);
+        newCommands[key] = currentCommand;
+        return;
+      }
+
+      if (currentCommand) {
+        newCommands[key] = currentCommand;
+        return;
+      }
+
+      if (prevCommand) {
+        commandsToRemove.push(key);
+      }
     });
+
+    if (commandsToRemove.length) {
+      KeyCommandRegistry.unregisterCommands(commandsToRemove);
+
+      commandsToRemove.forEach((command) => {
+        delete this.callbacks[command];
+      });
+    }
+
+    if (Object.keys(newCommands).length) {
+      const registryCommands: RegistryCommand[] = [];
+
+      Object.entries(newCommands).forEach(([key, command]) => {
+        registryCommands.push(buildCommandOptions(key, command));
+        this.callbacks[key] = parseKeyCommand(command).callback;
+      });
+
+      KeyCommandRegistry.registerCommands(registryCommands);
+    }
   }
 }
 
-function deleteCommand(command: string, keyCommand: NativeKeyCommand) {
-  callbacks.delete(command, keyCommand.callback);
+const keyCommandManager = new KeyCommandManager();
 
-  // If there are no commands left, remove it from the native list of key commands.
-  if (callbacks.size(command) === 0) {
-    KeyCommandRegistry.unregisterCommand({ command });
-  }
-}
-
-export function useKeyCommands(
-  shortcuts: Shortcuts,
-  options: KeyCommandOptions = {},
-) {
-  const keyList = useMemo(() => {
+export function useKeyCommands(shortcuts: Shortcuts) {
+  const keyMap = useMemo(() => {
     const platformName = getCurrentPlatform();
-    return Object.entries(createKeyMap(shortcuts, platformName));
+    return createKeyMap(shortcuts, platformName);
   }, [shortcuts]);
 
-  useEffect(() => {
-    keyList.forEach(([commandName, commandOptions]) => {
-      addCommand(commandName, commandOptions as NativeKeyCommand);
-    });
+  const prevKeyMap = useRef<KeyMap>({});
 
-    return () => {
-      keyList.forEach(([commadName, commandOptions]) => {
-        deleteCommand(commadName, commandOptions as NativeKeyCommand);
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => {
+    keyCommandManager.updateCommands(keyMap, prevKeyMap.current);
+
+    prevKeyMap.current = keyMap;
+  }, [keyMap]);
 }

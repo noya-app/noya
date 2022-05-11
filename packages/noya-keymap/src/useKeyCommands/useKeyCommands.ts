@@ -1,26 +1,12 @@
 import { useEffect, useMemo, useRef } from 'react';
 
-import { createKeyMap } from '../utils/createKeyMap';
+import { parseKeyCommand } from '../utils/parseKeyCommand';
+import type { Shortcuts, KeyCommandOptions } from '../types';
 import { getEventShortcutNames } from '../utils/shortcuts';
-import type {
-  Shortcuts,
-  KeyCommand,
-  NativeKeyCommand,
-  KeyCommandOptions,
-  KeyCommandCallback,
-} from '../types';
+import { createKeyMap } from '../utils/createKeyMap';
 import { getCurrentPlatform } from '../Platform';
 
 export const IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS = 'ignore-global-events';
-
-function getCommandCallback(command: KeyCommand): KeyCommandCallback {
-  if (typeof command === 'function') {
-    return command;
-  }
-
-  const { callback } = command as NativeKeyCommand;
-  return callback;
-}
 
 export function useKeyCommands(
   shortcuts: Shortcuts,
@@ -63,7 +49,7 @@ export function useKeyCommands(
 
       if (!matchingName) return;
 
-      const command = getCommandCallback(keyMapRef.current[matchingName]);
+      const command = parseKeyCommand(keyMapRef.current[matchingName]).callback;
 
       const result = command();
 

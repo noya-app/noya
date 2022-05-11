@@ -68,23 +68,25 @@ func parseKeyName(key: String) -> String {
 @available(iOS 13.0, *)
 class KeyCommandRegistry: RCTEventEmitter {
   // Map of commands grouped in menu names
-  var commandMap: [String: [String: UIKeyCommand]] = [:]
-  
+  var menuKeyCommands: [String: [String: UIKeyCommand]] = [:]
+  var keyCommands: [String: UIKeyCommand] = [:]
+
   func rebuildCommands() {
+    print("mkc",menuKeyCommands.values.map({ $0.keys }))
+    print("kc", keyCommands.keys)
+
     DispatchQueue.main.async {
       UIMenuSystem.main.setNeedsRebuild()
     }
   }
-
-  @objc
-  func registerCommand(_ options: NSDictionary) {
+  
+  func buildKeyCommand(_ options: NSDictionary) {
     guard let baseCommand = options["command"] as? String else { return }
-    let menuName = options["menuName"] as? String ?? "Menu"
 
     let parts = baseCommand.split(separator: "-")
     let key = parseKeyName(key: String(parts.last ?? ""))
     var flags = UIKeyModifierFlags()
-    
+
     if (parts.contains("Meta")) {
       flags.insert(.command)
     }
@@ -100,7 +102,7 @@ class KeyCommandRegistry: RCTEventEmitter {
     if (parts.contains("Alt")) {
       flags.insert(.alternate)
     }
-    
+
     let title = options["title"] as? String
 
     let keyCommand = UIKeyCommand(
@@ -110,33 +112,58 @@ class KeyCommandRegistry: RCTEventEmitter {
       modifierFlags: flags,
       propertyList: ["id": baseCommand]
     )
-    
+
     if #available(iOS 15.0, *) {
       if let priority = options["priority"] as? String {
         keyCommand.wantsPriorityOverSystemBehavior = priority == "system"
       }
     }
-    
-    if (commandMap[menuName] == nil) {
-      commandMap[menuName] = [:]
+
+    if let menuName = options["menuName"] as? String {
+      if (menuKeyCommands[menuName] == nil) {
+        menuKeyCommands[menuName] = [:]
+      }
+
+      menuKeyCommands[menuName]![baseCommand] = keyCommand
+    } else {
+      keyCommands[baseCommand] = keyCommand
     }
-
-    commandMap[menuName]![baseCommand] = keyCommand
-  
-    self.rebuildCommands()
   }
+  
+  func removeCommand(_ option: Any) {
+    guard let command = option as? String else { return }
 
-  @objc
-  func unregisterCommand(_ options: NSDictionary) {
-    guard let command = options["command"] as? String else { return }
-    var reducedCommands: [String: [String: UIKeyCommand]] = [:]
-    
-    commandMap.forEach({ (menuName, commands) in
-      reducedCommands[menuName] = commands.filter({ (key, _value) in key == command })
+    var reducedMenuCommands: [String: [String: UIKeyCommand]] = [:]
+
+    // Remove given command from menus if present
+    menuKeyCommands.forEach({ (menuName, commands) in
+      reducedMenuCommands[menuName] = commands.filter({ (key, _value) in key == command })
     })
+
+    self.menuKeyCommands = reducedMenuCommands
+
+    // Remove given command from menu-less commands
+    self.keyCommands.removeValue(forKey: command)
+  }
+  
+  @objc
+  func registerCommands(_ commands: NSArray) {
+    for command in commands {
+      if (command is NSDictionary) {
+        buildKeyCommand(command as! NSDictionary)
+      }
+    }
     
-    self.commandMap = reducedCommands
-    self.rebuildCommands()
+    rebuildCommands()
+  }
+  
+  @objc
+  func unregisterCommands(_ commands: NSArray) {
+    for command in commands {
+      removeCommand(command)
+    }
+    
+    rebuildCommands()
   }
 
   // Overrides
@@ -178,29 +205,47 @@ class KeyCommandRegistry: RCTEventEmitter {
   private static var instances: [KeyCommandRegistry] = []
 
   // API
-  static func allCommands() -> [String: [UIKeyCommand]] {
+  static func allMenuCommands() -> [String: [UIKeyCommand]] {
     var commands: [String: [UIKeyCommand]] = [:]
 
     instances.forEach { instance in
-
-      instance.commandMap.forEach({ (key, value) in
+      instance.menuKeyCommands.forEach({ (key, value) in
         if (commands[key] == nil) {
           commands[key] = []
         }
-        
+
         commands[key]?.append(contentsOf: value.values)
       })
     }
 
     return commands
   }
+  
+  static func allMenulessCommands() -> [UIKeyCommand] {
+    var commands: [UIKeyCommand] = []
+    
+    instances.forEach({ instance in
+      print(instance.keyCommands.keys)
+      commands.append(contentsOf: instance.keyCommands.values)
+    })
+    
+    return commands
+  }
 
   static func onKeyCommand(keyCommand: UIKeyCommand) {
     KeyCommandRegistry.instances.forEach({ instance in
-      instance.commandMap.values.forEach({ commandList in
+      // Search in commands without assigned menu
+      instance.keyCommands.forEach({ (commandName, command) in
+        guard command == keyCommand else { return }
+        
+        instance.sendEvent(withName: "onKeyCommand", body: ["command": commandName])
+      })
+
+      // Search in commands grouped into menus
+      instance.menuKeyCommands.values.forEach({ commandList in
         commandList.forEach({ (commandName, command) in
           guard command == keyCommand else { return }
-          
+
           instance.sendEvent(withName: "onKeyCommand", body: ["command": commandName])
         })
       })

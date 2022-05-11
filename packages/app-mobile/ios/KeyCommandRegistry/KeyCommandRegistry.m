@@ -10,7 +10,7 @@
 
 @interface RCT_EXTERN_MODULE(KeyCommandRegistry, RCTEventEmitter)
 
-RCT_EXTERN_METHOD(registerCommand:(NSDictionary *)options)
-RCT_EXTERN_METHOD(unregisterCommand:(NSDictionary *)options)
+RCT_EXTERN_METHOD(registerCommands: (NSArray *)commands)
+RCT_EXTERN_METHOD(unregisterCommands: (NSArray *)commands)
 
 @end

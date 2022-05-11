@@ -12,6 +12,9 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
   var window: UIWindow?
+  override var keyCommands: [UIKeyCommand] {
+    return KeyCommandRegistry.allMenulessCommands()
+  }
 
   @objc
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -78,7 +81,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
     builder.remove(menu: .window)
     builder.remove(menu: .help)
     
-    let commands = KeyCommandRegistry.allCommands()
+    let commands = KeyCommandRegistry.allMenuCommands()
     let menuNames = commands.keys.sorted { $0 < $1 }
     
     // Helper variable to insert the menus in correct order
