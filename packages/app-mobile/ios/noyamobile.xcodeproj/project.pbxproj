@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		047DE88127A829470004312A /* icomoon.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 047DE88027A829470004312A /* icomoon.ttf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		3E46A259282E80C400D89A8E /* KeyEventEmitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46A258282E80C400D89A8E /* KeyEventEmitter.swift */; };
+		3E46A25B282E80D500D89A8E /* KeyEventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3E46A25A282E80D500D89A8E /* KeyEventEmitter.m */; };
 		3E78F26A282C2BC9000061E6 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E78F269282C2BC9000061E6 /* RootViewController.swift */; };
 		3E8F276128240D19004A18CB /* KeyCommandRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F276028240D19004A18CB /* KeyCommandRegistry.swift */; };
 		3E8F276328240D45004A18CB /* KeyCommandRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F276228240D45004A18CB /* KeyCommandRegistry.m */; };
@@ -25,6 +27,8 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = noyamobile/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = noyamobile/Info.plist; sourceTree = "<group>"; };
 		1D0AE47A65C8663E3B452821 /* Pods-noyamobile-noyamobileTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile-noyamobileTests.release.xcconfig"; path = "Target Support Files/Pods-noyamobile-noyamobileTests/Pods-noyamobile-noyamobileTests.release.xcconfig"; sourceTree = "<group>"; };
+		3E46A258282E80C400D89A8E /* KeyEventEmitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventEmitter.swift; sourceTree = "<group>"; };
+		3E46A25A282E80D500D89A8E /* KeyEventEmitter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyEventEmitter.m; sourceTree = "<group>"; };
 		3E78F269282C2BC9000061E6 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RootViewController.swift; path = noyamobile/RootViewController.swift; sourceTree = "<group>"; };
 		3E8F276028240D19004A18CB /* KeyCommandRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCommandRegistry.swift; sourceTree = "<group>"; };
 		3E8F276228240D45004A18CB /* KeyCommandRegistry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyCommandRegistry.m; sourceTree = "<group>"; };
@@ -71,6 +75,7 @@
 		13B07FAE1A68108700A75B9A /* noyamobile */ = {
 			isa = PBXGroup;
 			children = (
+				3E46A257282E80AB00D89A8E /* KeyEventEmitter */,
 				3E8F276428240E54004A18CB /* noyamobile-Bridging-Header.h */,
 				3E8F275F28240CE5004A18CB /* KeyCommandRegistry */,
 				04AC522827A2D5E500219B82 /* noyamobile.entitlements */,
@@ -99,6 +104,15 @@
 				4A1365128A42E7DA9351FF5E /* ExpoModulesProvider.swift */,
 			);
 			name = noyamobile;
+			sourceTree = "<group>";
+		};
+		3E46A257282E80AB00D89A8E /* KeyEventEmitter */ = {
+			isa = PBXGroup;
+			children = (
+				3E46A258282E80C400D89A8E /* KeyEventEmitter.swift */,
+				3E46A25A282E80D500D89A8E /* KeyEventEmitter.m */,
+			);
+			path = KeyEventEmitter;
 			sourceTree = "<group>";
 		};
 		3E8F275F28240CE5004A18CB /* KeyCommandRegistry */ = {
@@ -324,7 +338,9 @@
 				3E78F26A282C2BC9000061E6 /* RootViewController.swift in Sources */,
 				44E0586A205C0C25B9F385E8 /* ExpoModulesProvider.swift in Sources */,
 				3E8F276328240D45004A18CB /* KeyCommandRegistry.m in Sources */,
+				3E46A259282E80C400D89A8E /* KeyEventEmitter.swift in Sources */,
 				3E8F276628256C5A004A18CB /* AppDelegate.swift in Sources */,
+				3E46A25B282E80D500D89A8E /* KeyEventEmitter.m in Sources */,
 				3E8F276128240D19004A18CB /* KeyCommandRegistry.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

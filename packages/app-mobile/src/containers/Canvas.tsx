@@ -8,21 +8,22 @@ import {
   useWorkspace,
   useApplicationState,
 } from 'noya-app-state-context';
-import Sketch from 'noya-file-format';
 import { AffineTransform, Point, createRect } from 'noya-geometry';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { ContextMenu } from 'noya-designsystem';
+import { useKeyEvent } from 'noya-keymap';
+import Sketch from 'noya-file-format';
 import {
-  Selectors,
-  getCurrentPage,
   Layers,
-  decodeCurvePoint,
+  Selectors,
   SelectedPoint,
+  getCurrentPage,
+  decodeCurvePoint,
   SelectedControlPoint,
 } from 'noya-state';
 import {
-  GestureState,
   useLayerMenu,
+  GestureState,
   CanvasTouchEvent,
   useCanvasGestures,
   useArrowKeyShortcuts,
@@ -58,6 +59,7 @@ const Canvas: React.FC<{}> = () => {
   );
 
   useArrowKeyShortcuts();
+  useKeyEvent();
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current page's zoom and offset from the origin

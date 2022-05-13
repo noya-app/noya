@@ -191,9 +191,9 @@ class KeyCommandRegistry: RCTEventEmitter {
     KeyCommandRegistry.instances.removeAll { $0 == self }
   }
 
-  /// Everytime the React Native bridge reloads, it instantiates a new instance of this KeyCommandRegistry.
-  /// We assume that key commands should affect every active instance, though in our case there should only
-  /// ever be one instance.
+  // Everytime the React Native bridge reloads, it instantiates a new instance of this KeyCommandRegistry.
+  // We assume that key commands should affect every active instance, though in our case there should only
+  // ever be one instance.
   private static var instances: [KeyCommandRegistry] = []
 
   // API
