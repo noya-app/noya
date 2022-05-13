@@ -129,15 +129,10 @@ class KeyCommandRegistry: RCTEventEmitter {
   
   func removeCommand(_ option: Any) {
     guard let command = option as? String else { return }
-
-    var reducedMenuCommands: [String: [String: UIKeyCommand]] = [:]
-
-    // Remove given command from menus if present
-    menuKeyCommands.forEach({ (menuName, commands) in
-      reducedMenuCommands[menuName] = commands.filter({ (key, _value) in key == command })
-    })
-
-    self.menuKeyCommands = reducedMenuCommands
+    
+    for var (_, commands) in menuKeyCommands {
+      commands.removeValue(forKey: command)
+    }
 
     // Remove given command from menu-less commands
     self.keyCommands.removeValue(forKey: command)

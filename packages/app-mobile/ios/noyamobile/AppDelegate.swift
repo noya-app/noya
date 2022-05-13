@@ -10,6 +10,7 @@ import UIKit
 
 @available(iOS 13.0, *)
 @UIApplicationMain
+
 class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
   var window: UIWindow?
   override var keyCommands: [UIKeyCommand] {
@@ -28,7 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
 //    }
 
     self.window = UIWindow(frame: UIScreen.main.bounds)
-    let rootViewController = UIViewController()
+    let rootViewController = RootViewController()
 
     rootViewController.view = rootView
 
@@ -94,7 +95,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
       let menu = UIMenu(
         title: menuName,
         image: nil,
-        identifier: UIMenu.Identifier("noyamobile.menusystem.\(menuName)"),
+        identifier: menuIdentifier,
         options: [],
         children: commandList.sorted { $0.title < $1.title }
       )
