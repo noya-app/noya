@@ -11,7 +11,7 @@ import {
 import { AffineTransform, Point, createRect } from 'noya-geometry';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { ContextMenu } from 'noya-designsystem';
-import { useKeyEvent } from 'noya-keymap';
+import { useKeyPresses, FALLTHROUGH } from 'noya-keymap';
 import Sketch from 'noya-file-format';
 import {
   Layers,
@@ -48,6 +48,23 @@ const Canvas: React.FC<{}> = () => {
     state.interactionState.type,
   );
 
+  const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
+
+  const isPanning =
+    state.interactionState.type === 'panMode' ||
+    state.interactionState.type === 'maybePan' ||
+    state.interactionState.type === 'panning';
+
+  const handleDeleteKey = () => {
+    if (isEditingText) return FALLTHROUGH;
+
+    if (state.selectedGradient) {
+      dispatch('deleteStopToGradient');
+    } else {
+      dispatch('deleteLayer', state.selectedLayerIds);
+    }
+  };
+
   const insets = useMemo(
     () => ({
       left: 0,
@@ -59,7 +76,73 @@ const Canvas: React.FC<{}> = () => {
   );
 
   useArrowKeyShortcuts();
-  useKeyEvent();
+  const presses = useKeyPresses({
+    Backspace: handleDeleteKey,
+    Delete: handleDeleteKey,
+    Escape: () => dispatch('interaction', ['reset']),
+    Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
+    Alt: () => dispatch('setKeyModifier', 'altKey', true),
+    Space: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      if (state.interactionState.type !== 'none') return;
+
+      dispatch('interaction', ['enablePanMode']);
+    },
+    Enter: () => {
+      if (isEditingText) return FALLTHROUGH;
+
+      switch (state.interactionState.type) {
+        case 'editPath': {
+          dispatch('interaction', ['reset']);
+
+          break;
+        }
+        case 'none': {
+          const selectedLayers = Selectors.getSelectedLayers(state);
+
+          if (selectedLayers.length > 0) {
+            const firstLayer = selectedLayers[0];
+
+            if (Layers.isTextLayer(firstLayer)) {
+              dispatch('selectLayer', firstLayer.do_objectID);
+              dispatch('interaction', [
+                'editingText',
+                firstLayer.do_objectID,
+                {
+                  anchor: 0,
+                  head: firstLayer.attributedString.string.length,
+                },
+              ]);
+            } else if (Layers.isPointsLayer(firstLayer)) {
+              dispatch(
+                'selectLayer',
+                selectedLayers
+                  .filter(Layers.isPointsLayer)
+                  .map((layer) => layer.do_objectID),
+              );
+              dispatch('interaction', ['editPath']);
+            }
+
+            break;
+          }
+        }
+      }
+    },
+  });
+
+  useKeyPresses(
+    {
+      Space: () => {
+        if (!isPanning) return;
+
+        dispatch('interaction', ['reset']);
+      },
+      Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
+      Alt: () => dispatch('setKeyModifier', 'altKey', false),
+    },
+    { eventName: 'keyup' },
+  );
 
   // Event coordinates are relative to (0,0), but we want them to include
   // the current page's zoom and offset from the origin
@@ -74,6 +157,7 @@ const Canvas: React.FC<{}> = () => {
   const onTouchStart = useCallback(
     ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
+      const { shiftKey } = state.keyModifiers;
 
       switch (state.interactionState.type) {
         case 'insert': {
@@ -99,7 +183,6 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'editPath': {
-          const { shiftKey } = state.keyModifiers;
           let selectedPoint: SelectedPoint | undefined = undefined;
           let selectedControlPoint: SelectedControlPoint | undefined;
 
@@ -148,19 +231,18 @@ const Canvas: React.FC<{}> = () => {
               dispatch('setIsClosed', true);
               dispatch('selectPoint', selectedPoint);
             } else {
-              // const alreadySelected = state.selectedPointLists[
-              //   selectedPoint[0]
-              // ]?.includes(selectedPoint[1]);
+              const alreadySelected = state.selectedPointLists[
+                selectedPoint[0]
+              ]?.includes(selectedPoint[1]);
 
               dispatch(
                 'selectPoint',
                 selectedPoint,
-                'replace',
-                // shiftKey || event[modKey]
-                //   ? alreadySelected
-                //     ? 'difference'
-                //     : 'intersection'
-                //   : 'replace',
+                shiftKey
+                  ? alreadySelected
+                    ? 'difference'
+                    : 'intersection'
+                  : 'replace',
               );
               dispatch('interaction', ['maybeMovePoint', point]);
             }
@@ -181,10 +263,7 @@ const Canvas: React.FC<{}> = () => {
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
             dispatch('interaction', ['maybeConvertCurveMode', point]);
-            // } else if (!(shiftKey || event[modKey])) {
-            //   dispatch('interaction', ['reset']);
-            // }
-          } else {
+          } else if (!shiftKey) {
             dispatch('interaction', ['reset']);
           }
           break;
@@ -227,7 +306,7 @@ const Canvas: React.FC<{}> = () => {
             insets,
             rawPoint,
             {
-              groups: 'groupAndChildren', // event[modKey] ? 'childrenOnly' : 'groupOnly',
+              groups: presses.Command ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
             },
@@ -252,15 +331,14 @@ const Canvas: React.FC<{}> = () => {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
             if (state.selectedLayerIds.includes(layer.do_objectID)) {
-              // if (event.shiftKey && state.selectedLayerIds.length !== 1) {
-              // dispatch('selectLayer', layer.do_objectID, 'difference');
-              // }
+              if (shiftKey && state.selectedLayerIds.length !== 1) {
+                dispatch('selectLayer', layer.do_objectID, 'difference');
+              }
             } else {
               dispatch(
                 'selectLayer',
                 layer.do_objectID,
-                'replace',
-                // event.shiftKey ? 'intersection' : 'replace',
+                shiftKey ? 'intersection' : 'replace',
               );
             }
 
@@ -274,7 +352,15 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [offsetEventPoint, CanvasKit, fontManager, state, dispatch, insets],
+    [
+      state,
+      insets,
+      presses,
+      dispatch,
+      CanvasKit,
+      fontManager,
+      offsetEventPoint,
+    ],
   );
 
   const onTouchUpdate = useCallback(
@@ -467,7 +553,7 @@ const Canvas: React.FC<{}> = () => {
             insets,
             createRect(origin, current),
             {
-              groups: 'groupOnly', // event[modKey] ? 'childrenOnly' : 'groupOnly',
+              groups: presses.Command ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
             },
@@ -501,7 +587,7 @@ const Canvas: React.FC<{}> = () => {
             insets,
             rawPoint,
             {
-              groups: 'groupOnly', //event[modKey] ? 'childrenOnly' : 'groupOnly',
+              groups: presses.Command ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
             },
@@ -538,6 +624,7 @@ const Canvas: React.FC<{}> = () => {
     [
       state,
       insets,
+      presses,
       dispatch,
       CanvasKit,
       fontManager,
@@ -627,7 +714,7 @@ const Canvas: React.FC<{}> = () => {
             insets,
             createRect(origin, current),
             {
-              groups: 'groupOnly', // event[modKey] ? 'childrenOnly' : 'groupOnly',
+              groups: presses.Command ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
             },
@@ -679,7 +766,15 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [offsetEventPoint, state, dispatch, insets, CanvasKit, fontManager],
+    [
+      state,
+      insets,
+      presses,
+      dispatch,
+      CanvasKit,
+      fontManager,
+      offsetEventPoint,
+    ],
   );
 
   const gestures = useCanvasGestures(

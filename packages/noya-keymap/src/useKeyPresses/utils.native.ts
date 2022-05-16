@@ -129,6 +129,8 @@ const VirtualKeyMap = {
   Enter: [NativeKeyMap.Return, NativeKeyMap.KeypadEnter],
   Comma: [NativeKeyMap.AlphaComma, NativeKeyMap.KeypadComma],
   Command: [NativeKeyMap.LeftCommand, NativeKeyMap.RightCommand],
+  Delete: [NativeKeyMap.DeleteForward, NativeKeyMap.DeleteOrBackspace],
+  ' ': [NativeKeyMap.Spacebar],
   Equal: [
     NativeKeyMap.EqualSign,
     NativeKeyMap.KeypadEqualSign,

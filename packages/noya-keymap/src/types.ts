@@ -50,3 +50,5 @@ export interface KeyCommandOptions {
   eventName?: KeyEventName;
   eventListener?: KeyboardEventListener;
 }
+
+export type PressesMap = Record<string, boolean>;
