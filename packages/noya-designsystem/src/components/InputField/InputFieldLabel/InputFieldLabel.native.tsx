@@ -8,7 +8,7 @@ import { InputFieldContext } from '../context';
 const LabelContainer = styled(View)<{
   labelPosition: LabelPosition;
   hasDropdown: boolean;
-}>(({ theme, labelPosition, hasDropdown }) => ({
+}>(({ labelPosition, hasDropdown }) => ({
   position: 'absolute',
   top: 0,
   right: 0,

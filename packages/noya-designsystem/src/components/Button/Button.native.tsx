@@ -6,12 +6,12 @@ import { ButtonProps, ButtonVariant } from './types';
 
 interface ElementsProps {
   variant: ButtonVariant;
-  active: boolean;
-  disabled: boolean;
+  active?: boolean;
+  disabled?: boolean;
   flex?: string | number;
 }
 
-const ButtonElement = styled(View)<ElementsProps>(
+export const ButtonElement = styled(View)<ElementsProps>(
   ({ theme, active, disabled, variant, flex }) => ({
     flex: flex ?? '0 0 auto',
     position: 'relative',
@@ -32,7 +32,7 @@ const ButtonElement = styled(View)<ElementsProps>(
   }),
 );
 
-const ButtonContent = styled(View)((p) => ({
+export const ButtonContent = styled(View)((p) => ({
   // Line height of small text - maybe figure out better way to ensure
   // icons don't have a smaller height
   minHeight: 19,
