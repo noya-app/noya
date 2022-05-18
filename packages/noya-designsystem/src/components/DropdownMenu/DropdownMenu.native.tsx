@@ -13,7 +13,9 @@ import {
   styles,
   CHECKBOX_WIDTH,
   SEPARATOR_ITEM,
+  KeyboardShortcut,
   CHECKBOX_RIGHT_INSET,
+  // getKeyboardShortcutsForMenuItems,
 } from '../internal/Menu';
 import { MenuItemProps, MenuProps } from '../ContextMenu';
 import { Layout } from '../Layout';
@@ -31,9 +33,14 @@ const ItemText = styled(Text)((props) => ({
 
 const CheckboxItemElement = styled(View)({});
 const StyledItemIndicator = styled(View)({});
+
 const Container = styled(View)({
   flex: 1,
   zIndex: 20,
+});
+
+const Trigger = styled(TouchableOpacity)({
+  flex: 1,
 });
 
 const DropdownElement = styled(Animated.View)({
@@ -91,16 +98,13 @@ const DropdownMenuItem = memo(function DropdownMenuItem<T extends string>({
           </>
         )}
         <ItemText>{label}</ItemText>
-        {/*
-          * TODO: show shortcut only when
-          * external keyboard is attached
         {shortcut && (
           <>
             <Layout.Queue />
             <Layout.Queue size={24} />
             <KeyboardShortcut shortcut={shortcut} />
           </>
-        )} */}
+        )}
         {items && items.length > 0 && (
           <>
             <Layout.Queue />
@@ -143,12 +147,6 @@ function DropdownMenuRoot<T extends string>({
   const onOpenDropdown = useCallback(() => {
     if (!showDropdown) {
       containerRef.current?.measure((_x, _y, width, height, pageX, pageY) => {
-        // dropdownRect.current = {
-        //   x: pageX,
-        //   y: pageY,
-        //   width,
-        //   height,
-        // };
         const dropdownWidth = Math.max(width, 80);
         const left =
           dropdownWidth !== width ? pageX + (width - dropdownWidth) / 2 : pageX;
@@ -174,7 +172,7 @@ function DropdownMenuRoot<T extends string>({
   return (
     <>
       <Container ref={containerRef}>
-        <TouchableOpacity onPress={onOpenDropdown}>{children}</TouchableOpacity>
+        <Trigger onPress={onOpenDropdown}>{children}</Trigger>
       </Container>
       <Modal transparent visible={showDropdown}>
         <TouchableWithoutFeedback onPress={onDismiss}>

@@ -14,12 +14,14 @@ export { default as useLayerMenu } from './hooks/useLayerMenu';
 export { default as ArrayController } from './ArrayController';
 export { default as ExportInspector } from './ExportInspector';
 export { default as ColorInspector } from './ColorInspector';
+export { default as CanvasGridItem } from './CanvasGridItem';
 export { default as FileDropTarget } from './FileDropTarget';
 export { default as BlurInspector } from './BlurInspector';
 export { default as useHistory } from './hooks/useHistory';
 export { default as LineInspector } from './LineInspector';
 export { default as FillInspector } from './FillInspector';
 export { default as FlipControls } from './FlipControls';
+export { default as CanvasViewer } from './CanvasViewer';
 export { default as LayerList } from './LayerList';
 
 export * from './hooks/useCanvasGestures';

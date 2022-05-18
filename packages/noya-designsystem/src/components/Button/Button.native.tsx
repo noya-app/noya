@@ -11,7 +11,7 @@ interface ElementsProps {
   flex?: string | number;
 }
 
-export const ButtonElement = styled(View)<ElementsProps>(
+const ButtonElement = styled(View)<ElementsProps>(
   ({ theme, active, disabled, variant, flex }) => ({
     flex: flex ?? '0 0 auto',
     position: 'relative',
@@ -32,7 +32,7 @@ export const ButtonElement = styled(View)<ElementsProps>(
   }),
 );
 
-export const ButtonContent = styled(View)((p) => ({
+const ButtonContent = styled(View)((p) => ({
   // Line height of small text - maybe figure out better way to ensure
   // icons don't have a smaller height
   minHeight: 19,
