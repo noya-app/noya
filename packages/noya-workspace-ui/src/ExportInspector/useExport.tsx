@@ -1,37 +1,20 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
 
 import {
   useSelector,
   useGetWorkspaceStateSnapshot,
 } from 'noya-app-state-context';
-import { Selectors } from 'noya-state';
-import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
-import { generateImage, ImageEncoding } from 'noya-generate-image';
-import type { CanvasKit } from 'canvaskit';
 import { Size } from 'noya-geometry';
 import Sketch from 'noya-file-format';
-import {
-  FileType,
-  getFileExtensionForType,
-  getFileTypeForExtension,
-} from 'noya-utils';
+import { Selectors } from 'noya-state';
+import type { CanvasKit } from 'canvaskit';
+import { generateImage, ImageEncoding } from 'noya-generate-image';
+import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { usePreviewLayer } from '../hooks/usePreviewLayer';
-
-async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
-  const file = new File([data], name, {
-    type,
-  });
-
-  await fileSave(
-    file,
-    { fileName: file.name, extensions: [`.${getFileExtensionForType(type)}`] },
-    undefined,
-    false,
-  );
-}
+import { getFileTypeForExtension } from 'noya-utils';
+import { saveFile } from './saveFile';
 
 function getExportSize(exportFormat: Sketch.ExportFormat, size: Size) {
   const { scale, absoluteSize, visibleScaleType } = exportFormat;
@@ -111,7 +94,7 @@ export default function useExport() {
     [selectedLayer],
   );
 
-  const handleExport = useCallback(async () => {
+  return useCallback(async () => {
     if (exportFormats.length === 1) {
       const exportFormat = exportFormats[0];
 
@@ -120,12 +103,15 @@ export default function useExport() {
         exportFormat.fileFormat !== Sketch.ExportFileFormat.PNG &&
         exportFormat.fileFormat !== Sketch.ExportFileFormat.SVG &&
         exportFormat.fileFormat !== Sketch.ExportFileFormat.WEBP
-      )
+      ) {
         return;
+      }
 
       const data = await renderImageForExportFormat(exportFormat);
 
-      if (!data) return;
+      if (!data) {
+        return;
+      }
 
       const fileName = getExportFileName(exportFormat);
 
@@ -140,7 +126,9 @@ export default function useExport() {
       const files = exportFormats.map(async (exportFormat) => {
         const data = await renderImageForExportFormat(exportFormat);
 
-        if (!data) return;
+        if (!data) {
+          return;
+        }
 
         zip.file(getExportFileName(exportFormat), data, {
           base64: true,
@@ -162,6 +150,4 @@ export default function useExport() {
     getExportFileName,
     renderImageForExportFormat,
   ]);
-
-  return handleExport;
 }

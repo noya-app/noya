@@ -67,6 +67,7 @@ const getPathConfigs = (appRootDir) => {
       appRootDir,
       './node_modules/expo-image-picker',
     ),
+    'expo-sharing': path.resolve(appRootDir, './node_modules/expo-sharing'),
   };
 
   packages.forEach((packageName) => {
