@@ -1,19 +1,22 @@
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
+import { renderToStaticMarkup } from 'react-dom/server';
 
-import type { CanvasKit as PublicCanvasKit } from 'canvaskit-types';
 import { SkiaView } from '@shopify/react-native-skia/src/views/SkiaView';
 import { skiaReconciler } from '@shopify/react-native-skia/src/renderer/Canvas';
 import { Container } from '@shopify/react-native-skia/src/renderer/nodes/Container';
 import { DrawingContext } from '@shopify/react-native-skia/src/renderer/DrawingContext';
 import { DependencyManager } from '@shopify/react-native-skia/src/renderer/DependencyManager';
 
+import type { CanvasKit as PublicCanvasKit } from 'canvaskit-types';
 import { CanvasKitNative } from 'noya-native-canvaskit';
 import { StateProvider } from 'noya-app-state-context';
 import { Components } from 'noya-react-canvaskit';
+import { SVGRenderer } from 'noya-svg-renderer';
 import { WorkspaceState } from 'noya-state';
 import { Theme } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { UTF16 } from 'noya-utils';
 import {
   CanvasKitProvider,
   ComponentsProvider,
@@ -46,8 +49,26 @@ export function generateImage(
 ): Promise<Uint8Array | undefined> {
   return new Promise((resolve) => {
     if (format === Sketch.ExportFileFormat.SVG) {
-      console.warn('SVG Export not yet supported!');
-      resolve(undefined);
+      const svg = renderToStaticMarkup(
+        <CanvasKitProvider CanvasKit={CanvasKit as unknown as PublicCanvasKit}>
+          <ThemeProvider theme={theme}>
+            <StateProvider state={state}>
+              <ImageCacheProvider>
+                <FontManagerProvider>
+                  <SVGRenderer
+                    idPrefix=""
+                    size={{ width: width, height: height }}
+                  >
+                    {renderContent()}
+                  </SVGRenderer>
+                </FontManagerProvider>
+              </ImageCacheProvider>
+            </StateProvider>
+          </ThemeProvider>
+        </CanvasKitProvider>,
+      );
+
+      resolve(UTF16.toUTF8(`<?xml version="1.0" encoding="UTF-8"?>\n` + svg));
       return;
     }
 

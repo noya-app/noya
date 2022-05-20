@@ -19,6 +19,7 @@ const allowList = [
   'noya-google-fonts',
   'noya-designsystem',
   'noya-workspace-ui',
+  'noya-svg-renderer',
   'noya-generate-image',
   'noya-react-canvaskit',
   'noya-native-canvaskit',
