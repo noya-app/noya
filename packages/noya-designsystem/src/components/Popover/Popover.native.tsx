@@ -165,13 +165,15 @@ const Content = memo(function Content({
     [setDimensions],
   );
 
+  if (!popover.isOpen) {
+    return null;
+  }
+
   return (
-    <Portal>
-      {popover.isOpen && (
-        <ContentView style={[style, positionStyle]} onLayout={onLayout}>
-          {children}
-        </ContentView>
-      )}
+    <Portal onChangeOpen={popover.onChangeOpen}>
+      <ContentView style={[style, positionStyle]} onLayout={onLayout}>
+        {children}
+      </ContentView>
     </Portal>
   );
 });
