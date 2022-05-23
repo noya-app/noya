@@ -3,8 +3,8 @@ import parseColor from 'color-parse';
 
 import {
   ICanvasKit,
-  IParagraphBuilderFactory,
   IShaderFactory,
+  IParagraphBuilderFactory,
 } from 'canvaskit-types';
 // import primitives separately for easier use
 import type {
@@ -30,6 +30,7 @@ import { MatrixHelpers, ColorMatrixHelpers } from './MatrixHelpers';
 import { ColorFilterFactoryNative } from './ColorFilterNative';
 import { MaskFilterFactoryNative } from './MaskFilterNative';
 import { RuntimeEffectFactoryNative } from './RuntimeEffectNative';
+import ContourMeasureIterNative from './ContourMeasureIterNative';
 import ImageNative from './ImageNative';
 import PaintNative from './PaintNative';
 import PathNative from './PathNative';
@@ -134,7 +135,7 @@ class CanvasKitNative
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ParagraphStyle = ParagraphStyleNative;
-  ContourMeasureIter = 0 as any;
+  ContourMeasureIter = ContourMeasureIterNative;
   Font = FontNative;
   Path = PathNative;
   Paint = PaintNative;
