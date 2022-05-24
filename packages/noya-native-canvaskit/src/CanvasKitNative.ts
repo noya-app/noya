@@ -30,7 +30,6 @@ import { MatrixHelpers, ColorMatrixHelpers } from './MatrixHelpers';
 import { ColorFilterFactoryNative } from './ColorFilterNative';
 import { MaskFilterFactoryNative } from './MaskFilterNative';
 import { RuntimeEffectFactoryNative } from './RuntimeEffectNative';
-import ContourMeasureIterNative from './ContourMeasureIterNative';
 import ImageNative from './ImageNative';
 import PaintNative from './PaintNative';
 import PathNative from './PathNative';
@@ -135,7 +134,7 @@ class CanvasKitNative
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ParagraphStyle = ParagraphStyleNative;
-  ContourMeasureIter = ContourMeasureIterNative;
+  ContourMeasureIter = 0 as any;
   Font = FontNative;
   Path = PathNative;
   Paint = PaintNative;

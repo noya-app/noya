@@ -3,7 +3,7 @@ import { IPath } from './IPath';
 
 export type PosTan = number[];
 
-export interface IContourMeasure<IRect> extends EmbindObject {
+export interface ContourMeasure<IRect> extends EmbindObject {
   getPosTan(distance: number, output?: PosTan): PosTan;
   getSegment(
     startD: number,
@@ -14,8 +14,8 @@ export interface IContourMeasure<IRect> extends EmbindObject {
   length(): number;
 }
 
-export interface IContourMeasureIter<IRect> extends EmbindObject {
-  next(): IContourMeasure<IRect> | null;
+export interface ContourMeasureIter<IRect> extends EmbindObject {
+  next(): ContourMeasure<IRect> | null;
 }
 
 export interface IContourMeasureIterConstructor<IRect> {
@@ -23,5 +23,5 @@ export interface IContourMeasureIterConstructor<IRect> {
     path: IPath<IRect>,
     forceClosed: boolean,
     resScale: number,
-  ): IContourMeasureIter<IRect>;
+  ): ContourMeasureIter<IRect>;
 }

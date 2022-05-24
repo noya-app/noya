@@ -52,12 +52,7 @@ const Toolbar: React.FC = () => {
   }, [state.interactionState]);
 
   const isButtonActive = useCallback(
-    (shape: DrawableLayerType | 'vector') => {
-      if (shape === 'vector') {
-        // TODO: check vector interaction
-        return false;
-      }
-
+    (shape: DrawableLayerType) => {
       return (
         layerType === shape &&
         (interType === 'drawing' || interType === 'insert')
@@ -71,12 +66,7 @@ const Toolbar: React.FC = () => {
   }, [dispatch]);
 
   const onAddShape = useCallback(
-    (shape: DrawableLayerType | 'vector') => () => {
-      if (shape === 'vector') {
-        dispatch('interaction', ['drawingShapePath']);
-        return;
-      }
-
+    (shape: DrawableLayerType) => () => {
       if (shape === 'artboard') {
         expandable.setActiveTab('right', 'inspector');
       }
@@ -202,12 +192,6 @@ const Toolbar: React.FC = () => {
         shortcut: { cmd: 'l', title: 'Line', menuName: 'Insert' },
         onPress: onAddShape('line'),
         active: isButtonActive('line'),
-      },
-      {
-        icon: 'share-1', // TODO: bring back shape-path icon?
-        shortcut: { cmd: 'v', title: 'Path', menuName: 'Insert' },
-        onPress: onAddShape('vector'),
-        active: isButtonActive('vector'),
       },
       {
         icon: 'zoom-in',

@@ -1,4 +1,3 @@
-export * from './IContourMeasureIter';
 export * from './IRuntimeEffect';
 export * from './MatrixHelpers';
 export * from './IImageFilter';

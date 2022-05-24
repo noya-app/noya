@@ -38,7 +38,7 @@ export const InsertPointOverlay = memo(function InsertPointOverlay() {
     point,
   );
 
-  if (!splitParameters) return null;
+  if (!splitParameters) return;
 
   const { segmentPath, pointOnPath } = splitParameters;
 
