@@ -15,11 +15,15 @@ export const InsertPointOverlay = memo(function InsertPointOverlay() {
   const { primary } = useTheme().colors;
   const paint = useStroke({ color: primary });
 
-  if (state.interactionState.type !== 'editPath') return null;
+  if (state.interactionState.type !== 'editPath') {
+    return null;
+  }
 
   const { point } = state.interactionState;
 
-  if (!point) return null;
+  if (!point) {
+    return null;
+  }
 
   const layers = Layers.findAll(
     page,
@@ -30,7 +34,9 @@ export const InsertPointOverlay = memo(function InsertPointOverlay() {
     Selectors.layerPathContainsPoint(CanvasKit, layer, point),
   );
 
-  if (!layer) return null;
+  if (!layer) {
+    return null;
+  }
 
   const splitParameters = Selectors.getSplitPathParameters(
     CanvasKit,
@@ -38,7 +44,9 @@ export const InsertPointOverlay = memo(function InsertPointOverlay() {
     point,
   );
 
-  if (!splitParameters) return;
+  if (!splitParameters) {
+    return null;
+  }
 
   const { segmentPath, pointOnPath } = splitParameters;
 

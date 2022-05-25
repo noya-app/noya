@@ -11,10 +11,6 @@ import { RectToLTRBArray } from 'noya-geometry';
 import { JSEmbindObject } from './misc';
 import { Rect } from './types';
 
-// NOTE:
-// This class/wrapper can be removed if/when react-native-skia
-// implenets: addPath, arc, *toCmds
-// * only used in tests
 export default class PathNative extends JSEmbindObject implements IPath<Rect> {
   private _path: SkPath;
 
@@ -158,9 +154,24 @@ export default class PathNative extends JSEmbindObject implements IPath<Rect> {
     return this;
   }
 
-  // @ts-ignore
   toCmds(): Float32Array {
-    console.warn(`SkiaPath.toCmds not implemented!`);
+    const pathCommands: number[] = [];
+    const skiaPathCommands = this._path.toCmds();
+
+    // For commands other than move (verb === 0)
+    // react-native-skia adds aditional start position
+    // as 2nd and 3rd parameter in command
+    skiaPathCommands.forEach((command) => {
+      const [verb, startX, startY, ...rest] = command;
+
+      if (verb === 0) {
+        pathCommands.push(verb, startX, startY);
+      } else {
+        pathCommands.push(verb, ...rest);
+      }
+    });
+
+    return new Float32Array(pathCommands);
   }
 
   toSVGString(): string {

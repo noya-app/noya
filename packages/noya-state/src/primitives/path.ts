@@ -396,7 +396,9 @@ export function pathToCurvePoints(
   path: Path,
   frame: Rect,
 ): Sketch.CurvePoint[] {
-  const svgCommands = parsePathCmds(path.toCmds()).map(pathCommandToSVGCommand);
+  const cmds = path.toCmds();
+  const parsed = parsePathCmds(cmds);
+  const svgCommands = parsed.map(pathCommandToSVGCommand);
 
   // Assume a single path. `isClosed` should already be handled, before calling
   // this function, so we can ignore it here.

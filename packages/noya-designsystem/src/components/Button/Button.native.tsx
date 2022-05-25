@@ -60,7 +60,7 @@ const ButtonRoot = forwardRef(function Button(
   forwardedRef: ForwardedRef<TouchableOpacity>,
 ) {
   const buttonElement = (
-    <TouchableOpacity onPress={onClick}>
+    <TouchableOpacity onPress={onClick} disabled={disabled}>
       <ButtonElement
         ref={forwardedRef}
         flex={flex}

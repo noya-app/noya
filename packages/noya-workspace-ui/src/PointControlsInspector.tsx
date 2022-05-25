@@ -101,7 +101,7 @@ export default memo(function PointControlsInspector() {
       </Primitives.SectionHeader>
       <Layout.Stack size={4} />
       <Primitives.Row>
-        <LabeledView label="Point Type">
+        <LabeledView label="Point Type" size={140}>
           <Select
             id={pointTypeId}
             value={getCurveModeString(curveMode) ?? 'None'}
