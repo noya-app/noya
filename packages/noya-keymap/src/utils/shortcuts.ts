@@ -1,8 +1,13 @@
 import { base, keyName } from 'w3c-keyname';
-import { KeyModifiers, normalizeKeyName, prependModifiers } from './names';
-import { PlatformName } from './platform';
 
-export type PlatformKeyboardShortcut = Partial<Record<PlatformName, string>>;
+import type {
+  KeyModifiers,
+  PlatformName,
+  PlatformKeyboardShortcut,
+} from '../types';
+import { normalizeKeyName, prependModifiers } from './names';
+
+const modifierKeyNames = new Set(['Alt', 'Control', 'Meta', 'Shift']);
 
 export function getPlatformShortcutName(
   shortcut: PlatformKeyboardShortcut,
@@ -12,8 +17,6 @@ export function getPlatformShortcutName(
 
   return platformKey ? normalizeKeyName(platformKey, platformName) : undefined;
 }
-
-const modifierKeyNames = new Set(['Alt', 'Control', 'Meta', 'Shift']);
 
 export function getEventShortcutNames(
   event: KeyboardEvent,

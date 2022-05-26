@@ -1,40 +1,16 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { createKeyMap, FALLTHROUGH } from './keyMap';
-import { getCurrentPlatform } from './platform';
-import { getEventShortcutNames } from './shortcuts';
+
+import { parseKeyCommand } from '../utils/parseKeyCommand';
+import type { Shortcuts, KeyCommandOptions } from '../types';
+import { getEventShortcutNames } from '../utils/shortcuts';
+import { createKeyMap } from '../utils/createKeyMap';
+import { getCurrentPlatform } from '../Platform';
 
 export const IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS = 'ignore-global-events';
 
-type KeyEventName = 'keydown' | 'keyup' | 'keypress';
-
-type KeyMapDefinition = Parameters<typeof createKeyMap>[0];
-
-interface KeyboardEventListener {
-  addEventListener: (
-    name: string,
-    handler: (keyboardEvent: KeyboardEvent) => void,
-  ) => void;
-  removeEventListener: (
-    name: string,
-    handler: (keyboardEvent: KeyboardEvent) => void,
-  ) => void;
-}
-
-interface KeyboardShortcutOptions {
-  eventName?: KeyEventName;
-
-  /**
-   * A custom event listener.
-   *
-   * Pass null to ignore events, e.g. if the listener element hasn't mounted yet.
-   * This is similar to conditionally disabling the hook.
-   */
-  eventListener?: KeyboardEventListener | null;
-}
-
-export function useKeyboardShortcuts(
-  shortcuts: KeyMapDefinition,
-  options: KeyboardShortcutOptions = {},
+export function useKeyCommands(
+  shortcuts: Shortcuts,
+  options: KeyCommandOptions = {},
 ) {
   const eventName = options.eventName ?? 'keydown';
   const eventRef = useMemo(
@@ -73,11 +49,11 @@ export function useKeyboardShortcuts(
 
       if (!matchingName) return;
 
-      const command = keyMapRef.current[matchingName];
+      const command = parseKeyCommand(keyMapRef.current[matchingName]).callback;
 
       const result = command();
 
-      if (result !== FALLTHROUGH) {
+      if (result !== 'fallthrough') {
         event.preventDefault();
         event.stopImmediatePropagation();
       }

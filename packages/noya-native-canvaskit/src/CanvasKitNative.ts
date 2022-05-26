@@ -3,8 +3,8 @@ import parseColor from 'color-parse';
 
 import {
   ICanvasKit,
-  IParagraphBuilderFactory,
   IShaderFactory,
+  IParagraphBuilderFactory,
 } from 'canvaskit-types';
 // import primitives separately for easier use
 import type {

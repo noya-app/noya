@@ -17,7 +17,7 @@ import {
   RegularMenuItem,
   createSectionedMenu,
 } from 'noya-designsystem';
-import { KeyCommand, useKeyboardShortcuts } from 'noya-keymap';
+import { KeyCommand, useKeyCommands } from 'noya-keymap';
 import {
   DrawableLayerType,
   InteractionType,
@@ -298,7 +298,7 @@ const ToolbarContent = memo(function ToolbarContent({
     }
   }, [isCreatingPath, dispatch]);
 
-  useKeyboardShortcuts({
+  useKeyCommands({
     'Mod-=': () => dispatch('setZoom*', 2, 'multiply'),
     'Mod-_': () => dispatch('setZoom*', 0.5, 'multiply'),
     ...(isEditingText

@@ -21,7 +21,7 @@ import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
-  useKeyboardShortcuts,
+  useKeyCommands,
 } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
@@ -48,8 +48,11 @@ import {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import { FileDropTarget, TypedFile } from 'noya-workspace-ui';
-import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
+import {
+  TypedFile,
+  FileDropTarget,
+  useArrowKeyShortcuts,
+} from 'noya-workspace-ui';
 import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useCopyHandler } from '../hooks/useCopyHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
@@ -156,7 +159,7 @@ export default memo(function Canvas() {
     }
   };
 
-  useKeyboardShortcuts({
+  useKeyCommands({
     Backspace: handleDeleteKey,
     Delete: handleDeleteKey,
     Escape: () => dispatch('interaction', ['reset']),
@@ -211,7 +214,7 @@ export default memo(function Canvas() {
     },
   });
 
-  useKeyboardShortcuts(
+  useKeyCommands(
     {
       Space: () => {
         if (!isPanning) return;

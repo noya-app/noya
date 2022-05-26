@@ -1,11 +1,10 @@
-import { PlatformName } from './platform';
-import { getPlatformShortcutName, PlatformKeyboardShortcut } from './shortcuts';
-
-export const FALLTHROUGH = 'fallthrough';
-
-export type KeyCommand = () => void | typeof FALLTHROUGH;
-
-export type KeyMap = Record<string, KeyCommand>;
+import type {
+  KeyMap,
+  KeyCommand,
+  PlatformName,
+  PlatformKeyboardShortcut,
+} from '../types';
+import { getPlatformShortcutName } from './shortcuts';
 
 export function createKeyMap(
   shortcuts: [string | PlatformKeyboardShortcut, KeyCommand][] | KeyMap,

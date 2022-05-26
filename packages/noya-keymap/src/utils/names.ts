@@ -1,4 +1,18 @@
-import { PlatformName } from './platform';
+import type { PlatformName, KeyModifiers } from '../types';
+
+const modifierDisplayName: Record<keyof KeyModifiers, string> = {
+  altKey: 'Alt',
+  ctrlKey: 'Ctrl',
+  metaKey: '⊞',
+  shiftKey: 'Shift',
+};
+
+const macModiferDisplayName: Record<keyof KeyModifiers, string> = {
+  altKey: '⌥',
+  ctrlKey: '^',
+  metaKey: '⌘',
+  shiftKey: '⇧',
+};
 
 export function parseKeyName(
   name: string,
@@ -51,20 +65,6 @@ export function normalizeKeyName(name: string, platform: PlatformName): string {
   return result;
 }
 
-const modifierDisplayName: Record<keyof KeyModifiers, string> = {
-  altKey: 'Alt',
-  ctrlKey: 'Ctrl',
-  metaKey: '⊞',
-  shiftKey: 'Shift',
-};
-
-const macModiferDisplayName: Record<keyof KeyModifiers, string> = {
-  altKey: '⌥',
-  ctrlKey: '^',
-  metaKey: '⌘',
-  shiftKey: '⇧',
-};
-
 function getModifierDisplayName(
   name: keyof KeyModifiers,
   platform: PlatformName,
@@ -93,13 +93,6 @@ export function getShortcutDisplayParts(
       key.toUpperCase(),
     ].filter((x): x is string => !!x),
   };
-}
-
-export interface KeyModifiers {
-  altKey: boolean;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  shiftKey: boolean;
 }
 
 export function prependModifiers(
