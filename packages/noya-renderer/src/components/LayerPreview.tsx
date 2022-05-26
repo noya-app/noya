@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import Sketch from 'noya-file-format';
 import {
@@ -52,7 +52,6 @@ export default function LayerPreview({
   backgroundColor,
 }: Props) {
   const CanvasKit = useCanvasKit();
-
   const bounds = createBounds(frame);
 
   const paddedSize = {

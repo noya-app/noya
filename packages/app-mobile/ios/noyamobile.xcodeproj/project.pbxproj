@@ -15,6 +15,7 @@
 		3E8F276128240D19004A18CB /* KeyCommandRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F276028240D19004A18CB /* KeyCommandRegistry.swift */; };
 		3E8F276328240D45004A18CB /* KeyCommandRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F276228240D45004A18CB /* KeyCommandRegistry.m */; };
 		3E8F276628256C5A004A18CB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F276528256C5A004A18CB /* AppDelegate.swift */; };
+		3EA51A5C283FA3A80029B064 /* CaseIterableExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA51A5B283FA3A80029B064 /* CaseIterableExtension.swift */; };
 		44E0586A205C0C25B9F385E8 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1365128A42E7DA9351FF5E /* ExpoModulesProvider.swift */; };
 		6172F2D35A4C3AA820D92908 /* libPods-noyamobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6423831EA8574132BED9D8CC /* libPods-noyamobile.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -34,6 +35,7 @@
 		3E8F276228240D45004A18CB /* KeyCommandRegistry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyCommandRegistry.m; sourceTree = "<group>"; };
 		3E8F276428240E54004A18CB /* noyamobile-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "noyamobile-Bridging-Header.h"; sourceTree = "<group>"; };
 		3E8F276528256C5A004A18CB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = noyamobile/AppDelegate.swift; sourceTree = "<group>"; };
+		3EA51A5B283FA3A80029B064 /* CaseIterableExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaseIterableExtension.swift; sourceTree = "<group>"; };
 		4A1365128A42E7DA9351FF5E /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-noyamobile/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		6423831EA8574132BED9D8CC /* libPods-noyamobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-noyamobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C97AB639B58BBB4B15BBE30 /* Pods-noyamobile-noyamobileTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-noyamobile-noyamobileTests.debug.xcconfig"; path = "Target Support Files/Pods-noyamobile-noyamobileTests/Pods-noyamobile-noyamobileTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				3E8F276528256C5A004A18CB /* AppDelegate.swift */,
 				3E78F269282C2BC9000061E6 /* RootViewController.swift */,
+				3EA51A5B283FA3A80029B064 /* CaseIterableExtension.swift */,
 			);
 			name = noyamobile;
 			sourceTree = "<group>";
@@ -342,6 +345,7 @@
 				3E8F276628256C5A004A18CB /* AppDelegate.swift in Sources */,
 				3E46A25B282E80D500D89A8E /* KeyEventEmitter.m in Sources */,
 				3E8F276128240D19004A18CB /* KeyCommandRegistry.swift in Sources */,
+				3EA51A5C283FA3A80029B064 /* CaseIterableExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -361,7 +365,8 @@
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = noyamobile/Info.plist;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 15.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -401,7 +406,8 @@
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = noyamobile/Info.plist;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 15.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

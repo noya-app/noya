@@ -14,7 +14,7 @@ const IconRenderer = createIconSetFromIcoMoon(
 
 const Icon: React.FC<IconProps> = ({
   name,
-  size = 12,
+  size = 15,
   color,
   selected,
   highlighted,

@@ -19,9 +19,9 @@ import { useCanvasKit } from 'noya-renderer';
 interface ToolbarItem {
   icon?: string;
   label?: string;
-  onPress: () => void;
   active?: boolean;
   disabled?: boolean;
+  onPress: () => void;
   shortcut?: {
     cmd: string;
     title: string;

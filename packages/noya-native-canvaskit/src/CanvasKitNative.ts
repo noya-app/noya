@@ -102,8 +102,8 @@ class CanvasKitNative
     console.warn(`SkiaCanvasKit.MakeCanvasSurface not implemented!`);
   }
 
-  MakeSurface(width: number, height: number): any {
-    console.warn(`SkiaCanvasKit.MakeSurface not implemented!`);
+  MakeSurface(width: number, height: number): RNSkia.ISurface | null {
+    return RNSkia.Skia.MakeSurface(width, height);
   }
 
   MakeImageFromEncoded(bytes: Uint8Array | ArrayBuffer): ImageNative | null {
@@ -205,6 +205,8 @@ class CanvasKitNative
   UnderlineDecoration = ParagraphDecoration.UnderlineDecoration;
   OverlineDecoration = ParagraphDecoration.OverlineDecoration;
   LineThroughDecoration = ParagraphDecoration.LineThroughDecoration;
+
+  FontMgr = RNSkia.Skia.FontMgr;
 }
 
 export default new CanvasKitNative();

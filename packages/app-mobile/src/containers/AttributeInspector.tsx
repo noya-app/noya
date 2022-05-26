@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, memo, useMemo } from 'react';
+import React, { Fragment, useCallback, memo } from 'react';
 import styled from 'styled-components';
 import { View } from 'react-native';
 
@@ -19,6 +19,7 @@ import {
   BlurInspector,
   FillInspector,
   LineInspector,
+  ExportInspector,
   RadiusInspector,
   ShadowInspector,
   BorderInspector,
@@ -126,133 +127,6 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
 
   const isEditingControlPoint = isEditingPath && state.selectedControlPoint;
 
-  const elements = useMemo(() => {
-    const dimensionsInspectorProps = {
-      x: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.x)),
-      y: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.y)),
-      width: getMultiNumberValue(
-        selectedLayers.map((layer) => layer.frame.width),
-      ),
-      height: getMultiNumberValue(
-        selectedLayers.map((layer) => layer.frame.height),
-      ),
-      rotation: getMultiNumberValue(
-        selectedLayers.map(Selectors.getLayerRotation),
-      ),
-    };
-
-    const onlyBitmapLayers = selectedLayers.every((l) =>
-      Layers.isBitmapLayer(l),
-    );
-    const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
-    const hasLineLayer = selectedLayers.every(
-      (l) => Layers.isPointsLayer(l) && isLine(l.points),
-    );
-    const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
-    const hasGroup = selectedLayers.some(Layers.isGroup);
-    const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
-    const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
-    const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
-    const hasOneSymbolInstance =
-      selectedLayers.length === 1 && hasSymbolInstance;
-
-    if (selectedLayers.length === 0) return null;
-
-    const views = [
-      <Fragment key="layout">
-        <AlignmentInspector />
-        {isEditingPath ? (
-          <HorizontalPaddingContainer>
-            {isEditingControlPoint ? (
-              <ControlPointCoordinatesInspector />
-            ) : (
-              <PointCoordinatesInspector />
-            )}
-          </HorizontalPaddingContainer>
-        ) : hasLineLayer ? (
-          <LineInspector
-            {...dimensionsInspectorProps}
-            isFlippedHorizontal={isFlippedHorizontal}
-            isFlippedVertical={isFlippedVertical}
-            onSetWidth={handleSetWidth}
-            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
-            onSetIsFlippedVertical={handleSetIsFlippedVertical}
-          />
-        ) : (
-          <DimensionsInspector
-            {...dimensionsInspectorProps}
-            supportsFlipping={supportsFlipping}
-            isFlippedHorizontal={isFlippedHorizontal}
-            isFlippedVertical={isFlippedVertical}
-            constrainProportions={constrainProportions}
-            onSetRotation={handleSetRotation}
-            onSetX={handleSetX}
-            onSetY={handleSetY}
-            onSetWidth={handleSetWidth}
-            onSetHeight={handleSetHeight}
-            onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
-            onSetIsFlippedVertical={handleSetIsFlippedVertical}
-            onSetConstraintProportions={handleSetConstrainProportions}
-          />
-        )}
-        <Layout.Stack size="medium" />
-      </Fragment>,
-      hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
-      isEditingPath && <PointControlsInspector />,
-      hasContextSettingsLayers && <OpacityInspector />,
-      // !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
-      //   <LayerThemeInspector />
-      // ),
-      // hasAllTextLayer && <ThemeTextInspector />,
-      // hasTextLayer && <TextStyleInspector />,
-      // hasOneSymbolMaster && <SymbolMasterInspector />,
-      // hasOneSymbolInstance && <SymbolInstanceInspector />,
-      selectedLayers.every(Layers.hasInspectableFill) && (
-        <FillInspector title="Fills" allowMoreThanOne />
-      ),
-      selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
-      selectedLayers.every(Layers.hasInspectableShadow) && (
-        <ShadowInspector
-          allowMoreThanOne={!hasGroup}
-          supportsSpread={!hasGroup}
-        />
-      ),
-      selectedLayers.every(Layers.hasInspectableInnerShadow) && (
-        <InnerShadowInspector />
-      ),
-      selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
-      onlyBitmapLayers && <ColorControlsInspector />,
-      // selectedLayers.length === 1 && <ExportInspector />,
-    ].filter((element): element is JSX.Element => !!element);
-
-    return withSeparatorElements(
-      views,
-      <>
-        <Layout.Stack size="medium" />
-        <Layout.Divider />
-        <Layout.Stack size="medium" />
-      </>,
-    );
-  }, [
-    selectedLayers,
-    isEditingPath,
-    isEditingControlPoint,
-    isFlippedHorizontal,
-    isFlippedVertical,
-    handleSetWidth,
-    handleSetIsFlippedHorizontal,
-    handleSetIsFlippedVertical,
-    supportsFlipping,
-    constrainProportions,
-    handleSetRotation,
-    handleSetX,
-    handleSetY,
-    handleSetHeight,
-    handleSetConstrainProportions,
-    hasFixedRadiusLayers,
-    hasContextSettingsLayers,
-  ]);
-
   if (
     state.interactionState.type === 'insert' &&
     state.interactionState.layerType === 'artboard'
@@ -260,7 +134,115 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     return <ArtboardSizeList />;
   }
 
-  return <ScrollableView>{elements}</ScrollableView>;
+  const dimensionsInspectorProps = {
+    x: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.x)),
+    y: getMultiNumberValue(selectedLayers.map((layer) => layer.frame.y)),
+    width: getMultiNumberValue(
+      selectedLayers.map((layer) => layer.frame.width),
+    ),
+    height: getMultiNumberValue(
+      selectedLayers.map((layer) => layer.frame.height),
+    ),
+    rotation: getMultiNumberValue(
+      selectedLayers.map(Selectors.getLayerRotation),
+    ),
+  };
+
+  const onlyBitmapLayers = selectedLayers.every((l) => Layers.isBitmapLayer(l));
+  // const hasTextLayer = selectedLayers.some((l) => Layers.isTextLayer(l));
+  const hasLineLayer = selectedLayers.every(
+    (l) => Layers.isPointsLayer(l) && isLine(l.points),
+  );
+  // const hasAllTextLayer = selectedLayers.every((l) => Layers.isTextLayer(l));
+  const hasGroup = selectedLayers.some(Layers.isGroup);
+  // const hasSymbolMaster = selectedLayers.some(Layers.isSymbolMaster);
+  // const hasSymbolInstance = selectedLayers.some(Layers.isSymbolInstance);
+  // const hasOneSymbolMaster = selectedLayers.length === 1 && hasSymbolMaster;
+  // const hasOneSymbolInstance = selectedLayers.length === 1 && hasSymbolInstance;
+
+  if (selectedLayers.length === 0) {
+    return null;
+  }
+
+  const views = [
+    <Fragment key="layout">
+      <AlignmentInspector />
+      {isEditingPath ? (
+        <HorizontalPaddingContainer>
+          {isEditingControlPoint ? (
+            <ControlPointCoordinatesInspector />
+          ) : (
+            <PointCoordinatesInspector />
+          )}
+        </HorizontalPaddingContainer>
+      ) : hasLineLayer ? (
+        <LineInspector
+          {...dimensionsInspectorProps}
+          isFlippedHorizontal={isFlippedHorizontal}
+          isFlippedVertical={isFlippedVertical}
+          onSetWidth={handleSetWidth}
+          onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+          onSetIsFlippedVertical={handleSetIsFlippedVertical}
+        />
+      ) : (
+        <DimensionsInspector
+          {...dimensionsInspectorProps}
+          supportsFlipping={supportsFlipping}
+          isFlippedHorizontal={isFlippedHorizontal}
+          isFlippedVertical={isFlippedVertical}
+          constrainProportions={constrainProportions}
+          onSetRotation={handleSetRotation}
+          onSetX={handleSetX}
+          onSetY={handleSetY}
+          onSetWidth={handleSetWidth}
+          onSetHeight={handleSetHeight}
+          onSetIsFlippedHorizontal={handleSetIsFlippedHorizontal}
+          onSetIsFlippedVertical={handleSetIsFlippedVertical}
+          onSetConstraintProportions={handleSetConstrainProportions}
+        />
+      )}
+      <Layout.Stack size="medium" />
+    </Fragment>,
+    hasFixedRadiusLayers && !isEditingPath && <RadiusInspector />,
+    isEditingPath && <PointControlsInspector />,
+    hasContextSettingsLayers && <OpacityInspector />,
+    // !hasTextLayer && !hasSymbolMaster && !hasSymbolInstance && (
+    //   <LayerThemeInspector />
+    // ),
+    // hasAllTextLayer && <ThemeTextInspector />,
+    // hasTextLayer && <TextStyleInspector />,
+    // hasOneSymbolMaster && <SymbolMasterInspector />,
+    // hasOneSymbolInstance && <SymbolInstanceInspector />,
+    selectedLayers.every(Layers.hasInspectableFill) && (
+      <FillInspector title="Fills" allowMoreThanOne />
+    ),
+    selectedLayers.every(Layers.hasInspectableBorder) && <BorderInspector />,
+    selectedLayers.every(Layers.hasInspectableShadow) && (
+      <ShadowInspector
+        allowMoreThanOne={!hasGroup}
+        supportsSpread={!hasGroup}
+      />
+    ),
+    selectedLayers.every(Layers.hasInspectableInnerShadow) && (
+      <InnerShadowInspector />
+    ),
+    selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
+    onlyBitmapLayers && <ColorControlsInspector />,
+    selectedLayers.length === 1 && <ExportInspector />,
+  ].filter((element): element is JSX.Element => !!element);
+
+  return (
+    <ScrollableView>
+      {withSeparatorElements(
+        views,
+        <>
+          <Layout.Stack size="medium" />
+          <Layout.Divider />
+          <Layout.Stack size="medium" />
+        </>,
+      )}
+    </ScrollableView>
+  );
 };
 
 export default memo(AttributeInspector);

@@ -36,7 +36,7 @@ export default class PathNative extends JSEmbindObject implements IPath<Rect> {
   }
 
   addRect(rect: Rect, isCCW?: boolean): PathNative {
-    this._path.addRect(rect, isCCW);
+    this._path.addRect(rect, isCCW ?? false);
 
     return this;
   }

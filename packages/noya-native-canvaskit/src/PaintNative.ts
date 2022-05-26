@@ -20,6 +20,7 @@ export default class PaintNative
   implements IPaint<Color>
 {
   private _paint = Skia.Paint();
+  private _paintStlye: PaintStyle = PaintStyle.Fill;
 
   copy(): PaintNative {
     const paintCopy = this._paint.copy();
@@ -122,6 +123,8 @@ export default class PaintNative
   }
 
   setStyle(style: PaintStyle): void {
+    this._paintStlye = style;
+
     this._paint.setStyle(style);
   }
 
@@ -130,7 +133,6 @@ export default class PaintNative
   }
 
   get style(): PaintStyle {
-    console.warn(`SkiaPaint.get style not implemented!`);
-    return 0;
+    return this._paintStlye;
   }
 }

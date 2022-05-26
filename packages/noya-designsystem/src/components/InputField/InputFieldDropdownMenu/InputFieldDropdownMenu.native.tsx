@@ -1,27 +1,36 @@
 import React, { memo } from 'react';
+import { View } from 'react-native';
 import styled from 'styled-components';
 
-import { Button } from '../../Button';
 import { Layout } from '../../Layout';
 import NoyaDropDownMenu from '../../DropdownMenu';
 import type { InputFieldDropdownProps } from '../types';
 
-const DropdownContainer = styled.span(({ theme }) => ({
+const DropdownContainer = styled(View)({
   position: 'absolute',
   right: 0,
-}));
+  top: 0,
+  bottom: 0,
+  zIndex: 1,
+});
+
+const DropDownView = styled(View)({
+  minHeight: 19,
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+});
 
 function InputFieldDropdownMenu<T extends string>({
-  id,
   items,
   onSelect,
 }: InputFieldDropdownProps<T>) {
   return (
     <DropdownContainer>
       <NoyaDropDownMenu<T> items={items} onSelect={onSelect}>
-        <Button id={id} variant="thin">
+        <DropDownView>
           <Layout.Icon name="caret-down" />
-        </Button>
+        </DropDownView>
       </NoyaDropDownMenu>
     </DropdownContainer>
   );

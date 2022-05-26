@@ -31,6 +31,7 @@ export * as Label from './Label';
 export * as Sortable from './Sortable';
 export { default as Popover } from './Popover';
 export { default as GridView } from './GridView';
+export { default as AspectRatio } from './AspectRatio';
 export { default as ScrollArea } from './ScrollArea';
 export { default as ContextMenu } from './ContextMenu';
 export { default as LabeledView } from './LabeledView';
