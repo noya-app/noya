@@ -201,8 +201,7 @@ export default memo(function FillRow({
       case Sketch.FillType.Shader:
         return withSeparatorElements(
           shaderProps.shader.variables
-            // TODO: remove types after implementing shaderProps types
-            .map((variable: { name: string; value: any }, index: number) => (
+            .map((variable, index) => (
               <LabeledView
                 label={variable.name}
                 flex={1}

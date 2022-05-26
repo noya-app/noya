@@ -146,7 +146,6 @@ function ContextMenuRoot<T extends string>({
     (item) => item !== SEPARATOR_ITEM && item.checked,
   );
 
-  // TODO: keybindings for mobile
   const keymap = useMemo(
     () =>
       isNested || shouldBindKeyboardShortcuts === false
