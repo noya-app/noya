@@ -1,4 +1,10 @@
-import React, { memo, PropsWithChildren, useCallback, useState } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useState,
+  useCallback,
+  PropsWithChildren,
+} from 'react';
 import {
   View,
   Text,
@@ -8,14 +14,17 @@ import {
 } from 'react-native';
 import styled from 'styled-components';
 
+import { useKeyCommands } from 'noya-keymap';
+import { TouchEvent, TouchableListener } from '../Touchable';
 import { Layout } from '../Layout';
 import {
   styles,
   CHECKBOX_WIDTH,
   SEPARATOR_ITEM,
+  KeyboardShortcut,
   CHECKBOX_RIGHT_INSET,
+  getKeyboardShortcutsForMenuItems,
 } from '../internal/Menu';
-import { TouchEvent, TouchableListener } from '../Touchable';
 import { MenuItemProps, MenuProps } from './types';
 
 const SeparatorElement = styled(View)(styles.separatorStyle);
@@ -63,16 +72,13 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
           </>
         )}
         <ItemText>{label}</ItemText>
-        {/*
-          * TODO: show shortcut only when
-          * external keyboard is attached
         {shortcut && (
           <>
             <Layout.Queue />
             <Layout.Queue size={24} />
             <KeyboardShortcut shortcut={shortcut} />
           </>
-        )} */}
+        )}
         {items && items.length > 0 && (
           <>
             <Layout.Queue />
@@ -129,8 +135,8 @@ interface MenuState {
 }
 
 function ContextMenuRoot<T extends string>({
-  // shouldBindKeyboardShortcuts,
-  // isNested,
+  shouldBindKeyboardShortcuts,
+  isNested,
   items,
   children,
   onSelect,
@@ -141,15 +147,15 @@ function ContextMenuRoot<T extends string>({
   );
 
   // TODO: keybindings for mobile
-  // const keymap = useMemo(
-  //   () =>
-  //     isNested || shouldBindKeyboardShortcuts === false
-  //       ? {}
-  //       : getKeyboardShortcutsForMenuItems(items, onSelect),
-  //   [isNested, items, onSelect, shouldBindKeyboardShortcuts],
-  // );
+  const keymap = useMemo(
+    () =>
+      isNested || shouldBindKeyboardShortcuts === false
+        ? {}
+        : getKeyboardShortcutsForMenuItems(items, onSelect),
+    [isNested, items, onSelect, shouldBindKeyboardShortcuts],
+  );
 
-  // useKeyboardShortcuts(keymap);
+  useKeyCommands(keymap);
 
   const onOpen = useCallback(
     (event: TouchEvent) => {

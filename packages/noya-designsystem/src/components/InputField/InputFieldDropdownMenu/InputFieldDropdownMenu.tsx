@@ -1,10 +1,15 @@
 import React, { memo } from 'react';
+import styled from 'styled-components';
 
 import { Button } from '../../Button';
 import { Layout } from '../../Layout';
 import NoyaDropDownMenu from '../../DropdownMenu';
 import type { InputFieldDropdownProps } from '../types';
-import DropdownContainer from './container';
+
+const DropdownContainer = styled.span(({ theme }) => ({
+  position: 'absolute',
+  right: 0,
+}));
 
 function InputFieldDropdownMenu<T extends string>({
   id,

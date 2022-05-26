@@ -15,6 +15,7 @@ import {
   BlurInspector,
   FillInspector,
   LineInspector,
+  ExportInspector,
   RadiusInspector,
   ShadowInspector,
   BorderInspector,
@@ -29,7 +30,6 @@ import {
   ControlPointCoordinatesInspector,
 } from 'noya-workspace-ui';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import ExportInspector from './ExportInspector';
 import LayerThemeInspector from './LinkedStyleInspector';
 import ThemeTextInspector from './LinkedTextStyleInspector';
 import SymbolInstanceInspector from './SymbolInstanceInspector';

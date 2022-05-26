@@ -1,6 +1,7 @@
-export * from './hooks';
-export * from './platform';
-export * from './names';
-export type { KeyModifiers } from './names';
-export type { KeyCommand } from './keyMap';
-export { FALLTHROUGH } from './keyMap';
+export * from './types';
+export * from './Platform';
+export * from './utils/names';
+export * from './useKeyPresses';
+export * from './useKeyCommands';
+
+export const FALLTHROUGH = 'fallthrough';

@@ -8,7 +8,21 @@ import { LabelPosition, InputFieldVariant } from '../types';
 import { InputFieldContext } from '../context';
 import { ignoredProps } from './utils';
 
-type TextAlign = 'left' | 'right' | 'center' | 'justify';
+type TextAlign = 'left' | 'right' | 'center' | 'justify' | 'start' | 'end';
+
+function parseTextAlign(
+  textAlign: string,
+): Exclude<TextAlign, 'start' | 'end'> {
+  if (textAlign === 'start') {
+    return 'left';
+  }
+
+  if (textAlign === 'end') {
+    return 'right';
+  }
+
+  return textAlign as Exclude<TextAlign, 'start' | 'end'>;
+}
 
 export const InputElement = styled(TextInput).withConfig({
   shouldForwardProp: (prop) => (ignoredProps.has(prop) ? false : true),
@@ -34,7 +48,7 @@ export const InputElement = styled(TextInput).withConfig({
     ...theme.textStyles.small,
     flex: 1,
     color: disabled ? theme.colors.textDisabled : theme.colors.text,
-    textAlign: textAlign ?? 'left',
+    textAlign: parseTextAlign(textAlign ?? 'left'),
     borderRadius: 4,
     paddingTop: 4,
     paddingBottom: 4,

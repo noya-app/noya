@@ -19,6 +19,7 @@ import {
   BlurInspector,
   FillInspector,
   LineInspector,
+  ExportInspector,
   RadiusInspector,
   ShadowInspector,
   BorderInspector,
@@ -227,7 +228,7 @@ const AttributeInspector: React.FC<AttributeInspectorProps> = (props) => {
     ),
     selectedLayers.every(Layers.hasInspectableBlur) && <BlurInspector />,
     onlyBitmapLayers && <ColorControlsInspector />,
-    // selectedLayers.length === 1 && <ExportInspector />,
+    selectedLayers.length === 1 && <ExportInspector />,
   ].filter((element): element is JSX.Element => !!element);
 
   return (

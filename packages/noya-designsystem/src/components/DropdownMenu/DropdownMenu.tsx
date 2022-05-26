@@ -3,7 +3,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import styled from 'styled-components';
 
-import { useKeyboardShortcuts } from 'noya-keymap';
+import { useKeyCommands } from 'noya-keymap';
 import {
   styles,
   CHECKBOX_WIDTH,
@@ -134,7 +134,7 @@ function DropdownMenuRoot<T extends string>({
     [isNested, items, onSelect, shouldBindKeyboardShortcuts],
   );
 
-  useKeyboardShortcuts(keymap);
+  useKeyCommands(keymap);
 
   return (
     <RadixDropdownMenu.Root>
