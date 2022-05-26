@@ -19,6 +19,8 @@ const allowList = [
   'noya-google-fonts',
   'noya-designsystem',
   'noya-workspace-ui',
+  'noya-svg-renderer',
+  'noya-generate-image',
   'noya-react-canvaskit',
   'noya-native-canvaskit',
   'noya-app-state-context',
@@ -66,6 +68,7 @@ const getPathConfigs = (appRootDir) => {
       appRootDir,
       './node_modules/expo-image-picker',
     ),
+    'expo-sharing': path.resolve(appRootDir, './node_modules/expo-sharing'),
   };
 
   packages.forEach((packageName) => {

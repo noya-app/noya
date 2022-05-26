@@ -31,10 +31,10 @@ const SelectContext = createContext<SelectContextValue>({
   value: '',
 });
 
-const Container = styled(View)((_p) => ({
+const Container = styled(View)({
   flex: 1,
   zIndex: 20,
-}));
+});
 
 const SelectText = styled(Text)(({ theme }) => ({
   ...theme.textStyles.small,
@@ -50,18 +50,18 @@ const SelectElement = styled(View)(({ theme }) => ({
   justifyContent: 'space-between',
 }));
 
-const SelectOptionElement = styled(View)(({ theme }) => ({
+const SelectOptionElement = styled(View)({
   paddingHorizontal: 8,
   paddingVertical: 4,
   flexDirection: 'row',
   alignItems: 'center',
-}));
+});
 
-const DropdownElement = styled(Animated.View)(({ theme }) => ({
+const DropdownElement = styled(Animated.View)({
   borderRadius: 4,
   paddingVertical: 4,
   backgroundColor: 'rgb(30, 30, 30)',
-}));
+});
 
 const Backdrop = styled(View)({
   position: 'absolute',
@@ -185,7 +185,7 @@ function Select<T extends string>({
                 entering={FadeInUp.duration(250)}
                 exiting={FadeOutUp.duration(250)}
                 style={{
-                  width: containerRect.width,
+                  width: Math.max(containerRect.width, 80),
                   top: containerRect.y + containerRect.height,
                   left: containerRect.x,
                 }}

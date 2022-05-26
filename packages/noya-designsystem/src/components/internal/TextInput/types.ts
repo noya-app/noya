@@ -19,7 +19,6 @@ interface Props {
   value: string;
   placeholder?: string;
   onKeyDown?: (params: KeyDownParams) => void;
-  // TODO: provide a common interface for both platforms?
   onClick?: MouseEventHandler;
   onPointerDown?: PointerEventHandler;
   autoComplete?:

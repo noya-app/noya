@@ -1,3 +1,5 @@
+import React, { memo, useCallback, useMemo } from 'react';
+
 import Sketch from 'noya-file-format';
 import {
   Select,
@@ -7,8 +9,7 @@ import {
   withSeparatorElements,
 } from 'noya-designsystem';
 import { ExportOptions } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
-import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
+import { Primitives } from '../primitives';
 
 export const SUPPORTED_EXPORT_FORMAT_OPTIONS: Sketch.ExportFileFormat[] = [
   Sketch.ExportFileFormat.PNG,
@@ -56,8 +57,8 @@ export default memo(function ExportFormatsRow({
     exportFormat.namingScheme === Sketch.ExportFormatNamingScheme.Prefix;
 
   const elements = [
-    <LabeledView label="Size">
-      <InputField.Root id={scaleInputId} size={55}>
+    <LabeledView label="Size" size={55}>
+      <InputField.Root id={scaleInputId}>
         <InputField.Input
           disabled={!canChangeScale}
           value={scaleString}
@@ -74,7 +75,7 @@ export default memo(function ExportFormatsRow({
         />
       </InputField.Root>
     </LabeledView>,
-    <LabeledView label="Prefix/Suffix">
+    <LabeledView label="Prefix/Suffix" flex={1}>
       <InputField.Root
         id={namingSchemeInputId}
         labelPosition={isPrefix ? 'end' : 'start'}
@@ -108,8 +109,8 @@ export default memo(function ExportFormatsRow({
         <InputField.Label>...</InputField.Label>
       </InputField.Root>
     </LabeledView>,
-    <LabeledView label="Format">
-      <InputField.Root size={65} id={fileFormatInputId}>
+    <LabeledView label="Format" size={65}>
+      <InputField.Root id={fileFormatInputId}>
         <Select
           id={`${id}-file-format-select`}
           value={exportFormat.fileFormat}
@@ -125,20 +126,14 @@ export default memo(function ExportFormatsRow({
   ];
 
   return (
-    <InspectorPrimitives.Row id={id}>
+    <Primitives.Row id={id}>
       {last ? (
-        withSeparatorElements(
-          elements,
-          <InspectorPrimitives.HorizontalSeparator />,
-        )
+        withSeparatorElements(elements, <Primitives.HorizontalSeparator />)
       ) : (
         <>
-          {withSeparatorElements(
-            elements,
-            <InspectorPrimitives.HorizontalSeparator />,
-          )}
+          {withSeparatorElements(elements, <Primitives.HorizontalSeparator />)}
         </>
       )}
-    </InspectorPrimitives.Row>
+    </Primitives.Row>
   );
 });

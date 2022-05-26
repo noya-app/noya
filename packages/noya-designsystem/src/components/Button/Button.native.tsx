@@ -6,8 +6,8 @@ import { ButtonProps, ButtonVariant } from './types';
 
 interface ElementsProps {
   variant: ButtonVariant;
-  active: boolean;
-  disabled: boolean;
+  active?: boolean;
+  disabled?: boolean;
   flex?: string | number;
 }
 

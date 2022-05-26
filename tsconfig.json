@@ -27,6 +27,7 @@
       "expo-image-picker": [
         "./packages/app-mobile/node_modules/expo-image-picker"
       ],
+      "expo-sharing": ["./packages/app-mobile/node_modules/expo-sharing"],
       /* Include path to all package src index files */
       "*": ["./*/src"]
     }
