@@ -8,64 +8,70 @@ import Foundation
 import React
 import UIKit
 
-let Modifiers = ["Shift", "Meta", "Ctrl", "Alt"]
-let SpecialKeys = ["Escape", "End", "Delete", "Home", "PageUp", "PageDown", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]
+enum Modifiers: String, CaseIterable {
+  case shift = "Shift"
+  case meta = "Meta"
+  case ctrl = "Ctrl"
+  case alt = "Alt"
+}
+
+enum SpecialKeys: String, CaseIterable {
+  case escape = "Escape"
+  case end = "End"
+  case delete = "Delete"
+  case home = "Home"
+  case pageUp = "PageUp"
+  case pageDown = "PageDown"
+  case arrowUp = "ArrowUp"
+  case arrowDown = "ArrowDown"
+  case arrowLeft = "ArrowLeft"
+  case arrowRight = "ArrowRight"
+}
 
 @objc
 protocol KeyCommandable {
-  @available(iOS 13.0, *)
   func onKeyCommand(_ sender: AnyObject) -> Void
 }
 
 func parseKeyName(key: String) -> String {
   // Desired shortcutk key is same as separator
-  if (Modifiers.contains(key)) {
+  if Modifiers.from(string: key) != nil {
     return "-"
   }
   
-  if (!SpecialKeys.contains(key)) {
-    return key
-  }
-    
-  switch key {
-    case "Escape":
-      return UIKeyCommand.inputEscape
-    case "End":
-      if #available(iOS 13.4, *) {
+  if let specialKey = SpecialKeys.from(string: key) {
+    switch specialKey {
+      case SpecialKeys.escape:
+        return UIKeyCommand.inputEscape
+      case SpecialKeys.end:
         return UIKeyCommand.inputEnd
-      }
-      return key
-    case "Delete":
-      if #available(iOS 15.0, *) {
-        return UIKeyCommand.inputDelete
-      }
+      case SpecialKeys.delete:
+        if #available(iOS 15.0, *) {
+          return UIKeyCommand.inputDelete
+        }
       
-      return key
-    case "Home":
-      if #available(iOS 13.4, *) {
+        return key
+      case SpecialKeys.home:
         return UIKeyCommand.inputHome
-      }
-      
-      return key
-    case "PageUp":
-      return UIKeyCommand.inputPageUp
-    case "PageDown":
-      return UIKeyCommand.inputPageDown
-    case "ArrowUp":
-      return UIKeyCommand.inputUpArrow
-    case "ArrowDown":
-      return UIKeyCommand.inputDownArrow
-    case "ArrowLeft":
-      return UIKeyCommand.inputLeftArrow
-    case "ArrowRight":
-      return UIKeyCommand.inputRightArrow
-    default:
-      return key
+      case SpecialKeys.pageUp:
+        return UIKeyCommand.inputPageUp
+      case SpecialKeys.pageDown:
+        return UIKeyCommand.inputPageDown
+      case SpecialKeys.arrowUp:
+        return UIKeyCommand.inputUpArrow
+      case SpecialKeys.arrowDown:
+        return UIKeyCommand.inputDownArrow
+      case SpecialKeys.arrowLeft:
+        return UIKeyCommand.inputLeftArrow
+      case SpecialKeys.arrowRight:
+        return UIKeyCommand.inputRightArrow
+    }
   }
+  
+  return key
 }
 
 @objc(KeyCommandRegistry)
-@available(iOS 13.0, *)
 class KeyCommandRegistry: RCTEventEmitter {
   // Map of commands grouped in menu names
   var menuKeyCommands: [String: [String: UIKeyCommand]] = [:]
