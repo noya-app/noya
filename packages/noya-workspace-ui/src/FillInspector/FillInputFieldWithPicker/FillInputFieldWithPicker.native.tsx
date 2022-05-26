@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 import Sketch from 'noya-file-format';
@@ -54,7 +54,13 @@ export default memo(function FillInputFieldWithPicker({
       case undefined:
         return <ColorFillPicker id={id} {...colorProps} />;
     }
-  }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
+  }, [
+    fillType,
+    gradientProps,
+    id,
+    patternProps,
+    /* shaderProps, */ colorProps,
+  ]);
 
   const value = useMemo(() => {
     switch (fillType) {
@@ -85,6 +91,13 @@ export default memo(function FillInputFieldWithPicker({
     },
     [dispatch, gradientProps, fillType],
   );
+
+  useEffect(() => {
+    return () => {
+      dispatch('setSelectedGradient', undefined);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Popover.Root onOpenChange={onOpenChange}>

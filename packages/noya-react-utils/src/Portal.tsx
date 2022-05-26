@@ -1,41 +1,28 @@
 import React, {
   memo,
+  useRef,
+  useMemo,
   useState,
   ReactNode,
-  createContext,
-  PropsWithChildren,
-  useCallback,
-  useMemo,
-  useContext,
-  useLayoutEffect,
-  useRef,
   useEffect,
+  useContext,
+  useCallback,
+  createContext,
+  useLayoutEffect,
+  PropsWithChildren,
 } from 'react';
 
 import { uuid } from 'noya-utils';
 
-interface NodeMap {
-  [id: string]: ReactNode;
+interface PortalNode {
+  id: string;
+  node: ReactNode;
+  onChangeOpen: (isOpen: boolean) => void;
 }
 
 interface ContextType {
-  setNode: (id: string, node: ReactNode) => void;
-  removeNode: (id: string) => void;
-}
-
-// Based on https://gist.github.com/renaudtertrais/d541e9d5d4e5614216c1a44cf4ae2dc2
-function omit<T extends Object>(obj: Object, inKeys: Array<keyof T> | keyof T) {
-  const keys = inKeys instanceof Array ? inKeys : [inKeys];
-
-  return Object.entries(obj)
-    .filter(([key]) => !keys.includes(key as keyof T))
-    .reduce(
-      (acc, [key, value]) =>
-        Object.assign({}, acc, {
-          [key]: value,
-        }),
-      {},
-    );
+  setNode: (node: PortalNode) => void;
+  removeNode: () => void;
 }
 
 const PortalContext = createContext<ContextType>({
@@ -46,56 +33,80 @@ const PortalContext = createContext<ContextType>({
 export const PortalProvider = memo(function PortalProvider({
   children,
 }: PropsWithChildren<{}>) {
-  const [nodes, setNodes] = useState<NodeMap>({});
+  const [node, setNode] = useState<PortalNode | undefined>();
+  // Temp handle to the node while currently displayed node
+  // is unmouting
+  const waitingNodeRef = useRef<PortalNode | undefined>();
+  const nodeRef = useRef(node);
 
-  const setNode = useCallback(
-    (id: string, node: ReactNode) => {
-      setNodes((prevNodes) => ({
-        ...prevNodes,
-        [id]: node,
-      }));
-    },
-    [setNodes],
-  );
+  useEffect(() => {
+    nodeRef.current = node;
+  }, [node]);
 
-  const removeNode = useCallback(
-    (id: string) => {
-      setNodes((prevNodes) => omit(prevNodes, id));
-    },
-    [setNodes],
-  );
+  const setPortalNode = useCallback((newNode: PortalNode) => {
+    if (!nodeRef.current) {
+      setNode(newNode);
+      return;
+    }
+
+    // Same node as mounted -> replace content
+    if (nodeRef.current.id === newNode.id) {
+      setNode(newNode);
+      return;
+    }
+
+    // There is currently different node mounted
+    // call the node to unmount itself
+    nodeRef.current.onChangeOpen(false);
+    // Save new node to mount it after
+    // current node will finish unmounting
+    waitingNodeRef.current = newNode;
+  }, []);
+
+  const removePortalNode = useCallback(() => {
+    setNode(undefined);
+
+    // Append new waiting node
+    if (waitingNodeRef.current) {
+      // setTimeout prevents sharing values
+      // between same type children components (?!)
+      setTimeout(() => {
+        setNode(waitingNodeRef.current);
+        waitingNodeRef.current = undefined;
+      });
+    }
+  }, []);
 
   const value = useMemo(
-    () => ({
-      setNode,
-      removeNode,
-    }),
-    [setNode, removeNode],
+    () => ({ setNode: setPortalNode, removeNode: removePortalNode }),
+    [setPortalNode, removePortalNode],
   );
 
   return (
     <PortalContext.Provider value={value}>
       {children}
-      {Object.entries(nodes).map(([id, node]) => (
-        <React.Fragment key={id}>{node}</React.Fragment>
-      ))}
+      {node?.node}
     </PortalContext.Provider>
   );
 });
 
 export const Portal = memo(function Portal({
   children,
-}: PropsWithChildren<{}>) {
+  onChangeOpen,
+}: PropsWithChildren<{
+  onChangeOpen: (isOpen: boolean) => void;
+}>) {
   const { setNode, removeNode } = useContext(PortalContext);
-  const nodeId = useRef(uuid()).current;
+  const nodeId = useMemo(() => uuid(), []);
 
   useLayoutEffect(() => {
-    setNode(nodeId, children);
-  }, [nodeId, children, setNode]);
+    setNode({ id: nodeId, onChangeOpen, node: children });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [children, setNode]);
 
   useEffect(() => {
     return () => {
-      removeNode(nodeId);
+      removeNode();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
