@@ -7,6 +7,7 @@ import {
   getInitialHistory,
   TouchMoveThreshold,
 } from 'noya-designsystem';
+import { useThrottledFunction } from 'noya-react-utils';
 import { GestureState, CanvasTouchCallback } from './types';
 
 export default function useCanvasGestures(
@@ -22,6 +23,8 @@ export default function useCanvasGestures(
     centroid: { x: 0, y: 0, absoluteX: 0, absoluteY: 0 },
     pinchIds: [0, 0],
   });
+
+  const onTouchUpdateThrottled = useThrottledFunction(onTouchUpdate);
 
   const gesture = Gesture.Manual()
     .runOnJS(true)
@@ -70,7 +73,7 @@ export default function useCanvasGestures(
       ) {
         gestureState.value = GestureState.Other;
       } else {
-        onTouchUpdate({
+        onTouchUpdateThrottled.current({
           ...features,
           state: gestureState.value,
         });

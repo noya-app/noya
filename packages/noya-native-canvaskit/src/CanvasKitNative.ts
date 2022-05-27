@@ -50,28 +50,15 @@ class CanvasKitNative
     >
 {
   Color(r: number, g: number, b: number, a?: number): Color {
-    let normalizedColor =
-      (r << 24) | (g << 16) | (b << 8) | (Math.floor((a ?? 1) * 255) << 0);
-
-    return ((normalizedColor << 24) | (normalizedColor >>> 8)) >>> 0;
+    return new Float32Array([r / 255, g / 255, b / 255, a ?? 1]);
   }
 
   Color4f(inR: number, inG: number, inB: number, inA?: number): Color {
-    const a = Math.floor((inA ?? 1) * 255) << 0;
-    const r = Math.floor(inR * 255) << 24;
-    const g = Math.floor(inG * 255) << 16;
-    const b = Math.floor(inB * 255) << 8;
-
-    const normalizedColor = a | r | g | b;
-
-    return ((normalizedColor << 24) | (normalizedColor >>> 8)) >>> 0;
+    return new Float32Array([inR, inG, inB, inA ?? 1]);
   }
 
-  getColorComponents(color: number): number[] {
-    const a = ((color & 0xff000000) >> 24) / 255.0;
-    const r = ((color & 0x00ff0000) >> 16) / 255.0;
-    const g = ((color & 0x0000ff00) >> 8) / 255.0;
-    const b = (color & 0x000000ff) / 255.0;
+  getColorComponents(color: Float32Array): number[] {
+    const [a, r, g, b] = color;
 
     return [r, g, b, a];
   }
@@ -102,7 +89,7 @@ class CanvasKitNative
     console.warn(`SkiaCanvasKit.MakeCanvasSurface not implemented!`);
   }
 
-  MakeSurface(width: number, height: number): RNSkia.ISurface | null {
+  MakeSurface(width: number, height: number): RNSkia.SkSurface | null {
     return RNSkia.Skia.MakeSurface(width, height);
   }
 

@@ -86,8 +86,14 @@ export default class PaintNative
     this._paint.setColorFilter(filter.getRNSColorFilter());
   }
 
-  setColorInt(color: Color, colorSpace?: ColorSpace): void {
-    this._paint.setColor(color);
+  setColorInt(color: number, colorSpace?: ColorSpace): void {
+    const a = ((color & 0xff000000) >> 24) / 255.0;
+    const r = ((color & 0x00ff0000) >> 16) / 255.0;
+    const g = ((color & 0x0000ff00) >> 8) / 255.0;
+    const b = (color & 0x000000ff) / 255.0;
+
+    // return [r, g, b, a];
+    this._paint.setColor(new Float32Array([r, g, b, a]));
   }
 
   setImageFilter(filter: ImageFilterNative): void {

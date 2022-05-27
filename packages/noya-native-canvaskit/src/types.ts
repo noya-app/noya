@@ -1,7 +1,7 @@
 import * as RNSkia from '@shopify/react-native-skia';
 
 // Primitives
-export type Color = number;
+export type Color = Float32Array;
 export type ColorArray = Color[];
 export type Rect = RNSkia.SkRect;
 export type Point = RNSkia.SkPoint;

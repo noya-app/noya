@@ -1,6 +1,6 @@
 import {
   Skia,
-  IRuntimeEffect as RNSRuntimeEffect,
+  SkRuntimeEffect as RNSRuntimeEffect,
 } from '@shopify/react-native-skia';
 
 import { IRuntimeEffect, IRuntimeEffectFactory } from 'canvaskit-types';

@@ -8,11 +8,29 @@
 import Foundation
 import UIKit
 
+#if DEBUG
+  import FlipperKit
+#endif
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
   var window: UIWindow?
   override var keyCommands: [UIKeyCommand] {
     return KeyCommandRegistry.allMenulessCommands()
+  }
+
+  private func initializeFlipper(with application: UIApplication) {
+    #if DEBUG
+      let client = FlipperClient.shared()
+      let layoutDescriptorMapper = SKDescriptorMapper(defaults: ())
+      //  FlipperKitLayoutComponentKitSupport.setUpWith(layoutDescriptorMapper)
+      client?.add(FlipperKitLayoutPlugin(rootNode: application, with: layoutDescriptorMapper!))
+      client?.add(FKUserDefaultsPlugin(suiteName: nil))
+      client?.add(FlipperKitReactPlugin())
+      client?.add(FlipperKitNetworkPlugin(networkAdapter: SKIOSNetworkAdapter()))
+      //  client?.add(FlipperReactPerformancePlugin.sharedInstance())
+      client?.start()
+    #endif
   }
 
   @objc
@@ -29,6 +47,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
 
     self.window!.rootViewController = rootViewController
     self.window!.makeKeyAndVisible()
+
+    initializeFlipper(with: application)
 
     return true
   }
