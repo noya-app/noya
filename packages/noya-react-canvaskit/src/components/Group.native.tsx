@@ -1,5 +1,5 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { ClipOp, createDrawing } from '@shopify/react-native-skia';
+import { ClipOp, createDrawing, SkMatrix } from '@shopify/react-native-skia';
 
 import { useCanvasKit } from 'noya-renderer';
 import { AffineTransform } from 'noya-geometry';
@@ -66,7 +66,17 @@ const onDraw = createDrawing<OnDrawProps>(function onDraw(
   if (transform) {
     const { m00, m01, m02, m10, m11, m12 } = transform;
 
-    canvas.concat([m00, m01, m02, m10, m11, m12, 0, 0, 1]);
+    canvas.concat([
+      m00,
+      m01,
+      m02,
+      m10,
+      m11,
+      m12,
+      0,
+      0,
+      1,
+    ] as unknown as SkMatrix);
   }
 
   if (needsLayer) {

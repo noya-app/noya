@@ -1,12 +1,16 @@
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { renderToStaticMarkup } from 'react-dom/server';
+import {
+  SkiaView,
+  Container,
+  skiaReconciler,
+} from '@shopify/react-native-skia';
 
-import { SkiaView } from '@shopify/react-native-skia/src/views/SkiaView';
-import { skiaReconciler } from '@shopify/react-native-skia/src/renderer/Canvas';
-import { Container } from '@shopify/react-native-skia/src/renderer/nodes/Container';
-import { DrawingContext } from '@shopify/react-native-skia/src/renderer/DrawingContext';
-import { DependencyManager } from '@shopify/react-native-skia/src/renderer/DependencyManager';
+// Importing typed files from src directory caused
+// typescript to complain about type mismatches
+// @ts-ignore-next-line
+import { DependencyManager } from '@shopify/react-native-skia/lib/module/renderer/DependencyManager';
 
 import type { CanvasKit as PublicCanvasKit } from 'canvaskit-types';
 import { CanvasKitNative } from 'noya-native-canvaskit';
@@ -100,7 +104,7 @@ export function generateImage(
         fontMgr: CanvasKit.FontMgr.RefDefault(),
       };
 
-      container.draw(drawingContext as unknown as DrawingContext);
+      container.draw(drawingContext as any);
 
       const image = surface.makeImageSnapshot();
 

@@ -6,11 +6,11 @@ import { Canvas as SkiaCanvas } from '@shopify/react-native-skia';
 import { useWorkspaceState, StateProvider } from 'noya-app-state-context';
 import { Components } from 'noya-react-canvaskit';
 import {
-  SketchFileRenderer,
   useCanvasKit,
   CanvasKitProvider,
   ComponentsProvider,
   ImageCacheProvider,
+  SketchFileRenderer,
   FontManagerProvider,
   RenderingModeProvider,
 } from 'noya-renderer';
