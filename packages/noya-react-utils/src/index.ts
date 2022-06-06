@@ -1,3 +1,4 @@
+export * from './hooks/useThrottledFunction';
 export * from './hooks/useShallowArray';
 export * from './hooks/useMutableState';
 export * from './hooks/usePixelRatio';

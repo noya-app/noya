@@ -4511,10 +4511,10 @@
     pkg-dir "^5.0.0"
     pluralize "^8.0.0"
 
-"@shopify/react-native-skia@^0.1.123":
-  version "0.1.123"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.123.tgz#eaaf886cf1ca3b49f4ba79b826cd4b8f803b933e"
-  integrity sha512-Yn9nHYRuTz84eCbHbpTi8VbP33tQc1D6rDQNEj7fgV6aPusaN79XjnnxtPsZsO+nLlbkpI3q1x+2Ds3Qu1I8ZA==
+"@shopify/react-native-skia@^0.1.128":
+  version "0.1.128"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.128.tgz#caf0d7948beb74646505065fb9f6c3a37b7d7aa6"
+  integrity sha512-oknOk4eSrbnhDZCju/4nDEsVbgEjmswvPjYCgtUbjZ2IwciuZ2bMi23yjZ5sI/QD7Y6p0Lz3yYQPADcEUr3x3w==
   dependencies:
     react-reconciler "^0.26.2"
 
@@ -17785,6 +17785,11 @@ react-native-codegen@^0.0.7:
     jscodeshift "^0.11.0"
     nullthrows "^1.1.1"
 
+react-native-flipper@^0.146.1:
+  version "0.146.1"
+  resolved "https://registry.yarnpkg.com/react-native-flipper/-/react-native-flipper-0.146.1.tgz#b6bbb23edc347597788bdca4c89b58bad425e1a1"
+  integrity sha512-M3pjqDigOPRpPN9lkT3o0yKDViqciGe5aUjPrtuKdxmaCbH4ofpMEZGxrcKjnEwXJWKC24IDZKtz7WitaWgRig==
+
 react-native-gesture-handler@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.3.2.tgz#65ce3b145bd96242c2200abbb9730c94bc73386c"
@@ -17800,6 +17805,16 @@ react-native-linear-gradient@^2.5.6:
   version "2.5.6"
   resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.5.6.tgz#96215cbc5ec7a01247a20890888aa75b834d44a0"
   integrity sha512-HDwEaXcQIuXXCV70O+bK1rizFong3wj+5Q/jSyifKFLg0VWF95xh8XQgfzXwtq0NggL9vNjPKXa016KuFu+VFg==
+
+react-native-performance-flipper-reporter@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-performance-flipper-reporter/-/react-native-performance-flipper-reporter-3.0.0.tgz#edad51e12bac245e9580fedff3ae3e6d3e50c95b"
+  integrity sha512-2cESO1bn1lqd2g6r2W2EePUMdgm/EbAFhwpga9cAzpGUYmw+jpdAM1c20YkLWyoGuGWrWLvRInyy9+OvjpjIpw==
+
+react-native-performance@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-performance/-/react-native-performance-3.0.1.tgz#0d8cae895e095fa9d66c9f1484a2487bced18318"
+  integrity sha512-hWIDC67ACE6Iq8jO0gU5ON2Fo2TYXzT/KByhpqus1BVBucUqHBgfaiqMCaseU6tS0bfjAOBYh6pl5+5kLhojLA==
 
 react-native-reanimated@^2.3.1:
   version "2.3.1"

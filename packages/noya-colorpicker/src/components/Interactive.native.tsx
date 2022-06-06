@@ -8,8 +8,9 @@ import React, {
 import { LayoutChangeEvent, View } from 'react-native';
 
 import { Touchable, TouchEvent, TouchableContext } from 'noya-designsystem';
-import { InteractiveProps } from './types';
+import { useThrottledFunction } from 'noya-react-utils';
 import { clamp } from '../utils/clamp';
+import { InteractiveProps } from './types';
 
 export const InteractiveContext = createContext<{
   width: number;
@@ -31,10 +32,12 @@ export const Interactive = memo(function InteractiveBase({
 }: InteractiveProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
+  const onMoveThrottled = useThrottledFunction(onMove);
+
   const handlePress = useCallback(
     (event: TouchEvent) => {
       if (!locations) {
-        onMove({
+        onMoveThrottled.current({
           left: clamp(event.point.x / size.width, 0, 1),
           top: clamp(event.point.y / size.height, 0, 1),
         });
@@ -62,27 +65,29 @@ export const Interactive = memo(function InteractiveBase({
 
       onClick?.({ left, top });
     },
-    [locations, onClick, size.width, size.height, onMove],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locations, onClick, size.width, size.height],
   );
 
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
-      onMove({
+      onMoveThrottled.current({
         left: clamp(event.point.x / size.width, 0, 1),
         top: clamp(event.point.y / size.height, 0, 1),
       });
     },
-    [size.width, size.height, onMove],
+    [size.width, size.height, onMoveThrottled],
   );
 
   const handleTouchUpdate = useCallback(
     ({ point }: TouchEvent) => {
-      onMove({
+      onMoveThrottled.current({
         left: clamp(point.x / size.width, 0, 1),
         top: clamp(point.y / size.height, 0, 1),
       });
     },
-    [onMove, size.width, size.height],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [size.width, size.height],
   );
 
   const onLayout = useCallback(

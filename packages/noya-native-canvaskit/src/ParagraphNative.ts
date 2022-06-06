@@ -54,7 +54,9 @@ export class ParagraphNative extends JSEmbindObject implements IParagraph {
       const paint = new PaintNative();
 
       paint.setColor(
-        style.color ?? paragraphStyle.textStyle?.color ?? 0xff000000,
+        style.color ??
+          paragraphStyle.textStyle?.color ??
+          new Float32Array([0, 0, 0, 1]),
       );
       const textSize = font.getFont().measureText(text, paint.getRNSkiaPaint());
 
