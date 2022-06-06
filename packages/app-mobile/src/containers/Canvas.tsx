@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { LayoutChangeEvent, View } from 'react-native';
 import { GestureDetector, ManualGesture } from 'react-native-gesture-handler';
 import styled from 'styled-components';
@@ -54,6 +54,9 @@ const Canvas: React.FC<{}> = () => {
     state.interactionState.type === 'panMode' ||
     state.interactionState.type === 'maybePan' ||
     state.interactionState.type === 'panning';
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const handleDeleteKey = () => {
     if (isEditingText) return FALLTHROUGH;
@@ -158,19 +161,23 @@ const Canvas: React.FC<{}> = () => {
   const onTouchStart = useCallback(
     ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
-      const { shiftKey } = state.keyModifiers;
+      const { shiftKey } = stateRef.current.keyModifiers;
 
-      switch (state.interactionState.type) {
+      switch (stateRef.current.interactionState.type) {
         case 'insert': {
           dispatch('interaction', [
             'startDrawing',
-            state.interactionState.layerType,
+            stateRef.current.interactionState.layerType,
             point,
           ]);
           break;
         }
         case 'insertingSymbol': {
-          dispatch('addSymbolLayer', state.interactionState.symbolID, point);
+          dispatch(
+            'addSymbolLayer',
+            stateRef.current.interactionState.symbolID,
+            point,
+          );
           dispatch('interaction', ['reset']);
           break;
         }
@@ -188,13 +195,13 @@ const Canvas: React.FC<{}> = () => {
           let selectedControlPoint: SelectedControlPoint | undefined;
 
           const boundingRects = Selectors.getBoundingRectMap(
-            Selectors.getCurrentPage(state),
-            state.selectedLayerIds,
+            Selectors.getCurrentPage(stateRef.current),
+            stateRef.current.selectedLayerIds,
             { groups: 'childrenOnly' },
           );
 
           const selectedPointsLayers = Selectors.getSelectedLayers(
-            state,
+            stateRef.current,
           ).filter(Layers.isPointsLayer);
 
           selectedPointsLayers.forEach((layer) => {
@@ -225,14 +232,17 @@ const Canvas: React.FC<{}> = () => {
           });
 
           const indexPathOfOpenShapeLayer =
-            Selectors.getIndexPathOfOpenShapeLayer(state);
+            Selectors.getIndexPathOfOpenShapeLayer(stateRef.current);
 
           if (selectedPoint) {
-            if (Selectors.canClosePath(state, selectedPoint) && !shiftKey) {
+            if (
+              Selectors.canClosePath(stateRef.current, selectedPoint) &&
+              !shiftKey
+            ) {
               dispatch('setIsClosed', true);
               dispatch('selectPoint', selectedPoint);
             } else {
-              const alreadySelected = state.selectedPointLists[
+              const alreadySelected = stateRef.current.selectedPointLists[
                 selectedPoint[0]
               ]?.includes(selectedPoint[1]);
 
@@ -276,7 +286,7 @@ const Canvas: React.FC<{}> = () => {
             Selectors.getCharacterIndexAtPointInSelectedLayer(
               CanvasKit,
               fontManager,
-              state,
+              stateRef.current,
               point,
               'bounded',
             );
@@ -290,10 +300,13 @@ const Canvas: React.FC<{}> = () => {
             return;
           }
 
-          if (state.selectedLayerIds.length > 0) {
-            const direction = Selectors.getScaleDirectionAtPoint(state, point);
+          if (stateRef.current.selectedLayerIds.length > 0) {
+            const direction = Selectors.getScaleDirectionAtPoint(
+              stateRef.current,
+              point,
+            );
 
-            if (direction && !state.selectedGradient) {
+            if (direction && !stateRef.current.selectedGradient) {
               dispatch('interaction', ['maybeScale', point, direction]);
 
               return;
@@ -303,7 +316,7 @@ const Canvas: React.FC<{}> = () => {
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
             fontManager,
-            state,
+            stateRef.current,
             insets,
             rawPoint,
             {
@@ -314,25 +327,28 @@ const Canvas: React.FC<{}> = () => {
           );
 
           const selectedGradientStopIndex =
-            Selectors.getGradientStopIndexAtPoint(state, point);
+            Selectors.getGradientStopIndexAtPoint(stateRef.current, point);
 
-          if (state.selectedGradient && selectedGradientStopIndex !== -1) {
+          if (
+            stateRef.current.selectedGradient &&
+            selectedGradientStopIndex !== -1
+          ) {
             dispatch('setSelectedGradientStopIndex', selectedGradientStopIndex);
 
             dispatch('interaction', ['maybeMoveGradientStop', point]);
           } else if (
-            state.selectedGradient &&
-            Selectors.isPointerOnGradientLine(state, point)
+            stateRef.current.selectedGradient &&
+            Selectors.isPointerOnGradientLine(stateRef.current, point)
           ) {
             dispatch('addStopToGradient', point);
           } else if (
-            state.selectedGradient &&
-            Selectors.isPointerOnGradientEllipseEditor(state, point)
+            stateRef.current.selectedGradient &&
+            Selectors.isPointerOnGradientEllipseEditor(stateRef.current, point)
           ) {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
           } else if (layer) {
-            if (state.selectedLayerIds.includes(layer.do_objectID)) {
-              if (shiftKey && state.selectedLayerIds.length !== 1) {
+            if (stateRef.current.selectedLayerIds.includes(layer.do_objectID)) {
+              if (shiftKey && stateRef.current.selectedLayerIds.length !== 1) {
                 dispatch('selectLayer', layer.do_objectID, 'difference');
               }
             } else {
@@ -353,15 +369,7 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [
-      state,
-      insets,
-      presses,
-      dispatch,
-      CanvasKit,
-      fontManager,
-      offsetEventPoint,
-    ],
+    [insets, presses, dispatch, CanvasKit, fontManager, offsetEventPoint],
   );
 
   const onTouchUpdate = useCallback(
@@ -379,11 +387,11 @@ const Canvas: React.FC<{}> = () => {
         return;
       }
 
-      const textSelection = Selectors.getTextSelection(state);
+      const textSelection = Selectors.getTextSelection(stateRef.current);
 
-      switch (state.interactionState.type) {
+      switch (stateRef.current.interactionState.type) {
         case 'maybeMoveGradientEllipseLength': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('interaction', ['movingGradientEllipseLength', point]);
@@ -391,7 +399,7 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'maybeSelectingText': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('interaction', ['selectingText', point]);
@@ -410,7 +418,7 @@ const Canvas: React.FC<{}> = () => {
             Selectors.getCharacterIndexAtPointInSelectedLayer(
               CanvasKit,
               fontManager,
-              state,
+              stateRef.current,
               point,
               'unbounded',
             );
@@ -425,7 +433,7 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'maybeMoveGradientStop': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('interaction', ['movingGradientStop', point]);
@@ -438,8 +446,8 @@ const Canvas: React.FC<{}> = () => {
         }
         case 'insert': {
           dispatch('interaction', [
-            state.interactionState.type,
-            state.interactionState.layerType,
+            stateRef.current.interactionState.type,
+            stateRef.current.interactionState.layerType,
             point,
           ]);
           break;
@@ -447,7 +455,7 @@ const Canvas: React.FC<{}> = () => {
         case 'insertingSymbol': {
           dispatch('interaction', [
             'insertingSymbol',
-            state.interactionState.symbolID,
+            stateRef.current.interactionState.symbolID,
             point,
           ]);
           break;
@@ -470,11 +478,11 @@ const Canvas: React.FC<{}> = () => {
         }
         case 'maybeMove':
         case 'maybeScale': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('interaction', [
-              state.interactionState.type === 'maybeMove'
+              stateRef.current.interactionState.type === 'maybeMove'
                 ? 'updateMoving'
                 : 'updateScaling',
               point,
@@ -484,7 +492,7 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'maybeMovePoint': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('interaction', ['movingPoint', origin, point]);
@@ -492,13 +500,13 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'movingPoint': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           dispatch('interaction', ['updateMovingPoint', origin, point]);
           break;
         }
         case 'maybeConvertCurveMode': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('setPointCurveMode', Sketch.CurveMode.Mirrored);
@@ -514,7 +522,7 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'maybeMoveControlPoint': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           if (isMoving(point, origin)) {
             dispatch('interaction', ['movingControlPoint', origin, point]);
@@ -522,7 +530,7 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'movingControlPoint': {
-          const { origin } = state.interactionState;
+          const { origin } = stateRef.current.interactionState;
 
           dispatch('interaction', ['updateMovingControlPoint', origin, point]);
 
@@ -531,7 +539,7 @@ const Canvas: React.FC<{}> = () => {
         case 'moving':
         case 'scaling': {
           dispatch('interaction', [
-            state.interactionState.type === 'moving'
+            stateRef.current.interactionState.type === 'moving'
               ? 'updateMoving'
               : 'updateScaling',
             point,
@@ -546,11 +554,11 @@ const Canvas: React.FC<{}> = () => {
         case 'marquee': {
           dispatch('interaction', ['updateMarquee', rawPoint]);
 
-          const { origin, current } = state.interactionState;
+          const { origin, current } = stateRef.current.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            state,
-            getCurrentPage(state),
+            stateRef.current,
+            getCurrentPage(stateRef.current),
             insets,
             createRect(origin, current),
             {
@@ -568,10 +576,13 @@ const Canvas: React.FC<{}> = () => {
           break;
         }
         case 'hoverHandle': {
-          const direction = Selectors.getScaleDirectionAtPoint(state, point);
+          const direction = Selectors.getScaleDirectionAtPoint(
+            stateRef.current,
+            point,
+          );
 
           if (direction) {
-            if (direction !== state.interactionState.direction) {
+            if (direction !== stateRef.current.interactionState.direction) {
               dispatch('interaction', ['hoverHandle', direction]);
             }
           } else {
@@ -584,7 +595,7 @@ const Canvas: React.FC<{}> = () => {
           const layer = Selectors.getLayerAtPoint(
             CanvasKit,
             fontManager,
-            state,
+            stateRef.current,
             insets,
             rawPoint,
             {
@@ -608,10 +619,13 @@ const Canvas: React.FC<{}> = () => {
             );
           }
 
-          if (state.selectedLayerIds.length > 0) {
-            const direction = Selectors.getScaleDirectionAtPoint(state, point);
+          if (stateRef.current.selectedLayerIds.length > 0) {
+            const direction = Selectors.getScaleDirectionAtPoint(
+              stateRef.current,
+              point,
+            );
 
-            if (direction && !state.selectedGradient) {
+            if (direction && !stateRef.current.selectedGradient) {
               dispatch('interaction', ['hoverHandle', direction]);
 
               return;
@@ -623,7 +637,6 @@ const Canvas: React.FC<{}> = () => {
       }
     },
     [
-      state,
       insets,
       presses,
       dispatch,
@@ -640,9 +653,9 @@ const Canvas: React.FC<{}> = () => {
     ({ point: rawPoint }: CanvasTouchEvent) => {
       const point = offsetEventPoint(rawPoint);
 
-      const textSelection = Selectors.getTextSelection(state);
+      const textSelection = Selectors.getTextSelection(stateRef.current);
 
-      switch (state.interactionState.type) {
+      switch (stateRef.current.interactionState.type) {
         case 'maybeSelectingText': {
           if (!textSelection) {
             dispatch('interaction', ['reset']);
@@ -668,7 +681,7 @@ const Canvas: React.FC<{}> = () => {
             Selectors.getCharacterIndexAtPointInSelectedLayer(
               CanvasKit,
               fontManager,
-              state,
+              stateRef.current,
               point,
               'bounded',
             );
@@ -707,11 +720,11 @@ const Canvas: React.FC<{}> = () => {
         case 'marquee': {
           dispatch('interaction', ['reset']);
 
-          const { origin, current } = state.interactionState;
+          const { origin, current } = stateRef.current.interactionState;
 
           const layers = Selectors.getLayersInRect(
-            state,
-            getCurrentPage(state),
+            stateRef.current,
+            getCurrentPage(stateRef.current),
             insets,
             createRect(origin, current),
             {
@@ -741,13 +754,13 @@ const Canvas: React.FC<{}> = () => {
         case 'moving':
         case 'scaling': {
           dispatch('interaction', [
-            state.interactionState.type === 'moving'
+            stateRef.current.interactionState.type === 'moving'
               ? 'updateMoving'
               : 'updateScaling',
             point,
           ]);
 
-          if (state.interactionState.type === 'moving')
+          if (stateRef.current.interactionState.type === 'moving')
             dispatch('moveLayersIntoParentAtPoint', point);
 
           dispatch('interaction', ['reset']);
@@ -767,15 +780,7 @@ const Canvas: React.FC<{}> = () => {
         }
       }
     },
-    [
-      state,
-      insets,
-      presses,
-      dispatch,
-      CanvasKit,
-      fontManager,
-      offsetEventPoint,
-    ],
+    [insets, presses, dispatch, CanvasKit, fontManager, offsetEventPoint],
   );
 
   const gestures = useCanvasGestures(

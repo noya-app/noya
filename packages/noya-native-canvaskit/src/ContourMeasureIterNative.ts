@@ -6,6 +6,7 @@ import PathNative from './PathNative';
 import { Rect } from './types';
 
 type SkContourMeasureIter = ReturnType<typeof Skia['ContourMeasureIter']>;
+
 type SkContourMeasure = Exclude<ReturnType<SkContourMeasureIter['next']>, null>;
 
 class ContourMeasureNative
