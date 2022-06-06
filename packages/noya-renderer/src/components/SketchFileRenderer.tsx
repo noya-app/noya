@@ -236,7 +236,7 @@ export default React.memo(function SketchFileRenderer() {
     return <PseudoPoint point={interactionState.point} />;
   }, [interactionState]);
 
-  // The `useMemo` is just for organization here, since we have `state` in the deps
+  // // The `useMemo` is just for organization here, since we have `state` in the deps
   const editPathPseudoElements = useMemo(() => {
     const indexPath = Selectors.getIndexPathOfOpenShapeLayer(state);
 
@@ -245,8 +245,9 @@ export default React.memo(function SketchFileRenderer() {
       interactionState.type !== 'editPath' ||
       !interactionState.point ||
       Selectors.getPathElementAtPoint(state, interactionState.point)
-    )
+    ) {
       return;
+    }
 
     const layer = Layers.access(
       page,

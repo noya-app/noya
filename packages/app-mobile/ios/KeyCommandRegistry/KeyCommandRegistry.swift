@@ -38,7 +38,7 @@ func parseKeyName(key: String) -> String {
   if Modifiers.from(string: key) != nil {
     return "-"
   }
-  
+
   if let specialKey = SpecialKeys.from(string: key) {
     switch specialKey {
       case SpecialKeys.escape:
@@ -49,7 +49,7 @@ func parseKeyName(key: String) -> String {
         if #available(iOS 15.0, *) {
           return UIKeyCommand.inputDelete
         }
-      
+
         return key
       case SpecialKeys.home:
         return UIKeyCommand.inputHome
@@ -67,7 +67,7 @@ func parseKeyName(key: String) -> String {
         return UIKeyCommand.inputRightArrow
     }
   }
-  
+
   return key
 }
 
@@ -82,7 +82,7 @@ class KeyCommandRegistry: RCTEventEmitter {
       UIMenuSystem.main.setNeedsRebuild()
     }
   }
-  
+
   func buildKeyCommand(_ options: NSDictionary) {
     guard let baseCommand = options["command"] as? String else { return }
 
@@ -132,10 +132,10 @@ class KeyCommandRegistry: RCTEventEmitter {
       keyCommands[baseCommand] = keyCommand
     }
   }
-  
+
   func removeCommand(_ option: Any) {
     guard let command = option as? String else { return }
-    
+
     for var (_, commands) in menuKeyCommands {
       commands.removeValue(forKey: command)
     }
@@ -143,7 +143,7 @@ class KeyCommandRegistry: RCTEventEmitter {
     // Remove given command from menu-less commands
     self.keyCommands.removeValue(forKey: command)
   }
-  
+
   @objc
   func registerCommands(_ commands: NSArray) {
     for command in commands {
@@ -151,16 +151,16 @@ class KeyCommandRegistry: RCTEventEmitter {
         buildKeyCommand(command as! NSDictionary)
       }
     }
-    
+
     rebuildCommands()
   }
-  
+
   @objc
   func unregisterCommands(_ commands: NSArray) {
     for command in commands {
       removeCommand(command)
     }
-    
+
     rebuildCommands()
   }
 
@@ -168,7 +168,7 @@ class KeyCommandRegistry: RCTEventEmitter {
   override class func requiresMainQueueSetup() -> Bool {
     return true
   }
-  
+
   override func supportedEvents() -> [String]! {
     return ["onKeyCommand"]
   }
@@ -218,14 +218,14 @@ class KeyCommandRegistry: RCTEventEmitter {
 
     return commands
   }
-  
+
   static func allMenulessCommands() -> [UIKeyCommand] {
     var commands: [UIKeyCommand] = []
-    
+
     instances.forEach({ instance in
       commands.append(contentsOf: instance.keyCommands.values)
     })
-    
+
     return commands
   }
 
@@ -234,7 +234,7 @@ class KeyCommandRegistry: RCTEventEmitter {
       // Search in commands without assigned menu
       instance.keyCommands.forEach({ (commandName, command) in
         guard command == keyCommand else { return }
-        
+
         instance.sendEvent(withName: "onKeyCommand", body: ["command": commandName])
       })
 

@@ -11,7 +11,6 @@ import {
 } from 'noya-app-state-context';
 import type { ApplicationMenuItemType } from 'noya-embedded';
 import { decode, encode } from 'noya-sketch-file';
-import { useHistory } from 'noya-workspace-ui';
 import { TreeView } from 'noya-designsystem';
 import { Base64 } from 'noya-utils';
 
@@ -35,7 +34,6 @@ const MainMenu: React.FC = () => {
     setShowRulers,
     preferences: { showRulers },
   } = useWorkspace();
-  const { redoDisabled, undoDisabled } = useHistory();
   const getStateSnapshot = useGetStateSnapshot();
   const dispatch = useDispatch();
 
@@ -124,14 +122,7 @@ const MainMenu: React.FC = () => {
           handleSave(value);
           break;
         }
-        case 'undo': {
-          dispatch('undo');
-          break;
-        }
-        case 'redo': {
-          dispatch('redo');
-          break;
-        }
+
         case 'showRulers': {
           setShowRulers(!showRulers);
           break;
@@ -169,25 +160,6 @@ const MainMenu: React.FC = () => {
         ],
       },
       {
-        title: 'Edit',
-        items: [
-          {
-            value: 'undo',
-            title: 'Undo',
-            disabled: undoDisabled,
-            shortcut: 'Mod-z',
-            role: 'undo',
-          },
-          {
-            value: 'redo',
-            title: 'Redo',
-            disabled: redoDisabled,
-            shortcut: 'Mod-Shift-z',
-            role: 'redo',
-          },
-        ],
-      },
-      {
         title: 'Preferences',
         items: [
           {
@@ -198,7 +170,7 @@ const MainMenu: React.FC = () => {
         ],
       },
     ];
-  }, [undoDisabled, showRulers, redoDisabled]);
+  }, [showRulers]);
 
   const menuElements = useMemo(
     () =>

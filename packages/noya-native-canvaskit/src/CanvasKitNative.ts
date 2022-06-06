@@ -25,11 +25,12 @@ import {
   TypefaceFontProviderFactoryNative,
 } from './misc';
 import ImageFilterFactoryNative from './ImageFilterNative';
-import { ParagraphBuilderFactoryNative } from './ParagraphNative';
-import { MatrixHelpers, ColorMatrixHelpers } from './MatrixHelpers';
-import { ColorFilterFactoryNative } from './ColorFilterNative';
 import { MaskFilterFactoryNative } from './MaskFilterNative';
+import { ColorFilterFactoryNative } from './ColorFilterNative';
+import ContourMeasureIterNative from './ContourMeasureIterNative';
+import { ParagraphBuilderFactoryNative } from './ParagraphNative';
 import { RuntimeEffectFactoryNative } from './RuntimeEffectNative';
+import { MatrixHelpers, ColorMatrixHelpers } from './MatrixHelpers';
 import ImageNative from './ImageNative';
 import PaintNative from './PaintNative';
 import PathNative from './PathNative';
@@ -134,7 +135,7 @@ class CanvasKitNative
 
   // Constructors, i.e. things made with `new CanvasKit.Foo()`;s
   ParagraphStyle = ParagraphStyleNative;
-  ContourMeasureIter = 0 as any;
+  ContourMeasureIter = ContourMeasureIterNative;
   Font = FontNative;
   Path = PathNative;
   Paint = PaintNative;

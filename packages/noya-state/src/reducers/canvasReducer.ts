@@ -476,7 +476,11 @@ export function canvasReducer(
           point,
         };
 
+        // In case of 1-point layer add next add the new point
+        // before the already existing one to keep drawing
+        // direction enforced by curveFrom points being default point to drag
         const isLastPointSelected =
+          layer.points.length > 1 &&
           pointIndexPath.pointIndex === layer.points.length - 1;
 
         const newDecodedPoints = isLastPointSelected

@@ -32,7 +32,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
 
     return true
   }
-  
+
   @objc func onKeyCommand(_ sender: AnyObject) {
     if let keyCommand = sender as? UIKeyCommand {
       KeyCommandRegistry.onKeyCommand(keyCommand: keyCommand)
@@ -50,17 +50,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
     builder.remove(menu: .view)
     builder.remove(menu: .window)
     builder.remove(menu: .help)
-    
+
     let commands = KeyCommandRegistry.allMenuCommands()
     let menuNames = commands.keys.sorted { $0 < $1 }
-    
+
     // Helper variable to insert the menus in correct order
     var prevMenuIdentifier: UIMenu.Identifier = .application
-    
+
     menuNames.forEach({ menuName in
       let commandList = commands[menuName]!
       let menuIdentifier = UIMenu.Identifier("noyamobile.menusystem.\(menuName)")
-      
+
       let menu = UIMenu(
         title: menuName,
         image: nil,
@@ -68,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, KeyCommandable {
         options: [],
         children: commandList.sorted { $0.title < $1.title }
       )
-      
+
       builder.insertSibling(menu, afterMenu: prevMenuIdentifier)
       prevMenuIdentifier = menuIdentifier
     })
