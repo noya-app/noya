@@ -1,17 +1,31 @@
+import { MakerDeb } from '@electron-forge/maker-deb';
+import { MakerRpm } from '@electron-forge/maker-rpm';
+import { MakerSquirrel } from '@electron-forge/maker-squirrel';
+import { MakerZIP } from '@electron-forge/maker-zip';
+import { WebpackPlugin } from '@electron-forge/plugin-webpack';
+import { WebpackConfiguration } from '@electron-forge/plugin-webpack/dist/Config';
+import type { ForgeConfig } from '@electron-forge/shared-types';
+
+import mainConfig from './webpack.main.config';
+import rendererConfig from './webpack.renderer.config';
+
 const appName = 'Noya';
 const appBundleId = 'com.noyasoftware.noya';
 
-const config = {
+const config: ForgeConfig = {
   packagerConfig: {
     name: appName,
     executableName: appName,
     appBundleId,
     osxSign: {
       identity: 'Developer ID Application: Devin Abbott (CV2RHZWPY9)',
-      hardenedRuntime: true,
-      'gatekeeper-assess': false,
-      entitlements: './entitlements.plist',
-      'entitlements-inherit': './entitlements.plist',
+      optionsForFile() {
+        return {
+          hardenedRuntime: true,
+          'gatekeeper-assess': false,
+          entitlements: './entitlements.plist',
+        };
+      },
     },
   },
   publishers: [
@@ -27,44 +41,28 @@ const config = {
     },
   ],
   makers: [
-    {
-      name: '@electron-forge/maker-squirrel',
-      config: {
-        name: 'noya_desktop',
-      },
-    },
-    {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
-    },
-    {
-      name: '@electron-forge/maker-deb',
-      config: {},
-    },
-    {
-      name: '@electron-forge/maker-rpm',
-      config: {},
-    },
+    new MakerSquirrel({
+      name: 'noya_desktop',
+    }),
+    new MakerZIP({}, ['darwin']),
+    new MakerRpm({}),
+    new MakerDeb({}),
   ],
   plugins: [
-    {
-      name: '@electron-forge/plugin-webpack',
-      config: {
-        mainConfig: './webpack.config.js',
-        renderer: {
-          config: './webpack.renderer.config.js',
-          entryPoints: [
-            {
-              name: 'main_window',
+    new WebpackPlugin({
+      mainConfig: mainConfig as WebpackConfiguration,
+      renderer: {
+        config: rendererConfig as WebpackConfiguration,
+        entryPoints: [
+          {
+            name: 'main_window',
+            preload: {
               js: './src/preload.ts',
-              preload: {
-                js: './src/preload.ts',
-              },
             },
-          ],
-        },
+          },
+        ],
       },
-    },
+    }),
   ],
 };
 
@@ -86,7 +84,7 @@ function notarizeMaybe() {
     return;
   }
 
-  config.packagerConfig.osxNotarize = {
+  (config.packagerConfig as any).osxNotarize = {
     appBundleId,
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_ID_PASSWORD,

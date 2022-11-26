@@ -1,8 +1,10 @@
-const baseConfig = require('./webpack.config');
+import type { Configuration } from 'webpack';
+
+import baseConfig from './webpack.main.config';
 
 const { entry, ...rest } = baseConfig;
 
-module.exports = {
+const config: Configuration = {
   ...rest,
   externals: {
     fs: 'commonjs2 fs',
@@ -13,3 +15,5 @@ module.exports = {
     electron: 'commonjs2 electron',
   },
 };
+
+export default config;

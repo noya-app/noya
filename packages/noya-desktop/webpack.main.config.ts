@@ -1,12 +1,10 @@
-const path = require('path');
+import path from 'path';
+import type { Configuration } from 'webpack';
 
 const workspacePackagesPath = path.join(__dirname, '..');
 const workspaceNodeModulesPath = path.resolve(__dirname, '../../node_modules');
 
-/**
- * @type import('webpack').Configuration
- */
-module.exports = {
+const config: Configuration = {
   entry: './src/main.ts',
   resolve: {
     modules: [workspaceNodeModulesPath, 'node_modules'],
@@ -14,12 +12,15 @@ module.exports = {
   },
   module: {
     rules: [
+      // Add support for native node modules
       {
-        test: /\.node$/,
+        // We're specifying native_modules in the test because the asset relocator loader generates a
+        // "fake" .node file which is really a cjs file.
+        test: /native_modules[/\\].+\.node$/,
         use: 'node-loader',
       },
       {
-        test: /\.(m?js|node)$/,
+        test: /[/\\]node_modules[/\\].+\.(m?js|node)$/,
         parser: { amd: false },
         use: {
           loader: '@vercel/webpack-asset-relocator-loader',
@@ -43,3 +44,5 @@ module.exports = {
     ],
   },
 };
+
+export default config;
