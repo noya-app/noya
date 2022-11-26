@@ -47,9 +47,9 @@ const config = {
     },
   ],
   plugins: [
-    [
-      '@electron-forge/plugin-webpack',
-      {
+    {
+      name: '@electron-forge/plugin-webpack',
+      config: {
         mainConfig: './webpack.config.js',
         renderer: {
           config: './webpack.renderer.config.js',
@@ -64,7 +64,7 @@ const config = {
           ],
         },
       },
-    ],
+    },
   ],
 };
 

@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: node:14.17
+      image: node:16.18.1
       env:
         CI: true
 
