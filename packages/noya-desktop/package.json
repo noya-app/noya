@@ -2,12 +2,12 @@
   "name": "Noya",
   "private": true,
   "productName": "Noya",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Noya wrapped with electron",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
-    "package": "electron-forge package",
+    "package": "electron-forge package --arch=all",
     "make": "electron-forge make",
     "release": "electron-forge publish",
     "clean": "rm -rf .webpack out"
