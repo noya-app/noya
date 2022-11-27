@@ -23,23 +23,20 @@
     "email": "dabbott@noyasoftware.com"
   },
   "license": "MIT",
-  "config": {
-    "forge": "./forge.config.js"
-  },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.59",
-    "@electron-forge/maker-deb": "^6.0.0-beta.59",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.59",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
-    "@electron-forge/maker-zip": "^6.0.0-beta.59",
-    "@electron-forge/plugin-webpack": "6.0.0-beta.59",
-    "@electron-forge/publisher-github": "^6.0.0-beta.59",
-    "@vercel/webpack-asset-relocator-loader": "1.6.0",
-    "electron": "13.2.1",
+    "@electron-forge/cli": "^6.0.3",
+    "@electron-forge/maker-deb": "^6.0.3",
+    "@electron-forge/maker-rpm": "^6.0.3",
+    "@electron-forge/maker-squirrel": "^6.0.3",
+    "@electron-forge/maker-zip": "^6.0.3",
+    "@electron-forge/plugin-webpack": "^6.0.3",
+    "@electron-forge/publisher-github": "^6.0.3",
+    "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "electron": "^21.3.1",
     "node-loader": "^2.0.0"
   },
   "dependencies": {
-    "electron-context-menu": "^3.1.1",
+    "electron-context-menu": "^3.6.0",
     "electron-squirrel-startup": "^1.0.0",
     "update-electron-app": "^2.0.1"
   }

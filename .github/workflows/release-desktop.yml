@@ -27,7 +27,7 @@ jobs:
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
       - uses: actions/setup-node@main
         with:
-          node-version: 14.17
+          node-version: 16.18.1
       - run: yarn
       - run: yarn release:desktop
         env:
