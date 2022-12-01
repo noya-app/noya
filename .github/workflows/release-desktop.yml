@@ -1,6 +1,7 @@
 name: Release Desktop App
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'desktop-v*'
@@ -18,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set MacOS signing certs
-        if: matrix.os == 'macOS-latest'
+        if: matrix.os == 'macos-latest'
         run: |
           chmod +x ./packages/noya-desktop/tools/add-macos-cert.sh
           ./packages/noya-desktop/tools/add-macos-cert.sh
@@ -29,7 +30,8 @@ jobs:
         with:
           node-version: 16.18.1
       - run: yarn
-      - run: yarn release:desktop
+      - run: |
+          yarn release:desktop ${{ matrix.os == 'macos-latest' && '--arch=universal' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
