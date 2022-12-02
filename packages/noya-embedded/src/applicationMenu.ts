@@ -21,7 +21,8 @@ export type ApplicationMenuItemType =
   | 'copy'
   | 'paste'
   // Preferences
-  | 'showRulers';
+  | 'showRulers'
+  | 'showPageListThumbnails';
 
 export type ApplicationMenuItem = Electron.MenuItemConstructorOptions;
 

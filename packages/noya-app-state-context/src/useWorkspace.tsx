@@ -1,7 +1,7 @@
+import { useDispatch, useWorkspaceState } from 'noya-app-state-context';
+import { Insets, Size } from 'noya-geometry';
 import { LayerHighlight } from 'noya-state';
 import { useCallback, useMemo } from 'react';
-import { useWorkspaceState, useDispatch } from 'noya-app-state-context';
-import { Insets, Size } from 'noya-geometry';
 
 export function useWorkspace() {
   const state = useWorkspaceState();
@@ -25,6 +25,11 @@ export function useWorkspace() {
 
   const setShowRulers = useCallback(
     (value: boolean) => dispatch('setShowRulers', value),
+    [dispatch],
+  );
+
+  const setShowPageListThumbnails = useCallback(
+    (value: boolean) => dispatch('setShowPageListThumbnails', value),
     [dispatch],
   );
 
@@ -72,6 +77,7 @@ export function useWorkspace() {
       preferences,
       setCanvasSize,
       setShowRulers,
+      setShowPageListThumbnails,
       didHandleFocus,
       renamingPage,
       startRenamingPage,
@@ -87,6 +93,7 @@ export function useWorkspace() {
       preferences,
       setCanvasSize,
       setShowRulers,
+      setShowPageListThumbnails,
       didHandleFocus,
       renamingPage,
       startRenamingPage,

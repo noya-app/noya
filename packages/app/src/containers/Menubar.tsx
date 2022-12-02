@@ -1,4 +1,3 @@
-import { HamburgerMenuIcon } from 'noya-icons';
 import { FileSystemHandle } from 'browser-fs-access';
 import {
   useDispatch,
@@ -13,6 +12,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { applicationMenu, ApplicationMenuItemType } from 'noya-embedded';
+import { HamburgerMenuIcon } from 'noya-icons';
 import { decode, encode } from 'noya-sketch-file';
 import { ApplicationState } from 'noya-state';
 import { memo, useCallback, useEffect, useMemo } from 'react';
@@ -25,7 +25,9 @@ interface Props {
   fileHandle?: FileSystemHandle;
   getStateSnapshot: () => ApplicationState;
   setShowRulers: (value: boolean) => void;
+  setShowPageListThumbnails: (value: boolean) => void;
   showRulers: boolean;
+  showPageListThumbnails: boolean;
   redoDisabled: boolean;
   undoDisabled: boolean;
 }
@@ -34,7 +36,9 @@ const MenubarContent = memo(function MenubarContent({
   fileHandle,
   getStateSnapshot,
   setShowRulers,
+  setShowPageListThumbnails,
   showRulers,
+  showPageListThumbnails,
   redoDisabled,
   undoDisabled,
 }: Props) {
@@ -163,10 +167,21 @@ const MenubarContent = memo(function MenubarContent({
             title: 'Rulers',
             checked: showRulers,
           },
+          {
+            value: 'showPageListThumbnails',
+            title: 'Page List Thumbnails',
+            checked: showPageListThumbnails,
+          },
         ],
       },
     ]);
-  }, [isElectron, redoDisabled, showRulers, undoDisabled]);
+  }, [
+    isElectron,
+    redoDisabled,
+    showPageListThumbnails,
+    showRulers,
+    undoDisabled,
+  ]);
 
   const onSelectMenuItem = useCallback(
     (value: ApplicationMenuItemType) => {
@@ -197,9 +212,20 @@ const MenubarContent = memo(function MenubarContent({
         case 'showRulers':
           setShowRulers(!showRulers);
           return;
+        case 'showPageListThumbnails':
+          setShowPageListThumbnails(!showPageListThumbnails);
+          return;
       }
     },
-    [dispatch, handleOpen, handleSave, setShowRulers, showRulers],
+    [
+      dispatch,
+      handleOpen,
+      handleSave,
+      setShowPageListThumbnails,
+      setShowRulers,
+      showPageListThumbnails,
+      showRulers,
+    ],
   );
 
   useEffect(() => {
@@ -233,7 +259,8 @@ export default function Menubar() {
   const {
     fileHandle,
     setShowRulers,
-    preferences: { showRulers },
+    setShowPageListThumbnails,
+    preferences: { showRulers, showPageListThumbnails },
   } = useWorkspace();
   const getStateSnapshot = useGetStateSnapshot();
   const { redoDisabled, undoDisabled } = useHistory();
@@ -245,6 +272,8 @@ export default function Menubar() {
       redoDisabled={redoDisabled}
       undoDisabled={undoDisabled}
       showRulers={showRulers}
+      setShowPageListThumbnails={setShowPageListThumbnails}
+      showPageListThumbnails={showPageListThumbnails}
       setShowRulers={setShowRulers}
     />
   );

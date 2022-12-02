@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { memo } from 'react';
-import CanvasGridItem from './CanvasGridItem';
+import CanvasPreviewItem from './CanvasPreviewItem';
 
 interface Props {
   layer: Sketch.SymbolMaster;
@@ -9,7 +9,7 @@ interface Props {
 
 export default memo(function Symbol({ layer }: Props) {
   return (
-    <CanvasGridItem
+    <CanvasPreviewItem
       renderContent={(size) => (
         <RCKLayerPreview
           layer={layer}

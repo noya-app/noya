@@ -1,41 +1,9 @@
-import Sketch from 'noya-file-format';
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { GridView, MenuItem } from 'noya-designsystem';
-import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
-import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
-import CanvasGridItem from '../components/theme/CanvasGridItem';
+import { memo, useCallback } from 'react';
+import { PagePreviewItem } from './PagePreviewItem';
 
 export type PageGridMenuItemType = 'duplicate' | 'delete' | 'rename';
-
-interface PageGridItemProps {
-  page: Sketch.Page;
-}
-
-const PageGridItem = memo(function PageGridItem({ page }: PageGridItemProps) {
-  const frame = useMemo(
-    () => Selectors.getPageContentBoundingRect(page),
-    [page],
-  );
-
-  return (
-    <CanvasGridItem
-      renderContent={useCallback(
-        (size) =>
-          frame && (
-            <RCKLayerPreview
-              layer={page}
-              layerFrame={frame}
-              previewSize={size}
-              scalingMode="down"
-              padding={10}
-            />
-          ),
-        [frame, page],
-      )}
-    />
-  );
-});
 
 export default memo(function PagesGrid() {
   const { startRenamingPage } = useWorkspace();
@@ -85,7 +53,7 @@ export default memo(function PagesGrid() {
                 dispatch('setTab', 'canvas');
               }}
             >
-              <PageGridItem page={item} />
+              <PagePreviewItem page={item} padding={10} />
             </GridView.Item>
           );
         })}
