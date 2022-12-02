@@ -1,12 +1,12 @@
-import Sketch from 'noya-file-format';
+import produce from 'immer';
 import { sketchColorToRgba } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { center, Size } from 'noya-geometry';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';
-import produce from 'immer';
-import React, { memo, useMemo } from 'react';
-import CanvasGridItem from './CanvasGridItem';
+import { memo, useMemo } from 'react';
+import CanvasPreviewItem from './CanvasPreviewItem';
 
 interface Props {
   name: string;
@@ -90,7 +90,7 @@ export default memo(function TextStyle({ name, style }: Props) {
   }, [color]);
 
   return (
-    <CanvasGridItem
+    <CanvasPreviewItem
       background={backgroundColor}
       renderContent={(size) => (
         <RCKTextStylePreview name={name} style={style} size={size} />

@@ -1,4 +1,3 @@
-import { FileIcon, StackIcon, TokensIcon } from 'noya-icons';
 import {
   useApplicationState,
   useDispatch,
@@ -6,11 +5,14 @@ import {
 } from 'noya-app-state-context';
 import {
   IconButton,
+  Label,
   MenuItem,
   RelativeDropPosition,
   Spacer,
   TreeView,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { FileIcon, StackIcon, TokensIcon } from 'noya-icons';
 import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';
@@ -22,6 +24,7 @@ import React, {
   useState,
 } from 'react';
 import styled, { useTheme } from 'styled-components';
+import { PagePreviewItem } from './PagePreviewItem';
 
 const Container = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   ...(expanded ? { height: '200px' } : { flex: '0 0 auto' }),
@@ -29,6 +32,46 @@ const Container = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   flexDirection: 'column',
   background: 'rgba(255,255,255,0.02)',
 }));
+
+const PagePreviewContainer = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+});
+
+const PageThumbnailContainer = styled.div({
+  width: 128,
+  height: 72,
+  background: 'white',
+});
+
+const PageNumberContainer = styled.div({
+  width: 16,
+  textAlign: 'center',
+});
+
+interface PagePreviewProps {
+  page: Sketch.Page;
+  pageNumber: number;
+  selected: boolean;
+}
+
+const PagePreview = memo(function PagePreview({
+  page,
+  pageNumber,
+  selected,
+}: PagePreviewProps) {
+  return (
+    <PagePreviewContainer>
+      <PageNumberContainer>
+        <Label.Label selected={selected}>{pageNumber}</Label.Label>
+      </PageNumberContainer>
+      <Spacer.Horizontal size={16} />
+      <PageThumbnailContainer>
+        <PagePreviewItem page={page} />
+      </PageThumbnailContainer>
+    </PagePreviewContainer>
+  );
+});
 
 const TitlePrefix = styled.span({
   opacity: 0.7,
@@ -40,8 +83,20 @@ type MenuItemType = 'duplicate' | 'rename' | 'delete';
 type PageInfo = {
   id: string;
   name: string;
-  type: 'header' | 'design' | 'theme';
-};
+} & (
+  | {
+      type: 'design';
+      page?: Sketch.Page;
+      pageNumber: number;
+    }
+  | {
+      type: 'header';
+      subtitle?: string;
+    }
+  | {
+      type: 'theme';
+    }
+);
 
 interface Props {
   currentTab: WorkspaceTab;
@@ -49,8 +104,10 @@ interface Props {
   pageInfo: PageInfo[];
   canDelete: boolean;
   renamingPage?: string;
+  renameOnCreate?: boolean;
   startRenamingPage: (id: string) => void;
   didHandleFocus: () => void;
+  listScrollThreshold: number;
 }
 
 const PageListContent = memo(function PageListContent({
@@ -61,6 +118,8 @@ const PageListContent = memo(function PageListContent({
   renamingPage,
   startRenamingPage,
   didHandleFocus,
+  renameOnCreate,
+  listScrollThreshold,
 }: Props) {
   const dispatch = useDispatch();
   const { icon: iconColor, iconSelected: iconSelectedColor } =
@@ -106,9 +165,12 @@ const PageListContent = memo(function PageListContent({
 
       const pageId = uuid();
       dispatch('addPage', pageId);
-      startRenamingPage(pageId);
+
+      if (renameOnCreate) {
+        startRenamingPage(pageId);
+      }
     },
-    [dispatch, startRenamingPage],
+    [dispatch, renameOnCreate, startRenamingPage],
   );
 
   useLayoutEffect(() => {
@@ -122,12 +184,9 @@ const PageListContent = memo(function PageListContent({
 
   const lastIndex = pageInfo.length - 1;
   const pages = isExpanded ? pageInfo : pageInfo.slice(0, 1);
-  const selectedPageName = pageInfo.find(
-    (info) => info.id === selectedPageId,
-  )?.name;
 
   // Limit the container size when we have enough pages
-  const scrollable = pages.length > 5;
+  const scrollable = pages.length > listScrollThreshold;
 
   return (
     <Container expanded={scrollable}>
@@ -192,6 +251,21 @@ const PageListContent = memo(function PageListContent({
                 ? StackIcon
                 : FileIcon;
 
+            const icon =
+              page.type === 'design' && page.page ? (
+                <PagePreview
+                  selected={selected}
+                  pageNumber={page.pageNumber}
+                  page={page.page}
+                />
+              ) : (
+                page.type !== 'header' && (
+                  <IconComponent
+                    color={selected ? iconSelectedColor : iconColor}
+                  />
+                )
+              );
+
             return (
               <TreeView.Row<MenuItemType>
                 id={page.id}
@@ -231,36 +305,33 @@ const PageListContent = memo(function PageListContent({
 
                   dispatch('selectPage', page.id);
                 }}
-                icon={
-                  page.type !== 'header' && (
-                    <IconComponent
-                      color={selected ? iconSelectedColor : iconColor}
+                icon={icon}
+              >
+                {
+                  // If we're showing a thumbnail, we don't show the page name
+                  page.type === 'design' && page.page ? (
+                    ''
+                  ) : page.id === editingPage ? (
+                    <TreeView.EditableRowTitle
+                      autoFocus
+                      value={page.name}
+                      onSubmitEditing={(name) => {
+                        setEditingPage(undefined);
+
+                        if (!name) return;
+
+                        dispatch('setPageName', page.id, name);
+                      }}
                     />
+                  ) : page.type === 'header' && !isExpanded && page.subtitle ? (
+                    <>
+                      <TitlePrefix>{page.name} / </TitlePrefix>
+                      {page.subtitle}
+                    </>
+                  ) : (
+                    page.name
                   )
                 }
-              >
-                {page.id === editingPage ? (
-                  <TreeView.EditableRowTitle
-                    autoFocus
-                    value={page.name}
-                    onSubmitEditing={(name) => {
-                      setEditingPage(undefined);
-
-                      if (!name) return;
-
-                      dispatch('setPageName', page.id, name);
-                    }}
-                  />
-                ) : page.type === 'header' &&
-                  !isExpanded &&
-                  selectedPageName ? (
-                  <>
-                    <TitlePrefix>{`${page.name} / `}</TitlePrefix>
-                    {selectedPageName}
-                  </>
-                ) : (
-                  page.name
-                )}
                 {page.type === 'header' && (
                   <>
                     <Spacer.Horizontal />
@@ -280,13 +351,12 @@ const PageListContent = memo(function PageListContent({
           [
             currentTab,
             selectedPageId,
+            iconSelectedColor,
+            iconColor,
             isExpanded,
             pageMenuItems,
             handleSelectMenuItem,
-            iconSelectedColor,
-            iconColor,
             editingPage,
-            selectedPageName,
             handleAddPage,
             dispatch,
             startRenamingPage,
@@ -299,25 +369,48 @@ const PageListContent = memo(function PageListContent({
 
 export default function PageList() {
   const [state] = useApplicationState();
-  const { renamingPage, startRenamingPage, didHandleFocus } = useWorkspace();
+  const {
+    renamingPage,
+    startRenamingPage,
+    didHandleFocus,
+    preferences: { showPageListThumbnails: showPageListThumbnail },
+  } = useWorkspace();
   const currentTab = Selectors.getCurrentTab(state);
+
+  const selectedPageIndex = state.sketch.pages.findIndex(
+    (page) => page.do_objectID === state.selectedPage,
+  );
+  const selectedPage = state.sketch.pages.find(
+    (page) => page.do_objectID === state.selectedPage,
+  );
 
   const pageInfo = useDeepMemo([
     {
       id: 'header',
       name: 'Pages',
+      subtitle:
+        showPageListThumbnail && selectedPageIndex !== undefined
+          ? (selectedPageIndex + 1).toString()
+          : selectedPage?.name,
       type: 'header' as const,
     },
-    ...state.sketch.pages.map((page) => ({
+    ...state.sketch.pages.map((page, index) => ({
       id: page.do_objectID,
       name: page.name,
       type: 'design' as const,
+      // Include page only if needed since this will worsen perf due to re-renders
+      page: showPageListThumbnail ? page : undefined,
+      pageNumber: index + 1,
     })),
-    {
-      id: 'theme',
-      name: 'Theme',
-      type: 'theme' as const,
-    },
+    ...(showPageListThumbnail
+      ? []
+      : [
+          {
+            id: 'theme',
+            name: 'Theme',
+            type: 'theme' as const,
+          },
+        ]),
   ]);
 
   return (
@@ -327,8 +420,10 @@ export default function PageList() {
       pageInfo={pageInfo}
       canDelete={state.sketch.pages.length > 1}
       renamingPage={renamingPage}
+      renameOnCreate={!showPageListThumbnail}
       startRenamingPage={startRenamingPage}
       didHandleFocus={didHandleFocus}
+      listScrollThreshold={showPageListThumbnail ? 3 : 5}
     />
   );
 }

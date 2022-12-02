@@ -4,7 +4,7 @@ import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { PageLayer } from 'noya-state';
 import { memo, useCallback } from 'react';
 import { usePreviewLayer } from '../../hooks/usePreviewLayer';
-import CanvasGridItem from '../theme/CanvasGridItem';
+import CanvasPreviewItem from '../theme/CanvasPreviewItem';
 
 interface Props {
   layer: PageLayer;
@@ -18,7 +18,7 @@ export default memo(function ExportPreviewRow({ layer, page }: Props) {
     <AspectRatio.Root
       ratio={Math.max(1, layer.frame.width / layer.frame.height)}
     >
-      <CanvasGridItem
+      <CanvasPreviewItem
         renderContent={useCallback(
           (size) => (
             <RCKLayerPreview

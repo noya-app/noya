@@ -42,6 +42,7 @@ export type WorkspaceState = {
   preferences: {
     showRulers: boolean;
     showPixelGrid: boolean;
+    showPageListThumbnails: boolean;
   };
 };
 
@@ -51,6 +52,7 @@ export type WorkspaceAction =
   | [type: 'setFileHandle', value?: FileSystemHandle]
   | [type: 'setCanvasSize', size: Size, insets: Insets]
   | [type: 'setShowRulers', value: boolean]
+  | [type: 'setShowPageListThumbnails', value: boolean]
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | HistoryAction;
@@ -114,6 +116,13 @@ export function workspaceReducer(
         draft.preferences.showRulers = value;
       });
     }
+    case 'setShowPageListThumbnails': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.preferences.showPageListThumbnails = value;
+      });
+    }
     case 'highlightLayer': {
       const [, highlight] = action;
 
@@ -151,6 +160,7 @@ export function createInitialWorkspaceState(
     preferences: {
       showRulers: false,
       showPixelGrid: true,
+      showPageListThumbnails: false,
     },
   };
 }

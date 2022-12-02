@@ -6,15 +6,20 @@ import * as Spacer from '../components/Spacer';
  * Label
  * ------------------------------------------------------------------------- */
 
-const LabelLabel = styled.label(({ theme }) => ({
-  ...theme.textStyles.small,
-  color: theme.colors.textMuted,
-  fontSize: '11px',
-  flex: '0 0 auto',
-  minWidth: '0',
-  letterSpacing: '0.4px',
-  whiteSpace: 'pre', // prevent breaking - may need to make this an option
-}));
+const LabelLabel = styled.label<{ selected?: boolean }>(
+  ({ theme, selected }) => ({
+    ...theme.textStyles.small,
+    color: theme.colors.textMuted,
+    ...(selected && {
+      color: theme.colors.text,
+    }),
+    fontSize: '11px',
+    flex: '0 0 auto',
+    minWidth: '0',
+    letterSpacing: '0.4px',
+    whiteSpace: 'pre', // prevent breaking - may need to make this an option
+  }),
+);
 
 /* ----------------------------------------------------------------------------
  * Root

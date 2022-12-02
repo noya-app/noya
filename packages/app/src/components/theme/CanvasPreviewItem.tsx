@@ -25,16 +25,16 @@ interface Props {
   background?: string;
 }
 
-export default memo(function CanvasGridItem({
+export default memo(function CanvasPreviewItem({
   renderContent,
   background,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const size = useSize(containerRef);
-  const renderer = useCallback(() => (size ? renderContent(size) : null), [
-    renderContent,
-    size,
-  ]);
+  const renderer = useCallback(
+    () => (size ? renderContent(size) : null),
+    [renderContent, size],
+  );
 
   return (
     <Container ref={containerRef} background={background}>
