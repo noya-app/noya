@@ -2,6 +2,7 @@ import { StateProvider } from 'noya-app-state-context';
 import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
 import { getCurrentPlatform, PlatformName } from 'noya-keymap';
+import { MultiplayerProvider } from 'noya-multiplayer';
 import { PromiseState } from 'noya-react-utils';
 import {
   CanvasKitProvider,
@@ -118,11 +119,13 @@ function Contents() {
   if (state.type !== 'success') return null;
 
   return (
-    <StateProvider state={state.value} dispatch={handleDispatch}>
-      <ImageCacheProvider>
-        <Workspace />
-      </ImageCacheProvider>
-    </StateProvider>
+    <MultiplayerProvider userName="Devin">
+      <StateProvider state={state.value} dispatch={handleDispatch}>
+        <ImageCacheProvider>
+          <Workspace />
+        </ImageCacheProvider>
+      </StateProvider>
+    </MultiplayerProvider>
   );
 }
 

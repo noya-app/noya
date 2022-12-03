@@ -1,6 +1,7 @@
 import produce from 'immer';
 import { useSelector } from 'noya-app-state-context';
 import {
+  Button,
   darkTheme,
   DesignSystemConfigurationProvider,
   Divider,
@@ -11,6 +12,7 @@ import {
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
+import { useMultiplayer } from 'noya-multiplayer';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -135,6 +137,9 @@ export default function Workspace() {
     });
   }, [colorScheme, isElectron]);
 
+  const multiplayer = useMultiplayer();
+  const sampleChannels = ['a', 'b', 'c'];
+
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       <DialogProvider>
@@ -176,6 +181,49 @@ export default function Workspace() {
           </LeftSidebarBorderedContent>
         </LeftSidebar>
         <MainView>
+          <pre style={{ background: 'white', margin: 0 }}>
+            User: {multiplayer.userId}
+            {'\n'}
+            Channels: [{multiplayer.channels.join(', ')}]{'\n'}
+            State Keys: [
+            {Object.entries(multiplayer.state ?? {})
+              .flatMap(([channel, object]) =>
+                Object.entries(object).map(
+                  ([key, value]) =>
+                    `${channel}.${key}=(${value.byteLength} bytes)`,
+                ),
+              )
+              .join(', ')}
+            ]
+            {sampleChannels.map((channel) => {
+              const isInChannel = multiplayer.channels.includes(channel);
+
+              return (
+                <div style={{ display: 'flex', gap: 10 }} key={channel}>
+                  <Button
+                    disabled={isInChannel}
+                    onClick={() => multiplayer.join(channel)}
+                  >
+                    Join {channel}
+                  </Button>
+                  <Button
+                    disabled={!isInChannel}
+                    onClick={() => multiplayer.leave(channel)}
+                  >
+                    Leave {channel}
+                  </Button>
+                  <Button
+                    disabled={!isInChannel}
+                    onClick={() =>
+                      multiplayer.setKeyValue(channel, 'greeting', 'hello')
+                    }
+                  >
+                    Say hello
+                  </Button>
+                </div>
+              );
+            })}
+          </pre>
           <ToolbarContainer onDoubleClick={doubleClickToolbar}>
             {useTabElement({
               canvas: <Toolbar />,

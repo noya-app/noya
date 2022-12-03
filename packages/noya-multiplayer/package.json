@@ -1,0 +1,10 @@
+{
+  "name": "noya-multiplayer",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@legendapp/state": "^0.22.4",
+    "socket.io-client": "^4.5.4"
+  }
+}
