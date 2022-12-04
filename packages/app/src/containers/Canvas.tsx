@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import {
   useApplicationState,
   useSelector,
@@ -6,34 +5,37 @@ import {
 } from 'noya-app-state-context';
 import {
   ContextMenu,
+  isLeftButtonClicked,
+  isRightButtonClicked,
   mergeEventHandlers,
   SupportedCanvasUploadType,
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
   useModKey,
-  isLeftButtonClicked,
-  isRightButtonClicked,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
+import { useMultiplayer, useObservable } from 'noya-multiplayer';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { decode } from 'noya-sketch-file';
 import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
-  ImportedImageTarget,
   getCurrentPage,
   getSelectedLineLayer,
+  ImportedImageTarget,
+  InsertedImage,
   Layers,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
-  InsertedImage,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
 import {
@@ -48,13 +50,12 @@ import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import DropTarget, { TypedFile } from '../components/FileDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
-import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useCopyHandler } from '../hooks/useCopyHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
+import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useSize } from '../hooks/useSize';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
-import { decode } from 'noya-sketch-file';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -127,6 +128,7 @@ export default memo(function Canvas() {
   const fontManager = useFontManager();
   const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
+  const pageId = getCurrentPage(state).do_objectID;
   const modKey = useModKey();
   const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
@@ -256,6 +258,14 @@ export default memo(function Canvas() {
     (point: Point) =>
       AffineTransform.scale(1 / meta.zoomValue)
         .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+        .applyTo(point),
+    [meta],
+  );
+  const unoffsetEventPoint = useCallback(
+    (point: Point) =>
+      AffineTransform.scale(1 / meta.zoomValue)
+        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+        .invert()
         .applyTo(point),
     [meta],
   );
@@ -552,10 +562,15 @@ export default memo(function Canvas() {
     ],
   );
 
+  const { setCursorPosition, cursors: cursors$ } = useMultiplayer();
+  const cursors = useObservable(cursors$);
+
   const handleMouseMove = useCallback(
     (event: React.PointerEvent) => {
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
+
+      setCursorPosition(pageId, point);
 
       const textSelection = Selectors.getTextSelection(state);
 
@@ -842,6 +857,8 @@ export default memo(function Canvas() {
     },
     [
       offsetEventPoint,
+      setCursorPosition,
+      pageId,
       state,
       dispatch,
       CanvasKit,
@@ -1204,6 +1221,38 @@ export default memo(function Canvas() {
             ref={inputRef}
             type="text"
           />
+          {Object.entries(cursors[pageId] || {}).map(([userId, info]) => {
+            // eslint-disable-next-line no-console
+            console.log(userId, info);
+            const point = unoffsetEventPoint(info.point);
+
+            return (
+              <div
+                id={'testing123'}
+                key={userId}
+                style={{
+                  position: 'absolute',
+                  top: point.y,
+                  left: point.x,
+                  borderRadius: 10,
+                  background: 'red',
+                }}
+              >
+                {userId.slice(0, 8)}
+              </div>
+            );
+            // const { point } = info;
+
+            // return (
+            //   <Cursor
+            //     key={user}
+            //     point={point}
+            //     color={info.color}
+            //     size={info.size}
+            //     name={info.name}
+            //   />
+            // );
+          })}
           <InsetContainer insets={insets}>
             {canvasSizeWithInsets && (
               // <SVGRenderer size={canvasSizeWithInsets}>

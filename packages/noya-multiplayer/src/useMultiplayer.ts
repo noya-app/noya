@@ -1,19 +1,49 @@
-import { useMultiplayerContext } from './MultiplayerContext';
-import { useSelector } from './useSelector';
+import { useCallback, useMemo } from 'react';
+import { useMultiplayer } from './MultiplayerContext';
+import { useObservableSelector } from './useObservable';
 
-export function useMultiplayer() {
-  const multiplayer = useMultiplayerContext();
+export function useMultiplayerStateKey(
+  channelId: string,
+  key: string,
+): [Uint8Array | undefined, (value: Uint8Array) => void] {
+  const { state, setKeyValue } = useMultiplayer();
 
-  // Actions
-  const join = multiplayer.join;
-  const leave = multiplayer.leave;
-  const setKeyValue = multiplayer.setKeyValue;
+  const value = useObservableSelector(state, () => state[channelId][key].get());
 
-  // State
-  const userName = useSelector(multiplayer.userName);
-  const userId = useSelector(multiplayer.userId);
-  const channels = useSelector(multiplayer.channels);
-  const state = useSelector(multiplayer.state);
+  const setValue = useCallback(
+    (value: Uint8Array) => setKeyValue(channelId, key, value),
+    [channelId, key, setKeyValue],
+  );
 
-  return { join, leave, setKeyValue, userName, userId, channels, state };
+  return useMemo(() => [value, setValue], [value, setValue]);
+}
+
+export function useMultiplayerStateString(
+  channelId: string,
+  key: string,
+): [string | undefined, (value: string) => void] {
+  const [buffer, setBuffer] = useMultiplayerStateKey(channelId, key);
+
+  return useMemo(
+    () => [
+      buffer ? new TextDecoder().decode(buffer) : undefined,
+      (value: string) => setBuffer(new TextEncoder().encode(value)),
+    ],
+    [buffer, setBuffer],
+  );
+}
+
+export function useMultiplayerStateJSON<T>(
+  channelId: string,
+  key: string,
+): [T | undefined, (value: T) => void] {
+  const [string, setString] = useMultiplayerStateString(channelId, key);
+
+  return useMemo(
+    () => [
+      string !== undefined ? JSON.parse(string) : undefined,
+      (value: T) => setString(JSON.stringify(value)),
+    ],
+    [string, setString],
+  );
 }

@@ -12,7 +12,7 @@ import {
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
-import { useMultiplayer } from 'noya-multiplayer';
+import { useMultiplayer, useObservable } from 'noya-multiplayer';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -138,6 +138,10 @@ export default function Workspace() {
   }, [colorScheme, isElectron]);
 
   const multiplayer = useMultiplayer();
+  const channels = useObservable(multiplayer.channels);
+  const userId = useObservable(multiplayer.userId);
+  const state = useObservable(multiplayer.state);
+  const cursors = useObservable(multiplayer.cursors);
   const sampleChannels = ['a', 'b', 'c'];
 
   return (
@@ -182,11 +186,13 @@ export default function Workspace() {
         </LeftSidebar>
         <MainView>
           <pre style={{ background: 'white', margin: 0 }}>
-            User: {multiplayer.userId}
+            User: {userId}
             {'\n'}
-            Channels: [{multiplayer.channels.join(', ')}]{'\n'}
+            Channels: [{channels.join(', ')}]{'\n'}
+            Cursors: {JSON.stringify(cursors, null, 2)}
+            {'\n'}
             State Keys: [
-            {Object.entries(multiplayer.state ?? {})
+            {Object.entries(state ?? {})
               .flatMap(([channel, object]) =>
                 Object.entries(object).map(
                   ([key, value]) =>
@@ -196,7 +202,7 @@ export default function Workspace() {
               .join(', ')}
             ]
             {sampleChannels.map((channel) => {
-              const isInChannel = multiplayer.channels.includes(channel);
+              const isInChannel = channels.includes(channel);
 
               return (
                 <div style={{ display: 'flex', gap: 10 }} key={channel}>

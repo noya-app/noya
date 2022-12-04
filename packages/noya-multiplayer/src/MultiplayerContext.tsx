@@ -25,7 +25,7 @@ export const MultiplayerProvider = memo(function MultiplayerProvider({
   );
 });
 
-export function useMultiplayerContext() {
+export function useMultiplayer() {
   const value = useContext(MultiplayerContext);
 
   if (!value) {

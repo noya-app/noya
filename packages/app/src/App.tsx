@@ -1,8 +1,12 @@
 import { StateProvider } from 'noya-app-state-context';
-import { fileManager } from 'noya-embedded';
 import { decodeFontName } from 'noya-fonts';
 import { getCurrentPlatform, PlatformName } from 'noya-keymap';
-import { MultiplayerProvider } from 'noya-multiplayer';
+import {
+  MultiplayerProvider,
+  useAutoJoinChannel,
+  useMultiplayer,
+  useMultiplayerStateJSON,
+} from 'noya-multiplayer';
 import { PromiseState } from 'noya-react-utils';
 import {
   CanvasKitProvider,
@@ -12,7 +16,7 @@ import {
   useDownloadFont,
   useFontManager,
 } from 'noya-renderer';
-import { decode, SketchFile } from 'noya-sketch-file';
+import { SketchFile } from 'noya-sketch-file';
 import {
   createInitialWorkspaceState,
   createSketchFile,
@@ -21,12 +25,11 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import Workspace from './containers/Workspace';
 import {
   EnvironmentParameters,
   EnvironmentParametersProvider,
-  useEnvironmentParameter,
 } from './hooks/useEnvironmentParameters';
 import {
   castHashParameter,
@@ -40,7 +43,6 @@ type Action =
 function Contents() {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const documentPath = useEnvironmentParameter('documentPath');
 
   const reducer = useMemo(
     () =>
@@ -75,24 +77,24 @@ function Contents() {
 
   const [state, dispatch] = useReducer(reducer, { type: 'pending' });
 
-  useEffect(() => {
-    if (state.type === 'success') return;
+  // useEffect(() => {
+  //   if (state.type === 'success') return;
 
-    async function loadFile() {
-      const file = await fileManager.open({ path: documentPath });
-      const data = await file.arrayBuffer();
-      const sketch = await decode(data);
+  //   async function loadFile() {
+  //     const file = await fileManager.open({ path: documentPath });
+  //     const data = await file.arrayBuffer();
+  //     const sketch = await decode(data);
 
-      dispatch({ type: 'set', value: sketch });
-      dispatch({ type: 'update', value: ['setFileHandle', file.handle] });
-    }
+  //     dispatch({ type: 'set', value: sketch });
+  //     dispatch({ type: 'update', value: ['setFileHandle', file.handle] });
+  //   }
 
-    if (documentPath) {
-      loadFile();
-    } else {
-      dispatch({ type: 'set', value: createSketchFile() });
-    }
-  }, [documentPath, state.type]);
+  //   if (documentPath) {
+  //     loadFile();
+  //   } else {
+  //     dispatch({ type: 'set', value: createSketchFile() });
+  //   }
+  // }, [documentPath, state.type]);
 
   const handleDispatch = useCallback((action: WorkspaceAction) => {
     dispatch({ type: 'update', value: action });
@@ -116,16 +118,56 @@ function Contents() {
     });
   }, [downloadFont, fontManager, state]);
 
+  const { join, channels } = useMultiplayer();
+  const isMember = useAutoJoinChannel('root');
+  const [sharedDocument, setSharedDocument] =
+    useMultiplayerStateJSON<SketchFile>('root', 'document');
+  const didInitialize = useRef(false);
+
+  // Load shared document if one exists, or create one
+  useEffect(() => {
+    if (!isMember) return;
+    if (sharedDocument) {
+      if (!didInitialize.current) {
+        dispatch({ type: 'set', value: sharedDocument });
+        didInitialize.current = true;
+      }
+      return;
+    }
+
+    const initialFile = createSketchFile();
+
+    dispatch({ type: 'set', value: initialFile });
+    didInitialize.current = true;
+    setSharedDocument(initialFile);
+  }, [isMember, setSharedDocument, sharedDocument]);
+
+  const sketchFile =
+    state.type === 'success' ? state.value.history.present.sketch : undefined;
+
+  useEffect(() => {
+    if (!didInitialize.current) return;
+    if (!sketchFile) return;
+
+    // Update shared doc for everyone
+    setSharedDocument(sketchFile);
+  }, [channels, join, setSharedDocument, sketchFile]);
+
+  useEffect(() => {
+    if (!sketchFile) return;
+
+    // Join each page's channel
+    sketchFile.pages.forEach((page) => join(page.do_objectID));
+  }, [channels, join, setSharedDocument, sketchFile]);
+
   if (state.type !== 'success') return null;
 
   return (
-    <MultiplayerProvider userName="Devin">
-      <StateProvider state={state.value} dispatch={handleDispatch}>
-        <ImageCacheProvider>
-          <Workspace />
-        </ImageCacheProvider>
-      </StateProvider>
-    </MultiplayerProvider>
+    <StateProvider state={state.value} dispatch={handleDispatch}>
+      <ImageCacheProvider>
+        <Workspace />
+      </ImageCacheProvider>
+    </StateProvider>
   );
 }
 
@@ -158,12 +200,14 @@ export default function App() {
   );
 
   return (
-    <EnvironmentParametersProvider value={environmentParameters}>
-      <CanvasKitProvider>
-        <FontManagerProvider>
-          <Contents />
-        </FontManagerProvider>
-      </CanvasKitProvider>
-    </EnvironmentParametersProvider>
+    <MultiplayerProvider userName="Devin">
+      <EnvironmentParametersProvider value={environmentParameters}>
+        <CanvasKitProvider>
+          <FontManagerProvider>
+            <Contents />
+          </FontManagerProvider>
+        </CanvasKitProvider>
+      </EnvironmentParametersProvider>
+    </MultiplayerProvider>
   );
 }
