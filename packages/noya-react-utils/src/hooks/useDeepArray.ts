@@ -1,5 +1,5 @@
-import { useRef } from 'react';
 import { isDeepEqual } from 'noya-utils';
+import { useRef } from 'react';
 
 /**
  * Memoize an array using deep equality comparison (by converting to JSON).

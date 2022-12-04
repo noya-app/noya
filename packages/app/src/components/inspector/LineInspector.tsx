@@ -9,7 +9,7 @@ import {
   Selectors,
   SetNumberMode,
 } from 'noya-state';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import CoordinatesInspector from './CoordinatesInspector';
 import DimensionInput from './DimensionInput';

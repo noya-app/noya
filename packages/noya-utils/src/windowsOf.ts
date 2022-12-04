@@ -3,7 +3,7 @@ import { TupleOf } from './types';
 export function windowsOf<T, N extends number>(
   array: T[],
   size: N,
-  wrapsAround: boolean = false,
+  wrapsAround = false,
 ): TupleOf<T, N>[] {
   let arr = array;
 

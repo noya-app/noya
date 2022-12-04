@@ -1,5 +1,5 @@
 import { Size } from 'noya-geometry';
-import { memo, ReactNode, useRef } from 'react';
+import React, { memo, ReactNode, useRef } from 'react';
 import styled from 'styled-components';
 import { useSize } from '../hooks/useSize';
 

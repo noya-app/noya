@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import styled from 'styled-components';
 import { textStyles } from '../theme';
 

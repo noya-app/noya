@@ -1,6 +1,6 @@
-import Sketch from 'noya-file-format';
 import { Divider, PatternPreviewBackground, Select } from 'noya-designsystem';
-import { memo, useCallback } from 'react';
+import Sketch from 'noya-file-format';
+import React, { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { GridSmall, Square } from './PickerAssetGrid';

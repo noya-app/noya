@@ -8,7 +8,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { Fragment, memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import { Group, Polyline, Rect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useZoom } from '../ZoomContext';

@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { useDrag } from 'react-use-gesture';
-import { animated, SpringValue, useSpring } from 'react-spring';
 import { snap } from '@popmotion/popcorn';
+import * as React from 'react';
+import { animated, SpringValue, useSpring } from 'react-spring';
+import { useDrag } from 'react-use-gesture';
 import { Spacer, Stack } from '../system';
 
 import { useIsomorphicLayoutEffect } from '../hooks/use-isomorphic-layout-effect';
@@ -81,7 +81,7 @@ export function PagerView({
   const trackSize = React.Children.toArray(children).reduce(
     (total: number) => total + viewSize,
     0,
-  ) as number;
+  );
   const [style, api] = useSpring(() => ({ x: 0 }));
   const moveTrackPosition = (amount: number) => {
     api.start({

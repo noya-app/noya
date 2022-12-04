@@ -26,8 +26,8 @@ export function useMutableState<T extends object>(
     [mutableValue],
   );
 
-  return useMemo(() => [wrappedValue, updateValue] as const, [
-    updateValue,
-    wrappedValue,
-  ]);
+  return useMemo(
+    () => [wrappedValue, updateValue] as const,
+    [updateValue, wrappedValue],
+  );
 }

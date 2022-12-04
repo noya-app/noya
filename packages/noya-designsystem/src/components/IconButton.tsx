@@ -1,5 +1,5 @@
 import * as Icons from 'noya-icons';
-import { ForwardedRef, forwardRef, memo } from 'react';
+import React, { ForwardedRef, forwardRef, memo } from 'react';
 import { useTheme } from 'styled-components';
 import Button, { ButtonRootProps } from './Button';
 

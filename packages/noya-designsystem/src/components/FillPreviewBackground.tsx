@@ -1,8 +1,8 @@
 import Sketch from 'noya-file-format';
-import { memo, useMemo } from 'react';
+import { useSketchImage } from 'noya-renderer';
+import React, { memo, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { useObjectURL } from '../hooks/useObjectURL';
-import { useSketchImage } from 'noya-renderer';
 import { getGradientBackground } from '../utils/getGradientBackground';
 import { sketchColorToRgbaString } from '../utils/sketchColor';
 import { SketchPattern } from '../utils/sketchPattern';

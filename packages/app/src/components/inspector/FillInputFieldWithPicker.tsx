@@ -10,7 +10,7 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
 import {
   useDialogContainsElement,
@@ -19,7 +19,7 @@ import {
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';
-import PatternInspector, { PatternFillType } from './PatternInspector';
+import PatternInspector from './PatternInspector';
 import PickerGradients from './PickerGradients';
 import PickerPatterns from './PickerPatterns';
 import ColorPickerSwatches from './PickerSwatches';

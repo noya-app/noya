@@ -1,6 +1,11 @@
 {
   "extends": "modular-scripts/tsconfig.json",
-  "include": ["modular", "packages/*/src"],
+  "include": [
+    "modular",
+    "packages/**/src",
+    "packages/**/next-env.d.ts",
+    "packages/**/*.config.ts"
+  ],
   "compilerOptions": {
     "paths": {
       "*": ["./packages/*/src"]

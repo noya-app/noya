@@ -6,7 +6,7 @@ import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Group, Rect, Text, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Layers, Selectors, TextSelectionRange } from 'noya-state';
-import { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'styled-components';
 import { getLuminance } from '../../colorMatrix';
 import { useFontManager } from '../../FontManagerContext';

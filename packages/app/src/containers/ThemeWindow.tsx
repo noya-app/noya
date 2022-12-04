@@ -1,12 +1,12 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
-import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
-import TextStylesGrid from '../components/theme/TextStylesGrid';
+import React, { memo, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 import SwatchesGrid from '../components/theme/SwatchesGrid';
 import SymbolsGrid from '../components/theme/SymbolsGrid';
-import { useShallowArray } from 'noya-react-utils';
-import styled from 'styled-components';
+import TextStylesGrid from '../components/theme/TextStylesGrid';
+import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 
 const Container = styled.main(({ theme }) => ({
   flex: '1',
@@ -44,9 +44,10 @@ const ThemeStyles = memo(function ThemeStyles() {
         (id: string[]) => dispatch('duplicateThemeStyle', id),
         [dispatch],
       )}
-      onDeleteThemeStyle={useCallback(() => dispatch('removeThemeStyle'), [
-        dispatch,
-      ])}
+      onDeleteThemeStyle={useCallback(
+        () => dispatch('removeThemeStyle'),
+        [dispatch],
+      )}
     />
   );
 });
@@ -125,9 +126,10 @@ const TextStyles = memo(function TextStyles() {
         },
         [dispatch],
       )}
-      onDeleteTextStyle={useCallback(() => dispatch('removeTextStyle'), [
-        dispatch,
-      ])}
+      onDeleteTextStyle={useCallback(
+        () => dispatch('removeTextStyle'),
+        [dispatch],
+      )}
     />
   );
 });

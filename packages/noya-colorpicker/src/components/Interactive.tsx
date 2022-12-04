@@ -31,8 +31,7 @@ const getRelativePosition = (
 ): Interaction => {
   const rect = node.getBoundingClientRect();
 
-  // Get user's pointer position from `touches` array if it's a `TouchEvent`
-  const pointer = isTouch(event) ? event.touches[0] : (event as PointerEvent);
+  const pointer = isTouch(event) ? event.touches[0] : (event);
 
   return {
     left: clamp(

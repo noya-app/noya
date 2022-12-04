@@ -23,7 +23,7 @@ import {
   Selectors,
 } from 'noya-state';
 import { round } from 'noya-utils';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { LayerIcon } from './LayerList';
 

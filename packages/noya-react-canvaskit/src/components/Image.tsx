@@ -1,7 +1,7 @@
 import { CanvasKit, Paint } from 'canvaskit';
 import { useCanvasKit } from 'noya-renderer';
-import { createElement, memo, useMemo } from 'react';
 import { memoize } from 'noya-utils';
+import { createElement, memo, useMemo } from 'react';
 import usePaint, { PaintParameters } from '../hooks/usePaint';
 import useRect, { RectParameters } from '../hooks/useRect';
 import { ImageComponentProps } from '../types';

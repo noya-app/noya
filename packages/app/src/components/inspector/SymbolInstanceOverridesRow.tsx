@@ -1,16 +1,16 @@
-import { ResetIcon } from 'noya-icons';
-import Sketch from 'noya-file-format';
+import { useApplicationState } from 'noya-app-state-context';
 import {
+  Button,
   InputField,
+  Select,
   Spacer,
   TreeView,
-  Select,
-  Button,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { ResetIcon } from 'noya-icons';
 import { ApplicationState, Overrides, Selectors } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { LayerIcon } from '../../containers/LayerList';
-import { useApplicationState } from 'noya-app-state-context';
 import * as InspectorPrimitives from './InspectorPrimitives';
 interface Props {
   symbolMaster: Sketch.SymbolMaster;

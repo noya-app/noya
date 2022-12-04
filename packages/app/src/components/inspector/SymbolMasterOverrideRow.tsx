@@ -1,9 +1,9 @@
-import Sketch from 'noya-file-format';
-import { Divider, Spacer, TreeView } from 'noya-designsystem';
-import { ApplicationState, Overrides, Selectors } from 'noya-state';
-import { memo, ReactNode, useCallback } from 'react';
-import { LayerIcon } from '../../containers/LayerList';
 import { useApplicationState } from 'noya-app-state-context';
+import { Divider, Spacer, TreeView } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import { ApplicationState, Overrides, Selectors } from 'noya-state';
+import React, { memo, ReactNode, useCallback } from 'react';
+import { LayerIcon } from '../../containers/LayerList';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {

@@ -7,7 +7,7 @@ import {
   useCanvasKit,
 } from 'noya-renderer';
 import { Base64, detectFileType, getFileExtensionForType } from 'noya-utils';
-import { memo, ReactNode, useMemo, useRef } from 'react';
+import React, { memo, ReactNode, useMemo, useRef } from 'react';
 import { ElementIdProvider, useGetNextElementId } from './ElementIdContext';
 
 const stringifyAffineTransform = (matrix: AffineTransform) => {

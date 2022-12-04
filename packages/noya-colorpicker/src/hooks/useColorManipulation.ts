@@ -1,6 +1,6 @@
 /* eslint-disable @shopify/prefer-early-return */
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ColorModel, AnyColor, HsvaColor } from '../types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnyColor, ColorModel, HsvaColor } from '../types';
 import { equalColorObjects } from '../utils/compare';
 import { useEventCallback } from './useEventCallback';
 

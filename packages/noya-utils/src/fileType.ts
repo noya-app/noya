@@ -30,11 +30,7 @@ export function getFileTypeForExtension<K extends keyof FileExtensionMap>(
   return FILE_EXTENSION_TO_TYPE[type];
 }
 
-function startsWith(
-  arrayBuffer: ArrayBuffer,
-  prefix: number[],
-  offset: number = 0,
-) {
+function startsWith(arrayBuffer: ArrayBuffer, prefix: number[], offset = 0) {
   return isEqualArray(
     [...new Uint8Array(arrayBuffer).slice(offset, offset + prefix.length)],
     prefix,

@@ -1,8 +1,7 @@
 import { Button, Spacer } from 'noya-designsystem';
-import { useCallback } from 'react';
+import { FlipHorizontalIcon, FlipVerticalIcon } from 'noya-icons';
+import React, { useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { FlipHorizontalIcon } from 'noya-icons';
-import { FlipVerticalIcon } from 'noya-icons';
 
 export type DimensionValue = number | undefined;
 

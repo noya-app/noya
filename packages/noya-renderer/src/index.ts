@@ -26,6 +26,7 @@ declare module 'canvaskit' {
 }
 
 // Using `var` avoids this being uninitialized, maybe due to circular dependencies
+// eslint-disable-next-line no-var
 var loadingPromise: ReturnType<typeof CanvasKitInit> | undefined = undefined;
 
 export function loadCanvasKit() {

@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
 import {
@@ -7,6 +6,7 @@ import {
   useSelector,
 } from 'noya-app-state-context';
 import { Button, Divider, withSeparatorElements } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
@@ -16,7 +16,7 @@ import {
   getFileExtensionForType,
   getFileTypeForExtension,
 } from 'noya-utils';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
 import ArrayController from '../components/inspector/ArrayController';
 import ExportFormatsRow from '../components/inspector/ExportFormatsRow';

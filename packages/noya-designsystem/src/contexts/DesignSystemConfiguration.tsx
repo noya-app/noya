@@ -1,5 +1,11 @@
 import { PlatformName } from 'noya-keymap';
-import { createContext, memo, ReactNode, useContext, useMemo } from 'react';
+import React, {
+  createContext,
+  memo,
+  ReactNode,
+  useContext,
+  useMemo,
+} from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Theme } from '../theme';
 

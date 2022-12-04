@@ -1,4 +1,4 @@
-import { Suspense, StrictMode } from 'react';
+import React, { StrictMode, Suspense } from 'react';
 import * as ReactDOM from 'react-dom';
 
 import App from './App';

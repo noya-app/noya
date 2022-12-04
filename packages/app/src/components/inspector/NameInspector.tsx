@@ -1,5 +1,5 @@
 import { InputField, Spacer } from 'noya-designsystem';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface Props {

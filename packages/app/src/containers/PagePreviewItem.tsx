@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { Selectors } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import CanvasPreviewItem from '../components/theme/CanvasPreviewItem';
 
 export type PageGridMenuItemType = 'duplicate' | 'delete' | 'rename';

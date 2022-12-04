@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import {
   IconButton,
   InputField,
@@ -7,8 +6,9 @@ import {
   Select,
   withSeparatorElements,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { ExportOptions } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 
 export const SUPPORTED_EXPORT_FORMAT_OPTIONS: Sketch.ExportFileFormat[] = [

@@ -1,7 +1,7 @@
-import styled from 'styled-components';
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { Slot } from '@radix-ui/react-slot';
-import { memo, ReactNode } from 'react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import React, { memo, ReactNode } from 'react';
+import styled from 'styled-components';
 
 // const Arrow = styled(TooltipPrimitive.Arrow)(({ theme }) => ({
 //   fill: theme.colors.popover.background,

@@ -20,7 +20,7 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import Workspace from './containers/Workspace';
 import {
   EnvironmentParameters,

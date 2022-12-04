@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import { fileOpen } from 'browser-fs-access';
 import {
   InputField,
@@ -10,8 +9,9 @@ import {
   SUPPORTED_IMAGE_UPLOAD_TYPES,
   useHover,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { getFileExtensionForType, uuid } from 'noya-utils';
-import { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import ImageDropTarget, { isSupportedFile, TypedFile } from '../FileDropTarget';
 import * as InspectorPrimitives from './InspectorPrimitives';

@@ -1,8 +1,8 @@
-import Sketch from 'noya-file-format';
 import { Select } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { SetNumberMode } from 'noya-state';
 import { invert } from 'noya-utils';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { DimensionSliderRow } from './DimensionSliderRow';
 import * as InspectorPrimitives from './InspectorPrimitives';
 

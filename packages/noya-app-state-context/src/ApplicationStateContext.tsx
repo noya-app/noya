@@ -1,6 +1,6 @@
 import { useGlobalInputBlurTrigger } from 'noya-designsystem';
 import { ApplicationState, WorkspaceAction, WorkspaceState } from 'noya-state';
-import {
+import React, {
   createContext,
   memo,
   ReactNode,
@@ -95,10 +95,10 @@ export const useApplicationState = (): [ApplicationState, FlatDispatcher] => {
   const state = useWorkspaceState();
   const dispatch = useDispatch();
 
-  return useMemo(() => [state.history.present, dispatch], [
-    state.history.present,
-    dispatch,
-  ]);
+  return useMemo(
+    () => [state.history.present, dispatch],
+    [state.history.present, dispatch],
+  );
 };
 
 /**
@@ -123,9 +123,10 @@ export const useGetWorkspaceStateSnapshot = (): (() => WorkspaceState) => {
 export const useGetStateSnapshot = (): (() => ApplicationState) => {
   const getWorkspaceStateSnapshot = useGetWorkspaceStateSnapshot();
 
-  return useCallback(() => getWorkspaceStateSnapshot().history.present, [
-    getWorkspaceStateSnapshot,
-  ]);
+  return useCallback(
+    () => getWorkspaceStateSnapshot().history.present,
+    [getWorkspaceStateSnapshot],
+  );
 };
 
 export function useSelector<Projection>(

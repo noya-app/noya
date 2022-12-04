@@ -5,7 +5,7 @@ import { GoogleFontProvider } from 'noya-google-fonts';
 import { getPublicPath } from 'noya-public-path';
 import { SuspendedValue, useMutableState } from 'noya-react-utils';
 import { useCanvasKit } from 'noya-renderer';
-import {
+import React, {
   createContext,
   memo,
   ReactNode,

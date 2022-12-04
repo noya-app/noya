@@ -19,7 +19,7 @@ export const compassDirectionMap: Record<CompassDirection, Point> = {
   w: { x: 0, y: 0.5 },
   nw: { x: 0, y: 0 },
 };
-export const dragHandleSize: number = 7;
+export const dragHandleSize = 7;
 
 export function getRectDragHandles(
   boundingRect: Rect,

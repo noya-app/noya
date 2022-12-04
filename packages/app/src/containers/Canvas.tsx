@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import {
   useApplicationState,
   useSelector,
@@ -6,15 +5,16 @@ import {
 } from 'noya-app-state-context';
 import {
   ContextMenu,
+  isLeftButtonClicked,
+  isRightButtonClicked,
   mergeEventHandlers,
   SupportedCanvasUploadType,
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
   useModKey,
-  isLeftButtonClicked,
-  isRightButtonClicked,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
 import {
   FALLTHROUGH,
@@ -22,21 +22,22 @@ import {
   useKeyboardShortcuts,
 } from 'noya-keymap';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
+import { decode } from 'noya-sketch-file';
 import {
   ApplicationState,
   CompassDirection,
   decodeCurvePoint,
-  ImportedImageTarget,
   getCurrentPage,
   getSelectedLineLayer,
+  ImportedImageTarget,
+  InsertedImage,
   Layers,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
-  InsertedImage,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
-import {
+import React, {
   CSSProperties,
   memo,
   useCallback,
@@ -48,13 +49,12 @@ import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 import DropTarget, { TypedFile } from '../components/FileDropTarget';
 import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
-import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useCopyHandler } from '../hooks/useCopyHandler';
 import useLayerMenu from '../hooks/useLayerMenu';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
+import { usePasteHandler } from '../hooks/usePasteHandler';
 import { useSize } from '../hooks/useSize';
 import CanvasKitRenderer from './renderer/CanvasKitRenderer';
-import { decode } from 'noya-sketch-file';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({

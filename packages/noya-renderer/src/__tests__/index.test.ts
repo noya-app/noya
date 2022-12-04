@@ -1,6 +1,6 @@
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
-import { color, fill, rect } from 'noya-state';
 import { loadCanvasKit } from 'noya-renderer';
+import { color, fill, rect } from 'noya-state';
 
 let CanvasKit: CanvasKitType;
 
@@ -8,7 +8,7 @@ beforeAll(async () => {
   CanvasKit = await loadCanvasKit();
 });
 
-test('converts color', async () => {
+test('converts color', () => {
   expect(
     color(CanvasKit, {
       _class: 'color',
@@ -20,7 +20,7 @@ test('converts color', async () => {
   ).toMatchSnapshot();
 });
 
-test('converts rect', async () => {
+test('converts rect', () => {
   expect(
     rect(CanvasKit, {
       x: 10,
@@ -31,7 +31,7 @@ test('converts rect', async () => {
   ).toMatchSnapshot();
 });
 
-test('converts fill', async () => {
+test('converts fill', () => {
   const frame = { x: 0, y: 0, width: 100, height: 100 };
   const paint = fill(
     CanvasKit,
@@ -91,5 +91,3 @@ test('converts fill', async () => {
   );
   expect(paint.getColor()).toMatchSnapshot();
 });
-
-export {};
