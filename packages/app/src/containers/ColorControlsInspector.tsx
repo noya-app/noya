@@ -2,7 +2,7 @@ import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 import { getMultiNumberValue, Selectors, SetNumberMode } from 'noya-state';
 import { interpolate, InterpolateOptions } from 'noya-utils';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import ColorControlsRow from '../components/inspector/ColorControlsRow';
 import EnableableElementController from '../components/inspector/EnableableElementController';
 

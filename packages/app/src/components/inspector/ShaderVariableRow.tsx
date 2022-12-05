@@ -8,7 +8,7 @@ import {
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { upperFirst } from 'noya-utils';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
@@ -139,7 +139,7 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
               (name) => {
                 name = name.replace(/[^_a-zA-Z0-9]/, '');
 
-                if (!name.match(/^[_a-zA-Z][_a-zA-Z0-9]*$/)) return;
+                if (!/^[_a-zA-Z][_a-zA-Z0-9]*$/.exec(name)) return;
 
                 onChangeName(name);
               },

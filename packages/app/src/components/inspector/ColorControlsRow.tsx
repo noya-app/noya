@@ -1,5 +1,5 @@
 import { SetNumberMode } from 'noya-state';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { DimensionValue } from './DimensionsInspector';
 import { DimensionSliderRow } from './DimensionSliderRow';

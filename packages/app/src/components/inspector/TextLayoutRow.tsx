@@ -1,19 +1,23 @@
+import {
+  Label,
+  LabeledElementView,
+  RadioGroup,
+  Spacer,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import {
+  AlignCenterVerticallyIcon,
+  PinBottomIcon,
+  PinTopIcon,
+  SquareIcon,
   StretchHorizontallyIcon,
   StretchVerticallyIcon,
-  SquareIcon,
   TextAlignCenterIcon,
   TextAlignJustifyIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-  PinBottomIcon,
-  PinTopIcon,
-  AlignCenterVerticallyIcon,
 } from 'noya-icons';
-import { Label, RadioGroup, LabeledElementView } from 'noya-designsystem';
-import { Spacer } from 'noya-designsystem';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextLayoutRowProps {

@@ -1,4 +1,4 @@
-import { DragEvent, memo, ReactNode, useCallback } from 'react';
+import React, { DragEvent, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { OffsetPoint } from '../containers/Canvas';
 import { useFileDropTarget } from '../hooks/useFileDropTarget';

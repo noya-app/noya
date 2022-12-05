@@ -1,7 +1,7 @@
 import { InputField } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import { round } from 'noya-utils';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { DimensionValue } from './DimensionsInspector';
 
 interface Props {

@@ -1,7 +1,13 @@
 import { useWorkspaceState } from 'noya-app-state-context';
 import { generateImage } from 'noya-generate-image';
 import { useCanvasKit } from 'noya-renderer';
-import { memo, ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTheme } from 'styled-components';
 
 interface Props {

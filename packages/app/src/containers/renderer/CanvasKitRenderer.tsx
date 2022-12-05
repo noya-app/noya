@@ -1,6 +1,8 @@
 import type { Surface } from 'canvaskit';
+import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
 import { Size } from 'noya-geometry';
 import { Components, render, unmount } from 'noya-react-canvaskit';
+import { usePixelRatio } from 'noya-react-utils';
 import {
   CanvasKitProvider,
   ComponentsProvider,
@@ -11,10 +13,8 @@ import {
   SketchFileRenderer,
   useCanvasKit,
 } from 'noya-renderer';
-import { memo, useLayoutEffect, useRef, useState } from 'react';
+import React, { memo, useLayoutEffect, useRef, useState } from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
-import { StateProvider, useWorkspaceState } from 'noya-app-state-context';
-import { usePixelRatio } from 'noya-react-utils';
 
 const CanvasComponent = styled.canvas<{ size: Size }>(({ size }) => ({
   position: 'absolute',

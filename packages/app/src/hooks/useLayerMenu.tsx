@@ -251,9 +251,8 @@ export default function useLayerMenu(
 
                 if (!blobText) return;
 
-                const layers = ClipboardUtils.fromEncodedHTML(blobText) as
-                  | Sketch.AnyLayer[]
-                  | undefined;
+                const layers: Sketch.AnyLayer[] | undefined =
+                  ClipboardUtils.fromEncodedHTML(blobText);
 
                 if (!layers) return;
 

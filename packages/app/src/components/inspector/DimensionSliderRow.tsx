@@ -1,6 +1,6 @@
 import { InputField, Slider } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import { DimensionValue } from './DimensionsInspector';
 

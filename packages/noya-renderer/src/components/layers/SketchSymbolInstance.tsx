@@ -1,6 +1,6 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
 import { useApplicationState } from 'noya-app-state-context';
+import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
@@ -12,7 +12,7 @@ import {
   replaceTextInRange,
   Selectors,
 } from 'noya-state';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Group, Rect } from '../..';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';

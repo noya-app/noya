@@ -6,7 +6,7 @@ import {
   getEditableStyles,
   Selectors,
 } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
 

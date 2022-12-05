@@ -1,7 +1,7 @@
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { PageLayer, Selectors } from 'noya-state';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { Group } from '../..';
 import { useIsLayerClipped } from '../../ClippedLayerContext';
 import SketchArtboard from './SketchArtboard';
@@ -60,7 +60,7 @@ export default memo(function SketchLayer({ layer }: Props) {
       element = <></>;
   }
 
-  let transforms: AffineTransform[] = [];
+  const transforms: AffineTransform[] = [];
 
   if (layer.isFlippedHorizontal || layer.isFlippedVertical) {
     transforms.push(Selectors.getLayerFlipTransform(layer));

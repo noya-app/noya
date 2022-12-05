@@ -8,7 +8,7 @@
  *
  * https://stackoverflow.com/a/11832950
  */
-export function round(number: number, precision: number = 0) {
+export function round(number: number, precision = 0) {
   const base = Math.pow(10, precision);
   return Math.round((number + Number.EPSILON) * base) / base;
 }

@@ -2,7 +2,7 @@ import * as AspectRatio from '@radix-ui/react-aspect-ratio';
 import Sketch from 'noya-file-format';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
 import { PageLayer } from 'noya-state';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { usePreviewLayer } from '../../hooks/usePreviewLayer';
 import CanvasPreviewItem from '../theme/CanvasPreviewItem';
 

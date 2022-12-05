@@ -1,5 +1,5 @@
-import { createContext, memo, useContext } from 'react';
 import type { Components } from 'noya-react-canvaskit';
+import React, { createContext, memo, useContext } from 'react';
 
 export type ComponentsContextValue = typeof Components;
 

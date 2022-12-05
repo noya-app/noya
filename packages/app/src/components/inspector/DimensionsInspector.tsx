@@ -1,6 +1,6 @@
 import { IconButton, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FlipControls from './FlipControls';

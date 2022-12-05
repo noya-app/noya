@@ -4,7 +4,7 @@ import { Rect } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
 import { Path, useCanvasKit } from 'noya-renderer';
 import { Primitives } from 'noya-state';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
 export default memo(function SketchBorder({
   path,

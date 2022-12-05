@@ -1,8 +1,8 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { Slot } from '@radix-ui/react-slot';
+import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { Spacer } from '..';
 import { MenuItemProps, MenuProps } from './ContextMenu';

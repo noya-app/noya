@@ -1,5 +1,5 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
-import { ComponentProps, memo, ReactNode, useCallback } from 'react';
+import React, { ComponentProps, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
 import { Tooltip } from '..';
 

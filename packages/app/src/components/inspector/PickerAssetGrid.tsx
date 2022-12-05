@@ -1,7 +1,7 @@
-import { GridIcon, RowsIcon } from 'noya-icons';
 import { RadioGroup } from 'noya-designsystem';
+import { GridIcon, RowsIcon } from 'noya-icons';
+import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
-import { memo, useCallback } from 'react';
 
 export const Square = styled.div<{ background?: string; selected?: boolean }>(
   ({ theme, background, selected = false }) => ({

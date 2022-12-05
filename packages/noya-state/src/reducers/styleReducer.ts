@@ -1,14 +1,14 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { GradientAction, gradientReducer } from './gradientReducer';
+import Sketch from 'noya-file-format';
+import { SketchModel } from 'noya-sketch-model';
+import { clamp } from 'noya-utils';
+import { moveArrayItem } from '../utils/moveArrayItem';
+import { BlurAction, blurReducer } from './blurReducer';
 import {
   ColorControlsAction,
   colorControlsReducer,
 } from './colorControlsReducer';
-import { clamp } from 'noya-utils';
-import { SketchModel } from 'noya-sketch-model';
-import { moveArrayItem } from '../utils/moveArrayItem';
-import { BlurAction, blurReducer } from './blurReducer';
+import { GradientAction, gradientReducer } from './gradientReducer';
 import { ShaderAction, shaderReducer } from './shaderReducer';
 
 export const defaultBorderColor = SketchModel.color({
@@ -477,7 +477,7 @@ export function styleReducer(
     case 'setBorderFillType': {
       const [, index, type] = action;
       return produce(state, (draft) => {
-        if (!draft.borders || !draft.borders![index]) return;
+        if (!draft.borders || !draft.borders[index]) return;
         draft.borders[index].fillType = type;
 
         if (!draft.borders[index].gradient) {

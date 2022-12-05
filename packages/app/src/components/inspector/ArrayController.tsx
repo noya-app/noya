@@ -1,16 +1,16 @@
-import * as InspectorPrimitives from './InspectorPrimitives';
 import {
-  Sortable,
-  Spacer,
+  Button,
+  IconButton,
   ListView,
   RelativeDropPosition,
+  Sortable,
+  Spacer,
   withSeparatorElements,
-  IconButton,
-  Button,
 } from 'noya-designsystem';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
 import { range } from 'noya-utils';
+import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import styled, { useTheme } from 'styled-components';
+import * as InspectorPrimitives from './InspectorPrimitives';
 
 const ElementRow = styled.div({
   flex: '0 0 auto',

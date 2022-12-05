@@ -1,5 +1,5 @@
 import * as RadixSlider from '@radix-ui/react-slider';
-import { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 const StyledSlider = styled(RadixSlider.Root)({
@@ -47,11 +47,10 @@ interface Props {
 }
 
 export default function Slider({ id, value, onValueChange, min, max }: Props) {
-  const arrayValue = useMemo(() => [Math.min(Math.max(value, min), max)], [
-    value,
-    min,
-    max,
-  ]);
+  const arrayValue = useMemo(
+    () => [Math.min(Math.max(value, min), max)],
+    [value, min, max],
+  );
 
   const handleValueChange = useCallback(
     (arrayValue: number[]) => {

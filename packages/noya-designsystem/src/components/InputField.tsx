@@ -1,8 +1,8 @@
-import { CaretDownIcon } from 'noya-icons';
 import { Property } from 'csstype';
 import { DropdownMenu as NoyaDropdownMenu, MenuItem } from 'noya-designsystem';
+import { CaretDownIcon } from 'noya-icons';
 import { memoize } from 'noya-utils';
-import {
+import React, {
   Children,
   createContext,
   ForwardedRef,

@@ -1,4 +1,4 @@
-import Sketch from 'noya-file-format';
+import { useApplicationState } from 'noya-app-state-context';
 import {
   Button,
   InputField,
@@ -7,15 +7,15 @@ import {
   Select,
   Spacer,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import {
   getMultiNumberValue,
   getMultiValue,
   Layers,
   Selectors,
 } from 'noya-state';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { useApplicationState } from 'noya-app-state-context';
 
 const CURVE_MODE_OPTIONS = [
   'Straight' as const,

@@ -94,5 +94,3 @@ describe('path', () => {
     expect(s.getFillType().value).toEqual(c.getFillType().value);
   });
 });
-
-export {};

@@ -1,5 +1,5 @@
 import { IconProps } from '@radix-ui/react-icons/dist/types';
-import { memo } from 'react';
+import React, { memo } from 'react';
 
 export const PointModeIcon = memo(function PointModeIcon({
   color = 'currentColor',

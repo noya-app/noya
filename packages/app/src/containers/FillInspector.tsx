@@ -1,14 +1,14 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { useShallowArray } from 'noya-react-utils';
 import {
   EditableFill,
   getEditableFill,
   getEditableStyles,
   Selectors,
 } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import FillRow from '../components/inspector/FillRow';
-import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function FillInspector({
   title,

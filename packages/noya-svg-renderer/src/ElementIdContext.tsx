@@ -1,4 +1,10 @@
-import { createContext, memo, ReactNode, useContext, useRef } from 'react';
+import React, {
+  createContext,
+  memo,
+  ReactNode,
+  useContext,
+  useRef,
+} from 'react';
 
 type ElementIdContextValue = (prefix: string) => string;
 

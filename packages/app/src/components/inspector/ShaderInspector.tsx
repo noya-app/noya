@@ -2,7 +2,7 @@ import { ScrollArea, Select } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { useDeletable } from 'noya-react-canvaskit';
 import { useCompileShader } from 'noya-renderer';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
 import { ShaderFillProps } from './FillInputFieldWithPicker';

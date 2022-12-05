@@ -1,10 +1,9 @@
-import styled from 'styled-components';
-import { ApplicationMenuItem } from 'noya-embedded';
-import { memo, ReactElement } from 'react';
-import { CSSObject } from 'styled-components';
-import { Theme } from '../../theme';
 import { useDesignSystemConfiguration } from 'noya-designsystem';
+import { ApplicationMenuItem } from 'noya-embedded';
 import { getShortcutDisplayParts } from 'noya-keymap';
+import React, { memo, ReactElement } from 'react';
+import styled, { CSSObject } from 'styled-components';
+import { Theme } from '../../theme';
 import withSeparatorElements from '../../utils/withSeparatorElements';
 
 export const SEPARATOR_ITEM = 'separator';

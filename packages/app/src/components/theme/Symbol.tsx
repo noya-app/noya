@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import { LayerPreview as RCKLayerPreview } from 'noya-renderer';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import CanvasPreviewItem from './CanvasPreviewItem';
 
 interface Props {
