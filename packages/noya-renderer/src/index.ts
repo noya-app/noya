@@ -1,23 +1,23 @@
 import { CanvasKitInit, Paint, PaintStyle } from 'canvaskit';
-import { getPathToWasm } from 'noya-utils';
+import { getPublicPath } from 'noya-public-path';
 import { Context } from './context';
+export * from './colorMatrix';
 export { default as LayerPreview } from './components/LayerPreview';
 export { default as SketchArtboard } from './components/layers/SketchArtboard';
 export { default as SketchGroup } from './components/layers/SketchGroup';
 export { default as SketchLayer } from './components/layers/SketchLayer';
+export { useTextLayerParagraph } from './components/layers/SketchText';
 export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
 export * from './FontManagerContext';
-export * from './RootScaleContext';
-export * from './ZoomContext';
-export * from './RenderingModeContext';
 export * from './hooks/useCanvasKit';
 export * from './hooks/useCompileShader';
-export * from './shaders';
-export * from './colorMatrix';
 export { ImageCacheProvider, useSketchImage } from './ImageCache';
+export * from './RenderingModeContext';
+export * from './RootScaleContext';
+export * from './shaders';
+export * from './ZoomContext';
 export type { Context };
-export { useTextLayerParagraph } from './components/layers/SketchText';
 
 declare module 'canvaskit' {
   interface Paint {
@@ -33,7 +33,7 @@ export function loadCanvasKit() {
 
   loadingPromise = new Promise(async (resolve) => {
     const CanvasKit = await CanvasKitInit({
-      locateFile: (file: string) => getPathToWasm() + file,
+      locateFile: (file: string) => getPublicPath() + 'wasm/' + file,
     });
 
     const _setStyle = CanvasKit.Paint.prototype.setStyle;

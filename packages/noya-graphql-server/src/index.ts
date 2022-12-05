@@ -1,12 +1,12 @@
 import { ApolloServer, gql } from 'apollo-server';
 import fs from 'fs';
+import { lightTheme } from 'noya-designsystem';
+import { generateImage, ImageEncoding } from 'noya-generate-image';
+import { setPublicPath } from 'noya-public-path';
+import { LayerPreview, loadCanvasKit } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import { createInitialWorkspaceState, Layers, Selectors } from 'noya-state';
 import path from 'path';
-import { LayerPreview, loadCanvasKit } from 'noya-renderer';
-import { setPathToWasm } from 'noya-utils';
-import { ImageEncoding, generateImage } from 'noya-generate-image';
-import { lightTheme } from 'noya-designsystem';
 import React from 'react';
 
 const wasmPath = path.join(
@@ -17,10 +17,9 @@ const wasmPath = path.join(
   'packages',
   'app',
   'public',
-  'wasm',
 );
 
-setPathToWasm(wasmPath);
+setPublicPath(wasmPath);
 
 const schema = fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf8');
 

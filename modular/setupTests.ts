@@ -4,11 +4,11 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom/extend-expect';
 
-import path from 'path';
 import fs from 'fs';
-import { setPathToWasm } from 'noya-utils';
-import nock from 'nock';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
+import nock from 'nock';
+import { setPublicPath } from 'noya-public-path';
+import path from 'path';
 import util from 'util';
 
 expect.extend({ toMatchImageSnapshot });
@@ -32,25 +32,18 @@ function arrayBuffer(this: Blob) {
   });
 }
 
-const pathToWasm = path.join(
-  __dirname,
-  '..',
-  'packages',
-  'app',
-  'public',
-  'wasm',
-);
+const pathToPublic = path.join(__dirname, '..', 'packages', 'app', 'public');
 
-setPathToWasm(pathToWasm);
+setPublicPath(pathToPublic);
 
 // Mock the http requests for wasm files
 nock('http://localhost')
-  .get(/.wasm$/)
+  .get(/.wasm|.ttf$/)
   .reply(200, (uri) => {
-    const match = uri.match(/([^/]+).wasm$/g);
+    const match = uri.match(/public\/(.+)$/);
 
     if (!match) throw new Error(`Bad nock url: ${uri}`);
 
-    return fs.createReadStream(path.join(pathToWasm, match[0]));
+    return fs.createReadStream(path.join(pathToPublic, match[1]));
   })
   .persist();

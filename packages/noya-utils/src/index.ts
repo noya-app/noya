@@ -27,15 +27,3 @@ export * from './unique';
 export * from './url';
 export * as delimitedPath from './delimitedPath';
 export { v4 as uuid } from 'uuid';
-
-// These are exposed for simpler dependency injection in tests
-// Consider moving to a separate package
-let PATH_TO_WASM = '/wasm/';
-
-export function getPathToWasm() {
-  return PATH_TO_WASM;
-}
-
-export function setPathToWasm(path: string) {
-  PATH_TO_WASM = path + '/';
-}
