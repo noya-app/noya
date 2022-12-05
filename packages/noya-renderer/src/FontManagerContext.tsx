@@ -1,10 +1,10 @@
 import { TypefaceFontProvider } from 'canvaskit';
-import fetch from 'cross-fetch';
 import { FontId, FontManager, SYSTEM_FONT_ID } from 'noya-fonts';
 import { GoogleFontProvider } from 'noya-google-fonts';
+import { getPublicPath } from 'noya-public-path';
 import { SuspendedValue, useMutableState } from 'noya-react-utils';
 import { useCanvasKit } from 'noya-renderer';
-import {
+import React, {
   createContext,
   memo,
   ReactNode,
@@ -33,10 +33,17 @@ const FontManagerContext = createContext<FontManagerContextValue | undefined>(
   undefined,
 );
 
+const load = (name: string) => {
+  const path = getPublicPath() + 'fonts/' + name;
+
+  // Detect node vs browser
+  return typeof window !== 'undefined' && typeof fetch !== 'undefined'
+    ? fetch(path).then((response) => response.arrayBuffer())
+    : (require('fs').promises.readFile(path) as Promise<ArrayBuffer>);
+};
+
 const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
-  fetch(
-    'https://storage.googleapis.com/skia-cdn/google-web-fonts/Roboto-Regular.ttf',
-  ).then((resp) => resp.arrayBuffer()),
+  load('roboto/Roboto-Regular.ttf'),
 );
 
 const sharedFontManager = new FontManager(GoogleFontProvider);

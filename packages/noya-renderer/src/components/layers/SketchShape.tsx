@@ -11,7 +11,7 @@ import {
 import { Group, Path, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { getStrokedPath, Primitives } from 'noya-state';
-import { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { compileShader } from '../../hooks/useCompileShader';
 import useLayerPath from '../../hooks/useLayerPath';
 import { useSketchImage } from '../../ImageCache';

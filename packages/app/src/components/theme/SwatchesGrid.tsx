@@ -1,13 +1,13 @@
-import Sketch from 'noya-file-format';
 import { rgbaToHex } from 'noya-colorpicker';
 import { GridView, sketchColorToRgba } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
-import { Fragment, memo, useCallback, useMemo } from 'react';
+import React, { Fragment, memo, useCallback, useMemo } from 'react';
+import { useOpenInputDialog } from '../../contexts/DialogContext';
 import { createThemeGroups } from '../../utils/themeTree';
 import ColorSwatch from './ColorSwatch';
 import { menuItems, ThemeMenuItemType } from './menuItems';
-import { useOpenInputDialog } from '../../contexts/DialogContext';
 
 interface Props {
   swatches: Sketch.Swatch[];

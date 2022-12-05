@@ -1,6 +1,6 @@
 import { Label, LabeledElementView } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
-import { memo, ReactNode, useCallback } from 'react';
+import React, { memo, ReactNode, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';

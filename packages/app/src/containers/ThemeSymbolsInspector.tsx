@@ -1,11 +1,11 @@
-import { Divider, withSeparatorElements } from 'noya-designsystem';
-import { Selectors } from 'noya-state';
-import { memo, useCallback } from 'react';
 import { useApplicationState, useSelector } from 'noya-app-state-context';
+import { Divider, withSeparatorElements } from 'noya-designsystem';
 import { useShallowArray } from 'noya-react-utils';
+import { Selectors } from 'noya-state';
+import { delimitedPath } from 'noya-utils';
+import React, { memo, useCallback } from 'react';
 import NameInspector from '../components/inspector/NameInspector';
 import SymbolMasterInspector from './SymbolMasterInspector';
-import { delimitedPath } from 'noya-utils';
 
 export default memo(function ThemeSymbolsInspector() {
   const [, dispatch] = useApplicationState();

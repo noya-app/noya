@@ -1,10 +1,10 @@
-import { Selectors } from 'noya-state';
-import { memo, useMemo } from 'react';
 import { useSelector } from 'noya-app-state-context';
+import { Selectors } from 'noya-state';
+import React, { memo, useMemo } from 'react';
 import SwatchInspector from './SwatchesInspector';
-import ThemeTextStyleInspector from './ThemeTextStyleInspector';
 import ThemeStyleInspector from './ThemeStyleInspector';
 import ThemeSymbolsInspector from './ThemeSymbolsInspector';
+import ThemeTextStyleInspector from './ThemeTextStyleInspector';
 
 export default memo(function ThemeInspector() {
   const tab = useSelector(Selectors.getCurrentComponentsTab);

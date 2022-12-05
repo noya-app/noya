@@ -15,7 +15,7 @@ import {
   Primitives,
   Selectors,
 } from 'noya-state';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
 import { Group, Rect as RCKRect } from '../ComponentsContext';

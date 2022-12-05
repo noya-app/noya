@@ -46,7 +46,7 @@ export function encodeQueryParameters(
 ) {
   const encoded = [];
 
-  for (let key in parameters) {
+  for (const key in parameters) {
     encoded.push(`${key}=${encodeURIComponent(parameters[key])}`);
   }
 

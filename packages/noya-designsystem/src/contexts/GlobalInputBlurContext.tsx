@@ -28,9 +28,8 @@ const defaultValue = (() => {
   return value;
 })();
 
-const GlobalInputBlurContext = createContext<GlobalInputBlurContextValue>(
-  defaultValue,
-);
+const GlobalInputBlurContext =
+  createContext<GlobalInputBlurContextValue>(defaultValue);
 
 export const GlobalInputBlurProvider = GlobalInputBlurContext.Provider;
 

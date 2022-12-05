@@ -14,7 +14,7 @@ import {
   useZoom,
 } from 'noya-renderer';
 import { Primitives, Selectors } from 'noya-state';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { useFontManager } from '../../FontManagerContext';
 import { useRenderingMode } from '../../RenderingModeContext';

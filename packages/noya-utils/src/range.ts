@@ -20,7 +20,7 @@ export function range(start: number, end?: number, step?: number): number[] {
 
   let index = -1;
   let length = Math.max(Math.ceil((end - start) / (step || 1)), 0);
-  let result = Array<number>(length);
+  const result = Array<number>(length);
 
   while (length--) {
     result[++index] = start;

@@ -38,7 +38,7 @@ import {
   Selectors,
 } from 'noya-state';
 import { getFileExtensionForType } from 'noya-utils';
-import {
+import React, {
   CSSProperties,
   memo,
   useCallback,

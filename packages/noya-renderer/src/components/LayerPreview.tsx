@@ -15,7 +15,7 @@ import {
   useCanvasKit,
 } from 'noya-renderer';
 import { PageLayer, Primitives } from 'noya-state';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import useCheckeredFill from '../hooks/useCheckeredFill';
 
 function CheckeredFill({ rect }: { rect: Rect }) {

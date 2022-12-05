@@ -12,7 +12,7 @@ export function compileShader(
   CanvasKit: CanvasKit,
   shader: Sketch.Shader,
 ): CompiledShader {
-  let compilerErrors: string = '';
+  let compilerErrors = '';
 
   const runtimeEffect =
     CanvasKit.RuntimeEffect.Make(

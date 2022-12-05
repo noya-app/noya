@@ -2,7 +2,7 @@ import { isShallowEqual } from '../index';
 
 // Currently these tests mirror the deep equal tests
 describe('shallow', () => {
-  describe('primitive values', () => {
+  test('primitive values', () => {
     expect(isShallowEqual(42, 42)).toEqual(true);
     expect(isShallowEqual('foo', 'foo')).toEqual(true);
     expect(isShallowEqual(true, true)).toEqual(true);
@@ -25,8 +25,8 @@ describe('shallow', () => {
     });
 
     test('same objects', () => {
-      let a = {};
-      let b = {};
+      const a = {};
+      const b = {};
       expect(isShallowEqual([a, b], [a, b])).toEqual(true);
       expect(isShallowEqual([a, b], [b, a])).toEqual(false);
     });
@@ -49,8 +49,8 @@ describe('shallow', () => {
     });
 
     test('same objects', () => {
-      let a = {};
-      let b = {};
+      const a = {};
+      const b = {};
 
       expect(isShallowEqual({ a, b }, { a, b })).toEqual(true);
     });

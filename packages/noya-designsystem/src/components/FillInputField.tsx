@@ -1,5 +1,5 @@
 import Sketch from 'noya-file-format';
-import { CSSProperties, ForwardedRef, forwardRef, memo } from 'react';
+import React, { CSSProperties, ForwardedRef, forwardRef, memo } from 'react';
 import styled from 'styled-components';
 import { SketchPattern } from '../utils/sketchPattern';
 import { FillPreviewBackground } from './FillPreviewBackground';

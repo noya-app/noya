@@ -1,5 +1,5 @@
 {
-  "name": "Noya",
+  "name": "noya-desktop",
   "private": true,
   "productName": "Noya",
   "version": "0.0.14",
@@ -32,6 +32,7 @@
     "@electron-forge/plugin-webpack": "^6.0.3",
     "@electron-forge/publisher-github": "^6.0.3",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
+    "babel-loader": "^9.1.0",
     "electron": "^21.3.1",
     "node-loader": "^2.0.0"
   },

@@ -1,5 +1,5 @@
-import { useRef } from 'react';
 import { isShallowEqual } from 'noya-utils';
+import { useRef } from 'react';
 
 /**
  * Memoize an array using shallow comparison.

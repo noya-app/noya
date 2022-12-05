@@ -14,7 +14,7 @@ import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { useMultiplayer, useObservable } from 'noya-multiplayer';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import { ReactNode, useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { AutoSizer } from '../components/AutoSizer';
 import { DialogProvider } from '../contexts/DialogContext';

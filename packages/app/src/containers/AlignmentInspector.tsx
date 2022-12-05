@@ -1,6 +1,6 @@
 import { useApplicationState } from 'noya-app-state-context';
 import { IconButton } from 'noya-designsystem';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 
 const AlignmentInspectorContainer = styled.div(({ theme }) => ({

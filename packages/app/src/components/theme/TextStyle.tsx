@@ -5,7 +5,7 @@ import { center, Size } from 'noya-geometry';
 import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import CanvasPreviewItem from './CanvasPreviewItem';
 
 interface Props {

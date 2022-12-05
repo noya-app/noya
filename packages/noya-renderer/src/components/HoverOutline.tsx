@@ -1,13 +1,13 @@
-import Sketch from 'noya-file-format';
 import { Paint } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
+import { useStroke } from 'noya-react-canvaskit';
 import { Layers, Selectors } from 'noya-state';
-import { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import { Group, Path, Rect } from '..';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';
-import { useCanvasKit } from '../hooks/useCanvasKit';
-import { useStroke } from 'noya-react-canvaskit';
 import { useZoom } from '../ZoomContext';
 
 interface HoverOutlinePathProps {
@@ -42,7 +42,7 @@ export default function HoverOutline({ layer, transform }: Props) {
     strokeWidth: 2 / zoom,
   });
 
-  let localTransform = useMemo(
+  const localTransform = useMemo(
     () =>
       AffineTransform.multiply(
         transform,

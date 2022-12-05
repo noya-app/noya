@@ -9,7 +9,7 @@ import {
   Selectors,
   SetNumberMode,
 } from 'noya-state';
-import { Fragment, memo, useCallback, useMemo } from 'react';
+import React, { Fragment, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import DimensionsInspector from '../components/inspector/DimensionsInspector';
 import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';

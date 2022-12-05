@@ -9,7 +9,7 @@ export function memoize<I extends unknown[], O>(
   return (...values: I): O => {
     let key = '';
 
-    for (let value of values) {
+    for (const value of values) {
       // Assign each argument value a unique index
       if (!intermediateCache.has(value)) {
         intermediateCache.set(value, `${intermediateCacheIndex++}`);

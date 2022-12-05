@@ -1,4 +1,3 @@
-import Sketch from 'noya-file-format';
 import {
   InputField,
   Label,
@@ -7,6 +6,7 @@ import {
   Select,
   SelectOption,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import {
   DEFAULT_FONT_TRAITS,
   encodeFontName,
@@ -16,7 +16,7 @@ import {
 } from 'noya-fonts';
 import { useFontManager } from 'noya-renderer';
 import { SetNumberMode } from 'noya-state';
-import { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import DimensionInput from './DimensionInput';
 import FillInputFieldWithPicker from './FillInputFieldWithPicker';

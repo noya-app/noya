@@ -1,6 +1,6 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import * as Layers from '../layers';
 import {
   getCurrentPage,
@@ -76,7 +76,7 @@ export function pointReducer(
 
       return produce(state, (draft) => {
         draft.selectedControlPoint = undefined;
-        for (let layerId in draft.selectedPointLists) {
+        for (const layerId in draft.selectedPointLists) {
           const currentIds = draft.selectedPointLists[layerId];
           updateSelection(
             currentIds,
@@ -92,7 +92,7 @@ export function pointReducer(
       const [, layerId, pointIndex, controlPointType] = action;
 
       return produce(state, (draft) => {
-        for (let layerId in draft.selectedPointLists) {
+        for (const layerId in draft.selectedPointLists) {
           draft.selectedPointLists[layerId] = [];
         }
 

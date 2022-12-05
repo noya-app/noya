@@ -1,7 +1,7 @@
 import {
+  MaskFilter,
   Paint,
   PaintStyle,
-  MaskFilter,
   StrokeCap,
   StrokeJoin,
 } from 'canvaskit';
@@ -67,7 +67,7 @@ function useStablePaintParameters(parameters: PaintParameters | undefined) {
       if (!maybeColor || !parameters) return;
 
       return {
-        color: maybeColor!,
+        color: maybeColor,
         style: parameters.style,
         antiAlias: parameters.antiAlias,
         strokeWidth: parameters.strokeWidth,

@@ -1,14 +1,14 @@
 import { useDispatch, useSelector } from 'noya-app-state-context';
+import { useShallowArray } from 'noya-react-utils';
 import {
   EditableShadow,
   getEditableShadow,
   getEditableStyles,
   Selectors,
 } from 'noya-state';
-import { memo, ReactNode, useCallback, useMemo } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
 import ShadowRow from '../components/inspector/ShadowRow';
-import { useShallowArray } from 'noya-react-utils';
 
 export default memo(function ShadowInspector({
   allowMoreThanOne = true,

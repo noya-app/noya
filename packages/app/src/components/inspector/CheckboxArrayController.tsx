@@ -1,4 +1,4 @@
-import { memo, ReactNode } from 'react';
+import React, { memo, ReactNode } from 'react';
 import styled from 'styled-components';
 import ArrayController from './ArrayController';
 

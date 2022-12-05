@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 // Saves incoming handler to the ref in order to avoid "useCallback hell"
 function useEventCallback<T extends any[]>(

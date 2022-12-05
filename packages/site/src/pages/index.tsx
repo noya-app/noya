@@ -1,23 +1,23 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { GitHubIcon } from '../components/Icons';
+import { Layout } from '../components/Layout';
+import { Packages } from '../components/Packages';
 import {
   Button,
   Grid,
   InputField,
+  mediaQuery,
   Spacer,
   Stack,
   Text,
-  mediaQuery,
   textStyles,
 } from '../system';
-import { GitHubIcon } from '../components/Icons';
-import { Layout } from '../components/Layout';
-import { Packages } from '../components/Packages';
 
+import figmaSrc from '../assets/figma.svg';
 import logoSrc from '../assets/logo.svg';
 import sketchSrc from '../assets/sketch.svg';
-import figmaSrc from '../assets/figma.svg';
 import xdSrc from '../assets/xd.svg';
 
 const preventTextRunt = (text: string) => text.replace(/ /g, '\u00a0');

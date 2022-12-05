@@ -2,7 +2,7 @@ import Sketch from 'noya-file-format';
 import { center, Size } from 'noya-geometry';
 import { SketchLayer } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import CanvasPreviewItem from './CanvasPreviewItem';
 
 interface Props {

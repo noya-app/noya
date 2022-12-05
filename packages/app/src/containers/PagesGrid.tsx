@@ -1,6 +1,6 @@
 import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { GridView, MenuItem } from 'noya-designsystem';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { PagePreviewItem } from './PagePreviewItem';
 
 export type PageGridMenuItemType = 'duplicate' | 'delete' | 'rename';

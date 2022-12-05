@@ -1,10 +1,12 @@
-import Sketch from 'noya-file-format';
 import { Label, LabeledElementView, RadioGroup } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import {
+  BorderCenterIcon,
+  BorderInsideIcon,
+  BorderOutsideIcon,
+} from 'noya-icons';
 import { SetNumberMode } from 'noya-state';
-import { memo, ReactNode, useCallback } from 'react';
-import { BorderCenterIcon } from 'noya-icons';
-import { BorderInsideIcon } from 'noya-icons';
-import { BorderOutsideIcon } from 'noya-icons';
+import React, { memo, ReactNode, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import DimensionInput from './DimensionInput';
 import { DimensionValue } from './DimensionsInspector';

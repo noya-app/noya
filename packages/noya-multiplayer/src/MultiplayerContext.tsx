@@ -1,5 +1,5 @@
 import { useLazyValue } from 'noya-react-utils';
-import { createContext, memo, ReactNode, useContext } from 'react';
+import React, { createContext, memo, ReactNode, useContext } from 'react';
 import { Multiplayer, MultiplayerOptions } from './Multiplayer';
 
 const MultiplayerContext = createContext<Multiplayer | undefined>(undefined);

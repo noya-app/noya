@@ -1,8 +1,8 @@
 import { act } from '@testing-library/react';
-import Sketch from 'noya-file-format';
 import type { CanvasKit as CanvasKitType } from 'canvaskit';
 import fs from 'fs';
 import { darkTheme } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
 import { FontManager } from 'noya-fonts';
 import { generateImage } from 'noya-generate-image';
 import { GoogleFontProvider } from 'noya-google-fonts';
@@ -23,6 +23,7 @@ import {
   WorkspaceState,
 } from 'noya-state';
 import path from 'path';
+import React from 'react';
 
 let CanvasKit: CanvasKitType;
 let context: ApplicationReducerContext;
@@ -43,7 +44,7 @@ beforeAll(async () => {
 function panToFit(
   workspaceState: WorkspaceState,
   pageIndex: number,
-  padding: number = 0,
+  padding = 0,
 ) {
   const page = workspaceState.history.present.sketch.pages[pageIndex];
 

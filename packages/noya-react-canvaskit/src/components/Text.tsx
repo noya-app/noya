@@ -1,7 +1,7 @@
 import { Paragraph } from 'canvaskit';
 import { createElement, memo, useMemo } from 'react';
-import { TextComponentProps } from '../types';
 import useRect, { RectParameters } from '../hooks/useRect';
+import { TextComponentProps } from '../types';
 
 interface TextProps {
   rect: RectParameters;

@@ -1,17 +1,17 @@
 import {
-  LetterCaseCapitalizeIcon,
-  LetterCaseLowercaseIcon,
-  LetterCaseUppercaseIcon,
-} from 'noya-icons';
-import Sketch from 'noya-file-format';
-import {
   Label,
   LabeledElementView,
   RadioGroup,
   Select,
 } from 'noya-designsystem';
+import Sketch from 'noya-file-format';
+import {
+  LetterCaseCapitalizeIcon,
+  LetterCaseLowercaseIcon,
+  LetterCaseUppercaseIcon,
+} from 'noya-icons';
 import { SimpleTextDecoration } from 'noya-state';
-import { memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 interface TextOptionsRowProps {

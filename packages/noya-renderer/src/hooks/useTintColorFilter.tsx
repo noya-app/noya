@@ -1,8 +1,8 @@
 import Sketch from 'noya-file-format';
 import { useDeletable } from 'noya-react-canvaskit';
 import { useCanvasKit } from 'noya-renderer';
-import { useMemo } from 'react';
 import { Primitives } from 'noya-state';
+import { useMemo } from 'react';
 
 export function useTintColorFilter(tintColor: Sketch.Color | undefined) {
   const CanvasKit = useCanvasKit();

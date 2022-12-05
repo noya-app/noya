@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
+import Sketch from 'noya-file-format';
 import { Layers, Primitives } from 'noya-state';
 
 export function getCombinedLayerPaths(
@@ -10,7 +10,7 @@ export function getCombinedLayerPaths(
     .filter(Layers.isPointsLayer)
     .filter((layer) => layer.isVisible)
     .map((child) => {
-      let path = Primitives.path(
+      const path = Primitives.path(
         CanvasKit,
         child.points,
         child.frame,

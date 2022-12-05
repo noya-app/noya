@@ -211,7 +211,7 @@ export function getArtboardLabelParagraph(
   CanvasKit: CanvasKit,
   fontManager: IFontManager,
   text: string,
-  textColor: string = 'black',
+  textColor = 'black',
 ) {
   const paragraphStyle = new CanvasKit.ParagraphStyle({
     textStyle: {
