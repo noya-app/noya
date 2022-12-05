@@ -3,7 +3,7 @@ import { MakerRpm } from '@electron-forge/maker-rpm';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
-import { WebpackConfiguration } from '@electron-forge/plugin-webpack/dist/Config';
+import type { WebpackConfiguration } from '@electron-forge/plugin-webpack/dist/Config';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 
 import mainConfig from './webpack.main.config';
