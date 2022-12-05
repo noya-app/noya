@@ -1,6 +1,5 @@
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
-import { Slot } from '@radix-ui/react-slot';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {
   memo,
@@ -184,17 +183,11 @@ function ContextMenuRoot<T extends string>({
   return (
     <RadixContextMenu.Root>
       {isNested ? (
-        <RadixContextMenu.TriggerItem
-          as={Slot as any}
-          onPointerDown={onPointerDown}
-        >
+        <RadixContextMenu.SubTrigger asChild onPointerDown={onPointerDown}>
           {children}
-        </RadixContextMenu.TriggerItem>
+        </RadixContextMenu.SubTrigger>
       ) : (
-        <RadixContextMenu.Trigger
-          as={Slot as any}
-          onPointerDown={onPointerDown}
-        >
+        <RadixContextMenu.Trigger asChild onPointerDown={onPointerDown}>
           {children}
         </RadixContextMenu.Trigger>
       )}

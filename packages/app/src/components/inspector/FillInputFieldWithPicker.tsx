@@ -1,5 +1,4 @@
 import * as Popover from '@radix-ui/react-popover';
-import { Slot } from '@radix-ui/react-slot';
 import { useApplicationState } from 'noya-app-state-context';
 import {
   Divider,
@@ -10,7 +9,7 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
 import {
   useDialogContainsElement,
@@ -403,7 +402,7 @@ export default memo(function FillInputFieldWithPicker({
         }
       }}
     >
-      <Popover.Trigger as={Slot}>
+      <Popover.Trigger asChild>
         <FillInputField
           id={id}
           flex={flex}
@@ -413,7 +412,7 @@ export default memo(function FillInputFieldWithPicker({
       <Content
         // Prevent focus within a dialog from closing the popover
         onFocusOutside={useCallback(
-          (event) => {
+          (event: CustomEvent) => {
             if (
               event.target &&
               event.target instanceof HTMLElement &&
@@ -425,11 +424,15 @@ export default memo(function FillInputFieldWithPicker({
           [dialogContainsElement],
         )}
         // Stop propagation on pointer events to prevent dndkit from triggering
-        onPointerDown={useCallback((event) => event.stopPropagation(), [])}
+        onPointerDown={useCallback(
+          (event: SyntheticEvent<HTMLDivElement, PointerEvent>) =>
+            event.stopPropagation(),
+          [],
+        )}
         variant={fillType === Sketch.FillType.Shader ? 'large' : 'normal'}
         side="bottom"
         align="center"
-        onInteractOutside={useCallback((event) => {
+        onInteractOutside={useCallback((event: CustomEvent) => {
           // We allow interacting with the canvas to support editing gradients.
           // If the inspector re-renders, e.g. due to layer selection change, the
           // popover will close automatically.

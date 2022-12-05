@@ -88,7 +88,9 @@ export const Dialog = forwardRef(function Dialog(
       <StyledOverlay />
       <StyledContent ref={contentRef} onOpenAutoFocus={onOpenAutoFocus}>
         <CloseButtonContainer>
-          <DialogPrimitive.Close as={IconButton} iconName="Cross1Icon" />
+          <DialogPrimitive.Close asChild>
+            <IconButton iconName="Cross1Icon" />
+          </DialogPrimitive.Close>
         </CloseButtonContainer>
         {title && (
           <>

@@ -1,4 +1,3 @@
-import { Slot } from '@radix-ui/react-slot';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import React, { memo, ReactNode } from 'react';
 import styled from 'styled-components';
@@ -24,12 +23,16 @@ interface Props {
 
 export default memo(function Tooltip({ children, content }: Props) {
   return (
-    <TooltipPrimitive.Root>
-      <TooltipPrimitive.Trigger as={Slot}>{children}</TooltipPrimitive.Trigger>
-      <Content side="bottom" align="center" sideOffset={2}>
-        {content}
-        {/* <Arrow /> */}
-      </Content>
-    </TooltipPrimitive.Root>
+    <TooltipPrimitive.Provider>
+      <TooltipPrimitive.Root>
+        <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
+        <TooltipPrimitive.Portal>
+          <Content side="bottom" align="center" sideOffset={2}>
+            {content}
+            {/* <Arrow /> */}
+          </Content>
+        </TooltipPrimitive.Portal>
+      </TooltipPrimitive.Root>
+    </TooltipPrimitive.Provider>
   );
 });

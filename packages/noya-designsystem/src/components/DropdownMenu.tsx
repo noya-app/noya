@@ -1,5 +1,4 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import { Slot } from '@radix-ui/react-slot';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, { memo, useCallback, useMemo } from 'react';
@@ -139,11 +138,11 @@ function DropdownMenuRoot<T extends string>({
   return (
     <RadixDropdownMenu.Root>
       {isNested ? (
-        <RadixDropdownMenu.TriggerItem as={Slot}>
+        <RadixDropdownMenu.SubTrigger asChild>
           {children}
-        </RadixDropdownMenu.TriggerItem>
+        </RadixDropdownMenu.SubTrigger>
       ) : (
-        <RadixDropdownMenu.Trigger as={Slot}>
+        <RadixDropdownMenu.Trigger asChild>
           {children}
         </RadixDropdownMenu.Trigger>
       )}
