@@ -458,7 +458,7 @@ const VirtualizedListInner = forwardRef(function VirtualizedListInner<T>(
                 key={scrollTop}
                 style={listStyle}
                 itemKey={keyExtractor}
-                onScroll={({ scrollOffset }) => {
+                onScroll={({ scrollOffset }: { scrollOffset: number }) => {
                   onChildScroll({ scrollTop: scrollOffset });
                 }}
                 initialScrollOffset={scrollTop}
@@ -587,8 +587,12 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       const prevChild = i - 1 >= 0 && renderChild(i - 1);
       const nextChild = i + 1 < data.length && renderChild(i + 1);
 
-      const next = isValidElement(nextChild) ? nextChild : undefined;
-      const prev = isValidElement(prevChild) ? prevChild : undefined;
+      const next: ReactElement | undefined = isValidElement(nextChild)
+        ? nextChild
+        : undefined;
+      const prev: ReactElement | undefined = isValidElement(prevChild)
+        ? prevChild
+        : undefined;
 
       const hasMarginTop = !prev;
       const hasMarginBottom =

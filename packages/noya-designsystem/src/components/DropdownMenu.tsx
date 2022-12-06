@@ -1,5 +1,4 @@
 import * as RadixDropdownMenu from '@radix-ui/react-dropdown-menu';
-import { Slot } from '@radix-ui/react-slot';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, { memo, useCallback, useMemo } from 'react';
@@ -113,7 +112,8 @@ const DropdownMenuItem = memo(function ContextMenuItem<T extends string>({
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootElement = styled(RadixDropdownMenu.Content)(styles.contentStyle);
+const Content = styled(RadixDropdownMenu.Content)(styles.contentStyle);
+const SubContent = styled(RadixDropdownMenu.SubContent)(styles.contentStyle);
 
 function DropdownMenuRoot<T extends string>({
   items,
@@ -136,50 +136,41 @@ function DropdownMenuRoot<T extends string>({
 
   useKeyboardShortcuts(keymap);
 
-  return (
-    <RadixDropdownMenu.Root>
-      {isNested ? (
-        <RadixDropdownMenu.TriggerItem as={Slot}>
-          {children}
-        </RadixDropdownMenu.TriggerItem>
-      ) : (
-        <RadixDropdownMenu.Trigger as={Slot}>
-          {children}
-        </RadixDropdownMenu.Trigger>
-      )}
-      <RootElement
-        sideOffset={4}
-        onCloseAutoFocus={useCallback((event) => {
-          // Prevent the trigger from being focused, which interferes with
-          // keyboard shortcuts going to the canvas
-          event.preventDefault();
+  const RootComponent = isNested
+    ? RadixDropdownMenu.Sub
+    : RadixDropdownMenu.Root;
+  const TriggerComponent = isNested
+    ? RadixDropdownMenu.SubTrigger
+    : RadixDropdownMenu.Trigger;
+  const ContentComponent = isNested ? SubContent : Content;
 
-          // Workaround radix-ui issue where all pointerEvents become blocked
-          // until the body is clicked again
-          document.body.style.pointerEvents = '';
-        }, [])}
-      >
-        {items.map((item, index) =>
-          item === SEPARATOR_ITEM ? (
-            <SeparatorElement key={index} />
-          ) : (
-            <DropdownMenuItem
-              key={item.value ?? index}
-              value={item.value}
-              indented={hasCheckedItem}
-              checked={item.checked ?? false}
-              disabled={item.disabled ?? false}
-              icon={item.icon}
-              onSelect={onSelect}
-              items={item.items}
-              shortcut={item.shortcut}
-            >
-              {item.title}
-            </DropdownMenuItem>
-          ),
-        )}
-      </RootElement>
-    </RadixDropdownMenu.Root>
+  return (
+    <RootComponent>
+      <TriggerComponent asChild>{children}</TriggerComponent>
+      <RadixDropdownMenu.Portal>
+        <ContentComponent sideOffset={4}>
+          {items.map((item, index) =>
+            item === SEPARATOR_ITEM ? (
+              <SeparatorElement key={index} />
+            ) : (
+              <DropdownMenuItem
+                key={item.value ?? index}
+                value={item.value}
+                indented={hasCheckedItem}
+                checked={item.checked ?? false}
+                disabled={item.disabled ?? false}
+                icon={item.icon}
+                onSelect={onSelect}
+                items={item.items}
+                shortcut={item.shortcut}
+              >
+                {item.title}
+              </DropdownMenuItem>
+            ),
+          )}
+        </ContentComponent>
+      </RadixDropdownMenu.Portal>
+    </RootComponent>
   );
 }
 

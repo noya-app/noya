@@ -1,6 +1,5 @@
 import * as RadixContextMenu from '@radix-ui/react-context-menu';
 import { CheckIcon, ChevronRightIcon } from 'noya-icons';
-import { Slot } from '@radix-ui/react-slot';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, {
   memo,
@@ -142,7 +141,8 @@ const ContextMenuItem = memo(function ContextMenuItem<T extends string>({
  * Root
  * ------------------------------------------------------------------------- */
 
-const RootElement = styled(RadixContextMenu.Content)(styles.contentStyle);
+const Content = styled(RadixContextMenu.Content)(styles.contentStyle);
+const SubContent = styled(RadixContextMenu.SubContent)(styles.contentStyle);
 
 export interface MenuProps<T extends string> {
   children: ReactNode;
@@ -181,45 +181,41 @@ function ContextMenuRoot<T extends string>({
     event.preventDefault();
   }, []);
 
+  const RootComponent = isNested ? RadixContextMenu.Sub : RadixContextMenu.Root;
+  const TriggerComponent = isNested
+    ? RadixContextMenu.SubTrigger
+    : RadixContextMenu.Trigger;
+  const ContentComponent: typeof Content = isNested ? SubContent : Content;
+
   return (
-    <RadixContextMenu.Root>
-      {isNested ? (
-        <RadixContextMenu.TriggerItem
-          as={Slot as any}
-          onPointerDown={onPointerDown}
-        >
-          {children}
-        </RadixContextMenu.TriggerItem>
-      ) : (
-        <RadixContextMenu.Trigger
-          as={Slot as any}
-          onPointerDown={onPointerDown}
-        >
-          {children}
-        </RadixContextMenu.Trigger>
-      )}
-      <RootElement>
-        {items.map((item, index) =>
-          item === SEPARATOR_ITEM ? (
-            <SeparatorElement key={index} />
-          ) : (
-            <ContextMenuItem
-              key={item.value ?? index}
-              value={item.value}
-              indented={hasCheckedItem}
-              checked={item.checked ?? false}
-              disabled={item.disabled ?? false}
-              icon={item.icon}
-              onSelect={onSelect}
-              items={item.items}
-              shortcut={item.shortcut}
-            >
-              {item.title}
-            </ContextMenuItem>
-          ),
-        )}
-      </RootElement>
-    </RadixContextMenu.Root>
+    <RootComponent>
+      <TriggerComponent asChild onPointerDown={onPointerDown}>
+        {children}
+      </TriggerComponent>
+      <RadixContextMenu.Portal>
+        <ContentComponent>
+          {items.map((item, index) =>
+            item === SEPARATOR_ITEM ? (
+              <SeparatorElement key={index} />
+            ) : (
+              <ContextMenuItem
+                key={item.value ?? index}
+                value={item.value}
+                indented={hasCheckedItem}
+                checked={item.checked ?? false}
+                disabled={item.disabled ?? false}
+                icon={item.icon}
+                onSelect={onSelect}
+                items={item.items}
+                shortcut={item.shortcut}
+              >
+                {item.title}
+              </ContextMenuItem>
+            ),
+          )}
+        </ContentComponent>
+      </RadixContextMenu.Portal>
+    </RootComponent>
   );
 }
 
