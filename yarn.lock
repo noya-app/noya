@@ -4265,13 +4265,13 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-virtualized@^9.21.13":
-  version "9.21.13"
-  resolved "https://registry.yarnpkg.com/@types/react-virtualized/-/react-virtualized-9.21.13.tgz#4222173abe7c9ed7504c75886c8367502ac7b9f1"
-  integrity sha512-tCIQ5wDKj+QJ3sMzjPKSLY0AXsznt+ovAUcq+JCLjPBOcAHbPt4FraGT9HKYEFfmp9E6+ELuN49i5bWtuBmi3w==
+"@types/react-virtualized@^9.21.21":
+  version "9.21.21"
+  resolved "https://registry.yarnpkg.com/@types/react-virtualized/-/react-virtualized-9.21.21.tgz#65c96f25314f0fb3d40536929dc78112753b49e1"
+  integrity sha512-Exx6I7p4Qn+BBA1SRyj/UwQlZ0I0Pq7g7uhAp0QQ4JWzZunqEqNBGTmCmMmS/3N9wFgAGWuBD16ap7k8Y14VPA==
   dependencies:
     "@types/prop-types" "*"
-    "@types/react" "*"
+    "@types/react" "^17"
 
 "@types/react-window@^1.8.5":
   version "1.8.5"
@@ -4284,6 +4284,15 @@
   version "17.0.19"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.19.tgz#8f2a85e8180a43b57966b237d26a29481dacc991"
   integrity sha512-sX1HisdB1/ZESixMTGnMxH9TDe8Sk709734fEQZzCV/4lSu9kJCPbo2PbTRoZM+53Pp0P10hYVyReUueGwUi4A==
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/scheduler" "*"
+    csstype "^3.0.2"
+
+"@types/react@^17":
+  version "17.0.52"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.52.tgz#10d8b907b5c563ac014a541f289ae8eaa9bf2e9b"
+  integrity sha512-vwk8QqVODi0VaZZpDXQCmEmiOuyjEFPY7Ttaw5vjM112LOq37yz1CDJGrRJwA1fYEq4Iitd5rnjd1yWAc/bT+A==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
@@ -15387,10 +15396,10 @@ react-virtualized@^9.22.3:
     prop-types "^15.7.2"
     react-lifecycles-compat "^3.0.4"
 
-react-window@^1.8.6:
-  version "1.8.6"
-  resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.6.tgz#d011950ac643a994118632665aad0c6382e2a112"
-  integrity sha512-8VwEEYyjz6DCnGBsd+MgkD0KJ2/OXFULyDtorIiTz+QzwoP94tBoA7CnbtyXMm+cCeAUER5KJcPtWl9cpKbOBg==
+react-window@^1.8.8:
+  version "1.8.8"
+  resolved "https://registry.yarnpkg.com/react-window/-/react-window-1.8.8.tgz#1b52919f009ddf91970cbdb2050a6c7be44df243"
+  integrity sha512-D4IiBeRtGXziZ1n0XklnFGu7h9gU684zepqyKzgPNzrsrk7xOCxni+TCckjg2Nr/DiaEEGVVmnhYSlT2rB47dQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
     memoize-one ">=3.1.1 <6"

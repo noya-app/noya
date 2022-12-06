@@ -17,10 +17,10 @@
     "@radix-ui/react-tooltip": "^1.0.2",
     "@radix-ui/react-utils": "^0.0.5",
     "react-virtualized": "^9.22.3",
-    "react-window": "^1.8.6"
+    "react-window": "^1.8.8"
   },
   "devDependencies": {
-    "@types/react-virtualized": "^9.21.13",
+    "@types/react-virtualized": "^9.21.21",
     "@types/react-window": "^1.8.5"
   }
 }
