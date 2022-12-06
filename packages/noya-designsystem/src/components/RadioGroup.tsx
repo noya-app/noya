@@ -41,7 +41,7 @@ const StyledItem = styled(ToggleGroupPrimitive.Item)(({ theme }) => ({
     outline: 'none',
     boxShadow: `0 0 0 1px ${theme.colors.sidebar.background}, 0 0 0 3px ${theme.colors.primary}`,
   },
-  '&[aria-pressed="true"]': {
+  '&[aria-checked="true"]': {
     backgroundColor: theme.colors.primary,
     color: 'white',
   },
