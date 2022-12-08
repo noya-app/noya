@@ -204,6 +204,7 @@ export default function useLayerMenu(
   const selectedLayerIds = useShallowArray(
     layers.map((layer) => layer.do_objectID),
   );
+  const suggestedSymbolName = layers.length > 0 ? layers[0].name : undefined;
 
   const onSelectMenuItem = useCallback(
     async (value: LayerMenuItemType) => {
@@ -276,7 +277,7 @@ export default function useLayerMenu(
           dispatch('ungroupLayers', selectedLayerIds);
           return;
         case 'createSymbol': {
-          const name = await openDialog('New Symbol Name');
+          const name = await openDialog('New Symbol Name', suggestedSymbolName);
 
           if (!name) return;
 
@@ -326,6 +327,7 @@ export default function useLayerMenu(
       selectedLayerIds,
       newIsAlphaMaskValue,
       openDialog,
+      suggestedSymbolName,
       newUseAsMaskValue,
       newIgnoreMasksValue,
       startRenamingLayer,
