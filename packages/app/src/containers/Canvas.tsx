@@ -102,9 +102,15 @@ function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
-function isMoving(point: Point, origin: Point): boolean {
-  return Math.abs(point.x - origin.x) > 2 || Math.abs(point.y - origin.y) > 2;
+function isMoving(point: Point, origin: Point, zoomValue: number): boolean {
+  const threshold = 2 / zoomValue;
+
+  return (
+    Math.abs(point.x - origin.x) > threshold ||
+    Math.abs(point.y - origin.y) > threshold
+  );
 }
+
 const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   ({ cursor }) => ({
     flex: '1',
@@ -250,14 +256,16 @@ export default memo(function Canvas() {
     [containerSize, insets.bottom, insets.left, insets.right, insets.top],
   );
 
+  const { zoomValue, scrollOrigin } = meta;
+
   // Event coordinates are relative to (0,0), but we want them to include
   // the current page's zoom and offset from the origin
   const offsetEventPoint = useCallback(
     (point: Point) =>
-      AffineTransform.scale(1 / meta.zoomValue)
-        .translate(-meta.scrollOrigin.x, -meta.scrollOrigin.y)
+      AffineTransform.scale(1 / zoomValue)
+        .translate(-scrollOrigin.x, -scrollOrigin.y)
         .applyTo(point),
-    [meta],
+    [scrollOrigin, zoomValue],
   );
 
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
@@ -563,7 +571,7 @@ export default memo(function Canvas() {
         case 'maybeMoveGradientEllipseLength': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('interaction', ['movingGradientEllipseLength', point]);
           }
 
@@ -574,7 +582,7 @@ export default memo(function Canvas() {
         case 'maybeSelectingText': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('interaction', ['selectingText', point]);
           }
 
@@ -611,7 +619,7 @@ export default memo(function Canvas() {
         case 'maybeMoveGradientStop': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('interaction', ['movingGradientStop', point]);
           }
 
@@ -663,7 +671,7 @@ export default memo(function Canvas() {
         case 'maybeScale': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('interaction', [
               state.interactionState.type === 'maybeMove'
                 ? 'updateMoving'
@@ -679,7 +687,7 @@ export default memo(function Canvas() {
         case 'maybeMovePoint': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('interaction', ['movingPoint', origin, point]);
           }
 
@@ -699,7 +707,7 @@ export default memo(function Canvas() {
         case 'maybeConvertCurveMode': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('setPointCurveMode', Sketch.CurveMode.Mirrored);
             dispatch(
               'selectControlPoint',
@@ -718,7 +726,7 @@ export default memo(function Canvas() {
         case 'maybeMoveControlPoint': {
           const { origin } = state.interactionState;
 
-          if (isMoving(point, origin)) {
+          if (isMoving(point, origin, zoomValue)) {
             dispatch('interaction', ['movingControlPoint', origin, point]);
           }
 
@@ -844,6 +852,7 @@ export default memo(function Canvas() {
       offsetEventPoint,
       state,
       dispatch,
+      zoomValue,
       CanvasKit,
       fontManager,
       selectedLayers,

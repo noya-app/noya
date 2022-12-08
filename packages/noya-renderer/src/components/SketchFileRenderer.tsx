@@ -307,7 +307,7 @@ export default memo(function SketchFileRenderer() {
     );
   }, [isEditingPath, page, state]);
 
-  const symbol = useMemo(() => {
+  const symbolToInsert = useMemo(() => {
     if (interactionState.type !== 'insertingSymbol') return;
 
     const point = interactionState.point;
@@ -350,6 +350,7 @@ export default memo(function SketchFileRenderer() {
             borders: [
               SketchModel.border({
                 color: defaultBorderColor,
+                thickness: 1 / zoomValue,
               }),
             ],
           }),
@@ -387,13 +388,26 @@ export default memo(function SketchFileRenderer() {
           <RCKRect rect={canvasRect} paint={backgroundFill} />
           <Group transform={canvasTransform}>
             <SketchGroup layer={page} />
+          </Group>
+          <Group transform={screenTransform}>
+            {showPixelGrid && <PixelGrid />}
+            {interactionState.type === 'marquee' && (
+              <Marquee
+                rect={createRect(
+                  interactionState.origin,
+                  interactionState.current,
+                )}
+              />
+            )}
+          </Group>
+          <Group transform={canvasTransform}>
             {state.selectedGradient && gradient && (
               <GradientEditor
                 gradient={gradient}
                 selectedStopIndex={state.selectedGradient.stopIndex}
               />
             )}
-            {symbol && <SketchArtboardContent layer={symbol} />}
+            {symbolToInsert && <SketchArtboardContent layer={symbolToInsert} />}
             {interactionState.type === 'drawingShapePath' ? (
               penToolPseudoElements
             ) : isEditingPath ? (
@@ -437,16 +451,7 @@ export default memo(function SketchFileRenderer() {
             )}
           </Group>
           <Group transform={screenTransform}>
-            {interactionState.type === 'marquee' && (
-              <Marquee
-                rect={createRect(
-                  interactionState.origin,
-                  interactionState.current,
-                )}
-              />
-            )}
             {showRulers && <HorizontalRuler />}
-            {showPixelGrid && <PixelGrid />}
           </Group>
         </Group>
       </ZoomProvider>
