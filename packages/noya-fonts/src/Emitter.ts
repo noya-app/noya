@@ -44,7 +44,7 @@ export class Emitter<T extends any[] = []> {
   };
 
   emit = (...args: T) => {
-    if (this.listeners.length === 0) {
+    if (this.bufferEventsIfNoListeners && this.listeners.length === 0) {
       this.bufferedEvents.push(args);
 
       return;
