@@ -44,6 +44,18 @@
     "printWidth": 80,
     "proseWrap": "always"
   },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "dependencies": {
     "@shopify/eslint-plugin": "^40.1.0",
     "@testing-library/jest-dom": "^5.11.9",
@@ -62,6 +74,7 @@
     "jest-image-snapshot": "^4.5.1",
     "lint-staged": "^13.1.0",
     "modular-scripts": "^3.6.0",
+    "modular-template-view": "^1.1.0",
     "nock": "^13.1.1",
     "prettier": "^2.2.1",
     "react": "^17.0.1",

@@ -1,0 +1,9 @@
+{
+  "name": "noya-json-editor",
+  "private": false,
+  "modular": {
+    "type": "view"
+  },
+  "main": "./src/index.tsx",
+  "version": "1.0.0"
+}
