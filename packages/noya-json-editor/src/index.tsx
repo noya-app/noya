@@ -7,7 +7,14 @@ import {
   Spacer,
   TreeView,
 } from 'noya-designsystem';
-import { CubeIcon, TextIcon } from 'noya-icons';
+import {
+  CubeIcon,
+  LayoutIcon,
+  PlusCircledIcon,
+  SwitchIcon,
+  TextIcon,
+  ValueNoneIcon,
+} from 'noya-icons';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -42,13 +49,31 @@ const Container = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.sidebar.background,
 }));
 
-type JsonType = 'string' | 'number' | 'boolean' | 'object' | 'array';
+type JsonType = 'string' | 'number' | 'boolean' | 'object' | 'array' | 'null';
+
+function getJsonTypeIcon(type: JsonType) {
+  switch (type) {
+    case 'string':
+      return <TextIcon />;
+    case 'number':
+      return <PlusCircledIcon />;
+    case 'boolean':
+      return <SwitchIcon />;
+    case 'object':
+      return <CubeIcon />;
+    case 'array':
+      return <LayoutIcon />;
+    case 'null':
+      return <ValueNoneIcon />;
+  }
+}
 
 type RenderableItem = {
   id: string;
   key: string;
   value: unknown;
   type: JsonType;
+  parentType?: JsonType;
   isExpanded?: boolean;
   depth: number;
   indexPath: IndexPath;
@@ -73,6 +98,7 @@ export default function NoyaJsonEditor(): JSX.Element {
         const key = node.get('key');
         const value = node.get('value');
         const type = node.get('type');
+        const parentType = node.parent?.get('type');
 
         renderableItems.push({
           id: node.id,
@@ -81,8 +107,12 @@ export default function NoyaJsonEditor(): JSX.Element {
           hasChildren: node.children.length > 0,
           isExpanded: true,
           key: typeof key === 'string' ? key : '',
-          value: typeof value === 'string' ? value : '',
-          type: type as JsonType,
+          value,
+          type: channel.root?.id === node.id ? 'object' : (type as JsonType),
+          parentType:
+            channel.root && channel.root?.id === node.parent?.id
+              ? 'object'
+              : (parentType as JsonType),
         });
       });
 
@@ -90,9 +120,8 @@ export default function NoyaJsonEditor(): JSX.Element {
     });
   }, []);
 
-  const [selectedId, setSelectedId] = React.useState<string | undefined>(
-    undefined,
-  );
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+  const [hoveredId, setHoveredId] = useState<string | undefined>(undefined);
 
   return (
     <DesignSystemConfigurationProvider theme={darkTheme} platform={'key'}>
@@ -108,47 +137,111 @@ export default function NoyaJsonEditor(): JSX.Element {
               return false;
             }}
             renderItem={(item, index, info) => {
+              // TODO: Sortable issue where this is undefined
               if (!item) return null;
+
+              const object = channel.objects[item.id];
+
+              if (!object) return null;
+
+              const isRootItem = item.id === channel.root?.id;
 
               return (
                 <TreeView.Row
                   key={item.id}
                   depth={item.depth}
+                  hovered={item.id === hoveredId}
+                  expanded={item.hasChildren ? item.isExpanded : undefined}
+                  icon={getJsonTypeIcon(item.type)}
+                  selected={item.id === selectedId}
+                  id={`tree-${item.id}`}
+                  onPress={() => {
+                    setSelectedId(item.id);
+                  }}
                   onSelectMenuItem={(value) => {
                     switch (value) {
                       case 'add-child':
-                        const child = channel.objects[item.id]?.createChild();
+                        const child = object.createChild();
+                        child.set('type', 'string');
                         child.set('key', 'a');
                         child.set('value', 'yo');
                         return;
                       case 'delete':
-                        channel.objects[item.id]?.destroy();
+                        object.destroy();
                         return;
                       case 'set-type-number':
-                        channel.objects[item.id]?.set('type', 'number');
+                        object.set('type', 'number');
+                        object.set('value', 0);
                         return;
                       case 'set-type-string':
-                        channel.objects[item.id]?.set('type', 'string');
+                        object.set('type', 'string');
+                        object.set('value', '');
+                        return;
+                      case 'set-type-boolean':
+                        object.set('type', 'boolean');
+                        object.set('value', false);
+                        return;
+                      case 'set-type-null':
+                        object.set('type', 'null');
+                        object.delete('value');
+                        return;
+                      case 'set-type-array':
+                        object.set('type', 'array');
+                        object.delete('value');
+                        return;
+                      case 'set-type-object':
+                        object.set('type', 'object');
+                        object.delete('value');
                         return;
                     }
                   }}
                   menuItems={[
-                    { value: 'add-child', title: 'Add Child' },
-                    { value: 'delete', title: 'Delete' },
+                    ...(isRootItem ||
+                    item.type === 'array' ||
+                    item.type === 'object'
+                      ? [{ value: 'add-child', title: 'Add Child' }]
+                      : []),
+                    ...(isRootItem
+                      ? [{ value: 'delete', title: 'Delete' }]
+                      : []),
                     {
                       title: 'Change Type',
                       items: [
-                        { value: 'set-type-string', title: 'String' },
-                        { value: 'set-type-number', title: 'Number' },
+                        {
+                          value: 'set-type-string',
+                          title: 'String',
+                          icon: getJsonTypeIcon('string'),
+                        },
+                        {
+                          value: 'set-type-number',
+                          title: 'Number',
+                          icon: getJsonTypeIcon('number'),
+                        },
+                        {
+                          value: 'set-type-boolean',
+                          title: 'Boolean',
+                          icon: getJsonTypeIcon('boolean'),
+                        },
+                        {
+                          value: 'set-type-null',
+                          title: 'Null',
+                          icon: getJsonTypeIcon('null'),
+                        },
+                        {
+                          value: 'set-type-array',
+                          title: 'Array',
+                          icon: getJsonTypeIcon('array'),
+                        },
+                        {
+                          value: 'set-type-object',
+                          title: 'Object',
+                          icon: getJsonTypeIcon('object'),
+                        },
                       ],
                     },
                   ]}
-                  expanded={item.hasChildren ? item.isExpanded : undefined}
-                  icon={item.type === 'string' ? <TextIcon /> : <CubeIcon />}
-                  selected={selectedId === item.id}
-                  id={`tree-${item.id}`}
-                  onPress={() => {
-                    setSelectedId(item.id);
+                  onHoverChange={() => {
+                    setHoveredId(item.id);
                   }}
                   onClickChevron={() => {
                     // const newRoot = produce(rootItem, (draft) => {
@@ -161,34 +254,54 @@ export default function NoyaJsonEditor(): JSX.Element {
                     // setRootItem(newRoot);
                   }}
                 >
-                  <InputField.Root>
-                    <InputField.Input
-                      value={item.key}
-                      onSubmit={(value) => {
-                        channel.objects[item.id]?.set('key', value);
+                  {!isRootItem && item.parentType === 'object' && (
+                    <InputField.Root>
+                      <InputField.Input
+                        value={item.key}
+                        onSubmit={(value) => {
+                          object.set('key', value);
+                        }}
+                      />
+                    </InputField.Root>
+                  )}
+                  {item.type === 'string' && (
+                    <InputField.Root>
+                      <InputField.Input
+                        value={typeof item.value === 'string' ? item.value : ''}
+                        onSubmit={(value) => {
+                          object.set('value', value);
+                        }}
+                      />
+                    </InputField.Root>
+                  )}
+                  {item.type === 'number' && (
+                    <InputField.Root>
+                      <InputField.NumberInput
+                        value={typeof item.value === 'number' ? item.value : 0}
+                        onSubmit={(value) => {
+                          object.set('value', value);
+                        }}
+                        onNudge={(value) => {
+                          const newValue =
+                            (typeof item.value === 'number' ? item.value : 0) +
+                            value;
+                          object.set('value', newValue);
+                        }}
+                      />
+                    </InputField.Root>
+                  )}
+                  {item.type === 'boolean' && (
+                    <input
+                      type="checkbox"
+                      checked={
+                        typeof item.value === 'boolean' ? item.value : false
+                      }
+                      onChange={() => {
+                        object.set('value', !item.value);
                       }}
                     />
-                    <InputField.Input
-                      value={typeof item.value === 'string' ? item.value : ''}
-                      onSubmit={(value) => {
-                        channel.objects[item.id]?.set('value', value);
-                      }}
-                    />
-                  </InputField.Root>
+                  )}
                   <Spacer.Horizontal />
-                  {/* <Select<JsonType>
-                    id={`select-${item.id}`}
-                    value="string"
-                    onChange={(value) => {
-                      channel.objects[item.id]?.set('type', value);
-                    }}
-                  >
-                    <SelectOption value="string" title="String" />
-                    <SelectOption value="number" title="Number" />
-                    <SelectOption value="boolean" title="Boolean" />
-                    <SelectOption value="array" title="Array" />
-                    <SelectOption value="object" title="Object" />
-                  </Select> */}
                 </TreeView.Row>
               );
             }}
