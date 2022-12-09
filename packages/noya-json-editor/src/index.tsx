@@ -16,7 +16,7 @@ import {
   TextIcon,
   ValueNoneIcon,
 } from 'noya-icons';
-import { isDeepEqual } from 'noya-utils';
+import { isDeepEqual, unique } from 'noya-utils';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -126,6 +126,20 @@ export default function NoyaJsonEditor(): JSX.Element {
 
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [hoveredId, setHoveredId] = useState<string | undefined>(undefined);
+
+  const uniqueIds = unique(flatItems.map((item) => item.id));
+  if (uniqueIds.length !== flatItems.length) {
+    console.info({ objects: channel.objects, root: channel.root });
+
+    uniqueIds.forEach((id) => {
+      console.info('scanning', id);
+      Object.values(channel.objects).forEach((object) => {
+        console.info(object.children.filter((child) => child.id === id));
+      });
+    });
+
+    debugger;
+  }
 
   return (
     <DesignSystemConfigurationProvider theme={darkTheme} platform={'key'}>
