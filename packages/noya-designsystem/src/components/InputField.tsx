@@ -222,6 +222,7 @@ type InputFieldNumberInputProps = Omit<
 > & {
   value: number | undefined;
   onNudge?: (value: number) => void;
+  variant?: 'bare';
 } & (
     | {
         onChange: (value: number) => void;

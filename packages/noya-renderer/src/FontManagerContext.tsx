@@ -42,9 +42,10 @@ const load = (name: string) => {
     : (require('fs').promises.readFile(path) as Promise<ArrayBuffer>);
 };
 
-const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
-  load('roboto/Roboto-Regular.ttf'),
-);
+// We don't start loading fonts until the Provider renders the first time,
+// since we currently support setting the wasm path at runtime when the app starts,
+// which needs to happen before `load` is called.
+let suspendedDefaultFont: SuspendedValue<ArrayBuffer>;
 
 const sharedFontManager = new FontManager(GoogleFontProvider);
 
@@ -55,6 +56,12 @@ interface Props {
 export const FontManagerProvider = memo(function FontManagerProvider({
   children,
 }: Props) {
+  if (!suspendedDefaultFont) {
+    suspendedDefaultFont = new SuspendedValue(
+      load('roboto/Roboto-Regular.ttf'),
+    );
+  }
+
   const CanvasKit = useCanvasKit();
 
   const defaultFont = suspendedDefaultFont.getValueOrThrow();

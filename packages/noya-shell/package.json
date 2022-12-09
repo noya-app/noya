@@ -1,0 +1,12 @@
+{
+  "name": "noya-shell",
+  "private": false,
+  "modular": {
+    "type": "view"
+  },
+  "main": "./src/index.tsx",
+  "version": "1.0.0",
+  "dependencies": {
+    "react-inspector": "^6.0.1"
+  }
+}

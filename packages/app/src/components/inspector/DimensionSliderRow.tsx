@@ -2,7 +2,7 @@ import { InputField, Slider } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-import { DimensionValue } from './DimensionsInspector';
+import { DimensionValue } from './DimensionInput';
 
 interface Props {
   id: string;

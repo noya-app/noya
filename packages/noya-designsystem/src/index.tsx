@@ -19,6 +19,8 @@ export * as darkTheme from './theme/dark';
 export * from './mediaQuery';
 
 // Components
+export * from './components/Avatar';
+export * from './components/Autofade';
 export { default as Button } from './components/Button';
 export { default as IconButton } from './components/IconButton';
 export * as Label from './components/Label';
