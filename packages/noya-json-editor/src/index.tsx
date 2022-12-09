@@ -3,6 +3,7 @@ import {
   darkTheme,
   DesignSystemConfigurationProvider,
   InputField,
+  RelativeDropPosition,
   ScrollArea,
   Spacer,
   TreeView,
@@ -15,6 +16,7 @@ import {
   TextIcon,
   ValueNoneIcon,
 } from 'noya-icons';
+import { isDeepEqual } from 'noya-utils';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
@@ -132,9 +134,102 @@ export default function NoyaJsonEditor(): JSX.Element {
             data={flatItems}
             sortable
             keyExtractor={(item) => item.id}
-            onMoveItem={() => {}}
-            acceptsDrop={() => {
-              return false;
+            onMoveItem={(sourceIndex, destinationIndex, position) => {
+              const sourceId = flatItems[sourceIndex].id;
+              // const sourceIds = [sourceId];
+              const destinationId = flatItems[destinationIndex].id;
+
+              if (position === 'inside') {
+                channel.objects[sourceId].move(
+                  0,
+                  channel.objects[destinationId],
+                );
+                return;
+              }
+
+              const parent = channel.objects[destinationId].parent;
+
+              if (!parent) return;
+
+              const destinationPath = flatItems[destinationIndex].indexPath;
+
+              const siblingIndex = destinationPath[destinationPath.length - 1];
+
+              destinationIndex =
+                position === 'above' ? siblingIndex : siblingIndex + 1;
+
+              channel.objects[sourceId].move(destinationIndex, parent);
+            }}
+            acceptsDrop={(
+              sourceId: string,
+              destinationId: string,
+              relationDropPosition: RelativeDropPosition,
+            ) => {
+              const sourceIds = [sourceId];
+              const sourceItems = flatItems.filter((item) =>
+                sourceIds.includes(item.id),
+              );
+              const destinationItem = flatItems.find(
+                (item) => item.id === destinationId,
+              );
+
+              if (sourceItems.length === 0 || !destinationItem) return false;
+
+              const sourcePaths = sourceItems.map((item) => item.indexPath);
+              const destinationPath = destinationItem.indexPath;
+
+              // console.log({
+              //   sourceId,
+              //   destinationId,
+              //   sourceItems,
+              //   destinationItem,
+              //   sourcePaths,
+              //   destinationPath,
+              // });
+
+              // Don't allow dragging into a descendant
+              if (
+                sourcePaths.some((sourcePath) =>
+                  isDeepEqual(
+                    sourcePath,
+                    destinationPath.slice(0, sourcePath.length),
+                  ),
+                )
+              )
+                return false;
+
+              // const sourceLayers = sourcePaths.map((sourcePath) =>
+              //   Layers.access(page, sourcePath),
+              // );
+              // const destinationLayer = Layers.access(page, destinationPath);
+
+              // const destinationExpanded =
+              //   destinationLayer.layerListExpandedType !==
+              //   Sketch.LayerListExpanded.Collapsed;
+
+              // // Don't allow dragging below expanded layers - we'll fall back to inside
+              // if (
+              //   destinationExpanded &&
+              //   Layers.isParentLayer(destinationLayer) &&
+              //   destinationLayer.layers.length > 0 &&
+              //   relationDropPosition === 'below'
+              // ) {
+              //   return false;
+              // }
+
+              // Only allow dropping inside of parent layers
+              if (
+                relationDropPosition === 'inside' &&
+                !(
+                  destinationItem.type === 'object' ||
+                  destinationItem.type === 'array' ||
+                  destinationItem.id === channel.root?.id
+                )
+              ) {
+                return false;
+              }
+
+              return true;
             }}
             renderItem={(item, index, info) => {
               // TODO: Sortable issue where this is undefined
@@ -154,7 +249,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                   expanded={item.hasChildren ? item.isExpanded : undefined}
                   icon={getJsonTypeIcon(item.type)}
                   selected={item.id === selectedId}
-                  id={`tree-${item.id}`}
+                  id={item.id}
                   onPress={() => {
                     setSelectedId(item.id);
                   }}
@@ -201,7 +296,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                     item.type === 'object'
                       ? [{ value: 'add-child', title: 'Add Child' }]
                       : []),
-                    ...(isRootItem
+                    ...(!isRootItem
                       ? [{ value: 'delete', title: 'Delete' }]
                       : []),
                     {
