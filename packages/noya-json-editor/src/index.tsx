@@ -1,19 +1,21 @@
-import produce from 'immer';
+import { NoyaObject, NoyaSession } from 'noya-backend-client';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
   InputField,
   ScrollArea,
-  Select,
-  SelectOption,
   Spacer,
   TreeView,
 } from 'noya-designsystem';
 import { CubeIcon, TextIcon } from 'noya-icons';
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { IndexPath, withOptions } from 'tree-visit';
+
+const session = new NoyaSession();
+session.start('devin');
+const channel = session.join('test');
 
 export const GlobalStyles = createGlobalStyle({
   '*': {
@@ -40,51 +42,54 @@ const Container = styled.div(({ theme }) => ({
   backgroundColor: theme.colors.sidebar.background,
 }));
 
-type Item = { id: string; children: Item[]; isExpanded?: boolean };
+type JsonType = 'string' | 'number' | 'boolean' | 'object' | 'array';
 
-const ItemUtils = withOptions({
-  getChildren: (item: Item) => item.children,
+type RenderableItem = {
+  id: string;
+  key: string;
+  value: unknown;
+  type: JsonType;
+  isExpanded?: boolean;
+  depth: number;
+  indexPath: IndexPath;
+  hasChildren: boolean;
+};
+
+const NoyaObjectUtils = withOptions({
+  getChildren: (item: NoyaObject) => [...item.children],
 });
 
-const initialRootItem: Item = {
-  id: 'root',
-  isExpanded: true,
-  children: [
-    { id: 'hello', children: [] },
-    { id: 'world', children: [] },
-    {
-      id: '123',
-      isExpanded: true,
-      children: [
-        { id: 'foo', children: [] },
-        { id: 'bar', children: [] },
-      ],
-    },
-  ],
-};
-
-type RenderableItem = Item & { depth: number; indexPath: IndexPath };
-
-const flattenItems = (item: Item): RenderableItem[] => {
-  const result: RenderableItem[] = [];
-
-  ItemUtils.visit(item, {
-    onEnter(node, indexPath) {
-      result.push({
-        ...node,
-        depth: indexPath.length,
-        indexPath: [...indexPath],
-      });
-      if (node.isExpanded === false) return 'skip';
-    },
-  });
-
-  return result;
-};
-
 export default function NoyaJsonEditor(): JSX.Element {
-  const [rootItem, setRootItem] = useState(initialRootItem);
-  const flatItems = flattenItems(rootItem);
+  const [flatItems, setFlatItems] = useState<RenderableItem[]>([]);
+
+  useEffect(() => {
+    return channel.addListener((event) => {
+      if (!channel.root) return;
+
+      const renderableItems: RenderableItem[] = [];
+
+      NoyaObjectUtils.visit(channel.root, (node, indexPath) => {
+        // console.log(node.id, node.serialize());
+        const key = node.get('key');
+        const value = node.get('value');
+        const type = node.get('type');
+
+        renderableItems.push({
+          id: node.id,
+          depth: indexPath.length,
+          indexPath: [...indexPath],
+          hasChildren: node.children.length > 0,
+          isExpanded: true,
+          key: typeof key === 'string' ? key : '',
+          value: typeof value === 'string' ? value : '',
+          type: type as JsonType,
+        });
+      });
+
+      setFlatItems(renderableItems);
+    });
+  }, []);
+
   const [selectedId, setSelectedId] = React.useState<string | undefined>(
     undefined,
   );
@@ -109,51 +114,81 @@ export default function NoyaJsonEditor(): JSX.Element {
                 <TreeView.Row
                   key={item.id}
                   depth={item.depth}
-                  expanded={
-                    item.children.length > 0 ? item.isExpanded : undefined
-                  }
-                  icon={item.children.length > 0 ? <CubeIcon /> : <TextIcon />}
+                  onSelectMenuItem={(value) => {
+                    switch (value) {
+                      case 'add-child':
+                        const child = channel.objects[item.id]?.createChild();
+                        child.set('key', 'a');
+                        child.set('value', 'yo');
+                        return;
+                      case 'delete':
+                        channel.objects[item.id]?.destroy();
+                        return;
+                      case 'set-type-number':
+                        channel.objects[item.id]?.set('type', 'number');
+                        return;
+                      case 'set-type-string':
+                        channel.objects[item.id]?.set('type', 'string');
+                        return;
+                    }
+                  }}
+                  menuItems={[
+                    { value: 'add-child', title: 'Add Child' },
+                    { value: 'delete', title: 'Delete' },
+                    {
+                      title: 'Change Type',
+                      items: [
+                        { value: 'set-type-string', title: 'String' },
+                        { value: 'set-type-number', title: 'Number' },
+                      ],
+                    },
+                  ]}
+                  expanded={item.hasChildren ? item.isExpanded : undefined}
+                  icon={item.type === 'string' ? <TextIcon /> : <CubeIcon />}
                   selected={selectedId === item.id}
                   id={`tree-${item.id}`}
                   onPress={() => {
                     setSelectedId(item.id);
                   }}
                   onClickChevron={() => {
-                    const newRoot = produce(rootItem, (draft) => {
-                      const mutableItem = ItemUtils.access(
-                        draft,
-                        item.indexPath,
-                      );
-
-                      mutableItem.isExpanded = !mutableItem.isExpanded;
-                    });
-
-                    setRootItem(newRoot);
+                    // const newRoot = produce(rootItem, (draft) => {
+                    //   const mutableItem = ItemUtils.access(
+                    //     draft,
+                    //     item.indexPath,
+                    //   );
+                    //   mutableItem.isExpanded = !mutableItem.isExpanded;
+                    // });
+                    // setRootItem(newRoot);
                   }}
                 >
                   <InputField.Root>
                     <InputField.Input
-                      value={item.id}
+                      value={item.key}
                       onSubmit={(value) => {
-                        const newRoot = produce(rootItem, (draft) => {
-                          const mutableItem = ItemUtils.access(
-                            draft,
-                            item.indexPath,
-                          );
-
-                          mutableItem.id = value;
-                        });
-
-                        setRootItem(newRoot);
+                        channel.objects[item.id]?.set('key', value);
+                      }}
+                    />
+                    <InputField.Input
+                      value={typeof item.value === 'string' ? item.value : ''}
+                      onSubmit={(value) => {
+                        channel.objects[item.id]?.set('value', value);
                       }}
                     />
                   </InputField.Root>
                   <Spacer.Horizontal />
-                  <Select id={`select-${item.id}`} value="string">
+                  {/* <Select<JsonType>
+                    id={`select-${item.id}`}
+                    value="string"
+                    onChange={(value) => {
+                      channel.objects[item.id]?.set('type', value);
+                    }}
+                  >
                     <SelectOption value="string" title="String" />
                     <SelectOption value="number" title="Number" />
                     <SelectOption value="boolean" title="Boolean" />
-                  </Select>
+                    <SelectOption value="array" title="Array" />
+                    <SelectOption value="object" title="Object" />
+                  </Select> */}
                 </TreeView.Row>
               );
             }}
