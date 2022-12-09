@@ -1,12 +1,19 @@
+import produce from 'immer';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
+  InputField,
   ScrollArea,
+  Select,
+  SelectOption,
+  Spacer,
   TreeView,
 } from 'noya-designsystem';
 import { CubeIcon, TextIcon } from 'noya-icons';
 import * as React from 'react';
+import { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
+import { IndexPath, withOptions } from 'tree-visit';
 
 export const GlobalStyles = createGlobalStyle({
   '*': {
@@ -35,7 +42,11 @@ const Container = styled.div(({ theme }) => ({
 
 type Item = { id: string; children: Item[]; isExpanded?: boolean };
 
-const rootItem: Item = {
+const ItemUtils = withOptions({
+  getChildren: (item: Item) => item.children,
+});
+
+const initialRootItem: Item = {
   id: 'root',
   isExpanded: true,
   children: [
@@ -52,27 +63,28 @@ const rootItem: Item = {
   ],
 };
 
-type RenderableItem = Item & { depth: number };
+type RenderableItem = Item & { depth: number; indexPath: IndexPath };
 
 const flattenItems = (item: Item): RenderableItem[] => {
   const result: RenderableItem[] = [];
 
-  const visit = (item: Item, depth: number) => {
-    result.push({ ...item, depth });
-
-    if (!item.isExpanded) return;
-
-    item.children.forEach((child) => visit(child, depth + 1));
-  };
-
-  visit(item, 0);
+  ItemUtils.visit(item, {
+    onEnter(node, indexPath) {
+      result.push({
+        ...node,
+        depth: indexPath.length,
+        indexPath: [...indexPath],
+      });
+      if (node.isExpanded === false) return 'skip';
+    },
+  });
 
   return result;
 };
 
-const flatItems = flattenItems(rootItem);
-
 export default function NoyaJsonEditor(): JSX.Element {
+  const [rootItem, setRootItem] = useState(initialRootItem);
+  const flatItems = flattenItems(rootItem);
   const [selectedId, setSelectedId] = React.useState<string | undefined>(
     undefined,
   );
@@ -106,8 +118,42 @@ export default function NoyaJsonEditor(): JSX.Element {
                   onPress={() => {
                     setSelectedId(item.id);
                   }}
+                  onClickChevron={() => {
+                    const newRoot = produce(rootItem, (draft) => {
+                      const mutableItem = ItemUtils.access(
+                        draft,
+                        item.indexPath,
+                      );
+
+                      mutableItem.isExpanded = !mutableItem.isExpanded;
+                    });
+
+                    setRootItem(newRoot);
+                  }}
                 >
-                  {item.id}
+                  <InputField.Root>
+                    <InputField.Input
+                      value={item.id}
+                      onSubmit={(value) => {
+                        const newRoot = produce(rootItem, (draft) => {
+                          const mutableItem = ItemUtils.access(
+                            draft,
+                            item.indexPath,
+                          );
+
+                          mutableItem.id = value;
+                        });
+
+                        setRootItem(newRoot);
+                      }}
+                    />
+                  </InputField.Root>
+                  <Spacer.Horizontal />
+                  <Select id={`select-${item.id}`} value="string">
+                    <SelectOption value="string" title="String" />
+                    <SelectOption value="number" title="Number" />
+                    <SelectOption value="boolean" title="Boolean" />
+                  </Select>
                 </TreeView.Row>
               );
             }}
