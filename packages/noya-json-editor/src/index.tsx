@@ -22,8 +22,10 @@ import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { IndexPath, withOptions } from 'tree-visit';
 
-const session = new NoyaSession();
-session.start('devin');
+// const session = new NoyaSession('Sam');
+const session = new NoyaSession('Sam', 'http://149.28.218.149/', {
+  transports: ['websocket'],
+});
 const channel = session.join('test');
 
 export const GlobalStyles = createGlobalStyle({
@@ -245,6 +247,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                 <TreeView.Row
                   key={item.id}
                   depth={item.depth}
+                  isSectionHeader={isRootItem}
                   hovered={item.id === hoveredId}
                   expanded={item.hasChildren ? item.isExpanded : undefined}
                   icon={getJsonTypeIcon(item.type)}
@@ -294,7 +297,13 @@ export default function NoyaJsonEditor(): JSX.Element {
                     ...(isRootItem ||
                     item.type === 'array' ||
                     item.type === 'object'
-                      ? [{ value: 'add-child', title: 'Add Child' }]
+                      ? [
+                          {
+                            value: 'add-child',
+                            title:
+                              item.type === 'array' ? 'Add Element' : 'Add Key',
+                          },
+                        ]
                       : []),
                     ...(!isRootItem
                       ? [{ value: 'delete', title: 'Delete' }]
@@ -349,6 +358,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                     // setRootItem(newRoot);
                   }}
                 >
+                  {isRootItem && <TreeView.RowTitle>Root</TreeView.RowTitle>}
                   {!isRootItem && item.parentType === 'object' && (
                     <InputField.Root>
                       <InputField.Input
