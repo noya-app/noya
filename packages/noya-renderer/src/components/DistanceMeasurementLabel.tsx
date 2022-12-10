@@ -4,31 +4,35 @@ import {
   distance,
   getLineOrientation,
   Point,
+  Size,
 } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
+import { useCanvasKit, useZoom } from 'noya-renderer';
 import { round } from 'noya-utils';
 import React, { useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect, Text } from '..';
 import { useFontManager } from '../FontManagerContext';
 
-const PADDING = {
-  width: 6,
-  height: 2,
-};
-
 interface Props {
   points: [Point, Point];
 }
 
 export function DistanceMeasurementLabel({ points }: Props) {
+  const zoomValue = useZoom();
+  const padding = useMemo(
+    (): Size => ({
+      width: 6 / zoomValue,
+      height: 2 / zoomValue,
+    }),
+    [zoomValue],
+  );
   const text = round(distance(...points)).toString();
 
   const centerPoint = useMemo(
     () => ({
-      x: (points[0].x + points[1].x) / 2,
-      y: (points[0].y + points[1].y) / 2,
+      x: round((points[0].x + points[1].x) / 2),
+      y: round((points[0].y + points[1].y) / 2),
     }),
     [points],
   );
@@ -63,17 +67,17 @@ export function DistanceMeasurementLabel({ points }: Props) {
 
   const paragraphSize = useMemo(
     () => ({
-      width: paragraph.getMinIntrinsicWidth(),
-      height: paragraph.getHeight(),
+      width: paragraph.getMinIntrinsicWidth() / zoomValue,
+      height: paragraph.getHeight() / zoomValue,
     }),
-    [paragraph],
+    [paragraph, zoomValue],
   );
 
   const labelRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        centerPoint.x + PADDING.width,
-        centerPoint.y + PADDING.height,
+        centerPoint.x + padding.width,
+        centerPoint.y + padding.height,
         paragraphSize.width,
         paragraphSize.height,
       ),
@@ -81,6 +85,8 @@ export function DistanceMeasurementLabel({ points }: Props) {
       CanvasKit,
       centerPoint.x,
       centerPoint.y,
+      padding.width,
+      padding.height,
       paragraphSize.width,
       paragraphSize.height,
     ],
@@ -88,17 +94,17 @@ export function DistanceMeasurementLabel({ points }: Props) {
 
   const backgroundSize = useMemo(
     () => ({
-      width: paragraphSize.width + PADDING.width * 2,
-      height: paragraphSize.height + PADDING.height * 2,
+      width: paragraphSize.width + padding.width * 2,
+      height: paragraphSize.height + padding.height * 2,
     }),
-    [paragraphSize.height, paragraphSize.width],
+    [padding.height, padding.width, paragraphSize.height, paragraphSize.width],
   );
 
   const backgroundRect = useMemo(
     () =>
       CanvasKit.XYWHRect(
-        round(centerPoint.x),
-        round(centerPoint.y),
+        centerPoint.x,
+        centerPoint.y,
         backgroundSize.width,
         backgroundSize.height,
       ),
@@ -110,11 +116,17 @@ export function DistanceMeasurementLabel({ points }: Props) {
   const transform = useMemo(() => {
     switch (orientation) {
       case 'vertical':
-        return AffineTransform.translate(6, -backgroundSize.height / 2);
+        return AffineTransform.translate(
+          padding.width,
+          -backgroundSize.height / 2,
+        );
       case 'horizontal':
-        return AffineTransform.translate(-backgroundSize.width / 2, 6);
+        return AffineTransform.translate(
+          -backgroundSize.width / 2,
+          padding.width,
+        );
     }
-  }, [backgroundSize, orientation]);
+  }, [padding.width, backgroundSize.height, backgroundSize.width, orientation]);
 
   return (
     <Group transform={transform}>
@@ -123,7 +135,15 @@ export function DistanceMeasurementLabel({ points }: Props) {
         paint={backgroundFill}
         cornerRadius={backgroundSize.height / 2}
       />
-      <Text rect={labelRect} paragraph={paragraph} />
+      <Group
+        transform={AffineTransform.scale(1 / zoomValue, 1 / zoomValue, {
+          // Scale with top left of background padding as origin
+          x: centerPoint.x + padding.width,
+          y: centerPoint.y + padding.height,
+        })}
+      >
+        <Text rect={labelRect} paragraph={paragraph} />
+      </Group>
     </Group>
   );
 }
