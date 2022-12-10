@@ -17,6 +17,7 @@ import { CompassDirection } from './reducers/interactionReducer';
 import { getLayersInRect } from './selectors/geometrySelectors';
 import {
   getBoundingRect,
+  getCurrentPageMetadata,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from './selectors/selectors';
 
@@ -136,15 +137,19 @@ export function getLayerSnapValues(
   return rect ? getSnapValues(rect, axis) : [];
 }
 
-const SNAP_DISTANCE = 6;
+const BASE_SNAP_DISTANCE = 6;
 
-export function getSnapAdjustmentDistance(values: Snap[]) {
+function getSnapDistance(zoomValue: number) {
+  return BASE_SNAP_DISTANCE / zoomValue;
+}
+
+export function getSnapAdjustmentDistance(values: Snap[], zoomValue: number) {
   const getDelta = (snap: Snap) => snap.source - snap.target;
 
   const getDistance = (snap: Snap) => Math.abs(getDelta(snap));
 
   const distances = values
-    .filter((snap) => getDistance(snap) <= SNAP_DISTANCE)
+    .filter((snap) => getDistance(snap) <= getSnapDistance(zoomValue))
     .sort((a, b) => getDistance(a) - getDistance(b));
 
   return distances.length > 0 ? getDelta(distances[0]) : 0;
@@ -197,10 +202,11 @@ export function getSnapAdjustmentForVisibleLayers(
       targetLayer.do_objectID,
     ),
   );
+  const { zoomValue } = getCurrentPageMetadata(state);
 
   return {
-    x: getSnapAdjustmentDistance(xSnaps),
-    y: getSnapAdjustmentDistance(ySnaps),
+    x: getSnapAdjustmentDistance(xSnaps, zoomValue),
+    y: getSnapAdjustmentDistance(ySnaps, zoomValue),
   };
 }
 
