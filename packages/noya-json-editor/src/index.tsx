@@ -23,9 +23,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { IndexPath, withOptions } from 'tree-visit';
 
 // const session = new NoyaSession('Sam');
-const session = new NoyaSession('Sam', 'http://149.28.218.149/', {
-  transports: ['websocket'],
-});
+const session = new NoyaSession('Sam', 'http://149.28.218.149');
 const channel = session.join('test');
 
 export const GlobalStyles = createGlobalStyle({
@@ -376,6 +374,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                   {!isRootItem && item.parentType === 'object' && (
                     <InputField.Root>
                       <InputField.Input
+                        variant="bare"
                         value={item.key}
                         onSubmit={(value) => {
                           object.set('key', value);
@@ -386,6 +385,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                   {item.type === 'string' && (
                     <InputField.Root>
                       <InputField.Input
+                        variant="bare"
                         value={typeof item.value === 'string' ? item.value : ''}
                         onSubmit={(value) => {
                           object.set('value', value);
@@ -396,6 +396,7 @@ export default function NoyaJsonEditor(): JSX.Element {
                   {item.type === 'number' && (
                     <InputField.Root>
                       <InputField.NumberInput
+                        variant="bare"
                         value={typeof item.value === 'number' ? item.value : 0}
                         onSubmit={(value) => {
                           object.set('value', value);
