@@ -26,7 +26,13 @@ interface Props {
   getStateSnapshot: () => ApplicationState;
   setShowRulers: (value: boolean) => void;
   setShowPageListThumbnails: (value: boolean) => void;
+  setShowInterface: (value: boolean) => void;
+  setShowLeftSidebar: (value: boolean) => void;
+  setShowRightSidebar: (value: boolean) => void;
   showRulers: boolean;
+  actuallyShowInterface: boolean;
+  actuallyShowLeftSidebar: boolean;
+  actuallyShowRightSidebar: boolean;
   showPageListThumbnails: boolean;
   redoDisabled: boolean;
   undoDisabled: boolean;
@@ -37,7 +43,13 @@ const MenubarContent = memo(function MenubarContent({
   getStateSnapshot,
   setShowRulers,
   setShowPageListThumbnails,
+  setShowInterface,
+  setShowLeftSidebar,
+  setShowRightSidebar,
   showRulers,
+  actuallyShowInterface,
+  actuallyShowLeftSidebar,
+  actuallyShowRightSidebar,
   showPageListThumbnails,
   redoDisabled,
   undoDisabled,
@@ -160,6 +172,30 @@ const MenubarContent = memo(function MenubarContent({
         ),
       },
       {
+        title: 'View',
+        items: [
+          {
+            value: 'showLeftSidebar',
+            title: actuallyShowLeftSidebar
+              ? 'Hide Left Sidebar'
+              : 'Show Left Sidebar',
+            shortcut: 'Mod-Alt-1',
+          },
+          {
+            value: 'showRightSidebar',
+            title: actuallyShowRightSidebar
+              ? 'Hide Right Sidebar'
+              : 'Show Right Sidebar',
+            shortcut: 'Mod-Alt-2',
+          },
+          {
+            value: 'showInterface',
+            title: actuallyShowInterface ? 'Hide Interface' : 'Show Interface',
+            shortcut: 'Mod-.',
+          },
+        ],
+      },
+      {
         title: 'Preferences',
         items: [
           {
@@ -176,6 +212,9 @@ const MenubarContent = memo(function MenubarContent({
       },
     ]);
   }, [
+    actuallyShowInterface,
+    actuallyShowLeftSidebar,
+    actuallyShowRightSidebar,
     isElectron,
     redoDisabled,
     showPageListThumbnails,
@@ -212,16 +251,31 @@ const MenubarContent = memo(function MenubarContent({
         case 'showRulers':
           setShowRulers(!showRulers);
           return;
+        case 'showInterface':
+          setShowInterface(!actuallyShowInterface);
+          return;
+        case 'showLeftSidebar':
+          setShowLeftSidebar(!actuallyShowLeftSidebar);
+          return;
+        case 'showRightSidebar':
+          setShowRightSidebar(!actuallyShowRightSidebar);
+          return;
         case 'showPageListThumbnails':
           setShowPageListThumbnails(!showPageListThumbnails);
           return;
       }
     },
     [
+      actuallyShowInterface,
+      actuallyShowLeftSidebar,
+      actuallyShowRightSidebar,
       dispatch,
       handleOpen,
       handleSave,
+      setShowInterface,
+      setShowLeftSidebar,
       setShowPageListThumbnails,
+      setShowRightSidebar,
       setShowRulers,
       showPageListThumbnails,
       showRulers,
@@ -260,6 +314,12 @@ export default function Menubar() {
     fileHandle,
     setShowRulers,
     setShowPageListThumbnails,
+    setShowInterface,
+    setShowLeftSidebar,
+    setShowRightSidebar,
+    actuallyShowInterface,
+    actuallyShowLeftSidebar,
+    actuallyShowRightSidebar,
     preferences: { showRulers, showPageListThumbnails },
   } = useWorkspace();
   const getStateSnapshot = useGetStateSnapshot();
@@ -272,7 +332,13 @@ export default function Menubar() {
       redoDisabled={redoDisabled}
       undoDisabled={undoDisabled}
       showRulers={showRulers}
+      actuallyShowInterface={actuallyShowInterface}
+      actuallyShowLeftSidebar={actuallyShowLeftSidebar}
+      actuallyShowRightSidebar={actuallyShowRightSidebar}
       setShowPageListThumbnails={setShowPageListThumbnails}
+      setShowInterface={setShowInterface}
+      setShowLeftSidebar={setShowLeftSidebar}
+      setShowRightSidebar={setShowRightSidebar}
       showPageListThumbnails={showPageListThumbnails}
       setShowRulers={setShowRulers}
     />

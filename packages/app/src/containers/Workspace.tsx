@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { useSelector } from 'noya-app-state-context';
+import { useSelector, useWorkspace } from 'noya-app-state-context';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -12,7 +12,7 @@ import {
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, { memo, ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { AutoSizer } from '../components/AutoSizer';
 import { DialogProvider } from '../contexts/DialogContext';
@@ -92,26 +92,27 @@ const ToolbarContainer = styled.header(({ theme }) => ({
   WebkitAppRegion: 'drag',
 }));
 
-const MenubarContainer = styled.header<{ showApplicationMenu: boolean }>(
-  ({ theme, showApplicationMenu }) => ({
-    minHeight: `${
-      theme.sizes.toolbar.height - (showApplicationMenu ? 8 : 0)
-    }px`,
-    display: 'flex',
-    flexDirection: 'column',
-    borderBottom: `1px solid ${
-      showApplicationMenu ? 'transparent' : theme.colors.dividerStrong
-    }`,
-    borderRight: `1px solid ${
-      showApplicationMenu ? theme.colors.dividerStrong : 'transparent'
-    }`,
-    alignItems: 'stretch',
-    justifyContent: 'center',
-    color: theme.colors.textMuted,
-    background: showApplicationMenu ? 'rgba(255,255,255,0.02)' : 'none',
-    WebkitAppRegion: 'drag',
-  }),
-);
+const MenubarContainer = styled.header<{
+  showApplicationMenu: boolean;
+  showBottomBorder: boolean;
+}>(({ theme, showApplicationMenu, showBottomBorder }) => ({
+  minHeight: `${theme.sizes.toolbar.height - (showApplicationMenu ? 8 : 0)}px`,
+  display: 'flex',
+  flexDirection: 'column',
+  borderBottom: `1px solid ${
+    showApplicationMenu || showBottomBorder
+      ? 'transparent'
+      : theme.colors.dividerStrong
+  }`,
+  borderRight: `1px solid ${
+    showApplicationMenu ? theme.colors.dividerStrong : 'transparent'
+  }`,
+  alignItems: 'stretch',
+  justifyContent: 'center',
+  color: theme.colors.textMuted,
+  background: showApplicationMenu ? 'rgba(255,255,255,0.02)' : 'none',
+  WebkitAppRegion: 'drag',
+}));
 
 function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
   const currentTab = useSelector(Selectors.getCurrentTab);
@@ -119,7 +120,15 @@ function useTabElement(elementMap: Record<WorkspaceTab, ReactNode>) {
   return elementMap[currentTab];
 }
 
-export default function Workspace() {
+interface Props {
+  actuallyShowLeftSidebar: boolean;
+  actuallyShowRightSidebar: boolean;
+}
+
+const WorkspaceContent = memo(function WorkspaceContent({
+  actuallyShowLeftSidebar,
+  actuallyShowRightSidebar,
+}: Props) {
   const colorScheme = useSystemColorScheme();
   const [layersFilter, setLayersFilter] = useState('');
   const isElectron = useEnvironmentParameter('isElectron');
@@ -135,48 +144,70 @@ export default function Workspace() {
     });
   }, [colorScheme, isElectron]);
 
+  const leftSidebarContent = useTabElement({
+    canvas: (
+      <>
+        <AutoSizer>
+          {(size) => <LayerList size={size} filter={layersFilter} />}
+        </AutoSizer>
+        <FilterContainer>
+          <InputField.Root labelPosition="start" labelSize={14}>
+            <InputField.Input
+              value={layersFilter}
+              onChange={setLayersFilter}
+              placeholder="Filter layers"
+              type="search"
+            />
+            <InputField.Label>
+              <MagnifyingGlassIcon />
+            </InputField.Label>
+          </InputField.Root>
+        </FilterContainer>
+        <Spacer.Vertical size={8} />
+      </>
+    ),
+    pages: <Spacer.Vertical />,
+    theme: <ThemeGroups />,
+  });
+
+  const rightSidebarContent = useTabElement({
+    canvas: <Inspector />,
+    pages: null,
+    theme: <ThemeInspector />,
+  });
+
+  const menuBar =
+    isElectron && !actuallyShowLeftSidebar ? (
+      <div>
+        <Spacer.Horizontal size={90} />
+        <Menubar />
+      </div>
+    ) : (
+      <MenubarContainer
+        showBottomBorder={!actuallyShowLeftSidebar}
+        showApplicationMenu={isElectron}
+        onDoubleClick={doubleClickToolbar}
+      >
+        <Menubar />
+      </MenubarContainer>
+    );
+
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       <DialogProvider>
-        <LeftSidebar>
-          <MenubarContainer
-            showApplicationMenu={isElectron}
-            onDoubleClick={doubleClickToolbar}
-          >
-            <Menubar />
-          </MenubarContainer>
-          <LeftSidebarBorderedContent>
-            <PageList />
-            <Divider />
-            {useTabElement({
-              canvas: (
-                <>
-                  <AutoSizer>
-                    {(size) => <LayerList size={size} filter={layersFilter} />}
-                  </AutoSizer>
-                  <FilterContainer>
-                    <InputField.Root labelPosition="start" labelSize={14}>
-                      <InputField.Input
-                        value={layersFilter}
-                        onChange={setLayersFilter}
-                        placeholder="Filter layers"
-                        type="search"
-                      />
-                      <InputField.Label>
-                        <MagnifyingGlassIcon />
-                      </InputField.Label>
-                    </InputField.Root>
-                  </FilterContainer>
-                  <Spacer.Vertical size={8} />
-                </>
-              ),
-              pages: <Spacer.Vertical />,
-              theme: <ThemeGroups />,
-            })}
-          </LeftSidebarBorderedContent>
-        </LeftSidebar>
+        {actuallyShowLeftSidebar && (
+          <LeftSidebar>
+            {menuBar}
+            <LeftSidebarBorderedContent>
+              <PageList />
+              <Divider />
+              {leftSidebarContent}
+            </LeftSidebarBorderedContent>
+          </LeftSidebar>
+        )}
         <MainView>
           <ToolbarContainer onDoubleClick={doubleClickToolbar}>
+            {!actuallyShowLeftSidebar && menuBar}
             {useTabElement({
               canvas: <Toolbar />,
               pages: null,
@@ -189,18 +220,25 @@ export default function Workspace() {
               pages: <PagesGrid />,
               theme: <ThemeWindow />,
             })}
-            <RightSidebar>
-              <ScrollArea>
-                {useTabElement({
-                  canvas: <Inspector />,
-                  pages: null,
-                  theme: <ThemeInspector />,
-                })}
-              </ScrollArea>
-            </RightSidebar>
+            {actuallyShowRightSidebar && (
+              <RightSidebar>
+                <ScrollArea>{rightSidebarContent}</ScrollArea>
+              </RightSidebar>
+            )}
           </ContentArea>
         </MainView>
       </DialogProvider>
     </DesignSystemConfigurationProvider>
+  );
+});
+
+export default function Workspace() {
+  const { actuallyShowLeftSidebar, actuallyShowRightSidebar } = useWorkspace();
+
+  return (
+    <WorkspaceContent
+      actuallyShowLeftSidebar={actuallyShowLeftSidebar}
+      actuallyShowRightSidebar={actuallyShowRightSidebar}
+    />
   );
 }

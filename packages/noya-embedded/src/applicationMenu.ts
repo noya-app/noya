@@ -21,6 +21,9 @@ export type ApplicationMenuItemType =
   | 'copy'
   | 'paste'
   // Preferences
+  | 'showLeftSidebar'
+  | 'showRightSidebar'
+  | 'showInterface'
   | 'showRulers'
   | 'showPageListThumbnails';
 

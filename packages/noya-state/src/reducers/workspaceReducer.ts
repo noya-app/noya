@@ -40,6 +40,9 @@ export type WorkspaceState = {
   canvasInsets: Insets;
   nextFocusAction?: NextFocusAction;
   preferences: {
+    showLeftSidebar: boolean;
+    showRightSidebar: boolean;
+    showInterface: boolean;
     showRulers: boolean;
     showPixelGrid: boolean;
     showPageListThumbnails: boolean;
@@ -53,6 +56,9 @@ export type WorkspaceAction =
   | [type: 'setCanvasSize', size: Size, insets: Insets]
   | [type: 'setShowRulers', value: boolean]
   | [type: 'setShowPageListThumbnails', value: boolean]
+  | [type: 'setShowLeftSidebar', value: boolean]
+  | [type: 'setShowRightSidebar', value: boolean]
+  | [type: 'setShowInterface', value: boolean]
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
   | HistoryAction;
@@ -123,6 +129,54 @@ export function workspaceReducer(
         draft.preferences.showPageListThumbnails = value;
       });
     }
+    case 'setShowLeftSidebar': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.preferences.showLeftSidebar = value;
+
+        if (value && !draft.preferences.showInterface) {
+          draft.preferences.showInterface = true;
+
+          if (draft.preferences.showRightSidebar) {
+            draft.preferences.showRightSidebar = false;
+          }
+        }
+      });
+    }
+    case 'setShowRightSidebar': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.preferences.showRightSidebar = value;
+
+        if (value && !draft.preferences.showInterface) {
+          draft.preferences.showInterface = true;
+
+          if (draft.preferences.showLeftSidebar) {
+            draft.preferences.showLeftSidebar = false;
+          }
+        }
+      });
+    }
+    case 'setShowInterface': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.preferences.showInterface = value;
+
+        // If the sidebars are both set to hidden, showing the interface
+        // won't do anything unless we also show the sidebars.
+        if (
+          value &&
+          !draft.preferences.showLeftSidebar &&
+          !draft.preferences.showRightSidebar
+        ) {
+          draft.preferences.showLeftSidebar = true;
+          draft.preferences.showRightSidebar = true;
+        }
+      });
+    }
     case 'highlightLayer': {
       const [, highlight] = action;
 
@@ -158,6 +212,9 @@ export function createInitialWorkspaceState(
     canvasSize: { width: 0, height: 0 },
     canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
     preferences: {
+      showLeftSidebar: true,
+      showRightSidebar: true,
+      showInterface: true,
       showRulers: false,
       showPixelGrid: true,
       showPageListThumbnails: false,

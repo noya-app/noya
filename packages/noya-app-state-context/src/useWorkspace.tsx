@@ -33,6 +33,21 @@ export function useWorkspace() {
     [dispatch],
   );
 
+  const setShowInterface = useCallback(
+    (value: boolean) => dispatch('setShowInterface', value),
+    [dispatch],
+  );
+
+  const setShowLeftSidebar = useCallback(
+    (value: boolean) => dispatch('setShowLeftSidebar', value),
+    [dispatch],
+  );
+
+  const setShowRightSidebar = useCallback(
+    (value: boolean) => dispatch('setShowRightSidebar', value),
+    [dispatch],
+  );
+
   const highlightLayer = useCallback(
     (highlight?: LayerHighlight) => dispatch('highlightLayer', highlight),
     [dispatch],
@@ -67,6 +82,18 @@ export function useWorkspace() {
   const renamingLayer =
     nextFocusAction?.type === 'renameLayer' ? nextFocusAction.id : undefined;
 
+  // The preferences for showing the various interface elements combine to feel natural
+  // for the user, but can look misleading in code. E.g. if `showInterface`
+  // is false, then we don't show the left sidebar even if `showLeftSidebar` is true.
+  // These `actually` variables more accurately represent the state of the UI in code.
+  const actuallyShowLeftSidebar =
+    preferences.showInterface && preferences.showLeftSidebar;
+  const actuallyShowRightSidebar =
+    preferences.showInterface && preferences.showRightSidebar;
+  const actuallyShowInterface =
+    preferences.showInterface &&
+    (preferences.showLeftSidebar || preferences.showRightSidebar);
+
   return useMemo(
     () => ({
       canvasInsets,
@@ -78,11 +105,17 @@ export function useWorkspace() {
       setCanvasSize,
       setShowRulers,
       setShowPageListThumbnails,
+      setShowInterface,
+      setShowLeftSidebar,
+      setShowRightSidebar,
       didHandleFocus,
       renamingPage,
       startRenamingPage,
       renamingLayer,
       startRenamingLayer,
+      actuallyShowLeftSidebar,
+      actuallyShowRightSidebar,
+      actuallyShowInterface,
     }),
     [
       canvasInsets,
@@ -94,11 +127,17 @@ export function useWorkspace() {
       setCanvasSize,
       setShowRulers,
       setShowPageListThumbnails,
+      setShowInterface,
+      setShowLeftSidebar,
+      setShowRightSidebar,
       didHandleFocus,
       renamingPage,
       startRenamingPage,
       renamingLayer,
       startRenamingLayer,
+      actuallyShowLeftSidebar,
+      actuallyShowRightSidebar,
+      actuallyShowInterface,
     ],
   );
 }
