@@ -29,6 +29,11 @@ const createWindow = (filename?: string) => {
     height: 800,
     width: 1200,
     titleBarStyle: 'hiddenInset',
+    // Match the position of native apps like Finder
+    trafficLightPosition: {
+      x: 19,
+      y: 18,
+    },
     webPreferences: {
       experimentalFeatures: true,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
