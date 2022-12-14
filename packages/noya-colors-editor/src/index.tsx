@@ -5,20 +5,13 @@ import {
   DesignSystemConfigurationProvider,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { createNoyaObject, serializeTree } from 'noya-object-utils';
+import { createLinkedNode, createNoyaObject } from 'noya-object-utils';
 import { SketchModel } from 'noya-sketch-model';
 import * as React from 'react';
 import { Suspense, useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { z } from 'zod';
 import { ColorsGrid } from './components/ColorsGrid';
-import {
-  AppData,
-  appDataSchema,
-  ColorSwatch,
-  documentSchema,
-  userDataSchema,
-} from './schema';
+import { AppData, ColorSwatch, documentSchema, userDataSchema } from './schema';
 
 const session = new NoyaSession('Sam');
 const channel = session.join('test');
@@ -57,49 +50,20 @@ export default function NoyaJsonEditor(): JSX.Element {
 
       if (!root) return;
 
-      const parsedUserData = z.string().safeParse(root.get('userDataNodeId'));
+      const userData = createLinkedNode(root, 'userDataNodeId', userDataSchema);
+      const document = createLinkedNode(root, 'documentNodeId', documentSchema);
 
-      if (!parsedUserData.success) {
-        const child = createNoyaObject(root, userDataSchema.parse(undefined));
-        root.set('userDataNodeId', child.id);
-        return;
-      }
+      if (!userData || !document) return;
 
-      const documentNodeId = z.string().safeParse(root.get('documentNodeId'));
-
-      if (!documentNodeId.success) {
-        const child = createNoyaObject(root, documentSchema.parse(undefined));
-        root.set('documentNodeId', child.id);
-        return;
-      }
-
-      const serialized = serializeTree(root);
-
-      const appData = appDataSchema.parse(serialized);
-
-      // console.log(serialized, appData);
-
-      setAppData(appData);
+      setAppData({ userData, document });
     });
   }, []);
 
-  // console.log(appData);
-
   if (!appData) return <>Loading...</>;
 
-  const { documentNodeId, userDataNodeId, children } = appData;
+  const { document, userData } = appData;
 
-  const documentNode = documentSchema.parse(
-    children.find((child) => child.id === documentNodeId),
-  );
-
-  const userDataNode = userDataSchema.parse(
-    children.find((child) => child.id === userDataNodeId),
-  );
-
-  // console.log(documentNode, userDataNode);
-
-  const sketchSwatches = documentNode.children.map((swatch): Sketch.Swatch => {
+  const sketchSwatches = document.children.map((swatch): Sketch.Swatch => {
     return {
       _class: 'swatch',
       do_objectID: swatch.id,
@@ -121,7 +85,7 @@ export default function NoyaJsonEditor(): JSX.Element {
           <div>Hello, world!</div>
           <Button
             onClick={() => {
-              const object = channel.objects[documentNode.id];
+              const object = channel.objects[document.id];
 
               if (!object) return;
 
@@ -135,9 +99,9 @@ export default function NoyaJsonEditor(): JSX.Element {
           </Button>
           <ColorsGrid
             swatches={sketchSwatches}
-            selectedSwatchIds={userDataNode.selectedIds}
+            selectedSwatchIds={userData.selectedIds}
             onSelectSwatch={(id) => {
-              const object = channel.objects[userDataNode.id];
+              const object = channel.objects[userData.id];
 
               if (!object) return;
 

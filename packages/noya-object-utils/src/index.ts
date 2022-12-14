@@ -1,6 +1,6 @@
 import { NoyaObject } from 'noya-backend-client';
-
 import { withOptions } from 'tree-visit';
+import { z } from 'zod';
 
 export const { visit } = withOptions({
   getChildren: (item: NoyaObject) => [...item.children],
@@ -61,4 +61,38 @@ export function createNoyaObject<T extends Record<PropertyKey, unknown>>(
   }
 
   return self;
+}
+
+export function createLinkedNode<T extends z.ZodTypeAny>(
+  parent: NoyaObject,
+  key: string,
+  schema: T,
+) {
+  const create = () => {
+    const child = createNoyaObject(parent, schema.parse(undefined));
+    parent.set(key, child.id);
+  };
+
+  const linkedId = z.string().safeParse(parent.get(key));
+
+  if (!linkedId.success) {
+    create();
+    return;
+  }
+
+  const child = parent.children.find((child) => child.id === linkedId.data);
+
+  if (!child) {
+    create();
+    return;
+  }
+
+  const linkedData = schema.safeParse(serializeTree(child));
+
+  if (!linkedData.success) {
+    create();
+    return;
+  }
+
+  return linkedData.data;
 }

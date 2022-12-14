@@ -33,17 +33,9 @@ export const userDataSchema = z
 
 export type UserData = z.infer<typeof userDataSchema>;
 
-const genericObjectSchema = z.object({ id: z.string() }).passthrough();
+export type ColorsDocument = z.infer<typeof documentSchema>;
 
-// type AppData = {
-//   userDataNodeId: string;
-//   documentNodeId: string;
-// };
-
-export const appDataSchema = z.object({
-  userDataNodeId: z.string(),
-  documentNodeId: z.string(),
-  children: z.array(genericObjectSchema),
-});
-
-export type AppData = z.infer<typeof appDataSchema>;
+export type AppData = {
+  userData: UserData;
+  document: ColorsDocument;
+};

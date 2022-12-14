@@ -1,5 +1,9 @@
 import { rgbaToHex } from 'noya-colorpicker';
-import { GridView, sketchColorToRgba } from 'noya-designsystem';
+import {
+  GridView,
+  sketchColorToRgba,
+  sketchColorToRgbaString,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
@@ -105,6 +109,13 @@ export const ColorsGrid = memo(function ColorsGrid({
                   // menuItems={menuItems}
                   // onSelectMenuItem={handleSelectMenuItem}
                 >
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      background: sketchColorToRgbaString(item.value),
+                    }}
+                  />
                   {/* <ColorSwatch value={item.value} /> */}
                 </GridView.Item>
               );
