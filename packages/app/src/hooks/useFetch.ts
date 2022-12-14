@@ -21,7 +21,7 @@ export default function useFetch<T>(
       } catch (error) {
         if (isStale) return;
 
-        setState({ type: 'failure', value: error });
+        setState({ type: 'failure', value: error as Error });
       }
     }
 
