@@ -5,7 +5,7 @@ export function useMutableState<T extends object>(
   valueOrInitializer: T | (() => T),
 ) {
   const mutableValue = useLazyValue(() =>
-    typeof valueOrInitializer === 'function'
+    valueOrInitializer instanceof Function
       ? valueOrInitializer()
       : valueOrInitializer,
   );
