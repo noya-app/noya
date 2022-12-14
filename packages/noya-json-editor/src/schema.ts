@@ -1,4 +1,3 @@
-import { NoyaObject } from 'noya-backend-client';
 import { z } from 'zod';
 
 const baseValueSchema = z.object({
@@ -47,11 +46,3 @@ export const noyaJsonObjectSchema = z.union([
   jsonValueSchema,
   rootObjectSchema,
 ]);
-
-export function serialize(object: NoyaObject) {
-  const serialized = object.serialize();
-  return {
-    ...Object.fromEntries(serialized.entries as any),
-    id: serialized.id,
-  };
-}

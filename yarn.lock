@@ -13079,6 +13079,11 @@ modular-scripts@^3.6.0:
     webpack-merge "^5.8.0"
     ws "8.8.1"
 
+modular-template-package@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/modular-template-package/-/modular-template-package-1.1.0.tgz#40ee23e5b141397ecea88cc5ecfccfb707e8a133"
+  integrity sha512-7DlC+fzkPywaTrTsic5yJliEDPW3oPPyuyTwHqQGkxZGUJdKZSPuMup2VXyJDRb7EEIfyUzrfDZYIZPDWSVSFg==
+
 modular-template-view@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/modular-template-view/-/modular-template-view-1.1.0.tgz#2ce54c21c0ffe74743301703ba15ebb82db7efc4"

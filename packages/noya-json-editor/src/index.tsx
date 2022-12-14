@@ -1,4 +1,4 @@
-import { NoyaObject, NoyaSession } from 'noya-backend-client';
+import { NoyaSession } from 'noya-backend-client';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -16,12 +16,13 @@ import {
   TextIcon,
   ValueNoneIcon,
 } from 'noya-icons';
+import { serialize, visit } from 'noya-object-utils';
 import { isDeepEqual, unique } from 'noya-utils';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { IndexPath, withOptions } from 'tree-visit';
-import { noyaJsonObjectSchema, serialize } from './schema';
+import { IndexPath } from 'tree-visit';
+import { noyaJsonObjectSchema } from './schema';
 
 const session = new NoyaSession('Sam');
 // const session = new NoyaSession('Sam', 'http://149.28.218.149');
@@ -83,10 +84,6 @@ type RenderableItem = {
   hasChildren: boolean;
 };
 
-const NoyaObjectUtils = withOptions({
-  getChildren: (item: NoyaObject) => [...item.children],
-});
-
 export default function NoyaJsonEditor(): JSX.Element {
   const [flatItems, setFlatItems] = useState<RenderableItem[]>([]);
 
@@ -96,7 +93,7 @@ export default function NoyaJsonEditor(): JSX.Element {
 
       const renderableItems: RenderableItem[] = [];
 
-      NoyaObjectUtils.visit(channel.root, (node, indexPath) => {
+      visit(channel.root, (node, indexPath) => {
         const parent = node.parent
           ? noyaJsonObjectSchema.parse(serialize(node.parent))
           : undefined;
