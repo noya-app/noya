@@ -12,7 +12,7 @@ export function isEqualArray<T>(a: T[], b: T[], deep: boolean) {
   return true;
 }
 
-function isEqualObject<T extends Record<string, any>>(
+function isEqualObject<T extends Record<PropertyKey, any>>(
   a: T,
   b: T,
   deep: boolean,
@@ -46,7 +46,8 @@ export function isEqual<T>(a: T, b: T, deep: boolean) {
 
   if (aType !== bType) return false;
 
-  if (aType !== 'object') return a === b;
+  // Handle non-objects and null/undefined
+  if (aType !== 'object' || !a || !b) return a === b;
 
   if (a instanceof Array && b instanceof Array) {
     return isEqualArray(a, b, deep);

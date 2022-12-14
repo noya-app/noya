@@ -39,6 +39,7 @@
   "dependencies": {
     "electron-context-menu": "^3.6.0",
     "electron-squirrel-startup": "^1.0.0",
+    "ts-node": "^10.9.1",
     "update-electron-app": "^2.0.1"
   }
 }
