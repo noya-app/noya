@@ -21,9 +21,10 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { IndexPath, withOptions } from 'tree-visit';
+import { noyaJsonObjectSchema, serialize } from './schema';
 
-// const session = new NoyaSession('Sam');
-const session = new NoyaSession('Sam', 'http://149.28.218.149');
+const session = new NoyaSession('Sam');
+// const session = new NoyaSession('Sam', 'http://149.28.218.149');
 const channel = session.join('test');
 
 export const GlobalStyles = createGlobalStyle({
@@ -96,11 +97,10 @@ export default function NoyaJsonEditor(): JSX.Element {
       const renderableItems: RenderableItem[] = [];
 
       NoyaObjectUtils.visit(channel.root, (node, indexPath) => {
-        // console.log(node.id, node.serialize());
-        const key = node.get('key');
-        const value = node.get('value');
-        const type = node.get('type');
-        const parentType = node.parent?.get('type');
+        const parent = node.parent
+          ? noyaJsonObjectSchema.parse(serialize(node.parent))
+          : undefined;
+        const object = noyaJsonObjectSchema.parse(serialize(node));
 
         renderableItems.push({
           id: node.id,
@@ -108,13 +108,10 @@ export default function NoyaJsonEditor(): JSX.Element {
           indexPath: [...indexPath],
           hasChildren: node.children.length > 0,
           isExpanded: true,
-          key: typeof key === 'string' ? key : '',
-          value,
-          type: channel.root?.id === node.id ? 'object' : (type as JsonType),
-          parentType:
-            channel.root && channel.root?.id === node.parent?.id
-              ? 'object'
-              : (parentType as JsonType),
+          key: object.key,
+          value: 'value' in object ? object.value : null,
+          type: object.type,
+          parentType: parent?.type,
         });
       });
 
