@@ -120,8 +120,18 @@ function EditorContent({
   const activeUsers = Object.entries(userStore.userDataMap)
     .filter(([id]) => id !== userId)
     .filter(([, value]) => {
-      return now - value.timestamp < 10000;
+      return now - value.timestamp < 2000;
     });
+
+  const setUserData = (selectedIds: string[]) => {
+    const object = channel.objects[userStore.id];
+
+    if (!object) return;
+
+    const userData: UserData = { selectedIds, timestamp: Date.now() };
+
+    object.set(userId, userData);
+  };
 
   return (
     <Container>
@@ -144,18 +154,7 @@ function EditorContent({
           swatches={sketchSwatches}
           selectedSwatchIds={userData.selectedIds}
           presence={activeUsers}
-          onSelectSwatch={(id) => {
-            const object = channel.objects[userStore.id];
-
-            if (!object) return;
-
-            const userData: UserData = {
-              selectedIds: id ? [id] : [],
-              timestamp: Date.now(),
-            };
-
-            object.set(userId, userData);
-          }}
+          onSelectSwatch={(id) => setUserData(id ? [id] : [])}
         />
       </Stack>
       <div style={{ width: '1px', background: 'black' }} />
@@ -183,25 +182,25 @@ function EditorContent({
               key={selectedSwatches[0].do_objectID}
               id={`color-swatch-${selectedSwatches[0].do_objectID}]}`}
               color={color}
-              // onSetOpacity={(value) => {
-              //   selectedSwatches.forEach((swatch) => {
-              //     const object = channel.objects[swatch.do_objectID];
+              onSetOpacity={(value) => {
+                selectedSwatches.forEach((swatch) => {
+                  const object = channel.objects[swatch.do_objectID];
 
-              //     if (!object) return;
+                  if (!object) return;
 
-              //     const noyaColor: Color = {
-              //       alpha: value,
-              //       red: swatch.value.red,
-              //       green: swatch.value.green,
-              //       blue: swatch.value.blue,
-              //     };
+                  const noyaColor: Color = {
+                    alpha: value,
+                    red: swatch.value.red,
+                    green: swatch.value.green,
+                    blue: swatch.value.blue,
+                  };
 
-              //     object.set('color', noyaColor);
-              //   });
-              // }}
+                  object.set('color', noyaColor);
+                });
+
+                setUserData(userData.selectedIds);
+              }}
               onChangeColor={(color) => {
-                // console.log('on change color', color);
-
                 selectedSwatches.forEach((swatch) => {
                   const object = channel.objects[swatch.do_objectID];
 
@@ -216,6 +215,8 @@ function EditorContent({
 
                   object.set('color', noyaColor);
                 });
+
+                setUserData(userData.selectedIds);
               }}
             />
           </>

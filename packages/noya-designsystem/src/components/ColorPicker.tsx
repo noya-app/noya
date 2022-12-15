@@ -26,6 +26,7 @@ export default memo(function ColorPicker({ value, onChange }: Props) {
     fromHsva: hsvaToRgba,
     equal: equalColorObjects,
   };
+
   const rgbaColor: RgbaColor = useMemo(() => sketchColorToRgba(value), [value]);
 
   const handleChange = useCallback(

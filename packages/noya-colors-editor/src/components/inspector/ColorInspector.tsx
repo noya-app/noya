@@ -1,5 +1,6 @@
 import { hexToRgba, validHex } from 'noya-colorpicker';
 import {
+  ColorPicker,
   InputField,
   Label,
   LabeledElementView,
@@ -83,7 +84,7 @@ export default memo(function ColorInspector({
   return (
     <InspectorPrimitives.Section>
       <InspectorPrimitives.Column>
-        {/* <ColorPicker value={displayColor} onChange={onChangeColor} /> */}
+        <ColorPicker value={displayColor} onChange={onChangeColor} />
         <InspectorPrimitives.VerticalSeparator />
         <InspectorPrimitives.Row id={id}>
           <LabeledElementView renderLabel={renderLabel}>
