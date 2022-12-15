@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 export const colorSchema = z.object({
-  red: z.number().min(0).max(1),
-  green: z.number().min(0).max(1),
-  blue: z.number().min(0).max(1),
-  alpha: z.number().min(0).max(1),
+  red: z.number().min(0).max(1).default(1),
+  green: z.number().min(0).max(1).default(1),
+  blue: z.number().min(0).max(1).default(1),
+  alpha: z.number().min(0).max(1).default(1),
 });
 
 export type Color = z.infer<typeof colorSchema>;
@@ -12,7 +12,7 @@ export type Color = z.infer<typeof colorSchema>;
 export const colorSwatchSchema = z.object({
   id: z.string(),
   name: z.string().default(''),
-  color: colorSchema,
+  color: colorSchema.default({}),
 });
 
 export type ColorSwatch = z.infer<typeof colorSwatchSchema>;

@@ -49,10 +49,9 @@ export function assign(
 export function createNoyaObject<T extends Record<PropertyKey, unknown>>(
   parent: NoyaObject,
   values: Omit<T, 'id'>,
+  id?: string,
 ) {
-  const self = parent.createChild();
-
-  assign(self, values);
+  const self = parent.createChild(undefined, id, Object.entries(values));
 
   if ('children' in values && Array.isArray(values.children)) {
     values.children.forEach((childValue) => {
@@ -68,8 +67,8 @@ export function createLinkedNode<T extends z.ZodTypeAny>(
   key: string,
   schema: T,
 ) {
-  const create = () => {
-    const child = createNoyaObject(parent, schema.parse(undefined));
+  const create = (id?: string) => {
+    const child = createNoyaObject(parent, schema.parse(undefined), id);
     parent.set(key, child.id);
   };
 
@@ -83,14 +82,14 @@ export function createLinkedNode<T extends z.ZodTypeAny>(
   const child = parent.children.find((child) => child.id === linkedId.data);
 
   if (!child) {
-    create();
+    create(linkedId.data);
     return;
   }
 
   const linkedData = schema.safeParse(serializeTree(child));
 
   if (!linkedData.success) {
-    create();
+    create(linkedId.data);
     return;
   }
 
