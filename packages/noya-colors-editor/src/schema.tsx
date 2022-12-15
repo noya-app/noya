@@ -35,7 +35,9 @@ export type UserData = z.infer<typeof userDataSchema>;
 
 export const userStoreSchema = z.preprocess(
   (obj: any) => {
-    const { id, children, ...rest } = obj ?? { id: '' };
+    // obj can be undefined when initialized
+    // obj can contain userDataMap if it was initialized to the zod default value
+    const { id, children, userDataMap, ...rest } = obj ?? {};
     return { id, userDataMap: rest };
   },
   z
