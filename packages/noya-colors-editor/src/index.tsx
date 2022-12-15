@@ -28,23 +28,25 @@ import {
   Color,
   ColorSwatch,
   documentSchema,
+  UserData,
   userDataSchema,
+  userStoreSchema,
 } from './schema';
 
 const session = new NoyaSession('Sam');
 const channel = session.join('test');
 
-function getAppData() {
+function getAppData(): AppData | undefined {
   const root = channel.root;
 
   if (!root) return;
 
-  const userData = createLinkedNode(root, 'userDataNodeId', userDataSchema);
+  const userStore = createLinkedNode(root, 'userStoreNodeId', userStoreSchema);
   const document = createLinkedNode(root, 'documentNodeId', documentSchema);
 
-  if (!userData || !document) return;
+  if (!userStore || !document) return;
 
-  return { userData, document };
+  return { userStore, document };
 }
 
 export const GlobalStyles = createGlobalStyle({
@@ -79,24 +81,16 @@ const Stack = styled.div(({ theme }) => ({
   alignItems: 'stretch',
 }));
 
-export function NoyaColorsEditor() {
-  const [appData, setAppData] = useState<AppData | undefined>(() =>
-    getAppData(),
-  );
+function EditorContent({
+  appData,
+  userId,
+}: {
+  appData: AppData;
+  userId: string;
+}) {
+  const { document, userStore } = appData;
 
-  useEffect(() => {
-    return channel.addListener(() => {
-      const appData = getAppData();
-      if (!appData) return;
-      setAppData(appData);
-    });
-  }, []);
-
-  // console.log(appData);
-
-  if (!appData) return <>Loading...</>;
-
-  const { document, userData } = appData;
+  const userData = userDataSchema.parse(userStore.userDataMap[userId]);
 
   const sketchSwatches = document.children.map((swatch): Sketch.Swatch => {
     return {
@@ -121,6 +115,14 @@ export function NoyaColorsEditor() {
     isDeepEqual,
   );
 
+  const now = Date.now();
+
+  const activeUsers = Object.entries(userStore.userDataMap)
+    .filter(([id]) => id !== userId)
+    .filter(([, value]) => {
+      return now - value.timestamp < 10000;
+    });
+
   return (
     <Container>
       <Stack>
@@ -141,14 +143,18 @@ export function NoyaColorsEditor() {
         <ColorsGrid
           swatches={sketchSwatches}
           selectedSwatchIds={userData.selectedIds}
+          presence={activeUsers}
           onSelectSwatch={(id) => {
-            // console.log('select', id);
-
-            const object = channel.objects[userData.id];
+            const object = channel.objects[userStore.id];
 
             if (!object) return;
 
-            object.set('selectedIds', [id]);
+            const userData: UserData = {
+              selectedIds: id ? [id] : [],
+              timestamp: Date.now(),
+            };
+
+            object.set(userId, userData);
           }}
         />
       </Stack>
@@ -174,7 +180,8 @@ export function NoyaColorsEditor() {
             />
             <Divider />
             <ColorInspector
-              id={'color-swatch'}
+              key={selectedSwatches[0].do_objectID}
+              id={`color-swatch-${selectedSwatches[0].do_objectID}]}`}
               color={color}
               // onSetOpacity={(value) => {
               //   selectedSwatches.forEach((swatch) => {
@@ -216,6 +223,24 @@ export function NoyaColorsEditor() {
       </Stack>
     </Container>
   );
+}
+
+export function NoyaColorsEditor() {
+  const [appData, setAppData] = useState<AppData | undefined>(() =>
+    getAppData(),
+  );
+
+  useEffect(() => {
+    return channel.addListener(() => {
+      const appData = getAppData();
+      if (!appData) return;
+      setAppData(appData);
+    });
+  }, []);
+
+  if (!appData || !session.userId) return <>Loading...</>;
+
+  return <EditorContent appData={appData} userId={session.userId} />;
 }
 
 let initialized = false;

@@ -26,16 +26,31 @@ export const documentSchema = z
 
 export const userDataSchema = z
   .object({
-    id: z.string().default(''),
     selectedIds: z.array(z.string()).default([]),
+    timestamp: z.number().default(0),
   })
   .default({});
 
 export type UserData = z.infer<typeof userDataSchema>;
 
+export const userStoreSchema = z.preprocess(
+  (obj: any) => {
+    const { id, children, ...rest } = obj ?? { id: '' };
+    return { id, userDataMap: rest };
+  },
+  z
+    .object({
+      id: z.string().default(''),
+      userDataMap: z.record(z.string(), userDataSchema).default({}),
+    })
+    .default({}),
+);
+
+export type UserStore = z.infer<typeof userStoreSchema>;
+
 export type ColorsDocument = z.infer<typeof documentSchema>;
 
 export type AppData = {
-  userData: UserData;
+  userStore: UserStore;
   document: ColorsDocument;
 };

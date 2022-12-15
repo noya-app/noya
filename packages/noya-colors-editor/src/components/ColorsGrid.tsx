@@ -1,5 +1,10 @@
 import { rgbaToHex } from 'noya-colorpicker';
-import { GridView, sketchColorToRgba } from 'noya-designsystem';
+import {
+  Autofade,
+  Avatar,
+  GridView,
+  sketchColorToRgba,
+} from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
@@ -9,9 +14,12 @@ import { createThemeGroups } from '../utils/themeTree';
 import ColorSwatch from './ColorSwatch';
 // import { menuItems, ThemeMenuItemType } from './menuItems';
 
+type Presence = [string, { selectedIds: string[]; timestamp: number }][];
+
 interface Props {
   swatches: Sketch.Swatch[];
   selectedSwatchIds: string[];
+  presence?: Presence;
   onDeleteSwatch?: () => void;
   onGroupSwatch?: (id: string[], name?: string) => void;
   onSelectSwatch?: (id?: string, selectionType?: SelectionType) => void;
@@ -21,6 +29,7 @@ interface Props {
 export const ColorsGrid = memo(function ColorsGrid({
   swatches,
   selectedSwatchIds,
+  presence,
   onGroupSwatch,
   onDeleteSwatch,
   onSelectSwatch,
@@ -89,6 +98,10 @@ export const ColorsGrid = memo(function ColorsGrid({
               const hex = rgbaToHex(color);
               const alphaPercent = `${Math.round(color.a * 100)}%`;
 
+              const activeUser = presence?.find(([userId, value]) =>
+                value.selectedIds.includes(item.do_objectID),
+              );
+
               return (
                 <GridView.Item
                   id={item.do_objectID}
@@ -100,6 +113,13 @@ export const ColorsGrid = memo(function ColorsGrid({
                     onSelectSwatch?.(
                       item.do_objectID,
                       event.shiftKey ? 'intersection' : 'replace',
+                    )
+                  }
+                  badge={
+                    activeUser && (
+                      <Autofade timestamp={activeUser[1].timestamp}>
+                        <Avatar />
+                      </Autofade>
                     )
                   }
                   onContextMenu={() => handleOnContextMenu(item.do_objectID)}

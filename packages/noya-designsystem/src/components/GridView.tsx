@@ -47,6 +47,7 @@ const ItemContainer = styled.div<{ selected: boolean }>(
 const GridContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
 }));
 
 const ItemTitle = styled.span(({ theme }) => ({
@@ -84,10 +85,17 @@ const SectionHeaderContainer = styled.div(({ theme }) => ({
   padding: '0 20px',
 }));
 
+const BadgeContainer = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: -4,
+  right: -4,
+}));
+
 interface ItemProps<MenuItemType extends string = string> {
   id: string;
   title: string;
   subtitle?: string;
+  badge?: ReactNode;
   selected: boolean;
   onClick?: (event: React.MouseEvent) => void;
   onDoubleClick?: () => void;
@@ -104,6 +112,7 @@ const GridViewItem = forwardRef(function GridViewItem<
     id,
     title,
     subtitle,
+    badge,
     selected,
     onClick,
     onDoubleClick,
@@ -126,6 +135,7 @@ const GridViewItem = forwardRef(function GridViewItem<
 
   const element = (
     <GridContainer id={id} ref={forwardedRef}>
+      {badge && <BadgeContainer>{badge}</BadgeContainer>}
       <ItemContainer
         selected={selected}
         onClick={handleClick}
