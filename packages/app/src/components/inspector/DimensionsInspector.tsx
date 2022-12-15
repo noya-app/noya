@@ -2,11 +2,9 @@ import { IconButton, Spacer } from 'noya-designsystem';
 import { SetNumberMode } from 'noya-state';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import DimensionInput from './DimensionInput';
+import DimensionInput, { DimensionValue } from './DimensionInput';
 import FlipControls from './FlipControls';
 import * as InspectorPrimitives from './InspectorPrimitives';
-
-export type DimensionValue = number | undefined;
 
 const Row = styled.div(({ theme }) => ({
   flex: '0 0 auto',

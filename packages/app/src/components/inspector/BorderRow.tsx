@@ -8,8 +8,7 @@ import {
 import { SetNumberMode } from 'noya-state';
 import React, { memo, ReactNode, useCallback } from 'react';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
-import DimensionInput from './DimensionInput';
-import { DimensionValue } from './DimensionsInspector';
+import DimensionInput, { DimensionValue } from './DimensionInput';
 import FillInputFieldWithPicker, {
   ColorFillProps,
   GradientFillProps,

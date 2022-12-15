@@ -1,15 +1,12 @@
 import { rgbaToHex } from 'noya-colorpicker';
-import {
-  GridView,
-  sketchColorToRgba,
-  sketchColorToRgbaString,
-} from 'noya-designsystem';
+import { GridView, sketchColorToRgba } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
 // import { useOpenInputDialog } from '../../contexts/DialogContext';
 import { createThemeGroups } from '../utils/themeTree';
+import ColorSwatch from './ColorSwatch';
 // import { menuItems, ThemeMenuItemType } from './menuItems';
 
 interface Props {
@@ -109,14 +106,7 @@ export const ColorsGrid = memo(function ColorsGrid({
                   // menuItems={menuItems}
                   // onSelectMenuItem={handleSelectMenuItem}
                 >
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      background: sketchColorToRgbaString(item.value),
-                    }}
-                  />
-                  {/* <ColorSwatch value={item.value} /> */}
+                  <ColorSwatch value={item.value} />
                 </GridView.Item>
               );
             })}
