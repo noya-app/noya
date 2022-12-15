@@ -33,7 +33,7 @@ import {
   userStoreSchema,
 } from './schema';
 
-const session = new NoyaSession('Sam');
+const session = new NoyaSession('Sam', 'http://149.28.218.149/');
 const channel = session.join('test');
 
 function getAppData(): AppData | undefined {
