@@ -1,5 +1,5 @@
 import { StateProvider } from 'noya-app-state-context';
-import { NoyaSession } from 'noya-backend-client';
+import { NoyaChannel, NoyaObject } from 'noya-backend-client';
 import {
   Button,
   darkTheme,
@@ -7,8 +7,10 @@ import {
   Divider,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { MultiplayerProvider, useMultiplayer } from 'noya-multiplayer';
 import { createLinkedNode, createNoyaObject } from 'noya-object-utils';
 import { setPublicPath } from 'noya-public-path';
+import { useLazyValue } from 'noya-react-utils';
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
 import {
   createInitialWorkspaceState,
@@ -17,7 +19,7 @@ import {
 } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import * as React from 'react';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { ColorsGrid } from './components/ColorsGrid';
 import ColorInspector from './components/inspector/ColorInspector';
@@ -32,11 +34,7 @@ import {
   userStoreSchema,
 } from './schema';
 
-// const session = new NoyaSession('Sam');
-const session = new NoyaSession('Sam', 'http://149.28.218.149/');
-const channel = session.join('test');
-
-function getAppData(): AppData | undefined {
+function getAppData(channel: NoyaChannel): AppData | undefined {
   const root = channel.root;
 
   if (!root) return;
@@ -84,9 +82,11 @@ const Stack = styled.div(({ theme }) => ({
 function EditorContent({
   appData,
   userId,
+  getObject,
 }: {
   appData: AppData;
   userId: string;
+  getObject: (id: string) => NoyaObject | undefined;
 }) {
   const { document, userStore } = appData;
 
@@ -126,7 +126,7 @@ function EditorContent({
     });
 
   const setUserData = (selectedIds: string[]) => {
-    const object = channel.objects[userStore.id];
+    const object = getObject(userStore.id);
 
     if (!object) return;
 
@@ -140,7 +140,7 @@ function EditorContent({
       <Stack>
         <Button
           onClick={() => {
-            const object = channel.objects[document.id];
+            const object = getObject(document.id);
 
             if (!object) return;
 
@@ -171,7 +171,7 @@ function EditorContent({
                 // console.log('on change name', name);
 
                 selectedSwatches.forEach((swatch) => {
-                  const object = channel.objects[swatch.do_objectID];
+                  const object = getObject(swatch.do_objectID);
 
                   if (!object) return;
 
@@ -186,7 +186,7 @@ function EditorContent({
               color={color}
               onSetOpacity={(value) => {
                 selectedSwatches.forEach((swatch) => {
-                  const object = channel.objects[swatch.do_objectID];
+                  const object = getObject(swatch.do_objectID);
 
                   if (!object) return;
 
@@ -205,7 +205,7 @@ function EditorContent({
               }}
               onChangeColor={(color) => {
                 selectedSwatches.forEach((swatch) => {
-                  const object = channel.objects[swatch.do_objectID];
+                  const object = getObject(swatch.do_objectID);
 
                   if (!object) return;
 
@@ -231,21 +231,36 @@ function EditorContent({
 }
 
 export function NoyaColorsEditor() {
+  const { session } = useMultiplayer();
+
+  const channel = useLazyValue(() => session.join('colors'));
+
+  const getObject = useCallback(
+    (id: string): NoyaObject | undefined => channel.objects[id],
+    [channel],
+  );
+
   const [appData, setAppData] = useState<AppData | undefined>(() =>
-    getAppData(),
+    getAppData(channel),
   );
 
   useEffect(() => {
     return channel.addListener(() => {
-      const appData = getAppData();
+      const appData = getAppData(channel);
       if (!appData) return;
       setAppData(appData);
     });
-  }, []);
+  }, [channel]);
 
   if (!appData || !session.userId) return <>Loading...</>;
 
-  return <EditorContent appData={appData} userId={session.userId} />;
+  return (
+    <EditorContent
+      appData={appData}
+      userId={session.userId}
+      getObject={getObject}
+    />
+  );
 }
 
 let initialized = false;
@@ -263,19 +278,21 @@ export default function NoyaColorsEditorStandalone(): JSX.Element {
 
   return (
     <Suspense fallback="Loading">
-      <CanvasKitProvider>
-        <FontManagerProvider>
-          <StateProvider state={workspaceState}>
-            <DesignSystemConfigurationProvider
-              theme={darkTheme}
-              platform={'key'}
-            >
-              <GlobalStyles />
-              <NoyaColorsEditor />
-            </DesignSystemConfigurationProvider>
-          </StateProvider>
-        </FontManagerProvider>
-      </CanvasKitProvider>
+      <MultiplayerProvider>
+        <CanvasKitProvider>
+          <FontManagerProvider>
+            <StateProvider state={workspaceState}>
+              <DesignSystemConfigurationProvider
+                theme={darkTheme}
+                platform={'key'}
+              >
+                <GlobalStyles />
+                <NoyaColorsEditor />
+              </DesignSystemConfigurationProvider>
+            </StateProvider>
+          </FontManagerProvider>
+        </CanvasKitProvider>
+      </MultiplayerProvider>
     </Suspense>
   );
 }
