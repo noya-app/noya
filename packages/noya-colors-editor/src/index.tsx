@@ -120,7 +120,7 @@ function EditorContent({
   const activeUsers = Object.entries(userStore.userDataMap)
     .filter(([id]) => id !== userId)
     .filter(([, value]) => {
-      return now - value.timestamp < 2000;
+      return now - value.timestamp < 10000;
     });
 
   const setUserData = (selectedIds: string[]) => {

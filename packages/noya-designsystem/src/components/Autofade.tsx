@@ -9,7 +9,7 @@ interface Props {
 export const Autofade = memo(function Autofade({
   children,
   timestamp,
-  delay = 2000,
+  delay = 10000,
 }: Props) {
   const [visible, setVisible] = useState(false);
 
