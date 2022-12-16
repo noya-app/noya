@@ -10,7 +10,6 @@ import Sketch from 'noya-file-format';
 import { createLinkedNode, createNoyaObject } from 'noya-object-utils';
 import { setPublicPath } from 'noya-public-path';
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
-import { SketchModel } from 'noya-sketch-model';
 import {
   createInitialWorkspaceState,
   createSketchFile,
@@ -33,6 +32,7 @@ import {
   userStoreSchema,
 } from './schema';
 
+// const session = new NoyaSession('Sam');
 const session = new NoyaSession('Sam', 'http://149.28.218.149/');
 const channel = session.join('test');
 
@@ -97,12 +97,14 @@ function EditorContent({
       _class: 'swatch',
       do_objectID: swatch.id,
       name: swatch.name,
-      value: SketchModel.color({
+      value: {
+        _class: 'color',
         red: swatch.color.red,
         green: swatch.color.green,
         blue: swatch.color.blue,
         alpha: swatch.color.alpha,
-      }),
+        colorSpaces: swatch.color.colorSpaces,
+      },
     };
   });
 
@@ -193,6 +195,7 @@ function EditorContent({
                     red: swatch.value.red,
                     green: swatch.value.green,
                     blue: swatch.value.blue,
+                    colorSpaces: swatch.value.colorSpaces,
                   };
 
                   object.set('color', noyaColor);
@@ -211,6 +214,7 @@ function EditorContent({
                     red: color.red,
                     green: color.green,
                     blue: color.blue,
+                    colorSpaces: color.colorSpaces,
                   };
 
                   object.set('color', noyaColor);

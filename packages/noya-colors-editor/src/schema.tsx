@@ -1,10 +1,22 @@
 import { z } from 'zod';
 
+const hsvaColorSchema = z.object({
+  hue: z.number().default(0),
+  saturation: z.number().default(0),
+  value: z.number().default(0),
+  alpha: z.number().default(0),
+});
+
 export const colorSchema = z.object({
   red: z.number().min(0).max(1).default(1),
   green: z.number().min(0).max(1).default(1),
   blue: z.number().min(0).max(1).default(1),
   alpha: z.number().min(0).max(1).default(1),
+  colorSpaces: z
+    .object({
+      hsva: hsvaColorSchema.optional(),
+    })
+    .optional(),
 });
 
 export type Color = z.infer<typeof colorSchema>;

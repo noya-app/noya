@@ -2,15 +2,14 @@ import {
   Alpha,
   ColorModel,
   ColorPicker as NoyaColorPicker,
-  equalColorObjects,
+  HsvaColor,
   hsvaToRgba,
   Hue,
-  RgbaColor,
   rgbaToHsva,
   Saturation,
 } from 'noya-colorpicker';
 import type Sketch from 'noya-file-format';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo } from 'react';
 import * as Spacer from '../components/Spacer';
 import { rgbaToSketchColor, sketchColorToRgba } from '../utils/sketchColor';
 
@@ -19,28 +18,42 @@ interface Props {
   onChange: (color: Sketch.Color) => void;
 }
 
+const colorModel: ColorModel<HsvaColor> = {
+  defaultColor: { h: 0, s: 0, v: 0, a: 1 },
+  equal: (a, b) => a.h === b.h && a.s === b.s && a.v === b.v && a.a === b.a,
+  toHsva: (a) => a,
+  fromHsva: (a) => a,
+};
+
 export default memo(function ColorPicker({ value, onChange }: Props) {
-  const colorModel: ColorModel<RgbaColor> = {
-    defaultColor: { r: 0, g: 0, b: 0, a: 1 },
-    toHsva: rgbaToHsva,
-    fromHsva: hsvaToRgba,
-    equal: equalColorObjects,
-  };
+  const input = value.colorSpaces?.hsva;
 
-  const rgbaColor: RgbaColor = useMemo(() => sketchColorToRgba(value), [value]);
-
-  const handleChange = useCallback(
-    (value: RgbaColor) => {
-      onChange(rgbaToSketchColor(value));
-    },
-    [onChange],
-  );
+  const color = input
+    ? { h: input.hue, s: input.saturation, v: input.value, a: input.alpha }
+    : rgbaToHsva(sketchColorToRgba(value));
 
   return (
-    <NoyaColorPicker
+    <NoyaColorPicker<HsvaColor>
+      color={color}
       colorModel={colorModel}
-      onChange={handleChange}
-      color={rgbaColor}
+      onChange={(hsva) => {
+        const updatedSketchRgba = rgbaToSketchColor(hsvaToRgba(hsva));
+
+        const updated: Sketch.Color = {
+          ...value,
+          ...updatedSketchRgba,
+          colorSpaces: {
+            hsva: {
+              hue: hsva.h,
+              saturation: hsva.s,
+              value: hsva.v,
+              alpha: hsva.a,
+            },
+          },
+        };
+
+        onChange(updated);
+      }}
     >
       <Saturation />
       <Spacer.Vertical size={12} />
