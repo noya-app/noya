@@ -10,8 +10,20 @@ const Container = styled.div(({ theme }) => ({
   background: '#08f',
   border: '2px solid white',
   boxShadow: '0 1px 2px black',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const Text = styled.div(({ theme }) => ({
+  ...theme.textStyles.small,
+  color: 'white',
 }));
 
 export const Avatar = memo(function Avatar(props: Props) {
-  return <Container />;
+  return (
+    <Container>
+      <Text>S</Text>
+    </Container>
+  );
 });
