@@ -9,6 +9,7 @@ import {
 import Sketch from 'noya-file-format';
 import { MultiplayerProvider, useMultiplayer } from 'noya-multiplayer';
 import { createLinkedNode, createNoyaObject } from 'noya-object-utils';
+import { PipelineProvider, usePipeline } from 'noya-pipeline';
 import { setPublicPath } from 'noya-public-path';
 import { useLazyValue } from 'noya-react-utils';
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
@@ -21,6 +22,7 @@ import { delimitedPath, isDeepEqual } from 'noya-utils';
 import * as React from 'react';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
+import { z } from 'zod';
 import { ColorsGrid } from './components/ColorsGrid';
 import ColorInspector from './components/inspector/ColorInspector';
 import NameInspector from './components/inspector/NameInspector';
@@ -28,13 +30,18 @@ import {
   AppData,
   Color,
   ColorSwatch,
+  colorSwatchArraySchema,
+  colorSwatchSchema,
   documentSchema,
   UserData,
   userDataSchema,
   userStoreSchema,
 } from './schema';
 
-function getAppData(channel: NoyaChannel): AppData | undefined {
+export type { AppData, ColorSwatch };
+export { documentSchema, colorSwatchSchema };
+
+export function getColorsAppData(channel: NoyaChannel): AppData | undefined {
   const root = channel.root;
 
   if (!root) return;
@@ -223,6 +230,20 @@ function EditorContent({
                 setUserData(userData.selectedIds);
               }}
             />
+            <Divider />
+            <Button
+              onClick={() => {
+                selectedSwatches.forEach((swatch) => {
+                  const object = getObject(swatch.do_objectID);
+
+                  if (!object) return;
+
+                  object.destroy();
+                });
+              }}
+            >
+              Delete
+            </Button>
           </>
         )}
       </Stack>
@@ -233,6 +254,7 @@ function EditorContent({
 export function NoyaColorsEditor() {
   const { session } = useMultiplayer();
 
+  const pipeline = usePipeline();
   const channel = useLazyValue(() => session.join('colors'));
 
   const getObject = useCallback(
@@ -241,16 +263,39 @@ export function NoyaColorsEditor() {
   );
 
   const [appData, setAppData] = useState<AppData | undefined>(() =>
-    getAppData(channel),
+    getColorsAppData(channel),
   );
 
   useEffect(() => {
-    return channel.addListener(() => {
-      const appData = getAppData(channel);
+    let appData: AppData | undefined;
+
+    const handle = pipeline.registerSourceNode({
+      id: 'colors',
+      name: 'Colors',
+      outputs: {
+        colors: colorSwatchArraySchema,
+      },
+      getOutput: (id): z.infer<typeof colorSwatchArraySchema> => {
+        const doc = appData?.document ?? documentSchema.parse(undefined);
+        return doc.children;
+      },
+    });
+
+    const unsubscribe = channel.addListener(() => {
+      appData = getColorsAppData(channel);
+
       if (!appData) return;
+
+      handle.invalidate();
+
       setAppData(appData);
     });
-  }, [channel]);
+
+    return () => {
+      unsubscribe();
+      handle.unregister();
+    };
+  }, [channel, pipeline]);
 
   if (!appData || !session.userId) return <>Loading...</>;
 
@@ -278,21 +323,23 @@ export default function NoyaColorsEditorStandalone(): JSX.Element {
 
   return (
     <Suspense fallback="Loading">
-      <MultiplayerProvider>
-        <CanvasKitProvider>
-          <FontManagerProvider>
-            <StateProvider state={workspaceState}>
-              <DesignSystemConfigurationProvider
-                theme={darkTheme}
-                platform={'key'}
-              >
-                <GlobalStyles />
-                <NoyaColorsEditor />
-              </DesignSystemConfigurationProvider>
-            </StateProvider>
-          </FontManagerProvider>
-        </CanvasKitProvider>
-      </MultiplayerProvider>
+      <PipelineProvider>
+        <MultiplayerProvider>
+          <CanvasKitProvider>
+            <FontManagerProvider>
+              <StateProvider state={workspaceState}>
+                <DesignSystemConfigurationProvider
+                  theme={darkTheme}
+                  platform={'key'}
+                >
+                  <GlobalStyles />
+                  <NoyaColorsEditor />
+                </DesignSystemConfigurationProvider>
+              </StateProvider>
+            </FontManagerProvider>
+          </CanvasKitProvider>
+        </MultiplayerProvider>
+      </PipelineProvider>
     </Suspense>
   );
 }

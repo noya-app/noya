@@ -26,7 +26,24 @@ export class Pipeline {
 
     return {
       invalidate: (keys?: string[]) => this.invalidateOutput(node.id, keys),
+      unregister: () => this.unregisterSourceNode(node.id),
     };
+  }
+
+  unregisterSourceNode(nodeId: string) {
+    delete this.nodes[nodeId];
+
+    this.outputCache.entries(nodeId).forEach(([key]) => {
+      this.outputCache.delete(nodeId, key);
+    });
+
+    this.subscriptions.entries(nodeId).forEach(([key, subscriptions]) => {
+      subscriptions.forEach((callback) => {
+        this.lastEmitted.delete(callback);
+      });
+
+      this.subscriptions.delete(nodeId, key);
+    });
   }
 
   invalidateOutput = async (nodeId: string, keys?: string[]) => {

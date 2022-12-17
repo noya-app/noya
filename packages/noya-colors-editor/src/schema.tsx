@@ -29,10 +29,12 @@ export const colorSwatchSchema = z.object({
 
 export type ColorSwatch = z.infer<typeof colorSwatchSchema>;
 
+export const colorSwatchArraySchema = z.array(colorSwatchSchema);
+
 export const documentSchema = z
   .object({
     id: z.string().default(''),
-    children: z.array(colorSwatchSchema).default([]),
+    children: colorSwatchArraySchema.default([]),
   })
   .default({});
 

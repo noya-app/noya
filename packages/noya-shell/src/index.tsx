@@ -1,15 +1,18 @@
 import { StateProvider } from 'noya-app-state-context';
-import { NoyaColorsEditor } from 'noya-colors-editor';
+import { ColorSwatch, NoyaColorsEditor } from 'noya-colors-editor';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
+  Label,
 } from 'noya-designsystem';
 import { MultiplayerProvider } from 'noya-multiplayer';
+import { PipelineProvider, Result, usePipeline } from 'noya-pipeline';
 import { setPublicPath } from 'noya-public-path';
 import { CanvasKitProvider, FontManagerProvider } from 'noya-renderer';
 import { createInitialWorkspaceState, createSketchFile } from 'noya-state';
 import * as React from 'react';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Inspector } from 'react-inspector';
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle({
@@ -32,7 +35,30 @@ export const GlobalStyles = createGlobalStyle({
 
 let initialized = false;
 
-export default function NoyaColorsEditorStandalone(): JSX.Element {
+export function NoyaShell() {
+  const pipeline = usePipeline();
+  const [colors, setColors] = useState<ColorSwatch[]>([]);
+
+  useEffect(() => {
+    pipeline.subscribe('colors', 'colors', (result: Result<ColorSwatch[]>) => {
+      if (result.type === 'error') return;
+      // console.log('colors -->', result.value);
+      setColors(result.value);
+    });
+  });
+
+  return (
+    <>
+      <NoyaColorsEditor />
+      <div style={{ width: '30%', background: '#222', padding: 10 }}>
+        <Label.Label>Colors Pipeline Output</Label.Label>
+        <Inspector theme="chromeDark" table={false} data={colors} />
+      </div>
+    </>
+  );
+}
+
+export default function NoyaShellStandalone(): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
     initialized = true;
@@ -45,21 +71,23 @@ export default function NoyaColorsEditorStandalone(): JSX.Element {
 
   return (
     <Suspense fallback="Loading">
-      <MultiplayerProvider>
-        <CanvasKitProvider>
-          <FontManagerProvider>
-            <StateProvider state={workspaceState}>
-              <DesignSystemConfigurationProvider
-                theme={darkTheme}
-                platform={'key'}
-              >
-                <GlobalStyles />
-                <NoyaColorsEditor />
-              </DesignSystemConfigurationProvider>
-            </StateProvider>
-          </FontManagerProvider>
-        </CanvasKitProvider>
-      </MultiplayerProvider>
+      <PipelineProvider>
+        <MultiplayerProvider>
+          <CanvasKitProvider>
+            <FontManagerProvider>
+              <StateProvider state={workspaceState}>
+                <DesignSystemConfigurationProvider
+                  theme={darkTheme}
+                  platform={'key'}
+                >
+                  <GlobalStyles />
+                  <NoyaShell />
+                </DesignSystemConfigurationProvider>
+              </StateProvider>
+            </FontManagerProvider>
+          </CanvasKitProvider>
+        </MultiplayerProvider>
+      </PipelineProvider>
     </Suspense>
   );
 }

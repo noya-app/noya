@@ -7,9 +7,9 @@ export class ObjectCache<V> {
   }
 
   delete(id: string, name: string) {
-    if (name in this.#cache[id]) {
-      delete this.#cache[id][name];
-    }
+    if (!(id in this.#cache) || !(name in this.#cache[id])) return;
+
+    delete this.#cache[id][name];
 
     if (Object.keys(this.#cache[id]).length === 0) {
       delete this.#cache[id];
