@@ -35,7 +35,7 @@ const ButtonElement = styled.button<{
   paddingLeft: variant === 'none' ? '0px' : variant === 'thin' ? '1px' : '6px',
   background: active
     ? theme.colors.primary
-    : variant === 'none'
+    : variant === 'none' || variant === 'thin'
     ? 'transparent'
     : theme.colors.inputBackground,
   color: active ? 'white' : theme.colors.text,

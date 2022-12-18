@@ -1,5 +1,5 @@
-import { mediaQuery } from '../mediaQuery';
 import { CSSObject } from 'styled-components';
+import { mediaQuery } from '../mediaQuery';
 
 export const colors = {
   text: 'rgb(38, 48, 83)',
@@ -9,7 +9,6 @@ export const colors = {
   divider: 'rgba(0, 0, 0, 0.07)',
   dividerStrong: 'rgba(0, 0, 0, 0.09)',
   primary: 'rgb(132, 63, 255)',
-  primaryDark: 'rgb(116, 36, 255)',
   primaryLight: 'rgb(147, 86, 255)',
   neutralBackground: 'rgb(222,223,232)',
   inputBackground: 'rgb(240, 240, 242)',

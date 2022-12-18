@@ -26,7 +26,7 @@ const Container = styled.div<{
   borderRadius: '4px',
   overflow: 'hidden',
   minHeight: '150px',
-  border: (isActive ? '2px ' : '0px ') + theme.colors.primaryDark,
+  border: `${isActive ? '2px ' : '0px '} solid ${theme.colors.primary}`,
   backgroundColor: 'white',
   imageRendering: 'crisp-edges',
   width: '100%',
