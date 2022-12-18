@@ -3,9 +3,9 @@ import {
   ColorModel,
   ColorPicker as NoyaColorPicker,
   equalColorObjects,
+  HsvaColor,
   hsvaToRgba,
   Hue,
-  RgbaColor,
   rgbaToHsva,
   Saturation,
 } from 'noya-colorpicker';
@@ -19,27 +19,45 @@ interface Props {
   onChange: (color: Sketch.Color) => void;
 }
 
+const colorModel: ColorModel<HsvaColor> = {
+  defaultColor: { h: 0, s: 0, v: 0, a: 1 },
+  equal: equalColorObjects,
+  toHsva: (a) => a,
+  fromHsva: (a) => a,
+};
+
 export default memo(function ColorPicker({ value, onChange }: Props) {
-  const colorModel: ColorModel<RgbaColor> = {
-    defaultColor: { r: 0, g: 0, b: 0, a: 1 },
-    toHsva: rgbaToHsva,
-    fromHsva: hsvaToRgba,
-    equal: equalColorObjects,
-  };
-  const rgbaColor: RgbaColor = useMemo(() => sketchColorToRgba(value), [value]);
+  const hsva = value.colorSpaces?.hsva;
+
+  const color = useMemo(() => {
+    return hsva
+      ? { h: hsva.hue, s: hsva.saturation, v: hsva.value, a: hsva.alpha }
+      : rgbaToHsva(sketchColorToRgba(value));
+  }, [value, hsva]);
 
   const handleChange = useCallback(
-    (value: RgbaColor) => {
-      onChange(rgbaToSketchColor(value));
+    (hsva: HsvaColor) => {
+      const updated = rgbaToSketchColor(hsvaToRgba(hsva));
+
+      updated.colorSpaces = {
+        hsva: {
+          hue: hsva.h,
+          saturation: hsva.s,
+          value: hsva.v,
+          alpha: hsva.a,
+        },
+      };
+
+      onChange(updated);
     },
     [onChange],
   );
 
   return (
-    <NoyaColorPicker
+    <NoyaColorPicker<HsvaColor>
+      color={color}
       colorModel={colorModel}
       onChange={handleChange}
-      color={rgbaColor}
     >
       <Saturation />
       <Spacer.Vertical size={12} />

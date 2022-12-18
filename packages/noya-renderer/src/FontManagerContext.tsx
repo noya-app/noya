@@ -33,18 +33,23 @@ const FontManagerContext = createContext<FontManagerContextValue | undefined>(
   undefined,
 );
 
-const load = (name: string) => {
-  const path = getPublicPath() + 'fonts/' + name;
+function loadPublicAsset(name: string) {
+  const path = getPublicPath() + name;
 
   // Detect node vs browser
-  return typeof window !== 'undefined' && typeof fetch !== 'undefined'
-    ? fetch(path).then((response) => response.arrayBuffer())
-    : (require('fs').promises.readFile(path) as Promise<ArrayBuffer>);
-};
+  if (typeof window !== 'undefined' && typeof fetch !== 'undefined') {
+    return new SuspendedValue(
+      fetch(path).then((response) => response.arrayBuffer()),
+    );
+  } else {
+    return SuspendedValue.resolveInstantly(require('fs').readFileSync(path));
+  }
+}
 
-const suspendedDefaultFont = new SuspendedValue<ArrayBuffer>(
-  load('roboto/Roboto-Regular.ttf'),
-);
+// We don't start loading fonts until the Provider renders the first time,
+// since we currently support setting the public path at runtime when the app starts,
+// which needs to happen before `load` is called.
+let suspendedDefaultFont: SuspendedValue<ArrayBuffer>;
 
 const sharedFontManager = new FontManager(GoogleFontProvider);
 
@@ -55,6 +60,10 @@ interface Props {
 export const FontManagerProvider = memo(function FontManagerProvider({
   children,
 }: Props) {
+  if (!suspendedDefaultFont) {
+    suspendedDefaultFont = loadPublicAsset('fonts/roboto/Roboto-Regular.ttf');
+  }
+
   const CanvasKit = useCanvasKit();
 
   const defaultFont = suspendedDefaultFont.getValueOrThrow();

@@ -13079,6 +13079,21 @@ modular-scripts@^3.6.0:
     webpack-merge "^5.8.0"
     ws "8.8.1"
 
+modular-template-app@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/modular-template-app/-/modular-template-app-1.1.0.tgz#8081d000ffb6265eb3bdfa7e1c1504f3069247ab"
+  integrity sha512-qaZJXUn4I0vp//WJNDm6fJTorZnKsiKrKG0BL7C9AVYZuOPnrZylRXPhXkrBV5E53sC3JxhQ1hCff1UpjYrSgw==
+
+modular-template-package@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/modular-template-package/-/modular-template-package-1.1.0.tgz#40ee23e5b141397ecea88cc5ecfccfb707e8a133"
+  integrity sha512-7DlC+fzkPywaTrTsic5yJliEDPW3oPPyuyTwHqQGkxZGUJdKZSPuMup2VXyJDRb7EEIfyUzrfDZYIZPDWSVSFg==
+
+modular-template-view@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/modular-template-view/-/modular-template-view-1.1.0.tgz#2ce54c21c0ffe74743301703ba15ebb82db7efc4"
+  integrity sha512-hESr/RxmvgoUV0cnArmt6IQBU0PpCqR/QrkoblCQ2vKhC5Uh5K3A3h3C3Gs0fOX4z6IoQvuIXiwi3uggAdLRlg==
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"

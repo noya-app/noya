@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { HsvaColor } from '../types';
 
-type ColorPickerContextValue = [
+export type ColorPickerContextValue = [
   hsva: HsvaColor,
   onChange: (
     color: Partial<HsvaColor>,
