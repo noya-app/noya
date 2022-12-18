@@ -1,5 +1,5 @@
 import { StateProvider } from 'noya-app-state-context';
-import { NoyaChannel, NoyaObject } from 'noya-backend-client';
+import { NoyaObject } from 'noya-backend-client';
 import {
   Button,
   darkTheme,
@@ -41,9 +41,7 @@ import {
 export type { AppData, ColorSwatch };
 export { documentSchema, colorSwatchSchema };
 
-export function getColorsAppData(channel: NoyaChannel): AppData | undefined {
-  const root = channel.root;
-
+export function getColorsAppData(root?: NoyaObject): AppData | undefined {
   if (!root) return;
 
   const userStore = createLinkedNode(root, 'userStoreNodeId', userStoreSchema);
@@ -86,7 +84,7 @@ const Stack = styled.div(({ theme }) => ({
   alignItems: 'stretch',
 }));
 
-function EditorContent({
+export function ColorsEditorContent({
   appData,
   userId,
   getObject,
@@ -251,7 +249,11 @@ function EditorContent({
   );
 }
 
-export function NoyaColorsEditor() {
+interface Props {
+  documentRoot: NoyaObject;
+}
+
+export function NoyaColorsEditor({ documentRoot }: Props) {
   const { session } = useMultiplayer();
 
   const pipeline = usePipeline();
@@ -263,7 +265,7 @@ export function NoyaColorsEditor() {
   );
 
   const [appData, setAppData] = useState<AppData | undefined>(() =>
-    getColorsAppData(channel),
+    getColorsAppData(channel.root),
   );
 
   useEffect(() => {
@@ -282,7 +284,7 @@ export function NoyaColorsEditor() {
     });
 
     const unsubscribe = channel.addListener(() => {
-      appData = getColorsAppData(channel);
+      appData = getColorsAppData(channel.root);
 
       if (!appData) return;
 
@@ -300,7 +302,7 @@ export function NoyaColorsEditor() {
   if (!appData || !session.userId) return <>Loading...</>;
 
   return (
-    <EditorContent
+    <ColorsEditorContent
       appData={appData}
       userId={session.userId}
       getObject={getObject}
@@ -309,6 +311,23 @@ export function NoyaColorsEditor() {
 }
 
 let initialized = false;
+
+function NoyaMultiplayerWrapper() {
+  const { session } = useMultiplayer();
+
+  const channel = useLazyValue(() => session.join('colors'));
+  const [root, setRoot] = useState<NoyaObject | undefined>();
+
+  useEffect(() => {
+    return channel.addListener(() => {
+      setRoot(channel.root);
+    });
+  }, [channel]);
+
+  if (!root) return <>Awaiting root...</>;
+
+  return <NoyaColorsEditor documentRoot={root} />;
+}
 
 export default function NoyaColorsEditorStandalone(): JSX.Element {
   if (!initialized) {
@@ -333,7 +352,7 @@ export default function NoyaColorsEditorStandalone(): JSX.Element {
                   platform={'key'}
                 >
                   <GlobalStyles />
-                  <NoyaColorsEditor />
+                  <NoyaMultiplayerWrapper />
                 </DesignSystemConfigurationProvider>
               </StateProvider>
             </FontManagerProvider>

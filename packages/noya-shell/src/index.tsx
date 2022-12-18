@@ -1,5 +1,5 @@
 import { StateProvider } from 'noya-app-state-context';
-import { ColorSwatch, NoyaColorsEditor } from 'noya-colors-editor';
+import { ColorSwatch } from 'noya-colors-editor';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -49,7 +49,7 @@ export function NoyaShell() {
 
   return (
     <>
-      <NoyaColorsEditor />
+      {/* <NoyaColorsEditor /> */}
       <div style={{ width: '30%', background: '#222', padding: 10 }}>
         <Label.Label>Colors Pipeline Output</Label.Label>
         <Inspector theme="chromeDark" table={false} data={colors} />

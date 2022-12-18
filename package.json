@@ -74,6 +74,7 @@
     "jest-image-snapshot": "^4.5.1",
     "lint-staged": "^13.1.0",
     "modular-scripts": "^3.6.0",
+    "modular-template-app": "^1.1.0",
     "modular-template-package": "^1.1.0",
     "modular-template-view": "^1.1.0",
     "nock": "^13.1.1",
