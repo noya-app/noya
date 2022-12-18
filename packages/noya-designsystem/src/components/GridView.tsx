@@ -47,6 +47,7 @@ const ItemContainer = styled.div<{ selected: boolean }>(
 const GridContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
 }));
 
 const ItemTitle = styled.span(({ theme }) => ({

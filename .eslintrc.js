@@ -54,5 +54,6 @@ module.exports = {
     'testing-library/no-container': 'off',
     '@typescript-eslint/no-namespace': 'off',
     'jest/prefer-to-have-length': 'off',
+    '@typescript-eslint/require-await': 'off',
   },
 };

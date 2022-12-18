@@ -42,6 +42,14 @@ export type Color = {
   green: UnitInterval;
   blue: UnitInterval;
   swatchID?: Uuid;
+  colorSpaces?: {
+    hsva?: {
+      hue: number;
+      saturation: number;
+      value: number;
+      alpha: number;
+    };
+  };
 };
 /**
  * The set of all real numbers that are greater than or equal to 0 and less than or equal to 1. Used within Sketch documents to encode normalised scalar values, for example RGB color components.

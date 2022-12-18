@@ -1,8 +1,8 @@
-import React, { ReactNode } from 'react';
+import { useDeepMemo } from 'noya-react-utils';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { ColorPickerProvider } from '../contexts/ColorPickerContext';
-import { useColorManipulation } from '../hooks/useColorManipulation';
-import { AnyColor, ColorModel, ColorPickerBaseProps } from '../types';
+import { ColorPickerContextValue, ColorPickerProvider } from '../contexts/ColorPickerContext';
+import { AnyColor, ColorModel, ColorPickerBaseProps, HsvaColor } from '../types';
 
 const Container = styled.div({
   position: 'relative',
@@ -23,7 +23,16 @@ export default function ColorPicker<T extends AnyColor>({
   onChange,
   children,
 }: Props<T>): JSX.Element {
-  const contextValue = useColorManipulation<T>(colorModel, color, onChange);
+  const hsva = useDeepMemo(colorModel.toHsva(color));
+
+  const handleChange = useCallback(
+    (params: Partial<HsvaColor>) => {
+      onChange?.(colorModel.fromHsva({ ...hsva, ...params }))
+    },
+    [colorModel, hsva, onChange],
+  );
+
+  const contextValue = useMemo((): ColorPickerContextValue => [hsva, handleChange], [handleChange, hsva])
 
   return (
     <ColorPickerProvider value={contextValue}>

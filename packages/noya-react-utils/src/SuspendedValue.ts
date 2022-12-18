@@ -24,4 +24,18 @@ export class SuspendedValue<T> {
         return this.promiseState.value;
     }
   }
+
+  /**
+   * Resolve a SuspendedValue immediately, without waiting for the next
+   * cycle of the event loop. Useful for synchronous tests.
+   */
+  static resolveInstantly<T>(value: T): SuspendedValue<T> {
+    const resolved: Promise<T> = Promise.resolve(value);
+    const suspended = new SuspendedValue(resolved);
+
+    // Replace the suspended promise internals
+    suspended.suspendedPromise = new Promise(() => {});
+    suspended.promiseState = { type: 'success', value: value };
+    return suspended;
+  }
 }
