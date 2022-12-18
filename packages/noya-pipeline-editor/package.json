@@ -1,0 +1,12 @@
+{
+  "name": "noya-pipeline-editor",
+  "private": false,
+  "modular": {
+    "type": "view"
+  },
+  "main": "./src/index.tsx",
+  "version": "1.0.0",
+  "dependencies": {
+    "reactflow": "^11.3.3"
+  }
+}
