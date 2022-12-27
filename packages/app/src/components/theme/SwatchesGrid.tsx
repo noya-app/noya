@@ -12,10 +12,10 @@ import { menuItems, ThemeMenuItemType } from './menuItems';
 interface Props {
   swatches: Sketch.Swatch[];
   selectedSwatchIds: string[];
-  onDeleteSwatch: () => void;
-  onGroupSwatch: (id: string[], name?: string) => void;
+  onDeleteSwatch?: () => void;
+  onGroupSwatch?: (id: string[], name?: string) => void;
   onSelectSwatch: (id?: string, selectionType?: SelectionType) => void;
-  onDuplicateSwatch: (id: string[]) => void;
+  onDuplicateSwatch?: (id: string[]) => void;
 }
 
 export default memo(function SwatchesGrid({
@@ -33,21 +33,21 @@ export default memo(function SwatchesGrid({
     async (value: ThemeMenuItemType) => {
       switch (value) {
         case 'duplicate':
-          onDuplicateSwatch(selectedSwatchIds);
+          onDuplicateSwatch?.(selectedSwatchIds);
           break;
         case 'delete':
-          onDeleteSwatch();
+          onDeleteSwatch?.();
           break;
         case 'group': {
           const groupName = await openDialog('Group Name');
 
           if (!groupName) return;
 
-          onGroupSwatch(selectedSwatchIds, groupName);
+          onGroupSwatch?.(selectedSwatchIds, groupName);
           break;
         }
         case 'ungroup':
-          onGroupSwatch(selectedSwatchIds);
+          onGroupSwatch?.(selectedSwatchIds);
           onSelectSwatch();
           break;
       }

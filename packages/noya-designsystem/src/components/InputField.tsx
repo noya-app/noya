@@ -176,10 +176,15 @@ export const InputElement = styled(TextInput).withConfig({
       boxShadow: `0 0 0 2px ${theme.colors.primary}`,
     },
     ...(variant === 'bare' && {
-      paddingTop: 0,
-      paddingRight: 0,
-      paddingBottom: 0,
-      paddingLeft: 0,
+      paddingTop: '4px',
+      paddingRight: '4px',
+      paddingBottom: '4px',
+      paddingLeft: '4px',
+      marginTop: '-4px',
+      marginRight: '-4px',
+      marginBottom: '-4px',
+      marginLeft: '-4px',
+      background: 'black',
     }),
 
     '&[type="search"]::-webkit-search-cancel-button': {
