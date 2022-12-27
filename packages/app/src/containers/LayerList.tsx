@@ -1,18 +1,4 @@
 import {
-  ArrowDownIcon,
-  CircleIcon,
-  Component1Icon,
-  ComponentInstanceIcon,
-  CopyIcon,
-  FrameIcon,
-  GroupIcon,
-  ImageIcon,
-  MaskOnIcon,
-  Share1Icon,
-  SquareIcon,
-  TextIcon,
-} from 'noya-icons';
-import {
   useApplicationState,
   useGetStateSnapshot,
   useSelector,
@@ -29,6 +15,21 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
+import {
+  ArrowDownIcon,
+  CircleIcon,
+  Component1Icon,
+  ComponentInstanceIcon,
+  CopyIcon,
+  FrameIcon,
+  GroupIcon,
+  ImageIcon,
+  LineIcon,
+  MaskOnIcon,
+  Share1Icon,
+  SquareIcon,
+  TextIcon,
+} from 'noya-icons';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
@@ -45,7 +46,6 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import { LineIcon } from 'noya-icons';
 import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const IconContainer = styled.span(({ theme }) => ({
@@ -127,12 +127,14 @@ export const LayerIcon = memo(function LayerIcon({
 }: {
   type: LayerType | 'line';
   selected?: boolean;
-  variant?: 'primary';
+  variant?: 'primary' | 'currentColor';
 }) {
   const colors = useTheme().colors;
 
   const color =
-    variant && !selected
+    variant === 'currentColor'
+      ? 'currentColor'
+      : variant && !selected
       ? colors[variant]
       : selected
       ? colors.iconSelected
@@ -291,7 +293,7 @@ const LayerRow = memo(
                 <Spacer.Horizontal size={15} />
               ) : null,
             ],
-            <Spacer.Horizontal size={6} />,
+            <Spacer.Horizontal size={8} />,
           )
         )}
       </TreeView.Row>

@@ -41,6 +41,7 @@ type ListRowContextValue = {
   selectedPosition: ListRowPosition;
   sortable: boolean;
   expandable: boolean;
+  padded: boolean;
   indentation: number;
   pressEventName: PressEventName;
 };
@@ -50,6 +51,7 @@ export const ListRowContext = createContext<ListRowContextValue>({
   selectedPosition: 'only',
   sortable: false,
   expandable: true,
+  padded: false,
   indentation: 12,
   pressEventName: 'onClick',
 });
@@ -124,6 +126,7 @@ const RowContainer = styled.div<{
   selectedPosition: ListRowPosition;
   disabled: boolean;
   hovered: boolean;
+  padded: boolean;
   isSectionHeader: boolean;
   showsActiveState: boolean;
 }>(
@@ -134,6 +137,7 @@ const RowContainer = styled.div<{
     selectedPosition,
     disabled,
     hovered,
+    padded,
     isSectionHeader,
     showsActiveState,
   }) => {
@@ -145,15 +149,17 @@ const RowContainer = styled.div<{
       flex: '0 0 auto',
       userSelect: 'none',
       cursor: 'default',
-      borderRadius: '4px',
       paddingTop: '6px',
       paddingRight: '12px',
       paddingBottom: '6px',
       paddingLeft: '12px',
-      marginLeft: '8px',
-      marginRight: '8px',
-      marginTop: `${margin.top}px`,
-      marginBottom: `${margin.bottom}px`,
+      ...(padded && {
+        borderRadius: '2px',
+        marginLeft: '8px',
+        marginRight: '8px',
+        marginTop: `${margin.top}px`,
+        marginBottom: `${margin.bottom}px`,
+      }),
       color: theme.colors.textMuted,
       ...(isSectionHeader && {
         backgroundColor: theme.colors.listView.raisedBackground,
@@ -181,7 +187,7 @@ const RowContainer = styled.div<{
         }),
       position: 'relative',
       ...(hovered && {
-        boxShadow: `0 0 0 1px ${theme.colors.primary}`,
+        boxShadow: `0 0 0 1px ${theme.colors.primary} inset`,
       }),
       ...(showsActiveState && {
         '&:active': {
@@ -270,6 +276,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     sortable,
     indentation,
     pressEventName,
+    padded,
   } = useContext(ListRowContext);
   const { hoverProps } = useHover({
     onHoverChange,
@@ -319,6 +326,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         disabled={disabled}
         hovered={hovered}
         selected={selected}
+        padded={padded}
         selectedPosition={selectedPosition}
         showsActiveState={pressEventName === 'onClick'}
         aria-selected={selected}
@@ -520,6 +528,8 @@ type RenderProps<T> = {
   virtualized?: Size;
 };
 
+type ListViewVariant = 'normal' | 'padded';
+
 type ListViewRootProps = {
   onPress?: () => void;
   scrollable?: boolean;
@@ -532,6 +542,7 @@ type ListViewRootProps = {
   indentation?: number;
   acceptsDrop?: Sortable.DropValidator;
   pressEventName?: PressEventName;
+  variant?: ListViewVariant;
 };
 
 const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
@@ -547,6 +558,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
     renderItem,
     keyExtractor,
     virtualized,
+    variant,
     pressEventName = 'onClick',
   }: RenderProps<T> & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
@@ -636,6 +648,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
         expandable,
         indentation,
         pressEventName,
+        padded: variant === 'padded',
       };
     },
     [
@@ -645,6 +658,7 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       expandable,
       indentation,
       pressEventName,
+      variant,
     ],
   );
 
@@ -690,10 +704,11 @@ const ListViewRootInner = forwardRef(function ListViewRootInner<T>(
       const margin = child?.marginType
         ? getPositionMargin(child.marginType)
         : { top: 0, bottom: 0 };
-      const height = margin.top + 31 + margin.bottom;
+      const height =
+        31 + (variant === 'padded' ? margin.top + margin.bottom : 0);
       return height;
     },
-    [getItemContextValue],
+    [getItemContextValue, variant],
   );
 
   const getKey = useCallback(
@@ -760,7 +775,7 @@ const ChildrenListViewInner = forwardRef(function ChildrenListViewInner(
 
 const ChildrenListView = memo(ChildrenListViewInner);
 
-const SimpleListViewInner = forwardRef(function SimpleListView<T = any>(
+const SimpleListViewInner = forwardRef(function SimpleListViewInner<T = any>(
   props: (ChildrenProps | RenderProps<T>) & ListViewRootProps,
   forwardedRef: ForwardedRef<IVirtualizedList>,
 ) {
@@ -779,4 +794,4 @@ const SimpleListView = memo(SimpleListViewInner);
 export const RowTitle = memo(ListViewRowTitle);
 export const EditableRowTitle = memo(ListViewEditableRowTitle);
 export const Row = memo(ListViewRow);
-export const Root = memo(SimpleListView);
+export const Root = SimpleListView;

@@ -12,7 +12,7 @@ import {
   TreeView,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { FileIcon, StackIcon, TokensIcon } from 'noya-icons';
+import { DashboardIcon, FileIcon, StackIcon } from 'noya-icons';
 import { useDeepMemo } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import { uuid } from 'noya-utils';
@@ -191,6 +191,7 @@ const PageListContent = memo(function PageListContent({
   return (
     <Container expanded={scrollable}>
       <TreeView.Root
+        variant="padded"
         sortable={!editingPage}
         scrollable={scrollable}
         acceptsDrop={useCallback(
@@ -246,7 +247,7 @@ const PageListContent = memo(function PageListContent({
 
             const IconComponent =
               page.type === 'theme'
-                ? TokensIcon
+                ? DashboardIcon
                 : Selectors.isSymbolsPage({ name: page.name })
                 ? StackIcon
                 : FileIcon;

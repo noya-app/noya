@@ -8,22 +8,23 @@ import React, {
   useContext,
 } from 'react';
 import styled from 'styled-components';
-import { ContextMenu, Divider, MenuItem, ScrollArea, Spacer } from '..';
+import { ContextMenu, MenuItem, ScrollArea, Spacer } from '..';
 import withSeparatorElements from '../utils/withSeparatorElements';
 
 export type GridViewVariant = 'small' | 'large';
 
-const Grid = styled.div<{ variant: GridViewVariant }>(({ theme, variant }) => ({
-  color: theme.colors.text,
-  display: 'grid',
-  gridTemplateColumns: `repeat(auto-fill, ${
-    variant === 'large' ? 280 : 250
-  }px)`,
-  gridAutoRows: variant === 'large' ? '280px' : '170px',
-  justifyContent: 'space-between',
-  gap: '20px',
-  padding: '20px',
-}));
+const Grid = styled.div<{ variant: GridViewVariant }>(({ theme, variant }) => {
+  return {
+    color: theme.colors.text,
+    display: 'grid',
+    gridTemplateColumns: `repeat(auto-fill, minmax(${
+      variant === 'large' ? 280 : 160
+    }px, 1fr))`,
+    gridAutoRows: variant === 'large' ? '280px' : '170px',
+    gap: `20px`,
+    padding: `20px`,
+  };
+});
 
 const Container = styled.div(({ theme }) => ({
   flex: '1',
@@ -31,15 +32,15 @@ const Container = styled.div(({ theme }) => ({
   flexDirection: 'column',
 }));
 
-const ItemContainer = styled.div<{ selected: boolean }>(
+const ItemContainer = styled.div<{ selected?: boolean }>(
   ({ theme, selected }) => ({
     display: 'flex',
     flex: '1',
     backgroundColor: theme.colors.sidebar.background,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '12px',
-    border: `2px solid ${selected ? theme.colors.primary : 'transparent'}`,
+    borderRadius: '2px',
+    border: `1px solid ${selected ? theme.colors.primary : 'transparent'}`,
     overflow: 'hidden',
   }),
 );
@@ -71,7 +72,7 @@ const ItemDescription = styled.span(({ theme }) => ({
 
 const SectionTitle = styled.span<{ last?: boolean }>(
   ({ theme, last = false }) => ({
-    ...theme.textStyles.body,
+    ...theme.textStyles.heading3,
     color: last ? theme.colors.text : theme.colors.textMuted,
     fontWeight: 500,
     userSelect: 'none',
@@ -89,7 +90,7 @@ interface ItemProps<MenuItemType extends string = string> {
   id: string;
   title: string;
   subtitle?: string;
-  selected: boolean;
+  selected?: boolean;
   onClick?: (event: React.MouseEvent) => void;
   onDoubleClick?: () => void;
   children?: ReactNode;
@@ -201,7 +202,6 @@ function GridViewSectionHeader({ title }: { title: string }) {
         <SectionTitle> / </SectionTitle>,
       )}
       <Spacer.Vertical size={8} />
-      <Divider />
     </SectionHeaderContainer>
   );
 }
