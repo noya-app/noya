@@ -1,0 +1,11 @@
+{
+  "name": "embedded",
+  "private": true,
+  "modular": {
+    "type": "app"
+  },
+  "version": "1.0.0",
+  "dependencies": {
+    "zod": "^3.20.2"
+  }
+}
