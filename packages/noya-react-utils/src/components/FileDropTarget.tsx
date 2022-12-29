@@ -1,7 +1,11 @@
+import { useFileDropTarget } from 'noya-react-utils';
 import React, { DragEvent, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
-import { OffsetPoint } from '../containers/Canvas';
-import { useFileDropTarget } from '../hooks/useFileDropTarget';
+
+export type OffsetPoint = {
+  offsetX: number;
+  offsetY: number;
+};
 
 export type TypedFile<T> = File & { type: T };
 
@@ -23,7 +27,7 @@ interface Props<T extends string> {
 
 const Container = styled.div(() => ({ display: 'flex', flex: 1 }));
 
-export default memo(function FileDropTarget<T extends string>({
+export const FileDropTarget = memo(function FileDropTarget<T extends string>({
   children,
   onDropFiles,
   supportedFileTypes,

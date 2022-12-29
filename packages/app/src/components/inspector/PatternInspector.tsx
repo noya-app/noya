@@ -10,10 +10,10 @@ import {
   useHover,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { FileDropTarget, isSupportedFile, TypedFile } from 'noya-react-utils';
 import { getFileExtensionForType, uuid } from 'noya-utils';
 import React, { memo, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import ImageDropTarget, { isSupportedFile, TypedFile } from '../FileDropTarget';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const Container = styled.div<{
@@ -124,7 +124,7 @@ const PatternPreview = memo(
     }, [handleImageFile]);
 
     return (
-      <ImageDropTarget<SupportedImageUploadType>
+      <FileDropTarget<SupportedImageUploadType>
         onDropFiles={useCallback(
           (files) => {
             if (files.length === 0) return;
@@ -153,7 +153,7 @@ const PatternPreview = memo(
             {isDropTargetActive && <DropTargetOverlay />}
           </Container>
         )}
-      </ImageDropTarget>
+      </FileDropTarget>
     );
   },
 );

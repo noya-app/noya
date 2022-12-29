@@ -1,7 +1,7 @@
 import { Size } from 'noya-geometry';
+import { useSize } from 'noya-react-utils';
 import React, { memo, ReactNode, useRef } from 'react';
 import styled from 'styled-components';
-import { useSize } from '../hooks/useSize';
 
 const Container = styled.div({
   display: 'flex',

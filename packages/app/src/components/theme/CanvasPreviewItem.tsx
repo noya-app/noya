@@ -1,8 +1,8 @@
 import { Size } from 'noya-geometry';
+import { useSize } from 'noya-react-utils';
 import React, { memo, ReactNode, useCallback, useRef } from 'react';
 import styled from 'styled-components';
 import CanvasViewer from '../../containers/CanvasViewer';
-import { useSize } from '../../hooks/useSize';
 
 const Container = styled.div<{ background?: string }>(({ background }) => ({
   position: 'relative',

@@ -28,7 +28,9 @@ interface Props {
   size: Size;
 }
 
-export default memo(function CanvasKitRenderer({ size }: Props) {
+export const CanvasKitRenderer = memo(function CanvasKitRenderer({
+  size,
+}: Props) {
   const theme = useTheme();
   const workspaceState = useWorkspaceState();
   const [surface, setSurface] = useState<Surface | null>(null);
