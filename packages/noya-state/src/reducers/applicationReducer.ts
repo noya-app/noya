@@ -1,7 +1,7 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
 import { WritableDraft } from 'immer/dist/internal';
+import Sketch from 'noya-file-format';
 import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
 import { IFontManager } from 'noya-renderer';
@@ -10,7 +10,6 @@ import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
-import { getSelectedGradient } from '../selectors/gradientSelectors';
 import {
   findPageLayerIndexPaths,
   fixGradientPositions,
@@ -21,7 +20,8 @@ import {
   getSelectedLayerIndexPaths,
   setNewPatternFill,
   setNewShaderFill,
-} from '../selectors/selectors';
+} from '../selectors';
+import { getSelectedGradient } from '../selectors/gradientSelectors';
 import { AlignmentAction, alignmentReducer } from './alignmentReducer';
 import { CanvasAction, canvasReducer } from './canvasReducer';
 import { ExportAction, exportReducer } from './exportReducer';
@@ -37,13 +37,11 @@ import {
 import { LayerAction, layerReducer } from './layerReducer';
 import { PageAction, pageReducer } from './pageReducer';
 import { markLayersAsEdited, PointAction, pointReducer } from './pointReducer';
-import { SetNumberMode, StyleAction, styleReducer } from './styleReducer';
+import { StyleAction, styleReducer } from './styleReducer';
 import { SymbolsAction, symbolsReducer } from './symbolsReducer';
 import { TextEditorAction, textEditorReducer } from './textEditorReducer';
 import { TextStyleAction, textStyleReducer } from './textStyleReducer';
 import { ThemeAction, themeReducer } from './themeReducer';
-
-export type { SetNumberMode };
 
 export type WorkspaceTab = 'canvas' | 'theme' | 'pages';
 

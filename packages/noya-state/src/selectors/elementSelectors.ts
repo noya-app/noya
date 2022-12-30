@@ -1,15 +1,15 @@
 import { Point } from 'noya-geometry';
 import { decodeCurvePoint } from 'noya-state';
+import {
+  getBoundingRectMap,
+  getIndexPathOfOpenShapeLayer,
+  getSelectedLayers,
+  isPointInRange,
+} from '.';
 import { ApplicationState, Layers } from '../index';
 import { SelectedControlPoint } from '../reducers/applicationReducer';
 import { SelectedPoint } from '../reducers/pointReducer';
 import { getCurrentPage } from './pageSelectors';
-import {
-  getBoundingRectMap,
-  getIndexPathOfOpenShapeLayer,
-  isPointInRange,
-  getSelectedLayers,
-} from './selectors';
 
 type PathElement =
   | {

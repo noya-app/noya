@@ -1,13 +1,12 @@
-import type Sketch from 'noya-file-format';
-import { delimitedPath } from 'noya-utils';
-import { Layers } from '..';
 import { Draft } from 'immer';
+import type Sketch from 'noya-file-format';
+import { SketchModel } from 'noya-sketch-model';
+import { delimitedPath, uuid } from 'noya-utils';
+import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
+import { Layers } from '../layer';
 import { ApplicationState } from '../reducers/applicationReducer';
 import { findPageLayerIndexPaths, LayerIndexPaths } from './indexPathSelectors';
 import { getCurrentTab } from './workspaceSelectors';
-import { uuid } from 'noya-utils';
-import { CHECKERED_BACKGROUND_BYTES } from '../checkeredBackground';
-import { SketchModel } from 'noya-sketch-model';
 
 export type ComponentsTypes =
   | Sketch.Swatch

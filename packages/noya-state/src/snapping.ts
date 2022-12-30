@@ -9,17 +9,18 @@ import {
 } from 'noya-geometry';
 import { cartesianProduct, isDeepEqual } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import { getRectExtentPoint, Layers, resizeRect } from '.';
+import { Layers } from './layer';
 import { ParentLayer } from './layers';
-import { ScalingOptions } from './primitives';
+import { resizeRect, ScalingOptions } from './primitives';
 import { ApplicationState } from './reducers/applicationReducer';
 import { CompassDirection } from './reducers/interactionReducer';
-import { getLayersInRect } from './selectors/geometrySelectors';
+import { getRectExtentPoint } from './selection';
 import {
   getBoundingRect,
-  getCurrentPageMetadata,
-  getSelectedLayerIndexPathsExcludingDescendants,
-} from './selectors/selectors';
+  getLayersInRect,
+} from './selectors/geometrySelectors';
+import { getSelectedLayerIndexPathsExcludingDescendants } from './selectors/indexPathSelectors';
+import { getCurrentPageMetadata } from './selectors/pageSelectors';
 
 export function getSnapValues(rect: Rect, axis: Axis): number[] {
   const bounds = createBounds(rect);

@@ -1,6 +1,6 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit, Path } from 'canvaskit';
 import { Draft } from 'immer';
+import Sketch from 'noya-file-format';
 import {
   createRectFromBounds,
   distance,
@@ -16,6 +16,7 @@ import {
   parsePoint,
   path,
   Primitives,
+  SetNumberMode,
   stringifyPoint,
 } from 'noya-state';
 import { range, windowsOf } from 'noya-utils';
@@ -28,9 +29,8 @@ import {
 } from '../index';
 import { PointsLayer, visit } from '../layers';
 import { SelectedControlPoint } from '../reducers/applicationReducer';
-import { SetNumberMode } from '../reducers/styleReducer';
+import { getBoundingRectMap } from './geometrySelectors';
 import { getCurrentPage } from './pageSelectors';
-import { getBoundingRectMap } from './selectors';
 
 export const POINT_RADIUS = 4;
 export const SELECTED_GRADIENT_POINT_RADIUS = POINT_RADIUS * 2;

@@ -32,11 +32,6 @@ import * as Layers from '../layers';
 import { ScalingOptions } from '../primitives';
 import { getLineDragHandleIndexForDirection } from '../selection';
 import {
-  getAngularGradientCircle,
-  getSelectedGradient,
-  getSelectedGradientStopPoints,
-} from '../selectors/gradientSelectors';
-import {
   addToParentLayer,
   computeCurvePointBoundingRect,
   EncodedPageMetadata,
@@ -57,7 +52,12 @@ import {
   moveLayer,
   moveSelectedPoints,
   resizeLayerFrame,
-} from '../selectors/selectors';
+} from '../selectors';
+import {
+  getAngularGradientCircle,
+  getSelectedGradient,
+  getSelectedGradientStopPoints,
+} from '../selectors/gradientSelectors';
 import {
   getScaledSnapBoundingRect,
   getSnapAdjustmentForVisibleLayers,

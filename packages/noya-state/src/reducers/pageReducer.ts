@@ -1,9 +1,9 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { getIncrementedName, uuid } from 'noya-utils';
 import * as Layers from '../layers';
-import { getSymbolsInstancesIndexPaths } from '../selectors/selectors';
+import { getSymbolsInstancesIndexPaths } from '../selectors';
 import { UUID } from '../types';
 import { moveArrayItem } from '../utils/moveArrayItem';
 import { ApplicationState } from './applicationReducer';

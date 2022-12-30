@@ -8,13 +8,10 @@ import {
   getSelectedLayerIndexPaths,
   moveControlPoints,
   moveSelectedPoints,
-} from '../selectors/selectors';
+} from '../selectors';
+import { SetNumberMode } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
-import {
-  ApplicationState,
-  SelectedPointLists,
-  SetNumberMode,
-} from './applicationReducer';
+import { ApplicationState, SelectedPointLists } from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]

@@ -1,6 +1,6 @@
-import Sketch from 'noya-file-format';
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import * as Layers from '../layers';
 import { decodeCurvePoint, encodeCurvePoint } from '../primitives/path';
 import {
@@ -12,9 +12,9 @@ import {
   getLayerRotationMultiplier,
   getSelectedLayerIndexPaths,
   resizeLayerFrame,
-} from '../selectors/selectors';
+} from '../selectors';
+import { SetNumberMode } from '../types';
 import { accessPageLayers, ApplicationState } from './applicationReducer';
-import { SetNumberMode } from './styleReducer';
 
 export type LayerPropertyAction =
   | [type: 'setLayerName', layerId: string, name: string]

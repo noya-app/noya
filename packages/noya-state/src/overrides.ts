@@ -1,5 +1,6 @@
 import type Sketch from 'noya-file-format';
-import { Layers, PageLayer } from '.';
+import { Layers } from './layer';
+import { PageLayer } from './layers';
 
 // Names are encoded as, e.g. "id1/id2/id3_stringValue"
 export function decodeName(overrideName: string) {

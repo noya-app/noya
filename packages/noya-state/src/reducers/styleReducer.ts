@@ -2,6 +2,7 @@ import produce from 'immer';
 import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { clamp } from 'noya-utils';
+import { SetNumberMode } from '../types';
 import { moveArrayItem } from '../utils/moveArrayItem';
 import { BlurAction, blurReducer } from './blurReducer';
 import {
@@ -22,8 +23,6 @@ export const defaultFillColor = SketchModel.color({
   green: 0.85,
   blue: 0.85,
 });
-
-export type SetNumberMode = 'replace' | 'adjust';
 
 export type StyleElementType = 'Fill' | 'Border' | 'Shadow' | 'InnerShadow';
 
