@@ -1,8 +1,8 @@
+import { CanvasViewer } from 'noya-canvas-preview';
 import { Size } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
 import React, { memo, ReactNode, useCallback, useRef } from 'react';
 import styled from 'styled-components';
-import CanvasViewer from '../../containers/CanvasViewer';
 
 const Container = styled.div<{ background?: string }>(({ background }) => ({
   position: 'relative',
@@ -25,7 +25,7 @@ interface Props {
   background?: string;
 }
 
-export default memo(function CanvasPreviewItem({
+export const CanvasPreviewItem = memo(function CanvasPreviewItem({
   renderContent,
   background,
 }: Props) {

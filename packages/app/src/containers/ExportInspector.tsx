@@ -18,6 +18,7 @@ import {
 } from 'noya-inspector';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
 import { PageLayer, Selectors } from 'noya-state';
+import { CanvasPreviewItem } from 'noya-theme-editor';
 import {
   FileType,
   getFileExtensionForType,
@@ -25,7 +26,6 @@ import {
 } from 'noya-utils';
 import React, { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import CanvasPreviewItem from '../components/theme/CanvasPreviewItem';
 
 export const ExportPreviewRow = memo(function ExportPreviewRow({
   layer,

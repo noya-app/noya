@@ -6,7 +6,7 @@ import { SketchLayer, useTextLayerParagraph } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
-import CanvasPreviewItem from './CanvasPreviewItem';
+import { CanvasPreviewItem } from './CanvasPreviewItem';
 
 interface Props {
   name: string;
@@ -72,7 +72,7 @@ function RCKTextStylePreview({
   return <SketchLayer layer={measuredLayer} />;
 }
 
-export default memo(function TextStyle({ name, style }: Props) {
+export const TextStyle = memo(function TextStyle({ name, style }: Props) {
   const color =
     style.textStyle?.encodedAttributes.MSAttributedStringColorAttribute;
 

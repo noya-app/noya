@@ -8,9 +8,9 @@ import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
-import { createThemeGroups } from '../../utils/themeTree';
-import ColorSwatch from './ColorSwatch';
-import { menuItems, ThemeMenuItemType } from './menuItems';
+import { menuItems, ThemeMenuItemType } from '../utils/menuItems';
+import { createThemeGroups } from '../utils/themeTree';
+import { ColorSwatch } from './ColorSwatch';
 
 interface Props {
   swatches: Sketch.Swatch[];
@@ -21,7 +21,7 @@ interface Props {
   onDuplicateSwatch?: (id: string[]) => void;
 }
 
-export default memo(function SwatchesGrid({
+export const SwatchesGrid = memo(function SwatchesGrid({
   swatches,
   selectedSwatchIds,
   onGroupSwatch,

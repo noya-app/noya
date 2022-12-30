@@ -3,7 +3,7 @@ import { center, Size } from 'noya-geometry';
 import { SketchLayer } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import React, { memo, useMemo } from 'react';
-import CanvasPreviewItem from './CanvasPreviewItem';
+import { CanvasPreviewItem } from './CanvasPreviewItem';
 
 interface Props {
   style: Sketch.Style;
@@ -25,7 +25,7 @@ function RCKStylePreview({ style, size }: { style: Sketch.Style; size: Size }) {
   return <SketchLayer layer={layer} />;
 }
 
-export default memo(function ThemeStyle({ style }: Props) {
+export const ThemeStyle = memo(function ThemeStyle({ style }: Props) {
   return (
     <CanvasPreviewItem
       renderContent={(size) => <RCKStylePreview style={style} size={size} />}

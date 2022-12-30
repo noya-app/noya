@@ -1,12 +1,14 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
+import {
+  SwatchesGrid,
+  SymbolsGrid,
+  TextStylesGrid,
+  ThemeStylesGrid,
+} from 'noya-theme-editor';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import SwatchesGrid from '../components/theme/SwatchesGrid';
-import SymbolsGrid from '../components/theme/SymbolsGrid';
-import TextStylesGrid from '../components/theme/TextStylesGrid';
-import ThemeStylesGrid from '../components/theme/ThemeStylesGrid';
 
 const Container = styled.main(({ theme }) => ({
   flex: '1',

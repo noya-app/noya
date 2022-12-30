@@ -3,9 +3,9 @@ import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
-import { createThemeGroups } from '../../utils/themeTree';
-import { menuItems, ThemeMenuItemType } from './menuItems';
-import ThemeStyle from './ThemeStyle';
+import { menuItems, ThemeMenuItemType } from '../utils/menuItems';
+import { createThemeGroups } from '../utils/themeTree';
+import { ThemeStyle } from './ThemeStyle';
 
 interface Props {
   sharedStyles: Sketch.SharedStyle[];
@@ -16,7 +16,7 @@ interface Props {
   onDuplicateThemeStyle: (id: string[]) => void;
 }
 
-export default memo(function ThemeStylesGrid({
+export const ThemeStylesGrid = memo(function ThemeStylesGrid({
   sharedStyles,
   selectedThemeStyleIds,
   onGroupThemeStyle,

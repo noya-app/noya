@@ -3,9 +3,9 @@ import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
-import { createThemeGroups } from '../../utils/themeTree';
-import { menuItems, ThemeMenuItemType } from './menuItems';
-import Symbol from './Symbol';
+import { menuItems, ThemeMenuItemType } from '../utils/menuItems';
+import { createThemeGroups } from '../utils/themeTree';
+import { Symbol } from './Symbol';
 
 interface Props {
   symbols: Sketch.SymbolMaster[];
@@ -16,7 +16,7 @@ interface Props {
   onSelectSymbol: (id?: string, selectionType?: SelectionType) => void;
 }
 
-export default memo(function SymbolsGrid({
+export const SymbolsGrid = memo(function SymbolsGrid({
   symbols,
   selectedSymbolsIds,
   onDeleteSymbol,

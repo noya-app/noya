@@ -4,9 +4,9 @@ import Sketch from 'noya-file-format';
 import { GroupIcon } from 'noya-icons';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
+import { createThemeGroups } from 'noya-theme-editor';
 import { sortBy } from 'noya-utils';
 import React, { memo, useCallback, useMemo } from 'react';
-import { createThemeGroups } from '../utils/themeTree';
 
 type ThemeGroupType = Sketch.Swatch | Sketch.SharedStyle | Sketch.SymbolMaster;
 

@@ -1,10 +1,10 @@
+import { CanvasViewer } from 'noya-canvas-preview';
 import { sketchColorToRgbaString } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
 import { useColorFill, useDeletable } from 'noya-react-canvaskit';
 import { Path, useCanvasKit } from 'noya-renderer';
 import React, { memo, useMemo } from 'react';
-import CanvasViewer from '../../containers/CanvasViewer';
 
 const PREVIEW_SIZE = 60;
 
@@ -27,7 +27,7 @@ function RCKColorSwatch({ color, size }: { color: string; size: Size }) {
   return <Path path={path} paint={fill} />;
 }
 
-export default memo(function ColorSwatch({ value }: Props) {
+export const ColorSwatch = memo(function ColorSwatch({ value }: Props) {
   const colorString = useMemo(() => sketchColorToRgbaString(value), [value]);
   const size = useMemo(
     () => ({ width: PREVIEW_SIZE, height: PREVIEW_SIZE }),

@@ -16,7 +16,7 @@ interface Props {
   renderContent: () => ReactNode;
 }
 
-export default memo(function CanvasViewer({
+export const CanvasViewer = memo(function CanvasViewer({
   width,
   height,
   renderContent,
