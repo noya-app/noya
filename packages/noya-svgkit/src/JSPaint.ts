@@ -14,20 +14,23 @@ import {
   StrokeCap,
   StrokeJoin,
 } from 'canvaskit';
+import { constants } from './constants';
 import { JSEmbindObject } from './Embind';
-import { SerializableProperties } from './index';
-import { SVGKit } from './SVGKit';
+
+type SerializableProperties<T> = {
+  [K in keyof T as T[K] extends Function ? never : K]: T[K];
+};
 
 export class JSPaint extends JSEmbindObject implements Paint {
   _antiAlias: boolean = true;
   _alpha: number = 1;
-  _blendMode: BlendMode = SVGKit.BlendMode.Clear;
-  _color: Color = SVGKit.BLACK;
-  _strokeCap: StrokeCap = SVGKit.StrokeCap.Butt;
-  _strokeJoin: StrokeJoin = SVGKit.StrokeJoin.Bevel;
+  _blendMode: BlendMode = constants.BlendMode.Clear;
+  _color: Color = constants.BLACK;
+  _strokeCap: StrokeCap = constants.StrokeCap.Butt;
+  _strokeJoin: StrokeJoin = constants.StrokeJoin.Bevel;
   _strokeMiter: number = 0;
   _strokeWidth: number = 0;
-  _style: PaintStyle = SVGKit.PaintStyle.Fill;
+  _style: PaintStyle = constants.PaintStyle.Fill;
 
   copy(): Paint {
     const properties: SerializableProperties<Omit<JSPaint, 'style'>> = {
