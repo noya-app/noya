@@ -8,15 +8,12 @@ import {
   Size,
 } from 'noya-geometry';
 import { ClipProps, useColorFill, useDeletable } from 'noya-react-canvaskit';
-import {
-  Group,
-  Rect as RCKRect,
-  SketchLayer,
-  useCanvasKit,
-} from 'noya-renderer';
 import { PageLayer, Primitives } from 'noya-state';
 import React, { useMemo } from 'react';
+import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import useCheckeredFill from '../hooks/useCheckeredFill';
+import SketchLayer from './layers/SketchLayer';
 
 function CheckeredFill({ rect }: { rect: Rect }) {
   const CanvasKit = useCanvasKit();
@@ -44,7 +41,7 @@ interface Props {
   backgroundColor?: Sketch.Color;
 }
 
-export default function LayerPreview({
+export function LayerPreview({
   layer,
   layerFrame: frame,
   previewSize: size,

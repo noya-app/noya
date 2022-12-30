@@ -1,11 +1,12 @@
 import { useApplicationState } from 'noya-app-state-context';
 import { Rect } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit, useZoom } from 'noya-renderer';
 import { getDragHandles, Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import { pixelAlignRect } from '../pixelAlignment';
+import { useZoom } from '../ZoomContext';
 
 interface Props {
   rect: Rect;

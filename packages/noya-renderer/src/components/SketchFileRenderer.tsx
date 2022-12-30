@@ -3,7 +3,6 @@ import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform, createRect, insetRect, Rect } from 'noya-geometry';
 import { useColorFill, useStroke } from 'noya-react-canvaskit';
-import { Polyline, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import {
   createDrawingLayer,
@@ -18,8 +17,9 @@ import {
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { ClippedLayerProvider } from '../ClippedLayerContext';
-import { Group, Rect as RCKRect } from '../ComponentsContext';
+import { Group, Polyline, Rect as RCKRect } from '../ComponentsContext';
 import { ALL_DIRECTIONS, getGuides } from '../guides';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import { useRenderingMode } from '../RenderingModeContext';
 import { useRootScale } from '../RootScaleContext';
 import { useZoom, ZoomProvider } from '../ZoomContext';

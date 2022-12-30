@@ -3,7 +3,8 @@ import { useStroke } from 'noya-react-canvaskit';
 import { Primitives } from 'noya-state';
 import React from 'react';
 import { useTheme } from 'styled-components';
-import { Path, useCanvasKit } from '..';
+import { Path } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 
 interface EditablePathPointProps {
   frame: Sketch.Rect;

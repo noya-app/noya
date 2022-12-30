@@ -11,7 +11,6 @@ import {
   Rect,
   Size,
 } from 'noya-geometry';
-import { Group, useZoom } from 'noya-renderer';
 import {
   getLayerSnapValues,
   getPossibleTargetSnapLayers,
@@ -23,6 +22,7 @@ import {
 } from 'noya-state';
 import { groupBy, round } from 'noya-utils';
 import React, { Fragment, memo, useMemo } from 'react';
+import { Group } from '../ComponentsContext';
 import {
   AXES,
   getAxisProperties,
@@ -31,6 +31,7 @@ import {
   X_DIRECTIONS,
   Y_DIRECTIONS,
 } from '../guides';
+import { useZoom } from '../ZoomContext';
 import { AreaMeasurementLabel } from './AreaMeasurementLabel';
 import { DistanceMeasurementLabel } from './DistanceMeasurementLabel';
 import { AlignmentGuide, ExtensionGuide, MeasurementGuide } from './Guides';

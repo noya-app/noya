@@ -2,9 +2,10 @@ import * as CanvasKit from 'canvaskit';
 import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import { useDeletable } from 'noya-react-canvaskit';
-import { Path, useCanvasKit } from 'noya-renderer';
 import { Primitives } from 'noya-state';
 import React, { memo, useMemo } from 'react';
+import { Path } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 
 export default memo(function SketchBorder({
   path,

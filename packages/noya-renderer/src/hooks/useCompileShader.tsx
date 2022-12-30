@@ -1,8 +1,9 @@
 import { CanvasKit, RuntimeEffect } from 'canvaskit';
 import Sketch from 'noya-file-format';
-import { getSkiaShaderString, useCanvasKit } from 'noya-renderer';
 import { SketchModel } from 'noya-sketch-model';
 import { useMemo } from 'react';
+import { getSkiaShaderString } from '../shaders';
+import { useCanvasKit } from './useCanvasKit';
 
 type CompiledShader =
   | { type: 'ok'; value: RuntimeEffect }

@@ -2,11 +2,11 @@ import { CanvasKit, ImageFilter, Shader } from 'canvaskit';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { ClipProps, useDeletable } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import { PageLayer, Primitives } from 'noya-state';
 import { chunkBy } from 'noya-utils';
 import React, { memo, ReactNode, useMemo } from 'react';
-import { Group } from '../..';
+import { Group } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import DropShadowGroup from '../effects/DropShadowGroup';
 import SketchLayer from './SketchLayer';
 

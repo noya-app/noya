@@ -1,7 +1,7 @@
 import type { CanvasKit } from 'canvaskit';
 import { SuspendedValue } from 'noya-react-utils';
-import { loadCanvasKit } from 'noya-renderer';
 import React, { createContext, memo, ReactNode, useContext } from 'react';
+import { loadCanvasKit } from '../loadCanvasKit';
 // import loadSVGKit from 'noya-svgkit';
 
 // We don't start loading CanvasKit until the Provider renders the first time,

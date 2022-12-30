@@ -1,9 +1,10 @@
 import { useApplicationState } from 'noya-app-state-context';
 import { useStroke } from 'noya-react-canvaskit';
-import { Path, useCanvasKit } from 'noya-renderer';
 import { Layers, Selectors } from 'noya-state';
 import React, { memo } from 'react';
 import { useTheme } from 'styled-components';
+import { Path } from '../ComponentsContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import PseudoPoint from './PseudoPoint';
 
 export const InsertPointOverlay = memo(function InsertPointOverlay() {

@@ -4,7 +4,7 @@ import { AffineTransform } from 'noya-geometry';
 import { useStroke } from 'noya-react-canvaskit';
 import { Layers, Selectors } from 'noya-state';
 import React, { ReactNode, useMemo } from 'react';
-import { Group, Path, Rect } from '..';
+import { Group, Path, Rect } from '../ComponentsContext';
 import { useCanvasKit } from '../hooks/useCanvasKit';
 import useLayerFrameRect from '../hooks/useLayerFrameRect';
 import useLayerPath from '../hooks/useLayerPath';

@@ -3,7 +3,6 @@ import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
 import { useFill } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import {
   Layers,
   Overrides,
@@ -13,7 +12,8 @@ import {
   Selectors,
 } from 'noya-state';
 import React, { memo, useMemo } from 'react';
-import { Group, Rect } from '../..';
+import { Group, Rect } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';
 

@@ -1,10 +1,10 @@
 import { SYSTEM_FONT_ID } from 'noya-fonts';
 import { Size } from 'noya-geometry';
 import { useColorFill } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import React, { useMemo } from 'react';
-import { Rect, Text } from '..';
+import { Rect, Text } from '../ComponentsContext';
 import { useFontManager } from '../FontManagerContext';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 
 interface Props {
   text: string;

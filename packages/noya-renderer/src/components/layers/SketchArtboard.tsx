@@ -6,18 +6,14 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
-import {
-  Group,
-  Rect as RCKRect,
-  Text,
-  useCanvasKit,
-  useZoom,
-} from 'noya-renderer';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
+import { Group, Rect as RCKRect, Text } from '../../ComponentsContext';
 import { useFontManager } from '../../FontManagerContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useRenderingMode } from '../../RenderingModeContext';
+import { useZoom } from '../../ZoomContext';
 import SketchGroup from './SketchGroup';
 
 interface ArtboardLabelProps {

@@ -1,7 +1,8 @@
 import Sketch from 'noya-file-format';
-import { Group, useCanvasKit } from 'noya-renderer';
 import { Primitives } from 'noya-state';
 import React, { memo, ReactNode, useMemo } from 'react';
+import { Group } from '../../ComponentsContext';
+import { useCanvasKit } from '../../hooks/useCanvasKit';
 
 interface Props {
   shadow: Sketch.Shadow;

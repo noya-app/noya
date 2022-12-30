@@ -1,8 +1,8 @@
 import { Point } from 'noya-geometry';
 import { useFill, useStroke } from 'noya-react-canvaskit';
-import { useCanvasKit } from 'noya-renderer';
 import React from 'react';
 import { useTheme } from 'styled-components';
+import { useCanvasKit } from '../hooks/useCanvasKit';
 import { EditablePathPoint } from './EditablePath';
 
 interface PseudoPointProps {
