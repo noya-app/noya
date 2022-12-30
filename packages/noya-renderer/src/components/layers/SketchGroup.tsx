@@ -8,7 +8,7 @@ import React, { memo, ReactNode, useMemo } from 'react';
 import { Group } from '../../ComponentsContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import DropShadowGroup from '../effects/DropShadowGroup';
-import SketchLayer from './SketchLayer';
+import { BaseLayerProps } from './types';
 
 function composeImageFilters(
   CanvasKit: CanvasKit,
@@ -33,7 +33,7 @@ function composeImageFilters(
   );
 }
 
-interface Props {
+interface Props extends BaseLayerProps {
   layer: Sketch.Group | Sketch.Artboard | Sketch.SymbolMaster | Sketch.Page;
 }
 
@@ -102,7 +102,7 @@ const SketchMask = memo(function SketchGroup({
   );
 });
 
-export default memo(function SketchGroup({ layer }: Props) {
+export default memo(function SketchGroup({ layer, SketchLayer }: Props) {
   const transform = useMemo(
     () => AffineTransform.translate(layer.frame.x, layer.frame.y),
     [layer.frame.x, layer.frame.y],

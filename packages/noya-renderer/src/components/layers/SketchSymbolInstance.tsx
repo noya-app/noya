@@ -16,8 +16,9 @@ import { Group, Rect } from '../../ComponentsContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useTintColorFilter } from '../../hooks/useTintColorFilter';
 import SketchGroup from './SketchGroup';
+import { BaseLayerProps } from './types';
 
-interface SymbolProps {
+interface SymbolProps extends BaseLayerProps {
   layer: Sketch.SymbolInstance;
   symbolMaster: Sketch.SymbolMaster;
   layerStyles: Sketch.SharedStyleContainer;
@@ -29,6 +30,7 @@ const Symbol = memo(function Symbol({
   symbolMaster,
   layerStyles,
   layerTextStyles,
+  SketchLayer,
 }: SymbolProps) {
   const CanvasKit = useCanvasKit();
 
@@ -152,16 +154,19 @@ const Symbol = memo(function Symbol({
       {overriddenSymbolMaster.includeBackgroundColorInInstance && (
         <Rect paint={fill} rect={rect} />
       )}
-      <SketchGroup layer={overriddenSymbolMaster} />
+      <SketchGroup SketchLayer={SketchLayer} layer={overriddenSymbolMaster} />
     </Group>
   );
 });
 
-interface Props {
+interface Props extends BaseLayerProps {
   layer: Sketch.SymbolInstance;
 }
 
-export default memo(function SketchSymbolInstance({ layer }: Props) {
+export default memo(function SketchSymbolInstance({
+  layer,
+  SketchLayer,
+}: Props) {
   const [state] = useApplicationState();
 
   const symbolMaster = useMemo(
@@ -182,6 +187,7 @@ export default memo(function SketchSymbolInstance({ layer }: Props) {
       symbolMaster={symbolMaster}
       layerStyles={state.sketch.document.layerStyles}
       layerTextStyles={state.sketch.document.layerTextStyles}
+      SketchLayer={SketchLayer}
     />
   );
 });

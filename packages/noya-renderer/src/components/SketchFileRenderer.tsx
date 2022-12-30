@@ -31,7 +31,6 @@ import { ExtensionGuide, MeasurementGuide } from './Guides';
 import HoverOutline from './HoverOutline';
 import { InsertPointOverlay } from './InsertPointOverlay';
 import { SketchArtboardContent } from './layers/SketchArtboard';
-import SketchGroup from './layers/SketchGroup';
 import SketchLayer from './layers/SketchLayer';
 import Marquee from './Marquee';
 import { PixelGrid } from './PixelGrid';
@@ -387,7 +386,7 @@ export default memo(function SketchFileRenderer() {
         <Group transform={rootScaleTransform}>
           <RCKRect rect={canvasRect} paint={backgroundFill} />
           <Group transform={canvasTransform}>
-            <SketchGroup layer={page} />
+            <SketchLayer layer={page} />
           </Group>
           <Group transform={screenTransform}>
             {showPixelGrid && <PixelGrid />}
@@ -407,7 +406,12 @@ export default memo(function SketchFileRenderer() {
                 selectedStopIndex={state.selectedGradient.stopIndex}
               />
             )}
-            {symbolToInsert && <SketchArtboardContent layer={symbolToInsert} />}
+            {symbolToInsert && (
+              <SketchArtboardContent
+                SketchLayer={SketchLayer}
+                layer={symbolToInsert}
+              />
+            )}
             {interactionState.type === 'drawingShapePath' ? (
               penToolPseudoElements
             ) : isEditingPath ? (

@@ -15,6 +15,7 @@ import { useCanvasKit } from '../../hooks/useCanvasKit';
 import { useRenderingMode } from '../../RenderingModeContext';
 import { useZoom } from '../../ZoomContext';
 import SketchGroup from './SketchGroup';
+import { BaseLayerProps } from './types';
 
 interface ArtboardLabelProps {
   text: string;
@@ -99,12 +100,13 @@ const ArtboardBlur = memo(function ArtboardBlur({
   return <RCKRect rect={blurRect} paint={blur} />;
 });
 
-interface SketchArtboardContentProps {
+interface SketchArtboardContentProps extends BaseLayerProps {
   layer: Sketch.Artboard | Sketch.SymbolMaster;
 }
 
 export const SketchArtboardContent = memo(function SketchArtboardContent({
   layer,
+  SketchLayer,
 }: SketchArtboardContentProps) {
   const CanvasKit = useCanvasKit();
 
@@ -134,18 +136,22 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
     <>
       {showBackground && <RCKRect rect={rect} paint={paint} />}
       <Group clip={clip}>
-        <SketchGroup layer={layer} />
+        <SketchGroup SketchLayer={SketchLayer} layer={layer} />
       </Group>
     </>
   );
 });
 
-interface Props {
+interface Props extends BaseLayerProps {
   layer: Sketch.Artboard | Sketch.SymbolMaster;
   isSymbolMaster: boolean;
 }
 
-export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
+export default memo(function SketchArtboard({
+  layer,
+  isSymbolMaster,
+  SketchLayer,
+}: Props) {
   const renderingMode = useRenderingMode();
 
   return (
@@ -160,7 +166,7 @@ export default memo(function SketchArtboard({ layer, isSymbolMaster }: Props) {
           <ArtboardBlur layerFrame={layer.frame} />
         </>
       )}
-      <SketchArtboardContent layer={layer} />
+      <SketchArtboardContent SketchLayer={SketchLayer} layer={layer} />
     </>
   );
 });
