@@ -4,6 +4,7 @@ import {
   useSelector,
   useWorkspace,
 } from 'noya-app-state-context';
+import { LayerMenuItemType, useLayerMenu } from 'noya-canvas';
 import {
   IconButton,
   ListView,
@@ -46,7 +47,6 @@ import React, {
 } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { visit } from 'tree-visit';
-import useLayerMenu, { LayerMenuItemType } from '../hooks/useLayerMenu';
 
 const IconContainer = styled.span(({ theme }) => ({
   color: theme.colors.mask,

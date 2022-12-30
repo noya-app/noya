@@ -1,9 +1,8 @@
-import { GridView } from 'noya-designsystem';
+import { GridView, useOpenInputDialog } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { SelectionType } from 'noya-state';
 import { delimitedPath, sortBy } from 'noya-utils';
 import React, { Fragment, memo, useCallback, useMemo } from 'react';
-import { useOpenInputDialog } from '../../contexts/DialogContext';
 import { createThemeGroups } from '../../utils/themeTree';
 import { menuItems, ThemeMenuItemType } from './menuItems';
 import ThemeStyle from './ThemeStyle';

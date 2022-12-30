@@ -8,7 +8,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
+import styled from 'styled-components';
+
+export const Row = styled.div(({ theme }) => ({
+  flex: '1',
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+}));
 
 function createDeferredPromise<T>() {
   let resolve: (value: T) => void = () => {};
@@ -148,14 +155,14 @@ export const DialogProvider = function DialogProvider({
           />
         </InputField.Root>
         <Spacer.Vertical size={20} />
-        <InspectorPrimitives.Row>
+        <Row>
           <Spacer.Horizontal />
           <Button onClick={close}>Cancel</Button>
-          <Spacer.Horizontal size={20} />
+          <Spacer.Horizontal size={16} />
           <Button disabled={!contents?.inputValue} onClick={submit}>
             Submit
           </Button>
-        </InspectorPrimitives.Row>
+        </Row>
       </Dialog>
     </>
   );

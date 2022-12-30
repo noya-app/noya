@@ -5,16 +5,14 @@ import {
   FillInputField,
   Select,
   SketchPattern,
+  useDialogContainsElement,
   useGlobalInputBlurListener,
+  useOpenInputDialog,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
 import React, { memo, SyntheticEvent, useCallback, useMemo } from 'react';
 import styled, { CSSProperties } from 'styled-components';
-import {
-  useDialogContainsElement,
-  useOpenInputDialog,
-} from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import ColorInspector from './ColorInspector';
 import GradientInspector from './GradientInspector';

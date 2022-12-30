@@ -7,10 +7,10 @@ import {
   MenuItem,
   Select,
   Spacer,
+  useOpenInputDialog,
 } from 'noya-designsystem';
 import type Sketch from 'noya-file-format';
 import React, { memo, useCallback, useState } from 'react';
-import { useOpenInputDialog } from '../../contexts/DialogContext';
 import * as InspectorPrimitives from '../inspector/InspectorPrimitives';
 import {
   GridSmall,

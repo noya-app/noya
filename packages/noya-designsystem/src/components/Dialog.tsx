@@ -28,7 +28,7 @@ const StyledContent = styled(DialogPrimitive.Content)(({ theme }) => ({
   maxWidth: '450px',
   maxHeight: '85vh',
   padding: theme.sizes.dialog.padding,
-  borderRadius: 4,
+  borderRadius: 2,
   ...theme.textStyles.small,
   backgroundColor: theme.colors.popover.background,
   overflowY: 'auto',

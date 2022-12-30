@@ -191,7 +191,6 @@ const PageListContent = memo(function PageListContent({
   return (
     <Container expanded={scrollable}>
       <TreeView.Root
-        variant="padded"
         sortable={!editingPage}
         scrollable={scrollable}
         acceptsDrop={useCallback(

@@ -4,13 +4,13 @@ import {
   MenuConfig,
   MenuItem,
   RegularMenuItem,
+  useOpenInputDialog,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { useShallowArray } from 'noya-react-utils';
 import { InteractionType, Layers, Selectors } from 'noya-state';
 import { ClipboardUtils } from 'noya-utils';
 import { useCallback, useMemo } from 'react';
-import { useOpenInputDialog } from '../contexts/DialogContext';
 
 function isValidClippingMaskType(type: Sketch.AnyLayer['_class']): boolean {
   switch (type) {
@@ -77,12 +77,12 @@ export type LayerMenuItemType =
   | 'hide'
   | 'show';
 
-export default function useLayerMenu(
+export function useLayerMenu(
   layers: Sketch.AnyLayer[],
   interactionType: InteractionType,
 ) {
   const dispatch = useDispatch();
-  const openDialog = useOpenInputDialog();
+  const openInputDialog = useOpenInputDialog();
   const { startRenamingLayer } = useWorkspace();
 
   const isEditingText = Selectors.getIsEditingText(interactionType);
@@ -277,7 +277,10 @@ export default function useLayerMenu(
           dispatch('ungroupLayers', selectedLayerIds);
           return;
         case 'createSymbol': {
-          const name = await openDialog('New Symbol Name', suggestedSymbolName);
+          const name = await openInputDialog(
+            'New Symbol Name',
+            suggestedSymbolName,
+          );
 
           if (!name) return;
 
@@ -326,7 +329,7 @@ export default function useLayerMenu(
       dispatch,
       selectedLayerIds,
       newIsAlphaMaskValue,
-      openDialog,
+      openInputDialog,
       suggestedSymbolName,
       newUseAsMaskValue,
       newIgnoreMasksValue,

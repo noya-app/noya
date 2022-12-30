@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Theme } from '../theme';
+import { DialogProvider } from './DialogContext';
 
 export type DesignSystemConfigurationContextValue = {
   platform: PlatformName;
@@ -26,11 +27,13 @@ export const DesignSystemConfigurationProvider = memo(
     children: ReactNode;
     theme: Theme;
   } & DesignSystemConfigurationContextValue) {
+    const contextValue = useMemo(() => ({ platform }), [platform]);
+
     return (
-      <DesignSystemConfigurationContext.Provider
-        value={useMemo(() => ({ platform }), [platform])}
-      >
-        <ThemeProvider theme={theme}>{children}</ThemeProvider>
+      <DesignSystemConfigurationContext.Provider value={contextValue}>
+        <ThemeProvider theme={theme}>
+          <DialogProvider>{children}</DialogProvider>
+        </ThemeProvider>
       </DesignSystemConfigurationContext.Provider>
     );
   },

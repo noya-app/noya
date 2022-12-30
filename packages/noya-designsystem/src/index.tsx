@@ -52,6 +52,7 @@ export type { MenuItem, RegularMenuItem } from './components/internal/Menu';
 // Contexts
 export * from './contexts/GlobalInputBlurContext';
 export * from './contexts/DesignSystemConfiguration';
+export * from './contexts/DialogContext';
 
 // Hooks
 export * from './hooks/mergeEventHandlers';

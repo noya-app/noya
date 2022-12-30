@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { useSelector, useWorkspace } from 'noya-app-state-context';
+import { Canvas } from 'noya-canvas';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -15,10 +16,8 @@ import { AutoSizer } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, { memo, ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { DialogProvider } from '../contexts/DialogContext';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import useSystemColorScheme from '../hooks/useSystemColorScheme';
-import Canvas from './Canvas';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';
@@ -194,40 +193,38 @@ const WorkspaceContent = memo(function WorkspaceContent({
 
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
-      <DialogProvider>
-        {actuallyShowLeftSidebar && (
-          <LeftSidebar>
-            {menuBar}
-            <LeftSidebarBorderedContent>
-              <PageList />
-              <Divider />
-              {leftSidebarContent}
-            </LeftSidebarBorderedContent>
-          </LeftSidebar>
-        )}
-        <MainView>
-          <ToolbarContainer onDoubleClick={doubleClickToolbar}>
-            {!actuallyShowLeftSidebar && menuBar}
-            {useTabElement({
-              canvas: <Toolbar />,
-              pages: null,
-              theme: <ThemeToolbar />,
-            })}
-          </ToolbarContainer>
-          <ContentArea>
-            {useTabElement({
-              canvas: <Canvas />,
-              pages: <PagesGrid />,
-              theme: <ThemeWindow />,
-            })}
-            {actuallyShowRightSidebar && (
-              <RightSidebar>
-                <ScrollArea>{rightSidebarContent}</ScrollArea>
-              </RightSidebar>
-            )}
-          </ContentArea>
-        </MainView>
-      </DialogProvider>
+      {actuallyShowLeftSidebar && (
+        <LeftSidebar>
+          {menuBar}
+          <LeftSidebarBorderedContent>
+            <PageList />
+            <Divider />
+            {leftSidebarContent}
+          </LeftSidebarBorderedContent>
+        </LeftSidebar>
+      )}
+      <MainView>
+        <ToolbarContainer onDoubleClick={doubleClickToolbar}>
+          {!actuallyShowLeftSidebar && menuBar}
+          {useTabElement({
+            canvas: <Toolbar />,
+            pages: null,
+            theme: <ThemeToolbar />,
+          })}
+        </ToolbarContainer>
+        <ContentArea>
+          {useTabElement({
+            canvas: <Canvas />,
+            pages: <PagesGrid />,
+            theme: <ThemeWindow />,
+          })}
+          {actuallyShowRightSidebar && (
+            <RightSidebar>
+              <ScrollArea>{rightSidebarContent}</ScrollArea>
+            </RightSidebar>
+          )}
+        </ContentArea>
+      </MainView>
     </DesignSystemConfigurationProvider>
   );
 });

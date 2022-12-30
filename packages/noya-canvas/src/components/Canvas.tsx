@@ -3,7 +3,14 @@ import {
   useSelector,
   useWorkspace,
 } from 'noya-app-state-context';
-import { CanvasKitRenderer } from 'noya-canvas';
+import {
+  CanvasKitRenderer,
+  useArrowKeyShortcuts,
+  useCopyHandler,
+  useLayerMenu,
+  useMultipleClickCount,
+  usePasteHandler,
+} from 'noya-canvas';
 import {
   ContextMenu,
   isLeftButtonClicked,
@@ -22,7 +29,12 @@ import {
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
-import { FileDropTarget, TypedFile, useSize } from 'noya-react-utils';
+import {
+  FileDropTarget,
+  OffsetPoint,
+  TypedFile,
+  useSize,
+} from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {
@@ -49,11 +61,6 @@ import React, {
 } from 'react';
 import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
-import { useArrowKeyShortcuts } from '../hooks/useArrowKeyShortcuts';
-import { useCopyHandler } from '../hooks/useCopyHandler';
-import useLayerMenu from '../hooks/useLayerMenu';
-import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
-import { usePasteHandler } from '../hooks/usePasteHandler';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
@@ -92,11 +99,6 @@ function getCursorForDirection(
   }
 }
 
-export type OffsetPoint = {
-  offsetX: number;
-  offsetY: number;
-};
-
 function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
@@ -118,7 +120,7 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   }),
 );
 
-export default memo(function Canvas() {
+export const Canvas = memo(function Canvas() {
   const theme = useTheme();
   const {
     sizes: {
