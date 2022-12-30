@@ -1,8 +1,8 @@
 import { PromiseState } from 'noya-react-utils';
 import { useEffect, useState } from 'react';
-import fetchData, { ResponseEncoding } from '../utils/fetchData';
+import { fetchData, ResponseEncoding } from '../utils/fetchData';
 
-export default function useFetch<T>(
+export function useFetch<T>(
   url: string,
   encoding: ResponseEncoding,
 ): PromiseState<T> {

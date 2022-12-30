@@ -5,7 +5,7 @@ const preferDarkQuery = '(prefers-color-scheme: dark)';
 
 type ColorScheme = 'light' | 'dark';
 
-export default function useSystemColorScheme() {
+export function useSystemColorScheme() {
   const mediaQuery = useLazyValue(() => global.matchMedia(preferDarkQuery));
 
   const [colorScheme, setColorScheme] = useState<ColorScheme>(

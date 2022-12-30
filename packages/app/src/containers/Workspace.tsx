@@ -12,12 +12,11 @@ import {
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
 import { MagnifyingGlassIcon } from 'noya-icons';
-import { AutoSizer } from 'noya-react-utils';
+import { AutoSizer, useSystemColorScheme } from 'noya-react-utils';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, { memo, ReactNode, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
-import useSystemColorScheme from '../hooks/useSystemColorScheme';
 import Inspector from './Inspector';
 import LayerList from './LayerList';
 import Menubar from './Menubar';

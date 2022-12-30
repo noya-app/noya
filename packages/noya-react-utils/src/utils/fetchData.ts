@@ -2,20 +2,14 @@ import fetch from 'cross-fetch';
 
 export type ResponseEncoding = 'json' | 'text' | 'arrayBuffer';
 
-export default async function fetchData(
-  url: string,
-  encoding: 'text',
-): Promise<string>;
+export async function fetchData(url: string, encoding: 'text'): Promise<string>;
 
-export default async function fetchData(
+export async function fetchData(
   url: string,
   encoding: 'arrayBuffer',
 ): Promise<ArrayBuffer>;
 
-export default async function fetchData<T>(
-  url: string,
-  encoding: 'json',
-): Promise<T>;
+export async function fetchData<T>(url: string, encoding: 'json'): Promise<T>;
 
 /**
  * Fetch from a url.
@@ -24,7 +18,7 @@ export default async function fetchData<T>(
  *
  * @param url
  */
-export default async function fetchData<T>(
+export async function fetchData<T>(
   url: string,
   encoding: ResponseEncoding,
 ): Promise<string | ArrayBuffer | T> {
