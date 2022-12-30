@@ -243,6 +243,9 @@ export const FillRow = memo(function FillRow({
                 onNudge={(value) =>
                   shaderProps.onNudgeShaderVariableValue(variable.name, value)
                 }
+                renderColorPicker={(props) => (
+                  <FillInputFieldWithPicker {...props} />
+                )}
               />
             ))
             .reverse()

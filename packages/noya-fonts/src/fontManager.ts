@@ -1,8 +1,8 @@
 import { FontFamilyId } from 'noya-fonts';
-import { Brand } from 'noya-utils';
 import { Emitter } from './Emitter';
 import { descriptorToFontId, FontDescriptor } from './fontDescriptor';
 import { decodeFontName } from './fontTraits';
+import { FontId } from './types';
 
 export interface FontProvider {
   getFontFamilyIdList(): FontFamilyId[];
@@ -11,8 +11,6 @@ export interface FontProvider {
   getFontFileUrl(descriptor: FontDescriptor): string | undefined;
   getFontDescriptorsForFamily(fontFamily: FontFamilyId): FontDescriptor[];
 }
-
-export type FontId = Brand<string, 'fontId'>;
 
 export const SYSTEM_FONT_ID = 'system' as FontId;
 

@@ -2,10 +2,10 @@ import { ScrollArea, Select } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { useDeletable } from 'noya-react-canvaskit';
 import { useCompileShader } from 'noya-renderer';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { ComponentProps, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { ArrayController } from './ArrayController';
-import { ShaderFillProps } from './FillInputFieldWithPicker';
+import type { ShaderFillProps } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 import { PatternFillType } from './PatternInspector';
 import { ShaderVariableRow } from './ShaderVariableRow';
@@ -59,7 +59,15 @@ export const ShaderInspector = memo(function ShaderInspector({
   onChangeShaderVariableValue,
   onNudgeShaderVariableValue,
   onChangeShaderVariableName,
-}: ShaderFillProps & { id: string }) {
+  renderColorPicker,
+}: ShaderFillProps & {
+  id: string;
+  // We pass the fill picker to avoid a require cycle, since the shader inspector
+  // renders within the fill picker.
+  renderColorPicker: ComponentProps<
+    typeof ShaderVariableRow
+  >['renderColorPicker'];
+}) {
   const compiled = useCompileShader(shader);
 
   // We only compile the shader here to detect errors, so cleanup memory immediately
@@ -123,6 +131,7 @@ export const ShaderInspector = memo(function ShaderInspector({
                   onChangeName={(name) =>
                     onChangeShaderVariableName(item.name, name)
                   }
+                  renderColorPicker={renderColorPicker}
                 />
               ),
               [
@@ -131,6 +140,7 @@ export const ShaderInspector = memo(function ShaderInspector({
                 onChangeShaderVariableValue,
                 onDeleteShaderVariable,
                 onNudgeShaderVariableValue,
+                renderColorPicker,
               ],
             )}
             onClickPlus={onAddShaderVariable}

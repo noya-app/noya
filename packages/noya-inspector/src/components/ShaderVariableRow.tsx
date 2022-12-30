@@ -9,7 +9,7 @@ import Sketch from 'noya-file-format';
 import { SketchModel } from 'noya-sketch-model';
 import { upperFirst } from 'noya-utils';
 import React, { memo, useCallback } from 'react';
-import { FillInputFieldWithPicker } from './FillInputFieldWithPicker';
+import type { ColorFillProps } from './FillInputFieldWithPicker';
 import * as InspectorPrimitives from './InspectorPrimitives';
 
 const SHADER_VARIABLE_TYPES: Sketch.ShaderVariable['value']['type'][] = [
@@ -24,6 +24,10 @@ interface ValueProps {
   onChange: (value: Sketch.ShaderVariable['value']) => void;
   onNudge: (amount: number) => void;
   flex?: string;
+  renderColorPicker: (props: {
+    id: string;
+    colorProps: ColorFillProps;
+  }) => JSX.Element;
 }
 
 export const ShaderVariableValueInput = memo(function ShaderVariableValueInput({
@@ -32,6 +36,7 @@ export const ShaderVariableValueInput = memo(function ShaderVariableValueInput({
   onChange,
   onNudge,
   flex,
+  renderColorPicker,
 }: ValueProps) {
   switch (value.type) {
     case 'integer':
@@ -47,16 +52,13 @@ export const ShaderVariableValueInput = memo(function ShaderVariableValueInput({
       );
     }
     case 'color': {
-      return (
-        <FillInputFieldWithPicker
-          id={id}
-          flex={flex}
-          colorProps={{
-            color: value.data,
-            onChangeColor: (data) => onChange({ type: value.type, data }),
-          }}
-        />
-      );
+      return renderColorPicker({
+        id,
+        colorProps: {
+          color: value.data,
+          onChangeColor: (data) => onChange({ type: value.type, data }),
+        },
+      });
     }
   }
 });
@@ -68,6 +70,7 @@ interface Props {
   onChangeValue: (value: Sketch.ShaderVariable['value']) => void;
   onNudge: (value: number) => void;
   onClickDelete: () => void;
+  renderColorPicker: ValueProps['renderColorPicker'];
 }
 
 export const ShaderVariableRow = memo(function ShaderVariableRow({
@@ -77,6 +80,7 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
   onNudge,
   onChangeName,
   onClickDelete,
+  renderColorPicker,
 }: Props) {
   const valueInputId = `${id}-value`;
   const nameInputId = `${id}-name`;
@@ -122,6 +126,7 @@ export const ShaderVariableRow = memo(function ShaderVariableRow({
           onChange={onChangeValue}
           onNudge={onNudge}
           value={variable.value}
+          renderColorPicker={renderColorPicker}
         />
         <InspectorPrimitives.HorizontalSeparator />
         <Select

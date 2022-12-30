@@ -11,7 +11,13 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Selectors } from 'noya-state';
-import React, { memo, SyntheticEvent, useCallback, useMemo } from 'react';
+import React, {
+  ComponentProps,
+  memo,
+  SyntheticEvent,
+  useCallback,
+  useMemo,
+} from 'react';
 import styled, { CSSProperties } from 'styled-components';
 import { ColorInspector } from './ColorInspector';
 import { GradientInspector } from './GradientInspector';
@@ -345,6 +351,16 @@ export const FillInputFieldWithPicker = memo(function FillInputFieldWithPicker({
   const dialogContainsElement = useDialogContainsElement();
 
   const [state, dispatch] = useApplicationState();
+
+  const renderColorPicker = useCallback(
+    (
+      props: Parameters<
+        ComponentProps<typeof ShaderInspector>['renderColorPicker']
+      >[0],
+    ) => <FillInputFieldWithPicker {...props} />,
+    [],
+  );
+
   const picker = useMemo(() => {
     switch (fillType) {
       case Sketch.FillType.Gradient:
@@ -357,13 +373,25 @@ export const FillInputFieldWithPicker = memo(function FillInputFieldWithPicker({
         ) : null;
       case Sketch.FillType.Shader:
         return shaderProps ? (
-          <ShaderInspector id={id} {...shaderProps} />
+          <ShaderInspector
+            id={id}
+            {...shaderProps}
+            renderColorPicker={renderColorPicker}
+          />
         ) : null;
       case Sketch.FillType.Color:
       case undefined:
         return <ColorFillPicker id={id} {...colorProps} />;
     }
-  }, [fillType, gradientProps, id, patternProps, shaderProps, colorProps]);
+  }, [
+    fillType,
+    gradientProps,
+    id,
+    patternProps,
+    shaderProps,
+    renderColorPicker,
+    colorProps,
+  ]);
 
   const value = useMemo(() => {
     switch (fillType) {

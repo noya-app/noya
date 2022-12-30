@@ -1,5 +1,5 @@
-import { invert } from '.';
 import { isEqualArray } from './internal/isEqual';
+import { invert } from './invert';
 
 const FILE_TYPE_TO_EXTENSION = {
   'image/png': 'png',
