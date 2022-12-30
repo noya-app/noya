@@ -1,7 +1,7 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import React, { ComponentProps, memo, ReactNode, useCallback } from 'react';
 import styled from 'styled-components';
-import { Tooltip } from '..';
+import { Tooltip } from './Tooltip';
 
 const StyledRoot = styled(ToggleGroupPrimitive.Root)(({ theme }) => ({
   appearance: 'none',
@@ -92,5 +92,7 @@ function ToggleGroupRoot({
   );
 }
 
-export const Root = memo(ToggleGroupRoot);
-export const Item = memo(ToggleGroupItem);
+export namespace RadioGroup {
+  export const Root = memo(ToggleGroupRoot);
+  export const Item = memo(ToggleGroupItem);
+}

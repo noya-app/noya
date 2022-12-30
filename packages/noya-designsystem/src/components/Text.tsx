@@ -23,7 +23,7 @@ const elements = {
 
 const TextAncestorContext = createContext(false);
 
-const Text = styled(
+export const Text = styled(
   ({ as: Element = 'p', variant = 'body', className, children }: TextProps) => {
     const hasTextAncestor = useContext(TextAncestorContext);
     // @ts-ignore
@@ -46,5 +46,3 @@ const Text = styled(
   textAlign: alignment,
   ...(theme.textStyles[variant] ?? {}),
 }));
-
-export default Text;

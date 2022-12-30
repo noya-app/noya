@@ -22,5 +22,7 @@ const SpacerHorizontal = styled.span<Props>(({ size }) => ({
   ...(size === undefined ? { flex: 1 } : { minWidth: size }),
 }));
 
-export const Vertical = SpacerVertical;
-export const Horizontal = SpacerHorizontal;
+export namespace Spacer {
+  export const Vertical = SpacerVertical;
+  export const Horizontal = SpacerHorizontal;
+}

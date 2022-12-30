@@ -122,7 +122,7 @@ const LayerRow = memo(
       isEditing,
       onSubmitEditing,
       ...props
-    }: TreeView.TreeRowProps<LayerMenuItemType> & {
+    }: TreeView.RowProps<LayerMenuItemType> & {
       name: string;
       selected: boolean;
       visible: boolean;
@@ -298,7 +298,7 @@ export default memo(function LayerList({
       index: number,
       { isDragging }: ListView.ItemInfo,
     ) => {
-      const handlePress = (info: TreeView.TreeViewClickInfo) => {
+      const handlePress = (info: TreeView.ClickInfo) => {
         dispatch('interaction', ['reset']);
 
         if (info[modKey]) {
@@ -431,7 +431,7 @@ export default memo(function LayerList({
     ],
   );
 
-  const ref = useRef<ListView.IVirtualizedList | null>(null);
+  const ref = useRef<ListView.VirtualizedList | null>(null);
 
   const scrollToIndex =
     items.findIndex((item) => item.id === selectedLayerIds[0]) ?? -1;

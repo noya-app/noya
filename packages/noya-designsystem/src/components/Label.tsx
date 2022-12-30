@@ -1,6 +1,6 @@
 import React, { memo, ReactNode } from 'react';
 import styled from 'styled-components';
-import * as Spacer from '../components/Spacer';
+import { Spacer } from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Label
@@ -56,5 +56,7 @@ function LabelRoot({ label, children }: LabelRootProps) {
   );
 }
 
-export const Label = memo(LabelLabel);
-export const Root = memo(LabelRoot);
+export namespace Label {
+  export const Label = memo(LabelLabel);
+  export const Root = memo(LabelRoot);
+}

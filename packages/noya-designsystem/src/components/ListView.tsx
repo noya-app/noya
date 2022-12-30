@@ -22,14 +22,15 @@ import React, {
 import { WindowScroller } from 'react-virtualized';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import styled from 'styled-components';
-import { InputField, Spacer } from '..';
 import { mergeEventHandlers } from '../hooks/mergeEventHandlers';
 import { useHover } from '../hooks/useHover';
 import { isLeftButtonClicked } from '../utils/mouseEvent';
-import ContextMenu from './ContextMenu';
+import { ContextMenu } from './ContextMenu';
+import { InputField } from './InputField';
 import { MenuItem } from './internal/Menu';
-import ScrollArea from './ScrollArea';
-import * as Sortable from './Sortable';
+import { ScrollArea } from './ScrollArea';
+import { DropValidator, RelativeDropPosition, Sortable } from './Sortable';
+import { Spacer } from './Spacer';
 
 export type ListRowMarginType = 'none' | 'top' | 'bottom' | 'vertical';
 export type ListRowPosition = 'only' | 'first' | 'middle' | 'last';
@@ -46,7 +47,7 @@ type ListRowContextValue = {
   pressEventName: PressEventName;
 };
 
-export const ListRowContext = createContext<ListRowContextValue>({
+const ListRowContext = createContext<ListRowContextValue>({
   marginType: 'none',
   selectedPosition: 'only',
   sortable: false,
@@ -200,8 +201,8 @@ const RowContainer = styled.div<{
   },
 );
 
-export const DragIndicatorElement = styled.div<{
-  relativeDropPosition: Sortable.RelativeDropPosition;
+const ListViewDragIndicatorElement = styled.div<{
+  relativeDropPosition: RelativeDropPosition;
   offsetLeft: number;
 }>(({ theme, relativeDropPosition, offsetLeft }) => ({
   zIndex: 1,
@@ -224,14 +225,14 @@ export const DragIndicatorElement = styled.div<{
       }),
 }));
 
-export interface ListViewClickInfo {
+interface ListViewClickInfo {
   shiftKey: boolean;
   altKey: boolean;
   metaKey: boolean;
   ctrlKey: boolean;
 }
 
-export interface ListViewRowProps<MenuItemType extends string = string> {
+interface ListViewRowProps<MenuItemType extends string = string> {
   id?: string;
   selected?: boolean;
   depth?: number;
@@ -310,7 +311,7 @@ const ListViewRow = forwardRef(function ListViewRow<
       relativeDropPosition,
       ...renderProps
     }: React.ComponentProps<typeof RowContainer> & {
-      relativeDropPosition?: Sortable.RelativeDropPosition;
+      relativeDropPosition?: RelativeDropPosition;
     },
     ref: Ref<HTMLElement>,
   ) => {
@@ -337,7 +338,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         )}
       >
         {relativeDropPosition && (
-          <DragIndicatorElement
+          <ListViewDragIndicatorElement
             relativeDropPosition={relativeDropPosition}
             offsetLeft={33 + depth * indentation}
           />
@@ -408,7 +409,7 @@ interface VirtualizedListProps<T> {
   renderItem: (index: number) => ReactNode;
 }
 
-export interface IVirtualizedList {
+interface IVirtualizedList {
   scrollToIndex(index: number): void;
 }
 
@@ -512,7 +513,7 @@ const RootContainer = styled.div<{ scrollable?: boolean }>(
   }),
 );
 
-export type ItemInfo = {
+type ListViewItemInfo = {
   isDragging: boolean;
 };
 
@@ -522,7 +523,7 @@ type ChildrenProps = {
 
 type RenderProps<T> = {
   data: T[];
-  renderItem: (item: T, index: number, info: ItemInfo) => ReactNode;
+  renderItem: (item: T, index: number, info: ListViewItemInfo) => ReactNode;
   keyExtractor: (item: T, index: number) => string;
   sortable?: boolean;
   virtualized?: Size;
@@ -537,10 +538,10 @@ type ListViewRootProps = {
   onMoveItem?: (
     sourceIndex: number,
     destinationIndex: number,
-    position: Sortable.RelativeDropPosition,
+    position: RelativeDropPosition,
   ) => void;
   indentation?: number;
-  acceptsDrop?: Sortable.DropValidator;
+  acceptsDrop?: DropValidator;
   pressEventName?: PressEventName;
   variant?: ListViewVariant;
 };
@@ -791,7 +792,16 @@ const SimpleListViewInner = forwardRef(function SimpleListViewInner<T = any>(
  */
 const SimpleListView = memo(SimpleListViewInner);
 
-export const RowTitle = memo(ListViewRowTitle);
-export const EditableRowTitle = memo(ListViewEditableRowTitle);
-export const Row = memo(ListViewRow);
-export const Root = SimpleListView;
+export namespace ListView {
+  export const RowTitle = memo(ListViewRowTitle);
+  export const EditableRowTitle = memo(ListViewEditableRowTitle);
+  export const Row = memo(ListViewRow);
+  export const Root = SimpleListView;
+  export const RowContext = ListRowContext;
+  export type ClickInfo = ListViewClickInfo;
+  export type ItemInfo = ListViewItemInfo;
+  export type RowProps<MenuItemType extends string = string> =
+    ListViewRowProps<MenuItemType>;
+  export type VirtualizedList = IVirtualizedList;
+  export const DragIndicator = ListViewDragIndicatorElement;
+}

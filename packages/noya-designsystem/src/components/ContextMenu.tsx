@@ -9,7 +9,6 @@ import React, {
   useMemo,
 } from 'react';
 import styled from 'styled-components';
-import { Spacer } from '..';
 import {
   CHECKBOX_RIGHT_INSET,
   CHECKBOX_WIDTH,
@@ -19,6 +18,7 @@ import {
   SEPARATOR_ITEM,
   styles,
 } from './internal/Menu';
+import { Spacer } from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -219,4 +219,4 @@ function ContextMenuRoot<T extends string>({
   );
 }
 
-export default memo(ContextMenuRoot);
+export const ContextMenu = memo(ContextMenuRoot);

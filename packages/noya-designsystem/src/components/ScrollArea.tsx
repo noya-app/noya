@@ -1,5 +1,5 @@
 import * as RadixScrollArea from '@radix-ui/react-scroll-area';
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 const SCROLLBAR_SIZE = 10;
@@ -42,7 +42,7 @@ interface Props {
   children?: ReactNode | ((scrollElementRef: HTMLDivElement) => ReactNode);
 }
 
-export default function ScrollArea({ children }: Props) {
+export const ScrollArea = memo(function ScrollArea({ children }: Props) {
   const [scrollElementRef, setScrollElementRef] =
     useState<HTMLDivElement | null>(null);
 
@@ -64,4 +64,4 @@ export default function ScrollArea({ children }: Props) {
       </StyledScrollArea>
     </Container>
   );
-}
+});

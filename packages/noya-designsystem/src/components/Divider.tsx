@@ -13,8 +13,6 @@ const DividerContainer = styled.div(({ theme }) => ({
 
 interface DividerProps {}
 
-function Divider(props: DividerProps) {
+export const Divider = memo(function Divider(props: DividerProps) {
   return <DividerContainer />;
-}
-
-export default memo(Divider);
+});

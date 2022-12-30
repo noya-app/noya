@@ -46,7 +46,13 @@ interface Props {
   max: number;
 }
 
-export default function Slider({ id, value, onValueChange, min, max }: Props) {
+export const Slider = function Slider({
+  id,
+  value,
+  onValueChange,
+  min,
+  max,
+}: Props) {
   const arrayValue = useMemo(
     () => [Math.min(Math.max(value, min), max)],
     [value, min, max],
@@ -73,4 +79,4 @@ export default function Slider({ id, value, onValueChange, min, max }: Props) {
       <StyledThumb />
     </StyledSlider>
   );
-}
+};

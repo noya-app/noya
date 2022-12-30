@@ -146,7 +146,7 @@ export const ArrayController = memo(function ArrayController<Item>({
                 <ItemContainer {...sortableProps}>
                   {renderRow(index)}
                   {relativeDropPosition && (
-                    <ListView.DragIndicatorElement
+                    <ListView.DragIndicator
                       relativeDropPosition={relativeDropPosition}
                       offsetLeft={0}
                     />

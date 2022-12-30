@@ -3,7 +3,6 @@ import { CheckIcon, ChevronRightIcon } from 'noya-icons';
 import { useKeyboardShortcuts } from 'noya-keymap';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { Spacer } from '..';
 import { MenuItemProps, MenuProps } from './ContextMenu';
 import {
   CHECKBOX_RIGHT_INSET,
@@ -13,6 +12,7 @@ import {
   SEPARATOR_ITEM,
   styles,
 } from './internal/Menu';
+import { Spacer } from './Spacer';
 
 /* ----------------------------------------------------------------------------
  * Separator
@@ -174,4 +174,4 @@ function DropdownMenuRoot<T extends string>({
   );
 }
 
-export default memo(DropdownMenuRoot);
+export const DropdownMenu = memo(DropdownMenuRoot);

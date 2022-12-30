@@ -1,4 +1,3 @@
-import { Button, Dialog, IDialog, InputField, Spacer } from 'noya-designsystem';
 import React, {
   createContext,
   ReactNode,
@@ -9,6 +8,10 @@ import React, {
   useState,
 } from 'react';
 import styled from 'styled-components';
+import { Button } from '../components/Button';
+import { Dialog, IDialog } from '../components/Dialog';
+import { InputField } from '../components/InputField';
+import { Spacer } from '../components/Spacer';
 
 export const Row = styled.div(({ theme }) => ({
   flex: '1',

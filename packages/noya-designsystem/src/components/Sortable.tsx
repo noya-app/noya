@@ -264,5 +264,7 @@ function SortableRoot({
   );
 }
 
-export const Item = memo(SortableItem);
-export const Root = memo(SortableRoot);
+export namespace Sortable {
+  export const Item = memo(SortableItem);
+  export const Root = memo(SortableRoot);
+}

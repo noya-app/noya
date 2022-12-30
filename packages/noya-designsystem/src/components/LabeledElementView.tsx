@@ -37,7 +37,7 @@ interface ContainerProps {
   renderLabel: (provided: { id: string; index: number }) => ReactNode;
 }
 
-export default memo(function LabeledElementView({
+export const LabeledElementView = memo(function LabeledElementView({
   children,
   renderLabel,
 }: ContainerProps) {

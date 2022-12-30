@@ -29,7 +29,7 @@ interface Props {
   flex?: CSSProperties['flex'];
 }
 
-export default memo(
+export const FillInputField = memo(
   forwardRef(function FillInputField(
     { id, value, ...rest }: Props,
     ref: ForwardedRef<HTMLButtonElement>,

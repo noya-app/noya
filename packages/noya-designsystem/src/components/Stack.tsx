@@ -22,7 +22,7 @@ export type StackProps = {
   background?: keyof Colors;
 };
 
-const Stack = styled.div<StackProps>(
+export const Stack = styled.div<StackProps>(
   (props) => ({
     display: 'flex',
     flexDirection: props.axis === 'x' ? 'row' : 'column',
@@ -87,5 +87,3 @@ const getSize = (
     };
   }
 };
-
-export default Stack;

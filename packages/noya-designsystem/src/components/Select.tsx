@@ -97,7 +97,12 @@ type Props<T extends string> = ChildrenProps<T> & {
   value: T;
 };
 
-function Select<T extends string>({ id, flex, value, ...rest }: Props<T>) {
+export const Select = memo(function Select<T extends string>({
+  id,
+  flex,
+  value,
+  ...rest
+}: Props<T>) {
   const options = 'options' in rest ? rest.options : undefined;
   const getTitle = 'options' in rest ? rest.getTitle : undefined;
   const onChange = 'options' in rest ? rest.onChange : undefined;
@@ -143,6 +148,4 @@ function Select<T extends string>({ id, flex, value, ...rest }: Props<T>) {
       </SelectElement>
     </SelectContext.Provider>
   );
-}
-
-export default memo(Select);
+});
