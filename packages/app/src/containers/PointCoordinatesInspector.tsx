@@ -1,7 +1,7 @@
+import { useApplicationState } from 'noya-app-state-context';
+import { CoordinatesInspector } from 'noya-inspector';
 import { getMultiNumberValue, Selectors, SetNumberMode } from 'noya-state';
 import React, { memo, useCallback } from 'react';
-import CoordinatesInspector from '../components/inspector/CoordinatesInspector';
-import { useApplicationState } from 'noya-app-state-context';
 
 export default memo(function PointCoordinatesInspector() {
   const [state, dispatch] = useApplicationState();

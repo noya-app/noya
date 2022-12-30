@@ -16,21 +16,8 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { Size } from 'noya-geometry';
-import {
-  ArrowDownIcon,
-  CircleIcon,
-  Component1Icon,
-  ComponentInstanceIcon,
-  CopyIcon,
-  FrameIcon,
-  GroupIcon,
-  ImageIcon,
-  LineIcon,
-  MaskOnIcon,
-  Share1Icon,
-  SquareIcon,
-  TextIcon,
-} from 'noya-icons';
+import { ArrowDownIcon, MaskOnIcon } from 'noya-icons';
+import { LayerIcon } from 'noya-inspector';
 import { useDeepMemo, useShallowArray } from 'noya-react-utils';
 import { Layers, PageLayer, Selectors } from 'noya-state';
 import { isDeepEqual } from 'noya-utils';
@@ -45,7 +32,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 import { visit } from 'tree-visit';
 
 const IconContainer = styled.span(({ theme }) => ({
@@ -119,56 +106,6 @@ function flattenLayerList(
 
   return flattened;
 }
-
-export const LayerIcon = memo(function LayerIcon({
-  type,
-  selected,
-  variant,
-}: {
-  type: LayerType | 'line';
-  selected?: boolean;
-  variant?: 'primary' | 'currentColor';
-}) {
-  const colors = useTheme().colors;
-
-  const color =
-    variant === 'currentColor'
-      ? 'currentColor'
-      : variant && !selected
-      ? colors[variant]
-      : selected
-      ? colors.iconSelected
-      : colors.icon;
-
-  switch (type) {
-    case 'rectangle':
-      return <SquareIcon color={color} />;
-    case 'oval':
-      return <CircleIcon color={color} />;
-    case 'text':
-      return <TextIcon color={color} />;
-    case 'artboard':
-      return <FrameIcon color={color} />;
-    case 'symbolMaster':
-      return <Component1Icon color={color} />;
-    case 'symbolInstance':
-      return <ComponentInstanceIcon color={color} />;
-    case 'group':
-      return <CopyIcon color={color} />;
-    case 'slice':
-      return <GroupIcon color={color} />;
-    case 'bitmap':
-      return <ImageIcon color={color} />;
-    case 'shapeGroup':
-      return <CopyIcon color={color} />;
-    case 'shapePath':
-      return <Share1Icon color={color} />;
-    case 'line':
-      return <LineIcon color={color} />;
-    default:
-      return null;
-  }
-});
 
 const LayerRow = memo(
   forwardRef(function LayerRow(

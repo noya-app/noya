@@ -1,6 +1,11 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider, Select, Spacer } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import {
+  BorderRow,
+  CheckboxArrayController,
+  InspectorPrimitives,
+} from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import {
   EditableBorder,
@@ -9,9 +14,6 @@ import {
   Selectors,
 } from 'noya-state';
 import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
-import BorderRow from '../components/inspector/BorderRow';
-import CheckboxArrayController from '../components/inspector/CheckboxArrayController';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 
 const LINE_CAP_OPTIONS = [
   Sketch.LineCapStyle.Butt.toString(),

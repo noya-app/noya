@@ -8,6 +8,7 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { InspectorPrimitives } from 'noya-inspector';
 import {
   getMultiNumberValue,
   getMultiValue,
@@ -15,7 +16,6 @@ import {
   Selectors,
 } from 'noya-state';
 import React, { memo, useCallback } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 
 const CURVE_MODE_OPTIONS = [
   'Straight' as const,

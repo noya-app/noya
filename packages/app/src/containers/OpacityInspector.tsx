@@ -1,9 +1,9 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { InputField, Slider, Spacer } from 'noya-designsystem';
+import { InspectorPrimitives } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { getMultiNumberValue, Selectors } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 
 export default memo(function OpacityInspector() {
   const [, dispatch] = useApplicationState();

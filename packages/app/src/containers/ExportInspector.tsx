@@ -1,3 +1,4 @@
+import * as AspectRatio from '@radix-ui/react-aspect-ratio';
 import { fileSave } from 'browser-fs-access';
 import JSZip from 'jszip';
 import {
@@ -9,8 +10,14 @@ import { Button, Divider, withSeparatorElements } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { generateImage, ImageEncoding } from 'noya-generate-image';
 import { Size } from 'noya-geometry';
+import {
+  ArrayController,
+  ExportFormatsRow,
+  InspectorPrimitives,
+  usePreviewLayer,
+} from 'noya-inspector';
 import { LayerPreview as RCKLayerPreview, useCanvasKit } from 'noya-renderer';
-import { Selectors } from 'noya-state';
+import { PageLayer, Selectors } from 'noya-state';
 import {
   FileType,
   getFileExtensionForType,
@@ -18,11 +25,38 @@ import {
 } from 'noya-utils';
 import React, { memo, useCallback } from 'react';
 import { useTheme } from 'styled-components';
-import ArrayController from '../components/inspector/ArrayController';
-import ExportFormatsRow from '../components/inspector/ExportFormatsRow';
-import ExportPreviewRow from '../components/inspector/ExportPreviewRow';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
-import { usePreviewLayer } from '../hooks/usePreviewLayer';
+import CanvasPreviewItem from '../components/theme/CanvasPreviewItem';
+
+export const ExportPreviewRow = memo(function ExportPreviewRow({
+  layer,
+  page,
+}: {
+  layer: PageLayer;
+  page: Sketch.Page;
+}) {
+  const preview = usePreviewLayer({ layer, page });
+
+  return (
+    <AspectRatio.Root
+      ratio={Math.max(1, layer.frame.width / layer.frame.height)}
+    >
+      <CanvasPreviewItem
+        renderContent={useCallback(
+          (size) => (
+            <RCKLayerPreview
+              layer={preview.layer}
+              layerFrame={preview.frame}
+              backgroundColor={preview.backgroundColor}
+              previewSize={size}
+              showCheckeredBackground
+            />
+          ),
+          [preview.backgroundColor, preview.frame, preview.layer],
+        )}
+      />
+    </AspectRatio.Root>
+  );
+});
 
 async function saveFile(name: string, type: FileType, data: ArrayBuffer) {
   const file = new File([data], name, {

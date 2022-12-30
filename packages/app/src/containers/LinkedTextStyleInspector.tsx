@@ -7,11 +7,11 @@ import {
   ResetIcon,
   UpdateIcon,
 } from 'noya-icons';
+import { InspectorPrimitives } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { Selectors } from 'noya-state';
 import React, { memo, useCallback, useMemo } from 'react';
 import { useTheme } from 'styled-components';
-import * as InspectorPrimitives from '../components/inspector/InspectorPrimitives';
 
 const NO_TEXT_STYLE = 'none';
 

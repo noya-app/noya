@@ -1,11 +1,10 @@
 import { useApplicationState, useSelector } from 'noya-app-state-context';
 import { Divider } from 'noya-designsystem';
+import { ColorInspector, NameInspector } from 'noya-inspector';
 import { useShallowArray } from 'noya-react-utils';
 import { getMultiValue, Selectors } from 'noya-state';
 import { delimitedPath, isDeepEqual } from 'noya-utils';
 import React, { memo, useCallback } from 'react';
-import ColorInspector from '../components/inspector/ColorInspector';
-import NameInspector from '../components/inspector/NameInspector';
 
 export default memo(function SwatchesInspectors() {
   const [state, dispatch] = useApplicationState();
