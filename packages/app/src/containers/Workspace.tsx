@@ -213,7 +213,7 @@ const WorkspaceContent = memo(function WorkspaceContent({
         </ToolbarContainer>
         <ContentArea>
           {useTabElement({
-            canvas: <Canvas />,
+            canvas: <Canvas rendererZIndex={-1} />,
             pages: <PagesGrid />,
             theme: <ThemeWindow />,
           })}

@@ -63,14 +63,16 @@ import { useGesture } from 'react-use-gesture';
 import styled, { useTheme } from 'styled-components';
 // import SVGRenderer from './renderer/SVGRenderer';
 
-const InsetContainer = styled.div<{ insets: Insets }>(({ insets }) => ({
-  position: 'absolute',
-  top: -insets.top,
-  bottom: -insets.bottom,
-  right: -insets.right,
-  left: -insets.left,
-  zIndex: -1,
-}));
+const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
+  ({ insets, zIndex }) => ({
+    position: 'absolute',
+    top: -insets.top,
+    bottom: -insets.bottom,
+    right: -insets.right,
+    left: -insets.left,
+    zIndex,
+  }),
+);
 
 const HiddenInputTarget = styled.input({
   position: 'absolute',
@@ -120,7 +122,11 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
   }),
 );
 
-export const Canvas = memo(function Canvas() {
+interface Props {
+  rendererZIndex?: number;
+}
+
+export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
   const theme = useTheme();
   const {
     sizes: {
@@ -1214,7 +1220,7 @@ export const Canvas = memo(function Canvas() {
             ref={inputRef}
             type="text"
           />
-          <InsetContainer insets={insets}>
+          <InsetContainer insets={insets} zIndex={rendererZIndex}>
             {canvasSizeWithInsets && (
               // <SVGRenderer size={canvasSizeWithInsets}>
               //   <SketchFileRenderer />

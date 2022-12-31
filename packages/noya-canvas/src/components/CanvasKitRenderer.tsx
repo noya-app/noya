@@ -19,7 +19,6 @@ import styled, { ThemeProvider, useTheme } from 'styled-components';
 const CanvasComponent = styled.canvas<{ size: Size }>(({ size }) => ({
   position: 'absolute',
   inset: 0,
-  zIndex: -1,
   width: `${size.width}px`,
   height: `${size.height}px`,
 }));

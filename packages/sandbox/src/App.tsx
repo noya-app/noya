@@ -1,4 +1,5 @@
 import { CanvasKit } from 'canvaskit';
+import produce from 'immer';
 import { StateProvider } from 'noya-app-state-context';
 import {
   darkTheme,
@@ -9,6 +10,7 @@ import {
   CanvasKitProvider,
   FontManagerProvider,
   IFontManager,
+  ImageCacheProvider,
   useCanvasKit,
   useFontManager,
 } from 'noya-renderer';
@@ -48,14 +50,16 @@ let initialized = false;
 
 const rectangle = SketchModel.rectangle({
   frame: SketchModel.rect({
-    x: -500,
-    y: -500,
-    width: 1000,
-    height: 1000,
+    x: 0,
+    y: 0,
+    width: 100,
+    height: 100,
   }),
   style: SketchModel.style({
     fills: [
-      SketchModel.fill({ color: SketchModel.color({ red: 1, alpha: 1 }) }),
+      SketchModel.fill({
+        color: SketchModel.color({ red: 1, alpha: 1 }),
+      }),
     ],
   }),
 });
@@ -151,12 +155,20 @@ function Workspace(): JSX.Element {
 
     return workspaceState;
   }, [CanvasKit, fontManager]);
+
   return (
     <StateProvider state={workspaceState}>
-      <Content />
+      <ImageCacheProvider>
+        <Content />
+      </ImageCacheProvider>
     </StateProvider>
   );
 }
+
+const theme = produce(darkTheme, (draft) => {
+  draft.sizes.sidebarWidth = 0;
+  draft.sizes.toolbar.height = 0;
+});
 
 export default function Embedded(): JSX.Element {
   if (!initialized) {
@@ -165,7 +177,7 @@ export default function Embedded(): JSX.Element {
   }
 
   return (
-    <DesignSystemConfigurationProvider theme={darkTheme} platform={'key'}>
+    <DesignSystemConfigurationProvider theme={theme} platform={'key'}>
       <GlobalStyles />
       <Suspense fallback="Loading">
         <CanvasKitProvider>
