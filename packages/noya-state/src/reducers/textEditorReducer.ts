@@ -8,7 +8,7 @@ import {
   TextSelectionRange,
 } from 'noya-state';
 import { UUID } from '../types';
-import {
+import type {
   ApplicationReducerContext,
   ApplicationState,
 } from './applicationReducer';
@@ -228,15 +228,13 @@ export function textEditorReducer(
 
         if (!Layers.isTextLayer(draftLayer)) return;
 
-        const {
-          attributedString,
-          range: newRange,
-        } = Selectors.replaceTextAndUpdateSelectionRange(
-          draftLayer.attributedString,
-          range,
-          text,
-          Selectors.getEncodedStringAttributes(draftLayer.style),
-        );
+        const { attributedString, range: newRange } =
+          Selectors.replaceTextAndUpdateSelectionRange(
+            draftLayer.attributedString,
+            range,
+            text,
+            Selectors.getEncodedStringAttributes(draftLayer.style),
+          );
 
         draftLayer.attributedString = attributedString;
         draft.interactionState = interactionReducer(draft.interactionState, [
@@ -274,15 +272,13 @@ export function textEditorReducer(
 
         // If we have a selected range, delete that range
         if (head !== anchor) {
-          const {
-            attributedString,
-            range: newRange,
-          } = Selectors.replaceTextAndUpdateSelectionRange(
-            draftLayer.attributedString,
-            range,
-            '',
-            Selectors.getEncodedStringAttributes(draftLayer.style),
-          );
+          const { attributedString, range: newRange } =
+            Selectors.replaceTextAndUpdateSelectionRange(
+              draftLayer.attributedString,
+              range,
+              '',
+              Selectors.getEncodedStringAttributes(draftLayer.style),
+            );
 
           draftLayer.attributedString = attributedString;
           draft.interactionState = interactionReducer(draft.interactionState, [
@@ -306,15 +302,13 @@ export function textEditorReducer(
             unit,
           );
 
-          const {
-            attributedString,
-            range: newRange,
-          } = Selectors.replaceTextAndUpdateSelectionRange(
-            draftLayer.attributedString,
-            { head: position.index, anchor: head },
-            '',
-            Selectors.getEncodedStringAttributes(draftLayer.style),
-          );
+          const { attributedString, range: newRange } =
+            Selectors.replaceTextAndUpdateSelectionRange(
+              draftLayer.attributedString,
+              { head: position.index, anchor: head },
+              '',
+              Selectors.getEncodedStringAttributes(draftLayer.style),
+            );
 
           draftLayer.attributedString = attributedString;
           draft.interactionState = interactionReducer(draft.interactionState, [

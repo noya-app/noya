@@ -1,7 +1,8 @@
 import type Sketch from 'noya-file-format';
 import { AffineTransform, createBounds, Insets } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
-import { ApplicationState, Layers } from '../index';
+import type { ApplicationState } from '../reducers/applicationReducer';
+import { Layers } from '../layer';
 import { toRadians } from '../utils/radians';
 import { getCurrentPageMetadata } from './pageSelectors';
 

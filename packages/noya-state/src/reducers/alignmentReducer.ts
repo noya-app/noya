@@ -11,7 +11,8 @@ import {
   getSelectedLayerIndexPaths,
   getSelectedRect,
 } from '../selectors';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+import { accessPageLayers } from '../selectors/layerSelectors';
+import type { ApplicationState } from './applicationReducer';
 
 export type AlignmentAction =
   | [type: 'distributeLayers', placement: 'horizontal' | 'vertical']

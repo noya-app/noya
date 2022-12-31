@@ -11,7 +11,10 @@ import {
 } from '../selectors';
 import { SetNumberMode } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState, SelectedPointLists } from './applicationReducer';
+import type {
+  ApplicationState,
+  SelectedPointLists,
+} from './applicationReducer';
 
 export type PointAction =
   | [type: 'setPointCurveMode', curveMode: Sketch.CurveMode]

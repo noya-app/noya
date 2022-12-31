@@ -1,6 +1,6 @@
 import Sketch from 'noya-file-format';
 import produce from 'immer';
-import { ExportOptions } from '../index';
+import * as ExportOptions from '../exportOptions';
 
 export type ExportAction =
   | [type: 'moveExportFormat', sourceIndex: number, destinationIndex: number]

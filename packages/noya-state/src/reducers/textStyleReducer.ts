@@ -9,7 +9,8 @@ import {
   getCurrentTab,
   getSelectedLayerIndexPaths,
 } from '../selectors';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+import type { ApplicationState } from './applicationReducer';
+import { accessPageLayers } from '../selectors/layerSelectors';
 import {
   StringAttributeAction,
   stringAttributeReducer,

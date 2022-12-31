@@ -12,7 +12,7 @@ import { IndexPath } from 'tree-visit';
 import { Layers } from './layer';
 import { ParentLayer } from './layers';
 import { resizeRect, ScalingOptions } from './primitives';
-import { ApplicationState } from './reducers/applicationReducer';
+import type { ApplicationState } from './reducers/applicationReducer';
 import { CompassDirection } from './reducers/interactionReducer';
 import { getRectExtentPoint } from './selection';
 import {

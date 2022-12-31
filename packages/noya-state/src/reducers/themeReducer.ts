@@ -15,11 +15,8 @@ import {
 } from '../selectors';
 import { SetNumberMode } from '../types';
 import { SelectionType, updateSelection } from '../utils/selection';
-import {
-  accessPageLayers,
-  ApplicationState,
-  ThemeTab,
-} from './applicationReducer';
+import type { ApplicationState, ThemeTab } from './applicationReducer';
+import { accessPageLayers } from '../selectors/layerSelectors';
 
 export type ComponentsElements = 'Swatch' | 'TextStyle' | 'ThemeStyle';
 

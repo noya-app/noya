@@ -38,8 +38,8 @@ import {
   removeLayer,
 } from '../selectors';
 import { SelectionType, updateSelection } from '../utils/selection';
-import { ApplicationState } from './applicationReducer';
-import { createPage } from './pageReducer';
+import type { ApplicationState } from './applicationReducer';
+import { createPage } from '../selectors/pageSelectors';
 
 export type LayerAction =
   | [

@@ -7,7 +7,7 @@ import {
   DragHandle,
   getSelectedLineLayer,
 } from 'noya-state';
-import { ApplicationState } from './reducers/applicationReducer';
+import type { ApplicationState } from './reducers/applicationReducer';
 
 export const compassDirectionMap: Record<CompassDirection, Point> = {
   n: { x: 0.5, y: 0 },

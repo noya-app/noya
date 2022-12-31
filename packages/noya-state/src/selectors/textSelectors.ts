@@ -19,7 +19,7 @@ import {
   TextSelectionRange,
 } from 'noya-state';
 import { memoize, unique } from 'noya-utils';
-import { ApplicationState } from '../reducers/applicationReducer';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 import { getTextStyleAttributes } from './textStyleSelectors';
 

@@ -21,14 +21,14 @@ import {
 } from 'noya-state';
 import { range, windowsOf } from 'noya-utils';
 import { IndexPath } from 'tree-visit';
-import {
+import type {
   ApplicationState,
-  InteractionState,
-  Layers,
   SelectedPointLists,
-} from '../index';
+  SelectedControlPoint,
+} from '../reducers/applicationReducer';
+import type { InteractionState } from '../reducers/interactionReducer';
+import { Layers } from '../layer';
 import { PointsLayer, visit } from '../layers';
-import { SelectedControlPoint } from '../reducers/applicationReducer';
 import { getBoundingRectMap } from './geometrySelectors';
 import { getCurrentPage } from './pageSelectors';
 

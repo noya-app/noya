@@ -1,6 +1,5 @@
 import { CanvasKit } from 'canvaskit';
 import produce from 'immer';
-import { WritableDraft } from 'immer/dist/internal';
 import Sketch from 'noya-file-format';
 import { Insets, Size } from 'noya-geometry';
 import { KeyModifiers } from 'noya-keymap';
@@ -8,9 +7,9 @@ import { IFontManager } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
 import { Selectors } from 'noya-state';
 import { uuid } from 'noya-utils';
-import { IndexPath } from 'tree-visit';
 import * as Layers from '../layers';
 import {
+  accessPageLayers,
   findPageLayerIndexPaths,
   fixGradientPositions,
   getCurrentComponentsTab,
@@ -485,22 +484,6 @@ export function applicationReducer(
     default:
       return themeReducer(state, action);
   }
-}
-
-/*
- * Get an array of all layers using as few lookups as possible on the state tree.
- *
- * Immer will duplicate any objects we access within a produce method, so we
- * don't want to walk every layer, since that would duplicate all of them.
- */
-export function accessPageLayers(
-  state: WritableDraft<ApplicationState>,
-  pageIndex: number,
-  layerIndexPaths: IndexPath[],
-): Sketch.AnyLayer[] {
-  return layerIndexPaths.map((layerIndex) => {
-    return Layers.access(state.sketch.pages[pageIndex], layerIndex);
-  });
 }
 
 export function createInitialState(sketch: SketchFile): ApplicationState {

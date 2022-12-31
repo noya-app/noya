@@ -3,7 +3,7 @@ import { SketchModel } from 'noya-sketch-model';
 import { Layers } from 'noya-state';
 import { unique } from 'noya-utils';
 import { SimpleTextDecoration } from '../primitives';
-import { ApplicationState } from '../reducers/applicationReducer';
+import type { ApplicationState } from '../reducers/applicationReducer';
 import { toTextSpans } from './attributedStringSelectors';
 
 export function getTextDecoration(

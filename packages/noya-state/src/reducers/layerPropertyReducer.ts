@@ -14,7 +14,8 @@ import {
   resizeLayerFrame,
 } from '../selectors';
 import { SetNumberMode } from '../types';
-import { accessPageLayers, ApplicationState } from './applicationReducer';
+import type { ApplicationState } from './applicationReducer';
+import { accessPageLayers } from '../selectors/layerSelectors';
 
 export type LayerPropertyAction =
   | [type: 'setLayerName', layerId: string, name: string]

@@ -14,15 +14,11 @@ import {
   transformRect,
 } from 'noya-geometry';
 import { IndexPath } from 'tree-visit';
-import {
-  ApplicationState,
-  getMultiValue,
-  isLine,
-  isPointsLayer,
-  Layers,
-  PageLayer,
-  Selectors,
-} from '../index';
+import { getMultiValue } from '../utils/getMultiValue';
+import { PageLayer } from '../layers';
+import { isLine } from './pointSelectors';
+import type { ApplicationState } from '../reducers/applicationReducer';
+import { Layers } from '../layer';
 import type { UUID } from '../types';
 import {
   getLayerIndexPathsExcludingDescendants,
@@ -30,6 +26,24 @@ import {
 } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
 import { getLayerTransformAtIndexPath } from './transformSelectors';
+import { getTextSelection } from './textSelectors';
+import { WritableDraft } from 'immer/dist/internal';
+
+/*
+ * Get an array of all layers using as few lookups as possible on the state tree.
+ *
+ * Immer will duplicate any objects we access within a produce method, so we
+ * don't want to walk every layer, since that would duplicate all of them.
+ */
+export function accessPageLayers(
+  state: WritableDraft<ApplicationState>,
+  pageIndex: number,
+  layerIndexPaths: IndexPath[],
+): Sketch.AnyLayer[] {
+  return layerIndexPaths.map((layerIndex) => {
+    return Layers.access(state.sketch.pages[pageIndex], layerIndex);
+  });
+}
 
 export const getSelectedLayersExcludingDescendants = (
   state: ApplicationState,
@@ -46,11 +60,11 @@ export const getSelectedLayersExcludingDescendants = (
 export const getSelectedTextLayers = (
   state: ApplicationState,
 ): Sketch.Text[] => {
-  const selectedText = Selectors.getTextSelection(state);
+  const selectedText = getTextSelection(state);
 
   if (selectedText) {
     const layer = Layers.find(
-      Selectors.getCurrentPage(state),
+      getCurrentPage(state),
       (layer) => layer.do_objectID === selectedText.layerId,
     );
 
@@ -184,14 +198,14 @@ export function getSelectedLineLayer(
 ): Layers.PointsLayer | undefined {
   if (state.selectedLayerIds.length !== 1) return;
 
-  const page = Selectors.getCurrentPage(state);
+  const page = getCurrentPage(state);
 
   const layer = Layers.find(
     page,
     (layer) => layer.do_objectID === state.selectedLayerIds[0],
   );
 
-  if (!layer || !isPointsLayer(layer) || !isLine(layer.points)) return;
+  if (!layer || !Layers.isPointsLayer(layer) || !isLine(layer.points)) return;
 
   return layer;
 }

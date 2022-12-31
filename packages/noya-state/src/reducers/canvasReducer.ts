@@ -62,7 +62,7 @@ import {
   getScaledSnapBoundingRect,
   getSnapAdjustmentForVisibleLayers,
 } from '../snapping';
-import {
+import type {
   ApplicationReducerContext,
   ApplicationState,
 } from './applicationReducer';

@@ -5,7 +5,7 @@ import { Layers } from '../layer';
 import { getSelectedLayers } from '../selectors/layerSelectors';
 import { getSelectedSymbols, getSymbols } from '../selectors/themeSelectors';
 import { SetNumberMode } from '../types';
-import { ApplicationState } from './applicationReducer';
+import type { ApplicationState } from './applicationReducer';
 
 export type SymbolsAction =
   | [type: 'setAdjustContentOnResize', value: boolean]
