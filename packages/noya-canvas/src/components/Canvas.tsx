@@ -5,7 +5,6 @@ import {
 } from 'noya-app-state-context';
 import {
   CanvasKitRenderer,
-  useArrowKeyShortcuts,
   useCopyHandler,
   useLayerMenu,
   useMultipleClickCount,
@@ -24,11 +23,7 @@ import {
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
-import {
-  FALLTHROUGH,
-  IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
-  useKeyboardShortcuts,
-} from 'noya-keymap';
+import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
@@ -57,6 +52,7 @@ import React, {
 import { useGesture } from 'react-use-gesture';
 import styled from 'styled-components';
 import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
+import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
@@ -141,97 +137,9 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
   const modKey = useModKey();
   const { highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
-    onWheel: ({ delta: [x, y] }) => {
-      dispatch('pan*', { x, y });
-    },
+    onWheel: ({ delta: [x, y] }) => dispatch('pan*', { x, y }),
   });
-
-  const isPanning =
-    state.interactionState.type === 'panMode' ||
-    state.interactionState.type === 'maybePan' ||
-    state.interactionState.type === 'panning';
-
-  const isEditingText = Selectors.getIsEditingText(state.interactionState.type);
-
-  useArrowKeyShortcuts();
-
-  const handleDeleteKey = () => {
-    if (isEditingText) return FALLTHROUGH;
-
-    if (state.selectedGradient) {
-      dispatch('deleteStopToGradient');
-    } else {
-      dispatch('deleteLayer', state.selectedLayerIds);
-    }
-  };
-
-  useKeyboardShortcuts({
-    Backspace: handleDeleteKey,
-    Delete: handleDeleteKey,
-    Escape: () => dispatch('interaction', ['reset']),
-    Shift: () => dispatch('setKeyModifier', 'shiftKey', true),
-    Alt: () => dispatch('setKeyModifier', 'altKey', true),
-    Space: () => {
-      if (isEditingText) return FALLTHROUGH;
-
-      if (state.interactionState.type !== 'none') return;
-
-      dispatch('interaction', ['enablePanMode']);
-    },
-    Enter: () => {
-      if (isEditingText) return FALLTHROUGH;
-
-      switch (state.interactionState.type) {
-        case 'editPath': {
-          dispatch('interaction', ['reset']);
-
-          break;
-        }
-        case 'none': {
-          const selectedLayers = Selectors.getSelectedLayers(state);
-
-          if (selectedLayers.length > 0) {
-            const firstLayer = selectedLayers[0];
-
-            if (Layers.isTextLayer(firstLayer)) {
-              dispatch('selectLayer', firstLayer.do_objectID);
-              dispatch('interaction', [
-                'editingText',
-                firstLayer.do_objectID,
-                {
-                  anchor: 0,
-                  head: firstLayer.attributedString.string.length,
-                },
-              ]);
-            } else if (Layers.isPointsLayer(firstLayer)) {
-              dispatch(
-                'selectLayer',
-                selectedLayers
-                  .filter(Layers.isPointsLayer)
-                  .map((layer) => layer.do_objectID),
-              );
-              dispatch('interaction', ['editPath']);
-            }
-
-            break;
-          }
-        }
-      }
-    },
-  });
-
-  useKeyboardShortcuts(
-    {
-      Space: () => {
-        if (!isPanning) return;
-
-        dispatch('interaction', ['reset']);
-      },
-      Shift: () => dispatch('setKeyModifier', 'shiftKey', false),
-      Alt: () => dispatch('setKeyModifier', 'altKey', false),
-    },
-    { eventName: 'keyup' },
-  );
+  useCanvasShortcuts();
 
   const { zoomValue, scrollOrigin } = meta;
 
