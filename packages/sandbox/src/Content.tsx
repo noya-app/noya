@@ -1,5 +1,6 @@
 import React from 'react';
+import { Canvas } from 'noya-canvas';
 
 export function Content() {
-  return <></>;
+  return <Canvas></Canvas>;
 }
