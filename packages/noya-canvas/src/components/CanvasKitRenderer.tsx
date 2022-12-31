@@ -10,10 +10,15 @@ import {
   ImageCacheProvider,
   RenderingModeProvider,
   RootScaleProvider,
-  SketchFileRenderer,
   useCanvasKit,
 } from 'noya-renderer';
-import React, { memo, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  ReactNode,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled, { ThemeProvider, useTheme } from 'styled-components';
 
 const CanvasComponent = styled.canvas<{ size: Size }>(({ size }) => ({
@@ -25,10 +30,12 @@ const CanvasComponent = styled.canvas<{ size: Size }>(({ size }) => ({
 
 interface Props {
   size: Size;
+  children: ReactNode;
 }
 
 export const CanvasKitRenderer = memo(function CanvasKitRenderer({
   size,
+  children,
 }: Props) {
   const theme = useTheme();
   const workspaceState = useWorkspaceState();
@@ -77,7 +84,7 @@ export const CanvasKitRenderer = memo(function CanvasKitRenderer({
                   <ComponentsProvider value={Components}>
                     <RenderingModeProvider value="interactive">
                       <RootScaleProvider value={pixelRatio}>
-                        <SketchFileRenderer />
+                        {children}
                       </RootScaleProvider>
                     </RenderingModeProvider>
                   </ComponentsProvider>
@@ -98,7 +105,7 @@ export const CanvasKitRenderer = memo(function CanvasKitRenderer({
     } catch (e) {
       console.warn('rendering error', e);
     }
-  }, [CanvasKit, workspaceState, theme, surface, pixelRatio]);
+  }, [CanvasKit, workspaceState, theme, surface, pixelRatio, children]);
 
   return <CanvasComponent size={size} ref={canvasRef} />;
 });

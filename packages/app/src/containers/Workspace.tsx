@@ -1,6 +1,6 @@
 import produce from 'immer';
 import { useSelector, useWorkspace } from 'noya-app-state-context';
-import { Canvas } from 'noya-canvas';
+import { Canvas, CanvasKitRenderer } from 'noya-canvas';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -11,10 +11,12 @@ import {
   Spacer,
 } from 'noya-designsystem';
 import { doubleClickToolbar } from 'noya-embedded';
+import { Size } from 'noya-geometry';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { AutoSizer, useSystemColorScheme } from 'noya-react-utils';
+import { SketchFileRenderer } from 'noya-renderer';
 import { Selectors, WorkspaceTab } from 'noya-state';
-import React, { memo, ReactNode, useMemo, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useEnvironmentParameter } from '../hooks/useEnvironmentParameters';
 import Inspector from './Inspector';
@@ -190,6 +192,18 @@ const WorkspaceContent = memo(function WorkspaceContent({
       </MenubarContainer>
     );
 
+  const renderCanvas = useCallback(
+    ({ size }: { size: Size }) => (
+      <CanvasKitRenderer size={size}>
+        <SketchFileRenderer />
+      </CanvasKitRenderer>
+      // <SVGRenderer size={size}>
+      //   <SketchFileRenderer />
+      // </SVGRenderer>
+    ),
+    [],
+  );
+
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={platform}>
       {actuallyShowLeftSidebar && (
@@ -213,7 +227,7 @@ const WorkspaceContent = memo(function WorkspaceContent({
         </ToolbarContainer>
         <ContentArea>
           {useTabElement({
-            canvas: <Canvas rendererZIndex={-1} />,
+            canvas: <Canvas rendererZIndex={-1}>{renderCanvas}</Canvas>,
             pages: <PagesGrid />,
             theme: <ThemeWindow />,
           })}

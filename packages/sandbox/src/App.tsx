@@ -1,5 +1,6 @@
 import produce from 'immer';
 import { StateProvider } from 'noya-app-state-context';
+import { Canvas } from 'noya-canvas';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -9,6 +10,8 @@ import {
   CanvasKitProvider,
   FontManagerProvider,
   ImageCacheProvider,
+  RenderingModeProvider,
+  SketchFileRenderer,
   useCanvasKit,
   useFontManager,
 } from 'noya-renderer';
@@ -19,9 +22,9 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
+import { SVGRenderer } from 'noya-svg-renderer';
 import * as React from 'react';
 import { Suspense, useReducer } from 'react';
-import { Content } from './Content';
 
 let initialized = false;
 
@@ -58,11 +61,34 @@ function Workspace(): JSX.Element {
   );
 
   return (
-    <StateProvider state={state} dispatch={dispatch}>
-      <ImageCacheProvider>
-        <Content />
-      </ImageCacheProvider>
-    </StateProvider>
+    <div style={{ flex: '1', display: 'flex' }}>
+      <div style={{ flex: '1', display: 'flex' }}>
+        <StateProvider state={state} dispatch={dispatch}>
+          <Canvas>
+            {({ size }) => (
+              <SVGRenderer size={size}>
+                <RenderingModeProvider value="interactive">
+                  <SketchFileRenderer />
+                </RenderingModeProvider>
+              </SVGRenderer>
+            )}
+          </Canvas>
+        </StateProvider>
+      </div>
+      <div style={{ flex: '1', display: 'flex' }}>
+        <StateProvider state={state}>
+          <Canvas>
+            {({ size }) => (
+              <SVGRenderer size={size}>
+                <RenderingModeProvider value="static">
+                  <SketchFileRenderer />
+                </RenderingModeProvider>
+              </SVGRenderer>
+            )}
+          </Canvas>
+        </StateProvider>
+      </div>
+    </div>
   );
 }
 
@@ -80,11 +106,13 @@ export default function Embedded(): JSX.Element {
   return (
     <DesignSystemConfigurationProvider theme={theme} platform={'key'}>
       <Suspense fallback="Loading">
-        <CanvasKitProvider>
-          <FontManagerProvider>
-            <Workspace />
-          </FontManagerProvider>
-        </CanvasKitProvider>
+        <ImageCacheProvider>
+          <CanvasKitProvider>
+            <FontManagerProvider>
+              <Workspace />
+            </FontManagerProvider>
+          </CanvasKitProvider>
+        </ImageCacheProvider>
       </Suspense>
     </DesignSystemConfigurationProvider>
   );

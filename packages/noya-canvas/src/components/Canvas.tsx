@@ -4,7 +4,6 @@ import {
   useWorkspace,
 } from 'noya-app-state-context';
 import {
-  CanvasKitRenderer,
   useCopyHandler,
   useLayerMenu,
   useMultipleClickCount,
@@ -22,7 +21,13 @@ import {
   useModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { AffineTransform, createRect, Insets, Point } from 'noya-geometry';
+import {
+  AffineTransform,
+  createRect,
+  Insets,
+  Point,
+  Size,
+} from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
@@ -53,7 +58,6 @@ import { useGesture } from 'react-use-gesture';
 import styled from 'styled-components';
 import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
 import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
-// import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
   ({ insets, zIndex }) => ({
@@ -115,10 +119,14 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
 );
 
 interface Props {
+  children: ({ size }: { size: Size }) => JSX.Element;
   rendererZIndex?: number;
 }
 
-export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
+export const Canvas = memo(function Canvas({
+  children,
+  rendererZIndex = 0,
+}: Props) {
   const [state, dispatch] = useApplicationState();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -1113,12 +1121,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
             type="text"
           />
           <InsetContainer insets={canvasInsets} zIndex={rendererZIndex}>
-            {canvasSize && (
-              // <SVGRenderer size={canvasSizeWithInsets}>
-              //   <SketchFileRenderer />
-              // </SVGRenderer>
-              <CanvasKitRenderer size={canvasSize} />
-            )}
+            {canvasSize && children({ size: canvasSize })}
           </InsetContainer>
         </Container>
       </ContextMenu>

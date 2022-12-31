@@ -399,61 +399,63 @@ export default memo(function SketchFileRenderer() {
               />
             )}
           </Group>
-          <Group transform={canvasTransform}>
-            {state.selectedGradient && gradient && (
-              <GradientEditor
-                gradient={gradient}
-                selectedStopIndex={state.selectedGradient.stopIndex}
-              />
-            )}
-            {symbolToInsert && (
-              <SketchArtboardContent
-                SketchLayer={SketchLayer}
-                layer={symbolToInsert}
-              />
-            )}
-            {interactionState.type === 'drawingShapePath' ? (
-              penToolPseudoElements
-            ) : isEditingPath ? (
-              <>
-                {editablePaths}
-                {editPathPseudoElements}
-                <InsertPointOverlay />
-              </>
-            ) : (
-              <>
-                {(state.selectedLayerIds.length > 1 ||
-                  !Selectors.getSelectedLineLayer(state)) &&
-                  boundingRect &&
-                  !state.selectedGradient &&
-                  !drawingLayer &&
-                  !isInserting && (
-                    <>
-                      <BoundingRect rect={boundingRect} />
-                      {!isEditingText &&
-                        state.selectedLayerIds.map((layerId) => (
-                          <RotatedBoundingRect
-                            key={layerId}
-                            layerId={layerId}
-                          />
-                        ))}
-                    </>
-                  )}
-                {!drawingLayer &&
-                  !isInserting &&
-                  !isEditingText &&
-                  highlightedSketchLayer}
-                {drawingLayer && <SketchLayer layer={drawingLayer} />}
-                <SnapGuides />
-                {quickMeasureGuides}
-                {!state.selectedGradient &&
-                  boundingRect &&
-                  !drawingLayer &&
-                  !isInserting &&
-                  !isEditingText && <DragHandles rect={boundingRect} />}
-              </>
-            )}
-          </Group>
+          {renderingMode === 'interactive' && (
+            <Group transform={canvasTransform}>
+              {state.selectedGradient && gradient && (
+                <GradientEditor
+                  gradient={gradient}
+                  selectedStopIndex={state.selectedGradient.stopIndex}
+                />
+              )}
+              {symbolToInsert && (
+                <SketchArtboardContent
+                  SketchLayer={SketchLayer}
+                  layer={symbolToInsert}
+                />
+              )}
+              {interactionState.type === 'drawingShapePath' ? (
+                penToolPseudoElements
+              ) : isEditingPath ? (
+                <>
+                  {editablePaths}
+                  {editPathPseudoElements}
+                  <InsertPointOverlay />
+                </>
+              ) : (
+                <>
+                  {(state.selectedLayerIds.length > 1 ||
+                    !Selectors.getSelectedLineLayer(state)) &&
+                    boundingRect &&
+                    !state.selectedGradient &&
+                    !drawingLayer &&
+                    !isInserting && (
+                      <>
+                        <BoundingRect rect={boundingRect} />
+                        {!isEditingText &&
+                          state.selectedLayerIds.map((layerId) => (
+                            <RotatedBoundingRect
+                              key={layerId}
+                              layerId={layerId}
+                            />
+                          ))}
+                      </>
+                    )}
+                  {!drawingLayer &&
+                    !isInserting &&
+                    !isEditingText &&
+                    highlightedSketchLayer}
+                  {drawingLayer && <SketchLayer layer={drawingLayer} />}
+                  <SnapGuides />
+                  {quickMeasureGuides}
+                  {!state.selectedGradient &&
+                    boundingRect &&
+                    !drawingLayer &&
+                    !isInserting &&
+                    !isEditingText && <DragHandles rect={boundingRect} />}
+                </>
+              )}
+            </Group>
+          )}
           <Group transform={screenTransform}>
             {showRulers && <HorizontalRuler />}
           </Group>
