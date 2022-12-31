@@ -29,12 +29,7 @@ import {
   IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
   useKeyboardShortcuts,
 } from 'noya-keymap';
-import {
-  FileDropTarget,
-  OffsetPoint,
-  TypedFile,
-  useSize,
-} from 'noya-react-utils';
+import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {
@@ -60,7 +55,8 @@ import React, {
   useRef,
 } from 'react';
 import { useGesture } from 'react-use-gesture';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
+import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
 // import SVGRenderer from './renderer/SVGRenderer';
 
 const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
@@ -127,21 +123,23 @@ interface Props {
 }
 
 export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
-  const theme = useTheme();
-  const {
-    sizes: {
-      sidebarWidth,
-      toolbar: { height: toolbarHeight },
-    },
-  } = theme;
   const [state, dispatch] = useApplicationState();
+
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const { canvasSize, canvasInsets, viewportSize } = useAutomaticCanvasSize({
+    containerRef,
+    onChangeSize: useCallback(
+      (size, insets) => dispatch('setCanvasSize', size, insets),
+      [dispatch],
+    ),
+  });
+
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const containerSize = useSize(containerRef);
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const modKey = useModKey();
-  const { setCanvasSize, highlightLayer, highlightedLayer } = useWorkspace();
+  const { highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => {
       dispatch('pan*', { x, y });
@@ -235,34 +233,6 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
     { eventName: 'keyup' },
   );
 
-  const insets = useMemo(
-    () => ({
-      left: sidebarWidth,
-      right: sidebarWidth,
-      top: toolbarHeight,
-      bottom: 0,
-    }),
-    [sidebarWidth, toolbarHeight],
-  );
-
-  // Update the canvas size whenever the window is resized
-  useLayoutEffect(() => {
-    if (!containerSize) return;
-
-    setCanvasSize(containerSize, insets);
-  }, [insets, setCanvasSize, containerSize]);
-
-  const canvasSizeWithInsets = useMemo(
-    () =>
-      containerSize && containerSize.width > 0 && containerSize.height > 0
-        ? {
-            width: containerSize.width + insets.left + insets.right,
-            height: containerSize.height + insets.top + insets.bottom,
-          }
-        : undefined,
-    [containerSize, insets.bottom, insets.left, insets.right, insets.top],
-  );
-
   const { zoomValue, scrollOrigin } = meta;
 
   // Event coordinates are relative to (0,0), but we want them to include
@@ -337,7 +307,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
           CanvasKit,
           fontManager,
           state,
-          insets,
+          canvasInsets,
           rawPoint,
           {
             groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
@@ -505,7 +475,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
             CanvasKit,
             fontManager,
             state,
-            insets,
+            canvasInsets,
             rawPoint,
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
@@ -562,7 +532,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
       CanvasKit,
       fontManager,
       dispatch,
-      insets,
+      canvasInsets,
       modKey,
     ],
   );
@@ -784,7 +754,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
           const layers = Selectors.getLayersInRect(
             state,
             getCurrentPage(state),
-            insets,
+            canvasInsets,
             createRect(origin, current),
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
@@ -818,7 +788,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
             CanvasKit,
             fontManager,
             state,
-            insets,
+            canvasInsets,
             rawPoint,
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
@@ -863,7 +833,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
       CanvasKit,
       fontManager,
       selectedLayers,
-      insets,
+      canvasInsets,
       modKey,
       highlightedLayer?.id,
       highlightLayer,
@@ -953,7 +923,7 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
           const layers = Selectors.getLayersInRect(
             state,
             getCurrentPage(state),
-            insets,
+            canvasInsets,
             createRect(origin, current),
             {
               groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
@@ -1014,7 +984,15 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
           break;
       }
     },
-    [offsetEventPoint, state, CanvasKit, fontManager, dispatch, insets, modKey],
+    [
+      offsetEventPoint,
+      state,
+      CanvasKit,
+      fontManager,
+      dispatch,
+      canvasInsets,
+      modKey,
+    ],
   );
 
   const handleDirection =
@@ -1116,10 +1094,16 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
 
   usePasteHandler<SupportedImageUploadType>({
     supportedFileTypes: SUPPORTED_IMAGE_UPLOAD_TYPES,
-    canvasSize: containerSize,
     onPasteImages: useCallback(
-      (files, point) => onImportImages(files, 'selectedArtboard', point),
-      [onImportImages],
+      (files) => {
+        const offsetSize = viewportSize ?? { width: 0, height: 0 };
+        const insertPoint = {
+          offsetX: offsetSize.width / 2,
+          offsetY: offsetSize.height / 2,
+        };
+        onImportImages(files, 'selectedArtboard', insertPoint);
+      },
+      [viewportSize, onImportImages],
     ),
     onPasteLayers: useCallback(
       (layers) => dispatch('addLayer', layers),
@@ -1220,12 +1204,12 @@ export const Canvas = memo(function Canvas({ rendererZIndex = 0 }: Props) {
             ref={inputRef}
             type="text"
           />
-          <InsetContainer insets={insets} zIndex={rendererZIndex}>
-            {canvasSizeWithInsets && (
+          <InsetContainer insets={canvasInsets} zIndex={rendererZIndex}>
+            {canvasSize && (
               // <SVGRenderer size={canvasSizeWithInsets}>
               //   <SketchFileRenderer />
               // </SVGRenderer>
-              <CanvasKitRenderer size={canvasSizeWithInsets} />
+              <CanvasKitRenderer size={canvasSize} />
             )}
           </InsetContainer>
         </Container>

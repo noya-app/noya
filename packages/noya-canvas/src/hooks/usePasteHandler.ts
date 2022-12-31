@@ -1,31 +1,19 @@
 import Sketch from 'noya-file-format';
-import { Size } from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
-import { isSupportedFile, OffsetPoint, TypedFile } from 'noya-react-utils';
+import { isSupportedFile, TypedFile } from 'noya-react-utils';
 import { ClipboardUtils } from 'noya-utils';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { NoyaClipboardData } from './useCopyHandler';
 
 export function usePasteHandler<T extends string>({
-  canvasSize,
   onPasteImages,
   onPasteLayers: onPasteLayer,
   supportedFileTypes,
 }: {
-  canvasSize: Size | undefined;
-  onPasteImages: (files: TypedFile<T>[], offsetPoint: OffsetPoint) => void;
+  onPasteImages: (files: TypedFile<T>[]) => void;
   onPasteLayers: (layer: Sketch.AnyLayer[]) => void;
   supportedFileTypes: T[];
 }) {
-  const insertPoint = useMemo((): OffsetPoint => {
-    const offsetSize = canvasSize ?? { width: 0, height: 0 };
-
-    return {
-      offsetX: offsetSize.width / 2,
-      offsetY: offsetSize.height / 2,
-    };
-  }, [canvasSize]);
-
   useEffect(() => {
     const handler = (event: ClipboardEvent) => {
       if (
@@ -69,11 +57,11 @@ export function usePasteHandler<T extends string>({
         return [file];
       });
 
-      onPasteImages(files, insertPoint);
+      onPasteImages(files);
     };
 
     document.addEventListener('paste', handler);
 
     return () => document.removeEventListener('paste', handler);
-  }, [insertPoint, onPasteImages, onPasteLayer, supportedFileTypes]);
+  }, [onPasteImages, onPasteLayer, supportedFileTypes]);
 }
