@@ -53,6 +53,7 @@ import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
 import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
 import { marqueeInteraction } from '../interactions/marquee';
 import { InteractionAPI } from '../interactions/types';
+import { convertPoint } from '../utils/convertPoint';
 import { importImageFile } from '../utils/importImageFile';
 import { ZERO_INSETS } from './CanvasElement';
 
@@ -180,26 +181,13 @@ export const Canvas = memo(function Canvas({
   }, [dispatch]);
 
   const api = useMemo((): InteractionAPI => {
-    // Event coordinates are relative to (0,0), but we want them to include
-    // the current page's zoom and offset from the origin
-    const canvasPointTransform = AffineTransform.scale(1 / zoomValue).translate(
-      -scrollOrigin.x,
-      -scrollOrigin.y,
-    );
-
     return {
       platformModKey,
       selectedLayerIds: state.selectedLayerIds,
       zoomValue,
       getScreenPoint: getPoint,
-      convertPoint: (point, system) => {
-        switch (system) {
-          case 'canvas':
-            return canvasPointTransform.applyTo(point);
-          case 'screen':
-            return canvasPointTransform.invert().applyTo(point);
-        }
-      },
+      convertPoint: (point, system) =>
+        convertPoint(scrollOrigin, zoomValue, point, system),
       getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
         const layers = Selectors.getLayersInRect(
           state,
@@ -227,8 +215,7 @@ export const Canvas = memo(function Canvas({
     canvasInsets,
     fontManager,
     platformModKey,
-    scrollOrigin.x,
-    scrollOrigin.y,
+    scrollOrigin,
     state,
     zoomValue,
   ]);

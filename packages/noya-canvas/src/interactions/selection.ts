@@ -1,4 +1,4 @@
-import { ReactEventHandlers } from 'noya-designsystem';
+import { isRightButtonClicked, ReactEventHandlers } from 'noya-designsystem';
 import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 
@@ -22,6 +22,18 @@ export function selectionInteraction({ selectLayer }: SelectionActions) {
             includeLockedLayers: false,
           },
         );
+
+        if (isRightButtonClicked(event)) {
+          if (!layerId) {
+            selectLayer([]);
+          } else if (!api.selectedLayerIds.includes(layerId)) {
+            selectLayer([layerId]);
+          }
+
+          event.preventDefault();
+
+          return;
+        }
 
         if (layerId) {
           if (api.selectedLayerIds.includes(layerId)) {

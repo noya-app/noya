@@ -4,7 +4,7 @@ import {
   ReactEventHandlers,
   usePlatformModKey,
 } from 'noya-designsystem';
-import { AffineTransform, Point, Rect } from 'noya-geometry';
+import { Point, Rect } from 'noya-geometry';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
@@ -18,6 +18,7 @@ import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { SelectionActions } from '../interactions/selection';
 import { InteractionAPI } from '../interactions/types';
+import { convertPoint } from '../utils/convertPoint';
 import {
   CanvasElement,
   CanvasElementProps,
@@ -73,26 +74,13 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   }, [dispatch]);
 
   const api = useMemo((): InteractionAPI => {
-    // Event coordinates are relative to (0,0), but we want them to include
-    // the current page's zoom and offset from the origin
-    const canvasPointTransform = AffineTransform.scale(1 / zoomValue).translate(
-      -scrollOrigin.x,
-      -scrollOrigin.y,
-    );
-
     return {
       ...ref.current,
       platformModKey,
       zoomValue,
       selectedLayerIds: state.selectedLayerIds,
-      convertPoint: (point, system) => {
-        switch (system) {
-          case 'canvas':
-            return canvasPointTransform.applyTo(point);
-          case 'screen':
-            return canvasPointTransform.invert().applyTo(point);
-        }
-      },
+      convertPoint: (point, system) =>
+        convertPoint(scrollOrigin, zoomValue, point, system),
       getScreenPoint: getPoint,
       getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
         const layers = Selectors.getLayersInRect(
@@ -116,15 +104,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
         )?.do_objectID;
       },
     };
-  }, [
-    CanvasKit,
-    fontManager,
-    platformModKey,
-    scrollOrigin.x,
-    scrollOrigin.y,
-    state,
-    zoomValue,
-  ]);
+  }, [CanvasKit, fontManager, platformModKey, scrollOrigin, state, zoomValue]);
 
   const handlers = (interactions ?? []).map((interaction) =>
     interaction(actions)(
