@@ -3,7 +3,7 @@ import { createRect, Point } from 'noya-geometry';
 import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 
-export interface MarqueeInteractionHandlers {
+export interface MarqueeActions {
   startMarquee: (point: Point) => void;
   updateMarquee: (point: Point) => void;
   selectLayer: (id: string[], selectionType?: SelectionType) => void;
@@ -15,7 +15,7 @@ export function marqueeInteraction({
   updateMarquee,
   selectLayer,
   reset,
-}: MarqueeInteractionHandlers) {
+}: MarqueeActions) {
   return handleActionType<
     InteractionState,
     [InteractionAPI],
@@ -23,7 +23,7 @@ export function marqueeInteraction({
   >({
     none: (interactionState, api) => ({
       onPointerDown: (event) => {
-        startMarquee(api.getRawPoint(event.nativeEvent));
+        startMarquee(api.getScreenPoint(event.nativeEvent));
 
         event.preventDefault();
       },
@@ -39,7 +39,7 @@ export function marqueeInteraction({
         });
 
         selectLayer(layerIds);
-        updateMarquee(api.getRawPoint(event.nativeEvent));
+        updateMarquee(api.getScreenPoint(event.nativeEvent));
 
         api.setPointerCapture?.(event.pointerId);
         event.preventDefault();

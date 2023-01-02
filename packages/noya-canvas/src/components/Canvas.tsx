@@ -180,10 +180,26 @@ export const Canvas = memo(function Canvas({
   }, [dispatch]);
 
   const api = useMemo((): InteractionAPI => {
+    // Event coordinates are relative to (0,0), but we want them to include
+    // the current page's zoom and offset from the origin
+    const canvasPointTransform = AffineTransform.scale(1 / zoomValue).translate(
+      -scrollOrigin.x,
+      -scrollOrigin.y,
+    );
+
     return {
       modKey,
       selectedLayerIds: state.selectedLayerIds,
-      getRawPoint: getPoint,
+      zoomValue,
+      getScreenPoint: getPoint,
+      convertPoint: (point, system) => {
+        switch (system) {
+          case 'canvas':
+            return canvasPointTransform.applyTo(point);
+          case 'screen':
+            return canvasPointTransform.invert().applyTo(point);
+        }
+      },
       getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
         const layers = Selectors.getLayersInRect(
           state,
@@ -206,7 +222,16 @@ export const Canvas = memo(function Canvas({
         )?.do_objectID;
       },
     };
-  }, [CanvasKit, canvasInsets, fontManager, modKey, state]);
+  }, [
+    CanvasKit,
+    canvasInsets,
+    fontManager,
+    modKey,
+    scrollOrigin.x,
+    scrollOrigin.y,
+    state,
+    zoomValue,
+  ]);
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {

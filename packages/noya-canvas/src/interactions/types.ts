@@ -4,9 +4,11 @@ import { LayerTraversalOptions } from 'noya-state';
 import { ICanvasElement } from '../components/types';
 
 export type InteractionAPI = Partial<ICanvasElement> & {
-  getRawPoint: (input: OffsetPoint) => Point;
   modKey: 'ctrlKey' | 'metaKey';
   selectedLayerIds: string[];
+  zoomValue: number;
+  convertPoint: (point: Point, to: 'screen' | 'canvas') => Point;
+  getScreenPoint: (input: OffsetPoint) => Point;
   getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => string[];
   getLayerIdAtPoint: (
     point: Point,

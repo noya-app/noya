@@ -1,6 +1,6 @@
 import produce from 'immer';
 import { StateProvider } from 'noya-app-state-context';
-import { Canvas, SimpleCanvas } from 'noya-canvas';
+import { Canvas, Interactions, SimpleCanvas } from 'noya-canvas';
 import {
   darkTheme,
   DesignSystemConfigurationProvider,
@@ -64,7 +64,13 @@ function Workspace(): JSX.Element {
     <div style={{ flex: '1', display: 'flex' }}>
       <div style={{ flex: '1', display: 'flex' }}>
         <StateProvider state={state} dispatch={dispatch}>
-          <SimpleCanvas>
+          <SimpleCanvas
+            interactions={[
+              Interactions.selection,
+              Interactions.move,
+              Interactions.marquee,
+            ]}
+          >
             {({ size }) => (
               <SVGRenderer size={size}>
                 <RenderingModeProvider value="interactive">

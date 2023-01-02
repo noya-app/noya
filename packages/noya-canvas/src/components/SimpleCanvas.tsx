@@ -1,18 +1,22 @@
 import { useApplicationState } from 'noya-app-state-context';
-import { mergeEventHandlers, useModKey } from 'noya-designsystem';
-import { Point, Rect } from 'noya-geometry';
+import {
+  mergeEventHandlers,
+  ReactEventHandlers,
+  useModKey,
+} from 'noya-designsystem';
+import { AffineTransform, Point, Rect } from 'noya-geometry';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
-import { getCurrentPage, LayerTraversalOptions, Selectors } from 'noya-state';
+import {
+  getCurrentPage,
+  InteractionState,
+  LayerTraversalOptions,
+  Selectors,
+} from 'noya-state';
 import React, { memo, useMemo, useRef } from 'react';
-import {
-  marqueeInteraction,
-  MarqueeInteractionHandlers,
-} from '../interactions/marquee';
-import {
-  selectionInteraction,
-  SelectionInteractionHandlers,
-} from '../interactions/selection';
+import { MarqueeActions } from '../interactions/marquee';
+import { MoveActions } from '../interactions/move';
+import { SelectionActions } from '../interactions/selection';
 import { InteractionAPI } from '../interactions/types';
 import {
   CanvasElement,
@@ -25,13 +29,25 @@ function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
+export type Actions = MarqueeActions & SelectionActions & MoveActions;
+
+export type Interaction = (
+  actions: Actions,
+) => (
+  state: InteractionState,
+  key: InteractionState['type'],
+  api: InteractionAPI,
+) => ReactEventHandlers;
+
 interface Props {
   rendererZIndex?: CanvasElementProps['rendererZIndex'];
   children: CanvasElementProps['children'];
+  interactions?: Interaction[];
 }
 
 export const SimpleCanvas = memo(function SimpleCanvas({
   children,
+  interactions,
   rendererZIndex = 0,
 }: Props) {
   const ref = useRef<ICanvasElement>(null);
@@ -40,9 +56,10 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const modKey = useModKey();
+  const meta = Selectors.getCurrentPageMetadata(state);
+  const { zoomValue, scrollOrigin } = meta;
 
-  const actions = useMemo((): MarqueeInteractionHandlers &
-    SelectionInteractionHandlers => {
+  const actions = useMemo((): Actions => {
     return {
       startMarquee: (point) => dispatch('interaction', ['startMarquee', point]),
       updateMarquee: (point) =>
@@ -50,15 +67,33 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       reset: () => dispatch('interaction', ['reset']),
       selectLayer: (layerId, selectionType) =>
         dispatch('selectLayer', layerId, selectionType),
+      maybeMove: (point) => dispatch('interaction', ['maybeMove', point]),
+      updateMoving: (point) => dispatch('interaction', ['updateMoving', point]),
     };
   }, [dispatch]);
 
   const api = useMemo((): InteractionAPI => {
+    // Event coordinates are relative to (0,0), but we want them to include
+    // the current page's zoom and offset from the origin
+    const canvasPointTransform = AffineTransform.scale(1 / zoomValue).translate(
+      -scrollOrigin.x,
+      -scrollOrigin.y,
+    );
+
     return {
       ...ref.current,
       modKey,
+      zoomValue,
       selectedLayerIds: state.selectedLayerIds,
-      getRawPoint: getPoint,
+      convertPoint: (point, system) => {
+        switch (system) {
+          case 'canvas':
+            return canvasPointTransform.applyTo(point);
+          case 'screen':
+            return canvasPointTransform.invert().applyTo(point);
+        }
+      },
+      getScreenPoint: getPoint,
       getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
         const layers = Selectors.getLayersInRect(
           state,
@@ -81,11 +116,17 @@ export const SimpleCanvas = memo(function SimpleCanvas({
         )?.do_objectID;
       },
     };
-  }, [CanvasKit, fontManager, modKey, state]);
+  }, [
+    CanvasKit,
+    fontManager,
+    modKey,
+    scrollOrigin.x,
+    scrollOrigin.y,
+    state,
+    zoomValue,
+  ]);
 
-  const interactions = [selectionInteraction, marqueeInteraction];
-
-  const handlers = interactions.map((interaction) =>
+  const handlers = (interactions ?? []).map((interaction) =>
     interaction(actions)(
       state.interactionState,
       state.interactionState.type,
