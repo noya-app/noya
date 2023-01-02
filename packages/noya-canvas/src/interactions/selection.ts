@@ -1,5 +1,5 @@
 import { ReactEventHandlers } from 'noya-designsystem';
-import { InteractionState, SelectionType, stateSwitch } from 'noya-state';
+import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 
 export interface SelectionInteractionHandlers {
@@ -9,7 +9,11 @@ export interface SelectionInteractionHandlers {
 export function selectionInteraction({
   selectLayer,
 }: SelectionInteractionHandlers) {
-  return stateSwitch<InteractionState, [InteractionAPI], ReactEventHandlers>({
+  return handleActionType<
+    InteractionState,
+    [InteractionAPI],
+    ReactEventHandlers
+  >({
     none: (interactionState, api) => ({
       onPointerDown: (event) => {
         const layerId = api.getLayerIdAtPoint(

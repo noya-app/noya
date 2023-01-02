@@ -54,6 +54,7 @@ import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
 import { marqueeInteraction } from '../interactions/marquee';
 import { InteractionAPI } from '../interactions/types';
 import { importImageFile } from '../utils/importImageFile';
+import { ZERO_INSETS } from './CanvasElement';
 
 const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
   ({ insets, zIndex }) => ({
@@ -116,18 +117,21 @@ const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
 
 interface Props {
   children: ({ size }: { size: Size }) => JSX.Element;
+  insets?: Insets;
   rendererZIndex?: number;
 }
 
 export const Canvas = memo(function Canvas({
   children,
+  insets: canvasInsets = ZERO_INSETS,
   rendererZIndex = 0,
 }: Props) {
   const [state, dispatch] = useApplicationState();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const { canvasSize, canvasInsets, viewportSize } = useAutomaticCanvasSize({
+  const { canvasSize, viewportSize } = useAutomaticCanvasSize({
+    insets: canvasInsets,
     containerRef,
     onChangeSize: useCallback(
       (size, insets) => dispatch('setCanvasSize', size, insets),
@@ -177,7 +181,6 @@ export const Canvas = memo(function Canvas({
 
   const api = useMemo((): InteractionAPI => {
     return {
-      containerRef,
       modKey,
       selectedLayerIds: state.selectedLayerIds,
       getRawPoint: getPoint,
@@ -217,10 +220,11 @@ export const Canvas = memo(function Canvas({
       const clickCount = getClickCount(point);
 
       const handler = () =>
-        marquee(state.interactionState)(
+        marquee(
+          state.interactionState,
           state.interactionState.type,
           api,
-        )?.onPointerDown?.(event);
+        ).onPointerDown?.(event);
 
       if (clickCount >= 2) {
         if (selectedLayers.length === 0) return;
@@ -506,10 +510,11 @@ export const Canvas = memo(function Canvas({
       const textSelection = Selectors.getTextSelection(state);
 
       const handler = () =>
-        marquee(state.interactionState)(
+        marquee(
+          state.interactionState,
           state.interactionState.type,
           api,
-        )?.onPointerMove?.(event);
+        ).onPointerMove?.(event);
 
       switch (state.interactionState.type) {
         case 'maybeMoveGradientEllipseLength': {
@@ -794,10 +799,11 @@ export const Canvas = memo(function Canvas({
       const textSelection = Selectors.getTextSelection(state);
 
       const handler = () =>
-        marquee(state.interactionState)(
+        marquee(
+          state.interactionState,
           state.interactionState.type,
           api,
-        )?.onPointerUp?.(event);
+        ).onPointerUp?.(event);
 
       switch (state.interactionState.type) {
         case 'maybeSelectingText': {

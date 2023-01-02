@@ -39,21 +39,26 @@ export function stateSwitch<
         : never;
     }
   >,
-) {
-  return (state: State) =>
-    (key: State['type'], ...args: Args) => {
-      return handlers[key]?.(state, ...args);
-    };
+): (state: State, key: State['type'], ...args: Args) => Result | undefined {
+  return (state: State, key: State['type'], ...args: Args) => {
+    return handlers[key]?.(state, ...args);
+  };
 }
 
-// export function stateSwitch<K extends string, State extends { type: K }>(
-//   handlers: StateSwitch<State, void>,
-// ) {
-//   return (state: State) => {
-//     const key = state.type
-//     const handler = handlers[key];
-//     if (handler) handler(state);
-//   };
-
-//   // return (state: State) => getKeyValue<State['type'], State>(state.type, state, handlers);
-// }
+export function handleActionType<
+  State extends { type: string },
+  Args extends any[],
+  Result extends {},
+>(
+  handlers: Partial<
+    {
+      [K in State['type']]: State extends { type: K }
+        ? (state: State, ...args: Args) => Result
+        : never;
+    }
+  >,
+): (state: State, key: State['type'], ...args: Args) => Partial<Result> {
+  return (state: State, key: State['type'], ...args: Args) => {
+    return handlers[key]?.(state, ...args) ?? {};
+  };
+}

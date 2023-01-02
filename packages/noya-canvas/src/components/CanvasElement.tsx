@@ -1,0 +1,102 @@
+import { Insets, Size } from 'noya-geometry';
+import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
+import React, {
+  CSSProperties,
+  ForwardedRef,
+  forwardRef,
+  memo,
+  useImperativeHandle,
+  useRef,
+} from 'react';
+import styled from 'styled-components';
+import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
+import { ICanvasElement } from './types';
+
+export const ZERO_INSETS: Insets = {
+  left: 0,
+  right: 0,
+  top: 0,
+  bottom: 0,
+};
+
+const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
+  ({ insets, zIndex }) => ({
+    position: 'absolute',
+    top: -insets.top,
+    bottom: -insets.bottom,
+    right: -insets.right,
+    left: -insets.left,
+    zIndex,
+  }),
+);
+
+const Container = styled.div<{ cursor: CSSProperties['cursor'] }>(
+  ({ cursor }) => ({
+    flex: '1',
+    position: 'relative',
+    cursor,
+  }),
+);
+
+const HiddenInputTarget = styled.input({
+  position: 'absolute',
+  top: '-200px',
+});
+
+export interface CanvasElementProps {
+  onChangeSize: (size: Size, insets: Insets) => void;
+  insets?: Insets;
+  rendererZIndex?: number;
+  children: ({ size }: { size: Size }) => JSX.Element;
+}
+
+export const CanvasElement = memo(
+  forwardRef(function CanvasElement(
+    {
+      children,
+      onChangeSize,
+      rendererZIndex = 0,
+      insets = ZERO_INSETS,
+      ...props
+    }: CanvasElementProps,
+    forwardedRef: ForwardedRef<ICanvasElement>,
+  ) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const { canvasSize } = useAutomaticCanvasSize({
+      insets,
+      containerRef,
+      onChangeSize,
+    });
+
+    useImperativeHandle(forwardedRef, () => ({
+      focus: () => inputRef.current?.focus(),
+      setPointerCapture: (pointerId: number) =>
+        containerRef.current?.setPointerCapture(pointerId),
+      releasePointerCapture: (pointerId: number) =>
+        containerRef.current?.releasePointerCapture(pointerId),
+    }));
+
+    return (
+      <Container
+        id="canvas-container"
+        ref={containerRef}
+        cursor={'default'}
+        tabIndex={0}
+        onFocus={() => inputRef.current?.focus()}
+        {...props}
+      >
+        <HiddenInputTarget
+          id="hidden-canvas-input"
+          className={IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS}
+          ref={inputRef}
+          type="text"
+        />
+        <InsetContainer insets={insets} zIndex={rendererZIndex}>
+          {canvasSize && children({ size: canvasSize })}
+        </InsetContainer>
+      </Container>
+    );
+  }),
+);

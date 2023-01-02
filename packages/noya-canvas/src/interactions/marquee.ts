@@ -1,6 +1,6 @@
 import { ReactEventHandlers } from 'noya-designsystem';
 import { createRect, Point } from 'noya-geometry';
-import { InteractionState, SelectionType, stateSwitch } from 'noya-state';
+import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 
 export interface MarqueeInteractionHandlers {
@@ -16,7 +16,11 @@ export function marqueeInteraction({
   selectLayer,
   reset,
 }: MarqueeInteractionHandlers) {
-  return stateSwitch<InteractionState, [InteractionAPI], ReactEventHandlers>({
+  return handleActionType<
+    InteractionState,
+    [InteractionAPI],
+    ReactEventHandlers
+  >({
     none: (interactionState, api) => ({
       onPointerDown: (event) => {
         startMarquee(api.getRawPoint(event.nativeEvent));
@@ -37,7 +41,7 @@ export function marqueeInteraction({
         selectLayer(layerIds);
         updateMarquee(api.getRawPoint(event.nativeEvent));
 
-        api.containerRef.current?.setPointerCapture(event.pointerId);
+        api.setPointerCapture?.(event.pointerId);
         event.preventDefault();
       },
       onPointerUp: (event) => {
@@ -52,7 +56,7 @@ export function marqueeInteraction({
         reset();
         selectLayer(layerIds);
 
-        api.containerRef.current?.releasePointerCapture(event.pointerId);
+        api.releasePointerCapture?.(event.pointerId);
         event.preventDefault();
       },
     }),

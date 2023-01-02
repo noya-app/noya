@@ -144,6 +144,15 @@ const WorkspaceContent = memo(function WorkspaceContent({
     });
   }, [colorScheme, isElectron]);
 
+  const insets = useMemo(() => {
+    return {
+      top: theme.sizes.toolbar.height,
+      right: theme.sizes.sidebarWidth,
+      bottom: 0,
+      left: theme.sizes.sidebarWidth,
+    };
+  }, [theme.sizes.sidebarWidth, theme.sizes.toolbar.height]);
+
   const leftSidebarContent = useTabElement({
     canvas: (
       <>
@@ -227,7 +236,11 @@ const WorkspaceContent = memo(function WorkspaceContent({
         </ToolbarContainer>
         <ContentArea>
           {useTabElement({
-            canvas: <Canvas rendererZIndex={-1}>{renderCanvas}</Canvas>,
+            canvas: (
+              <Canvas rendererZIndex={-1} insets={insets}>
+                {renderCanvas}
+              </Canvas>
+            ),
             pages: <PagesGrid />,
             theme: <ThemeWindow />,
           })}
