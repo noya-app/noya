@@ -1,6 +1,6 @@
-import { useGesture } from 'react-use-gesture';
 import { composeEventHandlers } from '@radix-ui/primitive';
 import { unique } from 'noya-utils';
+import { useGesture } from 'react-use-gesture';
 
 function composeAllEventHandlers<E>(...handlers: ((e: E) => void)[]) {
   const [first, ...rest] = handlers;
@@ -11,8 +11,8 @@ function composeAllEventHandlers<E>(...handlers: ((e: E) => void)[]) {
   );
 }
 
-type ReactEventHandlers = ReturnType<ReturnType<typeof useGesture>>;
-type EventName = keyof ReactEventHandlers;
+export type ReactEventHandlers = ReturnType<ReturnType<typeof useGesture>>;
+export type EventName = keyof ReactEventHandlers;
 
 export function mergeEventHandlers(
   ...handlerMaps: ReactEventHandlers[]

@@ -1,0 +1,36 @@
+import { SupportedCanvasUploadType } from 'noya-designsystem';
+import { Size } from 'noya-geometry';
+import { TypedFile } from 'noya-react-utils';
+import { InsertedImage } from 'noya-state';
+import { getFileExtensionForType } from 'noya-utils';
+
+export async function importImageFile(
+  file: TypedFile<SupportedCanvasUploadType>,
+  calculateSize: (bytes: ArrayBuffer) => Size | null,
+): Promise<InsertedImage | void> {
+  if (file.type === 'image/svg+xml') {
+    const svgString = await file.text();
+
+    return {
+      name: file.name.replace(/\.svg$/, ''),
+      extension: 'svg',
+      svgString,
+    };
+  } else {
+    const data = await file.arrayBuffer();
+    const size = calculateSize(data);
+
+    if (!size) return;
+
+    if (file.type === '') return;
+
+    const extension = getFileExtensionForType(file.type);
+
+    return {
+      name: file.name.replace(new RegExp(`\\.${extension}$`), ''),
+      extension,
+      size,
+      data,
+    };
+  }
+}

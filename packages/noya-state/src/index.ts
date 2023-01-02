@@ -1,3 +1,4 @@
+export * from './actions';
 export * from './checkeredBackground';
 export * from './editableStyles';
 export * as ExportOptions from './exportOptions';

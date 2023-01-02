@@ -1,5 +1,6 @@
 export * from './components/Canvas';
 export * from './components/CanvasKitRenderer';
+export * from './components/SimpleCanvas';
 export * from './hooks/useArrowKeyShortcuts';
 export * from './hooks/useCopyHandler';
 export * from './hooks/useLayerMenu';

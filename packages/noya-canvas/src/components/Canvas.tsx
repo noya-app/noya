@@ -21,13 +21,7 @@ import {
   useModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import {
-  AffineTransform,
-  createRect,
-  Insets,
-  Point,
-  Size,
-} from 'noya-geometry';
+import { AffineTransform, Insets, Point, Rect, Size } from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
@@ -39,13 +33,12 @@ import {
   getCurrentPage,
   getSelectedLineLayer,
   ImportedImageTarget,
-  InsertedImage,
   Layers,
+  LayerTraversalOptions,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
 } from 'noya-state';
-import { getFileExtensionForType } from 'noya-utils';
 import React, {
   CSSProperties,
   memo,
@@ -58,6 +51,9 @@ import { useGesture } from 'react-use-gesture';
 import styled from 'styled-components';
 import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
 import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
+import { marqueeInteraction } from '../interactions/marquee';
+import { InteractionAPI } from '../interactions/types';
+import { importImageFile } from '../utils/importImageFile';
 
 const InsetContainer = styled.div<{ insets: Insets; zIndex: number }>(
   ({ insets, zIndex }) => ({
@@ -169,6 +165,46 @@ export const Canvas = memo(function Canvas({
 
   const getClickCount = useMultipleClickCount();
 
+  const marquee = useMemo(() => {
+    return marqueeInteraction({
+      startMarquee: (point) => dispatch('interaction', ['startMarquee', point]),
+      updateMarquee: (point) =>
+        dispatch('interaction', ['updateMarquee', point]),
+      reset: () => dispatch('interaction', ['reset']),
+      selectLayer: (layerId) => dispatch('selectLayer', layerId),
+    });
+  }, [dispatch]);
+
+  const api = useMemo((): InteractionAPI => {
+    return {
+      containerRef,
+      modKey,
+      selectedLayerIds: state.selectedLayerIds,
+      getRawPoint: getPoint,
+      getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
+        const layers = Selectors.getLayersInRect(
+          state,
+          getCurrentPage(state),
+          canvasInsets,
+          rect,
+          options,
+        );
+
+        return layers.map((layer) => layer.do_objectID);
+      },
+      getLayerIdAtPoint: (point: Point, options?: LayerTraversalOptions) => {
+        return Selectors.getLayerAtPoint(
+          CanvasKit,
+          fontManager,
+          state,
+          canvasInsets,
+          point,
+          options,
+        )?.do_objectID;
+      },
+    };
+  }, [CanvasKit, canvasInsets, fontManager, modKey, state]);
+
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
       if (!state.selectedGradient) {
@@ -179,6 +215,12 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const clickCount = getClickCount(point);
+
+      const handler = () =>
+        marquee(state.interactionState)(
+          state.interactionState.type,
+          api,
+        )?.onPointerDown?.(event);
 
       if (clickCount >= 2) {
         if (selectedLayers.length === 0) return;
@@ -387,19 +429,6 @@ export const Canvas = memo(function Canvas({
             }
           }
 
-          const layer = Selectors.getLayerAtPoint(
-            CanvasKit,
-            fontManager,
-            state,
-            canvasInsets,
-            rawPoint,
-            {
-              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardOrChildren',
-              includeLockedLayers: false,
-            },
-          );
-
           const selectedGradientStopIndex =
             Selectors.getGradientStopIndexAtPoint(state, point);
 
@@ -417,23 +446,37 @@ export const Canvas = memo(function Canvas({
             Selectors.isPointerOnGradientEllipseEditor(state, point)
           ) {
             dispatch('interaction', ['maybeMoveGradientEllipseLength', point]);
-          } else if (layer) {
-            if (state.selectedLayerIds.includes(layer.do_objectID)) {
-              if (event.shiftKey && state.selectedLayerIds.length !== 1) {
-                dispatch('selectLayer', layer.do_objectID, 'difference');
-              }
-            } else {
-              dispatch(
-                'selectLayer',
-                layer.do_objectID,
-                event.shiftKey ? 'intersection' : 'replace',
-              );
-            }
-
-            dispatch('interaction', ['maybeMove', point]);
           } else {
-            dispatch('selectLayer', undefined);
-            dispatch('interaction', ['startMarquee', rawPoint]);
+            const layer = Selectors.getLayerAtPoint(
+              CanvasKit,
+              fontManager,
+              state,
+              canvasInsets,
+              rawPoint,
+              {
+                groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
+                artboards: 'emptyOrContainedArtboardOrChildren',
+                includeLockedLayers: false,
+              },
+            );
+
+            if (layer) {
+              if (state.selectedLayerIds.includes(layer.do_objectID)) {
+                if (event.shiftKey && state.selectedLayerIds.length !== 1) {
+                  dispatch('selectLayer', layer.do_objectID, 'difference');
+                }
+              } else {
+                dispatch(
+                  'selectLayer',
+                  layer.do_objectID,
+                  event.shiftKey ? 'intersection' : 'replace',
+                );
+              }
+
+              dispatch('interaction', ['maybeMove', point]);
+            } else {
+              handler();
+            }
           }
 
           break;
@@ -444,6 +487,8 @@ export const Canvas = memo(function Canvas({
       state,
       offsetEventPoint,
       getClickCount,
+      marquee,
+      api,
       selectedLayers,
       CanvasKit,
       fontManager,
@@ -459,6 +504,12 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const textSelection = Selectors.getTextSelection(state);
+
+      const handler = () =>
+        marquee(state.interactionState)(
+          state.interactionState.type,
+          api,
+        )?.onPointerMove?.(event);
 
       switch (state.interactionState.type) {
         case 'maybeMoveGradientEllipseLength': {
@@ -660,30 +711,7 @@ export const Canvas = memo(function Canvas({
           break;
         }
         case 'marquee': {
-          dispatch('interaction', ['updateMarquee', rawPoint]);
-
-          containerRef.current?.setPointerCapture(event.pointerId);
-          event.preventDefault();
-
-          const { origin, current } = state.interactionState;
-
-          const layers = Selectors.getLayersInRect(
-            state,
-            getCurrentPage(state),
-            canvasInsets,
-            createRect(origin, current),
-            {
-              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardOrChildren',
-              includeLockedLayers: false,
-            },
-          );
-
-          dispatch(
-            'selectLayer',
-            layers.map((layer) => layer.do_objectID),
-          );
-
+          handler();
           break;
         }
         case 'hoverHandle': {
@@ -744,6 +772,8 @@ export const Canvas = memo(function Canvas({
     [
       offsetEventPoint,
       state,
+      marquee,
+      api,
       dispatch,
       zoomValue,
       CanvasKit,
@@ -762,6 +792,12 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const textSelection = Selectors.getTextSelection(state);
+
+      const handler = () =>
+        marquee(state.interactionState)(
+          state.interactionState.type,
+          api,
+        )?.onPointerUp?.(event);
 
       switch (state.interactionState.type) {
         case 'maybeSelectingText': {
@@ -832,29 +868,7 @@ export const Canvas = memo(function Canvas({
           break;
         }
         case 'marquee': {
-          dispatch('interaction', ['reset']);
-
-          const { origin, current } = state.interactionState;
-
-          const layers = Selectors.getLayersInRect(
-            state,
-            getCurrentPage(state),
-            canvasInsets,
-            createRect(origin, current),
-            {
-              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
-              artboards: 'emptyOrContainedArtboardOrChildren',
-              includeLockedLayers: false,
-            },
-          );
-
-          dispatch(
-            'selectLayer',
-            layers.map((layer) => layer.do_objectID),
-          );
-
-          containerRef.current?.releasePointerCapture(event.pointerId);
-
+          handler();
           break;
         }
         case 'maybeMove':
@@ -900,15 +914,7 @@ export const Canvas = memo(function Canvas({
           break;
       }
     },
-    [
-      offsetEventPoint,
-      state,
-      CanvasKit,
-      fontManager,
-      dispatch,
-      canvasInsets,
-      modKey,
-    ],
+    [offsetEventPoint, state, marquee, api, CanvasKit, fontManager, dispatch],
   );
 
   const handleDirection =
@@ -967,38 +973,15 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const images = await Promise.all(
-        files.map(async (file): Promise<InsertedImage | void> => {
-          if (file.type === 'image/svg+xml') {
-            const svgString = await file.text();
+        files.map((file) =>
+          importImageFile(file, (bytes) => {
+            const image = CanvasKit.MakeImageFromEncoded(bytes);
 
-            return {
-              name: file.name.replace(/\.svg$/, ''),
-              extension: 'svg',
-              svgString,
-            };
-          } else {
-            const data = await file.arrayBuffer();
-            const decodedImage = CanvasKit.MakeImageFromEncoded(data);
-
-            if (!decodedImage) return;
-
-            const size = {
-              width: decodedImage.width(),
-              height: decodedImage.height(),
-            };
-
-            if (file.type === '') return;
-
-            const extension = getFileExtensionForType(file.type);
-
-            return {
-              name: file.name.replace(new RegExp(`\\.${extension}$`), ''),
-              extension,
-              size,
-              data,
-            };
-          }
-        }),
+            return image
+              ? { image, width: image.width(), height: image.height() }
+              : null;
+          }),
+        ),
       );
 
       const validImages = images.flatMap((image) => (image ? [image] : []));
