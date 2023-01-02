@@ -2,7 +2,7 @@ import { useApplicationState } from 'noya-app-state-context';
 import {
   mergeEventHandlers,
   ReactEventHandlers,
-  useModKey,
+  usePlatformModKey,
 } from 'noya-designsystem';
 import { AffineTransform, Point, Rect } from 'noya-geometry';
 import { OffsetPoint } from 'noya-react-utils';
@@ -55,7 +55,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   const [state, dispatch] = useApplicationState();
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
-  const modKey = useModKey();
+  const platformModKey = usePlatformModKey();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
 
@@ -82,7 +82,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
 
     return {
       ...ref.current,
-      modKey,
+      platformModKey,
       zoomValue,
       selectedLayerIds: state.selectedLayerIds,
       convertPoint: (point, system) => {
@@ -119,7 +119,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   }, [
     CanvasKit,
     fontManager,
-    modKey,
+    platformModKey,
     scrollOrigin.x,
     scrollOrigin.y,
     state,

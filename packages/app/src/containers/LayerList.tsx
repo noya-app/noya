@@ -11,7 +11,7 @@ import {
   RelativeDropPosition,
   Spacer,
   TreeView,
-  useModKey,
+  usePlatformModKey,
   withSeparatorElements,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
@@ -250,7 +250,7 @@ export default memo(function LayerList({
   const getStateSnapshot = useGetStateSnapshot();
   const page = useSelector(Selectors.getCurrentPage);
   const selectedLayers = useSelector(Selectors.getSelectedLayers);
-  const modKey = useModKey();
+  const modKey = usePlatformModKey();
 
   const { highlightLayer, renamingLayer, didHandleFocus } = useWorkspace();
   const selectedLayerIds = useShallowArray(state.selectedLayerIds);

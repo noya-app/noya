@@ -3,7 +3,7 @@ import { useDesignSystemConfiguration } from '../contexts/DesignSystemConfigurat
 /**
  * Either ctrl or meta, depending on the platform
  */
-export function useModKey(): 'ctrlKey' | 'metaKey' {
+export function usePlatformModKey(): 'ctrlKey' | 'metaKey' {
   const platform = useDesignSystemConfiguration().platform;
   return platform === 'mac' ? 'metaKey' : 'ctrlKey';
 }

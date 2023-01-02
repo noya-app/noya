@@ -18,7 +18,7 @@ import {
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
-  useModKey,
+  usePlatformModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Insets, Point, Rect, Size } from 'noya-geometry';
@@ -142,7 +142,7 @@ export const Canvas = memo(function Canvas({
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
   const meta = useSelector(Selectors.getCurrentPageMetadata);
-  const modKey = useModKey();
+  const platformModKey = usePlatformModKey();
   const { highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => dispatch('pan*', { x, y }),
@@ -188,7 +188,7 @@ export const Canvas = memo(function Canvas({
     );
 
     return {
-      modKey,
+      platformModKey,
       selectedLayerIds: state.selectedLayerIds,
       zoomValue,
       getScreenPoint: getPoint,
@@ -226,7 +226,7 @@ export const Canvas = memo(function Canvas({
     CanvasKit,
     canvasInsets,
     fontManager,
-    modKey,
+    platformModKey,
     scrollOrigin.x,
     scrollOrigin.y,
     state,
@@ -297,7 +297,7 @@ export const Canvas = memo(function Canvas({
           canvasInsets,
           rawPoint,
           {
-            groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
+            groups: event[platformModKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
           },
@@ -397,7 +397,7 @@ export const Canvas = memo(function Canvas({
               dispatch(
                 'selectPoint',
                 selectedPoint,
-                shiftKey || event[modKey]
+                shiftKey || event[platformModKey]
                   ? alreadySelected
                     ? 'difference'
                     : 'intersection'
@@ -422,7 +422,7 @@ export const Canvas = memo(function Canvas({
           } else if (indexPathOfOpenShapeLayer) {
             dispatch('addPointToPath', point);
             dispatch('interaction', ['maybeConvertCurveMode', point]);
-          } else if (!(shiftKey || event[modKey])) {
+          } else if (!(shiftKey || event[platformModKey])) {
             dispatch('interaction', ['reset']);
           }
           break;
@@ -483,7 +483,7 @@ export const Canvas = memo(function Canvas({
               canvasInsets,
               rawPoint,
               {
-                groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
+                groups: event[platformModKey] ? 'childrenOnly' : 'groupOnly',
                 artboards: 'emptyOrContainedArtboardOrChildren',
                 includeLockedLayers: false,
               },
@@ -523,7 +523,7 @@ export const Canvas = memo(function Canvas({
       fontManager,
       dispatch,
       canvasInsets,
-      modKey,
+      platformModKey,
     ],
   );
 
@@ -765,7 +765,7 @@ export const Canvas = memo(function Canvas({
             canvasInsets,
             rawPoint,
             {
-              groups: event[modKey] ? 'childrenOnly' : 'groupOnly',
+              groups: event[platformModKey] ? 'childrenOnly' : 'groupOnly',
               artboards: 'emptyOrContainedArtboardOrChildren',
               includeLockedLayers: false,
             },
@@ -810,7 +810,7 @@ export const Canvas = memo(function Canvas({
       fontManager,
       selectedLayers,
       canvasInsets,
-      modKey,
+      platformModKey,
       highlightedLayer?.id,
       highlightLayer,
     ],

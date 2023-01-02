@@ -17,7 +17,7 @@ export function selectionInteraction({ selectLayer }: SelectionActions) {
         const layerId = api.getLayerIdAtPoint(
           api.getScreenPoint(event.nativeEvent),
           {
-            groups: event[api.modKey] ? 'childrenOnly' : 'groupOnly',
+            groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
             artboards: 'emptyOrContainedArtboardOrChildren',
             includeLockedLayers: false,
           },

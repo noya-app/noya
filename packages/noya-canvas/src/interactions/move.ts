@@ -25,7 +25,7 @@ export function moveInteraction({
         const screenPoint = api.getScreenPoint(event.nativeEvent);
 
         const layerId = api.getLayerIdAtPoint(screenPoint, {
-          groups: event[api.modKey] ? 'childrenOnly' : 'groupOnly',
+          groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
           artboards: 'emptyOrContainedArtboardOrChildren',
           includeLockedLayers: false,
         });

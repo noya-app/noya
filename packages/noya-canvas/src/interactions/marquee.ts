@@ -33,7 +33,7 @@ export function marqueeInteraction({
         const { origin, current } = interactionState;
 
         const layerIds = api.getLayerIdsInRect(createRect(origin, current), {
-          groups: event[api.modKey] ? 'childrenOnly' : 'groupOnly',
+          groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
           artboards: 'emptyOrContainedArtboardOrChildren',
           includeLockedLayers: false,
         });
@@ -48,7 +48,7 @@ export function marqueeInteraction({
         const { origin, current } = interactionState;
 
         const layerIds = api.getLayerIdsInRect(createRect(origin, current), {
-          groups: event[api.modKey] ? 'childrenOnly' : 'groupOnly',
+          groups: event[api.platformModKey] ? 'childrenOnly' : 'groupOnly',
           artboards: 'emptyOrContainedArtboardOrChildren',
           includeLockedLayers: false,
         });
