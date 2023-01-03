@@ -1,3 +1,4 @@
+import { createDrawingInteraction } from './drawing';
 import { marqueeInteraction } from './marquee';
 import { moveInteraction } from './move';
 import { selectionInteraction } from './selection';
@@ -6,6 +7,5 @@ export namespace Interactions {
   export const move = moveInteraction;
   export const marquee = marqueeInteraction;
   export const selection = selectionInteraction;
-
-  export const all = [selection, move, marquee];
+  export const createDrawing = createDrawingInteraction;
 }

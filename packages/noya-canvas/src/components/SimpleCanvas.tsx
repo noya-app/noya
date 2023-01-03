@@ -8,12 +8,14 @@ import { Point, Rect } from 'noya-geometry';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
+  DrawableLayerType,
   getCurrentPage,
   InteractionState,
   LayerTraversalOptions,
   Selectors,
 } from 'noya-state';
 import React, { memo, useMemo, useRef } from 'react';
+import { DrawingActions } from '../interactions/drawing';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { SelectionActions } from '../interactions/selection';
@@ -30,7 +32,10 @@ function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
 }
 
-export type Actions = MarqueeActions & SelectionActions & MoveActions;
+export type Actions = MarqueeActions &
+  SelectionActions &
+  MoveActions &
+  DrawingActions;
 
 export type Interaction = (
   actions: Actions,
@@ -70,6 +75,11 @@ export const SimpleCanvas = memo(function SimpleCanvas({
         dispatch('selectLayer', layerId, selectionType),
       maybeMove: (point) => dispatch('interaction', ['maybeMove', point]),
       updateMoving: (point) => dispatch('interaction', ['updateMoving', point]),
+      addDrawnLayer: () => dispatch('addDrawnLayer'),
+      startDrawing: (layerType: DrawableLayerType, point: Point) =>
+        dispatch('interaction', ['startDrawing', layerType, point]),
+      updateDrawing: (point: Point) =>
+        dispatch('interaction', ['updateDrawing', point]),
     };
   }, [dispatch]);
 
