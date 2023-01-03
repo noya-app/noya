@@ -18,11 +18,15 @@ import {
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
+  usePlatform,
   usePlatformModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
 import { AffineTransform, Insets, Point, Rect, Size } from 'noya-geometry';
-import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
+import {
+  handleKeyboardEvent,
+  IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
+} from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
@@ -144,6 +148,7 @@ export const Canvas = memo(function Canvas({
   const fontManager = useFontManager();
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const platformModKey = usePlatformModKey();
+  const platform = usePlatform();
   const { highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => dispatch('pan*', { x, y }),
@@ -182,6 +187,7 @@ export const Canvas = memo(function Canvas({
 
   const api = useMemo((): InteractionAPI => {
     return {
+      platform,
       platformModKey,
       selectedLayerIds: state.selectedLayerIds,
       zoomValue,
@@ -209,11 +215,14 @@ export const Canvas = memo(function Canvas({
           options,
         )?.do_objectID;
       },
+      handleKeyboardEvent: (keyMap) => (event) =>
+        handleKeyboardEvent(event.nativeEvent, api.platform, keyMap),
     };
   }, [
     CanvasKit,
     canvasInsets,
     fontManager,
+    platform,
     platformModKey,
     scrollOrigin,
     state,

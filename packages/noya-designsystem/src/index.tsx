@@ -50,7 +50,7 @@ export * from './contexts/GlobalInputBlurContext';
 // Hooks
 export * from './hooks/mergeEventHandlers';
 export * from './hooks/useHover';
-export * from './hooks/usePlatformModKey';
+export * from './hooks/usePlatform';
 export * from './mediaQuery';
 export * from './theme';
 export * as darkTheme from './theme/dark';

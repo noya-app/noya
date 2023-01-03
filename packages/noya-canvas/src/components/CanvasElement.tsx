@@ -1,3 +1,4 @@
+import { ReactEventHandlers } from 'noya-designsystem';
 import { Insets, Size } from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import React, {
@@ -43,7 +44,7 @@ const HiddenInputTarget = styled.input({
   top: '-200px',
 });
 
-export interface CanvasElementProps {
+export interface CanvasElementProps extends ReactEventHandlers {
   onChangeSize: (size: Size, insets: Insets) => void;
   insets?: Insets;
   rendererZIndex?: number;
@@ -78,6 +79,16 @@ export const CanvasElement = memo(
         containerRef.current?.releasePointerCapture(pointerId),
     }));
 
+    const {
+      onKeyDown,
+      onKeyDownCapture,
+      onKeyUp,
+      onKeyUpCapture,
+      onKeyPress,
+      onKeyPressCapture,
+      ...rest
+    } = props;
+
     return (
       <Container
         id="canvas-container"
@@ -85,13 +96,19 @@ export const CanvasElement = memo(
         cursor={'default'}
         tabIndex={0}
         onFocus={() => inputRef.current?.focus()}
-        {...props}
+        {...rest}
       >
         <HiddenInputTarget
           id="hidden-canvas-input"
           className={IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS}
           ref={inputRef}
           type="text"
+          onKeyDown={onKeyDown}
+          onKeyDownCapture={onKeyDownCapture}
+          onKeyUp={onKeyUp}
+          onKeyUpCapture={onKeyUpCapture}
+          onKeyPress={onKeyPress}
+          onKeyPressCapture={onKeyPressCapture}
         />
         <InsetContainer insets={insets} zIndex={rendererZIndex}>
           {canvasSize && children({ size: canvasSize })}

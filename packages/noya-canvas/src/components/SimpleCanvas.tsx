@@ -2,9 +2,11 @@ import { useApplicationState } from 'noya-app-state-context';
 import {
   mergeEventHandlers,
   ReactEventHandlers,
+  usePlatform,
   usePlatformModKey,
 } from 'noya-designsystem';
 import { Point, Rect } from 'noya-geometry';
+import { handleKeyboardEvent } from 'noya-keymap';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
@@ -18,6 +20,7 @@ import React, { memo, useMemo, useRef } from 'react';
 import { DrawingActions } from '../interactions/drawing';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
+import { PanActions } from '../interactions/pan';
 import { SelectionActions } from '../interactions/selection';
 import { InteractionAPI } from '../interactions/types';
 import { convertPoint } from '../utils/convertPoint';
@@ -35,7 +38,8 @@ function getPoint(event: OffsetPoint): Point {
 export type Actions = MarqueeActions &
   SelectionActions &
   MoveActions &
-  DrawingActions;
+  DrawingActions &
+  PanActions;
 
 export type Interaction = (
   actions: Actions,
@@ -61,6 +65,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   const [state, dispatch] = useApplicationState();
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
+  const platform = usePlatform();
   const platformModKey = usePlatformModKey();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
@@ -80,15 +85,23 @@ export const SimpleCanvas = memo(function SimpleCanvas({
         dispatch('interaction', ['startDrawing', layerType, point]),
       updateDrawing: (point: Point) =>
         dispatch('interaction', ['updateDrawing', point]),
+      pan: (point) => dispatch('pan*', point),
+      startPanning: (point) => dispatch('interaction', ['startPanning', point]),
+      updatePanning: (point) =>
+        dispatch('interaction', ['updatePanning', point]),
+      maybePan: (point) => dispatch('interaction', ['maybePan', point]),
+      enablePanMode: () => dispatch('interaction', ['enablePanMode']),
     };
   }, [dispatch]);
 
   const api = useMemo((): InteractionAPI => {
     return {
       ...ref.current,
+      platform,
       platformModKey,
       zoomValue,
       selectedLayerIds: state.selectedLayerIds,
+      selectedGradient: state.selectedGradient,
       convertPoint: (point, system) =>
         convertPoint(scrollOrigin, zoomValue, point, system),
       getScreenPoint: getPoint,
@@ -113,8 +126,18 @@ export const SimpleCanvas = memo(function SimpleCanvas({
           options,
         )?.do_objectID;
       },
+      handleKeyboardEvent: (keyMap) => (event) =>
+        handleKeyboardEvent(event.nativeEvent, api.platform, keyMap),
     };
-  }, [CanvasKit, fontManager, platformModKey, scrollOrigin, state, zoomValue]);
+  }, [
+    CanvasKit,
+    fontManager,
+    platform,
+    platformModKey,
+    scrollOrigin,
+    state,
+    zoomValue,
+  ]);
 
   const handlers = (interactions ?? []).map((interaction) =>
     interaction(actions)(

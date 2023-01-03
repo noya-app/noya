@@ -66,6 +66,8 @@ function Workspace(): JSX.Element {
         <StateProvider state={state} dispatch={dispatch}>
           <SimpleCanvas
             interactions={[
+              Interactions.focus,
+              Interactions.pan,
               Interactions.selection,
               Interactions.move,
               Interactions.createDrawing({ initialState: 'none' }),

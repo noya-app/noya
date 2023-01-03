@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { createKeyMap, FALLTHROUGH } from './keyMap';
+import { handleKeyboardEvent } from './events';
+import { KeyShortcuts } from './keyMap';
 import { getCurrentPlatform } from './platform';
-import { getEventShortcutNames } from './shortcuts';
 
 export const IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS = 'ignore-global-events';
 
 type KeyEventName = 'keydown' | 'keyup' | 'keypress';
-
-type KeyMapDefinition = Parameters<typeof createKeyMap>[0];
 
 interface KeyboardEventListener {
   addEventListener: (
@@ -33,7 +31,7 @@ interface KeyboardShortcutOptions {
 }
 
 export function useKeyboardShortcuts(
-  shortcuts: KeyMapDefinition,
+  shortcuts: KeyShortcuts,
   options: KeyboardShortcutOptions = {},
 ) {
   const eventName = options.eventName ?? 'keydown';
@@ -45,15 +43,10 @@ export function useKeyboardShortcuts(
 
   const platformName = getCurrentPlatform(navigator);
 
-  const keyMap = useMemo(
-    () => createKeyMap(shortcuts, platformName),
-    [platformName, shortcuts],
-  );
-
-  const keyMapRef = useRef(keyMap);
+  const shortcutsRef = useRef(shortcuts);
 
   useEffect(() => {
-    keyMapRef.current = keyMap;
+    shortcutsRef.current = shortcuts;
   });
 
   useEffect(() => {
@@ -65,22 +58,7 @@ export function useKeyboardShortcuts(
       )
         return;
 
-      const eventShortcutNames = getEventShortcutNames(event, platformName);
-
-      const matchingName = eventShortcutNames.find(
-        (name) => name in keyMapRef.current,
-      );
-
-      if (!matchingName) return;
-
-      const command = keyMapRef.current[matchingName];
-
-      const result = command();
-
-      if (result !== FALLTHROUGH) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }
+      handleKeyboardEvent(event, platformName, shortcutsRef.current);
     };
 
     const listenerElement = eventRef;

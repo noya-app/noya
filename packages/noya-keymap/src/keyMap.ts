@@ -7,8 +7,12 @@ export type KeyCommand = () => void | typeof FALLTHROUGH;
 
 export type KeyMap = Record<string, KeyCommand>;
 
+export type KeyShortcuts =
+  | [string | PlatformKeyboardShortcut, KeyCommand][]
+  | KeyMap;
+
 export function createKeyMap(
-  shortcuts: [string | PlatformKeyboardShortcut, KeyCommand][] | KeyMap,
+  shortcuts: KeyShortcuts,
   platformName: PlatformName,
 ): KeyMap {
   const shortcutsArray = Array.isArray(shortcuts)

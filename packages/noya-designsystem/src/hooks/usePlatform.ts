@@ -1,5 +1,9 @@
 import { useDesignSystemConfiguration } from '../contexts/DesignSystemConfiguration';
 
+export function usePlatform() {
+  return useDesignSystemConfiguration().platform;
+}
+
 /**
  * Either ctrl or meta, depending on the platform
  */
