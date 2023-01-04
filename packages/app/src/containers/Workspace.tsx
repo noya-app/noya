@@ -14,7 +14,7 @@ import { doubleClickToolbar } from 'noya-embedded';
 import { Size } from 'noya-geometry';
 import { MagnifyingGlassIcon } from 'noya-icons';
 import { AutoSizer, useSystemColorScheme } from 'noya-react-utils';
-import { SketchFileRenderer } from 'noya-renderer';
+import { DesignFile } from 'noya-renderer';
 import { Selectors, WorkspaceTab } from 'noya-state';
 import React, { memo, ReactNode, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -204,11 +204,8 @@ const WorkspaceContent = memo(function WorkspaceContent({
   const renderCanvas = useCallback(
     ({ size }: { size: Size }) => (
       <CanvasKitRenderer size={size}>
-        <SketchFileRenderer />
+        <DesignFile />
       </CanvasKitRenderer>
-      // <SVGRenderer size={size}>
-      //   <SketchFileRenderer />
-      // </SVGRenderer>
     ),
     [],
   );

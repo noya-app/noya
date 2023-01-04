@@ -7,9 +7,9 @@ import { FontManager } from 'noya-fonts';
 import { generateImage } from 'noya-generate-image';
 import { GoogleFontProvider } from 'noya-google-fonts';
 import {
+  DesignFile,
   loadCanvasKit,
   RenderingModeProvider,
-  SketchFileRenderer,
 } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import { PointString, SketchModel } from 'noya-sketch-model';
@@ -117,7 +117,7 @@ async function generatePageImage(
         'png',
         () => (
           <RenderingModeProvider value="interactive">
-            <SketchFileRenderer />
+            <DesignFile />
           </RenderingModeProvider>
         ),
       ).then(resolve);

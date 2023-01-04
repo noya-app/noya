@@ -1,11 +1,11 @@
 import { Context } from './context';
 export * from './colorMatrix';
+export * from './components/Design';
 export * from './components/LayerPreview';
 export { default as SketchArtboard } from './components/layers/SketchArtboard';
 export { default as SketchGroup } from './components/layers/SketchGroup';
 export { default as SketchLayer } from './components/layers/SketchLayer';
 export { useTextLayerParagraph } from './components/layers/SketchText';
-export { default as SketchFileRenderer } from './components/SketchFileRenderer';
 export * from './ComponentsContext';
 export * from './FontManagerContext';
 export * from './hooks/useCanvasKit';

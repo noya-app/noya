@@ -7,10 +7,10 @@ import {
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
+  DesignFile,
   FontManagerProvider,
   ImageCacheProvider,
   RenderingModeProvider,
-  SketchFileRenderer,
   useCanvasKit,
   useFontManager,
 } from 'noya-renderer';
@@ -87,7 +87,7 @@ function Workspace(): JSX.Element {
             {({ size }) => (
               <CanvasKitRenderer size={size}>
                 <RenderingModeProvider value="interactive">
-                  <SketchFileRenderer />
+                  <DesignFile />
                 </RenderingModeProvider>
               </CanvasKitRenderer>
             )}
@@ -100,7 +100,7 @@ function Workspace(): JSX.Element {
             {({ size }) => (
               <SVGRenderer size={size}>
                 <RenderingModeProvider value="static">
-                  <SketchFileRenderer />
+                  <DesignFile />
                 </RenderingModeProvider>
               </SVGRenderer>
             )}
