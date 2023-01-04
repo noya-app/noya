@@ -1,9 +1,8 @@
-import produce from 'immer';
 import { StateProvider } from 'noya-app-state-context';
 import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import {
-  darkTheme,
   DesignSystemConfigurationProvider,
+  lightTheme,
 } from 'noya-designsystem';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -44,6 +43,17 @@ const rectangle = SketchModel.rectangle({
   }),
 });
 
+const artboard = SketchModel.artboard({
+  name: 'Wireframe',
+  frame: SketchModel.rect({
+    x: 0,
+    y: 0,
+    width: 400,
+    height: 800,
+  }),
+  layers: [rectangle],
+});
+
 function Workspace(): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
@@ -56,7 +66,7 @@ function Workspace(): JSX.Element {
 
   const [state, dispatch] = useReducer(reducer, undefined, () =>
     createInitialWorkspaceState(
-      createSketchFile(SketchModel.page({ layers: [rectangle] })),
+      createSketchFile(SketchModel.page({ layers: [artboard] })),
     ),
   );
 
@@ -101,11 +111,6 @@ function Workspace(): JSX.Element {
   );
 }
 
-const theme = produce(darkTheme, (draft) => {
-  draft.sizes.sidebarWidth = 0;
-  draft.sizes.toolbar.height = 0;
-});
-
 export default function Embedded(): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
@@ -113,7 +118,7 @@ export default function Embedded(): JSX.Element {
   }
 
   return (
-    <DesignSystemConfigurationProvider theme={theme} platform={'key'}>
+    <DesignSystemConfigurationProvider theme={lightTheme} platform={'key'}>
       <Suspense fallback="Loading">
         <ImageCacheProvider>
           <CanvasKitProvider>

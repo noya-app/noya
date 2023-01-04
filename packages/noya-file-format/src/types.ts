@@ -325,6 +325,10 @@ export type ShaderVariable = {
         data: number;
       }
     | {
+        type: 'float2';
+        data: { x: number; y: number };
+      }
+    | {
         type: 'color';
         data: Color;
       };

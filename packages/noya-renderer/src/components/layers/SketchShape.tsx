@@ -82,6 +82,13 @@ const SketchFill = memo(function SketchFill({
               name: 'iTime',
               value: { type: 'float', data: time },
             }),
+            SketchModel.shaderVariable({
+              name: 'iResolution',
+              value: {
+                type: 'float2',
+                data: { x: frame.width, y: frame.height },
+              },
+            }),
           ])
         : undefined;
 

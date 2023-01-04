@@ -110,6 +110,14 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
 }: SketchArtboardContentProps) {
   const CanvasKit = useCanvasKit();
 
+  // const paint = useDotFill({
+  //   gridSize: 10,
+  //   frame: layer.frame,
+  //   backgroundColor: layer.hasBackgroundColor
+  //     ? layer.backgroundColor
+  //     : SketchModel.WHITE,
+  // });
+
   const paint = usePaint({
     color: layer.hasBackgroundColor
       ? Primitives.color(CanvasKit, layer.backgroundColor)

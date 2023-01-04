@@ -23,6 +23,13 @@ export function compileShader(
           name: 'iTime',
           value: { type: 'float', data: 0 },
         }),
+        SketchModel.shaderVariable({
+          name: 'iResolution',
+          value: {
+            type: 'float2',
+            data: { x: 1, y: 1 },
+          },
+        }),
       ]),
       (errors) => {
         compilerErrors = errors
