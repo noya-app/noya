@@ -231,7 +231,7 @@ function Workspace(): JSX.Element {
 }
 
 const symbolIdToElement = {
-  [buttonSymbol.symbolID]: () => <Button>Button</Button>,
+  [buttonSymbol.symbolID]: () => <Button fullWidth>Button</Button>,
   [avatarSymbol.symbolID]: () => <Avatar />,
 };
 

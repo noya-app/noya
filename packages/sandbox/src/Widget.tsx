@@ -21,7 +21,7 @@ function useGetScreenRect() {
   return (frame: Rect) => transformRect(frame, screenTransform);
 }
 
-export function WidgetCore({
+function WidgetContainer({
   frame,
   children,
 }: {
@@ -39,31 +39,44 @@ export function WidgetCore({
         pointerEvents: 'none',
       }}
     >
-      <div
-        style={{
-          position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
-          background: 'black',
-          color: 'white',
-          pointerEvents: 'all',
-          padding: '2px 4px',
-          whiteSpace: 'pre',
-          borderRadius: '4px',
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        {children}
-      </div>
+      {children}
+    </div>
+  );
+}
+
+function WidgetLabel({
+  children,
+  onPointerDown,
+}: {
+  children: React.ReactNode;
+  onPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
+}) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 'calc(100% + 6px)',
+        right: 0,
+        background: 'black',
+        color: 'white',
+        pointerEvents: 'all',
+        padding: '2px 4px',
+        whiteSpace: 'pre',
+        borderRadius: '4px',
+      }}
+      onPointerDown={(event) => {
+        event.stopPropagation();
+        onPointerDown?.(event);
+      }}
+    >
+      {children}
     </div>
   );
 }
 
 export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
   const [state] = useApplicationState();
-  const frame = useGetScreenRect()(layer.frame);
+  const rect = useGetScreenRect()(layer.frame);
 
   const symbol = Layers.isSymbolInstance(layer)
     ? Selectors.getSymbolMaster(state, layer.symbolID)
@@ -73,7 +86,11 @@ export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
 
   if (!isSelected) return null;
 
-  return <WidgetCore frame={frame}>✨ {symbol?.name ?? layer.name}</WidgetCore>;
+  return (
+    <WidgetContainer frame={rect}>
+      <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
+    </WidgetContainer>
+  );
 }
 
 export function DrawingWidget({
@@ -101,5 +118,9 @@ export function DrawingWidget({
     createRect(state.interactionState.origin, state.interactionState.current),
   );
 
-  return <WidgetCore frame={rect}>✨ {symbol.name}</WidgetCore>;
+  return (
+    <WidgetContainer frame={rect}>
+      <WidgetLabel>✨ {symbol.name}</WidgetLabel>
+    </WidgetContainer>
+  );
 }
