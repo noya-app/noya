@@ -15,7 +15,9 @@ export interface DrawingActions {
 }
 
 export const createDrawingInteraction =
-  (options: { initialState?: 'insert' | 'none' } = {}) =>
+  (
+    options: { initialState?: 'insert' | 'none'; defaultSymbol?: string } = {},
+  ) =>
   ({ startDrawing, updateDrawing, addDrawnLayer, reset }: DrawingActions) => {
     const initialState = options.initialState ?? 'none';
 
@@ -31,7 +33,10 @@ export const createDrawingInteraction =
           const screenPoint = api.getScreenPoint(event.nativeEvent);
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
-          startDrawing('rectangle', canvasPoint);
+          startDrawing(
+            options.defaultSymbol ? { id: options.defaultSymbol } : 'rectangle',
+            canvasPoint,
+          );
 
           event.preventDefault();
         },

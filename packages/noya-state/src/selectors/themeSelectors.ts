@@ -109,17 +109,23 @@ export const getSymbols = (
   );
 };
 
+export const getSymbolMaster = (state: ApplicationState, symbolId: string) => {
+  return getSymbols(state).find(
+    ({ do_objectID }) => do_objectID === symbolId,
+  ) as Sketch.SymbolMaster;
+};
+
 export const getSelectedSymbols = (
   state: ApplicationState | Draft<ApplicationState>,
 ): Sketch.SymbolMaster[] => {
   const symbols = getSymbols(state);
 
-  const filter =
+  const selectedIds =
     getCurrentTab(state) === 'canvas'
       ? state.selectedLayerIds
       : state.selectedThemeTab.symbols.ids;
 
-  return symbols.filter((symbol) => filter.includes(symbol.do_objectID));
+  return symbols.filter((symbol) => selectedIds.includes(symbol.do_objectID));
 };
 
 export const getSymbolsInstancesIndexPaths = (

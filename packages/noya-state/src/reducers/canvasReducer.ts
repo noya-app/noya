@@ -47,7 +47,7 @@ import {
   getParentLayer,
   getParentLayerAtPoint,
   getSelectedLayerIndexPathsExcludingDescendants,
-  getSymbols,
+  getSymbolMaster,
   moveControlPoints,
   moveLayer,
   moveSelectedPoints,
@@ -286,30 +286,51 @@ export function canvasReducer(
         if (draft.interactionState.type !== 'drawing') return;
 
         const shapeType = draft.interactionState.shapeType;
-        const layer = createDrawingLayer(
-          CanvasKit,
-          shapeType,
-          SketchModel.style({
-            fills: [
-              SketchModel.fill({
-                color: defaultFillColor,
-              }),
-            ],
-            borders: [
-              SketchModel.border({
-                color: defaultBorderColor,
-              }),
-            ],
-          }),
-          draft.interactionState.origin,
-          draft.interactionState.current,
-          false,
-          {
-            constrainProportions: state.keyModifiers.shiftKey,
-            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
-          },
-          state.lastEditedTextStyle,
-        );
+        const layer =
+          typeof shapeType === 'string'
+            ? createDrawingLayer(
+                CanvasKit,
+                shapeType,
+                SketchModel.style({
+                  fills: [
+                    SketchModel.fill({
+                      color: defaultFillColor,
+                    }),
+                  ],
+                  borders: [
+                    SketchModel.border({
+                      color: defaultBorderColor,
+                    }),
+                  ],
+                }),
+                draft.interactionState.origin,
+                draft.interactionState.current,
+                false,
+                {
+                  constrainProportions: state.keyModifiers.shiftKey,
+                  scalingOriginMode: state.keyModifiers.altKey
+                    ? 'center'
+                    : 'extent',
+                },
+                state.lastEditedTextStyle,
+              )
+            : (() => {
+                const symbol = getSymbolMaster(state, shapeType.id);
+
+                if (!symbol) return SketchModel.rectangle();
+
+                const layer = SketchModel.symbolInstance({
+                  name: symbol.name,
+                  symbolID: symbol.symbolID,
+                  frame: {
+                    ...symbol.frame,
+                    x: draft.interactionState.origin.x,
+                    y: draft.interactionState.origin.y,
+                  },
+                });
+
+                return layer;
+              })();
 
         if (shapeType === 'text') {
           if (layer.frame.width < 10) {
@@ -384,9 +405,7 @@ export function canvasReducer(
       const [, symbolId, point] = action;
       const pageIndex = getCurrentPageIndex(state);
 
-      const symbol = getSymbols(state).find(
-        ({ do_objectID }) => do_objectID === symbolId,
-      ) as Sketch.SymbolMaster;
+      const symbol = getSymbolMaster(state, symbolId);
 
       const layer = SketchModel.symbolInstance({
         name: symbol.name,
@@ -1226,6 +1245,10 @@ export function createDrawingLayer(
   }
 
   const frame = SketchModel.rect(rect);
+
+  if (typeof shapeType !== 'string') {
+    return SketchModel.rectangle({ style, frame });
+  }
 
   switch (shapeType) {
     case 'oval':

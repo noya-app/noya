@@ -3,7 +3,11 @@ import Sketch from 'noya-file-format';
 import { GroupLayouts } from '../groupLayouts';
 import { Layers } from '../layer';
 import { getSelectedLayers } from '../selectors/layerSelectors';
-import { getSelectedSymbols, getSymbols } from '../selectors/themeSelectors';
+import {
+  getSelectedSymbols,
+  getSymbolMaster,
+  getSymbols,
+} from '../selectors/themeSelectors';
 import { SetNumberMode } from '../types';
 import type { ApplicationState } from './applicationReducer';
 
@@ -176,9 +180,7 @@ export function symbolsReducer(
     case 'setInstanceSymbolSource': {
       const [, symbolId] = action;
 
-      const symbolMaster = getSymbols(state).find(
-        (symbol) => symbol.symbolID === symbolId,
-      );
+      const symbolMaster = getSymbolMaster(state, symbolId);
 
       return produce(state, (draft) => {
         const symbols = getSelectedLayers(draft).filter(

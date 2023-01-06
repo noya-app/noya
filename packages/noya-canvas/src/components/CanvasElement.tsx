@@ -49,6 +49,7 @@ export interface CanvasElementProps extends ReactEventHandlers {
   insets?: Insets;
   rendererZIndex?: number;
   children: ({ size }: { size: Size }) => JSX.Element;
+  widgets?: JSX.Element;
 }
 
 export const CanvasElement = memo(
@@ -58,6 +59,7 @@ export const CanvasElement = memo(
       onChangeSize,
       rendererZIndex = 0,
       insets = ZERO_INSETS,
+      widgets,
       ...props
     }: CanvasElementProps,
     forwardedRef: ForwardedRef<ICanvasElement>,
@@ -113,6 +115,7 @@ export const CanvasElement = memo(
         <InsetContainer insets={insets} zIndex={rendererZIndex}>
           {canvasSize && children({ size: canvasSize })}
         </InsetContainer>
+        {widgets}
       </Container>
     );
   }),

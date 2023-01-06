@@ -150,10 +150,8 @@ const DesignInsertSymbol = memo(function DesignInsertSymbol() {
     if (!point) return;
 
     const symbol = {
-      ...Selectors.getSymbols(state).find(
-        ({ do_objectID }) => do_objectID === interactionState.symbolID,
-      ),
-    } as Sketch.SymbolMaster;
+      ...Selectors.getSymbolMaster(state, interactionState.symbolID),
+    };
 
     const symbolInstance = produce(symbol, (draft) => {
       if (!symbol || !draft.style) return;
@@ -420,46 +418,37 @@ const DesignDrawLayer = memo(function DesignDrawLayer() {
   const canvasTransform = Selectors.getCanvasTransform(state, canvasInsets);
   const renderingMode = useRenderingMode();
   const interactionState = state.interactionState;
-  const isEditingPath = Selectors.getIsEditingPath(interactionState.type);
 
   const CanvasKit = useCanvasKit();
   const { zoomValue } = Selectors.getCurrentPageMetadata(state);
 
-  const drawingLayer =
-    interactionState.type === 'drawing'
-      ? createDrawingLayer(
-          CanvasKit,
-          interactionState.shapeType === 'oval' ||
-            interactionState.shapeType === 'line'
-            ? interactionState.shapeType
-            : 'rectangle',
-          SketchModel.style({
-            borders: [
-              SketchModel.border({
-                color: defaultBorderColor,
-                thickness: 1 / zoomValue,
-              }),
-            ],
-          }),
-          interactionState.origin,
-          interactionState.current,
-          true,
-          {
-            constrainProportions: state.keyModifiers.shiftKey,
-            scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
-          },
-          state.lastEditedTextStyle,
-        )
-      : undefined;
-
-  if (
-    renderingMode !== 'interactive' ||
-    interactionState.type === 'drawingShapePath' ||
-    isEditingPath ||
-    !drawingLayer
-  ) {
+  if (renderingMode !== 'interactive' || interactionState.type !== 'drawing') {
     return <></>;
   }
+
+  const drawingLayer = createDrawingLayer(
+    CanvasKit,
+    interactionState.shapeType === 'oval' ||
+      interactionState.shapeType === 'line'
+      ? interactionState.shapeType
+      : 'rectangle',
+    SketchModel.style({
+      borders: [
+        SketchModel.border({
+          color: defaultBorderColor,
+          thickness: 1 / zoomValue,
+        }),
+      ],
+    }),
+    interactionState.origin,
+    interactionState.current,
+    true,
+    {
+      constrainProportions: state.keyModifiers.shiftKey,
+      scalingOriginMode: state.keyModifiers.altKey ? 'center' : 'extent',
+    },
+    state.lastEditedTextStyle,
+  );
 
   return (
     <Group transform={canvasTransform}>

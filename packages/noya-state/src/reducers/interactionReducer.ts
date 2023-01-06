@@ -1,5 +1,5 @@
-import Sketch from 'noya-file-format';
 import produce from 'immer';
+import Sketch from 'noya-file-format';
 import { Point, Rect } from 'noya-geometry';
 import { TextSelectionRange, UUID } from 'noya-state';
 
@@ -32,7 +32,8 @@ export type DrawableLayerType =
   | 'line'
   | 'text'
   | 'artboard'
-  | 'slice';
+  | 'slice'
+  | { id: string };
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 

@@ -292,6 +292,8 @@ export const {
   access,
   accessPath,
   diagram,
+  flat,
+  flatMap,
 } = withOptions<Sketch.AnyLayer>({
   getChildren,
 });

@@ -52,12 +52,14 @@ export type Interaction = (
 interface Props {
   rendererZIndex?: CanvasElementProps['rendererZIndex'];
   children: CanvasElementProps['children'];
+  widgets?: CanvasElementProps['widgets'];
   interactions?: Interaction[];
 }
 
 export const SimpleCanvas = memo(function SimpleCanvas({
   children,
   interactions,
+  widgets,
   rendererZIndex = 0,
 }: Props) {
   const ref = useRef<ICanvasElement>(null);
@@ -153,6 +155,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       {...mergeEventHandlers(...handlers)}
       onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
       rendererZIndex={rendererZIndex}
+      widgets={widgets}
     >
       {children}
     </CanvasElement>
