@@ -19,7 +19,7 @@ export function useCanvasShortcuts() {
     if (isEditingText) return FALLTHROUGH;
 
     if (state.selectedGradient) {
-      dispatch('deleteStopToGradient');
+      dispatch('deleteStopFromGradient');
     } else {
       dispatch('deleteLayer', state.selectedLayerIds);
     }

@@ -80,6 +80,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       reset: () => dispatch('interaction', ['reset']),
       selectLayer: (layerId, selectionType) =>
         dispatch('selectLayer', layerId, selectionType),
+      deleteLayer: (layerId) => dispatch('deleteLayer', layerId),
       maybeMove: (point) => dispatch('interaction', ['maybeMove', point]),
       updateMoving: (point) => dispatch('interaction', ['updateMoving', point]),
       addDrawnLayer: () => dispatch('addDrawnLayer'),

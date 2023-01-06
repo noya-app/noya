@@ -99,7 +99,7 @@ export type CanvasAction =
   | [type: 'addShapePathLayer', point: Point]
   | [type: 'addSymbolLayer', symbolId: string, point: Point]
   | [type: 'addStopToGradient', point: Point]
-  | [type: 'deleteStopToGradient']
+  | [type: 'deleteStopFromGradient']
   | [
       type: 'importImage',
       images: InsertedImage[],
@@ -498,7 +498,7 @@ export function canvasReducer(
         return;
       });
     }
-    case 'deleteStopToGradient': {
+    case 'deleteStopFromGradient': {
       const pageIndex = getCurrentPageIndex(state);
 
       if (!state.selectedGradient) return state;

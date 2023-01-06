@@ -4,9 +4,13 @@ import { InteractionAPI } from './types';
 
 export interface SelectionActions {
   selectLayer: (id: string[], selectionType?: SelectionType) => void;
+  deleteLayer: (id: string[]) => void;
 }
 
-export function selectionInteraction({ selectLayer }: SelectionActions) {
+export function selectionInteraction({
+  selectLayer,
+  deleteLayer,
+}: SelectionActions) {
   return handleActionType<
     InteractionState,
     [InteractionAPI],
@@ -47,6 +51,10 @@ export function selectionInteraction({ selectLayer }: SelectionActions) {
           selectLayer([]);
         }
       },
+      onKeyDown: api.handleKeyboardEvent({
+        Backspace: () => deleteLayer(api.selectedLayerIds),
+        Delete: () => deleteLayer(api.selectedLayerIds),
+      }),
     }),
   });
 }
