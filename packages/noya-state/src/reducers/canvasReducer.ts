@@ -322,11 +322,17 @@ export function canvasReducer(
                 const layer = SketchModel.symbolInstance({
                   name: symbol.name,
                   symbolID: symbol.symbolID,
-                  frame: {
-                    ...symbol.frame,
-                    x: draft.interactionState.origin.x,
-                    y: draft.interactionState.origin.y,
-                  },
+                  frame: SketchModel.rect(
+                    createRect(
+                      draft.interactionState.current,
+                      draft.interactionState.origin,
+                    ),
+                  ),
+                  // frame: {
+                  //   ...symbol.frame,
+                  //   x: draft.interactionState.origin.x,
+                  //   y: draft.interactionState.origin.y,
+                  // },
                 });
 
                 return layer;

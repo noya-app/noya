@@ -1,3 +1,5 @@
+import '@shopify/polaris/build/esm/styles.css';
+import enTranslations from '@shopify/polaris/locales/en.json';
 import { StateProvider, useApplicationState } from 'noya-app-state-context';
 import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import {
@@ -23,14 +25,13 @@ import {
   InteractionState,
   Layers,
   Selectors,
+  WorkspaceAction,
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
 import * as React from 'react';
 import { Suspense, useReducer } from 'react';
-import { useWidget } from './useWidget';
-import '@shopify/polaris/build/esm/styles.css';
-import enTranslations from '@shopify/polaris/locales/en.json';
+import { DrawingWidget, Widget } from './Widget';
 const { AppProvider, Avatar, Button } = require('@shopify/polaris');
 
 let initialized = false;
@@ -137,50 +138,6 @@ const avatarSymbol = SketchModel.symbolMaster({
   ],
 });
 
-function Widget({ layer }: { layer: Sketch.AnyLayer }) {
-  const [state] = useApplicationState();
-  const { frame } = useWidget({ layer });
-
-  const symbol = Layers.isSymbolInstance(layer)
-    ? Selectors.getSymbolMaster(state, layer.symbolID)
-    : undefined;
-  const isSelected = state.selectedLayerIds.includes(layer.do_objectID);
-
-  if (!isSelected) return null;
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        left: frame.x,
-        top: frame.y,
-        width: frame.width,
-        height: frame.height,
-        pointerEvents: 'none',
-      }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
-          background: 'black',
-          color: 'white',
-          pointerEvents: 'all',
-          padding: '2px 4px',
-          whiteSpace: 'pre',
-          borderRadius: '4px',
-        }}
-        onPointerDown={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        ✨ {symbol?.name ?? layer.name}
-      </div>
-    </div>
-  );
-}
-
 function inferBlock(
   interactionState: Extract<InteractionState, { type: 'drawing' }>,
 ): DrawableLayerType {
@@ -194,12 +151,60 @@ function inferBlock(
   };
 }
 
+function Content() {
+  const [state] = useApplicationState();
+
+  const layers = Layers.flat(Selectors.getCurrentPage(state));
+
+  return (
+    <div style={{ flex: '1', display: 'flex' }}>
+      <div style={{ flex: '1', display: 'flex' }}>
+        <SimpleCanvas
+          interactions={[
+            Interactions.focus,
+            Interactions.pan,
+            Interactions.selection,
+            Interactions.move,
+            Interactions.createDrawing({
+              initialState: 'none',
+              defaultSymbol: buttonSymbol.do_objectID,
+              inferBlock,
+            }),
+            Interactions.marquee,
+          ]}
+          widgets={
+            <>
+              {layers.map((layer) => (
+                <Widget key={layer.do_objectID} layer={layer} />
+              ))}
+              {state.interactionState.type === 'drawing' && (
+                <DrawingWidget inferBlock={inferBlock} />
+              )}
+            </>
+          }
+        >
+          {({ size }) => (
+            <CanvasKitRenderer size={size}>
+              <RenderingModeProvider value="interactive">
+                <DesignFile />
+              </RenderingModeProvider>
+            </CanvasKitRenderer>
+          )}
+        </SimpleCanvas>
+      </div>
+      <div style={{ flex: '1', display: 'flex' }}>
+        <DOMRenderer />
+      </div>
+    </div>
+  );
+}
+
 function Workspace(): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
 
   const reducer = React.useCallback(
-    (state: WorkspaceState, action: any) =>
+    (state: WorkspaceState, action: WorkspaceAction) =>
       workspaceReducer(state, action, CanvasKit, fontManager),
     [CanvasKit, fontManager],
   );
@@ -219,49 +224,10 @@ function Workspace(): JSX.Element {
     return workspace;
   });
 
-  const layers = Layers.flat(Selectors.getCurrentPage(state.history.present));
-
   return (
-    <div style={{ flex: '1', display: 'flex' }}>
-      <div style={{ flex: '1', display: 'flex' }}>
-        <StateProvider state={state} dispatch={dispatch}>
-          <SimpleCanvas
-            interactions={[
-              Interactions.focus,
-              Interactions.pan,
-              Interactions.selection,
-              Interactions.move,
-              Interactions.createDrawing({
-                initialState: 'none',
-                defaultSymbol: buttonSymbol.do_objectID,
-                inferBlock: inferBlock,
-              }),
-              Interactions.marquee,
-            ]}
-            widgets={
-              <>
-                {layers.map((layer) => (
-                  <Widget key={layer.do_objectID} layer={layer} />
-                ))}
-              </>
-            }
-          >
-            {({ size }) => (
-              <CanvasKitRenderer size={size}>
-                <RenderingModeProvider value="interactive">
-                  <DesignFile />
-                </RenderingModeProvider>
-              </CanvasKitRenderer>
-            )}
-          </SimpleCanvas>
-        </StateProvider>
-      </div>
-      <div style={{ flex: '1', display: 'flex' }}>
-        <StateProvider state={state}>
-          <DOMRenderer />
-        </StateProvider>
-      </div>
-    </div>
+    <StateProvider state={state} dispatch={dispatch}>
+      <Content />
+    </StateProvider>
   );
 }
 
@@ -300,7 +266,7 @@ function DOMRenderer(): JSX.Element {
   );
 }
 
-export default function Embedded(): JSX.Element {
+export default function App(): JSX.Element {
   if (!initialized) {
     setPublicPath('https://www.noya.design');
     initialized = true;
