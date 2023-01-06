@@ -163,6 +163,7 @@ function Content() {
           interactions={[
             Interactions.focus,
             Interactions.pan,
+            Interactions.scale,
             Interactions.selection,
             Interactions.move,
             Interactions.createDrawing({
@@ -170,7 +171,6 @@ function Content() {
               defaultSymbol: buttonSymbol.do_objectID,
               inferBlock,
             }),
-            Interactions.marquee,
           ]}
           widgets={
             <>

@@ -990,7 +990,9 @@ export function canvasReducer(
             const originalBoundingRect = getBoundingRect(
               pageSnapshot,
               layerIds,
-            )!;
+            );
+
+            if (!originalBoundingRect) break;
 
             const lineLayer = Selectors.getSelectedLineLayer(state);
 

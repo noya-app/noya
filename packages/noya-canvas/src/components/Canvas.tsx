@@ -31,11 +31,8 @@ import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {
-  ApplicationState,
-  CompassDirection,
   decodeCurvePoint,
   getCurrentPage,
-  getSelectedLineLayer,
   ImportedImageTarget,
   Layers,
   LayerTraversalOptions,
@@ -76,28 +73,6 @@ const HiddenInputTarget = styled.input({
   position: 'absolute',
   top: '-200px',
 });
-
-function getCursorForDirection(
-  direction: CompassDirection,
-  state: ApplicationState,
-): CSSProperties['cursor'] {
-  if (getSelectedLineLayer(state)) return 'move';
-
-  switch (direction) {
-    case 'e':
-    case 'w':
-      return 'ew-resize';
-    case 'n':
-    case 's':
-      return 'ns-resize';
-    case 'ne':
-    case 'sw':
-      return 'nesw-resize';
-    case 'nw':
-    case 'se':
-      return 'nwse-resize';
-  }
-}
 
 function getPoint(event: OffsetPoint): Point {
   return { x: Math.round(event.offsetX), y: Math.round(event.offsetY) };
@@ -217,6 +192,8 @@ export const Canvas = memo(function Canvas({
       },
       handleKeyboardEvent: (keyMap) => (event) =>
         handleKeyboardEvent(event.nativeEvent, api.platform, keyMap),
+      getScaleDirectionAtPoint: (point: Point) =>
+        Selectors.getScaleDirectionAtPoint(state, point),
     };
   }, [
     CanvasKit,
@@ -944,51 +921,7 @@ export const Canvas = memo(function Canvas({
     [offsetEventPoint, state, marquee, api, CanvasKit, fontManager, dispatch],
   );
 
-  const handleDirection =
-    state.interactionState.type === 'hoverHandle' ||
-    state.interactionState.type === 'maybeScale' ||
-    state.interactionState.type === 'scaling'
-      ? state.interactionState.direction
-      : undefined;
-
-  const cursor = useMemo((): CSSProperties['cursor'] => {
-    switch (state.interactionState.type) {
-      case 'panning':
-      case 'maybePan':
-        return 'grabbing';
-      case 'panMode':
-        return 'grab';
-      case 'insert':
-        return 'crosshair';
-      case 'drawingShapePath':
-        return 'crosshair';
-      case 'maybeScale':
-      case 'scaling':
-      case 'hoverHandle':
-        if (handleDirection) {
-          return getCursorForDirection(handleDirection, state);
-        }
-        return 'default';
-      case 'editPath': {
-        const { point } = state.interactionState;
-
-        return point
-          ? Selectors.getCursorForEditPathMode(state, point)
-          : 'default';
-      }
-      case 'maybeMoveControlPoint':
-      case 'maybeMovePoint':
-      case 'movingControlPoint':
-      case 'movingPoint':
-        return 'move';
-      case 'editingText':
-      case 'selectingText':
-      case 'maybeSelectingText':
-        return 'text';
-      default:
-        return 'default';
-    }
-  }, [state, handleDirection]);
+  const cursor = useMemo(() => Selectors.getCursor(state), [state]);
 
   const onImportImages = useCallback(
     async (

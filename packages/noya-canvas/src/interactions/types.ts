@@ -1,7 +1,11 @@
 import { Point, Rect } from 'noya-geometry';
 import { KeyMap, PlatformName } from 'noya-keymap';
 import { OffsetPoint } from 'noya-react-utils';
-import { LayerTraversalOptions, SelectedGradient } from 'noya-state';
+import {
+  CompassDirection,
+  LayerTraversalOptions,
+  SelectedGradient,
+} from 'noya-state';
 import React from 'react';
 import { ICanvasElement } from '../components/types';
 
@@ -18,5 +22,6 @@ export type InteractionAPI = Partial<ICanvasElement> & {
     point: Point,
     options?: LayerTraversalOptions,
   ) => string | undefined;
+  getScaleDirectionAtPoint: (point: Point) => CompassDirection | undefined;
   handleKeyboardEvent: (keyMap: KeyMap) => (event: React.KeyboardEvent) => void;
 };

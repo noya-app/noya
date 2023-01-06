@@ -10,6 +10,7 @@ import { handleKeyboardEvent } from 'noya-keymap';
 import { OffsetPoint } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import {
+  CompassDirection,
   DrawableLayerType,
   getCurrentPage,
   InteractionState,
@@ -21,6 +22,7 @@ import { DrawingActions } from '../interactions/drawing';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { PanActions } from '../interactions/pan';
+import { ScaleActions } from '../interactions/scale';
 import { SelectionActions } from '../interactions/selection';
 import { InteractionAPI } from '../interactions/types';
 import { convertPoint } from '../utils/convertPoint';
@@ -38,6 +40,7 @@ function getPoint(event: OffsetPoint): Point {
 export type Actions = MarqueeActions &
   SelectionActions &
   MoveActions &
+  ScaleActions &
   DrawingActions &
   PanActions;
 
@@ -83,6 +86,10 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       deleteLayer: (layerId) => dispatch('deleteLayer', layerId),
       maybeMove: (point) => dispatch('interaction', ['maybeMove', point]),
       updateMoving: (point) => dispatch('interaction', ['updateMoving', point]),
+      maybeScale: (point, direction) =>
+        dispatch('interaction', ['maybeScale', point, direction]),
+      updateScaling: (point) =>
+        dispatch('interaction', ['updateScaling', point]),
       addDrawnLayer: () => dispatch('addDrawnLayer'),
       startDrawing: (layerType: DrawableLayerType, point: Point) =>
         dispatch('interaction', ['startDrawing', layerType, point]),
@@ -94,6 +101,8 @@ export const SimpleCanvas = memo(function SimpleCanvas({
         dispatch('interaction', ['updatePanning', point]),
       maybePan: (point) => dispatch('interaction', ['maybePan', point]),
       enablePanMode: () => dispatch('interaction', ['enablePanMode']),
+      hoverHandle: (direction: CompassDirection) =>
+        dispatch('interaction', ['hoverHandle', direction]),
     };
   }, [dispatch]);
 
@@ -129,6 +138,8 @@ export const SimpleCanvas = memo(function SimpleCanvas({
           options,
         )?.do_objectID;
       },
+      getScaleDirectionAtPoint: (point: Point) =>
+        Selectors.getScaleDirectionAtPoint(state, point),
       handleKeyboardEvent: (keyMap) => (event) =>
         handleKeyboardEvent(event.nativeEvent, api.platform, keyMap),
     };
@@ -150,6 +161,8 @@ export const SimpleCanvas = memo(function SimpleCanvas({
     ),
   );
 
+  const cursor = useMemo(() => Selectors.getCursor(state), [state]);
+
   return (
     <CanvasElement
       ref={ref}
@@ -157,6 +170,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
       rendererZIndex={rendererZIndex}
       widgets={widgets}
+      cursor={cursor}
     >
       {children}
     </CanvasElement>

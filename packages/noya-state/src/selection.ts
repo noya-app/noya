@@ -6,6 +6,7 @@ import {
   decodeCurvePoint,
   DragHandle,
   getSelectedLineLayer,
+  InteractionState,
 } from 'noya-state';
 import type { ApplicationState } from './reducers/applicationReducer';
 
@@ -112,6 +113,14 @@ export function getDragHandles(
         zoom,
       )
     : getRectDragHandles(rect, zoom);
+}
+
+export function getCurrentHandleDirection(interactionState: InteractionState) {
+  return interactionState.type === 'hoverHandle' ||
+    interactionState.type === 'maybeScale' ||
+    interactionState.type === 'scaling'
+    ? interactionState.direction
+    : undefined;
 }
 
 // This function doesn't ensure a positive width/height, since we use it when

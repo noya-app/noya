@@ -50,6 +50,7 @@ export interface CanvasElementProps extends ReactEventHandlers {
   rendererZIndex?: number;
   children: ({ size }: { size: Size }) => JSX.Element;
   widgets?: JSX.Element;
+  cursor?: CSSProperties['cursor'];
 }
 
 export const CanvasElement = memo(
@@ -60,6 +61,7 @@ export const CanvasElement = memo(
       rendererZIndex = 0,
       insets = ZERO_INSETS,
       widgets,
+      cursor,
       ...props
     }: CanvasElementProps,
     forwardedRef: ForwardedRef<ICanvasElement>,
@@ -95,8 +97,8 @@ export const CanvasElement = memo(
       <Container
         id="canvas-container"
         ref={containerRef}
-        cursor={'default'}
         tabIndex={0}
+        cursor={cursor}
         onFocus={() => inputRef.current?.focus()}
         {...rest}
       >

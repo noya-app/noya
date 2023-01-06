@@ -176,7 +176,9 @@ export default memo(function SnapGuides() {
         const originalBoundingRect = Selectors.getBoundingRect(
           pageSnapshot,
           state.selectedLayerIds,
-        )!;
+        );
+
+        if (!originalBoundingRect) return;
 
         const lineLayer = Selectors.getSelectedLineLayer(state);
 

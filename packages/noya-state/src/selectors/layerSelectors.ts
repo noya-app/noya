@@ -1,6 +1,7 @@
-import type Sketch from 'noya-file-format';
 import produce, { Draft } from 'immer';
+import { WritableDraft } from 'immer/dist/internal';
 import { RelativeDropPosition } from 'noya-designsystem';
+import type Sketch from 'noya-file-format';
 import {
   AffineTransform,
   createBounds,
@@ -13,21 +14,22 @@ import {
   rectsIntersect,
   transformRect,
 } from 'noya-geometry';
+import { CSSProperties } from 'react';
 import { IndexPath } from 'tree-visit';
-import { getMultiValue } from '../utils/getMultiValue';
-import { PageLayer } from '../layers';
-import { isLine } from './pointSelectors';
-import type { ApplicationState } from '../reducers/applicationReducer';
 import { Layers } from '../layer';
+import { PageLayer } from '../layers';
+import type { ApplicationState } from '../reducers/applicationReducer';
+import { CompassDirection } from '../reducers/interactionReducer';
 import type { UUID } from '../types';
+import { getMultiValue } from '../utils/getMultiValue';
 import {
   getLayerIndexPathsExcludingDescendants,
   getSelectedLayerIndexPathsExcludingDescendants,
 } from './indexPathSelectors';
 import { getCurrentPage, getCurrentPageIndex } from './pageSelectors';
-import { getLayerTransformAtIndexPath } from './transformSelectors';
+import { isLine } from './pointSelectors';
 import { getTextSelection } from './textSelectors';
-import { WritableDraft } from 'immer/dist/internal';
+import { getLayerTransformAtIndexPath } from './transformSelectors';
 
 /*
  * Get an array of all layers using as few lookups as possible on the state tree.
@@ -208,6 +210,28 @@ export function getSelectedLineLayer(
   if (!layer || !Layers.isPointsLayer(layer) || !isLine(layer.points)) return;
 
   return layer;
+}
+
+export function getCursorForDirection(
+  direction: CompassDirection,
+  state: ApplicationState,
+): CSSProperties['cursor'] {
+  if (getSelectedLineLayer(state)) return 'move';
+
+  switch (direction) {
+    case 'e':
+    case 'w':
+      return 'ew-resize';
+    case 'n':
+    case 's':
+      return 'ns-resize';
+    case 'ne':
+    case 'sw':
+      return 'nesw-resize';
+    case 'nw':
+    case 'se':
+      return 'nwse-resize';
+  }
 }
 
 export function getParentLayerAtPoint(page: Sketch.Page, point: Point) {
