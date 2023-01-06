@@ -14,7 +14,7 @@ import {
 } from 'noya-state';
 import * as React from 'react';
 
-export function useWidget({ frame }: { frame: Rect }) {
+function useGetScreenRect() {
   const [state] = useApplicationState();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
@@ -23,7 +23,7 @@ export function useWidget({ frame }: { frame: Rect }) {
     .translate(-scrollOrigin.x, -scrollOrigin.y)
     .invert();
 
-  return { frame: transformRect(frame, screenTransform) };
+  return (frame: Rect) => transformRect(frame, screenTransform);
 }
 
 export function WidgetCore({
@@ -68,7 +68,7 @@ export function WidgetCore({
 
 export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
   const [state] = useApplicationState();
-  const { frame } = useWidget({ frame: layer.frame });
+  const frame = useGetScreenRect()(layer.frame);
 
   const symbol = Layers.isSymbolInstance(layer)
     ? Selectors.getSymbolMaster(state, layer.symbolID)
@@ -89,6 +89,7 @@ export function DrawingWidget({
   ) => DrawableLayerType;
 }) {
   const [state] = useApplicationState();
+  const getScreenRect = useGetScreenRect();
 
   if (state.interactionState.type !== 'drawing') return null;
 
@@ -98,9 +99,8 @@ export function DrawingWidget({
 
   const symbol = Selectors.getSymbolMaster(state, block.symbolId);
 
-  const rect = createRect(
-    state.interactionState.origin,
-    state.interactionState.current,
+  const rect = getScreenRect(
+    createRect(state.interactionState.origin, state.interactionState.current),
   );
 
   return <WidgetCore frame={rect}>✨ {symbol.name}</WidgetCore>;
