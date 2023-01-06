@@ -46,6 +46,8 @@ export type WorkspaceState = {
     showRulers: boolean;
     showPixelGrid: boolean;
     showPageListThumbnails: boolean;
+    showDotGrid: boolean;
+    wireframeMode: boolean;
   };
 };
 
@@ -218,6 +220,8 @@ export function createInitialWorkspaceState(
       showRulers: false,
       showPixelGrid: true,
       showPageListThumbnails: false,
+      showDotGrid: false,
+      wireframeMode: false,
     },
   };
 }

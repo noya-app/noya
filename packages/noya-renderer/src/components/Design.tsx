@@ -636,22 +636,22 @@ export const Design = {
 
 export const DesignFile = memo(function DesignFile() {
   return (
-    <DesignRoot>
-      <DesignBackground />
-      <DesignPage />
-      <DesignPixelGrid />
-      <DesignMarquee />
-      <DesignGradientEditor />
-      <DesignInsertSymbol />
-      <DesignDrawPath />
-      <DesignEditPath />
-      <DesignBoundingRect />
-      <DesignLayerHighlight />
-      <DesignDrawLayer />
-      <DesignSnapGuides />
-      <DesignMeasurementGuides />
-      <DesignDragHandles />
-      <DesignRulers />
-    </DesignRoot>
+    <Design.Root>
+      <Design.Background />
+      <Design.Page />
+      <Design.PixelGrid />
+      <Design.Marquee />
+      <Design.GradientEditor />
+      <Design.InsertSymbol />
+      <Design.DrawPath />
+      <Design.EditPath />
+      <Design.BoundingRect />
+      <Design.LayerHighlight />
+      <Design.DrawLayer />
+      <Design.SnapGuides />
+      <Design.MeasurementGuides />
+      <Design.DragHandles />
+      <Design.Rulers />
+    </Design.Root>
   );
 });

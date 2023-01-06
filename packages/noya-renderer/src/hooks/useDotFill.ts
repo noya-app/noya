@@ -12,10 +12,12 @@ export function useDotFill({
   gridSize,
   frame,
   backgroundColor,
+  foregroundColor,
 }: {
   gridSize: number;
   frame: Rect;
   backgroundColor: Sketch.Color;
+  foregroundColor: Sketch.Color;
 }) {
   const CanvasKit = useCanvasKit();
 
@@ -37,7 +39,7 @@ export function useDotFill({
           name: 'foregroundColor',
           value: {
             type: 'color',
-            data: SketchModel.BLACK,
+            data: foregroundColor,
           },
         }),
       ],
@@ -49,7 +51,7 @@ export function useDotFill({
         }
       `,
     });
-  }, [backgroundColor, gridSize]);
+  }, [backgroundColor, foregroundColor, gridSize]);
 
   const runtimeEffect = useMemo(() => {
     const compiled = compileShader(CanvasKit, dotShaderObject);

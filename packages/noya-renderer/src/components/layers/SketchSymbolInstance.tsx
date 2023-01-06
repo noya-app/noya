@@ -1,8 +1,8 @@
 import produce from 'immer';
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { AffineTransform } from 'noya-geometry';
-import { useFill } from 'noya-react-canvaskit';
+import { useColorFill, useFill } from 'noya-react-canvaskit';
 import {
   Layers,
   Overrides,
@@ -23,6 +23,7 @@ interface SymbolProps extends BaseLayerProps {
   symbolMaster: Sketch.SymbolMaster;
   layerStyles: Sketch.SharedStyleContainer;
   layerTextStyles: Sketch.SharedTextStyleContainer;
+  wireframe?: boolean;
 }
 
 const Symbol = memo(function Symbol({
@@ -30,6 +31,7 @@ const Symbol = memo(function Symbol({
   symbolMaster,
   layerStyles,
   layerTextStyles,
+  wireframe,
   SketchLayer,
 }: SymbolProps) {
   const CanvasKit = useCanvasKit();
@@ -149,6 +151,23 @@ const Symbol = memo(function Symbol({
     firstFill && firstFill.isEnabled ? firstFill.color : undefined;
   const colorFilter = useTintColorFilter(tintColor);
 
+  const greyFill = useColorFill('#DDD');
+
+  if (wireframe) {
+    return (
+      <Group transform={transform} opacity={opacity}>
+        <Rect
+          paint={greyFill}
+          rect={Primitives.rect(CanvasKit, {
+            ...layer.frame,
+            x: 0,
+            y: 0,
+          })}
+        />
+      </Group>
+    );
+  }
+
   return (
     <Group transform={transform} opacity={opacity} colorFilter={colorFilter}>
       {overriddenSymbolMaster.includeBackgroundColorInInstance && (
@@ -167,6 +186,9 @@ export default memo(function SketchSymbolInstance({
   layer,
   SketchLayer,
 }: Props) {
+  const {
+    preferences: { wireframeMode },
+  } = useWorkspace();
   const [state] = useApplicationState();
 
   const symbolMaster = useMemo(
@@ -188,6 +210,7 @@ export default memo(function SketchSymbolInstance({
       layerStyles={state.sketch.document.layerStyles}
       layerTextStyles={state.sketch.document.layerTextStyles}
       SketchLayer={SketchLayer}
+      wireframe={wireframeMode}
     />
   );
 });

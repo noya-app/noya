@@ -213,7 +213,8 @@ function Workspace(): JSX.Element {
     const workspace = createInitialWorkspaceState(
       createSketchFile(SketchModel.page({ layers: [artboard] })),
     );
-
+    workspace.preferences.showDotGrid = true;
+    workspace.preferences.wireframeMode = true;
     workspace.history.present.sketch.pages.push(
       SketchModel.page({
         name: 'Symbols',

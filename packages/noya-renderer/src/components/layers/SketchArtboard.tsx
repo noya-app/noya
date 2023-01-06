@@ -1,3 +1,4 @@
+import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { Rect } from 'noya-geometry';
 import {
@@ -6,12 +7,14 @@ import {
   useDeletable,
   usePaint,
 } from 'noya-react-canvaskit';
+import { SketchModel } from 'noya-sketch-model';
 import { Primitives, Selectors } from 'noya-state';
 import React, { memo, useMemo } from 'react';
 import { useTheme } from 'styled-components';
 import { Group, Rect as RCKRect, Text } from '../../ComponentsContext';
 import { useFontManager } from '../../FontManagerContext';
 import { useCanvasKit } from '../../hooks/useCanvasKit';
+import { useDotFill } from '../../hooks/useDotFill';
 import { useRenderingMode } from '../../RenderingModeContext';
 import { useZoom } from '../../ZoomContext';
 import SketchGroup from './SketchGroup';
@@ -108,21 +111,18 @@ export const SketchArtboardContent = memo(function SketchArtboardContent({
   layer,
   SketchLayer,
 }: SketchArtboardContentProps) {
+  const {
+    preferences: { showDotGrid },
+  } = useWorkspace();
   const CanvasKit = useCanvasKit();
 
-  // const paint = useDotFill({
-  //   gridSize: 10,
-  //   frame: layer.frame,
-  //   backgroundColor: layer.hasBackgroundColor
-  //     ? layer.backgroundColor
-  //     : SketchModel.WHITE,
-  // });
-
-  const paint = usePaint({
-    color: layer.hasBackgroundColor
-      ? Primitives.color(CanvasKit, layer.backgroundColor)
-      : CanvasKit.WHITE,
-    style: CanvasKit.PaintStyle.Fill,
+  const paint = useDotFill({
+    gridSize: 10,
+    frame: layer.frame,
+    backgroundColor: layer.hasBackgroundColor
+      ? layer.backgroundColor
+      : SketchModel.WHITE,
+    foregroundColor: showDotGrid ? SketchModel.BLACK : SketchModel.WHITE,
   });
 
   const rect = Primitives.rect(CanvasKit, layer.frame);
