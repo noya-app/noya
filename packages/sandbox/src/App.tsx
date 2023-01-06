@@ -7,6 +7,7 @@ import {
   lightTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
+import { Rect } from 'noya-geometry';
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
@@ -22,7 +23,6 @@ import {
   createInitialWorkspaceState,
   createSketchFile,
   DrawableLayerType,
-  InteractionState,
   Layers,
   Selectors,
   WorkspaceAction,
@@ -138,10 +138,8 @@ const avatarSymbol = SketchModel.symbolMaster({
   ],
 });
 
-function inferBlock(
-  interactionState: Extract<InteractionState, { type: 'drawing' }>,
-): DrawableLayerType {
-  if (Math.abs(interactionState.current.x - interactionState.origin.x) > 100) {
+function inferBlock({ rect }: { rect: Rect }): DrawableLayerType {
+  if (rect.width > 100) {
     return {
       symbolId: buttonSymbol.symbolID,
     };

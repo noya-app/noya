@@ -1,5 +1,5 @@
 import { ReactEventHandlers } from 'noya-designsystem';
-import { Point } from 'noya-geometry';
+import { createRect, Point, Rect } from 'noya-geometry';
 import {
   DrawableLayerType,
   handleActionType,
@@ -19,9 +19,7 @@ export const createDrawingInteraction =
     options: {
       initialState?: 'insert' | 'none';
       defaultSymbol?: string;
-      inferBlock?: (
-        interactionState: Extract<InteractionState, { type: 'drawing' }>,
-      ) => DrawableLayerType;
+      inferBlock?: ({ rect }: { rect: Rect }) => DrawableLayerType;
     } = {},
   ) =>
   ({ startDrawing, updateDrawing, addDrawnLayer, reset }: DrawingActions) => {
@@ -67,7 +65,15 @@ export const createDrawingInteraction =
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
           if (options.inferBlock) {
-            updateDrawing(canvasPoint, options.inferBlock(interactionState));
+            updateDrawing(
+              canvasPoint,
+              options.inferBlock({
+                rect: createRect(
+                  interactionState.origin,
+                  interactionState.current,
+                ),
+              }),
+            );
           } else {
             updateDrawing(canvasPoint, 'oval');
           }

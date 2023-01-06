@@ -6,12 +6,7 @@ import {
   Rect,
   transformRect,
 } from 'noya-geometry';
-import {
-  DrawableLayerType,
-  InteractionState,
-  Layers,
-  Selectors,
-} from 'noya-state';
+import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 
 function useGetScreenRect() {
@@ -84,16 +79,19 @@ export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
 export function DrawingWidget({
   inferBlock,
 }: {
-  inferBlock: (
-    interactionState: Extract<InteractionState, { type: 'drawing' }>,
-  ) => DrawableLayerType;
+  inferBlock: ({ rect }: { rect: Rect }) => DrawableLayerType;
 }) {
   const [state] = useApplicationState();
   const getScreenRect = useGetScreenRect();
 
   if (state.interactionState.type !== 'drawing') return null;
 
-  const block = inferBlock(state.interactionState);
+  const block = inferBlock({
+    rect: createRect(
+      state.interactionState.origin,
+      state.interactionState.current,
+    ),
+  });
 
   if (typeof block === 'string') return null;
 
