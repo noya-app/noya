@@ -111,7 +111,7 @@ export const getSymbols = (
 
 export const getSymbolMaster = (state: ApplicationState, symbolId: string) => {
   return getSymbols(state).find(
-    ({ do_objectID }) => do_objectID === symbolId,
+    (layer) => layer.symbolID === symbolId,
   ) as Sketch.SymbolMaster;
 };
 

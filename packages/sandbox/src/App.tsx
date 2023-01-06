@@ -19,15 +19,19 @@ import { SketchModel } from 'noya-sketch-model';
 import {
   createInitialWorkspaceState,
   createSketchFile,
+  DrawableLayerType,
+  InteractionState,
   Layers,
   Selectors,
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import { SVGRenderer } from 'noya-svg-renderer';
 import * as React from 'react';
 import { Suspense, useReducer } from 'react';
 import { useWidget } from './useWidget';
+import '@shopify/polaris/build/esm/styles.css';
+import enTranslations from '@shopify/polaris/locales/en.json';
+const { AppProvider, Avatar, Button } = require('@shopify/polaris');
 
 let initialized = false;
 
@@ -106,6 +110,33 @@ const buttonSymbol = SketchModel.symbolMaster({
   ],
 });
 
+const avatarSymbol = SketchModel.symbolMaster({
+  name: 'Avatar',
+  frame: SketchModel.rect({
+    x: 0,
+    y: 0,
+    width: 60,
+    height: 60,
+  }),
+  layers: [
+    SketchModel.rectangle({
+      frame: SketchModel.rect({
+        x: 0,
+        y: 0,
+        width: 60,
+        height: 60,
+      }),
+      style: SketchModel.style({
+        fills: [
+          SketchModel.fill({
+            color: SketchModel.color({ red: 0.5, green: 0, blue: 0, alpha: 1 }),
+          }),
+        ],
+      }),
+    }),
+  ],
+});
+
 function Widget({ layer }: { layer: Sketch.AnyLayer }) {
   const [state] = useApplicationState();
   const { frame } = useWidget({ layer });
@@ -150,6 +181,19 @@ function Widget({ layer }: { layer: Sketch.AnyLayer }) {
   );
 }
 
+function inferBlock(
+  interactionState: Extract<InteractionState, { type: 'drawing' }>,
+): DrawableLayerType {
+  if (Math.abs(interactionState.current.x - interactionState.origin.x) > 100) {
+    return {
+      symbolId: buttonSymbol.symbolID,
+    };
+  }
+  return {
+    symbolId: avatarSymbol.symbolID,
+  };
+}
+
 function Workspace(): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
@@ -168,7 +212,7 @@ function Workspace(): JSX.Element {
     workspace.history.present.sketch.pages.push(
       SketchModel.page({
         name: 'Symbols',
-        layers: [buttonSymbol],
+        layers: [buttonSymbol, avatarSymbol],
       }),
     );
 
@@ -190,6 +234,7 @@ function Workspace(): JSX.Element {
               Interactions.createDrawing({
                 initialState: 'none',
                 defaultSymbol: buttonSymbol.do_objectID,
+                inferBlock: inferBlock,
               }),
               Interactions.marquee,
             ]}
@@ -213,17 +258,44 @@ function Workspace(): JSX.Element {
       </div>
       <div style={{ flex: '1', display: 'flex' }}>
         <StateProvider state={state}>
-          <SimpleCanvas>
-            {({ size }) => (
-              <SVGRenderer size={size}>
-                <RenderingModeProvider value="static">
-                  <DesignFile />
-                </RenderingModeProvider>
-              </SVGRenderer>
-            )}
-          </SimpleCanvas>
+          <DOMRenderer />
         </StateProvider>
       </div>
+    </div>
+  );
+}
+
+const symbolIdToElement = {
+  [buttonSymbol.symbolID]: () => <Button>Button</Button>,
+  [avatarSymbol.symbolID]: () => <Avatar />,
+};
+
+function DOMRenderer(): JSX.Element {
+  const [state] = useApplicationState();
+  const page = Selectors.getCurrentPage(state);
+  const artboard = page.layers[0] as Sketch.Artboard;
+  return (
+    <div style={{ position: 'relative' }}>
+      <AppProvider i18n={enTranslations}>
+        {artboard.layers.map((layer) => {
+          return (
+            <div
+              key={layer.do_objectID}
+              style={{
+                position: 'absolute',
+                left: layer.frame.x,
+                top: layer.frame.y,
+                width: layer.frame.width,
+                height: layer.frame.height,
+              }}
+            >
+              {Layers.isSymbolInstance(layer) &&
+                typeof symbolIdToElement[layer.symbolID] === 'function' &&
+                symbolIdToElement[layer.symbolID]()}
+            </div>
+          );
+        })}
+      </AppProvider>
     </div>
   );
 }

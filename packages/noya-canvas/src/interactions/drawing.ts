@@ -9,14 +9,20 @@ import { InteractionAPI } from './types';
 
 export interface DrawingActions {
   startDrawing: (layerType: DrawableLayerType, point: Point) => void;
-  updateDrawing: (point: Point) => void;
+  updateDrawing: (point: Point, layerType?: DrawableLayerType) => void;
   addDrawnLayer: () => void;
   reset: () => void;
 }
 
 export const createDrawingInteraction =
   (
-    options: { initialState?: 'insert' | 'none'; defaultSymbol?: string } = {},
+    options: {
+      initialState?: 'insert' | 'none';
+      defaultSymbol?: string;
+      inferBlock?: (
+        interactionState: Extract<InteractionState, { type: 'drawing' }>,
+      ) => DrawableLayerType;
+    } = {},
   ) =>
   ({ startDrawing, updateDrawing, addDrawnLayer, reset }: DrawingActions) => {
     const initialState = options.initialState ?? 'none';
@@ -34,7 +40,9 @@ export const createDrawingInteraction =
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
           startDrawing(
-            options.defaultSymbol ? { id: options.defaultSymbol } : 'rectangle',
+            options.defaultSymbol
+              ? { symbolId: options.defaultSymbol }
+              : 'rectangle',
             canvasPoint,
           );
 
@@ -58,7 +66,11 @@ export const createDrawingInteraction =
           const screenPoint = api.getScreenPoint(event.nativeEvent);
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
-          updateDrawing(canvasPoint);
+          if (options.inferBlock) {
+            updateDrawing(canvasPoint, options.inferBlock(interactionState));
+          } else {
+            updateDrawing(canvasPoint, 'oval');
+          }
 
           api.setPointerCapture?.(event.pointerId);
           event.preventDefault();

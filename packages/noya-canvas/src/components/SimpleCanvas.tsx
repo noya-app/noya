@@ -85,8 +85,8 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       addDrawnLayer: () => dispatch('addDrawnLayer'),
       startDrawing: (layerType: DrawableLayerType, point: Point) =>
         dispatch('interaction', ['startDrawing', layerType, point]),
-      updateDrawing: (point: Point) =>
-        dispatch('interaction', ['updateDrawing', point]),
+      updateDrawing: (point: Point, layerType?: DrawableLayerType) =>
+        dispatch('interaction', ['updateDrawing', point, layerType]),
       pan: (point) => dispatch('pan*', point),
       startPanning: (point) => dispatch('interaction', ['startPanning', point]),
       updatePanning: (point) =>

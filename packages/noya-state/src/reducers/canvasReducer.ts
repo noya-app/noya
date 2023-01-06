@@ -315,7 +315,7 @@ export function canvasReducer(
                 state.lastEditedTextStyle,
               )
             : (() => {
-                const symbol = getSymbolMaster(state, shapeType.id);
+                const symbol = getSymbolMaster(state, shapeType.symbolId);
 
                 if (!symbol) return SketchModel.rectangle();
 

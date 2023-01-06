@@ -4,5 +4,8 @@
   "modular": {
     "type": "app"
   },
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "dependencies": {
+    "@shopify/polaris": "^10.17.1"
+  }
 }

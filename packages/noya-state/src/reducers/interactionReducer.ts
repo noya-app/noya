@@ -33,7 +33,7 @@ export type DrawableLayerType =
   | 'text'
   | 'artboard'
   | 'slice'
-  | { id: string };
+  | { symbolId: string };
 
 type Append<T extends unknown[], I extends unknown[]> = [...T, ...I];
 
@@ -54,7 +54,7 @@ export type InteractionAction =
   | [type: 'drawingShapePath', current?: Point]
   | [type: 'resetEditPath', current?: Point]
   | [type: 'startDrawing', shapeType: DrawableLayerType, point: Point]
-  | [type: 'updateDrawing', point: Point]
+  | [type: 'updateDrawing', point: Point, shapeType?: DrawableLayerType]
   | [type: 'startMarquee', point: Point]
   | [type: 'updateMarquee', point: Point]
   | [type: 'hoverHandle', direction: CompassDirection]
@@ -259,11 +259,12 @@ export function interactionReducer(
     case 'updateDrawing': {
       if (state.type !== 'drawing') return state;
 
-      const [, point] = action;
+      const [, point, shapeType] = action;
 
       return {
         ...state,
         current: point,
+        shapeType: shapeType ?? state.shapeType,
       };
     }
     case 'maybeMove': {
