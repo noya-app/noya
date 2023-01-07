@@ -14,11 +14,14 @@ import {
   DrawableLayerType,
   getCurrentPage,
   InteractionState,
+  Layers,
   LayerTraversalOptions,
   Selectors,
 } from 'noya-state';
 import React, { memo, useMemo, useRef } from 'react';
+import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
 import { DrawingActions } from '../interactions/drawing';
+import { EditBlockActions } from '../interactions/editBlock';
 import { MarqueeActions } from '../interactions/marquee';
 import { MoveActions } from '../interactions/move';
 import { PanActions } from '../interactions/pan';
@@ -42,7 +45,8 @@ export type Actions = MarqueeActions &
   MoveActions &
   ScaleActions &
   DrawingActions &
-  PanActions;
+  PanActions &
+  EditBlockActions;
 
 export type Interaction = (
   actions: Actions,
@@ -74,6 +78,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   const platformModKey = usePlatformModKey();
   const meta = Selectors.getCurrentPageMetadata(state);
   const { zoomValue, scrollOrigin } = meta;
+  const { getClickCount, setLatestClick } = useMultipleClickCount();
 
   const actions = useMemo((): Actions => {
     return {
@@ -103,6 +108,8 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       enablePanMode: () => dispatch('interaction', ['enablePanMode']),
       hoverHandle: (direction: CompassDirection) =>
         dispatch('interaction', ['hoverHandle', direction]),
+      startEditingBlock: (layerId) =>
+        dispatch('interaction', ['editingBlock', layerId]),
     };
   }, [dispatch]);
 
@@ -112,6 +119,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       platform,
       platformModKey,
       zoomValue,
+      getClickCount,
       selectedLayerIds: state.selectedLayerIds,
       selectedGradient: state.selectedGradient,
       convertPoint: (point, system) =>
@@ -138,6 +146,12 @@ export const SimpleCanvas = memo(function SimpleCanvas({
           options,
         )?.do_objectID;
       },
+      getLayerTypeById: (id: string) => {
+        return Layers.find(
+          getCurrentPage(state),
+          (layer) => layer.do_objectID === id,
+        )!._class;
+      },
       getScaleDirectionAtPoint: (point: Point) =>
         Selectors.getScaleDirectionAtPoint(state, point),
       handleKeyboardEvent: (keyMap) => (event) =>
@@ -146,6 +160,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   }, [
     CanvasKit,
     fontManager,
+    getClickCount,
     platform,
     platformModKey,
     scrollOrigin,
@@ -166,7 +181,14 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   return (
     <CanvasElement
       ref={ref}
-      {...mergeEventHandlers(...handlers)}
+      {...mergeEventHandlers(
+        {
+          onPointerDown: (event) => {
+            setLatestClick(getPoint(event.nativeEvent));
+          },
+        },
+        ...handlers,
+      )}
       onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
       rendererZIndex={rendererZIndex}
       widgets={widgets}

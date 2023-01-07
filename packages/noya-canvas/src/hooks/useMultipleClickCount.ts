@@ -1,8 +1,8 @@
 import { distance, Point } from 'noya-geometry';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef } from 'react';
 
 export function useMultipleClickCount() {
-  const [lastClick, setLastClick] = useState<
+  const lastClick = useRef<
     | {
         timestamp: number;
         point: Point;
@@ -11,20 +11,29 @@ export function useMultipleClickCount() {
     | undefined
   >();
 
-  return useCallback(
-    function setLatestClick(point: Point) {
+  const setLatestClick = useCallback(
+    (point: Point) => {
       const timestamp = Date.now();
       const clickCount =
-        lastClick &&
-        distance(lastClick.point, point) < 5 &&
-        timestamp - lastClick.timestamp < 300
-          ? lastClick.clickCount + 1
+        lastClick.current &&
+        distance(lastClick.current.point, point) < 5 &&
+        timestamp - lastClick.current.timestamp < 300
+          ? lastClick.current.clickCount + 1
           : 1;
 
-      setLastClick({ point, timestamp, clickCount });
+      lastClick.current = { point, timestamp, clickCount };
 
       return clickCount;
     },
     [lastClick],
   );
+
+  const getClickCount = useCallback(() => {
+    return lastClick.current ? lastClick.current.clickCount : 1;
+  }, [lastClick]);
+
+  return {
+    getClickCount,
+    setLatestClick,
+  };
 }

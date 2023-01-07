@@ -148,7 +148,7 @@ export const Canvas = memo(function Canvas({
     state.interactionState.type,
   );
 
-  const getClickCount = useMultipleClickCount();
+  const { getClickCount, setLatestClick } = useMultipleClickCount();
 
   const marquee = useMemo(() => {
     return marqueeInteraction({
@@ -166,6 +166,7 @@ export const Canvas = memo(function Canvas({
       platformModKey,
       selectedLayerIds: state.selectedLayerIds,
       zoomValue,
+      getClickCount,
       getScreenPoint: getPoint,
       convertPoint: (point, system) =>
         convertPoint(scrollOrigin, zoomValue, point, system),
@@ -190,6 +191,7 @@ export const Canvas = memo(function Canvas({
           options,
         )?.do_objectID;
       },
+      getLayerTypeById: (id: string) => 'rectangle',
       handleKeyboardEvent: (keyMap) => (event) =>
         handleKeyboardEvent(event.nativeEvent, api.platform, keyMap),
       getScaleDirectionAtPoint: (point: Point) =>
@@ -199,6 +201,7 @@ export const Canvas = memo(function Canvas({
     CanvasKit,
     canvasInsets,
     fontManager,
+    getClickCount,
     platform,
     platformModKey,
     scrollOrigin,
@@ -215,7 +218,7 @@ export const Canvas = memo(function Canvas({
       const rawPoint = getPoint(event.nativeEvent);
       const point = offsetEventPoint(rawPoint);
 
-      const clickCount = getClickCount(point);
+      const clickCount = setLatestClick(point);
 
       const handler = () =>
         marquee(
@@ -488,7 +491,7 @@ export const Canvas = memo(function Canvas({
     [
       state,
       offsetEventPoint,
-      getClickCount,
+      setLatestClick,
       marquee,
       api,
       selectedLayers,

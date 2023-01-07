@@ -37,7 +37,6 @@ function WidgetContainer({
         width: frame.width,
         height: frame.height,
         pointerEvents: 'none',
-        background: 'red',
       }}
     >
       {children}
@@ -85,33 +84,25 @@ export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
 
   const isSelected = state.selectedLayerIds.includes(layer.do_objectID);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isEditing, setIsEditing] = React.useState(false);
-
   if (!isSelected) return null;
+
+  const isEditing =
+    state.interactionState.type === 'editingBlock' &&
+    state.interactionState.layerId === layer.do_objectID;
 
   return (
     <WidgetContainer frame={rect}>
       <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
-      {!isEditing && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 10,
-            background: 'blue',
-            pointerEvents: 'all',
-          }}
-        ></div>
-      )}
       {isEditing && (
-        <div
+        <textarea
           style={{
             position: 'absolute',
-            inset: 10,
-            background: 'blue',
+            inset: 0,
+            background: 'white',
             pointerEvents: 'all',
+            resize: 'none',
           }}
-          contentEditable
+          autoFocus
           onFocusCapture={(event) => {
             event.stopPropagation();
           }}

@@ -4,6 +4,7 @@ import { OffsetPoint } from 'noya-react-utils';
 import {
   CompassDirection,
   LayerTraversalOptions,
+  LayerType,
   SelectedGradient,
 } from 'noya-state';
 import React from 'react';
@@ -15,6 +16,7 @@ export type InteractionAPI = Partial<ICanvasElement> & {
   selectedLayerIds: string[];
   selectedGradient?: SelectedGradient;
   zoomValue: number;
+  getClickCount: () => number;
   convertPoint: (point: Point, to: 'screen' | 'canvas') => Point;
   getScreenPoint: (input: OffsetPoint) => Point;
   getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => string[];
@@ -22,6 +24,7 @@ export type InteractionAPI = Partial<ICanvasElement> & {
     point: Point,
     options?: LayerTraversalOptions,
   ) => string | undefined;
+  getLayerTypeById: (id: string) => LayerType;
   getScaleDirectionAtPoint: (point: Point) => CompassDirection | undefined;
   handleKeyboardEvent: (keyMap: KeyMap) => (event: React.KeyboardEvent) => void;
 };

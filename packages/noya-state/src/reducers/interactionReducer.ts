@@ -73,6 +73,7 @@ export type InteractionAction =
   | [type: 'maybeMoveGradientEllipseLength', origin: Point]
   | [type: 'movingGradientEllipseLength', current: Point]
   | [type: 'editingText', id: UUID, range: TextSelectionRange]
+  | [type: 'editingBlock', id: UUID]
   | [type: 'maybeSelectText', origin: Point]
   | [type: 'selectingText', current: Point];
 
@@ -179,6 +180,7 @@ export type InteractionState =
       current: Point;
     }
   | { type: 'editingText'; layerId: UUID; range: TextSelectionRange }
+  | { type: 'editingBlock'; layerId: UUID }
   | {
       type: 'maybeSelectingText';
       origin: Point;
@@ -491,6 +493,14 @@ export function interactionReducer(
         type: 'editingText',
         layerId,
         range,
+      };
+    }
+    case 'editingBlock': {
+      const [, layerId] = action;
+
+      return {
+        type: 'editingBlock',
+        layerId,
       };
     }
     case 'maybeSelectText': {

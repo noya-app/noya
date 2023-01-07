@@ -12,6 +12,8 @@ export type ParentLayer = Extract<Sketch.AnyLayer, { layers: any }>;
 
 export type PageLayer = Sketch.Page['layers'][number];
 
+export type LayerType = Sketch.AnyLayer['_class'];
+
 export type ChildLayer = Exclude<
   Sketch.AnyLayer,
   { _class: 'artboard' | 'symbolMaster' | 'page' }

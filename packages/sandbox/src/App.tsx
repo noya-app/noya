@@ -159,6 +159,7 @@ function Content() {
       <div style={{ flex: '1', display: 'flex' }}>
         <SimpleCanvas
           interactions={[
+            Interactions.editBlock,
             Interactions.focus,
             Interactions.pan,
             Interactions.scale,
