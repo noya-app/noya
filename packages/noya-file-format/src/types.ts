@@ -1161,6 +1161,7 @@ export type SymbolInstance = {
   symbolID: Uuid;
   verticalSpacing: number;
   horizontalSpacing: number;
+  blockText?: string;
 };
 /**
  * Defines an individual symbol override

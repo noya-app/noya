@@ -1,15 +1,17 @@
 import { ReactEventHandlers } from 'noya-designsystem';
-import { handleActionType, InteractionState } from 'noya-state';
+import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 
 export interface EditBlockActions {
   startEditingBlock: (id: string) => void;
   reset: () => void;
+  selectLayer: (id: string[], selectionType?: SelectionType) => void;
 }
 
 export function editBlockInteraction({
   startEditingBlock,
   reset,
+  selectLayer,
 }: EditBlockActions) {
   return handleActionType<
     InteractionState,
@@ -40,6 +42,7 @@ export function editBlockInteraction({
     editingBlock: () => ({
       onPointerDown: (event) => {
         reset();
+        selectLayer([]);
         event.preventDefault();
       },
     }),

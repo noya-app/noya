@@ -8,6 +8,7 @@ import {
 } from 'noya-geometry';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
+import { useEffect, useRef } from 'react';
 
 function useGetScreenRect() {
   const [state] = useApplicationState();
@@ -75,8 +76,9 @@ function WidgetLabel({
 }
 
 export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
-  const [state] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
   const rect = useGetScreenRect()(layer.frame);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const symbol = Layers.isSymbolInstance(layer)
     ? Selectors.getSymbolMaster(state, layer.symbolID)
@@ -84,39 +86,52 @@ export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
 
   const isSelected = state.selectedLayerIds.includes(layer.do_objectID);
 
-  if (!isSelected) return null;
-
   const isEditing =
     state.interactionState.type === 'editingBlock' &&
     state.interactionState.layerId === layer.do_objectID;
 
+  useEffect(() => {
+    if (isEditing) {
+      textareaRef.current?.focus();
+    }
+  }, [isEditing]);
+
+  if (!Layers.isSymbolInstance(layer)) return null;
+
+  const blockText = layer.blockText ?? '';
+
   return (
     <WidgetContainer frame={rect}>
-      <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
-      {isEditing && (
-        <textarea
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'white',
-            pointerEvents: 'all',
-            resize: 'none',
-          }}
-          autoFocus
-          onFocusCapture={(event) => {
-            event.stopPropagation();
-          }}
-          onPointerDownCapture={(event) => {
-            event.stopPropagation();
-          }}
-          onPointerMoveCapture={(event) => {
-            event.stopPropagation();
-          }}
-          onPointerUpCapture={(event) => {
-            event.stopPropagation();
-          }}
-        />
-      )}
+      {isSelected && <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>}
+
+      <textarea
+        ref={textareaRef}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: isEditing ? '#fff' : '#eee',
+          pointerEvents: isEditing ? 'all' : 'none',
+          padding: 4,
+          resize: 'none',
+        }}
+        disabled={!isEditing}
+        onChange={(event) => {
+          dispatch('setBlockText', event.target.value);
+        }}
+        onFocusCapture={(event) => {
+          event.stopPropagation();
+        }}
+        onPointerDownCapture={(event) => {
+          event.stopPropagation();
+        }}
+        onPointerMoveCapture={(event) => {
+          event.stopPropagation();
+        }}
+        onPointerUpCapture={(event) => {
+          event.stopPropagation();
+        }}
+        value={blockText}
+      />
     </WidgetContainer>
   );
 }

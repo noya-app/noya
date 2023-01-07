@@ -232,8 +232,22 @@ function Workspace(): JSX.Element {
 }
 
 const symbolIdToElement = {
-  [buttonSymbol.symbolID]: () => <Button fullWidth>Button</Button>,
-  [avatarSymbol.symbolID]: () => <Avatar />,
+  [buttonSymbol.symbolID]: (layer: Sketch.SymbolInstance) => {
+    let size;
+    if (layer.frame.height < 30) {
+      size = 'slim' as const;
+    } else if (layer.frame.height > 50) {
+      size = 'large' as const;
+    } else {
+      size = 'medium' as const;
+    }
+    return (
+      <Button fullWidth size={size}>
+        {layer.blockText}
+      </Button>
+    );
+  },
+  [avatarSymbol.symbolID]: (layer: Sketch.SymbolInstance) => <Avatar />,
 };
 
 function DOMRenderer(): JSX.Element {
@@ -257,7 +271,7 @@ function DOMRenderer(): JSX.Element {
             >
               {Layers.isSymbolInstance(layer) &&
                 typeof symbolIdToElement[layer.symbolID] === 'function' &&
-                symbolIdToElement[layer.symbolID]()}
+                symbolIdToElement[layer.symbolID](layer)}
             </div>
           );
         })}

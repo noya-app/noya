@@ -197,6 +197,7 @@ export function applicationReducer(
     case 'setHasClippingMask':
     case 'setShouldBreakMaskChain':
     case 'setMaskMode':
+    case 'setBlockText':
       return layerPropertyReducer(state, action, CanvasKit);
     case 'groupLayers':
     case 'deleteLayer':

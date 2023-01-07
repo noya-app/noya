@@ -39,7 +39,8 @@ export type LayerPropertyAction =
   | [type: 'setIsFlippedHorizontal', value: boolean]
   | [type: 'setHasClippingMask', value: boolean]
   | [type: 'setShouldBreakMaskChain', value: boolean]
-  | [type: 'setMaskMode', value: 'alpha' | 'outline'];
+  | [type: 'setMaskMode', value: 'alpha' | 'outline']
+  | [type: 'setBlockText', value: string];
 
 export function layerPropertyReducer(
   state: ApplicationState,
@@ -321,6 +322,19 @@ export function layerPropertyReducer(
       return produce(state, (draft) => {
         accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
           layer.clippingMaskMode = value === 'alpha' ? 1 : 0;
+        });
+      });
+    }
+    case 'setBlockText': {
+      const [, value] = action;
+      const pageIndex = getCurrentPageIndex(state);
+      const layerIndexPaths = getSelectedLayerIndexPaths(state);
+
+      return produce(state, (draft) => {
+        accessPageLayers(draft, pageIndex, layerIndexPaths).forEach((layer) => {
+          if (Layers.isSymbolInstance(layer)) {
+            layer.blockText = value;
+          }
         });
       });
     }
