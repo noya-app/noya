@@ -6,6 +6,9 @@
   },
   "version": "1.0.0",
   "dependencies": {
-    "@shopify/polaris": "^10.17.1"
+    "@chakra-ui/react": "^1",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "framer-motion": "^6"
   }
 }
