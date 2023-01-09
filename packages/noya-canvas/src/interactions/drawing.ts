@@ -18,7 +18,7 @@ export const createDrawingInteraction =
   (
     options: {
       initialState?: 'insert' | 'none';
-      inferBlock?: ({ rect }: { rect: Rect }) => DrawableLayerType;
+      inferBlockType?: ({ rect }: { rect: Rect }) => DrawableLayerType;
     } = {},
   ) =>
   ({ startDrawing, updateDrawing, addDrawnLayer, reset }: DrawingActions) => {
@@ -37,8 +37,8 @@ export const createDrawingInteraction =
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
           startDrawing(
-            options.inferBlock
-              ? options.inferBlock({
+            options.inferBlockType
+              ? options.inferBlockType({
                   rect: createRect(canvasPoint, canvasPoint),
                 })
               : 'rectangle',
@@ -65,10 +65,10 @@ export const createDrawingInteraction =
           const screenPoint = api.getScreenPoint(event.nativeEvent);
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
-          if (options.inferBlock) {
+          if (options.inferBlockType) {
             updateDrawing(
               canvasPoint,
-              options.inferBlock({
+              options.inferBlockType({
                 rect: createRect(
                   interactionState.origin,
                   interactionState.current,

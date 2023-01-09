@@ -23,7 +23,11 @@ export type SymbolsAction =
   | [type: 'setMinWidth', amount: number, type: SetNumberMode]
   | [type: 'setAllowsOverrides', value: boolean]
   | [type: 'onSetOverrideProperty', overrideName: string, value: boolean]
-  | [type: 'setInstanceSymbolSource', symbolId: string]
+  | [
+      type: 'setInstanceSymbolSource',
+      symbolId: string,
+      dimensions: 'resetToMaster' | 'preserveCurrent',
+    ]
   | [type: 'goToSymbolSource', overrideName: string]
   | [type: 'setOverrideValue', overrideName?: string, value?: string];
 
@@ -178,7 +182,7 @@ export function symbolsReducer(
       });
     }
     case 'setInstanceSymbolSource': {
-      const [, symbolId] = action;
+      const [, symbolId, dimensions] = action;
 
       const symbolMaster = getSymbolMaster(state, symbolId);
 
@@ -191,8 +195,14 @@ export function symbolsReducer(
         symbols.forEach((symbol) => {
           symbol.frame = {
             ...symbol.frame,
-            width: symbolMaster.frame.width,
-            height: symbolMaster.frame.height,
+            width:
+              dimensions === 'resetToMaster'
+                ? symbolMaster.frame.width
+                : symbol.frame.width,
+            height:
+              dimensions === 'resetToMaster'
+                ? symbolMaster.frame.height
+                : symbol.frame.height,
           };
           symbol.symbolID = symbolId;
         });

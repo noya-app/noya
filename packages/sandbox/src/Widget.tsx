@@ -9,6 +9,7 @@ import {
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
+import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 
 function useGetScreenRect() {
   const [state] = useApplicationState();
@@ -75,7 +76,15 @@ function WidgetLabel({
   );
 }
 
-export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
+export function Widget({
+  layer,
+  inferBlockTypes,
+  onChangeBlockType,
+}: {
+  layer: Sketch.AnyLayer;
+  inferBlockTypes: (input: BlockHeuristicInput) => InferredBlockTypeResult[];
+  onChangeBlockType: (type: DrawableLayerType) => void;
+}) {
   const [state, dispatch] = useApplicationState();
   const rect = useGetScreenRect()(layer.frame);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -99,6 +108,8 @@ export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
   if (!Layers.isSymbolInstance(layer)) return null;
 
   const blockText = layer.blockText ?? '';
+
+  const blockTypes = inferBlockTypes({ rect });
 
   return (
     <WidgetContainer frame={rect}>
@@ -132,21 +143,56 @@ export function Widget({ layer }: { layer: Sketch.AnyLayer }) {
         }}
         value={blockText}
       />
+      {isSelected && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 32px)',
+            right: 0,
+            background: 'black',
+            color: 'white',
+            pointerEvents: 'all',
+            padding: '2px 4px',
+            whiteSpace: 'pre',
+            borderRadius: '4px',
+          }}
+        >
+          {blockTypes.map((blockType) => {
+            const symbol =
+              typeof blockType.type === 'string'
+                ? undefined
+                : Selectors.getSymbolMaster(state, blockType.type.symbolId);
+            return (
+              <div
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                  onChangeBlockType(blockType.type);
+                }}
+              >
+                {blockType.score}{' '}
+                {typeof blockType.type === 'string'
+                  ? blockType.type
+                  : symbol?.name ?? blockType.type.symbolId}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </WidgetContainer>
   );
 }
 
 export function DrawingWidget({
-  inferBlock,
+  inferBlockType,
 }: {
-  inferBlock: ({ rect }: { rect: Rect }) => DrawableLayerType;
+  inferBlockType: ({ rect }: { rect: Rect }) => DrawableLayerType;
 }) {
   const [state] = useApplicationState();
   const getScreenRect = useGetScreenRect();
 
   if (state.interactionState.type !== 'drawing') return null;
 
-  const block = inferBlock({
+  const block = inferBlockType({
     rect: createRect(
       state.interactionState.origin,
       state.interactionState.current,

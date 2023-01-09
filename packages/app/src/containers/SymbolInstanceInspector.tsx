@@ -39,7 +39,7 @@ export default memo(function SymbolMasterInspector() {
       symbolId={selectedSymbolInstance.symbolID}
       onSelect={useCallback(
         (value) => {
-          dispatch('setInstanceSymbolSource', value);
+          dispatch('setInstanceSymbolSource', value, 'resetToMaster');
         },
         [dispatch],
       )}

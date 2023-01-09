@@ -7,7 +7,6 @@ import {
   lightTheme,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { Rect } from 'noya-geometry';
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
@@ -31,6 +30,7 @@ import {
 } from 'noya-state';
 import * as React from 'react';
 import { Suspense, useReducer } from 'react';
+import { BlockHeuristicInput, InferredBlockTypeResult } from './types';
 import { DrawingWidget, Widget } from './Widget';
 const { AppProvider, Avatar, Button } = require('@shopify/polaris');
 
@@ -138,19 +138,55 @@ const avatarSymbol = SketchModel.symbolMaster({
   ],
 });
 
-function inferBlock({ rect }: { rect: Rect }): DrawableLayerType {
-  if (rect.width > 100) {
-    return {
-      symbolId: buttonSymbol.symbolID,
-    };
+const BLOCK_TYPE_HEURISTICS = {
+  [buttonSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    return 0.1;
+  },
+  [avatarSymbol.symbolID]: ({ rect }: BlockHeuristicInput) => {
+    if (
+      rect.width > 30 &&
+      rect.width < 50 &&
+      rect.height > 30 &&
+      rect.height < 50 &&
+      rect.width / rect.height > 0.8 &&
+      rect.width / rect.height < 1.2
+    ) {
+      return 1;
+    } else {
+      return 0;
+    }
+  },
+};
+
+function inferBlockTypes(
+  input: BlockHeuristicInput,
+): InferredBlockTypeResult[] {
+  let results: InferredBlockTypeResult[] = [];
+
+  for (const [symbolId, heuristicFunction] of Object.entries(
+    BLOCK_TYPE_HEURISTICS,
+  )) {
+    results.push({
+      type: { symbolId },
+      score: heuristicFunction(input) ?? 0,
+    });
   }
-  return {
-    symbolId: avatarSymbol.symbolID,
-  };
+
+  results.sort(
+    (
+      a: { type: DrawableLayerType; score: number },
+      b: { type: DrawableLayerType; score: number },
+    ) => b.score - a.score,
+  );
+  return results;
+}
+
+function inferBlockType(input: BlockHeuristicInput): DrawableLayerType {
+  return inferBlockTypes(input)[0].type;
 }
 
 function Content() {
-  const [state] = useApplicationState();
+  const [state, dispatch] = useApplicationState();
 
   const layers = Layers.flat(Selectors.getCurrentPage(state));
 
@@ -168,16 +204,29 @@ function Content() {
             Interactions.move,
             Interactions.createDrawing({
               initialState: 'none',
-              inferBlock,
+              inferBlockType: inferBlockType,
             }),
           ]}
           widgets={
             <>
               {layers.map((layer) => (
-                <Widget key={layer.do_objectID} layer={layer} />
+                <Widget
+                  key={layer.do_objectID}
+                  layer={layer}
+                  inferBlockTypes={inferBlockTypes}
+                  onChangeBlockType={(type: DrawableLayerType) => {
+                    dispatch(
+                      'setInstanceSymbolSource',
+                      typeof type !== 'string'
+                        ? type.symbolId
+                        : buttonSymbol.symbolID,
+                      'preserveCurrent',
+                    );
+                  }}
+                />
               ))}
               {state.interactionState.type === 'drawing' && (
-                <DrawingWidget inferBlock={inferBlock} />
+                <DrawingWidget inferBlockType={inferBlockType} />
               )}
             </>
           }
