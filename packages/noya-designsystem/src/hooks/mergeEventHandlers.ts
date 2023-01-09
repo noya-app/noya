@@ -18,6 +18,7 @@ export type ReactEventHandlers = ReturnType<ReturnType<typeof useGesture>> & {
   onKeyUpCapture?: (e: React.KeyboardEvent) => void;
   onKeyPress?: (e: React.KeyboardEvent) => void;
   onKeyPressCapture?: (e: React.KeyboardEvent) => void;
+  onBeforeInput?: (e: InputEvent) => void;
 };
 export type EventName = keyof ReactEventHandlers;
 

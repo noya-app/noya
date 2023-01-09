@@ -159,6 +159,7 @@ function Content() {
       <div style={{ flex: '1', display: 'flex' }}>
         <SimpleCanvas
           interactions={[
+            Interactions.editText,
             Interactions.editBlock,
             Interactions.focus,
             Interactions.pan,
@@ -167,7 +168,6 @@ function Content() {
             Interactions.move,
             Interactions.createDrawing({
               initialState: 'none',
-              defaultSymbol: buttonSymbol.do_objectID,
               inferBlock,
             }),
           ]}

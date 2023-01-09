@@ -7,6 +7,7 @@ import React, {
   forwardRef,
   memo,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
 } from 'react';
 import styled from 'styled-components';
@@ -90,8 +91,19 @@ export const CanvasElement = memo(
       onKeyUpCapture,
       onKeyPress,
       onKeyPressCapture,
+      onBeforeInput,
       ...rest
     } = props;
+
+    useLayoutEffect(() => {
+      const input = inputRef.current;
+
+      if (!input || !onBeforeInput) return;
+
+      input.addEventListener('beforeinput', onBeforeInput);
+
+      return () => input.removeEventListener('beforeinput', onBeforeInput);
+    }, [onBeforeInput]);
 
     return (
       <Container

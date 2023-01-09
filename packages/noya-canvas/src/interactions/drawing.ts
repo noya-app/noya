@@ -18,7 +18,6 @@ export const createDrawingInteraction =
   (
     options: {
       initialState?: 'insert' | 'none';
-      defaultSymbol?: string;
       inferBlock?: ({ rect }: { rect: Rect }) => DrawableLayerType;
     } = {},
   ) =>
@@ -38,8 +37,10 @@ export const createDrawingInteraction =
           const canvasPoint = api.convertPoint(screenPoint, 'canvas');
 
           startDrawing(
-            options.defaultSymbol
-              ? { symbolId: options.defaultSymbol }
+            options.inferBlock
+              ? options.inferBlock({
+                  rect: createRect(canvasPoint, canvasPoint),
+                })
               : 'rectangle',
             canvasPoint,
           );
@@ -75,7 +76,7 @@ export const createDrawingInteraction =
               }),
             );
           } else {
-            updateDrawing(canvasPoint, 'oval');
+            updateDrawing(canvasPoint, 'rectangle');
           }
 
           api.setPointerCapture?.(event.pointerId);

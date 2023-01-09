@@ -1,5 +1,6 @@
 import { createDrawingInteraction } from './drawing';
 import { editBlockInteraction } from './editBlock';
+import { editTextInteraction } from './editText';
 import { focusInteraction } from './focus';
 import { marqueeInteraction } from './marquee';
 import { moveInteraction } from './move';
@@ -16,4 +17,5 @@ export namespace Interactions {
   export const pan = panInteraction;
   export const createDrawing = createDrawingInteraction;
   export const editBlock = editBlockInteraction;
+  export const editText = editTextInteraction;
 }

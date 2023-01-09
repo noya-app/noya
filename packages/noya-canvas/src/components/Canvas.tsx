@@ -18,24 +18,24 @@ import {
   SupportedImageUploadType,
   SUPPORTED_CANVAS_UPLOAD_TYPES,
   SUPPORTED_IMAGE_UPLOAD_TYPES,
-  usePlatform,
   usePlatformModKey,
 } from 'noya-designsystem';
 import Sketch from 'noya-file-format';
-import { AffineTransform, Insets, Point, Rect, Size } from 'noya-geometry';
 import {
-  handleKeyboardEvent,
-  IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS,
-} from 'noya-keymap';
+  AffineTransform,
+  createRect,
+  Insets,
+  Point,
+  Size,
+} from 'noya-geometry';
+import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import { FileDropTarget, OffsetPoint, TypedFile } from 'noya-react-utils';
 import { useCanvasKit, useFontManager } from 'noya-renderer';
 import { decode } from 'noya-sketch-file';
 import {
   decodeCurvePoint,
-  getCurrentPage,
   ImportedImageTarget,
   Layers,
-  LayerTraversalOptions,
   SelectedControlPoint,
   SelectedPoint,
   Selectors,
@@ -52,9 +52,6 @@ import { useGesture } from 'react-use-gesture';
 import styled from 'styled-components';
 import { useAutomaticCanvasSize } from '../hooks/useAutomaticCanvasSize';
 import { useCanvasShortcuts } from '../hooks/useCanvasShortcuts';
-import { marqueeInteraction } from '../interactions/marquee';
-import { InteractionAPI } from '../interactions/types';
-import { convertPoint } from '../utils/convertPoint';
 import { importImageFile } from '../utils/importImageFile';
 import { ZERO_INSETS } from './CanvasElement';
 
@@ -123,7 +120,6 @@ export const Canvas = memo(function Canvas({
   const fontManager = useFontManager();
   const meta = useSelector(Selectors.getCurrentPageMetadata);
   const platformModKey = usePlatformModKey();
-  const platform = usePlatform();
   const { highlightLayer, highlightedLayer } = useWorkspace();
   const bind = useGesture({
     onWheel: ({ delta: [x, y] }) => dispatch('pan*', { x, y }),
@@ -148,66 +144,7 @@ export const Canvas = memo(function Canvas({
     state.interactionState.type,
   );
 
-  const { getClickCount, setLatestClick } = useMultipleClickCount();
-
-  const marquee = useMemo(() => {
-    return marqueeInteraction({
-      startMarquee: (point) => dispatch('interaction', ['startMarquee', point]),
-      updateMarquee: (point) =>
-        dispatch('interaction', ['updateMarquee', point]),
-      reset: () => dispatch('interaction', ['reset']),
-      selectLayer: (layerId) => dispatch('selectLayer', layerId),
-    });
-  }, [dispatch]);
-
-  const api = useMemo((): InteractionAPI => {
-    return {
-      platform,
-      platformModKey,
-      selectedLayerIds: state.selectedLayerIds,
-      zoomValue,
-      getClickCount,
-      getScreenPoint: getPoint,
-      convertPoint: (point, system) =>
-        convertPoint(scrollOrigin, zoomValue, point, system),
-      getLayerIdsInRect: (rect: Rect, options?: LayerTraversalOptions) => {
-        const layers = Selectors.getLayersInRect(
-          state,
-          getCurrentPage(state),
-          canvasInsets,
-          rect,
-          options,
-        );
-
-        return layers.map((layer) => layer.do_objectID);
-      },
-      getLayerIdAtPoint: (point: Point, options?: LayerTraversalOptions) => {
-        return Selectors.getLayerAtPoint(
-          CanvasKit,
-          fontManager,
-          state,
-          canvasInsets,
-          point,
-          options,
-        )?.do_objectID;
-      },
-      getLayerTypeById: (id: string) => 'rectangle',
-      handleKeyboardEvent: (keyMap) => (event) =>
-        handleKeyboardEvent(event.nativeEvent, api.platform, keyMap),
-      getScaleDirectionAtPoint: (point: Point) =>
-        Selectors.getScaleDirectionAtPoint(state, point),
-    };
-  }, [
-    CanvasKit,
-    canvasInsets,
-    fontManager,
-    getClickCount,
-    platform,
-    platformModKey,
-    scrollOrigin,
-    state,
-    zoomValue,
-  ]);
+  const { setLatestClick } = useMultipleClickCount();
 
   const handleMouseDown = useCallback(
     (event: React.PointerEvent) => {
@@ -219,13 +156,6 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const clickCount = setLatestClick(point);
-
-      const handler = () =>
-        marquee(
-          state.interactionState,
-          state.interactionState.type,
-          api,
-        ).onPointerDown?.(event);
 
       if (clickCount >= 2) {
         if (selectedLayers.length === 0) return;
@@ -480,7 +410,8 @@ export const Canvas = memo(function Canvas({
 
               dispatch('interaction', ['maybeMove', point]);
             } else {
-              handler();
+              dispatch('selectLayer', undefined);
+              dispatch('interaction', ['startMarquee', rawPoint]);
             }
           }
 
@@ -492,8 +423,6 @@ export const Canvas = memo(function Canvas({
       state,
       offsetEventPoint,
       setLatestClick,
-      marquee,
-      api,
       selectedLayers,
       CanvasKit,
       fontManager,
@@ -509,13 +438,6 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const textSelection = Selectors.getTextSelection(state);
-
-      const handler = () =>
-        marquee(
-          state.interactionState,
-          state.interactionState.type,
-          api,
-        ).onPointerMove?.(event);
 
       switch (state.interactionState.type) {
         case 'maybeMoveGradientEllipseLength': {
@@ -717,7 +639,30 @@ export const Canvas = memo(function Canvas({
           break;
         }
         case 'marquee': {
-          handler();
+          dispatch('interaction', ['updateMarquee', rawPoint]);
+
+          containerRef.current?.setPointerCapture(event.pointerId);
+          event.preventDefault();
+
+          const { origin, current } = state.interactionState;
+
+          const layers = Selectors.getLayersInRect(
+            state,
+            Selectors.getCurrentPage(state),
+            canvasInsets,
+            createRect(origin, current),
+            {
+              groups: event[platformModKey] ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
+            },
+          );
+
+          dispatch(
+            'selectLayer',
+            layers.map((layer) => layer.do_objectID),
+          );
+
           break;
         }
         case 'hoverHandle': {
@@ -778,8 +723,6 @@ export const Canvas = memo(function Canvas({
     [
       offsetEventPoint,
       state,
-      marquee,
-      api,
       dispatch,
       zoomValue,
       CanvasKit,
@@ -798,13 +741,6 @@ export const Canvas = memo(function Canvas({
       const point = offsetEventPoint(rawPoint);
 
       const textSelection = Selectors.getTextSelection(state);
-
-      const handler = () =>
-        marquee(
-          state.interactionState,
-          state.interactionState.type,
-          api,
-        ).onPointerUp?.(event);
 
       switch (state.interactionState.type) {
         case 'maybeSelectingText': {
@@ -875,7 +811,29 @@ export const Canvas = memo(function Canvas({
           break;
         }
         case 'marquee': {
-          handler();
+          dispatch('interaction', ['reset']);
+
+          const { origin, current } = state.interactionState;
+
+          const layers = Selectors.getLayersInRect(
+            state,
+            Selectors.getCurrentPage(state),
+            canvasInsets,
+            createRect(origin, current),
+            {
+              groups: event[platformModKey] ? 'childrenOnly' : 'groupOnly',
+              artboards: 'emptyOrContainedArtboardOrChildren',
+              includeLockedLayers: false,
+            },
+          );
+
+          dispatch(
+            'selectLayer',
+            layers.map((layer) => layer.do_objectID),
+          );
+
+          containerRef.current?.releasePointerCapture(event.pointerId);
+
           break;
         }
         case 'maybeMove':
@@ -921,7 +879,15 @@ export const Canvas = memo(function Canvas({
           break;
       }
     },
-    [offsetEventPoint, state, marquee, api, CanvasKit, fontManager, dispatch],
+    [
+      offsetEventPoint,
+      state,
+      CanvasKit,
+      fontManager,
+      dispatch,
+      canvasInsets,
+      platformModKey,
+    ],
   );
 
   const cursor = useMemo(() => Selectors.getCursor(state), [state]);
@@ -1029,6 +995,12 @@ export const Canvas = memo(function Canvas({
     [dispatch],
   );
 
+  const { onBeforeInput, ...mergedHandlers } = mergeEventHandlers(bind(), {
+    onPointerDown: handleMouseDown,
+    onPointerMove: handleMouseMove,
+    onPointerUp: handleMouseUp,
+  });
+
   return (
     <FileDropTarget<SupportedCanvasUploadType>
       supportedFileTypes={SUPPORTED_CANVAS_UPLOAD_TYPES}
@@ -1052,11 +1024,7 @@ export const Canvas = memo(function Canvas({
           id="canvas-container"
           ref={containerRef}
           cursor={cursor}
-          {...mergeEventHandlers(bind(), {
-            onPointerDown: handleMouseDown,
-            onPointerMove: handleMouseMove,
-            onPointerUp: handleMouseUp,
-          })}
+          {...mergedHandlers}
           tabIndex={0}
           onFocus={() => inputRef.current?.focus()}
         >
