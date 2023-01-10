@@ -3,10 +3,10 @@ import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import { DesignFile, RenderingModeProvider } from 'noya-renderer';
 import { DrawableLayerType, Layers, Selectors } from 'noya-state';
 import * as React from 'react';
-import { DrawingWidget, Widget } from './Widget';
-import { buttonSymbol } from './symbols';
 import { DOMRenderer } from './DOMRenderer';
 import { inferBlockType, inferBlockTypes } from './inferBlock';
+import { buttonSymbol } from './symbols';
+import { DrawingWidget, Widget } from './Widget';
 
 export function Content() {
   const [state, dispatch] = useApplicationState();
@@ -63,6 +63,7 @@ export function Content() {
           )}
         </SimpleCanvas>
       </div>
+      <div style={{ width: '1px', backgroundColor: '#ccc' }} />
       <div style={{ flex: '1', display: 'flex' }}>
         <DOMRenderer />
       </div>

@@ -147,7 +147,7 @@ export function Widget({
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 32px)',
+            top: 'calc(100% + 36px)',
             right: 0,
             background: 'black',
             color: 'white',
@@ -158,21 +158,21 @@ export function Widget({
           }}
         >
           {blockTypes.map((blockType) => {
-            const symbol =
+            const name =
               typeof blockType.type === 'string'
-                ? undefined
-                : Selectors.getSymbolMaster(state, blockType.type.symbolId);
+                ? blockType.type
+                : Selectors.getSymbolMaster(state, blockType.type.symbolId)
+                    .name;
+
             return (
               <div
+                key={name}
                 onPointerDown={(event) => {
                   event.stopPropagation();
                   onChangeBlockType(blockType.type);
                 }}
               >
-                {blockType.score}{' '}
-                {typeof blockType.type === 'string'
-                  ? blockType.type
-                  : symbol?.name ?? blockType.type.symbolId}
+                {blockType.score} {name}
               </div>
             );
           })}
