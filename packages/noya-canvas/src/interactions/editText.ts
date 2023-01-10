@@ -27,6 +27,14 @@ export interface EditTextActions {
     unit: 'word' | 'line',
   ) => void;
   selectAllText: (id: string) => void;
+  moveCursor: (
+    direction: TextEditorCursorDirection,
+    unit: TextEditorCursorUnit,
+  ) => void;
+  moveTextSelection: (
+    direction: TextEditorCursorDirection,
+    unit: TextEditorCursorUnit,
+  ) => void;
   reset: () => void;
 }
 
@@ -39,6 +47,8 @@ export function editTextInteraction({
   selectingText,
   selectAllText,
   selectContainingText,
+  moveCursor,
+  moveTextSelection,
   reset,
 }: EditTextActions) {
   return handleActionType<
@@ -145,6 +155,30 @@ export function editTextInteraction({
           }
         }
       },
+      onKeyDown: api.handleKeyboardEvent({
+        // Cursor movement
+        ArrowLeft: () => moveCursor('backward', 'character'),
+        ArrowRight: () => moveCursor('forward', 'character'),
+        ArrowUp: () => moveCursor('backward', 'vertical'),
+        ArrowDown: () => moveCursor('forward', 'vertical'),
+        'Alt-ArrowLeft': () => moveCursor('backward', 'word'),
+        'Alt-ArrowRight': () => moveCursor('forward', 'word'),
+        'Mod-ArrowLeft': () => moveCursor('backward', 'line'),
+        'Mod-ArrowRight': () => moveCursor('forward', 'line'),
+        'Mod-ArrowUp': () => moveCursor('backward', 'all'),
+        'Mod-ArrowDown': () => moveCursor('forward', 'all'),
+        // Selection movement
+        'Shift-ArrowLeft': () => moveTextSelection('backward', 'character'),
+        'Shift-ArrowRight': () => moveTextSelection('forward', 'character'),
+        'Shift-ArrowUp': () => moveTextSelection('backward', 'vertical'),
+        'Shift-ArrowDown': () => moveTextSelection('forward', 'vertical'),
+        'Shift-Alt-ArrowLeft': () => moveTextSelection('backward', 'word'),
+        'Shift-Alt-ArrowRight': () => moveTextSelection('forward', 'word'),
+        'Shift-Mod-ArrowLeft': () => moveTextSelection('backward', 'line'),
+        'Shift-Mod-ArrowRight': () => moveTextSelection('forward', 'line'),
+        'Shift-Mod-ArrowUp': () => moveTextSelection('backward', 'all'),
+        'Shift-Mod-ArrowDown': () => moveTextSelection('forward', 'all'),
+      }),
     }),
     maybeSelectingText: (interactionState, api) => ({
       onPointerMove: (event) => {

@@ -3,6 +3,7 @@ import {
   DesignSystemConfigurationProvider,
   lightTheme,
 } from 'noya-designsystem';
+import { getCurrentPlatform } from 'noya-keymap';
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
@@ -93,7 +94,10 @@ export default function App(): JSX.Element {
   }
 
   return (
-    <DesignSystemConfigurationProvider theme={lightTheme} platform={'key'}>
+    <DesignSystemConfigurationProvider
+      theme={lightTheme}
+      platform={getCurrentPlatform(navigator)}
+    >
       <Suspense fallback="Loading">
         <ImageCacheProvider>
           <CanvasKitProvider>

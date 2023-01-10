@@ -17,6 +17,7 @@ import {
   Layers,
   LayerTraversalOptions,
   Selectors,
+  SetNumberMode,
   TextEditorCursorDirection,
   TextEditorCursorUnit,
   TextSelectionRange,
@@ -125,6 +126,18 @@ export function useInteractionHandlers({
         direction: TextEditorCursorDirection,
         unit: TextEditorCursorUnit,
       ) => dispatch('deleteText', direction, unit),
+      moveCursor: (
+        direction: TextEditorCursorDirection,
+        unit: TextEditorCursorUnit,
+      ) => dispatch('moveCursor', direction, unit),
+      moveTextSelection: (
+        direction: TextEditorCursorDirection,
+        unit: TextEditorCursorUnit,
+      ) => dispatch('moveTextSelection', direction, unit),
+      setLayerX: (value: number, mode: SetNumberMode) =>
+        dispatch('setLayerX', value, mode),
+      setLayerY: (value: number, mode: SetNumberMode) =>
+        dispatch('setLayerY', value, mode),
     };
   }, [dispatch]);
 
