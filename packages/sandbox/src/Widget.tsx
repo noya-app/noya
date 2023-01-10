@@ -125,6 +125,7 @@ export function Widget({
           pointerEvents: isEditing ? 'all' : 'none',
           padding: 4,
           resize: 'none',
+          border: '1px solid rgba(0,0,0,0.1)',
         }}
         disabled={!isEditing}
         onChange={(event) => {
