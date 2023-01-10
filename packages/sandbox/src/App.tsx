@@ -23,7 +23,18 @@ import {
 import * as React from 'react';
 import { Suspense, useReducer } from 'react';
 import { Content } from './Content';
-import { avatarSymbol, buttonSymbol } from './symbols';
+import {
+  avatarSymbol,
+  boxSymbol,
+  buttonSymbol,
+  checkboxSymbol,
+  headingSymbol,
+  iconButtonSymbol,
+  imageSymbol,
+  inputSymbol,
+  switchSymbol,
+  textSymbol,
+} from './symbols';
 
 let initialized = false;
 
@@ -31,8 +42,8 @@ const rectangle = SketchModel.rectangle({
   frame: SketchModel.rect({
     x: 0,
     y: 0,
-    width: 100,
-    height: 100,
+    width: 0,
+    height: 0,
   }),
   style: SketchModel.style({
     fills: [
@@ -73,7 +84,19 @@ function Workspace(): JSX.Element {
     workspace.history.present.sketch.pages.push(
       SketchModel.page({
         name: 'Symbols',
-        layers: [buttonSymbol, avatarSymbol],
+        layers: [
+          buttonSymbol,
+          avatarSymbol,
+          boxSymbol,
+          boxSymbol,
+          checkboxSymbol,
+          iconButtonSymbol,
+          inputSymbol,
+          switchSymbol,
+          textSymbol,
+          imageSymbol,
+          headingSymbol,
+        ],
       }),
     );
 

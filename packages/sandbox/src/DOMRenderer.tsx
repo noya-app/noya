@@ -1,10 +1,33 @@
-import { Avatar, Button, ChakraProvider } from '@chakra-ui/react';
+import React from 'react';
+import {
+  Avatar,
+  Box,
+  Button,
+  ChakraProvider,
+  Checkbox,
+  Heading,
+  IconButton,
+  Image,
+  Input,
+  Switch,
+  Text,
+} from '@chakra-ui/react';
 import { useApplicationState } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import { createRect, Rect } from 'noya-geometry';
 import { Layers, Selectors } from 'noya-state';
-import * as React from 'react';
-import { avatarSymbol, buttonSymbol } from './symbols';
+import {
+  avatarSymbol,
+  boxSymbol,
+  buttonSymbol,
+  checkboxSymbol,
+  headingSymbol,
+  iconButtonSymbol,
+  imageSymbol,
+  inputSymbol,
+  switchSymbol,
+  textSymbol,
+} from './symbols';
 
 type DOMElementsProps = {
   frame: Rect;
@@ -28,6 +51,38 @@ export const symbolIdToElement = {
     );
   },
   [avatarSymbol.symbolID]: (props: DOMElementsProps) => <Avatar size="full" />,
+  [boxSymbol.symbolID]: (props: DOMElementsProps) => (
+    <Box
+      bg={
+        props.blockText && CSS.supports('color', props.blockText)
+          ? props.blockText
+          : '#eee'
+      }
+      w="100%"
+      h="100%"
+    />
+  ),
+  [checkboxSymbol.symbolID]: (props: DOMElementsProps) => <Checkbox />,
+  [iconButtonSymbol.symbolID]: (props: DOMElementsProps) => (
+    <IconButton aria-label={''} />
+  ),
+  [inputSymbol.symbolID]: (props: DOMElementsProps) => <Input />,
+  [switchSymbol.symbolID]: (props: DOMElementsProps) => <Switch />,
+  [textSymbol.symbolID]: (props: DOMElementsProps) => (
+    <Text>{props.blockText}</Text>
+  ),
+  [imageSymbol.symbolID]: (props: DOMElementsProps) => (
+    <Image
+      src={`https://source.unsplash.com/${props.frame.width}x${props.frame.height}?${props.blockText}`}
+      fit="cover"
+      align="middle"
+      w="100%"
+      h="100%"
+    />
+  ),
+  [headingSymbol.symbolID]: (props: DOMElementsProps) => (
+    <Heading>{props.blockText}</Heading>
+  ),
 };
 
 function SymbolRenderer({
