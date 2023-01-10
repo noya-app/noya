@@ -65,6 +65,7 @@ function WidgetLabel({
         padding: '2px 4px',
         whiteSpace: 'pre',
         borderRadius: '4px',
+        zIndex: 1,
       }}
       onPointerDown={(event) => {
         event.stopPropagation();
@@ -155,6 +156,7 @@ export function Widget({
             padding: '2px 4px',
             whiteSpace: 'pre',
             borderRadius: '4px',
+            zIndex: 1,
           }}
         >
           {blockTypes.map((blockType) => {
