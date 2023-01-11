@@ -1,5 +1,7 @@
 import { SketchModel } from 'noya-sketch-model';
 
+export const ayonLibraryId = 'e6cc1791-d9c1-410a-84b6-b381fe058bef';
+
 export const buttonSymbolId = 'cdf2346b-cb21-4f23-8d93-7c4fb2e3a5a0';
 export const avatarSymbolId = 'fe7dd31d-b140-4e4c-ab7b-90fbe833936b';
 export const boxSymbolId = '9dc8f73e-64f2-43f2-8902-af334a7a17cd';
@@ -60,3 +62,16 @@ export const headingSymbol = SketchModel.symbolMaster({
   symbolID: headingSymbolId,
   name: 'Heading',
 });
+
+export const allAyonSymbols = [
+  buttonSymbol,
+  avatarSymbol,
+  boxSymbol,
+  checkboxSymbol,
+  iconButtonSymbol,
+  inputSymbol,
+  switchSymbol,
+  textSymbol,
+  imageSymbol,
+  headingSymbol,
+];

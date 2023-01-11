@@ -1,3 +1,4 @@
+import produce from 'immer';
 import { NoyaAPI, useNoyaClient } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import { setPublicPath } from 'noya-public-path';
@@ -9,6 +10,7 @@ import {
   useFontManager,
 } from 'noya-renderer';
 import { SketchFile } from 'noya-sketch-file';
+import { SketchModel } from 'noya-sketch-model';
 import {
   createInitialWorkspaceState,
   WorkspaceAction,
@@ -17,6 +19,7 @@ import {
 } from 'noya-state';
 import React, { Suspense, useCallback, useEffect, useReducer } from 'react';
 import { Content } from '../ayon/Content';
+import { allAyonSymbols, ayonLibraryId } from '../ayon/symbols';
 
 let initialized = false;
 
@@ -41,6 +44,14 @@ function Workspace({
     workspace.preferences.showDotGrid = true;
     workspace.preferences.wireframeMode = true;
 
+    workspace.history.present.sketch.document.foreignSymbols =
+      allAyonSymbols.map((symbol) =>
+        SketchModel.foreignSymbol({
+          symbolMaster: symbol,
+          libraryID: ayonLibraryId,
+        }),
+      );
+
     return workspace;
   });
 
@@ -64,9 +75,13 @@ export default function Ayon({ file }: { file: NoyaAPI.File }): JSX.Element {
   const client = useNoyaClient();
 
   const updateData = (design: SketchFile) => {
+    const designWithoutForeignSymbols = produce(design, (draft) => {
+      draft.document.foreignSymbols = [];
+    });
+
     client.files.update(file.id, {
       name: file.data.name,
-      design,
+      design: designWithoutForeignSymbols,
     });
   };
 

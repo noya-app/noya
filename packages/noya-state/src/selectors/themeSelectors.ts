@@ -104,9 +104,12 @@ export function setComponentName<T extends ComponentsTypes>(
 export const getSymbols = (
   state: Draft<ApplicationState>,
 ): Sketch.SymbolMaster[] => {
-  return state.sketch.pages.flatMap((p) =>
-    p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
-  );
+  return [
+    ...state.sketch.pages.flatMap((p) =>
+      p.layers.flatMap((l) => (Layers.isSymbolMaster(l) ? [l] : [])),
+    ),
+    ...state.sketch.document.foreignSymbols.map((s) => s.symbolMaster),
+  ];
 };
 
 export const getSymbolMaster = (state: ApplicationState, symbolId: string) => {

@@ -1,17 +1,5 @@
 import { SketchModel } from 'noya-sketch-model';
 import { createSketchFile } from 'noya-state';
-import {
-  avatarSymbol,
-  boxSymbol,
-  buttonSymbol,
-  checkboxSymbol,
-  headingSymbol,
-  iconButtonSymbol,
-  imageSymbol,
-  inputSymbol,
-  switchSymbol,
-  textSymbol,
-} from './symbols';
 
 const rectangle = SketchModel.rectangle({
   frame: SketchModel.rect({
@@ -42,25 +30,6 @@ const artboard = SketchModel.artboard({
 
 export function createAyonFile() {
   const sketch = createSketchFile(SketchModel.page({ layers: [artboard] }));
-
-  sketch.pages.push(
-    SketchModel.page({
-      name: 'Symbols',
-      layers: [
-        buttonSymbol,
-        avatarSymbol,
-        boxSymbol,
-        boxSymbol,
-        checkboxSymbol,
-        iconButtonSymbol,
-        inputSymbol,
-        switchSymbol,
-        textSymbol,
-        imageSymbol,
-        headingSymbol,
-      ],
-    }),
-  );
 
   return sketch;
 }

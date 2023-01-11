@@ -1,8 +1,8 @@
 import Sketch from 'noya-file-format';
 import { uuid } from 'noya-utils';
 
-export { PointString } from './PointString';
 export * from './debugDescription';
+export { PointString } from './PointString';
 
 type ModelOptions<T> = Partial<Omit<T, '_class'>>;
 
@@ -651,6 +651,22 @@ function symbolMaster(
   };
 }
 
+function foreignSymbol(
+  options?: ModelOptions<Sketch.ForeignSymbol>,
+): Sketch.ForeignSymbol {
+  return {
+    do_objectID: options?.do_objectID ?? uuid(),
+    libraryID: options?.libraryID ?? uuid(),
+    sourceLibraryName: 'Library',
+    symbolPrivate: false,
+    originalMaster: options?.originalMaster ?? symbolMaster(),
+    symbolMaster: options?.symbolMaster ?? symbolMaster(),
+    missingLibraryFontAcknowledged: true,
+    ...options,
+    _class: Sketch.ClassValue.MSImmutableForeignSymbol,
+  };
+}
+
 function meta(options?: ModelOptions<Sketch.Meta>): Sketch.Meta {
   const app = Sketch.BundleId.PublicRelease;
   const build = 109185;
@@ -773,6 +789,7 @@ export const SketchModel = {
   fileReference,
   fill,
   fontDescriptor,
+  foreignSymbol,
   freeformGroupLayout,
   gradient,
   gradientStop,
