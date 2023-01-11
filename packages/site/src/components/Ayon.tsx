@@ -1,3 +1,4 @@
+import { NoyaAPI } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -16,7 +17,7 @@ import {
 } from 'noya-state';
 import React, { Suspense, useCallback, useEffect, useReducer } from 'react';
 import { Content } from '../ayon/Content';
-import { noyaAPI, NoyaAPI } from '../utils/api';
+import { noyaAPI } from '../utils/api';
 
 let initialized = false;
 

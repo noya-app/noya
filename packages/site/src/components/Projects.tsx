@@ -1,5 +1,6 @@
 import { formatDistance, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
+import { NoyaAPI } from 'noya-api';
 import {
   Button,
   Heading2,
@@ -11,14 +12,23 @@ import {
 import { DashboardIcon, PlusIcon } from 'noya-icons';
 import React, { useEffect, useState } from 'react';
 import { createAyonFile } from '../ayon/createAyonFile';
-import { noyaAPI, NoyaAPI } from '../utils/api';
+import { noyaAPI } from '../utils/api';
 
 export function Projects() {
   const { push } = useRouter();
   const [files, setFiles] = useState<NoyaAPI.FileList>([]);
 
   useEffect(() => {
-    noyaAPI.files.list().then(setFiles);
+    noyaAPI.files
+      .list()
+      .then((files) =>
+        setFiles(
+          files.sort(
+            (a, b) =>
+              parseISO(b.updatedAt).valueOf() - parseISO(a.updatedAt).valueOf(),
+          ),
+        ),
+      );
   }, []);
 
   const [hovered, setHovered] = useState<string | undefined>();
@@ -113,7 +123,7 @@ export function Projects() {
                     {'edited '}
                     {formatDistance(parseISO(file.updatedAt), new Date(), {
                       addSuffix: true,
-                    })}
+                    }).replace('less than a minute ago', 'just now')}
                   </Small>
                 </Stack.H>
               </ListView.Row>

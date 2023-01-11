@@ -1,12 +1,13 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { NoyaAPI } from 'noya-api';
 import {
   DesignSystemConfigurationProvider,
   lightTheme,
 } from 'noya-designsystem';
 import { getCurrentPlatform } from 'noya-keymap';
 import React, { useEffect } from 'react';
-import { noyaAPI, NoyaAPI } from '../../utils/api';
+import { noyaAPI } from '../../utils/api';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
 

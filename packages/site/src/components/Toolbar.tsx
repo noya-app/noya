@@ -1,6 +1,7 @@
+import { NoyaAPI } from 'noya-api';
 import { Small, Spacer, Stack, useDesignSystemTheme } from 'noya-designsystem';
 import React, { useEffect, useState } from 'react';
-import { noyaAPI, NoyaAPI } from '../utils/api';
+import { noyaAPI } from '../utils/api';
 
 export function Toolbar() {
   const theme = useDesignSystemTheme();
