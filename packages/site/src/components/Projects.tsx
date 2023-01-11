@@ -1,6 +1,6 @@
 import { formatDistance, parseISO } from 'date-fns';
 import { useRouter } from 'next/router';
-import { NoyaAPI } from 'noya-api';
+import { useNoyaClient, useNoyaFiles } from 'noya-api';
 import {
   Button,
   Heading2,
@@ -10,26 +10,17 @@ import {
   Stack,
 } from 'noya-designsystem';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { createAyonFile } from '../ayon/createAyonFile';
-import { noyaAPI } from '../utils/api';
 
 export function Projects() {
   const { push } = useRouter();
-  const [files, setFiles] = useState<NoyaAPI.FileList>([]);
+  const files = useNoyaFiles();
+  const client = useNoyaClient();
 
-  useEffect(() => {
-    noyaAPI.files
-      .list()
-      .then((files) =>
-        setFiles(
-          files.sort(
-            (a, b) =>
-              parseISO(b.updatedAt).valueOf() - parseISO(a.updatedAt).valueOf(),
-          ),
-        ),
-      );
-  }, []);
+  const sortedFiles = files.sort(
+    (a, b) => parseISO(b.updatedAt).valueOf() - parseISO(a.updatedAt).valueOf(),
+  );
 
   const [hovered, setHovered] = useState<string | undefined>();
   const [selected, setSelected] = useState<string | undefined>();
@@ -44,9 +35,12 @@ export function Projects() {
           onClick={() => {
             const design = createAyonFile();
 
-            noyaAPI.files.create({ name: 'Untitled', design }).then((id) => {
-              push(`/projects/${id}`);
-            });
+            client.files
+              // Wait till after navigating to refetch, since it looks bad
+              // if the list updates before transitioning to the new page
+              .create({ name: 'Untitled', design }, { fetchPolicy: 'no-cache' })
+              .then((id) => push(`/projects/${id}`))
+              .then(() => client.files.refetch());
           }}
         >
           <PlusIcon />
@@ -57,7 +51,7 @@ export function Projects() {
       <Spacer.Vertical size={44} />
       <Stack.V margin={'0 -12px'}>
         <ListView.Root>
-          {files.map((file) => {
+          {sortedFiles.map((file) => {
             return (
               <ListView.Row
                 key={file.id}
@@ -76,9 +70,7 @@ export function Projects() {
                 onSelectMenuItem={(value) => {
                   switch (value) {
                     case 'delete':
-                      noyaAPI.files.delete(file.id).then(() => {
-                        window.location.reload();
-                      });
+                      client.files.delete(file.id);
                       return;
                     case 'rename':
                       setRenaming(file.id);
@@ -107,7 +99,7 @@ export function Projects() {
 
                         if (value === file.data.name) return;
 
-                        noyaAPI.files.update(file.id, {
+                        client.files.update(file.id, {
                           ...file.data,
                           name: value,
                         });

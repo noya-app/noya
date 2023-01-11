@@ -1,4 +1,4 @@
-import { NoyaAPI } from 'noya-api';
+import { NoyaAPI, useNoyaClient } from 'noya-api';
 import { StateProvider } from 'noya-app-state-context';
 import { setPublicPath } from 'noya-public-path';
 import {
@@ -17,7 +17,6 @@ import {
 } from 'noya-state';
 import React, { Suspense, useCallback, useEffect, useReducer } from 'react';
 import { Content } from '../ayon/Content';
-import { noyaAPI } from '../utils/api';
 
 let initialized = false;
 
@@ -62,8 +61,10 @@ export default function Ayon({ file }: { file: NoyaAPI.File }): JSX.Element {
     initialized = true;
   }
 
+  const client = useNoyaClient();
+
   const updateData = (design: SketchFile) => {
-    noyaAPI.files.update(file.id, {
+    client.files.update(file.id, {
       name: file.data.name,
       design,
     });

@@ -1,15 +1,10 @@
-import { NoyaAPI } from 'noya-api';
+import { useNoyaSession } from 'noya-api';
 import { Small, Spacer, Stack, useDesignSystemTheme } from 'noya-designsystem';
-import React, { useEffect, useState } from 'react';
-import { noyaAPI } from '../utils/api';
+import React from 'react';
 
 export function Toolbar() {
   const theme = useDesignSystemTheme();
-  const [session, setSession] = useState<NoyaAPI.Session | undefined>();
-
-  useEffect(() => {
-    noyaAPI.auth.session().then(setSession);
-  }, []);
+  const session = useNoyaSession();
 
   return (
     <Stack.H

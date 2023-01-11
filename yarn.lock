@@ -3095,6 +3095,11 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@legendapp/state@^0.23.1":
+  version "0.23.1"
+  resolved "https://registry.yarnpkg.com/@legendapp/state/-/state-0.23.1.tgz#404824ee8011c2546ffa09c4d4e438eaa07a2e2f"
+  integrity sha512-gr8L0r6h9zYSy04GIahgsQLpQ4Xkr4K7UW5BKO9H9G8tvH35RHAOH+MHlA1JqUn9HDzJnW4gen93oEXDeB7piA==
+
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"

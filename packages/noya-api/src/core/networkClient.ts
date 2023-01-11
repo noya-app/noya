@@ -19,7 +19,7 @@ unless otherwise specified, returns 200 on success or 4xx/5xx error
 
 */
 
-export class NoyaAPIClient {
+export class NoyaNetworkClient {
   baseURI: string;
   onError?: (error: NoyaAPIError) => boolean;
 
