@@ -110,6 +110,7 @@ export function Projects() {
                   )}
                   <Spacer.Horizontal size={10} />
                   <Small>
+                    {'edited '}
                     {formatDistance(parseISO(file.updatedAt), new Date(), {
                       addSuffix: true,
                     })}

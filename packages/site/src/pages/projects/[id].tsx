@@ -1,9 +1,17 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import {
+  DesignSystemConfigurationProvider,
+  lightTheme,
+} from 'noya-designsystem';
+import { getCurrentPlatform } from 'noya-keymap';
 import React, { useEffect } from 'react';
 import { noyaAPI, NoyaAPI } from '../../utils/api';
 
 const Ayon = dynamic(() => import('../../components/Ayon'), { ssr: false });
+
+const platform =
+  typeof navigator !== 'undefined' ? getCurrentPlatform(navigator) : 'key';
 
 export default function Project(): JSX.Element {
   const {
@@ -20,5 +28,9 @@ export default function Project(): JSX.Element {
 
   if (!file) return <div>Loading...</div>;
 
-  return <Ayon file={file} />;
+  return (
+    <DesignSystemConfigurationProvider platform={platform} theme={lightTheme}>
+      <Ayon file={file} />
+    </DesignSystemConfigurationProvider>
+  );
 }
