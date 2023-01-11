@@ -9,6 +9,10 @@
   "dependencies": {
     "@types/styled-components": "^5.1.14",
     "date-fns": "^2.29.3",
-    "next": "^12"
+    "next": "^12",
+    "@chakra-ui/react": "^1",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "framer-motion": "^6"
   }
 }
