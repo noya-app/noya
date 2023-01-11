@@ -6,6 +6,7 @@ export const colors = {
   textMuted: 'rgb(85, 85, 85)',
   textSubtle: 'rgb(121, 121, 121)',
   textDisabled: 'rgb(160, 160, 160)',
+  dividerSubtle: 'rgba(0, 0, 0, 0.04)',
   divider: 'rgba(0, 0, 0, 0.07)',
   dividerStrong: 'rgba(0, 0, 0, 0.09)',
   primary: 'rgb(132, 63, 255)',
