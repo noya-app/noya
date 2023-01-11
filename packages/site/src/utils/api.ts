@@ -1,3 +1,4 @@
+import { SketchFile } from 'noya-sketch-file';
 import { z } from 'zod';
 
 /**
@@ -28,9 +29,16 @@ const sessionSchema = z.object({
 
 type NoyaSession = z.infer<typeof sessionSchema>;
 
+const noyaDataSchema = z
+  .object({
+    name: z.string(),
+    design: z.custom<SketchFile>(),
+  })
+  .passthrough();
+
 const noyaFileSchema = z.object({
   id: z.string(),
-  data: z.string(),
+  data: z.string().transform((json) => noyaDataSchema.parse(JSON.parse(json))),
   userId: z.string(),
 });
 
@@ -47,6 +55,11 @@ class NoyaAPIError extends Error {
     super(message);
   }
 }
+
+type NoyaFileData = {
+  name: string;
+  design: SketchFile;
+};
 
 class NoyaAPIClient {
   baseURI: string;
@@ -67,6 +80,7 @@ class NoyaAPIClient {
 
   get files() {
     return {
+      read: this.#readFile,
       create: this.#createFile,
       list: this.#listFiles,
       delete: this.#deleteFile,
@@ -85,6 +99,18 @@ class NoyaAPIClient {
     return parsed;
   };
 
+  #readFile = async (id: string) => {
+    const response = await fetch(`${this.baseURI}/files/${id}`, {
+      credentials: 'include',
+    });
+
+    this.#ensureAuthorized(response);
+
+    const json = await response.json();
+    const parsed = noyaFileSchema.parse(json);
+    return parsed;
+  };
+
   #listFiles = async () => {
     const response = await fetch(`${this.baseURI}/files`, {
       credentials: 'include',
@@ -94,10 +120,10 @@ class NoyaAPIClient {
 
     const json = await response.json();
     const parsed = noyaFileListSchema.parse(json);
-    return parsed;
+    return parsed.reverse();
   };
 
-  #createFile = async (data: unknown) => {
+  #createFile = async (data: NoyaFileData) => {
     const response = await fetch(`${this.baseURI}/files`, {
       method: 'POST',
       credentials: 'include',
