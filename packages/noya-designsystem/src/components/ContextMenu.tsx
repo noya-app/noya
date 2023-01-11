@@ -150,6 +150,7 @@ export interface MenuProps<T extends string> {
   onSelect: (value: T) => void;
   isNested?: boolean;
   shouldBindKeyboardShortcuts?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 function ContextMenuRoot<T extends string>({
@@ -158,6 +159,7 @@ function ContextMenuRoot<T extends string>({
   onSelect,
   isNested,
   shouldBindKeyboardShortcuts,
+  onOpenChange,
 }: MenuProps<T>) {
   const hasCheckedItem = items.some(
     (item) => item !== SEPARATOR_ITEM && item.checked,
@@ -188,7 +190,7 @@ function ContextMenuRoot<T extends string>({
   const ContentComponent: typeof Content = isNested ? SubContent : Content;
 
   return (
-    <RootComponent>
+    <RootComponent onOpenChange={onOpenChange}>
       <TriggerComponent asChild onPointerDown={onPointerDown}>
         {children}
       </TriggerComponent>

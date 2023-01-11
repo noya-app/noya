@@ -248,6 +248,7 @@ interface ListViewRowProps<MenuItemType extends string = string> {
   menuItems?: MenuItem<MenuItemType>[];
   onSelectMenuItem?: (value: MenuItemType) => void;
   onContextMenu?: () => void;
+  onMenuOpenChange?: (isOpen: boolean) => void;
 }
 
 const ListViewRow = forwardRef(function ListViewRow<
@@ -268,6 +269,7 @@ const ListViewRow = forwardRef(function ListViewRow<
     menuItems,
     onContextMenu,
     onSelectMenuItem,
+    onMenuOpenChange,
   }: ListViewRowProps<MenuItemType>,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
@@ -353,6 +355,7 @@ const ListViewRow = forwardRef(function ListViewRow<
         <ContextMenu<MenuItemType>
           items={menuItems}
           onSelect={onSelectMenuItem}
+          onOpenChange={onMenuOpenChange}
         >
           {element}
         </ContextMenu>

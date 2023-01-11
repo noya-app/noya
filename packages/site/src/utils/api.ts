@@ -40,6 +40,8 @@ const noyaFileSchema = z.object({
   id: z.string(),
   data: z.string().transform((json) => noyaDataSchema.parse(JSON.parse(json))),
   userId: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 type NoyaFile = z.infer<typeof noyaFileSchema>;
