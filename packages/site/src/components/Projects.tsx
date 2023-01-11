@@ -28,7 +28,7 @@ export function Projects() {
   return (
     <Stack.V flex="1">
       <Stack.H alignItems="center">
-        <Heading2>Projects</Heading2>
+        <Heading2 color="text">Projects</Heading2>
         <Spacer.Horizontal />
         <Button
           onClick={() => {
@@ -109,7 +109,7 @@ export function Projects() {
                     </ListView.RowTitle>
                   )}
                   <Spacer.Horizontal size={10} />
-                  <Small color="textMuted">
+                  <Small>
                     {formatDistance(parseISO(file.updatedAt), new Date(), {
                       addSuffix: true,
                     })}

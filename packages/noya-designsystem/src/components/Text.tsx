@@ -59,15 +59,7 @@ const StyledElement = styled.span<
 }));
 
 export const Text = forwardRef(function Text(
-  {
-    as,
-    variant,
-    breakpoints,
-    children,
-    className,
-    color = 'text',
-    ...rest
-  }: Props,
+  { as, variant, breakpoints, children, className, color, ...rest }: Props,
   forwardedRef: ForwardedRef<HTMLElement>,
 ) {
   const element = as ?? elements[variant] ?? 'span';

@@ -18,7 +18,7 @@ export function Toolbar() {
       padding={'0 20px'}
     >
       <Spacer.Horizontal />
-      <Small>{session?.user.name ?? session?.user.email}</Small>
+      <Small color="text">{session?.user.name ?? session?.user.email}</Small>
     </Stack.H>
   );
 }
