@@ -1,37 +1,9 @@
 import { useRouter } from 'next/router';
 import { Button, Heading2, ListView, Spacer, Stack } from 'noya-designsystem';
 import { DashboardIcon, PlusIcon } from 'noya-icons';
-import { SketchModel } from 'noya-sketch-model';
-import { createSketchFile } from 'noya-state';
 import React, { useEffect, useState } from 'react';
+import { createAyonFile } from '../ayon/createAyonFile';
 import { noyaAPI, NoyaAPI } from '../utils/api';
-
-const rectangle = SketchModel.rectangle({
-  frame: SketchModel.rect({
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-  }),
-  style: SketchModel.style({
-    fills: [
-      SketchModel.fill({
-        color: SketchModel.color({ red: 1, alpha: 1 }),
-      }),
-    ],
-  }),
-});
-
-const artboard = SketchModel.artboard({
-  name: 'Wireframe',
-  frame: SketchModel.rect({
-    x: 0,
-    y: 0,
-    width: 400,
-    height: 800,
-  }),
-  layers: [rectangle],
-});
 
 export function Projects() {
   const { push } = useRouter();
@@ -50,9 +22,7 @@ export function Projects() {
         <Spacer.Horizontal />
         <Button
           onClick={() => {
-            const design = createSketchFile(
-              SketchModel.page({ layers: [artboard] }),
-            );
+            const design = createAyonFile();
 
             noyaAPI.files.create({ name: 'Test', design }).then((id) => {
               window.location.reload();

@@ -1,9 +1,7 @@
 import { StateProvider } from 'noya-app-state-context';
-import { CanvasKitRenderer, Interactions, SimpleCanvas } from 'noya-canvas';
 import { setPublicPath } from 'noya-public-path';
 import {
   CanvasKitProvider,
-  DesignFile,
   FontManagerProvider,
   ImageCacheProvider,
   useCanvasKit,
@@ -16,12 +14,19 @@ import {
   workspaceReducer,
   WorkspaceState,
 } from 'noya-state';
-import React, { Suspense, useCallback, useReducer } from 'react';
-import { NoyaAPI } from '../utils/api';
+import React, { Suspense, useCallback, useEffect, useReducer } from 'react';
+import { Content } from '../ayon/Content';
+import { noyaAPI, NoyaAPI } from '../utils/api';
 
 let initialized = false;
 
-function Workspace({ initialData }: { initialData: SketchFile }): JSX.Element {
+function Workspace({
+  initialData,
+  updateData,
+}: {
+  initialData: SketchFile;
+  updateData: (design: SketchFile) => void;
+}): JSX.Element {
   const CanvasKit = useCanvasKit();
   const fontManager = useFontManager();
 
@@ -39,15 +44,13 @@ function Workspace({ initialData }: { initialData: SketchFile }): JSX.Element {
     return workspace;
   });
 
+  useEffect(() => {
+    updateData(state.history.present.sketch);
+  }, [state.history.present.sketch, updateData]);
+
   return (
     <StateProvider state={state} dispatch={dispatch}>
-      <SimpleCanvas interactions={[Interactions.pan]}>
-        {({ size }) => (
-          <CanvasKitRenderer size={size}>
-            <DesignFile />
-          </CanvasKitRenderer>
-        )}
-      </SimpleCanvas>
+      <Content />
     </StateProvider>
   );
 }
@@ -58,12 +61,19 @@ export default function Ayon({ file }: { file: NoyaAPI.File }): JSX.Element {
     initialized = true;
   }
 
+  const updateData = (design: SketchFile) => {
+    noyaAPI.files.update(file.id, {
+      name: file.data.name,
+      design,
+    });
+  };
+
   return (
     <Suspense fallback="Loading">
       <ImageCacheProvider>
         <CanvasKitProvider>
           <FontManagerProvider>
-            <Workspace initialData={file.data.design} />
+            <Workspace initialData={file.data.design} updateData={updateData} />
           </FontManagerProvider>
         </CanvasKitProvider>
       </ImageCacheProvider>

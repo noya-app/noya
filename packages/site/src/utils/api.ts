@@ -82,8 +82,9 @@ class NoyaAPIClient {
     return {
       read: this.#readFile,
       create: this.#createFile,
-      list: this.#listFiles,
+      update: this.#updateFile,
       delete: this.#deleteFile,
+      list: this.#listFiles,
     };
   }
 
@@ -109,6 +110,16 @@ class NoyaAPIClient {
     const json = await response.json();
     const parsed = noyaFileSchema.parse(json);
     return parsed;
+  };
+
+  #updateFile = async (id: string, data: NoyaFileData) => {
+    const response = await fetch(`${this.baseURI}/files/${id}`, {
+      method: 'PUT',
+      credentials: 'include',
+      body: JSON.stringify({ data }),
+    });
+
+    this.#ensureAuthorized(response);
   };
 
   #listFiles = async () => {
