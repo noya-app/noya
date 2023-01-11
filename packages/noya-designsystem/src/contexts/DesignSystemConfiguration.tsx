@@ -6,7 +6,7 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider, useTheme } from 'styled-components';
 import { Theme } from '../theme';
 import { DialogProvider } from './DialogContext';
 
@@ -47,4 +47,8 @@ export function useDesignSystemConfiguration(): DesignSystemConfigurationContext
   }
 
   return value;
+}
+
+export function useDesignSystemTheme() {
+  return useTheme();
 }

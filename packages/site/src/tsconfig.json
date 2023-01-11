@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // This isn't actually used, since this tsconfig is in the "src" dir,
+    // but this prevents VSCode "organize imports" from deleting the React import.
+    // Next automatically sets the "jsx" option to "preserve" when it builds,
+    // so we can't change it in the parent directory.
+    "jsx": "react"
+  }
+}
