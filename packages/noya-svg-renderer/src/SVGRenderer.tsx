@@ -7,7 +7,14 @@ import {
   useCanvasKit,
 } from 'noya-renderer';
 import { Base64, detectFileType, getFileExtensionForType } from 'noya-utils';
-import React, { memo, ReactNode, useMemo, useRef } from 'react';
+import React, {
+  ComponentProps,
+  memo,
+  ReactNode,
+  SVGProps,
+  useMemo,
+  useRef,
+} from 'react';
 import { ElementIdProvider, useGetNextElementId } from './ElementIdContext';
 
 const stringifyAffineTransform = (matrix: AffineTransform) => {
@@ -174,23 +181,60 @@ const ClipPath = memo(
   },
 );
 
+function useImageFilter(
+  imageFilter: ComponentProps<ComponentsContextValue['Group']>['imageFilter'],
+) {
+  const getNextId = useGetNextElementId();
+  const shadowId = useMemo(() => getNextId('shadow-'), [getNextId]);
+  const dropShadow =
+    imageFilter && 'type' in imageFilter ? imageFilter : undefined;
+
+  if (!dropShadow) return undefined;
+
+  return {
+    id: shadowId,
+    element: (
+      <filter id={shadowId}>
+        <feDropShadow
+          dx={dropShadow.offset.x}
+          dy={dropShadow.offset.y}
+          stdDeviation={dropShadow.radius / 2}
+        />
+      </filter>
+    ),
+  };
+}
+
 const Group: ComponentsContextValue['Group'] = memo(
-  ({ opacity, transform, children, clip, colorFilter, imageFilter }) => {
-    const groupProps = {
+  ({ opacity, transform, children, clip, imageFilter }) => {
+    const shadow = useImageFilter(imageFilter);
+
+    const groupProps: Partial<SVGProps<SVGGElement>> = {
       opacity,
       transform: transform ? stringifyAffineTransform(transform) : undefined,
       children,
+      filter: shadow ? `url(#${shadow.id})` : undefined,
     };
 
     if (clip) {
       return (
         <ClipPath clip={clip}>
-          {(url) => <g {...groupProps} clipPath={url} />}
+          {(url) => (
+            <>
+              {shadow?.element ?? null}
+              <g {...groupProps} clipPath={url} />
+            </>
+          )}
         </ClipPath>
       );
     }
 
-    return <g {...groupProps} />;
+    return (
+      <>
+        {shadow?.element ?? null}
+        <g {...groupProps} />
+      </>
+    );
   },
 );
 

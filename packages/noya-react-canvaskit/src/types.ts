@@ -10,6 +10,7 @@ import {
   Rect,
 } from 'canvaskit';
 import { ReactNode } from 'react';
+import { DropShadow } from './filters/ImageFilter';
 
 export interface RectComponentProps {
   rect: Rect;
@@ -66,7 +67,7 @@ export interface GroupComponentProps {
   children: ReactNode;
   clip?: ClipProps;
   colorFilter?: ColorFilter;
-  imageFilter?: ImageFilter;
+  imageFilter?: ImageFilter | DropShadow;
   backdropImageFilter?: ImageFilter;
 }
 
