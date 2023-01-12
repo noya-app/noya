@@ -1,3 +1,4 @@
+import { copyPasteInteraction } from './copyPaste';
 import { createDrawingInteraction } from './drawing';
 import { editBlockInteraction } from './editBlock';
 import { editTextInteraction } from './editText';
@@ -18,4 +19,5 @@ export namespace Interactions {
   export const createDrawing = createDrawingInteraction;
   export const editBlock = editBlockInteraction;
   export const editText = editTextInteraction;
+  export const copyPaste = copyPasteInteraction;
 }

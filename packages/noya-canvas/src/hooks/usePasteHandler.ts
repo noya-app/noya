@@ -7,12 +7,12 @@ import { NoyaClipboardData } from './useCopyHandler';
 
 export function usePasteHandler<T extends string>({
   onPasteImages,
-  onPasteLayers: onPasteLayer,
-  supportedFileTypes,
+  onPasteLayers,
+  supportedFileTypes = [],
 }: {
-  onPasteImages: (files: TypedFile<T>[]) => void;
-  onPasteLayers: (layer: Sketch.AnyLayer[]) => void;
-  supportedFileTypes: T[];
+  onPasteImages?: (files: TypedFile<T>[]) => void;
+  onPasteLayers?: (layer: Sketch.AnyLayer[]) => void;
+  supportedFileTypes?: T[];
 }) {
   useEffect(() => {
     const handler = (event: ClipboardEvent) => {
@@ -38,7 +38,7 @@ export function usePasteHandler<T extends string>({
 
           switch (data.type) {
             case 'layers': {
-              onPasteLayer(data.layers);
+              onPasteLayers?.(data.layers);
             }
           }
         }
@@ -57,11 +57,11 @@ export function usePasteHandler<T extends string>({
         return [file];
       });
 
-      onPasteImages(files);
+      onPasteImages?.(files);
     };
 
     document.addEventListener('paste', handler);
 
     return () => document.removeEventListener('paste', handler);
-  }, [onPasteImages, onPasteLayer, supportedFileTypes]);
+  }, [onPasteImages, onPasteLayers, supportedFileTypes]);
 }

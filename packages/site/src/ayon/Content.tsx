@@ -20,6 +20,7 @@ export function Content() {
       <div style={{ flex: '1', display: 'flex', position: 'relative' }}>
         <SimpleCanvas
           interactions={[
+            Interactions.copyPaste,
             Interactions.editText,
             Interactions.editBlock,
             Interactions.focus,

@@ -1,10 +1,13 @@
 import { useApplicationState } from 'noya-app-state-context';
+import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import React, { memo, useMemo, useRef } from 'react';
+import { useCopyHandler } from '../hooks/useCopyHandler';
 import {
   Interaction,
   useInteractionHandlers,
 } from '../hooks/useInteractionHandlers';
+import { usePasteHandler } from '../hooks/usePasteHandler';
 import {
   CanvasElement,
   CanvasElementProps,
@@ -28,29 +31,44 @@ export const SimpleCanvas = memo(function SimpleCanvas({
   const ref = useRef<ICanvasElement>(null);
   const [state, dispatch] = useApplicationState();
 
-  const { handlers } = useInteractionHandlers({
-    interactions,
-    elementInterface: {
-      focus: () => ref.current?.focus(),
-      releasePointerCapture: (pointerId) =>
-        ref.current?.releasePointerCapture(pointerId),
-      setPointerCapture: (pointerId) =>
-        ref.current?.setPointerCapture(pointerId),
-    },
-  });
+  const { actions, handlers, getMenuItems, onSelectMenuItem } =
+    useInteractionHandlers({
+      interactions,
+      elementInterface: {
+        focus: () => ref.current?.focus(),
+        releasePointerCapture: (pointerId) =>
+          ref.current?.releasePointerCapture(pointerId),
+        setPointerCapture: (pointerId) =>
+          ref.current?.setPointerCapture(pointerId),
+      },
+    });
 
   const cursor = useMemo(() => Selectors.getCursor(state), [state]);
+  const items = getMenuItems();
+
+  useCopyHandler();
+
+  usePasteHandler<SupportedImageUploadType>({
+    onPasteLayers: actions.addLayer,
+  });
 
   return (
-    <CanvasElement
-      ref={ref}
-      {...handlers}
-      onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
-      rendererZIndex={rendererZIndex}
-      widgets={widgets}
-      cursor={cursor}
+    <ContextMenu
+      items={items}
+      onSelect={(id) => {
+        onSelectMenuItem?.(id);
+      }}
     >
-      {children}
-    </CanvasElement>
+      <CanvasElement
+        ref={ref}
+        {...handlers}
+        onChangeSize={(size) => dispatch('setCanvasSize', size, ZERO_INSETS)}
+        rendererZIndex={rendererZIndex}
+        widgets={widgets}
+        cursor={cursor}
+      >
+        {children}
+      </CanvasElement>
+    </ContextMenu>
   );
 });

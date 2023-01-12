@@ -1,5 +1,6 @@
 import { useApplicationState } from 'noya-app-state-context';
 import {
+  createSectionedMenu,
   mergeEventHandlers,
   ReactEventHandlers,
   usePlatform,
@@ -26,6 +27,7 @@ import { useMemo } from 'react';
 import { ZERO_INSETS } from '../components/CanvasElement';
 import { ICanvasElement } from '../components/types';
 import { useMultipleClickCount } from '../hooks/useMultipleClickCount';
+import { CopyPasteActions } from '../interactions/copyPaste';
 import { DrawingActions } from '../interactions/drawing';
 import { EditBlockActions } from '../interactions/editBlock';
 import { EditTextActions } from '../interactions/editText';
@@ -48,7 +50,8 @@ export type Actions = MarqueeActions &
   DrawingActions &
   PanActions &
   EditBlockActions &
-  EditTextActions;
+  EditTextActions &
+  CopyPasteActions;
 
 export type Interaction = (
   actions: Actions,
@@ -64,7 +67,7 @@ interface Props {
 }
 
 export function useInteractionHandlers({
-  interactions,
+  interactions = [],
   elementInterface,
 }: Props) {
   const [state, dispatch] = useApplicationState();
@@ -138,6 +141,8 @@ export function useInteractionHandlers({
         dispatch('setLayerX', value, mode),
       setLayerY: (value: number, mode: SetNumberMode) =>
         dispatch('setLayerY', value, mode),
+      selectAllLayers: () => dispatch('selectAllLayers'),
+      addLayer: (layer) => dispatch('addLayer', layer),
     };
   }, [dispatch]);
 
@@ -228,13 +233,31 @@ export function useInteractionHandlers({
     zoomValue,
   ]);
 
-  const handlers = (interactions ?? []).map((interaction) =>
+  const handlers = interactions.map((interaction) =>
     interaction(actions)(
       state.interactionState,
       state.interactionState.type,
       api,
     ),
   );
+
+  const getMenuItems = () =>
+    createSectionedMenu(
+      ...handlers.map((handler) =>
+        handler.onContributeMenuItems ? handler.onContributeMenuItems() : [],
+      ),
+    );
+
+  const onSelectMenuItem = (item: string) => {
+    handlers.map(
+      (handler) => handler.onSelectMenuItem && handler.onSelectMenuItem(item),
+    );
+  };
+
+  const domHandlers = handlers.map((handler) => {
+    const { onContributeMenuItems, onSelectMenuItem, ...rest } = handler;
+    return rest;
+  });
 
   return {
     api,
@@ -245,7 +268,9 @@ export function useInteractionHandlers({
           setLatestClick(getPoint(event.nativeEvent));
         },
       },
-      ...handlers,
+      ...domHandlers,
     ),
+    getMenuItems,
+    onSelectMenuItem,
   };
 }

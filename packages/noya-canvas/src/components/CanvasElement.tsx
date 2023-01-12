@@ -1,4 +1,4 @@
-import { ReactEventHandlers } from 'noya-designsystem';
+import { ReactDOMEventHandlers } from 'noya-designsystem';
 import { Insets, Size } from 'noya-geometry';
 import { IGNORE_GLOBAL_KEYBOARD_SHORTCUTS_CLASS } from 'noya-keymap';
 import React, {
@@ -45,7 +45,7 @@ const HiddenInputTarget = styled.input({
   top: '-200px',
 });
 
-export interface CanvasElementProps extends ReactEventHandlers {
+export interface CanvasElementProps extends ReactDOMEventHandlers {
   onChangeSize: (size: Size, insets: Insets) => void;
   insets?: Insets;
   rendererZIndex?: number;
