@@ -1,5 +1,6 @@
 import { Insets, Size } from 'noya-geometry';
 import { useSize } from 'noya-react-utils';
+import { round } from 'noya-utils';
 import { useLayoutEffect, useMemo } from 'react';
 
 type CanvasSizes = {
@@ -19,7 +20,18 @@ export function useAutomaticCanvasSize({
   containerRef: React.RefObject<HTMLElement>;
   onChangeSize: (size: Size, insets: Insets) => void;
 }): CanvasSizes {
-  const containerSize = useSize(containerRef);
+  const rawContainerSize = useSize(containerRef);
+
+  const containerSize = useMemo(
+    () =>
+      rawContainerSize
+        ? {
+            width: round(rawContainerSize.width),
+            height: round(rawContainerSize.height),
+          }
+        : undefined,
+    [rawContainerSize],
+  );
 
   // Update the canvas size whenever the window is resized
   useLayoutEffect(() => {

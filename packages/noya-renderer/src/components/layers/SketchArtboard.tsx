@@ -1,11 +1,13 @@
 import { useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
-import { Rect } from 'noya-geometry';
+import { insetRect, Rect } from 'noya-geometry';
 import {
   ClipProps,
   useBlurMaskFilter,
+  useColor,
   useDeletable,
   usePaint,
+  useStroke,
 } from 'noya-react-canvaskit';
 import { SketchModel } from 'noya-sketch-model';
 import { Primitives, Selectors } from 'noya-state';
@@ -81,6 +83,9 @@ const ArtboardBlur = memo(function ArtboardBlur({
   layerFrame,
 }: ArtboardBlurProps) {
   const CanvasKit = useCanvasKit();
+  const {
+    preferences: { showDotGrid },
+  } = useWorkspace();
 
   const maskFilter = useBlurMaskFilter({
     style: CanvasKit.BlurStyle.Normal,
@@ -99,6 +104,20 @@ const ArtboardBlur = memo(function ArtboardBlur({
     ...layerFrame,
     y: layerFrame.y + 1,
   });
+
+  const stroke = useStroke({
+    color: useColor('#ccc'),
+    strokeWidth: 1,
+  });
+
+  if (showDotGrid) {
+    return (
+      <RCKRect
+        rect={Primitives.rect(CanvasKit, insetRect(layerFrame, -0.5))}
+        paint={stroke}
+      />
+    );
+  }
 
   return <RCKRect rect={blurRect} paint={blur} />;
 });

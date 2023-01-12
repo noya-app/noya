@@ -1,3 +1,4 @@
+import { round } from 'noya-utils';
 import { Point } from './types';
 
 export function distance(
@@ -17,5 +18,12 @@ export function pointSum(
   return {
     x: x1 + x2,
     y: y1 + y2,
+  };
+}
+
+export function roundPoint({ x, y }: Point, precision?: number) {
+  return {
+    x: round(x, precision),
+    y: round(y, precision),
   };
 }

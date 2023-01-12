@@ -15,6 +15,7 @@ import {
   Point,
   rectContainsPoint,
   resize,
+  roundPoint,
   Size,
 } from 'noya-geometry';
 import { svgToLayer } from 'noya-import-svg';
@@ -160,10 +161,10 @@ export function canvasReducer(
           y: context.canvasSize.height / 2,
         };
 
-        const newScrollOrigin = {
+        const newScrollOrigin = roundPoint({
           x: viewportCenter.x - bounds.midX * newZoom,
           y: viewportCenter.y - bounds.midY * newZoom,
-        };
+        });
 
         draftUser[pageId] = {
           ...draftUser[pageId],
@@ -193,10 +194,12 @@ export function canvasReducer(
 
         // To find the new scrollOrigin: start at the viewport center and
         // move by the scaled the distance to the scrollOrigin
-        const newScrollOrigin = AffineTransform.translate(
-          (scrollOrigin.x - viewportCenter.x) * (newValue / zoomValue),
-          (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
-        ).applyTo(viewportCenter);
+        const newScrollOrigin = roundPoint(
+          AffineTransform.translate(
+            (scrollOrigin.x - viewportCenter.x) * (newValue / zoomValue),
+            (scrollOrigin.y - viewportCenter.y) * (newValue / zoomValue),
+          ).applyTo(viewportCenter),
+        );
 
         draftUser[pageId] = {
           ...draftUser[pageId],
@@ -550,7 +553,7 @@ export function canvasReducer(
 
         draft.sketch.user[currentPageId] = {
           ...meta,
-          scrollOrigin: Primitives.stringifyPoint(parsed),
+          scrollOrigin: Primitives.stringifyPoint(roundPoint(parsed)),
         };
       });
     }
