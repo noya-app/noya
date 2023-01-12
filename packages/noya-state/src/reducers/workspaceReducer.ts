@@ -36,6 +36,7 @@ export type WorkspaceState = {
   fileHandle?: FileSystemHandle;
   history: HistoryState;
   highlightedLayer?: LayerHighlight;
+  isContextMenuOpen: boolean;
   canvasSize: { width: number; height: number };
   canvasInsets: Insets;
   nextFocusAction?: NextFocusAction;
@@ -63,6 +64,7 @@ export type WorkspaceAction =
   | [type: 'setShowInterface', value: boolean]
   | [type: 'setNextFocusAction', value?: NextFocusAction]
   | [type: 'highlightLayer', highlight: LayerHighlight | undefined]
+  | [type: 'setIsContextMenuOpen', value: boolean]
   | HistoryAction;
 
 export function workspaceReducer(
@@ -193,6 +195,13 @@ export function workspaceReducer(
         draft.nextFocusAction = value;
       });
     }
+    case 'setIsContextMenuOpen': {
+      const [, value] = action;
+
+      return produce(state, (draft) => {
+        draft.isContextMenuOpen = value;
+      });
+    }
     default: {
       return produce(state, (draft) => {
         draft.history = historyReducer(state.history, action, CanvasKit, {
@@ -211,6 +220,7 @@ export function createInitialWorkspaceState(
   return {
     history: createInitialHistoryState(sketch),
     highlightedLayer: undefined,
+    isContextMenuOpen: false,
     canvasSize: { width: 0, height: 0 },
     canvasInsets: { top: 0, bottom: 0, left: 0, right: 0 },
     preferences: {

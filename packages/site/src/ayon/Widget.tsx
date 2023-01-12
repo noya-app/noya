@@ -1,4 +1,4 @@
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import Sketch from 'noya-file-format';
 import {
   AffineTransform,
@@ -87,6 +87,7 @@ export function Widget({
   onChangeBlockType: (type: DrawableLayerType) => void;
 }) {
   const [state, dispatch] = useApplicationState();
+  const { isContextMenuOpen } = useWorkspace();
   const rect = useGetScreenRect()(layer.frame);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -114,7 +115,9 @@ export function Widget({
 
   return (
     <WidgetContainer frame={rect}>
-      {isSelected && <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>}
+      {isSelected && !isContextMenuOpen && (
+        <WidgetLabel>✨ {symbol?.name ?? layer.name}</WidgetLabel>
+      )}
 
       <textarea
         ref={textareaRef}
@@ -145,7 +148,7 @@ export function Widget({
         }}
         value={blockText}
       />
-      {isSelected && (
+      {isSelected && !isContextMenuOpen && (
         <div
           style={{
             position: 'absolute',

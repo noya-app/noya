@@ -14,6 +14,7 @@ export function useWorkspace() {
     canvasInsets,
     preferences,
     nextFocusAction,
+    isContextMenuOpen,
   } = state;
 
   const setCanvasSize = useCallback(
@@ -50,6 +51,11 @@ export function useWorkspace() {
 
   const highlightLayer = useCallback(
     (highlight?: LayerHighlight) => dispatch('highlightLayer', highlight),
+    [dispatch],
+  );
+
+  const setIsContextMenuOpen = useCallback(
+    (value: boolean) => dispatch('setIsContextMenuOpen', value),
     [dispatch],
   );
 
@@ -116,6 +122,8 @@ export function useWorkspace() {
       actuallyShowLeftSidebar,
       actuallyShowRightSidebar,
       actuallyShowInterface,
+      isContextMenuOpen,
+      setIsContextMenuOpen,
     }),
     [
       canvasInsets,
@@ -138,6 +146,8 @@ export function useWorkspace() {
       actuallyShowLeftSidebar,
       actuallyShowRightSidebar,
       actuallyShowInterface,
+      isContextMenuOpen,
+      setIsContextMenuOpen,
     ],
   );
 }

@@ -1,4 +1,4 @@
-import { useApplicationState } from 'noya-app-state-context';
+import { useApplicationState, useWorkspace } from 'noya-app-state-context';
 import { ContextMenu, SupportedImageUploadType } from 'noya-designsystem';
 import { Selectors } from 'noya-state';
 import React, { memo, useMemo, useRef } from 'react';
@@ -30,6 +30,7 @@ export const SimpleCanvas = memo(function SimpleCanvas({
 }: Props) {
   const ref = useRef<ICanvasElement>(null);
   const [state, dispatch] = useApplicationState();
+  const { setIsContextMenuOpen } = useWorkspace();
 
   const { actions, handlers, getMenuItems, onSelectMenuItem } =
     useInteractionHandlers({
@@ -57,6 +58,9 @@ export const SimpleCanvas = memo(function SimpleCanvas({
       items={items}
       onSelect={(id) => {
         onSelectMenuItem?.(id);
+      }}
+      onOpenChange={(isOpen) => {
+        setIsContextMenuOpen(isOpen);
       }}
     >
       <CanvasElement
