@@ -59,13 +59,15 @@ function WidgetLabel({
         position: 'absolute',
         top: 'calc(100% + 6px)',
         right: 0,
-        background: 'black',
-        color: 'white',
+        background: 'whitesmoke',
+        border: '1px solid rgba(0,0,0,0.1)',
+        color: 'black',
         pointerEvents: 'all',
-        padding: '2px 4px',
+        padding: '1px 4px',
         whiteSpace: 'pre',
-        borderRadius: '4px',
+        borderRadius: '2px',
         zIndex: 1,
+        fontSize: 13,
       }}
       onPointerDown={(event) => {
         event.stopPropagation();
@@ -95,7 +97,7 @@ export function Widget({
     ? Selectors.getSymbolMaster(state, layer.symbolID)
     : undefined;
 
-  const isSelected = state.selectedLayerIds.includes(layer.do_objectID);
+  const isSelected = state.selectedLayerIds[0] === layer.do_objectID;
 
   const isEditing =
     state.interactionState.type === 'editingBlock' &&
@@ -154,12 +156,14 @@ export function Widget({
             position: 'absolute',
             top: 'calc(100% + 36px)',
             right: 0,
-            background: 'black',
-            color: 'white',
+            background: 'whitesmoke',
+            border: '1px solid rgba(0,0,0,0.1)',
+            color: 'black',
             pointerEvents: 'all',
-            padding: '2px 4px',
+            padding: '1px 4px',
             whiteSpace: 'pre',
-            borderRadius: '4px',
+            borderRadius: '2px',
+            fontSize: 13,
             zIndex: 1,
           }}
         >

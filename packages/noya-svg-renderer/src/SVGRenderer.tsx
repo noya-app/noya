@@ -79,9 +79,17 @@ function getRectProps(rect: Float32Array) {
   };
 }
 
-const Rect: ComponentsContextValue['Rect'] = memo(({ rect, paint }) => {
-  return <rect {...usePaintProps(paint)} {...getRectProps(rect)} />;
-});
+const Rect: ComponentsContextValue['Rect'] = memo(
+  ({ rect, paint, cornerRadius }) => {
+    return (
+      <rect
+        {...usePaintProps(paint)}
+        {...getRectProps(rect)}
+        rx={cornerRadius}
+      />
+    );
+  },
+);
 
 const Polyline: ComponentsContextValue['Polyline'] = memo(
   ({ points, paint }) => {
@@ -142,7 +150,7 @@ const Text: ComponentsContextValue['Text'] = memo(({ rect, paragraph }) => {
 
           return info.map(([position, string], i) => (
             <text
-              fontSize={12}
+              fontSize={run.size}
               fill="white"
               key={`${s}-${r}-${i}`}
               x={position.x}
