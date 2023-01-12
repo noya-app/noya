@@ -9,11 +9,13 @@ export interface CopyPasteActions {
   addLayer: (layers: Sketch.AnyLayer[]) => void;
 }
 
+type MenuItemType = 'copy' | 'paste';
+
 export function copyPasteInteraction({ addLayer }: CopyPasteActions) {
   return handleActionType<
     InteractionState,
     [InteractionAPI],
-    ReactEventHandlers
+    ReactEventHandlers<MenuItemType>
   >({
     none: (interactionState, api) => ({
       onContributeMenuItems: () => {

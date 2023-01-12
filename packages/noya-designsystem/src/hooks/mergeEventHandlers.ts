@@ -26,10 +26,11 @@ export type ReactDOMEventHandlers = ReturnType<
   onBeforeInput?: (e: InputEvent) => void;
 };
 
-export type ReactEventHandlers = ReactDOMEventHandlers & {
-  onContributeMenuItems?: () => Optional<RegularMenuItem<string>>[];
-  onSelectMenuItem?: (id: string) => void;
-};
+export type ReactEventHandlers<MenuItemType extends string = string> =
+  ReactDOMEventHandlers & {
+    onContributeMenuItems?: () => Optional<RegularMenuItem<MenuItemType>>[];
+    onSelectMenuItem?: (id: string) => void;
+  };
 
 export type EventName = keyof ReactEventHandlers;
 

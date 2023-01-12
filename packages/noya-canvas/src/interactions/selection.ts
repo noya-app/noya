@@ -1,8 +1,4 @@
-import {
-  isRightButtonClicked,
-  ReactEventHandlers,
-  RegularMenuItem,
-} from 'noya-designsystem';
+import { isRightButtonClicked, ReactEventHandlers } from 'noya-designsystem';
 import { handleActionType, InteractionState, SelectionType } from 'noya-state';
 import { InteractionAPI } from './types';
 
@@ -12,7 +8,7 @@ export interface SelectionActions {
   deleteLayer: (id: string[]) => void;
 }
 
-type MenuItemType = 'selectAll';
+type MenuItemType = 'delete' | 'selectAll';
 
 export function selectionInteraction({
   selectLayer,
@@ -22,11 +18,15 @@ export function selectionInteraction({
   return handleActionType<
     InteractionState,
     [InteractionAPI],
-    ReactEventHandlers
+    ReactEventHandlers<MenuItemType>
   >({
     none: (interactionState, api) => ({
-      onContributeMenuItems: (): RegularMenuItem<MenuItemType>[] => {
+      onContributeMenuItems: () => {
         return [
+          api.selectedLayerIds.length > 0 && {
+            value: 'delete',
+            title: 'Delete',
+          },
           {
             title: 'Select All',
             value: 'selectAll',
@@ -36,9 +36,12 @@ export function selectionInteraction({
       },
       onSelectMenuItem: (id) => {
         switch (id) {
+          case 'delete':
+            deleteLayer(api.selectedLayerIds);
+            break;
           case 'selectAll':
             selectAllLayers();
-            return;
+            break;
         }
       },
       onPointerDown: (event) => {
