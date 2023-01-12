@@ -41,18 +41,21 @@ function Workspace({
 
   const [state, dispatch] = useReducer(reducer, undefined, () => {
     const workspace = createInitialWorkspaceState(initialData);
-    workspace.preferences.showDotGrid = true;
-    workspace.preferences.wireframeMode = true;
 
-    workspace.history.present.sketch.document.foreignSymbols =
-      allAyonSymbols.map((symbol) =>
-        SketchModel.foreignSymbol({
-          symbolMaster: symbol,
-          libraryID: ayonLibraryId,
-        }),
+    return produce(workspace, (draft) => {
+      draft.preferences.showDotGrid = true;
+      draft.preferences.wireframeMode = true;
+
+      draft.history.present.sketch.document.foreignSymbols = allAyonSymbols.map(
+        (symbol) =>
+          SketchModel.foreignSymbol({
+            symbolMaster: symbol,
+            libraryID: ayonLibraryId,
+          }),
       );
 
-    return workspace;
+      return draft;
+    });
   });
 
   useEffect(() => {

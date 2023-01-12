@@ -19,6 +19,11 @@ unless otherwise specified, returns 200 on success or 4xx/5xx error
 
 */
 
+export interface INoyaNetworkClient {
+  auth: NoyaNetworkClient['auth'];
+  files: NoyaNetworkClient['files'];
+}
+
 export class NoyaNetworkClient {
   baseURI: string;
   onError?: (error: NoyaAPIError) => boolean;
